@@ -1,6 +1,6 @@
 import { executeWritingToolCommand } from "./api";
+import { CommandNumber, CommandTitle } from "./Command";
 
 export default async function main() {
-  const command = "Make Concise";
-  await executeWritingToolCommand(command);
+  await executeWritingToolCommand(CommandNumber.MAKE_CONCISE, CommandTitle.MAKE_CONCISE);
 }

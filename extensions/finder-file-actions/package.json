@@ -83,5 +83,8 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "test": "bun test"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

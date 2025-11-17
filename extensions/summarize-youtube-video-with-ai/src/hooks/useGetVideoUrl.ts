@@ -63,5 +63,5 @@ export const useGetVideoUrl = ({
     };
 
     fetchData();
-  }, [input]);
+  }, [input, setVideoURL]);
 };

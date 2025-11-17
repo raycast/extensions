@@ -20,6 +20,7 @@ import {
   isCurrentVersion,
   calculateAge,
 } from "../../utils/FileUtils";
+import { showFailureToast } from "@raycast/utils";
 
 const execPromise = promisify(exec);
 
@@ -46,7 +47,6 @@ interface ObjectVersion {
   timeDeleted?: string;
 }
 
-// Define interface for version object from API
 interface ApiObjectVersion {
   id?: string;
   name: string;
@@ -62,26 +62,22 @@ interface ApiObjectVersion {
   md5Hash?: string;
   crc32c?: string;
   timeDeleted?: string;
-  [key: string]: string | boolean | undefined; // More specific index signature
+  [key: string]: string | boolean | undefined;
 }
 
-// Define interface for error response
 interface ErrorResponse {
   message: string;
   includes(text: string): boolean;
 }
 
-// Define interface for accessory item
 interface AccessoryItem {
   text: string;
   tooltip?: string;
   icon?: Icon;
 }
 
-// Define cache result type
 type CacheResult = ApiObjectVersion[] | string | null;
 
-// Add a helper function to safely parse size
 function parseSizeToNumber(size: string | undefined): number {
   if (!size) return 0;
   try {
@@ -98,10 +94,8 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
   const [error, setError] = useState<string | null>(null);
   const { push, pop } = useNavigation();
 
-  // Move cache into useRef to persist between renders
   const cacheRef = useRef(new Map<string, CacheResult>());
 
-  // Function to invalidate cache entries matching a pattern
   function invalidateCache(pattern: RegExp) {
     for (const key of cacheRef.current.keys()) {
       if (pattern.test(key)) {
@@ -110,7 +104,6 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
     }
   }
 
-  // Optimized command execution with caching
   async function executeCommand(
     gcloudPath: string,
     command: string,
@@ -123,14 +116,12 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
   ) {
     const { projectId, formatJson = true, quiet = false, retries = 0 } = options;
 
-    // Build the full command
     const projectFlag = projectId ? ` --project=${projectId}` : "";
     const formatFlag = formatJson ? " --format=json" : "";
     const quietFlag = quiet ? " --quiet" : "";
 
     const fullCommand = `${gcloudPath} ${command}${projectFlag}${formatFlag}${quietFlag}`;
 
-    // Check cache first using cacheRef
     const cacheKey = fullCommand;
     if (cacheRef.current.has(cacheKey)) {
       return cacheRef.current.get(cacheKey);
@@ -153,7 +144,6 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
 
       const result = JSON.parse(stdout);
 
-      // Cache the result using cacheRef
       cacheRef.current.set(cacheKey, result);
 
       return result;
@@ -170,7 +160,6 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
     }
   }
 
-  // Memoized fetch function to avoid recreating it on every render
   const fetchVersions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -182,10 +171,9 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
     });
 
     try {
-      // Use the optimized command execution with caching
       const result = await executeCommand(
         gcloudPath,
-        `storage objects list gs://${bucketName}/${objectName} --all-versions`,
+        `storage objects list gs://${bucketName} --include="${objectName}" --versions`,
         {
           projectId,
           retries: 1,
@@ -221,7 +209,6 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
         };
       });
 
-      // Sort versions by generation (newest first)
       formattedVersions.sort((a: ObjectVersion, b: ObjectVersion) => {
         const genA = parseInt(a.generation, 10) || 0;
         const genB = parseInt(b.generation, 10) || 0;
@@ -240,7 +227,6 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
       loadingToast.hide();
       console.error("Error fetching object versions:", error);
 
-      // Provide more user-friendly error messages for common errors
       let errorMessage = error instanceof Error ? error.message : String(error);
       let errorTitle = "Failed to load versions";
 
@@ -260,8 +246,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
 
       setError(`${errorTitle}: ${errorMessage}`);
 
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: errorTitle,
         message: errorMessage,
       });
@@ -270,7 +255,6 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
     }
   }, [projectId, gcloudPath, bucketName, objectName]);
 
-  // Initial load
   useEffect(() => {
     fetchVersions();
   }, [fetchVersions]);
@@ -293,12 +277,15 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
       });
 
       try {
-        // Use the optimized command execution
-        await executeCommand(gcloudPath, `storage objects restore gs://${bucketName}/${objectName}#${generation}`, {
-          projectId,
-          formatJson: false,
-          quiet: true,
-        });
+        await executeCommand(
+          gcloudPath,
+          `storage objects restore gs://${bucketName}/${objectName} --generation=${generation}`,
+          {
+            projectId,
+            formatJson: false,
+            quiet: true,
+          },
+        );
 
         restoringToast.hide();
         showToast({
@@ -307,32 +294,24 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
           message: `Object ${objectName} restored to version ${formatGeneration(generation)}`,
         });
 
-        // Invalidate the objects cache
-        invalidateCache(new RegExp(`gs://${bucketName}`));
-
-        // Refresh the versions list
+        invalidateCache(new RegExp(`gs://${bucketName}/${objectName}`));
         fetchVersions();
       } catch (error) {
         restoringToast.hide();
         console.error("Error restoring version:", error);
 
-        // Provide more user-friendly error messages for common errors
         let errorMessage = error instanceof Error ? error.message : String(error);
         let errorTitle = "Failed to restore version";
 
-        const errorResponse = error as ErrorResponse;
-        if (errorResponse.message && typeof errorResponse.message === "string") {
-          if (errorResponse.message.includes("Permission denied") || errorResponse.message.includes("403")) {
-            errorTitle = "Permission denied";
-            errorMessage = "You don't have permission to restore this version.";
-          } else if (errorResponse.message.includes("not found") || errorResponse.message.includes("404")) {
-            errorTitle = "Version not found";
-            errorMessage = `The version ${formatGeneration(generation)} was not found.`;
-          }
+        if (errorMessage.includes("Permission denied") || errorMessage.includes("403")) {
+          errorTitle = "Permission denied";
+          errorMessage = "You don't have permission to restore this version.";
+        } else if (errorMessage.includes("not found") || errorMessage.includes("404")) {
+          errorTitle = "Version not found";
+          errorMessage = `The version "${generation}" was not found.`;
         }
 
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: errorTitle,
           message: errorMessage,
         });
@@ -358,8 +337,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
       });
 
       try {
-        // Use the optimized command execution
-        await executeCommand(gcloudPath, `storage rm gs://${bucketName}/${objectName}#${generation}`, {
+        await executeCommand(gcloudPath, `storage rm gs://${bucketName}/${objectName} --generation=${generation}`, {
           projectId,
           formatJson: false,
           quiet: true,
@@ -372,32 +350,24 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
           message: `Version ${formatGeneration(generation)} deleted`,
         });
 
-        // Invalidate the objects cache
-        invalidateCache(new RegExp(`gs://${bucketName}`));
-
-        // Refresh the versions list
+        invalidateCache(new RegExp(`gs://${bucketName}/${objectName}`));
         fetchVersions();
       } catch (error) {
         deletingToast.hide();
         console.error("Error deleting version:", error);
 
-        // Provide more user-friendly error messages for common errors
         let errorMessage = error instanceof Error ? error.message : String(error);
         let errorTitle = "Failed to delete version";
 
-        const errorResponse = error as ErrorResponse;
-        if (errorResponse.message && typeof errorResponse.message === "string") {
-          if (errorResponse.message.includes("Permission denied") || errorResponse.message.includes("403")) {
-            errorTitle = "Permission denied";
-            errorMessage = "You don't have permission to delete this version.";
-          } else if (errorResponse.message.includes("not found") || errorResponse.message.includes("404")) {
-            errorTitle = "Version not found";
-            errorMessage = `The version ${formatGeneration(generation)} was not found.`;
-          }
+        if (errorMessage.includes("Permission denied") || errorMessage.includes("403")) {
+          errorTitle = "Permission denied";
+          errorMessage = "You don't have permission to delete this version.";
+        } else if (errorMessage.includes("not found") || errorMessage.includes("404")) {
+          errorTitle = "Version not found";
+          errorMessage = `The version "${generation}" was not found. It may have been deleted already.`;
         }
 
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: errorTitle,
           message: errorMessage,
         });

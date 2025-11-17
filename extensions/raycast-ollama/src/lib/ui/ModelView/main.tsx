@@ -1,7 +1,7 @@
 import * as Types from "./types";
 import * as React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { getProgressIcon, usePromise } from "@raycast/utils";
+import { getProgressIcon, usePromise, useLocalStorage } from "@raycast/utils";
 import { DeleteModel, DeleteServer, GetModels, UpdateModel } from "./function";
 import { FormPullModel } from "./form/PullModel";
 import { FormEditServer } from "./form/EditServer";
@@ -13,15 +13,19 @@ import { GetOllamaServers } from "../../settings/settings";
  * @returns {JSX.Element} Raycast Model View.
  */
 export function ModelView(): JSX.Element {
-  const [SelectedServer, setSelectedServer]: [string, React.Dispatch<React.SetStateAction<string>>] =
-    React.useState("Local");
+  const abort = React.useRef(new AbortController());
+  const {
+    value: SelectedServer,
+    setValue: setSelectedServer,
+    isLoading: isLoadingSelectedServer,
+  } = useLocalStorage<string>("ollama_server_selected", "Local");
   const { data: Servers, isLoading: IsLoadingServers, revalidate: RevalidateServers } = usePromise(GetServerArray);
   const { data: ServersSettings, revalidate: RevalidateServersSettings } = usePromise(GetOllamaServers);
   const {
     data: Models,
     isLoading: IsLoadingModels,
     revalidate: RevalidateModels,
-  } = usePromise(GetModels, [SelectedServer]);
+  } = usePromise(GetModels, [SelectedServer], { abortable: abort });
   const [Download, setDownload]: [
     Types.UiModelDownload[],
     React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>
@@ -52,6 +56,13 @@ export function ModelView(): JSX.Element {
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="Format" text={prop.model.detail.details.format} />
             <List.Item.Detail.Metadata.Label title="Family" text={prop.model.detail.details.family} />
+            {prop.model.show.capabilities && prop.model.show.capabilities.length > 0 && (
+              <List.Item.Detail.Metadata.TagList title="Capabilities">
+                {prop.model.show.capabilities.map((c) => (
+                  <List.Item.Detail.Metadata.TagList.Item text={c} color={Color.Purple} />
+                ))}
+              </List.Item.Detail.Metadata.TagList>
+            )}
             {prop.model.detail.details.families && prop.model.detail.details.families.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Families">
                 {prop.model.detail.details.families.map((f) => (
@@ -81,13 +92,15 @@ export function ModelView(): JSX.Element {
             <List.Item.Detail.Metadata.Label title="System Prompt" text={prop.model.show.system} />
             <List.Item.Detail.Metadata.Label title="Template" text={prop.model.show.template} />
             <List.Item.Detail.Metadata.Separator />
-            <List.Item.Detail.Metadata.TagList title="Parameters">
-              {Object.keys(prop.model.modelfile.parameter).map((p, i) => (
-                <List.Item.Detail.Metadata.TagList.Item
-                  text={`${p} ${prop.model.modelfile && Object.values(prop.model.modelfile?.parameter)[i]}`}
-                />
-              ))}
-            </List.Item.Detail.Metadata.TagList>
+            {prop.model.modelfile && (
+              <List.Item.Detail.Metadata.TagList title="Parameters">
+                {Object.keys(prop.model.modelfile.parameter).map((p, i) => (
+                  <List.Item.Detail.Metadata.TagList.Item
+                    text={`${p} ${prop.model.modelfile && Object.values(prop.model.modelfile?.parameter)[i]}`}
+                  />
+                ))}
+              </List.Item.Detail.Metadata.TagList>
+            )}
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="License" text={prop.model.show.license} />
           </List.Item.Detail.Metadata>
@@ -144,7 +157,7 @@ export function ModelView(): JSX.Element {
           {SelectedServer !== "All" && SelectedServer !== "Local" && (
             <Action title="Edit Server" icon={Icon.Pencil} onAction={() => setShowEditServerForm(true)} />
           )}
-          {SelectedServer !== "All" && SelectedServer !== "Local" && (
+          {SelectedServer !== "All" && SelectedServer !== "Local" && SelectedServer !== undefined && (
             <ActionPanel.Submenu title="Delete Server" icon={Icon.DeleteDocument}>
               <Action
                 title={`Yes, Delete "${prop.model.server.name}" Server`}
@@ -159,7 +172,7 @@ export function ModelView(): JSX.Element {
     );
   }
 
-  function ModelAccessories(SelectedServer: string, Model: Types.UiModel) {
+  function ModelAccessories(SelectedServer: string | undefined, Model: Types.UiModel) {
     const accessories = [];
 
     if (SelectedServer === "All") accessories.push({ tag: Model.server.name, icon: Icon.HardDrive });
@@ -190,7 +203,7 @@ export function ModelView(): JSX.Element {
         setDownload={setDownload}
         revalidate={RevalidateModels}
         servers={Servers.filter((s) => s !== "All")}
-        selectedServer={SelectedServer}
+        selectedServer={SelectedServer as string}
       />
     );
 
@@ -203,14 +216,14 @@ export function ModelView(): JSX.Element {
         setShow={setShowEditServerForm}
         revalidate={RevalidateServers}
         servers={Servers}
-        server={ServersSettings.get(SelectedServer)}
+        server={ServersSettings.get(SelectedServer as string)}
         name={SelectedServer}
       />
     );
 
   return (
     <List
-      isLoading={IsLoadingModels || IsLoadingServers}
+      isLoading={isLoadingSelectedServer || IsLoadingModels || IsLoadingServers}
       isShowingDetail={showDetail}
       searchBarAccessory={SearchBarAccessory()}
       actions={
@@ -231,10 +244,10 @@ export function ModelView(): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="Ollama Server">
             <Action title="Add Server" icon={Icon.NewDocument} onAction={() => setShowNewServerForm(true)} />
-            {SelectedServer !== "All" && SelectedServer !== "Local" && (
+            {SelectedServer !== "All" && SelectedServer !== "Local" && SelectedServer !== undefined && (
               <Action title="Edit Server" icon={Icon.Pencil} onAction={() => setShowEditServerForm(true)} />
             )}
-            {SelectedServer !== "All" && SelectedServer !== "Local" && (
+            {SelectedServer !== "All" && SelectedServer !== "Local" && SelectedServer !== undefined && (
               <Action
                 title="Delete Server"
                 icon={Icon.DeleteDocument}
@@ -246,6 +259,7 @@ export function ModelView(): JSX.Element {
       }
     >
       {Models &&
+        Models.length > 0 &&
         Models.map((item) => {
           return (
             <List.Item
@@ -271,6 +285,13 @@ export function ModelView(): JSX.Element {
             />
           );
       })}
+      {(Models === undefined || Models.length === 0) && (Download === undefined || Download.length === 0) && (
+        <List.EmptyView
+          icon={Icon.Download}
+          title="No Models Installed."
+          description="No model is currently installed on this server. You can download a new model using the ⌘+D shortcut."
+        />
+      )}
     </List>
   );
 }

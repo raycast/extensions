@@ -1,6 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-import { getLinearClient, linear } from "../api/linearClient";
 import { Action } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
+
+import { getLinearClient, linear } from "../api/linearClient";
 
 type Input = {
   /** The ID of the issue to add the label to. Format is a combination of a team key and a unique number, like `ENG-123` */

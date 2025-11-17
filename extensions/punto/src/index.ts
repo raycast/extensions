@@ -5,14 +5,14 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { en_ru, ru_en } from "./Dict";
-import { exec as Exec } from "child_process";
-import { promisify } from "util";
+import {
+  getAvailableInputSourceIds,
+  selectInputSource,
+} from "swift:../swift/Punto";
 
-const exec = promisify(Exec);
 interface Preferences {
-  layoutSwitchModifier: string;
-  latLayoutName: string;
-  cyrLayoutName: string;
+  latLayoutID: string;
+  cyrLayoutID: string;
   showSuccessHUD: boolean;
 }
 
@@ -53,55 +53,29 @@ async function switchKeyboardLayout(
   preferences: Preferences,
   targetLayout: Layout,
 ): Promise<void> {
-  const languages = await getInstalledLayoutNames();
-  // console.log("installed layout names are " + languages.join(", "));
+  const languageIds =
+    (await getAvailableInputSourceIds()) as unknown as string[];
+  // console.log("installed layout names are " + languageIds.join(", "));
   // console.log("target layout is " + targetLayout);
-  const targetLayoutName =
+
+  const targetLayoutID =
     targetLayout === Layout.LAT
-      ? preferences.latLayoutName
-      : preferences.cyrLayoutName;
-  if (!languages.includes(targetLayoutName)) {
+      ? preferences.latLayoutID
+      : preferences.cyrLayoutID;
+
+  if (!languageIds.includes(targetLayoutID)) {
     await showHUD(
       "Layout " +
-        targetLayoutName +
-        " is not installed. Please install it or update the preferences",
+        targetLayoutID +
+        " is not installed. Please install it or update the preferences." +
+        `Available layouts include: ${languageIds.join(", ")}`,
     );
     return;
   }
 
-  const currentLayoutName = await getActiveLayoutName();
-  // console.log("current layout name is " + currentLayoutName);
+  // console.log("switching to " + targetLayoutID);
 
-  if (currentLayoutName === targetLayoutName) {
-    // console.log("already in target layout");
-    return;
-  }
-
-  // console.log("switching to " + targetLayoutName);
-  let attempts = languages.length;
-
-  while (attempts > 0) {
-    const modifierKey = preferences.layoutSwitchModifier;
-    await exec(
-      `osascript -e 'tell application "System Events" to keystroke " " using ` +
-        modifierKey +
-        ` down'`,
-    );
-    const activeLayoutName = await getActiveLayoutName();
-    // console.log("active layout after switch is " + activeLayoutName);
-    if (activeLayoutName === targetLayoutName) {
-      if (preferences.showSuccessHUD) await showHUD("Layout switched!");
-      // console.log("layout switched");
-      return;
-    }
-    if (currentLayoutName === activeLayoutName) {
-      break;
-    }
-    attempts--;
-  }
-
-  await showHUD("Failed to switch layout, please check the preferences");
-  // console.log("failed to switch layout");
+  await selectInputSource(targetLayoutID);
 }
 
 function detectLayout(input: string): Layout {
@@ -119,24 +93,4 @@ function switchCharacterLayout(char: string): string {
     // console.log(char + " is probably detected in ru dict"),
     return ru_en.get(char) ?? char;
   }
-}
-
-async function getInstalledLayoutNames(): Promise<string[]> {
-  const result = await exec(
-    `defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleEnabledInputSources`,
-  );
-  return result.stdout
-    .split("\n")
-    .filter((line) => line.includes("KeyboardLayout Name"))
-    .map((line) => line.split("=")[1].trim().replace(/;/g, ""));
-}
-
-async function getActiveLayoutName(): Promise<string> {
-  const result = await exec(
-    `defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleSelectedInputSources`,
-  );
-  return result.stdout
-    .split("\n")
-    .filter((line) => line.includes("KeyboardLayout Name"))
-    .map((line) => line.split("=")[1].trim().replace(/;/g, ""))[0];
 }

@@ -1,4 +1,5 @@
 import { withAccessToken } from "@raycast/utils";
+
 import { getLinearClient, linear } from "../api/linearClient";
 
 type Input = {

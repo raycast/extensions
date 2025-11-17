@@ -1,12 +1,16 @@
-# Changelog
+# GitHub Enterprise Changelog
 
-## Add Github Notifications - 2024-05-31
+## [Chore: Fixed typo while searching for issues] - 2025-09-02
+
+## [Add Github Notifications] - 2024-05-31
+
 - Add Github Notifications list command
 - Add Unread Notifications in the macOS menu bar
 
 This change requires additional permissions to the token:
-  - `read:org`
-  - `read:project`
+
+- `read:org`
+- `read:project`
 
 ## [Dependency Updates] - 2023-08-09
 

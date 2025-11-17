@@ -1,5 +1,10 @@
 # LoL Esports Changelog
 
+## [AI Tools] - 2025-05-12
+
+- Add new AI tools to get leagues, schedules and standings
+- Fix `Show Schedule` command
+
 ## [Fixes & Improvements] - 2024-03-28
 
 - Fix ties not showing up in the `Show Standings` command

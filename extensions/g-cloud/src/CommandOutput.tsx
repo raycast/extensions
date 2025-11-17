@@ -27,12 +27,10 @@ export default function CommandOutput({ command, projectId, gcloudPath }: Comman
       const fullCommand = `${gcloudPath} ${command} --project=${projectId} --format=json`;
       const { stdout } = await execPromise(fullCommand);
 
-      // Try to parse JSON output for better formatting
       try {
         const jsonOutput = JSON.parse(stdout);
         setOutput("```json\n" + JSON.stringify(jsonOutput, null, 2) + "\n```");
       } catch {
-        // If not valid JSON, just display as is
         setOutput("```\n" + stdout + "\n```");
       }
 

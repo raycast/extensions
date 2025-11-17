@@ -5,6 +5,7 @@ import VPCView from "./VPCView";
 import IPAddressView from "./IPAddressView";
 import FirewallRulesView from "./FirewallRulesView";
 import { NetworkService } from "./NetworkService";
+import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 
 interface NetworkViewProps {
   projectId: string;
@@ -44,8 +45,19 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
     };
   }, [gcloudPath, projectId]);
 
+  const handleProjectSwitch = (newProjectId: string) => {
+    if (newProjectId !== projectId) {
+      push(<NetworkView projectId={newProjectId} gcloudPath={gcloudPath} />);
+    }
+  };
+
   return (
-    <List isLoading={isLoading} navigationTitle="Manage Networks" searchBarPlaceholder="Search network services...">
+    <List
+      isLoading={isLoading}
+      navigationTitle="Manage Networks"
+      searchBarPlaceholder="Search network services..."
+      searchBarAccessory={<QuickProjectSwitcher gcloudPath={gcloudPath} onProjectSelect={handleProjectSwitch} />}
+    >
       <List.Section title="VPC Networks">
         <List.Item
           title="VPC Networks"

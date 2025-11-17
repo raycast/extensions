@@ -1,6 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
-import { Preferences } from "../models/preferences.model";
 import { FormData } from "formdata-node";
 import { fileFromPath } from "formdata-node/file-from-path";
 import { PostDocument } from "../models/docPost.model";

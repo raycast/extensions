@@ -15,7 +15,7 @@ export interface UiModel {
   server: UiServer;
   detail: OllamaApiTagsResponseModel;
   show: OllamaApiShowResponse;
-  modelfile: OllamaApiShowModelfile;
+  modelfile?: OllamaApiShowModelfile;
   ps?: OllamaApiPsModel;
 }
 

@@ -27,12 +27,14 @@
     "jonas_list",
     "xilopaint",
     "lachero",
-    "pascal_burkhard"
+    "pascal_burkhard",
+    "roberto.cinetto"
   ],
   "keywords": [
     "vscode",
     "cursor",
     "codium",
+    "kiro",
     "positron",
     "windsurf",
     "trae",
@@ -90,6 +92,10 @@
         {
           "title": "Cursor",
           "value": "Cursor"
+        },
+        {
+          "title": "Kiro",
+          "value": "Kiro"
         },
         {
           "title": "Positron",
@@ -214,5 +220,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

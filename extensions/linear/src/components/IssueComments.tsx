@@ -3,11 +3,9 @@ import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
 import { IssueResult } from "../api/getIssues";
-
-import { getUserIcon } from "../helpers/users";
 import { getLinearClient } from "../api/linearClient";
 import { getErrorMessage } from "../helpers/errors";
-
+import { getUserIcon } from "../helpers/users";
 import useIssueComments from "../hooks/useIssueComments";
 import useMe from "../hooks/useMe";
 

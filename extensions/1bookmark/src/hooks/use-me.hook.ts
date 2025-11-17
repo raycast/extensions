@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { hostname } from "node:os";
 import { RouterOutputs, trpc } from "@/utils/trpc.util";
 import { useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
@@ -9,22 +10,27 @@ export const useMe = () => {
   const [sessionToken, setSessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   const [cachedData, setCachedData] = useCachedState<RouterOutputs["user"]["me"] | null>(CACHED_KEY_ME, null);
 
-  const me = trpc.user.me.useQuery(undefined, {
-    enabled: !!sessionToken,
-    initialData: () => {
-      if (!cachedData) {
-        return undefined;
-      }
-
-      if (!cachedData.associatedSpaces[0]?.tags) {
-        setCachedData(null);
-        return undefined;
-      }
-
-      console.info("Cache hit useMe");
-      return cachedData;
+  const me = trpc.user.me.useQuery(
+    {
+      device: hostname(),
     },
-  });
+    {
+      enabled: !!sessionToken,
+      initialData: () => {
+        if (!cachedData) {
+          return undefined;
+        }
+
+        if (!cachedData.associatedSpaces[0]?.tags) {
+          setCachedData(null);
+          return undefined;
+        }
+
+        console.info("Cache hit useMe");
+        return cachedData;
+      },
+    },
+  );
 
   useEffect(() => {
     if (!me.data) return;

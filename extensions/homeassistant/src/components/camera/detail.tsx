@@ -1,10 +1,11 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
 import { ActionPanel, Detail, Toast, showToast } from "@raycast/api";
+import React from "react";
 import { CameraOpenStreamInBrowserAction, CameraOpenStreamInIINAAction, CameraOpenStreamInVLCAction } from "./actions";
 import { useImage } from "./hooks";
 
-export function CameraImageDetail(props: { state: State }): JSX.Element {
+export function CameraImageDetail(props: { state: State }): React.ReactElement {
   const s = props.state;
   const { localFilepath, isLoading, error } = useImage(s.entity_id);
   if (error) {

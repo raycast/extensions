@@ -6,20 +6,14 @@ import { generateLogsMarkdown } from "../lib/markdown/generateLogsMarkdown";
 
 export default function LogsViewer({ logFiles }: { logFiles: string[] }) {
   const { isLoading, data } = usePromise(async () => {
-    console.log("=====================");
     const response = await fetchLogs(logFiles);
-    console.log("+++++++++++++++++++++");
-    // console.log(response);
+
     return response;
   });
 
-  if (!data) {
-    <List.EmptyView title="No Builds Found" />;
-  }
-
   return (
     <List isLoading={isLoading} navigationTitle="Logs" isShowingDetail>
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           {data.map((group) => (
             <List.Item

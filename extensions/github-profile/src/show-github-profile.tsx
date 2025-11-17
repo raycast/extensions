@@ -44,7 +44,7 @@ export default function Command() {
 
     const userProfileSection = formatUserProfile(profile);
     const contributionHeatmapSection = `
-**Contribution Activity: total ${contributions.contributionCalendar.totalContributions} last year**
+**Contribution Activity: total ${contributions.contributionCalendar.totalContributions} in last year**
 ${ContributionHeatmap({ weeks: contributions.contributionCalendar.weeks })}
 `;
     const repositoriesSection = formatRepositories(repositories);

@@ -303,17 +303,33 @@ export default function ComputeInstanceDetailView({
         message: `Zone: ${zone}`,
       });
 
-      await service.stopInstance(instance.name, zone);
+      const result = await service.stopInstance(instance.name, zone);
       loadingToast.hide();
 
-      showToast({
-        style: Toast.Style.Success,
-        title: `Stopped ${instance.name}`,
-        message: "The instance has been stopped",
-      });
+      if (result.success) {
+        if (result.isTimedOut) {
+          showToast({
+            style: Toast.Style.Success,
+            title: `Stopping ${instance.name}`,
+            message: "The instance is in the process of stopping. This may take several minutes to complete.",
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Success,
+            title: `Stopped ${instance.name}`,
+            message: "The instance has been stopped",
+          });
+        }
 
-      await onRefresh();
-      popToRoot();
+        await onRefresh();
+        popToRoot();
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: `Failed to Stop ${instance.name}`,
+          message: "An error occurred while trying to stop the VM",
+        });
+      }
     } catch (error) {
       showFailureToast(error, {
         title: `Failed to Stop ${instance.name}`,

@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2025-04-23
+
+- Add preferences to select the history lookback window
+
 ## [Enhancements] - 2025-03-17
 
 - Add preferences to show/hide clients, projects, tasks, and tags in the time entry form

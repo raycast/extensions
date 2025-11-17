@@ -3,7 +3,7 @@ import { executeScript } from "../utils/executeScript";
 
 export async function getProjects(): Promise<Project[]> {
   const projects = await executeScript<Project[]>(`
- const omnifocus = Application('OmniFocus');
+    const omnifocus = Application('OmniFocus');
     const doc = omnifocus.defaultDocument();
     
     const projects = doc.flattenedProjects()

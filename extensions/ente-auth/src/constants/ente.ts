@@ -2,14 +2,18 @@ import { getPreferenceValues } from "@raycast/api";
 import os from "os";
 import path from "path";
 
+let cachedExportDirPath: string;
+
 export const DEFAULT_EXPORT_DIR_PATH = (): string => {
-  const exportPath = getPreferenceValues().exportPath || path.join(process.env.HOME || "", "Documents", "ente");
+	if (cachedExportDirPath) {
+		return cachedExportDirPath;
+	}
 
-  if (exportPath.startsWith("~/")) {
-    return exportPath.replace("~", os.homedir());
-  }
+	const exportPath = getPreferenceValues().exportPath || path.join(os.homedir(), "Documents", "ente");
 
-  return exportPath;
+	cachedExportDirPath = exportPath.startsWith("~/") ? exportPath.replace("~", os.homedir()) : exportPath;
+
+	return cachedExportDirPath;
 };
 
 export const EXPORT_FILE_PATH = `${DEFAULT_EXPORT_DIR_PATH()}/ente_auth.txt`;

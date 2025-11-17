@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
-import { LoginView } from "./views/LoginView";
+import { LoginFormInView } from "./components/LoginFormInView";
 import useAvailableBrowsers from "./browser-bookmark-hooks/useAvailableBrowsers";
 import { BROWSERS_BUNDLE_ID } from "./browser-bookmark-hooks/useAvailableBrowsers";
 import { BookmarksImportFromBrowserView } from "./views/BookmarksToImportFromBrowserView";
@@ -60,7 +60,7 @@ function Body() {
   const { loggedOutStatus } = useLoggedOutStatus();
 
   if (loggedOutStatus) {
-    return <LoginView />;
+    return <LoginFormInView />;
   }
 
   if (!enabledSpaces) {

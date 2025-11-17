@@ -12,20 +12,12 @@ import {
 } from '@raycast/api';
 
 import { AddNewTodo } from '../add-new-todo';
-import {
-  CommandListName,
-  Todo,
-  setTodoProperty,
-  deleteTodo,
-  updateTodo,
-  handleError,
-  List as TList,
-  TodoParams,
-} from '../api';
+import { setTodoProperty, deleteProject, deleteTodo, updateTodo, updateProject, handleError } from '../api';
 import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
+import { Todo, List as TList, CommandListName, UpdateTodoParams } from '../types';
 
 // Match URLs with protocols, with optional //
 const URL_REGEX = /([a-zA-Z][a-zA-Z0-9.+-]+):(?:\/\/\S+|%\S+)/;
@@ -54,9 +46,13 @@ export default function TodoListItemActions({
 
   const notesURL = todo.notes.match(URL_REGEX)?.[0];
 
-  async function updateAction(args: TodoParams, successToastOptions: Toast.Options) {
+  async function updateAction(args: UpdateTodoParams, successToastOptions: Toast.Options) {
     try {
-      await updateTodo(todo.id, args);
+      if (todo.isProject) {
+        await updateProject(todo.id, args);
+      } else {
+        await updateTodo(todo.id, args);
+      }
       await showToast({
         style: Toast.Style.Success,
         title: successToastOptions.title,
@@ -139,26 +135,58 @@ New title:
     await updateAction({ 'add-tags': tag }, { title: 'Added tag' });
   }
 
-  async function setDeadline(date: Date) {
-    await updateAction({ deadline: date.toISOString() }, { title: 'Set deadline' });
+  async function setDeadline(date: string | null) {
+    const title = date === null ? 'Removed deadline' : 'Set deadline';
+    const deadline = date === null ? '' : date;
+
+    await updateAction({ deadline }, { title });
   }
 
-  async function deleteToDo() {
+  async function deleteToDoOrProject() {
+    const isProject = todo.isProject;
+
+    let title = isProject ? 'Delete Project' : 'Delete To-Do';
+    const message = isProject
+      ? 'Are you sure you want to delete this project?'
+      : 'Are you sure you want to delete this to-do?';
+    const deleteFunction = isProject ? deleteProject : deleteTodo;
+
     if (
       await confirmAlert({
-        title: 'Delete To-Do',
-        message: 'Are you sure you want to delete this to-do?',
+        title,
+        message,
         icon: { source: Icon.Trash, tintColor: Color.Red },
       })
     ) {
-      await deleteTodo(todo.id);
+      await deleteFunction(todo.id);
+
+      title = isProject ? 'Deleted project' : 'Deleted to-do';
+
       await showToast({
         style: Toast.Style.Success,
-        title: 'Deleted to-do',
+        title,
         message: todo.name,
       });
       refreshTodos();
     }
+  }
+
+  function formatDateTime(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const datePart = `${year}-${month}-${day}`;
+
+    // If the user picked a full day, we avoid providing the time, as
+    // Things leverages the time part to understand whether a reminder
+    // should be set.
+    if (Action.PickDate.isFullDay(date)) {
+      return datePart;
+    }
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${datePart}@${hours}:${minutes}`;
   }
 
   return (
@@ -208,15 +236,21 @@ New title:
             title="Date…"
             icon={Icon.Calendar}
             min={new Date()}
-            onChange={(date) => schedule(date ? date.toISOString() : 'anytime')}
-            type={Action.PickDate.Type.Date}
+            onChange={(date) => {
+              if (!date) {
+                return schedule('anytime');
+              }
+
+              return schedule(formatDateTime(date));
+            }}
+            type={Action.PickDate.Type.DateTime}
           />
           <Action {...listItems.someday} onAction={() => schedule('someday')} />
         </ActionPanel.Submenu>
 
         {lists && lists.length > 0 ? (
           <ActionPanel.Submenu
-            title="Move To"
+            title="Move to"
             icon={Icon.ArrowRight}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
           >
@@ -247,9 +281,7 @@ New title:
           shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
           min={new Date()}
           onChange={(date) => {
-            if (date) {
-              return setDeadline(date);
-            }
+            return setDeadline(date ? formatDateTime(date) : null);
           }}
           type={Action.PickDate.Type.Date}
         />
@@ -275,18 +307,18 @@ New title:
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           shortcut={Keyboard.Shortcut.Common.Remove}
-          onAction={deleteToDo}
+          onAction={deleteToDoOrProject}
         />
       </ActionPanel.Section>
 
       {notesURL && (
         <ActionPanel.Section>
           <Action.OpenInBrowser
-            title="Open URL From Notes"
+            title="Open URL from Notes"
             url={notesURL}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
           />
-          <Action.CopyToClipboard title="Copy URL From Notes" content={notesURL} />
+          <Action.CopyToClipboard title="Copy URL from Notes" content={notesURL} />
         </ActionPanel.Section>
       )}
 

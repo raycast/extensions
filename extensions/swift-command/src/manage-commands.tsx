@@ -1,10 +1,14 @@
-import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, confirmAlert, Clipboard, Image } from "@raycast/api";
 
 import { useEffect, useMemo, useState } from "react";
-import { getDatasourceFolderPath, getDatasourcePath } from "./perference";
+import { getDatasourceFolderPath, getDatasourcePath } from "./preference";
 import { createDataSource, DataItem, DataSource } from "./datasource";
 import { commandFilter } from "./filter";
 import { ActionDataItem, ArgumentForm, CommandForm } from "./form";
+import { useFrontmostApp } from "./useFrontmostApp";
+import { useTerminals } from "./useTerminals";
+import { TerminalActions } from "./terminal-actions";
+import { Terminal } from "./types";
 
 export function filterCommand(cmds: DataItem[], searchKey: string) {
   if (searchKey === "") {
@@ -18,11 +22,15 @@ export function filterCommand(cmds: DataItem[], searchKey: string) {
 
 export default function Command() {
   const [searchBarText, setSearchBarText] = useState("");
-  const [fullItems, setFullItems] = useState<DataItem[]>([]);
+  const [fullItems, setFullItems] = useState<DataItem[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [dataSource, setDataSource] = useState<DataSource | null>(null);
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const filePath = getDatasourcePath();
+
+  // Load available terminals
+  const { data: terminals } = useTerminals();
 
   useEffect(() => {
     try {
@@ -42,8 +50,27 @@ export default function Command() {
 
   const items = useMemo(() => {
     // searchBarText changed
+    if (fullItems === null) {
+      return null;
+    }
+
     return filterCommand(fullItems, searchBarText);
   }, [fullItems, searchBarText]);
+
+  const frontmostApps = useFrontmostApp();
+  const pasteTitle = useMemo(() => {
+    if (frontmostApps.data && frontmostApps.data.length > 0) {
+      return `Paste to ${frontmostApps.data[0].name}`;
+    }
+    return "Paste to Frontmost App";
+  }, [frontmostApps.data]);
+
+  const pasteIcon = useMemo(() => {
+    if (frontmostApps.data && frontmostApps.data.length > 0) {
+      return { fileIcon: frontmostApps.data[0].path } as Image.ImageLike;
+    }
+    return Icon.AppWindow as Image.ImageLike;
+  }, [frontmostApps.data]);
 
   function refreshList() {
     if (!dataSource) return;
@@ -94,6 +121,51 @@ export default function Command() {
     refreshList();
   }
 
+  async function handleDeleteAll(): Promise<void> {
+    if (!dataSource) return;
+
+    const options = {
+      title: "Delete All Commands",
+      message: "Are you sure you want to delete all commands? This action cannot be undone.",
+      icon: Icon.Trash,
+    };
+
+    if (await confirmAlert(options)) {
+      try {
+        // Delete each item using the dataSource
+        const itemsToDelete = [...(fullItems || [])];
+
+        if (itemsToDelete.length === 0) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "No commands to delete",
+          });
+          return;
+        }
+
+        setIsLoading(true);
+
+        for (const item of itemsToDelete) {
+          dataSource.delete(item.id);
+        }
+
+        showToast({
+          style: Toast.Style.Success,
+          title: "All commands deleted",
+          message: `Successfully deleted ${itemsToDelete.length} commands`,
+        });
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to delete all commands",
+          message: error as string,
+        });
+      } finally {
+        refreshList();
+      }
+    }
+  }
+
   function handleUpdate(updatedCmd: ActionDataItem) {
     if (!dataSource) return;
 
@@ -127,26 +199,61 @@ export default function Command() {
     <List
       onSearchTextChange={setSearchBarText}
       searchBarPlaceholder="Search or create your command..."
-      actions={
-        <ActionPanel>
-          <CreateCommandAction onCreate={handleCreate} command={searchBarText} />
-          <OpenDataFileFolderAction />
-        </ActionPanel>
-      }
+      isShowingDetail={isShowingDetail}
       isLoading={isLoading}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Toggle Detail View"
+          storeValue={true}
+          onChange={(newValue) => {
+            setIsShowingDetail(newValue === "detail");
+          }}
+        >
+          <List.Dropdown.Item title="Hide Details" value="list" />
+          <List.Dropdown.Item title="Show Details" value="detail" />
+        </List.Dropdown>
+      }
     >
-      {items.map((item) => (
-        <CommandListItem
-          key={item.data}
-          item={item}
-          onDelete={handleDelete}
-          onUpdate={handleUpdate}
-          onCreate={handleCreate}
-          onPaste={handlePaste}
-          refreshList={refreshList}
-          searchBarText={searchBarText}
-        />
-      ))}
+      {items === null ? null : (
+        <>
+          {items.map((item) => (
+            <CommandListItem
+              key={item.data}
+              item={item}
+              onDelete={handleDelete}
+              onUpdate={handleUpdate}
+              onCreate={handleCreate}
+              onPaste={handlePaste}
+              refreshList={refreshList}
+              searchBarText={searchBarText}
+              onDeleteAll={handleDeleteAll}
+              pasteTitle={pasteTitle}
+              pasteIcon={pasteIcon}
+              terminals={terminals || []}
+            />
+          ))}
+
+          {items !== null && items.length === 0 && (
+            <List.EmptyView
+              title="No commands"
+              description="Create a new command with the search bar above"
+              actions={
+                <ActionPanel>
+                  <CreateCommandAction onCreate={handleCreate} command={searchBarText} />
+                  <Action
+                    title="Delete All Commands"
+                    onAction={handleDeleteAll}
+                    icon={Icon.Trash}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+                    style={Action.Style.Destructive}
+                  />
+                  <OpenDataFileFolderAction />
+                </ActionPanel>
+              }
+            />
+          )}
+        </>
+      )}
     </List>
   );
 }
@@ -183,26 +290,82 @@ function CommandListItem(props: {
   onPaste: (cmd: ActionDataItem) => void;
   searchBarText: string;
   refreshList: () => void;
+  onDeleteAll: () => Promise<void>;
+  pasteTitle: string;
+  pasteIcon: Image.ImageLike;
+  terminals: Terminal[];
 }) {
   function handlePaste() {
     props.onPaste(props.item);
     props.refreshList();
   }
 
+  function handleExecute() {
+    props.onPaste(props.item);
+  }
+
+  // Prepare arguments for display
+  const argsDisplay =
+    props.item.args && props.item.args.length > 0
+      ? props.item.args
+          .map((arg) => {
+            let value = arg.value || "(empty)";
+            // Show special message for clipboard argument
+            if (arg.name === "clipboard") {
+              value = "(import from clipboard)";
+            }
+            return `- **${arg.name}**: ${value}`;
+          })
+          .join("\n")
+      : "No arguments";
+
   return (
     <List.Item
       title={props.item.data}
-      key={props.item.data}
+      key={props.item.id}
       subtitle={props.item.remark}
+      detail={
+        <List.Item.Detail
+          markdown={`## Command Details
+
+### Command
+\`\`\`bash
+${props.item.data}
+\`\`\`
+
+${props.item.remark ? `### Description\n${props.item.remark}\n\n` : ""}
+
+### Arguments
+${argsDisplay}
+
+### Command ID
+\`${props.item.id}\`
+`}
+        />
+      }
       actions={
         <ActionPanel>
           {(props.item.args?.length || 0) === 0 ? (
-            <Action.Paste title="Paste" content={props.item.data} icon={Icon.Clipboard} onPaste={handlePaste} />
+            <Action
+              title={props.pasteTitle}
+              icon={props.pasteIcon}
+              onAction={async () => {
+                await Clipboard.paste(props.item.data);
+                handlePaste();
+              }}
+            />
           ) : (
             <Action.Push
               icon={Icon.NewDocument}
               title="Fill Arguments"
-              target={<ArgumentForm cmd={props.item} onPaste={handlePaste} />}
+              target={
+                <ArgumentForm
+                  cmd={props.item}
+                  onPaste={handlePaste}
+                  pasteTitle={props.pasteTitle}
+                  pasteIcon={props.pasteIcon}
+                />
+              }
             />
           )}
           <Action.CopyToClipboard title="Copy Command" content={props.item.data} />
@@ -213,11 +376,19 @@ function CommandListItem(props: {
             icon={Icon.Pencil}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
           />
+          <TerminalActions terminals={props.terminals} command={props.item.data} onExecute={handleExecute} />
           <Action
             title="Delete Command"
             onAction={() => props.onDelete(props.item.id)}
             icon={Icon.Trash}
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            style={Action.Style.Destructive}
+          />
+          <Action
+            title="Delete All Commands"
+            onAction={props.onDeleteAll}
+            icon={Icon.Trash}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
             style={Action.Style.Destructive}
           />
           <OpenDataFileFolderAction />

@@ -1,9 +1,3 @@
-/**
- * Predefined Google Cloud Compute Engine resources
- * This file contains common GCP compute resources like machine types, disk types, and OS images
- * to avoid unnecessary API calls when displaying resource information.
- */
-
 interface MachineTypeInfo {
   name: string;
   description: string;
@@ -25,9 +19,7 @@ interface ImageFamilyInfo {
   title: string;
 }
 
-// Machine Types by Series
 export const machineTypes: Record<string, MachineTypeInfo[]> = {
-  // General Purpose
   "n1-standard": [
     { name: "n1-standard-1", description: "1 vCPU, 3.75 GB RAM" },
     { name: "n1-standard-2", description: "2 vCPUs, 7.5 GB RAM" },
@@ -77,7 +69,7 @@ export const machineTypes: Record<string, MachineTypeInfo[]> = {
     { name: "c2-standard-30", description: "30 vCPUs, 120 GB RAM" },
     { name: "c2-standard-60", description: "60 vCPUs, 240 GB RAM" },
   ],
-  // High Memory
+
   "n1-highmem": [
     { name: "n1-highmem-2", description: "2 vCPUs, 13 GB RAM" },
     { name: "n1-highmem-4", description: "4 vCPUs, 26 GB RAM" },
@@ -99,7 +91,7 @@ export const machineTypes: Record<string, MachineTypeInfo[]> = {
     { name: "n2-highmem-96", description: "96 vCPUs, 768 GB RAM" },
     { name: "n2-highmem-128", description: "128 vCPUs, 864 GB RAM" },
   ],
-  // High CPU
+
   "n1-highcpu": [
     { name: "n1-highcpu-2", description: "2 vCPUs, 1.8 GB RAM" },
     { name: "n1-highcpu-4", description: "4 vCPUs, 3.6 GB RAM" },
@@ -111,7 +103,6 @@ export const machineTypes: Record<string, MachineTypeInfo[]> = {
   ],
 };
 
-// Disk Types
 export const diskTypes: DiskTypeInfo[] = [
   { name: "pd-standard", title: "Standard persistent disk", description: "Efficient and economical block storage" },
   { name: "pd-balanced", title: "Balanced persistent disk", description: "Balance of cost and performance" },
@@ -129,7 +120,6 @@ export const diskTypes: DiskTypeInfo[] = [
   },
 ];
 
-// Image Projects
 export const imageProjects: ImageProjectInfo[] = [
   { name: "debian-cloud", title: "Debian Cloud" },
   { name: "ubuntu-os-cloud", title: "Ubuntu Cloud" },
@@ -140,7 +130,6 @@ export const imageProjects: ImageProjectInfo[] = [
   { name: "windows-cloud", title: "Windows Cloud" },
 ];
 
-// Image Families
 export const imageFamilies: Record<string, ImageFamilyInfo[]> = {
   "debian-cloud": [
     { name: "debian-12", title: "Debian 12 (Bookworm)" },
@@ -180,7 +169,6 @@ export const imageFamilies: Record<string, ImageFamilyInfo[]> = {
   ],
 };
 
-// Helper functions
 export function getMachineTypeDescription(machineType: string): string {
   const matchingSeries = Object.entries(machineTypes).find(([, types]) => types.some((mt) => mt.name === machineType));
 

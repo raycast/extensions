@@ -3,7 +3,6 @@ import { useState } from "react";
 import { documentsResponse } from "./models/paperlessResponse.model";
 import { fetchDocuments } from "./utils/fetchDocuments";
 import { DocListItem } from "./components/DocListItem";
-import { Preferences } from "./models/preferences.model";
 import { DocGridItem } from "./components/DocGridItem";
 import { useCorrespondents } from "./hooks/useCorrespondents";
 import { useTags } from "./hooks/useTags";

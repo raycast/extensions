@@ -21,17 +21,18 @@ type Preferences = {
 type FormValues = {
   prefix: string;
   description: string;
+  domain: string;
 };
 
 export default function Command() {
   const [maskedEmail, setMaskedEmail] = useState<string>("");
   const { create_prefix } = getPreferenceValues<Preferences>();
 
-  const handleSubmit = async ({ prefix, description }: FormValues) => {
+  const handleSubmit = async ({ prefix, description, domain }: FormValues) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Creating masked email..." });
 
     try {
-      const email = await createMaskedEmail(prefix, description);
+      const email = await createMaskedEmail(prefix, description, domain);
 
       Clipboard.copy(email);
 
@@ -48,11 +49,11 @@ export default function Command() {
     }
   };
 
-  const handleSubmitInteractive = async ({ prefix, description }: FormValues) => {
+  const handleSubmitInteractive = async ({ prefix, description, domain }: FormValues) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Creating masked email..." });
 
     try {
-      const email = await createMaskedEmail(prefix, description);
+      const email = await createMaskedEmail(prefix, description, domain);
 
       setMaskedEmail(email);
 
@@ -99,6 +100,7 @@ A prefix must be <= 64 characters in length and only contain characters a-z, 0-9
         placeholder="What is this masked email for?"
         autoFocus={true}
       />
+      <Form.TextField id="domain" title="Domain (Optional)" placeholder="What is the domain for this masked email?" />
       {maskedEmail && (
         <>
           <Form.Description text={`\n${maskedEmail}\n`} />

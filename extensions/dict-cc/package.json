@@ -5,6 +5,9 @@
   "description": "Simple translation using dict.cc",
   "icon": "icon.png",
   "author": "natterstefan",
+  "contributors": [
+    "YourMCGeek"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -287,7 +290,6 @@
     "eslint": "^9.24.0",
     "prettier": "^3.5.3",
     "react": "^19.1.0",
-    "react-devtools": "^6.1.1",
     "typescript": "^5.8.3"
   },
   "scripts": {

@@ -13,9 +13,9 @@ import {
   injectQueryNamedParameters,
 } from "./issues";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function SearchMyIssues(): JSX.Element {
+export function SearchMyIssues() {
   const [scope, setScope] = useState<string>(IssueScope.created_by_me);
   const state = IssueState.all;
   const [search, setSearch] = useState<string>();
@@ -35,7 +35,7 @@ export function SearchMyIssues(): JSX.Element {
       deps: [scope, state, search],
       secondsToRefetch: 1,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   if (error) {
     showErrorToast(getErrorMessage(error), "Could not fetch Issues");

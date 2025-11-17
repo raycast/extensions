@@ -5,6 +5,10 @@
   "description": "Search the Internet for animated GIFs",
   "icon": "command-icon.png",
   "author": "josephschmitt",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "contributors": [
     "tm.wrnr",
     "j3lte",
@@ -98,6 +102,10 @@
         {
           "title": "Copy GIF",
           "value": "copyFile"
+        },
+        {
+          "title": "Paste GIF",
+          "value": "pasteFile"
         },
         {
           "title": "Copy GIF Link",

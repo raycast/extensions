@@ -21,7 +21,7 @@ export default function FastGPTView(props: FastGPTViewProps) {
     async function fetchFastGPTAnswer() {
       try {
         setIsLoading(true);
-        const result = await searchWithFastGPT(props.query, apiKey, controller.signal);
+        const result = await searchWithFastGPT(props.query, apiKey ? apiKey : "", controller.signal);
 
         if (result) {
           setAnswer(result.content || "");

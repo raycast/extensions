@@ -1,4 +1,23 @@
-# 1bookmark Changelog
+# 1Bookmark Changelog
+
+## [Improve Space Authentication UX] - 2025-05-23
+
+- 0.11.1
+- 📱 Before modifying a space auth policy, check that the current account is compliant with the policy and then reject the policy modification. This prevents you from accidentally modifying the policy and losing access to the space.
+- 📱 You can edit the nickname and image for each space.
+
+## [Space Authentication Policy] - 2025-05-19
+
+- 0.11.0
+- 📱 Space member email auth policy is now available. This feature enhances the security of your team space.
+- 📱 Form validation has been improved.
+- 💻 There have been several small bug fixes and performance improvements.
+- 📝 Rename title from 1bookmark to 1Bookmark.
+
+## [Index Ranking System] - 2025-04-25
+
+- 0.10.0
+- 📱 Index ranking is now available. It boosts bookmarks that are more relevant to the search keyword.
 
 ## [Per-Device Enable/Disable Spaces] - 2025-04-08
 

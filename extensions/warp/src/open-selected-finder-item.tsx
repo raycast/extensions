@@ -1,8 +1,9 @@
-import { getSelectedFinderItems, showToast, Toast, open, getFrontmostApplication } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { newTab } from "./uri";
+import { getSelectedFinderItems, showToast, Toast, open, getFrontmostApplication } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { getNewTabUri } from "./uri";
+import { getAppName } from "./constants";
 
 const getSelectedPathFinderItems = async () => {
   const script = `
@@ -34,7 +35,7 @@ const fallback = async (): Promise<boolean> => {
     return false;
   }
 
-  await open(newTab(currentDirectory));
+  await open(getNewTabUri(currentDirectory));
 
   return true;
 };
@@ -59,7 +60,7 @@ export default async function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "No directory selected",
-          message: "Please select a directory in Finder or Path Finder first",
+          message: `Please select a directory in Finder or Path Finder to open in ${getAppName()}`,
         });
       }
 
@@ -71,11 +72,11 @@ export default async function Command() {
     results
       .map((result) => (result.info.isDirectory() ? result.item.path : path.dirname(result.item.path)))
       .filter((value, index, self) => self.indexOf(value) === index)
-      .forEach((toOpen) => open(newTab(toOpen)));
+      .forEach((toOpen) => open(getNewTabUri(toOpen)));
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Cannot open selected item",
+      title: `Cannot open selected item in ${getAppName()}`,
       message: String(error),
     });
   }

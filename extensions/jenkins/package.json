@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "k8scat",
   "contributors": [
-    "vkhitrin"
+    "vkhitrin",
+    "evo"
   ],
   "categories": [
     "Developer Tools",
@@ -45,6 +46,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

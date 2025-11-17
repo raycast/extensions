@@ -1,5 +1,40 @@
 # Parcel Changelog
 
+## [Add Delivery Overhaul] - 2025-11-06
+
+- Add Delivery now works on both Mac and Windows without requiring the Parcel Mac app to be installed by using Parcel's Add Delivery API
+- The Add Delivery form now prevents leaving required form fields empty
+- Deliveries added from the extension will automatically use your system's language in Parcel
+- Replaced the success toast with a cleaner Raycast HUD notification
+- Fixed API errors to display the specific error from Parcel rather than a generic "Something went wrong" 
+
+## [Detail View Refactor, Metadata, UX] - 2025-09-19
+
+- Refactored "My Deliveries" command UI to only show tracking events in the markdown section (all other details are now displayed in the metadata panel for improved clarity and structure)
+- Added support for Portuguese date formats in tracking events
+- Removed redundant "View Recent/Active Deliveries" action (filtering is now handled exclusively by the dropdown)
+
+## [Expected Delivery Date Formatting Overhaul] - 2025-06-12
+
+- Delivery windows now show the full time range when available (e.g., "12 Jun 10:45 – 12:45"), so you know exactly when to expect your package.
+- Times are shown when provided by the carrier, making delivery info more precise.
+- Dates are now easier to read: you'll see "Today", "Tomorrow", weekday names, or a simple date, depending on when your package is due.
+
+## [Enhanced Date Format Support] - 2025-06-03
+
+- Added support for more date formats in delivery tracking, including dates with day names
+- Improved handling of various international date formats for better compatibility with carrier APIs
+
+## [Added ISO 8601 Date Support] - 2025-05-30
+
+- Added support for ISO 8601 date format (YYYY-MM-DD HH:mm:ss) in delivery date parsing
+- Improved date format handling for better compatibility with various carrier APIs
+
+## [Improved Date Handling] - 2025-05-28
+
+- **Enhanced date recognition:** Improved parsing of delivery dates, including better support for European formats (like DD.MM.YYYY HH:mm and DD.MM.YYYY HH:mm:ss).
+- **More reliable display for unknown dates:** Unspecified or unparseable dates will now more consistently display as "Not available", providing clearer information.
+
 ## [Track on Website, Cache] - 2025-04-12
 
 - Added "Track on Website" action to open the carrier's tracking page in the default browser

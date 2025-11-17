@@ -1,4 +1,4 @@
-export const languageStrings = [
+export const LANGUAGE_STRINGS = [
   "English [en]",
   "Unknown language",
   "Spanish [es]",
@@ -51,9 +51,9 @@ export const languageStrings = [
   "Tamil [ta]",
 ];
 
-export const fileTypes = ["pdf", "epub", "cbr", "mobi", "fb2", "cbz", "azw3", "djvu", "fb2.zip", "rar", "zip"];
+export const FILE_TYPES = ["pdf", "epub", "cbr", "mobi", "fb2", "cbz", "azw3", "djvu", "fb2.zip", "rar", "zip"];
 
-export const docTypes = [
+export const DOC_TYPES = [
   "Book (non-fiction)",
   "Book (fiction)",
   "Book (unknown)",
@@ -62,3 +62,14 @@ export const docTypes = [
   "Magazine",
   "Standards document",
 ];
+
+export const MIRROR_LIST = [
+  "https://annas-archive.org",
+  "https://annas-archive.se",
+  "https://annas-archive.li",
+] as const;
+
+export const DEFAULT_MIRROR = "https://annas-archive.org";
+
+export const USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36";

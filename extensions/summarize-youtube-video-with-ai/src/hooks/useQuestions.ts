@@ -17,11 +17,6 @@ export function useQuestions(summary: string | undefined) {
     },
   ]);
 
-  const handleAdditionalQuestion = (newQuestion: string) => {
-    setQuestion(newQuestion);
-  };
-
-  // Set initial summary as first answered question
   useEffect(() => {
     if (summary) {
       setQuestions((prevQuestions) => [
@@ -34,5 +29,5 @@ export function useQuestions(summary: string | undefined) {
     }
   }, [summary]);
 
-  return { questions, setQuestions, question, setQuestion, handleAdditionalQuestion };
+  return { questions, setQuestions, question, setQuestion };
 }

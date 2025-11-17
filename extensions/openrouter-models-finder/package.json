@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openrouter-models-finder",
+  "title": "OpenRouter Models Finder",
+  "description": "Search and copy AI model IDs from OpenRouter to clipboard",
+  "icon": "icon.png",
+  "author": "jeejeeguan",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "openrouter",
+    "models",
+    "search",
+    "copy",
+    "model name",
+    "model id"
+  ],
+  "commands": [
+    {
+      "name": "find-models",
+      "title": "Find Models",
+      "description": "Search and copy AI model IDs from OpenRouter",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

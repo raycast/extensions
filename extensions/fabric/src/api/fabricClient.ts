@@ -19,7 +19,7 @@ type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
 
 type APIRequestOptions = {
   path: string;
-  method: string;
+  method?: string;
   body?: Buffer | JSONValue;
   expectedStatusCodes?: number[];
 };
@@ -43,6 +43,10 @@ export interface Resource {
   thumbnail?: {
     sm: string;
   };
+  parent: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 export enum Kind {
@@ -58,19 +62,37 @@ export enum Kind {
 }
 
 export interface SearchQuery {
-  text: string;
+  text?: string;
   kind?: Kind;
+  includeRoots?: boolean;
+  order?: {
+    property: string;
+    direction?: "ASC" | "DESC";
+  };
 }
 
 export interface CreateNotepadParams {
   name: string;
   content: string;
+  tagsExisting?: string[];
+  tagsNew?: string;
+  parentId: string;
 }
 
 export interface CreateBookmarkParams {
   url: string;
   comment: string;
+  tagsExisting?: string[];
+  tagsNew?: string;
+  parentId: string;
 }
+
+export interface Tag {
+  id: string;
+  name: string;
+}
+
+type CreationTags = ({ id: string } | { name: string })[];
 
 /**
  * Given a object it tries to transform it into a JSONValue that can be sent to
@@ -126,7 +148,7 @@ class FabricClient {
   private async request({ path, method, body, expectedStatusCodes = [200] }: APIRequestOptions) {
     const { token } = await getAccessToken();
     const response = await fetch(`${this.endpoint}${path}`, {
-      method,
+      method: method || "GET",
       headers: {
         "Content-Type": body instanceof Buffer ? "application/octet-stream" : "application/json",
         Authorization: `Bearer ${token}`,
@@ -143,19 +165,57 @@ class FabricClient {
     return response;
   }
 
+  private parseTags(tags: string): string[] {
+    return tags
+      .split(/[\n#,]+/)
+      .map((tag) => tag.trim())
+      .filter((tag) => !!tag);
+  }
+
+  private prepareCreationTags(tagsExisting?: string[], tagsNew?: string): CreationTags {
+    const tags: CreationTags = tagsExisting?.length ? tagsExisting.map((tag) => ({ id: tag })) : [];
+    if (tagsNew) {
+      tags.push(
+        ...this.parseTags(tagsNew).map((tag) => ({
+          name: tag,
+        })),
+      );
+    }
+    return tags;
+  }
+
   async listResources(query: SearchQuery): Promise<Resource[]> {
     const response = await this.request({
       path: "/resources/filter",
       method: "POST",
       body: transformToJSONValue({
-        name: query.text,
+        includeRoots: query.includeRoots || false,
+        ...(query.text && { name: query.text }),
         ...(query.kind && { kind: [query.kind] }),
+        order: {
+          property: "name",
+        },
       }),
       expectedStatusCodes: [200],
     });
 
     const body = (await response.json()) as { resources: Resource[] };
     return body.resources;
+  }
+
+  async listTags(): Promise<Tag[]> {
+    const response = await this.request({
+      path: "/tags",
+      expectedStatusCodes: [200],
+    });
+
+    const body = (await response.json()) as {
+      count: number;
+      data: {
+        tags: Tag[];
+      };
+    };
+    return body.data.tags;
   }
 
   async searchResources(query: SearchQuery): Promise<Resource[]> {
@@ -182,20 +242,21 @@ class FabricClient {
     return body.hits;
   }
 
-  async createNotepad({ name, content }: CreateNotepadParams) {
+  async createNotepad({ name, content, tagsExisting, tagsNew, parentId }: CreateNotepadParams) {
     await this.request({
       path: "/notepads",
       method: "POST",
       body: transformToJSONValue({
         ...(name && { name }),
-        parentId: "@alias::inbox",
         ydoc: Array.from(await this.createYDocFromMarkdown(content)),
+        parentId,
+        tags: this.prepareCreationTags(tagsExisting, tagsNew),
       }),
       expectedStatusCodes: [201],
     });
   }
 
-  async createBookmark({ url, comment }: CreateBookmarkParams) {
+  async createBookmark({ url, comment, tagsExisting, tagsNew, parentId }: CreateBookmarkParams) {
     await this.request({
       path: "/bookmarks",
       method: "POST",
@@ -206,7 +267,8 @@ class FabricClient {
             content: comment,
           },
         }),
-        parentId: "@alias::inbox",
+        parentId,
+        tags: this.prepareCreationTags(tagsExisting, tagsNew),
       }),
       expectedStatusCodes: [201],
     });

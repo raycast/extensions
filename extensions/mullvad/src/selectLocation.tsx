@@ -168,7 +168,7 @@ function ServerList({
 }
 
 export default function Command() {
-  const isMullvadInstalled = useExec("mullvad", ["version"]);
+  const isMullvadInstalled = useExec("mullvad", ["--version"]);
   const rawRelayList = useExec("mullvad", ["relay", "list"], { execute: !!isMullvadInstalled.data });
 
   const locations = rawRelayList.data ? parseRelayList(rawRelayList.data) : [];

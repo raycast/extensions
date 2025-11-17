@@ -1,11 +1,14 @@
-import { Children, PropsWithChildren } from "react";
+import { Children, ReactNode } from "react";
 
-export type ComponentReverserProps = PropsWithChildren<{
+type SyncChildren = Exclude<ReactNode, Promise<unknown>>;
+
+export type ComponentReverserProps = {
   reverse?: boolean;
-}>;
+  children?: SyncChildren;
+};
 
 const ComponentReverser = (props: ComponentReverserProps) => {
-  const children = Children.toArray(props.children);
+  const children = Children.toArray(props.children) as SyncChildren[];
   if (props.reverse) children.reverse();
   return <>{children}</>;
 };

@@ -16,7 +16,7 @@ type TaskDetailProps = {
   taskId: Task["id"];
 };
 
-export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
+export default function TaskDetail({ taskId }: TaskDetailProps) {
   const [data, setData] = useCachedData();
 
   const task = data?.items.find((task) => task.id === taskId);

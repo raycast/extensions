@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Creativity } from "./lib/enum";
+import { OllamaApiModelCapability } from "./lib/ollama/enum";
 import { CommandAnswer } from "./lib/settings/enum";
 import { Preferences } from "./lib/types";
 import { AnswerView } from "./lib/ui/AnswerView/main";
@@ -25,5 +26,12 @@ Explanation: Philosophy is the study of the fundamental nature of knowledge, rea
 Text: {selection}
 
 Explanation:`;
-  return <AnswerView command={c} prompt={p} creativity={Creativity.Low} />;
+  return (
+    <AnswerView
+      command={c}
+      prompt={p}
+      creativity={Creativity.Low}
+      capabilities={[OllamaApiModelCapability.COMPLETION]}
+    />
+  );
 }

@@ -1,5 +1,25 @@
 # Aave Search Changelog
 
+## [1.1.4] - 2025-09-29
+
+### Maintenance
+
+- Update toolbox to support new networks
+
+## [1.1.3] - 2025-08-26
+
+### Maintenance
+
+- Add bob, plasma and ink icons
+- Improve sorting algorithm
+
+## [1.1.2] - 2025-06-03
+
+### Maintenance
+
+- Retired deprecated `@bgd-labs/rpc-env` in favor of `@bgd-labs/toolbox`
+- Added Soneium icon
+
 ## [1.1.1] - 2025-03-31
 
 ### Fixes

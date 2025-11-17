@@ -24,7 +24,6 @@ interface MachineType {
 
 interface ServiceAccountResponse {
   email: string;
-  // Add other properties if needed
 }
 
 export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: CreateVMFormProps) {
@@ -48,7 +47,6 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
 
   const { pop } = useNavigation();
 
-  // Initialize data on component mount
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
@@ -61,26 +59,20 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         const computeService = new ComputeService(gcloudPath, projectId);
         const networkService = new NetworkService(gcloudPath, projectId);
 
-        // Fetch zones - still need to fetch these dynamically as they vary by project
         const zonesList = await computeService.listZones();
         setZones(zonesList);
 
-        // Set default selected zone if available
         if (zonesList.length > 0) {
           setSelectedZone(zonesList[0]);
         }
 
-        // Set machine types from predefined data
         setMachineTypesByFamily(getMachineTypesByFamily());
 
-        // Set initial image families based on default image project
         setImageFamiliesByProject(getImageFamiliesByProject(selectedImageProject));
 
-        // Fetch networks - still need to fetch these dynamically
         const networksList = await fetchNetworks(networkService);
         setNetworks(networksList);
 
-        // Fetch service accounts - still need to fetch these dynamically
         const serviceAccountsList = await fetchServiceAccounts();
         setServiceAccounts(serviceAccountsList);
 
@@ -93,7 +85,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
           title: "Failed to load resources",
           message: error instanceof Error ? error.message : "An unknown error occurred",
         });
-        // Load with default values instead of failing
+
         setIsLoading(false);
       }
     };
@@ -103,19 +95,14 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
 
   const fetchNetworks = async (networkService: NetworkService): Promise<string[]> => {
     try {
-      // Get VPCs using the NetworkService
       const vpcs = await networkService.getVPCs();
       const networkNames = vpcs.map((vpc) => vpc.name);
 
-      // Fetch subnets for each network
       const subnetworksMap: Record<string, Subnet[]> = {};
 
-      // Get all subnets at once
       const allSubnets = await networkService.getSubnets();
 
-      // Group subnets by network
       for (const vpc of vpcs) {
-        // Filter subnets by this VPC
         const vpcSubnets = allSubnets.filter(
           (subnet) => subnet.network.includes(`/${vpc.name}`) || subnet.network === vpc.name,
         );
@@ -168,11 +155,9 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     setFormValues((prev) => ({ ...prev, customMemory: value }));
   };
 
-  // Helper to format region names
   const formatRegionName = (regionPath: string): string => {
     if (!regionPath) return "";
-    // If it's a path like "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-central1"
-    // Extract just the region name
+
     const parts = regionPath.split("/");
     return parts[parts.length - 1];
   };
@@ -199,7 +184,6 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       return true;
     }
 
-    // Validate cores
     const cores = parseInt(values.customCores || "0", 10);
     if (isNaN(cores) || cores < 1 || cores > 96) {
       showFailureToast({
@@ -209,7 +193,6 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       return false;
     }
 
-    // Validate memory
     const memory = parseInt(values.customMemory || "0", 10);
     if (isNaN(memory) || memory < 256 || memory % 256 !== 0) {
       showFailureToast({
@@ -263,107 +246,85 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     });
 
     try {
-      // Sanitize values to prevent null
       const network = values.network === "null" || !values.network ? "default" : values.network;
       const subnet = values.subnet === "null" ? "" : values.subnet;
 
-      // Build the command
       let command = `compute instances create ${values.name} --zone=${values.zone} --machine-type=${values.machineType}`;
 
-      // Add boot disk options
       command += ` --image-project=${values.imageProject} --image-family=${values.imageFamily}`;
 
-      // Add network options
       command += ` --network=${network}`;
       if (subnet) {
-        // Use the subnet name directly - gcloud will look for the subnet in the region matching the zone
         command += ` --subnet=${subnet}`;
       }
 
-      // Add public IP option
       if (values.externalIP === "none") {
         command += " --no-address";
       }
 
-      // Add boot disk type
       if (values.bootDiskType) {
         command += ` --boot-disk-type=${values.bootDiskType}`;
       }
 
-      // Add boot disk size
       if (values.bootDiskSize) {
         command += ` --boot-disk-size=${values.bootDiskSize}GB`;
       }
 
-      // Add service account
       if (values.serviceAccount) {
         command += ` --service-account=${values.serviceAccount}`;
       }
 
-      // Add metadata
       if (values.metadata) {
         command += ` --metadata=${values.metadata}`;
       }
 
-      // Add advanced options
       if (advancedMode) {
-        // Add tags
         if (values.tags) {
           command += ` --tags=${values.tags}`;
         }
 
-        // Add custom machine type
         if (values.customCores && values.customMemory && values.machineType === "custom") {
           const cores = parseInt(values.customCores, 10);
           const memory = parseInt(values.customMemory, 10);
           command += ` --custom-cpu=${cores} --custom-memory=${memory}`;
         }
 
-        // Add preemptible option
         if (values.preemptible === "true") {
           command += " --preemptible";
         }
 
-        // Add spot option
         if (values.spot === "true") {
           command += " --spot";
         }
 
-        // Add maintenance policy
         if (values.onHostMaintenance) {
           command += ` --maintenance-policy=${values.onHostMaintenance}`;
         }
 
-        // Add disk auto-delete option
         if (values.bootDiskAutoDelete === "false") {
           command += " --no-boot-disk-auto-delete";
         }
 
-        // Add min CPU platform
         if (values.minCpuPlatform) {
           command += ` --min-cpu-platform=${values.minCpuPlatform}`;
         }
 
-        // Add scopes
         if (values.scopes) {
           command += ` --scopes=${values.scopes}`;
         }
 
-        // Add startup script
         if (values.startupScript) {
           command += ` --metadata-from-file startup-script=${values.startupScript}`;
         }
 
-        // Add reservation
         if (values.reservation) {
           command += ` --reservation=${values.reservation}`;
         }
       }
 
-      // Execute the command
       await executeGcloudCommand(gcloudPath, command, projectId, {
         skipCache: true,
-        timeout: 120000, // Increase timeout to 120 seconds for VM creation which can take longer
+        timeout: 120000,
       });
 
       toast.hide();
@@ -373,10 +334,8 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         message: values.name,
       });
 
-      // Call onVMCreated callback to refresh VM instances view
       onVMCreated();
 
-      // Navigate back to the VM instances view
       pop();
     } catch (error: unknown) {
       toast.hide();
@@ -405,7 +364,6 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     >
       <Form.Description text="Create a new Compute Engine virtual machine instance" />
 
-      {/* Basic settings */}
       <Form.TextField
         id="name"
         title="Name"
@@ -484,7 +442,6 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         </>
       )}
 
-      {/* Boot Disk Configuration */}
       <Form.Separator />
       <Form.Description title="Boot Disk" text="Configure the boot disk for this instance" />
 
@@ -526,7 +483,6 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         </Form.Dropdown>
       )}
 
-      {/* Network settings */}
       <Form.Separator />
       <Form.Description title="Network" text="Configure network settings for this instance" />
 
@@ -547,14 +503,12 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         }
       >
         {selectedNetwork && subnetworks[selectedNetwork]?.length > 0 ? (
-          // First show subnets in the same region as the selected zone for better UX
           subnetworks[selectedNetwork]
             .map((subnet, index) => {
-              // Get region from subnet path
               const subnetRegion = formatRegionName(subnet.region);
-              // Get selected zone's region
+
               const zoneRegion = selectedZone ? selectedZone.split("-").slice(0, 2).join("-") : "";
-              // Determine if this subnet is in the same region as the selected zone
+
               const isMatchingRegion = !zoneRegion || subnetRegion === zoneRegion;
 
               return {
@@ -564,12 +518,12 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
                 index,
               };
             })
-            // Sort by matching region first, then by name
+
             .sort((a, b) => {
               if (a.isMatchingRegion !== b.isMatchingRegion) {
-                return a.isMatchingRegion ? -1 : 1; // Matching regions first
+                return a.isMatchingRegion ? -1 : 1;
               }
-              return a.subnet.name.localeCompare(b.subnet.name); // Then alphabetically
+              return a.subnet.name.localeCompare(b.subnet.name);
             })
             .map(({ subnet, subnetRegion, isMatchingRegion, index }) => (
               <Form.Dropdown.Item
@@ -589,7 +543,6 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         <Form.Dropdown.Item key="ip-none" value="none" title="None (private instance)" />
       </Form.Dropdown>
 
-      {/* Service Account */}
       <Form.Separator />
       <Form.Description title="Identity" text="Configure identity and access control" />
 
@@ -611,13 +564,12 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
             id="scopes"
             title="Access Scopes"
             placeholder="Comma-separated list of scopes"
-            info="Example: https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/devstorage.read_only"
+            info="Example: https://www.googleapis.com/auth/cloud-platform"
             defaultValue="https://www.googleapis.com/auth/cloud-platform"
           />
         </>
       )}
 
-      {/* Additional settings in advanced mode */}
       {advancedMode && (
         <>
           <Form.Separator />

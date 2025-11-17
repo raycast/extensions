@@ -1,9 +1,3 @@
-/**
- * Predefined Google Cloud IAM roles information
- * This file contains common GCP IAM roles and their descriptions to avoid
- * unnecessary API calls when displaying role information.
- */
-
 export interface IAMRoleInfo {
   title: string;
   description: string;
@@ -11,7 +5,6 @@ export interface IAMRoleInfo {
 }
 
 export const predefinedRoles: Record<string, IAMRoleInfo> = {
-  // Storage roles
   "roles/storage.admin": {
     title: "Storage Admin",
     description: "Full control of GCS resources.",
@@ -59,7 +52,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Storage",
   },
 
-  // Compute roles
   "roles/compute.admin": {
     title: "Compute Admin",
     description: "Full control of all Compute Engine resources.",
@@ -82,7 +74,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Compute Engine",
   },
 
-  // IAM roles
   "roles/iam.serviceAccountAdmin": {
     title: "Service Account Admin",
     description: "Create and manage service accounts.",
@@ -99,7 +90,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "IAM",
   },
 
-  // Project roles
   "roles/owner": {
     title: "Owner",
     description: "Full access to all resources.",
@@ -116,7 +106,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Project",
   },
 
-  // BigQuery roles
   "roles/bigquery.admin": {
     title: "BigQuery Admin",
     description: "Full access to BigQuery resources and data.",
@@ -133,7 +122,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "BigQuery",
   },
 
-  // Cloud Run roles
   "roles/run.admin": {
     title: "Cloud Run Admin",
     description: "Full access to Cloud Run resources.",
@@ -145,7 +133,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Run",
   },
 
-  // Kubernetes Engine roles
   "roles/container.admin": {
     title: "Kubernetes Engine Admin",
     description: "Full access to Kubernetes Engine resources.",
@@ -162,7 +149,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Kubernetes Engine",
   },
 
-  // Pub/Sub roles
   "roles/pubsub.admin": {
     title: "Pub/Sub Admin",
     description: "Full access to Pub/Sub resources.",
@@ -179,7 +165,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Pub/Sub",
   },
 
-  // Cloud Functions roles
   "roles/cloudfunctions.admin": {
     title: "Cloud Functions Admin",
     description: "Full access to Cloud Functions resources.",
@@ -196,7 +181,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Functions",
   },
 
-  // Datastore roles
   "roles/datastore.owner": {
     title: "Datastore Owner",
     description: "Full access to Datastore resources.",
@@ -213,7 +197,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Datastore",
   },
 
-  // Logging roles
   "roles/logging.admin": {
     title: "Logging Admin",
     description: "Full access to logs and logging configurations.",
@@ -225,7 +208,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Logging",
   },
 
-  // Monitoring roles
   "roles/monitoring.admin": {
     title: "Monitoring Admin",
     description: "Full access to monitoring resources.",
@@ -237,7 +219,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Monitoring",
   },
 
-  // Cloud SQL roles
   "roles/cloudsql.admin": {
     title: "Cloud SQL Admin",
     description: "Full control of Cloud SQL resources.",
@@ -259,7 +240,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud SQL",
   },
 
-  // App Engine roles
   "roles/appengine.appAdmin": {
     title: "App Engine Admin",
     description: "Full control over App Engine applications.",
@@ -281,7 +261,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "App Engine",
   },
 
-  // Cloud Spanner roles
   "roles/spanner.admin": {
     title: "Cloud Spanner Admin",
     description: "Full control over Cloud Spanner resources.",
@@ -303,7 +282,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Spanner",
   },
 
-  // Cloud Bigtable roles
   "roles/bigtable.admin": {
     title: "Bigtable Admin",
     description: "Full control over Bigtable resources.",
@@ -320,7 +298,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Bigtable",
   },
 
-  // Firestore roles (replacing duplicate Datastore roles)
   "roles/firestore.admin": {
     title: "Firestore Admin",
     description: "Full control over Firestore resources.",
@@ -337,14 +314,12 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Firestore",
   },
 
-  // Service Networking roles
   "roles/servicenetworking.networksAdmin": {
     title: "Service Networking Admin",
     description: "Manage service networking connections.",
     service: "Service Networking",
   },
 
-  // Cloud KMS roles
   "roles/cloudkms.admin": {
     title: "Cloud KMS Admin",
     description: "Full control over Cloud KMS resources.",
@@ -366,7 +341,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud KMS",
   },
 
-  // Secret Manager roles
   "roles/secretmanager.admin": {
     title: "Secret Manager Admin",
     description: "Full control over Secret Manager resources.",
@@ -383,7 +357,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Secret Manager",
   },
 
-  // Cloud Build roles
   "roles/cloudbuild.builds.editor": {
     title: "Cloud Build Editor",
     description: "Create and manage Cloud Build resources.",
@@ -400,7 +373,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Build",
   },
 
-  // Artifact Registry roles
   "roles/artifactregistry.admin": {
     title: "Artifact Registry Admin",
     description: "Full control over Artifact Registry resources.",
@@ -417,7 +389,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Artifact Registry",
   },
 
-  // Cloud Scheduler roles
   "roles/cloudscheduler.admin": {
     title: "Cloud Scheduler Admin",
     description: "Full control over Cloud Scheduler jobs.",
@@ -429,7 +400,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Scheduler",
   },
 
-  // Cloud Tasks roles
   "roles/cloudtasks.admin": {
     title: "Cloud Tasks Admin",
     description: "Full control over Cloud Tasks queues and tasks.",
@@ -441,7 +411,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Tasks",
   },
 
-  // Service Usage roles
   "roles/serviceusage.serviceUsageAdmin": {
     title: "Service Usage Admin",
     description: "Full control over service usage.",
@@ -458,7 +427,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Service Usage",
   },
 
-  // Cloud Memorystore roles
   "roles/redis.admin": {
     title: "Cloud Memorystore Redis Admin",
     description: "Full control over Cloud Memorystore Redis instances.",
@@ -470,7 +438,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Memorystore",
   },
 
-  // Cloud DNS roles
   "roles/dns.admin": {
     title: "DNS Administrator",
     description: "Full control over Cloud DNS resources.",
@@ -482,7 +449,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud DNS",
   },
 
-  // Cloud CDN roles
   "roles/cdn.editor": {
     title: "Cloud CDN Editor",
     description: "Manage Cloud CDN configurations.",
@@ -494,7 +460,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud CDN",
   },
 
-  // Cloud Load Balancing roles
   "roles/loadbalancing.admin": {
     title: "Load Balancing Admin",
     description: "Full control over load balancing resources.",
@@ -506,7 +471,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Load Balancing",
   },
 
-  // VPC Network roles
   "roles/compute.networkUser": {
     title: "Compute Network User",
     description: "Use Compute Engine networks.",
@@ -518,7 +482,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "VPC Network",
   },
 
-  // Cloud AI Platform roles
   "roles/aiplatform.admin": {
     title: "AI Platform Admin",
     description: "Full control over AI Platform resources.",
@@ -535,7 +498,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "AI Platform",
   },
 
-  // Cloud Data Fusion roles
   "roles/datafusion.admin": {
     title: "Data Fusion Admin",
     description: "Full control over Data Fusion instances.",
@@ -552,7 +514,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Data Fusion",
   },
 
-  // Cloud Composer roles
   "roles/composer.admin": {
     title: "Cloud Composer Admin",
     description: "Full control over Cloud Composer environments.",
@@ -574,7 +535,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Composer",
   },
 
-  // Cloud Data Loss Prevention roles
   "roles/dlp.admin": {
     title: "DLP Administrator",
     description: "Full control over DLP resources.",
@@ -591,7 +551,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Data Loss Prevention",
   },
 
-  // Cloud IoT roles
   "roles/cloudiot.admin": {
     title: "Cloud IoT Admin",
     description: "Full control over Cloud IoT resources.",
@@ -608,7 +567,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud IoT",
   },
 
-  // Cloud Healthcare roles
   "roles/healthcare.datasetAdmin": {
     title: "Healthcare Dataset Administrator",
     description: "Full control over Healthcare datasets.",
@@ -625,7 +583,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Healthcare",
   },
 
-  // Cloud Dataflow roles
   "roles/dataflow.admin": {
     title: "Dataflow Administrator",
     description: "Full control over Dataflow jobs.",
@@ -642,7 +599,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Dataflow",
   },
 
-  // Cloud Dataproc roles
   "roles/dataproc.admin": {
     title: "Dataproc Administrator",
     description: "Full control over Dataproc resources.",
@@ -659,7 +615,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Dataproc",
   },
 
-  // Cloud Life Sciences roles
   "roles/lifesciences.admin": {
     title: "Cloud Life Sciences Admin",
     description: "Full control over Life Sciences resources.",
@@ -676,7 +631,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Life Sciences",
   },
 
-  // Cloud Filestore roles
   "roles/file.editor": {
     title: "Cloud Filestore Editor",
     description: "Edit Filestore instances.",
@@ -688,7 +642,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Filestore",
   },
 
-  // Cloud NAT roles
   "roles/nat.admin": {
     title: "Cloud NAT Admin",
     description: "Full control over Cloud NAT resources.",
@@ -700,7 +653,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud NAT",
   },
 
-  // Cloud Endpoints roles
   "roles/endpoints.admin": {
     title: "Cloud Endpoints Admin",
     description: "Full control over Cloud Endpoints resources.",
@@ -712,7 +664,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Endpoints",
   },
 
-  // Service Directory roles
   "roles/servicedirectory.admin": {
     title: "Service Directory Admin",
     description: "Full control over Service Directory resources.",
@@ -729,7 +680,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Service Directory",
   },
 
-  // Organization roles
   "roles/resourcemanager.organizationAdmin": {
     title: "Organization Administrator",
     description: "Full control of all resources in the organization.",
@@ -776,7 +726,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Organization",
   },
 
-  // Billing roles
   "roles/billing.admin": {
     title: "Billing Account Administrator",
     description: "Full control of billing accounts.",
@@ -808,7 +757,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Billing",
   },
 
-  // Security roles
   "roles/iam.securityAdmin": {
     title: "Security Admin",
     description: "Administer security policies and configurations.",
@@ -835,7 +783,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "IAM",
   },
 
-  // Cloud Identity roles
   "roles/cloudidentity.groupAdmin": {
     title: "Groups Administrator",
     description: "Administer Cloud Identity groups.",
@@ -852,7 +799,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Identity",
   },
 
-  // Audit roles
   "roles/logging.privateLogViewer": {
     title: "Private Logs Viewer",
     description: "Access to private logs.",
@@ -869,7 +815,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Logging",
   },
 
-  // Cloud Asset roles
   "roles/cloudasset.owner": {
     title: "Cloud Asset Owner",
     description: "Full control of Cloud Asset Inventory resources.",
@@ -881,7 +826,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Asset",
   },
 
-  // Service Management roles
   "roles/servicemanagement.admin": {
     title: "Service Management Administrator",
     description: "Full control of Service Management resources.",
@@ -898,7 +842,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Service Management",
   },
 
-  // Cloud Deploy roles
   "roles/clouddeploy.admin": {
     title: "Cloud Deploy Admin",
     description: "Full control of Cloud Deploy resources.",
@@ -925,7 +868,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Deploy",
   },
 
-  // Cloud Storage Insights roles
   "roles/storageinsights.admin": {
     title: "Storage Insights Admin",
     description: "Full control of Storage Insights resources.",
@@ -937,7 +879,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Storage Insights",
   },
 
-  // Vertex AI roles
   "roles/vertexai.admin": {
     title: "Vertex AI Administrator",
     description: "Full control of Vertex AI resources.",
@@ -954,7 +895,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Vertex AI",
   },
 
-  // Cloud Armor roles
   "roles/compute.securityPolicyAdmin": {
     title: "Cloud Armor Security Policy Admin",
     description: "Full control of Cloud Armor security policies.",
@@ -966,7 +906,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Armor",
   },
 
-  // Cloud Domains roles
   "roles/domains.admin": {
     title: "Cloud Domains Admin",
     description: "Full control of Cloud Domains resources.",
@@ -978,7 +917,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Domains",
   },
 
-  // API Gateway roles
   "roles/apigateway.admin": {
     title: "API Gateway Admin",
     description: "Full control of API Gateway resources.",
@@ -990,7 +928,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "API Gateway",
   },
 
-  // Cloud Source Repositories roles
   "roles/source.admin": {
     title: "Source Repository Administrator",
     description: "Full control of Cloud Source Repositories.",
@@ -1007,7 +944,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Source Repositories",
   },
 
-  // Cloud Profiler roles
   "roles/cloudprofiler.agent": {
     title: "Cloud Profiler Agent",
     description: "Access to submit profile data to Cloud Profiler.",
@@ -1019,7 +955,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Profiler",
   },
 
-  // Cloud Trace roles
   "roles/cloudtrace.admin": {
     title: "Cloud Trace Admin",
     description: "Full control of Cloud Trace resources.",
@@ -1036,7 +971,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Trace",
   },
 
-  // Error Reporting roles
   "roles/errorreporting.admin": {
     title: "Error Reporting Admin",
     description: "Full control of Error Reporting resources.",
@@ -1053,7 +987,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Error Reporting",
   },
 
-  // Cloud Debugger roles
   "roles/clouddebugger.agent": {
     title: "Cloud Debugger Agent",
     description: "Access for debugger agents to register with the service.",
@@ -1065,7 +998,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud Debugger",
   },
 
-  // Additional Cloud KMS roles
   "roles/cloudkms.cryptoKeyEncrypterDecrypter": {
     title: "Cloud KMS CryptoKey Encrypter/Decrypter",
     description: "Encrypt and decrypt data using Cloud KMS keys.",
@@ -1087,7 +1019,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Cloud KMS",
   },
 
-  // Web Security Scanner roles
   "roles/websecurityscanner.editor": {
     title: "Web Security Scanner Editor",
     description: "Edit Web Security Scanner scan configurations.",
@@ -1099,7 +1030,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Web Security Scanner",
   },
 
-  // Data Catalog roles
   "roles/datacatalog.admin": {
     title: "Data Catalog Admin",
     description: "Full control of Data Catalog resources.",
@@ -1146,7 +1076,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Data Catalog",
   },
 
-  // Deployment Manager roles
   "roles/deploymentmanager.editor": {
     title: "Deployment Manager Editor",
     description: "Edit Deployment Manager deployments.",
@@ -1168,7 +1097,6 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
     service: "Deployment Manager",
   },
 
-  // Security Command Center roles
   "roles/securitycenter.admin": {
     title: "Security Center Admin",
     description: "Full control of Security Command Center resources.",
@@ -1216,18 +1144,11 @@ export const predefinedRoles: Record<string, IAMRoleInfo> = {
   },
 };
 
-/**
- * Get information about a predefined IAM role
- * @param roleName The full role name (e.g., "roles/storage.admin")
- * @returns Role information or a default formatted name if not found
- */
 export function getRoleInfo(roleName: string): IAMRoleInfo {
-  // Check if it's a predefined role
   if (predefinedRoles[roleName]) {
     return predefinedRoles[roleName];
   }
 
-  // If not found, format the name nicely
   return {
     title: formatRoleName(roleName),
     description: "",
@@ -1235,40 +1156,29 @@ export function getRoleInfo(roleName: string): IAMRoleInfo {
   };
 }
 
-/**
- * Format a role name to be more readable
- * Handles edge cases like malformed roles, multiple dots, or empty parts
- * @param role The role name (e.g., "roles/storage.legacyObjectOwner")
- * @returns Formatted role name (e.g., "Storage Legacy Object Owner")
- */
 export function formatRoleName(role: string): string {
   if (!role) {
     return "Unknown Role";
   }
 
-  // Remove the "roles/" prefix if present
   const roleName = role.replace(/^roles\//, "");
 
-  // Handle empty role name after prefix removal
   if (!roleName) {
     return "Unknown Role";
   }
 
-  // Split by dots and handle multiple dots
   const parts = roleName.split(".").filter(Boolean);
 
-  // If no valid parts found
   if (parts.length === 0) {
     return "Unknown Role";
   }
 
-  // Process each part
   return parts
     .map((part) => {
       if (!part.trim()) {
         return "";
       }
-      // Split on capital letters and handle consecutive capitals
+
       return part
         .trim()
         .split(/(?=[A-Z])/)
@@ -1283,30 +1193,22 @@ export function formatRoleName(role: string): string {
     .join(" - ");
 }
 
-/**
- * Extract the service name from a role
- * Handles edge cases like malformed roles or missing service names
- * @param role The role name (e.g., "roles/storage.legacyObjectOwner")
- * @returns Service name (e.g., "Storage")
- */
 export function getRoleService(role: string): string {
   if (!role) {
     return "Other";
   }
 
-  // Get the part after the last slash or the whole string
   const baseName = role.split("/").pop() || role;
 
-  // Split by dot and get the first non-empty part
   const parts = baseName.split(".").filter(Boolean);
 
   if (parts.length > 0 && parts[0]) {
     const service = parts[0].trim();
-    // Handle empty or invalid service names
+
     if (!service) {
       return "Other";
     }
-    // Properly capitalize service name
+
     return service.charAt(0).toUpperCase() + service.slice(1).toLowerCase();
   }
 

@@ -20,19 +20,19 @@ import { showFailureToast } from "@raycast/utils";
 interface IAMMembersViewProps {
   projectId: string;
   gcloudPath: string;
-  resourceName?: string; // Optional: specific resource (bucket, etc.) to view
-  resourceType?: string; // Optional: type of resource (storage, compute, etc.)
+  resourceName?: string;
+  resourceType?: string;
 }
 
 interface IAMRole {
   role: string;
-  title: string; // Friendly name
+  title: string;
   description?: string;
   members: IAMMember[];
 }
 
 interface IAMMember {
-  type: string; // user, group, serviceAccount, etc.
+  type: string;
   id: string;
   email?: string;
   displayName?: string;
@@ -59,11 +59,9 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     let debugText = "";
 
     if (resourceType === "storage" && resourceName) {
-      // For a specific storage bucket
-      command = `storage buckets get-iam-policy gs://${resourceName} --project=${projectId}`;
+      command = `storage buckets get-iam-policy gs://${resourceName} --format=json`;
       debugText = `Fetching IAM policy for bucket: ${resourceName}\n`;
     } else {
-      // For project-level IAM
       command = `projects get-iam-policy ${projectId}`;
       debugText = `Fetching project-level IAM policy for: ${projectId}\n`;
     }
@@ -96,11 +94,9 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         return;
       }
 
-      // Process the bindings into a more organized structure
       const processedRoles: IAMRole[] = policy.bindings.map((binding: { role: string; members: string[] }) => {
         const roleInfo = getRoleInfo(binding.role);
 
-        // Process members
         const members = binding.members.map((member: string) => {
           const [type, id] = member.split(":");
           return {
@@ -197,7 +193,6 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     });
 
     try {
-      // Validate the member ID format based on type
       if (!validateMemberId(values.memberType, values.memberId)) {
         addingToast.hide();
         showFailureToast({
@@ -210,7 +205,7 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       let command = "";
 
       if (resourceType === "storage" && resourceName) {
-        command = `storage buckets add-iam-policy-binding gs://${resourceName} --member=${values.memberType}:${values.memberId} --role=${values.role} --project=${projectId}`;
+        command = `storage buckets add-iam-policy-binding gs://${resourceName} --member=${values.memberType}:${values.memberId} --role=${values.role}`;
       } else {
         command = `projects add-iam-policy-binding ${projectId} --member=${values.memberType}:${values.memberId} --role=${values.role}`;
       }
@@ -224,12 +219,10 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         message: `${values.memberType}:${values.memberId} to ${values.role}`,
       });
 
-      // Refresh the policy
       fetchIAMPolicy();
     } catch (error: unknown) {
       addingToast.hide();
 
-      // Provide more specific error messages
       if (error instanceof Error) {
         const message = error.message;
         if (message.includes("does not exist")) {
@@ -251,29 +244,22 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     }
   }
 
-  // Helper function to validate member ID format based on type
   function validateMemberId(type: string, id: string): boolean {
     switch (type) {
       case "user":
-        // Basic email validation
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
       case "serviceAccount":
-        // Service account email validation
         return (
           /^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.iam\.gserviceaccount\.com$/.test(id) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id)
         );
       case "group":
-        // Group email validation
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
       case "domain":
-        // Domain validation
         return /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/.test(id);
       case "allUsers":
       case "allAuthenticatedUsers":
-        // These types don't have IDs
         return true;
       default:
-        // For unknown types, just check it's not empty
         return id.trim() !== "";
     }
   }
@@ -300,7 +286,7 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         let command = "";
 
         if (resourceType === "storage" && resourceName) {
-          command = `storage buckets remove-iam-policy-binding gs://${resourceName} --member=${memberType}:${memberId} --role=${role} --project=${projectId}`;
+          command = `storage buckets remove-iam-policy-binding gs://${resourceName} --member=${memberType}:${memberId} --role=${role}`;
         } else {
           command = `projects remove-iam-policy-binding ${projectId} --member=${memberType}:${memberId} --role=${role}`;
         }
@@ -314,7 +300,6 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
           message: `${memberType}:${memberId} from ${role}`,
         });
 
-        // Refresh the policy
         fetchIAMPolicy();
       } catch (error: unknown) {
         removingToast.hide();
@@ -324,7 +309,6 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
   }
 
   function showAddMemberForm() {
-    // Get the first available role as default, or storage.objectViewer if no roles available yet
     const defaultRole = roles.length > 0 ? roles[0].role : "roles/storage.objectViewer";
 
     push(
@@ -359,14 +343,11 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     push(<Detail markdown={`# Debug Information\n\n${debugInfo}`} />);
   }
 
-  // Filter roles and members based on search text
   const filteredRoles = roles.filter((role) => {
-    // If there's a selected role and this isn't it, filter it out
     if (selectedRole && role.role !== selectedRole) {
       return false;
     }
 
-    // If there's search text, check if the role or any members match
     if (searchText) {
       const roleMatches =
         role.role.toLowerCase().includes(searchText.toLowerCase()) ||

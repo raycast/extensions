@@ -1,5 +1,21 @@
 # Apple Reminders Changelog
 
+## [Add ability to move reminders between lists] - 2025-10-17
+
+- Add list selection dropdown in the Edit Reminder form
+- Implement `moveToList` function to change reminder's list
+- Allow users to move reminders to different lists when editing
+- Added logic to only update title/notes and list if they have changed
+
+## [Add Creation Date option for sorting] - 2025-06-13
+
+- Retrieve the Creation Date from the EventKit API
+- Add an option to sort reminders by Creation Date, as this is available in the native app
+
+## [✨ Add option to show list name in menu bar reminders] - 2025-06-04
+
+- Add an option that allows users to choose whether to display the list name next to each reminder’s name in the menu bar.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add new "Upcoming" grouping option] - 2025-02-10

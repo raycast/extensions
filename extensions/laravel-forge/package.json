@@ -95,7 +95,6 @@
     "eslint-config-prettier": "^8.8.0",
     "node-ray": "^1.19.4",
     "prettier": "2.8.7",
-    "react-devtools": "^4.27.4",
     "typescript": "^5.0.4"
   },
   "scripts": {
@@ -104,5 +103,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

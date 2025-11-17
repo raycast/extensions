@@ -18,6 +18,7 @@ export interface EntryBase {
   type: "cutPaste" | "directReplace";
   title: string;
   description?: string;
+  lastUsed: Date;
 }
 
 export interface EntryCutPaste extends EntryBase {

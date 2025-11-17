@@ -69,6 +69,7 @@ const cliPaths: Record<string, string> = {
   Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
   "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
   Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
+  Kiro: "/Applications/Kiro.app/Contents/Resources/app/bin/kiro",
   Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
   Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
   "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
@@ -184,6 +185,7 @@ const buildSchemes: Record<string, string> = {
   Code: "vscode",
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",
+  Kiro: "kiro",
   VSCodium: "vscode-oss",
   Positron: "positron",
   Windsurf: "windsurf",

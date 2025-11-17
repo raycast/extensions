@@ -1,5 +1,45 @@
 # GitHub Changelog
 
+## [Checkout PR project action] - 2025-10-24
+
+- My Pull Requests: Added "Check Out PR" action to clone repository and switch to PR branch locally
+
+## [Unified handle notification icon retrieval error] - 2025-10-02
+
+- Notifications Command and Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
+## [Fix clone with options action] - 2025-09-08
+
+- Fix the clone action by adding the quote to the command to prevent issues with spaces in the path
+
+## [Add My Starred Repositories command] - 2025-08-25
+
+- Add new "My Starred Repositories" command to view starred repositories
+- Displays starred repositories with support for sorting and visiting history
+- Integrated with existing repository list components for consistent experience
+
+## [Issue type specification] - 2025-08-22
+
+- Adds the ability to specify the issue type when creating a new issue.
+
+## [Fix repository filtering] - 2025-06-26
+
+- Correct the repository filtering for exclude mode
+
+## [Add repository filtering] - 2025-06-05
+
+- my-issues, my-pull-requests and menu counterparts can now specify repositories to include / exclude
+
+## [Filter recently closed PRs by last update date] - 2025-04-16
+
+- Fixed a bug where active pull requests could be hidden: the `updated` filter is now only applied to closed PRs, so all active PRs are always shown in `My Pull Requests`.
+
+## [Add support for merge queues and auto-merge] - 2025-04-15
+
+- Adds PR actions for repositories that use merge queues
+- Adds the ability to enable auto-merge
+- Fix codegen lint hook
+
 ## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
 
 - Add the ability to search for collaborators in the pull request actions, instead of just showing the first 25.

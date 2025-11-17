@@ -19,3 +19,8 @@ export const CACHED_KEY_RECENT_SELECTED_SPACE = "recent-selected-space";
 export const CACHED_KEY_RECENT_SELECTED_TAGS = "recent-selected-tags";
 
 export const CACHED_KEY_DISABLED_SPACE_IDS = "disabled-space-ids";
+
+export const CACHED_KEY_RANKING_ENTRIES = "ranking-entries";
+
+export const CACHED_KEY_SPACE_VERIFYING_AUTH_EMAIL = "space-verifying-auth-email";
+export const CACHED_KEY_SPACE_AUTH_CODE_SENT = "space-auth-code-sent";

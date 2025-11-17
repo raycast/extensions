@@ -1,6 +1,11 @@
 # Host Switch
 
 Quickly switch between hosts while preserving the url path.
-Supports Safari, Chrome and Arc.
+
+## 🌐 Supported Browsers
+- Arc
+- Brave
+- Chrome
+- Safari
 
 ![screenshot](media/screenshot.png)

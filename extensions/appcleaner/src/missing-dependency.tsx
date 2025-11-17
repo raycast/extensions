@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import { UNINSTALLERS } from "./lib/uninstaller";
+import { UNINSTALLERS } from "./lib/constants";
 
 export function MissingDependency() {
   const error = `

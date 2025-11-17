@@ -1,6 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
-import { folderName, enclosingFolderName } from "../utils";
-import { ReactNode } from "react";
+import { folderName, enclosingFolderName, formatDate } from "../utils";
+import { JSX } from "react";
 import { SpotlightSearchResult } from "../types";
 
 interface FolderListSectionProps {
@@ -8,7 +8,8 @@ interface FolderListSectionProps {
   results: SpotlightSearchResult[];
   isShowingDetail: boolean;
   resultIsPinned: (result: SpotlightSearchResult) => boolean;
-  renderActions: (result: SpotlightSearchResult, resultIndex: number) => ReactNode;
+  renderActions: (result: SpotlightSearchResult, resultIndex: number, isPinnedSection?: boolean) => JSX.Element;
+  isPinnedSection?: boolean;
 }
 
 export function FolderListSection({
@@ -17,6 +18,7 @@ export function FolderListSection({
   isShowingDetail,
   resultIsPinned,
   renderActions,
+  isPinnedSection = false,
 }: FolderListSectionProps) {
   return (
     <List.Section title={title}>
@@ -28,6 +30,7 @@ export function FolderListSection({
           subtitle={!isShowingDetail ? enclosingFolderName(result) : ""}
           icon={{ fileIcon: result.path }}
           accessories={resultIsPinned(result) ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []}
+          quickLook={{ path: result.path, name: folderName(result) }}
           detail={
             <List.Item.Detail
               metadata={
@@ -39,20 +42,14 @@ export function FolderListSection({
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Type" text={result.kMDItemKind} />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={result.kMDItemFSCreationDate?.toLocaleString()}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created" text={formatDate(result.kMDItemFSCreationDate)} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Modified"
-                    text={result.kMDItemContentModificationDate?.toLocaleString()}
+                    text={formatDate(result.kMDItemContentModificationDate)}
                   />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Last used"
-                    text={result.kMDItemLastUsedDate?.toLocaleString() || "-"}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Last used" text={formatDate(result.kMDItemLastUsedDate)} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Use count"
@@ -63,7 +60,7 @@ export function FolderListSection({
               }
             />
           }
-          actions={renderActions(result, resultIndex)}
+          actions={renderActions(result, resultIndex, isPinnedSection)}
         />
       ))}
     </List.Section>

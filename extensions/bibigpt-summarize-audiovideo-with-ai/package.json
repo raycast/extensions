@@ -32,18 +32,54 @@
           "title": "Output Language",
           "default": "en-US",
           "data": [
-            {"title": "en-US", "value": "en-US"},
-            {"title": "zh-CN", "value": "zh-CN"},
-            {"title": "zh-TW", "value": "zh-TW"},
-            {"title": "ja-JP", "value": "ja-JP"},
-            {"title": "it-IT", "value": "it-IT"},
-            {"title": "de-DE", "value": "de-DE"},
-            {"title": "es-ES", "value": "es-ES"},
-            {"title": "fr-FR", "value": "fr-FR"},
-            {"title": "nl-NL", "value": "nl-NL"},
-            {"title": "ko-KR", "value": "ko-KR"},
-            {"title": "km-KH", "value": "km-KH"},
-            {"title": "hi-IN", "value": "hi-IN"}
+            {
+              "title": "en-US",
+              "value": "en-US"
+            },
+            {
+              "title": "zh-CN",
+              "value": "zh-CN"
+            },
+            {
+              "title": "zh-TW",
+              "value": "zh-TW"
+            },
+            {
+              "title": "ja-JP",
+              "value": "ja-JP"
+            },
+            {
+              "title": "it-IT",
+              "value": "it-IT"
+            },
+            {
+              "title": "de-DE",
+              "value": "de-DE"
+            },
+            {
+              "title": "es-ES",
+              "value": "es-ES"
+            },
+            {
+              "title": "fr-FR",
+              "value": "fr-FR"
+            },
+            {
+              "title": "nl-NL",
+              "value": "nl-NL"
+            },
+            {
+              "title": "ko-KR",
+              "value": "ko-KR"
+            },
+            {
+              "title": "km-KH",
+              "value": "km-KH"
+            },
+            {
+              "title": "hi-IN",
+              "value": "hi-IN"
+            }
           ]
         }
       ]
@@ -68,5 +104,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

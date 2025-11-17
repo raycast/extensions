@@ -1,5 +1,13 @@
 # Kill Process Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Add support for Windows
+
+## [Added force kill] - 2025-06-10
+
+- Force kills the chosen process with sudo (requires enabling sudo authentication with fingerprint)
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 - Added AI Extensions support allowing natural language interaction with the extension

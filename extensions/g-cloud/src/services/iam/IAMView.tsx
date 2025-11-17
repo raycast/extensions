@@ -15,12 +15,13 @@ import { useState, useEffect, useMemo } from "react";
 import { IAMService, IAMPrincipal, IAMRole } from "./IAMService";
 import { showFailureToast } from "@raycast/utils";
 import { predefinedRoles } from "../../utils/iamRoles";
+import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 
 interface IAMViewProps {
   projectId: string;
   gcloudPath: string;
-  resourceName?: string; // Optional: specific resource (bucket, etc.) to view
-  resourceType?: string; // Optional: type of resource (storage, compute, etc.)
+  resourceName?: string;
+  resourceType?: string;
 }
 
 export default function IAMView({ projectId, gcloudPath, resourceName, resourceType }: IAMViewProps) {
@@ -34,7 +35,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
 
   const iamService = useMemo(() => new IAMService(gcloudPath, projectId), [gcloudPath, projectId]);
 
-  // Group predefined roles by service for the dropdown
   const rolesByService = useMemo(() => {
     const services: Record<string, { title: string; roles: { value: string; title: string }[] }> = {};
 
@@ -52,28 +52,25 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       });
     });
 
-    // Sort roles within each service
     Object.values(services).forEach((service) => {
       service.roles.sort((a, b) => a.title.localeCompare(b.title));
     });
 
-    // Sort services by name and return the values only
     return Object.entries(services)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([, service]) => service);
   }, []);
 
-  // Helper function to extract service from role name
   const getRoleService = (role: string): string => {
     if (role.startsWith("roles/")) {
       const parts = role.split("/")[1].split(".");
       if (parts.length > 1) {
-        return parts[0]; // Return the service part (e.g., "storage" from "storage.admin")
+        return parts[0];
       } else {
-        return "project"; // For basic roles like roles/owner, roles/editor
+        return "project";
       }
     }
-    return "custom"; // For custom roles
+    return "custom";
   };
 
   useEffect(() => {
@@ -83,7 +80,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
   async function fetchIAMPolicy() {
     setIsLoading(true);
 
-    // Show loading toast for initial load only
     let loadingToast;
     if (principals.length === 0) {
       loadingToast = await showToast({
@@ -98,7 +94,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       setPrincipals(fetchedPrincipals);
       setError(null);
 
-      // Hide loading toast if it exists
       if (loadingToast) {
         loadingToast.hide();
       }
@@ -106,7 +101,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       console.error("Error fetching IAM policy:", error);
       setError("Failed to fetch IAM policy");
 
-      // Hide loading toast if it exists
       if (loadingToast) {
         loadingToast.hide();
       }
@@ -125,7 +119,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
 
   const filteredPrincipals = useMemo(() => {
     return principals.filter((principal) => {
-      // Filter by search text
       if (
         searchText &&
         !principal.id.toLowerCase().includes(searchText.toLowerCase()) &&
@@ -138,12 +131,10 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
         return false;
       }
 
-      // Filter by principal type
       if (selectedType && principal.type !== selectedType) {
         return false;
       }
 
-      // Filter by service using exact service matching
       if (selectedService) {
         return principal.roles.some((role) => getRoleService(role.role) === selectedService.toLowerCase());
       }
@@ -152,7 +143,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
     });
   }, [principals, searchText, selectedType, selectedService]);
 
-  // Group principals by type for the dropdown
   const principalsByType = useMemo(() => {
     const byType: Record<string, IAMPrincipal[]> = {};
 
@@ -164,7 +154,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       byType[principal.type].push(principal);
     });
 
-    // Sort principals within each type
     Object.values(byType).forEach((typePrincipals) => {
       typePrincipals.sort((a, b) => a.id.localeCompare(b.id));
     });
@@ -183,7 +172,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
               onSubmit={async (values) => {
                 setIsLoading(true);
 
-                // Show loading toast
                 const loadingToast = await showToast({
                   style: Toast.Style.Animated,
                   title: "Adding member...",
@@ -191,14 +179,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                 });
 
                 try {
-                  // Determine which member ID to use
                   let memberId = "";
 
                   if (values.existingMemberId && values.existingMemberId !== "none") {
-                    // Use existing member ID if selected
                     memberId = values.existingMemberId;
                   } else if (values.newMemberId) {
-                    // Use new member ID if provided
                     memberId = values.newMemberId;
                   }
 
@@ -209,7 +194,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
 
                   await iamService.addMember(values.role, values.memberType, memberId, resourceType, resourceName);
 
-                  // Hide loading toast
                   loadingToast.hide();
 
                   showToast({
@@ -309,7 +293,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
               onSubmit={async (values) => {
                 setIsLoading(true);
 
-                // Show loading toast
                 const loadingToast = await showToast({
                   style: Toast.Style.Animated,
                   title: "Creating group...",
@@ -319,7 +302,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                 try {
                   await iamService.createGroup(values.groupId, values.displayName, values.description);
 
-                  // Hide loading toast
                   loadingToast.hide();
 
                   showToast({
@@ -381,7 +363,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
     if (confirmed) {
       setIsLoading(true);
 
-      // Show loading toast
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Removing member...",
@@ -391,7 +372,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       try {
         await iamService.removeMember(role.role, principal.type, principal.id, resourceType, resourceName);
 
-        // Hide loading toast
         loadingToast.hide();
 
         showToast({
@@ -447,7 +427,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
   }
 
   function showPrincipalDetails(principal: IAMPrincipal) {
-    // Generate markdown for the principal's details
     let markdown = `# ${principal.displayName}: ${principal.id}\n\n`;
 
     markdown += `## Roles\n\n`;
@@ -500,7 +479,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
     );
   }
 
-  // Function to add a role to an existing principal
   async function showAddRoleForm(principal: IAMPrincipal) {
     push(
       <Form
@@ -512,7 +490,6 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
               onSubmit={async (values) => {
                 setIsLoading(true);
 
-                // Show loading toast
                 const loadingToast = await showToast({
                   style: Toast.Style.Animated,
                   title: "Adding role...",
@@ -520,17 +497,13 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                 });
 
                 try {
-                  // Determine which member ID to use
                   let memberId = "";
 
                   if (values.existingMemberId && values.existingMemberId !== "none") {
-                    // Use existing member ID if selected
                     memberId = values.existingMemberId;
                   } else if (values.newMemberId) {
-                    // Use new member ID if provided
                     memberId = values.newMemberId;
                   } else {
-                    // Default to the current principal if no other selection is made
                     memberId = principal.id;
                   }
 
@@ -539,20 +512,17 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                     throw new Error("Member ID is required");
                   }
 
-                  // Determine member type from the ID format if not the original principal
                   let memberType = principal.type;
                   if (memberId !== principal.id) {
-                    // Extract member type from ID format (e.g., "user:email@example.com")
                     const parts = memberId.split(":");
                     if (parts.length === 2) {
                       memberType = parts[0];
-                      memberId = parts[1]; // Extract just the ID part
+                      memberId = parts[1];
                     }
                   }
 
                   await iamService.addMember(values.role, memberType, memberId, resourceType, resourceName);
 
-                  // Hide loading toast
                   loadingToast.hide();
 
                   showToast({
@@ -677,14 +647,23 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
       isLoading={isLoading}
       searchBarPlaceholder="Search members or roles..."
       onSearchTextChange={setSearchText}
-      navigationTitle={resourceName ? `Manage Permissions for ${resourceName}` : "Manage Permissions"}
+      navigationTitle={resourceName ? `IAM for ${resourceName}` : `IAM - ${projectId}`}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Member Type" value={selectedType || ""} onChange={setSelectedType}>
-          <List.Dropdown.Item title="All Types" value="" />
-          {principalTypes.map((type) => (
-            <List.Dropdown.Item key={type} title={iamService.formatMemberType(type)} value={type} />
-          ))}
-        </List.Dropdown>
+        <QuickProjectSwitcher
+          gcloudPath={gcloudPath}
+          onProjectSelect={(selectedProjectId) => {
+            if (selectedProjectId !== projectId) {
+              push(
+                <IAMView
+                  projectId={selectedProjectId}
+                  gcloudPath={gcloudPath}
+                  resourceType={resourceType}
+                  resourceName={resourceName}
+                />,
+              );
+            }
+          }}
+        />
       }
       isShowingDetail
       actions={
@@ -693,7 +672,7 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
           <Action title="Create Group" icon={Icon.PersonCircle} onAction={showCreateGroupForm} />
           <Action
             title="Refresh"
-            icon={Icon.ArrowClockwise}
+            icon={Icon.RotateClockwise}
             onAction={fetchIAMPolicy}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />

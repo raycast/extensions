@@ -17,7 +17,9 @@
     "teziovsky",
     "lukebars",
     "AlanHuang",
-    "alexs"
+    "alexs",
+    "ARui",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -148,6 +150,15 @@
       "description": "Whether or not to show the tags field in the create and update time entry forms.",
       "label": "Show tags",
       "default": true
+    },
+    {
+      "name": "timeEntriesLookbackDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Time Entries Lookback Days",
+      "description": "Number of days to look back when fetching time entries (default: 14, max: 60)",
+      "placeholder": "Enter a number between 1-60",
+      "default": "14"
     }
   ],
   "dependencies": {
@@ -162,8 +173,7 @@
     "@types/node": "~20.12.12",
     "@types/react": "~18.3.3",
     "eslint": "^8.56.0",
-    "react-devtools": "^4.27.2",
-    "typescript": "^5.4.5"
+        "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { PathLike } from "fs";
 import { useState } from "react";
 import { downloadsFolder, getDownloads, withAccessToDownloadsFolder } from "./utils";
@@ -10,6 +10,10 @@ function Command() {
     setDownloads((downloads) =>
       downloads.filter((download) => (Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path))
     );
+  }
+
+  function handleReload() {
+    setDownloads(getDownloads());
   }
 
   return (
@@ -43,6 +47,12 @@ function Command() {
                   title="Copy File"
                   content={{ file: download.path }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+                <Action
+                  title="Reload Downloads"
+                  icon={Icon.RotateAntiClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={handleReload}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>

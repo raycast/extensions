@@ -16,9 +16,16 @@ export default async function AddTodoCommand(props: LaunchProps<{ arguments: Arg
     return;
   }
 
-  await addTask({ name: todo, tags: [] });
-  await showToast({
-    title: "Task created!",
-    style: Toast.Style.Success,
-  });
+  const { error } = await addTask({ name: todo, tags: [] });
+  if (!error) {
+    await showToast({
+      title: "Task created!",
+      style: Toast.Style.Success,
+    });
+  } else {
+    await showToast({
+      title: "An error occurred",
+      style: Toast.Style.Failure,
+    });
+  }
 }

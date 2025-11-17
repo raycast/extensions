@@ -13,9 +13,9 @@ export enum GitLabIcons {
   issue = "exclamation.png",
   project = "project.svg",
   merged = "merged.png",
-  mropen = "mropen.png",
+  mropen = "mropen.png", // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
   mraccepted = "todo.png",
-  branches = "merged.png",
+  branches = "merged.png", // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
   ci = "rocket.png",
   milestone = "board_circuit.png",
   explorer = "list.png",
@@ -24,7 +24,7 @@ export enum GitLabIcons {
   labels = "dash.png",
   epic = "epic.svg",
   comment = "book.png",
-  wiki = "list.png",
+  wiki = "list.png", // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
   show_details = "app-window-sidebar-right-16",
   tag = "tag.png",
   commit = "commit.svg",
@@ -52,7 +52,7 @@ async function getImageCacheDirectory(ensureDirectory = false): Promise<string> 
 
 export function useImage(
   url?: string,
-  defaultIcon?: string
+  defaultIcon?: string,
 ): {
   localFilepath?: string;
   error?: string;
@@ -71,7 +71,7 @@ export function useImage(
       const imgFilepath = path.join(imgDir, hashString(url)) + ".png"; // TODO get the extension correctly
       return await gitlab.downloadFile(url, { localFilepath: imgFilepath });
     },
-    { deps: [url], secondsToRefetch: 600, secondsToInvalid: daysInSeconds(7) }
+    { deps: [url], secondsToRefetch: 600, secondsToInvalid: daysInSeconds(7) },
   );
 
   useEffect(() => {

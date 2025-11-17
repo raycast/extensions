@@ -16,12 +16,13 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { IAMService, IAMPrincipal } from "./IAMService";
 import { formatRoleName } from "../../utils/iamRoles";
 import { showFailureToast } from "@raycast/utils";
+import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 
 interface IAMMembersByPrincipalViewProps {
   projectId: string;
   gcloudPath: string;
-  resourceName?: string; // Optional: specific resource (bucket, etc.) to view
-  resourceType?: string; // Optional: type of resource (storage, compute, etc.)
+  resourceName?: string;
+  resourceType?: string;
 }
 
 export default function IAMMembersByPrincipalView({
@@ -39,7 +40,6 @@ export default function IAMMembersByPrincipalView({
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedService, setSelectedService] = useState<string | null>(null);
 
-  // Create IAM service instance
   const iamService = useMemo(() => new IAMService(gcloudPath, projectId), [gcloudPath, projectId]);
 
   const fetchIAMPolicy = useCallback(
@@ -57,12 +57,10 @@ export default function IAMMembersByPrincipalView({
       }
 
       try {
-        // Use the IAM service to get principals
         const principalsArray = await iamService.getIAMPrincipals(resourceType, resourceName);
 
         setPrincipals(principalsArray);
 
-        // Generate debug info
         const debugText = resourceName
           ? `Fetched IAM policy for ${resourceType}: ${resourceName}\n`
           : `Fetched project-level IAM policy for: ${projectId}\n`;
@@ -92,7 +90,6 @@ export default function IAMMembersByPrincipalView({
   );
 
   useEffect(() => {
-    // Only show toast on first mount
     fetchIAMPolicy(true);
   }, [fetchIAMPolicy]);
 
@@ -152,7 +149,6 @@ export default function IAMMembersByPrincipalView({
     });
 
     try {
-      // Use the IAM service to add a member
       await iamService.addMember(values.role, values.memberType, values.memberId, resourceType, resourceName);
 
       addingToast.hide();
@@ -162,7 +158,6 @@ export default function IAMMembersByPrincipalView({
         message: `${values.memberType}:${values.memberId} to ${values.role}`,
       });
 
-      // Refresh the policy
       fetchIAMPolicy();
     } catch (error: unknown) {
       addingToast.hide();
@@ -197,7 +192,6 @@ export default function IAMMembersByPrincipalView({
       });
 
       try {
-        // Use the IAM service to remove a member
         await iamService.removeMember(role, principal.type, principal.id, resourceType, resourceName);
 
         removingToast.hide();
@@ -207,7 +201,6 @@ export default function IAMMembersByPrincipalView({
           message: `${role} removed from ${principal.type}:${principal.id}`,
         });
 
-        // Refresh the policy
         fetchIAMPolicy();
       } catch (error: unknown) {
         removingToast.hide();
@@ -267,7 +260,6 @@ export default function IAMMembersByPrincipalView({
   }
 
   function showPrincipalDetails(principal: IAMPrincipal) {
-    // Generate markdown for the principal's details
     let markdown = `# ${principal.displayName}: ${principal.id}\n\n`;
 
     markdown += `## Roles\n\n`;
@@ -335,7 +327,6 @@ export default function IAMMembersByPrincipalView({
     );
   }
 
-  // Extract unique services from roles
   const services = useMemo(() => {
     const serviceSet = new Set<string>();
 
@@ -351,7 +342,6 @@ export default function IAMMembersByPrincipalView({
     return Array.from(serviceSet).sort();
   }, [principals]);
 
-  // Helper function to get service from role
   function getRoleService(role: string): string {
     if (role.startsWith("roles/storage.")) {
       return "Storage";
@@ -374,15 +364,12 @@ export default function IAMMembersByPrincipalView({
     }
   }
 
-  // Filter principals based on search text, selected type, and selected service
   const filteredPrincipals = useMemo(() => {
     return principals.filter((principal) => {
-      // If there's a selected type and this principal doesn't match, filter it out
       if (selectedType && principal.type !== selectedType) {
         return false;
       }
 
-      // If there's a selected service, check if any roles match that service
       if (selectedService) {
         const hasMatchingService = principal.roles.some((role) => getRoleService(role.role) === selectedService);
 
@@ -391,7 +378,6 @@ export default function IAMMembersByPrincipalView({
         }
       }
 
-      // If there's search text, check if the principal or any roles match
       if (searchText) {
         const principalMatches =
           principal.id.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -411,7 +397,6 @@ export default function IAMMembersByPrincipalView({
     });
   }, [principals, selectedType, selectedService, searchText]);
 
-  // Get unique principal types for the dropdown
   const principalTypes = useMemo(() => {
     return Array.from(new Set(principals.map((p) => p.type)));
   }, [principals]);
@@ -437,12 +422,21 @@ export default function IAMMembersByPrincipalView({
       onSearchTextChange={setSearchText}
       navigationTitle={resourceName ? `IAM for ${resourceName}` : "IAM Members"}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Member Type" value={selectedType || ""} onChange={setSelectedType}>
-          <List.Dropdown.Item title="All Types" value="" />
-          {principalTypes.map((type) => (
-            <List.Dropdown.Item key={type} title={iamService.formatMemberType(type)} value={type} />
-          ))}
-        </List.Dropdown>
+        <QuickProjectSwitcher
+          gcloudPath={gcloudPath}
+          onProjectSelect={(selectedProjectId) => {
+            if (selectedProjectId !== projectId) {
+              push(
+                <IAMMembersByPrincipalView
+                  projectId={selectedProjectId}
+                  gcloudPath={gcloudPath}
+                  resourceType={resourceType}
+                  resourceName={resourceName}
+                />,
+              );
+            }
+          }}
+        />
       }
       isShowingDetail
       actions={

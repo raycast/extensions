@@ -1,6 +1,8 @@
 import { withAccessToken } from "@raycast/utils";
+
 import { getLinearClient, linear } from "../api/linearClient";
 import { updateIssue } from "../api/updateIssue";
+
 import { formatConfirmation } from "./formatConfirmation";
 
 type Input = {

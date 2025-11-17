@@ -3,8 +3,8 @@ import { trpc } from "./trpc.util.js";
 import { httpBatchLink } from "@trpc/client";
 import SuperJSON from "superjson";
 import { API_URL_TRPC } from "./constants.util.js";
-import axios from "axios";
-import { showToast, Toast } from "@raycast/api";
+import axios, { isAxiosError } from "axios";
+import { showFailureToast } from "@raycast/utils";
 
 interface TRPCError {
   response?: {
@@ -79,19 +79,45 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
               }
 
               return {
-                json: () => res.data,
+                json: () => {
+                  const errorIdx = res.data.findIndex((item: { error: { json: { message: string } } }) => item.error);
+                  const errors = res.data.filter((item: { error: { json: { message: string } } }) => item.error);
+                  if (errors.length > 0) {
+                    // Since this is a batch request, some requests may fail while others succeed. (207 response)
+                    // In this case, we show the first error that occurred.
+                    const error = errors[0];
+                    const errorRouterName = (url as string).split("?")[0].split("/").pop()?.split(",")[errorIdx];
+                    const errorMessage = error.error.json.message || "Unknown API Error";
+                    const httpStatus = error.error.json.data.httpStatus;
+                    const title = `${errorRouterName}: ${errorMessage} (${httpStatus})`;
+
+                    showFailureToast(new Error(`tRPC error in batch results -> ${title}`), { title });
+                    console.error("tRPC Error(batch):");
+                    console.error(title);
+                  }
+                  return res.data;
+                },
               };
             } catch (err) {
+              // When a single request fails, the error gets caught here.
               const trpcError = err as TRPCError;
-              const msg = trpcError.response?.data?.[0]?.error?.json?.message;
-              console.log("err:");
-              console.log(err);
-              console.log("tRPC Error:");
-              console.log(trpcError.response?.data?.[0]?.error?.json);
-              showToast({
-                style: Toast.Style.Failure,
-                title: msg ? msg : trpcError.response?.status === 401 ? "Login Required" : "Unknown API Error",
-              });
+              const errorRouterName = (url as string).split("?")[0].split("/").pop()?.split(",")[0];
+              const axiosErrorMessage = isAxiosError(err) ? `AxiosError [${err.stack?.split("\n")[0]}]` : "";
+              const middlewareErrorMessage = (trpcError.response?.data as { middlewareErrorMessage?: string })
+                ?.middlewareErrorMessage;
+              const errorMessage =
+                trpcError.response?.data?.[0]?.error?.json?.message ||
+                middlewareErrorMessage ||
+                axiosErrorMessage ||
+                "Unknown API Error";
+              const httpStatus = trpcError.response?.status;
+              const routerName = middlewareErrorMessage ? "Middleware" : errorRouterName;
+              const title = `${routerName}: ${errorMessage} (${httpStatus})`;
+
+              (err as Error).message = (err as Error).message + ` -> ${title}`;
+              showFailureToast(err, { title });
+              console.error("tRPC Error:");
+              console.error(title);
 
               return {
                 json: () => {

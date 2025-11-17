@@ -1,4 +1,5 @@
 import { Action } from "@raycast/api";
+
 import { isLinearInstalled } from "../helpers/isLinearInstalled";
 
 type OpenInLinearProps = {

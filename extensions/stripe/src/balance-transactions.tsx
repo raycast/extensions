@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import type Stripe from "stripe";
-import { convertAmount, convertTimestampToDate, titleCase } from "./utils";
+import { convertAmount, convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
 import { useStripeApi } from "./hooks";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
@@ -34,21 +34,9 @@ const resolveBalanceTransaction = (balanceTransaction: Stripe.BalanceTransaction
   return resolvedBalanceTransaction;
 };
 
-const resolveMetadataValue = (value: any) => {
-  if (typeof value === "string") {
-    return value;
-  }
-
-  if (typeof value === "number") {
-    return `${value}`;
-  }
-
-  return "";
-};
-
 const BalanceTransactions = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.BALANCE_TRANSACTIONS, true);
-  const formattedBalanceTransactions = data.map(resolveBalanceTransaction);
+  const formattedBalanceTransactions = (data as Stripe.BalanceTransaction[]).map(resolveBalanceTransaction);
 
   const renderBalanceTransactions = (transaction: BalanceTransaction) => {
     const { amount, currency, id } = transaction;

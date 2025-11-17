@@ -96,6 +96,6 @@ export async function compressImage(filePath: string, option: CompressOption): P
 }
 
 export function isSupportedImage(filePath: string) {
-  const ext = extname(filePath);
+  const ext = extname(filePath).toLowerCase();
   return ext === ".jpg" || ext === ".jpeg" || ext === ".png" || ext === ".webp";
 }

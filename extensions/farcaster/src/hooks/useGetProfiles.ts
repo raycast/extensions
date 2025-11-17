@@ -1,8 +1,8 @@
-import { useFetch } from '@raycast/utils';
-import { CastAuthor, FeedUsersResponse } from '../utils/types';
-import { ApiUrls } from '../utils/endpoints';
-import { Toast, showToast } from '@raycast/api';
-import { headers } from '../utils/helpers';
+import { useFetch } from "@raycast/utils";
+import { CastAuthor, FeedUsersResponse } from "../utils/types";
+import { ApiUrls } from "../utils/endpoints";
+import { Toast, showToast } from "@raycast/api";
+import { headers } from "../utils/helpers";
 
 function getProfileByFIDOrUsername(q: string, cursor?: string) {
   let url: string;
@@ -16,13 +16,13 @@ function getProfileByFIDOrUsername(q: string, cursor?: string) {
 
 export function useGetProfiles(query: string) {
   return useFetch<FeedUsersResponse>(({ cursor }) => getProfileByFIDOrUsername(query, cursor), {
-    method: 'GET',
+    method: "GET",
     headers: headers,
     execute: !!query,
     keepPreviousData: true,
     onError: (error: Error) => {
       console.error(error);
-      showToast(Toast.Style.Failure, 'Could not fetch profiles');
+      showToast(Toast.Style.Failure, "Could not fetch profiles");
     },
     mapResult(result: FeedUsersResponse) {
       const rootResult = result?.result ?? result;

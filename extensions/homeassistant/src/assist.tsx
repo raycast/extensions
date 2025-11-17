@@ -3,7 +3,7 @@ import { getTranslation } from "@lib/translation";
 import { getErrorMessage } from "@lib/utils";
 import { Action, ActionPanel, Color, Icon, Image, List, Toast, clearSearchBar, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface PlainSpeech {
   speech: string;
@@ -114,7 +114,7 @@ function getInitialConversations(language: string): ConversationContent[] {
 function PipelinesDropdownList(props: {
   pipelines: HAAssistPipelines | undefined;
   onChange?: (newValue: HAAssistPipeline | undefined) => void;
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const p = props.pipelines;
   if (!p) {
     return null;
@@ -134,7 +134,7 @@ function PipelinesDropdownList(props: {
   );
 }
 
-export default function AssistCommand(): JSX.Element {
+export default function AssistCommand(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>("");
   const { pipelines, isLoading: isLoadingPipeline, error } = useAssistPipelines();
   const [conversations, setConversations] = useState<ConversationContent[]>();

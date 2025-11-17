@@ -35,7 +35,7 @@ export type Competitor = {
   color: string;
   alternateColor: string;
   home: string;
-  score: string;
+  score: number;
   linescores: {
     value: number;
   }[];

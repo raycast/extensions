@@ -1,5 +1,9 @@
 # File Manager Changelog
 
+## [Update] - 2025-05-22
+
+- Added a preferences to enable search by file permissions
+
 ## [Fixes] - 2025-02-29
 
 - Fixed shell command errors caused by filenames containing single quotes.

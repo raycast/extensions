@@ -18,12 +18,10 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
   const { push } = useNavigation();
 
   useEffect(() => {
-    // Initialize service with provided gcloudPath and projectId
     const networkService = new NetworkService(gcloudPath, projectId);
     setService(networkService);
 
     const initializeData = async () => {
-      // Show initial loading toast
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Loading VPC networks...",
@@ -31,11 +29,9 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
       });
 
       try {
-        // Fetch VPCs
         const fetchedVPCs = await networkService.getVPCs();
         setVPCs(fetchedVPCs);
 
-        // Prefetch subnets in background for faster subnet view
         networkService.getSubnets().catch((error) => {
           console.error("Background subnet fetch error:", error);
           showFailureToast("Failed to prefetch subnets - subnet view may load slower");
@@ -288,7 +284,6 @@ function CreateVPCForm({ service, onVPCCreated }: CreateVPCFormProps) {
       return;
     }
 
-    // Validate MTU if provided
     let mtuValue: number | undefined;
     if (values.mtu) {
       if (!/^\d+$/.test(values.mtu)) {

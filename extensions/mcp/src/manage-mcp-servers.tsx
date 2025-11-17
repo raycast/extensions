@@ -1,14 +1,23 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
-import { environment } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { execSync } from "child_process";
-import { Color } from "@raycast/api";
-import os from "os";
-import { getClients, ClientInfo } from "./getClients";
-import { confirmAlert, Alert } from "@raycast/api";
-import fs from "fs";
-import { Form, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  environment,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { execSync } from "child_process";
+import fs from "fs";
+import os from "os";
+import { useEffect, useState } from "react";
+import { ClientInfo, getClients } from "./getClients";
 
 interface SignUpFormValues {
   serverJSON: string;
@@ -95,7 +104,7 @@ export function AddServerUI({ setClients }: { setClients: (clients: ClientInfo[]
 export default function Command() {
   function getUserShellPath() {
     const shell = os.userInfo().shell || "/bin/sh";
-    const command = `${shell} -l -i -c 'echo $PATH'`;
+    const command = `${shell} -l -c 'echo $PATH'`;
 
     try {
       const path = execSync(command).toString().trim();

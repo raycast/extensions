@@ -1,5 +1,9 @@
 # Gitmoji Changelog
 
+## [Upgrade gitmoji] - 2025-05-19
+
+- Add frecency sorting
+
 ## [Upgrade gitmoji] - 2023-08-19
 
 - Fix raycast reserved modifier keys

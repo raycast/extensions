@@ -169,3 +169,22 @@ export async function getFocusedTab() {
     throw new Error(`Failed to get focused tab: ${error}`);
   }
 }
+
+export async function closeOtherTabs() {
+  try {
+    const script = `
+      tell application "${safariAppIdentifier}"
+        tell front window
+          set currentTabIndex to index of current tab
+          close (every tab whose index is not currentTabIndex)
+          return "Other tabs closed successfully"
+        end tell
+      end tell
+    `;
+
+    const result = await runAppleScript(script);
+    return result;
+  } catch (error) {
+    return `Error: ${error}`;
+  }
+}

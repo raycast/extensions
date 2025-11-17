@@ -1,7 +1,8 @@
 import { Initiative, Project } from "@linear/sdk";
-import { getLinearClient, linear } from "../api/linearClient";
-import { sortBy } from "lodash";
 import { withAccessToken } from "@raycast/utils";
+import { sortBy } from "lodash";
+
+import { getLinearClient, linear } from "../api/linearClient";
 
 export type InitiativeResult = Pick<Initiative, "id" | "name" | "color" | "icon" | "sortOrder" | "description"> & {
   projects?: { nodes: Pick<Project, "id">[] };

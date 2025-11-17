@@ -1,5 +1,53 @@
 # Zen Changelog
 
+## [Fix New Tab and History For Windows] - 2025-11-10
+
+- Fix the new tab and history commands for Windows by using the PowerShell script to open the URL in Zen Browser.
+
+## [Added Create New Window Command] - 2025-10-29
+
+- Added a command to create a new window in Zen Browser.
+
+## [Added Open Workspace Command] - 2025-10-09
+
+- Added a command to open a specific workspace in Zen Browser.
+- Added a hook to fetch user shortcuts.
+- Improved retry mechanism for SQL queries.
+
+## [Windows Support] - 2025-09-16
+
+- Added Windows Support
+- Added a preference to change the location of Zen profiles
+
+## [Simplify Actions and Remove Browser Default Search] - 2025-09-16
+
+- Simplified new tab and history actions to use native Raycast Action.Open instead of AppleScript
+- Removed Browser Default search engine option and set Google as the new default
+- Removed openHistoryTab and setActiveTab functions in favor of simpler browser opening
+- Removed code for searching tabs as it was unused
+
+## []
+
+## [Fix New Tab and History Tab] - 2025-06-11
+
+- Fix new tab and history tab commands, by adding a delay to the script to ensure the URL bar is focused.
+
+## [✨ AI Enhancements] - 2025-05-15
+
+AI Tools to:
+
+- Open New Tab
+- Search History
+
+## [Update brew install command] - 2025-04-24
+
+- Update the brew install command from Firefox to Zen Browser.
+
+## [Add Browser Default Search Engine] - 2025-04-22
+
+- Added the ability to use the user's default browser search engine set within Zen as the search engine.
+- Changed the default search engine to the Browser Default.
+
 ## [Changing the name of app called] - 2025-03-21
 
 - Changed name of app being called from "Zen Browser" to "Zen"

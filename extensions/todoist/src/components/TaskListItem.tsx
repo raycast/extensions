@@ -23,14 +23,7 @@ type TaskListItemProps = {
   quickLinkView?: QuickLinkView;
 };
 
-export default function TaskListItem({
-  task,
-  mode,
-  viewProps,
-  data,
-  setData,
-  quickLinkView,
-}: TaskListItemProps): JSX.Element {
+export default function TaskListItem({ task, mode, viewProps, data, setData, quickLinkView }: TaskListItemProps) {
   const taskComments = data?.notes.filter((note) => note.item_id === task.id);
   const accessories: List.Item.Accessory[] = [];
   const keywords: string[] = [];

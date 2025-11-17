@@ -6,7 +6,9 @@
   "icon": "extension-icon.png",
   "author": "Mehdi_Hp",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "snuki",
+    "ridemountainpig"
   ],
   "version": "0.0.1",
   "categories": [
@@ -69,6 +71,15 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "showHiddenFolders",
+      "label": "Show Hidden Folders",
+      "title": "Show hidden folders",
+      "description": "Show hidden folders",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {

@@ -1,5 +1,40 @@
 # Messages Changelog
 
+## [Performance Optimizations] - 2025-11-05
+
+- Added "Load Contact Photos" preference to disable contact photo loading
+- Optimized contact fetching to use a single batch query instead of per-phone-number queries
+- Added phone number normalization for better matching
+- Removed email addresses from Contact type
+
+## [Spam and Unknown Sender Filtering] - 2025-10-03
+
+- Added backward-compatible support for the `is_filtered` field to filter spam and unknown sender messages
+- Added "Filter Out Spam" extension-level preference to hide messages marked as spam
+- Added "Filter Out Unknown Senders" extension-level preference to hide messages from unknown senders
+- Filters apply across My Latest Messages, Unread Messages, and AI tools
+- Filter status values documented as constants for maintainability
+
+## [Start New Chat on No Results] - 2025-07-09
+
+When a search in Open Chats returns no matching chats and the input consists solely of valid phone-number characters, display a "Start New Chat" action to open the Messages app with the entered number.
+
+## [Support for Hyphenated OTP Codes] - 2025-07-09
+
+Added detection for OTP codes formatted with hyphens (e.g. 123-456), requiring at least 3 digits on both sides.
+
+## [Docs: Add note about automation permissions] - 2025-07-01
+
+Added a note about automation permissions for Raycast in the README.md file.
+
+## [Fix OTP Code Parsing for Messages with colons in the message body] - 2025-05-30
+
+Fixed an issue where OTP codes with colons in the message body were not being parsed correctly.
+
+## [Fix OTP Code Parsing for Messages with Special Characters] - 2025-05-08
+
+Fixed issues with wrong number being parsed by adding additional common characters the regex and adding a bit more logic to select the largest OTP from the filtered list.
+
 ## [Added Keyword] - 2025-02-26
 
 Added a "2FA" keyword for improved discovery

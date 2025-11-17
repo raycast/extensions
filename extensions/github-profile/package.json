@@ -5,6 +5,9 @@
   "description": "View GitHub profiles directly in Raycast",
   "icon": "icon.png",
   "author": "ViGeng",
+  "contributors": [
+    "kero13"
+  ],
   "categories": [
     "Developer Tools",
     "Fun"

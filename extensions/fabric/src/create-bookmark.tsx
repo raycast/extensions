@@ -2,10 +2,14 @@ import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation, withAccessToken } from "@raycast/utils";
 
 import { CreateBookmarkParams, getFabricClient, oauthService } from "./api/fabricClient";
+import { CreationMetadata } from "./components/CreationMetadata";
 
 type CreationValues = {
   url: string;
   comment: string;
+  tagsNew: string;
+  tagsExisting: string[];
+  parentId: string;
 };
 
 function CreateBookmark() {
@@ -47,6 +51,7 @@ function CreateBookmark() {
     >
       <Form.TextField title="Link" placeholder="Type or paste a link..." {...itemProps.url} />
       <Form.TextArea title="Comment" placeholder="Say something about it (optional)" {...itemProps.comment} />
+      <CreationMetadata<CreationValues> itemProps={itemProps} />
     </Form>
   );
 }

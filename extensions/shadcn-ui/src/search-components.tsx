@@ -26,43 +26,35 @@ export const parseComponentName = (componentName: string) => {
 |________/|__/|_______/    \___/
 */
 
-async function parseFetchResponse(response: Response) {
-  const json = (await response.json()) as
-    | {
-        name: string;
-      }[]
-    | { code: string; message: string };
-
-  if (!response.ok || "message" in json) {
-    throw new Error("message" in json ? json.message : response.statusText);
+/**
+ * Fetch the list of components directly from the shadcn/ui GitHub repo
+ */
+async function getComponentsFromGitHub(): Promise<SearchResult[]> {
+  // GitHub API for directory listing
+  const res = await fetch("https://api.github.com/repos/shadcn/ui/contents/apps/www/content/docs/components");
+  if (!res.ok) {
+    throw new Error(res.statusText);
   }
-
-  console.log(json);
-
-  return json.map((result) => {
-    return {
-      name: parseComponentName(result.name),
-      component: result.name,
-      url: `${SHADCN_URL.DOCS_COMPONENTS}/${result.name}`,
-    } as SearchResult;
-  });
+  const files = (await res.json()) as Array<{ name: string; type: string }>;
+  return files
+    .filter((file) => file.type === "file" && file.name.endsWith(".mdx"))
+    .map((file) => {
+      const component = file.name.replace(/\.mdx$/, "");
+      return {
+        name: parseComponentName(component),
+        component,
+        url: `${SHADCN_URL.DOCS_COMPONENTS}/${component}`,
+      } as SearchResult;
+    });
 }
 
 export default function SearchComponents() {
-  const { isLoading, data } = useCachedPromise(
-    async (url: string) => {
-      const response = await fetch(url);
-
-      return await parseFetchResponse(response);
+  const { isLoading, data } = useCachedPromise(getComponentsFromGitHub, [], {
+    keepPreviousData: true,
+    onError: async (e) => {
+      await showToast(CREATE_ERROR_TOAST_OPTIONS(e));
     },
-    [SHADCN_URL.API_COMPONENTS],
-    {
-      keepPreviousData: true,
-      onError: async (e) => {
-        await showToast(CREATE_ERROR_TOAST_OPTIONS(e));
-      },
-    }
-  );
+  });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search components..." isShowingDetail>
@@ -113,16 +105,16 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           isLoading={isLoading}
           markdown={!detailData ? "# NA" : `# ${detailData.title}\n## ${detailData.description}`}
           metadata={
-            !!detailData?.radix && (
+            !!detailData?.links && (
               <List.Item.Detail.Metadata>
-                {detailData.radix.link && (
-                  <List.Item.Detail.Metadata.Link title="Radix UI" target={detailData.radix.link} text="Radix UI" />
+                {detailData.links.doc && (
+                  <List.Item.Detail.Metadata.Link title="Radix UI" target={detailData.links.doc} text="Radix UI" />
                 )}
                 <List.Item.Detail.Metadata.Separator />
-                {detailData.radix.api && (
+                {detailData.links.api && (
                   <List.Item.Detail.Metadata.Link
                     title="API Reference"
-                    target={detailData.radix.api}
+                    target={detailData.links.api}
                     text="Radix API Reference"
                   />
                 )}
@@ -172,8 +164,8 @@ interface FrontMatter {
   title: string;
   description: string;
   component: boolean;
-  radix: {
-    link: string;
+  links: {
+    doc: string;
     api: string;
   };
 }

@@ -28,6 +28,7 @@ interface Font {
   isSystem: boolean;
   styles: string[];
   isPinned?: boolean;
+  postScriptNames: string[];
 }
 
 interface Preferences {
@@ -42,6 +43,7 @@ interface FontFile {
 interface Typeface {
   family: string;
   style: string;
+  _name: string;
 }
 
 async function getFonts(): Promise<Font[]> {
@@ -67,11 +69,15 @@ async function getFonts(): Promise<Font[]> {
             path: fontFile.path,
             isSystem: fontFile.path.startsWith("/System"),
             styles: [typeface.style],
+            postScriptNames: [typeface._name],
           });
         } else {
           const font = fontMap.get(fontName)!;
           if (!font.styles.includes(typeface.style)) {
             font.styles.push(typeface.style);
+          }
+          if (!font.postScriptNames.includes(typeface._name)) {
+            font.postScriptNames.push(typeface._name);
           }
         }
       });
@@ -159,7 +165,7 @@ export default function Command() {
         <List.Section title="Pinned">
           {pinnedFilteredFonts.map((font) => (
             <FontListItem
-              key={`${font.name}-${font.path}`}
+              key={`${font.name}-${font.path}-pinned`}
               font={font}
               previewText={preferences.previewText}
               onReload={revalidate}
@@ -171,7 +177,7 @@ export default function Command() {
       <List.Section title={pinnedFilteredFonts.length > 0 ? "Other" : "All"}>
         {unpinnedFilteredFonts.map((font) => (
           <FontListItem
-            key={`${font.name}-${font.path}`} // Updated key
+            key={`${font.name}-${font.path}`}
             font={font}
             previewText={preferences.previewText}
             onReload={revalidate}
@@ -197,7 +203,6 @@ function FontListItem({
 }) {
   const [previewSVG, setPreviewSVG] = useState<string | null>(null);
 
-  // Generate font preview SVG
   useEffect(() => {
     setPreviewSVG(createFontPreviewSVG(font.name, previewText));
   }, [font, previewText]);
@@ -214,6 +219,12 @@ function FontListItem({
             onCopy={() => showToast({ title: "Font name copied", style: Toast.Style.Success })}
           />
           <Action.ShowInFinder path={font.path} />
+          <Action.Push
+            title="Show PostScript Names"
+            icon={Icon.List}
+            target={<PostScriptNamesList fontName={font.name} postScriptNames={font.postScriptNames || []} />}
+            shortcut={Keyboard.Shortcut.Common.New}
+          />
           <Action
             title={font.isPinned ? "Unpin Font" : "Pin Font"}
             icon={font.isPinned ? Icon.TackDisabled : Icon.Tack}
@@ -246,5 +257,47 @@ function FontListItem({
         />
       }
     />
+  );
+}
+
+interface PostScriptNamesListProps {
+  fontName: string;
+  postScriptNames: string[];
+}
+
+function PostScriptNamesList({ fontName, postScriptNames }: PostScriptNamesListProps) {
+  const [searchText, setSearchText] = useState("");
+
+  const filteredNames = postScriptNames.filter((name) => name.toLowerCase().includes(searchText.toLowerCase()));
+
+  return (
+    <List
+      navigationTitle={`PostScript Names for ${fontName}`}
+      searchBarPlaceholder="Search PostScript names..."
+      onSearchTextChange={setSearchText}
+      isShowingDetail={false}
+    >
+      {filteredNames.length === 0 && postScriptNames.length > 0 && searchText.length > 0 ? (
+        <List.EmptyView title="No matching PostScript names" description="Try a different search term." />
+      ) : filteredNames.length === 0 && postScriptNames.length === 0 ? (
+        <List.EmptyView title="No PostScript Names" description={`No PostScript names found for ${fontName}.`} />
+      ) : (
+        filteredNames.map((name) => (
+          <List.Item
+            key={name}
+            title={name}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard
+                  title="Copy PostScript Name"
+                  content={name}
+                  onCopy={() => showToast({ title: "PostScript name copied", style: Toast.Style.Success })}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
+    </List>
   );
 }

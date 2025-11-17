@@ -1,5 +1,12 @@
 # Tidal Controller Changelog
 
+## [Now Playing Support] - 2025-04-09
+
+- Added now playing command that displays a message of the currently playing song
+- Added menu bar that shows the tidal logo & if available currently playing song.
+  - If song title is not available (closed, paused, window closed) it will just display the Tidal logo and link to open
+  - If song title is available, other commands are presented (pause, skip, etc.)
+
 ## [Volume Control Support] - 2025-03-31
 
 - Added volume up and down control. This allows for users to bind Tidal-only volume control to a hotkey.

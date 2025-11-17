@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
+  "name": "owl",
+  "title": "Owl",
+  "description": "Oops Wrong Language - Change text into the correct language",
+  "icon": "extension_icon.png",
+  "author": "gohadar",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "owl",
+      "title": "Owl",
+      "description": "Converts the selected text to another language.",
+      "mode": "view"
+    },
+    {
+      "name": "configure-owls",
+      "title": "Configure Owls",
+      "description": "Configure the Owls (languages) to use.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "history-depth",
+      "title": "History Depth",
+      "description": "The number of items to keep in the history.",
+      "type": "textfield",
+      "required": true,
+      "default": "20"
+    }
+  ],
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.0",
+    "@raycast/utils": "^1.17.0",
+    "raycast": "^1.0.8",
+    "raycast-cross-extension": "^0.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
+    "eslint-plugin-react": "^7.37.5",
+    "jsdom": "^26.1.0",
+    "lodash": "^4.17.21",
+    "prettier": "^3.5.3",
+    "puppeteer": "^24.15.0",
+    "sharp": "^0.34.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

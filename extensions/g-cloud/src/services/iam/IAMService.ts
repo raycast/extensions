@@ -1,8 +1,3 @@
-/**
- * IAM Service - Provides efficient access to Google Cloud IAM functionality
- * Optimized for performance and user experience
- */
-
 import { executeGcloudCommand } from "../../gcloud";
 import { showFailureToast } from "@raycast/utils";
 import { getRoleInfo as getGCPRoleInfo, formatRoleName as formatGCPRoleName } from "../../utils/iamRoles";
@@ -26,7 +21,7 @@ interface GCPRole {
 }
 
 export interface IAMPrincipal {
-  type: string; // user, group, serviceAccount, etc.
+  type: string;
   id: string;
   email: string;
   displayName: string;
@@ -76,31 +71,23 @@ export interface IAMCustomRole {
   etag: string;
 }
 
-/**
- * IAM Service class - provides optimized access to IAM functionality
- */
 export class IAMService {
   private gcloudPath: string;
   private projectId: string;
   private policyCache: Map<string, { policy: IAMPolicy; timestamp: number }> = new Map();
-  private readonly CACHE_TTL = 300000; // 5 minutes cache TTL (increased from 30 seconds)
+  private readonly CACHE_TTL = 300000;
 
   constructor(gcloudPath: string, projectId: string) {
     this.gcloudPath = gcloudPath;
     this.projectId = projectId;
   }
 
-  /**
-   * Get IAM policy for a project or resource
-   * Uses caching for improved performance
-   */
   async getIAMPolicy(resourceType?: string, resourceName?: string): Promise<IAMPolicy> {
     const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
 
     const cachedPolicy = this.policyCache.get(cacheKey);
     const now = Date.now();
 
-    // Return cached policy if it exists and is not expired
     if (cachedPolicy && now - cachedPolicy.timestamp < this.CACHE_TTL) {
       return cachedPolicy.policy;
     }
@@ -136,7 +123,6 @@ export class IAMService {
         throw new Error("Invalid IAM policy format: no bindings found");
       }
 
-      // Cache the policy
       this.policyCache.set(cacheKey, { policy, timestamp: now });
 
       return policy;
@@ -150,15 +136,10 @@ export class IAMService {
     }
   }
 
-  /**
-   * Get IAM principals (members) with their roles
-   * Optimized for performance with caching
-   */
   async getIAMPrincipals(resourceType?: string, resourceName?: string): Promise<IAMPrincipal[]> {
     try {
       const policy = await this.getIAMPolicy(resourceType, resourceName);
 
-      // Process the bindings into a member-centric structure
       const principalsMap = new Map<string, IAMPrincipal>();
 
       for (const binding of policy.bindings) {
@@ -196,7 +177,6 @@ export class IAMService {
         }
       }
 
-      // Convert map to array and sort by type and email
       const principalsArray = Array.from(principalsMap.values());
       principalsArray.sort((a, b) => {
         if (a.type !== b.type) {
@@ -216,9 +196,6 @@ export class IAMService {
     }
   }
 
-  /**
-   * Add a member to a role
-   */
   async addMember(
     role: string,
     memberType: string,
@@ -226,7 +203,6 @@ export class IAMService {
     resourceType?: string,
     resourceName?: string,
   ): Promise<void> {
-    // Validate the member ID format
     if (!this.validateMemberId(memberType, memberId)) {
       showFailureToast({
         title: "Invalid Member ID",
@@ -248,7 +224,6 @@ export class IAMService {
     try {
       await executeGcloudCommand(this.gcloudPath, command);
 
-      // Invalidate cache
       const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
       this.policyCache.delete(cacheKey);
     } catch (error: unknown) {
@@ -261,9 +236,6 @@ export class IAMService {
     }
   }
 
-  /**
-   * Remove a member from a role
-   */
   async removeMember(
     role: string,
     memberType: string,
@@ -271,7 +243,6 @@ export class IAMService {
     resourceType?: string,
     resourceName?: string,
   ): Promise<void> {
-    // Validate the member ID format
     if (!this.validateMemberId(memberType, memberId)) {
       showFailureToast({
         title: "Invalid Member ID",
@@ -293,7 +264,6 @@ export class IAMService {
     try {
       await executeGcloudCommand(this.gcloudPath, command);
 
-      // Invalidate cache
       const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
       this.policyCache.delete(cacheKey);
     } catch (error: unknown) {
@@ -306,9 +276,6 @@ export class IAMService {
     }
   }
 
-  /**
-   * Get service accounts for the project
-   */
   async getServiceAccounts(): Promise<IAMServiceAccount[]> {
     try {
       const command = `iam service-accounts list --project=${this.projectId}`;
@@ -340,9 +307,6 @@ export class IAMService {
     }
   }
 
-  /**
-   * Get custom roles for the project
-   */
   async getCustomRoles(): Promise<IAMCustomRole[]> {
     try {
       const command = `iam roles list --project=${this.projectId}`;
@@ -370,9 +334,6 @@ export class IAMService {
     }
   }
 
-  /**
-   * Format a member type for display
-   */
   formatMemberType(type: string): string {
     switch (type) {
       case "user":
@@ -398,9 +359,6 @@ export class IAMService {
     }
   }
 
-  /**
-   * Get information about a role
-   */
   getRoleInfo(role: string): { title: string; description: string } {
     const roleInfo = getGCPRoleInfo(role);
 
@@ -410,52 +368,33 @@ export class IAMService {
     };
   }
 
-  /**
-   * Format a role name for display
-   */
   formatRoleName(role: string): string {
     return formatGCPRoleName(role);
   }
 
-  /**
-   * Validate a member ID format based on type
-   */
   validateMemberId(type: string, id: string): boolean {
     switch (type) {
       case "user":
-        // Basic email validation
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
       case "serviceAccount":
-        // Service account email validation
         return (
           /^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.iam\.gserviceaccount\.com$/.test(id) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id)
         );
       case "group":
-        // Group email validation
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
       case "domain":
-        // Domain validation
         return /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/.test(id);
       case "allUsers":
       case "allAuthenticatedUsers":
       case "projectEditor":
       case "projectOwner":
       case "projectViewer":
-        // These types don't have IDs
         return true;
       default:
-        // For unknown types, just check it's not empty
         return id.trim() !== "";
     }
   }
 
-  /**
-   * Creates a new Google Cloud IAM group
-   * @param groupId The ID of the group to create (e.g., my-group@example.com)
-   * @param displayName Optional display name for the group
-   * @param description Optional description for the group
-   * @returns Promise resolving to the created group details
-   */
   async createGroup(groupId: string, displayName?: string, description?: string): Promise<Record<string, unknown>> {
     try {
       let command = `identity groups create ${groupId}`;
@@ -480,11 +419,6 @@ export class IAMService {
     }
   }
 
-  /**
-   * Gets role suggestions based on a partial role name or description
-   * @param query The search query for role suggestions
-   * @returns Promise resolving to an array of suggested roles
-   */
   async getRoleSuggestions(query: string): Promise<IAMRole[]> {
     try {
       if (!query || query.length < 2) {
@@ -493,7 +427,6 @@ export class IAMService {
 
       const allRoles = (await executeGcloudCommand(this.gcloudPath, "iam roles list")) as GCPRole[];
 
-      // Filter roles based on query
       const filteredRoles = allRoles.filter((role) => {
         const roleId = role.name.split("/").pop() || "";
         return (
@@ -503,7 +436,6 @@ export class IAMService {
         );
       });
 
-      // Map to our IAMRole interface
       return filteredRoles.map((role) => ({
         role: role.name,
         title: role.title || role.name,

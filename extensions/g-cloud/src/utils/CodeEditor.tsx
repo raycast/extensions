@@ -10,10 +10,6 @@ interface CodeEditorProps {
   onCancel?: () => void;
 }
 
-/**
- * A code editor component that provides syntax highlighting.
- * Uses Detail view with Markdown code blocks for highlighting and a Form for editing.
- */
 export function CodeEditor({
   code,
   onChange,
@@ -26,7 +22,6 @@ export function CodeEditor({
   const [editedCode, setEditedCode] = useState(code);
   const { pop } = useNavigation();
 
-  // Keep editedCode in sync with code prop changes when not editing
   useEffect(() => {
     if (!isEditing) {
       setEditedCode(code);
@@ -50,7 +45,6 @@ export function CodeEditor({
     }
   };
 
-  // Edit mode
   if (isEditing) {
     return (
       <Form
@@ -85,7 +79,6 @@ export function CodeEditor({
     );
   }
 
-  // View mode with syntax highlighting
   return (
     <Detail
       navigationTitle={title}
@@ -116,7 +109,7 @@ export function CodeEditor({
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               onAction={async () => {
                 if (onCancel) await onCancel();
-                setEditedCode(code); // Reset to original code on cancel
+                setEditedCode(code);
                 pop();
               }}
             />

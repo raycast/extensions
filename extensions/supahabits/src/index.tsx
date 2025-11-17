@@ -19,6 +19,7 @@ import { Habit } from "./models/habit";
 import CreateHabitForm from "./components/create-habit-form";
 import EditHabitForm from "./components/edit-habit-form";
 import FeedbackForm from "./components/feedback-form";
+import HabitStatsView from "./components/habit-stats-view";
 import { getColorValue } from "./utils/colors";
 
 export default function Command() {
@@ -183,15 +184,16 @@ export default function Command() {
         <ActionPanel>
           <Action title="Track Habit" icon={Icon.CheckCircle} onAction={() => markHabitAsCompleted(habit.id)} />
           {editAction}
+          <Action.Push
+            title="View Habit Stats"
+            icon={Icon.BarChart}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            target={<HabitStatsView habit={habit} />}
+          />
           <Action.OpenInBrowser
             title="View Habits Details Online"
             url="https://www.supahabits.com/dashboard"
             shortcut={{ modifiers: ["cmd"], key: "h" }}
-          />
-          <Action.OpenInBrowser
-            title="View Habit Stats"
-            url="https://www.supahabits.com/dashboard/stats"
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
           {removeAction}
         </ActionPanel>
@@ -203,15 +205,16 @@ export default function Command() {
         <ActionPanel>
           <Action title="Mark as Done" icon={Icon.CheckCircle} onAction={() => markHabitAsCompleted(habit.id)} />
           {editAction}
+          <Action.Push
+            title="View Habit Stats"
+            icon={Icon.BarChart}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            target={<HabitStatsView habit={habit} />}
+          />
           <Action.OpenInBrowser
             title="View Habits Details Online"
             url="https://www.supahabits.com/dashboard"
             shortcut={{ modifiers: ["cmd"], key: "h" }}
-          />
-          <Action.OpenInBrowser
-            title="View Habit Stats"
-            url="https://www.supahabits.com/dashboard/stats"
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
           {removeAction}
         </ActionPanel>
@@ -222,15 +225,16 @@ export default function Command() {
       <ActionPanel>
         <Action title="Unmark as Done" icon={Icon.Xmark} onAction={() => removeLastTracking(habit.id)} />
         {editAction}
+        <Action.Push
+          title="View Habit Stats"
+          icon={Icon.BarChart}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          target={<HabitStatsView habit={habit} />}
+        />
         <Action.OpenInBrowser
           title="View Habits Details Online"
           url="https://www.supahabits.com/dashboard"
           shortcut={{ modifiers: ["cmd"], key: "h" }}
-        />
-        <Action.OpenInBrowser
-          title="View Habit Stats"
-          url="https://www.supahabits.com/dashboard/stats"
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
         />
         {removeAction}
       </ActionPanel>

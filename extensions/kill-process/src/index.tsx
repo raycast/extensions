@@ -4,9 +4,11 @@ import {
   clearSearchBar,
   closeMainWindow,
   Color,
+  confirmAlert,
   getPreferenceValues,
   Icon,
   List,
+  open,
   popToRoot,
   showToast,
   Toast,
@@ -16,6 +18,8 @@ import prettyBytes from "pretty-bytes";
 import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
+import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp } from "./utils/platform";
+import { fetchRunningProcesses } from "./utils/process";
 
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
@@ -36,35 +40,18 @@ export default function ProcessList() {
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
   const fetchProcesses = () => {
-    exec(`ps -eo pid,ppid,pcpu,rss,comm`, (err, stdout) => {
-      if (err != null) {
-        return;
-      }
-
-      const processes = stdout
-        .split("\n")
-        .map((line) => {
-          const defaultValue = ["", "", "", "", "", ""];
-          const regex = /(\d+)\s+(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/;
-          const [, id, pid, cpu, mem, path] = line.match(regex) ?? defaultValue;
-          const processName = path.match(/[^/]*[^/]*$/i)?.[0] ?? "";
-          const isPrefPane = path.includes(".prefPane");
-          const isApp = path.includes(".app/");
-
-          return {
-            id: parseInt(id),
-            pid: parseInt(pid),
-            cpu: parseFloat(cpu),
-            mem: parseInt(mem),
-            type: isPrefPane ? "prefPane" : isApp ? "app" : "binary",
-            path,
-            processName,
-          } as Process;
-        })
-        .filter((process) => process.processName !== "");
-
-      setFetchResult(processes);
-    });
+    fetchRunningProcesses()
+      .then((processes) => {
+        setFetchResult(processes);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch processes:", err);
+        showToast({
+          title: "Failed to fetch processes",
+          style: Toast.Style.Failure,
+          message: err instanceof Error ? err.message : "Unknown error",
+        });
+      });
   };
 
   useInterval(fetchProcesses, refreshDuration);
@@ -84,21 +71,54 @@ export default function ProcessList() {
   }, [fetchResult, sortBy, aggregateApps]);
 
   const fileIcon = (process: Process) => {
-    if (process.type === "prefPane") {
-      return {
-        fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "",
-      };
-    }
-
-    if (process.type === "app" || process.type === "aggregatedApp") {
-      return { fileIcon: process.path?.replace(/(.+\.app)(.+)/, "$1") ?? "" };
-    }
-
-    return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
+    return getFileIcon(process);
   };
 
-  const killProcess = (process: Process) => {
-    exec(`kill -9 ${process.id}`);
+  const killProcess = async (process: Process, force: boolean = false) => {
+    const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
+    if (
+      !(await confirmAlert({
+        title: `${force ? "Force " : ""}Kill ${processName}?`,
+        rememberUserChoice: true,
+      }))
+    ) {
+      showToast({
+        title: `Cancelled Killing ${processName}`,
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
+
+    const command = getKillCommand(process.id, force);
+    exec(command, (error) => {
+      if (error) {
+        const errorHelp = getPlatformSpecificErrorHelp(force);
+
+        if (force && errorHelp.helpUrl) {
+          confirmAlert({
+            title: errorHelp.title,
+            message: errorHelp.message,
+            primaryAction: {
+              title: "Open Help",
+              onAction: () => open(errorHelp.helpUrl!),
+            },
+          });
+        } else {
+          showToast({
+            title: errorHelp.title,
+            message: errorHelp.message,
+            style: Toast.Style.Failure,
+          });
+        }
+        return;
+      }
+
+      showToast({
+        title: `Killed ${processName}`,
+        style: Toast.Style.Success,
+      });
+    });
+
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (closeWindowAfterKill) {
       closeMainWindow();
@@ -109,10 +129,6 @@ export default function ProcessList() {
     if (clearSearchBarAfterKill) {
       clearSearchBar({ forceScrollToTop: true });
     }
-    showToast({
-      title: `Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
-      style: Toast.Style.Success,
-    });
   };
 
   const subtitleString = (process: Process) => {
@@ -282,6 +298,7 @@ export default function ProcessList() {
                 actions={
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
+                    <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
                     {process.path == null ? null : <Action.CopyToClipboard title="Copy Path" content={process.path} />}
                     <Action
                       title="Reload"

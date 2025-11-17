@@ -85,6 +85,8 @@ export async function openNewTab({
 
             if not winExists then
                 make new window
+            else
+                activate
             end if
 
             tell window 1
@@ -92,8 +94,8 @@ export async function openNewTab({
         (url
           ? `with properties {URL:"${url}"}`
           : query
-          ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
-          : "") +
+            ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
+            : "") +
         `
             end tell
         end tell
@@ -105,7 +107,6 @@ export async function openNewTab({
       script = getOpenInProfileCommand(profileCurrent);
       break;
     case SettingsProfileOpenBehaviour.ProfileOriginal:
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       script = getOpenInProfileCommand(profileOriginal!);
       break;
   }
@@ -133,6 +134,19 @@ export async function closeActiveTab(tab: Tab): Promise<void> {
       set index of _wnd to 1
       set active tab index of _wnd to ${tab.tabIndex}
       close active tab of _wnd
+    end tell
+    return true
+  `);
+}
+
+export async function reloadTab(tab: Tab): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      activate
+      set _wnd to first window where id is ${tab.windowsId}
+      set index of _wnd to 1
+      set active tab index of _wnd to ${tab.tabIndex}
+      tell active tab of _wnd to reload
     end tell
     return true
   `);
@@ -192,6 +206,16 @@ export async function createNewTabToWebsite(website: string): Promise<void> {
     tell application "Google Chrome"
       activate
       open location "${website}"
+    end tell
+    return true
+  `);
+}
+
+export async function createNewIncognitoWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new window with properties {mode:"incognito"}
+      activate
     end tell
     return true
   `);

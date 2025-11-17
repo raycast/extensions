@@ -43,7 +43,6 @@ export default function StorageBucketList({
 }: StorageBucketListProps) {
   const [searchText, setSearchText] = useState("");
 
-  // Memoize filtered buckets calculation
   const filteredBuckets = useMemo(
     () =>
       buckets.filter(
@@ -52,28 +51,26 @@ export default function StorageBucketList({
           bucket.location.toLowerCase().includes(searchText.toLowerCase()) ||
           bucket.storageClass.toLowerCase().includes(searchText.toLowerCase()),
       ),
-    [buckets, searchText], // Only recalculate when buckets or searchText changes
+    [buckets, searchText],
   );
 
-  // Format the creation date
   function formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString() + " " + date.toLocaleTimeString();
   }
 
-  // Get icon for storage class
   function getStorageClassIcon(storageClass: string): { source: Icon; tintColor: string } {
     switch (storageClass.toLowerCase()) {
       case "standard":
-        return { source: Icon.HardDrive, tintColor: "#4285F4" }; // Google Blue
+        return { source: Icon.HardDrive, tintColor: "#4285F4" };
       case "nearline":
-        return { source: Icon.HardDrive, tintColor: "#34A853" }; // Google Green
+        return { source: Icon.HardDrive, tintColor: "#34A853" };
       case "coldline":
-        return { source: Icon.HardDrive, tintColor: "#FBBC05" }; // Google Yellow
+        return { source: Icon.HardDrive, tintColor: "#FBBC05" };
       case "archive":
-        return { source: Icon.HardDrive, tintColor: "#EA4335" }; // Google Red
+        return { source: Icon.HardDrive, tintColor: "#EA4335" };
       default:
-        return { source: Icon.HardDrive, tintColor: "#4285F4" }; // Default to Google Blue
+        return { source: Icon.HardDrive, tintColor: "#4285F4" };
     }
   }
 

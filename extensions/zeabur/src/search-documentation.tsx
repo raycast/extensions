@@ -45,6 +45,11 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser url={url} />
+                    <Action.CopyToClipboard
+                      title="Copy Documentation URL"
+                      content={url}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
                   </ActionPanel>
                 }
               />

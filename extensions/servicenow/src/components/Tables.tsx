@@ -7,6 +7,7 @@ import { DBObjectsResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function Tables() {
   const {
@@ -105,6 +106,7 @@ export default function Tables() {
         ) : (
           data?.map((table) => {
             const accessories: List.Item.Accessory[] = [];
+            const listUrl = buildServiceNowUrl(instanceName, `${table.name}_list.do`);
             if (table.super_class)
               accessories.push({
                 tag: { value: table.super_class },
@@ -121,25 +123,28 @@ export default function Tables() {
                   <ActionPanel>
                     <ActionPanel.Section title={table.label}>
                       <Action.OpenInBrowser
-                        title="Open in Servicenow"
-                        url={`${instanceUrl}/${table.name}_list.do`}
+                        title="Open in ServiceNow"
+                        url={listUrl}
                         icon={{ source: "servicenow.svg" }}
                       />
                       <Action.OpenInBrowser
                         title="Open Table Definition (Admins)"
-                        url={`${instanceUrl}/sys_db_object.do?sysparm_query=name=${table.name}`}
+                        url={buildServiceNowUrl(instanceName, `/sys_db_object.do?sysparm_query=name=${table.name}`)}
                         icon={{ source: "servicenow.svg" }}
                       />
                       <Action.OpenInBrowser
                         title="Open Schema Map (Admins)"
-                        url={`${instanceUrl}/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=${table.name},show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext`}
+                        url={buildServiceNowUrl(
+                          instanceName,
+                          `generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=${table.name},show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext`,
+                        )}
                         icon={{ source: "servicenow.svg" }}
                         shortcut={{ modifiers: ["cmd"], key: "s" }}
                       />
                     </ActionPanel.Section>
                     <Action.CopyToClipboard
                       title="Copy URL"
-                      content={`${instanceUrl}/${table.name}_list.do`}
+                      content={listUrl}
                       shortcut={Keyboard.Shortcut.Common.CopyPath}
                     />
                     <Actions revalidate={revalidate} />

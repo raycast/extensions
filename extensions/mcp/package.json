@@ -5,9 +5,15 @@
   "description": "Interact with the Model Context Protocol (MCP) in Raycast AI",
   "icon": "mcp-icon.png",
   "author": "EvanZhouDev",
+  "version": "1.1.0",
   "contributors": [
+    "EugeneVanchugov",
     "radzio"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raycast/extensions"
+  },
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -30,10 +36,11 @@
     {
       "name": "run-mcp-tool",
       "title": "Run MCP Tool",
-      "description": "Runs an available MCP tool"
+      "description": "Runs an available MCP tool. The client name, tool name, and tool parameters must be provided."
     }
   ],
   "ai": {
+    "instructions": "get-mcp-clients must be called first to get the list of available MCP clients. Then, run-mcp-tool can be called to run a specific tool from one of the clients.",
     "evals": [
       {
         "input": "@mcp think about derivative of cos(cos(sin(x)))",
@@ -45,20 +52,126 @@
         "mocks": {
           "get-mcp-clients": []
         }
+      },
+      {
+        "input": "@mcp use calculator tool to add 2 and 3",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-mcp-clients"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "run-mcp-tool",
+              "args": {
+                "clientName": "my-tools",
+                "toolName": "calculator",
+                "toolParameters": "{ \"expression\": \"2 + 3\" }"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-mcp-clients": [
+            {
+              "name": "my-tools",
+              "tools": [
+                {
+                  "name": "calculator",
+                  "description": "A simple calculator tool",
+                  "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                      "expression": {
+                        "type": "string",
+                        "description": "Mathematical expression to evaluate"
+                      }
+                    },
+                    "required": [
+                      "expression"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "run-mcp-tool": {
+            "result": 5
+          }
+        },
+        "usedAsExample": false
+      },
+      {
+        "input": "@mcp get top posts from hackernews",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-mcp-clients"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "run-mcp-tool",
+              "args": {
+                "clientName": "hackernews",
+                "toolName": "getTopPosts",
+                "toolParameters": "{ \"limit\": 5 }"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-mcp-clients": [
+            {
+              "name": "hackernews",
+              "tools": [
+                {
+                  "name": "getTopPosts",
+                  "description": "Get top posts from Hacker News",
+                  "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                      "limit": {
+                        "type": "number",
+                        "description": "Number of posts to retrieve"
+                      }
+                    },
+                    "required": [
+                      "limit"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "run-mcp-tool": {
+            "result": [
+              {
+                "title": "Post 1",
+                "url": "https://example.com/post1"
+              },
+              {
+                "title": "Post 2",
+                "url": "https://example.com/post2"
+              }
+            ]
+          }
+        },
+        "usedAsExample": false
       }
     ]
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.4.1",
+    "@modelcontextprotocol/sdk": "1.9.0",
     "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.17.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },

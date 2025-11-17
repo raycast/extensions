@@ -32,7 +32,7 @@ function useAgents(dustApi: DustAPI) {
     isLoading,
     mutate,
   } = useCachedPromise(async () => {
-    const r = await dustApi.getAgentConfigurations();
+    const r = await dustApi.getAgentConfigurations({ view: "list" });
 
     if (r.isErr()) {
       setError(r.error.message);
@@ -136,16 +136,10 @@ export default withPickedWorkspace(function AskDustAgentCommand() {
   const { selectedText, isLoading: isLoadingSelectedText } = useGetSelectedText();
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: `Could not refresh agents list: ${error}`,
-    });
+    showToast({ style: Toast.Style.Failure, title: `Could not refresh agents list: ${error}` });
   }
   if (!isLoadingAgents && agents) {
-    showToast({
-      style: Toast.Style.Success,
-      title: `Loaded ${Object.values(agents).length} agents`,
-    });
+    showToast({ style: Toast.Style.Success, title: `Loaded ${Object.values(agents).length} agents` });
   }
 
   const saveFavoriteAgent = useCallback(async (agent: { sId: string; name: string }) => {
@@ -156,15 +150,9 @@ export default withPickedWorkspace(function AskDustAgentCommand() {
     });
     if (r.isOk()) {
       void mutateAgents();
-      showToast({
-        style: Toast.Style.Success,
-        title: `${agent.name} added as favorite`,
-      });
+      showToast({ style: Toast.Style.Success, title: `${agent.name} added as favorite` });
     } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Could not add ${agent.name} as favorite: ${r.error.message}`,
-      });
+      showToast({ style: Toast.Style.Failure, title: `Could not add ${agent.name} as favorite: ${r.error.message}` });
     }
   }, []);
 
@@ -176,10 +164,7 @@ export default withPickedWorkspace(function AskDustAgentCommand() {
     });
     if (r.isOk()) {
       void mutateAgents();
-      showToast({
-        style: Toast.Style.Success,
-        title: `${agent.name} removed as favorite`,
-      });
+      showToast({ style: Toast.Style.Success, title: `${agent.name} removed as favorite` });
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -281,7 +266,7 @@ function AgentListItem({
           )}
           {!isFavorite && (
             <Action
-              title="Add To Favorites"
+              title="Add to Favorites"
               icon={Icon.Star}
               onAction={onSaveFavorite}
               shortcut={{ key: "d", modifiers: ["cmd"] }}
@@ -289,7 +274,7 @@ function AgentListItem({
           )}
           {isFavorite && (
             <Action
-              title="Remove From Favorites"
+              title="Remove from Favorites"
               icon={Icon.StarDisabled}
               onAction={onRemoveFavorite}
               style={Action.Style.Destructive}

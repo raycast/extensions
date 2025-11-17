@@ -3,7 +3,9 @@
   "name": "doorstopper",
   "title": "Doorstopper",
   "description": "Prevent your MacBook from going to sleep when you close the lid",
-  "categories": ["System"],
+  "categories": [
+    "System"
+  ],
   "icon": "icon.png",
   "author": "roele",
   "license": "MIT",
@@ -91,5 +93,8 @@
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

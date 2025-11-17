@@ -53,7 +53,6 @@ export default function CreateBucketForm({
   const [suggestedName, setSuggestedName] = useState(generateUniqueBucketName("storage"));
   const [nameError, setNameError] = useState<string | undefined>();
 
-  // Generate a new suggested name
   function regenerateName() {
     setSuggestedName(generateUniqueBucketName("storage"));
     setNameError(undefined);
@@ -83,10 +82,8 @@ export default function CreateBucketForm({
     setIsSubmitting(true);
 
     try {
-      // Build the command with all options
-      let command = `${gcloudPath} storage buckets create gs://${values.name} --project=${projectId} --location=${values.location} --default-storage-class=${values.storageClass}`;
+      let command = `${gcloudPath} storage buckets create gs://${values.name} --location=${values.location} --storage-class=${values.storageClass} --project=${projectId}`;
 
-      // Add optional flags
       if (values.publicAccess) {
         command += " --public-access";
       }
@@ -95,7 +92,6 @@ export default function CreateBucketForm({
         command += " --uniform-bucket-level-access";
       }
 
-      // Execute the command
       const { stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {

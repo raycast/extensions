@@ -23,7 +23,7 @@ export default function useClickUp<T>(endpoint: string, { apiVersion }: { apiVer
       failureToastOptions: {
         title: "ClickUp Error",
       },
-    }
+    },
   );
   return { isLoading, data };
 }

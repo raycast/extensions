@@ -6,6 +6,43 @@ import { Color } from "../constants";
  */
 export type ColorResult = Omit<Color, "category"> & { categories: Color["category"][] };
 
+/**
+ * Calculate a match score for a text against a search term.
+ * Returns a value between 0 and 1, where lower scores indicate better matches:
+ * - 0.0: Exact match
+ * - 0.2: Word boundary match
+ * - 0.4: Start of word match
+ * - 0.6-0.8: Contains match (score based on position)
+ * - 1.0: No match
+ */
+export function getMatchScore(text: string, searchTerm: string): number {
+  const normalizedText = text.toLowerCase();
+  const normalizedSearch = searchTerm.toLowerCase();
+
+  // Exact match
+  if (normalizedText === normalizedSearch) return 0;
+
+  // Match at word boundary
+  if (
+    normalizedText.startsWith(normalizedSearch + " ") ||
+    normalizedText.includes(" " + normalizedSearch) ||
+    normalizedText.endsWith(" " + normalizedSearch)
+  )
+    return 0.2;
+
+  // Match at start
+  if (normalizedText.startsWith(normalizedSearch)) return 0.4;
+
+  // Contains a subset of the search term
+  if (normalizedText.includes(normalizedSearch)) {
+    // Score based on position (earlier is better)
+    const position = normalizedText.indexOf(normalizedSearch);
+    return 0.6 + (position / normalizedText.length) * 0.2;
+  }
+
+  return 1;
+}
+
 const searchOptions = {
   keys: [
     { name: "name", weight: 2 }, // Give more weight to name matches

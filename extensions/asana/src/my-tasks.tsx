@@ -24,7 +24,7 @@ function MyTasks() {
   const tasksBySection = groupBy(tasks, "assignee_section.gid");
   const sections = uniqBy(
     tasks?.map((task) => task.assignee_section),
-    "gid"
+    "gid",
   ).map((section) => {
     const tasks = tasksBySection[section.gid];
 
@@ -37,7 +37,7 @@ function MyTasks() {
 
   return (
     <List
-      searchBarPlaceholder="Filter by task name, project, section, or custom fields"
+      searchBarPlaceholder="Filter by task name, project, section, tag or custom fields"
       isLoading={isLoadingWorkspaces || isLoadingMyTasks}
       {...(workspaces && workspaces.length > 1
         ? {

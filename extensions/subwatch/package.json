@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "subwatch",
+  "title": "Subwatch",
+  "description": "Turn subscription chaos into financial harmony",
+  "icon": "icon.png",
+  "author": "nirgn",
+  "categories": [
+    "Finance",
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-subscriptions",
+      "title": "Manage Subscriptions",
+      "subtitle": "Subwatch",
+      "description": "List and delete subscriptions",
+      "mode": "view"
+    },
+    {
+      "name": "add-subscription",
+      "title": "Add New Subscription",
+      "subtitle": "Subwatch",
+      "description": "Add a new subscription to your Subwatch calendar",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "subwatchApiKey",
+      "title": "Subwatch - Raycast Key",
+      "description": "Your Subwatch key to use raycast, you can find it in the Subwatch extension or app settings.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "supabaseApiKey",
+      "title": "Public API Key",
+      "description": "The public API key for the Subwatch service",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.97.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

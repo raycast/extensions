@@ -47,7 +47,7 @@ function CloneURLInVSCodeListItem(props: { url?: string }) {
   }
 }
 
-function CloneInVSCodeList(props: { project: Project }): JSX.Element {
+function CloneInVSCodeList(props: { project: Project }) {
   return (
     <List navigationTitle="Clone in VSCode">
       <CloneURLInVSCodeListItem url={props.project.ssh_url_to_repo} />
@@ -59,13 +59,13 @@ function CloneInVSCodeList(props: { project: Project }): JSX.Element {
 export function CloneProjectInVSCodeAction(props: {
   shortcut?: Keyboard.Shortcut;
   project: Project;
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const pro = props.project;
   const code = getVSCodeAppPath();
   if (code && (pro.http_url_to_repo || pro.ssh_url_to_repo)) {
     return (
       <Action.Push
-        title="Clone in VSCode"
+        title="Clone in VS Code"
         icon={{ fileIcon: code }}
         shortcut={props.shortcut}
         target={<CloneInVSCodeList project={pro} />}
@@ -76,7 +76,10 @@ export function CloneProjectInVSCodeAction(props: {
   }
 }
 
-export function CloneProjectInGitPod(props: { shortcut?: Keyboard.Shortcut; project: Project }): JSX.Element | null {
+export function CloneProjectInGitPod(props: {
+  shortcut?: Keyboard.Shortcut;
+  project: Project;
+}): React.ReactElement | null {
   const pro = props.project;
   const url = `https://gitpod.io#${pro.web_url}`;
   if (pro.http_url_to_repo || pro.ssh_url_to_repo) {
@@ -93,7 +96,7 @@ export function CloneProjectInGitPod(props: { shortcut?: Keyboard.Shortcut; proj
   }
 }
 
-export function ShowProjectLabels(props: { project: Project; shortcut?: Keyboard.Shortcut }): JSX.Element {
+export function ShowProjectLabels(props: { project: Project; shortcut?: Keyboard.Shortcut }) {
   return (
     <Action.Push
       title="Labels"
@@ -104,7 +107,7 @@ export function ShowProjectLabels(props: { project: Project; shortcut?: Keyboard
   );
 }
 
-export function OpenProjectAction(props: { project: Project }): JSX.Element {
+export function OpenProjectAction(props: { project: Project }) {
   return (
     <Action.Push
       title="Open Project"
@@ -114,11 +117,11 @@ export function OpenProjectAction(props: { project: Project }): JSX.Element {
   );
 }
 
-export function OpenProjectInBrowserAction(props: { project: Project }): JSX.Element {
+export function OpenProjectInBrowserAction(props: { project: Project }) {
   return <GitLabOpenInBrowserAction url={props.project.web_url} />;
 }
 
-export function ProjectDefaultActions(props: { project: Project }): JSX.Element {
+export function ProjectDefaultActions(props: { project: Project }) {
   if (getPrimaryActionPreference() === PrimaryAction.Detail) {
     return (
       <React.Fragment>
@@ -136,15 +139,15 @@ export function ProjectDefaultActions(props: { project: Project }): JSX.Element 
   }
 }
 
-export function CopyProjectIDToClipboardAction(props: { project: Project }): JSX.Element {
+export function CopyProjectIDToClipboardAction(props: { project: Project }) {
   return <Action.CopyToClipboard title="Copy Project ID" content={props.project.id} />;
 }
 
-export function CopyProjectUrlToClipboardAction(props: { project: Project }): JSX.Element {
+export function CopyProjectUrlToClipboardAction(props: { project: Project }) {
   return <Action.CopyToClipboard title="Copy Project URL" content={props.project.web_url} />;
 }
 
-function CloneUrlList(props: { project: Project }): JSX.Element {
+function CloneUrlList(props: { project: Project }) {
   return (
     <List navigationTitle="Copy Clone URL">
       <List.Item
@@ -152,7 +155,7 @@ function CloneUrlList(props: { project: Project }): JSX.Element {
         icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="HTTP" content={props.project.http_url_to_repo || ""} />
+            <Action.CopyToClipboard title="Http" content={props.project.http_url_to_repo || ""} />
           </ActionPanel>
         }
       />
@@ -161,7 +164,7 @@ function CloneUrlList(props: { project: Project }): JSX.Element {
         icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="SSH" content={props.project.ssh_url_to_repo || ""} />
+            <Action.CopyToClipboard title="Ssh" content={props.project.ssh_url_to_repo || ""} />
           </ActionPanel>
         }
       />
@@ -169,10 +172,7 @@ function CloneUrlList(props: { project: Project }): JSX.Element {
   );
 }
 
-export function CopyCloneUrlToClipboardAction(props: {
-  shortcut?: Keyboard.Shortcut;
-  project: Project;
-}): JSX.Element | null {
+export function CopyCloneUrlToClipboardAction(props: { shortcut?: Keyboard.Shortcut; project: Project }) {
   const pro = props.project;
   if (pro.http_url_to_repo || pro.ssh_url_to_repo) {
     return (
@@ -188,7 +188,7 @@ export function CopyCloneUrlToClipboardAction(props: {
   }
 }
 
-export function OpenProjectIssuesPushAction(props: { project: Project }): JSX.Element {
+export function OpenProjectIssuesPushAction(props: { project: Project }) {
   return (
     <Action.Push
       title="Issues"
@@ -199,7 +199,7 @@ export function OpenProjectIssuesPushAction(props: { project: Project }): JSX.El
   );
 }
 
-export function CreateNewProjectIssuePushAction(props: { project: Project }): JSX.Element {
+export function CreateNewProjectIssuePushAction(props: { project: Project }) {
   return (
     <GitLabOpenInBrowserAction
       title="Create New Issue"
@@ -210,7 +210,7 @@ export function CreateNewProjectIssuePushAction(props: { project: Project }): JS
   );
 }
 
-export function OpenProjectMergeRequestsPushAction(props: { project: Project }): JSX.Element {
+export function OpenProjectMergeRequestsPushAction(props: { project: Project }) {
   return (
     <Action.Push
       title="Merge Requests"
@@ -221,7 +221,7 @@ export function OpenProjectMergeRequestsPushAction(props: { project: Project }):
   );
 }
 
-export function OpenProjectBranchesPushAction(props: { project: Project }): JSX.Element {
+export function OpenProjectBranchesPushAction(props: { project: Project }) {
   return (
     <Action.Push
       title="Branches"
@@ -232,7 +232,7 @@ export function OpenProjectBranchesPushAction(props: { project: Project }): JSX.
   );
 }
 
-export function OpenProjectPipelinesPushAction(props: { project: Project }): JSX.Element {
+export function OpenProjectPipelinesPushAction(props: { project: Project }) {
   return (
     <Action.Push
       title="Pipelines"
@@ -243,7 +243,7 @@ export function OpenProjectPipelinesPushAction(props: { project: Project }): JSX
   );
 }
 
-export function OpenProjectMilestonesPushAction(props: { project: Project }): JSX.Element {
+export function OpenProjectMilestonesPushAction(props: { project: Project }) {
   return (
     <Action.Push
       title="Milestones"
@@ -258,7 +258,7 @@ function webUrl(project: Project, partial: string) {
   return getGitLabGQL().urlJoin(`${project.fullPath}/${partial}`);
 }
 
-export function OpenProjectWikiInBrowserAction(props: { project: Project }): JSX.Element {
+export function OpenProjectWikiInBrowserAction(props: { project: Project }) {
   return (
     <GitLabOpenInBrowserAction
       title="Wiki"
@@ -268,7 +268,7 @@ export function OpenProjectWikiInBrowserAction(props: { project: Project }): JSX
   );
 }
 
-export function OpenProjectLabelsInBrowserAction(props: { project: Project }): JSX.Element {
+export function OpenProjectLabelsInBrowserAction(props: { project: Project }) {
   return (
     <GitLabOpenInBrowserAction
       title="Labels"
@@ -278,7 +278,7 @@ export function OpenProjectLabelsInBrowserAction(props: { project: Project }): J
   );
 }
 
-export function OpenProjectSecurityComplianceInBrowserAction(props: { project: Project }): JSX.Element {
+export function OpenProjectSecurityComplianceInBrowserAction(props: { project: Project }) {
   return (
     <GitLabOpenInBrowserAction
       title="Security & Compliance"
@@ -288,7 +288,7 @@ export function OpenProjectSecurityComplianceInBrowserAction(props: { project: P
   );
 }
 
-export function OpenProjectSettingsInBrowserAction(props: { project: Project }): JSX.Element {
+export function OpenProjectSettingsInBrowserAction(props: { project: Project }) {
   return (
     <GitLabOpenInBrowserAction
       title="Settings"

@@ -1,6 +1,7 @@
-import fetch from "node-fetch";
 import { format } from "date-fns";
 import { getPreferenceValues } from "@raycast/api";
+
+import { KNOWN_RANGES } from ".";
 
 /**
  * It takes an endpoint and returns a promise that resolves to an object with an ok property and either
@@ -16,9 +17,11 @@ async function routeHandler<T extends object>(endpoint: string): Promise<Types.R
     const res = await fetch(`${baseURL.endsWith("/") ? baseURL.slice(0, -1) : baseURL}${endpoint}`, {
       headers: getAuthToken(),
     });
-    const result = (await res.json()) as T | { error: string };
+    const result = (await res.json()) as T | { error: string } | { errors: string[] };
 
     if ("error" in result) throw new Error(result.error);
+    if ("errors" in result) throw new Error(result.errors.join(", "));
+
     return { ok: true, result };
   } catch (error) {
     return {
@@ -38,7 +41,7 @@ function getAuthToken() {
   const API_KEY_REGEX = /^(waka_)?[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const { apiKey } = getPreferenceValues<{ apiKey?: string }>();
 
-  if (!apiKey) return;
+  if (!apiKey) throw new Error("Missing API Key");
   if (!API_KEY_REGEX.test(apiKey)) throw new Error("Invalid API Key");
 
   return { Authorization: `Basic ${Buffer.from(apiKey).toString("base64")}` };
@@ -62,7 +65,16 @@ export const getProjects = () => routeHandler<WakaTime.Projects>(`/users/current
  * @param {Date} start - The start date of the summary.
  * @returns A promise that resolves to a WakaTime.Summary object.
  */
-export const getSummary = (key: string, start: Date) => {
+export const getSummary: {
+  (key: WakaTime.KNOWN_RANGE): ReturnType<typeof routeHandler<WakaTime.Summary>>;
+  (key: string, start: Date): ReturnType<typeof routeHandler<WakaTime.Summary>>;
+} = (key: string, start?: Date) => {
+  if (KNOWN_RANGES[key as WakaTime.KNOWN_RANGE] != null) {
+    return routeHandler<WakaTime.Summary>(`/users/current/summaries?range=${key}`);
+  }
+
+  if (start == null) throw new Error("Start date must be provided for custom ranges.");
+
   const end = /^last/i.test(key) ? new Date() : start;
   const query = `?start=${format(start, "yyyy-MM-dd")}&end=${format(end, "yyyy-MM-dd")}`;
 

@@ -18,12 +18,10 @@ export default function SubnetsView({ projectId, gcloudPath, vpc }: SubnetsViewP
   const { push } = useNavigation();
 
   useEffect(() => {
-    // Initialize service with provided gcloudPath and projectId
     const networkService = new NetworkService(gcloudPath, projectId);
     setService(networkService);
 
     const initializeData = async () => {
-      // Show initial loading toast
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Loading subnets...",
@@ -31,10 +29,8 @@ export default function SubnetsView({ projectId, gcloudPath, vpc }: SubnetsViewP
       });
 
       try {
-        // Fetch all subnets
         const fetchedSubnets = await networkService.getSubnets();
 
-        // Filter by network (vpc)
         const filteredSubnets = fetchedSubnets.filter(
           (subnet) => subnet.network.includes(`/${vpc.name}`) || subnet.network === vpc.name,
         );
@@ -76,13 +72,10 @@ export default function SubnetsView({ projectId, gcloudPath, vpc }: SubnetsViewP
     });
 
     try {
-      // Force refresh subnets to avoid cache issues
       await service.forceRefreshSubnets();
 
-      // Now fetch the subnets which should get fresh data
       const fetchedSubnets = await service.getSubnets();
 
-      // Filter by network (vpc)
       const filteredSubnets = fetchedSubnets.filter(
         (subnet) => subnet.network.includes(`/${vpc.name}`) || subnet.network === vpc.name,
       );
@@ -111,7 +104,6 @@ export default function SubnetsView({ projectId, gcloudPath, vpc }: SubnetsViewP
     }
   }, [service, vpc]);
 
-  // Filter subnets based on search text
   const filteredSubnets = subnets.filter(
     (subnet) =>
       subnet.name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -267,7 +259,6 @@ export default function SubnetsView({ projectId, gcloudPath, vpc }: SubnetsViewP
   );
 }
 
-// Add CIDR validation regex and helper functions at the top level
 const CIDR_REGEX = /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/;
 
 function isValidCIDR(cidr: string): { valid: boolean; error?: string } {
@@ -279,7 +270,6 @@ function isValidCIDR(cidr: string): { valid: boolean; error?: string } {
     return { valid: false, error: "Invalid CIDR format. Expected format: xxx.xxx.xxx.xxx/xx" };
   }
 
-  // Validate IP portion
   const [ip, prefix] = cidr.split("/");
   const octets = ip.split(".").map(Number);
 
@@ -287,7 +277,6 @@ function isValidCIDR(cidr: string): { valid: boolean; error?: string } {
     return { valid: false, error: "IP address octets must be between 0 and 255" };
   }
 
-  // Validate prefix length
   const prefixNum = Number(prefix);
   if (isNaN(prefixNum) || prefixNum < 0 || prefixNum > 32) {
     return { valid: false, error: "Network prefix must be between 0 and 32" };
@@ -296,7 +285,6 @@ function isValidCIDR(cidr: string): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
-// Add helper function for secondary range validation
 function validateSecondaryRanges(input: string): {
   valid: boolean;
   ranges?: { rangeName: string; ipCidrRange: string }[];
@@ -369,14 +357,12 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
       return;
     }
 
-    // Validate primary IP range
     const ipRangeValidation = isValidCIDR(values.ipRange);
     if (!ipRangeValidation.valid) {
       showFailureToast(ipRangeValidation.error || "Invalid IP range format");
       return;
     }
 
-    // Validate secondary ranges if provided
     if (values.secondaryRanges) {
       const validation = validateSecondaryRanges(values.secondaryRanges);
       if (!validation.valid) {
@@ -396,7 +382,6 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
     try {
       const service = new NetworkService(gcloudPath, projectId);
 
-      // Use validated secondary ranges
       const { ranges: secondaryRanges } = values.secondaryRanges
         ? validateSecondaryRanges(values.secondaryRanges)
         : { ranges: undefined };
@@ -417,7 +402,6 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
         return;
       }
 
-      // Force refresh subnets to ensure we have the latest data
       await service.forceRefreshSubnets();
 
       loadingToast.hide();
@@ -427,7 +411,6 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
         message: `Successfully created ${values.name} in ${values.region}`,
       });
 
-      // Update parent component and close form
       onSubnetCreated();
       pop();
     } catch (error: unknown) {

@@ -1,10 +1,10 @@
-import { Form } from "@raycast/api";
-import { getNameOfHAServiceField, HAServiceField, HAServiceTargetArea, HAServiceTargetEntity } from "./utils";
-import { State } from "@lib/haapi";
-import { getFriendlyName } from "@lib/utils";
-import { parse } from "yaml";
 import { HAArea } from "@components/area/utils";
 import { HADevice } from "@components/device/utils";
+import { State } from "@lib/haapi";
+import { getFriendlyName } from "@lib/utils";
+import { Form } from "@raycast/api";
+import { parse } from "yaml";
+import { getNameOfHAServiceField, HAServiceField, HAServiceTargetArea, HAServiceTargetEntity } from "./utils";
 
 export interface ServiceFormFieldEntitiesTagPickerProps extends Form.TagPicker.Props {
   field: HAServiceField;
@@ -17,7 +17,9 @@ export function ServiceFormFieldEntitiesTagPicker({ id, states, field }: Service
   }
   return (
     <Form.TagPicker id={id} title={getNameOfHAServiceField(field, id)}>
-      {states?.map((s) => <Form.TagPicker.Item value={s.entity_id} title={`${getFriendlyName(s)} (${s.entity_id})`} />)}
+      {states?.map((s) => (
+        <Form.TagPicker.Item value={s.entity_id} title={`${getFriendlyName(s)} (${s.entity_id})`} />
+      ))}
     </Form.TagPicker>
   );
 }
@@ -62,7 +64,9 @@ export function ServiceFormFieldSelectDropdown({ id, field }: ServiceFormFieldSe
   const labeledOpts = opts.map((o) => (typeof o === "string" ? { label: o, value: o } : o));
   return (
     <Form.Dropdown id={id} title={getNameOfHAServiceField(field, id)}>
-      {labeledOpts?.map((o) => <Form.Dropdown.Item key={o.value} value={o.value} title={o.label} />)}
+      {labeledOpts?.map((o) => (
+        <Form.Dropdown.Item key={o.value} value={o.value} title={o.label} />
+      ))}
     </Form.Dropdown>
   );
 }
@@ -77,7 +81,10 @@ export function ServiceFormFieldObject({ id, field, value, ...restProps }: Servi
       if (value) {
         parse(value);
       }
-    } catch (error) {
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      error
+    ) {
       return "Invalid yaml";
     }
   };
@@ -153,7 +160,9 @@ export function ServiceFormTargetAreaTagPicker({
 }: ServiceFormTargetAreaTagPickerProps) {
   return (
     <Form.TagPicker id={id} title="Target Area" placeholder="Target Area" {...restProps} defaultValue={value ?? []}>
-      {areas?.map((s) => <Form.TagPicker.Item key={s.area_id} value={s.area_id} title={s.name ?? s.area_id} />)}
+      {areas?.map((s) => (
+        <Form.TagPicker.Item key={s.area_id} value={s.area_id} title={s.name ?? s.area_id} />
+      ))}
     </Form.TagPicker>
   );
 }
@@ -186,7 +195,9 @@ export interface ServiceFormFieldAreaProps extends Form.TagPicker.Props {
 export function ServiceFormFieldArea({ id, areas, field, value, ...restProps }: ServiceFormFieldAreaProps) {
   return (
     <Form.TagPicker id={id} title={getNameOfHAServiceField(field, id)} {...restProps} defaultValue={value ?? []}>
-      {areas?.map((s) => <Form.TagPicker.Item key={s.area_id} value={s.area_id} title={s.name ?? s.area_id} />)}
+      {areas?.map((s) => (
+        <Form.TagPicker.Item key={s.area_id} value={s.area_id} title={s.name ?? s.area_id} />
+      ))}
     </Form.TagPicker>
   );
 }

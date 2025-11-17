@@ -30,7 +30,6 @@ export default function IAMPrincipalList({
 }: IAMPrincipalListProps) {
   const filteredPrincipals = useMemo(() => {
     return principals.filter((principal) => {
-      // Filter by search text
       if (
         searchText &&
         !principal.id.toLowerCase().includes(searchText.trim().toLowerCase()) &&
@@ -43,12 +42,10 @@ export default function IAMPrincipalList({
         return false;
       }
 
-      // Filter by principal type
       if (selectedType && principal.type !== selectedType) {
         return false;
       }
 
-      // Filter by service
       if (selectedService && !principal.roles.some((role) => role.role.includes(selectedService))) {
         return false;
       }
@@ -57,7 +54,6 @@ export default function IAMPrincipalList({
     });
   }, [principals, searchText, selectedType, selectedService]);
 
-  // Get icon for principal type
   function getPrincipalIcon(type: string): { source: Icon; tintColor: Color } {
     switch (type) {
       case "user":

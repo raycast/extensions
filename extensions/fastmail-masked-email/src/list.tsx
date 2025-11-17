@@ -131,7 +131,7 @@ export default function Command() {
             key={email.id}
             title={email.email}
             subtitle={email.forDomain || email.description}
-            keywords={[email.description]}
+            keywords={[email.description, email.forDomain]}
             accessories={[
               { date: new Date(email.createdAt), tooltip: `Created ${new Date(email.createdAt).toLocaleString()}` },
               accessoryForMaskedEmail(email),

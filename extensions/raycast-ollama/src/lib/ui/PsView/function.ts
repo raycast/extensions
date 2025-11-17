@@ -8,8 +8,11 @@ import * as Types from "./types";
  * @param server - Ollama Server Name.
  * @returns Array of Loaded Models.
  */
-export async function GetModels(server: string): Promise<Types.UiModel[]> {
+export async function GetModels(server: string | undefined): Promise<Types.UiModel[]> {
   let o: Types.UiModel[] = [];
+
+  if (server === undefined) return o;
+
   let s = await GetServerClass();
   if (server !== "All" && !s.has(server)) return [];
   if (server !== "All") s = new Map([[server, s.get(server) as Ollama]]);

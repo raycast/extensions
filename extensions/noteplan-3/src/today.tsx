@@ -8,7 +8,7 @@ export default () => {
   return (
     <NoteDetail
       entry={{
-        relativePath: `/Calendar/{$path}`,
+        relativePath: `/Calendar/${path}`,
         fileName: format(new Date(), "yyyyMMdd"),
         type: NoteType.Calendar,
         callbackPath: path,

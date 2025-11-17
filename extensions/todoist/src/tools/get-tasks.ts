@@ -1,21 +1,8 @@
-import { getTodoistRestApi, withTodoistApi } from "../helpers/withTodoistApi";
+import { Task } from "../api";
+import { mapPriority } from "../helpers/priorities";
+import { getTodoistApi, withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
-  /**
-   * Filter tasks by project ID
-   */
-  project_id?: string;
-
-  /**
-   * Filter tasks by section ID
-   */
-  section_id?: string;
-
-  /**
-   * Filter tasks by label name
-   */
-  label?: string;
-
   /**
    * Filter tasks by any supported filter. Supports advanced filtering with various operators and keywords.
    *
@@ -83,23 +70,23 @@ type Input = {
    *
    * Note: Multiple filters (using the comma operator) are not supported
    */
-  filter?: string;
+  query: string;
 
   /**
    * IETF language tag defining what language filter is written in,
    * if differs from default English
    */
   lang?: string;
-
-  /**
-   * A list of the task IDs to retrieve, this should be a comma separated list.
-   */
-  ids?: string;
 };
 
-export default withTodoistApi(async (input: Input = {}) => {
-  const todoistApi = getTodoistRestApi();
+export default withTodoistApi(async (input: Input) => {
+  const todoistApi = getTodoistApi();
+  const { data } = await todoistApi.get<{ results: Task[] }>("/tasks/filter", { params: input });
 
-  const { data } = await todoistApi.get("/tasks", { params: input });
-  return data;
+  const results = data.results.map((input) => ({
+    ...input,
+    priority: mapPriority(input.priority),
+  }));
+
+  return results;
 });

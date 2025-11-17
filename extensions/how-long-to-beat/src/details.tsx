@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { HowLongToBeatEntry } from "howlongtobeat";
-import { baseUrl } from ".";
+import { HltbSearch } from "./hltbsearch";
 import { pluralize } from "./helpers";
 import axios from "axios";
 import UserAgent from "user-agents";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 
 interface DetailsProps {
   id: string;
@@ -65,7 +65,7 @@ ${result.playableOn.join(", ")}
     getDetails();
   }, []);
 
-  const url = `${baseUrl}${id}`;
+  const url = `${HltbSearch.DETAIL_URL}${id}`;
 
   const mainStoryHours = state.result?.gameplayMain || 0;
   const mainStoryText =
@@ -105,7 +105,7 @@ ${result.playableOn.join(", ")}
 
 async function detailHtml(gameId: string, signal?: AbortSignal): Promise<string> {
   try {
-    const result = await axios.get(`${baseUrl}${gameId}`, {
+    const result = await axios.get(`${HltbSearch.DETAIL_URL}${gameId}`, {
       // followRedirect: false,
       headers: {
         "User-Agent": new UserAgent().toString(),
@@ -176,7 +176,7 @@ function parseDetails(html: string, id: string): HowLongToBeatEntry {
     gameplayMainExtra,
     gameplayComplete,
     1,
-    gameName
+    gameName,
   );
 }
 

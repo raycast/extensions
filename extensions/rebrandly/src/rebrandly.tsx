@@ -17,7 +17,6 @@ import { getFavicon, showFailureToast, useFetch, useForm } from "@raycast/utils"
 import { useState } from "react";
 import { API_HEADERS, API_URL } from "./config";
 import { BrandedLink } from "./interfaces";
-import fetch from "node-fetch";
 
 export default function Rebrandly() {
   const [filter, setFilter] = useState("");
@@ -54,7 +53,7 @@ export default function Rebrandly() {
               return data.filter((l) => l.id !== link.id);
             },
             shouldRevalidateAfter: false,
-          }
+          },
         );
         toast.style = Toast.Style.Success;
         toast.title = "Deleted link";
@@ -92,6 +91,12 @@ export default function Rebrandly() {
                 <ActionPanel>
                   <Action.OpenInBrowser icon={icon} url={url} />
                   <Action.CopyToClipboard content={url} />
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    title="Update Link"
+                    target={<UpdateLink link={link} onUpdate={revalidate} />}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                  />
                   <Action.Push
                     icon={Icon.Plus}
                     title="Create New Link"
@@ -142,7 +147,7 @@ function CreateNewLink({ onCreate }: { onCreate: () => void }) {
         if (!value) return "The item is required";
         try {
           new URL(value);
-        } catch (error) {
+        } catch {
           return "Must be a valid URL";
         }
       },
@@ -186,6 +191,75 @@ function CreateNewLink({ onCreate }: { onCreate: () => void }) {
         info="The keyword portion of your branded short link. A random one (as short as possible according to the branded domain you use) will be auto-generated if you do not specify one"
         {...itemProps.slashtag}
       />
+      <Form.TextField
+        title="Link title"
+        placeholder="A random title will be assigned"
+        info="A title you assign to the branded short link in order to remember what's behind it."
+        {...itemProps.title}
+      />
+    </Form>
+  );
+}
+
+function UpdateLink({ link, onUpdate }: { link: BrandedLink; onUpdate: () => void }) {
+  const { pop } = useNavigation();
+  const [execute, setExecute] = useState(false);
+  interface FormValues {
+    destination: string;
+    title: string;
+  }
+  const { itemProps, handleSubmit, values } = useForm<FormValues>({
+    onSubmit() {
+      setExecute(true);
+    },
+    initialValues: {
+      destination: link.destination,
+      title: link.title,
+    },
+    validation: {
+      destination(value) {
+        if (!value) return "The item is required";
+        try {
+          new URL(value);
+        } catch {
+          return "Must be a valid URL";
+        }
+      },
+    },
+  });
+  const { isLoading } = useFetch(API_URL + "links/" + link.id, {
+    method: "POST",
+    headers: API_HEADERS,
+    body: JSON.stringify(values),
+    execute,
+    parseResponse,
+    onData() {
+      onUpdate();
+      pop();
+    },
+    async onError(error) {
+      await showFailureToast(error);
+      setExecute(false);
+    },
+  });
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Pencil} title="Update Link" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="ID" text={link.id} />
+      <Form.TextField
+        title="Destination URL"
+        placeholder="Type or paste a link (URL)"
+        info="Destination URL is the long link you want to shorten and rebrand"
+        {...itemProps.destination}
+      />
+      <Form.Separator />
+      <Form.Description text="OPTIONAL" />
       <Form.TextField
         title="Link title"
         placeholder="A random title will be assigned"

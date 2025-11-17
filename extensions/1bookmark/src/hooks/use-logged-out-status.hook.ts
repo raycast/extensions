@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import { RouterOutputs, trpc } from "@/utils/trpc.util";
-import { cache } from "../views/MyAccount";
+import { cache } from "../utils/cache.util";
 import {
   CACHED_KEY_SESSION_TOKEN,
   CACHED_KEY_ME,

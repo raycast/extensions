@@ -8,7 +8,8 @@
   "contributors": [
     "pernielsentikaer",
     "bkeys818",
-    "ridemountainpig"
+    "ridemountainpig",
+    "yusifaliyevpro"
   ],
   "categories": [
     "Productivity",
@@ -120,19 +121,22 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.55.2",
-    "@raycast/utils": "^1.9.0",
+    "@raycast/api": "^1.103.1",
+    "@raycast/utils": "^2.2.1",
     "axios": "^0.27.2",
     "curl-string": "^1.1.1",
     "jsonpath-plus": "^10.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
-    "@types/react": "^18.0.9",
-    "eslint": "^8.45.0",
-    "prettier": "^3.0.0",
-    "typescript": "^5.1.6"
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.34.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.6",
+    "@types/react": "^19.1.13",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -140,5 +144,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

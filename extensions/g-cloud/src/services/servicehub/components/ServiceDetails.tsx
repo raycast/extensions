@@ -22,13 +22,10 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
     try {
       setIsLoading(true);
 
-      // Use the service data we already have while fetching details
       setServiceDetails(service);
 
-      // Check the current status directly
       const isEnabled = await serviceHub.isServiceEnabled(service.name);
 
-      // If the status is different from what we have, update it
       if (isEnabled !== service.isEnabled) {
         const updatedService = {
           ...service,
@@ -37,10 +34,8 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
         };
         setServiceDetails(updatedService);
 
-        // Notify parent of the status change
         onServiceStatusChange(updatedService);
       } else {
-        // Fetch full details
         const details = await serviceHub.getServiceDetails(service.name);
         setServiceDetails(details);
       }
@@ -50,7 +45,7 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
         title: "Failed to fetch service details",
         message: error instanceof Error ? error.message : String(error),
       });
-      // Use the service data we already have
+
       setServiceDetails(service);
     } finally {
       setIsLoading(false);
@@ -72,10 +67,8 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
 
         await serviceHub.disableService(serviceDetails.name);
 
-        // Add delay to allow backend changes to propagate
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        // Verify the service was actually disabled
         const isStillEnabled = await serviceHub.isServiceEnabled(serviceDetails.name);
 
         if (!isStillEnabled) {
@@ -84,7 +77,6 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
             title: `Disabled ${serviceDetails.displayName || serviceDetails.name}`,
           });
 
-          // Update local state
           const updatedService = {
             ...serviceDetails,
             isEnabled: false,
@@ -92,7 +84,6 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
           };
           setServiceDetails(updatedService);
 
-          // Notify parent component with updated service
           onServiceStatusChange(updatedService);
         } else {
           showToast({
@@ -109,10 +100,8 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
 
         await serviceHub.enableService(serviceDetails.name);
 
-        // Add delay to allow backend changes to propagate
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        // Verify the service was actually enabled
         const isNowEnabled = await serviceHub.isServiceEnabled(serviceDetails.name);
 
         if (isNowEnabled) {
@@ -121,7 +110,6 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
             title: `Enabled ${serviceDetails.displayName || serviceDetails.name}`,
           });
 
-          // Update local state
           const updatedService = {
             ...serviceDetails,
             isEnabled: true,
@@ -129,7 +117,6 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
           };
           setServiceDetails(updatedService);
 
-          // Notify parent component with updated service
           onServiceStatusChange(updatedService);
         } else {
           showToast({
@@ -149,15 +136,12 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
       setIsToggling(false);
       setIsLoading(false);
 
-      // Add delay before final refresh to ensure we get the latest state
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Refresh the service details to ensure we have the latest data
       fetchServiceDetails();
     }
   }
 
-  // Generate markdown content for the detail view
   function getMarkdownContent() {
     if (!serviceDetails) {
       return "Loading service details...";

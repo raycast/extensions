@@ -228,16 +228,19 @@ const outboundModes = {
     english: "Direct Outbound",
     chinese: "直接连接",
     name: "Direct",
+    emoji: "⚪️",
   },
   Global: {
     english: "Global Proxy",
     chinese: "全局代理",
     name: "Global",
+    emoji: "🟢",
   },
   Rule: {
     english: "Rule-Based Proxy",
     chinese: "规则判定",
     name: "Rule-Based",
+    emoji: "🔵",
   },
 };
 
@@ -731,7 +734,7 @@ export async function setSurgeOutboundMode(mode: "Direct" | "Global" | "Rule"): 
       lastHitTimestamp: Date.now(),
     };
 
-    await showHUD(`🌐 Set to ${modeConfig.name} Mode`);
+    await showHUD(`${modeConfig.emoji} Set to ${modeConfig.name} Mode`);
   } catch (error) {
     // Handle errors and show failure notification
     console.error(`🔴 Error setting to ${outboundModes[mode].name} mode:`, error);

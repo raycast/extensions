@@ -15,10 +15,6 @@ export interface FileDownloadProps {
   children?: ReactNode;
 }
 
-/**
- * A reusable file downloader component that allows users to specify download location
- * or use the native macOS save dialog
- */
 export function FileDownloader({
   onDownload,
   fileName,
@@ -61,7 +57,6 @@ export function FileDownloader({
                 return;
               }
 
-              // Ensure the directory exists
               try {
                 const dirPath = dirname(path);
                 await ensureDirectoryExists(dirPath);
@@ -126,9 +121,6 @@ export function FileDownloader({
   );
 }
 
-/**
- * A specialized version of FileDownloader for cloud storage objects
- */
 export function CloudStorageDownloader({
   onDownload,
   fileName,

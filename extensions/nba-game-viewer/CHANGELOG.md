@@ -1,5 +1,9 @@
 # NBA Game Viewer Changelog
 
+## [Fixes] - 2025-04-16
+
+- Fixed a bug incorrectly comparing the scores as string - [#18573](https://github.com/raycast/extensions/issues/18573)
+
 ## [Improvements] - 2025-01-31
 
 - Added play-by-play view for completed and in-progress games.

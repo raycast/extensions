@@ -17,7 +17,7 @@ export function generateContributionSVG(
 
   // Define color schemes for light and dark modes
   const lightModeColors = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"];
-  const darkModeColors = ["#238636", "#0e4429", "#006d32", "#26a641", "#39d353"];
+  const darkModeColors = ["#25252580", "#0e4429", "#006d32", "#26a641", "#39d353"];
 
   const levelColors = appearance === "dark" ? darkModeColors : lightModeColors;
   const textColor = appearance === "dark" ? "#7d8590" : "#24292f";

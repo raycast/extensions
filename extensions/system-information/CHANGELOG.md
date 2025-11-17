@@ -1,5 +1,9 @@
 # System Information Changelog
 
+## [AI Tools] - 2025-04-29
+- Interact and perform the same functionality as the extension but simply with AI tools.
+- Reordered storage row to be at the top, so user wont have to scroll down to see it.
+
 ## [Improved Storage Calculation] - 2025-03-18
 - Implement storage calculation with Swift script to be more accurate.
 

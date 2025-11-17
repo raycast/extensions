@@ -1,0 +1,50 @@
+# Raycast Extension Guidelines
+
+## General Guidelines
+
+- Follow the project-wide guidelines defined in the root `.clinerules` file
+- Maintain compatibility with Raycast extension requirements
+- Keep the extension lightweight and performant
+
+## Code Organization
+
+- Use TypeScript for all code
+- Place all source code in the `src` directory except root command files
+- Follow the file naming conventions:
+  - Components: `ComponentName.tsx`
+  - Hooks: `use-feature-name.hook.ts`
+  - Utilities: `feature-name.util.ts`
+
+## API Usage
+
+- Do not use `trpc.user.me` directly
+- Always use the `use-me.hook.ts` hook for user-related operations
+- This ensures consistent error handling and state management
+
+## Performance Considerations
+
+- Minimize API calls
+- Cache data when appropriate
+- Use efficient data structures
+- Optimize for quick response times
+
+## UI/UX Guidelines
+
+- Follow Raycast design guidelines
+- Keep commands simple and intuitive
+- Provide clear feedback for user actions
+- Handle errors gracefully
+
+## Testing
+
+- Test all commands and features
+- Verify compatibility with different Raycast versions
+- Test error scenarios
+- Ensure proper cleanup of resources
+
+## Deployment
+
+- Follow the deployment process in `prepare-to-publish-raycast-production.sh`
+- Update version numbers appropriately
+- Update CHANGELOG.md with changes (use {PR_MERGE_DATE} template in entry titles)
+- Test the extension before publishing

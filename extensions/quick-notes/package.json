@@ -5,6 +5,9 @@
   "description": "Create simple markdown notes in Raycast and sync to a folder locally. No integrations required!",
   "icon": "icon.png",
   "author": "biknandy",
+  "contributors": [
+    "dead_hikikomori"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"

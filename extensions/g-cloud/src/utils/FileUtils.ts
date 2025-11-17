@@ -7,16 +7,10 @@ const fsAccess = promisify(fs.access);
 const fsMkdir = promisify(fs.mkdir);
 const fsStat = promisify(fs.stat);
 
-/**
- * Ensures that a directory exists, creating it if necessary
- * @param dirPath The directory path to ensure exists
- * @returns A promise that resolves when the directory exists
- */
 export async function ensureDirectoryExists(dirPath: string): Promise<void> {
   try {
     await fsAccess(dirPath, fs.constants.F_OK);
   } catch (error) {
-    // Directory doesn't exist or isn't accessible, try to create it
     try {
       await fsMkdir(dirPath, { recursive: true });
     } catch (mkdirError: unknown) {
@@ -28,11 +22,6 @@ export async function ensureDirectoryExists(dirPath: string): Promise<void> {
   }
 }
 
-/**
- * Formats a file size in bytes to a human-readable string
- * @param bytes The size in bytes
- * @returns A formatted string (e.g., "1.5 MB")
- */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -41,11 +30,6 @@ export function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
-/**
- * Guesses the content type of a file based on its extension
- * @param filename The filename to analyze
- * @returns The guessed MIME type
- */
 export function guessContentType(filename: string): string {
   const ext = filename.split(".").pop()?.toLowerCase() || "";
 
@@ -83,11 +67,6 @@ export function guessContentType(filename: string): string {
   return contentTypeMap[ext] || "application/octet-stream";
 }
 
-/**
- * Validates if a file exists and is accessible
- * @param filePath The path to the file to validate
- * @returns A promise that resolves to true if the file exists and is accessible
- */
 export async function validateFile(filePath: string): Promise<boolean> {
   try {
     await fsAccess(filePath, fs.constants.F_OK | fs.constants.R_OK);
@@ -119,11 +98,6 @@ export async function validateFile(filePath: string): Promise<boolean> {
   }
 }
 
-/**
- * Gets file information
- * @param filePath The path to the file
- * @returns A promise that resolves to an object with file information
- */
 export async function getFileInfo(filePath: string): Promise<{
   name: string;
   size: number;
@@ -154,11 +128,6 @@ export async function getFileInfo(filePath: string): Promise<{
   }
 }
 
-/**
- * Formats a timestamp into a human-readable date and time
- * @param timestamp ISO timestamp string
- * @returns Formatted date and time string
- */
 export function formatTimestamp(timestamp: string): string {
   if (!timestamp) return "Unknown";
   try {
@@ -168,14 +137,9 @@ export function formatTimestamp(timestamp: string): string {
   }
 }
 
-/**
- * Formats a generation ID to be more readable
- * @param generation The generation ID string
- * @returns Formatted generation ID
- */
 export function formatGeneration(generation: string): string {
   if (!generation) return "Unknown";
-  // Shorten the generation ID for display purposes
+
   return generation.length > 12
     ? `${generation.substring(0, 6)}...${generation.substring(generation.length - 6)}`
     : generation;
@@ -186,20 +150,10 @@ interface StorageObject {
   [key: string]: unknown;
 }
 
-/**
- * Determines if an object is the current version
- * @param object The storage object
- * @returns True if it's the current version
- */
 export function isCurrentVersion(object: StorageObject): boolean {
   return object.timeDeleted === undefined;
 }
 
-/**
- * Calculates the age of an object version
- * @param timestamp ISO timestamp string
- * @returns Human-readable age string
- */
 export function calculateAge(timestamp: string): string {
   if (!timestamp) return "Unknown";
 
@@ -208,7 +162,6 @@ export function calculateAge(timestamp: string): string {
     const now = new Date().getTime();
     const diff = now - created;
 
-    // Convert to appropriate time unit
     const seconds = Math.floor(diff / 1000);
     if (seconds < 60) return `${seconds} second${seconds !== 1 ? "s" : ""}`;
 

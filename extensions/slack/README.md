@@ -25,11 +25,8 @@ If you don't want to log in through OAuth, you can use an access token instead. 
     oauth_config:
       scopes:
         user:
-          # Command: Search Messages
-          - search:read
-
-          # Command: Search & Unread Messages & Set Presence
-          - users:read
+         # Command: Search & Unread Messages & Set Presence
+         - users:read
 
          # Command: Search & Unread Messages
          - channels:read
@@ -61,6 +58,9 @@ If you don't want to log in through OAuth, you can use an access token instead. 
 
          # Command: Send Message
          - chat:write
+
+         # Command: Search Emojis
+         - emoji:read
 
    settings:
      org_deploy_enabled: false

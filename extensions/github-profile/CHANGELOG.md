@@ -1,5 +1,9 @@
 # GitHub Profile Changelog
 
+## [Fix Style in Dark Mode] - 2025-04-14
+
+- 🎨 Update style in dark appearance
+
 ## [Fix Mock Data] - 2025-03-17
 
 - 🔐 Change GitHub token as required field
