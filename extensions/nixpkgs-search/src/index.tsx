@@ -310,8 +310,3 @@ interface SearchResult {
   platforms: string[];
   licenses: { name: string; url: string | null }[];
 }
-
-interface Preferences {
-  searchSize?: string;
-  branchName?: string;
-}
