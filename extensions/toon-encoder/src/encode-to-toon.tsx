@@ -49,11 +49,7 @@ export default function EncodeToTOON() {
       // Clear input
       setInput("");
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      await showFailureToast(error, { title: "Error" });
     }
   };
 
