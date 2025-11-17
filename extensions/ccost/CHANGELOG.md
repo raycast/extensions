@@ -1,5 +1,5 @@
 # ccost Changelog
 
-## [Initial Version] - 2025-11-17
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of ccost extension
