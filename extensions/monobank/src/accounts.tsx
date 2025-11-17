@@ -119,7 +119,7 @@ export default function Command() {
           account.title,
           account.currency.code,
           account.type,
-          account.maskedPan.length ? account.maskedPan[0] : account.iban
+          account.maskedPan.length ? account.maskedPan[0] : account.iban,
         );
       }
 
@@ -127,15 +127,15 @@ export default function Command() {
     }) as (Account | Jar)[];
 
   const filteredCards = filterOutPinnedItems({ category, items: cards, pinned }).filter((card) =>
-    satisfiesTexts(searchText, card.title, card.currency.code, card.type, card.maskedPan[0])
+    satisfiesTexts(searchText, card.title, card.currency.code, card.type, card.maskedPan[0]),
   );
 
   const filteredFops = filterOutPinnedItems({ category, items: fops, pinned }).filter((fop) =>
-    satisfiesTexts(searchText, fop.title, fop.currency.code, fop.type, fop.iban)
+    satisfiesTexts(searchText, fop.title, fop.currency.code, fop.type, fop.iban),
   );
 
   const filteredJars = filterOutPinnedItems({ category, items: jars, pinned }).filter((jar) =>
-    satisfiesTexts(searchText, jar.title, jar.currency.code)
+    satisfiesTexts(searchText, jar.title, jar.currency.code),
   );
 
   const totalAmount = calculateTotal([...cards, ...fops, ...jars], rates);
@@ -282,7 +282,7 @@ function CategoryDropdown(props: { onCategoryChange: (newValue: Category) => voi
   const { onCategoryChange } = props;
 
   const commonCategories = Object.values(Category).filter((category) =>
-    [Category.ALL, Category.PINNED].includes(category)
+    [Category.ALL, Category.PINNED].includes(category),
   );
   const otherCategories = Object.values(Category).filter((category) => !commonCategories.includes(category));
 
