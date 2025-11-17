@@ -137,6 +137,12 @@
       "subtitle": "Open Bible Word Study",
       "description": "Launches the Bible Word Study tool in Logos via ref.ly.",
       "mode": "view",
+      "keywords": [
+        "word study",
+        "bws",
+        "lemma",
+        "original language"
+      ],
       "preferences": [
         {
           "name": "autocompletePath",
@@ -154,6 +160,11 @@
       "subtitle": "Open Exegetical Guide",
       "description": "Type a Bible passage and open your Exegetical Guide in Logos.",
       "mode": "view",
+      "keywords": [
+        "exegetical guide",
+        "passage study",
+        "bible guide"
+      ],
       "preferences": [
         {
           "name": "guideTitle",
@@ -197,6 +208,11 @@
       "subtitle": "Open today's Logos reading",
       "description": "List your Logos reading plans and jump to today's assignment.",
       "mode": "view",
+      "keywords": [
+        "reading plan",
+        "daily reading",
+        "devotional"
+      ],
       "preferences": [
         {
           "name": "documentsDbPath",
@@ -209,11 +225,39 @@
       ]
     },
     {
+      "name": "open-layout",
+      "title": "Open Logos Layout",
+      "subtitle": "Load a saved Logos workspace",
+      "description": "Filter and launch your saved Logos layouts directly from Raycast.",
+      "mode": "view",
+      "keywords": [
+        "layout",
+        "workspace",
+        "window"
+      ],
+      "preferences": [
+        {
+          "name": "documentsDbPath",
+          "type": "textfield",
+          "title": "Documents DB Path Override",
+          "placeholder": "~/Library/Application Support/Logos4/Documents/.../LayoutManager/layouts.db",
+          "description": "Optional path to Layouts.db (or its parent folder). Leave empty for auto-discovery.",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "tools-launcher",
       "title": "Logos Tools Launcher",
       "subtitle": "Search Logos tools & interactives",
       "description": "Browse Atlas, Text Comparison, Sermon Builder, Copy Bible Verses, and dozens of interactives with autocomplete, then open them in Logos.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "tools",
+        "launcher",
+        "atlas",
+        "timeline"
+      ]
     }
   ],
   "dependencies": {

@@ -1,4 +1,4 @@
-# Logos Search
+# Logos Launcher
 
 Raycast extension with commands that open verses, run searches, and browse resources in Logos Bible Software.
 
