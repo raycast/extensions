@@ -1,4 +1,4 @@
 # Mollie Changelog
 
-## [Initial Version] - 2025-11-09
+## [Initial Version] - {PR_MERGE_DATE}
 First launch of Mollie for Raycast
