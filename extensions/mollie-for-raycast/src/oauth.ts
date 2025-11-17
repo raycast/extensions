@@ -16,7 +16,7 @@ const SCOPES =
   "organizations.read profiles.read payments.read payments.write sales-invoices.read sales-invoices.write balances.read settlements.read payment-links.read payment-links.write subscriptions.read subscriptions.write refunds.write refunds.read";
 
 // --- OAUTH CLIENT ---
-// We gebruiken Raycast's basis-client en vertrouwen op de ingebouwde logica.
+// We use Raycast's base client and rely on the built-in logic.
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Mollie",
