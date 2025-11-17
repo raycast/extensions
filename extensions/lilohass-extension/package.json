@@ -13,11 +13,39 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "togglApiToken",
+      "title": "Toggl API Token",
+      "description": "Your API token for the Toggl Track API.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your Toggl API token"
+    }
+  ],
   "commands": [
     {
       "name": "lilohass",
       "title": "Lilohass",
       "description": "Lilohass productivity extension",
+      "mode": "view"
+    },
+    {
+      "name": "show-tasks",
+      "title": "Show Tasks",
+      "description": "Show tasks from Toggl",
+      "mode": "view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Toggl Timer",
+      "description": "Stop the current running Toggl timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Start a new Toggl timer",
       "mode": "view"
     }
   ],
@@ -29,6 +57,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
+    "@types/node-fetch": "^2.6.13",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
