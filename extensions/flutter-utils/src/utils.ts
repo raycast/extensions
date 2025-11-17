@@ -17,9 +17,7 @@ import path from "node:path";
  * Throws if no valid path is found.
  */
 export async function resolveProjectPath(): Promise<string> {
-  type Preferences = {
-  projectPath?: string;
-  flutterSdkPath?: string;
+  const { projectPath } = getPreferenceValues<Preferences>();
 };
 
 /**
