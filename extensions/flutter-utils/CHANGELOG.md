@@ -25,8 +25,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Added `metadata/` folder with `screenshots/` and Store descriptions.
 
 ### Changed
-- Amélioration conformité soumission Raycast Store.
-- Bump version à 0.5.3.
+- Improved Raycast Store submission compliance.
+- Bump version to 0.5.3.
 
 ## [0.5.2] - {PR_MERGE_DATE}
 
