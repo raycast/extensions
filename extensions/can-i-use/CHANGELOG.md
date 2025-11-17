@@ -1,6 +1,6 @@
 # Can I Use Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-11-17
 
 - Update navigation title
 
