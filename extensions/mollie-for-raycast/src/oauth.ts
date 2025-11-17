@@ -48,7 +48,7 @@ export async function authorize(): Promise<string> {
   // Clear any stale tokens before starting new authorization
   await client.removeTokens();
 
-  // Raycast genereert nu zelf de correcte redirectURI
+  // Raycast now generates the correct redirectURI itself
   const authRequest = await client.authorizationRequest({
     endpoint: proxiedAuthorizeUrl,
     clientId: clientId,
