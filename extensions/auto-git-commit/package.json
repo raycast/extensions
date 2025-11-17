@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "auto-git-commit",
+  "title": "Auto Git Commit",
+  "description": "AI-powered Git commit assistant. Generate meaningful commit messages in seconds using Raycast AI.",
+  "icon": "icon-light.png",
+  "author": "garrick_zhang",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "git",
+    "commit",
+    "ai",
+    "github",
+    "repository",
+    "automation",
+    "developer",
+    "productivity",
+    "version-control",
+    "commit-message",
+    "conventional-commits",
+    "gitmoji"
+  ],
+  "commands": [
+    {
+      "name": "quick-git-commit",
+      "title": "Quick Git Commit",
+      "subtitle": "Auto Git Commit",
+      "description": "Select a repository and generate AI commit messages",
+      "mode": "view"
+    },
+    {
+      "name": "manage-repositories",
+      "title": "Manage Repositories",
+      "subtitle": "Auto Git Commit",
+      "description": "Scan, batch manage, and organize your Git repositories with AI assistance",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "commitMode",
+      "type": "dropdown",
+      "required": true,
+      "title": "Commit Mode",
+      "description": "How commits should be handled",
+      "default": "PREVIEW",
+      "data": [
+        {
+          "title": "Preview Before Commit",
+          "value": "PREVIEW"
+        },
+        {
+          "title": "Auto Commit (Immediate)",
+          "value": "AUTO"
+        },
+        {
+          "title": "Quick Commit (5s countdown)",
+          "value": "QUICK"
+        }
+      ]
+    },
+    {
+      "name": "commitStyle",
+      "type": "dropdown",
+      "required": true,
+      "title": "Commit Style",
+      "description": "Style of commit messages to generate",
+      "default": "conventional",
+      "data": [
+        {
+          "title": "Conventional Commits",
+          "value": "conventional"
+        },
+        {
+          "title": "Simple (one-line)",
+          "value": "simple"
+        },
+        {
+          "title": "Gitmoji (with emoji)",
+          "value": "gitmoji"
+        },
+        {
+          "title": "Detailed Commit",
+          "value": "detailed"
+        }
+      ]
+    },
+    {
+      "name": "customInstructions",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom AI Instructions",
+      "description": "Additional instructions for AI commit message generation (optional)",
+      "placeholder": "e.g., Keep under 50 chars, Focus on business impact"
+    },
+    {
+      "name": "terminalIde",
+      "type": "appPicker",
+      "required": false,
+      "title": "Terminal/IDE",
+      "description": "Preferred application to open a repository folder",
+      "default": {
+        "macOS": "Terminal",
+        "Windows": "Visual Studio Code"
+      }
+    },
+    {
+      "name": "autoStageAllFiles",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Stage All Files",
+      "description": "If enabled, include unstaged changes in AI and stage all before committing",
+      "default": false,
+      "label": "Stage all files before committing"
+    },
+    {
+      "name": "autoPushAfterCommit",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Push After Commit",
+      "description": "If enabled, automatically push to remote after successful commit",
+      "default": false,
+      "label": "Push to remote after committing"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/uuid": "^9.0.7",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"It seems like you are trying to publish the Raycast extension to npm. If you did intend to publish it to npm, remove the prepublishOnly script and rerun npm publish again. If you wanted to publish it to the Raycast Store instead, use npm run publish instead.\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
