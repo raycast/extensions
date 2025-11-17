@@ -1,28 +1,27 @@
 ## Flutter Utils – Description Store
 
-Flutter Utils offre un accès rapide aux commandes Flutter courantes directement depuis Raycast. Lancez `flutter run`, exécutez `pub get`, nettoyez avec `clean`, analysez et testez votre projet, construisez pour plusieurs cibles (`apk`, `appbundle`, `ios`) et consultez le diagnostic `doctor` — le tout via une interface unifiée.
+Flutter Utils provides quick access to common Flutter commands directly from Raycast. Launch `flutter run`, execute `pub get`, clean with `clean`, analyze and test your project, build for multiple targets (`apk`, `appbundle`, `ios`) and check diagnostic `doctor` — all through a unified interface.
 
-### Points forts
+### Key Features
 
-- Sélecteur d’action unique avec formulaire d’arguments
-- Sélection de device pour `flutter run`
-- Suivi de progression et logs en direct avec mise en évidence des statuts
-- Exécution interactive dans un terminal (Warp prioritaire, repli sur Terminal.app)
-- Résolution flexible du chemin projet et du SDK Flutter via préférences
+- Single action selector with arguments form
+- Device selection for `flutter run`
+- Progress tracking and live logs with status highlighting
+- Interactive execution in terminal (Warp priority, fallback to Terminal.app)
+- Flexible project path and Flutter SDK resolution via preferences
 
-### Cas d’usage
+### Use Cases
 
-- Démarrer rapidement une session `flutter run` sur un device spécifique
-- Installer les dépendances (`pub get`) ou nettoyer l’artefact (`clean`)
-- Analyser, tester et construire sans quitter Raycast
-- Diagnostiquer l’environnement avec `doctor`
+- Quickly start a `flutter run` session on a specific device
+- Install dependencies (`pub get`) or clean artifacts (`clean`)
+- Analyze, test and build without leaving Raycast
+- Diagnose environment with `doctor`
 
 ### Configuration
 
-- Préférences: `Project Path` (optionnel), `Flutter SDK Path` (optionnel)
-- Icône: `assets/extension-icon.png`
+- Preferences: `Project Path` (optional), `Flutter SDK Path` (optional)
+- Icon: `assets/extension-icon.png`
 
 ### Notes
 
-L’extension gère les erreurs, nettoie les processus, et optimise les workflows macOS. Les commandes simples peuvent s’exécuter en arrière‑plan; `flutter run` privilégie une session terminal interactive.
-
+The extension handles errors, cleans up processes, and optimizes macOS workflows. Simple commands can run in background; `flutter run` prioritizes interactive terminal session.
