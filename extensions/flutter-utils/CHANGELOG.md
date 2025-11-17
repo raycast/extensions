@@ -17,7 +17,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Bump version to 0.5.4.
 
 ### Fixed
-- Conformité Store: alignement structure `assets/` et métadonnées.
+- Store compliance: aligned `assets/` structure and metadata.
 
 ## [0.5.3] - {PR_MERGE_DATE}
 
