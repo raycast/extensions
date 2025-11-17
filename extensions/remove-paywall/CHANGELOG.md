@@ -1,5 +1,12 @@
 # Remove Paywall Changelog
 
+## [Update and fixes] - {PR_MERGE_DATE}
+
+- Updated ESLint configuration to use the latest Raycast ESLint config
+- Fixed issue with freedium.cfd not working to use updated freedium-mirror.cfd URL
+- Refactored code to use a default service constant
+- Refactored code to use URL constants for better maintainability
+
 ## [Browser integration and advanced features] - 2025-07-15
 
 - Added "Remove Paywall from Current Tab" command with automatic browser detection
