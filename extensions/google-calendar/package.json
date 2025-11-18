@@ -142,7 +142,7 @@
   "dependencies": {
     "@googleapis/calendar": "^9.8.0",
     "@googleapis/people": "^3.0.9",
-    "@raycast/api": "^1.94.2",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "humanize-duration": "^3.32.1",
