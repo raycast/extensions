@@ -1,0 +1,302 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "osint-toolkit",
+  "title": "OSINT Toolkit",
+  "description": "Comprehensive OSINT toolkit for security analysts to research IOCs (IPs, domains, URLs, hashes) across multiple threat intelligence platforms",
+  "icon": "icon.png",
+  "author": "jergensturdley",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-ioc",
+      "title": "Search IOC",
+      "subtitle": "OSINT Toolkit",
+      "description": "Auto-detect and search any IOC (IP, domain, URL, hash) across OSINT platforms",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ioc",
+          "placeholder": "Enter IP, domain, URL, or hash",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-ip",
+      "title": "Search IP Address",
+      "subtitle": "OSINT Toolkit",
+      "description": "Search IP addresses across threat intelligence platforms",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ip",
+          "placeholder": "Enter IP address (e.g., 8.8.8.8)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-domain",
+      "title": "Search Domain",
+      "subtitle": "OSINT Toolkit",
+      "description": "Search domains across threat intelligence platforms",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "Enter domain (e.g., example.com)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-url",
+      "title": "Search URL",
+      "subtitle": "OSINT Toolkit",
+      "description": "Search URLs across threat intelligence platforms",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Enter URL (e.g., https://example.com)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-hash",
+      "title": "Search File Hash",
+      "subtitle": "OSINT Toolkit",
+      "description": "Search file hashes (MD5, SHA1, SHA256) across threat intelligence platforms",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "hash",
+          "placeholder": "Enter hash (MD5, SHA1, or SHA256)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "import-source",
+      "title": "Import Custom Source",
+      "subtitle": "OSINT Toolkit",
+      "description": "Import a custom OSINT source by pasting JSON",
+      "mode": "view"
+    },
+    {
+      "name": "manage-sources",
+      "title": "Manage Custom Sources",
+      "subtitle": "OSINT Toolkit",
+      "description": "Manage your imported OSINT sources (enable/disable/delete)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "summary_only_mode",
+      "title": "Show Only Summary Rows",
+      "description": "When enabled, hide individual source entries and show only per-IOC summary items.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "virustotal_api_key",
+      "title": "VirusTotal API Key",
+      "description": "API key for VirusTotal (optional, free lookups work without it)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "abuseipdb_api_key",
+      "title": "AbuseIPDB API Key",
+      "description": "API key for AbuseIPDB (optional)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "shodan_api_key",
+      "title": "Shodan API Key",
+      "description": "API key for Shodan (optional)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "alienvault_api_key",
+      "title": "AlienVault OTX API Key",
+      "description": "API key for AlienVault OTX (optional)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "urlscan_api_key",
+      "title": "URLScan.io API Key",
+      "description": "API key for URLScan.io (optional)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "enable_virustotal",
+      "title": "Enable VirusTotal",
+      "description": "Show VirusTotal in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_abuseipdb",
+      "title": "Enable AbuseIPDB",
+      "description": "Show AbuseIPDB in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_shodan",
+      "title": "Enable Shodan",
+      "description": "Show Shodan in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_alienvault",
+      "title": "Enable AlienVault OTX",
+      "description": "Show AlienVault OTX in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_urlscan",
+      "title": "Enable URLScan.io",
+      "description": "Show URLScan.io in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_threatfox",
+      "title": "Enable ThreatFox",
+      "description": "Show ThreatFox in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_hybridanalysis",
+      "title": "Enable Hybrid Analysis",
+      "description": "Show Hybrid Analysis in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_anyrun",
+      "title": "Enable ANY.RUN",
+      "description": "Show ANY.RUN in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_pulsedive",
+      "title": "Enable Pulsedive",
+      "description": "Show Pulsedive in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_ipinfo",
+      "title": "Enable ipinfo.io",
+      "description": "Show ipinfo.io in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "copy_on_select",
+      "title": "Copy IOC on Selection",
+      "description": "Automatically copy the IOC to clipboard when selecting a search result",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_haveibeenpwned",
+      "title": "Enable Have I Been Pwned",
+      "description": "Enable Have I Been Pwned in search results (for email IOCs)",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "show_hibp_quick_link",
+      "title": "Show Have I Been Pwned Quick Link",
+      "description": "Show a quick action for Have I Been Pwned when an email IOC is detected.",
+      "type": "checkbox",
+      "default": true,
+      "label": "Enabled",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.12.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.1",
+    "eslint": "^8.51.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "npm run build && npm run lint",
+    "publish": "npx @raycast/api@latest publish",
+    "publish:interactive": "npx @raycast/api@latest publish"
+  },
+  "categories": [
+    "Security",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "osint",
+    "security",
+    "threat intelligence",
+    "ioc",
+    "virustotal",
+    "shodan",
+    "malware analysis",
+    "cybersecurity",
+    "ip lookup",
+    "domain lookup",
+    "hash lookup"
+  ]
+}
