@@ -33,7 +33,7 @@ export interface GitCommit {
 
 export interface Preferences {
   commitMode: "AUTO" | "PREVIEW" | "QUICK";
-  commitStyle: "conventional" | "simple" | "detailed";
+  commitStyle: "conventional" | "simple" | "detailed" | "template";
   customInstructions?: string;
   terminalIde?: string;
   autoStageAllFiles?: boolean;
@@ -53,6 +53,7 @@ export interface CommitMessageData {
   context?: string;
   customInstructions?: string;
   repoName?: string;
+  repoPath?: string;
   previousMessage?: string;
   regenerateInstruction?: string;
 }
@@ -72,6 +73,7 @@ export enum CommitStyle {
   CONVENTIONAL = "conventional",
   SIMPLE = "simple",
   DETAILED = "detailed",
+  TEMPLATE = "template",
 }
 
 export enum Language {

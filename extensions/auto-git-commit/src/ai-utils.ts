@@ -1,5 +1,11 @@
 import { AI } from "@raycast/api";
 import { CommitMessageData, AICommitMessage, CommitStyle } from "./types";
+import { exec } from "child_process";
+import { promisify } from "util";
+import { promises as fs } from "fs";
+import * as path from "path";
+
+const execAsync = promisify(exec);
 
 export class AIUtils {
   private static readonly MAX_TOKENS = 4000;
@@ -7,7 +13,7 @@ export class AIUtils {
 
   static async generateCommitMessage(data: CommitMessageData): Promise<AICommitMessage> {
     try {
-      const prompt = this.buildPrompt(data);
+      const prompt = await this.buildPrompt(data);
       const result = await AI.ask(prompt);
 
       return {
@@ -20,12 +26,15 @@ export class AIUtils {
     }
   }
 
-  private static buildPrompt(data: CommitMessageData): string {
-    const { diff, style, context, customInstructions, repoName, previousMessage, regenerateInstruction } = data;
+  private static async buildPrompt(data: CommitMessageData): Promise<string> {
+    const { diff, style, context, customInstructions, repoName, previousMessage, regenerateInstruction, repoPath } =
+      data;
     const lines: string[] = [];
 
     lines.push("Output only the Git commit message text, with no extra explanations, tags, or code fences.");
-    lines.push(this.getStylePrompt(style));
+
+    const stylePrompt = await this.getStylePrompt(style, repoPath);
+    lines.push(stylePrompt);
 
     if (repoName) {
       lines.push("Repository Name: " + repoName);
@@ -51,7 +60,7 @@ export class AIUtils {
     return lines.join("\n");
   }
 
-  private static getStylePrompt(style: string): string {
+  private static async getStylePrompt(style: string, repoPath?: string): Promise<string> {
     switch (style) {
       case CommitStyle.CONVENTIONAL:
         return "Use Conventional Commits format (e.g., feat: add user auth, fix: resolve login error)";
@@ -65,8 +74,69 @@ export class AIUtils {
           "- Body: bullet points explaining WHAT changed, WHY, and IMPACT",
           "- Reference key files/modules; include risks or breaking changes if any",
         ].join("\n");
+      case CommitStyle.TEMPLATE: {
+        const template = await this.readGitMessageTemplate(repoPath);
+        if (template) {
+          return [
+            "Use the following commit message template as a guide:",
+            "```",
+            template,
+            "```",
+            "Follow the structure and format of the template above. Replace placeholders with actual information based on the diff.",
+            "Comments (lines starting with #) are instructions and should not be included in the final message.",
+          ].join("\n");
+        }
+        return "Use Conventional Commits format (template not found, falling back to conventional)";
+      }
       default:
         return "Use Conventional Commits format";
+    }
+  }
+
+  private static async readGitMessageTemplate(repoPath?: string): Promise<string | null> {
+    try {
+      // 1. Try to get template path from git config
+      if (repoPath) {
+        try {
+          const { stdout } = await execAsync("git config commit.template", { cwd: repoPath });
+          const templatePath = stdout.trim();
+          if (templatePath) {
+            const absolutePath = path.isAbsolute(templatePath) ? templatePath : path.join(repoPath, templatePath);
+            const content = await fs.readFile(absolutePath, "utf-8");
+            return content;
+          }
+        } catch {
+          // Git config not set, continue to next option
+        }
+      }
+
+      // 2. Try repository .gitmessage
+      if (repoPath) {
+        try {
+          const repoTemplatePath = path.join(repoPath, ".gitmessage");
+          const content = await fs.readFile(repoTemplatePath, "utf-8");
+          return content;
+        } catch {
+          // File not found in repo, continue to next option
+        }
+      }
+
+      // 3. Try home directory .gitmessage
+      const homeDir = process.env.HOME || process.env.USERPROFILE;
+      if (homeDir) {
+        try {
+          const homeTemplatePath = path.join(homeDir, ".gitmessage");
+          const content = await fs.readFile(homeTemplatePath, "utf-8");
+          return content;
+        } catch {
+          // File not found in home directory
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error reading git message template:", error);
+      return null;
     }
   }
 

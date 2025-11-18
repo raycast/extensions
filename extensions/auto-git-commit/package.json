@@ -32,7 +32,15 @@
       "title": "Quick Git Commit",
       "subtitle": "Auto Git Commit",
       "description": "Select a repository and generate AI commit messages",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "repositoryId",
+          "type": "text",
+          "placeholder": "Repository ID",
+          "required": false
+        }
+      ]
     },
     {
       "name": "manage-repositories",
@@ -84,6 +92,10 @@
         {
           "title": "Detailed Commit",
           "value": "detailed"
+        },
+        {
+          "title": "Template (.gitmessage)",
+          "value": "template"
         }
       ]
     },

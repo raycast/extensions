@@ -14,6 +14,7 @@ import {
   Color,
   getPreferenceValues,
   Alert,
+  LaunchProps,
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import path from "path";
@@ -199,6 +200,16 @@ function RepositoryListItem({ repository, onUpdate, onAddRepository }: Repositor
               icon={ICONS.CODE}
               onAction={openPreferred}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+            <Action.CreateQuicklink
+              title="Create Quicklink"
+              quicklink={{
+                name: `Commit: ${repository.displayName || repository.name}`,
+                link: `raycast://extensions/garrick_zhang/auto-git-commit/quick-git-commit?arguments=${encodeURIComponent(
+                  JSON.stringify({ repositoryId: repository.id }),
+                )}`,
+              }}
+              shortcut={{ modifiers: ["cmd"], key: "l" }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -433,6 +444,7 @@ function CommitPreview({ repository, preferences, onComplete, quickAutoCommit }:
         context: repository.context,
         customInstructions: preferences.customInstructions,
         repoName: repository.displayName || repository.name,
+        repoPath: repository.path,
       });
 
       setCommitMessage(aiMessage.message);
@@ -551,6 +563,7 @@ function CommitPreview({ repository, preferences, onComplete, quickAutoCommit }:
         context: repository.context,
         customInstructions: preferences.customInstructions,
         repoName: repository.displayName || repository.name,
+        repoPath: repository.path,
         previousMessage: commitMessage,
         regenerateInstruction,
       });
@@ -664,6 +677,7 @@ async function performAutoCommit(repository: Repository, preferences: Preference
     context: repository.context,
     customInstructions: preferences.customInstructions,
     repoName: repository.displayName || repository.name,
+    repoPath: repository.path,
   });
 
   await GitUtils.commit(repository.path, aiMessage.message);
@@ -723,17 +737,33 @@ async function pLimit<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[
 
 // removed quick commit flow, handled via preview with auto-commit
 
-export default function QuickGitCommit() {
+interface QuickGitCommitArguments {
+  repositoryId?: string;
+}
+
+export default function QuickGitCommit(props: LaunchProps<{ arguments: QuickGitCommitArguments }>) {
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [initialPath, setInitialPath] = useState<string | undefined>(undefined);
   const { push } = useNavigation();
+  const { repositoryId } = props.arguments;
 
   useEffect(() => {
     loadRepositories();
     checkSelectedFolder();
   }, []);
+
+  // Auto-open commit preview if repositoryId is provided
+  useEffect(() => {
+    if (repositoryId && repositories.length > 0) {
+      const repository = repositories.find((repo) => repo.id === repositoryId);
+      if (repository && repository.hasChanges) {
+        const preferences = getPreferenceValues<Preferences>();
+        push(<CommitPreview repository={repository} preferences={preferences} onComplete={() => loadRepositories()} />);
+      }
+    }
+  }, [repositoryId, repositories]);
 
   async function checkSelectedFolder() {
     try {
