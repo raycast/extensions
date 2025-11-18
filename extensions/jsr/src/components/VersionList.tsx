@@ -1,4 +1,3 @@
-/* eslint-disable @raycast/prefer-title-case */
 import { formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
 
@@ -7,7 +6,7 @@ import { showFailureToast } from "@raycast/utils";
 
 import type { NameAndScope } from "@/types";
 
-import { useVersions } from "@/hooks/useJSRAPI";
+import { useVersions } from "@/hooks/jsrApi";
 
 export const VersionList = (props: NameAndScope) => {
   const { error, data, isLoading } = useVersions(props);
@@ -40,11 +39,20 @@ export const VersionList = (props: NameAndScope) => {
           ]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open Specific Version (JSR)"
-                icon={{ source: "jsr.svg" }}
-                url={`https://jsr.io/@${result.scope}/${result.package}@${result.version}`}
-              />
+              <ActionPanel.Section title="Open">
+                <Action.OpenInBrowser
+                  title="Open Specific Version (JSR)"
+                  icon={{ source: "jsr.svg" }}
+                  url={`https://jsr.io/@${result.scope}/${result.package}@${result.version}`}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Import Command">
+                <Action.CopyToClipboard
+                  title="ESM.sh (Deno)"
+                  content={`import {  } from "https://esm.sh/jsr/@${result.scope}/${result.package}@${result.version}"`}
+                  icon={{ source: "deno.svg" }}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

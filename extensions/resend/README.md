@@ -1,6 +1,10 @@
+<p align="center">
+  <img src="./assets/resend-extension_icon@dark.png" width="150" height="150" />
+</p>
+
 # <img src="./assets/resend-extension_icon@dark.png" width="20" height="20" /> Resend Raycast Extension
 
-This is a Raycast extension for [Resend](https://resend.com/). With this extension, you can Manage API Keys and Domains, and Send Emails using Resend.
+This is a Raycast extension for [Resend](https://resend.com/) - _Email for developers_. With this extension, you can Manage API Keys, Audiences & Contacts, Domains, Emails and Send Emails using **Resend**.
 
 ## 🚀 Getting Started
 
@@ -8,21 +12,17 @@ This is a Raycast extension for [Resend](https://resend.com/). With this extensi
 
 2. **Get your API Key**: The first time you use the extension, you'll need to enter your Resend API key:
 
-   a. `Sign in to your Resend Dashboard` at [this link](https://resend.com/login) OR `Create an account` at [this link](https://resend.com/signup)
+   a. `Sign in` to your Resend Dashboard at [this link](https://resend.com/login) OR `Create an account` at [this link](https://resend.com/signup)
 
    b. `Navigate` to [API Keys](https://resend.com/api-keys)
 
-   c. `Create API Key` with **Permission** as "_Full access_""
+   c. `Create` API Key with **Permission** as "_Full access_""
    <img src="./assets/resend-create-api-key.png" alt="Create API Key" />
 
    d. `Copy` the once shown **API Key**
    <img src="./assets/resend-view-api-key.png" alt="View API Key" />
 
-   d. Enter `API Key` in Preferences OR at first prompt
-
-## 🗒️ Notes
-
-- Currently, Resend API does not allow you to fetch ALL sent emails. As a workaround, when you send a new email using the extension, it is **logged** locally for your convenience. You can choose to keep or delete logged emails from log (they can still be viewed in your Resend Dashboard at [this link](https://resend.com/emails))
+   e. `Enter` API Key in Preferences OR at first prompt
 
 ## 🔧 Commands
 
@@ -31,15 +31,15 @@ This extension provides the following commands:
 - API Keys
   - View API Keys
   - Create API Key
-- Emails
-  - View Logged Emails
-  - Send New Email
-- Domains
-  - View Domains
-  - Add New Domain
 - Contacts
   - View Contacts
   - Create, Update And Delete Contacts
+- Domains
+  - View Domains
+  - Add New Domain
+- Emails
+  - View Sent Emails
+  - Send New Email
 
 Additionally, this extension supports ✨[AI tools](https://youtu.be/sHIlFKKaq0A)✨, so you can use it with natural language by mentioning `@resend`.
 

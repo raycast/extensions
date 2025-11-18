@@ -121,7 +121,7 @@ export default function DownloadVideo() {
 
         if (filePath) {
           toast.primaryAction = {
-            title: "Open in Finder",
+            title: isMac ? "Open in Finder" : "Open in Explorer",
             shortcut: { modifiers: ["cmd", "shift"], key: "o" },
             onAction: () => {
               open(path.dirname(filePath));

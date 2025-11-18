@@ -1,5 +1,9 @@
 # Unicode Symbols
 
+## [Bugfix] - 2025-10-30
+
+- Fixing an issue where it is filtered out characters because of improper search logic (ref: [#22508](https://github.com/raycast/extensions/issues/22508))
+
 ## [Bugfix] - 2025-10-13
 
 - Fixing an issue where the extension does not show proper icons in the Grid view on Windows (ref: [#22082](https://github.com/raycast/extensions/issues/22082))

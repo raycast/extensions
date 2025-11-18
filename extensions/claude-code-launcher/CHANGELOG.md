@@ -1,5 +1,10 @@
 # Claude Code Launcher
 
+## [Unreleased]
+
+### Added
+- Support for Ghostty terminal emulator
+
 ## [1.0.0] - 2025-09-30
 
 ### Features

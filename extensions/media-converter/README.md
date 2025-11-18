@@ -10,6 +10,7 @@
 - Simple customization of the quality of the output file; precise control by enabling it in extension preferences
 - Smart file naming to prevent conflicts
 - Automatic FFmpeg installation and management
+- Copy FFmpeg command to clipboard to inspect/learn/run it manually in terminal
 
 ## Supported Formats
 

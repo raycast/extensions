@@ -34,6 +34,7 @@ export function useChats(searchText: string = "") {
   const preferences = getPreferenceValues();
   const filterSpam = preferences.filterSpam ?? false;
   const filterUnknownSenders = preferences.filterUnknownSenders ?? false;
+  const loadContactPhotos = preferences.loadContactPhotos ?? true;
 
   // Build filter conditions synchronously (column check happens at query time)
   const buildQuery = () => {
@@ -59,7 +60,7 @@ export function useChats(searchText: string = "") {
         chat.chat_identifier,
         chat.display_name,
         chat.service_name,
-        CASE 
+        CASE
           WHEN EXISTS(SELECT 1 FROM pragma_table_info('chat') WHERE name='is_filtered')
           THEN chat.is_filtered
           ELSE NULL
@@ -105,13 +106,13 @@ export function useChats(searchText: string = "") {
   });
 
   const { data, isLoading: isLoadingContacts } = usePromise(
-    async (rawChats) => {
+    async (rawChats, loadPhotos) => {
       if (!rawChats) return [];
 
       const chats = rawChats as SQLChat[];
 
       const uniqueChatIdentifiers = [...new Set(chats.map((c) => c.chat_identifier))];
-      const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers);
+      const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, loadPhotos);
       const contactMap = createContactMap(contacts);
 
       return chats.map((c) => {
@@ -132,7 +133,7 @@ export function useChats(searchText: string = "") {
         };
       });
     },
-    [rawData],
+    [rawData, loadContactPhotos],
     { execute: !!rawData },
   );
 
