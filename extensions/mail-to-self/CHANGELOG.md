@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - Initial Release
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Send quick emails to yourself via SMTP directly from Raycast
