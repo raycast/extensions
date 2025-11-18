@@ -7,7 +7,7 @@ All notable changes to this project are documented here.
 ### Added
 
 - Quick Git Commit command to browse repositories and commit changes
-- AI-powered commit message generation with styles: conventional, simple, gitmoji, detailed
+- AI-powered commit message generation with styles: conventional, simple, detailed
 - Multiple commit modes: Preview, Quick (5s countdown), Auto commit
 - Preferences: `autoStageAllFiles` to include unstaged changes; `autoPushAfterCommit` to push after commit
 - Manage Repositories command with scanning, pin/unpin, batch operations, and refresh

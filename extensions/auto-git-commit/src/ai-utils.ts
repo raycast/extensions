@@ -57,8 +57,6 @@ export class AIUtils {
         return "Use Conventional Commits format (e.g., feat: add user auth, fix: resolve login error)";
       case CommitStyle.SIMPLE:
         return "Use a concise one-line description (under 50 characters)";
-      case CommitStyle.GITMOJI:
-        return "Use Gitmoji format (e.g., ✨ add new feature, 🐛 fix bug)";
       case CommitStyle.DETAILED:
         return [
           "Write a multi-line detailed commit:",

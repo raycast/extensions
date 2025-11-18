@@ -14,7 +14,7 @@ An AI-powered Git commit assistant that helps developers manage multiple Git rep
 ### 🤖 AI-Powered Commit Messages
 
 - **Intelligent Generation**: Uses Raycast AI to analyze git diffs and generate meaningful commit messages
-- **Multiple Styles**: Support for Conventional Commits, Simple one-line, and Gitmoji formats
+- **Multiple Styles**: Support for Conventional Commits, Simple one-line, and Detailed formats
 - **Smart Diff Processing**: Automatically handles large diffs by sampling and prioritizing important changes
 - **Context Awareness**: Repository context and custom instructions help AI generate better messages
 

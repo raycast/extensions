@@ -33,7 +33,7 @@ export interface GitCommit {
 
 export interface Preferences {
   commitMode: "AUTO" | "PREVIEW" | "QUICK";
-  commitStyle: "conventional" | "simple" | "gitmoji" | "detailed";
+  commitStyle: "conventional" | "simple" | "detailed";
   customInstructions?: string;
   terminalIde?: string;
   autoStageAllFiles?: boolean;
@@ -71,7 +71,6 @@ export enum CommitMode {
 export enum CommitStyle {
   CONVENTIONAL = "conventional",
   SIMPLE = "simple",
-  GITMOJI = "gitmoji",
   DETAILED = "detailed",
 }
 

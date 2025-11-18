@@ -77,14 +77,14 @@ async function generateContextForRepo(repoPath: string): Promise<string> {
 
     const prompt = `Analyze this Git repository and generate a comprehensive context description:
 
-📁 Repository Path: ${repoPath}
-🌿 Current Branch: ${repoInfo.branch}
-📊 Project Type: ${projectType}
+Repository Path: ${repoPath}
+Current Branch: ${repoInfo.branch}
+Project Type: ${projectType}
 
-📋 Recent Commit History:
+Recent Commit History:
 ${recentCommits.map((c, i) => `${i + 1}. ${c.message} (${c.author}, ${new Date(c.date).toLocaleDateString()})`).join("\n")}
 
-🔍 Analysis Requirements:
+Analysis Requirements:
 Based on the repository path, branch name, project type, and commit patterns, provide a detailed context that includes:
 
 1. **Project Domain & Purpose**: What is the main goal of this project?
@@ -166,7 +166,7 @@ function EditRepositoryForm({ item, onSave }: EditRepositoryFormProps) {
         placeholder="Describe this repository to help AI generate better commit messages"
         value={context}
         onChange={setContext}
-        info="💡 Tip: Use AI to automatically generate context based on repository structure"
+        info="Tip: Use AI to automatically generate context based on repository structure"
       />
     </Form>
   );
@@ -441,7 +441,7 @@ export default function ManageRepositories() {
       await showToast({
         style: Toast.Style.Success,
         title: "Context generation complete",
-        message: `✅ ${successCount} succeeded, ❌ ${failCount} failed`,
+        message: `${successCount} succeeded, ${failCount} failed`,
       });
     } finally {
       setIsLoading(false);

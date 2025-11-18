@@ -24,8 +24,7 @@
     "productivity",
     "version-control",
     "commit-message",
-    "conventional-commits",
-    "gitmoji"
+    "conventional-commits"
   ],
   "commands": [
     {
@@ -81,10 +80,6 @@
         {
           "title": "Simple (one-line)",
           "value": "simple"
-        },
-        {
-          "title": "Gitmoji (with emoji)",
-          "value": "gitmoji"
         },
         {
           "title": "Detailed Commit",

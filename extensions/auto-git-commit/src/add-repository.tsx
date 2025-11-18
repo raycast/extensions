@@ -165,14 +165,14 @@ function AddRepository({ onComplete, initialPath }: AddRepositoryProps) {
       // Create a comprehensive prompt for AI to generate context
       const prompt = `Analyze this Git repository and generate a comprehensive context description:
 
-📁 Repository Path: ${repoPath}
-🌿 Current Branch: ${repoInfo.branch}
-📊 Project Type: ${projectType}
+Repository Path: ${repoPath}
+Current Branch: ${repoInfo.branch}
+Project Type: ${projectType}
 
-📋 Recent Commit History:
+Recent Commit History:
 ${recentCommits.map((c, i) => `${i + 1}. ${c.message} (${c.author}, ${new Date(c.date).toLocaleDateString()})`).join("\n")}
 
-🔍 Analysis Requirements:
+Analysis Requirements:
 Based on the repository path, branch name, project type, and commit patterns, provide a detailed context that includes:
 
 1. **Project Domain & Purpose**: What is the main goal of this project? (e.g., e-commerce platform, internal tool, client library, etc.)
@@ -386,11 +386,11 @@ Based on the repository path, branch name, project type, and commit patterns, pr
         }}
         info={
           isValidRepo === true
-            ? "✅ Valid Git repository"
+            ? "Valid Git repository"
             : isValidRepo === false
-              ? "❌ Not a valid Git repository"
+              ? "Not a valid Git repository"
               : repoPath
-                ? "🔍 Validating repository..."
+                ? "Validating repository..."
                 : "Select a folder containing a Git repository"
         }
         error={
@@ -417,7 +417,7 @@ Based on the repository path, branch name, project type, and commit patterns, pr
         placeholder="Describe what this repository is about to help AI generate better commit messages"
         value={context}
         onChange={setContext}
-        info="💡 Tip: Use the AI button in the action panel to automatically generate context based on your repository's structure and recent commits"
+        info="Tip: Use the AI button in the action panel to automatically generate context based on your repository's structure and recent commits"
       />
     </Form>
   );
