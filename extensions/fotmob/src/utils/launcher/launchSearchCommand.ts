@@ -1,8 +1,12 @@
 import { LaunchType, launchCommand } from "@raycast/api";
 
-export function launchSearchCommand() {
-  return launchCommand({
-    name: "favorite",
-    type: LaunchType.UserInitiated,
-  });
+export async function launchSearchCommand() {
+  try {
+    await launchCommand({
+      name: "favorite",
+      type: LaunchType.UserInitiated,
+    });
+  } catch (error) {
+    console.error("Failed to launch search command:", error);
+  }
 }
