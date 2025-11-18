@@ -1,6 +1,6 @@
 import { getAccessToken, ensureValidToken } from "./auth";
 import { DataSnapshot, TransactionsResponse, CredentialWithAccounts } from "./types";
-import { API_BASE_URL, SDK_PLATFORM, SDK_VERSION, CLIENT_ID, API_VERSION } from "./constants";
+import { API_BASE_URL, SDK_PLATFORM, SDK_VERSION, CLIENT_ID, API_VERSION, APP_BASE_URL } from "./constants";
 
 /**
  * Get default headers for API requests
@@ -12,8 +12,8 @@ async function getDefaultHeaders(): Promise<Record<string, string>> {
     Accept: "application/json, text/plain, */*",
     "Accept-Language": "en-US,en;q=0.9",
     Authorization: `Bearer ${accessToken}`,
-    Origin: "https://app.getmoneytree.com",
-    Referer: "https://app.getmoneytree.com/",
+    Origin: APP_BASE_URL,
+    Referer: `${APP_BASE_URL}/`,
     "mt-sdk-platform": SDK_PLATFORM,
     "mt-sdk-version": SDK_VERSION,
     "x-api-key": CLIENT_ID,

@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { createHash, randomBytes } from "crypto";
 import { OAuthTokenResponse } from "./types";
-import { CLIENT_ID, REDIRECT_URI, OAUTH_BASE_URL, SDK_PLATFORM, SDK_VERSION } from "./constants";
+import { CLIENT_ID, REDIRECT_URI, OAUTH_BASE_URL, SDK_PLATFORM, SDK_VERSION, APP_BASE_URL } from "./constants";
 import { getStoredTokens, saveTokens, clearTokens, isTokenExpired } from "./storage";
 
 interface Preferences {
@@ -43,8 +43,8 @@ export async function exchangeCodeForToken(code: string, codeVerifier: string): 
       "Content-Type": "application/json",
       "mt-sdk-platform": SDK_PLATFORM,
       "mt-sdk-version": SDK_VERSION,
-      Origin: "https://app.getmoneytree.com",
-      Referer: "https://app.getmoneytree.com/",
+      Origin: APP_BASE_URL,
+      Referer: `${APP_BASE_URL}/`,
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
     },
@@ -75,8 +75,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<OAuthTok
       "Content-Type": "application/json",
       "mt-sdk-platform": SDK_PLATFORM,
       "mt-sdk-version": SDK_VERSION,
-      Origin: "https://app.getmoneytree.com",
-      Referer: "https://app.getmoneytree.com/",
+      Origin: APP_BASE_URL,
+      Referer: `${APP_BASE_URL}/`,
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
     },
@@ -251,7 +251,7 @@ function extractAuthenticityToken(html: string): string | null {
 
 /**
  * Extract authorization code from callback URL
- * The callback URL format is: https://app.getmoneytree.com/callback?code=XXX&state=YYY
+ * The callback URL format is: ${APP_BASE_URL}/callback?code=XXX&state=YYY
  */
 export function extractCodeFromUrl(url: string): string | null {
   try {
