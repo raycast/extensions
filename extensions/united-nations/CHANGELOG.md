@@ -1,5 +1,10 @@
 # United Nations Extension
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Fix issue when access values from undefined
+- Bump all dependencies to the latest
+
 ## [Maintenance] - 2025-10-08
 
 - Add support for Windows platform (Text-to-Speech disabled)

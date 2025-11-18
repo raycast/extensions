@@ -43,29 +43,33 @@ export const fetchUnNews = async (newsType: NewsType) => {
   ).text();
   const xmlParser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
   const news = xmlParser.parse(xml);
-  // @ts-expect-error: Expected any usage
-  return news.rss.channel.item.map((x) => ({
-    title: x.title,
-    description: x.description,
-    link: x.guid["#text"],
-    pubDate: x.pubDate,
-    image: x?.enclosure?.url,
-    source: x.source["#text"],
-  })) as UnNews[];
+  return (
+    // @ts-expect-error: Expected any usage
+    news?.rss?.channel?.item?.map((x) => ({
+      title: x.title,
+      description: x.description,
+      link: x.guid["#text"],
+      pubDate: x.pubDate,
+      image: x?.enclosure?.url,
+      source: x.source["#text"],
+    })) ?? ([] as UnNews[])
+  );
 };
 
 export const fetchUnPress = async () => {
   const xml = await got("https://press.un.org/en/rss.xml").text();
   const xmlParser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
   const press = xmlParser.parse(xml);
-  // @ts-expect-error: Expected any usage
-  return press.rss.channel.item.map((x) => ({
-    title: x.title,
-    description: x.description,
-    link: x.guid["#text"],
-    pubDate: x.pubDate,
-    creator: x["dc:creator"],
-  })) as UnPress[];
+  return (
+    // @ts-expect-error: Expected any usage
+    press?.rss?.channel?.item?.map((x) => ({
+      title: x.title,
+      description: x.description,
+      link: x.guid["#text"],
+      pubDate: x.pubDate,
+      creator: x["dc:creator"],
+    })) ?? ([] as UnPress[])
+  );
 };
 
 export const fetchDetail = async (link: string, selector: string) => {
