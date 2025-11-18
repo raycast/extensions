@@ -2,7 +2,7 @@ import { Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getCredentials } from "./lib/api";
 import { getAccessToken } from "./lib/auth";
-import { CACHE_KEYS, getCached, setCached } from "./lib/cache";
+import { CACHE_KEYS, getCached, setCached, removeCached } from "./lib/cache";
 import { CACHE_TTL } from "./lib/constants";
 import { CredentialWithAccounts } from "./lib/types";
 
@@ -97,6 +97,18 @@ export default function Command() {
             setCached(CACHE_KEYS.dataSnapshot(), data, CACHE_TTL.ACCOUNTS);
           } catch (error) {
             console.debug(`[List Credentials] Background refresh failed: ${error}`);
+            // If authentication fails, clear cache and show error
+            if (error instanceof Error && error.message.includes("Authenticate")) {
+              removeCached(CACHE_KEYS.dataSnapshot());
+              setCredentials([]);
+              setError(error.message);
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Authentication required",
+                message: "Please authenticate to view credentials",
+              });
+              return;
+            }
             // Silently fail background refresh - we have cached data to show
           }
           return;

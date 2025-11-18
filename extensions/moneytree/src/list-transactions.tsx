@@ -2,7 +2,7 @@ import { Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getAllAccounts, getTransactions } from "./lib/api";
 import { getAccessToken } from "./lib/auth";
-import { CACHE_KEYS, getCached, setCached } from "./lib/cache";
+import { CACHE_KEYS, getCached, setCached, removeCached } from "./lib/cache";
 import { CACHE_TTL } from "./lib/constants";
 import { CredentialWithAccounts, Transaction } from "./lib/types";
 
@@ -92,6 +92,18 @@ export default function Command() {
             setCached(cacheKey, response.transactions, CACHE_TTL.TRANSACTIONS);
           } catch (error) {
             console.debug(`[List Transactions] Background refresh failed: ${error}`);
+            // If authentication fails, clear cache and show error
+            if (error instanceof Error && error.message.includes("Authenticate")) {
+              removeCached(cacheKey);
+              setTransactions([]);
+              setError(error.message);
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Authentication required",
+                message: "Please authenticate to view transactions",
+              });
+              return;
+            }
             // Silently fail background refresh - we have cached data to show
           }
           return;

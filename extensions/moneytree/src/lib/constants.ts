@@ -14,14 +14,6 @@ export const SDK_PLATFORM = "js";
 export const SDK_VERSION = "3.1.1";
 export const API_VERSION = "6";
 
-// Storage Keys
-export const STORAGE_KEYS = {
-  ACCESS_TOKEN: "moneytree_access_token",
-  REFRESH_TOKEN: "moneytree_refresh_token",
-  EXPIRES_AT: "moneytree_expires_at",
-  CODE_VERIFIER: "moneytree_code_verifier",
-} as const;
-
 // Cache TTL (in milliseconds)
 export const CACHE_TTL = {
   CREDENTIALS: 5 * 60 * 1000, // 5 minutes

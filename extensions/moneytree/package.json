@@ -14,24 +14,13 @@
     "Finance"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "email",
-      "type": "textfield",
-      "required": true,
-      "title": "Email",
-      "description": "Your MoneyTree account email address",
-      "placeholder": "your.email@example.com"
-    },
-    {
-      "name": "password",
-      "type": "password",
-      "required": true,
-      "title": "Password",
-      "description": "Your MoneyTree account password"
-    }
-  ],
   "commands": [
+    {
+      "name": "authenticate",
+      "title": "Authenticate",
+      "description": "Connect your Moneytree account",
+      "mode": "view"
+    },
     {
       "name": "list-credentials",
       "title": "List Credentials",
