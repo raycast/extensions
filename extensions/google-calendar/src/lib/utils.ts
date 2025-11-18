@@ -108,7 +108,7 @@ export function formatRecurrence(recurrence: string[]): string {
 }
 
 function isInternal() {
-  return environment.supportPath.includes(".internal");
+  return environment.supportPath.includes("internal");
 }
 
 export function getClientId() {
