@@ -1,6 +1,6 @@
 # Prompt Builder Changelog
 
-## [New Template Management] - 2025-11-15
+## [New Template Management] - {PR_MERGE_DATE}
 
 - Save prompts as templates
 - Update existing templates
