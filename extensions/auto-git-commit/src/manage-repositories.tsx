@@ -38,11 +38,11 @@ interface ScanOptions {
 // ==================== Quick Scan Presets ====================
 
 const QUICK_SCAN_PRESETS = [
-  { name: "Projects Folder", path: `${process.env.HOME}/Projects`, icon: "📁" },
-  { name: "Code Folder", path: `${process.env.HOME}/Code`, icon: "💻" },
-  { name: "Work Folder", path: `${process.env.HOME}/Work`, icon: "💼" },
-  { name: "Desktop", path: `${process.env.HOME}/Desktop`, icon: "🖥️" },
-  { name: "Documents", path: `${process.env.HOME}/Documents`, icon: "📄" },
+  { name: "Projects Folder", path: `${process.env.HOME}/Projects` },
+  { name: "Code Folder", path: `${process.env.HOME}/Code` },
+  { name: "Work Folder", path: `${process.env.HOME}/Work` },
+  { name: "Desktop", path: `${process.env.HOME}/Desktop` },
+  { name: "Documents", path: `${process.env.HOME}/Documents` },
 ];
 
 // ==================== Helper Functions ====================
@@ -226,31 +226,31 @@ function ScanForm({ onScan, onCancel }: ScanFormProps) {
           </ActionPanel.Section>
           <ActionPanel.Section title="Quick Scan">
             <Action
-              title={`${QUICK_SCAN_PRESETS[0].icon} ${QUICK_SCAN_PRESETS[0].name}`}
+              title={QUICK_SCAN_PRESETS[0].name}
               icon={Icon.Folder}
               onAction={() => handleQuickScan(QUICK_SCAN_PRESETS[0].path)}
               shortcut={{ modifiers: ["cmd"], key: "1" }}
             />
             <Action
-              title={`${QUICK_SCAN_PRESETS[1].icon} ${QUICK_SCAN_PRESETS[1].name}`}
+              title={QUICK_SCAN_PRESETS[1].name}
               icon={Icon.Folder}
               onAction={() => handleQuickScan(QUICK_SCAN_PRESETS[1].path)}
               shortcut={{ modifiers: ["cmd"], key: "2" }}
             />
             <Action
-              title={`${QUICK_SCAN_PRESETS[2].icon} ${QUICK_SCAN_PRESETS[2].name}`}
+              title={QUICK_SCAN_PRESETS[2].name}
               icon={Icon.Folder}
               onAction={() => handleQuickScan(QUICK_SCAN_PRESETS[2].path)}
               shortcut={{ modifiers: ["cmd"], key: "3" }}
             />
             <Action
-              title={`${QUICK_SCAN_PRESETS[3].icon} ${QUICK_SCAN_PRESETS[3].name}`}
+              title={QUICK_SCAN_PRESETS[3].name}
               icon={Icon.Folder}
               onAction={() => handleQuickScan(QUICK_SCAN_PRESETS[3].path)}
               shortcut={{ modifiers: ["cmd"], key: "4" }}
             />
             <Action
-              title={`${QUICK_SCAN_PRESETS[4].icon} ${QUICK_SCAN_PRESETS[4].name}`}
+              title={QUICK_SCAN_PRESETS[4].name}
               icon={Icon.Folder}
               onAction={() => handleQuickScan(QUICK_SCAN_PRESETS[4].path)}
               shortcut={{ modifiers: ["cmd"], key: "5" }}

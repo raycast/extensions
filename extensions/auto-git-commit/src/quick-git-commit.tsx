@@ -627,49 +627,29 @@ function CommitPreview({ repository, preferences, onComplete, quickAutoCommit }:
 }
 
 async function performAutoCommit(repository: Repository, preferences: Preferences) {
-  try {
-    const autoStage = preferences.autoStageAllFiles ?? false;
-    if (autoStage) {
-      try {
-        await GitUtils.stageAllFiles(repository.path);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        if (message.includes("index.lock")) {
-          const confirmed = await confirmAlert({
-            title: "Unlock Git Repository",
-            message: "Detected a Git index.lock. Close any Git operations. Unlock and retry?",
-            primaryAction: { title: "Unlock and Retry", style: Alert.ActionStyle.Destructive },
-          });
-          if (confirmed) {
-            await GitUtils.unlockRepository(repository.path);
-            await GitUtils.stageAllFiles(repository.path);
-          } else {
-            throw error;
-          }
+  const autoStage = preferences.autoStageAllFiles ?? false;
+  if (autoStage) {
+    try {
+      await GitUtils.stageAllFiles(repository.path);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes("index.lock")) {
+        const confirmed = await confirmAlert({
+          title: "Unlock Git Repository",
+          message: "Detected a Git index.lock. Close any Git operations. Unlock and retry?",
+          primaryAction: { title: "Unlock and Retry", style: Alert.ActionStyle.Destructive },
+        });
+        if (confirmed) {
+          await GitUtils.unlockRepository(repository.path);
+          await GitUtils.stageAllFiles(repository.path);
         } else {
           throw error;
         }
-      }
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    if (message.includes("index.lock")) {
-      const confirmed = await confirmAlert({
-        title: "Unlock Git Repository",
-        message: "Detected a Git index.lock. Close any Git operations. Unlock and retry?",
-        primaryAction: { title: "Unlock and Retry", style: Alert.ActionStyle.Destructive },
-      });
-      if (confirmed) {
-        await GitUtils.unlockRepository(repository.path);
-        await GitUtils.stageAllFiles(repository.path);
       } else {
         throw error;
       }
-    } else {
-      throw error;
     }
   }
-  const autoStage = preferences.autoStageAllFiles ?? false;
   const diff = autoStage
     ? await GitUtils.getCombinedDiff(repository.path)
     : await GitUtils.getStagedDiff(repository.path);
