@@ -1,6 +1,6 @@
 # Logos Search Changelog
 
-## [Unreleased] - {PR_MERGE_DATE}
+## [Unreleased] - 2025-11-18
 
 - Added a Logos Tools Launcher command that autocompletes Logos tools (Atlas, Text Comparison, Study Assistant, Sermon Builder, Copy Bible Verses, Advanced Timeline, Systematic Theologies, interactives, etc.) and opens them with multiple URI fallbacks.
 - Added a Reading Plans command that lists every Logos plan and opens today's assignment via its deep link.
