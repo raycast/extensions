@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "moneytree",
+  "title": "Moneytree",
+  "description": "View and manage your finances from Moneytree via Raycast",
+  "icon": "moneytree-icon.png",
+  "author": "clins1994",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data",
+    "Finance"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Your MoneyTree account email address",
+      "placeholder": "your.email@example.com"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your MoneyTree account password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "list-credentials",
+      "title": "List Credentials",
+      "description": "Lists your credentials",
+      "mode": "view"
+    },
+    {
+      "name": "list-accounts",
+      "title": "List Accounts",
+      "description": "Lists your financial accounts",
+      "mode": "view"
+    },
+    {
+      "name": "list-transactions",
+      "title": "List Transactions",
+      "description": "Lists your latest transactions",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.6",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
