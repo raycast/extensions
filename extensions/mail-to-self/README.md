@@ -2,6 +2,8 @@
 
 Send quick subject + body notes straight into your inbox via SMTP without leaving Raycast. I keep my inbox as an "informal task list", so this command makes capturing ideas frictionless.
 
+![Mail to Self](metadata/mail-to-self-1.png)
+
 ## Features
 - Prompts for subject and body inside a Raycast form so nothing breaks your flow.
 - Failure toasts remind you to update the SMTP username/password in Raycast Preferences whenever authentication errors pop up. Those fields remain optional, so anonymous relays still work.
