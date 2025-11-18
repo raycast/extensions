@@ -39,7 +39,7 @@ function openInIDE(path: string, ide?: Application) {
     // IDE not set, keep default
   }
   try {
-    execSync(`open -a ${name} ${path}`);
+    execSync(`open -a "${name}" "${path}"`, { timeout: 10000 });
   } catch {
     throw new Error(`Failed to open ${ide}, please ensure the command line tool is installed and configured correctly`);
   }
@@ -48,7 +48,7 @@ function openInIDE(path: string, ide?: Application) {
 function RepositoryListItem({ repository, onUpdate, onAddRepository }: RepositoryListItemProps) {
   const { push } = useNavigation();
 
-  // 使用缓存的 gitStatus，避免重复的 Git 操作
+  // Use cached gitStatus to avoid repeated Git operations
   const gitStatus = useMemo<GitStatus>(() => {
     return (
       repository.gitStatus || {
@@ -126,7 +126,7 @@ function RepositoryListItem({ repository, onUpdate, onAddRepository }: Repositor
     return Color.Green;
   }
 
-  // 只显示分支名，不显示路径
+  // Only show branch name, not path
   const subtitle = repository.branch;
 
   async function openPreferred() {
@@ -610,7 +610,7 @@ function CommitPreview({ repository, preferences, onComplete, quickAutoCommit }:
         placeholder="Enter commit message..."
         value={commitMessage}
         onChange={setCommitMessage}
-        info="提交将直接使用此消息，不会使用下面的再生成指令。"
+        info="The commit will use this message directly, ignoring the regeneration instruction below."
       />
 
       <Form.Separator />
@@ -620,7 +620,7 @@ function CommitPreview({ repository, preferences, onComplete, quickAutoCommit }:
         placeholder="e.g., Focus on API changes; keep under 50 chars; summarise business impact"
         value={regenerateInstruction}
         onChange={setRegenerateInstruction}
-        info="仅用于再生成；留空则使用偏好中的自定义指令。建议使用英文指令。"
+        info="Only used for regeneration; leave empty to use custom instructions from preferences."
       />
     </Form>
   );
@@ -717,7 +717,7 @@ async function performAutoCommit(repository: Repository, preferences: Preference
   }
 }
 
-// 并发控制工具函数：限制同时执行的异步任务数量
+// Concurrency control utility function: limit the number of async tasks executing simultaneously
 async function pLimit<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
   const results: Promise<T>[] = [];
   const executing: Promise<void>[] = [];
@@ -777,10 +777,10 @@ export default function QuickGitCommit() {
       setRepositories(repos);
       setIsLoading(false);
 
-      // 批量收集所有更新，避免多次 setRepositories
+      // Batch collect all updates to avoid multiple setRepositories calls
       const updatesMap = new Map<string, Partial<Repository>>();
 
-      // 按优先级排序仓库：pinned > hasChanges > 其他
+      // Sort repositories by priority: pinned > hasChanges > others
       const sortedRepos = [...repos].sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
@@ -789,7 +789,7 @@ export default function QuickGitCommit() {
         return 0;
       });
 
-      // 创建任务数组，使用并发控制（最多同时3个Git操作）
+      // Create task array with concurrency control (max 3 Git operations at a time)
       const tasks = sortedRepos.map((repo) => async () => {
         try {
           const info = await GitUtils.getRepositoryInfo(repo.path);
@@ -798,7 +798,7 @@ export default function QuickGitCommit() {
             hasChanges: !!info.hasChanges,
             changedFilesCount: info.changedFilesCount || 0,
             lastCommit: info.lastCommit || repo.lastCommit,
-            gitStatus: info.gitStatus, // 保存详细的 Git 状态
+            gitStatus: info.gitStatus, // Save detailed Git status
           };
           await StorageManager.updateRepository(repo.id, updates);
           updatesMap.set(repo.id, updates);
@@ -807,10 +807,10 @@ export default function QuickGitCommit() {
         }
       });
 
-      // 并发控制：最多同时3个仓库
+      // Concurrency control: max 3 repositories at a time
       await pLimit(tasks, 3);
 
-      // 最后一次性更新所有仓库状态
+      // Update all repository statuses at once
       if (updatesMap.size > 0) {
         setRepositories((prev) =>
           prev.map((r) => {

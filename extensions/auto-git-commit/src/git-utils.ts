@@ -46,7 +46,7 @@ export class GitUtils {
           ? statusResult.value.stdout.split("\n").filter((line) => line.length > 0)
           : [];
 
-      // 计算详细的 Git 状态
+      // Calculate detailed Git status
       let staged = 0,
         unstaged = 0,
         untracked = 0;
@@ -226,7 +226,9 @@ export class GitUtils {
 
   static async commit(path: string, message: string): Promise<void> {
     try {
-      await execAsync(`git commit -m "${message.replace(/"/g, '\\"')}"`, { cwd: path });
+      // Use heredoc to safely handle commit messages with special characters
+      const command = `git commit -F - <<'EOF'\n${message}\nEOF`;
+      await execAsync(command, { cwd: path });
     } catch (error) {
       console.error(`Failed to commit for ${path}:`, error);
       throw new Error(`Failed to commit: ${error}`);

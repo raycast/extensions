@@ -13,7 +13,7 @@ export interface Repository {
   changedFilesCount: number;
   lastCommit?: GitCommit;
   context?: string;
-  gitStatus?: GitStatus; // 缓存的详细 Git 状态
+  gitStatus?: GitStatus; // Cached detailed Git status
 }
 
 export interface GitStatus {
@@ -77,7 +77,6 @@ export enum CommitStyle {
 
 export enum Language {
   EN = "en",
-  ZH = "zh",
 }
 
 export const ICONS = {

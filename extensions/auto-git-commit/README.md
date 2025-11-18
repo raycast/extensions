@@ -29,7 +29,6 @@ An AI-powered Git commit assistant that helps developers manage multiple Git rep
 - **Usage Tracking**: Tracks repository usage to prioritize frequently used repos
 - **Pinning**: Pin important repositories for quick access
 - **Search**: Quickly find repositories by name or path
-- **Multi-language Support**: Generate commit messages in English or Chinese
 - **AI Context Generation**: Automatically generate repository context descriptions to improve commit message quality
 - **Auto Stage & Push**: Optional auto-staging of files and auto-push after commit
 
@@ -77,7 +76,7 @@ Access preferences via `⌘+,` in Raycast:
 
 - Raycast with AI subscription
 - Git installed on your system
-- macOS or Windows
+- macOS
 
 ## Privacy & Data
 

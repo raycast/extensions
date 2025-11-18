@@ -106,10 +106,7 @@
       "required": false,
       "title": "Terminal/IDE",
       "description": "Preferred application to open a repository folder",
-      "default": {
-        "macOS": "Terminal",
-        "Windows": "Visual Studio Code"
-      }
+      "default": "Terminal"
     },
     {
       "name": "autoStageAllFiles",
