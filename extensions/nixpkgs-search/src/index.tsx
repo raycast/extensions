@@ -1,20 +1,91 @@
-import { ActionPanel, Action, Color, getPreferenceValues, List, Icon, Keyboard } from "@raycast/api";
-import { useState } from "react";
+import {
+  ActionPanel,
+  Action,
+  Color,
+  getPreferenceValues,
+  List,
+  Icon,
+  Keyboard,
+  Form,
+  useNavigation,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useState, useEffect } from "react";
 import { URL } from "node:url";
 import { useFetch, showFailureToast } from "@raycast/utils";
 
+interface NixOSChannel {
+  channel: string;
+  name: string;
+  revision: string;
+  release: string;
+}
+
+interface VersionInfo {
+  nixos_search: {
+    frontend_version: string;
+    channel_version: string;
+  };
+  nixos_channels: NixOSChannel[];
+  last_updated: string;
+}
+
 export default function Command() {
-  const { searchSize = "20", branchName = "unstable" } = getPreferenceValues<Preferences>();
+  const { searchSize = "20" } = getPreferenceValues<Preferences>();
+  const [currentSearchSize, setCurrentSearchSize] = useState<number>(
+    Math.max(1, Math.min(200, Math.trunc(+searchSize) || 20)),
+  );
+
+  const [selectedBranch, setSelectedBranch] = useState<string>("unstable");
+  const [availableBranches, setAvailableBranches] = useState<Array<{ value: string; title: string }>>([
+    { value: "unstable", title: "Unstable (rolling release)" },
+  ]);
+
+  // Fetch available branches from API
+  useEffect(() => {
+    async function fetchBranches() {
+      try {
+        const resp = await fetch(
+          "https://raw.githubusercontent.com/0xdhrv/nix-version-reporter/refs/heads/main/versions.json",
+        );
+        if (!resp.ok) throw new Error("Failed to fetch version info");
+
+        const versionInfo = (await resp.json()) as VersionInfo;
+        const branches = [
+          { value: "unstable", title: "Unstable (rolling release)" },
+          ...versionInfo.nixos_channels.map((channel) => ({
+            value: channel.channel,
+            title: `NixOS ${channel.channel}`,
+          })),
+        ];
+
+        setAvailableBranches(branches);
+      } catch (error) {
+        console.error("Failed to fetch branches:", error);
+        // Keep default branches if fetch fails
+      }
+    }
+
+    fetchBranches();
+  }, []);
 
   const [url, setUrl] = useState<string | undefined>(undefined);
   if (!url) {
-    getSearchUrl({ branchName })
+    getSearchUrl({ branchName: selectedBranch })
       .then(setUrl)
       .catch((error) => showFailureToast(error, { title: "Could not get search URL" }));
   }
 
+  // Update URL when branch changes
+  useEffect(() => {
+    getSearchUrl({ branchName: selectedBranch })
+      .then(setUrl)
+      .catch((error) => showFailureToast(error, { title: "Could not get search URL" }));
+  }, [selectedBranch]);
+
   const [searchText, setSearchText] = useState("");
-  const state = useSearch({ url, searchText, searchSize: Math.trunc(+searchSize) });
+  const state = useSearch({ url, searchText, searchSize: currentSearchSize });
 
   return (
     <List
@@ -23,17 +94,57 @@ export default function Command() {
       searchBarPlaceholder="Search nix packages..."
       throttle
       isShowingDetail
+      searchBarAccessory={
+        <List.Dropdown tooltip="Select NixOS Branch" value={selectedBranch} onChange={setSelectedBranch}>
+          {availableBranches.map((branch) => (
+            <List.Dropdown.Item key={branch.value} value={branch.value} title={branch.title} />
+          ))}
+        </List.Dropdown>
+      }
     >
-      <List.Section title="Results" subtitle={state.results.length + ""}>
-        {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
-        ))}
-      </List.Section>
+      {state.results.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title={searchText ? "No packages found" : "Search NixOS Packages"}
+          description={searchText ? "Try a different search term" : "Start typing to search for packages"}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section title="Settings">
+                <Action.Push
+                  title="Customize Search Result Count"
+                  icon={Icon.Gear}
+                  target={<SearchSizeForm currentSize={currentSearchSize} onSubmit={setCurrentSearchSize} />}
+                  shortcut={{ modifiers: ["cmd"], key: "," }}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.Section title="Results" subtitle={state.results.length + ""}>
+          {state.results.map((searchResult) => (
+            <SearchListItem
+              key={searchResult.id}
+              searchResult={searchResult}
+              searchSize={currentSearchSize}
+              onChangeSearchSize={setCurrentSearchSize}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({
+  searchResult,
+  searchSize,
+  onChangeSearchSize,
+}: {
+  searchResult: SearchResult;
+  searchSize: number;
+  onChangeSearchSize: (size: number) => void;
+}) {
   return (
     <List.Item
       title={searchResult.attrName}
@@ -41,6 +152,14 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Package Attr Name" content={searchResult.attrName} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Settings">
+            <Action.Push
+              title="Customize Search Result Count"
+              icon={Icon.Gear}
+              target={<SearchSizeForm currentSize={searchSize} onSubmit={onChangeSearchSize} />}
+              shortcut={{ modifiers: ["cmd"], key: "," }}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             {searchResult.homepage[0] ? (
@@ -132,6 +251,41 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         />
       }
     />
+  );
+}
+
+function SearchSizeForm({ currentSize, onSubmit }: { currentSize: number; onSubmit: (size: number) => void }) {
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: { searchSize: string }) {
+    const newSize = Math.max(1, Math.min(200, Math.trunc(+values.searchSize) || 20));
+    onSubmit(newSize);
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Search Result Count Updated",
+      message: `Now showing ${newSize} results`,
+    });
+
+    pop();
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save Preference" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="Customize the number of search results displayed at once" />
+      <Form.Dropdown id="searchSize" title="Search Result Count" defaultValue={currentSize.toString()}>
+        <Form.Dropdown.Item value="10" title="10 results" />
+        <Form.Dropdown.Item value="20" title="20 results" />
+        <Form.Dropdown.Item value="50" title="50 results" />
+        <Form.Dropdown.Item value="100" title="100 results" />
+      </Form.Dropdown>
+    </Form>
   );
 }
 
@@ -309,4 +463,9 @@ interface SearchResult {
   defaultOutput: string | null;
   platforms: string[];
   licenses: { name: string; url: string | null }[];
+}
+
+interface Preferences {
+  /** Number of search results to display (10, 20, 50, or 100) */
+  searchSize: string;
 }

@@ -2,6 +2,11 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- **API-driven branch selection**: Available NixOS branches are now fetched dynamically from the [nix-version-reporter API](https://github.com/0xdhrv/nix-version-reporter)
+- **In-app branch switcher**: Added a dropdown in the search bar to switch between NixOS versions without going to preferences
+- **Auto-updating branch list**: Extension automatically includes new NixOS releases as they become available
+- **Simplified preferences**: Removed static branch configuration from preferences in favor of dynamic runtime selection
+- **Improved validation**: Only valid, currently-indexed branches are shown as options
 - Bump dependencies to latest versions.
 - Added copy action to package details view
 - Added Windows as supported platform.
