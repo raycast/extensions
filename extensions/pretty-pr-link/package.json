@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pretty-pr-link",
+  "title": "Pretty PR Link",
+  "description": "Quickly copy the link of a GitHub Pull Request in a formatted way so you can share with your team and ask for reviews.",
+  "icon": "extension-icon.png",
+  "author": "jopcmelo",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-formatted-link",
+      "title": "Copy Formatted Link",
+      "description": "Copy the formatted link without urgency indicator",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "prefix",
+          "title": "Prefix",
+          "type": "textfield",
+          "required": false,
+          "default": "📝",
+          "description": "The prefix to use when copying a non urgent pull request link"
+        }
+      ]
+    },
+    {
+      "name": "copy-formatted-urgent-link",
+      "title": "Copy Formatted Urgent Link",
+      "description": "Copy the formatted link with urgency indicator",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "prefix",
+          "title": "Prefix",
+          "type": "textfield",
+          "required": false,
+          "default": "🚨",
+          "description": "The prefix to use when copying a urgent pull request link"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
