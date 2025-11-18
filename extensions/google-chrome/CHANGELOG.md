@@ -1,5 +1,10 @@
 # Google Chrome Changelog
 
+## [Support for Guest Profile] - 2025-11-17
+
+- Add support for Guest profile in all commands
+- Update dependencies to latest versions
+
 ## [Add Exclude Search Feature] - 2025-11-05
 
 - Add support for excluding search terms using " -" (space + dash) prefix

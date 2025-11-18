@@ -1,16 +1,14 @@
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState, useCallback, useEffect } from "react";
 import { ExcelFormulaBeautifier } from "./parser/excel-formula-parser";
 
 export default function Command() {
   const [formula, setFormula] = useState<string>("");
   const [beautifiedFormula, setBeautifiedFormula] = useState<string>("");
-  const [error, setError] = useState<string>("");
 
   const beautifyFormula = useCallback((inputFormula: string) => {
     if (!inputFormula.trim()) {
       setBeautifiedFormula("");
-      setError("");
       return;
     }
 
@@ -22,10 +20,17 @@ export default function Command() {
       const beautified = ExcelFormulaBeautifier.rawText(formulaWithEquals);
 
       setBeautifiedFormula(beautified);
-      setError("");
+      showToast({
+        style: Toast.Style.Success,
+        title: "Formula beautified",
+      });
     } catch (formulaError) {
       setBeautifiedFormula("");
-      setError(formulaError instanceof Error ? formulaError.message : String(formulaError));
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid Excel formula",
+        message: formulaError instanceof Error ? formulaError.message : String(formulaError),
+      });
     }
   }, []);
 
@@ -45,38 +50,10 @@ export default function Command() {
   const handleClear = () => {
     setFormula("");
     setBeautifiedFormula("");
-    setError("");
   };
 
   const getResultPreview = () => {
     return beautifiedFormula;
-  };
-
-  const getStatusMessage = () => {
-    if (error) {
-      // Make parser errors more user-friendly
-      let friendlyError = error;
-      if (error.includes("Parse error")) {
-        friendlyError =
-          "Invalid formula syntax - please check for missing parentheses, quotes, or incomplete expressions";
-      }
-      return `❌ ${friendlyError}`;
-    }
-
-    if (!beautifiedFormula && !formula.trim()) {
-      return `📝 Enter a formula above to see the beautified result.
-
-Examples to try:
-• SUM(A1:B10)+AVERAGE(C1:C10)
-• IF(A1>0,B1*2,C1-1)
-• VLOOKUP(D1,Sheet1!A:B,2,FALSE)`;
-    }
-
-    if (!beautifiedFormula && formula.trim()) {
-      return "⏳ Processing...";
-    }
-
-    return "✅ Formula beautified successfully!";
   };
 
   return (
@@ -104,15 +81,13 @@ Examples to try:
       <Form.TextArea
         id="formula"
         title="Excel Formula"
-        placeholder="Enter your Excel formula here (e.g., =SUM(A1:B10)+IF(C1>0,D1*2,0))"
+        placeholder="Enter your Excel formula here (e.g., =SUM(A1:B10)+IF(C1>0,D1*2,IF(C1>0,D1*2,0))"
         value={formula}
         onChange={handleFormulaChange}
         info="Type your formula and see the beautified result below"
       />
 
       <Form.Separator />
-
-      <Form.Description title="" text={getStatusMessage()} />
 
       {beautifiedFormula && (
         <Form.TextArea

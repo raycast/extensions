@@ -14,15 +14,35 @@
       "name": "projects",
       "title": "Projects",
       "description": "Manage Local Projects and View Services",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sort_order",
+          "title": "Sort Order",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Updated At (ASC)",
+              "value": "updated_at_asc"
+            },
+            {
+              "title": "Updated At (DESC)",
+              "value": "updated_at_des"
+            }
+          ],
+          "required": true,
+          "description": "Default Sort Order",
+          "default": "updated_at_des"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.5",
+    "@raycast/api": "^1.103.6",
     "@raycast/utils": "^2.2.2",
     "dayjs": "^1.11.18",
     "filesize": "^11.0.13",
-    "node-appwrite": "^20.2.1"
+    "node-appwrite": "^20.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
