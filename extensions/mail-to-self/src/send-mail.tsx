@@ -110,7 +110,7 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm
             title={isSending ? "Sending…" : "Send Email"}
-            icon={Icon.Paperplane}
+            icon={Icon.Envelope}
             onSubmit={handleSubmit}
           />
         </ActionPanel>
@@ -184,7 +184,7 @@ async function sendMail({
     throw new Error("Invalid SMTP port");
   }
 
-  const transportOptions: nodemailer.TransportOptions = {
+  const transportOptions: Record<string, unknown> = {
     host,
     port,
     secure: encryption === "ssl_tls",
@@ -212,7 +212,9 @@ async function sendMail({
     };
   }
 
-  const transporter = nodemailer.createTransport(transportOptions);
+  const transporter = nodemailer.createTransport(
+    transportOptions as nodemailer.TransportOptions,
+  );
 
   await transporter.sendMail({
     from: formatAddress(fromEmail, fromName),

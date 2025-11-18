@@ -102,20 +102,19 @@
     {
       "name": "send-mail",
       "title": "Mail to Self",
-      "subtitle": "Quick Note",
       "description": "Compose and send a short email to yourself.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.86.0",
-    "nodemailer": "^6.9.8"
+    "nodemailer": "^7.0.10"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",
     "@types/node": "^20.10.5",
     "@types/nodemailer": "^6.4.15",
-    "@types/react": "^18.2.31",
+    "@types/react": "^18.3.3",
     "eslint": "^8.56.0",
     "prettier": "^3.1.0",
     "typescript": "^5.3.3"
