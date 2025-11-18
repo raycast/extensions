@@ -15,108 +15,68 @@ export default function Command() {
     markdown: "",
     procs: [],
   });
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
+    async function load() {
+      const [cpu, mem, procs] = await Promise.all([si.currentLoad(), si.mem(), si.processes()]);
 
-    async function loadCpuAndMem() {
-      try {
-        const [cpu, mem] = await Promise.all([si.currentLoad(), si.mem()]);
+      const cores = cpu.cpus.map((c, i) => ({
+        name: `CPU${i}`,
+        value: c.load,
+      }));
+      const memUsed = (mem.active / mem.total) * 100;
+      const isDark = environment.appearance === "dark";
+      const svg = buildFullSvg([{ name: "Mem", value: memUsed }, ...cores], isDark);
 
-        if (!isMounted) return;
+      const markdown = `![](data:image/svg+xml;utf8,${encodeURIComponent(svg)})`;
 
-        const cores = cpu.cpus.map((c, i) => ({
-          name: `CPU${i}`,
-          value: c.load,
+      const top = procs.list
+        .sort((a, b) => b.cpu - a.cpu)
+        .slice(0, 10)
+        .map((p) => ({
+          pid: p.pid,
+          name: p.name,
+          cpu: p.cpu,
+          mem: p.mem,
         }));
-        const memUsed = (mem.active / mem.total) * 100;
-        const isDark = environment.appearance === "dark";
-        const svg = buildFullSvg([{ name: "Mem", value: memUsed }, ...cores], isDark);
 
-        const markdown = `![](data:image/svg+xml;utf8,${encodeURIComponent(svg)})`;
-
-        setStats((prev) => ({ ...prev, markdown }));
-        setIsLoading(false);
-      } catch (error) {
-        if (isMounted) {
-          console.error("Error loading CPU/memory:", error);
-          setIsLoading(false);
-        }
-      }
+      setStats({ markdown, procs: top });
     }
 
-    async function loadProcesses() {
-      try {
-        const procs = await si.processes();
-
-        if (!isMounted) return;
-
-        const top = procs.list
-          .sort((a, b) => b.cpu - a.cpu)
-          .slice(0, 10)
-          .map((p) => ({
-            pid: p.pid,
-            name: p.name,
-            cpu: p.cpu,
-            mem: p.mem,
-          }));
-
-        setStats((prev) => ({ ...prev, procs: top }));
-      } catch (error) {
-        if (isMounted) {
-          console.error("Error loading processes:", error);
-        }
-      }
-    }
-
-    loadCpuAndMem();
-    loadProcesses();
-
-    const interval = setInterval(() => {
-      loadCpuAndMem();
-      loadProcesses();
-    }, 2000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
+    load();
+    const interval = setInterval(load, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <List isShowingDetail isLoading={isLoading}>
+    <List isShowingDetail>
       <List.Item title="System Stats" detail={<List.Item.Detail markdown={stats.markdown} />} />
 
       <List.Section title="Top Processes">
-        {stats.procs.length === 0 && !isLoading ? (
-          <List.Item title="Loading processes..." />
-        ) : (
-          stats.procs.map((p) => (
-            <List.Item
-              key={p.pid}
-              title={p.name}
-              accessories={[{ text: p.cpu.toFixed(1) + " %" }]}
-              detail={
-                <List.Item.Detail
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="PID" text={p.pid.toString()} />
-                      <List.Item.Detail.Metadata.Label title="CPU" text={`${p.cpu.toFixed(1)} %`} />
-                      <List.Item.Detail.Metadata.Label title="Memory" text={`${p.mem.toFixed(1)} %`} />
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action title="Kill Process" style={Action.Style.Destructive} onAction={() => killProcess(p.pid)} />
-                  <Action.CopyToClipboard title="Copy PID" content={p.pid.toString()} />
-                </ActionPanel>
-              }
-            />
-          ))
-        )}
+        {stats.procs.map((p) => (
+          <List.Item
+            key={p.pid}
+            title={p.name}
+            accessories={[{ text: p.cpu.toFixed(1) + " %" }]}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="PID" text={p.pid.toString()} />
+                    <List.Item.Detail.Metadata.Label title="CPU" text={`${p.cpu.toFixed(1)} %`} />
+                    <List.Item.Detail.Metadata.Label title="Memory" text={`${p.mem.toFixed(1)} %`} />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action title="Kill Process" style={Action.Style.Destructive} onAction={() => killProcess(p.pid)} />
+                <Action.CopyToClipboard title="Copy PID" content={p.pid.toString()} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
     </List>
   );
