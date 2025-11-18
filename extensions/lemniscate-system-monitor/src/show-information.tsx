@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, environment } from "@raycast/api";
 import { useEffect, useState } from "react";
 import si from "systeminformation";
 import { exec } from "child_process";
@@ -15,67 +15,108 @@ export default function Command() {
     markdown: "",
     procs: [],
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      const [cpu, mem, procs] = await Promise.all([si.currentLoad(), si.mem(), si.processes()]);
+    let isMounted = true;
 
-      const cores = cpu.cpus.map((c, i) => ({
-        name: `CPU${i}`,
-        value: c.load,
-      }));
-      const memUsed = (mem.active / mem.total) * 100;
-      const svg = buildFullSvg([{ name: "Mem", value: memUsed }, ...cores]);
+    async function loadCpuAndMem() {
+      try {
+        const [cpu, mem] = await Promise.all([si.currentLoad(), si.mem()]);
 
-      const markdown = `![](data:image/svg+xml;utf8,${encodeURIComponent(svg)})`;
+        if (!isMounted) return;
 
-      const top = procs.list
-        .sort((a, b) => b.cpu - a.cpu)
-        .slice(0, 10)
-        .map((p) => ({
-          pid: p.pid,
-          name: p.name,
-          cpu: p.cpu,
-          mem: p.mem,
+        const cores = cpu.cpus.map((c, i) => ({
+          name: `CPU${i}`,
+          value: c.load,
         }));
+        const memUsed = (mem.active / mem.total) * 100;
+        const isDark = environment.appearance === "dark";
+        const svg = buildFullSvg([{ name: "Mem", value: memUsed }, ...cores], isDark);
 
-      setStats({ markdown, procs: top });
+        const markdown = `![](data:image/svg+xml;utf8,${encodeURIComponent(svg)})`;
+
+        setStats((prev) => ({ ...prev, markdown }));
+        setIsLoading(false);
+      } catch (error) {
+        if (isMounted) {
+          console.error("Error loading CPU/memory:", error);
+          setIsLoading(false);
+        }
+      }
     }
 
-    load();
-    const interval = setInterval(load, 2000);
-    return () => clearInterval(interval);
+    async function loadProcesses() {
+      try {
+        const procs = await si.processes();
+
+        if (!isMounted) return;
+
+        const top = procs.list
+          .sort((a, b) => b.cpu - a.cpu)
+          .slice(0, 10)
+          .map((p) => ({
+            pid: p.pid,
+            name: p.name,
+            cpu: p.cpu,
+            mem: p.mem,
+          }));
+
+        setStats((prev) => ({ ...prev, procs: top }));
+      } catch (error) {
+        if (isMounted) {
+          console.error("Error loading processes:", error);
+        }
+      }
+    }
+
+    loadCpuAndMem();
+    loadProcesses();
+
+    const interval = setInterval(() => {
+      loadCpuAndMem();
+      loadProcesses();
+    }, 2000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   return (
-    <List isShowingDetail>
+    <List isShowingDetail isLoading={isLoading}>
       <List.Item title="System Stats" detail={<List.Item.Detail markdown={stats.markdown} />} />
 
       <List.Section title="Top Processes">
-        {stats.procs.map((p) => (
-          <List.Item
-            key={p.pid}
-            title={p.name}
-            accessories={[{ text: p.cpu.toFixed(1) + " %" }]}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="PID" text={p.pid.toString()} />
-                    <List.Item.Detail.Metadata.Label title="CPU" text={`${p.cpu.toFixed(1)} %`} />
-                    <List.Item.Detail.Metadata.Label title="Memory" text={`${p.mem.toFixed(1)} %`} />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action title="Kill Process" style={Action.Style.Destructive} onAction={() => killProcess(p.pid)} />
-                <Action.CopyToClipboard title="Copy PID" content={p.pid.toString()} />
-              </ActionPanel>
-            }
-          />
-        ))}
+        {stats.procs.length === 0 && !isLoading ? (
+          <List.Item title="Loading processes..." />
+        ) : (
+          stats.procs.map((p) => (
+            <List.Item
+              key={p.pid}
+              title={p.name}
+              accessories={[{ text: p.cpu.toFixed(1) + " %" }]}
+              detail={
+                <List.Item.Detail
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="PID" text={p.pid.toString()} />
+                      <List.Item.Detail.Metadata.Label title="CPU" text={`${p.cpu.toFixed(1)} %`} />
+                      <List.Item.Detail.Metadata.Label title="Memory" text={`${p.mem.toFixed(1)} %`} />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action title="Kill Process" style={Action.Style.Destructive} onAction={() => killProcess(p.pid)} />
+                  <Action.CopyToClipboard title="Copy PID" content={p.pid.toString()} />
+                </ActionPanel>
+              }
+            />
+          ))
+        )}
       </List.Section>
     </List>
   );
@@ -96,33 +137,47 @@ async function killProcess(pid: number) {
   });
 }
 
-function buildFullSvg(allItems: { name: string; value: number }[]) {
-  const blocks = 28;
-  const blockW = 9;
-  const spacing = 1.5;
-  const barH = 16;
-  const labelW = 65;
-  const colPadding = 10;
-  const barW = blocks * (blockW + spacing);
-  const rowHeight = 22;
-  const rowGap = 8;
+function buildFullSvg(allItems: { name: string; value: number }[], isDark: boolean) {
+  const width = 400;
+  const rowHeight = 26;
+  const rowGap = 2;
 
+  // layout columns
+  const labelW = 65; // space for "CPU0"
+  const pctW = 55; // space for "100%"
+  const sidePad = 0; // no padding on sides to maximize bar space
+
+  // bar configuration
+  const blocks = 15;
+  const spacing = 2;
+
+  // calculate bar dimensions
+  const availableWidth = width - labelW - pctW - sidePad * 2;
+  const totalSpacing = (blocks - 1) * spacing;
+  const blockW = (availableWidth - totalSpacing) / blocks;
+  const barH = 18;
+
+  // colors
+  const bg = "transparent";
+  const filledColor = isDark ? "#a78bfa" : "#7c3aed"; // violet
+  const emptyColor = isDark ? "#333333" : "#e5e7eb"; // dark gray / light gray
+  const textColor = isDark ? "#ffffff" : "#000000"; // high contrast text
+
+  // generate content
   const rowsCount = allItems.length;
-  const width = "100%";
-  const height = rowsCount * (rowHeight + rowGap) + 16;
-
-  const bg = "#000";
-  const filledColor = "#ddd";
-  const emptyColor = "#222";
-  const textColor = "#eee";
+  const fontSize = 16;
+  const contentHeight = rowsCount * rowHeight + (rowsCount - 1) * rowGap;
+  const minPadding = fontSize / 2;
+  const verticalPadding = minPadding;
+  const totalHeight = contentHeight + verticalPadding * 2;
 
   const makeBar = (val: number, xOff: number, yOff: number) => {
     const filled = Math.round((val / 100) * blocks);
-    const y = yOff + (rowHeight - barH) / 2;
+    const barY = yOff + (rowHeight - barH) / 2;
     let s = "";
     for (let i = 0; i < blocks; i++) {
-      const x = xOff + labelW + colPadding + i * (blockW + spacing);
-      s += `<rect x="${x}" y="${y}" width="${blockW}" height="${barH}" fill="${
+      const x = xOff + i * (blockW + spacing);
+      s += `<rect x="${x}" y="${barY}" width="${blockW}" height="${barH}" rx="2" fill="${
         i < filled ? filledColor : emptyColor
       }"/>`;
     }
@@ -131,26 +186,46 @@ function buildFullSvg(allItems: { name: string; value: number }[]) {
 
   let content = "";
   for (let r = 0; r < rowsCount; r++) {
-    const y = 12 + r * (rowHeight + rowGap);
+    const y = verticalPadding + r * (rowHeight + rowGap);
     const item = allItems[r];
-    const baseY = y + rowHeight / 2;
+    const barY = y + (rowHeight - barH) / 2;
+    const barCenterY = barY + barH / 2;
+    const textY = barCenterY + 5;
 
-    const x = 20;
+    const labelX = sidePad + labelW / 2;
+    const barX = sidePad + labelW;
+    const pctX = width - sidePad;
+
     content += `
-      <text x="${x + labelW / 2}" y="${baseY + 4}" class="lbl" text-anchor="middle">${item.name}</text>
-      ${makeBar(item.value, x, y)}
-      <text x="${x + labelW + colPadding + barW + 10}" y="${baseY + 4}" class="pct">${item.value.toFixed(0)}%</text>
+      <!-- Label -->
+      <text x="${labelX}" y="${textY}" class="lbl" text-anchor="middle">${item.name}</text>
+      <!-- Bar -->
+      ${makeBar(item.value, barX, y)}
+      <!-- Percent -->
+      <text x="${pctX}" y="${textY}" class="pct" text-anchor="end">${item.value.toFixed(0)}%</text>
     `;
   }
 
+  const displayWidth = 360;
+  const aspectRatio = totalHeight / width;
+  const baseDisplayHeight = displayWidth * aspectRatio;
+  const extraVerticalSpace = 100;
+  const displayHeight = baseDisplayHeight + extraVerticalSpace;
+  const viewBoxY = -extraVerticalSpace / 2;
+  const viewBoxHeight = totalHeight + extraVerticalSpace;
   return `
-  <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="${displayWidth}" height="${displayHeight}" viewBox="0 ${viewBoxY} ${width} ${viewBoxHeight}" preserveAspectRatio="xMidYMid meet" style="display: block; margin: 0 auto; max-width: 100%;">
     <style>
       .lbl, .pct {
         font-family: monospace;
-        font-size: 18px;
+        font-weight: bold;
+        font-size: ${fontSize}px; 
         fill: ${textColor};
         dominant-baseline: middle;
+        text-anchor: middle;
+      }
+      .pct {
+        text-anchor: end;
       }
     </style>
     <rect width="100%" height="100%" fill="${bg}"/>
