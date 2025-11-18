@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Windows Support and Bugfixes] - {PR_MERGE_DATE}
+## [Windows Support and Bugfixes] - 2025-11-18
 
 - Added Windows support for the World Clock extension.
 - Fixed a bug where time zone copying did not work as expected in grid layout.
