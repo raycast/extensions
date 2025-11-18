@@ -1,6 +1,6 @@
 # Scheduler Changelog
 
-## [Background Refresh Alert] - {PR_MERGE_DATE}
+## [Background Refresh Alert] - 2025-11-18
 
 - Added warning banner to alert users when background refresh is not enabled for scheduled commands
 - Fixes issue where users couldn't understand why scheduled commands weren't executing automatically
