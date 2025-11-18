@@ -1,6 +1,6 @@
 # Moneytree
 
-View and manage your financial data from Moneytree directly from Raycast. This extension provides quick access to your financial credentials, accounts, balances and latest transactions without leaving your workflow.
+View and manage your financial data from [Moneytree](https://getmoneytree.com/jp/home) directly from Raycast. This extension provides quick access to your financial credentials, accounts, balances and latest transactions without leaving your workflow.
 
 If you're concerned about security, please read the [Regarding Security](#regarding-security) section at the end of this document.
 
