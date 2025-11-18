@@ -10,12 +10,13 @@ type QuotaSnapshot = {
 /**
  * Calculates the consumed percentage from a quota snapshot
  * Uses percent_remaining directly from the API
+ * @returns Percentage consumed (0-100), capped at 100%
  */
 const getConsumedPercentage = (snapshot: QuotaSnapshot | undefined): number => {
   if (!snapshot || snapshot.unlimited) return 0;
 
   if (snapshot.percent_remaining !== undefined) {
-    return 100 - snapshot.percent_remaining;
+    return Math.min(100, 100 - snapshot.percent_remaining);
   }
 
   return 0;
