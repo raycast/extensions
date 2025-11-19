@@ -2,7 +2,7 @@
 
 All notable changes to this project are recorded in this file.
 
-## Unreleased - 2025-11-19
+## [0.1.0] - {PR_MERGE_DATE}
 
 ### Added
 
