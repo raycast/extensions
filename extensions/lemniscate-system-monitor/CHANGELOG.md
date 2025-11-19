@@ -1,3 +1,3 @@
-# Lemniscate Monitor Changelog
+# Lemniscate | System Monitor Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

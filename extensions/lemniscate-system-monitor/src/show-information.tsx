@@ -11,6 +11,8 @@ interface Proc {
 }
 
 export default function Command() {
+  const [isLoading, setIsLoading] = useState(true);
+
   const [stats, setStats] = useState<{ markdown: string; procs: Proc[] }>({
     markdown: "",
     procs: [],
@@ -18,29 +20,35 @@ export default function Command() {
 
   useEffect(() => {
     async function load() {
-      const [cpu, mem, procs] = await Promise.all([si.currentLoad(), si.mem(), si.processes()]);
-
-      const cores = cpu.cpus.map((c, i) => ({
-        name: `CPU${i}`,
-        value: c.load,
-      }));
-      const memUsed = (mem.active / mem.total) * 100;
-      const isDark = environment.appearance === "dark";
-      const svg = buildFullSvg([{ name: "Mem", value: memUsed }, ...cores], isDark);
-
-      const markdown = `![](data:image/svg+xml;utf8,${encodeURIComponent(svg)})`;
-
-      const top = procs.list
-        .sort((a, b) => b.cpu - a.cpu)
-        .slice(0, 10)
-        .map((p) => ({
-          pid: p.pid,
-          name: p.name,
-          cpu: p.cpu,
-          mem: p.mem,
+      try {
+        const [cpu, mem, procs] = await Promise.all([si.currentLoad(), si.mem(), si.processes()]);
+        const cores = cpu.cpus.map((c, i) => ({
+          name: `CPU${i}`,
+          value: c.load,
         }));
-
-      setStats({ markdown, procs: top });
+        const memUsed = (mem.active / mem.total) * 100;
+        const isDark = environment.appearance === "dark";
+        const svg = buildFullSvg([{ name: "Mem", value: memUsed }, ...cores], isDark);
+        const markdown = `![](data:image/svg+xml;utf8,${encodeURIComponent(svg)})`;
+        const top = procs.list
+          .sort((a, b) => b.cpu - a.cpu)
+          .slice(0, 10)
+          .map((p) => ({
+            pid: p.pid,
+            name: p.name,
+            cpu: p.cpu,
+            mem: p.mem,
+          }));
+        setStats({ markdown, procs: top });
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load system information",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     load();
@@ -49,7 +57,7 @@ export default function Command() {
   }, []);
 
   return (
-    <List isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail>
       <List.Item title="System Stats" detail={<List.Item.Detail markdown={stats.markdown} />} />
 
       <List.Section title="Top Processes">

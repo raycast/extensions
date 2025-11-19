@@ -1,4 +1,4 @@
-# Lemniscate Monitor
+# Lemniscate | System Monitor
 
 A Raycast extension for monitoring system performance on macOS and Windows. Get real-time CPU and memory usage information with a visual representation and a list of top processes.
 
