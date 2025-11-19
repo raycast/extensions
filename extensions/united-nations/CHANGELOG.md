@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-11-19
 
 - Fix issue when access values from undefined
 - Bump all dependencies to the latest
