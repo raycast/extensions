@@ -1,5 +1,16 @@
 # Music Assistant Controls Changelog
 
+## [Update for breaking changes in Music Assistant API] - {PR_MERGE_DATE}
+
+### ✅ Compatibility
+
+- Restores support for the latest Music Assistant release so playback controls, queue actions, and player commands work again without errors.
+
+### 🧠 Reliability
+
+- Loads players, queues, and providers immediately after connecting so the menu bar and commands always have up-to-date data.
+
+
 ## [Volume Control Features] - 2025-09-12
 
 ### ✨ New Features
