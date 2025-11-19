@@ -3,7 +3,7 @@ import { ItermCommand } from "./core/iterm-command";
 import { ErrorToast } from "./core/error-toast";
 import { useSelectedItems } from "./core/use-selected-items";
 import { useFinderPath } from "./core/use-finder-path";
-import { FileSystemItem } from "@raycast/api";
+import { FileSystemItem, getPreferenceValues } from "@raycast/api";
 import { dirname } from "path";
 import { statSync } from "fs";
 
@@ -11,6 +11,10 @@ const getItemPath = (item: FileSystemItem) => {
   const stats = statSync(item.path);
   return stats.isDirectory() ? item.path : dirname(item.path);
 };
+
+interface Preferences {
+  windowOrTab: "new-window" | "new-tab";
+}
 
 export default function Command() {
   const { items, error: itemsError } = useSelectedItems();
@@ -40,7 +44,7 @@ export default function Command() {
             key={path}
             command={`cd "${path}"`}
             loadingMessage="Getting selected file(s)..."
-            location="new-window"
+            location={getPreferenceValues<Preferences>().windowOrTab}
           />
         ))}
       </>
