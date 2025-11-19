@@ -8,6 +8,8 @@ export async function ensureBrowserExtensionAccess() {
     await showFailureToast(
       "You need to install the browser extension to use this command",
     );
-    return;
+    return false;
   }
+
+  return true;
 }
