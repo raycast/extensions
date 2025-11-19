@@ -9,7 +9,6 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { findXcodesPath, listInstalled, XcodeVersion } from "./utils/xcodes";
-import { exec } from "child_process";
 
 export default function Command() {
   const [versions, setVersions] = useState<XcodeVersion[]>([]);
@@ -51,7 +50,7 @@ export default function Command() {
   };
 
   const openInFinder = (path: string) => {
-    exec(`open "${path}"`);
+    open(path);
   };
 
   if (error) {

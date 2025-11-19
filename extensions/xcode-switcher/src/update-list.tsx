@@ -24,7 +24,7 @@ export default async function Command() {
     toast.style = Toast.Style.Success;
     toast.title = "Xcode list updated successfully";
 
-    // Fecha a janela após sucesso
+    // Close the window after success
     await closeMainWindow();
   } catch (error: any) {
     toast.style = Toast.Style.Failure;

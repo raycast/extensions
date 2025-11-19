@@ -4,14 +4,14 @@ Complete Xcode version management with xcodes CLI integration for Raycast.
 
 ## Features
 
-- 🔄 **Switch Xcode Versions**: Quickly select between installed Xcode versions
-- 📦 **List Installed Xcodes**: View all Xcode installations on your system
-- 🌐 **Browse Available Versions**: See all Xcode versions available for download
-- ⬇️ **Download Xcode**: Download specific Xcode versions
-- 🚀 **Install Xcode**: Download and install Xcode versions
-- 🗑️ **Uninstall Xcode**: Remove unwanted Xcode installations
-- 📱 **Manage Runtimes**: Install and manage iOS/watchOS/tvOS simulator runtimes
-- 🔄 **Update List**: Refresh the list of available Xcode versions
+- **Switch Xcode Versions**: Quickly select between installed Xcode versions
+- **List Installed Xcodes**: View all Xcode installations on your system
+- **Browse Available Versions**: See all Xcode versions available for download
+- **Download Xcode**: Download specific Xcode versions
+- **Install Xcode**: Download and install Xcode versions
+- **Uninstall Xcode**: Remove unwanted Xcode installations
+- **Manage Runtimes**: Install and manage iOS/watchOS/tvOS simulator runtimes
+- **Update List**: Refresh the list of available Xcode versions
 
 ## Prerequisites
 
@@ -53,18 +53,6 @@ xcodes signin
 - **Download**: Download a specific version without installing
 - **Install**: Download and install a specific version
 - **Uninstall**: Remove an installed version
-
-### Language Settings
-
-The extension supports English and Portuguese. You can:
-- Let it auto-detect your system language (default)
-- Manually select your preferred language in extension settings
-
-To change language:
-1. Open Raycast Settings
-2. Go to Extensions → Xcode Manager
-3. Click "Configure Extension"
-4. Select your preferred language
 
 ## Security
 

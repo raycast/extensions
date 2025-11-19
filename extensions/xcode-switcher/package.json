@@ -13,48 +13,56 @@
     {
       "name": "toggle-xcode",
       "title": "Select Xcode Version",
+      "subtitle": "Xcode Manager",
       "description": "Switch between installed Xcode versions",
       "mode": "view"
     },
     {
       "name": "list-installed",
       "title": "List Installed Xcodes",
+      "subtitle": "Xcode Manager",
       "description": "Show all installed Xcode versions",
       "mode": "view"
     },
     {
       "name": "list-available",
       "title": "List Available Xcodes",
+      "subtitle": "Xcode Manager",
       "description": "Browse and install available Xcode versions",
       "mode": "view"
     },
     {
       "name": "download-xcode",
       "title": "Download Xcode",
+      "subtitle": "Xcode Manager",
       "description": "Download a specific Xcode version",
       "mode": "view"
     },
     {
       "name": "install-xcode",
       "title": "Install Xcode",
+      "subtitle": "Xcode Manager",
       "description": "Download and install a specific Xcode version",
       "mode": "view"
     },
     {
       "name": "uninstall-xcode",
       "title": "Uninstall Xcode",
+      "subtitle": "Xcode Manager",
       "description": "Remove installed Xcode versions",
       "mode": "view"
     },
     {
       "name": "list-runtimes",
       "title": "Simulator Runtimes",
+      "subtitle": "Xcode Manager",
       "description": "Manage iOS/watchOS/tvOS simulator runtimes",
       "mode": "view"
     },
     {
       "name": "update-list",
       "title": "Update Xcode List",
+      "subtitle": "Xcode Manager",
       "description": "Refresh the list of available Xcode versions",
       "mode": "no-view"
     }

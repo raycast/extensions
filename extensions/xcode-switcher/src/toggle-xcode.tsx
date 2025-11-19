@@ -196,7 +196,7 @@ export default function Command() {
     } catch (error: any) {
       console.error("[TOGGLE-XCODE] Error selecting version:", error.message);
 
-      // Se o erro for de senha inválida, pede nova senha
+      // If the error is an invalid password, request a new password
       if (error.message.includes("Invalid password")) {
         console.log(
           "[TOGGLE-XCODE] Invalid password, clearing and requesting new one",
