@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Enhancements] - 2025-11-18
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Improved `Search Recent Projects` for remote workspaces by fuzzy matching remote authorities.
 
