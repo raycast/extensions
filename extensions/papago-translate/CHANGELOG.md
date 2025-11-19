@@ -1,6 +1,6 @@
 # Papago Translate Changelog
 
-## [Update API URLs and Refactor] - {PR_MERGE_DATE}
+## [Update API URLs and Refactor] - 2025-11-19
 
 - Update API URLs to use new endpoints
 - Refactor translation request logic for improved maintainability
