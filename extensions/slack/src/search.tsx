@@ -108,6 +108,12 @@ function Search() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />
 
+                  <Action.CopyToClipboard
+                    title="Copy ID to Clipboard"
+                    content={userId}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+
                   <ActionPanel.Section>
                     <Action
                       icon={Icon.ArrowCounterClockwise}
@@ -141,6 +147,12 @@ function Search() {
                         : { link: `https://app.slack.com/client/${workspaceId}/${channelId}` }),
                     }}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  />
+
+                  <Action.CopyToClipboard
+                    title="Copy ID to Clipboard"
+                    content={channelId}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
 
                   <ActionPanel.Section>
