@@ -94,42 +94,7 @@ Custom sources are stored locally and will appear alongside bundled sources in t
 2. (Optional) Configure API keys for enhanced features in Raycast preferences
 3. Start searching IOCs using the commands or pass them as arguments
 
-## Publishing (Raycast)
 
-Follow the official Raycast publish steps to submit your extension to the Marketplace. The extension includes a `publish:interactive` script which calls the Raycast publisher and prompts you for publish options.
-
-Quick steps (interactive):
-
-1. Make sure everything builds and lints:
-
-```bash
-npm run build
-npm run lint
-```
-
-2. Create and push a branch for your changes (if not done already):
-
-```bash
-git checkout -b chore/publish-ready
-git add -A
-git commit -m "chore: prepare extension for publish"
-git push -u origin chore/publish-ready
-```
-
-1. Run interactive publish (you will be prompted for your Raycast token if needed):
-
-```bash
-npm run publish:interactive
-```
-
-1. If you prefer to pass the token non-interactively, export it first:
-
-```bash
-set RAYCAST_ACCESS_TOKEN=your_token_here
-npm run publish
-```
-
-Notes:
 - You may want to create a PR and run CI (e.g., Codacy) before publishing.
 - Raycast may require a review of your extension before it's listed — follow the Raycast docs for additional steps.
 
