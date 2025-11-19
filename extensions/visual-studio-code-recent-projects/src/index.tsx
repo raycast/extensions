@@ -276,8 +276,13 @@ function RemoteItem(
   const scheme = getBuildScheme();
 
   const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
-  const keywords =
-    isRemoteEntry(props.entry) || isRemoteWorkspaceEntry(props.entry) ? props.entry.remoteAuthority.split("+") : [];
+
+  let keywords: string[] = [];
+  if (isRemoteEntry(props.entry)) {
+    keywords = props.entry.remoteAuthority.split("+");
+  } else if (isRemoteWorkspaceEntry(props.entry)) {
+    keywords = props.entry.remoteAuthority.split("+");
+  }
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
