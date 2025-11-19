@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xcode-switcher",
+  "title": "Xcode Manager",
+  "description": "Complete Xcode version management with xcodes CLI",
+  "icon": "command-icon.png",
+  "author": "fillipeags",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "description": "Choose the language for the extension",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (System Default)",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Português",
+          "value": "pt"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "toggle-xcode",
+      "title": "Select Xcode Version",
+      "description": "Switch between installed Xcode versions",
+      "mode": "view"
+    },
+    {
+      "name": "list-installed",
+      "title": "List Installed Xcodes",
+      "description": "Show all installed Xcode versions",
+      "mode": "view"
+    },
+    {
+      "name": "list-available",
+      "title": "List Available Xcodes",
+      "description": "Browse and install available Xcode versions",
+      "mode": "view"
+    },
+    {
+      "name": "download-xcode",
+      "title": "Download Xcode",
+      "description": "Download a specific Xcode version",
+      "mode": "view"
+    },
+    {
+      "name": "install-xcode",
+      "title": "Install Xcode",
+      "description": "Download and install a specific Xcode version",
+      "mode": "view"
+    },
+    {
+      "name": "uninstall-xcode",
+      "title": "Uninstall Xcode",
+      "description": "Remove installed Xcode versions",
+      "mode": "view"
+    },
+    {
+      "name": "list-runtimes",
+      "title": "Simulator Runtimes",
+      "description": "Manage iOS/watchOS/tvOS simulator runtimes",
+      "mode": "view"
+    },
+    {
+      "name": "update-list",
+      "title": "Update Xcode List",
+      "description": "Refresh the list of available Xcode versions",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/utils": "^1.12.0",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.2.6",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
