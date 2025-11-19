@@ -1,6 +1,6 @@
 # Open in Visual Studio Code Changelog
 
-## [Feature: Windows Support] - {PR_MERGE_DATE}
+## [Feature: Windows Support] - 2025-11-19
 
 - Added Windows support with a PowerShell script.
 - Updated dependencies.
