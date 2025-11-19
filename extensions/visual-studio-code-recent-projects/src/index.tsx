@@ -29,7 +29,6 @@ import {
 } from "./preferences";
 import { EntryLike, EntryType, PinMethods } from "./types";
 import {
-  buildEntryKeywords,
   filterEntriesByType,
   filterUnpinnedEntries,
   isFileEntry,
@@ -151,7 +150,7 @@ function LocalItem(
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
-  const keywords = buildEntryKeywords(props.entry, props.uri);
+  const keywords = path.split("/");
   const [gitBranch, setGitBranch] = useState<string | null>(null);
 
   const { data: editorApp } = usePromise(async () => {
@@ -277,7 +276,11 @@ function RemoteItem(
   const scheme = getBuildScheme();
 
   const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
-  const keywords = buildEntryKeywords(props.entry, props.uri);
+
+  const keywords = remotePath.split("/");
+  if (isRemoteEntry(props.entry) || isRemoteWorkspaceEntry(props.entry)) {
+    keywords.push(...props.entry.remoteAuthority.split("+"));
+  }
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
@@ -300,9 +303,9 @@ function RemoteItem(
       id={props.pinned ? remotePath : undefined}
       title={remotePath}
       subtitle={props.subtitle || "/"}
-      keywords={keywords}
       icon="remote.svg"
       content="remote.svg"
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
