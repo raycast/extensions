@@ -8,7 +8,7 @@ export default async function main() {
     return;
   }
 
-  const { prefix } =
+  const { urgentPrefix } =
     await getPreferenceValues<Preferences.CopyFormattedUrgentLink>();
-  await copyActiveGithubLink({ prefix });
+  await copyActiveGithubLink({ prefix: urgentPrefix });
 }

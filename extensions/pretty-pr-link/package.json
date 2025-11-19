@@ -15,38 +15,36 @@
     "Web"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "nonUrgentPrefix",
+      "title": "Non Urgent Prefix",
+      "type": "textfield",
+      "required": false,
+      "default": "📝",
+      "description": "The prefix to use when copying a non urgent pull request link"
+    },
+    {
+      "name": "urgentPrefix",
+      "title": "Urgent Prefix",
+      "type": "textfield",
+      "required": false,
+      "default": "🚨",
+      "description": "The prefix to use when copying a urgent pull request link"
+    }
+  ],
   "commands": [
     {
       "name": "copy-formatted-link",
       "title": "Copy Formatted Link",
       "description": "Copy the formatted link without urgency indicator",
-      "mode": "no-view",
-      "preferences": [
-        {
-          "name": "prefix",
-          "title": "Prefix",
-          "type": "textfield",
-          "required": false,
-          "default": "📝",
-          "description": "The prefix to use when copying a non urgent pull request link"
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "copy-formatted-urgent-link",
       "title": "Copy Formatted Urgent Link",
       "description": "Copy the formatted link with urgency indicator",
-      "mode": "no-view",
-      "preferences": [
-        {
-          "name": "prefix",
-          "title": "Prefix",
-          "type": "textfield",
-          "required": false,
-          "default": "🚨",
-          "description": "The prefix to use when copying a urgent pull request link"
-        }
-      ]
+      "mode": "no-view"
     }
   ],
   "dependencies": {
