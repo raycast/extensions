@@ -1,5 +1,10 @@
 # macOSIcons.com Changelog
 
+## [Fix Cloudflare Error]
+
+- Add User-Agent header to API requests to resolve HTTP 403 Cloudflare challenge page errors
+- User-Agent implementation based on patterns from other extensions (e.g.⁠instant-domain-search)
+
 ## [Enhanced Error Handling] - 2025-10-15
 
 - Fix response body consumption bug preventing proper error messages
