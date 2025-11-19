@@ -29,6 +29,7 @@ import {
 } from "./preferences";
 import { EntryLike, EntryType, PinMethods } from "./types";
 import {
+  buildEntryKeywords,
   filterEntriesByType,
   filterUnpinnedEntries,
   isFileEntry,
@@ -150,7 +151,7 @@ function LocalItem(
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
-  const keywords = path.split("/");
+  const keywords = buildEntryKeywords(props.entry, props.uri);
   const [gitBranch, setGitBranch] = useState<string | null>(null);
 
   const { data: editorApp } = usePromise(async () => {
@@ -276,6 +277,7 @@ function RemoteItem(
   const scheme = getBuildScheme();
 
   const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
+  const keywords = buildEntryKeywords(props.entry, props.uri);
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
@@ -298,6 +300,7 @@ function RemoteItem(
       id={props.pinned ? remotePath : undefined}
       title={remotePath}
       subtitle={props.subtitle || "/"}
+      keywords={keywords}
       icon="remote.svg"
       content="remote.svg"
       actions={

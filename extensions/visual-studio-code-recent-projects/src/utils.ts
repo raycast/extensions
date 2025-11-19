@@ -1,7 +1,7 @@
 import { open } from "@raycast/api";
 import * as fs from "fs";
 import { existsSync } from "fs";
-import { URL } from "url";
+import { URL, fileURLToPath } from "url";
 import { isDeepStrictEqual } from "util";
 import { getBuildScheme } from "./lib/vscode";
 import {
@@ -69,6 +69,10 @@ export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
 export function isRemoteWorkspaceEntry(entry: EntryLike): entry is RemoteWorkspaceEntry {
   const { workspace, remoteAuthority } = entry as RemoteWorkspaceEntry;
   return workspace !== undefined && remoteAuthority !== undefined;
+}
+
+export function isRemoteLikeEntry(entry: EntryLike): entry is RemoteEntry | RemoteWorkspaceEntry {
+  return isRemoteEntry(entry) || isRemoteWorkspaceEntry(entry);
 }
 
 export function isSameEntry(a: EntryLike, b: EntryLike) {
@@ -161,4 +165,84 @@ export async function openURIinVSCode(uri: string) {
 
 export function isValidHexColor(color: string): boolean {
   return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
+}
+
+export function buildEntryKeywords(entry: EntryLike, uri: string): string[] {
+  const keywords = new Set<string>();
+  const add = (value?: string) => addKeywordValue(keywords, value);
+
+  add(uri);
+
+  if (isRemoteLikeEntry(entry)) {
+    add(entry.remoteAuthority);
+    entry.remoteAuthority.split("+").filter(Boolean).forEach(add);
+    add(entry.label);
+    add(entry.remoteAuthority.split("+").slice(1).join("+"));
+    if ("folderUri" in entry) {
+      add(entry.folderUri);
+    }
+    addUriParts(keywords, uri);
+    if ("workspace" in entry) {
+      add(entry.workspace.configPath);
+    }
+  } else {
+    let path: string | undefined;
+    if (uri) {
+      try {
+        path = fileURLToPath(uri);
+      } catch {
+        path = undefined;
+      }
+    }
+    add(path);
+    if (isWorkspaceEntry(entry)) {
+      add(entry.workspace.configPath);
+    }
+    if (isFolderEntry(entry)) {
+      add(entry.folderUri);
+    }
+    if (isFileEntry(entry)) {
+      add(entry.fileUri);
+    }
+  }
+
+  return Array.from(keywords).filter(Boolean);
+}
+
+function addKeywordValue(keywords: Set<string>, raw?: string) {
+  if (!raw) {
+    return;
+  }
+
+  let value: string;
+  try {
+    value = decodeURIComponent(raw).trim();
+  } catch {
+    value = raw.trim();
+  }
+
+  if (!value) {
+    return;
+  }
+
+  keywords.add(value);
+  const lower = value.toLowerCase();
+  if (lower !== value) {
+    keywords.add(lower);
+  }
+
+  value
+    .split(/[^a-zA-Z0-9]+/)
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .forEach((segment) => keywords.add(segment));
+}
+
+function addUriParts(keywords: Set<string>, raw: string) {
+  try {
+    const parsed = new URL(raw);
+    [parsed.href, parsed.host, parsed.hostname, parsed.pathname].forEach((value) => addKeywordValue(keywords, value));
+  } catch {
+    addKeywordValue(keywords, raw);
+  }
 }
