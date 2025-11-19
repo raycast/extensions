@@ -1,6 +1,6 @@
 // utils/search.ts - Refactored
 
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, openExtensionPreferences } from "@raycast/api";
 import { getSimpleCurrentUser } from "./userHelpers";
 import { showFailureToast } from "@raycast/utils";
 import { SearchOptions, SearchResult } from "../types";
