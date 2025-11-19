@@ -1,6 +1,6 @@
 # Punto Changelog
 
-## [Phonetic layouts support] - 2025-11-18
+## [Phonetic layouts support] - {PR_MERGE_DATE}
 
 - Added support for phonetic keyboard layouts
 
