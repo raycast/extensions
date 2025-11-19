@@ -24,6 +24,7 @@ export const BROWSERS_BUNDLE_ID = {
   vivaldi: "com.vivaldi.vivaldi",
   zen: "app.zen-browser.zen",
   whale: "com.naver.whale",
+  helium: "net.imput.helium",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);

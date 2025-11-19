@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Helium Browser] - 2025-11-19
+
+- Added support for `Helium` browser.
+
 ## [Bug Fixes] - 2025-11-10
 
 - Improved error handling for directory reading.
