@@ -1,7 +1,11 @@
 # Webbites Raycast Extension Changelog
 
+## [Improvement]  - {date}
+- Improved error handling and logging in when session token expires.
+
 ## [Improvement] - 2025-11-03
- - Updated name of endpoints to use the new convention.
+
+- Updated name of endpoints to use the new convention.
 
 ## [Improvement] - 2025-10-06
 
