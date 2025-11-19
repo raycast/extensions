@@ -1,6 +1,18 @@
-import { useCachedPromise } from "@raycast/utils";
+import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { attio, parseErrorMessage } from "./attio";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { Task } from "attio-js/dist/commonjs/models/components/task";
 import { differenceInDays, format, formatDistanceToNow, isBefore, isToday } from "date-fns";
 import { useMemo } from "react";
@@ -118,11 +130,13 @@ export default function Tasks() {
             title={task.isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
             onAction={() => toggleTask(task)}
           />
+          <Action.Push icon={Icon.Plus} title="New Task" target={<NewTask />} onPop={mutate} />
           <Action
             icon={Icon.Trash}
             title="Delete Task"
             onAction={() => confirmAndDelete(task)}
             style={Action.Style.Destructive}
+            shortcut={Keyboard.Shortcut.Common.Remove}
           />
         </ActionPanel>
       }
@@ -167,5 +181,52 @@ export default function Tasks() {
         </>
       )}
     </List>
+  );
+}
+
+function NewTask() {
+  type FormValues = {
+    content: string;
+    deadlineAt: Date | null;
+    isCompleted: boolean;
+  };
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Creating");
+      try {
+        await attio.tasks.create({
+          data: {
+            ...values,
+            deadlineAt: values.deadlineAt ? values.deadlineAt.toISOString() : null,
+            format: "plaintext",
+            linkedRecords: [],
+            assignees: [],
+          },
+        });
+        toast.style = Toast.Style.Success;
+        toast.title = "Created";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = parseErrorMessage(error);
+      }
+    },
+    validation: {
+      content: FormValidation.Required,
+    },
+  });
+  return (
+    <Form
+      navigationTitle={`Tasks / Add`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Check} title="New Task" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextArea title="Content" placeholder="Tweet about @Attio" {...itemProps.content} />
+      <Form.DatePicker title="Deadline" {...itemProps.deadlineAt} />
+      <Form.Checkbox label="Completed" {...itemProps.isCompleted} />
+    </Form>
   );
 }

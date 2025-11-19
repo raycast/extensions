@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ports",
+  "title": "Port Manager",
+  "description": "Monitor and manage open ports on your system with the ability to kill processes using specific ports.",
+  "icon": "extension.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Open Ports",
+      "description": "Lists all open TCP/UDP ports on your system, allows you to view details, and terminate the process occupying each port with a single action. Helps free up ports quickly when developing apps or debugging software.",
+      "mode": "view",
+      "subtitle": "List, monitor, and kill processes by port"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "dleteliers_",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System",
+    "Web"
+  ]
+}

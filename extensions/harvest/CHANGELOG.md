@@ -1,5 +1,10 @@
 # Harvest Changelog
 
+## [Bug Fixes] - 2025-11-03
+
+- Fix: Changing task in the form didn't save properly
+- Added: Loading indicator for the "Start on Today" action
+
 ## [UI Refresh & Bug Fixes] - 2025-10-29
 
 - Fix: Pagination converted to use `next_page` URL provided by Harvest API response as `page` is a deprecated API parameter

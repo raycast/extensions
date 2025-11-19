@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Add Download Repository command and copy markdown URL actions] - 2025-11-19
+
+- Search Repositories: Added "Download Repository" action to download a repository as a zip file
+- Added "Copy Markdown URL" actions to copy an issue's markdown URL
+
 ## [Checkout PR project action] - 2025-10-24
 
 - My Pull Requests: Added "Check Out PR" action to clone repository and switch to PR branch locally

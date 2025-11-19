@@ -264,10 +264,17 @@ function useSearch({ url, searchText, searchSize }: { url?: string; searchText: 
 }
 
 async function getSearchUrl({ branchName }: { branchName: string }) {
-  const resp = await fetch("https://raw.githubusercontent.com/NixOS/nixos-search/main/VERSION");
+  const resp = await fetch("https://raw.githubusercontent.com/NixOS/nixos-search/main/version.nix");
   if (!resp.ok) throw new Error("Cannot access GitHub");
-  const version = (await resp.text()).trim();
-  return `https://search.nixos.org/backend/latest-${version}-nixos-${branchName}/_search`;
+
+  const text = await resp.text();
+
+  // extract frontend = "NN";
+  const m = text.match(/frontend\s*=\s*"([^"]+)"\s*;/);
+  if (!m) throw new Error("Cannot parse frontend version from version.nix");
+
+  const frontend = m[1].trim();
+  return `https://search.nixos.org/backend/latest-${frontend}-nixos-${branchName}/_search`;
 }
 
 interface SearchResult {

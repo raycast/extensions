@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "juliusmarminge",
   "contributors": [
-    "xmok"
+    "xmok",
+    "taken"
   ],
   "owner": "pingdotgg",
   "access": "public",
@@ -75,5 +76,9 @@
     "extends": [
       "@raycast"
     ]
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }

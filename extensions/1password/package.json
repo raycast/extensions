@@ -206,8 +206,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.0.1",
+    "@1password/sdk": "^0.4.0-beta.1",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {

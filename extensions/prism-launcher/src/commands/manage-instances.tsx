@@ -8,12 +8,14 @@ import {
   LocalStorage,
   Icon,
   Keyboard,
+  Toast,
+  showToast,
+  open,
 } from "@raycast/api";
 import useAsyncEffect from "use-async-effect";
 import { useState } from "react";
 import { Instance } from "../types";
 import * as path from "path";
-import * as child_process from "child_process";
 import { When } from "react-if";
 import {
   isPrismLauncherInstalled,
@@ -23,7 +25,9 @@ import {
   sortInstances,
   getMinecraftFolderPath,
   instancesPath,
+  isWin,
 } from "../utils/prism";
+import { launchInstance, showInstance } from "../utils/instance";
 
 export default function ManageInstances() {
   const [instances, setInstances] = useState<Instance[]>();
@@ -84,9 +88,9 @@ export default function ManageInstances() {
                 <ActionPanel>
                   <Action
                     title="Launch Instance"
-                    icon={"app-window-16"}
+                    icon={Icon.Rocket}
                     onAction={async () => {
-                      child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --launch "${instance.id}"`);
+                      await launchInstance(instance.id);
                       await closeMainWindow({
                         popToRootType: PopToRootType.Immediate,
                         clearRootSearch: true,
@@ -101,10 +105,10 @@ export default function ManageInstances() {
                   />
                   <Action
                     title="Open Instance Window"
-                    icon={"app-window-list-16"}
+                    icon={Icon.AppWindowList}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
                     onAction={async () => {
-                      child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --show "${instance.id}"`);
+                      await showInstance(instance.id);
                       await closeMainWindow({
                         popToRootType: PopToRootType.Immediate,
                         clearRootSearch: true,
@@ -112,16 +116,16 @@ export default function ManageInstances() {
                     }}
                   />
                   <Action
-                    title="Open Minecraft Folder in Finder"
+                    title={`Open Minecraft Folder in ${isWin ? "File Explorer" : "Finder"}`}
                     icon={Icon.Finder}
                     shortcut={{ modifiers: ["shift", "cmd"], key: "o" }}
                     onAction={async () => {
                       const minecraftPath = await getMinecraftFolderPath(instance.id);
-                      if (minecraftPath) {
-                        child_process.exec(`open "${minecraftPath}"`);
-                      } else {
-                        child_process.exec(`open "${path.join(instancesPath, instance.id)}"`);
+                      if (!minecraftPath) {
+                        await showToast({ style: Toast.Style.Failure, title: "Failed to locate Minecraft folder" });
+                        return;
                       }
+                      open(minecraftPath);
                       await closeMainWindow({
                         popToRootType: PopToRootType.Immediate,
                         clearRootSearch: true,
@@ -135,7 +139,7 @@ export default function ManageInstances() {
       </When>
       <When condition={isPrismInstalled == false}>
         <List.EmptyView
-          icon={"x-mark-circle-16"}
+          icon={Icon.ExclamationMark}
           title={"Prism Launcher is not installed"}
           description={`Prism Launcher not installed or ${instancesPath} is not present`}
         />

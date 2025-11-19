@@ -92,7 +92,7 @@ export const LaunchActions = ({ name = "", appid = 0 }) => {
       <Action
         icon={Icon.StarCircle}
         // eslint-disable-next-line @raycast/prefer-title-case
-        title="View ProtonDB Scroe"
+        title="View ProtonDB Score"
         onAction={() => {
           crossLaunchCommand({
             name: "browse",

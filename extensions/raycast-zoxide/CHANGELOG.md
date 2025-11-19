@@ -1,5 +1,9 @@
 # Raycast Zoxide Changelog
 
+## [Added Search using Spotlight Secondary Action] - 2025-11-10
+
+- Added "Search using Spotlight" secondary action to Zoxide results to enable searching for directories not in the list. Previously was only accessible via an empty list.
+
 ## [Added Additional Path Directories Preference] - 2025-10-16
 
 - Added preference to allow additional directories to be prepended to PATH when executing commands

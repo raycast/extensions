@@ -1,5 +1,9 @@
 # T3 Chat Changelog
 
+## [v1.3.0] - 2025-11-03
+
+- Added support for latest AI models
+
 ## [v1.2.1] - 2025-07-28
 
 - Updated icon

@@ -1,5 +1,9 @@
 # Punto Changelog
 
+## [Use TIS API to switch layouts] - 2025-11-05
+
+- Uses Text Input Source Services API to switch layouts instead of keyboard shortcuts approach
+
 ## [Ua layout mapping] - 2025-02-04
 
 - Added Ukrainian layout mapping to dropdown

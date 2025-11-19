@@ -14,17 +14,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "defaultBibleVersion",
-      "title": "Default Bible Version",
-      "description": "The default bible version to use when searching. Defaults to \"NLT\".",
-      "type": "textfield",
-      "required": false,
-      "default": "NLT",
-      "placeholder": "Version"
-    }
-  ],
   "commands": [
     {
       "name": "bibleSearch",
@@ -91,14 +80,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.2",
     "cheerio": "^1.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
-    "eslint": "^9.22.0",
+    "eslint": "^9.39.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
@@ -108,6 +98,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "update-bible-versions": "node ./scripts/updateBibleVersions.js"
+    "update-bible-versions": "node ./scripts/updateBibleVersions.mts ./assets/bible-versions.json"
   }
 }
