@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": [
+    "src/**/*",
+    "raycast-env.d.ts",
+    "src/raycast-types.d.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "ES2023"
+    ],
+    "module": "commonjs",
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "ignoreDeprecations": "5.0",
+    "noErrorTruncation": true,
+    // Suppress specific TypeScript errors that are common with Raycast API
+    "noImplicitAny": false,
+    "strictNullChecks": false
+  }
+}
