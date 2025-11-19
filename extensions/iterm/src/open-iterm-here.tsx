@@ -16,6 +16,7 @@ export default function Command() {
   const { items, error: itemsError } = useSelectedItems();
   const { path: finderPath, error: finderError } = useFinderPath();
   const [paths, setPaths] = useState(new Set<string>());
+  const { windowOrTab } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     if (items.length) {
@@ -40,7 +41,7 @@ export default function Command() {
             key={path}
             command={`cd "${path}"`}
             loadingMessage="Getting selected file(s)..."
-            location={getPreferenceValues().windowOrTab}
+            location={windowOrTab}
           />
         ))}
       </>
