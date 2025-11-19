@@ -2,7 +2,7 @@
 
 ## [Add Windows support] - {PR_MERGE_DATE}
 
-Adds the options to run comands in `PowerShell`, `PowerShell 7` or `Command Prompt` on Windows.
+Adds the options to run commands in `PowerShell`, `PowerShell 7` or `Command Prompt` on Windows.
 
 ## [✨ AI Enhancements] - 2025-02-21
 
