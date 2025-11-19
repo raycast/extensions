@@ -158,8 +158,18 @@ const handleSearchError = async (error: unknown) => {
       //   console.error("Key generation failed:", e);
       // }
       showFailureToast(error as Error, {
-        title: "Authentication failed",
-        message: errorData?.message || "Please log in again",
+        title: "Session expired",
+        message:
+          "Your session has expired. Please re-enter your credentials to continue.",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: async () => {
+            // Clear session token and user data to force fresh login
+            await LocalStorage.removeItem(SESSION_TOKEN_KEY);
+            await LocalStorage.removeItem("webbites_user_data");
+            openExtensionPreferences();
+          },
+        },
       });
     } else if (response.status === 429) {
       showFailureToast(error as Error, {
