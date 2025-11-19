@@ -41,8 +41,12 @@ function openInIDE(path: string, ide?: Application) {
   }
   try {
     execSync(`open -a "${name}" "${path}"`, { timeout: 10000 });
-  } catch {
-    throw new Error(`Failed to open ${ide}, please ensure the command line tool is installed and configured correctly`);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`Failed to open ${name}:`, errorMessage);
+    throw new Error(
+      `Failed to open ${name}. ${errorMessage}. Please ensure the application is installed and configured correctly.`,
+    );
   }
 }
 
@@ -482,26 +486,7 @@ function CommitPreview({ repository, preferences, onComplete, quickAutoCommit }:
     try {
       const autoStage = preferences.autoStageAllFiles ?? false;
       if (autoStage) {
-        try {
-          await GitUtils.stageAllFiles(repository.path);
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          if (message.includes("index.lock")) {
-            const confirmed = await confirmAlert({
-              title: "Unlock Git Repository",
-              message: "Detected a Git index.lock. Close any Git operations. Unlock and retry?",
-              primaryAction: { title: "Unlock and Retry", style: Alert.ActionStyle.Destructive },
-            });
-            if (confirmed) {
-              await GitUtils.unlockRepository(repository.path);
-              await GitUtils.stageAllFiles(repository.path);
-            } else {
-              throw error;
-            }
-          } else {
-            throw error;
-          }
-        }
+        await stageFilesWithLockHandling(repository.path);
       } else {
         const staged = await GitUtils.getStagedDiff(repository.path);
         if (!staged.trim()) {
@@ -639,29 +624,34 @@ function CommitPreview({ repository, preferences, onComplete, quickAutoCommit }:
   );
 }
 
-async function performAutoCommit(repository: Repository, preferences: Preferences) {
-  const autoStage = preferences.autoStageAllFiles ?? false;
-  if (autoStage) {
-    try {
-      await GitUtils.stageAllFiles(repository.path);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (message.includes("index.lock")) {
-        const confirmed = await confirmAlert({
-          title: "Unlock Git Repository",
-          message: "Detected a Git index.lock. Close any Git operations. Unlock and retry?",
-          primaryAction: { title: "Unlock and Retry", style: Alert.ActionStyle.Destructive },
-        });
-        if (confirmed) {
-          await GitUtils.unlockRepository(repository.path);
-          await GitUtils.stageAllFiles(repository.path);
-        } else {
-          throw error;
-        }
+// Helper function to stage files with index.lock detection and unlock handling
+async function stageFilesWithLockHandling(repoPath: string): Promise<void> {
+  try {
+    await GitUtils.stageAllFiles(repoPath);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes("index.lock")) {
+      const confirmed = await confirmAlert({
+        title: "Unlock Git Repository",
+        message: "Detected a Git index.lock. Close any Git operations. Unlock and retry?",
+        primaryAction: { title: "Unlock and Retry", style: Alert.ActionStyle.Destructive },
+      });
+      if (confirmed) {
+        await GitUtils.unlockRepository(repoPath);
+        await GitUtils.stageAllFiles(repoPath);
       } else {
         throw error;
       }
+    } else {
+      throw error;
     }
+  }
+}
+
+async function performAutoCommit(repository: Repository, preferences: Preferences) {
+  const autoStage = preferences.autoStageAllFiles ?? false;
+  if (autoStage) {
+    await stageFilesWithLockHandling(repository.path);
   }
   const diff = autoStage
     ? await GitUtils.getCombinedDiff(repository.path)
