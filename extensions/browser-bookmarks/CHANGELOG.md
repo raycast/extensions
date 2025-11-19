@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for Helium Browser] - 2025-11-19
+## [Support for Helium Browser] - {PR_MERGE_DATE}
 
 - Added support for `Helium` browser.
 
