@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { buildApiUrl, API_ENDPOINTS } from "./env";
 
+const isDev = process.env.NODE_ENV !== "production";
 // URL validation helper
 export const isValidUrl = (text: string): boolean => {
   try {
@@ -32,14 +33,15 @@ export const saveTabToQstash = async (data: {
   try {
     const { url, textNote, title, siteNotes, tags, customId } = data;
 
-    console.log("Saving bookmark to backend API:", {
-      url,
-      textNote,
-      title,
-      siteNotes,
-      tags,
-      customId,
-    });
+    if (isDev)
+      console.log("Saving bookmark to backend API:", {
+        url,
+        textNote,
+        title,
+        siteNotes,
+        tags,
+        customId,
+      });
 
     // Get session token from local storage
     const sessionToken = await LocalStorage.getItem<string>(
