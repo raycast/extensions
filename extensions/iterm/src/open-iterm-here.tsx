@@ -16,7 +16,7 @@ export default function Command() {
   const { items, error: itemsError } = useSelectedItems();
   const { path: finderPath, error: finderError } = useFinderPath();
   const [paths, setPaths] = useState(new Set<string>());
-  const { windowOrTab } = getPreferenceValues<Preferences>();
+  const { windowOrTab } = getPreferenceValues<Preferences.OpenItermHere>();
 
   useEffect(() => {
     if (items.length) {
