@@ -110,7 +110,7 @@ const PromptFormActions = ({ formState, templateState }: PromptFormActionsProp) 
 
   return (
     <ActionPanel>
-      <Action.SubmitForm title="Copy to Clipboard" onSubmit={handleCopyToClipboard} />
+      <Action.SubmitForm title="Copy to Clipboard" icon={Icon.Clipboard} onSubmit={handleCopyToClipboard} />
       <Action.SubmitForm
         title="Preview Prompt"
         icon={Icon.Eye}
