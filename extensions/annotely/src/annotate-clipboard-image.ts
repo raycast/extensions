@@ -1,9 +1,9 @@
-import { Clipboard, showToast, Toast, open } from "@raycast/api";
+import { Clipboard, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import http from "http";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { serveImageAndOpenAnnotely } from "./utils";
 
 export default async function Command() {
   const toast = await showToast({
@@ -59,78 +59,7 @@ export default async function Command() {
       return;
     }
 
-    await new Promise<void>((resolve, reject) => {
-      const server = http.createServer((req, res) => {
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-
-        if (req.method === "OPTIONS") {
-          res.writeHead(200);
-          res.end();
-          return;
-        }
-
-        if (!imagePath || !fs.existsSync(imagePath)) {
-          res.statusCode = 404;
-          res.end("Not found");
-          return;
-        }
-
-        try {
-          const stat = fs.statSync(imagePath);
-          res.writeHead(200, {
-            "Content-Type": "image/png",
-            "Content-Length": stat.size,
-          });
-          const readStream = fs.createReadStream(imagePath);
-          readStream.pipe(res);
-        } catch {
-          res.statusCode = 500;
-          res.end("Internal Server Error");
-        }
-      });
-
-      server.listen(0, "127.0.0.1", async () => {
-        const address = server.address();
-        if (typeof address === "object" && address) {
-          const port = address.port;
-          const fileName = path.basename(imagePath!);
-          const localUrl = `http://127.0.0.1:${port}/${fileName}`;
-          const annotelyUrl = `https://annotely.com/editor?url=${encodeURIComponent(localUrl)}`;
-
-          await open(annotelyUrl);
-
-          toast.style = Toast.Style.Success;
-          toast.title = "Opened in Annotely";
-        } else {
-          server.close();
-          if (isTempFile && imagePath && fs.existsSync(imagePath)) {
-            try {
-              fs.unlinkSync(imagePath);
-            } catch {
-              // Ignore cleanup errors
-            }
-          }
-          reject(new Error("Failed to get server address"));
-        }
-      });
-
-      server.on("error", (err) => {
-        reject(err);
-      });
-
-      setTimeout(() => {
-        server.close();
-        if (isTempFile && imagePath && fs.existsSync(imagePath)) {
-          try {
-            fs.unlinkSync(imagePath);
-          } catch {
-            // Ignore cleanup errors
-          }
-        }
-        resolve();
-      }, 60000);
-    });
+    await serveImageAndOpenAnnotely(imagePath, isTempFile, toast);
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Error";
