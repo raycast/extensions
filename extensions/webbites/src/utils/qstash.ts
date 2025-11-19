@@ -105,7 +105,6 @@ export const saveTabToQstash = async (data: {
       throw new Error(result.message || "Failed to save bookmark");
     }
 
-    const isDev = process.env.NODE_ENV !== "production";
     if (isDev) console.log("Bookmark saved successfully:", result);
     return result;
   } catch (error) {
