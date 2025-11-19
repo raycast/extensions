@@ -1,5 +1,9 @@
 # Punto Changelog
 
+## [Phonetic layouts support] - 2025-11-18
+
+- Added support for phonetic keyboard layouts
+
 ## [Use TIS API to switch layouts] - 2025-11-05
 
 - Uses Text Input Source Services API to switch layouts instead of keyboard shortcuts approach
