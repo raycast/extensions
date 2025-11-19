@@ -12,10 +12,6 @@ const getItemPath = (item: FileSystemItem) => {
   return stats.isDirectory() ? item.path : dirname(item.path);
 };
 
-interface Preferences {
-  windowOrTab: "new-window" | "new-tab";
-}
-
 export default function Command() {
   const { items, error: itemsError } = useSelectedItems();
   const { path: finderPath, error: finderError } = useFinderPath();
@@ -44,7 +40,7 @@ export default function Command() {
             key={path}
             command={`cd "${path}"`}
             loadingMessage="Getting selected file(s)..."
-            location={getPreferenceValues<Preferences>().windowOrTab}
+            location={getPreferenceValues().windowOrTab}
           />
         ))}
       </>
