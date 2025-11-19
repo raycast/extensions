@@ -10,7 +10,6 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { findXcodesPath } from "./utils/xcodes";
-import { t } from "./utils/i18n";
 import { execSync } from "child_process";
 
 interface Runtime {
@@ -57,12 +56,12 @@ export default function Command() {
     setXcodesPath(path);
 
     if (!path) {
-      setError(t("xcodes.notFound"));
+      setError("xcodes not found");
       setIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
-        title: t("xcodes.notFound"),
-        message: t("xcodes.installMessage"),
+        title: "xcodes not found",
+        message: "Install with: brew install xcodesorg/made/xcodes",
       });
     } else {
       loadRuntimes(path);
@@ -96,7 +95,7 @@ export default function Command() {
         setError(err.message);
         showToast({
           style: Toast.Style.Failure,
-          title: t("error"),
+          title: "Error",
           message: err.message,
         });
       }
@@ -129,7 +128,7 @@ export default function Command() {
       setTimeout(() => loadRuntimes(xcodesPath), 1000);
     } catch (error: any) {
       toast.style = Toast.Style.Failure;
-      toast.title = t("error");
+      toast.title = "Error";
       toast.message = error.message;
     }
   };
@@ -139,7 +138,7 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={Icon.XMarkCircle}
-          title={t("error")}
+          title="Error"
           description={error}
         />
       </List>
@@ -178,13 +177,13 @@ export default function Command() {
                 <ActionPanel>
                   {!runtime.isInstalled && (
                     <Action
-                      title={t("runtimes.install")}
+                      title="Install Runtime"
                       icon={Icon.Download}
                       onAction={() => handleInstallRuntime(runtime)}
                     />
                   )}
                   <Action
-                    title={t("reload")}
+                    title="Reload"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={() => xcodesPath && loadRuntimes(xcodesPath)}

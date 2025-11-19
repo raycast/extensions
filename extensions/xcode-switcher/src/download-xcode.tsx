@@ -8,15 +8,14 @@ import {
   Icon,
   popToRoot,
 } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { findXcodesPath, downloadXcode, listAvailable } from "./utils/xcodes";
-import { t } from "./utils/i18n";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const [availableVersions, setAvailableVersions] = useState<string[]>([]);
 
-  useState(() => {
+  useEffect(() => {
     const xcodesPath = findXcodesPath();
     if (xcodesPath) {
       try {
@@ -28,7 +27,7 @@ export default function Command() {
         console.error("Failed to load versions:", err);
       }
     }
-  });
+  }, []);
 
   const handleSubmit = async (values: { version: string }) => {
     const xcodesPath = findXcodesPath();
@@ -36,8 +35,8 @@ export default function Command() {
     if (!xcodesPath) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("xcodes.notFound"),
-        message: t("xcodes.installMessage"),
+        title: "xcodes not found",
+        message: "Install with: brew install xcodesorg/made/xcodes",
       });
       return;
     }
@@ -45,8 +44,8 @@ export default function Command() {
     if (!values.version || values.version.trim() === "") {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("error"),
-        message: t("download.enterVersionPrompt"),
+        title: "Error",
+        message: "Please enter a version number",
       });
       return;
     }
@@ -54,19 +53,19 @@ export default function Command() {
     setIsLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: t("download.downloading", { version: values.version }),
+      title: `Downloading Xcode ${values.version}...`,
     });
 
     try {
       await downloadXcode(xcodesPath, values.version);
 
       toast.style = Toast.Style.Success;
-      toast.title = t("download.success", { version: values.version });
+      toast.title = `Xcode ${values.version} downloaded successfully`;
 
       setTimeout(() => popToRoot(), 1000);
     } catch (error: any) {
       toast.style = Toast.Style.Failure;
-      toast.title = t("error");
+      toast.title = "Error";
       toast.message = error.message;
     } finally {
       setIsLoading(false);
@@ -79,7 +78,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("download.title")}
+            title="Download Xcode"
             icon={Icon.Download}
             onSubmit={handleSubmit}
           />
@@ -87,15 +86,15 @@ export default function Command() {
       }
     >
       <Form.Description
-        title={t("download.title")}
-        text={t("download.description")}
+        title="Download Xcode"
+        text="Download a specific version of Xcode without installing it. The downloaded file will be saved but not installed."
       />
 
       {availableVersions.length > 0 ? (
         <Form.Dropdown
           id="version"
           title="Xcode Version"
-          placeholder={t("download.selectVersion")}
+          placeholder="Select a version"
         >
           {availableVersions.map((version) => (
             <Form.Dropdown.Item
@@ -110,11 +109,11 @@ export default function Command() {
           id="version"
           title="Xcode Version"
           placeholder="e.g., 16.4, 15.3"
-          info={t("download.enterVersion")}
+          info="Enter the exact version number you want to download"
         />
       )}
 
-      <Form.Description text={t("download.note")} />
+      <Form.Description text="This will download the Xcode .xip file to your Downloads folder. You can install it later using the 'Install Xcode' command or manually." />
     </Form>
   );
 }

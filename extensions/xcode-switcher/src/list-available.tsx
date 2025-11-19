@@ -16,7 +16,6 @@ import {
   downloadXcode,
   installXcode,
 } from "./utils/xcodes";
-import { t } from "./utils/i18n";
 
 export default function Command() {
   const [versions, setVersions] = useState<XcodeVersion[]>([]);
@@ -29,12 +28,12 @@ export default function Command() {
     setXcodesPath(path);
 
     if (!path) {
-      setError(t("xcodes.notFound"));
+      setError("xcodes not found");
       setIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
-        title: t("xcodes.notFound"),
-        message: t("xcodes.installMessage"),
+        title: "xcodes not found",
+        message: "Install with: brew install xcodesorg/made/xcodes",
       });
     } else {
       loadVersions(path);
@@ -50,7 +49,7 @@ export default function Command() {
       setError(err.message);
       showToast({
         style: Toast.Style.Failure,
-        title: t("error"),
+        title: "Error",
         message: err.message,
       });
     } finally {
@@ -63,19 +62,19 @@ export default function Command() {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: t("download.downloading", { version }),
+      title: `Downloading Xcode ${version}...`,
     });
 
     try {
       await downloadXcode(xcodesPath, version);
 
       toast.style = Toast.Style.Success;
-      toast.title = t("download.success", { version });
+      toast.title = `Xcode ${version} downloaded successfully`;
 
       setTimeout(() => loadVersions(xcodesPath), 1000);
     } catch (error: any) {
       toast.style = Toast.Style.Failure;
-      toast.title = t("error");
+      toast.title = "Error";
       toast.message = error.message;
     }
   };
@@ -85,19 +84,19 @@ export default function Command() {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: t("install.installing", { version }),
+      title: `Installing Xcode ${version}...`,
     });
 
     try {
       await installXcode(xcodesPath, version);
 
       toast.style = Toast.Style.Success;
-      toast.title = t("install.success", { version });
+      toast.title = `Xcode ${version} installed successfully`;
 
       setTimeout(() => loadVersions(xcodesPath), 1000);
     } catch (error: any) {
       toast.style = Toast.Style.Failure;
-      toast.title = t("error");
+      toast.title = "Error";
       toast.message = error.message;
     }
   };
@@ -107,12 +106,12 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={Icon.XMarkCircle}
-          title={t("error")}
+          title="Error"
           description={error}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title={t("xcodes.viewDocs")}
+                title="View xcodes Documentation"
                 url="https://github.com/XcodesOrg/xcodes"
               />
             </ActionPanel>
@@ -133,25 +132,25 @@ export default function Command() {
           }}
           title={`Xcode ${xcode.version}`}
           subtitle={xcode.build}
-          accessories={[{ text: xcode.isInstalled ? t("list.installed") : "" }]}
+          accessories={[{ text: xcode.isInstalled ? "Installed" : "" }]}
           actions={
             <ActionPanel>
               {!xcode.isInstalled && (
                 <>
                   <Action
-                    title={t("list.installXcode", { version: xcode.version })}
+                    title={`Install Xcode ${xcode.version}`}
                     icon={Icon.Download}
                     onAction={() => handleInstall(xcode.version)}
                   />
                   <Action
-                    title={t("list.downloadXcode", { version: xcode.version })}
+                    title={`Download Xcode ${xcode.version}`}
                     icon={Icon.ArrowDown}
                     onAction={() => handleDownload(xcode.version)}
                   />
                 </>
               )}
               <Action
-                title={t("reload")}
+                title="Reload"
                 icon={Icon.ArrowClockwise}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={() => xcodesPath && loadVersions(xcodesPath)}

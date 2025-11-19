@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execSync, spawnSync } from "child_process";
 import { existsSync } from "fs";
 import { executeWithSudo } from "./auth";
 
@@ -38,10 +38,14 @@ export function findXcodesPath(): string | null {
   return null;
 }
 
-function execXcodes(args: string, xcodesPath: string): string {
-  console.log(`[XCODES] Executing: ${xcodesPath} ${args}`);
+function execXcodes(
+  command: string,
+  args: string[],
+  xcodesPath: string,
+): string {
+  console.log(`[XCODES] Executing: ${xcodesPath} ${command} ${args.join(" ")}`);
   try {
-    const result = execSync(`${xcodesPath} ${args}`, {
+    const result = execSync(`${xcodesPath} ${command} ${args.join(" ")}`, {
       encoding: "utf-8",
       timeout: 60000,
       env: {
@@ -60,7 +64,7 @@ function execXcodes(args: string, xcodesPath: string): string {
     if (err.stderr) {
       console.error(`[XCODES] stderr: ${err.stderr.substring(0, 200)}`);
     }
-    // Muitos comandos do xcodes retornam erro mas têm stdout válido
+    // Many xcodes commands return errors but have valid stdout
     if (err.stdout) {
       return err.stdout;
     }
@@ -94,14 +98,18 @@ export function parseInstalledOutput(output: string): XcodeVersion[] {
   const versions: XcodeVersion[] = [];
 
   lines.forEach((line) => {
-    // Parse: 16.4 (16F6) (/Applications/Xcode-16.4.0.app)
-    const match = line.match(/([\d.]+)\s+\(([^)]+)\)\s+\(([^)]+)\)/);
+    // Parse: 16.4 (16F6) (Selected)    /Applications/Xcode-16.4.0.app
+    // Or: 26.0.1 (17A400)    /Applications/Xcode-26.0.1.app
+    // Format: version (build) [optional (Selected)]    path
+    const match = line.match(
+      /([\d.]+)\s+\(([^)]+)\)(?:\s+\(Selected\))?\s+(.+)/,
+    );
     if (match) {
       versions.push({
         number: "",
         version: match[1],
         build: match[2],
-        path: match[3],
+        path: match[3].trim(),
         isInstalled: true,
       });
     }
@@ -131,12 +139,12 @@ export function parseListOutput(output: string): XcodeVersion[] {
 }
 
 export function listInstalled(xcodesPath: string): XcodeVersion[] {
-  const output = execXcodes("installed", xcodesPath);
+  const output = execXcodes("installed", [], xcodesPath);
   return parseInstalledOutput(output);
 }
 
 export function listAvailable(xcodesPath: string): XcodeVersion[] {
-  const output = execXcodes("list", xcodesPath);
+  const output = execXcodes("list", [], xcodesPath);
   return parseListOutput(output);
 }
 
@@ -148,62 +156,106 @@ export async function selectVersion(
   console.log(`[XCODES] selectVersion called with number: ${number}`);
   console.log(`[XCODES] Password ${password ? "provided" : "not provided"}`);
 
-  try {
-    // Primeiro, tenta sem sudo para ver se funciona
-    console.log("[XCODES] Attempting select without sudo first");
-    const simpleCommand = `echo "${number}" | ${xcodesPath} select`;
+  // Validate number input to prevent command injection
+  if (!/^\d+$/.test(number)) {
+    throw new Error("Invalid version number");
+  }
 
-    try {
-      const result = execSync(simpleCommand, {
-        encoding: "utf-8",
-        shell: "/bin/bash",
-        timeout: 10000,
-        env: {
-          ...process.env,
-          PATH: `/opt/homebrew/bin:/usr/local/bin:${process.env.PATH}`,
-        },
-      });
-      console.log("[XCODES] Select succeeded without sudo!");
-      console.log(`[XCODES] Output: ${result}`);
-      return;
-    } catch (normalError: any) {
-      console.log("[XCODES] Select without sudo failed, trying with sudo");
-      console.error(`[XCODES] Normal error: ${normalError.message}`);
-      if (normalError.stderr) {
-        console.error(`[XCODES] stderr: ${normalError.stderr}`);
-      }
-      if (normalError.stdout) {
-        console.log(`[XCODES] stdout: ${normalError.stdout}`);
+  if (!password) {
+    throw new Error("Password required for selecting Xcode version");
+  }
+
+  try {
+    // Step 1: Get the list of installed Xcode versions with their paths
+    console.log("[XCODES] Getting list of installed Xcodes");
+    const listResult = spawnSync(xcodesPath, ["select"], {
+      input: "", // No input, just get the list
+      encoding: "utf-8",
+      timeout: 10000,
+      env: {
+        ...process.env,
+        PATH: `/opt/homebrew/bin:/usr/local/bin:/usr/bin:${process.env.PATH}`,
+      },
+    });
+
+    const listOutput = listResult.stdout || "";
+    console.log("[XCODES] List output:", listOutput);
+
+    // Parse the output to find the selected version's path
+    // Format: "1) 16.4 (16F6) (Selected)"
+    //         "2) 26.0.1 (17A400)"
+    const lines = listOutput.split("\n");
+    let selectedVersion = "";
+
+    for (const line of lines) {
+      const match = line.match(
+        new RegExp(`^${number}\\)\\s+([\\d.]+)\\s+\\(([^)]+)\\)`),
+      );
+      if (match) {
+        selectedVersion = match[1];
+        console.log(
+          `[XCODES] Found version ${selectedVersion} for number ${number}`,
+        );
+        break;
       }
     }
 
-    // Se falhou sem sudo, tenta com sudo
-    console.log("[XCODES] Executing select with sudo");
-    const sudoCommand = `sh -c 'echo "${number}" | ${xcodesPath} select'`;
-    const result = await executeWithSudo(sudoCommand, password);
+    if (!selectedVersion) {
+      throw new Error(`Could not find Xcode version for number ${number}`);
+    }
 
-    console.log("[XCODES] Select with sudo completed");
-    console.log(`[XCODES] Result: ${result}`);
+    // Step 2: Get the installed Xcodes to find the path
+    const installed = listInstalled(xcodesPath);
+    const targetXcode = installed.find((x) => x.version === selectedVersion);
+
+    if (!targetXcode || !targetXcode.path) {
+      throw new Error(
+        `Could not find installation path for Xcode ${selectedVersion}`,
+      );
+    }
+
+    console.log(`[XCODES] Target Xcode path: ${targetXcode.path}`);
+
+    // Step 3: Run sudo xcode-select -s directly with our secure sudo wrapper
+    console.log("[XCODES] Running xcode-select with sudo");
+    const result = await executeWithSudo(
+      "/usr/bin/xcode-select",
+      ["-s", targetXcode.path],
+      password,
+    );
+
+    console.log("[XCODES] xcode-select completed successfully");
+    console.log("[XCODES] Output:", result);
   } catch (error: any) {
     console.error("[XCODES] selectVersion failed:", error.message);
     throw error;
   }
 }
 
+function validateVersion(version: string): void {
+  // Validate version format: should be digits and dots only (e.g., "16.4", "15.3")
+  if (!/^[\d.]+$/.test(version)) {
+    throw new Error("Invalid version format");
+  }
+}
+
 export function downloadXcode(xcodesPath: string, version: string): void {
-  execXcodes(`download ${version}`, xcodesPath);
+  validateVersion(version);
+  execXcodes("download", [version], xcodesPath);
 }
 
 export function installXcode(xcodesPath: string, version: string): void {
-  execXcodes(`install ${version}`, xcodesPath);
+  validateVersion(version);
+  execXcodes("install", [version], xcodesPath);
 }
 
 export function uninstallXcode(xcodesPath: string, version: string): void {
-  execXcodes(`uninstall ${version}`, xcodesPath);
+  validateVersion(version);
+  execXcodes("uninstall", [version], xcodesPath);
 }
 
 export function updateList(xcodesPath: string): void {
-  execXcodes("update", xcodesPath);
+  execXcodes("update", [], xcodesPath);
 }
 
 export function listRuntimes(_xcodesPath: string): Runtime[] {

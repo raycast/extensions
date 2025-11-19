@@ -17,7 +17,6 @@ import {
   uninstallXcode,
   XcodeVersion,
 } from "./utils/xcodes";
-import { t } from "./utils/i18n";
 
 export default function Command() {
   const [versions, setVersions] = useState<XcodeVersion[]>([]);
@@ -30,12 +29,12 @@ export default function Command() {
     setXcodesPath(path);
 
     if (!path) {
-      setError(t("xcodes.notFound"));
+      setError("xcodes not found");
       setIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
-        title: t("xcodes.notFound"),
-        message: t("xcodes.installMessage"),
+        title: "xcodes not found",
+        message: "Install with: brew install xcodesorg/made/xcodes",
       });
     } else {
       loadVersions(path);
@@ -51,7 +50,7 @@ export default function Command() {
       setError(err.message);
       showToast({
         style: Toast.Style.Failure,
-        title: t("error"),
+        title: "Error",
         message: err.message,
       });
     } finally {
@@ -63,10 +62,10 @@ export default function Command() {
     if (!xcodesPath) return;
 
     const confirmed = await confirmAlert({
-      title: t("uninstall.confirm", { version }),
-      message: t("uninstall.confirm", { version }),
+      title: `Uninstall Xcode ${version}?`,
+      message: `Uninstall Xcode ${version}?`,
       primaryAction: {
-        title: t("uninstall.title"),
+        title: "Uninstall Xcode",
         style: Alert.ActionStyle.Destructive,
       },
     });
@@ -75,19 +74,19 @@ export default function Command() {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: t("uninstall.uninstalling", { version }),
+      title: `Uninstalling Xcode ${version}...`,
     });
 
     try {
       await uninstallXcode(xcodesPath, version);
 
       toast.style = Toast.Style.Success;
-      toast.title = t("uninstall.success", { version });
+      toast.title = `Xcode ${version} uninstalled successfully`;
 
       setTimeout(() => loadVersions(xcodesPath), 1000);
     } catch (error: any) {
       toast.style = Toast.Style.Failure;
-      toast.title = t("error");
+      toast.title = "Error";
       toast.message = error.message;
     }
   };
@@ -97,7 +96,7 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={Icon.XMarkCircle}
-          title={t("error")}
+          title="Error"
           description={error}
         />
       </List>
@@ -116,13 +115,13 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title={t("uninstall.title")}
+                title="Uninstall Xcode"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={() => handleUninstall(xcode.version)}
               />
               <Action
-                title={t("reload")}
+                title="Reload"
                 icon={Icon.ArrowClockwise}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={() => xcodesPath && loadVersions(xcodesPath)}

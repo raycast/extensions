@@ -1,6 +1,5 @@
 import { showToast, Toast, closeMainWindow } from "@raycast/api";
 import { findXcodesPath, updateList } from "./utils/xcodes";
-import { t } from "./utils/i18n";
 
 export default async function Command() {
   const xcodesPath = findXcodesPath();
@@ -8,28 +7,28 @@ export default async function Command() {
   if (!xcodesPath) {
     await showToast({
       style: Toast.Style.Failure,
-      title: t("xcodes.notFound"),
-      message: t("xcodes.installMessage"),
+      title: "xcodes not found",
+      message: "Install with: brew install xcodesorg/made/xcodes",
     });
     return;
   }
 
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: t("update.updating"),
+    title: "Updating Xcode list...",
   });
 
   try {
     await updateList(xcodesPath);
 
     toast.style = Toast.Style.Success;
-    toast.title = t("update.success");
+    toast.title = "Xcode list updated successfully";
 
     // Fecha a janela após sucesso
     await closeMainWindow();
   } catch (error: any) {
     toast.style = Toast.Style.Failure;
-    toast.title = t("error");
+    toast.title = "Error";
     toast.message = error.message;
   }
 }

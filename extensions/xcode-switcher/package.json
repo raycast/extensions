@@ -9,30 +9,6 @@
     "Developer Tools"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "language",
-      "type": "dropdown",
-      "required": false,
-      "title": "Language",
-      "description": "Choose the language for the extension",
-      "default": "auto",
-      "data": [
-        {
-          "title": "Auto (System Default)",
-          "value": "auto"
-        },
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "Português",
-          "value": "pt"
-        }
-      ]
-    }
-  ],
   "commands": [
     {
       "name": "toggle-xcode",

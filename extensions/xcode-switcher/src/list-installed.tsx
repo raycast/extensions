@@ -9,7 +9,6 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { findXcodesPath, listInstalled, XcodeVersion } from "./utils/xcodes";
-import { t } from "./utils/i18n";
 import { exec } from "child_process";
 
 export default function Command() {
@@ -26,11 +25,11 @@ export default function Command() {
     const xcodesPath = findXcodesPath();
 
     if (!xcodesPath) {
-      setError(t("xcodes.notFound"));
+      setError("xcodes not found");
       showToast({
         style: Toast.Style.Failure,
-        title: t("xcodes.notFound"),
-        message: t("xcodes.installMessage"),
+        title: "xcodes not found",
+        message: "Install with: brew install xcodesorg/made/xcodes",
       });
       setIsLoading(false);
       return;
@@ -43,7 +42,7 @@ export default function Command() {
       setError(err.message);
       showToast({
         style: Toast.Style.Failure,
-        title: t("error"),
+        title: "Error",
         message: err.message,
       });
     } finally {
@@ -60,7 +59,7 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={Icon.XMarkCircle}
-          title={t("error")}
+          title="Error"
           description={error}
         />
       </List>
@@ -80,13 +79,13 @@ export default function Command() {
             <ActionPanel>
               {xcode.path && (
                 <Action
-                  title={t("installed.openInFinder")}
+                  title="Open in Finder"
                   icon={Icon.Finder}
                   onAction={() => openInFinder(xcode.path!)}
                 />
               )}
               <Action
-                title={t("reload")}
+                title="Reload"
                 icon={Icon.ArrowClockwise}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={loadVersions}

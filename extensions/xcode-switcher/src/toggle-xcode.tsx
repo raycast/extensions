@@ -17,7 +17,6 @@ import {
   selectVersion,
   XcodeVersion,
 } from "./utils/xcodes";
-import { t } from "./utils/i18n";
 import {
   getSavedPassword,
   savePassword,
@@ -40,7 +39,7 @@ function PasswordForm({ onPasswordSet }: PasswordFormProps) {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: t("auth.validating"),
+      title: "Validating password...",
     });
 
     try {
@@ -49,8 +48,8 @@ function PasswordForm({ onPasswordSet }: PasswordFormProps) {
       if (!isValid) {
         console.log("[PASSWORD-FORM] Password validation failed");
         toast.style = Toast.Style.Failure;
-        toast.title = t("auth.invalidPassword");
-        toast.message = t("auth.tryAgain");
+        toast.title = "Invalid Password";
+        toast.message = "Please try again";
         setIsValidating(false);
         return;
       }
@@ -59,7 +58,7 @@ function PasswordForm({ onPasswordSet }: PasswordFormProps) {
       await savePassword(password);
 
       toast.style = Toast.Style.Success;
-      toast.title = t("auth.passwordSaved");
+      toast.title = "Password saved successfully";
 
       console.log("[PASSWORD-FORM] Password saved, closing form");
       pop();
@@ -67,7 +66,7 @@ function PasswordForm({ onPasswordSet }: PasswordFormProps) {
     } catch (error: any) {
       console.error("[PASSWORD-FORM] Error:", error.message);
       toast.style = Toast.Style.Failure;
-      toast.title = t("error");
+      toast.title = "Error";
       toast.message = error.message;
       setIsValidating(false);
     }
@@ -78,22 +77,19 @@ function PasswordForm({ onPasswordSet }: PasswordFormProps) {
       isLoading={isValidating}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={t("auth.savePassword")}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Save Password" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description text={t("auth.passwordDescription")} />
+      <Form.Description text="To switch Xcode versions, we need your macOS password. It will be stored securely in Raycast's local storage." />
       <Form.PasswordField
         id="password"
-        title={t("auth.password")}
-        placeholder={t("auth.enterPassword")}
+        title="Password"
+        placeholder="Enter your macOS password"
         value={password}
         onChange={setPassword}
       />
-      <Form.Description text={t("auth.passwordNote")} />
+      <Form.Description text="⚠️ Your password is stored locally and used only for executing sudo commands to switch Xcode versions." />
     </Form>
   );
 }
@@ -110,12 +106,12 @@ export default function Command() {
     setXcodesPath(path);
 
     if (!path) {
-      setError(t("xcodes.notFound"));
+      setError("xcodes not found");
       setIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
-        title: t("xcodes.notFound"),
-        message: t("xcodes.installMessage"),
+        title: "xcodes not found",
+        message: "Install with: brew install xcodesorg/made/xcodes",
       });
     } else {
       loadVersions(path);
@@ -138,7 +134,7 @@ export default function Command() {
 
       const parsed = parseSelectOutput(output);
       if (parsed.length === 0) {
-        setError(t("select.noVersions"));
+        setError("No Xcode versions found");
       } else {
         setVersions(parsed);
       }
@@ -148,13 +144,13 @@ export default function Command() {
         if (parsed.length > 0) {
           setVersions(parsed);
         } else {
-          setError(t("select.noVersions"));
+          setError("No Xcode versions found");
         }
       } else {
         setError(err.message);
         showToast({
           style: Toast.Style.Failure,
-          title: t("error"),
+          title: "Error",
           message: err.message,
         });
       }
@@ -172,7 +168,7 @@ export default function Command() {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: t("select.switching", { version }),
+      title: `Switching to Xcode ${version}...`,
     });
 
     try {
@@ -182,8 +178,8 @@ export default function Command() {
       if (!savedPassword) {
         console.log("[TOGGLE-XCODE] No saved password, showing password form");
         toast.style = Toast.Style.Failure;
-        toast.title = t("auth.passwordRequired");
-        toast.message = t("auth.enterPassword");
+        toast.title = "Password Required";
+        toast.message = "Enter your macOS password";
         return;
       }
 
@@ -194,7 +190,7 @@ export default function Command() {
 
       console.log("[TOGGLE-XCODE] Version selected successfully");
       toast.style = Toast.Style.Success;
-      toast.title = t("select.success", { version });
+      toast.title = `Xcode ${version} is now active`;
 
       setTimeout(() => loadVersions(xcodesPath), 1000);
     } catch (error: any) {
@@ -206,19 +202,19 @@ export default function Command() {
           "[TOGGLE-XCODE] Invalid password, clearing and requesting new one",
         );
         toast.style = Toast.Style.Failure;
-        toast.title = t("auth.invalidPassword");
-        toast.message = t("auth.enterPassword");
+        toast.title = "Invalid Password";
+        toast.message = "Enter your macOS password";
         return;
       }
 
       if (error.stdout && error.stdout.includes("Selected")) {
         console.log("[TOGGLE-XCODE] Selection succeeded despite error");
         toast.style = Toast.Style.Success;
-        toast.title = t("select.success", { version });
+        toast.title = `Xcode ${version} is now active`;
         setTimeout(() => loadVersions(xcodesPath), 1000);
       } else {
         toast.style = Toast.Style.Failure;
-        toast.title = t("error");
+        toast.title = "Error";
         toast.message = error.message;
       }
     }
@@ -229,16 +225,16 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={Icon.XMarkCircle}
-          title={t("error")}
+          title="Error"
           description={error}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title={t("xcodes.viewDocs")}
+                title="View xcodes Documentation"
                 url="https://github.com/XcodesOrg/xcodes"
               />
               <Action.OpenInBrowser
-                title={t("xcodes.installBrew")}
+                title="Install Homebrew"
                 url="https://brew.sh"
               />
             </ActionPanel>
@@ -256,14 +252,12 @@ export default function Command() {
           icon={xcode.isSelected ? Icon.CheckCircle : Icon.Circle}
           title={`Xcode ${xcode.version}`}
           subtitle={xcode.build}
-          accessories={[
-            { text: xcode.isSelected ? `✓ ${t("select.active")}` : "" },
-          ]}
+          accessories={[{ text: xcode.isSelected ? `✓ Active` : "" }]}
           actions={
             <ActionPanel>
               {!xcode.isSelected && (
                 <Action
-                  title={t("select.selectVersion")}
+                  title="Select This Version"
                   icon={Icon.Check}
                   onAction={() =>
                     handleSelectVersion(xcode.number, xcode.version)
@@ -271,7 +265,7 @@ export default function Command() {
                 />
               )}
               <Action
-                title={t("auth.configurePassword")}
+                title="Configure Password"
                 icon={Icon.Lock}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                 onAction={() =>
@@ -283,7 +277,7 @@ export default function Command() {
                 }
               />
               <Action
-                title={t("auth.clearPassword")}
+                title="Clear Saved Password"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={async () => {
@@ -291,12 +285,12 @@ export default function Command() {
                   await clearPassword();
                   await showToast({
                     style: Toast.Style.Success,
-                    title: t("auth.passwordCleared"),
+                    title: "Password cleared",
                   });
                 }}
               />
               <Action
-                title={t("reload")}
+                title="Reload"
                 icon={Icon.ArrowClockwise}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={() => xcodesPath && loadVersions(xcodesPath)}
