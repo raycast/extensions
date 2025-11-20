@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hyperdash",
+  "title": "Hyperdash",
+  "version": "1.0.7",
+  "description": "v1.0.7 - Manage Obsidian projects and tasks with TaskNotes 4.0.1 compatibility. Tag-based filtering, smart sorting, recurrence patterns, and time tracking.",
+  "icon": "icon.png",
+  "author": "jeremyallen",
+  "license": "MIT",
+  "keywords": [
+    "obsidian",
+    "tasks",
+    "projects",
+    "productivity",
+    "tasknotes",
+    "todo",
+    "notes"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "permissions": [
+    "filesystem"
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "type": "textfield",
+      "required": true,
+      "title": "Task Notes Path",
+      "description": "Path to scan for todos (e.g., /path/to/vault/todos for better performance)",
+      "placeholder": "/path/to/obsidian/vault/todos"
+    },
+    {
+      "name": "projectPath",
+      "type": "textfield",
+      "required": true,
+      "title": "Project Path",
+      "description": "Path to scan for projects. Set to full vault root for all projects.",
+      "placeholder": "/path/to/obsidian/vault"
+    },
+    {
+      "name": "basesTodoFile",
+      "type": "textfield",
+      "required": true,
+      "title": "Todo Base Path",
+      "description": "Path to your Bases .base file containing todo tag definitions",
+      "placeholder": "/path/to/obsidian/vault/bases/hyperdash.base"
+    },
+    {
+      "name": "basesProjectFile",
+      "type": "textfield",
+      "required": true,
+      "title": "Project Base Path",
+      "description": "Path to your Bases .base file containing project tag definitions",
+      "placeholder": "/path/to/obsidian/vault/bases/hyperpro.base"
+    },
+    {
+      "name": "showRecurrence",
+      "type": "checkbox",
+      "required": false,
+      "title": "Display Features",
+      "label": "Show recurrence info",
+      "description": "Display recurrence patterns for recurring tasks",
+      "default": true
+    },
+    {
+      "name": "showPriority",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show priority",
+      "description": "Display task priority (use alphabetical names: 1-urgent, 2-high, 3-medium, 4-low)",
+      "default": true
+    },
+    {
+      "name": "showTimeTracking",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show time tracking",
+      "description": "Display time tracked and estimates",
+      "default": false
+    },
+    {
+      "name": "maxResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Performance",
+      "description": "Maximum number of tasks to display (default: 500, helps with large vaults)",
+      "placeholder": "500",
+      "default": "500"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray build -e dev",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "browse",
+      "title": "Task Notes",
+      "subtitle": "hyperDASH",
+      "description": "List Todos (tag-only) and Projects (Bases-compatible)",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Project Notes",
+      "subtitle": "hyperDASH",
+      "description": "List Projects (Bases-compatible)",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "fast-glob": "^3.3.2",
+    "gray-matter": "^4.0.3",
+    "yaml": "^2.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.2",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0"
+  }
+}
