@@ -1,6 +1,6 @@
 # Git Assistant Changelog
 
-## [Git Tools Enhancements] - 2025-11-20
+## [Git Tools Enhancements] - {PR_MERGE_DATE}
 - Added checkout and branch management tools (`checkout-branch`, `create-branch`, `get-current-branch`, `get-git-branches`).
 - Introduced diff and change inspection tools for staged, unstaged, and target comparisons with improved output trimming.
 - Expanded staging workflows with `stage-files`, `unstage-files`, and `reset-staged` for fine-grained index control.
