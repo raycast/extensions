@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, getSelectedFinderItems } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { serveImageAndOpenAnnotely } from "./utils";
 import fs from "fs";
@@ -10,17 +10,27 @@ export default async function Command() {
   });
 
   try {
-    // We use AppleScript directly because getSelectedFinderItems throws if Finder isn't frontmost
-    const imagePath = await runAppleScript(`
-      tell application "Finder"
-        set theSelection to selection
-        if theSelection is {} then
-          return ""
-        end if
-        set theItem to item 1 of theSelection
-        return POSIX path of (theItem as alias)
-      end tell
-    `);
+    let imagePath = "";
+
+    if (process.platform === "darwin") {
+      // We use AppleScript directly because getSelectedFinderItems throws if Finder isn't frontmost
+      imagePath = await runAppleScript(`
+        tell application "Finder"
+          set theSelection to selection
+          if theSelection is {} then
+            return ""
+          end if
+          set theItem to item 1 of theSelection
+          return POSIX path of (theItem as alias)
+        end tell
+      `);
+    } else {
+      // On Windows, we rely on the standard API
+      const items = await getSelectedFinderItems();
+      if (items.length > 0) {
+        imagePath = items[0].path;
+      }
+    }
 
     if (!imagePath || imagePath.trim() === "") {
       toast.style = Toast.Style.Failure;

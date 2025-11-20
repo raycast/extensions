@@ -19,19 +19,22 @@
       "name": "annotate-clipboard-image",
       "title": "Annotate Clipboard Image",
       "description": "Upload and annotate the image from your clipboard.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Annotely"
     },
     {
       "name": "annotate-selected-file",
       "title": "Annotate Selected File",
       "description": "Upload and annotate the selected image file from Finder.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Annotely"
     },
     {
       "name": "annotate-web-url",
       "title": "Annotate Web URL",
       "description": "Open a web image URL in Annotely.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Annotely"
     }
   ],
   "dependencies": {
