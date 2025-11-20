@@ -14,6 +14,8 @@
 
 A powerful Raycast extension for managing Obsidian Projects and Tasks with full TaskNotes 4.0.1 compatibility. Seamlessly browse, filter, and organize your Obsidian vault's tasks and projects directly from Raycast.
 
+![Hyperdash Screenshot](metadata/hyperdash-1.png)
+
 ## Features
 
 - **Tag-based filtering** via Obsidian Bases files
