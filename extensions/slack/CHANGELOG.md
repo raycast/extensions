@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Add "Copy ID to Clipboard" action to the "Open Channel" command] - 2025-11-20
+## [Add action for copying IDs of users or channels] - {PR_MERGE_DATE}
 
 - Added "Copy ID to Clipboard" action to the "Open Channel" command so we can easily copy the user or channel's ID straight from the list
 
