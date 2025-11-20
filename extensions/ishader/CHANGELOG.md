@@ -1,6 +1,6 @@
 # iShader Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-11-20
 
 - Add dither shader effect with multiple patterns (Floyd-Steinberg, Bayer)
 - Add ASCII art shader effect
