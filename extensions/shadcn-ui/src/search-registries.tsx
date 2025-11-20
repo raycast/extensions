@@ -69,6 +69,7 @@ function RegistryListItem({ registry }: { registry: Registry }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Registry Name" content={registry.name} />
+            <Action.CopyToClipboard title="Copy Registry URL" content={registry.url} />
             <Action.OpenInBrowser title="Visit Website" url={registry.domain} />
           </ActionPanel.Section>
         </ActionPanel>
