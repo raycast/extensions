@@ -16,6 +16,10 @@ interface DocumentCommentsProps {
   documentTitle: string;
 }
 
+interface ContentBlock {
+  content?: { text?: string }[];
+}
+
 export default function DocumentComments({
   documentId,
   documentTitle,
@@ -46,12 +50,10 @@ export default function DocumentComments({
   function getCommentText(comment: Comment): string {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const textContent = comment.data.content
-        .flatMap(
-          (block: { content?: { text?: string }[] }) => block.content || [],
-        )
-        .filter((item: { text?: string }) => item.text)
-        .map((item: { text?: string }) => item.text)
+      const textContent = (comment.data.content as ContentBlock[])
+        .flatMap((block) => block.content || [])
+        .filter((item) => item.text)
+        .map((item) => item.text)
         .join(" ");
       return textContent || "No text content";
     } catch {
