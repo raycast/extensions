@@ -205,8 +205,6 @@
   },
   "scripts": {
     "build": "ray build -e dist -o dist",
-    "build:windows": "bunx ray build -e dist -o dist && (node ./scripts/install-on-windows.cjs || bun ./scripts/install-on-windows.cjs)",
-    "install-windows": "node ./scripts/install-on-windows.cjs || bun ./scripts/install-on-windows.cjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
