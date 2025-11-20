@@ -16,7 +16,8 @@
   "commands": [
     {
       "name": "za-id-number",
-      "title": "ZA ID Number",
+      "title": "Copy ID Number",
+      "subtitle": "South African Fake ID Number Generator",
       "description": "Create a fake South African ID number and copy it to your clipboard",
       "mode": "no-view"
     }
