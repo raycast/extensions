@@ -1,0 +1,91 @@
+{
+    "name": "outline-raycast",
+    "title": "Outline",
+    "description": "Search and manage your Outline knowledge base.",
+    "icon": "command-icon.png",
+    "author": "max",
+    "categories": [
+        "Other"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "search-documents",
+            "title": "Search Documents",
+            "subtitle": "Outline",
+            "description": "Search for documents in Outline",
+            "mode": "view"
+        },
+        {
+            "name": "create-document",
+            "title": "Create Document",
+            "subtitle": "Outline",
+            "description": "Create a new document in Outline",
+            "mode": "view"
+        },
+        {
+            "name": "starred-documents",
+            "title": "Starred Documents",
+            "subtitle": "Outline",
+            "description": "View your starred documents",
+            "mode": "view"
+        },
+        {
+            "name": "recent-documents",
+            "title": "Recent Documents",
+            "subtitle": "Outline",
+            "description": "View recently viewed documents",
+            "mode": "view"
+        },
+        {
+            "name": "browse-collections",
+            "title": "Browse Collections",
+            "subtitle": "Outline",
+            "description": "Browse documents by collection",
+            "mode": "view"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "apiKey",
+            "type": "password",
+            "required": true,
+            "title": "API Key",
+            "description": "Your Outline API key. Generate one in Settings → API Keys.",
+            "placeholder": "Enter your Outline API key"
+        },
+        {
+            "name": "instanceUrl",
+            "type": "textfield",
+            "required": false,
+            "title": "Instance URL",
+            "description": "URL of your Outline instance (leave empty for cloud version)",
+            "placeholder": "https://app.getoutline.com",
+            "default": "https://app.getoutline.com"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.86.0",
+        "@raycast/utils": "^1.16.3",
+        "node-fetch": "^3.3.2"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.8",
+        "@types/node": "20.8.10",
+        "@types/react": "18.2.27",
+        "eslint": "^8.57.0",
+        "prettier": "^3.3.3",
+        "typescript": "^5.4.5"
+    },
+    "overrides": {
+        "@types/react": "18.2.27"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\\"prepublishOnly\\\" script and rerun \\\"npm publish\\\" again.\\nIf you wanted to publish it to the Raycast Store instead, use \\\"npm run publish\\\" instead.\\n\\n\" && exit 1",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
