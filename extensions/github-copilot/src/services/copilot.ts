@@ -96,6 +96,18 @@ type GetJobResponse =
       };
     };
 
+type QuotaSnapshot = {
+  entitlement: number;
+  overage_count: number;
+  overage_permitted: boolean;
+  percent_remaining: number;
+  quota_id: string;
+  quota_remaining: number;
+  remaining: number;
+  unlimited: boolean;
+  timestamp_utc: string;
+};
+
 type CopilotInternalUserResponse = {
   access_type_sku: string;
   analytics_tracking_id: string;
@@ -110,54 +122,24 @@ type CopilotInternalUserResponse = {
   }>;
   quota_reset_date: string;
   quota_snapshots: {
-    chat?: {
-      entitlement: number;
-      overage_count: number;
-      overage_permitted: boolean;
-      percent_remaining: number;
-      quota_id: string;
-      quota_remaining: number;
-      remaining: number;
-      unlimited: boolean;
-      timestamp_utc: string;
-    };
-    completions?: {
-      entitlement: number;
-      overage_count: number;
-      overage_permitted: boolean;
-      percent_remaining: number;
-      quota_id: string;
-      quota_remaining: number;
-      remaining: number;
-      unlimited: boolean;
-      timestamp_utc: string;
-    };
-    premium_interactions?: {
-      entitlement: number;
-      overage_count: number;
-      overage_permitted: boolean;
-      percent_remaining: number;
-      quota_id: string;
-      quota_remaining: number;
-      remaining: number;
-      unlimited: boolean;
-      timestamp_utc: string;
-    };
+    chat?: QuotaSnapshot;
+    completions?: QuotaSnapshot;
+    premium_interactions?: QuotaSnapshot;
   };
   quota_reset_date_utc: string;
 };
 
 type CopilotUsage = {
   inlineSuggestions: {
-    current: number;
+    percentageUsed: number;
     limit: number | null;
   };
   chatMessages: {
-    current: number;
+    percentageUsed: number;
     limit: number | null;
   };
   premiumRequests: {
-    current: number;
+    percentageUsed: number;
     limit: number | null;
   };
   allowanceResetAt: string;
@@ -421,5 +403,12 @@ export const fetchCopilotUsage = async (): Promise<CopilotUsage> => {
 };
 
 // Export types for use in other files
-export type { AgentSession, PullRequest, PullRequestWithAgentSessions, CopilotUsage, CopilotInternalUserResponse };
+export type {
+  AgentSession,
+  PullRequest,
+  PullRequestWithAgentSessions,
+  CopilotUsage,
+  CopilotInternalUserResponse,
+  QuotaSnapshot,
+};
 export { AgentSessionState };

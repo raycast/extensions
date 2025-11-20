@@ -1,8 +1,8 @@
 import { usePromise } from "@raycast/utils";
-import { CopilotUsage } from "../services/copilot";
+import { fetchCopilotUsage } from "../services/copilot";
 
-export function useCopilotUsage(fetchUsage: () => Promise<CopilotUsage>) {
-  const { isLoading, data: usage, revalidate } = usePromise(fetchUsage, [], { execute: true });
+export function useCopilotUsage() {
+  const { isLoading, data: usage, revalidate } = usePromise(fetchCopilotUsage, [], { execute: true });
 
   return { isLoading, usage, revalidate };
 }

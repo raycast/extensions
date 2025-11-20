@@ -1,27 +1,24 @@
-import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { useCallback } from "react";
+import { List, Icon, Color } from "@raycast/api";
 import { useCopilotUsage } from "./hooks/useCopilotUsage";
-import { fetchCopilotUsage } from "./services/copilot";
+import { RefreshAction } from "./components/RefreshAction";
 
 function Command() {
-  const fetchUsage = useCallback(() => fetchCopilotUsage(), []);
+  const { isLoading, usage, revalidate } = useCopilotUsage();
 
-  const { isLoading, usage, revalidate } = useCopilotUsage(fetchUsage);
-
-  const formatUsage = (current: number, limit: number | null): string => {
+  const formatUsage = (percentageUsed: number, limit: number | null): string => {
     if (limit === null) {
-      return "Included";
+      return "Unlimited";
     }
-    return `${current.toFixed(1)}%`;
+    return `${percentageUsed.toFixed(1)}%`;
   };
 
-  const getProgressColor = (current: number, limit: number | null): Color => {
+  const getProgressColor = (percentageUsed: number, limit: number | null): Color => {
     if (limit === null) {
       return Color.Green;
     }
-    if (current >= 90) {
+    if (percentageUsed >= 90) {
       return Color.Red;
-    } else if (current >= 70) {
+    } else if (percentageUsed >= 70) {
       return Color.Orange;
     }
     return Color.Blue;
@@ -60,77 +57,60 @@ function Command() {
               title="Code completions"
               accessories={[
                 {
-                  text: formatUsage(usage.inlineSuggestions.current, usage.inlineSuggestions.limit),
+                  text: formatUsage(usage.inlineSuggestions.percentageUsed, usage.inlineSuggestions.limit),
                   icon: {
                     source: Icon.BarChart,
-                    tintColor: getProgressColor(usage.inlineSuggestions.current, usage.inlineSuggestions.limit),
+                    tintColor: getProgressColor(usage.inlineSuggestions.percentageUsed, usage.inlineSuggestions.limit),
                   },
                 },
               ]}
               icon={{ source: Icon.Code, tintColor: Color.PrimaryText }}
-              actions={
-                <ActionPanel>
-                  <Action title="Refresh" onAction={revalidate} />
-                </ActionPanel>
-              }
+              actions={<RefreshAction onRefresh={revalidate} />}
             />
             <List.Item
               title="Chat messages"
               accessories={[
                 {
-                  text: formatUsage(usage.chatMessages.current, usage.chatMessages.limit),
+                  text: formatUsage(usage.chatMessages.percentageUsed, usage.chatMessages.limit),
                   icon: {
                     source: Icon.BarChart,
-                    tintColor: getProgressColor(usage.chatMessages.current, usage.chatMessages.limit),
+                    tintColor: getProgressColor(usage.chatMessages.percentageUsed, usage.chatMessages.limit),
                   },
                 },
               ]}
               icon={{ source: Icon.Message, tintColor: Color.PrimaryText }}
-              actions={
-                <ActionPanel>
-                  <Action title="Refresh" onAction={revalidate} />
-                </ActionPanel>
-              }
+              actions={<RefreshAction onRefresh={revalidate} />}
             />
             <List.Item
               title="Premium requests"
               accessories={[
                 {
-                  text: formatUsage(usage.premiumRequests.current, usage.premiumRequests.limit),
+                  text: formatUsage(usage.premiumRequests.percentageUsed, usage.premiumRequests.limit),
                   icon: {
                     source: Icon.BarChart,
-                    tintColor: getProgressColor(usage.premiumRequests.current, usage.premiumRequests.limit),
+                    tintColor: getProgressColor(usage.premiumRequests.percentageUsed, usage.premiumRequests.limit),
                   },
                 },
               ]}
               icon={{ source: Icon.Star, tintColor: Color.PrimaryText }}
-              actions={
-                <ActionPanel>
-                  <Action title="Refresh" onAction={revalidate} />
-                </ActionPanel>
-              }
+              actions={<RefreshAction onRefresh={revalidate} />}
             />
           </List.Section>
-          <List.Section title="">
-            <List.Item
-              title="Additional paid premium requests enabled."
-              icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
-              actions={
-                <ActionPanel>
-                  <Action title="Refresh" onAction={revalidate} />
-                </ActionPanel>
-              }
-            />
-            <List.Item
-              title={`Allowance resets ${formatResetDate(usage.allowanceResetAt)}.`}
-              icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
-              actions={
-                <ActionPanel>
-                  <Action title="Refresh" onAction={revalidate} />
-                </ActionPanel>
-              }
-            />
-          </List.Section>
+
+          {usage.allowanceResetAt && (
+            <List.Section title="">
+              <List.Item
+                title="Additional paid premium requests enabled."
+                icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
+                actions={<RefreshAction onRefresh={revalidate} />}
+              />
+              <List.Item
+                title={`Allowance resets ${formatResetDate(usage.allowanceResetAt)}.`}
+                icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
+                actions={<RefreshAction onRefresh={revalidate} />}
+              />
+            </List.Section>
+          )}
         </>
       )}
     </List>

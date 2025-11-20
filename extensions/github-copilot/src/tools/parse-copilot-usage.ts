@@ -1,11 +1,4 @@
-import type { CopilotInternalUserResponse, CopilotUsage } from "../services/copilot";
-
-type QuotaSnapshot = {
-  entitlement?: number;
-  percent_remaining?: number;
-  remaining?: number;
-  unlimited?: boolean;
-};
+import type { CopilotInternalUserResponse, CopilotUsage, QuotaSnapshot } from "../services/copilot";
 
 /**
  * Calculates the consumed percentage from a quota snapshot
@@ -47,15 +40,15 @@ export const parseUsageData = (response: CopilotInternalUserResponse): CopilotUs
 
   return {
     inlineSuggestions: {
-      current: inlineSuggestionsCurrent,
+      percentageUsed: inlineSuggestionsCurrent,
       limit: inlineSuggestionsLimit,
     },
     chatMessages: {
-      current: chatMessagesCurrent,
+      percentageUsed: chatMessagesCurrent,
       limit: chatMessagesLimit,
     },
     premiumRequests: {
-      current: premiumRequestsCurrent,
+      percentageUsed: premiumRequestsCurrent,
       limit: premiumRequestsLimit,
     },
     allowanceResetAt: response.quota_reset_date_utc,
