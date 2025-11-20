@@ -12,6 +12,7 @@ import {
   launchCommand,
   LaunchType,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
@@ -34,6 +35,7 @@ import { StartRadioAction } from "./components/StartRadioAction";
 import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
 import { getErrorMessage } from "./helpers/getError";
+import isMenuBarAvailable from "./helpers/isMenuBarAvailable";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
@@ -74,7 +76,7 @@ function NowPlayingCommand() {
                 onAction={async () => {
                   currentlyPlayingRevalidate();
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }
@@ -194,11 +196,18 @@ function NowPlayingCommand() {
         <Action
           icon={Icon.Forward}
           title="Next"
-          shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "arrowRight" },
+            Windows: { modifiers: ["ctrl"], key: "arrowRight" },
+          }}
           onAction={async () => {
             try {
               await skipToNext();
-              await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+
+              if (isMenuBarAvailable()) {
+                await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+              }
+
               if (closeWindowOnAction) {
                 await showHUD("Skipped to next");
                 await popToRoot();
@@ -221,11 +230,18 @@ function NowPlayingCommand() {
         <Action
           icon={Icon.Rewind}
           title="Previous"
-          shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+            Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+          }}
           onAction={async () => {
             try {
               await skipToPrevious();
-              await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+
+              if (isMenuBarAvailable()) {
+                await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+              }
+
               if (closeWindowOnAction) {
                 await showHUD("Skipped to previous");
                 await popToRoot();

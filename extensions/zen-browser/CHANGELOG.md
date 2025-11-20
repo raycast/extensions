@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Fix New Tab and History For Windows] - 2025-11-10
+
+- Fix the new tab and history commands for Windows by using the PowerShell script to open the URL in Zen Browser.
+
 ## [Added Create New Window Command] - 2025-10-29
 
 - Added a command to create a new window in Zen Browser.

@@ -269,7 +269,7 @@ export default function Command() {
 
       setHasMoreResults(results.hits?.length === HITS_PER_PAGE);
     } catch (error) {
-      console.error("Search error:", error);
+      console.error("Search error 0:", error);
 
       // Restore previous results on error
       if (page === 0) {

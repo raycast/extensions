@@ -1,0 +1,210 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paperform",
+  "title": "Paperform",
+  "description": "Search forms and view submissions from Paperform",
+  "icon": "extension_icon.png",
+  "author": "parterburn",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "ai": {
+    "instructions": "You are a helpful assistant that can help me find my Paperform forms and submissions. Only parse out the searchTerm if it seems like the user is searching for a specific named form(s). Always link to the form in the search results (https://paperform.co/edit/{slug}).",
+    "evals": [
+      {
+        "input" : "@paperform most recently active",
+        "mocks" : {
+          "search-paperforms" : {
+            "items" : [
+              {
+                "created_at" : "2025-10-21T21:21:02+00:00",
+                "id" : "tktktk",
+                "submission_count" : 0,
+                "title" : "TKTKTK",
+                "updated_at" : "2025-10-21T21:21:18+00:00",
+                "url" : "https://tktktk.paperform.co"
+              },
+              {
+                "created_at" : "2025-10-15T13:22:22+00:00",
+                "id" : "tktktk",
+                "submission_count" : 4,
+                "title" : "TKTKTK",
+                "updated_at" : "2025-10-27T01:41:29+00:00",
+                "url" : "https://tktktk.paperform.co"
+              }
+            ],
+            "summary" : "2 of 229 forms • sort=created_desc"
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "limit" : 10,
+                "sort" : "created_desc"
+              },
+              "name" : "search-paperforms"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@paperform most popular forms",
+        "mocks" : {
+          "search-paperforms" : {
+            "items" : [
+              {
+                "created_at" : "2021-02-08T19:17:40+00:00",
+                "id" : "tktktk",
+                "submission_count" : 1826,
+                "title" : "TKTKTK",
+                "updated_at" : "2025-09-09T15:20:34+00:00",
+                "url" : "https://tktktk.paperform.co"
+              },
+              {
+                "created_at" : "2019-01-19T20:00:14+00:00",
+                "id" : "tktktk",
+                "submission_count" : 1629,
+                "title" : "TKTKTK",
+                "updated_at" : "2025-09-09T15:06:02+00:00",
+                "url" : "https://tktktk.paperform.co"
+              },
+              {
+                "created_at" : "2021-04-23T17:47:18+00:00",
+                "id" : "tktktk",
+                "submission_count" : 593,
+                "title" : "TKTKTK",
+                "updated_at" : "2025-09-09T15:20:30+00:00",
+                "url" : "https://tktktk.paperform.co"
+              }
+            ],
+            "summary" : "3 of 229 forms • minSubmissions=40 sort=submissions_desc"
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "minSubmissions" : 40,
+                "sort" : "submissions_desc"
+              },
+              "name" : "search-paperforms"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@paperform list forms created over a year ago with no submissions and output all of the slugs in @raycast-notes",
+        "mocks" : {
+          "notes-create-note" : {
+            "message" : "Created new note at raycast://extensions/raycast/raycast-notes/raycast-notes?context=%7B%22id%22:%221234567890%22%7D"
+          },
+          "search-paperforms" : {
+            "counts" : {
+              "filtered" : 2,
+              "scanned" : 229,
+              "shown" : 2
+            },
+            "items" : [
+      
+            ],
+            "presentation" : "slugs_only",
+            "slugs" : [
+              "tktktk",
+              "tktktk2"
+            ],
+            "slugsPlain" : "tktktk\ntktktk2",
+            "summary" : "2 forms (scanned 229) • olderThan=365d maxSubmissions=0"
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "maxSubmissions" : 0,
+                "olderThan" : {
+                  "unit" : "years",
+                  "value" : 1
+                },
+                "returnIdsOnly" : true
+              },
+              "name" : "search-paperforms"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "content" : "# Paperform Slugs - Created Over 1 Year Ago, No Submissions\n\nFound 2 forms matching criteria:\n\n* tktktk\n* tkt",
+                "open" : true
+              },
+              "name" : "notes-create-note"
+            }
+          }
+        ]
+      }      
+    ]
+  },
+  "commands": [
+    {
+      "name": "list-paperforms",
+      "title": "Search Paperforms",
+      "description": "Search forms and view submissions",
+      "mode": "view",
+      "icon": "extension_icon.png",
+      "keywords": [
+        "paperform",
+        "forms",
+        "submissions"
+      ],
+      "preferences": [
+        {
+          "name": "apiKey",
+          "title": "API Key",
+          "type": "password",
+          "required": true,
+          "placeholder": "Paste your Paperform API key",
+          "description": "Generate a key at https://paperform.co/account/developer"
+        },
+        {
+          "name": "businessApi",
+          "label": "Business API access",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "description": "Enable Business API-only actions like enabling/disabling submissions."
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-paperforms",
+      "title": "Ask Paperform",
+      "description": "Use natural language to search and list forms in your Paperform account."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

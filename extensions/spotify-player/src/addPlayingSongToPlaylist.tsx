@@ -3,6 +3,7 @@ import {
   Action,
   ActionPanel,
   Icon,
+  Keyboard,
   LaunchProps,
   LaunchType,
   List,
@@ -71,7 +72,7 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                 onAction={async () => {
                   currentlyPlayingRevalidate();
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }
