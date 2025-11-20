@@ -1,6 +1,6 @@
 # Twos Post Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-11-20
 
 - Add support for Windows platform.
 - Bump all dependencies to the latest.
