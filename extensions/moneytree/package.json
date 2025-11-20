@@ -16,10 +16,16 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "authenticate",
-      "title": "Authenticate",
+      "name": "login",
+      "title": "Login",
       "description": "Connect your Moneytree account",
       "mode": "view"
+    },
+    {
+      "name": "logout",
+      "title": "Logout",
+      "description": "Disconnect your Moneytree account",
+      "mode": "no-view"
     },
     {
       "name": "list-credentials",

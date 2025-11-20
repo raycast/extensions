@@ -6,9 +6,35 @@ If you're concerned about security, please read the [Regarding Security](#regard
 
 ## Authentication
 
-Currently, authenticating with Moneytree requires a few manual steps due to the lack of an official Raycast integration on the Moneytree side. You'll need to copy an authorization URL, visit it in a private browser window, and manually extract and paste the authorization code back into the extension. These steps are needed as we can't provide a seamless in-app OAuth experience without Moneytree officially supporting this extension as a client.
+Use the "Login to Moneytree" command and enter your email and password. Your credentials are used only for authentication and are never stored.
 
-We hope that in the future Moneytree will provide an official OAuth client for Raycast, enabling direct authorization with proper browser redirects and a much simpler setup process. But no promises here ...
+## Regarding Security
+
+### Token Storage
+- Authentication tokens are stored securely using your system's built-in security (Keychain on Mac, Credential Manager on Windows)
+- Tokens are encrypted and only accessible to your user account
+
+### Credential Handling
+- Your email and password are never stored - they're used only once to log in
+- Credentials are sent directly to Moneytree and not saved anywhere in the extension
+
+### Direct Communication
+- The extension communicates directly with Moneytree's servers
+- No data passes through any third-party services
+
+### Read-Only Access
+- The extension only views your data - it cannot make transfers, payments, or modifications
+
+### Open Source
+- The source code is open and available for review
+
+### Local Caching
+- Data is cached locally to reduce API calls and improve privacy
+- Cache expires automatically after a few minutes
+
+### No Data Collection
+- The extension doesn't collect or share any data
+- Your information stays between you and Moneytree
 
 ## Contributing
 
