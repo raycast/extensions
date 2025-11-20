@@ -46,6 +46,19 @@ function searchItemAccessories(
   return searchMetadata;
 }
 
+function CopyIdAction({ id }: { id: string }) {
+  return (
+    <Action.CopyToClipboard
+      title="Copy ID to Clipboard"
+      content={id}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "c" },
+        windows: { modifiers: ["ctrl", "shift"], key: "c" },
+      }}
+    />
+  );
+}
+
 function Search() {
   const { isAppInstalled, isLoading } = useSlackApp();
   const { data, isLoading: isLoadingChannels } = useChannels();
@@ -108,14 +121,7 @@ function Search() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />
 
-                  <Action.CopyToClipboard
-                    title="Copy ID to Clipboard"
-                    content={userId}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                      windows: { modifiers: ["ctrl", "shift"], key: "c" },
-                    }}
-                  />
+                  <CopyIdAction id={userId} />
 
                   <ActionPanel.Section>
                     <Action
@@ -152,14 +158,7 @@ function Search() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
                   />
 
-                  <Action.CopyToClipboard
-                    title="Copy ID to Clipboard"
-                    content={channelId}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                      windows: { modifiers: ["ctrl", "shift"], key: "c" },
-                    }}
-                  />
+                  <CopyIdAction id={channelId} />
 
                   <ActionPanel.Section>
                     <Action
