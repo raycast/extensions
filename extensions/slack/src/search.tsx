@@ -111,7 +111,10 @@ function Search() {
                   <Action.CopyToClipboard
                     title="Copy ID to Clipboard"
                     content={userId}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                      windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                    }}
                   />
 
                   <ActionPanel.Section>
@@ -152,7 +155,10 @@ function Search() {
                   <Action.CopyToClipboard
                     title="Copy ID to Clipboard"
                     content={channelId}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                      windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                    }}
                   />
 
                   <ActionPanel.Section>
