@@ -9,7 +9,8 @@
     "williamwelsh",
     "Olivier-OG",
     "ridemountainpig",
-    "siddharth-2382"
+    "siddharth-2382",
+    "1weiho"
   ],
   "categories": [
     "Documentation",
@@ -46,6 +47,13 @@
       "title": "Search Examples",
       "subtitle": "shadcn/ui",
       "description": "Search shadcn/ui examples",
+      "mode": "view"
+    },
+    {
+      "name": "search-registries",
+      "title": "Search Registries",
+      "subtitle": "shadcn/ui",
+      "description": "Search shadcn/ui registries",
       "mode": "view"
     }
   ],
