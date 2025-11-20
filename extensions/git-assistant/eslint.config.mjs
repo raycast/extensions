@@ -1,7 +1,6 @@
+import { defineConfig } from "eslint/config";
 import raycastConfig from "@raycast/eslint-config";
 
-const flattenedConfig = raycastConfig.flatMap((entry) =>
-    Array.isArray(entry) ? entry : [entry]
-);
-
-export default flattenedConfig;
+export default defineConfig([
+  ...raycastConfig,
+]);
