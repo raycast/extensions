@@ -922,7 +922,7 @@
 /extensions/imagekit-uploader                                       @ludafa
 /extensions/imageoptim                                              @marckohlbrugge
 /extensions/images-compression                                      @okooo5km
-/extensions/imdb                                                    @ryan-exe @kgrhartlage @bibixx @dnsv @owain-williams
+/extensions/imdb                                                    @ryan-exe @kgrhartlage @bibixx @dnsv @owain-williams @xmok
 /extensions/imessage-2fa                                            @yuercl @thomaspaulmann @arronhunt @ronaldheft @hitolaus @taschaub @omaerkhan @clins1994
 /extensions/imgur                                                   @BalliAsghar @pernielsentikaer @caumeira
 /extensions/immich                                                  @xmok
@@ -2200,7 +2200,7 @@
 /extensions/twitter-trendscast                                      @pradeepb28
 /extensions/twitter-video-downloader                                @kaanrkaraman
 /extensions/two-factor-authentication-code-generator                @cjdenio @97albertus @LitoMore @cristiangrojas @xmok
-/extensions/twos                                                    @ekafyi
+/extensions/twos                                                    @ekafyi @ridemountainpig
 /extensions/tyme-3-time-tracker                                     @melkstam @medienbaecker
 /extensions/tynyfy                                                  @kusthi
 /extensions/type-snob                                               @sawyerh @chrismessina @0xdhrv
