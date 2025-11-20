@@ -14,6 +14,8 @@ Use the "Login to Moneytree" command and enter your email and password. Your cre
 - Authentication tokens are stored securely using your system's built-in security (Keychain on Mac, Credential Manager on Windows)
 - Tokens are encrypted and only accessible to your user account
 
+See [Raycast's OAuth documentation](https://developers.raycast.com/api-reference/oauth#oauth.pkceclient) for more details.
+
 ### Credential Handling
 - Your email and password are never stored - they're used only once to log in
 - Credentials are sent directly to Moneytree and not saved anywhere in the extension
