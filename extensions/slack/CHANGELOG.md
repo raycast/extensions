@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Add "Copy ID to Clipboard" action to the "Open Channel" command] - 2025-11-20
+
+- Added "Copy ID to Clipboard" action to the "Open Channel" command so we can easily copy the user or channel's ID straight from the list
+
 ## [Fix Send Message Missing Scope Error] - 2025-08-25
 - Add missing `chat:write` scope to fix “missing_scope” error when using the **Send Message** command.
 
