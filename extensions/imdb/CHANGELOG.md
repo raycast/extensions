@@ -1,6 +1,6 @@
 # IMDb Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-20
 
 - Add a Windows compatible `Keyboard` shortcut to ActionOpenParentalGuide
 
