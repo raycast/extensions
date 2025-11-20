@@ -1,5 +1,5 @@
 # Antigravity Changelog
 
-## [Added Antigravity] - {PR_MERGE_DATE}
+## [Added Antigravity] - 2025-11-20
 
 Initial version code
