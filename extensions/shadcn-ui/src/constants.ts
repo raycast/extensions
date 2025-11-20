@@ -8,7 +8,7 @@ export const SHADCN_URL = {
 } as const;
 
 export const OCTOKIT_CONFIG = {
-  owner: "shadcn",
+  owner: "shadcn-ui",
   repo: "ui",
   pathExamples: "apps/www/app/(app)/examples",
 } as const;
