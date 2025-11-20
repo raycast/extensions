@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - 2025-11-20
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release of Outline Raycast extension
 - Features include:
