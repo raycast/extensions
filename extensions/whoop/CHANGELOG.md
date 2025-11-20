@@ -1,5 +1,11 @@
 # WHOOP Changelog
 
+## [1.0.4] - 2025-11-20
+
+### Changed
+
+- Updated the API to use V2 endpoints since V1 got deprecated.
+
 All notable changes to this project will be documented in this file.
 
 ## [1.0.3] - 2024-10-19
