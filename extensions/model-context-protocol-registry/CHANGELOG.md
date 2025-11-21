@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Linear MCP Server] - 2025-11-21
+## [Add Atono MCP Server] - 2025-11-21
 
 Add official Atono MCP Server to registry to manage projects
 
