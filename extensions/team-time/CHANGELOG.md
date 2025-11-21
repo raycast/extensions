@@ -1,6 +1,6 @@
 # Team Time Changelog
 
-## [Menu Bar Title Group Count Preference and Team Time Menu Bar Functionality] - {PR_MERGE_DATE}
+## [Menu Bar Title Group Count Preference and Team Time Menu Bar Functionality] - 2025-11-21
 
 - Added a new preference for the number of time groups to display in the menu bar title.
 - Implemented the Team Time Menu Bar feature to show team flags and current times.
