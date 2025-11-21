@@ -1,8 +1,7 @@
 import { runPowerShellScript } from "@raycast/utils";
 
 export default async function setWallpaper(path: string) {
-  try {
-    await runPowerShellScript(`
+  await runPowerShellScript(`
 if (-Not (Test-Path "${path}")) {
     Write-Error "File not found: ${path}"
     exit 1
@@ -24,7 +23,4 @@ $flags = $SPIF_UPDATEINIFILE -bor $SPIF_SENDCHANGE
 
 [Wallpaper]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, "${path}", $flags)
 `);
-  } catch (error) {
-    console.error(`Could not set Windows wallpaper '${path}'. Reason: ${error}`);
-  }
 }
