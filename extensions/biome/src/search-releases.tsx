@@ -39,9 +39,11 @@ export default function SearchReleases() {
         <List.Section title={`Releases (${filteredReleases.length})`}>
           {filteredReleases.map((release) => {
             const isPrerelease = release.prerelease;
-            const releaseDate = new Date(
-              release.published_at || release.created_at,
-            ).toLocaleDateString();
+            const dateString =
+              release.published_at ||
+              release.created_at ||
+              new Date().toISOString();
+            const releaseDate = new Date(dateString).toLocaleDateString();
 
             return (
               <List.Item
@@ -72,11 +74,13 @@ export default function SearchReleases() {
                       content={release.tag_name}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
-                    <Action.OpenInBrowser
-                      title="Open on GitHub"
-                      url={release.html_url}
-                      shortcut={{ modifiers: ["cmd"], key: "o" }}
-                    />
+                    {release.html_url && (
+                      <Action.OpenInBrowser
+                        title="Open on GitHub"
+                        url={release.html_url}
+                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      />
+                    )}
                   </ActionPanel>
                 }
               />
@@ -97,9 +101,9 @@ export default function SearchReleases() {
 }
 
 function ReleaseDetail({ release }: { release: GitHubRelease }) {
-  const releaseDate = new Date(
-    release.published_at || release.created_at,
-  ).toLocaleString();
+  const dateString =
+    release.published_at || release.created_at || new Date().toISOString();
+  const releaseDate = new Date(dateString).toLocaleString();
   const markdown = `# ${release.tag_name}
 
 **Published:** ${releaseDate}
@@ -114,11 +118,13 @@ ${release.body || "No release notes available"}`;
       navigationTitle={release.tag_name}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open on GitHub"
-            url={release.html_url}
-            icon={Icon.Eye}
-          />
+          {release.html_url && (
+            <Action.OpenInBrowser
+              title="Open on GitHub"
+              url={release.html_url}
+              icon={Icon.Eye}
+            />
+          )}
           <Action.CopyToClipboard
             title="Copy Version"
             content={release.tag_name}
