@@ -63,14 +63,20 @@ export default function Command() {
         mode,
         excludes,
       }));
+      const excludes = await loadExcludeList();
+      
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        nodes: providerData.nodes,
+        providers: providerData.providers,
+        activeNode: selector?.now,
+        mode,
+        excludes,
+      }));
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load Clash Verge data",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Failed to load Clash Verge data" });
       setState((prev) => ({ ...prev, isLoading: false }));
-    }
   }
 
   const nodesByProvider = useMemo(() => {
