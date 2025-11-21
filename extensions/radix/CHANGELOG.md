@@ -1,6 +1,6 @@
 # Radix Changelog
 
-## [Added dynamic data generation] - 2025-11-20
+## [Added dynamic data generation] - {PR_MERGE_DATE}
 
 - Add automatic data generation from Radix website repository
 - Add component descriptions extracted from MDX files
