@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Color, Detail, confirmAlert, Alert, Keyboard} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, Detail, confirmAlert, Alert, Keyboard } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
