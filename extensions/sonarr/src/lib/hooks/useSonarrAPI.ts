@@ -7,7 +7,6 @@ import type { SeriesFull, SeriesLookup, RootFolder, QualityProfile, AddSeriesOpt
 import type { QueueItem } from "@/lib/types/queue";
 import type { WantedMissingResponse } from "@/lib/types/wanted";
 import type { SystemStatus, HealthCheck, Command } from "@/lib/types/system";
-import type { Preferences } from "@/lib/types/config";
 import {
   SeriesLookupSchema,
   SeriesFullSchema,

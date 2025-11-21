@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { format, formatDistanceToNow, isPast, isFuture } from "date-fns";
 import type { Image, Ratings } from "@/lib/types/episode";
-import type { Preferences } from "@/lib/types/config";
 import { CoverType } from "@/lib/types/episode";
 
 export function getSonarrUrl(): string {

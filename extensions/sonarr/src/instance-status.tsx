@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Icon, List, Color, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import type { Preferences } from "@/lib/types/config";
 import { getSonarrUrl } from "@/lib/utils/formatting";
 import { testConnection, useSystemStatus, useHealth } from "@/lib/hooks/useSonarrAPI";
 import { HealthCheckType } from "@/lib/types/system";

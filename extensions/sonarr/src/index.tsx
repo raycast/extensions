@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, List, confirmAlert, Alert, Color, Image, getPreferenceValues } from "@raycast/api";
 import { useMemo, useState } from "react";
 import type { SingleSeries } from "@/lib/types/episode";
-import type { Preferences } from "@/lib/types/config";
 import { useCalendar, searchEpisode, searchSeason, toggleEpisodeMonitoring } from "@/lib/hooks/useSonarrAPI";
 import {
   formatAirDate,
