@@ -31,7 +31,7 @@
     },
     {
       "name": "kill-process",
-      "title": "(force) Kill Process",
+      "title": "(Force) Kill Process",
       "description": "Terminates a process by its exact name or PID (Force kill requires enabling sudo authentication with touchID on macOS: https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28, admin rights on Windows)"
     }
   ],
