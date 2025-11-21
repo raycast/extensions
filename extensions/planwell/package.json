@@ -5,6 +5,7 @@
   "description": "Companion extension for PlanWell - the markdown-native teacher planning app. View today's classes, upcoming events, and todos. Requires a PlanWell vault (planwellmd.com).",
   "icon": "command-icon.png",
   "author": "Raynold",
+  "categories": ["Productivity", "Applications"],
   "license": "MIT",
   "commands": [
     {
