@@ -249,12 +249,12 @@ ${status.blurb}
         <List.Section title="Suggestions">
           <List.Item
             title="Current Location"
-            icon={Icon.MapPin}
+            icon={Icon.Pin}
             actions={
               <ActionPanel>
                 <Action
                   title="Use Current Location"
-                  icon={Icon.MapPin}
+                  icon={Icon.Pin}
                   onAction={handleUseCurrentLocation}
                 />
                 <Action

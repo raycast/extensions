@@ -228,7 +228,7 @@ export default function Command() {
                     ? `${Math.round(currentData.relativehumidity)}%`
                     : "N/A"
                 }
-                icon={Icon.Tint}
+                icon={Icon.Humidity}
               />
               {currentData.sealevelpressure && (
                 <List.Item
@@ -384,12 +384,12 @@ export default function Command() {
         <List.Section title="Suggestions">
           <List.Item
             title="Current Location"
-            icon={Icon.MapPin}
+            icon={Icon.Pin}
             actions={
               <ActionPanel>
                 <Action
                   title="Use Current Location"
-                  icon={Icon.MapPin}
+                  icon={Icon.Pin}
                   onAction={handleUseCurrentLocation}
                 />
                 <Action
