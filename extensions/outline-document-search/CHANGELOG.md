@@ -1,6 +1,6 @@
 # Outline Search Changelog
 
-## [Unreleased]
+## [Unreleased] - {PR_MERGE_DATE}
 
 ### Added
 - "Starred Documents" command to view and manage starred documents
