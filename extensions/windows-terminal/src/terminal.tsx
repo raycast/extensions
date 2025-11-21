@@ -229,7 +229,7 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
               title="Back to Terminal"
               onAction={() =>
                 onComplete({
-                  id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
                   command,
                   output,
                   timestamp: Date.now(),
