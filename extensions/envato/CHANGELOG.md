@@ -1,5 +1,14 @@
 # Envato Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- Modernize to use latest Raycast eslint configuration
+- Fix issue where "accountEnvato" would crash on first run due to missing cache
+- Show tooltip on badges
+- Add error handling in case of failed download link retrieval
+- Show _error_code_ in error message
+- Fix "verifyPurchaseCode" where it would resubmit onchange
+
 ## [Search Items + Purchases Enhancements] - 2024-12-02
 
 - Tweak title and description of extension
