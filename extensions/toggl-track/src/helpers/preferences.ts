@@ -10,4 +10,6 @@ export const {
   timeEntriesLookbackDays,
 } = preferences;
 
-export const cacheTtl = Number(preferences.cacheTtl) || 300;
+const cacheTtlParsed = parseInt(preferences.cacheTtl ?? "0");
+
+export const cacheTtl = isNaN(cacheTtlParsed) || cacheTtlParsed < 0 ? 0 : cacheTtlParsed;
