@@ -1,6 +1,6 @@
 # GitHub Enterprise Changelog
 
-## [Fix notification URLs for GitHub Enterprise Cloud] - {PR_MERGE_DATE}
+## [Fix notification URLs for GitHub Enterprise Cloud] - 2025-11-21
 
 - Fixed notification URLs for GitHub Enterprise Cloud instances
 - Clicking on notifications from the menu bar now correctly opens the web URL instead of the API URL
