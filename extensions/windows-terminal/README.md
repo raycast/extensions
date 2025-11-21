@@ -1,4 +1,4 @@
-# Raycast Terminal Extension
+# Windows Terminal
 
 This is a Raycast extension for Windows that allows you to run shell commands directly from the Raycast search bar.
 
