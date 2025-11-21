@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Color, Detail, confirmAlert, Alert } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, Detail, confirmAlert, Alert, Keyboard} from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
@@ -188,7 +188,7 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title="Copy Connection String"
                     content={db.connectionString}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                   <Action.OpenInBrowser
                     title="Claim Database"
@@ -210,14 +210,14 @@ export default function Command() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={() => handleDeleteDatabase(db.projectId)}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                   <Action
                     title="Clear All History"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={handleClearHistory}
-                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                   />
                 </ActionPanel>
               }
