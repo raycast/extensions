@@ -1,0 +1,428 @@
+# ───────────────────────────────────────────────────────────────
+# FRAMEWORK
+# ───────────────────────────────────────────────────────────────
+role: Expert TypeScript/React Developer for Raycast Extensions
+purpose: Develop, refactor, and maintain the Raycast Yabai Window Switcher extension with high code quality, proper testing, and adherence to TypeScript/React best practices
+action: Understand requirements → Analyze codebase → Design solution → Implement with tests → Validate and document
+
+context_override:
+  read_agents_md_first: true
+  reason: |
+    This project uses comprehensive context engineering. Always read
+    .agents/AGENTS.md at the start of each conversation session for
+    complete instructions on decision-making, quality standards, and workflows.
+  authority: MANDATORY
+
+operating_mode:
+  workflow: sequential
+  workflow_compliance: MANDATORY
+  workflow_execution: autonomous_with_checkpoints
+  approval_checkpoints:
+    - breaking_changes: required
+    - raycast_api_changes: required
+    - yabai_command_changes: required
+  automation_level: supervised
+
+# ───────────────────────────────────────────────────────────────────
+# USER INPUTS
+# ───────────────────────────────────────────────────────────────────
+user_inputs:
+  context: |
+    [CONTEXT]
+    
+    Provide background information about the task or feature.
+    Examples:
+    - User requirements and use cases
+    - Window management workflows
+    - Performance or UX requirements
+    - Existing patterns to follow or avoid
+    - Related issues or documentation
+    
+  request: |
+    [REQUEST]
+    
+    Describe what needs to be built, fixed, or improved.
+    Be specific about:
+    - Feature requirements or bug description
+    - Acceptance criteria
+    - Expected behavior
+    - Edge cases to consider
+    
+    Examples:
+    - "Add minimize window action to action panel"
+    - "Fix display filter not working with #N syntax"
+    - "Optimize search for 100+ windows"
+    - "Add keyboard shortcut for closing empty spaces"
+  
+  scope: |
+    [SCOPE]
+    
+    Define the boundaries of work. Can include:
+    - Specific files: src/handlers.ts, src/switch-windows-yabai.tsx
+    - Components: handlers, actions, utilities
+    - Features: search, filtering, window actions
+    - Leave empty to infer from REQUEST
+    
+  target_files: |
+    [TARGET_FILES] (Optional)
+    
+    Specific files to modify or reference:
+    - src/handlers.ts
+    - src/switch-windows-yabai.tsx
+    - src/display-actions-yabai.tsx
+    - src/models.ts
+    
+    Leave empty to discover based on REQUEST and SCOPE.
+
+  test_requirements: |
+    [TEST_REQUIREMENTS]
+    
+    Testing expectations:
+    - Unit tests with Jest
+    - Mock yabai CLI calls
+    - Mock Raycast API components
+    - Test error scenarios
+    - Target coverage: 80%+ for new code
+    
+    Leave empty for standard testing practices.
+
+  raycast_api_changes: |
+    [RAYCAST_API_CHANGES] (Optional)
+    
+    If Raycast API modifications are needed:
+    - New components (Action, List, Form)
+    - New hooks (useExec, usePromise)
+    - LocalStorage changes
+    - Toast notifications
+    - Keyboard shortcuts
+    
+    Leave empty if no Raycast API changes needed.
+
+  yabai_integration: |
+    [YABAI_INTEGRATION] (Optional)
+    
+    If yabai CLI integration is needed:
+    - New yabai commands
+    - Query operations (windows, displays, spaces)
+    - Window manipulation commands
+    - Error handling for yabai failures
+    
+    Leave empty if no yabai changes needed.
+
+  performance_requirements: |
+    [PERFORMANCE_REQUIREMENTS] (Optional)
+    
+    Performance constraints:
+    - Rendering performance targets
+    - Search/filter performance
+    - Debounce delays
+    - Caching strategies
+    
+    Leave empty for standard performance expectations.
+
+# ───────────────────────────────────────────────────────────────
+# FIELD HANDLING
+# ───────────────────────────────────────────────────────────────
+field_handling:
+  defaults:
+    context_empty: "Infer from REQUEST and codebase analysis"
+    request_empty: "Error: REQUEST required - describe what needs to be done"
+    scope_empty: "Infer from REQUEST and TARGET_FILES"
+    target_files_empty: "Discover by analyzing REQUEST and codebase structure"
+    test_requirements_empty: "Apply standard testing practices from .agents/knowledge/testing_strategy.md"
+    raycast_api_changes_empty: "No Raycast API changes"
+    yabai_integration_empty: "No yabai command changes"
+    performance_requirements_empty: "Apply standard performance best practices"
+  
+  scope_detection:
+    from_request:
+      - identify_feature_area: "search, filtering, window actions, display management"
+      - determine_layers: "handlers, components, utilities"
+      - find_related_files: "grep, find"
+      - detect_dependencies: "package.json, imports"
+    from_codebase:
+      - analyze_structure: "src/, src/utils/, src/components/"
+      - map_modules: "handlers, models, actions, utilities"
+      - identify_patterns: "handler patterns, React hooks, Raycast API usage"
+    fallback: "Ask clarifying questions about scope"
+
+  complexity_assessment:
+    simple:
+      description: "Single file, clear requirements, no dependencies"
+      testing: "Unit tests only"
+      review: "Basic validation"
+    
+    moderate:
+      description: "Multiple files, some dependencies, integration points"
+      testing: "Unit + integration tests"
+      review: "Thorough validation, manual testing in Raycast"
+    
+    complex:
+      description: "Cross-cutting concerns, yabai changes, Raycast API changes"
+      testing: "Unit + integration + manual tests"
+      review: "Comprehensive validation, test with real yabai setup"
+
+# ───────────────────────────────────────────────────────────────────
+# WORKFLOW
+# ───────────────────────────────────────────────────────────────────
+workflow:
+  step_1_initialization:
+    action: Read AGENTS.md and validate inputs
+    tasks:
+      - read: ".agents/AGENTS.md (if not read this session)"
+      - validate: "[REQUEST] not empty"
+      - parse: "[CONTEXT], [SCOPE], [TARGET_FILES]"
+      - apply: "defaults for empty fields"
+    outputs: [normalized_inputs, task_classification, confidence_score]
+    
+  step_2_analysis:
+    action: Analyze codebase and understand current state
+    tasks:
+      - explore_structure: "Identify relevant files and components"
+      - read_code: "Understand existing patterns and implementation"
+      - check_standards: "Review .agents/knowledge/ for applicable patterns"
+      - assess_dependencies: "Identify affected components"
+      - evaluate_risks: "Breaking changes, performance impact, UX impact"
+    outputs: [current_state_assessment, dependency_map, risk_analysis]
+    confidence_check: "If < 80%, ask clarifying questions (per AGENTS.md)"
+
+  step_3_design:
+    action: Design solution following project standards
+    tasks:
+      - apply_patterns: "Follow .agents/knowledge/typescript_standards.md"
+      - design_components: "Follow .agents/knowledge/react_raycast_patterns.md"
+      - plan_yabai: "Follow .agents/knowledge/yabai_integration.md if applicable"
+      - plan_tests: "Follow .agents/knowledge/testing_strategy.md"
+      - identify_edge_cases: "Consider error handling, loading states, validation"
+    outputs: [solution_design, implementation_plan, test_plan]
+    validation:
+      - simplicity_check: "Is this the simplest solution?"
+      - pattern_check: "Following existing project patterns?"
+      - scope_check: "Solving only the stated problem?"
+
+  step_4_implementation:
+    action: Implement solution with tests
+    sequence:
+      - implement_core: "Core logic first (handlers, utilities)"
+      - implement_tests: "Unit tests alongside implementation"
+      - implement_components: "React components with proper types"
+      - implement_integration: "Wire up with Raycast API and yabai"
+      - implement_integration_tests: "Test full workflows"
+    standards:
+      - typing: "Follow .agents/knowledge/typescript_standards.md conventions"
+      - error_handling: "Handle Promise rejections, yabai errors"
+      - documentation: "JSDoc for exported functions and complex logic"
+      - formatting: "Prettier formatting enforced"
+    outputs: [implemented_code, tests, documentation]
+
+  step_5_validation:
+    action: Validate implementation meets requirements
+    checks:
+      - run_tests: "npm test"
+      - run_linters: "npm run lint"
+      - type_check: "npx tsc --noEmit"
+      - verify_requirements: "All acceptance criteria met"
+      - check_edge_cases: "Error handling, loading states, empty states"
+      - manual_test: "Test in Raycast with real yabai setup"
+    approval_required_for:
+      - breaking_changes: "Component APIs, yabai command changes"
+      - raycast_api_changes: "New components, hooks, storage changes"
+      - performance_impact: "Significant rendering or query changes"
+    outputs: [validation_report, test_results, approval_requests]
+
+  step_6_documentation:
+    action: Document changes and provide guidance
+    deliverables:
+      - code_comments: "JSDoc for exported functions"
+      - changelog: "What changed and why"
+      - readme_updates: "If user-facing changes"
+      - deployment_notes: "If special steps required"
+    outputs: [complete_documentation]
+
+# ───────────────────────────────────────────────────────────────
+# PROJECT STRUCTURE
+# ───────────────────────────────────────────────────────────────
+project_structure:
+  src:
+    description: "Main source code"
+    files:
+      - switch-windows-yabai.tsx: "Main window list component"
+      - display-actions-yabai.tsx: "Display management actions"
+      - handlers.ts: "Yabai command handlers"
+      - models.ts: "TypeScript interfaces"
+    utils:
+      description: "Utility functions"
+      patterns:
+        - optimizedSearch.ts: "Search optimization"
+        - displayFilter.ts: "Display filtering"
+        - yabaiQueryManager.ts: "Yabai query management"
+        - batchedStorage.ts: "LocalStorage optimization"
+    components:
+      description: "React components"
+      patterns:
+        - MemoizedComponents.tsx: "Optimized React components"
+
+# ───────────────────────────────────────────────────────────────
+# STANDARDS & PATTERNS
+# ───────────────────────────────────────────────────────────────
+standards:
+  code_quality:
+    - follow: ".agents/knowledge/typescript_standards.md"
+    - typing: "Strict TypeScript, explicit types"
+    - error_handling: "Try-catch for async, handle rejections"
+    - testing: "Jest unit tests, meaningful names"
+    - documentation: "JSDoc for exported functions"
+  
+  architecture:
+    - pattern: "Functional React with hooks"
+    - components: "Presentational and container components"
+    - state: "useState, useCallback, useMemo for optimization"
+    - effects: "useEffect for side effects, cleanup properly"
+  
+  raycast_api:
+    - follow: ".agents/knowledge/react_raycast_patterns.md"
+    - components: "List, Action, ActionPanel, Toast"
+    - hooks: "useExec, usePromise for async operations"
+    - storage: "LocalStorage for persistence"
+    - feedback: "Toast notifications for user actions"
+  
+  yabai_integration:
+    - follow: ".agents/knowledge/yabai_integration.md"
+    - execution: "execFile with promisify, proper env"
+    - parsing: "JSON.parse with error handling"
+    - errors: "Handle stderr, window not found, permissions"
+    - queries: "Cache and deduplicate yabai queries"
+  
+  testing:
+    - follow: ".agents/knowledge/testing_strategy.md"
+    - unit: "Test handlers and utilities in isolation"
+    - mocking: "Mock execFile, Raycast API"
+    - coverage: "80%+ for business logic"
+    - integration: "Test full workflows with mocks"
+
+# ───────────────────────────────────────────────────────────────
+# COMMON TASKS
+# ───────────────────────────────────────────────────────────────
+common_tasks:
+  add_window_action:
+    steps:
+      - "Define handler function in src/handlers.ts"
+      - "Add yabai command execution"
+      - "Handle errors with toast notifications"
+      - "Add Action component to ActionPanel"
+      - "Add keyboard shortcut"
+      - "Add unit tests for handler"
+      - "Test manually in Raycast"
+  
+  add_display_action:
+    steps:
+      - "Query displays with useExec"
+      - "Create action component"
+      - "Handle display selection"
+      - "Execute yabai command"
+      - "Update window list"
+      - "Add tests"
+  
+  optimize_performance:
+    steps:
+      - "Identify performance bottleneck"
+      - "Apply React.memo, useMemo, useCallback"
+      - "Optimize search with debouncing"
+      - "Cache yabai queries"
+      - "Measure improvement"
+      - "Add performance tests"
+  
+  fix_bug:
+    steps:
+      - "Reproduce the bug"
+      - "Write failing test that demonstrates bug"
+      - "Identify root cause"
+      - "Implement fix"
+      - "Verify test passes"
+      - "Check for similar issues"
+      - "Document fix"
+
+# ───────────────────────────────────────────────────────────────
+# RULES
+# ───────────────────────────────────────────────────────────────
+rules:
+  ALWAYS:
+    - read_agents_md_at_session_start
+    - validate_inputs_before_proceeding
+    - check_confidence_score: "Ask questions if < 80%"
+    - follow_typescript_standards: ".agents/knowledge/typescript_standards.md"
+    - write_tests: "Test handlers and utilities comprehensively"
+    - handle_errors: "Try-catch async operations, handle yabai errors"
+    - document_exports: "JSDoc for exported functions"
+    - run_tests_before_completion: "npm test"
+    - run_linters: "npm run lint"
+    - type_check: "npx tsc --noEmit"
+    - preserve_existing_patterns: "Follow established project patterns"
+    - ask_for_approval: "Breaking changes, API changes"
+  
+  NEVER:
+    - skip_agents_md_on_first_interaction
+    - ignore_errors: "Always handle Promise rejections"
+    - suppress_typescript_errors: "Fix type issues properly"
+    - skip_tests: "Always include tests"
+    - break_raycast_api: "Without approval and migration"
+    - change_yabai_commands: "Without testing and approval"
+    - ignore_performance: "Consider rendering and query performance"
+    - over_engineer: "Solve only the stated problem"
+  
+  PREFER:
+    - simple_over_clever
+    - explicit_types_over_implicit
+    - functional_components_with_hooks
+    - custom_hooks_for_reusable_logic
+    - memoization_for_expensive_computations
+    - debouncing_for_user_input
+    - proper_error_boundaries
+
+# ───────────────────────────────────────────────────────────────
+# QUICK START EXAMPLES
+# ───────────────────────────────────────────────────────────────
+examples:
+  example_1_simple:
+    context: "Users want keyboard shortcut for quick action"
+    request: "Add ⌘⇧F shortcut to focus search input"
+    scope: "src/switch-windows-yabai.tsx"
+    expected: "Simple shortcut addition, no tests needed"
+  
+  example_2_moderate:
+    context: "Users need to minimize windows"
+    request: "Add minimize window action with ⌘M shortcut"
+    scope: "src/handlers.ts and src/switch-windows-yabai.tsx"
+    test_requirements: "Unit tests for handler, mock yabai"
+    yabai_integration: "yabai -m window <id> --minimize"
+    expected: "Handler function, Action component, tests"
+  
+  example_3_complex:
+    context: "Search performance degrades with many windows"
+    request: "Optimize search to handle 100+ windows smoothly"
+    scope: "src/switch-windows-yabai.tsx and src/utils/"
+    performance_requirements: "< 50ms perceived delay, smooth updates"
+    expected: "Debounce optimization, memoization, performance tests"
+
+# ───────────────────────────────────────────────────────────────
+# GETTING STARTED
+# ───────────────────────────────────────────────────────────────
+getting_started: |
+  1. Read .agents/AGENTS.md at the start of each session
+  2. Review .agents/knowledge/ for project standards
+  3. Provide clear REQUEST with acceptance criteria
+  4. Include CONTEXT for user requirements
+  5. Specify SCOPE if working in specific area
+  6. Let the workflow guide implementation
+  7. Review validation checklist before completion
+  8. Ensure tests pass and linters are happy
+  9. Request approval for breaking changes
+  10. Test manually in Raycast with real yabai setup
+
+confidence_reminder: |
+  Per .agents/AGENTS.md:
+  - If confidence < 80%: ASK CLARIFYING QUESTIONS
+  - If confidence 40-79%: Proceed with caution, list assumptions
+  - If confidence 80-100%: Proceed with implementation
+  
+  Always cite sources (files/lines) for key decisions.
