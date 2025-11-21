@@ -1,6 +1,6 @@
 # Markdown Codeblock Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-11-21
 
 - Action titles now display the active application name instead of "Active App"
 - Action icons now display the active application icon
