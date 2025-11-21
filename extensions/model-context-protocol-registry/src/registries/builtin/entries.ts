@@ -6,8 +6,13 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "atono",
     title: "Atono",
     description:
-      "The Atono MCP server provides a secure way for AI-powered development tools to access and act on data within your Atono workspace.",
-    icon: "https://atono.io/api/assets-proxy/1422005f-89bb-429d-ac9a-643c4c296144.svg",
+      "AI-powered project management for product teams. Connect your AI assistant to Atono's workflow platform to create and update stories, track bugs, manage team assignments, and document fixes—all through natural language commands.",
+    icon: {
+      source: {
+        light: "https://atono-test.directus.app/assets/feaa7f21-4bbe-4164-b725-ff2729725cbf",
+        dark: "https://atono-test.directus.app/assets/869c76cd-bb5f-459c-88d1-2315a7b8a545",
+      },
+    },
     homepage: "https://docs.atono.io/docs/mcp-server-for-atono/",
     configuration: {
       command: "docker",
