@@ -5,6 +5,9 @@
   "description": "Search documents in multiple instances of Outline.",
   "icon": "outline.png",
   "author": "dnlfrst",
+  "contributors": [
+    "derFrisson"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -18,6 +21,34 @@
       "mode": "view"
     },
     {
+      "name": "starred-documents",
+      "title": "Starred Documents",
+      "subtitle": "Outline",
+      "description": "View your starred documents.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-documents",
+      "title": "Recent Documents",
+      "subtitle": "Outline",
+      "description": "View recently accessed documents.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-collections",
+      "title": "Browse Collections",
+      "subtitle": "Outline",
+      "description": "Browse documents by collection.",
+      "mode": "view"
+    },
+    {
+      "name": "create-document",
+      "title": "Create Document",
+      "subtitle": "Outline",
+      "description": "Create a new document in Outline.",
+      "mode": "view"
+    },
+    {
       "name": "manage-outline-instances",
       "title": "Manage Instances",
       "subtitle": "Outline",
@@ -26,17 +57,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1"
+    "@raycast/api": "^1.72.1",
+    "node-fetch": "^3.3.2",
+    "react-use": "^17.5.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@raycast/utils": "^1.15.0",
     "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.9",
     "@types/react": "18.2.27",
-    "axios": "^1.8.4",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
-    "react-use": "^17.5.0",
     "typescript": "^5.2.2"
   },
   "scripts": {

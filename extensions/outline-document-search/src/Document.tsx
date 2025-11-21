@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { Instance } from "./queryInstances";
-import OutlineDocument from "./OutlineDocument";
+import { OutlineDocument } from "./api/OutlineApi";
 import { useFetch } from "@raycast/utils";
+import DocumentActions from "./components/DocumentActions";
 
 export interface Collection {
   icon: string;
@@ -12,7 +13,13 @@ export interface CollectionResponse {
   data: Collection;
 }
 
-const Document = ({ document, instance }: { document: OutlineDocument; instance: Instance }) => {
+interface DocumentProps {
+  document: OutlineDocument;
+  instance: Instance;
+  onRefresh?: () => void;
+}
+
+const Document = ({ document, instance, onRefresh }: DocumentProps) => {
   const { data: collection } = useFetch<CollectionResponse, never, Collection>(`${instance.url}/api/collections.info`, {
     body: JSON.stringify({
       id: document.collectionId,
@@ -21,26 +28,30 @@ const Document = ({ document, instance }: { document: OutlineDocument; instance:
     method: "POST",
   });
 
+  // Use emoji if available, otherwise use document icon
+  const doc = document as OutlineDocument & { emoji?: string };
+  const icon = doc.emoji || Icon.Document;
+
   return (
     <List.Item
       accessories={[
         {
-          icon: Icon.Person,
-          tag: document.collaboratorIds.length.toString(),
+          date: new Date(document.updatedAt),
         },
       ]}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={document.url} title="Open Document in Outline" />
-        </ActionPanel>
-      }
+      actions={<DocumentActions document={document} instance={instance} onRefresh={onRefresh} />}
       detail={
         <List.Item.Detail
-          markdown={document.text}
+          markdown={document.text || "No content"}
           metadata={
             <List.Item.Detail.Metadata>
               {collection && <List.Item.Detail.Metadata.Label text={collection.name} title="Collection" />}
-              <List.Item.Detail.Metadata.Label text={document.createdBy.name} title="Author" />
+              {(() => {
+                const doc = document as OutlineDocument & { createdBy?: { name: string } };
+                return doc.createdBy ? (
+                  <List.Item.Detail.Metadata.Label text={doc.createdBy.name} title="Author" />
+                ) : null;
+              })()}
               <List.Item.Detail.Metadata.Label
                 text={new Date(document.createdAt).toLocaleDateString()}
                 title="Created At"
@@ -53,7 +64,7 @@ const Document = ({ document, instance }: { document: OutlineDocument; instance:
           }
         />
       }
-      icon={document.emoji}
+      icon={icon}
       key={document.id}
       title={document.title}
     />
