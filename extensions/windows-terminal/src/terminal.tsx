@@ -207,7 +207,7 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
 
       // Complete immediately on termination
       onComplete({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         command,
         output: (output || "") + "\n\n[Process terminated by user]",
         timestamp: Date.now(),
