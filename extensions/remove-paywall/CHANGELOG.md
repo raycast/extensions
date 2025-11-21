@@ -1,6 +1,6 @@
 # Remove Paywall Changelog
 
-## [Update and fixes] - {PR_MERGE_DATE}
+## [Update and fixes] - 2025-11-21
 
 - Fixed issue with freedium.cfd not working to use updated freedium-mirror.cfd URL
 
