@@ -19,7 +19,8 @@
     "AlanHuang",
     "alexs",
     "ARui",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "AdrianKokot"
   ],
   "license": "MIT",
   "commands": [
@@ -159,6 +160,15 @@
       "description": "Number of days to look back when fetching time entries (default: 14, max: 60)",
       "placeholder": "Enter a number between 1-60",
       "default": "14"
+    },
+    {
+      "description": "The API responses cache time-to-live in seconds.",
+      "name": "cacheTtl",
+      "placeholder": "Enter cache TTL in seconds (default: 0)",
+      "required": false,
+      "title": "Cache TTL",
+      "type": "textfield",
+      "default": "0"
     }
   ],
   "dependencies": {

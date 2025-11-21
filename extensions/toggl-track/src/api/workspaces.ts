@@ -1,7 +1,8 @@
 import { get } from "@/api/togglClient";
+import { cacheHelper } from "@/helpers/cache-helper";
 
 export function getMyWorkspaces() {
-  return get<Workspace[]>("/me/workspaces");
+  return cacheHelper.getOrSet("workspaces", () => get<Workspace[]>("/me/workspaces"));
 }
 
 // https://developers.track.toggl.com/docs/api/workspaces#response-4

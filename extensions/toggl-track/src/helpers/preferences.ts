@@ -9,3 +9,5 @@ export const {
   showTagsInForm,
   timeEntriesLookbackDays,
 } = preferences;
+
+export const cacheTtl = Number(preferences.cacheTtl) || 300;

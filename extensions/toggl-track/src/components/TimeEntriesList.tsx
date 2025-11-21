@@ -2,6 +2,7 @@ import { ActionPanel, Icon, List } from "@raycast/api";
 
 import { TimeEntry, TimeEntryMetaData } from "@/api";
 import { formatSeconds } from "@/helpers/formatSeconds";
+import { JSX } from "react";
 
 interface TimeEntriesListProps {
   isLoading: boolean;
