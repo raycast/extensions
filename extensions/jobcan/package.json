@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jobcan",
+  "title": "Jobcan",
+  "description": "Countering bad ux/ui of Jobcan, a Japanese attendance management system, by using Raycast in a fun way",
+  "icon": "jobcan-icon.png",
+  "author": "clins1994",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "email",
+      "type": "password",
+      "required": true,
+      "title": "Email",
+      "description": "Your Jobcan account email",
+      "placeholder": "your.email@example.co.jp"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your Jobcan account password",
+      "placeholder": "your.password"
+    },
+    {
+      "name": "autoReloginOnRefreshFailure",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "title": "Auto Re-login",
+      "label": "Automatically re-login when session expires",
+      "description": "When enabled, the extension will automatically attempt to re-login using your stored credentials if the session expires or fails"
+    },
+    {
+      "name": "hideHolidays",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "title": "Hide Holidays",
+      "label": "Hide holiday entries in the attendance list",
+      "description": "When enabled, holiday entries will be hidden from the attendance list"
+    },
+    {
+      "name": "useGridsOverLists",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "title": "Use Grids Over Lists",
+      "label": "Use grid layout instead of list layout",
+      "description": "When enabled, attendance records will be displayed in a grid layout"
+    },
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "required": true,
+      "default": "8",
+      "title": "Grid Columns",
+      "description": "Number of columns in grid view (more columns = smaller items)",
+      "data": [
+        {
+          "value": "5",
+          "title": "5 Columns (Large)"
+        },
+        {
+          "value": "6",
+          "title": "6 Columns (Medium)"
+        },
+        {
+          "value": "7",
+          "title": "7 Columns (Small)"
+        },
+        {
+          "value": "8",
+          "title": "8 Columns (Very Small)"
+        }
+      ]
+    },
+    {
+      "name": "attendancePeriodFilter",
+      "type": "dropdown",
+      "required": true,
+      "default": "all",
+      "title": "Default Attendance Period",
+      "description": "Default period filter for attendance records",
+      "data": [
+        {
+          "value": "all",
+          "title": "All"
+        },
+        {
+          "value": "last30days",
+          "title": "Last 30 Days"
+        },
+        {
+          "value": "current",
+          "title": "Current Month"
+        },
+        {
+          "value": "previous",
+          "title": "Previous Month"
+        }
+      ]
+    },
+    {
+      "name": "iconPack",
+      "type": "dropdown",
+      "required": true,
+      "default": "gif",
+      "title": "Icon Pack",
+      "description": "Choose the icon pack to use for attendance status indicators",
+      "data": [
+        {
+          "value": "raycast",
+          "title": "Raycast Icons"
+        },
+        {
+          "value": "pduck",
+          "title": "PDuck"
+        },
+        {
+          "value": "gif",
+          "title": "GIF"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-attendance",
+      "title": "Search Attendance",
+      "description": "View your attendance records",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.6",
+    "eslint": "^9.39.1",
+    "node-html-parser": "^7.0.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "npx tsx --test test/**/*.test.ts",
+    "extract-fixtures": "node scripts/extract-fixture.js",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

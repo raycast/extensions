@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Modify Attendance</title>
+  </head>
+  <body>
+    <form>
+      <input type="hidden" name="token" value="test_token_123" />
+      <input type="hidden" name="client_id" value="test_client_id" />
+      <input type="hidden" name="employee_id" value="test_employee_id" />
+
+      <label for="group_id">Clock-in/out Spot</label>
+      <select name="group_id" id="group_id" required>
+        <option value="1">SOUNDRAW</option>
+        <option value="2">Office</option>
+        <option value="3">Remote</option>
+      </select>
+
+      <label for="notice">Notes</label>
+      <textarea name="notice" id="notice" required placeholder="Enter notes"></textarea>
+
+      <label for="ter_time">Time</label>
+      <input type="text" name="time" id="ter_time" placeholder="ex) 0915 or 2600" />
+      <small>Clocking type is automatically sorted</small>
+    </form>
+  </body>
+</html>
