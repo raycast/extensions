@@ -10,7 +10,7 @@ export const SHADCN_URL = {
 export const OCTOKIT_CONFIG = {
   owner: "shadcn-ui",
   repo: "ui",
-  pathExamples: "apps/www/app/(app)/examples",
+  pathExamples: "apps/v4/app/(app)/examples",
 } as const;
 
 export const CREATE_ERROR_TOAST_OPTIONS = (e: Error): Toast.Options => ({
