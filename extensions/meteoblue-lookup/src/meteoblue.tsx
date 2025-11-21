@@ -9,7 +9,9 @@ import {
 import { useWeather } from "./hooks";
 import {
   formatTemperature,
+  formatTemperatureRange,
   formatWindSpeed,
+  formatWindSpeedDisplay,
   formatPrecipitation,
   getWeatherIcon,
 } from "./utils";
@@ -31,6 +33,7 @@ export default function Command() {
     handleUseCurrentLocation,
     fetchWeatherData,
     preferences,
+    setLocationResults,
   } = useWeather();
 
   // Error state - API key missing
@@ -225,7 +228,7 @@ export default function Command() {
                     ? `${Math.round(currentData.relativehumidity)}%`
                     : "N/A"
                 }
-                icon={Icon.Drop}
+                icon={Icon.Tint}
               />
               {currentData.sealevelpressure && (
                 <List.Item
@@ -291,7 +294,7 @@ export default function Command() {
                         icon={Icon.Info}
                         target={
                           <Detail
-                            markdown={`# Weather Details\n\n**Time:** ${new Date(item.time).toLocaleString()}\n\n**Temperature:** ${formatTemperature(item.temperature, weatherData.basic?.units?.temperature || "°C")}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basic?.units?.felttemperature || weatherData.basic?.units?.temperature || "°C")}\n**Precipitation:** ${formatPrecipitation(item.precipitation, weatherData.basic?.units?.precipitation || "mm")}\n**Wind Speed:** ${formatWindSpeed(item.windspeed, weatherData.basic?.units?.windspeed || "km/h")}\n**Wind Direction:** ${item.winddirection ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
+                            markdown={`# Weather Details\n\n**Time:** ${new Date(item.time).toLocaleString()}\n\n**Temperature:** ${formatTemperature(item.temperature, weatherData.basic?.units?.temperature || "°C")}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basic?.units?.felttemperature || weatherData.basic?.units?.temperature || "°C")}\n**Precipitation:** ${formatPrecipitation(item.precipitation, weatherData.basic?.units?.precipitation || "mm")}\n**Wind Speed:** ${formatWindSpeed(item.windspeed, weatherData.basic?.units?.windspeed || "km/h")}\n**Wind Direction:** ${item.winddirection !== undefined ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
                           />
                         }
                       />
@@ -323,11 +326,24 @@ export default function Command() {
                 day: "numeric",
               });
 
+              const tempUnit =
+                weatherData.basicDay?.units?.temperature ||
+                weatherData.basic?.units?.temperature ||
+                "°C";
+              const precipUnit =
+                weatherData.basicDay?.units?.precipitation ||
+                weatherData.basic?.units?.precipitation ||
+                "mm";
+              const windUnit =
+                weatherData.basicDay?.units?.windspeed ||
+                weatherData.basic?.units?.windspeed ||
+                "km/h";
+
               return (
                 <List.Item
                   key={item.time}
                   title={dateStr}
-                  subtitle={`${formatTemperature(item.temperature, weatherData.basicDay?.units?.temperature || weatherData.basic?.units?.temperature || "°C")} • ${formatPrecipitation(item.precipitation, weatherData.basicDay?.units?.precipitation || weatherData.basic?.units?.precipitation || "mm")} • ${formatWindSpeed(item.windspeed, weatherData.basicDay?.units?.windspeed || weatherData.basic?.units?.windspeed || "km/h")}`}
+                  subtitle={`${formatTemperatureRange(item.temperature, item.temperature_min, item.temperature_max, tempUnit)} • ${formatPrecipitation(item.precipitation, precipUnit)} • ${formatWindSpeedDisplay(item.windspeed, item.windspeed_max, item.windspeed_mean, windUnit)}`}
                   icon={getWeatherIcon(item.pictocode)}
                   actions={
                     <ActionPanel>
@@ -336,7 +352,7 @@ export default function Command() {
                         icon={Icon.Info}
                         target={
                           <Detail
-                            markdown={`# Daily Forecast\n\n**Date:** ${date.toLocaleDateString([], { weekday: "long", year: "numeric", month: "long", day: "numeric" })}\n\n**Temperature:** ${formatTemperature(item.temperature, weatherData.basicDay?.units?.temperature || weatherData.basic?.units?.temperature || "°C")}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basicDay?.units?.felttemperature || weatherData.basic?.units?.felttemperature || weatherData.basicDay?.units?.temperature || weatherData.basic?.units?.temperature || "°C")}\n**Precipitation:** ${formatPrecipitation(item.precipitation, weatherData.basicDay?.units?.precipitation || weatherData.basic?.units?.precipitation || "mm")}\n**Wind Speed:** ${formatWindSpeed(item.windspeed, weatherData.basicDay?.units?.windspeed || weatherData.basic?.units?.windspeed || "km/h")}\n**Wind Direction:** ${item.winddirection ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basicDay?.units?.sealevelpressure || weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
+                            markdown={`# Daily Forecast\n\n**Date:** ${date.toLocaleDateString([], { weekday: "long", year: "numeric", month: "long", day: "numeric" })}\n\n**Temperature:** ${formatTemperatureRange(item.temperature, item.temperature_min, item.temperature_max, tempUnit)}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basicDay?.units?.felttemperature || weatherData.basic?.units?.felttemperature || tempUnit)}\n**Precipitation:** ${formatPrecipitation(item.precipitation, precipUnit)}\n**Wind Speed:** ${formatWindSpeedDisplay(item.windspeed, item.windspeed_max, item.windspeed_mean, windUnit)}\n**Wind Direction:** ${item.winddirection !== undefined ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basicDay?.units?.sealevelpressure || weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
                           />
                         }
                       />
@@ -368,12 +384,12 @@ export default function Command() {
         <List.Section title="Suggestions">
           <List.Item
             title="Current Location"
-            icon={Icon.Location}
+            icon={Icon.MapPin}
             actions={
               <ActionPanel>
                 <Action
                   title="Use Current Location"
-                  icon={Icon.Location}
+                  icon={Icon.MapPin}
                   onAction={handleUseCurrentLocation}
                 />
                 <Action

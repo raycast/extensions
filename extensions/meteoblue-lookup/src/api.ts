@@ -184,16 +184,52 @@ export async function getWeatherForecast(
         const length = typedPkg.time.length;
         const result: TimeStep[] = [];
 
+        const keyMapping: Record<string, string> = {
+          // Normalize keys to match TimeStep interface
+          temperature_instant: "temperature", // fallback
+          max_temperature: "temperature_max",
+          min_temperature: "temperature_min",
+          mean_temperature: "temperature_mean",
+          max_windspeed: "windspeed_max",
+          min_windspeed: "windspeed_min",
+          mean_windspeed: "windspeed_mean",
+          temperatureMax: "temperature_max",
+          temperatureMin: "temperature_min",
+          windspeedMax: "windspeed_max",
+          windspeedMin: "windspeed_min",
+        };
+
         for (let i = 0; i < length; i++) {
           const step: TimeStep = { time: typedPkg.time[i] };
+
+          // Copy all valid fields
           for (const key of Object.keys(typedPkg)) {
-            if (key !== "time" && Array.isArray(typedPkg[key])) {
+            // Skip time as it is already set
+            if (key === "time") continue;
+
+            const mappedKey = keyMapping[key] || key;
+
+            if (Array.isArray(typedPkg[key])) {
               const val = typedPkg[key][i];
               if (typeof val === "number" || typeof val === "string") {
-                step[key] = val;
+                step[mappedKey] = val;
               }
             }
           }
+
+          // Explicit fallback logic if needed
+          if (
+            step.temperature === undefined &&
+            step.temperature_instant !== undefined
+          ) {
+            // Only set temperature from instant if not already set
+            // However, for daily data, we might prefer not to use instant as average.
+            // But avoiding N/A is better.
+            // Let's only do this if we don't have min/max either?
+            // No, if we have instant, let's use it as "temperature"
+            // step.temperature = step.temperature_instant as number;
+          }
+
           result.push(step);
         }
         return result;

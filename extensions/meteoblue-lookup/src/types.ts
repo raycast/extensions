@@ -18,9 +18,15 @@ export interface TimeStep {
   snowfraction?: number;
   rainspot?: string;
   temperature?: number;
+  temperature_max?: number;
+  temperature_min?: number;
+  temperature_mean?: number;
   felttemperature?: number;
   pictocode?: number;
   windspeed?: number;
+  windspeed_max?: number;
+  windspeed_min?: number;
+  windspeed_mean?: number;
   winddirection?: number;
   relativehumidity?: number;
   sealevelpressure?: number;

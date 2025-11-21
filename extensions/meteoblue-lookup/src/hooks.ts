@@ -186,5 +186,6 @@ export function useWeather() {
     handleUseCurrentLocation,
     fetchWeatherData,
     preferences,
+    setLocationResults,
   };
 }

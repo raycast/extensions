@@ -194,12 +194,12 @@ export default function Command() {
         <List.Section title="Suggestions">
           <List.Item
             title="Current Location"
-            icon={Icon.Location}
+            icon={Icon.MapPin}
             actions={
               <ActionPanel>
                 <Action
                   title="Use Current Location"
-                  icon={Icon.Location}
+                  icon={Icon.MapPin}
                   onAction={handleUseCurrentLocation}
                 />
                 <Action
