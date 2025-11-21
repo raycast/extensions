@@ -66,5 +66,4 @@ v0-by-vercel
 github-copilot
 cursor-agents
 circleback
-sound-search
 pieces-raycast
