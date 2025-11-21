@@ -66,7 +66,11 @@ export default async () => {
     }
 
     const activeFileManagerPath = await getActiveFileManagerWindow();
-    await open(activeFileManagerPath, vscodeApplication);
+    if (isMac) {
+      await open(activeFileManagerPath, vscodeApplication);
+      return;
+    }
+    await open(`"${activeFileManagerPath}"`, vscodeApplication);
     return;
   } catch {
     const fileManagerName = isMac ? "Finder" : "File Explorer";
