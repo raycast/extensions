@@ -1,4 +1,4 @@
-import { Clipboard, getPreferenceValues, getSelectedText, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
 import { encode } from "@toon-format/toon";
 
 interface Preferences {
@@ -25,11 +25,7 @@ export default async function Command() {
     }
 
     if (!text.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No JSON found",
-        message: "Selection and clipboard are empty",
-      });
+      await showHUD("No JSON found - selection and clipboard are empty");
       return;
     }
 
@@ -38,18 +34,10 @@ export default async function Command() {
 
     if (preferences.defaultAction === "copy") {
       await Clipboard.copy(toonString);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Converted!",
-        message: "TOON format copied to clipboard",
-      });
+      await showHUD("Converted! TOON format copied to clipboard");
     } else {
       await Clipboard.paste(toonString);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Converted!",
-        message: "TOON format pasted to active app",
-      });
+      await showHUD("Converted! TOON format pasted to active app");
     }
   } catch (error) {
     console.error(error);
