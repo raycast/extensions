@@ -1,6 +1,6 @@
 # Karakeep Changelog
 
-## [2.1.0] {PR_MERGE_DATE}
+## [2.1.0] 2025-11-21
 
 ### Big changes
 

@@ -236,5 +236,8 @@
       "default": false,
       "required": false
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
