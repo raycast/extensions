@@ -14,7 +14,13 @@ const Command = () => {
           <ActionPanel>
             <Action
               title="Manage Instances"
-              onAction={() => launchCommand({ name: "manage-outline-instances", type: LaunchType.UserInitiated })}
+              onAction={() => {
+                try {
+                  launchCommand({ name: "manage-outline-instances", type: LaunchType.UserInitiated });
+                } catch (error) {
+                  console.error(error);
+                }
+              }}
             />
           </ActionPanel>
         }
@@ -32,7 +38,13 @@ const Command = () => {
             <ActionPanel>
               <Action
                 title="Manage Instances"
-                onAction={() => launchCommand({ name: "manage-outline-instances", type: LaunchType.UserInitiated })}
+                onAction={() => {
+                  try {
+                    launchCommand({ name: "manage-outline-instances", type: LaunchType.UserInitiated });
+                  } catch (error) {
+                    console.error(error);
+                  }
+                }}
               />
             </ActionPanel>
           }
