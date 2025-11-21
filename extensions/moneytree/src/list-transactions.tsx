@@ -1,10 +1,11 @@
-import { Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getAllAccounts, getTransactions } from "./lib/api";
 import { getAccessToken } from "./lib/auth";
 import { CACHE_KEYS, getCached, setCached, removeCached } from "./lib/cache";
 import { CACHE_TTL } from "./lib/constants";
 import { CredentialWithAccounts, Transaction } from "./lib/types";
+import { LogoutAction } from "./components/logout-action";
 
 function formatCurrency(amount: number, currency: string = "JPY"): string {
   return new Intl.NumberFormat("ja-JP", {
@@ -36,6 +37,14 @@ function getAccountName(accountId: number, credentials: CredentialWithAccounts[]
     }
   }
   return `Account #${accountId}`;
+}
+
+function getTransactionDetails(transaction: Transaction): string {
+  const isExpense = transaction.amount < 0;
+  const date = formatDate(transaction.date);
+  const description = transaction.description_pretty || transaction.description_raw;
+  const amount = `${isExpense ? "-" : "+"}${formatCurrency(transaction.amount)}`;
+  return `${date} - ${description}: ${amount}`;
 }
 
 export default function Command() {
@@ -93,14 +102,17 @@ export default function Command() {
           } catch (error) {
             console.debug(`[List Transactions] Background refresh failed: ${error}`);
             // If authentication fails, clear cache and show error
-            if (error instanceof Error && error.message.includes("Authenticate")) {
+            if (
+              error instanceof Error &&
+              (error.message.includes("authentication") || error.message.includes("preferences"))
+            ) {
               removeCached(cacheKey);
               setTransactions([]);
               setError(error.message);
               await showToast({
                 style: Toast.Style.Failure,
                 title: "Authentication required",
-                message: "Please authenticate to view transactions",
+                message: "Please check your credentials in extension preferences",
               });
               return;
             }
@@ -155,6 +167,16 @@ export default function Command() {
           icon={Icon.Receipt}
           title="No Transactions"
           description="No transactions found for the last 30 days."
+          actions={
+            <ActionPanel>
+              <LogoutAction
+                onLogout={() => {
+                  setTransactions([]);
+                  setAccounts([]);
+                }}
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         transactions.map((transaction) => {
@@ -175,6 +197,21 @@ export default function Command() {
                   text: `${isExpense ? "-" : "+"}${formatCurrency(transaction.amount)}`,
                 },
               ]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Transaction Details"
+                    icon={Icon.Clipboard}
+                    content={getTransactionDetails(transaction)}
+                  />
+                  <LogoutAction
+                    onLogout={() => {
+                      setTransactions([]);
+                      setAccounts([]);
+                    }}
+                  />
+                </ActionPanel>
+              }
               detail={
                 <List.Item.Detail
                   metadata={

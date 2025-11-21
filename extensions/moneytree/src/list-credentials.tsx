@@ -1,10 +1,11 @@
-import { Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getCredentials } from "./lib/api";
 import { getAccessToken } from "./lib/auth";
 import { CACHE_KEYS, getCached, setCached, removeCached } from "./lib/cache";
 import { CACHE_TTL } from "./lib/constants";
 import { CredentialWithAccounts } from "./lib/types";
+import { LogoutAction } from "./components/logout-action";
 
 function getStatusIcon(status: string): Icon {
   switch (status) {
@@ -98,14 +99,17 @@ export default function Command() {
           } catch (error) {
             console.debug(`[List Credentials] Background refresh failed: ${error}`);
             // If authentication fails, clear cache and show error
-            if (error instanceof Error && error.message.includes("Authenticate")) {
+            if (
+              error instanceof Error &&
+              (error.message.includes("authentication") || error.message.includes("preferences"))
+            ) {
               removeCached(CACHE_KEYS.dataSnapshot());
               setCredentials([]);
               setError(error.message);
               await showToast({
                 style: Toast.Style.Failure,
                 title: "Authentication required",
-                message: "Please authenticate to view credentials",
+                message: "Please check your credentials in extension preferences",
               });
               return;
             }
@@ -149,7 +153,16 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       {credentials.length === 0 && !isLoading ? (
-        <List.EmptyView icon={Icon.List} title="No Credentials" description="No credentials found." />
+        <List.EmptyView
+          icon={Icon.List}
+          title="No Credentials"
+          description="No credentials found."
+          actions={
+            <ActionPanel>
+              <LogoutAction onLogout={() => setCredentials([])} />
+            </ActionPanel>
+          }
+        />
       ) : (
         credentials
           .filter((credential) => !unsupportedCredentialTypes.includes(credential.status))
@@ -165,6 +178,16 @@ export default function Command() {
                   text: credential.last_success ? `Last success: ${formatDate(credential.last_success)}` : "N/A",
                 },
               ]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Credential Details"
+                    icon={Icon.Clipboard}
+                    content={getCredentialTitle(credential)}
+                  />
+                  <LogoutAction onLogout={() => setCredentials([])} />
+                </ActionPanel>
+              }
               detail={
                 <List.Item.Detail
                   metadata={

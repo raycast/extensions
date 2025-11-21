@@ -14,19 +14,34 @@
     "Finance"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "email",
+      "type": "password",
+      "required": true,
+      "title": "Email",
+      "description": "Your Moneytree account email",
+      "placeholder": "your.email@example.com"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your Moneytree account password",
+      "placeholder": "your.password"
+    },
+    {
+      "name": "autoReloginOnRefreshFailure",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "title": "Auto Re-login",
+      "label": "Automatically re-login when refresh token fails",
+      "description": "When enabled, the extension will automatically attempt to re-login using your stored credentials if the refresh token expires or fails"
+    }
+  ],
   "commands": [
-    {
-      "name": "login",
-      "title": "Login",
-      "description": "Connect your Moneytree account",
-      "mode": "view"
-    },
-    {
-      "name": "logout",
-      "title": "Logout",
-      "description": "Disconnect your Moneytree account",
-      "mode": "no-view"
-    },
     {
       "name": "list-credentials",
       "title": "List Credentials",
@@ -47,7 +62,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
+    "@raycast/api": "^1.103.7",
     "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {

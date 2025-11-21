@@ -6,19 +6,25 @@ If you're concerned about security, please read the [Regarding Security](#regard
 
 ## Authentication
 
-Use the "Login to Moneytree" command and enter your email and password. Your credentials are used only for authentication and are never stored.
+Set your Moneytree email and password in the extension preferences. Your credentials are stored encrypted and used for authentication.
 
 ## Regarding Security
 
+### Credential Storage
+- Your email and password are stored encrypted in Raycast preferences
+- Preferences are secured using your system's built-in security (Keychain on Mac, Credential Manager on Windows)
+- Credentials are only accessible to your user account and are never transmitted anywhere except directly to Moneytree
+- All credential storage is handled by Raycast's secure preference system
+
 ### Token Storage
-- Authentication tokens are stored securely using your system's built-in security (Keychain on Mac, Credential Manager on Windows)
+- OAuth authentication tokens are stored securely using your system's built-in security
 - Tokens are encrypted and only accessible to your user account
+- See [Raycast's OAuth documentation](https://developers.raycast.com/api-reference/oauth#oauth.pkceclient) for more details
 
-See [Raycast's OAuth documentation](https://developers.raycast.com/api-reference/oauth#oauth.pkceclient) for more details.
-
-### Credential Handling
-- Your email and password are never stored - they're used only once to log in
-- Credentials are sent directly to Moneytree and not saved anywhere in the extension
+### Auto Re-login
+- When enabled (default), the extension will automatically re-authenticate if your refresh token expires
+- This uses your stored encrypted credentials to seamlessly maintain access
+- You can disable this feature in extension preferences if you prefer manual re-authentication
 
 ### Direct Communication
 - The extension communicates directly with Moneytree's servers
@@ -33,6 +39,10 @@ See [Raycast's OAuth documentation](https://developers.raycast.com/api-reference
 ### Local Caching
 - Data is cached locally to reduce API calls and improve privacy
 - Cache expires automatically after a few minutes
+
+### Logout
+- Use the Logout action (available in all commands) to clear all tokens and cached data
+- After logout, you can manually clear your credentials from extension preferences if desired
 
 ### No Data Collection
 - The extension doesn't collect or share any data

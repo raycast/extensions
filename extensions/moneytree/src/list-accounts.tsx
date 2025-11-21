@@ -1,10 +1,11 @@
-import { Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getAllAccounts } from "./lib/api";
 import { getAccessToken } from "./lib/auth";
 import { CACHE_KEYS, getCached, setCached, removeCached } from "./lib/cache";
 import { CACHE_TTL } from "./lib/constants";
 import { Account, CredentialWithAccounts } from "./lib/types";
+import { LogoutAction } from "./components/logout-action";
 
 function getAccountTypeIcon(accountType: string): Icon {
   switch (accountType) {
@@ -39,6 +40,10 @@ function formatAccountType(accountType: string): string {
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+function getAccountDetails(account: Account): string {
+  return `${account.nickname || account.institution_account_name}: ${formatCurrency(account.current_balance, account.currency)}`;
 }
 
 export default function Command() {
@@ -81,14 +86,17 @@ export default function Command() {
           } catch (error) {
             console.debug(`[List Accounts] Background refresh failed: ${error}`);
             // If authentication fails, clear cache and show error
-            if (error instanceof Error && error.message.includes("Authenticate")) {
+            if (
+              error instanceof Error &&
+              (error.message.includes("authentication") || error.message.includes("preferences"))
+            ) {
               removeCached(CACHE_KEYS.dataSnapshot());
               setCredentials([]);
               setError(error.message);
               await showToast({
                 style: Toast.Style.Failure,
                 title: "Authentication required",
-                message: "Please authenticate to view accounts",
+                message: "Please check your credentials in extension preferences",
               });
               return;
             }
@@ -142,7 +150,16 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       {allAccounts.length === 0 && !isLoading ? (
-        <List.EmptyView icon={Icon.Wallet} title="No Accounts" description="No accounts found." />
+        <List.EmptyView
+          icon={Icon.Wallet}
+          title="No Accounts"
+          description="No accounts found."
+          actions={
+            <ActionPanel>
+              <LogoutAction onLogout={() => setCredentials([])} />
+            </ActionPanel>
+          }
+        />
       ) : (
         allAccounts
           .filter((account) => !unsupportedAccountTypes.includes(account.account_type))
@@ -159,6 +176,16 @@ export default function Command() {
                   icon: account.current_balance >= 0 ? Icon.ArrowUp : Icon.ArrowDown,
                 },
               ]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Account Details"
+                    icon={Icon.Clipboard}
+                    content={getAccountDetails(account)}
+                  />
+                  <LogoutAction onLogout={() => setCredentials([])} />
+                </ActionPanel>
+              }
               detail={
                 <List.Item.Detail
                   metadata={
