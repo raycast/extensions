@@ -148,13 +148,17 @@ export const withPickedWorkspace = <T,>(Component: React.ComponentType<T>) => {
         // @ts-ignore too complicated for TS
         return <Component {...props} />;
       } else {
-        launchCommand({
-          name: "pickWorkspace",
-          type: LaunchType.UserInitiated,
-          context: {
-            missingWorkspace: true,
-          },
-        });
+        try {
+          launchCommand({
+            name: "pickWorkspace",
+            type: LaunchType.UserInitiated,
+            context: {
+              missingWorkspace: true,
+            },
+          });
+        } catch (error) {
+          console.error("Error launching pickWorkspace command:", error);
+        }
       }
     };
     return withDustClient(OauthCheckComponent);
