@@ -1,6 +1,6 @@
 # Punto Changelog
 
-## [Phonetic layouts support] - {PR_MERGE_DATE}
+## [Phonetic layouts support] - 2025-11-21
 
 - Fixed mapping for phonetic keyboard layouts
 
