@@ -294,7 +294,7 @@ export function ModelView(): JSX.Element {
         <List.EmptyView
           icon={Icon.Download}
           title="No Models Installed."
-          description="No model is currently installed on this server. You can download a new model using the ⌘+E (macOS) or ctrl+E (Windows) shortcut."
+          description="No model is currently installed on this server. You can download a new model using the ⌘+N (macOS) or ctrl+N (Windows) shortcut."
         />
       )}
     </List>
