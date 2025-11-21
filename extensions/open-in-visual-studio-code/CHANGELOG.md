@@ -1,5 +1,10 @@
 # Open in Visual Studio Code Changelog
 
+## [Fix: Windows Path Handling] - {PR_MERGE_DATE}
+
+- Fixed issue with spaces in file paths on Windows by adding proper quote escaping
+- Updated dependencies
+
 ## [Feature: Windows Support] - 2025-11-19
 
 - Added Windows support with a PowerShell script.

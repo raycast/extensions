@@ -56,7 +56,11 @@ export default async () => {
 
     if (selectedFinderItems.length) {
       for (const finderItem of selectedFinderItems) {
-        await open(finderItem.path, vscodeApplication);
+        if (isMac) {
+          await open(finderItem.path, vscodeApplication);
+          continue;
+        }
+        await open(`"${finderItem.path}"`, vscodeApplication);
       }
       return;
     }
