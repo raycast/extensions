@@ -65,7 +65,7 @@ export function AccountItem(props: {
     <List.Item
       icon={props.infoUser.image ?? "🔍"}
       title={String(props.infoUser.username ?? "Loading..")}
-      subtitle={`${props.infoAccount.firstname} ${props.infoAccount.surname}`}
+      subtitle={`${props.infoAccount.firstname ?? ""} ${props.infoAccount.surname ?? ""}`}
       accessories={[
         { text: `${props.infoUser.sales ?? "0"}`, icon: { source: Icon.BarChart, tintColor: Color.Green } },
         {
