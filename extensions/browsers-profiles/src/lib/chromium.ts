@@ -43,18 +43,20 @@ export const getChromiumProfiles = () => {
     } catch (error) {
       return null;
     }
-    const infoCacheData = localState?.profile?.info_cache;
+
+    const infoCacheData = localState?.profile?.info_cache as
+      | Record<
+          string,
+          {
+            name: string;
+          }
+        >
+      | undefined;
     if (!infoCacheData) {
       return null;
     }
-    const profileInfoCache = infoCacheData as Record<
-      string,
-      {
-        name: string;
-      }
-    >;
 
-    const browserProfiles: ChromiumProfile[] = Object.entries(profileInfoCache).map(
+    const browserProfiles: ChromiumProfile[] = Object.entries(infoCacheData).map(
       ([profileDir, { name: profileName }]) => ({
         type: browser.type,
         browser: browser.title,
