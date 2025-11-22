@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chrome-profile-shortcuts",
+  "title": "Toggle Chrome Profiles",
+  "description": "Set shortcuts for each slot. Assign a chrome profile to a slot using 'Set Chrome Profile Slot' command.",
+  "icon": "extension-icon.png",
+  "author": "harshit",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Set Chrome Profile Slot",
+      "subtitle": "Google Chrome",
+      "description": "Navigate though your Google Chrome profiles and assign Slots",
+      "mode": "view"
+    },
+    {
+      "name": "open-slot-1",
+      "title": "Open Slot 1",
+      "subtitle": "Google Chrome",
+      "description": "Open Chrome profile assigned to Slot 1",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-slot-2",
+      "title": "Open Slot 2",
+      "subtitle": "Google Chrome",
+      "description": "Open Chrome profile assigned to Slot 2",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-slot-3",
+      "title": "Open Slot 3",
+      "subtitle": "Google Chrome",
+      "description": "Open Chrome profile assigned to Slot 3",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-slot-4",
+      "title": "Open Slot 4",
+      "subtitle": "Google Chrome",
+      "description": "Open Chrome profile assigned to Slot 4",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-slot-5",
+      "title": "Open Slot 5",
+      "subtitle": "Google Chrome",
+      "description": "Open Chrome profile assigned to Slot 5",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-slot-6",
+      "title": "Open Slot 6",
+      "subtitle": "Google Chrome",
+      "description": "Open Chrome profile assigned to Slot 6",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-slot-7",
+      "title": "Open Slot 7",
+      "subtitle": "Google Chrome",
+      "description": "Open Chrome profile assigned to Slot 7",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-slot-8",
+      "title": "Open Slot 8",
+      "subtitle": "Google Chrome",
+      "description": "Open Chrome profile assigned to Slot 8",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-slot-9",
+      "title": "Open Slot 9",
+      "subtitle": "Google Chrome",
+      "description": "Open Chrome profile assigned to Slot 9",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
