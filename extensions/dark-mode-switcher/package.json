@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dark-mode-switcher",
+  "name": "appearance-switcher",
   "title": "Dark Mode Switcher",
   "description": "Toggles dark mode with a single command.",
   "icon": "icon.png",
