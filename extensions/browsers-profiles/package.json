@@ -10,7 +10,8 @@
   "author": "skydiver",
   "contributors": [
     "kytta",
-    "emilshr"
+    "emilshr",
+    "chingweih"
   ],
   "scripts": {
     "build": "ray build",

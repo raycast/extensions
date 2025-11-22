@@ -29,29 +29,31 @@ export const getChromiumProfiles = () => {
       return null;
     }
 
-    const directories = fs.readdirSync(path);
+    const localStatePath = `${path}/Local State`;
+    const localStateExists = fs.existsSync(localStatePath);
 
-    const browserProfiles: ChromiumProfile[] = [];
+    if (!localStateExists) {
+      return null;
+    }
 
-    directories.forEach((directory) => {
-      const preferences = `${path}/${directory}/Preferences`;
-
-      if (directory === "System Profile" || !fs.existsSync(preferences)) {
-        return null;
+    const localStateFile = fs.readFileSync(localStatePath, "utf-8");
+    const localState = JSON.parse(localStateFile).profile.info_cache as Record<
+      string,
+      {
+        name: string;
       }
+    >;
 
-      const file = fs.readFileSync(preferences, "utf-8");
-      const profile = JSON.parse(file);
-
-      browserProfiles.push({
+    const browserProfiles: ChromiumProfile[] = Object.entries(localState).map(
+      ([profileDir, { name: profileName }]) => ({
         type: browser.type,
         browser: browser.title,
         app: browser.app,
-        path: directory,
-        name: profile.profile.name,
+        path: profileDir,
+        name: profileName,
         icon: browser.icon,
-      });
-    });
+      })
+    );
 
     sortProfiles(browserProfiles);
 
