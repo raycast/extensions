@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Add bookmark and history search] - 2025-11-21
+## [Add bookmark and history search] - {PR_MERGE_DATE}
 
 - Added bookmark search with profile selection and include/exclude query filters.
 - Added history search with profile selection and query filters.
