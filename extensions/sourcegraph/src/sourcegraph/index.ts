@@ -56,6 +56,10 @@ export function instanceName(src: Sourcegraph) {
   return new URL(src.instance).hostname || src.instance || null;
 }
 
+export async function getAnonymousUserID(): Promise<string | undefined> {
+  return await LocalStorage.getItem<string>("anonymous-user-id");
+}
+
 /**
  * sourcegraphDotCom returns the user's configuration for connecting to Sourcegraph.com.
  */
@@ -66,7 +70,7 @@ export async function sourcegraphDotCom(): Promise<Sourcegraph> {
   // If there is no token, generate a persisted anonymous identifier for the user.
   let anonymousUserID = "";
   if (!prefs.cloudToken) {
-    anonymousUserID = (await LocalStorage.getItem("anonymous-user-id")) as string;
+    anonymousUserID = (await getAnonymousUserID()) || "";
     if (!anonymousUserID) {
       anonymousUserID = uuidv4();
       await LocalStorage.setItem("anonymous-user-id", anonymousUserID);

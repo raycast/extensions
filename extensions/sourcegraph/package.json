@@ -69,6 +69,34 @@
   ],
   "commands": [
     {
+      "name": "deepSearchInstance",
+      "title": "Ask Deep Search",
+      "subtitle": "Sourcegraph",
+      "description": "Ask deep questions about code on your Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "deep search",
+        "code search",
+        "ai"
+      ],
+      "disabledByDefault": false
+    },
+    {
+      "name": "deepSearchConversationsInstance",
+      "title": "View Deep Search Conversations",
+      "subtitle": "Sourcegraph",
+      "description": "List and manage Deep Search conversations.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "deep search",
+        "list",
+        "history"
+      ],
+      "disabledByDefault": false
+    },
+    {
       "name": "searchDotCom",
       "title": "Search Public Code",
       "subtitle": "Sourcegraph",
@@ -181,8 +209,8 @@
   ],
   "dependencies": {
     "@apollo/client": "^3.11.10",
-    "@raycast/api": "^1.86.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2",
     "@sourcegraph/telemetry": "^0.18.0",
     "@types/uuid": "^10.0.0",
     "cross-fetch": "^4.0.0",
@@ -202,8 +230,8 @@
     "@graphql-codegen/typescript-react-apollo": "^4.3.2",
     "@types/eventsource": "^1.1.15",
     "@types/luxon": "^3.4.2",
-    "@types/node": "~22.10.1",
-    "@types/react": "^18.3.12",
+    "@types/node": "~22.14.0",
+    "@types/react": "^19.1.8",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.16.0",

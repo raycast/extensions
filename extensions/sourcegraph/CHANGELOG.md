@@ -1,5 +1,9 @@
 # Changelog
 
+## Deep Search - TODO
+
+- **deepsearch**: Added new commands 'Ask Deep Search' and 'View Deep Search Conversations' to interact with Sourcegraph's new [agentic, natural language code search](https://sourcegraph.com/deep-search).
+
 ## [Branding updates and workspaces](https://github.com/raycast/extensions/pull/16793) - 2025-02-03
 
 - **search**: We've updated colors throughout the extension to match Sourcegraph's refreshed branding.

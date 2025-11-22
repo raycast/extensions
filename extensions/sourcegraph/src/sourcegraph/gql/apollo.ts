@@ -10,7 +10,7 @@ export function newApolloClient(connect: {
   anonymousUserID?: string;
 }) {
   const headers: Record<string, string> = {
-    "X-Requested-With": "Raycast-Sourcegraph",
+    "X-Requested-With": "raycast-sourcegraph 0.0.0",
   };
   if (connect.anonymousUserID) {
     headers["X-Sourcegraph-Actor-Anonymous-UID"] = connect.anonymousUserID;
