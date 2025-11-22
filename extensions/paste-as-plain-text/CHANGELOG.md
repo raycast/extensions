@@ -1,30 +1,35 @@
 # Paste as Plain text Changelog
 
+## [Maintenance] - 2025-10-23
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Function Optimisation] - 2025-04-15
 
 - Update Paste as JSON, support flexible JSON-like inputs.
 
 ## [Fix Paste as Number] - 2024-12-03
 
--  Fix Paste as Number
+- Fix Paste as Number
 
 ## [Optional No Prompt] - 2024-06-17
 
--  Optional No Prompt after pasting
--  Update metadata screenshot
+- Optional No Prompt after pasting
+- Update metadata screenshot
 
 ## [Paste as File] - 2024-06-17
 
--  Paste as File, extract file path from the clipboard and paste it as file
--  Auto fetch title from URL when pasting as Markdown Link and Markdown Image
+- Paste as File, extract file path from the clipboard and paste it as file
+- Auto fetch title from URL when pasting as Markdown Link and Markdown Image
 
 ## [Function Optimisation] - 2024-06-06
 
--  Update Paste as Number: Now all the numbers will be extracted and stitched together for display
+- Update Paste as Number: Now all the numbers will be extracted and stitched together for display
 
 ## [Fix Hotkey Error] - 2024-05-27
 
--  Fix the problem of using hotkeys to invoke commands
+- Fix the problem of using hotkeys to invoke commands
 
 ## [Advanced Paste] - 2024-05-27
 
@@ -40,15 +45,19 @@
 - Trim allows you to paste the clipboard text without leading/trailing spaces
 
 ## [Refactor code] - 2022-06-04
+
 - Refactor code
 
 ## [Update Raycast Api] - 2022-05-01
+
 - Update Raycast Api
 
 ## [Update extension name] - 2022-04-20
+
 - Release of Paste as Plain text(Paste without Formatting) version 1.1
 - Update extension name from **Paste without Formatting** to **Paste as Plain text**
 
 ## [Added Paste without Formatting] - 2022-03-24
+
 - Release of Paste without Formatting version 1.0
 - **Paste without Formatting**: Paste text from the clipboard without formatting

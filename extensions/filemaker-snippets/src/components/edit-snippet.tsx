@@ -103,6 +103,8 @@ export function useFormLogic({ onSubmit, snippet }: EditSnippetProps) {
         ...values,
         tags: typeof values.tags === "string" ? values.tags?.split(",") ?? [] : values.tags,
         snippet: snippetText,
+        dynamicFields: values.dynamicFields ?? snippet.dynamicFields ?? [],
+        customXML: values.customXML ?? snippet.customXML ?? false,
         id,
       },
       foundLocation

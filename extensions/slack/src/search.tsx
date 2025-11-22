@@ -46,6 +46,19 @@ function searchItemAccessories(
   return searchMetadata;
 }
 
+function CopyIdAction({ id }: { id: string }) {
+  return (
+    <Action.CopyToClipboard
+      title="Copy ID to Clipboard"
+      content={id}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "c" },
+        windows: { modifiers: ["ctrl", "shift"], key: "c" },
+      }}
+    />
+  );
+}
+
 function Search() {
   const { isAppInstalled, isLoading } = useSlackApp();
   const { data, isLoading: isLoadingChannels } = useChannels();
@@ -108,6 +121,8 @@ function Search() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />
 
+                  <CopyIdAction id={userId} />
+
                   <ActionPanel.Section>
                     <Action
                       icon={Icon.ArrowCounterClockwise}
@@ -142,6 +157,8 @@ function Search() {
                     }}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
                   />
+
+                  <CopyIdAction id={channelId} />
 
                   <ActionPanel.Section>
                     <Action

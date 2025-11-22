@@ -31,7 +31,7 @@ type Output = {
 export default async function tool(input: Input): Promise<Output> {
   try {
     // Use shared helper for consistent document lookup
-    const document = findDocumentById(input.noteId);
+    const document = await findDocumentById(input.noteId);
 
     const transcript = await getTranscript(input.noteId);
 

@@ -39,7 +39,6 @@ class OpenAIModule {
     const response = await this.openai?.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "gpt-5-nano",
-      temperature: 0.5,
     });
 
     return response?.choices[0]?.message.content ? this.trimQuotes(response.choices[0]?.message.content) : "";

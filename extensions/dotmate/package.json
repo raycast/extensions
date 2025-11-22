@@ -5,6 +5,9 @@
   "description": "Dotfile Manager for Raycast",
   "icon": "dotmate.png",
   "author": "knealking",
+  "contributors": [
+    "csaper"
+  ],
   "type": "module",
   "publish": "npx @raycast/api@latest publish",
   "categories": [

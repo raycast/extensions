@@ -1,25 +1,42 @@
 import { List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
-import { URLSearchParams } from "node:url";
 import { Ticker } from "./types";
 import { EventListItem } from "./common";
-import { POLY_REST_URL } from "./constants";
+import { POLY_URL } from "./constants";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useFetch(
-    POLY_REST_URL +
-      "events/global?" +
-      new URLSearchParams({ q: searchText.length === 0 ? "" : searchText, events_status: "active" }),
+    searchText.length > 0
+      ? `${POLY_URL}public-search?${new URLSearchParams({
+          q: searchText,
+          page: "1",
+          limit_per_type: "25",
+          type: "events",
+          events_status: "active",
+          sort: "volume_24hr",
+        })}`
+      : `${POLY_URL}events?${new URLSearchParams({
+          limit: "25",
+          active: "true",
+          archived: "false",
+          closed: "false",
+          order: "volume24hr",
+          ascending: "false",
+          offset: "0",
+        })}`,
     {
-      parseResponse: parseFetchResponse,
+      parseResponse: searchText.length > 0 ? parseSearchResponse : parseFetchResponse,
     },
   );
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search Polymarket..." throttle>
-      <List.Section title="Results" subtitle={data?.length.toString()}>
+      <List.Section
+        title={searchText.length > 0 ? "Search Results" : "Top Markets by 24h Volume"}
+        subtitle={data?.length?.toString() || "0"}
+      >
         {data?.map((ticker) => <EventListItem key={ticker.slug} ticker={ticker} />)}
       </List.Section>
     </List>
@@ -27,11 +44,21 @@ export default function Command() {
 }
 
 async function parseFetchResponse(response: Response) {
-  const json = (await response.json()) as { events?: Ticker[] } | [] | { error: string };
+  const json = (await response.json()) as Ticker[] | { error: string };
 
   if (!response.ok || "error" in json) {
     throw new Error("error" in json ? json.error : response.statusText);
   }
 
-  return "events" in json ? json.events : [];
+  return json as Ticker[];
+}
+
+async function parseSearchResponse(response: Response) {
+  const json = (await response.json()) as { events: Ticker[] } | { error: string };
+
+  if (!response.ok || "error" in json) {
+    throw new Error("error" in json ? json.error : response.statusText);
+  }
+
+  return json.events as Ticker[];
 }

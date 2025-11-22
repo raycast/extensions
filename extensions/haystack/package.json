@@ -1,0 +1,425 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "haystack",
+  "title": "Haystack",
+  "description": "Organize anything by capturing screenshots",
+  "icon": "haystack-icon.png",
+  "author": "dimuuu",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-new-stack",
+      "title": "Create New Stack",
+      "subtitle": "Haystack",
+      "description": "Use to create a new stack for collecting captures.",
+      "mode": "view"
+    },
+    {
+      "name": "list-all-stacks",
+      "title": "List All Stacks",
+      "subtitle": "Haystack",
+      "description": "Use to list all created stacks.",
+      "mode": "view"
+    },
+    {
+      "name": "list-all-captures",
+      "title": "List All Captures",
+      "subtitle": "Haystack",
+      "description": "Use to list all captures.",
+      "mode": "view"
+    },
+    {
+      "name": "create-new-capture",
+      "title": "Create New Capture",
+      "subtitle": "Haystack",
+      "description": "Use to create a new capture.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "chat-with-captures",
+      "title": "Chat with Captures",
+      "description": "Use to chat with captures."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@haystack what flights did i capture",
+        "mocks": {
+          "chat-with-captures": [
+            {
+              "createdAt": "2025-10-09T08:15:29.789Z",
+              "data": {
+                "Airline": {
+                  "type": "text",
+                  "value": "easyJet"
+                },
+                "Arrival city": {
+                  "type": "text",
+                  "value": "Paris"
+                },
+                "Date": {
+                  "type": "date",
+                  "value": "November 19"
+                },
+                "Departure city": {
+                  "type": "text",
+                  "value": "London"
+                },
+                "Price": {
+                  "type": "currency",
+                  "value": "€48"
+                },
+                "Time": {
+                  "type": "time",
+                  "value": "2:40 PM"
+                }
+              },
+              "id": "yhLfI48EH-DjuwiHMdGHo",
+              "imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/yhLfI48EH-DjuwiHMdGHo.png",
+              "stack": {
+                "id": "Ijeo1qhlRcch_E7Qb46ki",
+                "name": "Plane Tickets",
+                "version": 1
+              },
+              "title": "easyJet London Paris"
+            },
+            {
+              "createdAt": "2025-10-09T08:16:28.373Z",
+              "data": {
+                "Airline": {
+                  "type": "text",
+                  "value": "KLM"
+                },
+                "Arrival city": {
+                  "type": "text",
+                  "value": "Amsterdam"
+                },
+                "Date": {
+                  "type": "date",
+                  "value": "November 19"
+                },
+                "Departure city": {
+                  "type": "text",
+                  "value": "London"
+                },
+                "Price": {
+                  "type": "currency",
+                  "value": "€155"
+                },
+                "Time": {
+                  "type": "time",
+                  "value": "10:00 AM"
+                }
+              },
+              "id": "WfM5AmwTGQ1_WkgUvEyiV",
+              "imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/WfM5AmwTGQ1_WkgUvEyiV.png",
+              "stack": {
+                "id": "Ijeo1qhlRcch_E7Qb46ki",
+                "name": "Plane Tickets",
+                "version": 1
+              },
+              "title": "KLM London Amsterdam"
+            },
+            {
+              "createdAt": "2025-10-09T08:27:12.574Z",
+              "data": {
+                "Album name": {
+                  "type": "text",
+                  "value": "Getting Killed"
+                },
+                "Artist name": {
+                  "type": "text",
+                  "value": "Geese"
+                },
+                "Genre": {
+                  "type": "text",
+                  "value": "Rock"
+                },
+                "Rating": {
+                  "type": "number",
+                  "value": "9.0"
+                },
+                "Year released": {
+                  "type": "number",
+                  "value": "2025"
+                }
+              },
+              "id": "3sM755sM6wsRzunKL2vx6",
+              "imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/3sM755sM6wsRzunKL2vx6.png",
+              "stack": {
+                "id": "Lq629K8wP_c0w_x02UHd2",
+                "name": "Pitchfork Albums",
+                "version": 1
+              },
+              "title": "Getting Killed"
+            },
+            {
+              "createdAt": "2025-10-09T08:28:03.986Z",
+              "data": {
+                "Album name": {
+                  "type": "text",
+                  "value": "Live Laugh Love"
+                },
+                "Artist name": {
+                  "type": "text",
+                  "value": "Earl Sweatshirt"
+                },
+                "Genre": {
+                  "type": "text",
+                  "value": "Rap"
+                },
+                "Rating": {
+                  "type": "number",
+                  "value": "8.5"
+                },
+                "Year released": {
+                  "type": "number",
+                  "value": "2025"
+                }
+              },
+              "id": "JflnkG2yqKKT9JrSMMgd3",
+              "imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/JflnkG2yqKKT9JrSMMgd3.png",
+              "stack": {
+                "id": "Lq629K8wP_c0w_x02UHd2",
+                "name": "Pitchfork Albums",
+                "version": 1
+              },
+              "title": "Live Laugh Love"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "chat-with-captures"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@haystack what is the highest rated album i captured",
+        "mocks": {
+          "chat-with-captures": [
+            {
+              "createdAt": "2025-10-09T08:15:29.789Z",
+              "data": {
+                "Airline": {
+                  "type": "text",
+                  "value": "easyJet"
+                },
+                "Arrival city": {
+                  "type": "text",
+                  "value": "Paris"
+                },
+                "Date": {
+                  "type": "date",
+                  "value": "November 19"
+                },
+                "Departure city": {
+                  "type": "text",
+                  "value": "London"
+                },
+                "Price": {
+                  "type": "currency",
+                  "value": "€48"
+                },
+                "Time": {
+                  "type": "time",
+                  "value": "2:40 PM"
+                }
+              },
+              "id": "yhLfI48EH-DjuwiHMdGHo",
+              "imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/yhLfI48EH-DjuwiHMdGHo.png",
+              "stack": {
+                "id": "Ijeo1qhlRcch_E7Qb46ki",
+                "name": "Plane Tickets",
+                "version": 1
+              },
+              "title": "easyJet London Paris"
+            },
+            {
+              "createdAt": "2025-10-09T08:16:28.373Z",
+              "data": {
+                "Airline": {
+                  "type": "text",
+                  "value": "KLM"
+                },
+                "Arrival city": {
+                  "type": "text",
+                  "value": "Amsterdam"
+                },
+                "Date": {
+                  "type": "date",
+                  "value": "November 19"
+                },
+                "Departure city": {
+                  "type": "text",
+                  "value": "London"
+                },
+                "Price": {
+                  "type": "currency",
+                  "value": "€155"
+                },
+                "Time": {
+                  "type": "time",
+                  "value": "10:00 AM"
+                }
+              },
+              "id": "WfM5AmwTGQ1_WkgUvEyiV",
+              "imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/WfM5AmwTGQ1_WkgUvEyiV.png",
+              "stack": {
+                "id": "Ijeo1qhlRcch_E7Qb46ki",
+                "name": "Plane Tickets",
+                "version": 1
+              },
+              "title": "KLM London Amsterdam"
+            },
+            {
+              "createdAt": "2025-10-09T08:27:12.574Z",
+              "data": {
+                "Album name": {
+                  "type": "text",
+                  "value": "Getting Killed"
+                },
+                "Artist name": {
+                  "type": "text",
+                  "value": "Geese"
+                },
+                "Genre": {
+                  "type": "text",
+                  "value": "Rock"
+                },
+                "Rating": {
+                  "type": "number",
+                  "value": "9.0"
+                },
+                "Year released": {
+                  "type": "number",
+                  "value": "2025"
+                }
+              },
+              "id": "3sM755sM6wsRzunKL2vx6",
+              "imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/3sM755sM6wsRzunKL2vx6.png",
+              "stack": {
+                "id": "Lq629K8wP_c0w_x02UHd2",
+                "name": "Pitchfork Albums",
+                "version": 1
+              },
+              "title": "Getting Killed"
+            },
+            {
+              "createdAt": "2025-10-09T08:28:03.986Z",
+              "data": {
+                "Album name": {
+                  "type": "text",
+                  "value": "Live Laugh Love"
+                },
+                "Artist name": {
+                  "type": "text",
+                  "value": "Earl Sweatshirt"
+                },
+                "Genre": {
+                  "type": "text",
+                  "value": "Rap"
+                },
+                "Rating": {
+                  "type": "number",
+                  "value": "8.5"
+                },
+                "Year released": {
+                  "type": "number",
+                  "value": "2025"
+                }
+              },
+              "id": "JflnkG2yqKKT9JrSMMgd3",
+              "imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/JflnkG2yqKKT9JrSMMgd3.png",
+              "stack": {
+                "id": "Lq629K8wP_c0w_x02UHd2",
+                "name": "Pitchfork Albums",
+                "version": 1
+              },
+              "title": "Live Laugh Love"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Lists Getting Killed by Geese with a rating of 9.0"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your OpenAI API key. You can get one at https://platform.openai.com/account/api-keys.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "GPT model to use for the API calls.",
+      "type": "dropdown",
+      "required": true,
+      "default": "gpt-5-mini",
+      "data": [
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-4o mini",
+          "value": "gpt-4o-mini"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.15",
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.0.1",
+    "ai": "^5.0.15",
+    "jimp": "^1.6.0",
+    "nanoid": "^5.1.5",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "contributors": [
+    "pernielsentikaer"
+  ]
+}

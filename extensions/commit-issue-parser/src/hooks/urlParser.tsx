@@ -105,38 +105,30 @@ export default function useUrlParser({ cache }: useUrlParserProps): UrlParserSta
     const newIssue: Issue = { ...issue, entry };
 
     const parts = entry.split(",");
-    const firstPart = parts[0].trim();
-    const thirdPart = parts.length > 1 ? parts[parts.length - 1].trim() : undefined;
-    const secondPart =
-      parts.length > 2 ? parts.slice(1, -1).join(",").trim() : parts.length === 2 ? parts[1].trim() : undefined;
-
-    let description: string | undefined;
-    let body: string | undefined;
+    const [firstPart, ...rest] = parts.map((p, i) => {
+      if (i < 3) return p.trim();
+      return p;
+    });
 
     const spaceParts = firstPart.split(" ");
     const possibleUrl = parseUrl(spaceParts[0]);
     const possibleId = extractIdFromUrl(possibleUrl);
 
+    let description: string | undefined;
+    let body: string | undefined;
+
     if (spaceParts.length > 1) {
-      description = spaceParts.slice(1).join(" ").trimStart();
-      if (parts.length > 2) {
-        description += `,${parts
-          .slice(1, parts.length - 1)
-          .join(",")
-          .trimEnd()}`;
-        body = parts[parts.length - 1].trim();
-      } else {
-        body = secondPart ?? thirdPart;
-      }
+      description = spaceParts.slice(1).join(" ").trim();
+      body = rest.length > 0 ? rest.join(",") : undefined;
     } else {
-      description = secondPart;
-      body = thirdPart;
+      description = rest[0] || undefined;
+      body = rest.length > 1 ? rest.slice(1).join(",") : undefined;
     }
 
     newIssue.url = possibleUrl;
     newIssue.id = possibleId ?? undefined;
-    newIssue.description = description ?? undefined;
-    newIssue.body = body ?? undefined;
+    newIssue.description = description || undefined;
+    newIssue.body = body || undefined;
 
     setIssue(newIssue);
     try {

@@ -25,8 +25,8 @@ function DomainrSearch() {
           A.filter(O.isSome),
           A.map((o) => o.value),
           setResults,
-          loading.stop
-        )
+          loading.stop,
+        ),
       ),
       TE.mapLeft((err) =>
         pipe(
@@ -41,16 +41,16 @@ function DomainrSearch() {
                 is, // returns O.some<null> if the error is a network error
                 O.fold(
                   () => showToast(ToastStyle.Failure, "Failed to perform search", "Invalid response body"),
-                  () => showToast(ToastStyle.Failure, "Failed to perform search", (err as Error).message)
-                )
+                  () => showToast(ToastStyle.Failure, "Failed to perform search", (err as Error).message),
+                ),
               ),
-            () => setIsValidApiKey(false)
+            () => setIsValidApiKey(false),
           ),
-          loading.stop
-        )
-      )
+          loading.stop,
+        ),
+      ),
     ),
-    [results, loading]
+    [results, loading],
   );
 
   // Perform Search
@@ -94,7 +94,7 @@ function DomainrSearch() {
               )}
 
               {![DomainStatus.Disallowed, DomainStatus.Reserved, DomainStatus.Invalid].includes(
-                STATUS_MAPPING[result.status]
+                STATUS_MAPPING[result.status],
               ) && <OpenInBrowserAction title="Visit" url={`https://${result.domain}`} />}
             </ActionPanel>
           }

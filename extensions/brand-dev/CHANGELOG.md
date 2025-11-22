@@ -1,5 +1,19 @@
 # Brand.dev Changelog
 
+## [Retrieve Styleguide + Take Screenshots] - 2025-10-14
+
+### Retrieve Styleguide
+
+### Take Screenshots
+
+### Retrieve Brands
+
+- Now search by Domain, Ticker or Name
+- More data:
+    1. Content Rating (NSFW/SFW)
+    2. Industries (EIC)
+    3. Links
+
 ## [Quick Search via Search Text] - 2025-08-14
 
 - If a Brand is not found when you search/filter, you can now quickly trigger a search for that query

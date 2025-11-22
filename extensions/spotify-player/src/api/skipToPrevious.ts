@@ -1,6 +1,5 @@
-import { runAppleScript } from "@raycast/utils";
-import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
+import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 export async function skipToPrevious() {
@@ -15,8 +14,7 @@ export async function skipToPrevious() {
       error?.toLocaleLowerCase().includes("restricted device") ||
       error?.toLocaleLowerCase().includes("premium required")
     ) {
-      const script = buildScriptEnsuringSpotifyIsRunning("previous track");
-      await runAppleScript(script);
+      await runSpotifyScript(SpotifyScriptType.PreviousTrack);
       return;
     }
 

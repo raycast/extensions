@@ -1,5 +1,23 @@
 # Radarr Changelog
 
+## [Update] - 2025-11-03
+
+### Changed
+
+- Reorganized codebase to lib structure for better maintainability
+- Improved Instance Status command with health checks display (errors/warnings)
+- Updated dependencies to latest versions
+
+### Removed
+
+- Removed duplicate system-status command
+
+## [1.0.1] - 2025-08-26
+
+### Fixed
+
+- Fixed TypeError when API data is undefined in search-movies command
+
 ## [Initial Version] - 2025-08-14
 
 ### Added

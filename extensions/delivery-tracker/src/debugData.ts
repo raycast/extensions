@@ -1,5 +1,5 @@
-import { Delivery } from "./delivery";
-import { PackageMap } from "./package";
+import { Delivery } from "./types/delivery";
+import { PackageMap } from "./types/package";
 
 export const debugDeliveries: Delivery[] = [
   {

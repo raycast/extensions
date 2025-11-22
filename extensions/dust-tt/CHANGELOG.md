@@ -1,6 +1,17 @@
 # Dust.tt Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Fixes] - 2025-10-14
+
+- Move gpt4 and claude3 defaults to gpt5 and claude4
+- Fix a login bug for users in EU workspaces
+
+## [Update] - 2025-10-07
+
+- Remove deprecated API Key flow.
+- OAuth flow without setup.
+- Allow workspace switch between regions.
+
+## [Maintenance] - 2025-10-07
 
 - Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
 

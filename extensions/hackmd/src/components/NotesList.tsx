@@ -29,7 +29,7 @@ export default function NotesList({
   notes?: Note[];
   mutate?: () => void;
   isLoading: boolean;
-  searchBarAccessory?: ReactElement<List.Dropdown.Props>;
+  searchBarAccessory?: ReactElement<List.Dropdown.Props, string>;
   sortByCategory?: boolean;
 }) {
   const groupedNotesByCategory = useMemo(() => {

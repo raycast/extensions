@@ -64,7 +64,7 @@ export async function searchGeniusLyrics(songTitle: string, artistName: string):
           }
         }
       }
-    } catch (apiError) {
+    } catch {
       // Silently fall back to web search if API fails
     }
 
@@ -185,7 +185,7 @@ async function extractLyricsFromPage(songUrl: string): Promise<GeniusLyricsResul
               break;
             }
           }
-        } catch (jsonError) {
+        } catch {
           // Ignore JSON parsing errors and continue with other methods
         }
       }

@@ -48,7 +48,7 @@ const useLastFm = (props: Props) => {
           }
         },
         onError: handleError,
-      }
+      },
     );
 
     return {

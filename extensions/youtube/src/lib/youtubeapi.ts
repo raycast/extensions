@@ -1,10 +1,9 @@
-import { getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getErrorMessage } from "./utils";
 import { youtube, youtube_v3 } from "@googleapis/youtube";
-import { GaxiosResponse } from "googleapis-common";
+import { getPreferenceValues } from "@raycast/api";
 import { convertYouTubeDuration } from "duration-iso-8601";
+import { useEffect, useState } from "react";
 import { Preferences } from "./types";
+import { getErrorMessage } from "./utils";
 
 function createClient(): youtube_v3.Youtube {
   const { apikey } = getPreferenceValues<Preferences>();
@@ -41,7 +40,7 @@ export function useRefresher<T>(
   const depsAll = [timestamp];
   if (deps) {
     for (const d of deps) {
-      depsAll.push(d as any);
+      depsAll.push(d as Date);
     }
   }
   let cancel = false;
@@ -185,6 +184,7 @@ async function fetchAndInjectVideoStats(videos: Video[]) {
 
 export interface SearchOptions {
   order?: string;
+  eventType?: "live" | "completed" | "upcoming";
 }
 
 async function search(
@@ -192,7 +192,7 @@ async function search(
   type: SearchType,
   channedId?: string | undefined,
   options?: SearchOptions,
-): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
+): Promise<youtube_v3.Schema$SearchListResponse> {
   const data = await youtubeClient.search.list({
     q: query,
     part: ["id", "snippet"],
@@ -200,8 +200,10 @@ async function search(
     maxResults: maxPageResults,
     channelId: channedId,
     order: options?.order ?? "relevance",
+    // eventType only applies to video searches
+    eventType: type === SearchType.video ? options?.eventType : undefined,
   });
-  return data;
+  return data.data;
 }
 
 export async function searchVideos(
@@ -210,7 +212,7 @@ export async function searchVideos(
   options?: SearchOptions,
 ): Promise<Video[]> {
   const data = await search(query, SearchType.video, channedId, options);
-  const items = data?.data.items;
+  const items = data?.items;
   const result: Video[] = [];
   if (items) {
     for (const r of items) {
@@ -276,7 +278,7 @@ export async function getVideos(videoIds: string[]): Promise<Video[]> {
 
 export async function searchChannels(query: string, options?: SearchOptions): Promise<Channel[]> {
   const data = await search(query, SearchType.channel, undefined, options);
-  const items = data?.data.items;
+  const items = data?.items;
   const channelIds: string[] = [];
   const result: Channel[] = [];
   if (items) {

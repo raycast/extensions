@@ -173,8 +173,7 @@
     "@types/node": "~20.12.12",
     "@types/react": "~18.3.3",
     "eslint": "^8.56.0",
-    "react-devtools": "^4.27.2",
-    "typescript": "^5.4.5"
+        "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

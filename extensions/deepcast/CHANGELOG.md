@@ -1,5 +1,10 @@
 # Deepcast Changelog
 
+## [Maintenance] - 2025-11-12
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Default Formality Configuration] - 2025-06-07
 
 - Added new "Default Formality" preference option to set a global formality level for all supported languages

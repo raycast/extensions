@@ -5,7 +5,7 @@ import fs from "fs/promises";
 /**
  * Promisified spawn function
  */
-export function spawn(command: string, args: ReadonlyArray<string>) {
+export function spawn(command: string, args: ReadonlyArray<string>): Promise<string> {
   return new Promise((resolve, reject) => {
     const process = spawnSync(command, args);
     if (process.error !== undefined) {
@@ -24,7 +24,7 @@ export async function generateContents(selected: GitignoreFile[], signal?: Abort
     const contents = [];
     for (const gitignore of selected) {
       contents.push(
-        `# ---- ${gitignore.name} ----\n${await (await fs.readFile(gitignore.path, { signal })).toString()}`
+        `# ---- ${gitignore.name} ----\n${await (await fs.readFile(gitignore.path, { signal })).toString()}`,
       );
     }
     return contents.join("\n");

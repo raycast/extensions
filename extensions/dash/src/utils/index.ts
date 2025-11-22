@@ -6,7 +6,7 @@ export const getFilteredDocsets = (docsets: Docset[], searchText: string) =>
   docsets.filter(
     (docset) =>
       docset.docsetName.toLowerCase().includes(searchText.toLowerCase()) ||
-      docset.docsetKeyword.toLowerCase().includes(searchText.toLowerCase())
+      docset.docsetKeyword.toLowerCase().includes(searchText.toLowerCase()),
   );
 
 export const getDocsetByKeyword = (docsets: Docset[], keyword: string) => {
@@ -21,7 +21,7 @@ export const createDeeplinkForDocset = (docset: string) => {
     "arguments",
     JSON.stringify({
       docset,
-    })
+    }),
   );
   deeplink = url.toString();
   return deeplink;

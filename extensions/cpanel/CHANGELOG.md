@@ -1,5 +1,13 @@
 # cPanel Changelog
 
+## [Delete DNS Zone] - 2025-08-18
+
+- Show more file icons based on MIME types
+- Toggle data/content for DNS Zone
+- Delete DNS Zone
+- Format API Token date
+- Fix: throw in `callUAPI` for better error handling
+
 ## [Modernize + Manage API Tokens] - 2025-05-19
 
 - View API Tokens

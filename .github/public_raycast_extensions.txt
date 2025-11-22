@@ -19,6 +19,7 @@ devutils
 arc
 netlify
 pinata
+plane
 grafbase
 tailscale
 todoist
@@ -62,4 +63,8 @@ send-ai
 kaleidoscope
 exa
 v0-by-vercel
+github-copilot
+cursor-agents
+circleback
+sound-search
 pieces-raycast

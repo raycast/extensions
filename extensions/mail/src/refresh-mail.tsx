@@ -1,19 +1,19 @@
-import { getMessages } from "./scripts/messages";
+import { environment, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
 import { getAccounts } from "./scripts/accounts";
-import { showToast, Toast, environment, LaunchType, showHUD } from "@raycast/api";
+import { getMessages } from "./scripts/messages";
 
 export default async function RefreshMail() {
   if (environment.launchType !== LaunchType.Background) {
-    await showToast(Toast.Style.Animated, "Refreshing All Mail Accounts");
+    await showToast(Toast.Style.Animated, "Refreshing all Mail accounts");
   } else {
-    console.log("Refreshing All Mail Accounts...");
+    console.log("Refreshing all Mail accounts...");
   }
   const accounts = await getAccounts();
   if (!accounts) {
     if (environment.launchType !== LaunchType.Background) {
-      await showToast(Toast.Style.Failure, "Failed to Get Mail Accounts");
+      await showToast(Toast.Style.Failure, "Failed to get Mail accounts");
     } else {
-      await showHUD("Failed to Get Mail Accounts");
+      await showHUD("Failed to get Mail accounts");
     }
     return;
   }
@@ -21,15 +21,15 @@ export default async function RefreshMail() {
   const mailboxes = accounts.flatMap((account) => account.mailboxes.map((mailbox) => ({ ...mailbox, account })));
   if (!mailboxes) {
     if (environment.launchType !== LaunchType.Background) {
-      await showToast(Toast.Style.Failure, "Failed to Get Mailboxes");
+      await showToast(Toast.Style.Failure, "Failed to get mailboxes");
     } else {
-      await showHUD("Failed to Get Mailboxes");
+      await showHUD("Failed to get mailboxes");
     }
     return;
   }
 
   if (environment.launchType !== LaunchType.Background) {
-    await showToast(Toast.Style.Animated, "Refreshing Messages for Accounts");
+    await showToast(Toast.Style.Animated, "Refreshing messages for accounts");
   }
   const getAccountMessagesPromises = mailboxes.map((mailbox) => getMessages(mailbox.account, mailbox));
 
@@ -37,16 +37,16 @@ export default async function RefreshMail() {
   for (const messages of mailboxMessages) {
     if (!messages) {
       if (environment.launchType !== LaunchType.Background) {
-        await showToast(Toast.Style.Failure, "Failed to Refresh Messages");
+        await showToast(Toast.Style.Failure, "Failed to refresh messages");
       } else {
-        await showHUD("Failed to Refresh Messages");
+        console.log("Failed to refresh messages");
       }
       return;
     }
   }
   if (environment.launchType !== LaunchType.Background) {
-    await showToast(Toast.Style.Success, "Refreshed All Mail Accounts");
+    await showToast(Toast.Style.Success, "Refreshed all Mail accounts");
   } else {
-    console.log("Refreshed All Mail Accounts");
+    console.log("Refreshed all Mail accounts");
   }
 }

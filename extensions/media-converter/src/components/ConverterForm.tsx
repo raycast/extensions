@@ -8,6 +8,7 @@ import {
   Icon,
   openCommandPreferences,
   getPreferenceValues,
+  Clipboard,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
@@ -18,9 +19,8 @@ import {
   OUTPUT_IMAGE_EXTENSIONS,
   type MediaType,
   type AllOutputExtension,
-  type QualitySettings,
-  type OutputAudioExtension,
   type OutputVideoExtension,
+  type QualitySettings,
   getMediaType,
   AUDIO_BITRATES,
   type AudioBitrate,
@@ -34,7 +34,7 @@ import {
   DEFAULT_VBR_QUALITIES,
   AUDIO_COMPRESSION_LEVEL,
   type AudioCompressionLevel,
-  VIDEO_ENCODING_MODES,
+  ALLOWED_VIDEO_ENCODING_MODES,
   type VideoEncodingMode,
   VIDEO_BITRATE,
   type VideoBitrate,
@@ -50,8 +50,8 @@ import {
   VideoMaxBitrate,
   VIDEO_MAX_BITRATE,
   type QualityLevel,
-  getQualitySettingsFromSimple,
   DEFAULT_SIMPLE_QUALITY,
+  getDefaultQuality,
 } from "../types/media";
 import path from "path";
 import { execPromise } from "../utils/exec";
@@ -63,22 +63,8 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
   const [outputFormat, setOutputFormat] = useState<AllOutputExtension | null>(null);
   const [currentQualitySetting, setCurrentQualitySetting] = useState<QualitySettings | null>(null);
   const [simpleQuality, setSimpleQuality] = useState<QualityLevel>(DEFAULT_SIMPLE_QUALITY);
+
   const [isLoading, setIsLoading] = useState(true);
-
-  // Helper function to get quality settings. If custom quality level is provided, then it is simple audio/video.
-  const getDefaultQuality = (format: AllOutputExtension): QualitySettings => {
-    // For images or when advanced settings are enabled, use DEFAULT_QUALITIES
-    if (getMediaType(format) === "image" || preferences.moreConversionSettings) {
-      return {
-        [format]: DEFAULT_QUALITIES[format],
-      } as QualitySettings;
-    }
-
-    // For audio/video in simple mode, use simple quality mappings
-    return {
-      [format]: getQualitySettingsFromSimple(format as OutputAudioExtension | OutputVideoExtension),
-    } as QualitySettings;
-  };
 
   useEffect(() => {
     if (initialFiles && initialFiles.length > 0) {
@@ -165,9 +151,9 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       setOutputFormat(defaultFormat);
 
       if (preferences.moreConversionSettings || primaryFileType === "image") {
-        setCurrentQualitySetting(getDefaultQuality(defaultFormat));
+        setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences));
       } else {
-        setCurrentQualitySetting(getDefaultQuality(defaultFormat));
+        setCurrentQualitySetting(getDefaultQuality(defaultFormat, preferences, DEFAULT_SIMPLE_QUALITY));
       }
     } catch (error) {
       const errorMessage = String(error);
@@ -249,13 +235,48 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       actions={
         <ActionPanel>
           {currentFiles && currentFiles.length > 0 && selectedFileType && (
-            <Action.SubmitForm
-              title="Convert"
-              onSubmit={handleSubmit}
-              icon={Icon.NewDocument}
-              // For some reason, this still shows up as cmd+return instead of just return, so no use for now
-              /* shortcut={{ modifiers: [], key: "return" }} */
-            />
+            <>
+              <Action.SubmitForm
+                title="Convert"
+                onSubmit={handleSubmit}
+                icon={Icon.NewDocument}
+                // For some reason, this still shows up as cmd+return instead of just return, so no use for now
+                /* shortcut={{ modifiers: [], key: "return" }} */
+              />
+              <Action
+                title="Copy FFmpeg Command"
+                icon={Icon.Clipboard}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                  windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                }}
+                onAction={async () => {
+                  if (!outputFormat || !currentQualitySetting) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Configuration incomplete",
+                      message: "Output format and quality settings must be configured",
+                    });
+                    return;
+                  }
+                  try {
+                    const command = await convertMedia(currentFiles[0], outputFormat, currentQualitySetting, true);
+                    await Clipboard.copy(command);
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Command copied to clipboard",
+                      message: currentFiles.length > 1 ? "Command for the first file copied" : "FFmpeg command copied",
+                    });
+                  } catch (error) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to generate command",
+                      message: String(error),
+                    });
+                  }
+                }}
+              />
+            </>
           )}
         </ActionPanel>
       }
@@ -278,10 +299,10 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
             const format = newFormat as AllOutputExtension;
             setOutputFormat(format);
             if (preferences.moreConversionSettings || selectedFileType === "image") {
-              setCurrentQualitySetting(getDefaultQuality(format));
+              setCurrentQualitySetting(getDefaultQuality(format, preferences));
             } else {
               // Update quality settings based on current simple quality level
-              setCurrentQualitySetting(getDefaultQuality(format));
+              setCurrentQualitySetting(getDefaultQuality(format, preferences, DEFAULT_SIMPLE_QUALITY));
             }
           }}
         >
@@ -319,7 +340,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
               onChange={(newQuality) => {
                 const quality = newQuality as QualityLevel;
                 setSimpleQuality(quality);
-                setCurrentQualitySetting(getDefaultQuality(outputFormat!));
+                setCurrentQualitySetting(getDefaultQuality(outputFormat!, preferences, quality));
               }}
               info="Choose the quality level for your converted file"
             >
@@ -664,7 +685,7 @@ function QualitySettingsComponent({
                 }}
                 info="CRF provides constant visual quality, VBR uses variable bitrate for target file size"
               >
-                {VIDEO_ENCODING_MODES.map((mode) => (
+                {(ALLOWED_VIDEO_ENCODING_MODES[outputFormat as OutputVideoExtension] || []).map((mode) => (
                   <Form.Dropdown.Item
                     key={mode}
                     value={mode}

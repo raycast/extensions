@@ -15,7 +15,7 @@ import {
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 
-import { addComment, quickAddTask, uploadFile, Label } from "./api";
+import { addComment, addTask, uploadFile, Label } from "./api";
 import RefreshAction from "./components/RefreshAction";
 import TaskDetail from "./components/TaskDetail";
 import { getCollaboratorIcon, getProjectCollaborators } from "./helpers/collaborators";
@@ -74,12 +74,44 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       await toast.show();
 
       try {
-        // Always use quickAddTask API for Todoist-like behavior
-        // The title will contain all the natural language parameters
-        const taskData = await quickAddTask({
-          text: values.content,
-          note: values.description || undefined,
-        });
+        // Clean content by removing embedded project names and assignees when selected via form
+        let cleanContent = values.content;
+
+        // Remove project references from content if project is selected via dropdown
+        if (values.projectId && projects) {
+          const selectedProject = projects.find((p) => p.id === values.projectId);
+          if (selectedProject) {
+            // Remove both quoted and unquoted project references
+            // Create regex to match both #Project and #"Project Name" formats
+            const escapedName = selectedProject.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const projectRegex = new RegExp(`#(?:"${escapedName}"|#${escapedName})`, "gi");
+            cleanContent = cleanContent.replace(projectRegex, "").trim();
+          }
+        }
+
+        // Use addTask API with structured parameters for reliable assignment
+        const taskData = await addTask(
+          {
+            content: cleanContent,
+            description: values.description || undefined,
+            project_id: values.projectId || undefined,
+            responsible_uid: values.responsibleUid || undefined,
+            labels: Array.isArray(values.labels) && values.labels.length > 0 ? values.labels : undefined,
+            priority: parseInt(values.priority),
+            section_id: values.sectionId || undefined,
+            parent_id: values.parentId || undefined,
+            due: values.date ? { date: values.date.toISOString() } : undefined,
+            deadline: values.deadline ? { date: values.deadline.toLocaleDateString("en-CA") } : undefined,
+            duration:
+              values.duration && values.date && !values.date.toDateString().includes(":")
+                ? {
+                    unit: "minute" as const,
+                    amount: parseInt(values.duration),
+                  }
+                : undefined,
+          },
+          { data, setData },
+        );
 
         const id = taskData.id;
 
@@ -102,7 +134,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             },
           };
 
-          if (values.files.length > 0) {
+          if (Array.isArray(values.files) && values.files.length > 0) {
             try {
               toast.message = "Uploading file and adding to comment…";
               const file = await uploadFile(values.files[0]);
@@ -142,7 +174,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       }
     },
     initialValues: {
-      content: draftValues?.content,
+      content: draftValues?.content ?? "",
       description: draftValues?.description,
       date: draftValues?.date ?? (fromTodayEmptyView ? new Date() : null),
       deadline: draftValues?.deadline ?? null,
@@ -152,6 +184,8 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       sectionId: draftValues?.sectionId ?? "",
       responsibleUid: draftValues?.responsibleUid ?? "",
       labels: draftValues?.labels ?? (fromLabel ? [fromLabel] : []),
+      files: draftValues?.files ?? [],
+      parentId: draftValues?.parentId ?? "",
     },
     validation: {
       content: FormValidation.Required,
@@ -636,7 +670,19 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     // Only update if NLP parsing is more recent than last manual change
     if (nlpTimestamp > manualTimestamp) {
       if (parsedData.parsedDate) {
-        setValue("date", parsedData.parsedDate);
+        const newDate = parsedData.parsedDate;
+
+        if (
+          values.date &&
+          (values.date.getHours() !== 0 || values.date.getMinutes() !== 0) &&
+          newDate.toDateString() === values.date.toDateString()
+        ) {
+          newDate.setHours(values.date.getHours());
+          newDate.setMinutes(values.date.getMinutes());
+          newDate.setSeconds(values.date.getSeconds());
+        }
+
+        setValue("date", newDate);
         lastActionRef.current.date = { source: "nlp", timestamp: nlpTimestamp };
       } else {
         // Reset to null/empty when date parameter is removed from title
@@ -721,7 +767,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 🎯 What you can type:
 • Priority: p1 (urgent), p2 (high), p3 (medium), p4 (low)
 • Projects: #ProjectName or #"Project Name" (for names with spaces)
-• Labels: @label or @"Label Name" (for names with spaces)  
+• Labels: @label or @"Label Name" (for names with spaces)
 • Dates: tomorrow, next Friday, Monday at 3pm, in 2 weeks
 • Deadlines: {March 30} or {next month}
 
@@ -737,7 +783,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.date} title="Date" />
+      <Form.DatePicker {...itemProps.date} title="Date" type={Form.DatePicker.Type.DateTime} />
 
       {values.date && !Form.DatePicker.isFullDay(values.date) ? (
         <Form.TextField {...itemProps.duration} title="Duration (minutes)" />
