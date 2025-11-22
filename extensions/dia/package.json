@@ -31,6 +31,20 @@
       "subtitle": "Dia",
       "description": "Create a new incognito window.",
       "mode": "no-view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Dia",
+      "description": "Search Dia bookmarks by title or URL.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Dia",
+      "description": "Search Dia history by title or URL.",
+      "mode": "view"
     }
   ],
   "dependencies": {
