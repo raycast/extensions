@@ -10,7 +10,8 @@ func recognizeText(
   languageCorrection: Bool,
   ignoreLineBreaks: Bool,
   customWordsList: [String],
-  languages: [String]
+  languages: [String],
+  playSound: Bool
 ) -> String {
   let mode: VNRequestTextRecognitionLevel = fast ? .fast : .accurate
   let useLangCorrection: Bool = languageCorrection
@@ -21,7 +22,7 @@ func recognizeText(
   if fullscreen {
     imgRef = captureScreen(keepImage: keepImage)
   } else {
-    imgRef = captureSelectedArea(keepImage: keepImage)
+    imgRef = captureSelectedArea(keepImage: keepImage, playSound: playSound)
   }
 
   guard let capturedImage = imgRef else {
@@ -60,9 +61,10 @@ func recognizeText(
 
 @raycast
 func detectBarcode(
-  keepImage: Bool
+  keepImage: Bool,
+  playSound: Bool
 ) -> String {
-  let imgRef = captureSelectedArea(keepImage: keepImage)
+  let imgRef = captureSelectedArea(keepImage: keepImage, playSound: playSound)
 
   guard let capturedImage = imgRef else {
     return "Error: failed to capture image"
@@ -127,11 +129,16 @@ func captureScreen(keepImage: Bool) -> CGImage? {
   return imageRef
 }
 
-func captureSelectedArea(keepImage: Bool) -> CGImage? {
+func captureSelectedArea(keepImage: Bool, playSound: Bool) -> CGImage? {
   let filePath = randomPngPath()
   let task = Process()
   task.launchPath = "/usr/sbin/screencapture"
-  task.arguments = ["-i", keepImage ? "-c" : filePath]
+  var arguments: [String] = ["-i"]
+  arguments.append(keepImage ? "-c" : filePath)
+  if !playSound {
+    arguments.append("-x")
+  }
+  task.arguments = arguments
   task.launch()
   task.waitUntilExit()
 

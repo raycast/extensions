@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+
 import resetCache from "../../reset-cache";
 
 const INSTRUCTION = `
@@ -25,13 +26,13 @@ const INSTRUCTION = `
 export function Guide() {
   return (
     <Detail
-      markdown={INSTRUCTION}
       actions={
         <ActionPanel>
-          <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
+          <Action icon={Icon.Gear} onAction={openExtensionPreferences} title="Open Extension Preferences" />
+          <Action icon={Icon.Trash} onAction={() => resetCache()} title="Reset Cache"></Action>
         </ActionPanel>
       }
+      markdown={INSTRUCTION}
     />
   );
 }

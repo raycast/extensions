@@ -25,8 +25,8 @@ This extension lets you save your most-used project directories and open them in
 **Where do I get Claude Code?**  
 Visit [claude.ai/code](https://claude.ai/code) to download and install Claude Code.
 
-**Can I use a different terminal?**  
-Currently supports Terminal.app and Alacritty. PRs are welcome for additional terminal support.
+**Can I use a different terminal?**
+Supports Terminal.app, Alacritty, and Ghostty. Choose your preferred terminal in extension preferences.
 
 **Projects not showing up?**  
 Make sure you've added them first with `⌘N`. The extension only shows directories you've explicitly saved as favorites.

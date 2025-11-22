@@ -66,12 +66,14 @@
   "dependencies": {
     "@raycast/api": "^1.103.2",
     "@raycast/utils": "^2.2.1",
-    "date-fns": "^4.1.0"
+    "date-fns": "^4.1.0",
+    "turndown": "^7.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.6",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"

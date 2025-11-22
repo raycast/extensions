@@ -1,5 +1,13 @@
 # Prism Launcher Changelog
 
+## [New Additions] - 2025-11-11
+
+- Added windows support
+
+## [Fix] - 2025-11-04
+
+- Fixed an issue where favorite server were duplicated in the list
+
 ## [New Additions] - 2025-11-04
 
 - Add command: Join Server – browse servers per instance and join directly

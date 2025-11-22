@@ -49,11 +49,24 @@
       "title": "Max Results",
       "placeholder": "10",
       "default": "10"
+    },
+    {
+      "name": "downloadPath",
+      "description": "Specify the path to download images",
+      "type": "directory",
+      "required": false,
+      "title": "Download Path",
+      "default": {
+        "macOS": "~/Downloads",
+        "Windows": "C:\\Users\\%USERPROFILE%\\Downloads"
+      }
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.1",
+    "axios": "^1.13.1",
+    "file-type": "^21.0.0",
     "knowyourmeme-js": "^1.3.1"
   },
   "devDependencies": {

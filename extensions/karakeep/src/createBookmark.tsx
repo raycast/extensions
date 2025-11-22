@@ -1,44 +1,35 @@
-import { Action, ActionPanel, Form, FormDropdownProps, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchAddBookmarkToList, fetchCreateBookmark } from "./apis";
-import { BookmarkDetail } from "./components/BookmarkDetail";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useTranslation } from "./hooks/useTranslation";
 import { useConfig } from "./hooks/useConfig";
+import { getBrowserLink } from "./hooks/useBrowserLink";
 import { Bookmark } from "./types";
 import { validUrl } from "./utils/url";
 
 interface FormValues {
-  type: "text" | "link";
-  url?: string;
-  content?: string;
+  url: string;
   list?: string;
 }
 
 export default function CreateBookmarkView() {
-  const { push, pop } = useNavigation();
+  const { pop } = useNavigation();
   const { t } = useTranslation();
   const { lists } = useGetAllLists();
   const { config } = useConfig();
+  const [isLoadingTab, setIsLoadingTab] = useState(false);
 
-  const { handleSubmit, itemProps, values } = useForm<FormValues>({
+  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
     initialValues: {
-      type: config.createBookmarkType,
+      url: "",
     },
     validation: {
-      type: FormValidation.Required,
-      content: (value: string | undefined) => {
-        if (values.type === "text") {
-          if (!value) return t("bookmark.contentRequired");
-          if (value.length > 2500) return t("bookmark.contentTooLong");
-        }
-        return undefined;
-      },
       url: (value: string | undefined) => {
-        if (values.type === "link") {
-          if (!value) return t("bookmark.urlInvalid");
-          if (!validUrl(value)) return t("bookmark.urlInvalid");
-        }
+        if (!value) return t("bookmark.urlInvalid");
+        if (!validUrl(value)) return t("bookmark.urlInvalid");
         return undefined;
       },
     },
@@ -49,16 +40,10 @@ export default function CreateBookmarkView() {
       });
 
       try {
-        const basePayload = {
-          createdAt: new Date().toISOString(),
-        };
-
-        const content =
-          values.type === "text" ? { type: "text", text: values.content } : { type: "link", url: values.url };
-
         const payload = {
-          ...basePayload,
-          ...content,
+          type: "link",
+          url: values.url,
+          createdAt: new Date().toISOString(),
         };
         const bookmark = (await fetchCreateBookmark(payload)) as Bookmark;
 
@@ -68,15 +53,12 @@ export default function CreateBookmarkView() {
           }
         }
 
-        if (values.type === "text") {
-          push(<BookmarkDetail bookmark={bookmark as Bookmark} />);
-        } else {
-          pop();
-        }
+        pop();
 
         toast.style = Toast.Style.Success;
         toast.title = t("bookmark.createSuccess");
       } catch (error) {
+        logger.error("Failed to create bookmark", { url: values.url, error });
         toast.style = Toast.Style.Failure;
         toast.title = t("bookmark.createFailed");
         toast.message = String(error);
@@ -84,28 +66,37 @@ export default function CreateBookmarkView() {
     },
   });
 
+  useEffect(() => {
+    async function loadBrowserTab() {
+      if (!config.prefillUrlFromBrowser) return;
+
+      setIsLoadingTab(true);
+      try {
+        const url = await getBrowserLink();
+        if (url) {
+          setValue("url", url);
+        }
+      } catch (error) {
+        // Browser extension not available or no permission
+        logger.log("Failed to prefill URL from browser", error);
+      } finally {
+        setIsLoadingTab(false);
+      }
+    }
+
+    loadBrowserTab();
+  }, [config.prefillUrlFromBrowser, setValue]);
+
   return (
     <Form
+      isLoading={isLoadingTab}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("bookmark.create")} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown title={t("bookmark.type")} {...(itemProps.type as unknown as FormDropdownProps)}>
-        <Form.Dropdown.Item value="text" title={t("bookmark.typeText")} />
-        <Form.Dropdown.Item value="link" title={t("bookmark.typeLink")} />
-      </Form.Dropdown>
-
-      {itemProps.type.value === "text" ? (
-        <Form.TextArea
-          {...itemProps.content}
-          title={t("bookmark.content")}
-          placeholder={t("bookmark.contentPlaceholder")}
-        />
-      ) : (
-        <Form.TextField {...itemProps.url} title={t("bookmark.url")} placeholder={t("bookmark.urlPlaceholder")} />
-      )}
+      <Form.TextField {...itemProps.url} title={t("bookmark.url")} placeholder={t("bookmark.urlPlaceholder")} />
 
       <Form.Dropdown title={t("bookmark.list")} {...itemProps.list}>
         <Form.Dropdown.Item value="" title={t("bookmark.defaultListPlaceholder")} />
