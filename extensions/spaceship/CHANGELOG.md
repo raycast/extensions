@@ -1,5 +1,9 @@
 # Spaceship Changelog
 
+## [Check Domain Availability] - {PR_MERGE_DATE}
+
+- New command to check if a domain is available
+
 ## [Domain + NS Enhancements + Windows Support] - 2025-09-29
 
 - View Lifecycle State of "Domain"
