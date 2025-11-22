@@ -36,6 +36,7 @@
   },
   "author": "patrick_dawson",
   "platforms": [
+    "macOS",
     "Windows"
   ],
   "categories": [

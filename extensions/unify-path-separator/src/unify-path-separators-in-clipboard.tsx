@@ -33,7 +33,7 @@ export default function Command() {
   return (
     <List>
       <List.Item
-        title="Convert to \"
+        title="Convert to backslash"
         subtitle="Replace forward slashes with backslashes"
         actions={
           <ActionPanel>
@@ -42,7 +42,7 @@ export default function Command() {
         }
       />
       <List.Item
-        title="Convert /"
+        title="Convert slash"
         subtitle="Replace backslashes with forward slashes"
         actions={
           <ActionPanel>
