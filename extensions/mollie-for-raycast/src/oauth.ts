@@ -1,8 +1,8 @@
 // src/oauth.ts
 import { OAuth } from "@raycast/api";
 
-// --- CONFIGURATION ---
-// Your app credentials
+// --- CONFIGURATIE ---
+// Jouw ingevulde sleutels
 const clientId = "app_aLGHhWSHe8e3d494VRiNtac2";
 const proxiedAuthorizeUrl =
   "https://oauth.raycast.com/v1/authorize/NxaZKqcp7vp8pAw3Mp8r8UOXy_z3pnka8zfft5NcBEoB09N36m-7Y6r_EBUphunBEkTTec8UnAC_hq1ENW73rgp77by3LF_mXqJ4ct1g9kqbLRe8Hx1ezlHoU2sxnqKZfzHWkdV7hGugdqZksA";
@@ -11,12 +11,12 @@ const proxiedTokenUrl =
 const proxiedRefreshTokenUrl =
   "https://oauth.raycast.com/v1/refresh-token/hiXK17eErlQSoxjH5w0qTI3fjCmQt-Qw7TWqV0PhNEi6xvSqLjnklSkwNy7D0g67FwQAfXV3udahWqjl2tFPa5b7zO_rFNtJQTvPto9gQMrQDdQFFC6VvdGZstEn8K2juivJh2SwmBzBfg";
 
-// Define the permissions your app needs
+// Definieer de permissies die je app nodig heeft
 const SCOPES =
   "organizations.read profiles.read payments.read payments.write sales-invoices.read sales-invoices.write balances.read settlements.read payment-links.read payment-links.write subscriptions.read subscriptions.write refunds.write refunds.read";
 
 // --- OAUTH CLIENT ---
-// We use Raycast's base client and rely on the built-in logic.
+// We gebruiken Raycast's basis-client en vertrouwen op de ingebouwde logica.
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Mollie",
@@ -24,7 +24,7 @@ export const client = new OAuth.PKCEClient({
   description: "Connect your Mollie account to Raycast.",
 });
 
-// --- CORE AUTHENTICATION LOGIC ---
+// --- KERN AUTHENTICATIE LOGICA ---
 export async function authorize(): Promise<string> {
   const tokenSet = await client.getTokens();
 
@@ -48,7 +48,7 @@ export async function authorize(): Promise<string> {
   // Clear any stale tokens before starting new authorization
   await client.removeTokens();
 
-  // Raycast now generates the correct redirectURI itself
+  // Raycast genereert nu zelf de correcte redirectURI
   const authRequest = await client.authorizationRequest({
     endpoint: proxiedAuthorizeUrl,
     clientId: clientId,
