@@ -1,4 +1,4 @@
-# Smart Calendars AI: Create Events Using AI
+# Smart Calendars AI – Create Events / Reminders Using AI
 
 Transform scheduling with AI-powered calendar management: Create events instantly by pasting text/emails/websites.
 
