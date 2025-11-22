@@ -36,8 +36,20 @@ export const getChromiumProfiles = () => {
       return null;
     }
 
-    const localStateFile = fs.readFileSync(localStatePath, "utf-8");
-    const localState = JSON.parse(localStateFile).profile.info_cache as Record<
+    let localState;
+    try {
+      const localStateFile = fs.readFileSync(localStatePath, "utf-8");
+      localState = JSON.parse(localStateFile);
+    } catch (error) {
+      return null;
+    }
+
+    const infoCacheData = localState?.profile?.info_cache;
+    if (!infoCacheData) {
+      return null;
+    }
+
+    const profileInfoCache = infoCacheData as Record<
       string,
       {
         name: string;
