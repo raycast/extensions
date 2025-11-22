@@ -1,26 +1,17 @@
-import { ActionPanel, Form, Action, LocalStorage, showToast, popToRoot } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { ActionPanel, Form, Action, LocalStorage, showToast, popToRoot, Toast } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { TEMP_MAIL_DOMAINS } from "temp-mail-plus-api";
 import { setTimeout } from "timers/promises";
 
+interface CreateMailFormValues {
+  mail_username: string;
+  mail_domain: string;
+}
+
 export default function Command() {
-  const [mailUsername, setMailUsername] = useState<string>();
-  const [mailDomain, setMailDomain] = useState<string>();
-
-  const getCurrentMailAddress = async () => {
-    const mailAddress = await LocalStorage.getItem<string>("mail_address");
-    if (mailAddress) {
-      const [user, domain] = mailAddress.split("@");
-      setMailDomain(domain);
-      setMailUsername(user);
-    }
-  };
-
   const setMailAddress = async ({ mail_username, mail_domain }: { mail_username: string; mail_domain: string }) => {
     const mailAddress = `${mail_username}@${mail_domain}`;
     await LocalStorage.setItem("mail_address", mailAddress);
-    setMailDomain(mail_domain);
-    setMailUsername(mail_username);
 
     await showToast({
       title: "Mail address set",
@@ -31,33 +22,42 @@ export default function Command() {
     popToRoot();
   };
 
-  useEffect(() => {
-    getCurrentMailAddress();
-  }, []);
+  const { handleSubmit, itemProps } = useForm<CreateMailFormValues>({
+    onSubmit(values) {
+      showToast({
+        style: Toast.Style.Success,
+        title: "Yay!",
+        message: `${values.mail_username}@${values.mail_domain} mail address set`,
+      });
+
+      setMailAddress({
+        mail_username: values.mail_username as string,
+        mail_domain: values.mail_domain as string,
+      });
+    },
+    validation: {
+      mail_username: (value) => {
+        if (!value || value?.length < 1) return "Mail address is required";
+      },
+      mail_domain: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Get New Mail Address"
-            onSubmit={(values) => {
-              setMailAddress({
-                mail_username: values.mail_username as string,
-                mail_domain: values.mail_domain as string,
-              });
-            }}
-          />
+          <Action.SubmitForm title="Get New Mail Address" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="mail_domain" title="Domain" onChange={setMailDomain}>
+      <Form.Dropdown title="Domain" storeValue={true} {...itemProps.mail_domain}>
         {TEMP_MAIL_DOMAINS.map((domain) => (
           <Form.Dropdown.Item value={domain} title={`@${domain}`} key={domain} icon={"💌"} />
         ))}
       </Form.Dropdown>
 
-      <Form.TextField id="mail_username" title="Mail name" value={mailUsername} onChange={setMailUsername} />
+      <Form.TextField storeValue={true} autoFocus={false} title="Mail name" {...itemProps.mail_username} />
     </Form>
   );
 }
