@@ -1,5 +1,11 @@
 # Linkding Changelog
 
+## [Refactor + Features] - {PR_MERGE_DATE}
+
+- feat: add archive action
+- feat: confirm deletion
+- fix: drop cheerio dep and extract html w/ regex
+
 ## [Dependency Upgrades] - 2025-10-17
 
 - chore: upgrade dependencies
