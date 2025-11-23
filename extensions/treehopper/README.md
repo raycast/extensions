@@ -23,7 +23,7 @@ Navigate and create git worktrees from Raycast.
 
 List all worktrees across your repos.
 
-![List Worktrees](images/list-worktree.png)
+![List Worktrees](media/list-worktree.png)
 
 - `Enter` - Open in editor
 - `Cmd+Enter` - Open in terminal
@@ -34,21 +34,21 @@ List all worktrees across your repos.
 
 Select a repo/branch, enter new branch name, creates worktree and opens in editor.
 
-![Create Worktree](images/new-worktree.png)
+![Create Worktree](media/new-worktree.png)
 
 ## Configuration
 
 Configure via Raycast preferences (Cmd+, or click the gear icon):
 
-![Configuration](images/settings.png)
+![Configuration](media/settings.png)
 
-| Setting | Description | Example |
-|---------|-------------|---------|
-| **Repos Directory** | Base path containing repos | `/Users/you/Code` |
-| **Auto Discover** | Scan all git repos in directory | Checkbox |
-| **Repositories** | Manual list (if auto-discover off) | `api:main:production,frontend:main` |
-| **Editor** | CLI command to open worktrees | `cursor`, `code`, `zed` |
-| **Terminal** | Terminal app | Terminal, iTerm, Warp |
+| Setting             | Description                        | Example                             |
+| ------------------- | ---------------------------------- | ----------------------------------- |
+| **Repos Directory** | Base path containing repos         | `/Users/you/Code`                   |
+| **Auto Discover**   | Scan all git repos in directory    | Checkbox                            |
+| **Repositories**    | Manual list (if auto-discover off) | `api:main:production,frontend:main` |
+| **Editor**          | CLI command to open worktrees      | `cursor`, `code`, `zed`             |
+| **Terminal**        | Terminal app                       | Terminal, iTerm, Warp               |
 
 ## Development
 

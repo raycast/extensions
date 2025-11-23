@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "treehopper",
   "title": "Treehopper",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Navigate and create git worktrees",
   "icon": "icon.png",
   "author": "insanoid",

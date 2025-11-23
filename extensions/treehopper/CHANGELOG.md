@@ -1,6 +1,6 @@
 # Treehopper Changelog
 
-## [Initial Version] - 2024-11-23
+## [Initial Version] - {PR_MERGE_DATE}
 
 - List and open existing git worktrees
 - Create new worktrees with new branch from base
