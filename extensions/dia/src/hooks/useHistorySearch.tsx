@@ -14,7 +14,7 @@ type RawHistoryRow = {
   lastVisitedMs: number;
 };
 
-const HISTORY_LIMIT = 100;
+const HISTORY_LIMIT = 200;
 
 const HISTORY_QUERY = `
   SELECT id, url, title, (last_visit_time / 1000 - 11644473600000) AS lastVisitedMs
