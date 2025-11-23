@@ -54,7 +54,7 @@ async function setValue(name: ThemePref, value: number) {
     `New-ItemProperty -Path ${regPath} -Name ${name} -Value ${value} -PropertyType DWord`,
   );
 
-  if (newError === null) {
+  if (newError) {
     await showFailureToast(newError, { title: `Failed to create ${name} property` });
   }
 }

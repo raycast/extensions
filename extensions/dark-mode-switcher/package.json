@@ -12,10 +12,10 @@
   "commands": [
     {
       "name": "toggle",
-      "title": "Toggle Dark Mode",
+      "title": "Toggle Desktop Appearance",
       "description": "Toggles desktop appearance with a single command.",
       "mode": "no-view",
-      "subtitle": "Dark Mode Switcher",
+      "subtitle": "Toggle",
       "preferences": [
         {
           "name": "announce",

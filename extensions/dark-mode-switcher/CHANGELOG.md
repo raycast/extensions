@@ -1,4 +1,4 @@
-# Dark Mode Switcher Changelog
+# Toggle Desktop Appearance Changelog
 
 ## [Initial Realese] - {PR_MERGE_DATE}
 
