@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "treehopper",
+  "title": "Treehopper",
+  "version": "2.0.1",
+  "description": "Navigate and create git worktrees",
+  "icon": "icon.png",
+  "author": "insanoid",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-worktrees",
+      "title": "List Worktrees",
+      "subtitle": "Treehopper",
+      "description": "List and open existing git worktrees",
+      "mode": "view",
+      "keywords": [
+        "wt",
+        "worktree",
+        "git"
+      ]
+    },
+    {
+      "name": "create-worktree",
+      "title": "Create Worktree",
+      "subtitle": "Treehopper",
+      "description": "Create a new git worktree",
+      "mode": "view",
+      "keywords": [
+        "wtn",
+        "new",
+        "worktree",
+        "git"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "reposDirectory",
+      "title": "Repos Directory",
+      "description": "Base directory containing your git repositories",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "/Users/you/Code"
+    },
+    {
+      "name": "autoDiscover",
+      "title": "Auto Discover",
+      "description": "Automatically scan all git repos in directory",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Scan all git repos in directory"
+    },
+    {
+      "name": "repositories",
+      "title": "Repositories",
+      "description": "Manual list (ignored if auto-discover on). Format: name:branch:hotfix",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "api:main:production,frontend:main"
+    },
+    {
+      "name": "editor",
+      "title": "Editor",
+      "description": "Editor command to open worktrees",
+      "type": "textfield",
+      "required": false,
+      "default": "cursor",
+      "placeholder": "cursor, code, zed"
+    },
+    {
+      "name": "terminal",
+      "title": "Terminal",
+      "description": "Terminal app for opening directories",
+      "type": "dropdown",
+      "required": false,
+      "default": "terminal",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.1",
+    "typescript": "^5.3.2"
+  },
+  "overrides": {
+    "@types/react": "^19.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
