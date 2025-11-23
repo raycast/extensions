@@ -1,0 +1,65 @@
+{
+  "name": "spotify-search",
+  "title": "Spotify Search",
+  "description": "Search for songs, albums, and artists on Spotify",
+  "icon": "spotify-icon.png",
+  "author": "aaa",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Spotify",
+      "description": "Search for songs, albums, and artists on Spotify",
+      "mode": "view",
+      "preferredSubtitle": "Spotify"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "textfield",
+      "required": true,
+      "title": "Spotify Client ID",
+      "description": "Your Spotify App Client ID",
+      "placeholder": "Enter your Spotify Client ID"
+    },
+    {
+      "name": "clientSecret",
+      "type": "password",
+      "required": true,
+      "title": "Spotify Client Secret",
+      "description": "Your Spotify App Client Secret",
+      "placeholder": "Enter your Spotify Client Secret"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.10.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.13",
+    "@types/react": "18.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "globals": "^16.5.0",
+    "react": "^18.2.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
