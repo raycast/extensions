@@ -1,11 +1,11 @@
 # workflowy-inbox Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Added Windows Support + Retitled Extension] - {PR_MERGE_DATE}
 
 - Added command to View Nodes
-- Renamed to "Workflowy Inbox" since we have more commands now
+- Retitled to "Workflowy Inbox" since we have more commands now
 - Modernized to use latest Raycast eslint configuration
-- Added Windows support
+- Added Windows support (ref: [Issue #23082](https://github.com/raycast/extensions/issues/23082))
 - Fixed error where `Form` would close even if the submit was unsuccessful
 - Fixed error where Inboxy URL would not open if URL invalid
 

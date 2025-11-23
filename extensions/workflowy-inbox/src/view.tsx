@@ -36,6 +36,9 @@ export default function Command() {
       return { data: (result as { targets: Target[] }).targets };
     },
     initialData: [],
+    failureToastOptions: {
+      title: "Failed to fetch targets",
+    },
   });
   const [targetId, setTargetId] = useState("None");
   const { isLoading: isLoadingNodes, data: nodes } = useFetch(API_URL + `v1/nodes?parent_id=${targetId}`, {
@@ -44,6 +47,9 @@ export default function Command() {
       return { data: (result as { nodes: Node[] }).nodes };
     },
     initialData: [],
+    failureToastOptions: {
+      title: "Failed to fetch nodes",
+    },
   });
 
   return (
@@ -67,7 +73,11 @@ export default function Command() {
           title={node.name}
           actions={
             <ActionPanel>
-              <Action.Push title="View Nodes" target={<ViewNodes parentNode={node} navigationTitle={node.name} />} />
+              <Action.Push
+                icon={Icon.Dot}
+                title="View Nodes"
+                target={<ViewNodes parentNode={node} navigationTitle={node.name} />}
+              />
             </ActionPanel>
           }
         />
@@ -76,6 +86,13 @@ export default function Command() {
   );
 }
 
+const formatNavigationTitle = (title: string) => {
+  const parts = title.split("/");
+  if (parts.length <= 3) return title;
+  const first = parts[0];
+  const lastTwo = parts.slice(-2).join(" / ");
+  return `${first} / … / ${lastTwo}`;
+};
 function ViewNodes({ parentNode, navigationTitle }: { parentNode: Node; navigationTitle: string }) {
   const { isLoading, data: nodes } = useFetch(API_URL + `v1/nodes?parent_id=${parentNode.id}`, {
     headers: API_HEADERS,
@@ -86,7 +103,7 @@ function ViewNodes({ parentNode, navigationTitle }: { parentNode: Node; navigati
   });
 
   return (
-    <List isLoading={isLoading} navigationTitle={navigationTitle}>
+    <List isLoading={isLoading} navigationTitle={formatNavigationTitle(navigationTitle)}>
       {nodes.map((node) => (
         <List.Item
           key={node.id}

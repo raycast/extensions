@@ -53,7 +53,6 @@
   "dependencies": {
     "@raycast/api": "^1.103.7",
     "@raycast/utils": "^2.2.2",
-    "nanoid": "^5.0.6",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
