@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix Create Pull Request branch selection] - 2025-11-22
+## [Fix Create Pull Request branch selection] - {PR_MERGE_DATE}
 
 - Create Pull Request: Fixed issue where the default branch wasn't appearing in the "From" dropdown options
 - Create Pull Request: Fixed validation errors when searching for branches while a branch is already selected
