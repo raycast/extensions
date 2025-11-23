@@ -29,12 +29,11 @@
   "preferences": [
     {
       "name": "farragoDataDir",
-      "type": "textfield",
+      "type": "directory",
       "title": "Farrago Data Directory",
       "default": "~/Library/Application Support/Farrago 2",
-      "placeholder": "~/Library/Application Support/Farrago 2",
       "description": "Path to Farrago's data directory",
-      "required": true
+      "required": false
     },
     {
       "name": "oscRemoteHost",
@@ -43,7 +42,7 @@
       "default": "localhost",
       "placeholder": "localhost",
       "description": "OSC host defined in Farrago under \"OSC Input\"",
-      "required": true
+      "required": false
     },
     {
       "name": "oscRemotePort",
@@ -52,7 +51,7 @@
       "default": "8090",
       "placeholder": "8090",
       "description": "OSC port defined in Farrago under \"OSC Input\"",
-      "required": true
+      "required": false
     },
     {
       "name": "oscLocalHost",
@@ -61,7 +60,7 @@
       "default": "localhost",
       "placeholder": "localhost",
       "description": "OSC host defined in Farrago under \"OSC Input\"",
-      "required": true
+      "required": false
     },
     {
       "name": "oscLocalPort",
@@ -70,7 +69,7 @@
       "default": "8091",
       "placeholder": "8091",
       "description": "OSC port defined in Farrago under \"OSC Input\"",
-      "required": true
+      "required": false
     },
     {
       "name": "shortcutTitleTemplate",
