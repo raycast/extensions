@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2025-11-24
 
 - Fix: Resolved issue where task selection would not update in the New Time Entry form
 
