@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-linear-issue",
+  "title": "Linear Issue AI",
+  "description": "Create Linear issue from selected text + natural language input using AI",
+  "icon": "list-icon.png",
+  "author": "sean",
+  "license": "MIT",
+  "version": "1.0.0",
+  "homepage": "https://github.com/EIART/raycast-linear-issue#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EIART/raycast-linear-issue.git"
+  },
+  "bugs": {
+    "url": "https://github.com/EIART/raycast-linear-issue/issues"
+  },
+  "keywords": [
+    "raycast",
+    "linear",
+    "issue-tracking",
+    "ai",
+    "productivity"
+  ],
+  "commands": [
+    {
+      "name": "create-issue",
+      "title": "Create Linear Issue (AI)",
+      "subtitle": "Linear",
+      "description": "Generate a Linear issue from selected text using AI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "linearApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Linear API Key",
+      "description": "Create a personal API key in Linear → Settings → API",
+      "placeholder": "lin_api_..."
+    },
+    {
+      "name": "useRaycastAI",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use Raycast AI",
+      "label": "Use Raycast AI instead of OpenAI",
+      "description": "Toggle to use Raycast's built-in AI",
+      "default": true
+    },
+    {
+      "name": "openaiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key (only if not using Raycast AI)",
+      "placeholder": "sk-..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.0",
+    "json5": "^2.2.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "overrides": {
+    "@types/react": "^18.3.3"
+  }
+}
