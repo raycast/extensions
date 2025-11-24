@@ -1,6 +1,6 @@
 # Rename Images with AI Changelog
 
-## [Updated] - {PR_MERGE_DATE}
+## [Updated] - 2025-11-24
 
 - Upgraded Google Gemini SDK: migrated from `@google/generative-ai` to `@google/genai`
 - Updated API calls to match the new SDK specification
