@@ -51,6 +51,7 @@
     }
   ],
   "dependencies": {
+    "@plausible-analytics/tracker": "^0.4.4",
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0",
     "axios": "^1.8.2",

@@ -12,7 +12,6 @@ export const BACKEND_API_URL = "https://api.webbites.io/";
  * API endpoints
  */
 export const API_ENDPOINTS = {
-  // LOGIN: "raycast/raycast-login",
   LOGIN: "v1/auth/login",
   LOGOUT: "v1/auth/logout",
   USER: "v1/raycast/raycast-user",

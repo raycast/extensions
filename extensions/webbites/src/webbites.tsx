@@ -93,9 +93,7 @@ export default function Command() {
 
       // Track extension open
       const user = await getSimpleCurrentUser();
-      if (user) {
-        await plausible.trackExtensionOpen(user.id);
-      }
+      if (user) await plausible.trackExtensionOpen(user.id);
     } catch (error) {
       console.error("Initialization error:", error);
       setIsAuthenticated(false);
