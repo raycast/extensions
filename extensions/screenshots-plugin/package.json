@@ -3,7 +3,7 @@
   "name": "screenshots-plugin",
   "version": "1.0.0",
   "title": "Screenshots Plugin",
-  "description": "快速截图并悬浮显示，支持 OCR 文字识别 | Quick screenshot with floating window and OCR text recognition",
+  "description": "Quick screenshot with floating window and OCR text recognition",
   "icon": "assets/icon.png",
   "author": "chaosyoung",
   "categories": [
