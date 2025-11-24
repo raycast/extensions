@@ -1,6 +1,6 @@
 # Webbites Raycast Extension Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-11-24
 - Improved error handling and logging in when session token expires.
 
 ## [Improvement] - 2025-11-03
