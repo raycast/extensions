@@ -71,11 +71,6 @@ async function renameScreenshot(filePath: string): Promise<RenameResult> {
         };
       }
       throw error; // Re-throw other errors
-      return {
-        originalPath: filePath,
-        newPath: newFilePath,
-        success: true,
-      };
     }
   } catch (error) {
     console.error(`Error renaming ${filePath}:`, error);
