@@ -220,3 +220,36 @@ export async function createNewIncognitoWindow(): Promise<void> {
     return true
   `);
 }
+
+export async function createNewGuestWindow(): Promise<void> {
+  // Use `open` with --args --guest to ensure guest mode even when AppleScript doesn't support it.
+  await checkAppInstalled();
+
+  await runAppleScript(`
+    do shell script "open -na 'Google Chrome' --args --guest"
+  `);
+}
+
+export async function createNewGuestWindowToWebsite(website: string): Promise<void> {
+  await checkAppInstalled();
+  await runAppleScript(`
+    set link to quoted form of "${website}"
+    do shell script "open -na 'Google Chrome' --args --guest " & link
+  `);
+}
+
+export async function getActiveTabURL(): Promise<string> {
+  await checkAppInstalled();
+
+  const url = await runAppleScript(`
+    tell application "Google Chrome"
+      try
+        return URL of active tab of front window
+      on error
+        return ""
+      end try
+    end tell
+  `);
+
+  return url;
+}

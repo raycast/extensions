@@ -54,6 +54,28 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-collections",
+      "title": "List Collections",
+      "description": "Retrieve the user's collections together with their hierarchy."
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search bookmarks by query, tags, and collection."
+    },
+    {
+      "name": "get-bookmark-details",
+      "title": "Get Bookmark Details",
+      "description": "Fetch a bookmark's full details, including notes and highlights."
+    },
+    {
+      "name": "save-bookmark",
+      "title": "Save Bookmark",
+      "description": "Create a new Raindrop bookmark from a URL."
+    }
+  ],
   "preferences": [
     {
       "name": "token",
@@ -226,6 +248,115 @@
       "description": "Specify a secondary browser to use for opening bookmarks"
     }
   ],
+  "ai": {
+    "instructions": "- Mention bookmark titles as Markdown links that point to their URLs.\\n- Call `search-bookmarks` before answering any question about existing content so you rely on up-to-date data.\\n- If the user references a bookmark by title, search for it first and then call `get-bookmark-details` with the returned id to read its note or highlights.\\n- When the user wants to save a link, translate the requested collection name into an id using `list-collections` (unless the id is already provided) before calling `save-bookmark`. Default to the Unsorted collection (collectionId: -1) when nothing is specified.\\n- Include collection names and relevant tags in your answers so the user understands where the bookmark lives.\\n- Never add or change bookmark notes unless the user explicitly provides the text you should store.",
+    "evals": [
+      {
+        "input": "@raindrop-io show me my TypeScript bookmarks tagged performance",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": "TypeScript",
+                "tags": [
+                  "performance"
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "id": 101,
+              "title": "TypeScript perf tips",
+              "url": "https://example.com/ts-perf",
+              "collectionTitle": "Development",
+              "collectionId": 12,
+              "tags": [
+                "performance",
+                "typescript"
+              ],
+              "excerpt": "Tips for optimizing TS projects."
+            }
+          ]
+        }
+      },
+      {
+        "input": "@raindrop-io save https://blog.raycast.com/ai-guide into my Research collection with tags ai and raycast",
+        "expected": [
+          {
+            "callsTool": "list-collections"
+          },
+          {
+            "callsTool": {
+              "name": "save-bookmark",
+              "arguments": {
+                "url": "https://blog.raycast.com/ai-guide",
+                "collectionId": 5,
+                "tags": [
+                  "ai",
+                  "raycast"
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-collections": [
+            {
+              "id": 5,
+              "title": "Research",
+              "path": "Personal / Research"
+            }
+          ],
+          "save-bookmark": {
+            "id": 999,
+            "title": "AI Guide",
+            "url": "https://blog.raycast.com/ai-guide",
+            "collectionId": 5
+          }
+        }
+      },
+      {
+        "input": "@raindrop-io what's the note on my \"Raycast AI launch plan\" bookmark?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": "Raycast AI launch plan"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-bookmark-details",
+              "arguments": {
+                "bookmarkId": "1234"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "id": 1234,
+              "title": "Raycast AI launch plan",
+              "url": "https://example.com/raycast-ai",
+              "collectionTitle": "Product Launches"
+            }
+          ],
+          "get-bookmark-details": {
+            "id": 1234,
+            "title": "Raycast AI launch plan",
+            "note": "Finalize talking points before Friday."
+          }
+        }
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.102.6",
     "@raycast/utils": "^1.19.1"

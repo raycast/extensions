@@ -1,5 +1,11 @@
 # Home Assistant Changelog
 
+## [Fix] - 2025-11-14
+
+- Replaced deprecated `kelvin` attribute with `color_temp_kelvin` for lights actions
+- Fixed max_color_temp_kelvin always being rounded incorrectly in the `Color Temperature` action
+- The Actions `Color Temperature Down` and `Color Temperature Up` now will not render when the entities current color temperature is already at the minimum or maximum, respectively
+
 ## [Windows] - 2025-08-25
 
 Add Windows support

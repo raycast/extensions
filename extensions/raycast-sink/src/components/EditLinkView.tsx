@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { Link } from "../types";
 import { editLink } from "../utils/api";
 import { useTranslation } from "../hooks/useTranslation";
@@ -50,7 +50,7 @@ export function EditLinkView({ link, onEditSuccess }: EditLinkViewProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={`${t.editLink}: ${link.slug}`} onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Pencil} title={`${t.editLink}: ${link.slug}`} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

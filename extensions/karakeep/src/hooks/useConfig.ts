@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { Config, Preferences } from "../types";
 
 const getConfig = (): Config => {
@@ -12,7 +13,7 @@ const getConfig = (): Config => {
       showWebsitePreview: preferences.showWebsitePreview,
       linkMainAction: preferences.linkMainAction || "openInBrowser",
       textMainAction: preferences.textMainAction || "viewDetail",
-      createBookmarkType: preferences.createBookmarkType || "link",
+      prefillUrlFromBrowser: preferences.prefillUrlFromBrowser ?? true,
       displayBookmarkPreview: preferences.displayBookmarkPreview ?? true,
       displayTags: preferences.displayTags ?? true,
       displayCreatedAt: preferences.displayCreatedAt ?? true,
@@ -22,7 +23,7 @@ const getConfig = (): Config => {
       displaySummary: preferences.displaySummary ?? false,
     };
   } catch (error) {
-    console.error("Config load failed:", error);
+    logger.error("Config load failed, using defaults", error);
     return {
       apiUrl: "",
       apiKey: "",
@@ -30,7 +31,7 @@ const getConfig = (): Config => {
       showWebsitePreview: true,
       linkMainAction: "viewDetail",
       textMainAction: "viewDetail",
-      createBookmarkType: "link",
+      prefillUrlFromBrowser: true,
       displayBookmarkPreview: true,
       displayTags: true,
       displayCreatedAt: true,

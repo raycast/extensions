@@ -1,5 +1,9 @@
 # Jira Search Self Hosted Changelog
 
+## [Update] - 2025-11-12
+
+- Improved search by `key` to include numbers in project key.
+
 ## [Fixed typo] - 2024-04-30
 
 ## [Update] - 2024-02-02

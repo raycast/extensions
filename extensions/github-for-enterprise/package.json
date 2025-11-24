@@ -164,5 +164,8 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "generate": "graphql-codegen --config codegen.ts"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

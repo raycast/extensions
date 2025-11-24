@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import { useTranslation } from "./hooks/useTranslation";
 import { createLink } from "./utils/api";
 import { LinkDetail } from "./components/LinkDetail";
@@ -9,7 +9,7 @@ import { validUrl } from "./utils/url";
 
 interface FormValues {
   url: string;
-  slug: string;
+  slug?: string;
   comment?: string;
 }
 
@@ -24,11 +24,11 @@ export default function CreateLinkView() {
         if (!value) return t.urlRequired;
         if (!validUrl(value)) return t.invalidUrl;
       },
-      slug: FormValidation.Required,
     },
     async onSubmit(values) {
       const toast = await showToast({ title: t.linkCreating, style: Toast.Style.Animated });
       try {
+        if (!values.slug) delete values.slug;
         const newLink = (await createLink(values.url, values.slug, values.comment)) as CreateLinkResponse;
 
         if (newLink && newLink.link) {

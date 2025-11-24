@@ -1,5 +1,9 @@
 # FreeAgent Changelog
 
+## [Added new command to create tasks in projects] - 2025-11-12
+
+- New `Create a new task in FreeAgent` command
+
 ## [Timezone Fix for Date Handling] - 2025-08-27
 
 - Fixed timezone issue where selecting "today" in timeslip and invoice creation would sometimes be saved as "yesterday" in FreeAgent

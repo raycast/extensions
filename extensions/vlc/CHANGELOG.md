@@ -1,5 +1,15 @@
 # VLC Changelog
 
+## [Speed Controls & Playlist] - 2025-11-12
+
+- Added playback speed controls:
+  - Speed Up: Increase speed by 0.25x increments (up to 4.0x)
+  - Speed Down: Decrease speed by 0.25x increments (down to 0.25x)
+  - Normal Speed: Reset playback to 1.0x
+  - Set Playback Speed: Custom speed with form interface
+- Added Playlist viewer to browse and play VLC playlist items
+- Fixed VLC capitalization consistency across the extension
+
 ## [Initial Version] - 2025-08-04
 
 - Initial release of VLC Raycast extension.

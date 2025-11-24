@@ -1,5 +1,10 @@
 # UploadThing Changelog
 
+## [2.0.3] - 2025-11-24
+
+- Added copy url to clipboard and delete file action
+- Added an option to choose default action (copy to clipboard or open in browser)
+
 ## [2.0.2] - 2025-11-09
 
 - Toggled on windows support
