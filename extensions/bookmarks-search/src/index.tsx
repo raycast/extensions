@@ -11,7 +11,6 @@ import fs from "fs/promises";
 import path from "path";
 import os from "os";
 
-// 1. Define supported browser types (Removed Safari)
 type BrowserType = "chrome" | "edge";
 
 interface BrowserConfig {
@@ -21,7 +20,7 @@ interface BrowserConfig {
   winPathCandidates: string[][];
 }
 
-// 2. Configuration for Chrome & Edge
+//  Configuration for Chrome & Edge
 const BROWSERS: Record<BrowserType, BrowserConfig> = {
   chrome: {
     name: "Google Chrome",
