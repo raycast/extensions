@@ -1,6 +1,6 @@
 # Envato Changelog
 
-## [Fix Issue in Portfolio + Modernize] - {PR_MERGE_DATE}
+## [Fix Issue in Portfolio + Modernize] - 2025-11-24
 
 - Modernize to use latest Raycast eslint configuration
 - Fix issue where "accountEnvato" would crash on first run due to missing cache
