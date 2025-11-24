@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-11-24
 
 ### Added
 - Match Day view to see current match schedule and results
