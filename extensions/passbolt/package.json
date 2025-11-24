@@ -1,0 +1,150 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "passbolt",
+  "title": "Passbolt",
+  "description": "Manage your Passbolt passwords from Raycast",
+  "icon": "extension-icon.png",
+  "author": "adreatik_dedej",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Passwords",
+      "subtitle": "Passbolt",
+      "description": "Search for passwords in Passbolt",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "entrypoint": "src/search.tsx"
+    },
+    {
+      "name": "create",
+      "title": "Create Password",
+      "subtitle": "Passbolt",
+      "description": "Create a new password in Passbolt",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "entrypoint": "src/create.tsx"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "Passbolt",
+      "description": "Generate a secure password with customizable options",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "entrypoint": "src/generate-password.tsx"
+    },
+    {
+      "name": "generate-password-quick",
+      "title": "Generate Password (Quick)",
+      "subtitle": "Passbolt",
+      "description": "Quickly generate and copy/paste a password",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "entrypoint": "src/generate-password-quick.tsx",
+      "preferences": [
+        {
+          "name": "quickAction",
+          "type": "dropdown",
+          "title": "Action",
+          "description": "What to do with the generated password",
+          "required": false,
+          "default": "copyAndPaste",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            },
+            {
+              "title": "Copy and Paste",
+              "value": "copyAndPaste"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "authenticator",
+      "title": "Authenticator",
+      "subtitle": "Passbolt",
+      "description": "View all TOTP codes from your Passbolt vault",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "entrypoint": "src/authenticator.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "passboltUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Passbolt URL",
+      "description": "The URL of your Passbolt instance (e.g., https://passbolt.example.com)",
+      "placeholder": "https://passbolt.example.com"
+    },
+    {
+      "name": "privateKey",
+      "type": "file",
+      "required": true,
+      "title": "Private Key File",
+      "description": "Select your armored PGP private key file",
+      "placeholder": "/path/to/private.key"
+    },
+    {
+      "name": "passphrase",
+      "type": "password",
+      "required": true,
+      "title": "Passphrase",
+      "description": "The passphrase for your private key",
+      "placeholder": "Enter your passphrase"
+    },
+    {
+      "name": "totpSecret",
+      "type": "password",
+      "required": false,
+      "title": "TOTP Secret",
+      "description": "Your TOTP secret key for automatic MFA code generation (the base32 string from QR code setup)",
+      "placeholder": "JBSWY3DPEHPK3PXP"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest",
+    "node-fetch": "^3.3.2",
+    "openpgp": "^5.11.2",
+    "otpauth": "^9.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/react-dom": "18.2.14",
+    "eslint": "latest",
+    "prettier": "latest",
+    "typescript": "latest"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "@types/react": "18.2.27",
+    "@types/react-dom": "18.2.14"
+  }
+}
