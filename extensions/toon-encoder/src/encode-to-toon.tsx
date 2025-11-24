@@ -4,6 +4,7 @@ import { encodeToTOON } from "./utils/encoder";
 import { saveRecent } from "./utils/storage";
 import { calculateTokenSavings } from "./utils/encoder";
 import { InputFormat } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export default function EncodeToTOON() {
   const [input, setInput] = useState("");
