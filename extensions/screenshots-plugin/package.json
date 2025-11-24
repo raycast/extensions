@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenshots-plugin",
+  "version": "1.0.0",
+  "title": "Screenshots Plugin",
+  "description": "快速截图并悬浮显示，支持 OCR 文字识别 | Quick screenshot with floating window and OCR text recognition",
+  "icon": "assets/icon.png",
+  "author": "chaosyoung",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "screenshot",
+    "ocr",
+    "floating window",
+    "text recognition",
+    "capture",
+    "截图",
+    "文字识别",
+    "悬浮窗口"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chaosyoung97/ScreenshotsPluginOnRaycast.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chaosyoung97/ScreenshotsPluginOnRaycast/issues"
+  },
+  "commands": [
+    {
+      "name": "screenshot",
+      "title": "Take Screenshot",
+      "subtitle": "截图并悬浮显示",
+      "description": "快速截取屏幕并悬浮显示截图，支持 OCR 文字识别 | Capture screen and display in floating window with OCR support",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.60.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "prebuild": "test -f float-window && test -f get_mouse_position || (test -f build-native.sh && ./build-native.sh || echo '⚠️  Please run ./build-native.sh to compile float-window and get_mouse_position')",
+    "build": "tsc --project tsconfig.json --outDir dist && cp float-window dist/ && cp get_mouse_position dist/",
+    "postbuild": "if [ -d dist ] && [ -d ~/.config/raycast/extensions/screenshots-plugin ]; then cp -r dist/* ~/.config/raycast/extensions/screenshots-plugin/; fi",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# macOS
+.DS_Store
+*.log
+
+# Environment
+.env
+.env.local
+
+# Raycast
+.raycast/
+
+# Native binaries (will be compiled during build)
+float-window
+get_mouse_position
+*.o
+
+# But keep binaries in dist after build
+!dist/float-window
+!dist/get_mouse_position
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+.cache/
