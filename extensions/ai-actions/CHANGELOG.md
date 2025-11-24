@@ -1,6 +1,10 @@
 # AI Actions Changelog
 
-## [Initial Version] - 2024-11-24
+## [Initial Version] - {PR_MERGE_DATE}
+
+Initial release of AI Actions extension.
+
+### Features
 
 - Create and manage custom AI prompts
 - Support for Gemini API, gemini-balance, and OpenRouter
