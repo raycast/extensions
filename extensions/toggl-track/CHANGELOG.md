@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-11-24
 
 - Add Windows support
 - Fixed stopping running time entry shortcut issue
