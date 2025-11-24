@@ -51,14 +51,12 @@ export default function Command() {
       await LocalStorage.setItem("scripts", JSON.stringify(scripts));
       showToast({ title: "Script Saved", message: "Try it out using the 'View Scripts' page!" });
     } catch {
-      showToast({ 
-        style: Toast.Style.Failure, 
-        title: "Error", 
-        message: "Failed to save script. Please try again." 
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Failed to save script. Please try again.",
       });
     }
-
-    showToast({ title: "Script Saved", message: "Try it out using the 'View Scripts' page!" });
   }
 
   return (
