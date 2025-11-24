@@ -1,12 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  List,
-  Icon,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, List, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
@@ -34,57 +26,49 @@ const DUMMY_APP_METADATA: AppMetadata = {
 
 const DUMMY_DOWNLOAD_LINKS: DownloadLink[] = [
   {
-    fileName:
-      "15647NeonBand.ExplorerforFiles_1.219.24.0_x64_g3b9h1p9bdemw.appx",
+    fileName: "15647NeonBand.ExplorerforFiles_1.219.24.0_x64_g3b9h1p9bdemw.appx",
     url: "https://example.com/download/1",
     size: "19.31 MB",
     type: "APPX",
   },
   {
-    fileName:
-      "15647NeonBand.ExplorerforFiles_1.219.24.0_x86_g3b9h1p9bdemw.appx",
+    fileName: "15647NeonBand.ExplorerforFiles_1.219.24.0_x86_g3b9h1p9bdemw.appx",
     url: "https://example.com/download/2",
     size: "16.89 MB",
     type: "APPX",
   },
   {
-    fileName:
-      "15647NeonBand.ExplorerforFiles_1.246.168.0_x64_g3b9h1p9bdemw.appx",
+    fileName: "15647NeonBand.ExplorerforFiles_1.246.168.0_x64_g3b9h1p9bdemw.appx",
     url: "https://example.com/download/3",
     size: "19.37 MB",
     type: "APPX",
   },
   {
-    fileName:
-      "15647NeonBand.ExplorerforFiles_1.246.168.0_x86_g3b9h1p9bdemw.appx",
+    fileName: "15647NeonBand.ExplorerforFiles_1.246.168.0_x86_g3b9h1p9bdemw.appx",
     url: "https://example.com/download/4",
     size: "17.04 MB",
     type: "APPX",
   },
   {
-    fileName:
-      "15647NeonBand.ExplorerforFiles_1.385.96.0_x64_g3b9h1p9bdemw.msix",
+    fileName: "15647NeonBand.ExplorerforFiles_1.385.96.0_x64_g3b9h1p9bdemw.msix",
     url: "https://example.com/download/5",
     size: "61.34 MB",
     type: "MSIX",
   },
   {
-    fileName:
-      "15647NeonBand.ExplorerforFiles_1.385.96.0_x86_g3b9h1p9bdemw.msix",
+    fileName: "15647NeonBand.ExplorerforFiles_1.385.96.0_x86_g3b9h1p9bdemw.msix",
     url: "https://example.com/download/6",
     size: "57.36 MB",
     type: "MSIX",
   },
   {
-    fileName:
-      "15647NeonBand.ExplorerforFiles_1.387.28.0_x64_g3b9h1p9bdemw.msix",
+    fileName: "15647NeonBand.ExplorerforFiles_1.387.28.0_x64_g3b9h1p9bdemw.msix",
     url: "https://example.com/download/7",
     size: "85.91 MB",
     type: "MSIX",
   },
   {
-    fileName:
-      "15647NeonBand.ExplorerforFiles_1.387.28.0_x86_g3b9h1p9bdemw.msix",
+    fileName: "15647NeonBand.ExplorerforFiles_1.387.28.0_x86_g3b9h1p9bdemw.msix",
     url: "https://example.com/download/8",
     size: "80.12 MB",
     type: "MSIX",
@@ -110,12 +94,8 @@ export default function Command() {
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   // Initialize with dummy data if enabled
-  const [downloadLinks, setDownloadLinks] = useState<DownloadLink[]>(
-    USE_DUMMY_DATA ? DUMMY_DOWNLOAD_LINKS : []
-  );
-  const [appMetadata, setAppMetadata] = useState<AppMetadata | null>(
-    USE_DUMMY_DATA ? DUMMY_APP_METADATA : null
-  );
+  const [downloadLinks, setDownloadLinks] = useState<DownloadLink[]>(USE_DUMMY_DATA ? DUMMY_DOWNLOAD_LINKS : []);
+  const [appMetadata, setAppMetadata] = useState<AppMetadata | null>(USE_DUMMY_DATA ? DUMMY_APP_METADATA : null);
   const [showResults, setShowResults] = useState(USE_DUMMY_DATA);
 
   function extractProductId(microsoftStoreUrl: string): string {
@@ -123,9 +103,7 @@ export default function Command() {
     const productIdMatch = microsoftStoreUrl.match(/([0-9][A-Z0-9]{11,13})/i);
 
     if (!productIdMatch) {
-      throw new Error(
-        "Invalid Microsoft Store URL - could not find product ID"
-      );
+      throw new Error("Invalid Microsoft Store URL - could not find product ID");
     }
 
     return productIdMatch[1];
@@ -175,9 +153,7 @@ export default function Command() {
     return "Package";
   }
 
-  async function fetchDownloadLinks(
-    productId: string
-  ): Promise<{ links: DownloadLink[]; metadata: AppMetadata }> {
+  async function fetchDownloadLinks(productId: string): Promise<{ links: DownloadLink[]; metadata: AppMetadata }> {
     const formData = new URLSearchParams();
     formData.append("type", "ProductId");
     formData.append("url", productId);
@@ -219,8 +195,7 @@ export default function Command() {
     const links: DownloadLink[] = [];
 
     // Match table rows with links and file sizes
-    const tableRowRegex =
-      /<tr[^>]*>[\s\S]*?<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>[\s\S]*?<\/tr>/gi;
+    const tableRowRegex = /<tr[^>]*>[\s\S]*?<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>[\s\S]*?<\/tr>/gi;
     let match;
 
     while ((match = tableRowRegex.exec(html)) !== null) {
@@ -228,10 +203,7 @@ export default function Command() {
       const fileName = match[2].trim();
 
       // Only include actual download links
-      if (
-        url.includes("tlu.dl.delivery.mp.microsoft.com") ||
-        url.includes(".windowsupdate.com")
-      ) {
+      if (url.includes("tlu.dl.delivery.mp.microsoft.com") || url.includes(".windowsupdate.com")) {
         // Extract file size from the same row
         const rowHtml = match[0];
         const sizeMatch = rowHtml.match(/>(\d+\.?\d*\s*[KMGT]?B)</i);
@@ -278,7 +250,6 @@ export default function Command() {
       setAppMetadata(DUMMY_APP_METADATA);
       setShowResults(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSubmit(values: { url: string }) {
@@ -341,10 +312,7 @@ export default function Command() {
 
   if (showResults && downloadLinks.length > 0) {
     return (
-      <List
-        navigationTitle={appMetadata?.name || "Downloads"}
-        searchBarPlaceholder="Search downloads..."
-      >
+      <List navigationTitle={appMetadata?.name || "Downloads"} searchBarPlaceholder="Search downloads...">
         {appMetadata && (
           <List.Section title="App Information">
             <List.Item
@@ -366,9 +334,9 @@ export default function Command() {
               icon={Icon.Download}
               title={link.fileName}
               subtitle={link.type}
-              accessories={[
-                link.size ? { text: link.size, icon: Icon.HardDrive } : {},
-              ].filter((acc) => Object.keys(acc).length > 0)}
+              accessories={[link.size ? { text: link.size, icon: Icon.HardDrive } : {}].filter(
+                (acc) => Object.keys(acc).length > 0,
+              )}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={link.url} title="Download" />
@@ -401,10 +369,7 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Get Download Links"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Get Download Links" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
