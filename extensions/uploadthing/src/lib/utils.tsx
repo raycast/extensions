@@ -82,7 +82,7 @@ export const filePathsToFile = async (filePaths: string[]) => {
       const filepath = file.startsWith("file://") ? fileURLToPath(file) : file;
       const filename = basename(filepath);
       const buf = await readFile(filepath);
-      return new UTFile([buf], filename);
+      return new UTFile([new Uint8Array(buf)], filename);
     }),
   );
   return files;

@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Improvement] - 2025-11-11
+
+- Updated extension icon.
+
 ## [Fix: Update Button Text to "Open in Explorer" on Windows] - 2025-10-20
 
 - The text on the "Open in Finder" button will now display "Open in Explorer" on Windows.

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "papra",
+  "title": "Papra",
+  "description": "Simple & Secure Document Archiving for Long-Term Storage",
+  "icon": "papra-1.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "papra_url",
+      "title": "Papra URL",
+      "placeholder": "https://dashboard.papra.app/",
+      "required": true,
+      "default": "https://dashboard.papra.app/",
+      "type": "textfield",
+      "description": "URL of Papra Instance"
+    },
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "placeholder": "ppapi_XX...xx",
+      "required": true,
+      "type": "password",
+      "description": "API Token from Papra Dashboard"
+    }
+  ],
+  "commands": [
+    {
+      "name": "organizations",
+      "title": "Organizations",
+      "description": "Manage Organizations, Documents, Tags",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
+    "filesize": "^11.0.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

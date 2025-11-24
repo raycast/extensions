@@ -20,7 +20,8 @@
     "drewbabel",
     "hayden_barnes",
     "pernielsentikaer",
-    "j3lte"
+    "j3lte",
+    "0xdhrv"
   ],
   "pastContributors": [
     "jonasengelmann"
@@ -76,6 +77,21 @@
       "description": "Create New Incognito Window.",
       "mode": "no-view"
     }
+    ,
+    {
+      "name": "new-guest-window",
+      "title": "Create New Guest Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Guest Window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-current-in-guest",
+      "title": "Open Current Tab in Guest",
+      "subtitle": "Google Chrome",
+      "description": "Open the current active tab's URL in a new Chrome Guest window.",
+      "mode": "no-view"
+    }
   ],
   "tools": [
     {
@@ -87,6 +103,16 @@
       "name": "new-window",
       "title": "New Window",
       "description": "Open a blank new window or a window to a given website."
+    },
+    {
+      "name": "new-guest-window",
+      "title": "New Guest Window",
+      "description": "Open a blank new guest window or a guest window to a given website."
+    },
+    {
+      "name": "open-current-in-guest",
+      "title": "Open Current Tab in Guest",
+      "description": "Open the current active tab's URL in a new Chrome Guest window."
     },
     {
       "name": "search-bookmarks",
@@ -183,6 +209,61 @@
         ]
       },
       {
+        "input": "@google-chrome open a new guest window",
+        "mocks": {
+          "new-guest-window": "New guest window opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-guest-window",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new guest window"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new guest window to github.com",
+        "mocks": {
+          "new-guest-window": "New guest window opened to https://github.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-guest-window",
+              "arguments": {
+                "website": {
+                  "includes": "github.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new guest window to https://github.com"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open current tab in guest",
+        "mocks": {
+          "open-current-in-guest": "Opened current tab URL in guest window"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-current-in-guest",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opens the current tab in a guest window"
+          }
+        ]
+      },
+      {
         "input": "@google-chrome search bookmarks for raycast",
         "mocks": {
           "search-bookmarks": [
@@ -254,7 +335,7 @@
             }
           },
           {
-            "meetsCriteria": "Returns the history for Raycast"
+            "meetsCriteria": "Lists history results including Raycast"
           }
         ]
       },
@@ -280,7 +361,7 @@
             }
           },
           {
-            "meetsCriteria": "Returns Chrome profiles with their names and IDs"
+            "meetsCriteria": "Lists available Chrome profiles"
           }
         ]
       }
@@ -330,17 +411,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
     "run-applescript": "^7.1.0",
     "sql.js": "^1.13.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.5",
     "@types/sql.js": "^1.4.9",
-    "eslint": "^9.37.0",
+    "eslint": "^9.39.1",
     "prettier": "^3.6.2",
     "react": "^19.2.0",
     "typescript": "^5.9.3"

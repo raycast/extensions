@@ -81,7 +81,7 @@ export default function IndexCommand() {
         const access: string | undefined = json?.access;
         const name: string = json.name;
         const link = `https://raycast.com/${owner ?? author}/${name}`;
-        const cleanedPath = file.replace("/package.json", "");
+        const cleanedPath = path.dirname(file);
 
         return {
           path: cleanedPath,
@@ -184,9 +184,7 @@ export default function IndexCommand() {
             return (
               <List.Item
                 key={index}
-                // [TODO] Raycast Windows does not support relative image path yet.
-                // Remove the condition when it is supported.
-                icon={isWindows ? undefined : `${item.path}/assets/${item.icon}`}
+                icon={path.join(item.path, "assets", item.icon)}
                 title={item.title}
                 keywords={[item.author]}
                 actions={

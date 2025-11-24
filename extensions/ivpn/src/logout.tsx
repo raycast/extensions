@@ -2,8 +2,9 @@ import { Alert, Clipboard, Icon, Toast, confirmAlert, showHUD, showToast } from 
 
 import { IVPN } from "@/api/ivpn";
 import { verifyIvpnAuth } from "@/api/ivpn/utils";
+import { withNoViewErrorHandler } from "@/utils/errorHandler";
 
-export default async () => {
+export default withNoViewErrorHandler(async () => {
   const [isAuthenticated, authError] = await verifyIvpnAuth();
   if (!isAuthenticated) {
     await showToast({
@@ -36,4 +37,4 @@ export default async () => {
   await IVPN.logout();
 
   showToast({ title: "Logout Successful" });
-};
+});

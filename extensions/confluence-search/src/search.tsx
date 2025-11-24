@@ -33,8 +33,12 @@ export default function Command() {
       if (!site) {
         return;
       }
-      const spaces = await fetchFavouriteSpaces(site);
-      setSpaces(spaces);
+      try {
+        const spaces = await fetchFavouriteSpaces(site);
+        setSpaces(spaces);
+      } catch (error) {
+        console.error("Error fetching favourite spaces:", error);
+      }
     })();
   }, [site]);
 

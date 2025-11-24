@@ -1,16 +1,7 @@
-import type {
-  MeetingFilter,
-  Paginated,
-  Meeting,
-  Recording,
-  Summary,
-  Transcript,
-  Team,
-  TeamMember,
-} from "../types/Types";
+import type { MeetingFilter, Paginated, Meeting, Summary, Transcript, Team, TeamMember } from "../types/Types";
 import { getFathomClient, getApiKey } from "./client";
 import { isNumber, toStringOrUndefined } from "../utils/typeGuards";
-import { convertSDKMeeting, convertSDKTeam, convertSDKTeamMember, mapRecordingFromMeeting } from "../utils/converters";
+import { convertSDKMeeting, convertSDKTeam, convertSDKTeamMember } from "../utils/converters";
 import { formatTranscriptToMarkdown } from "../utils/formatting";
 import { parseTimestamp } from "../utils/dates";
 import { logger } from "@chrismessina/raycast-logger";
@@ -116,6 +107,7 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
     let nextCursor: string | undefined = undefined;
 
     for await (const response of result) {
+      if (!response) continue;
       const meetingListResponse = response.result;
       items.push(...meetingListResponse.items.map(convertSDKMeeting));
       nextCursor = meetingListResponse.nextCursor || undefined;
@@ -124,13 +116,7 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
 
     return { items, nextCursor };
   } catch (error) {
-    // Fallback to direct HTTP if SDK validation fails
-    // This is expected with SDK v0.0.30 - the API returns valid data but SDK validation is strict
-    if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
-      // Silent fallback - API returned 200, just SDK validation failed
-      return await listMeetingsHTTP(filter);
-    }
-    // For other errors, log and fallback
+    // Fallback to direct HTTP for network/connection errors
     logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
     return await listMeetingsHTTP(filter);
   }
@@ -347,17 +333,6 @@ function mapMeetingFromHTTP(raw: unknown): Meeting | undefined {
   };
 }
 
-export async function listRecentRecordings(
-  args: { pageSize?: number; cursor?: string } = {},
-): Promise<Paginated<Recording>> {
-  // Fallback: derive recordings from meetings until a dedicated recordings list endpoint is available.
-  const page = await listMeetings({ cursor: args.cursor });
-  return {
-    items: page.items.map(mapRecordingFromMeeting),
-    nextCursor: page.nextCursor,
-  };
-}
-
 export async function getMeetingSummary(recordingId: string): Promise<Summary> {
   logger.log(`[API] 📝 getMeetingSummary called for recordingId: ${recordingId}`);
   const resp = await authGet<unknown>(`/recordings/${encodeURIComponent(recordingId)}/summary`);
@@ -431,26 +406,50 @@ export async function getMeetingTranscript(recordingId: string): Promise<Transcr
 }
 
 export async function listTeams(
-  args: { pageSize?: number; cursor?: string; query?: string } = {},
+  args: { pageSize?: number; cursor?: string; query?: string; maxPages?: number } = {},
 ): Promise<Paginated<Team>> {
   logger.log(`[API] 👥 listTeams called with args:`, args);
   logger.log(`[API] 🔵 Calling Fathom SDK client.listTeams()...`);
   try {
     const client = getFathomClient();
+    const maxPages = args.maxPages ?? 10; // Generous default: ~100-500 teams depending on page size
 
-    const response = await client.listTeams({
+    const result = await client.listTeams({
       cursor: args.cursor,
     });
 
-    const items = response.items.map(convertSDKTeam);
-    const nextCursor = response.nextCursor || undefined;
+    const items: Team[] = [];
+    let nextCursor: string | undefined = undefined;
+    let pageCount = 0;
+
+    for await (const response of result) {
+      if (!response?.result) continue;
+
+      pageCount++;
+      if (pageCount > maxPages) {
+        logger.log(`[API] 👥 Reached maxPages limit (${maxPages}), stopping pagination`);
+        break;
+      }
+
+      const teamListResponse = response.result;
+      const pageItems = teamListResponse.items.map(convertSDKTeam);
+      items.push(...pageItems);
+      nextCursor = teamListResponse.nextCursor || undefined;
+
+      if (pageCount > 1) {
+        logger.log(`[API] 👥 Fetched page ${pageCount}: ${pageItems.length} teams (total: ${items.length})`);
+      }
+
+      // Continue fetching all pages automatically unless maxPages limit is reached
+      if (!nextCursor) {
+        logger.log(`[API] 👥 Pagination complete: ${pageCount} pages, ${items.length} total teams`);
+        break;
+      }
+    }
 
     return { items, nextCursor };
   } catch (error) {
-    // Fallback to direct HTTP if SDK validation fails
-    if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
-      return await listTeamsHTTP(args);
-    }
+    // Fallback to direct HTTP for network/connection errors
     logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
     return await listTeamsHTTP(args);
   }
@@ -514,17 +513,22 @@ export async function listTeamMembers(
       requestParams.team = teamId;
     }
 
-    const response = await client.listTeamMembers(requestParams);
+    const result = await client.listTeamMembers(requestParams);
 
-    const items = response.items.map((tm) => convertSDKTeamMember(tm, teamId));
-    const nextCursor = response.nextCursor || undefined;
+    const items: TeamMember[] = [];
+    let nextCursor: string | undefined = undefined;
+
+    for await (const response of result) {
+      if (!response?.result) continue;
+      const teamMemberListResponse = response.result;
+      items.push(...teamMemberListResponse.items.map((tm) => convertSDKTeamMember(tm, teamId)));
+      nextCursor = teamMemberListResponse.nextCursor || undefined;
+      // Continue fetching all pages automatically
+    }
 
     return { items, nextCursor };
   } catch (error) {
-    // Fallback to direct HTTP if SDK validation fails
-    if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
-      return await listTeamMembersHTTP(teamId, args);
-    }
+    // Fallback to direct HTTP for network/connection errors
     logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
     return await listTeamMembersHTTP(teamId, args);
   }

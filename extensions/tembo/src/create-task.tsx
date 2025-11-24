@@ -85,10 +85,19 @@ export default function Command() {
     }
   }
 
-  const getGitHubIcon = () => {
-    // Check if we're in dark mode using Raycast's environment
+  const getRepoIcon = (integrationType: string) => {
     const isDarkMode = environment.appearance === "dark";
-    return isDarkMode ? "github-inverted.png" : "github.png";
+
+    switch (integrationType.toLowerCase()) {
+      case "github":
+        return isDarkMode ? "github-inverted.png" : "github.png";
+      case "gitlab":
+        return "gitlab.png";
+      case "bitbucket":
+        return "bitbucket.png";
+      default:
+        return isDarkMode ? "github-inverted.png" : "github.png";
+    }
   };
 
   return (
@@ -114,7 +123,12 @@ export default function Command() {
         placeholder={isLoadingRepos ? "Loading repositories..." : "Select a repository"}
       >
         {repositories.map((repo) => (
-          <Form.Dropdown.Item key={repo.id} value={repo.id} title={repo.name} icon={getGitHubIcon()} />
+          <Form.Dropdown.Item
+            key={repo.id}
+            value={repo.id}
+            title={repo.name}
+            icon={getRepoIcon(repo.integration.type)}
+          />
         ))}
       </Form.Dropdown>
 

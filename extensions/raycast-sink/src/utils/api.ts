@@ -1,14 +1,9 @@
-import fetch from "node-fetch";
 import { URL } from "url";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../types";
 
 async function getApiConfig() {
   const preferences = getPreferenceValues<Preferences>();
   const { host, token } = preferences;
-  if (!host || !token) {
-    throw new Error("API configuration is not initialized");
-  }
   return { host, token };
 }
 
