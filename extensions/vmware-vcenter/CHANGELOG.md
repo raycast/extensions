@@ -1,5 +1,11 @@
 # VMware vCenter Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- [Improvement] New Liquid Glass Icon.
+- [Improvement] Added Windows support.
+- [Improvement] Adjusted shortcuts for better Raycast consistency.
+
 ## [Improvement] - 2025-06-11
 
 - Implement AI tools that can: list virtual machines, retrieve detailed information about them, open the virtual machine console, and shut down, restart, or power on virtual machines. 
