@@ -1,6 +1,6 @@
 # workflowy-inbox Changelog
 
-## [Added Windows Support + Retitled Extension] - {PR_MERGE_DATE}
+## [Added Windows Support + Retitled Extension] - 2025-11-24
 
 - Added command to View Nodes
 - Retitled to "Workflowy Inbox" since we have more commands now
