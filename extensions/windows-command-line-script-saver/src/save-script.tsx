@@ -15,7 +15,7 @@ interface Script {
 }
 
 export default function Command() {
-  function handleSubmit(values: Values) {
+  async function handleSubmit(values: Values) {
     if (!values.name.trim()) {
       showToast({ style: Toast.Style.Failure, title: "Error", message: "Please enter a script name." });
       return;
