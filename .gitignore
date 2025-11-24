@@ -179,13 +179,3 @@ bun.lock
 
 scripts/internal/**
 .claude**
-
-
-#Ignore vscode AI rules
-.github/instructions/codacy.instructions.md
-PR_UPDATE_BODY.txt
-TMP_LOOKUP_COMMIT.txt
-raycast-api-ambient.d.ts
-tsc-err.txt
-tsc-out.txt
-PR_DESCRIPTION_FINAL.txt
