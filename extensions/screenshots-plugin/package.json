@@ -31,7 +31,7 @@
     {
       "name": "screenshot",
       "title": "Take Screenshot",
-      "subtitle": "截图并悬浮显示",
+      "subtitle": "Screenshots Plugin",
       "description": "快速截取屏幕并悬浮显示截图，支持 OCR 文字识别 | Capture screen and display in floating window with OCR support",
       "mode": "no-view"
     }
