@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [New Addition] - 2025-11-24
+## [New Addition] - {PR_MERGE_DATE}
 - Added support for custom instance folders
 - Added support for custom Prism Launcher installation paths
 - Refactored code to use usePromise hook for better async handling
