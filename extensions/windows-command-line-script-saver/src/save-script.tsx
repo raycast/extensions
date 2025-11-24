@@ -50,7 +50,7 @@ export default function Command() {
       scripts.push(newScript);
       await LocalStorage.setItem("scripts", JSON.stringify(scripts));
       showToast({ title: "Script Saved", message: "Try it out using the 'View Scripts' page!" });
-    } catch (error) {
+    } catch {
       showToast({ 
         style: Toast.Style.Failure, 
         title: "Error", 
