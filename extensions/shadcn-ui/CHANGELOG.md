@@ -1,6 +1,6 @@
 # shadcn/ui Changelog
 
-## [Add search registries command and fix GitHub URL] - {PR_MERGE_DATE}
+## [Add search registries command and fix GitHub URL] - 2025-11-24
 
 - Add "search registries" command
 - Fix shadcn-ui GitHub URL
