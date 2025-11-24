@@ -35,17 +35,14 @@ class PlausibleAnalytics {
   private initPromise: Promise<void> | null;
   private userId: string | null;
   private isBrowser: boolean;
-  private trackerTrack:
-    | ((name: string, options?: PlausibleTrackOptions) => Promise<void>)
-    | null;
+  private trackerTrack: ((name: string, options?: PlausibleTrackOptions) => Promise<void>) | null;
 
   constructor() {
     this.domain = "webbites.io";
     this.apiEndpoint = "https://stats.webbites.io/api/event";
     this.initPromise = null;
     this.userId = null;
-    this.isBrowser =
-      typeof window !== "undefined" && typeof document !== "undefined";
+    this.isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
     this.trackerTrack = null;
   }
 
@@ -57,8 +54,7 @@ class PlausibleAnalytics {
       if (!this.isBrowser) {
         try {
           const { LocalStorage } = await import("@raycast/api");
-          const userDataString =
-            await LocalStorage.getItem<string>("webbites_user_data");
+          const userDataString = await LocalStorage.getItem<string>("webbites_user_data");
           if (userDataString) {
             const userData = JSON.parse(userDataString);
             this.userId = userData.objectId || null;
@@ -71,13 +67,8 @@ class PlausibleAnalytics {
       if (this.isBrowser) {
         try {
           const plausibleModule = await import("@plausible-analytics/tracker");
-          const plausibleInit = plausibleModule.init as (
-            opts: PlausibleInitOptions,
-          ) => void;
-          this.trackerTrack = plausibleModule.track as (
-            name: string,
-            options?: PlausibleTrackOptions,
-          ) => Promise<void>;
+          const plausibleInit = plausibleModule.init as (opts: PlausibleInitOptions) => void;
+          this.trackerTrack = plausibleModule.track as (name: string, options?: PlausibleTrackOptions) => Promise<void>;
           plausibleInit({
             domain: this.domain,
             endpoint: this.apiEndpoint,

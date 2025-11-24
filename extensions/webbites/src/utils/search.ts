@@ -16,30 +16,16 @@ const API_URL = `${BACKEND_API_URL}${API_ENDPOINTS.SEARCH}`;
  * @param options Search options including term, filters, sorting, and pagination
  * @returns Promise resolving to search results
  */
-export const search = async (
-  options: SearchOptions = {},
-): Promise<SearchResult> => {
+export const search = async (options: SearchOptions = {}): Promise<SearchResult> => {
   try {
     // Extract and set default options
-    const {
-      searchTerm,
-      orderBy = "relevance",
-      page = 0,
-      hitsPerPage = 20,
-    } = options;
+    const { searchTerm, orderBy = "relevance", page = 0, hitsPerPage = 20 } = options;
 
     // Get authentication information
     const { userId, sessionToken } = await getAuthInfo();
 
     // Make the search request
-    const response = await makeSearchRequest(
-      searchTerm || "",
-      userId,
-      sessionToken,
-      orderBy,
-      page,
-      hitsPerPage,
-    );
+    const response = await makeSearchRequest(searchTerm || "", userId, sessionToken, orderBy, page, hitsPerPage);
     const data = await response.json();
     return data.search as SearchResult;
   } catch (error) {
@@ -159,8 +145,7 @@ const handleSearchError = async (error: unknown) => {
       // }
       showFailureToast(error as Error, {
         title: "Session expired",
-        message:
-          "Your session has expired. Please re-enter your credentials to continue.",
+        message: "Your session has expired. Please re-enter your credentials to continue.",
         primaryAction: {
           title: "Open Preferences",
           onAction: async () => {
@@ -179,9 +164,7 @@ const handleSearchError = async (error: unknown) => {
     } else {
       showFailureToast(error as Error, {
         title: "Search failed",
-        message:
-          errorData?.message ||
-          `HTTP ${response.status}: ${response.statusText}`,
+        message: errorData?.message || `HTTP ${response.status}: ${response.statusText}`,
       });
     }
   } else {

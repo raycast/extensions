@@ -44,9 +44,7 @@ export const saveTabToQstash = async (data: {
       });
 
     // Get session token from local storage
-    const sessionToken = await LocalStorage.getItem<string>(
-      "webbites_session_token",
-    );
+    const sessionToken = await LocalStorage.getItem<string>("webbites_session_token");
     if (!sessionToken) {
       throw new Error("No session token available. Please log in first.");
     }
@@ -90,13 +88,8 @@ export const saveTabToQstash = async (data: {
     });
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ statusMessage: "Unknown error" }));
-      throw new Error(
-        errorData.statusMessage ||
-          `HTTP ${response.status}: ${response.statusText}`,
-      );
+      const errorData = await response.json().catch(() => ({ statusMessage: "Unknown error" }));
+      throw new Error(errorData.statusMessage || `HTTP ${response.status}: ${response.statusText}`);
     }
 
     const result = await response.json();
