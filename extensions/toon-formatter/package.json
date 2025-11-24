@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toon-formatter",
+  "title": "TOON Formatter",
+  "description": "Formats a JSON file into the TOON structure — a compact, LLM-friendly format that saves tokens, improves parsing consistency, and reduces hallucination surface. If the JSON is stringified, it will be parsed automatically before converting to TOON.",
+  "icon": "extension-icon.png",
+  "author": "omaralex24",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-clipboard-json-to-toon",
+      "title": "Convert Clipboard JSON to TOON",
+      "subtitle": "Convert clipboard JSON into TOON",
+      "description": "Converts a JSON/JS object stored in the clipboard into TOON format and copies/pastes it back.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-selected-json-to-toon",
+      "title": "Convert Selected JSON to TOON",
+      "subtitle": "Convert selected text into TOON",
+      "description": "Converts a JSON/JS Object selected in the foremost editor into TOON format and replaces it inline.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-selected-show",
+      "title": "Convert Selected JSON and Show",
+      "subtitle": "Preview selected text as TOON",
+      "description": "Converts the selected JSON into TOON and shows a preview to copy.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-json-to-toon",
+      "title": "Convert JSON to TOON",
+      "subtitle": "Convert JSON text into TOON in a form",
+      "description": "Converts a JSON/JS Object selected in the foremost editor into TOON format and replaces it inline.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^1.17.0",
+    "@toon-format/toon": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
