@@ -1,5 +1,10 @@
 # shadcn/ui Changelog
 
+## [Add search registries command and fix GitHub URL] - 2025-11-24
+
+- Add "search registries" command
+- Fix shadcn-ui GitHub URL
+
 ## [Fix search examples and components commands] - 2025-06-05
 
 - Fix "search components" command by removing dependency on the deprecated /api endpoint and fetching data directly from GitHub

@@ -1,4 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchGetAllLists, fetchGetSingleListBookmarks } from "../apis";
 import { ApiResponse, List, ListDetails } from "../types";
 
@@ -19,7 +20,8 @@ export function useGetAllLists() {
             ...list,
             count: details.bookmarks?.length || 0,
           };
-        } catch {
+        } catch (error) {
+          logger.log("Failed to fetch list bookmark count", { listId: list.id, listName: list.name, error });
           return { ...list, count: 0 } as ListWithCount;
         }
       }),

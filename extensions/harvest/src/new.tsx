@@ -236,7 +236,12 @@ export default function Command({
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" value={taskId ?? ""} onChange={onSave}>
+      <Form.Dropdown
+        id="task_id"
+        title="Task"
+        value={tasks.find((t) => t.task.id.toString() === taskId) ? taskId ?? "" : ""}
+        onChange={setTaskId}
+      >
         {tasks?.map((task) => {
           return <Form.Dropdown.Item value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}

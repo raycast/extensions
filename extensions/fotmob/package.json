@@ -2,13 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fotmob",
   "title": "Fotmob",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Football match schedule, result, table",
   "icon": "command-icon.png",
   "author": "iamlas",
   "contributors": [
     "j3lte",
-    "Antitoxic9639"
+    "Antitoxic9639",
+    "guztaver",
+    "pernielsentikaer"
   ],
   "categories": [
     "News",
@@ -45,20 +47,96 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "player",
+      "title": "Player Detail",
+      "subtitle": "Fotmob",
+      "description": "View detail of a player by player's id",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "playerId",
+          "type": "text",
+          "description": "Player ID",
+          "placeholder": "Enter player ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "league-table",
+      "title": "League Table",
+      "subtitle": "Fotmob",
+      "description": "View league table by league's id",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "leagueId",
+          "type": "text",
+          "description": "League ID",
+          "placeholder": "Enter league ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "match-detail",
+      "title": "Match Detail",
+      "subtitle": "Fotmob",
+      "description": "View detail of a match by match's id",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "matchId",
+          "type": "text",
+          "description": "Match ID",
+          "placeholder": "Enter match ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "search-players",
+      "title": "Search Players",
+      "subtitle": "Fotmob",
+      "description": "Search for players",
+      "mode": "view"
+    },
+    {
+      "name": "search-teams",
+      "title": "Search Teams",
+      "subtitle": "Fotmob",
+      "description": "Search for teams",
+      "mode": "view"
+    },
+    {
+      "name": "favorite-league-tables",
+      "title": "Favorite League Tables",
+      "subtitle": "Fotmob",
+      "description": "View favorite league tables",
+      "mode": "view"
+    },
+    {
+      "name": "favorite-upcoming-matches",
+      "title": "Favorite Upcoming Matches",
+      "subtitle": "Fotmob",
+      "description": "View upcoming matches for favorite teams",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.16.0"
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "20.12.7",
-    "@types/react": "18.2.79",
-    "eslint": "^8.51.0",
-    "prettier": "^3.3.1",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -66,5 +144,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -2,6 +2,7 @@ import * as React from "react";
 import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { convertAnswerToChat, GetModel, Run } from "./function";
+import { Shortcut } from "../shortcut";
 import { CommandAnswer } from "../../settings/enum";
 import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel } from "../../ollama/types";
 import { EditModel } from "./form/EditModel";
@@ -100,7 +101,7 @@ export function AnswerView(props: props): JSX.Element {
         <Action
           title={showAnswerMetadata ? "Hide Metadata" : "Show Metadata"}
           icon={showAnswerMetadata ? Icon.EyeDisabled : Icon.Eye}
-          shortcut={{ modifiers: ["cmd"], key: "y" }}
+          shortcut={Shortcut.ToggleQuickLook}
           onAction={() => setShowAnswerMetadata((prevState) => !prevState)}
         />
         {props.command && (
@@ -108,7 +109,7 @@ export function AnswerView(props: props): JSX.Element {
             title="Change Model"
             icon={Icon.Box}
             onAction={() => setShowSelectModelForm(true)}
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
+            shortcut={Shortcut.ChangeModel}
           />
         )}
         {Model && !loading && answer && (
@@ -118,7 +119,7 @@ export function AnswerView(props: props): JSX.Element {
             onAction={async () =>
               await convertAnswerToChat(Model, query.current, images.current, answer, answerMetadata)
             }
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Shortcut.New}
           />
         )}
       </ActionPanel>

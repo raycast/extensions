@@ -1,5 +1,9 @@
 # Harvest Changelog
 
+## [Bug Fixes] - 2025-11-24
+
+- Fix: Resolved issue where task selection would not update in the New Time Entry form
+
 ## [Bug Fixes] - 2025-11-03
 
 - Fix: Changing task in the form didn't save properly
