@@ -1,6 +1,6 @@
 # ChatGPT Atlas Changelog
 
-## [Fix Crash when not installed] - {PR_MERGE_DATE}
+## [Fix Crash when not installed] - 2025-11-24
 
 - Fix crash when **ChatGPT Atlas** is not installed
 
