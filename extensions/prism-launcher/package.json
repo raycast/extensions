@@ -37,6 +37,30 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "installPath",
+      "title": "Prism Launcher location",
+      "description": "Path to the Prism Launcher",
+      "required": true,
+      "type": "appPicker",
+      "default": {
+        "Windows": "%LOCALAPPDATA%\\Programs\\PrismLauncher\\prismlauncher.exe",
+        "macOS": "/Applications/Prism Launcher.app"
+      }
+    },
+    {
+      "name": "instancesPath",
+      "title": "Instances location",
+      "description": "Path to the Prism Launcher instances folder",
+      "required": true,
+      "type": "directory",
+      "default": {
+        "Windows": "%USERPROFILE%\\AppData\\Roaming\\PrismLauncher\\instances",
+        "macOS": "~/Library/Application Support/PrismLauncher/instances"
+      }
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.98.0",
     "@raycast/utils": "^1.19.0",
