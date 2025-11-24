@@ -54,7 +54,7 @@
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0",
     "axios": "^1.8.2",
-    "parse": "^6.0.0"
+    "parse": "^7.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
