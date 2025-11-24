@@ -8,8 +8,7 @@ import {
   Icon,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState } from "react";
-import React from "react";
+import { useState, useEffect } from "react";
 
 interface DownloadLink {
   fileName: string;
@@ -25,12 +24,99 @@ interface AppMetadata {
   productId: string;
 }
 
+// Dummy data for screenshots
+const DUMMY_APP_METADATA: AppMetadata = {
+  name: "15647 Neon Band. Explorerfor Files",
+  productId: "9n0kwg910ldh",
+  version: "1.219.24.0",
+  publisher: "15647 Neon Band",
+};
+
+const DUMMY_DOWNLOAD_LINKS: DownloadLink[] = [
+  {
+    fileName:
+      "15647NeonBand.ExplorerforFiles_1.219.24.0_x64_g3b9h1p9bdemw.appx",
+    url: "https://example.com/download/1",
+    size: "19.31 MB",
+    type: "APPX",
+  },
+  {
+    fileName:
+      "15647NeonBand.ExplorerforFiles_1.219.24.0_x86_g3b9h1p9bdemw.appx",
+    url: "https://example.com/download/2",
+    size: "16.89 MB",
+    type: "APPX",
+  },
+  {
+    fileName:
+      "15647NeonBand.ExplorerforFiles_1.246.168.0_x64_g3b9h1p9bdemw.appx",
+    url: "https://example.com/download/3",
+    size: "19.37 MB",
+    type: "APPX",
+  },
+  {
+    fileName:
+      "15647NeonBand.ExplorerforFiles_1.246.168.0_x86_g3b9h1p9bdemw.appx",
+    url: "https://example.com/download/4",
+    size: "17.04 MB",
+    type: "APPX",
+  },
+  {
+    fileName:
+      "15647NeonBand.ExplorerforFiles_1.385.96.0_x64_g3b9h1p9bdemw.msix",
+    url: "https://example.com/download/5",
+    size: "61.34 MB",
+    type: "MSIX",
+  },
+  {
+    fileName:
+      "15647NeonBand.ExplorerforFiles_1.385.96.0_x86_g3b9h1p9bdemw.msix",
+    url: "https://example.com/download/6",
+    size: "57.36 MB",
+    type: "MSIX",
+  },
+  {
+    fileName:
+      "15647NeonBand.ExplorerforFiles_1.387.28.0_x64_g3b9h1p9bdemw.msix",
+    url: "https://example.com/download/7",
+    size: "85.91 MB",
+    type: "MSIX",
+  },
+  {
+    fileName:
+      "15647NeonBand.ExplorerforFiles_1.387.28.0_x86_g3b9h1p9bdemw.msix",
+    url: "https://example.com/download/8",
+    size: "80.12 MB",
+    type: "MSIX",
+  },
+  {
+    fileName: "15647NeonBand.ExplorerforFiles_1.400.0.0_x64_g3b9h1p9bdemw.msix",
+    url: "https://example.com/download/9",
+    size: "92.45 MB",
+    type: "MSIX",
+  },
+  {
+    fileName: "15647NeonBand.ExplorerforFiles_1.400.0.0_x86_g3b9h1p9bdemw.msix",
+    url: "https://example.com/download/10",
+    size: "88.23 MB",
+    type: "MSIX",
+  },
+];
+
+// Set to true to show dummy data for screenshots
+const USE_DUMMY_DATA = false;
+
 export default function Command() {
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [downloadLinks, setDownloadLinks] = useState<DownloadLink[]>([]);
-  const [appMetadata, setAppMetadata] = useState<AppMetadata | null>(null);
-  const [showResults, setShowResults] = useState(false);
+  // Initialize with dummy data if enabled
+  const [downloadLinks, setDownloadLinks] = useState<DownloadLink[]>(
+    USE_DUMMY_DATA ? DUMMY_DOWNLOAD_LINKS : []
+  );
+  const [appMetadata, setAppMetadata] = useState<AppMetadata | null>(
+    USE_DUMMY_DATA ? DUMMY_APP_METADATA : null
+  );
+  const [showResults, setShowResults] = useState(USE_DUMMY_DATA);
 
   function extractProductId(microsoftStoreUrl: string): string {
     // Extract product ID from various Microsoft Store URL formats
@@ -38,7 +124,7 @@ export default function Command() {
 
     if (!productIdMatch) {
       throw new Error(
-        "Invalid Microsoft Store URL - could not find product ID",
+        "Invalid Microsoft Store URL - could not find product ID"
       );
     }
 
@@ -90,7 +176,7 @@ export default function Command() {
   }
 
   async function fetchDownloadLinks(
-    productId: string,
+    productId: string
   ): Promise<{ links: DownloadLink[]; metadata: AppMetadata }> {
     const formData = new URLSearchParams();
     formData.append("type", "ProductId");
@@ -185,10 +271,38 @@ export default function Command() {
     return { links, metadata };
   }
 
+  // Ensure dummy data loads on mount if enabled
+  useEffect(() => {
+    if (USE_DUMMY_DATA) {
+      setDownloadLinks(DUMMY_DOWNLOAD_LINKS);
+      setAppMetadata(DUMMY_APP_METADATA);
+      setShowResults(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleSubmit(values: { url: string }) {
     setIsLoading(true);
 
     try {
+      // Use dummy data if enabled
+      if (USE_DUMMY_DATA) {
+        // Simulate a brief delay for realism
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        setDownloadLinks(DUMMY_DOWNLOAD_LINKS);
+        setAppMetadata(DUMMY_APP_METADATA);
+        setShowResults(true);
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Downloads Found",
+          message: `Found ${DUMMY_DOWNLOAD_LINKS.length} download(s)`,
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const productId = extractProductId(values.url);
 
       await showToast({
@@ -246,9 +360,9 @@ export default function Command() {
         )}
 
         <List.Section title={`Available Downloads (${downloadLinks.length})`}>
-          {downloadLinks.map((link, index) => (
+          {downloadLinks.map((link) => (
             <List.Item
-              key={index}
+              key={link.url}
               icon={Icon.Download}
               title={link.fileName}
               subtitle={link.type}
