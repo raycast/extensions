@@ -34,7 +34,8 @@ export default function Command() {
 
     // get existing scripts from local storage and append the new one,
     // with an id of +1 compared to the last script (if none exist, start with id 1)
-    LocalStorage.getItem<string>("scripts").then((storedScripts) => {
+    try {
+      const storedScripts = await LocalStorage.getItem<string>("scripts");
       let scripts: Script[] = [];
       if (storedScripts) {
         scripts = JSON.parse(storedScripts);
@@ -47,8 +48,15 @@ export default function Command() {
         lastAccessed: Date.now(),
       };
       scripts.push(newScript);
-      LocalStorage.setItem("scripts", JSON.stringify(scripts));
-    });
+      await LocalStorage.setItem("scripts", JSON.stringify(scripts));
+      showToast({ title: "Script Saved", message: "Try it out using the 'View Scripts' page!" });
+    } catch (error) {
+      showToast({ 
+        style: Toast.Style.Failure, 
+        title: "Error", 
+        message: "Failed to save script. Please try again." 
+      });
+    }
 
     showToast({ title: "Script Saved", message: "Try it out using the 'View Scripts' page!" });
   }
