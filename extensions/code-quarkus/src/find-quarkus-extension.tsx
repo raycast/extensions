@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Action, ActionPanel, List, popToRoot, showToast, Toast, Icon } from "@raycast/api";
 import { QuarkusVersionDropdown } from "./QuarkusVersionDropDown";
 import { QuarkusVersion } from "./models/QuarkusVersion";
@@ -12,20 +12,20 @@ export default function FindQuarkusExtensionCommand() {
   const [version, setVersion] = useState<QuarkusVersion | null>(null);
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
 
-  async function fetchQuarkusVersions() {
+  async function fetchQuarkusVersions(): Promise<QuarkusVersion[]> {
     const response = await getQuarkusVersion();
     if (!response.ok) {
       throw new Error(`Failed to fetch quarkus version: ${response.status} ${response.statusText}`);
     }
     const versions = (await response.json()) as QuarkusVersion[];
     setVersions(versions);
-    setVersion(versions[0]);
+    return versions;
   }
 
-  async function fetchDependencies() {
-    if (!version) return;
+  const fetchDependencies = useCallback(async (versionToUse: QuarkusVersion | null) => {
+    if (!versionToUse) return;
     try {
-      const response = await fetchQuarkusExtensions(version.key);
+      const response = await fetchQuarkusExtensions(versionToUse.key);
       if (!response.ok) {
         throw new Error(`Failed to fetch Quarkus dependencies: ${response.status} ${response.statusText}`);
       }
@@ -48,16 +48,26 @@ export default function FindQuarkusExtensionCommand() {
         message: error instanceof Error ? error.message : "Failed to load metadata",
       });
     }
-  }
+  }, []);
 
   useEffect(() => {
-    fetchQuarkusVersions().then(() => fetchDependencies());
+    fetchQuarkusVersions().then((versions) => {
+      if (versions && versions.length > 0) {
+        setVersion(versions[0]);
+      }
+    });
   }, []);
+
+  useEffect(() => {
+    if (version) {
+      fetchDependencies(version);
+    }
+  }, [version, fetchDependencies]);
 
   const onVersionChange = (newValue: QuarkusVersion) => {
     console.log(newValue.key);
     setVersion(newValue);
-    fetchDependencies();
+    fetchDependencies(newValue);
   };
 
   function getClipboard(action: ClipboardAction, dep: Dependency) {

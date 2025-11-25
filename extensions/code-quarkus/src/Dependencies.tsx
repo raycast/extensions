@@ -98,8 +98,6 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
 
       await afterDownload(dir);
 
-      await popToRoot();
-
       await showToast({
         style: Toast.Style.Success,
         title: "Project Downloaded",
