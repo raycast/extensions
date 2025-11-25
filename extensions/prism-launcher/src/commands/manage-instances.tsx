@@ -26,6 +26,7 @@ import {
   getMinecraftFolderPath,
   instancesPath,
   isWin,
+  getInstanceVersions,
 } from "../utils/prism";
 import { launchInstance, showInstance } from "../utils/instance";
 
@@ -80,7 +81,10 @@ export default function ManageInstances() {
             <List.Item
               key={`instance-${index}`}
               title={instance.name}
-              accessories={instance.favorite ? [{ icon: Icon.Star, tooltip: "Favorited" }] : []}
+              accessories={[
+                ...getInstanceVersions(instance.id).map((version) => ({ text: version.text, icon: version.icon })),
+                instance.favorite ? { icon: Icon.Star, tooltip: "Favorited" } : {},
+              ]}
               icon={{
                 source: instance.icon ?? path.join(environment.assetsPath, "instance-icon.png"),
               }}

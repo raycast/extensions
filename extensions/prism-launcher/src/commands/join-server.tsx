@@ -23,6 +23,7 @@ import {
   sortServers,
   loadFavoriteInstanceIds,
   instancesPath,
+  getInstanceVersions,
 } from "../utils/prism";
 import { Server, Instance } from "../types";
 import { joinServer, launchInstance } from "../utils/instance";
@@ -180,7 +181,10 @@ export default function JoinServer() {
             <List.Item
               key={`instance-${index}`}
               title={instance.name}
-              accessories={instance.favorite ? [{ icon: Icon.Star, tooltip: "Favorited" }] : []}
+              accessories={[
+                ...getInstanceVersions(instance.id).map((version) => ({ text: version.text, icon: version.icon })),
+                instance.favorite ? { icon: Icon.Star, tooltip: "Favorited" } : {},
+              ]}
               icon={{
                 source: instance.icon ?? path.join(environment.assetsPath, "instance-icon.png"),
               }}

@@ -4,6 +4,7 @@ import { ConfigIniParser } from "config-ini-parser";
 import { Instance, Server } from "../types";
 import * as async from "modern-async";
 import nbt from "prismarine-nbt";
+import { environment } from "@raycast/api";
 
 export const isWin = process.platform === "win32";
 
@@ -134,6 +135,60 @@ export function sortInstances(instancesList: Instance[]): Instance[] {
     // Otherwise sort alphabetically
     return a.name.localeCompare(b.name);
   });
+}
+
+type MMCPackData = {
+  components: {
+    cachedName: string;
+    version: string;
+  }[];
+};
+
+export function getInstanceVersions(instanceId: string) {
+  const packFilePath = getMmcPackFile(instanceId);
+  if (!packFilePath) return [];
+
+  const packFileContent = fs.readFileSync(packFilePath, "utf-8");
+  try {
+    const packData = JSON.parse(packFileContent) as MMCPackData;
+    const mcVersion = packData.components.find((p) => p.cachedName === "Minecraft")?.version || null;
+    const forgeVersion = packData.components.find((p) => p.cachedName === "Forge")?.version || null;
+    const fabricVersion = packData.components.find((p) => p.cachedName === "Fabric Loader")?.version || null;
+
+    return [
+      mcVersion
+        ? {
+            text: mcVersion,
+            icon: path.join(environment.assetsPath, "minecraft.png"),
+          }
+        : {},
+      forgeVersion
+        ? {
+            text: forgeVersion,
+            icon: path.join(environment.assetsPath, "forge.png"),
+          }
+        : {},
+      fabricVersion
+        ? {
+            text: fabricVersion,
+            icon: path.join(environment.assetsPath, "fabric.png"),
+          }
+        : {},
+    ];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get MMC pack file
+ */
+function getMmcPackFile(instanceId: string) {
+  const packFilePath = path.join(instancesPath, instanceId, "mmc-pack.json");
+  if (fs.pathExistsSync(packFilePath)) {
+    return packFilePath;
+  }
+  return null;
 }
 
 /**
