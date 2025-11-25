@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteTag } from "./apis";
 import { BookmarkList } from "./components/BookmarkList";
 import { useConfig } from "./hooks/useConfig";
@@ -22,18 +23,16 @@ export default function Tags() {
       const {
         bookmarks,
         isLoading: isLoadingBookmarks,
-        hasMore,
         revalidate: revalidateBookmarks,
-        loadNextPage,
+        pagination,
       } = useGetTagsBookmarks(tagId);
 
       return (
         <BookmarkList
           bookmarks={bookmarks}
-          hasMore={hasMore}
           isLoading={isLoadingBookmarks}
           onRefresh={revalidateBookmarks}
-          loadMore={loadNextPage}
+          pagination={pagination}
           searchBarPlaceholder={`In ${tagName} tag search...`}
           emptyViewTitle="No bookmarks found"
           emptyViewDescription="No bookmarks in this tag yet"
@@ -53,6 +52,7 @@ export default function Tags() {
       toast.style = Toast.Style.Success;
       await revalidate();
     } catch (error) {
+      logger.error("Failed to delete tag", { tagId, error });
       toast.title = "Delete tag";
       toast.message = "Tag deletion failed";
       toast.style = Toast.Style.Failure;

@@ -1,5 +1,3 @@
-import "./web-polyfill";
-
 import { Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -98,7 +96,7 @@ export const useAppInfo = () => {
 export const useFiles = () => {
   const utapi = new UTApi({ token: getToken() });
   const LIMIT = 20;
-  const { isLoading, data, pagination } = useCachedPromise(
+  const { isLoading, data, pagination, revalidate } = useCachedPromise(
     () => async (options: { page: number }) => {
       const res = await utapi.listFiles({
         offset: options.page * LIMIT,
@@ -113,5 +111,5 @@ export const useFiles = () => {
     [],
     { initialData: [] },
   );
-  return { isLoading, files: data, pagination };
+  return { isLoading, files: data, pagination, revalidate };
 };
