@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Fix issue with AI response not being parsed correctly
+
 ## [Update] - 2025-09-18
 
 - Fix default calendar color not being used
