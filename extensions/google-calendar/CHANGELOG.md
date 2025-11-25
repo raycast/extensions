@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [1.3.1] - {PR_MERGE_DATE}
+## [1.3.1] - 2025-11-25
 
 - Allow the user to configure if they wish to open a meeting directly as the default action instead of the calendar event, defaults to the existing behaviour.
 
