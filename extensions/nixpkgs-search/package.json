@@ -52,36 +52,6 @@
           "value": "100"
         }
       ]
-    },
-    {
-      "name": "nixosVersion",
-      "description": "NixOS version/branch to search in",
-      "type": "dropdown",
-      "required": false,
-      "title": "NixOS Version",
-      "default": "unstable",
-      "data": [
-        {
-          "title": "Unstable (rolling release)",
-          "value": "unstable"
-        },
-        {
-          "title": "NixOS 25.05",
-          "value": "25.05"
-        },
-        {
-          "title": "NixOS 24.11",
-          "value": "24.11"
-        },
-        {
-          "title": "NixOS 24.05",
-          "value": "24.05"
-        },
-        {
-          "title": "NixOS 23.11",
-          "value": "23.11"
-        }
-      ]
     }
   ],
   "dependencies": {

@@ -2,21 +2,21 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- **API-driven branch selection**: Available NixOS branches are now fetched dynamically from the [nix-version-reporter API](https://github.com/0xdhrv/nix-version-reporter)
 - **In-app branch switcher**: Added a dropdown in the search bar to switch between NixOS versions without going to preferences
-- **Auto-updating branch list**: Extension automatically includes new NixOS releases as they become available
-- **Simplified preferences**: Removed static branch configuration from preferences in favor of dynamic runtime selection
-- **Improved validation**: Only valid, currently-indexed branches are shown as options
+- **Branch validation**: Extension validates which hardcoded branches are currently available and only shows valid options
+- **Simplified preferences**: Removed static branch configuration from preferences in favor of runtime selection
 - Bump dependencies to latest versions.
 - Added copy action to package details view
 - Added Windows as supported platform.
 
 ## [Fix] - 2025-11-10
+
 - Change search URL by parsing frontend version to match the upstream change.
 
 ## [Fix] - 2025-05-13
+
 - Compose URL with a version number fetched from [NixOS/nixos-search](https://github.com/NixOS/nixos-search/tree/221d27a68edad8dc291de4bb3fa208d471c46947).
-    - This will prevent issues like [#18939](https://github.com/raycast/extensions/issues/18939).
+  - This will prevent issues like [#18939](https://github.com/raycast/extensions/issues/18939).
 
 ## [Enhancements] - 2024-11-13
 

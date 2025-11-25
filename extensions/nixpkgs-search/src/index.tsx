@@ -15,7 +15,7 @@ export default function Command() {
   const [availableBranches, setAvailableBranches] = useState<(typeof AVAILABLE_BRANCHES)[number][]>([
     ...AVAILABLE_BRANCHES,
   ]);
-  const [selectedBranch, setSelectedBranch] = useState<string>("nixos-unstable");
+  const [selectedBranch, setSelectedBranch] = useState<string>("unstable");
 
   // Load stored selected branch and filter unsupported branches on mount
   useEffect(() => {
