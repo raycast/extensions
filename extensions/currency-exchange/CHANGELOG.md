@@ -1,6 +1,6 @@
 # Currency Exchange Changelog
 
-## [Added missing contributor] - {PR_MERGE_DATE}
+## [Added missing contributor] - 2025-11-25
 
 ## [Update] - 2025-11-04
 
