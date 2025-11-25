@@ -7,8 +7,7 @@ export const joinServer = async (instanceId: string, serverAddress: string) => {
   const prismLauncherPath = await getPrismLauncherPath();
   try {
     if (isWin) {
-      if (!prismLauncherPath) throw new Error("Prism Launcher path not found");
-      spawn(prismLauncherPath, ["--launch", instanceId, "--server", serverAddress]);
+      if (!prismLauncherPath) spawn(prismLauncherPath, ["--launch", instanceId, "--server", serverAddress]);
     } else {
       spawn("open", [
         "-b",
@@ -29,8 +28,7 @@ export const launchInstance = async (instanceId: string) => {
   const prismLauncherPath = await getPrismLauncherPath();
   try {
     if (isWin) {
-      if (!prismLauncherPath) throw new Error("Prism Launcher path not found");
-      spawn(prismLauncherPath, ["--launch", instanceId]);
+      if (!prismLauncherPath) spawn(prismLauncherPath, ["--launch", instanceId]);
     } else {
       spawn("open", ["-b", "org.prismlauncher.PrismLauncher", "--args", "--launch", instanceId]);
     }
@@ -43,8 +41,7 @@ export const showInstance = async (instanceId: string) => {
   const prismLauncherPath = await getPrismLauncherPath();
   try {
     if (isWin) {
-      if (!prismLauncherPath) throw new Error("Prism Launcher path not found");
-      spawn(prismLauncherPath, ["--show", instanceId]);
+      if (!prismLauncherPath) spawn(prismLauncherPath, ["--show", instanceId]);
     } else {
       spawn("open", ["-b", "org.prismlauncher.PrismLauncher", "--args", "--show", instanceId]);
     }
