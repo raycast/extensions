@@ -1,6 +1,6 @@
 # Chatbase Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2025-11-25
 
 - Fixed crash when chatbot is missing "styles" or "button_color" properties
 - Made "styles" and "button_color" optional in Chatbot type
