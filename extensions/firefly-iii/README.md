@@ -12,7 +12,7 @@ This is an extension for [Firefly III](https://firefly-iii.org/) - _a free and o
 
 2. **Enter Firefly III Details**:
 
-    - **Firefly III URL** - URL of Firefly III instance
+    - **Firefly III URL** - URL of Firefly III instance (e.g. https://demo.firefly-iii.org/)
     - **Firefly PAT** - PAT from Dashboard ([instructions](https://docs.firefly-iii.org/how-to/firefly-iii/features/api/#:~:text=of%20this%20document.-,Personal%20Access%20Tokens,-Some%20technical%20background))
 
 ---
