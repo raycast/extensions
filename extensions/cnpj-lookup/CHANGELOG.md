@@ -1,6 +1,6 @@
 # CNPJ Lookup Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-25
 
 - Added Windows support
 - New `Simples Nacional` and `MEI` fields
