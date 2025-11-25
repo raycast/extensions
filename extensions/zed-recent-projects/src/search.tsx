@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Application, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useZedContext, withZed } from "./components/with-zed";
 import { isWindows } from "./lib/utils";
 import { exists } from "./lib/utils";
@@ -9,7 +9,7 @@ import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
 import { execWindowsZed } from "./lib/windows";
 
 export function Command() {
-  const { app, dbPath, workspaceDbVersion } = useZedContext();
+  const { dbPath, workspaceDbVersion } = useZedContext();
   const { workspaces, isLoading, error, removeEntry, removeAllEntries } = useRecentWorkspaces(
     dbPath,
     workspaceDbVersion,
@@ -50,7 +50,7 @@ export function Command() {
               entry={entry}
               actions={
                 <ActionPanel>
-                  <OpenInZedAction entry={entry} app={app} />
+                  <OpenInZedAction entry={entry} />
                   {entry.type === "local" &&
                     (isWindows ? (
                       <Action.Open title="Show in File Explorer" target={entry.path} />
@@ -107,7 +107,7 @@ export function Command() {
                 entry={entry}
                 actions={
                   <ActionPanel>
-                    <OpenInZedAction entry={entry} app={app} />
+                    <OpenInZedAction entry={entry} />
                     {entry.type === "local" &&
                       (isWindows ? (
                         <Action.Open title="Show in File Explorer" target={entry.path} />
