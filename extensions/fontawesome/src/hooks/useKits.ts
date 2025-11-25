@@ -34,8 +34,10 @@ export const useKits = (accessToken: string, execute: boolean, kitFilter?: strin
 
     if (tokensOrNames.length > 0) {
       filteredKits = allKits.filter((kit) => {
-        const nameLower = kit.name.toLowerCase();
-        return tokensOrNames.some((value) => value === kit.token || value === kit.id || value === nameLower);
+        const nameLower = kit.name?.toLowerCase() ?? "";
+        const tokenLower = kit.token?.toLowerCase() ?? "";
+        const idLower = kit.id?.toLowerCase() ?? "";
+        return tokensOrNames.some((value) => value === tokenLower || value === idLower || value === nameLower);
       });
     }
   }
