@@ -1,17 +1,29 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reboot-to-bios",
-  "title": "Reboot to Bios",
+  "title": "Reboot to BIOS",
   "description": "Quickly reboot your Windows PC directly to BIOS or Advanced Boot Options",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
     {
       "name": "reboot-to-bios",
-      "title": "Reboot to Bios",
-      "description": "Reboot To Bios",
+      "title": "Reboot to BIOS",
+      "description": "Instantly restart your PC to BIOS firmware settings or Advanced Boot Options",
       "mode": "no-view",
-      "subtitle": "Reboot To Bios"
+      "subtitle": "System",
+      "preferences": [
+        {
+          "name": "showConfirmation",
+          "type": "checkbox",
+          "required": false,
+          "title": "Confirmation Dialog",
+          "description": "When disabled, the extension will reboot immediately without asking for confirmation (fast reboot mode)",
+          "default": true,
+          "label": "Show confirmation before rebooting",
+          "icon": "extension-icon.png"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -31,10 +43,9 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "build": "ray build",
-    "publish": "npx @raycast/api@latest publish",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+    "publish": "npx @raycast/api@latest publish"
   },
-  "author": "spix18",
+  "author": "spix",
   "platforms": [
     "Windows"
   ],
