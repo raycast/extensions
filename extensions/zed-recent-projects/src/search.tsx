@@ -50,7 +50,7 @@ export function Command() {
               entry={entry}
               actions={
                 <ActionPanel>
-                  <OpenOnZed entry={entry} app={app} />
+                  <OpenInZedAction entry={entry} app={app} />
                   {entry.type === "local" &&
                     (isWindows ? (
                       <Action.Open title="Show in File Explorer" target={entry.path} />
@@ -107,7 +107,7 @@ export function Command() {
                 entry={entry}
                 actions={
                   <ActionPanel>
-                    <OpenOnZed entry={entry} app={app} />
+                    <OpenInZedAction entry={entry} app={app} />
                     {entry.type === "local" &&
                       (isWindows ? (
                         <Action.Open title="Show in File Explorer" target={entry.path} />
@@ -134,11 +134,12 @@ export function Command() {
   );
 }
 
-function OpenOnZed({ entry, app }: { entry: Entry; app: Application }) {
+function OpenInZedAction({ entry }: { entry: Entry }) {
+  const { app } = useZedContext();
   const zedIcon = { fileIcon: app.path };
-  const openWsl = () => execWindowsZed(["--wsl", `${entry.wsl?.user}@${entry.wsl?.distro}`, `/${entry.path}`]);
+  const openZedInWsl = () => execWindowsZed(["--wsl", `${entry.wsl?.user}@${entry.wsl?.distro}`, `/${entry.path}`]);
   return entry.wsl ? (
-    <Action title="Open in Zed" onAction={openWsl} icon={zedIcon} />
+    <Action title="Open in Zed" onAction={openZedInWsl} icon={zedIcon} />
   ) : (
     <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />
   );
