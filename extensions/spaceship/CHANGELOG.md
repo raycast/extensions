@@ -1,6 +1,6 @@
 # Spaceship Changelog
 
-## [Check Domain Availability] - {PR_MERGE_DATE}
+## [Check Domain Availability] - 2025-11-25
 
 - New command to check if a domain is available
 
