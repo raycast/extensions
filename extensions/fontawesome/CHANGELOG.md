@@ -1,6 +1,6 @@
 # Font Awesome Changelog
 
-## [Added Custom Kits Support for Pro accounts] - {PR_MERGE_DATE}
+## [Added Custom Kits Support for Pro accounts] - 2025-11-25
 
 - Added support for browsing and searching custom kit icons
 - Added "Remember Last Used Kit" preference to restore your previous selection on launch
