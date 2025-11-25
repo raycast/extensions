@@ -5,11 +5,16 @@
   "description": "View calendar month-by-month",
   "icon": "command-icon.png",
   "author": "fuksman",
-  "contributors": ["pernielsentikaer", "tonka3000"],
-  "categories": ["Productivity"],
+  "contributors": [
+    "pernielsentikaer",
+    "tonka3000"
+  ],
   "platforms": [
     "macOS",
     "Windows"
+  ],
+  "categories": [
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
