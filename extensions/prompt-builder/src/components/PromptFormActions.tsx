@@ -28,6 +28,7 @@ const PromptFormActions = ({ formState, templateState }: PromptFormActionsProp) 
     deleteTemplate,
     deleteAllTemplates,
   } = templateState;
+  const isMac = process.platform === "darwin";
 
   const validateAndGetPrompt = (values: FormValues): string | undefined => {
     const errors = validateForm(values);
@@ -115,12 +116,12 @@ const PromptFormActions = ({ formState, templateState }: PromptFormActionsProp) 
         title="Preview Prompt"
         icon={Icon.Eye}
         onSubmit={handlePreviewPrompt}
-        shortcut={{ modifiers: ["cmd"], key: "y" }}
+        shortcut={isMac ? { modifiers: ["cmd"], key: "y" } : { modifiers: ["ctrl"], key: "y" }}
       />
       <Action.Push
         title="Save as Template"
         icon={Icon.PlusSquare}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        shortcut={isMac ? { modifiers: ["cmd"], key: "s" } : { modifiers: ["ctrl"], key: "s" }}
         target={
           <SaveTemplateForm
             addTemplate={addTemplate}
@@ -138,7 +139,7 @@ const PromptFormActions = ({ formState, templateState }: PromptFormActionsProp) 
           <Action.Push
             title="Update Template"
             icon={Icon.Repeat}
-            shortcut={{ modifiers: ["cmd"], key: "u" }}
+            shortcut={isMac ? { modifiers: ["cmd"], key: "u" } : { modifiers: ["ctrl"], key: "u" }}
             target={
               <SaveTemplateForm
                 addTemplate={addTemplate}
@@ -156,13 +157,13 @@ const PromptFormActions = ({ formState, templateState }: PromptFormActionsProp) 
             title="Delete Template"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            shortcut={isMac ? { modifiers: ["cmd", "shift"], key: "d" } : { modifiers: ["ctrl", "shift"], key: "d" }}
             onAction={handleDeleteTemplate}
           />
           <Action
             title="New Empty Template"
             icon={Icon.BlankDocument}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={isMac ? { modifiers: ["cmd"], key: "n" } : { modifiers: ["ctrl"], key: "n" }}
             onAction={() => {
               setSelectedTemplateId("none");
               resetFormValues();
@@ -174,7 +175,7 @@ const PromptFormActions = ({ formState, templateState }: PromptFormActionsProp) 
       <Action
         title="Clear Form"
         icon={Icon.Eraser}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        shortcut={isMac ? { modifiers: ["cmd"], key: "d" } : { modifiers: ["ctrl"], key: "d" }}
         onAction={async () => {
           resetFormValues();
           setTaskError(undefined);
@@ -189,7 +190,9 @@ const PromptFormActions = ({ formState, templateState }: PromptFormActionsProp) 
         title="Delete All Templates"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
-        shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "d" }}
+        shortcut={
+          isMac ? { modifiers: ["cmd", "shift", "opt"], key: "d" } : { modifiers: ["ctrl", "shift", "alt"], key: "d" }
+        }
         onAction={handleDeleteAllTemplates}
       />
     </ActionPanel>
