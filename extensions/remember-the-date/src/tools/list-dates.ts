@@ -26,6 +26,7 @@ export default async function listDates(input: ListDatesInput = {}) {
     success: true,
     count: filteredItems.length,
     items: filteredItems.map((item) => ({
+      id: item.id,
       name: item.name,
       subtitle: item.subtitle,
       date: item.date,
