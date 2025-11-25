@@ -19,5 +19,5 @@ This extension requires your Amp Code session token to authenticate API requests
 
 - Browse your Amp Code threads with infinite scroll
 - Search threads by title
-- Copy the CLI command to continue a thread (`amp --thread=...`)
+- Copy the CLI command to continue a thread (`amp threads continue <id>`)
 - Open threads directly in your browser

@@ -143,7 +143,7 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Copy Thread Command" content={`amp --thread=${thread.id}`} />
+                  <Action.CopyToClipboard title="Copy Thread Command" content={`amp threads continue ${thread.id}`} />
                   <Action.OpenInBrowser title="Open in Browser" url={`https://ampcode.com/threads/${thread.id}`} />
                   <Action.CopyToClipboard
                     title="Copy Thread URL"
