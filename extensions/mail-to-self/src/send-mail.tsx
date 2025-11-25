@@ -208,7 +208,7 @@ function parseRecipients(value: string): RecipientOption[] {
         seen.add(email.toLowerCase());
         return {
           value: email,
-          label: name ? `${name} <${email}>` : email,
+          label: name || email,
           email,
           name: name || undefined,
         };
