@@ -9,7 +9,7 @@
     {
       "name": "reboot-to-bios",
       "title": "Reboot to BIOS",
-      "description": "Instantly restart your PC to BIOS firmware settings",
+      "description": "Quickly reboot your Windows PC directly to BIOS firmware settings",
       "mode": "no-view",
       "subtitle": "System",
       "preferences": [
@@ -18,7 +18,7 @@
           "type": "checkbox",
           "required": false,
           "title": "Confirmation Dialog",
-          "description": "When disabled, the extension will reboot immediately without asking for confirmation (fast reboot mode)",
+          "description": "Show confirmation before rebooting. Disable for instant hotkey execution.",
           "default": true,
           "label": "Show confirmation before rebooting",
           "icon": "extension-icon.png"

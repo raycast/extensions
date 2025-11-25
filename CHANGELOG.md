@@ -1,6 +1,6 @@
 # Reboot to BIOS Changelog
 
-## [Initial Version] - 2025-11-25
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Reboot to BIOS extension
