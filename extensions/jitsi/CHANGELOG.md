@@ -1,6 +1,6 @@
 # Jitsi Changelog
 
-## [Added Preferences and Enhanced Functionality] - {PR_MERGE_DATE}
+## [Added Preferences and Enhanced Functionality] - 2025-11-25
 
 - Added custom Jitsi server support - use your own server instead of meet.jit.si
 - Added multiple meeting name format options (timestamp, random words, custom prefix, random only)
