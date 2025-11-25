@@ -13,6 +13,13 @@ export type CreateSubscriberRequest = {
   email: string;
 };
 
+export type Tag = {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Template = {
   id: number;
   name: string;
@@ -33,11 +40,11 @@ export type PaginatedResult<T> = SuccessResult<T[]> & {
     next: string | null;
   };
   meta: {
-    current_page: 1;
-    from: string | null;
-    last_page: 1;
+    current_page: number;
+    from: number | number;
+    last_page: number;
     per_page: number;
-    to: string | null;
+    to: number | null;
     total: number;
   };
 };

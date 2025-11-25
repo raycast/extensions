@@ -6,13 +6,14 @@ import {
   confirmAlert,
   Form,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { sendportalRequest } from "./sendportal";
+import { buildUrl, sendportalRequest } from "./sendportal";
 import { CreateTemplateRequest, PaginatedResult, Template } from "./types";
 import TurndownService from "turndown";
 
@@ -80,12 +81,14 @@ export default function Templates() {
             detail={<List.Item.Detail markdown={turndown.turndown(template.content)} />}
             actions={
               <ActionPanel>
+                <Action.OpenInBrowser url={buildUrl(`templates/${template.id}/edit`)} />
                 <Action.Push icon={Icon.Plus} title="New Template" target={<NewTemplate />} onPop={mutate} />
                 <Action
                   icon={Icon.Trash}
                   title="Delete Template"
                   style={Action.Style.Destructive}
                   onAction={() => confirmAndDelete(template)}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel>
             }

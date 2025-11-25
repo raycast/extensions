@@ -6,14 +6,15 @@ import {
   confirmAlert,
   Form,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { sendportalRequest } from "./sendportal";
-import { CreateSubscriberRequest, PaginatedResult, Subscriber, SuccessResult } from "./types";
+import { buildUrl, sendportalRequest } from "./sendportal";
+import { CreateSubscriberRequest, PaginatedResult, Subscriber, SuccessResult, Tag } from "./types";
 import { useState } from "react";
 
 export default function Subscribers() {
@@ -106,12 +107,14 @@ export default function Subscribers() {
             ]}
             actions={
               <ActionPanel>
+                <Action.OpenInBrowser url={buildUrl(`subscribers/${subscriber.id}`)} />
                 <Action.Push icon={Icon.AddPerson} title="New Subscriber" target={<NewSubscriber />} onPop={mutate} />
                 <Action
                   icon={Icon.Trash}
                   title="Delete Subscriber"
                   style={Action.Style.Destructive}
                   onAction={() => confirmAndDelete(subscriber)}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel>
             }
@@ -124,11 +127,27 @@ export default function Subscribers() {
 
 function NewSubscriber() {
   const { pop } = useNavigation();
-  const { handleSubmit, itemProps } = useForm<CreateSubscriberRequest>({
+  const { isLoading, data: tags } = useCachedPromise(
+    async () => {
+      const { data } = await sendportalRequest<PaginatedResult<Tag>>("tags");
+      return data;
+    },
+    [],
+    { initialData: [] },
+  );
+  const { handleSubmit, itemProps } = useForm<CreateSubscriberRequest & { tags: string[]; subscribed: boolean }>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating", values.email);
       try {
-        const { data } = await sendportalRequest<SuccessResult<Subscriber>>("subscribers", { method: "POST", body: JSON.stringify(values) });
+        const body = {
+          ...values,
+          tags: values.tags.map((tag) => +tag),
+          unsubscribed_at: values.subscribed ? undefined : new Date().toISOString(),
+        };
+        const { data } = await sendportalRequest<SuccessResult<Subscriber>>("subscribers", {
+          method: "POST",
+          body: JSON.stringify(body),
+        });
         toast.style = Toast.Style.Success;
         toast.title = "Created";
         toast.message = data.email;
@@ -139,12 +158,16 @@ function NewSubscriber() {
         toast.message = `${error}`;
       }
     },
+    initialValues: {
+      subscribed: true,
+    },
     validation: {
       email: FormValidation.Required,
     },
   });
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.AddPerson} title="Save" onSubmit={handleSubmit} />
@@ -154,6 +177,12 @@ function NewSubscriber() {
       <Form.TextField title="Email" {...itemProps.email} />
       <Form.TextField title="First Name" {...itemProps.first_name} />
       <Form.TextField title="Last Name" {...itemProps.last_name} />
+      <Form.TagPicker title="Tags" placeholder="Nothing selected" {...itemProps.tags}>
+        {tags.map((tag) => (
+          <Form.TagPicker.Item key={tag.id} icon={Icon.Tag} title={tag.name} value={tag.id.toString()} />
+        ))}
+      </Form.TagPicker>
+      <Form.Checkbox label="Subscribed" {...itemProps.subscribed} />
     </Form>
   );
 }

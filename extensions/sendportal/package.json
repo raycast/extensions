@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sendportal",
   "title": "SendPortal",
-  "description": "",
+  "description": "Open Source Email Marketing Software",
   "icon": "sendportal.png",
   "author": "xmok",
   "platforms": [
@@ -25,7 +25,7 @@
     {
       "name": "sendportal_api_key",
       "title": "SendPortal API Key",
-      "placeholder": "",
+      "placeholder": "XXXX...xxx",
       "description": "API Key for SendPortal Instance",
       "type": "password",
       "required": true
@@ -48,13 +48,13 @@
   "dependencies": {
     "@raycast/api": "^1.103.8",
     "@raycast/utils": "^2.2.2",
-    "@types/turndown": "^5.0.6",
     "turndown": "^7.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.6",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
