@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reboot-to-bios",
   "title": "Reboot to Bios",
-  "description": "This extention allows you to reboot to bios directly as quickly as possible",
+  "description": "Quickly reboot your Windows PC directly to BIOS or Advanced Boot Options",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
@@ -34,12 +34,11 @@
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
-  "author": "Spix",
+  "author": "spix18",
   "platforms": [
     "Windows"
   ],
   "categories": [
-    "Developer Tools",
-    "Other"
+    "System"
   ]
 }
