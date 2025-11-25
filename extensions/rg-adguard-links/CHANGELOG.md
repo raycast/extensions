@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2025-11-25
 
 - Added Windows as a supported platform in package.json
 - Refactored code to clean up and abstract code
