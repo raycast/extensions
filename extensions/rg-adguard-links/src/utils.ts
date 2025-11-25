@@ -1,6 +1,5 @@
 import { API_URL, REGEX } from "./constants";
 import { AppMetadata, DownloadLink, FetchResult } from "./types";
-import fetch from "node-fetch";
 
 /**
  * Extracts the product ID from a Microsoft Store URL or validates a raw ID.
