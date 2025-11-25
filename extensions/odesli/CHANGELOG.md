@@ -1,5 +1,10 @@
 # Odesli Changelog
 
+## [Add history, favourites, and Windows support] - {PR_MERGE_DATE}
+
+- Added history and favourites functionality
+- Added Windows OS support
+
 ## [2023-11-16-1] - 2023-11-16
 
 ### Documentation
