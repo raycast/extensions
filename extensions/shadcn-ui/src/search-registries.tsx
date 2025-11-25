@@ -1,11 +1,12 @@
-import { ActionPanel, Action, List, showToast } from "@raycast/api";
-import { useCachedPromise, getFavicon } from "@raycast/utils";
-import { CREATE_ERROR_TOAST_OPTIONS } from "./constants";
+import { Action, ActionPanel, List, showToast } from "@raycast/api";
+import { getFavicon, useCachedPromise } from "@raycast/utils";
 import fetch from "node-fetch";
+import { RegistryItemsList } from "./components/registry-items-list";
+import { CREATE_ERROR_TOAST_OPTIONS } from "./constants";
 
 const REGISTRIES_API_URL = "https://ui.shadcn.com/r/registries.json";
 
-interface Registry {
+export interface Registry {
   name: string;
   url: string;
   domain: string;
@@ -67,6 +68,9 @@ function RegistryListItem({ registry }: { registry: Registry }) {
       icon={getFavicon(registry.domain)}
       actions={
         <ActionPanel>
+          <ActionPanel.Section>
+            <Action.Push title="View Components" target={<RegistryItemsList registry={registry} />} />
+          </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Registry Name" content={registry.name} />
             <Action.CopyToClipboard title="Copy Registry URL" content={registry.url} />
