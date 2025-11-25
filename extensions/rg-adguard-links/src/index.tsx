@@ -76,7 +76,7 @@ export default function Command() {
   // Render Results List
   if (showResults && downloadLinks.length > 0) {
     return (
-      <List navigationTitle={appMetadata?.name || "Downloads"} searchBarPlaceholder="Filter downloads...">
+      <List navigationTitle={appMetadata?.name || "Downloads"} searchBarPlaceholder="Search downloads...">
         {appMetadata && (
           <List.Section title="App Information">
             <List.Item
@@ -117,8 +117,7 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                   <Action
-                    icon={Icon.ArrowLeft}
-                    title="Back to Search"
+                    title="Back to Input"
                     onAction={() => setShowResults(false)}
                     shortcut={{ modifiers: ["cmd"], key: "b" }}
                   />
@@ -143,13 +142,13 @@ export default function Command() {
     >
       <Form.TextField
         id="url"
-        title="Microsoft Store URL or ID"
-        placeholder="https://apps.microsoft.com/detail/9n0kwg910ldh"
+        title="Microsoft Store URL or Product ID"
+        placeholder="https://apps.microsoft.com/detail/9n0kwg910ldh or 9n0kwg910ldh"
         value={url}
         onChange={setUrl}
         autoFocus
       />
-      <Form.Description text="Paste a Microsoft Store URL or Product ID to generate direct download links." />
+      <Form.Description text="Paste a Microsoft Store URL or product ID to get direct download links via rg-adguard.net" />
     </Form>
   );
 }
