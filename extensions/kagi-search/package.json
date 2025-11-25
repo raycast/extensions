@@ -6,7 +6,12 @@
   "icon": "command-icon.png",
   "author": "fearoffish",
   "contributors": [
-    "goto10"
+    "goto10",
+    "ridemountainpig"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -49,23 +54,23 @@
       "type": "checkbox",
       "default": true,
       "required": false
-
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "node-fetch": "^3.1.0",
-    "open": "^8.4.0"
+    "@raycast/api": "^1.103.6",
+    "node-fetch": "^3.3.2",
+    "open": "^11.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^3.5.3",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~24.10.1",
+    "@types/react": "^19.2.5",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,5 +1,9 @@
 # Can I Use Changelog
 
+## [Updates] - 2025-11-17
+
+- Update navigation title
+
 ## [Updates] - 2024-04-11
 
 - Update the Can I Use package to the latest version

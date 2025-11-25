@@ -1,9 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*", "raycast-env.d.ts"],
+  "include": ["src/**/*", "raycast-env.d.ts", "eslint.config.mjs"],
   "compilerOptions": {
+    "types": ["node", "react", "react-dom"],
     "lib": ["ES2023"],
     "module": "commonjs",
+    "moduleResolution": "node",
     "target": "ES2022",
     "strict": true,
     "isolatedModules": true,

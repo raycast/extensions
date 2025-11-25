@@ -7,6 +7,7 @@ const cachedGetApplications = cacheFunc(getApplications);
 
 // Map of build names to bundle IDs
 const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe: string } }> = {
+  Antigravity: { macos: "com.google.antigravity", windows: { name: "Antigravity", exe: "Antigravity.exe" } },
   Code: { macos: "com.microsoft.VSCode", windows: { name: "Visual Studio Code", exe: "Code.exe" } },
   "Code - Insiders": {
     macos: "com.microsoft.VSCodeInsiders",

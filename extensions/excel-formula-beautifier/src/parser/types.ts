@@ -17,11 +17,6 @@ export class ExcelExpression {
   getChilds(): Array<ExcelExpression> {
     return this.childs;
   }
-
-  replaceChildren(newChildren: Array<ExcelExpression>): void {
-    // TODO find a way not to have this.
-    this.childs = newChildren;
-  }
 }
 
 export class SubExpression extends ExcelExpression {}

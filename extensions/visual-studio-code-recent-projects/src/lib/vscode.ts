@@ -73,6 +73,7 @@ function cliPaths(): Record<string, string> {
   if (isWin) {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     cliPaths = {
+      Antigravity: path.join(programsFolder, "Antigravity", "bin", "antigravity.cmd"),
       Code: path.join(programsFolder, "Microsoft VS Code", "bin", "code.cmd"),
       "Code - Insiders": path.join(programsFolder, "Microsoft VS Code Insiders", "bin", "code-insiders.cmd"),
       Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
@@ -88,6 +89,7 @@ function cliPaths(): Record<string, string> {
 
   if (isMacOs) {
     cliPaths = {
+      Antigravity: "/Applications/Antigravity.app/Contents/Resources/app/bin/antigravity",
       Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
       "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
       Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
@@ -239,6 +241,7 @@ export function getBuildNamePreference(): string {
 }
 
 const buildSchemes: Record<string, string> = {
+  Antigravity: "antigravity",
   Code: "vscode",
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",

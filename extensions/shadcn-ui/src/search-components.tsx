@@ -31,7 +31,7 @@ export const parseComponentName = (componentName: string) => {
  */
 async function getComponentsFromGitHub(): Promise<SearchResult[]> {
   // GitHub API for directory listing
-  const res = await fetch("https://api.github.com/repos/shadcn/ui/contents/apps/www/content/docs/components");
+  const res = await fetch("https://api.github.com/repos/shadcn-ui/ui/contents/apps/v4/content/docs/components");
   if (!res.ok) {
     throw new Error(res.statusText);
   }

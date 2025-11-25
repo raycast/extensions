@@ -93,9 +93,7 @@ export default function Command() {
 
       // Track extension open
       const user = await getSimpleCurrentUser();
-      if (user) {
-        await plausible.trackExtensionOpen(user.id);
-      }
+      if (user) await plausible.trackExtensionOpen(user.id);
     } catch (error) {
       console.error("Initialization error:", error);
       setIsAuthenticated(false);
@@ -109,10 +107,8 @@ export default function Command() {
 
   const loadCachedResults = async () => {
     try {
-      const cachedResults =
-        await LocalStorage.getItem<string>(CACHED_RESULTS_KEY);
-      const sessionToken =
-        await LocalStorage.getItem<string>(SESSION_TOKEN_KEY);
+      const cachedResults = await LocalStorage.getItem<string>(CACHED_RESULTS_KEY);
+      const sessionToken = await LocalStorage.getItem<string>(SESSION_TOKEN_KEY);
       if (cachedResults && sessionToken) {
         const parsedResults = JSON.parse(cachedResults) as BookmarkItem[];
         setSearchResults(parsedResults);
@@ -198,10 +194,7 @@ export default function Command() {
   };
 
   const removeDuplicateItems = (items: BookmarkItem[]) => {
-    return items.filter(
-      (item, index, self) =>
-        index === self.findIndex((i) => i.objectId === item.objectId),
-    );
+    return items.filter((item, index, self) => index === self.findIndex((i) => i.objectId === item.objectId));
   };
 
   const cacheResults = async (results: BookmarkItem[]) => {
@@ -261,10 +254,7 @@ export default function Command() {
       if (page === 0) {
         setSearchResults(results.hits || []);
       } else {
-        setSearchResults((prevResults) => [
-          ...prevResults,
-          ...(results.hits || []),
-        ]);
+        setSearchResults((prevResults) => [...prevResults, ...(results.hits || [])]);
       }
 
       setHasMoreResults(results.hits?.length === HITS_PER_PAGE);
@@ -389,8 +379,7 @@ export default function Command() {
   };
 
   const getIconType = (result: BookmarkItem) => {
-    const iconSource =
-      CONTENT_TYPE_ICONS[result.type as keyof typeof CONTENT_TYPE_ICONS];
+    const iconSource = CONTENT_TYPE_ICONS[result.type as keyof typeof CONTENT_TYPE_ICONS];
     return iconSource ? { source: iconSource } : { source: Icon.Link };
   };
 
@@ -424,16 +413,11 @@ export default function Command() {
   };
 
   const getBookmarkTitle = (result: BookmarkItem, isList = false) => {
-    const title =
-      result.type === "textNote"
-        ? removeHtml(result.textNote || "")
-        : result.siteTitle;
+    const title = result.type === "textNote" ? removeHtml(result.textNote || "") : result.siteTitle;
 
     if (isList) return title;
 
-    const emoji = result.type
-      ? TYPE_EMOJI[result.type as keyof typeof TYPE_EMOJI] || ""
-      : "";
+    const emoji = result.type ? TYPE_EMOJI[result.type as keyof typeof TYPE_EMOJI] || "" : "";
     return `${emoji}${title}`;
   };
 
@@ -443,11 +427,7 @@ export default function Command() {
       <ActionPanel>
         <ActionPanel.Section>
           <Action.OpenInBrowser
-            url={
-              result.type === "textNote"
-                ? `https://www.webbites.io/app?bookmarkId=${result.objectId}`
-                : result.url
-            }
+            url={result.type === "textNote" ? `https://www.webbites.io/app?bookmarkId=${result.objectId}` : result.url}
             onOpen={async () => {
               // Track website open
               const user = await getSimpleCurrentUser();
@@ -468,11 +448,7 @@ export default function Command() {
           {isAuthenticated && (
             <Action
               icon={{ source: Icon.Plus }}
-              title={
-                searchText.trim()
-                  ? `Save "${searchText}" to WebBites`
-                  : "Save to WebBites"
-              }
+              title={searchText.trim() ? `Save "${searchText}" to WebBites` : "Save to WebBites"}
               onAction={handleSaveToWebBites}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
             />
@@ -485,16 +461,8 @@ export default function Command() {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
           )}
-          <Action
-            icon={{ source: Icon.Gear }}
-            title="Open Extension Preferences"
-            onAction={openExtensionPreferences}
-          />
-          <Action
-            icon={{ source: Icon.Logout }}
-            title="Logout"
-            onAction={handleLogout}
-          />
+          <Action icon={{ source: Icon.Gear }} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action icon={{ source: Icon.Logout }} title="Logout" onAction={handleLogout} />
         </ActionPanel.Section>
       </ActionPanel>
     ) : (
@@ -503,11 +471,7 @@ export default function Command() {
           {isAuthenticated && (
             <Action
               icon={{ source: Icon.Plus }}
-              title={
-                searchText.trim()
-                  ? `Save "${searchText}" to WebBites`
-                  : "Save to WebBites"
-              }
+              title={searchText.trim() ? `Save "${searchText}" to WebBites` : "Save to WebBites"}
               onAction={handleSaveToWebBites}
               shortcut={{ modifiers: [], key: "s" }}
             />
@@ -531,14 +495,8 @@ export default function Command() {
   };
 
   const emptyStateMessage = () => {
-    let title =
-      searchText && !isSearching
-        ? noResultsMessage(searchText)
-        : noBookmarksMessage;
-    let description =
-      searchText && !isSearching
-        ? "Try a different search term"
-        : "Add some bookmarks to get started";
+    let title = searchText && !isSearching ? noResultsMessage(searchText) : noBookmarksMessage;
+    let description = searchText && !isSearching ? "Try a different search term" : "Add some bookmarks to get started";
 
     if (isLoading || isAuthenticated === null || isSearching) {
       title = "Loading WebBites...";
@@ -589,10 +547,7 @@ export default function Command() {
             value: {
               source: getBookmarkImage(result),
             },
-            tooltip:
-              result.type === "textNote"
-                ? removeHtml(result.textNote || "")
-                : result.siteTitle,
+            tooltip: result.type === "textNote" ? removeHtml(result.textNote || "") : result.siteTitle,
           }}
           title={getBookmarkTitle(result)}
           actions={getCommonActions(result)}
@@ -617,11 +572,7 @@ export default function Command() {
           {isAuthenticated && (
             <Action
               icon={{ source: Icon.Plus }}
-              title={
-                searchText.trim()
-                  ? `Save "${searchText}" to WebBites`
-                  : "Save to WebBites"
-              }
+              title={searchText.trim() ? `Save "${searchText}" to WebBites` : "Save to WebBites"}
               onAction={handleSaveToWebBites}
               shortcut={{ modifiers: [], key: "s" }}
             />
@@ -664,16 +615,8 @@ export default function Command() {
               }
             }}
           >
-            <List.Dropdown.Item
-              title="Grid View"
-              value="grid"
-              icon={Icon.AppWindowGrid3x3}
-            />
-            <List.Dropdown.Item
-              title="List View"
-              value="list"
-              icon={Icon.List}
-            />
+            <List.Dropdown.Item title="Grid View" value="grid" icon={Icon.AppWindowGrid3x3} />
+            <List.Dropdown.Item title="List View" value="list" icon={Icon.List} />
           </List.Dropdown>
         }
         actions={isAuthenticated ? emptyListActions : undefined}
@@ -686,10 +629,7 @@ export default function Command() {
                 key={result.objectId || index}
                 subtitle={result.url}
                 icon={getFaviconForList(result)}
-                accessories={[
-                  { text: formatDate(result.createdAt) },
-                  { icon: getIconType(result) },
-                ]}
+                accessories={[{ text: formatDate(result.createdAt) }, { icon: getIconType(result) }]}
                 actions={getCommonActions(result)}
               />
             ))}
@@ -706,11 +646,7 @@ export default function Command() {
         {isAuthenticated && (
           <Action
             icon={{ source: Icon.Plus }}
-            title={
-              searchText.trim()
-                ? `Save "${searchText}" to WebBites`
-                : "Save to WebBites"
-            }
+            title={searchText.trim() ? `Save "${searchText}" to WebBites` : "Save to WebBites"}
             onAction={handleSaveToWebBites}
           />
         )}
@@ -759,16 +695,8 @@ export default function Command() {
           }}
         >
           <Grid.Dropdown.Section title="View Mode">
-            <Grid.Dropdown.Item
-              title="Grid View"
-              value="grid"
-              icon={Icon.AppWindowGrid3x3}
-            />
-            <Grid.Dropdown.Item
-              title="List View"
-              value="list"
-              icon={Icon.List}
-            />
+            <Grid.Dropdown.Item title="Grid View" value="grid" icon={Icon.AppWindowGrid3x3} />
+            <Grid.Dropdown.Item title="List View" value="list" icon={Icon.List} />
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Grid Size">
             <Grid.Dropdown.Item title="Large" value="3" />

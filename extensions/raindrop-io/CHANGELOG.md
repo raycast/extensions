@@ -1,5 +1,11 @@
 # Raindrop.io Extension Changelog
 
+## [AI Assistant] - 2025-11-17
+
+- Added Raycast AI tooling so you can mention `@raindrop-io` in Raycast AI to search, inspect, and summarize bookmarks.
+- Added AI support for saving links via natural language, including automatic collection lookups and confirmation prompts.
+- Documented the new functionality in the README.
+
 ## [Enhancements] - 2025-11-03
 
 - Add a "Note" field to the bookmark creation and editing forms.

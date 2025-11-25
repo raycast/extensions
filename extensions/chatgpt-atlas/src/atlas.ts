@@ -1,7 +1,7 @@
-import { runAppleScript, useCachedPromise, usePromise, useSQL } from "@raycast/utils";
+import { runAppleScript, showFailureToast, useCachedPromise, usePromise, useSQL } from "@raycast/utils";
 import { resolve } from "path";
 import { homedir } from "os";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { readFile } from "fs/promises";
 
 type LocalState = {
@@ -56,6 +56,7 @@ function getActiveProfilePath() {
     homedir(),
     "Library/Application Support/com.openai.atlas/browser-data/host/Local State",
   );
+  if (!existsSync(localStatePath)) throw new Error("Local State file not found");
 
   try {
     const fileContent = readFileSync(localStatePath, "utf-8");
@@ -103,7 +104,13 @@ function getHistoryQuery(searchText?: string, limit = 200) {
 }
 
 export function useSearchHistory(searchText?: string, options: { limit?: number } = {}) {
-  const historyPath = getHistoryPath();
+  let historyPath = "";
+  try {
+    historyPath = getHistoryPath();
+  } catch (error) {
+    showFailureToast(error, { title: "Error reading history file" });
+    return { isLoading: false, error: error as Error, data: [], permissionView: null };
+  }
 
   const escapedSearchText = searchText?.replace(/"/g, '""') ?? "";
   const historyQuery = getHistoryQuery(escapedSearchText, options?.limit);
@@ -268,5 +275,9 @@ async function getBookmarks() {
 }
 
 export function useBookmarks() {
-  return useCachedPromise(getBookmarks);
+  return useCachedPromise(getBookmarks, [], {
+    failureToastOptions: {
+      title: "Failed to fetch bookmarks",
+    },
+  });
 }

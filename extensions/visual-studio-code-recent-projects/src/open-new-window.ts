@@ -9,6 +9,7 @@ import { getVSCodeCLI } from "./lib/vscode";
  * The index of the `New Window` menu item in the `File` menu.
  */
 const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
+  [VSCodeBuild.Antigravity]: 3,
   [VSCodeBuild.Code]: 3,
   [VSCodeBuild.CodeInsiders]: 3,
   [VSCodeBuild.Cursor]: 2,

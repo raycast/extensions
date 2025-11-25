@@ -15,10 +15,13 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Fuse from "fuse.js";
-import initSqlJs, { Database, SqlJsStatic } from "sql.js";
+import type { Database } from "sql.js";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
+import { expandTilde, pathExists } from "./utils/fs";
+import { extractErrorMessage } from "./utils/errors";
+import { findColumn, getSqlInstance, quoteIdentifier } from "./utils/sql";
 
 type Preferences = {
   catalogPath?: string;
@@ -80,8 +83,6 @@ const ABBREV_COLUMN_CANDIDATES = ["abbreviation", "abbrev", "shorttitle", "resou
 const RECORD_ID_COLUMN_CANDIDATES = ["recordid", "record_id"];
 const COVER_CACHE_DIR = "covers";
 const COVER_WRITE_BATCH_SIZE = 50;
-
-let sqlInstancePromise: Promise<SqlJsStatic> | undefined;
 
 export default function Command() {
   const preferences = useMemo(() => getPreferenceValues<Preferences>(), []);
@@ -453,13 +454,6 @@ async function writeCoverFile(filePath: string, blob: Uint8Array) {
   await fs.writeFile(filePath, buffer);
 }
 
-async function getSqlInstance(): Promise<SqlJsStatic> {
-  if (!sqlInstancePromise) {
-    sqlInstancePromise = initSqlJs({ locateFile: (file: string) => path.join(environment.assetsPath, file) });
-  }
-  return sqlInstancePromise;
-}
-
 function findResourceTable(database: Database) {
   const tablesResult = database.exec("SELECT name FROM sqlite_master WHERE type='table'");
   const tableNames = new Set<string>();
@@ -609,46 +603,4 @@ async function writeCache(cachePath: string, payload: CachePayload) {
   } catch (error) {
     console.error("Failed to write cache", error);
   }
-}
-
-function findColumn(columns: string[], candidates: string[]): string | undefined {
-  const lowerCaseColumns = columns.map((column) => column.toLowerCase());
-  for (const candidate of candidates) {
-    const index = lowerCaseColumns.indexOf(candidate);
-    if (index >= 0) {
-      return columns[index];
-    }
-  }
-  return undefined;
-}
-
-function quoteIdentifier(identifier: string): string {
-  const escaped = identifier.replace(/"/g, '""');
-  return `"${escaped}"`;
-}
-
-function expandTilde(input: string): string {
-  if (!input.startsWith("~")) {
-    return input;
-  }
-  return path.join(os.homedir(), input.slice(1));
-}
-
-async function pathExists(target: string): Promise<boolean> {
-  try {
-    await fs.access(target);
-    return true;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return false;
-    }
-    throw error;
-  }
-}
-
-function extractErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return String(error);
 }

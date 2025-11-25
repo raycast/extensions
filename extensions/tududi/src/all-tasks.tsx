@@ -37,7 +37,7 @@ interface Task {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<{ apiUrl: string; email: string; password: string }>();
+  const preferences = getPreferenceValues<{ apiUrl: string; token: string }>();
   const [tasks, setTasks] = useState<Task[]>();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,20 +51,9 @@ export default function Command() {
   useEffect(() => {
     async function load() {
       try {
-        // Always login to get session cookie
-        const loginRes = await fetch(`${preferences.apiUrl}/api/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: preferences.email, password: preferences.password }),
-        });
-        if (!loginRes.ok) {
-          throw new Error("Login failed");
-        }
-        const cookie = loginRes.headers.get("set-cookie");
-
         // Fetch projects
         const projectsRes = await fetch(`${preferences.apiUrl}/api/projects`, {
-          headers: cookie ? { Cookie: cookie } : undefined,
+          headers: { Authorization: `Bearer ${preferences.token}` },
         });
         if (projectsRes.ok) {
           const projectsData = (await projectsRes.json()) as { projects: Project[] };
@@ -73,7 +62,7 @@ export default function Command() {
 
         // Fetch tasks
         const tasksRes = await fetch(`${preferences.apiUrl}/api/tasks?type=all&client_side_filtering=true`, {
-          headers: cookie ? { Cookie: cookie } : undefined,
+          headers: { Authorization: `Bearer ${preferences.token}` },
         });
         if (!tasksRes.ok) {
           throw new Error("Failed to fetch tasks");
@@ -100,21 +89,10 @@ export default function Command() {
     }
 
     load();
-  }, [preferences.apiUrl, preferences.email, preferences.password]);
+  }, [preferences.apiUrl, preferences.token]);
 
   async function updateTaskStatus(task: Task, newStatus: number) {
     try {
-      // Login to get session cookie
-      const loginRes = await fetch(`${preferences.apiUrl}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: preferences.email, password: preferences.password }),
-      });
-      if (!loginRes.ok) {
-        throw new Error("Login failed");
-      }
-      const cookie = loginRes.headers.get("set-cookie");
-
       // Prepare full task data with updated status
       const updatedTask = {
         name: task.name,
@@ -131,7 +109,7 @@ export default function Command() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(cookie ? { Cookie: cookie } : {}),
+          Authorization: `Bearer ${preferences.token}`,
         },
         body: JSON.stringify(updatedTask),
       });
@@ -151,17 +129,6 @@ export default function Command() {
 
   async function updateTaskPriority(task: Task, newPriority: number) {
     try {
-      // Login to get session cookie
-      const loginRes = await fetch(`${preferences.apiUrl}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: preferences.email, password: preferences.password }),
-      });
-      if (!loginRes.ok) {
-        throw new Error("Login failed");
-      }
-      const cookie = loginRes.headers.get("set-cookie");
-
       // Prepare full task data with updated priority
       const updatedTask = {
         name: task.name,
@@ -178,7 +145,7 @@ export default function Command() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(cookie ? { Cookie: cookie } : {}),
+          Authorization: `Bearer ${preferences.token}`,
         },
         body: JSON.stringify(updatedTask),
       });
@@ -199,17 +166,6 @@ export default function Command() {
   async function toggleToday(task: Task) {
     try {
       console.log(`Toggling today for task ${task.id}`);
-      // Login to get session cookie
-      const loginRes = await fetch(`${preferences.apiUrl}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: preferences.email, password: preferences.password }),
-      });
-      if (!loginRes.ok) {
-        throw new Error("Login failed");
-      }
-      const cookie = loginRes.headers.get("set-cookie");
-
       // Toggle today
       const toggleUrl = `${preferences.apiUrl}/api/task/${task.id}/toggle-today`;
       console.log(`Calling ${toggleUrl}`);
@@ -217,7 +173,7 @@ export default function Command() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(cookie ? { Cookie: cookie } : {}),
+          Authorization: `Bearer ${preferences.token}`,
         },
       });
       console.log(`Response status: ${response.status}, ok: ${response.ok}, statusText: ${response.statusText}`);
@@ -384,7 +340,7 @@ function TaskDetail({
   updateTaskPriority: (task: Task, newPriority: number) => Promise<void>;
   toggleToday: (task: Task) => Promise<void>;
 }) {
-  const preferences = getPreferenceValues<{ apiUrl: string; email: string; password: string }>();
+  const preferences = getPreferenceValues<{ apiUrl: string; token: string }>();
   const { pop } = useNavigation();
 
   const getStatusText = (status: number) => {

@@ -102,3 +102,12 @@ export const getCommitDiffMessage = (
   const rightParenthese = options?.includeParentheses ? ")" : "";
   return hasDiff ? `${prefix}${leftParenthese}${aheadMessage}${behindMessage}${rightParenthese}` : "";
 };
+
+/**
+ * Adds quotes to a path if it is in Windows and contains spaces and is not already quoted.
+ * @param path The path to add quotes to.
+ * @returns The path with quotes added if necessary.
+ */
+export const addQuotesIfInWindows = (path: string) => {
+  return isWindows && path.includes(" ") && !(path.startsWith('"') && path.endsWith('"')) ? `"${path}"` : path;
+};
