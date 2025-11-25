@@ -4,6 +4,7 @@ export type Instance = {
   icon?: string;
   favorite?: boolean;
   hasServers?: boolean;
+  accessories: { text?: string | null; icon?: string | null }[];
 };
 
 export type Server = {

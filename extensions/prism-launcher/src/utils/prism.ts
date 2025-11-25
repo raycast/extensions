@@ -5,6 +5,7 @@ import * as path from "path";
 import nbt from "prismarine-nbt";
 import type { Instance, Server } from "../types";
 import { getPreferences } from "./preferences";
+import { environment } from "@raycast/api";
 
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
@@ -13,17 +14,18 @@ export const isMac = process.platform === "darwin";
  * Get the PrismLauncher installation path dynamically
  */
 export async function getPrismLauncherPath(): Promise<string | null> {
-  const { path: installPath, bundleId } = getPreferences("installPath");
-  const executableName = path.basename(installPath);
+  const path = getPreferences("installPath");
 
-  // Checks to verify it's actually PrismLauncher
-  if (isMac && bundleId !== "org.prismlauncher.PrismLauncher") return null;
+  if (isMac) {
+    return path;
+  }
 
-  if (isWin && executableName.toLowerCase() !== "prismlauncher.exe") return null;
+  if (!path) return null;
 
-  if (!(await fs.pathExists(installPath))) return null;
+  if (path.split("\\").pop()?.toLowerCase() !== "prismlauncher.exe") return null;
+  if (!(await fs.pathExists(path))) return null;
 
-  return installPath;
+  return path;
 }
 
 /**
@@ -45,6 +47,38 @@ export async function isPrismLauncherInstalled(): Promise<boolean> {
 
   const isInstalled = prismLauncherPath !== null && instancesPath !== null;
   return isInstalled;
+}
+
+type MMCPack = {
+  components: {
+    cachedName: string;
+    version: string;
+  }[];
+};
+
+async function getInstanceVersions(instace: string): Promise<{ text?: string | null; icon?: string | null }[]> {
+  const instancesPath = await getInstancesPath();
+  if (!instancesPath) return [];
+
+  const mmcPackPath = path.join(instancesPath, instace, "mmc-pack.json");
+  if (!(await fs.pathExists(mmcPackPath))) return [];
+
+  const mmcPackContent = await fs.readFile(mmcPackPath, "utf-8");
+  try {
+    const { components }: MMCPack = JSON.parse(mmcPackContent);
+
+    const mcVersion = components.find((comp) => comp.cachedName === "Minecraft")?.version || "Unknown";
+    const forgeVersion = components.find((comp) => comp.cachedName === "Forge")?.version || null;
+    const fabricVersion = components.find((comp) => comp.cachedName === "Fabric Loader")?.version || null;
+
+    return [
+      { text: mcVersion, icon: path.join(environment.assetsPath, "minecraft.png") },
+      forgeVersion ? { text: forgeVersion, icon: path.join(environment.assetsPath, "forge.png") } : {},
+      fabricVersion ? { text: fabricVersion, icon: path.join(environment.assetsPath, "fabric.png") } : {},
+    ];
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -86,6 +120,7 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
     const instanceFolder = path.join(instancesPath, instanceId);
     const instanceCfgStr = (await fs.readFile(path.join(instanceFolder, "instance.cfg"))).toString("utf-8");
     const instanceCfg = parser.parse(instanceCfgStr);
+    const accessories = await getInstanceVersions(instanceId);
 
     const paths = await async.asyncMap(["minecraft", ".minecraft"], async (subfolder: string) =>
       path.join(instanceFolder, subfolder, "icon.png"),
@@ -105,7 +140,7 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
       id: instanceId,
       icon: iconPath,
       favorite: favoriteIds.includes(instanceId),
-
+      accessories: accessories,
       ...(onlyWithServers ? { hasServers } : {}),
     };
   });
