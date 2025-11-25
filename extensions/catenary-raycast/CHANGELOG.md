@@ -1,6 +1,6 @@
 # Catenary Changelog
 
-## [Initial Release] - 2025-11-24
+## [Initial Release] - {PR_MERGE_DATE}
 - View nearby departures
 - Filter by mode
 - Merge stops and consolidate bays
