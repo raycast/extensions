@@ -1,15 +1,5 @@
 import { showHUD, Clipboard, open, getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  jitsiServer: string;
-  meetingNameFormat: "timestamp-random" | "random-words" | "custom-prefix" | "random-only";
-  customPrefix: string;
-  autoOpenBrowser: boolean;
-  startWithVideoMuted: boolean;
-  startWithAudioMuted: boolean;
-  defaultUsername: string;
-}
-
 // List of random words for meeting names
 const RANDOM_WORDS = [
   "happy",
@@ -74,7 +64,7 @@ function getRandomString(length: number = 6): string {
   return result.substring(0, length);
 }
 
-function generateMeetingId(format: Preferences["meetingNameFormat"], customPrefix: string): string {
+function generateMeetingId(format: string, customPrefix: string): string {
   switch (format) {
     case "timestamp-random":
       return `${Date.now()}-${getRandomString()}`;
@@ -131,7 +121,7 @@ function buildJitsiUrl(
 }
 
 export default async function main() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.CreateJitsiMeetLink>();
 
   try {
     // Generate meeting ID based on selected format
