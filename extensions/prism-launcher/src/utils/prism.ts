@@ -54,11 +54,11 @@ type MMCPack = {
   }[];
 };
 
-async function getInstanceVersions(instace: string): Promise<{ text?: string | null; icon?: string | null }[]> {
+async function getInstanceVersions(instance: string): Promise<{ text?: string | null; icon?: string | null }[]> {
   const instancesPath = await getInstancesPath();
   if (!instancesPath) return [];
 
-  const mmcPackPath = path.join(instancesPath, instace, "mmc-pack.json");
+  const mmcPackPath = path.join(instancesPath, instance, "mmc-pack.json");
   if (!(await fs.pathExists(mmcPackPath))) return [];
 
   const mmcPackContent = await fs.readFile(mmcPackPath, "utf-8");
