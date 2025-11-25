@@ -11,20 +11,7 @@ import {
 } from "@raycast/api";
 import { useMemo, useState } from "react";
 import nodemailer from "nodemailer";
-
-type EncryptionMode = "ssl_tls" | "starttls" | "none";
-
-type MailPreferences = {
-  smtpHost: string;
-  smtpPort: string;
-  encryption: EncryptionMode;
-  allowSelfSigned?: boolean;
-  smtpUsername?: string;
-  smtpPassword?: string;
-  senderEmail: string;
-  senderName?: string;
-  recipientList: string;
-};
+import { showFailureToast } from "@raycast/utils";
 
 type RecipientOption = {
   value: string;
@@ -40,13 +27,10 @@ type FormValues = {
 };
 
 export default function Command() {
-  const preferences = getPreferenceValues<MailPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const [isSending, setIsSending] = useState(false);
 
-  const recipients = useMemo(
-    () => parseRecipients(preferences.recipientList),
-    [preferences.recipientList],
-  );
+  const recipients = useMemo(() => parseRecipients(preferences.recipientList), [preferences.recipientList]);
   const defaultRecipient = recipients[0]?.value;
 
   async function handleSubmit(values: FormValues) {
@@ -55,24 +39,14 @@ export default function Command() {
     }
 
     const selectedRecipientValue = values.recipient || defaultRecipient;
-    const selectedRecipient = recipients.find(
-      (recipient) => recipient.value === selectedRecipientValue,
-    );
+    const selectedRecipient = recipients.find((recipient) => recipient.value === selectedRecipientValue);
 
     if (!selectedRecipientValue || !selectedRecipient) {
-      await showToast(
-        Toast.Style.Failure,
-        "Recipient is missing",
-        "Update the extension preferences first.",
-      );
+      await showToast(Toast.Style.Failure, "Recipient is missing", "Update the extension preferences first.");
       return;
     }
 
-    const toast = await showToast(
-      Toast.Style.Animated,
-      "Sending Email",
-      selectedRecipient.label,
-    );
+    const toast = await showToast(Toast.Style.Animated, "Sending Email", selectedRecipient.label);
     setIsSending(true);
 
     try {
@@ -96,9 +70,7 @@ export default function Command() {
       await closeMainWindow({ clearRootSearch: true });
       await popToRoot({ clearSearchBar: true });
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to Send";
-      toast.message = `${getErrorMessage(error)} (Check SMTP username/password in Raycast Preferences.)`;
+      await showFailureToast(error, { title: "Check SMTP username/password in Raycast Preferences." });
     } finally {
       setIsSending(false);
     }
@@ -117,32 +89,15 @@ export default function Command() {
       }
     >
       {recipients.length > 1 ? (
-        <Form.Dropdown
-          id="recipient"
-          title="Recipient"
-          defaultValue={defaultRecipient}
-          storeValue
-        >
+        <Form.Dropdown id="recipient" title="Recipient" defaultValue={defaultRecipient} storeValue>
           {recipients.map((recipient) => (
-            <Form.Dropdown.Item
-              key={recipient.value}
-              value={recipient.value}
-              title={recipient.label}
-            />
+            <Form.Dropdown.Item key={recipient.value} value={recipient.value} title={recipient.label} />
           ))}
         </Form.Dropdown>
       ) : (
-        <Form.Description
-          title="Recipient"
-          text={recipients[0]?.label || "Configure at least one email"}
-        />
+        <Form.Description title="Recipient" text={recipients[0]?.label || "Configure at least one email"} />
       )}
-      <Form.TextField
-        id="subject"
-        title="Subject"
-        placeholder="Reminder"
-        autoFocus
-      />
+      <Form.TextField id="subject" title="Subject" placeholder="Reminder" autoFocus />
       <Form.TextArea
         id="body"
         title="Body"
@@ -154,14 +109,17 @@ export default function Command() {
 }
 
 type SendMailArgs = {
+  // SMTP connection settings
   host: string;
   port: number;
-  encryption: EncryptionMode;
-  allowSelfSigned: boolean;
-  authUser?: string;
+  encryption: Preferences["encryption"];
+  allowSelfSigned: Preferences["allowSelfSigned"];
+  // Authentication (optional)
+  authUser?: Preferences["smtpUsername"];
   authPass?: string;
-  fromEmail: string;
-  fromName?: string;
+  // Email composition
+  fromEmail: Preferences["senderEmail"];
+  fromName?: Preferences["senderName"];
   to: string;
   subject: string;
   body: string;
@@ -212,9 +170,7 @@ async function sendMail({
     };
   }
 
-  const transporter = nodemailer.createTransport(
-    transportOptions as nodemailer.TransportOptions,
-  );
+  const transporter = nodemailer.createTransport(transportOptions as nodemailer.TransportOptions);
 
   await transporter.sendMail({
     from: formatAddress(fromEmail, fromName),
@@ -279,12 +235,4 @@ function formatAddress(email: string, name?: string) {
 
   const safeName = name.replace(/"/g, "'");
   return `"${safeName}" <${email}>`;
-}
-
-function getErrorMessage(error: unknown) {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Unknown error";
 }
