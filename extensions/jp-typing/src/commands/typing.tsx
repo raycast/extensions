@@ -42,8 +42,8 @@ export default function TypingCommand() {
 
     showToast({
       style: Toast.Style.Success,
-      title: "練習完了！",
-      message: `CPM: ${result.cpm}, 正確性: ${(result.accuracy * 100).toFixed(1)}%, 単語: ${result.completedWords}`,
+      title: "Practice Complete!",
+      message: `CPM: ${result.cpm}, Accuracy: ${(result.accuracy * 100).toFixed(1)}%, Words: ${result.completedWords}`,
     });
   };
 

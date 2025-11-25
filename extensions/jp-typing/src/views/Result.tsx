@@ -26,53 +26,53 @@ export function Result({ result, onRestart, onClose }: ResultProps) {
   const wordStats =
     result.practiceMode === "word"
       ? [
-          `- **完了単語数**: ${result.completedWords}`,
-          `- **平均単語時間**: ${averageWordTime ? `${averageWordTime} 秒/単語` : "―"}`,
+          `- **Words Completed**: ${result.completedWords}`,
+          `- **Avg Time per Word**: ${averageWordTime ? `${averageWordTime}s` : "—"}`,
         ].join("\n")
       : "";
 
   return (
     <Detail
       markdown={`
-# 🎯 練習結果
+# 🎯 Practice Results
 
-## 📊 パフォーマンス評価
+## 📊 Performance Rating
 ### **${performanceLevel}**
 
 ---
 
-## ⏱️ タイム
-- 練習時間: ${formatTime(result.durationSec)}
+## ⏱️ Time
+- Duration: ${formatTime(result.durationSec)}
 
-## 🚀 速度
-- **CPM**: ${result.cpm} (文字/分)
-- **WPM**: ${result.wpm} (単語/分)
+## 🚀 Speed
+- **CPM**: ${result.cpm} (chars/min)
+- **WPM**: ${result.wpm} (words/min)
 ${wordStats ? `\n${wordStats}` : ""}
 
-## 🎯 正確性
-- **正確率**: ${accuracyPercentage}%
-  - **総タイプ数**: ${totalAttempts}
-- **正打数**: ${correctCount}
-- **ミス数**: ${result.mistakes}
+## 🎯 Accuracy
+- **Accuracy**: ${accuracyPercentage}%
+  - **Total Keystrokes**: ${totalAttempts}
+- **Correct**: ${correctCount}
+- **Mistakes**: ${result.mistakes}
 
-## 🔥 連続記録
-- **最長連続正打**: ${result.streakMax}
+## 🔥 Streak
+- **Best Streak**: ${result.streakMax}
 
-## ⏭️ その他
-- **スキップ回数**: ${result.skips}
+## ⏭️ Other
+- **Skips**: ${result.skips}
 
 ---
 
-## 💡 アドバイス
+## 💡 Tips
 ${getAdvice(result)}
 
 ---
-*練習日時: ${new Date(result.finishedAt).toLocaleString("ja-JP")}*
+*Completed: ${new Date(result.finishedAt).toLocaleString("en-US")}*
       `.trim()}
       actions={
         <ActionPanel>
-          <Action title="もう一度練習" onAction={onRestart} shortcut={{ modifiers: ["cmd"], key: "r" }} />
-          <Action title="閉じる" onAction={onClose} shortcut={{ modifiers: ["cmd"], key: "w" }} />
+          <Action title="Practice Again" onAction={onRestart} shortcut={{ modifiers: ["cmd"], key: "r" }} />
+          <Action title="Close" onAction={onClose} shortcut={{ modifiers: ["cmd"], key: "w" }} />
         </ActionPanel>
       }
     />
@@ -80,12 +80,12 @@ ${getAdvice(result)}
 }
 
 function getPerformanceLevel(cpm: number): string {
-  if (cpm >= 400) return "🏆 Sランク (達人)";
-  if (cpm >= 350) return "🥇 Aランク (上級者)";
-  if (cpm >= 300) return "🥈 Bランク (中級者)";
-  if (cpm >= 250) return "🥉 Cランク (初級者)";
-  if (cpm >= 200) return "📚 Dランク (初心者)";
-  return "🌱 Eランク (入門者)";
+  if (cpm >= 400) return "🏆 S Rank (Master)";
+  if (cpm >= 350) return "🥇 A Rank (Advanced)";
+  if (cpm >= 300) return "🥈 B Rank (Intermediate)";
+  if (cpm >= 250) return "🥉 C Rank (Elementary)";
+  if (cpm >= 200) return "📚 D Rank (Novice)";
+  return "🌱 E Rank (Beginner)";
 }
 
 function getAdvice(result: SessionResult): string {
@@ -94,23 +94,23 @@ function getAdvice(result: SessionResult): string {
   const advice = [];
 
   if (cpm < 250) {
-    advice.push("• **速度向上**: ホームポジションを意識し、指先で素早く打つ練習をしましょう。");
+    advice.push("• **Improve Speed**: Focus on home row position and practice quick finger movements.");
   }
 
   if (accuracy < 0.9) {
-    advice.push("• **正確性向上**: 焦らず、正確なキーを意識して打つ練習をしましょう。");
+    advice.push("• **Improve Accuracy**: Slow down and focus on hitting the correct keys.");
   }
 
   if (mistakes > 10) {
-    advice.push("• **ミス削減**: 難しい文字列を重点的に練習し、ミスを減らしましょう。");
+    advice.push("• **Reduce Mistakes**: Practice difficult character combinations more often.");
   }
 
   if (streakMax < 20) {
-    advice.push("• **連続正打**: 短い単語から始めて、連続して正打できる練習をしましょう。");
+    advice.push("• **Build Streaks**: Start with shorter words to build consistent accuracy.");
   }
 
   if (advice.length === 0) {
-    advice.push("• 素晴らしいパフォーマンスです！さらに上を目指して練習を続けましょう。");
+    advice.push("• Excellent performance! Keep practicing to maintain your skills.");
   }
 
   return advice.join("\\n");

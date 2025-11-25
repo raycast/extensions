@@ -54,7 +54,7 @@ describe("TypingPrompt", () => {
     expect(result.markdown).toContain("a");
     expect(result.markdown).toContain("i");
     expect(result.markdown).toContain("u");
-    expect(result.readingLine).toContain("ローマ字: aiu");
+    expect(result.readingLine).toContain("Romaji: aiu");
   });
 
   test("marks current segment as error when feedback is error", () => {

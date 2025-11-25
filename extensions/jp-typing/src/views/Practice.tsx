@@ -8,9 +8,9 @@ import { TypingPrompt } from "./components/TypingPrompt";
 import { ROMAJI_PROFILES, stepRomanizer } from "../engine/romanizer";
 
 const DIFFICULTY_LABELS: Record<SessionConfig["difficulty"], string> = {
-  1: "初級",
-  2: "中級",
-  3: "上級",
+  1: "Beginner",
+  2: "Intermediate",
+  3: "Advanced",
 };
 
 interface PracticeProps {
@@ -234,7 +234,7 @@ export function Practice({ config, onComplete }: PracticeProps) {
     return base;
   }, [sessionState.phase, isPaused, promptBaseMarkdown, readingLine]);
 
-  const statusText = sessionState.phase === "paused" ? "一時停止中" : "練習中";
+  const statusText = sessionState.phase === "paused" ? "Paused" : "Practicing";
   const { metrics } = sessionState;
   const accuracyText = `${(metrics.accuracy * 100).toFixed(1)}%`;
 
@@ -290,47 +290,47 @@ export function Practice({ config, onComplete }: PracticeProps) {
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="開始" onSubmit={handleStartForm} />
+            <Action.SubmitForm title="Start" onSubmit={handleStartForm} />
           </ActionPanel>
         }
       >
         <Form.Description
-          title="日本語タイピング練習"
-          text={`日本語のローマ字タイピングを練習できます。\nIMEをOFFにしてから練習を開始してください。`}
+          title="Japanese Typing Practice"
+          text={`Practice Japanese romaji typing.\nPlease turn off IME before starting.`}
         />
         <Form.Dropdown
           id="practiceMode"
-          title="練習モード"
+          title="Practice Mode"
           value={selectedMode}
           onChange={(value) => setSelectedMode(value as SessionConfig["practiceMode"])}
         >
-          <Form.Dropdown.Item value="word" title="単語モード (一語ずつ練習)" />
-          <Form.Dropdown.Item value="sentence" title="長文モード (文章で練習)" />
+          <Form.Dropdown.Item value="word" title="Word Mode (one word at a time)" />
+          <Form.Dropdown.Item value="sentence" title="Sentence Mode (full sentences)" />
         </Form.Dropdown>
         <Form.Dropdown
           id="durationSec"
-          title="練習時間"
+          title="Duration"
           value={selectedDuration.toString()}
           onChange={(value) => setSelectedDuration(Number(value))}
         >
-          <Form.Dropdown.Item value="30" title="30秒" />
-          <Form.Dropdown.Item value="60" title="60秒" />
-          <Form.Dropdown.Item value="180" title="180秒" />
+          <Form.Dropdown.Item value="30" title="30 seconds" />
+          <Form.Dropdown.Item value="60" title="60 seconds" />
+          <Form.Dropdown.Item value="180" title="180 seconds" />
         </Form.Dropdown>
         <Form.Dropdown
           id="difficulty"
-          title="難易度"
+          title="Difficulty"
           value={selectedDifficulty.toString()}
           onChange={(value) => setSelectedDifficulty(Number(value) as SessionConfig["difficulty"])}
         >
-          <Form.Dropdown.Item value="1" title="初級" />
-          <Form.Dropdown.Item value="2" title="中級" />
-          <Form.Dropdown.Item value="3" title="上級" />
+          <Form.Dropdown.Item value="1" title="Beginner" />
+          <Form.Dropdown.Item value="2" title="Intermediate" />
+          <Form.Dropdown.Item value="3" title="Advanced" />
         </Form.Dropdown>
         <Form.Separator />
         <Form.Description
-          title="設定"
-          text={`時間: ${sessionConfig.durationSec}秒\n難易度: ${DIFFICULTY_LABELS[sessionConfig.difficulty]}\nローマ字規則: ${sessionConfig.romajiProfile}\n読み表示: ${sessionConfig.showReading ? "ON" : "OFF"}`}
+          title="Settings"
+          text={`Duration: ${sessionConfig.durationSec}s\nDifficulty: ${DIFFICULTY_LABELS[sessionConfig.difficulty]}\nRomaji: ${sessionConfig.romajiProfile}\nReading: ${sessionConfig.showReading ? "ON" : "OFF"}`}
         />
       </Form>
     );
@@ -342,40 +342,40 @@ export function Practice({ config, onComplete }: PracticeProps) {
       searchText={inputText}
       onSearchTextChange={handleInputChange}
       enableFiltering={false}
-      searchBarPlaceholder="ここにタイピング..."
+      searchBarPlaceholder="Type here..."
       actions={
         <ActionPanel>
           {sessionState.phase === "running" ? (
             <>
-              <Action title="一時停止" onAction={togglePause} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+              <Action title="Pause" onAction={togglePause} shortcut={{ modifiers: ["cmd"], key: "p" }} />
               {sessionConfig.practiceMode === "word" && (
-                <Action title="スキップ" onAction={skipCurrent} shortcut={{ modifiers: ["cmd"], key: "arrowRight" }} />
+                <Action title="Skip" onAction={skipCurrent} shortcut={{ modifiers: ["cmd"], key: "arrowRight" }} />
               )}
             </>
           ) : (
-            <Action title="再開" onAction={togglePause} />
+            <Action title="Resume" onAction={togglePause} />
           )}
-          <Action title="終了" onAction={finishSession} shortcut={{ modifiers: ["cmd"], key: "w" }} />
+          <Action title="Finish" onAction={finishSession} shortcut={{ modifiers: ["cmd"], key: "w" }} />
         </ActionPanel>
       }
     >
       <List.Section title="">
         <List.Item
-          title="練習中"
+          title="Practicing"
           subtitle={statusText}
           detail={
             <List.Item.Detail
               markdown={promptMarkdown}
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="状態" text={statusText} />
-                  <List.Item.Detail.Metadata.Label title="残り時間" text={formatTime(remainingSeconds)} />
+                  <List.Item.Detail.Metadata.Label title="Status" text={statusText} />
+                  <List.Item.Detail.Metadata.Label title="Time Left" text={formatTime(remainingSeconds)} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="CPM" text={`${metrics.cpm}`} />
                   <List.Item.Detail.Metadata.Label title="WPM" text={`${metrics.wpm}`} />
-                  <List.Item.Detail.Metadata.Label title="正確性" text={accuracyText} />
+                  <List.Item.Detail.Metadata.Label title="Accuracy" text={accuracyText} />
                   {sessionConfig.practiceMode === "word" && (
-                    <List.Item.Detail.Metadata.Label title="完了単語数" text={`${sessionState.completedWords}`} />
+                    <List.Item.Detail.Metadata.Label title="Words" text={`${sessionState.completedWords}`} />
                   )}
                 </List.Item.Detail.Metadata>
               }
@@ -384,9 +384,9 @@ export function Practice({ config, onComplete }: PracticeProps) {
           accessories={[
             { text: `CPM: ${metrics.cpm}` },
             { text: `WPM: ${metrics.wpm}` },
-            { text: `正確性: ${accuracyText}` },
-            { text: `残り: ${formatTime(remainingSeconds)}` },
-            ...(sessionConfig.practiceMode === "word" ? [{ text: `単語: ${sessionState.completedWords}` }] : []),
+            { text: `Acc: ${accuracyText}` },
+            { text: `Left: ${formatTime(remainingSeconds)}` },
+            ...(sessionConfig.practiceMode === "word" ? [{ text: `Words: ${sessionState.completedWords}` }] : []),
           ]}
         />
       </List.Section>

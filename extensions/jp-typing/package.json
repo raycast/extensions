@@ -15,27 +15,27 @@
   "commands": [
     {
       "name": "typing",
-      "title": "JP Typing (日本語タイピング練習)",
-      "description": "リアルタイムフィードバック付きで日本語ローマ字タイピングを練習",
+      "title": "JP Typing",
+      "description": "Practice Japanese romaji typing with real-time feedback",
       "mode": "view",
       "preferences": [
         {
           "name": "practiceMode",
           "type": "dropdown",
-          "title": "練習モード（デフォルト）",
-          "description": "単語モードか文章モードを選択",
+          "title": "Practice Mode",
+          "description": "Select word mode or sentence mode",
           "required": false,
           "default": "sentence",
           "data": [
-            { "title": "単語モード", "value": "word" },
-            { "title": "文章モード", "value": "sentence" }
+            { "title": "Word Mode", "value": "word" },
+            { "title": "Sentence Mode", "value": "sentence" }
           ]
         },
         {
           "name": "defaultDurationSec",
           "type": "dropdown",
-          "title": "練習時間（デフォルト）",
-          "description": "デフォルトの練習時間（秒）",
+          "title": "Practice Duration",
+          "description": "Default practice duration in seconds",
           "required": false,
           "default": "60",
           "data": [
@@ -47,21 +47,21 @@
         {
           "name": "defaultDifficulty",
           "type": "dropdown",
-          "title": "難易度（デフォルト）",
-          "description": "デフォルトの難易度設定",
+          "title": "Difficulty",
+          "description": "Default difficulty level",
           "required": false,
           "default": "2",
           "data": [
-            { "title": "初級", "value": "1" },
-            { "title": "中級", "value": "2" },
-            { "title": "上級", "value": "3" }
+            { "title": "Beginner", "value": "1" },
+            { "title": "Intermediate", "value": "2" },
+            { "title": "Advanced", "value": "3" }
           ]
         },
         {
           "name": "romajiProfile",
           "type": "dropdown",
-          "title": "ローマ字入力方式",
-          "description": "ローマ字変換方式",
+          "title": "Romaji Input Style",
+          "description": "Romaji conversion style",
           "required": false,
           "default": "hepburn",
           "data": [
@@ -73,9 +73,9 @@
         {
           "name": "showReading",
           "type": "checkbox",
-          "title": "かな読みを表示",
+          "title": "Show Reading Hint",
           "label": "Enabled",
-          "description": "練習中にかな読みのヒントを表示する",
+          "description": "Display kana reading hints during practice",
           "required": false,
           "default": true
         }

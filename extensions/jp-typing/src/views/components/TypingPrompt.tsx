@@ -32,13 +32,13 @@ export function TypingPrompt({ sessionState, config }: TypingPromptProps): Typin
   const segments = buildSegments(romajiUnits, cursorUnitIndex);
   const isErrorActive = feedback?.kind === "error";
 
-  const heading = target ? `### ${escapeMarkdown(target.text)}` : "### 課題を読み込み中";
+  const heading = target ? `### ${escapeMarkdown(target.text)}` : "### Loading...";
   const promptLine = renderSegments(segments, typedBuffer, Boolean(isErrorActive));
-  const markdown = [heading, "", promptLine || "_読み込み中..._"].join("\n");
+  const markdown = [heading, "", promptLine || "_Loading..._"].join("\n");
 
   const readingLine =
     target && config.showReading && config.practiceMode !== "sentence"
-      ? `読み: ${escapeMarkdown(target.reading)}\nローマ字: ${escapeMarkdown(target.romaji)}`
+      ? `Reading: ${escapeMarkdown(target.reading)}\nRomaji: ${escapeMarkdown(target.romaji)}`
       : undefined;
 
   const totalUnits = readingUnits.length;
