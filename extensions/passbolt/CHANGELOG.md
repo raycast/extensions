@@ -1,6 +1,6 @@
 # Passbolt Changelog
 
-## [1.0.0] - Initial Release
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Features
 
