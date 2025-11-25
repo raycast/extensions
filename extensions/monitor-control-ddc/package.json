@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "monitor-control-ddc",
+  "title": "Monitor Brightness Controller",
+  "description": "Control monitor brightness, contrast, and color settings",
+  "icon": "extension-icon.png",
+  "author": "jayeshbhole",
+  "version": "1.0.3",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "brightness-up",
+      "title": "Increase Brightness",
+      "description": "Increase monitor brightness by 10%",
+      "mode": "no-view"
+    },
+    {
+      "name": "brightness-down",
+      "title": "Decrease Brightness",
+      "description": "Decrease monitor brightness by 10%",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-brightness",
+      "title": "Set Brightness",
+      "description": "Set monitor brightness to specific level (0-100)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "Brightness level (0-100)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "set-contrast",
+      "title": "Set Contrast",
+      "description": "Set monitor contrast to specific level (0-100)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "Contrast level (0-100)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "brightness-presets",
+      "title": "Brightness & Contrast",
+      "description": "Control brightness, contrast, and color settings",
+      "mode": "view"
+    },
+    {
+      "name": "setup",
+      "title": "Setup Monitor Control",
+      "description": "Install required dependencies and setup guide",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
