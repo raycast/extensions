@@ -1,4 +1,5 @@
 import { showHUD, confirmAlert, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { writeFile } from "fs/promises";
@@ -52,9 +53,7 @@ export default async function main() {
     }
 
     await executeReboot();
-  } catch (error: unknown) {
-    console.error(`exec error: ${error}`);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    await showHUD(`Failed: ${errorMessage}`);
+  } catch (error) {
+    await showFailureToast(error, { title: "Failed to reboot to BIOS" });
   }
 }
