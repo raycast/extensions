@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "redmine-raycast",
+  "title": "Redmine",
+  "description": "Tool to work with Redmine from within Raycast",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "Redmine Issues",
+      "description": "This command lists all your redmine issues.",
+      "mode": "view",
+      "subtitle": "List all your issues"
+    },
+    {
+      "name": "search",
+      "title": "Redmine Search",
+      "description": "Search for a Redmine issue by ID",
+      "mode": "view",
+      "subtitle": "Search issue by ID",
+      "arguments": [
+        {
+          "name": "ticketId",
+          "placeholder": "Ticket ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue for Myself",
+      "description": "Create a new Redmine issue assigned to yourself",
+      "mode": "view",
+      "subtitle": "Create new issue"
+    },
+    {
+      "name": "update-status",
+      "title": "Update Issue Status",
+      "description": "Update the status of a Redmine issue",
+      "mode": "view",
+      "subtitle": "Update issue status",
+      "arguments": [
+        {
+          "name": "issueId",
+          "placeholder": "Issue ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "mubashiro",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Applications"
+  ],
+  "preferences": [
+    {
+      "name": "redmineUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Redmine URL",
+      "description": "Your Redmine instance URL (e.g., https://redmine.example.com)",
+      "placeholder": "https://redmine.example.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Redmine API access key (found in My Account > API access key)"
+    },
+    {
+      "name": "allowSelfSignedCert",
+      "type": "checkbox",
+      "required": true,
+      "defaultValue": false,
+      "label": "Allow Self-Signed Certificates",
+      "title": "Allow Self-Signed Certificates",
+      "description": "Enable this if your Redmine instance uses a self-signed SSL certificate"
+    }
+  ]
+}
