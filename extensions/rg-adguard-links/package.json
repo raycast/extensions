@@ -5,6 +5,9 @@
   "description": "Convert Microsoft Store URLs to rg-adguard.net download links",
   "icon": "icon.png",
   "author": "jergensturdley",
+  "contributors": [
+    "0xdhrv"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,16 +19,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^2.2.0"
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -35,6 +38,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
