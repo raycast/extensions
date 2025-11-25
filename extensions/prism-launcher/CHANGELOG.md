@@ -1,5 +1,9 @@
 # Prism Launcher Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+- Temporary fix for Windows
+- Optimisation
+
 ## [New Addition] - 2025-11-24
 - Added support for custom instance folders
 - Added support for custom Prism Launcher installation paths
