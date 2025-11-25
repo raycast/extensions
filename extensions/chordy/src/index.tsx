@@ -7,124 +7,101 @@ type Values = {
   scale: ScaleName;
 };
 
-export function ResultMarkdownFrame({
-  noteRoot,
-  scaleChord,
-  outputNotes,
-}: {
-  noteRoot: string | null;
-  scaleChord: string | null;
-  outputNotes: string | null;
-}) {
-  const md = `
-  # ${outputNotes}\n
-  ## Description\n
+const ROOT_NOTES = ["C", "D", "E", "F", "G", "A", "B"] as const;
 
-  Root selected: ${noteRoot}\n
-  Scale selected: ${scaleChord}\n
+type ChordResult = {
+  rootNote: string;
+  scale: ScaleName;
+  outputNotes: string;
+};
 
-  *Output*: ${outputNotes}
-  `;
+function ResultMarkdownFrame({ rootNote, scale, outputNotes }: ChordResult) {
+  const markdown = `# ${outputNotes}
 
-  return <Detail navigationTitle="Chord" markdown={md} />;
+## ${rootNote} ${scale.charAt(0).toUpperCase() + scale.slice(1)} Scale
+
+**Notes:** ${outputNotes}
+`;
+
+  return <Detail navigationTitle={`Chord: ${rootNote} ${scale}`} markdown={markdown} />;
 }
 
 export default function Command() {
-  const [submitted, setSubmitted] = useState<string | null>(null);
-  const [submittedError, setSubmittedError] = useState<string | null>(null);
-  const [rootNote, setRootNote] = useState<string | null>(null);
-  const [scale, setScale] = useState<ScaleName | null>(null);
-  const [outputNotes, setNotes] = useState<string | null>(null);
-
-  // wip: include more scales later on
-  function selectScale(scale: ScaleName): ScaleName {
-    if (scale === ScaleName.Minor) {
-      return ScaleName.Minor;
-    }
-    return ScaleName.Major;
-  }
+  const [result, setResult] = useState<ChordResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(values: Values): void {
-    // require root or scale to be present (dropdown will provide it when selected)
-    // ROOT NOTE VERIFY
-    console.log("Submitted values:", values);
-
     if (!values.rootNote) {
       const msg = "Please define a root note (C, D, E, F, G, A, B).";
-      setSubmittedError(msg);
+      setError(msg);
       showToast({ title: "Missing selection", message: msg, style: Toast.Style.Failure });
       return;
     }
 
-    // SCALE VERIFY
     if (!values.scale) {
       const msg = "Please select a scale (Major or Minor).";
-      setSubmittedError(msg);
+      setError(msg);
       showToast({ title: "Missing selection", message: msg, style: Toast.Style.Failure });
       return;
     }
 
     try {
-      const rootNote: string = values.rootNote;
-      const scale: ScaleName = selectScale(values.scale);
-      const chordNotes: string = chordStringToScaleNotes(rootNote, scale);
+      const outputNotes = chordStringToScaleNotes(values.rootNote, values.scale);
+      const chordResult: ChordResult = {
+        rootNote: values.rootNote,
+        scale: values.scale,
+        outputNotes,
+      };
 
-      setRootNote(rootNote);
-      setScale(scale);
-      setNotes(chordNotes);
-
-      setSubmittedError(null);
-      setSubmitted(values.rootNote);
-
-      showToast({ title: "Chord translated", message: `Chord ${values.rootNote} submitted successfully` });
+      setResult(chordResult);
+      setError(null);
+      showToast({ title: "Chord translated", message: `${values.rootNote} ${values.scale} scale` });
     } catch (err) {
-      if (err instanceof ParseError) {
-        setSubmittedError(err.message);
-        setSubmitted(null);
-      } else if (err instanceof Error) {
-        setSubmittedError(err.message);
-        setSubmitted(null);
-      } else {
-        setSubmittedError("Unexpected error while parsing chord");
-        setSubmitted(null);
-      }
+      const errorMessage =
+        err instanceof ParseError || err instanceof Error ? err.message : "Unexpected error while parsing chord";
+
+      setError(errorMessage);
+      setResult(null);
+      showToast({ title: "Error", message: errorMessage, style: Toast.Style.Failure });
     }
   }
 
-  if (submitted || submittedError) {
-    return ResultMarkdownFrame({
-      noteRoot: rootNote,
-      scaleChord: scale,
-      outputNotes: outputNotes,
-    });
+  if (result) {
+    return <ResultMarkdownFrame {...result} />;
+  }
+
+  if (error) {
+    return (
+      <Detail
+        navigationTitle="Error"
+        markdown={`# Error\n\n${error}`}
+        actions={
+          <ActionPanel>
+            <Action title="Try Again" onAction={() => setError(null)} />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   return (
-    <>
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm onSubmit={handleSubmit} />
-          </ActionPanel>
-        }
-      >
-        {/* ROOT NOTE SELECTION */}
-        <Form.Dropdown id="rootNote" title="Define Root note" placeholder="C" storeValue={false}>
-          <Form.Dropdown.Item value="C" title="C" />
-          <Form.Dropdown.Item value="D" title="D" />
-          <Form.Dropdown.Item value="E" title="E" />
-          <Form.Dropdown.Item value="F" title="F" />
-          <Form.Dropdown.Item value="G" title="G" />
-          <Form.Dropdown.Item value="A" title="A" />
-          <Form.Dropdown.Item value="B" title="B" />
-        </Form.Dropdown>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown id="rootNote" title="Root Note" placeholder="Select root note" storeValue={false}>
+        {ROOT_NOTES.map((note) => (
+          <Form.Dropdown.Item key={note} value={note} title={note} />
+        ))}
+      </Form.Dropdown>
 
-        {/* SCALE SELECTION */}
-        <Form.Dropdown id="scale" title="Scale" defaultValue={ScaleName.Major} storeValue={false}>
-          <Form.Dropdown.Item value={ScaleName.Major} title="Major" />
-          <Form.Dropdown.Item value={ScaleName.Minor} title="Minor" />
-        </Form.Dropdown>
-      </Form>
-    </>
+      <Form.Dropdown id="scale" title="Scale" defaultValue={ScaleName.Major} storeValue={false}>
+        <Form.Dropdown.Item value={ScaleName.Major} title="Major" />
+        <Form.Dropdown.Item value={ScaleName.Minor} title="Minor" />
+      </Form.Dropdown>
+    </Form>
   );
 }
