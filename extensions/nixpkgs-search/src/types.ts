@@ -12,11 +12,6 @@ export interface SearchResult {
   licenses: { name: string; url: string | null }[];
 }
 
-export interface Preferences {
-  searchSize?: string;
-  nixosVersion?: string;
-}
-
 export interface ElasticsearchResponse {
   hits: {
     hits: {

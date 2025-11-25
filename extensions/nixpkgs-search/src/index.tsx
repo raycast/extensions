@@ -1,47 +1,100 @@
-import { getPreferenceValues, List, Icon } from "@raycast/api";
+import { getPreferenceValues, List, Icon, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { useFetch, showFailureToast } from "@raycast/utils";
+import { useFetch, usePromise } from "@raycast/utils";
 import { AVAILABLE_BRANCHES, SEARCH_CONFIG, API_CONFIG } from "./constants";
 import { getSearchUrl, buildSearchQuery, parseSearchResponse } from "./api";
 import { SearchListItem } from "./components/SearchListItem";
-import type { Preferences } from "./types";
 
 export default function Command() {
-  const { searchSize = "20", nixosVersion = "unstable" } = getPreferenceValues<Preferences>();
+  const { searchSize = "20" } = getPreferenceValues<Preferences>();
 
   const searchSizeNum = Math.max(
     SEARCH_CONFIG.minSize,
     Math.min(SEARCH_CONFIG.maxSize, Math.trunc(+searchSize) || SEARCH_CONFIG.defaultSize),
   );
-  const [selectedBranch, setSelectedBranch] = useState<string>(nixosVersion);
+  const [availableBranches, setAvailableBranches] = useState<(typeof AVAILABLE_BRANCHES)[number][]>([
+    ...AVAILABLE_BRANCHES,
+  ]);
+  const [selectedBranch, setSelectedBranch] = useState<string>("nixos-unstable");
 
-  const [url, setUrl] = useState<string | undefined>(undefined);
-  if (!url) {
-    getSearchUrl({ branchName: selectedBranch })
-      .then(setUrl)
-      .catch((error) => showFailureToast(error, { title: "Could not get search URL" }));
-  }
-
-  // Update URL when branch changes
+  // Load stored selected branch and filter unsupported branches on mount
   useEffect(() => {
-    getSearchUrl({ branchName: selectedBranch })
-      .then(setUrl)
-      .catch((error) => showFailureToast(error, { title: "Could not get search URL" }));
-  }, [selectedBranch]);
+    let mounted = true;
+
+    async function loadAndFilter() {
+      // Try to read stored branch
+      try {
+        const stored = await LocalStorage.getItem<string>("selectedBranch");
+        if (stored) {
+          setSelectedBranch(stored);
+        }
+      } catch {
+        // ignore storage errors
+      }
+
+      // Check which branches respond successfully and filter unsupported ones
+      const checks = await Promise.all(
+        AVAILABLE_BRANCHES.map(async (branch) => {
+          try {
+            const url = await getSearchUrl({ branchName: branch.value });
+            // HEAD is a lightweight way to check existence
+            const resp = await fetch(url, { method: "HEAD" });
+            return resp.ok ? branch : null;
+          } catch {
+            return null;
+          }
+        }),
+      );
+
+      const supported = checks.filter(Boolean) as (typeof AVAILABLE_BRANCHES)[number][];
+      if (mounted) {
+        if (supported.length > 0) setAvailableBranches([...supported]);
+        // If the currently selected branch is not supported, pick the first supported one
+        if (supported.length > 0 && !supported.find((b) => b.value === selectedBranch)) {
+          setSelectedBranch(supported[0].value);
+          try {
+            await LocalStorage.setItem("selectedBranch", supported[0].value);
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+    }
+
+    loadAndFilter();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Fetch the search URL for the selected branch using usePromise to avoid duplicate calls
+  const { isLoading: isUrlLoading, data: url } = usePromise(
+    async (branchName: string) => {
+      const data = await getSearchUrl({ branchName });
+      return data;
+    },
+    [selectedBranch],
+    {
+      failureToastOptions: {
+        title: "Could not get search URL",
+      },
+    },
+  );
 
   const [searchText, setSearchText] = useState("");
-  const state = useSearch({ url, searchText, searchSize: searchSizeNum });
+  const state = useSearch({ url, searchText, searchSize: +searchSizeNum });
 
   return (
     <List
-      isLoading={state.isLoading}
+      isLoading={state.isLoading || isUrlLoading}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search nix packages..."
       throttle
       isShowingDetail
       searchBarAccessory={
-        <List.Dropdown tooltip="Select NixOS Branch" value={selectedBranch} onChange={setSelectedBranch}>
-          {AVAILABLE_BRANCHES.map((branch) => (
+        <List.Dropdown tooltip="Select NixOS Branch" value={selectedBranch} onChange={setSelectedBranch} storeValue>
+          {availableBranches.map((branch) => (
             <List.Dropdown.Item key={branch.value} value={branch.value} title={branch.title} />
           ))}
         </List.Dropdown>
