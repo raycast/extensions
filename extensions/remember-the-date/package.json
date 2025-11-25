@@ -124,6 +124,141 @@
         ]
       },
       {
+        "input": "@remember-the-date remember a week ago as my cat's 2nd birthday",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"Cat's 2nd birthday\" to your remembered dates.",
+            "item": {
+              "id": "test-id-456",
+              "name": "Cat's 2nd birthday",
+              "subtitle": "",
+              "date": "2025-11-18",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "Cat's 2nd birthday",
+              "subtitle": "",
+              "date": "2025-11-18"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date add yesterday as the day I finished my project",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"The day I finished my project\" to your remembered dates.",
+            "item": {
+              "id": "test-id-123",
+              "name": "The day I finished my project",
+              "subtitle": "",
+              "date": "2025-11-24",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "The day I finished my project",
+              "subtitle": "",
+              "date": "2025-11-24"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date remember 3 days ago as my doctor appointment",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"Doctor appointment\" to your remembered dates.",
+            "item": {
+              "id": "test-id-789",
+              "name": "Doctor appointment",
+              "subtitle": "",
+              "date": "2025-11-22",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "Doctor appointment",
+              "subtitle": "",
+              "date": "2025-11-22"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date add wedding anniversary as the day we got married in Hawaii",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"Wedding anniversary\" to your remembered dates.",
+            "item": {
+              "id": "test-id-789",
+              "name": "Wedding anniversary",
+              "subtitle": "The day we got married in Hawaii",
+              "date": "2024-06-15",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "Wedding anniversary",
+              "subtitle": "The day we got married in Hawaii",
+              "date": "2024-06-15"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date add last Friday as my job interview",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"Job interview\" to your remembered dates.",
+            "item": {
+              "id": "test-id-999",
+              "name": "Job interview",
+              "subtitle": "",
+              "date": "2025-11-21",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "Job interview",
+              "subtitle": "",
+              "date": "2025-11-21"
+            }
+          }
+        ]
+      },
+      {
         "input": "@remember-the-date show me all my dates",
         "mocks": {
           "list-dates": {
@@ -224,7 +359,7 @@
               {
                 "id": "test-id-2",
                 "name": "Birthday",
-                "subtitle": "Mom's birthday", 
+                "subtitle": "Mom's birthday",
                 "date": "2024-08-22"
               }
             ]

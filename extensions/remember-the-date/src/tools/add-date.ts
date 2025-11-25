@@ -10,7 +10,7 @@ type AddDateInput = {
    */
   name: string;
   /**
-   * A description or subtitle for the date
+   * Optional description or subtitle
    */
   subtitle?: string;
   /**

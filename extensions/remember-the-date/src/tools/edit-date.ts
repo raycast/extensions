@@ -8,15 +8,15 @@ type EditDateInput = {
    */
   id: string;
   /**
-   * The updated name of the date
+   * The new name of the date
    */
   name?: string;
   /**
-   * The updated description or subtitle for the date
+   * The new description or subtitle
    */
   subtitle?: string;
   /**
-   * The updated date in YYYY-MM-DD format
+   * The new date in YYYY-MM-DD format
    */
   date?: string;
 };

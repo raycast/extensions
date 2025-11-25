@@ -2,13 +2,13 @@ import { getItems } from "../storage";
 
 type ListDatesInput = {
   /**
-   * Optional filter to search dates by name
+   * Optional filter to search dates by name or subtitle
    */
   filter?: string;
 };
 
 /**
- * List all remembered dates with optional filtering
+ * List all remembered dates
  */
 export default async function listDates(input: ListDatesInput = {}) {
   const items = await getItems();
