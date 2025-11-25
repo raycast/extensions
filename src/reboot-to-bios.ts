@@ -16,9 +16,6 @@ async function executeReboot() {
   const batContent = `@echo off
 if not DEFINED IS_MINIMIZED set IS_MINIMIZED=1 && start "" /min "%~f0" %* && exit
 shutdown /r /fw /t 0
-if %errorlevel% neq 0 (
-    shutdown /r /o /t 0
-)
 `;
   await writeFile(batPath, batContent);
 
@@ -42,7 +39,7 @@ export default async function main() {
       const confirmed = await confirmAlert({
         title: "Confirm Reboot to BIOS",
         message:
-          "Your computer will restart immediately and boot into BIOS/Advanced Boot Options.\n\nAll unsaved work will be lost. Please save your work before continuing.\n\nTip: You can disable this confirmation in extension preferences for faster reboots.",
+          "Your computer will restart immediately and boot into BIOS firmware settings.\n\nAll unsaved work will be lost. Please save your work before continuing.\n\nTip: You can disable this confirmation in extension preferences for faster reboots.",
         primaryAction: {
           title: "Reboot Now",
         },

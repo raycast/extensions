@@ -2,14 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reboot-to-bios",
   "title": "Reboot to BIOS",
-  "description": "Quickly reboot your Windows PC directly to BIOS or Advanced Boot Options",
+  "description": "Quickly reboot your Windows PC directly to BIOS firmware settings",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
     {
       "name": "reboot-to-bios",
       "title": "Reboot to BIOS",
-      "description": "Instantly restart your PC to BIOS firmware settings or Advanced Boot Options",
+      "description": "Instantly restart your PC to BIOS firmware settings",
       "mode": "no-view",
       "subtitle": "System",
       "preferences": [
