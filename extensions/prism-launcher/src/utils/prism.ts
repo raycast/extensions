@@ -20,8 +20,6 @@ export async function getPrismLauncherPath(): Promise<string | null> {
     return path;
   }
 
-  if (!path) return null;
-
   if (path.split("\\").pop()?.toLowerCase() !== "prismlauncher.exe") return null;
   if (!(await fs.pathExists(path))) return null;
 
