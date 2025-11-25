@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-25
 
 - Added support for Antigravity.
 
