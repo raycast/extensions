@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-26
 
 - Fix issue with AI response not being parsed correctly
 
