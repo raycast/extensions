@@ -38,7 +38,7 @@ export default function Command() {
       const tempMailInstance = new TempMail(mailAddress);
       const mails = (await tempMailInstance.fetchInbox()).mail_list || [];
       return mails;
-    } catch (error) {
+    } catch {
       await showFailureToast("Failed to fetch mails");
       return [];
     }
