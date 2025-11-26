@@ -2,7 +2,6 @@
 
 ## [New Addition] - {PR_MERGE_DATE}
 
-- Fixed a bug on windows where it wouldn't be able to get Prism Launcher
 - Added current versions for instances in launch instance and join server commands
 
 ## [New Addition] - 2025-11-24
