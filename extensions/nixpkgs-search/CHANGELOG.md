@@ -3,10 +3,11 @@
 ## [Update] - {PR_MERGE_DATE}
 
 - **In-app branch switcher**: Added a dropdown in the search bar to switch between NixOS versions without going to preferences
-- **Branch validation**: Extension validates which hardcoded branches are currently available and only shows valid options
+- **Updated available branches**: Removed unsupported branches (24.11, 24.05, 23.11) and kept only working versions (unstable, 25.05)
 - **Simplified preferences**: Removed static branch configuration from preferences in favor of runtime selection
+- **Improved localStorage handling**: Cleaned up storage logic with proper Promise handling
 - Bump dependencies to latest versions.
-- Added copy action to package details view
+- Added copy action to package details view.
 - Added Windows as supported platform.
 
 ## [Fix] - 2025-11-10

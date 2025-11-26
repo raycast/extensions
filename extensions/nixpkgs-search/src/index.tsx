@@ -12,56 +12,18 @@ export default function Command() {
     SEARCH_CONFIG.minSize,
     Math.min(SEARCH_CONFIG.maxSize, Math.trunc(+searchSize) || SEARCH_CONFIG.defaultSize),
   );
-  const [availableBranches, setAvailableBranches] = useState<(typeof AVAILABLE_BRANCHES)[number][]>([
-    ...AVAILABLE_BRANCHES,
-  ]);
+
   const [selectedBranch, setSelectedBranch] = useState<string>("unstable");
 
-  // Load stored selected branch and filter unsupported branches on mount
+  // Load stored selected branch on mount
   useEffect(() => {
     let mounted = true;
 
-    async function loadAndFilter() {
-      // Try to read stored branch
-      try {
-        const stored = await LocalStorage.getItem<string>("selectedBranch");
-        if (stored) {
-          setSelectedBranch(stored);
-        }
-      } catch {
-        // ignore storage errors
+    LocalStorage.getItem<string>("selectedBranch").then((stored) => {
+      if (mounted && stored && AVAILABLE_BRANCHES.some((b) => b.value === stored)) {
+        setSelectedBranch(stored);
       }
-
-      // Check which branches respond successfully and filter unsupported ones
-      const checks = await Promise.all(
-        AVAILABLE_BRANCHES.map(async (branch) => {
-          try {
-            const url = await getSearchUrl({ branchName: branch.value });
-            // HEAD is a lightweight way to check existence
-            const resp = await fetch(url, { method: "HEAD" });
-            return resp.ok ? branch : null;
-          } catch {
-            return null;
-          }
-        }),
-      );
-
-      const supported = checks.filter(Boolean) as (typeof AVAILABLE_BRANCHES)[number][];
-      if (mounted) {
-        if (supported.length > 0) setAvailableBranches([...supported]);
-        // If the currently selected branch is not supported, pick the first supported one
-        if (supported.length > 0 && !supported.find((b) => b.value === selectedBranch)) {
-          setSelectedBranch(supported[0].value);
-          try {
-            await LocalStorage.setItem("selectedBranch", supported[0].value);
-          } catch {
-            /* ignore */
-          }
-        }
-      }
-    }
-
-    loadAndFilter();
+    });
 
     return () => {
       mounted = false;
@@ -93,8 +55,15 @@ export default function Command() {
       throttle
       isShowingDetail
       searchBarAccessory={
-        <List.Dropdown tooltip="Select NixOS Branch" value={selectedBranch} onChange={setSelectedBranch} storeValue>
-          {availableBranches.map((branch) => (
+        <List.Dropdown
+          tooltip="Select NixOS Branch"
+          value={selectedBranch}
+          onChange={(newValue) => {
+            setSelectedBranch(newValue);
+            LocalStorage.setItem("selectedBranch", newValue);
+          }}
+        >
+          {AVAILABLE_BRANCHES.map((branch) => (
             <List.Dropdown.Item key={branch.value} value={branch.value} title={branch.title} />
           ))}
         </List.Dropdown>

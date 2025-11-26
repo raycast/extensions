@@ -2,9 +2,6 @@
 export const AVAILABLE_BRANCHES = [
   { value: "unstable", title: "Unstable (rolling release)" },
   { value: "25.05", title: "NixOS 25.05" },
-  { value: "24.11", title: "NixOS 24.11" },
-  { value: "24.05", title: "NixOS 24.05" },
-  { value: "23.11", title: "NixOS 23.11" },
 ] as const;
 
 // Elasticsearch query fields with their boost values
