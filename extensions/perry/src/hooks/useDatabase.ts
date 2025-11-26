@@ -29,7 +29,7 @@ export function useDatabases() {
 
   const activeDatabase = useMemo(
     () => databases.find((db) => db.id === activeDatabaseId),
-    [databases, activeDatabaseId]
+    [databases, activeDatabaseId],
   );
 
   const changeDatabase = useCallback(async (id: string) => {
@@ -100,7 +100,7 @@ export function useQueryExecution(activeDatabase: Database | undefined) {
         setIsExecuting(false);
       }
     },
-    [activeDatabase]
+    [activeDatabase],
   );
 
   const clear = useCallback(() => {

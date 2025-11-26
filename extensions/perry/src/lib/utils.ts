@@ -1,4 +1,4 @@
-export function addLimitIfNeeded(query: string, defaultLimit: number = 100): string {
+export function addLimitIfNeeded(query: string, defaultLimit: number = 20): string {
   const trimmed = query.trim();
   const upper = trimmed.toUpperCase();
 

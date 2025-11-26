@@ -47,8 +47,8 @@ export default function QueryDatabase() {
         setSuggestions(
           filterSuggestions(
             tableColumns.length > 0 ? tableColumns : [...new Set(columns.map((c) => c.columnName))],
-            partial
-          )
+            partial,
+          ),
         );
       } else {
         setSuggestions(["*"]);
@@ -71,7 +71,7 @@ export default function QueryDatabase() {
         upper.lastIndexOf(" JOIN"),
         upper.lastIndexOf(" INNER JOIN"),
         upper.lastIndexOf(" LEFT JOIN"),
-        upper.lastIndexOf(" RIGHT JOIN")
+        upper.lastIndexOf(" RIGHT JOIN"),
       );
       const lastIdx = Math.max(fromIdx, joinIdx);
 

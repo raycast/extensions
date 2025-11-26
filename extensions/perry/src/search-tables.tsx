@@ -22,11 +22,11 @@ export default function SearchTables() {
           schema: t.schema,
           name: t.name,
           fullName: t.schema === "public" ? t.name : `${t.schema}.${t.name}`,
-        })
+        }),
       );
     },
     [activeDatabase?.connectionString],
-    { execute: !!activeDatabase }
+    { execute: !!activeDatabase },
   );
 
   if (databases.length === 0 && !isLoadingDbs) {
@@ -106,7 +106,7 @@ function TableBrowser({ table, database }: { table: TableInfo; database: Databas
     const toast = await showToast({ style: Toast.Style.Animated, title: "Loading table..." });
 
     try {
-      const query = `SELECT * FROM ${table.fullName} LIMIT 100`;
+      const query = `SELECT * FROM ${table.fullName} LIMIT 20`;
       const [queryResult, schemaData] = await Promise.all([
         executeQuery(database.connectionString, query, database.isReadonly),
         loadFullSchema(database.connectionString),
@@ -115,7 +115,7 @@ function TableBrowser({ table, database }: { table: TableInfo; database: Databas
       setResults(queryResult);
 
       const tableColumns = schemaData.allColumns.filter(
-        (c) => c.tableName === table.name && c.tableSchema === table.schema
+        (c) => c.tableName === table.name && c.tableSchema === table.schema,
       );
       setColumns(tableColumns);
       setTextColumns(tableColumns.filter((c) => /char|text|string/i.test(c.dataType)).map((c) => c.columnName));
@@ -157,13 +157,12 @@ function TableBrowser({ table, database }: { table: TableInfo; database: Databas
         return;
       }
 
+      const searchPattern = `%${searchText.trim()}%`;
       const whereClause =
-        selectedColumn === "any"
-          ? textColumns.map((c) => `${c} ILIKE '%${searchText.trim()}%'`).join(" OR ")
-          : `${selectedColumn} ILIKE '%${searchText.trim()}%'`;
+        selectedColumn === "any" ? textColumns.map((c) => `${c} ILIKE $1`).join(" OR ") : `${selectedColumn} ILIKE $1`;
 
-      const query = `SELECT * FROM ${table.fullName} WHERE ${whereClause} LIMIT 100`;
-      const queryResult = await executeQuery(database.connectionString, query, database.isReadonly);
+      const query = `SELECT * FROM ${table.fullName} WHERE ${whereClause} LIMIT 20`;
+      const queryResult = await executeQuery(database.connectionString, query, database.isReadonly, [searchPattern]);
       setResults(queryResult);
 
       await addQueryToHistory({
@@ -280,7 +279,7 @@ function TableBrowser({ table, database }: { table: TableInfo; database: Databas
 function TableSchema({ table, database }: { table: TableInfo; database: Database }) {
   const { data: schema, isLoading } = useCachedPromise(
     () => getTableSchema(database.connectionString, table.name, table.schema),
-    []
+    [],
   );
 
   if (!schema) {
@@ -292,7 +291,7 @@ function TableSchema({ table, database }: { table: TableInfo; database: Database
   }
 
   const fkMap = new Map(
-    schema.foreignKeys.map((fk) => [fk.columnName, `${fk.referencedTable}.${fk.referencedColumn}`])
+    schema.foreignKeys.map((fk) => [fk.columnName, `${fk.referencedTable}.${fk.referencedColumn}`]),
   );
 
   return (

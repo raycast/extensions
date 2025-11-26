@@ -13,30 +13,35 @@
     {
       "name": "query-database",
       "title": "Quick Query",
+      "subtitle": "Perry",
       "description": "Execute quick SQL queries",
       "mode": "view"
     },
     {
       "name": "search-tables",
       "title": "Search Tables",
+      "subtitle": "Perry",
       "description": "Browse and search table data",
       "mode": "view"
     },
     {
       "name": "saved-queries",
       "title": "Saved Queries",
+      "subtitle": "Perry",
       "description": "Manage and execute saved queries",
       "mode": "view"
     },
     {
       "name": "query-history",
       "title": "Query History",
+      "subtitle": "Perry",
       "description": "View and re-run recent queries",
       "mode": "view"
     },
     {
       "name": "manage-databases",
       "title": "Manage Databases",
+      "subtitle": "Perry",
       "description": "Add, edit, or remove database connections",
       "mode": "view"
     }

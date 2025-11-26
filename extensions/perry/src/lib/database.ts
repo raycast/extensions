@@ -37,7 +37,12 @@ export async function testConnection(connectionString: string): Promise<{ succes
   }
 }
 
-export async function executeQuery(connectionString: string, query: string, isReadonly = false): Promise<QueryResult> {
+export async function executeQuery(
+  connectionString: string,
+  query: string,
+  isReadonly = false,
+  params?: unknown[],
+): Promise<QueryResult> {
   const pool = getPool(connectionString);
   const startTime = Date.now();
   let client: PoolClient | null = null;
@@ -46,7 +51,7 @@ export async function executeQuery(connectionString: string, query: string, isRe
     client = await pool.connect();
 
     if (isReadonly) await client.query("BEGIN READ ONLY");
-    const result: PgQueryResult = await client.query(query);
+    const result: PgQueryResult = params ? await client.query(query, params) : await client.query(query);
     if (isReadonly) await client.query("COMMIT");
 
     return {

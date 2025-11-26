@@ -84,7 +84,7 @@ export interface TableSchemaInfo {
 export async function getTableSchema(
   connectionString: string,
   tableName: string,
-  schema: string = "public"
+  schema: string = "public",
 ): Promise<TableSchemaInfo> {
   const pool = new Pool({ connectionString, max: 1 });
 
@@ -101,7 +101,7 @@ export async function getTableSchema(
         WHERE table_schema = $1 AND table_name = $2
         ORDER BY ordinal_position
       `,
-        [schema, tableName]
+        [schema, tableName],
       ),
       pool.query(
         `
@@ -110,7 +110,7 @@ export async function getTableSchema(
         JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
         WHERE i.indrelid = ($1 || '.' || $2)::regclass AND i.indisprimary
       `,
-        [schema, tableName]
+        [schema, tableName],
       ),
       pool.query(
         `
@@ -129,7 +129,7 @@ export async function getTableSchema(
           AND tc.table_schema = $1
           AND tc.table_name = $2
       `,
-        [schema, tableName]
+        [schema, tableName],
       ),
       pool.query(
         `
@@ -144,7 +144,7 @@ export async function getTableSchema(
         WHERE i.schemaname = $1 AND i.tablename = $2
         ORDER BY i.indexname
       `,
-        [schema, tableName]
+        [schema, tableName],
       ),
     ]);
 
