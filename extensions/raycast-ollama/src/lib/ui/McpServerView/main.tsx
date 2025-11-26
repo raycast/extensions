@@ -4,6 +4,7 @@ import React from "react";
 import { McpServerConfig } from "../../mcp/types";
 import { McpServerFormConfig } from "./form/config";
 import { DeleteMcpServer, GetMcpServerConfig } from "./function";
+import { Shortcut } from "../shortcut";
 
 export function McpServerView(): React.JSX.Element {
   const {
@@ -22,7 +23,7 @@ export function McpServerView(): React.JSX.Element {
             <Action
               title="Show Detail"
               icon={showDetail ? Icon.EyeDisabled : Icon.Eye}
-              shortcut={{ modifiers: ["cmd"], key: "y" }}
+              shortcut={Shortcut.ToggleQuickLook}
               onAction={() =>
                 setShowDetail((prev) => {
                   return !prev;
@@ -31,18 +32,13 @@ export function McpServerView(): React.JSX.Element {
             />
           )}
           {McpServer && (
-            <Action
-              title="Add"
-              icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={() => setShowForm(true)}
-            />
+            <Action title="Add" icon={Icon.Plus} shortcut={Shortcut.New} onAction={() => setShowForm(true)} />
           )}
           {props.mcpServerName && McpServer && (
             <Action
               title="Edit"
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Shortcut.Edit}
               onAction={() => {
                 form.current = (
                   <McpServerFormConfig
@@ -57,7 +53,7 @@ export function McpServerView(): React.JSX.Element {
             />
           )}
           {props.mcpServerName && McpServer && (
-            <ActionPanel.Submenu title="Delete" icon={Icon.Trash}>
+            <ActionPanel.Submenu title="Delete" icon={Icon.Trash} shortcut={Shortcut.Remove}>
               <Action
                 title={`Yes, Delete "${props.mcpServerName}" Mcp Server`}
                 icon={Icon.CheckCircle}
@@ -107,7 +103,7 @@ export function McpServerView(): React.JSX.Element {
         <List.EmptyView
           icon={Icon.WrenchScrewdriver}
           title="No Mcp Server configured"
-          description="You can add new Mcp Server using ⌘+D shortcut."
+          description="You can add new Mcp Server using ⌘+N (macOS) or ctrl+N (Windows) shortcut."
         />
       )}
     </List>

@@ -19,7 +19,8 @@
     "AlanHuang",
     "alexs",
     "ARui",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "AdrianKokot"
   ],
   "license": "MIT",
   "commands": [
@@ -159,10 +160,19 @@
       "description": "Number of days to look back when fetching time entries (default: 14, max: 60)",
       "placeholder": "Enter a number between 1-60",
       "default": "14"
+    },
+    {
+      "description": "The API responses cache time-to-live in seconds.",
+      "name": "cacheTtl",
+      "placeholder": "Enter cache TTL in seconds (default: 0)",
+      "required": false,
+      "title": "Cache TTL",
+      "type": "textfield",
+      "default": "0"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.15.0",
     "dayjs": "^1.11.11",
     "node-fetch": "^3.3.2"
@@ -170,10 +180,10 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "~20.12.12",
-    "@types/react": "~18.3.3",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "eslint": "^8.56.0",
-        "typescript": "^5.4.5"
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -182,5 +192,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "pull-contributions": "npx @raycast/api@latest pull-contributions"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

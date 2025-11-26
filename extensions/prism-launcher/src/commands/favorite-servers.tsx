@@ -9,22 +9,27 @@ import {
   PopToRootType,
   closeMainWindow,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { usePromise } from "@raycast/utils";
+import { useState } from "react";
+import { Unless, When } from "react-if";
+import useAsyncEffect from "use-async-effect";
+import type { Instance, Server } from "../types";
+import { joinServer } from "../utils/instance";
 import {
   isPrismLauncherInstalled,
-  loadInstances,
   loadFavoriteInstanceIds,
   loadFavoriteServers,
-  saveFavoriteServers,
+  loadInstances,
   parseServersFromInstance,
+  saveFavoriteServers,
   sortServers,
 } from "../utils/prism";
-import { Instance, Server } from "../types";
-import { joinServer } from "../utils/instance";
+import NoInstall from "./no-install";
 
 export default function FavoriteServers() {
-  const [isPrismInstalled, setIsPrismInstalled] = useState<boolean>();
+  const { data: isPrismInstalledData } = usePromise(isPrismLauncherInstalled, []);
+  const isPrismInstalled = isPrismInstalledData ?? false;
+
   const [servers, setServers] = useState<Server[]>();
   const [favoriteAddresses, setFavoriteAddresses] = useState<string[]>([]);
 
@@ -47,110 +52,97 @@ export default function FavoriteServers() {
     }
   };
 
-  // Load favorite server addresses
-  const { data: storedFavorites } = usePromise(() => loadFavoriteServers(LocalStorage), []);
-  useEffect(() => {
-    if (storedFavorites) {
-      setFavoriteAddresses(storedFavorites);
-    }
-  }, [storedFavorites]);
+  const revalidateServers = async () => {
+    // Load favorite addresses
+    const storedFavorites = await loadFavoriteServers(LocalStorage);
+    setFavoriteAddresses(storedFavorites);
 
-  // Check Prism presence
-  const { data: installed } = usePromise(isPrismLauncherInstalled, []);
-  useEffect(() => {
-    if (installed !== undefined) {
-      setIsPrismInstalled(installed);
-    }
-  }, [installed]);
+    // Load servers from all instances
+    const favoriteInstanceIds = await loadFavoriteInstanceIds(LocalStorage);
+    const instances: Instance[] = await loadInstances(favoriteInstanceIds);
 
-  // Load servers from all instances once we know favorites and installation status
-  const { data: loadedServers, isLoading: isLoadingServers } = usePromise(
-    async () => {
-      const favoriteInstanceIds = await loadFavoriteInstanceIds(LocalStorage);
-      const instances: Instance[] = await loadInstances(favoriteInstanceIds);
-
-      const allServers: Server[] = [];
-      for (const instance of instances) {
-        const parsed = await parseServersFromInstance(instance);
-        allServers.push(
-          ...parsed.map((s) => ({
-            ...s,
-            favorite: storedFavorites!.includes(s.address),
-          })),
-        );
-      }
-
-      const favoriteServersOnly = allServers.filter((s) => storedFavorites!.includes(s.address));
-
-      // Deduplicate servers by IP address - keep only the first occurrence
-      const uniqueServers = favoriteServersOnly.filter(
-        (server, index, self) => index === self.findIndex((s) => s.address === server.address),
+    const allServers: Server[] = [];
+    for (const instance of instances) {
+      const parsed = await parseServersFromInstance(instance);
+      allServers.push(
+        ...parsed.map((s) => ({
+          ...s,
+          favorite: storedFavorites.includes(s.address),
+        })),
       );
-
-      return sortServers(uniqueServers, storedFavorites!);
-    },
-    [],
-    { execute: Boolean(installed && storedFavorites) },
-  );
-
-  useEffect(() => {
-    if (loadedServers) {
-      setServers(loadedServers);
     }
-  }, [loadedServers]);
+
+    const favoriteServersOnly = allServers.filter((s) => storedFavorites.includes(s.address));
+
+    // Deduplicate servers by IP address - keep only the first occurrence
+    const uniqueServers = favoriteServersOnly.filter(
+      (server, index, self) => index === self.findIndex((s) => s.address === server.address),
+    );
+
+    setServers(sortServers(uniqueServers, storedFavorites));
+  };
+
+  useAsyncEffect(async () => {
+    if (isPrismInstalled) await revalidateServers();
+  }, [isPrismInstalled]);
 
   return (
     <List
       searchBarPlaceholder={"Search favorite servers..."}
-      {...(isPrismInstalled ? { isLoading: servers === undefined || isLoadingServers } : {})}
+      {...(isPrismInstalled ? { isLoading: servers === undefined } : {})}
     >
-      {servers && servers.length > 0 ? (
-        servers.map((server, index) => (
-          <List.Item
-            key={`fav-server-${index}`}
-            title={server.name}
-            subtitle={server.address}
-            accessories={[{ text: server.instanceName }, ...(server.favorite ? [{ icon: Icon.Star }] : [])]}
-            icon={server.icon ? { source: server.icon } : Icon.Network}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Join Server"
-                  icon={Icon.GameController}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
-                  onAction={async () => {
-                    await joinServer(server.instanceId, server.address);
-                    await closeMainWindow({
-                      popToRootType: PopToRootType.Immediate,
-                      clearRootSearch: true,
-                    });
-                  }}
-                />
-                <Action
-                  title={server.favorite ? "Remove from Favorites" : "Add to Favorites"}
-                  icon={server.favorite ? Icon.StarDisabled : Icon.Star}
-                  onAction={() => toggleFavorite(server.address)}
-                  shortcut={Keyboard.Shortcut.Common.Pin}
-                />
-                <Action
-                  title="Copy Server Address"
-                  icon={Icon.CopyClipboard}
-                  onAction={async () => {
-                    await Clipboard.copy(server.address);
-                  }}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
-              </ActionPanel>
-            }
+      <When condition={isPrismInstalled}>
+        {servers && servers.length > 0 ? (
+          servers.map((server, index) => (
+            <List.Item
+              key={`fav-server-${index}`}
+              title={server.name}
+              subtitle={server.address}
+              accessories={[{ text: server.instanceName }, ...(server.favorite ? [{ icon: Icon.Star }] : [])]}
+              icon={server.icon ? { source: server.icon } : Icon.Network}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Join Server"
+                    icon={Icon.GameController}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+                    onAction={async () => {
+                      await joinServer(server.instanceId, server.address);
+                      await closeMainWindow({
+                        popToRootType: PopToRootType.Immediate,
+                        clearRootSearch: true,
+                      });
+                    }}
+                  />
+                  <Action
+                    title={server.favorite ? "Remove from Favorites" : "Add to Favorites"}
+                    icon={server.favorite ? Icon.StarDisabled : Icon.Star}
+                    onAction={() => toggleFavorite(server.address)}
+                    shortcut={Keyboard.Shortcut.Common.Pin}
+                  />
+                  <Action
+                    title="Copy Server Address"
+                    icon={Icon.CopyClipboard}
+                    onAction={async () => {
+                      await Clipboard.copy(server.address);
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
+        ) : (
+          <List.EmptyView
+            icon={Icon.Signal0}
+            title={"No favorite servers"}
+            description={"Mark servers as favorites to see them here"}
           />
-        ))
-      ) : (
-        <List.EmptyView
-          icon={Icon.Signal0}
-          title={"No favorite servers"}
-          description={"Mark servers as favorites to see them here"}
-        />
-      )}
+        )}
+      </When>
+      <Unless condition={isPrismInstalled}>
+        <NoInstall />
+      </Unless>
     </List>
   );
 }

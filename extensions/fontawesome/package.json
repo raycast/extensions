@@ -11,7 +11,8 @@
     "ridemountainpig",
     "yusifaliyevpro",
     "xmok",
-    "j3lte"
+    "j3lte",
+    "hellonicolas"
   ],
   "categories": [
     "Design Tools",
@@ -32,7 +33,7 @@
       "type": "password",
       "required": false,
       "title": "API Token (For Font Awesome Pro Accounts)",
-      "description": "Optionally Use Font Awesome Pro icons by providing an API Token, not necessary to access free icons."
+      "description": "Optionally use Font Awesome Pro icons and custom kits by providing an API Token. Not necessary to access free icons."
     },
     {
       "name": "STYLE_PREFERENCE",
@@ -113,6 +114,21 @@
       ],
       "title": "Icon primary action",
       "description": "Choose which action to perform when selecting an icon."
+    },
+    {
+      "name": "REMEMBER_LAST_KIT",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Remember Last Used Kit",
+      "description": "When enabled, the extension will open with your previously selected icon style or custom kit."
+    },
+    {
+      "name": "KIT_FILTER",
+      "type": "textfield",
+      "required": false,
+      "title": "Filter Custom Kits",
+      "description": "Limit which custom kits appear in the dropdown. Enter kit names or IDs separated by commas (e.g., \"My Icons, abc123\"). Leave empty to show all kits."
     }
   ],
   "dependencies": {

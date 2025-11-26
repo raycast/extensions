@@ -1,9 +1,21 @@
-import { Clipboard, getSelectedText, showToast, closeMainWindow, Toast } from "@raycast/api";
+import { Clipboard, getSelectedText, showToast, showHUD, Toast } from "@raycast/api";
 import fetch from "node-fetch";
+import { addToHistory } from "./storage";
+
+interface Entity {
+  id: string;
+  type: string;
+  title?: string;
+  artistName?: string;
+  thumbnailUrl?: string;
+  apiProvider: string;
+  platforms: string[];
+}
 
 interface SongInfo {
   entityUniqueId: string;
   pageUrl: string;
+  entitiesByUniqueId?: Record<string, Entity>;
 }
 
 class SongNotFoundError extends Error {
@@ -26,7 +38,7 @@ const getTextFromSelectionOrClipboard = async () => {
       text: selectedText,
       fromClipboard: false,
     };
-  } catch (error) {
+  } catch {
     const clipboardText = await Clipboard.read();
 
     return {
@@ -49,7 +61,39 @@ const convertToOdesliLink = async (text: string) => {
 
   const songInfoJson = (await songInfo.json()) as SongInfo;
 
-  return songInfoJson.pageUrl;
+  // Extract song details
+  let title: string | undefined;
+  let artist: string | undefined;
+  let thumbnailUrl: string | undefined;
+
+  if (songInfoJson.entitiesByUniqueId && songInfoJson.entityUniqueId) {
+    const entity = songInfoJson.entitiesByUniqueId[songInfoJson.entityUniqueId];
+    if (entity) {
+      title = entity.title;
+      artist = entity.artistName;
+      thumbnailUrl = entity.thumbnailUrl;
+    }
+  }
+
+  // Save to history
+  try {
+    await addToHistory({
+      originalUrl: text,
+      odesliUrl: songInfoJson.pageUrl,
+      title,
+      artist,
+      thumbnailUrl,
+    });
+  } catch (error) {
+    // Don't fail the conversion if history save fails
+    console.error("Failed to save to history:", error);
+  }
+
+  return {
+    url: songInfoJson.pageUrl,
+    title,
+    artist,
+  };
 };
 
 export default async function main() {
@@ -66,23 +110,24 @@ export default async function main() {
   }
 
   try {
-    const odesliLink = await convertToOdesliLink(text);
+    const result = await convertToOdesliLink(text);
+
+    // Create a descriptive HUD message
+    let hudMessage = "Odesli link copied!";
+    if (result.title && result.artist) {
+      hudMessage = `${result.title} - ${result.artist}`;
+    } else if (result.title) {
+      hudMessage = result.title;
+    }
 
     if (fromClipboard) {
-      await Clipboard.copy(odesliLink);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Link copied to clipboard.",
-        message: "You can now paste it anywhere.",
-      });
-
+      await Clipboard.copy(result.url);
+      await showHUD(`✓ ${hudMessage}`);
       return;
     }
 
-    await Clipboard.paste(odesliLink);
-
-    await closeMainWindow();
+    await Clipboard.paste(result.url);
+    await showHUD(`✓ ${hudMessage}`);
   } catch (error) {
     if (error instanceof SongNotFoundError) {
       await showToast({
@@ -90,6 +135,7 @@ export default async function main() {
         title: "Unable to convert link.",
         message: "Song not found.",
       });
+      return;
     }
 
     await showToast({
