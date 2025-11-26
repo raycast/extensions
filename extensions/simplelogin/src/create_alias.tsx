@@ -116,7 +116,7 @@ export default function Command() {
           setPrefix(value);
         }}
         onBlur={(event) => {
-          if (event.target.value?.length == 0) {
+          if (event.target.value?.length === 0) {
             setPrefixError("A prefix is required");
           } else {
             dropAliasPrefixErrorIfNeeded();
