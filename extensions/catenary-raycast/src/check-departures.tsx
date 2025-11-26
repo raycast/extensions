@@ -428,7 +428,7 @@ function NearbyStopsView({ location }: { location: LocationChoice }) {
                           <Action.OpenInBrowser
                             title="Open Stop in Maps"
                             icon={Icon.Map}
-                            url={`https://www.openstreetmap.org/?mlat=${first.stopLat}&mlon=${first.stopLon}#map=17/${first.stopLat}/${first.stopLon}`}
+                            url={`https://maps.apple.com/?sll=${first.stopLat},${first.stopLon}&q=${encodeURIComponent(first.stopName + " " + (dep.route_type === 3 ? "Stop" : dep.route_type === 4 ? "" : "Station"))}&ll=${first.stopLat},${first.stopLon}&dirflg=r&t=r`}
                           />
                           <Action title="Refresh" icon={Icon.Repeat} onAction={() => revalidate()} />
                         </ActionPanel>
