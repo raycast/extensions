@@ -1,6 +1,6 @@
 # OpenRouter Model Search Changelog
 
-## [Code Refactoring Add Windows Support] - {PR_MERGE_DATE}
+## [Code Refactoring Add Windows Support] - 2025-11-26
 
 - Add support for Windows platform
 - Secured inputs, errors, and cache
