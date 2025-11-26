@@ -1,6 +1,6 @@
 # Calendar Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-11-26
 
 - Add Windows support
 
