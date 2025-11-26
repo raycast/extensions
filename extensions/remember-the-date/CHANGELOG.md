@@ -1,6 +1,6 @@
 # Remember the Date Changelog
 
-## [AI Tools Integration and Windows Support] - {PR_MERGE_DATE}
+## [AI Tools Integration and Windows Support] - 2025-11-26
 
 - Added AI tools for seamless date management via Raycast AI
 - Add new dates with natural language commands
