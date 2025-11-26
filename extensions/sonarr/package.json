@@ -166,5 +166,8 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "format-check": "prettier --check \"src/**/*.{ts,tsx}\""
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

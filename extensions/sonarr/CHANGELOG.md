@@ -1,6 +1,6 @@
 # Sonarr Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-26
 
 - Added fuzzy search filtering (e.g., "simps" finds "The Simpsons")
 - Created Instance Status with health monitoring
