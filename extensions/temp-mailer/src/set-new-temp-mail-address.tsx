@@ -13,11 +13,6 @@ export default function Command() {
     const mailAddress = `${mail_username}@${mail_domain}`;
     await LocalStorage.setItem("mail_address", mailAddress);
 
-    await showToast({
-      title: "Mail address set",
-      message: `Your new mail address is ${mail_username}@${mail_domain}`,
-    });
-
     await setTimeout(1_000);
     popToRoot();
   };
@@ -27,7 +22,7 @@ export default function Command() {
       showToast({
         style: Toast.Style.Success,
         title: "Yay!",
-        message: `${values.mail_username}@${values.mail_domain} mail address set`,
+        message: `${values.mail_username}@${values.mail_domain} your mail address has been set`,
       });
 
       setMailAddress({

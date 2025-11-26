@@ -3,6 +3,9 @@ import { List, LocalStorage } from "@raycast/api";
 import TempMail from "temp-mail-plus-api";
 import { MailResponse } from "temp-mail-plus-api/dist/src/types";
 import TurndownService from "turndown";
+import { showFailureToast } from "@raycast/utils";
+
+const turndownService = new TurndownService();
 
 interface MailItem {
   mail_id: number;
@@ -15,7 +18,7 @@ export default function Command() {
   const [mailDetails, setMailDetails] = useState<Record<number, MailResponse & { markdown: string }>>({});
   const [mailboxResults, setMailboxResults] = useState<MailItem[]>([]);
   const [searchText, setSearchText] = useState("");
-  const turndownService = new TurndownService();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setMailboxResults(mailList.filter((item) => item.subject.includes(searchText)));
@@ -29,11 +32,16 @@ export default function Command() {
   };
 
   const fetchMails = async () => {
-    const mailAddress = await getCurrentMailAddress();
-    if (!mailAddress) return [];
-    const tempMailInstance = new TempMail(mailAddress);
-    const mails = (await tempMailInstance.fetchInbox()).mail_list || [];
-    return mails;
+    try {
+      const mailAddress = await getCurrentMailAddress();
+      if (!mailAddress) return [];
+      const tempMailInstance = new TempMail(mailAddress);
+      const mails = (await tempMailInstance.fetchInbox()).mail_list || [];
+      return mails;
+    } catch (error) {
+      await showFailureToast("Failed to fetch mails");
+      return [];
+    }
   };
 
   const fetchMailInformation = async (mailId: number) => {
@@ -61,16 +69,20 @@ export default function Command() {
     }
   };
 
-  fetchMails().then((mails: MailItem[]) => {
+  useEffect(() => {
     if (didEmailsFetched.current) return;
-    setMailList(mails);
-    setMailboxResults(mails);
-    didEmailsFetched.current = true;
-    fetchMailDetails(mails);
-  });
+
+    fetchMails().then((mails: MailItem[]) => {
+      setMailList(mails);
+      setMailboxResults(mails);
+      didEmailsFetched.current = true;
+      setIsLoading(false);
+      fetchMailDetails(mails);
+    });
+  }, []);
 
   return (
-    <List isShowingDetail filtering={false} onSearchTextChange={setSearchText}>
+    <List isLoading={isLoading} isShowingDetail filtering={false} onSearchTextChange={setSearchText}>
       {mailboxResults.map((mail: MailItem) => (
         <List.Item
           key={mail.mail_id}
