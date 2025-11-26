@@ -1,6 +1,6 @@
 # NixPkgs Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-26
 
 - **In-app branch switcher**: Added a dropdown in the search bar to switch between NixOS versions without going to preferences
 - **Updated available branches**: Removed unsupported branches (24.11, 24.05, 23.11) and kept only working versions (unstable, 25.05)
