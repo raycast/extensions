@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Refactor + Features] - {PR_MERGE_DATE}
+## [Refactor + Features] - 2025-11-26
 
 - feat: add archive action
 - feat: confirm deletion
