@@ -1,6 +1,6 @@
 # PlanWell Changelog
 
-## [Initial Version] - 2024-11-21
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Today's Classes: View your schedule with period times and remaining time
 - Upcoming Events: See multi-day events with start/end dates
