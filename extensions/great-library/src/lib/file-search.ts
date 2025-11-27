@@ -18,6 +18,10 @@ function parseStoreName(store: FileSearchStore | string, fallbackDisplayName?: s
     return { id, name: store };
   }
 
+  if (!store.name) {
+    throw new Error("File Search store is missing a name.");
+  }
+
   const name = store.name;
   const id = name.split("/").pop() ?? name;
   const displayName = store.displayName ?? fallbackDisplayName;
