@@ -2,6 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mock-data-generator",
   "title": "Mock Data Generator",
+  "subtitle": "Generate mock data for multiple languages",
   "version": "1.0.1",
   "description": "Generate mock data for Java and Python. Quickly create POJO classes, Records, Builder patterns, Dataclasses, and Pydantic models with customizable fields and quick templates.",
   "icon": "extension_icon.png",
