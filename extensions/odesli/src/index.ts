@@ -1,29 +1,20 @@
 import { Clipboard, showToast, showHUD, Toast, LaunchProps } from "@raycast/api";
-import { getTextFromSelectionOrClipboard, convertToOdesliLink, SongNotFoundError } from "./utils";
+import { convertToOdesliLink, SongNotFoundError } from "./utils";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
-  let text = undefined;
+  const url = props.arguments.url?.trim();
 
-  const textArg = props.arguments.url?.trim();
-  if (textArg && textArg.length > 0) {
-    text = textArg;
-  } else {
-    const result = await getTextFromSelectionOrClipboard();
-    text = result.text;
-  }
-
-  if (!text) {
+  if (!url) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Unable to convert link.",
-      message: "Please select a link or copy it to clipboard.",
+      message: "Please provide a valid URL.",
     });
-
     return;
   }
 
   try {
-    const result = await convertToOdesliLink(text);
+    const result = await convertToOdesliLink(url);
 
     // Create a descriptive HUD message
     let hudMessage = "Odesli link copied!";
@@ -33,13 +24,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       hudMessage = result.title;
     }
 
-    if (text) {
-      await Clipboard.copy(result.url);
-      await showHUD(`✓ ${hudMessage}`);
-      return;
-    }
-
-    await Clipboard.paste(result.url);
+    await Clipboard.copy(result.url);
     await showHUD(`✓ ${hudMessage}`);
   } catch (error) {
     if (error instanceof SongNotFoundError) {

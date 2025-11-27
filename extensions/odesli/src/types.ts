@@ -30,8 +30,3 @@ export interface ConversionResult {
   title?: string;
   artist?: string;
 }
-
-export interface TextSource {
-  text: string;
-  fromClipboard: boolean;
-}

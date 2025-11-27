@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "odesli",
   "title": "Odesli",
-  "description": "Get an Odesli link for the currently copied link of a song/album. Odesli is a service that provides smart music links. These links show a list of platforms you can hear the song/album on.",
+  "description": "Convert song/album links to Odesli links. Odesli is a service that provides smart music links. These links show a list of platforms you can hear the song/album on.",
   "icon": "command-icon.png",
   "author": "annedouwe",
   "contributors": [
@@ -16,14 +16,14 @@
     {
       "name": "index",
       "title": "Copy Odesli Link",
-      "description": "Convert currently copied song/album link to Odesli link.",
+      "description": "Convert song/album link to Odesli link.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "url",
-          "placeholder": "Song URL (optional)",
+          "placeholder": "Song URL",
           "type": "text",
-          "required": false
+          "required": true
         }
       ]
     },
