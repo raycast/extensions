@@ -308,7 +308,7 @@ export default function PullRequestActions({
 
       <Action.Push
         icon={Icon.Download}
-        title="Check out PR"
+        title="Check Out PR"
         shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
         target={<CheckoutPullRequestForm pullRequest={pullRequest} />}
       />

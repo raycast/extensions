@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  Image,
+  Toast,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -30,79 +40,85 @@ export function IssueForm({ draftValues }: IssueFormProps) {
   const { data: repositories } = useMyRepositories();
   const { github } = getGitHubClient();
 
-  const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<IssueFormValues>({
-    async onSubmit(values) {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
-
-      try {
-        const createResult = await github.createIssue({
-          repositoryId: values.repository,
-          title: values.title,
-          body: values.description,
-          assigneeIds: values.assignees,
-          labelIds: values.labels,
-          milestoneId: values.milestone || null,
-          issueTypeId: values.issueType || null,
+  const { handleSubmit, itemProps, values, setValue, reset, focus } =
+    useForm<IssueFormValues>({
+      async onSubmit(values) {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Creating issue",
         });
 
-        const issue = createResult?.createIssue?.issue;
+        try {
+          const createResult = await github.createIssue({
+            repositoryId: values.repository,
+            title: values.title,
+            body: values.description,
+            assigneeIds: values.assignees,
+            labelIds: values.labels,
+            milestoneId: values.milestone || null,
+            issueTypeId: values.issueType || null,
+          });
 
-        if (issue) {
-          // It's not possible to add an issue to a project from the createIssue call
-          await Promise.all(
-            values.projects.map((projectId) => github.addIssueToProject({ issueId: issue.id, projectId })),
-          );
+          const issue = createResult?.createIssue?.issue;
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Created issue";
+          if (issue) {
+            // It's not possible to add an issue to a project from the createIssue call
+            await Promise.all(
+              values.projects.map((projectId) =>
+                github.addIssueToProject({ issueId: issue.id, projectId }),
+              ),
+            );
 
-          toast.primaryAction = {
-            title: "Open Issue",
-            shortcut: { modifiers: ["shift", "cmd"], key: "o" },
-            onAction: () => push(<IssueDetail initialIssue={issue} />),
-          };
+            toast.style = Toast.Style.Success;
+            toast.title = "Created issue";
 
-          toast.secondaryAction = {
-            title: `Copy URL`,
-            shortcut: { modifiers: ["shift", "cmd"], key: "c" },
-            onAction: () => Clipboard.copy(issue.url),
-          };
+            toast.primaryAction = {
+              title: "Open Issue",
+              shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+              onAction: () => push(<IssueDetail initialIssue={issue} />),
+            };
+
+            toast.secondaryAction = {
+              title: `Copy URL`,
+              shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+              onAction: () => Clipboard.copy(issue.url),
+            };
+          }
+
+          reset({
+            title: "",
+            description: "",
+            reviewers: [],
+            assignees: [],
+            labels: [],
+            projects: [],
+            milestone: "",
+            issueType: "",
+          });
+
+          focus("repository");
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed creating issue";
+          toast.message = getErrorMessage(error);
         }
-
-        reset({
-          title: "",
-          description: "",
-          reviewers: [],
-          assignees: [],
-          labels: [],
-          projects: [],
-          milestone: "",
-          issueType: "",
-        });
-
-        focus("repository");
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed creating issue";
-        toast.message = getErrorMessage(error);
-      }
-    },
-    initialValues: {
-      repository: draftValues?.repository ?? "",
-      title: draftValues?.title ?? "",
-      description: draftValues?.description ?? "",
-      reviewers: draftValues?.reviewers ?? [],
-      assignees: draftValues?.assignees ?? [],
-      labels: draftValues?.labels ?? [],
-      projects: draftValues?.projects ?? [],
-      milestone: draftValues?.milestone ?? "",
-      issueType: draftValues?.issueType ?? "",
-    },
-    validation: {
-      repository: FormValidation.Required,
-      title: FormValidation.Required,
-    },
-  });
+      },
+      initialValues: {
+        repository: draftValues?.repository ?? "",
+        title: draftValues?.title ?? "",
+        description: draftValues?.description ?? "",
+        reviewers: draftValues?.reviewers ?? [],
+        assignees: draftValues?.assignees ?? [],
+        labels: draftValues?.labels ?? [],
+        projects: draftValues?.projects ?? [],
+        milestone: draftValues?.milestone ?? "",
+        issueType: draftValues?.issueType ?? "",
+      },
+      validation: {
+        repository: FormValidation.Required,
+        title: FormValidation.Required,
+      },
+    });
 
   const { data } = useCachedPromise(
     (repository) => {
@@ -112,7 +128,10 @@ export function IssueForm({ draftValues }: IssueFormProps) {
         return Promise.resolve(null);
       }
 
-      return github.dataForRepository({ owner: selectedRepository.owner.login, name: selectedRepository.name });
+      return github.dataForRepository({
+        owner: selectedRepository.owner.login,
+        name: selectedRepository.name,
+      });
     },
     [values.repository],
     { execute: !!values.repository },
@@ -124,18 +143,24 @@ export function IssueForm({ draftValues }: IssueFormProps) {
 
   const repositoryProjects = data?.repository?.projectsV2?.nodes ?? [];
   const organizationProjects =
-    data?.repository?.owner?.__typename === "Organization" ? data.repository.owner.projectsV2?.nodes ?? [] : [];
-  const projects = [...repositoryProjects, ...organizationProjects].filter((project, index, list) => {
-    if (!project) {
-      return false;
-    }
+    data?.repository?.owner?.__typename === "Organization"
+      ? (data.repository.owner.projectsV2?.nodes ?? [])
+      : [];
+  const projects = [...repositoryProjects, ...organizationProjects].filter(
+    (project, index, list) => {
+      if (!project) {
+        return false;
+      }
 
-    return list.findIndex((item) => item?.id === project.id) === index;
-  });
+      return list.findIndex((item) => item?.id === project.id) === index;
+    },
+  );
 
   const milestones = data?.repository?.milestones?.nodes;
 
-  const issueTypes = data?.repository?.issueTypes?.nodes?.filter((t) => t && t.isEnabled);
+  const issueTypes = data?.repository?.issueTypes?.nodes?.filter(
+    (t) => t && t.isEnabled,
+  );
 
   useEffect(() => {
     setValue("description", "");
@@ -162,7 +187,10 @@ export function IssueForm({ draftValues }: IssueFormProps) {
               key={repository.id}
               title={repository.nameWithOwner}
               value={repository.id}
-              icon={{ source: repository.owner.avatarUrl, mask: Image.Mask.Circle }}
+              icon={{
+                source: repository.owner.avatarUrl,
+                mask: Image.Mask.Circle,
+              }}
             />
           );
         })}
@@ -170,7 +198,11 @@ export function IssueForm({ draftValues }: IssueFormProps) {
 
       <Form.Separator />
 
-      <Form.TextField {...itemProps.title} title="Title" placeholder="Issue title" />
+      <Form.TextField
+        {...itemProps.title}
+        title="Title"
+        placeholder="Issue title"
+      />
 
       <Form.TextArea
         {...itemProps.description}
@@ -188,7 +220,12 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           const user = getGitHubUser(collaborator);
 
           return (
-            <Form.TagPicker.Item key={collaborator.id} icon={user.icon} title={user.text} value={collaborator.id} />
+            <Form.TagPicker.Item
+              key={collaborator.id}
+              icon={user.icon}
+              title={user.text}
+              value={collaborator.id}
+            />
           );
         })}
       </Form.TagPicker>
@@ -216,7 +253,13 @@ export function IssueForm({ draftValues }: IssueFormProps) {
             return null;
           }
 
-          return <Form.TagPicker.Item key={project.id} title={project.title} value={project.id} />;
+          return (
+            <Form.TagPicker.Item
+              key={project.id}
+              title={project.title}
+              value={project.id}
+            />
+          );
         })}
       </Form.TagPicker>
 
@@ -247,7 +290,13 @@ export function IssueForm({ draftValues }: IssueFormProps) {
             return null;
           }
 
-          return <Form.Dropdown.Item key={milestone.id} title={milestone.title} value={milestone.id} />;
+          return (
+            <Form.Dropdown.Item
+              key={milestone.id}
+              title={milestone.title}
+              value={milestone.id}
+            />
+          );
         })}
       </Form.Dropdown>
     </Form>
