@@ -1,6 +1,6 @@
 # Moneytree Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-11-27
 
 - Added authentication using email and password + OAuth 2.0 (PKCE) under the hood
 - Added commands to list credentials, accounts with balances and latest transactions
