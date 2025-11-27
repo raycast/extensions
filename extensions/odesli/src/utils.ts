@@ -1,5 +1,23 @@
+import { Clipboard, getSelectedText } from "@raycast/api";
 import { ConversionResult, SongInfo } from "./types";
 import { addToHistory } from "./storage";
+
+// Clipboard and selection helper
+export const getTextFromSelectionOrClipboard = async () => {
+  try {
+    const selected = await getSelectedText();
+
+    if (selected && selected.length > 0) {
+      return { text: selected, fromClipboard: false };
+    }
+
+    const clipboard = (await Clipboard.readText()) ?? "";
+    return { text: clipboard, fromClipboard: true };
+  } catch {
+    const fallback = (await Clipboard.readText().catch(() => "")) ?? "";
+    return { text: fallback, fromClipboard: true };
+  }
+};
 
 // Custom error classes
 export class SongNotFoundError extends Error {

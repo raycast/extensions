@@ -23,7 +23,7 @@
           "name": "url",
           "placeholder": "Song URL",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
