@@ -33,5 +33,16 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@raycast/eslint-config"
+    ]
+  },
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": false,
+    "tabWidth": 2
   }
 }

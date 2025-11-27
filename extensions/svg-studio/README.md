@@ -6,8 +6,6 @@ An advanced SVG playground right inside Raycast. Preview, edit, and export SVGs 
 
 **SVG Studio** transforms Raycast into a lightweight IDE for vector graphics. Whether you need to check an icon from your clipboard, tweak a color attribute, or export a high-resolution PNG for a presentation, SVG Studio handles it all with a native-like experience.
 
-*(Note: Replace `metadata/1.png` with your actual screenshot path if needed)*
-
 
 
 ## ✨ Features

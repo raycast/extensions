@@ -113,7 +113,6 @@ function generateHtml(svgCode: string): string {
         <div class="header-left">
             <button class="icon-btn" onclick="toggleSidebar()" title="Toggle Sidebar">◫</button>
             <span class="title">SVG Studio</span>
-            <span class="author-info">WeChat: JaffryGao</span>
         </div>
         <div class="header-right">
             <button onclick="toggleTheme()" id="themeBtn">🌗 Dark Mode</button>
