@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [AI Updates] - {PR_MERGE_DATE}
+## [AI Updates] - 2025-11-27
 
  - Extract AI instructions from package.json into dedicated `ai.yaml` file
  - Fix and clarify AI eval criteria wording, and improve the instructions for some edge cases
