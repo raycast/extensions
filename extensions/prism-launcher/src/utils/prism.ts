@@ -13,15 +13,27 @@ export const isMac = process.platform === "darwin";
  * Get the PrismLauncher installation path dynamically
  */
 export async function getPrismLauncherPath(): Promise<string | null> {
-  const { path: installPath, bundleId } = getPreferences("installPath");
+  const { path: installPath, bundleId, name } = getPreferences("installPath");
   const executableName = path.basename(installPath);
+
+  if (!(await fs.pathExists(installPath))) return null;
+
+  // Workaround for Windows: appPicker preference does not return full path on Windows, looking for common path for now
+  const commonWindowsPrismPath = path.join(
+    `${process.env.HOME}`,
+    "AppData",
+    "Local",
+    "Programs",
+    "PrismLauncher",
+    "prismlauncher.exe",
+  );
+
+  if (isWin && name === "Prism Launcher" && (await fs.exists(commonWindowsPrismPath))) return commonWindowsPrismPath;
 
   // Checks to verify it's actually PrismLauncher
   if (isMac && bundleId !== "org.prismlauncher.PrismLauncher") return null;
 
-  if (isWin && executableName.toLowerCase() !== "prismlauncher.exe") return null;
-
-  if (!(await fs.pathExists(installPath))) return null;
+  if (isWin && executableName.toLowerCase() !== "prismlauncher.exe" && name === "Prism Launcher") return null;
 
   return installPath;
 }
@@ -40,11 +52,9 @@ export async function getInstancesPath(): Promise<string | null> {
  * Check if PrismLauncher is installed
  */
 export async function isPrismLauncherInstalled(): Promise<boolean> {
-  const prismLauncherPath = await getPrismLauncherPath();
-  const instancesPath = await getInstancesPath();
+  const [prismLauncherPath, instancesPath] = await Promise.all([getPrismLauncherPath(), getInstancesPath()]);
 
-  const isInstalled = prismLauncherPath !== null && instancesPath !== null;
-  return isInstalled;
+  return prismLauncherPath !== null && instancesPath !== null;
 }
 
 /**

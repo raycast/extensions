@@ -213,7 +213,7 @@
 /extensions/browser-bookmarks                                       @thomaslombart @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish @theherk @zhsks311 @daniel-nagy @gewoonseba @ridemountainpig
 /extensions/browser-history                                         @crisboarna @TKDKid1000 @MikuGeek @ridemountainpig
 /extensions/browser-tabs                                            @koinzhang
-/extensions/browsers-profiles                                       @skydiver @kytta @emilshr
+/extensions/browsers-profiles                                       @skydiver @kytta @emilshr @chingweih
 /extensions/brreg                                                   @holene @holene
 /extensions/bttv-emote                                              @Aayush9029
 /extensions/buddy                                                   @lamalamaMark
@@ -486,7 +486,7 @@
 /extensions/devutils                                                @vietanhlehuu
 /extensions/dex-screener                                            @wp-lai
 /extensions/dexcom-reader                                           @jmedina21
-/extensions/dia                                                     @tleo19
+/extensions/dia                                                     @tleo19 @daat21
 /extensions/dia-skills                                              @Visual-Studio-Coder @pernielsentikaer
 /extensions/dice-and-coin                                           @yonbergman
 /extensions/dice-tiles                                              @Jumitti @pernielsentikaer
@@ -574,7 +574,7 @@
 /extensions/edgestore-raycast                                       @perfectbase
 /extensions/ekstraklasa                                             @szarbartosz
 /extensions/element                                                 @Aayush9029 @Visual-Studio-Coder
-/extensions/elevenlabs-tts                                          @lachiejames
+/extensions/elevenlabs-tts                                          @lachiejames @thierrygrimm
 /extensions/elgato-key-light                                        @thomaspaulmann @omarshahine
 /extensions/elixir                                                  @dinocosta
 /extensions/elm-search                                              @NeoVier
@@ -753,7 +753,7 @@
 /extensions/git-worktrees                                           @philstainer
 /extensions/gitee                                                   @koinzhang
 /extensions/gitfox                                                  @azlekov
-/extensions/github                                                  @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither @marcotf @qeude @nesl247 @xilopaint @antonengelhardt @bangerang @wottpal @LitoMore @d-mitrofanov-v @j3lte @jfkisafk @vlasischar @JavaLangRuntimeException @shyakadavis @sushichan044 @luarmr @nicolas-marien @ionTea @ridemountainpig @kud @MartinGonzalez
+/extensions/github                                                  @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither @marcotf @qeude @nesl247 @xilopaint @antonengelhardt @bangerang @wottpal @LitoMore @d-mitrofanov-v @j3lte @jfkisafk @vlasischar @JavaLangRuntimeException @shyakadavis @sushichan044 @luarmr @nicolas-marien @ionTea @ridemountainpig @kud @MartinGonzalez @brandonnly
 /extensions/github-cli-manual                                       @demartini
 /extensions/github-codespaces                                       @mkwng
 /extensions/github-copilot                                          @timrogers @pernielsentikaer @thomaspaulmann
@@ -994,6 +994,7 @@
 /extensions/json-format                                             @Destiner @Aayush9029 @devloos @lacherogwu @AlexIsMaking @jfkisafk @duranbe @m4l0n @cl1107 @andyfase @kricsleo
 /extensions/json-resume                                             @0xdhrv
 /extensions/json-to-go                                              @chyroc
+/extensions/json-to-toon-converter                                  @mshll
 /extensions/json2ts                                                 @gon250 @yusifaliyevpro
 /extensions/jsr                                                     @j3lte @LitoMore
 /extensions/jsrepo                                                  @ieedan
@@ -1553,6 +1554,7 @@
 /extensions/planetscale                                             @vimtor
 /extensions/planning-center                                         @caleb531
 /extensions/planning-center-api-docs                                @teharmond
+/extensions/planwell                                                @cucumbers2blue
 /extensions/plausible-analytics                                     @thebrokenfinger @xmok
 /extensions/playback-duration-calculator                            @nathanwijaya
 /extensions/playnite-launcher                                       @bennett-sh
@@ -2204,7 +2206,7 @@
 /extensions/tuya-smart                                              @AndresMorelos
 /extensions/tv2---denmark                                           @mSarheed
 /extensions/tw-colorsearch                                          @magicjaqk @ridemountainpig @sebdanielsson
-/extensions/twenty                                                  @Nabhag8848 @chrisdadev13 @xmok
+/extensions/twenty                                                  @Nabhag8848 @chrisdadev13 @xmok @0xdhrv
 /extensions/twingate                                                @guyscher
 /extensions/twitch                                                  @dieserRobin @Aayush9029 @suth @pernielsentikaer @MiracleXYZ @Sheraff @TakenMC
 /extensions/twitch-chat                                             @Aayush9029

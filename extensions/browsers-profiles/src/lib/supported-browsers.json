@@ -55,6 +55,13 @@
       "title": "Microsoft Edge Canary",
       "path": "/Library/Application Support/Microsoft Edge Canary",
       "icon": "edge-canary.png"
+    },
+    {
+      "app": "Helium",
+      "type": "CHROMIUM",
+      "title": "Helium",
+      "path": "/Library/Application Support/net.imput.helium",
+      "icon": "helium.png"
     }
   ],
   "firefox": [

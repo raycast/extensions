@@ -1,5 +1,10 @@
 # Dust.tt Changelog
 
+## [Fixes] - 2025-11-27
+
+- Tighten auth flow for people with multiple accounts
+- Solved a bug where people would log out but being unable to re-log in on the same account
+
 ## [Fixes] - 2025-10-14
 
 - Move gpt4 and claude3 defaults to gpt5 and claude4
