@@ -1,4 +1,4 @@
-import { ReactNode } from "@raycast/api";
+import { ReactNode } from "react";
 
 export interface SearchResult<T> {
   readonly isLoading: boolean;
