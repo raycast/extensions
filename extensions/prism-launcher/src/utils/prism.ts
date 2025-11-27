@@ -9,19 +9,6 @@ import { getPreferences } from "./preferences";
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
 
-fs.readFileSync(
-  path.join(
-    `${process.env.HOME}`,
-    "AppData",
-    "Local",
-    "Packages",
-    "Microsoft.WindowsTerminal_8wekyb3d8bbwe",
-    "LocalState",
-    "settings.json",
-  ),
-  "utf8",
-);
-
 export async function getPrismLauncherPath(): Promise<string | null> {
   const { path: installPath, bundleId, name } = getPreferences("installPath");
 
