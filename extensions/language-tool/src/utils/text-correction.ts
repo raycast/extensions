@@ -1,14 +1,14 @@
 import type { CheckTextResponse } from "../types";
 
 /**
- * Calcula o texto corrigido aplicando as sugestões especificadas
+ * Calculates the corrected text by applying specified suggestions
  *
- * Função pura - pode ser usada em qualquer contexto (hooks, comandos async, etc)
+ * Pure function - can be used in any context (hooks, async commands, etc)
  *
- * @param textChecked - Texto original
- * @param result - Resposta da API com os matches
- * @param appliedIndexes - Set de índices das sugestões a aplicar
- * @returns Texto com correções aplicadas
+ * @param textChecked - Original text
+ * @param result - API response with matches
+ * @param appliedIndexes - Set of suggestion indices to apply
+ * @returns Text with applied corrections
  */
 export function calculateCorrectedText(
   textChecked: string,
