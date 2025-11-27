@@ -9,7 +9,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   const urlArg = props.arguments.url?.trim();
   if (urlArg && urlArg.length > 0) {
     text = urlArg;
-    fromClipboard = true; // Treat argument as clipboard (copy behavior)
+    fromClipboard = false; // Paste behavior for URL arguments
   } else {
     // Fall back to selection or clipboard
     const result = await getTextFromSelectionOrClipboard();
