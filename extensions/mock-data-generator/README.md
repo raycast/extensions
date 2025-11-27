@@ -2,7 +2,7 @@
 
 > Generate production-ready mock data for Java and Python instantly with customizable fields and templates.
 
-![Extension Demo](metadata/generate-mock-data-demo.gif)
+![Extension Demo](images/generate-mock-data-demo.gif)
 
 ## ✨ Features
 
@@ -59,11 +59,11 @@ Install from the [Raycast Store](https://raycast.com/kiing-dom/mock-data-generat
 
 | Form View | Generated Code |
 |-----------|----------------|
-| ![Initial Form](metadata/initial-form.png) | ![Generated Code](metadata/mock-data-example.png) |
+| ![Initial Form](images/initial-form.png) | ![Generated Code](images/mock-data-example.png) |
 
-![Language Selection](metadata/form-language-select.png)
+![Language Selection](images/form-language-select.png)
 
-![Field Management](metadata/form%20fields.png)
+![Field Management](images/form%20fields.png)
 
 ### Keyboard Shortcuts
 
