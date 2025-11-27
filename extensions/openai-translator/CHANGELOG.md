@@ -1,5 +1,9 @@
 # OpenAI Translator Changelog
 
+## [Update Raycast AI Model] - {PR_MERGE_DATE}
+
+- Update Raycast AI Model to OpenAI_GPT-4.1
+
 ## [Added Recent Translate Language] - 2024-10-30
 
 - Added the recent translation languages to the language dropdown list.
