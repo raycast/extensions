@@ -1,6 +1,6 @@
 # Raycast ElevenLabs TTS Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2025-11-27
 
 ### Added
 - Dynamic chunk scheduling based on text length for better short text support
