@@ -24,70 +24,70 @@ interface Preferences {
 }
 
 export interface CheckTextOptions {
-  /** O texto a ser verificado (obrigatório se 'data' não for fornecido) */
+  /** The text to be checked (required if 'data' is not provided) */
   text?: string;
-  /** JSON com markup (alternativa a 'text') */
+  /** JSON with markup (alternative to 'text') */
   data?: string;
-  /** Código do idioma (ex: 'en-US', 'pt-BR', 'auto') */
+  /** Language code (e.g., 'en-US', 'pt-BR', 'auto') */
   language: string;
-  /** Lista separada por vírgula de dicionários a incluir */
+  /** Comma-separated list of dictionaries to include */
   dicts?: string;
-  /** Código do idioma nativo para verificações de falsos cognatos */
+  /** Native language code for false-friend checks */
   motherTongue?: string;
-  /** Variantes preferidas quando usar language=auto (ex: 'en-GB,de-AT') */
+  /** Preferred variants when using language=auto (e.g., 'en-GB,de-AT') */
   preferredVariants?: string;
-  /** IDs de regras a serem habilitadas, separadas por vírgula */
+  /** Rule IDs to enable, comma-separated */
   enabledRules?: string;
-  /** IDs de regras a serem desabilitadas, separadas por vírgula */
+  /** Rule IDs to disable, comma-separated */
   disabledRules?: string;
-  /** IDs de categorias a serem habilitadas, separadas por vírgula */
+  /** Category IDs to enable, comma-separated */
   enabledCategories?: string;
-  /** IDs de categorias a serem desabilitadas, separadas por vírgula */
+  /** Category IDs to disable, comma-separated */
   disabledCategories?: string;
-  /** Se true, apenas regras/categorias especificadas em enabledRules/enabledCategories são ativadas */
+  /** If true, only rules/categories listed in enabledRules/enabledCategories are activated */
   enabledOnly?: boolean;
-  /** Nível de verificação: '' (padrão), 'default' ou 'picky' (mais rigoroso) */
+  /** Checking level: '' (default), 'default' or 'picky' (stricter) */
   level?: "" | "default" | "picky";
-  /** Se true, habilita regras ocultas na API */
+  /** If true, enables hidden rules in the API */
   enableHiddenRules?: boolean;
-  /** Idiomas que não devem ser processados (separados por vírgula) */
+  /** Languages that should not be processed (comma-separated) */
   noopLanguages?: string;
-  /** Configuração de testes A/B para recursos experimentais */
+  /** A/B testing configuration for experimental features */
   abtest?: string;
-  /** Modo da API: '', 'allButTextLevelOnly' ou 'textLevelOnly' */
+  /** API mode: '', 'allButTextLevelOnly', or 'textLevelOnly' */
   mode?: "" | "allButTextLevelOnly" | "textLevelOnly";
-  /** Se true, permite resultados incompletos */
+  /** If true, allows incomplete results */
   allowIncompleteResults?: boolean;
-  /** User agent para requisições da API */
+  /** User agent for API requests */
   useragent?: string;
 }
 
 /**
- * Serviço centralizado para chamadas à API LanguageTool
- * Automaticamente inclui credenciais Premium se configuradas nas preferências
+ * Centralized service for LanguageTool API calls
+ * Automatically includes Premium credentials if configured in preferences
  */
 export async function checkTextWithAPI(options: CheckTextOptions): Promise<CheckTextResponse> {
   const preferences = getPreferenceValues<Preferences>();
 
-  // Monta os parâmetros base
+  // Build base parameters
   const params: Record<string, string> = {
     language: options.language,
   };
 
-  // Texto ou data (um deles é obrigatório)
+  // Text or data (one of them is required)
   if (options.text && !isEmpty(options.text)) {
     params.text = options.text;
   } else if (options.data) {
     params.data = options.data;
   }
 
-  // Adiciona credenciais Premium se existirem
+  // Add Premium credentials if available
   if (preferences.username && preferences.apiKey) {
     params.username = preferences.username;
     params.apiKey = preferences.apiKey;
   }
 
-  // Adiciona todas as opções avançadas se fornecidas
+  // Add all advanced options if provided
   if (options.dicts && !isEmpty(options.dicts)) {
     params.dicts = options.dicts;
   }
@@ -153,7 +153,7 @@ export async function checkTextWithAPI(options: CheckTextOptions): Promise<Check
 }
 
 /**
- * Verifica se o usuário tem credenciais Premium configuradas
+ * Checks whether the user has Premium credentials configured
  */
 export function hasPremiumAccess(): boolean {
   const preferences = getPreferenceValues<Preferences>();
