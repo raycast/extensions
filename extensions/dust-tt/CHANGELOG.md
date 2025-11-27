@@ -1,6 +1,6 @@
 # Dust.tt Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-11-27
 
 - Tighten auth flow for people with multiple accounts
 - Solved a bug where people would log out but being unable to re-log in on the same account
