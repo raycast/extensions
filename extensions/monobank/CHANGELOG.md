@@ -1,6 +1,6 @@
 # monobank Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-11-27
 
 - Added Windows support
 
