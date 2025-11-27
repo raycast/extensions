@@ -35,4 +35,4 @@ Analyze disk space usage and identify large files and folders in your home direc
 
 ## Permissions
 
-This extension requires Full Disk Access to scan your home directory. Without this permission, the scan will fail with an error message.
+This extension requires Full Disk Access to scan your home directory. Without this permission, the scan will not show full usage or fail with an error message.
