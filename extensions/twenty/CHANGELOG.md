@@ -1,6 +1,6 @@
 # Twenty Changelog
 
-## [Fix Bug] - {PR_MERGE_DATE}
+## [Fix Bug] - 2025-11-27
 
 - Fixed issue when adding API Key, it would not work
 - Added Windows platform support
