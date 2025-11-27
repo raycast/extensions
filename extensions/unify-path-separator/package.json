@@ -10,8 +10,7 @@
       "name": "unify-path-separators-in-clipboard",
       "title": "Unify Path Separators in Clipboard",
       "description": "Convert all path separators from slash to backslash",
-      "mode": "view",
-      "subtitle": "Overwrites current clipboard entry"
+      "mode": "view"
     }
   ],
   "dependencies": {
