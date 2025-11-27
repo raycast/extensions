@@ -54,7 +54,7 @@ export function ResultActions({
         </ActionPanel.Section>
       )}
 
-      {/* Ações de Texto */}
+      {/* Text Actions */}
       <ActionPanel.Section title="Text Actions">
         <Action title="Copy Corrected Text" icon={Icon.Clipboard} onAction={copyToClipboard} />
         {matchesCount > 0 && <Action title="Paste Corrected Text" icon={Icon.Text} onAction={pasteText} />}
