@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mock-data-generator",
+  "title": "Mock Data Generator",
+  "version": "1.0.1",
+  "description": "Generate mock data for Java and Python. Quickly create POJO classes, Records, Builder patterns, Dataclasses, and Pydantic models with customizable fields and quick templates.",
+  "icon": "extension_icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-mock-data",
+      "title": "Generate Mock Data",
+      "description": "Generate mock data in multiple languages and testing frameworks. Customize fields and instantly copy the output.",
+      "mode": "view",
+      "subtitle": "Mock Data"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "react-icons": "^5.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "kiing-dom",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ]
+}
