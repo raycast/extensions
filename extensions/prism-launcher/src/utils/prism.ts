@@ -66,8 +66,10 @@ export async function getInstanceVersions(instanceId: string): Promise<Accessori
   const instancesPath = await getInstancesPath();
   if (!instancesPath) return [];
 
-  const versionsFilePath = path.join(instancesPath, instanceId, "mmc-pack.json");
-  const mmcPackContent = await fs.readFile(versionsFilePath, "utf-8");
+  const mmcpack = path.join(instancesPath, instanceId, "mmc-pack.json");
+  if (!(await fs.pathExists(mmcpack))) return [];
+
+  const mmcPackContent = await fs.readFile(mmcpack, "utf-8");
   try {
     const { components }: MMCPack = JSON.parse(mmcPackContent);
 
