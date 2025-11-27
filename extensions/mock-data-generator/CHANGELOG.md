@@ -2,7 +2,7 @@
 
 All notable changes to the Mock Data Generator extension will be documented in this file.
 
-## [1.0.0] - 2025-11-27
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### 🎉 Initial Release
 
