@@ -24,10 +24,10 @@
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "20.8.10",
     "@types/react": "^19.0.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.22.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
   },
