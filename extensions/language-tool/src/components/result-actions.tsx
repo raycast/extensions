@@ -60,7 +60,7 @@ export function ResultActions({
         {matchesCount > 0 && <Action title="Paste Corrected Text" icon={Icon.Text} onAction={pasteText} />}
       </ActionPanel.Section>
 
-      {/* Ações de Correção */}
+      {/* Correction Actions */}
       {matchesCount > 0 && (
         <ActionPanel.Section title="Corrections">
           <Action
