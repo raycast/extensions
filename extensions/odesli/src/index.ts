@@ -1,103 +1,16 @@
-import { Clipboard, getSelectedText, showToast, showHUD, Toast } from "@raycast/api";
-import fetch from "node-fetch";
-import { addToHistory } from "./storage";
+import { Clipboard, showToast, showHUD, Toast, LaunchProps } from "@raycast/api";
+import { getTextFromSelectionOrClipboard, convertToOdesliLink, SongNotFoundError } from "./utils";
 
-interface Entity {
-  id: string;
-  type: string;
-  title?: string;
-  artistName?: string;
-  thumbnailUrl?: string;
-  apiProvider: string;
-  platforms: string[];
-}
+export default async function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  let text = undefined;
 
-interface SongInfo {
-  entityUniqueId: string;
-  pageUrl: string;
-  entitiesByUniqueId?: Record<string, Entity>;
-}
-
-class SongNotFoundError extends Error {
-  constructor() {
-    super("Song not found.");
+  const textArg = props.arguments.url?.trim();
+  if (textArg && textArg.length > 0) {
+    text = textArg;
+  } else {
+    const result = await getTextFromSelectionOrClipboard();
+    text = result.text;
   }
-}
-
-class UnknownError extends Error {
-  constructor() {
-    super("Unknown error.");
-  }
-}
-
-const getTextFromSelectionOrClipboard = async () => {
-  try {
-    const selectedText = await getSelectedText();
-
-    return {
-      text: selectedText,
-      fromClipboard: false,
-    };
-  } catch {
-    const clipboardText = await Clipboard.read();
-
-    return {
-      text: clipboardText.text,
-      fromClipboard: true,
-    };
-  }
-};
-
-const convertToOdesliLink = async (text: string) => {
-  const songInfo = await fetch(`https://api.song.link/v1-alpha.1/links?url=${encodeURIComponent(text)}`);
-
-  if (!songInfo.ok && songInfo.status === 404) {
-    throw new SongNotFoundError();
-  }
-
-  if (!songInfo.ok) {
-    throw new UnknownError();
-  }
-
-  const songInfoJson = (await songInfo.json()) as SongInfo;
-
-  // Extract song details
-  let title: string | undefined;
-  let artist: string | undefined;
-  let thumbnailUrl: string | undefined;
-
-  if (songInfoJson.entitiesByUniqueId && songInfoJson.entityUniqueId) {
-    const entity = songInfoJson.entitiesByUniqueId[songInfoJson.entityUniqueId];
-    if (entity) {
-      title = entity.title;
-      artist = entity.artistName;
-      thumbnailUrl = entity.thumbnailUrl;
-    }
-  }
-
-  // Save to history
-  try {
-    await addToHistory({
-      originalUrl: text,
-      odesliUrl: songInfoJson.pageUrl,
-      title,
-      artist,
-      thumbnailUrl,
-    });
-  } catch (error) {
-    // Don't fail the conversion if history save fails
-    console.error("Failed to save to history:", error);
-  }
-
-  return {
-    url: songInfoJson.pageUrl,
-    title,
-    artist,
-  };
-};
-
-export default async function main() {
-  const { text, fromClipboard } = await getTextFromSelectionOrClipboard();
 
   if (!text) {
     await showToast({
@@ -120,7 +33,7 @@ export default async function main() {
       hudMessage = result.title;
     }
 
-    if (fromClipboard) {
+    if (text) {
       await Clipboard.copy(result.url);
       await showHUD(`✓ ${hudMessage}`);
       return;

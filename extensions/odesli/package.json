@@ -17,7 +17,15 @@
       "name": "index",
       "title": "Copy Odesli Link",
       "description": "Convert currently copied song/album link to Odesli link.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Song URL (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "history",
@@ -28,13 +36,13 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.7",
-    "node-fetch": "^3.3.2"
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "24.10.1",
-    "@types/react": "19.2.7",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "eslint": "^9.39.1",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
