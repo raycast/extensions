@@ -4,13 +4,7 @@ export type Instance = {
   icon?: string;
   favorite?: boolean;
   hasServers?: boolean;
-  accessories: Accessories;
 };
-
-export type Accessories = Array<{
-  text?: string;
-  icon?: string;
-}>;
 
 export type Server = {
   name: string;
@@ -21,11 +15,4 @@ export type Server = {
   instanceName: string;
   favorite?: boolean;
   secret?: string;
-};
-
-export type MMCPack = {
-  components: Array<{
-    cachedName: string;
-    version: string;
-  }>;
 };

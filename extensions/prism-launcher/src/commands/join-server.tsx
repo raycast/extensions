@@ -179,10 +179,7 @@ export default function JoinServer() {
           <List.Item
             key={`instance-${index}`}
             title={instance.name}
-            accessories={[
-              ...instance.accessories,
-              ...(instance.favorite ? [{ icon: Icon.Star, tooltip: "Favorited" }] : []),
-            ]}
+            accessories={[...(instance.favorite ? [{ icon: Icon.Star, tooltip: "Favorited" }] : [])]}
             icon={{
               source: instance.icon ?? path.join(environment.assetsPath, "instance-icon.png"),
             }}

@@ -3,7 +3,6 @@
 ## [Fix] - {PR_MERGE_DATE}
 
 - Actual temp fix for windows
-- Added display of versions for an instance
 - Added loading state to prevent flashing of Prism Launcher not installed
 
 ## [Fix] - 2025-11-27
