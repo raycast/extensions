@@ -5,7 +5,10 @@
   "description": "Companion extension for PlanWell - the markdown-native teacher planning app. View today's classes, upcoming events, and todos. Requires a PlanWell vault (planwellmd.com).",
   "icon": "command-icon.png",
   "author": "Raynold",
-  "categories": ["Productivity", "Applications"],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -43,8 +46,14 @@
       "description": "Default view for Today's Classes",
       "default": "all",
       "data": [
-        { "title": "All Periods", "value": "all" },
-        { "title": "Classes Only", "value": "classes" }
+        {
+          "title": "All Periods",
+          "value": "all"
+        },
+        {
+          "title": "Classes Only",
+          "value": "classes"
+        }
       ]
     },
     {
@@ -88,5 +97,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
