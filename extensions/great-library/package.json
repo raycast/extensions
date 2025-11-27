@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "great-library",
+  "title": "Great Library",
+  "description": "Ask anything in your Great Library.",
+  "icon": "extension_icon4.png",
+  "author": "wdchen",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upload-files",
+      "title": "Upload Files",
+      "description": "Upload files to Great Library",
+      "mode": "view"
+    },
+    {
+      "name": "list-files",
+      "title": "List Files",
+      "description": "What are stored in Great Library",
+      "mode": "view"
+    }
+  ,
+    {
+      "name": "quick-note",
+      "title": "Quick Note",
+      "description": "Jot it down in the Great Library",
+      "mode": "no-view"
+    }
+      ],
+  "tools": [
+    {
+      "name": "ask",
+      "title": "Ask the Library",
+      "description": "Answer questions about the documents stored in the Great Library."
+    },
+    {
+      "name": "note",
+      "title": "Note",
+      "description": "Take notes and upload to Great Library."
+    }
+  ],
+  "dependencies": {
+    "@google/genai": "^1.29.0",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0",
+    "mime-types": "^3.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "preferences": [
+    {
+      "name": "api-key",
+      "title": "Google AI API Key",
+      "type": "password",
+      "description": "Generate one at https://aistudio.google.com/api-keys and paste it here.",
+      "required": true
+    },
+    {
+      "name": "store-display-name",
+      "title": "File Search Store Display Name",
+      "type": "textfield",
+      "placeholder": "Great Library",
+      "default": "Great Library",
+      "description": "Shown in Gemini File Search console. Used only when the store is created for the first time.",
+      "required": false
+    }
+  ],
+  "ai": {
+    "instructions": "When the user asks about the Great Library or their indexed documents, call the ask tool to respond. Reference citations when they are available."
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
