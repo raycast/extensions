@@ -20,7 +20,6 @@ const API_HEADERS = {
   Authorization: `Bearer ${api_key}`,
   "Content-Type": "application/json",
 };
-export const LIMIT = 25;
 
 const makeRequest = async <T>(endpoint: string, options?: RequestInit) => {
   const response = await fetch(API_URL + endpoint, {

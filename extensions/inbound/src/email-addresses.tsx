@@ -80,12 +80,13 @@ export default function EmailAddresses({ domain }: { domain: DomainWithStats }) 
             key={emailAddress.id}
             icon={Icon.AtSymbol}
             title={emailAddress.address.split("@")[0]}
-            subtitle={emailAddress.domain.name}
+            subtitle={`@${emailAddress.domain.name}`}
             accessories={[
               { text: emailAddress.routing.type === "none" ? "Store in Inbound" : emailAddress.routing.type },
             ]}
             actions={
               <ActionPanel>
+                <Action.CopyToClipboard content={emailAddress.address} />
                 <Action.Push
                   icon={Icon.PlusCircle}
                   title="Add Email Address"

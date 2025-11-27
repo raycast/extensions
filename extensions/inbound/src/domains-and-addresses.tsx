@@ -12,7 +12,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, getFavicon, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { inbound } from "./inbound";
 import { DomainWithStats, PostDomainsRequest } from "./types";
 import EmailAddresses from "./email-addresses";
@@ -77,7 +77,7 @@ export default function DomainsAndAddresses() {
         domains.map((domain) => (
           <List.Item
             key={domain.id}
-            icon={getFavicon(`https://${domain.domain}`, { fallback: Icon.Globe })}
+            icon={{ source: Icon.Dot, tintColor: domain.status === "verified" ? Color.Green : Color.Red }}
             title={domain.domain}
             subtitle={`API ID: ${domain.id}`}
             accessories={[
