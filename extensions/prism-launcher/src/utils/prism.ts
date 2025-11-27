@@ -3,8 +3,9 @@ import * as fs from "fs-extra";
 import * as async from "modern-async";
 import * as path from "path";
 import nbt from "prismarine-nbt";
-import type { Instance, Server } from "../types";
+import type { Accessories, Instance, MMCPack, Server } from "../types";
 import { getPreferences } from "./preferences";
+import { environment } from "@raycast/api";
 
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
@@ -14,9 +15,6 @@ export const isMac = process.platform === "darwin";
  */
 export async function getPrismLauncherPath(): Promise<string | null> {
   const { path: installPath, bundleId, name } = getPreferences("installPath");
-  const executableName = path.basename(installPath);
-
-  if (!(await fs.pathExists(installPath))) return null;
 
   // Workaround for Windows: appPicker preference does not return full path on Windows, looking for common path for now
   const commonWindowsPrismPath = path.join(
@@ -29,6 +27,10 @@ export async function getPrismLauncherPath(): Promise<string | null> {
   );
 
   if (isWin && name === "Prism Launcher" && (await fs.exists(commonWindowsPrismPath))) return commonWindowsPrismPath;
+
+  const executableName = path.basename(installPath);
+
+  if (!(await fs.pathExists(installPath))) return null;
 
   // Checks to verify it's actually PrismLauncher
   if (isMac && bundleId !== "org.prismlauncher.PrismLauncher") return null;
@@ -55,6 +57,32 @@ export async function isPrismLauncherInstalled(): Promise<boolean> {
   const [prismLauncherPath, instancesPath] = await Promise.all([getPrismLauncherPath(), getInstancesPath()]);
 
   return prismLauncherPath !== null && instancesPath !== null;
+}
+
+/**
+ *  Get the instance versions
+ */
+export async function getInstanceVersions(instanceId: string): Promise<Accessories> {
+  const instancesPath = await getInstancesPath();
+  if (!instancesPath) return [];
+
+  const versionsFilePath = path.join(instancesPath, instanceId, "mmc-pack.json");
+  const mmcPackContent = await fs.readFile(versionsFilePath, "utf-8");
+  try {
+    const { components }: MMCPack = JSON.parse(mmcPackContent);
+
+    const mcVersion = components.find((comp) => comp.cachedName === "Minecraft")?.version || "Unknown";
+    const forgeVersion = components.find((comp) => comp.cachedName === "Forge")?.version || null;
+    const fabricVersion = components.find((comp) => comp.cachedName === "Fabric Loader")?.version || null;
+
+    return [
+      { text: mcVersion, icon: path.join(environment.assetsPath, "minecraft.png") },
+      forgeVersion ? { text: forgeVersion, icon: path.join(environment.assetsPath, "forge.png") } : {},
+      fabricVersion ? { text: fabricVersion, icon: path.join(environment.assetsPath, "fabric.png") } : {},
+    ];
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -96,6 +124,7 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
     const instanceFolder = path.join(instancesPath, instanceId);
     const instanceCfgStr = (await fs.readFile(path.join(instanceFolder, "instance.cfg"))).toString("utf-8");
     const instanceCfg = parser.parse(instanceCfgStr);
+    const accessories = await getInstanceVersions(instanceId);
 
     const paths = await async.asyncMap(["minecraft", ".minecraft"], async (subfolder: string) =>
       path.join(instanceFolder, subfolder, "icon.png"),
@@ -115,7 +144,7 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
       id: instanceId,
       icon: iconPath,
       favorite: favoriteIds.includes(instanceId),
-
+      accessories,
       ...(onlyWithServers ? { hasServers } : {}),
     };
   });
