@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-11-27
 - Temporary fix for Windows
 - Optimisation
 
