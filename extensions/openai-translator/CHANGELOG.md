@@ -1,6 +1,6 @@
 # OpenAI Translator Changelog
 
-## [Update Raycast AI Model] - {PR_MERGE_DATE}
+## [Update Raycast AI Model] - 2025-11-27
 
 - Update Raycast AI Model to OpenAI_GPT-4.1
 
