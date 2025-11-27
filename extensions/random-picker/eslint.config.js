@@ -1,6 +1,6 @@
-require("@rushstack/eslint-patch/modern-module-resolution");
+const { defineConfig } = require("eslint/config");
+const raycastConfig = require("@raycast/eslint-config");
 
-module.exports = {
-  root: true,
-  extends: ["@raycast"],
-};
+module.exports = defineConfig([
+  ...raycastConfig,
+]);
