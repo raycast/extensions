@@ -6,8 +6,13 @@ import { calculateCorrectedText } from "../utils/text-correction";
 /**
  * Hook to manage text corrections
  */
-export function useTextCorrections(textChecked: string, result: CheckTextResponse) {
-  const [appliedSuggestions, setAppliedSuggestions] = useState<Set<number>>(new Set());
+export function useTextCorrections(
+  textChecked: string,
+  result: CheckTextResponse,
+) {
+  const [appliedSuggestions, setAppliedSuggestions] = useState<Set<number>>(
+    new Set(),
+  );
 
   // Current corrected text
   const correctedText = useMemo(() => {
@@ -45,7 +50,11 @@ export function useTextCorrections(textChecked: string, result: CheckTextRespons
   // Apply all and paste
   const applyAllAndPaste = useCallback(async () => {
     const allIndexes = new Set(result.matches?.map((_, index) => index) || []);
-    const fullyCorrectedText = calculateCorrectedText(textChecked, result, allIndexes);
+    const fullyCorrectedText = calculateCorrectedText(
+      textChecked,
+      result,
+      allIndexes,
+    );
 
     setAppliedSuggestions(allIndexes);
     await Clipboard.paste(fullyCorrectedText);

@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
 import type { CheckTextResponse } from "../types";
 
-interface ResultActionsProps {
+type ResultActionsProps = {
   result: CheckTextResponse;
   appliedSuggestions: Set<number>;
   applyAllAndPaste: () => Promise<void>;
@@ -10,7 +10,7 @@ interface ResultActionsProps {
   applyAllSuggestions: () => Promise<void>;
   resetCorrections: () => void;
   applySuggestion: (index: number) => Promise<void>;
-}
+};
 
 export function ResultActions({
   result,
@@ -56,8 +56,18 @@ export function ResultActions({
 
       {/* Text Actions */}
       <ActionPanel.Section title="Text Actions">
-        <Action title="Copy Corrected Text" icon={Icon.Clipboard} onAction={copyToClipboard} />
-        {matchesCount > 0 && <Action title="Paste Corrected Text" icon={Icon.Text} onAction={pasteText} />}
+        <Action
+          title="Copy Corrected Text"
+          icon={Icon.Clipboard}
+          onAction={copyToClipboard}
+        />
+        {matchesCount > 0 && (
+          <Action
+            title="Paste Corrected Text"
+            icon={Icon.Text}
+            onAction={pasteText}
+          />
+        )}
       </ActionPanel.Section>
 
       {/* Correction Actions */}
@@ -92,7 +102,10 @@ export function ResultActions({
           if (appliedSuggestions.has(index)) return null;
 
           return (
-            <ActionPanel.Section key={index} title={`Fix: ${match.shortMessage || match.message}`}>
+            <ActionPanel.Section
+              key={index}
+              title={`Fix: ${match.shortMessage || match.message}`}
+            >
               <Action
                 title={`Apply: "${match.replacements[0]?.value}"`}
                 icon={Icon.Check}

@@ -4,10 +4,10 @@ import { useTextCorrections } from "../hooks/use-text-corrections";
 import { ResultMetadata } from "./result-metadata";
 import { ResultActions } from "./result-actions";
 
-interface CheckTextResultProps {
+type CheckTextResultProps = {
   result: CheckTextResponse;
   textChecked: string;
-}
+};
 
 export function CheckTextResult({ result, textChecked }: CheckTextResultProps) {
   // Hook manages all correction logic
@@ -28,7 +28,12 @@ export function CheckTextResult({ result, textChecked }: CheckTextResultProps) {
     <Detail
       markdown={markdown}
       navigationTitle="Check Results"
-      metadata={<ResultMetadata result={result} appliedSuggestions={appliedSuggestions} />}
+      metadata={
+        <ResultMetadata
+          result={result}
+          appliedSuggestions={appliedSuggestions}
+        />
+      }
       actions={
         <ResultActions
           result={result}

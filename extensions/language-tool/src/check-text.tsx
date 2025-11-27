@@ -1,11 +1,23 @@
-import { ActionPanel, Action, Form, useNavigation, getPreferenceValues } from "@raycast/api";
-import { useFetch, useCachedState, useForm, FormValidation, useFrecencySorting } from "@raycast/utils";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  useNavigation,
+  getPreferenceValues,
+} from "@raycast/api";
+import {
+  useFetch,
+  useCachedState,
+  useForm,
+  FormValidation,
+  useFrecencySorting,
+} from "@raycast/utils";
 import type { Language } from "./types";
 import { CheckTextResult } from "./components";
 import { API_ENDPOINTS } from "./config/api";
 import { checkTextWithAPI } from "./services/languagetool-api";
 
-interface Preferences {
+type Preferences = {
   showAdvancedOptions?: boolean;
   motherTongue?: string;
   preferredVariants?: string;
@@ -21,9 +33,9 @@ interface Preferences {
   mode?: "" | "allButTextLevelOnly" | "textLevelOnly";
   allowIncompleteResults?: boolean;
   useragent?: "" | "standalone";
-}
+};
 
-interface FormValues {
+type FormValues = {
   language: string;
   text: string;
   // Advanced options (optional in form, but come from preferences)
@@ -41,22 +53,30 @@ interface FormValues {
   mode?: "" | "allButTextLevelOnly" | "textLevelOnly";
   allowIncompleteResults?: boolean;
   useragent?: "" | "standalone";
-}
+};
 
 export default function Command() {
   const { push } = useNavigation();
   const preferences = getPreferenceValues<Preferences>();
 
   // Persist selected language between executions
-  const [selectedLanguage, setSelectedLanguage] = useCachedState<string>("selected-language", "en-US");
+  const [selectedLanguage, setSelectedLanguage] = useCachedState<string>(
+    "selected-language",
+    "en-US",
+  );
 
   // Fetch languages with automatic cache
-  const { data: languages, isLoading: loadingLanguages } = useFetch<Language[]>(API_ENDPOINTS.LANGUAGES);
+  const { data: languages, isLoading: loadingLanguages } = useFetch<Language[]>(
+    API_ENDPOINTS.LANGUAGES,
+  );
 
   // Sort languages by frequency of use (most used appear first!)
-  const { data: sortedLanguages, visitItem } = useFrecencySorting(languages || [], {
-    key: (lang) => lang.longCode,
-  });
+  const { data: sortedLanguages, visitItem } = useFrecencySorting(
+    languages || [],
+    {
+      key: (lang) => lang.longCode,
+    },
+  );
 
   // Form with validation
   const { handleSubmit, itemProps, values } = useForm<FormValues>({
@@ -73,18 +93,23 @@ export default function Command() {
           language: values.language,
           // Advanced options: use form if filled, otherwise use preferences
           motherTongue: values.motherTongue || preferences.motherTongue,
-          preferredVariants: values.preferredVariants || preferences.preferredVariants,
+          preferredVariants:
+            values.preferredVariants || preferences.preferredVariants,
           level: values.level || preferences.level,
           enabledRules: values.enabledRules || preferences.enabledRules,
           disabledRules: values.disabledRules || preferences.disabledRules,
-          enabledCategories: values.enabledCategories || preferences.enabledCategories,
-          disabledCategories: values.disabledCategories || preferences.disabledCategories,
+          enabledCategories:
+            values.enabledCategories || preferences.enabledCategories,
+          disabledCategories:
+            values.disabledCategories || preferences.disabledCategories,
           enabledOnly: values.enabledOnly ?? preferences.enabledOnly,
-          enableHiddenRules: values.enableHiddenRules ?? preferences.enableHiddenRules,
+          enableHiddenRules:
+            values.enableHiddenRules ?? preferences.enableHiddenRules,
           noopLanguages: values.noopLanguages || preferences.noopLanguages,
           abtest: values.abtest || preferences.abtest,
           mode: values.mode || preferences.mode,
-          allowIncompleteResults: values.allowIncompleteResults ?? preferences.allowIncompleteResults,
+          allowIncompleteResults:
+            values.allowIncompleteResults ?? preferences.allowIncompleteResults,
           useragent: values.useragent || preferences.useragent,
         };
 
@@ -117,7 +142,7 @@ export default function Command() {
       disabledRules: preferences.disabledRules || "",
       enabledCategories: preferences.enabledCategories || "",
       disabledCategories: preferences.disabledCategories || "",
-      enabledOnly: preferences.enabledOnly || false,
+      enabledOnly: preferences.enabledOnly ?? false,
       enableHiddenRules: preferences.enableHiddenRules ?? true,
       noopLanguages: preferences.noopLanguages || "",
       abtest: preferences.abtest || "",
@@ -150,7 +175,11 @@ export default function Command() {
       >
         <Form.Dropdown.Item key="auto" value="auto" title="Auto" />
         {sortedLanguages.map((lang) => (
-          <Form.Dropdown.Item key={lang.longCode} value={lang.longCode} title={lang.name} />
+          <Form.Dropdown.Item
+            key={lang.longCode}
+            value={lang.longCode}
+            title={lang.name}
+          />
         ))}
       </Form.Dropdown>
 
@@ -172,7 +201,11 @@ export default function Command() {
             title="Check Level"
             info="Verification level: empty (default API behavior), 'default' (force standard mode), or 'picky' (stricter checking with additional rules for formal text)."
             value={values.level}
-            onChange={(newValue) => itemProps.level.onChange?.(newValue as "" | "default" | "picky" | undefined)}
+            onChange={(newValue) =>
+              itemProps.level.onChange?.(
+                newValue as "" | "default" | "picky" | undefined,
+              )
+            }
           >
             <Form.Dropdown.Item value="" title="--" />
             <Form.Dropdown.Item value="default" title="Default" />
@@ -253,11 +286,20 @@ export default function Command() {
             info="API mode: empty (default), 'allButTextLevelOnly', or 'textLevelOnly'."
             value={values.mode}
             onChange={(newValue) =>
-              itemProps.mode.onChange?.(newValue as "" | "allButTextLevelOnly" | "textLevelOnly" | undefined)
+              itemProps.mode.onChange?.(
+                newValue as
+                  | ""
+                  | "allButTextLevelOnly"
+                  | "textLevelOnly"
+                  | undefined,
+              )
             }
           >
             <Form.Dropdown.Item value="" title="--" />
-            <Form.Dropdown.Item value="allButTextLevelOnly" title="All But Text Level Only" />
+            <Form.Dropdown.Item
+              value="allButTextLevelOnly"
+              title="All But Text Level Only"
+            />
             <Form.Dropdown.Item value="textLevelOnly" title="Text Level Only" />
           </Form.Dropdown>
 
@@ -272,7 +314,11 @@ export default function Command() {
             title="User Agent"
             info="User agent configuration for API requests"
             value={values.useragent}
-            onChange={(newValue) => itemProps.useragent.onChange?.(newValue as "" | "standalone" | undefined)}
+            onChange={(newValue) =>
+              itemProps.useragent.onChange?.(
+                newValue as "" | "standalone" | undefined,
+              )
+            }
           >
             <Form.Dropdown.Item value="standalone" title="Standalone" />
             <Form.Dropdown.Item value="" title="--" />

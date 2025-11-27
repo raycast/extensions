@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from "../config/api";
 import type { CheckTextResponse } from "../types";
 import { isEmpty } from "../utils/string-utils";
 
-interface Preferences {
+type Preferences = {
   username?: string;
   apiKey?: string;
   showAdvancedOptions?: boolean;
@@ -21,9 +21,9 @@ interface Preferences {
   mode?: "" | "allButTextLevelOnly" | "textLevelOnly";
   allowIncompleteResults?: boolean;
   useragent?: string;
-}
+};
 
-export interface CheckTextOptions {
+export type CheckTextOptions = {
   /** The text to be checked (required if 'data' is not provided) */
   text?: string;
   /** JSON with markup (alternative to 'text') */
@@ -60,13 +60,15 @@ export interface CheckTextOptions {
   allowIncompleteResults?: boolean;
   /** User agent for API requests */
   useragent?: string;
-}
+};
 
 /**
  * Centralized service for LanguageTool API calls
  * Automatically includes Premium credentials if configured in preferences
  */
-export async function checkTextWithAPI(options: CheckTextOptions): Promise<CheckTextResponse> {
+export async function checkTextWithAPI(
+  options: CheckTextOptions,
+): Promise<CheckTextResponse> {
   const preferences = getPreferenceValues<Preferences>();
 
   // Build base parameters

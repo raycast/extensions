@@ -175,7 +175,14 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "required": ["message", "offset", "length", "replacements", "context", "sentence"],
+                    "required": [
+                      "message",
+                      "offset",
+                      "length",
+                      "replacements",
+                      "context",
+                      "sentence"
+                    ],
                     "properties": {
                       "message": {
                         "type": "string",

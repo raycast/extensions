@@ -29,8 +29,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/lucastaonline/raycast-language-tool.git
-cd raycast-language-tool
+git clone https://github.com/raycast/extensions.git
+cd extensions/extensions/language-tool
 
 # Install dependencies
 npm install
@@ -241,15 +241,14 @@ MIT License - see [LICENSE](./LICENSE) file for details.
 
 Found a bug or have a suggestion?
 
-- 🐛 [Report an issue](https://github.com/lucastaonline/raycast-language-tool/issues)
-- 💬 [Discussions](https://github.com/lucastaonline/raycast-language-tool/discussions)
-- 📧 Contact: [your-email@example.com]
+- 🐛 [Report an issue](https://github.com/raycast/extensions/issues)
+- 💬 [Join the Raycast Community](https://raycast.com/community)
 
 ## 🔗 Links
 
 - [Raycast Store](https://raycast.com/store)
 - [LanguageTool API Docs](https://languagetool.org/http-api/)
-- [GitHub Repository](https://github.com/lucastaonline/raycast-language-tool)
+- [GitHub Repository](https://github.com/raycast/extensions/tree/main/extensions/language-tool)
 
 ---
 

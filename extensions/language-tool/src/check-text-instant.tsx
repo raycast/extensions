@@ -1,8 +1,14 @@
-import { Clipboard, showToast, Toast, closeMainWindow, getPreferenceValues } from "@raycast/api";
+import {
+  Clipboard,
+  showToast,
+  Toast,
+  closeMainWindow,
+  getPreferenceValues,
+} from "@raycast/api";
 import { applyAllCorrections } from "./utils/text-correction";
 import { checkTextWithAPI } from "./services/languagetool-api";
 
-interface Preferences {
+type Preferences = {
   level?: "" | "default" | "picky";
   disabledRules?: string;
   enableHiddenRules?: boolean;
@@ -11,7 +17,7 @@ interface Preferences {
   mode?: "" | "allButTextLevelOnly" | "textLevelOnly";
   allowIncompleteResults?: boolean;
   useragent?: "" | "standalone";
-}
+};
 
 /**
  * Command that reads text from clipboard, checks it, and pastes the corrected result
@@ -63,7 +69,8 @@ export default async function Command() {
     // Feedback
     const matchesCount = result.matches?.length || 0;
     await showToast({
-      title: matchesCount > 0 ? `Fixed ${matchesCount} issues` : "No issues found",
+      title:
+        matchesCount > 0 ? `Fixed ${matchesCount} issues` : "No issues found",
       message: "Corrected text pasted",
       style: Toast.Style.Success,
     });

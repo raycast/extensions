@@ -46,7 +46,10 @@ export function calculateCorrectedText(
  * @param result - API response
  * @returns Fully corrected text
  */
-export function applyAllCorrections(textChecked: string, result: CheckTextResponse): string {
+export function applyAllCorrections(
+  textChecked: string,
+  result: CheckTextResponse,
+): string {
   if (!result.matches || result.matches.length === 0) {
     return textChecked;
   }

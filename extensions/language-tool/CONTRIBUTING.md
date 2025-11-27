@@ -68,9 +68,9 @@ Create an issue with:
 ### Setup
 
 ```bash
-# Clone your fork
-git clone https://github.com/YOUR_USERNAME/raycast-language-tool.git
-cd raycast-language-tool
+# Clone the repository
+git clone https://github.com/raycast/extensions.git
+cd extensions/extensions/language-tool
 
 # Install dependencies
 npm install
@@ -106,15 +106,15 @@ src/
 
 - Use **TypeScript** for all new code
 - Provide **type annotations** for parameters and return values
-- Use **interfaces** over types when possible
+- Use **type** over interfaces (following Raycast conventions)
 - Avoid `any` - use proper types or `unknown`
 
 **Good:**
 ```typescript
-interface CheckTextOptions {
+type CheckTextOptions = {
   text: string;
   language: string;
-}
+};
 
 async function checkText(options: CheckTextOptions): Promise<CheckTextResponse> {
   // ...
@@ -150,7 +150,7 @@ export default function MyComponent({ title }: { title: string }) {
 - **Files**: kebab-case (`check-text-result.tsx`)
 - **Functions**: camelCase (`checkTextWithAPI`)
 - **Constants**: SCREAMING_SNAKE_CASE (`API_BASE_URL`)
-- **Interfaces**: PascalCase (`CheckTextOptions`)
+- **Types**: PascalCase (`CheckTextOptions`)
 - **Hooks**: use + PascalCase (`useTextCorrections`)
 
 ### File Organization
@@ -372,8 +372,8 @@ npm run lint
 
 ## 📞 Getting Help
 
-- 💬 [GitHub Discussions](https://github.com/lucastaonline/raycast-language-tool/discussions)
-- 🐛 [GitHub Issues](https://github.com/lucastaonline/raycast-language-tool/issues)
+- 💬 [Join the Raycast Community](https://raycast.com/community)
+- 🐛 [GitHub Issues](https://github.com/raycast/extensions/issues)
 - 📖 [Raycast Documentation](https://developers.raycast.com/)
 - 📖 [LanguageTool API Docs](https://languagetool.org/http-api/)
 

@@ -362,8 +362,8 @@ Premium accounts get additional benefits:
 
 ## 💬 Need Help?
 
-- 🐛 [Report issues](https://github.com/lucastaonline/raycast-language-tool/issues)
-- 💬 [Discussions](https://github.com/lucastaonline/raycast-language-tool/discussions)
+- 🐛 [Report issues](https://github.com/raycast/extensions/issues)
+- 💬 [Join the Raycast Community](https://raycast.com/community)
 - 📖 [Main README](./README.md)
 
 ---
