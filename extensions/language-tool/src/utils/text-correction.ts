@@ -22,7 +22,7 @@ export function calculateCorrectedText(
   let text = textChecked;
   let offset = 0;
 
-  // Aplica as correções em ordem
+  // Apply corrections in order
   const sortedMatches = result.matches
     .filter((_, index) => appliedIndexes.has(index))
     .sort((a, b) => a.offset - b.offset);
