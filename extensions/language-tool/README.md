@@ -243,7 +243,7 @@ Found a bug or have a suggestion?
 
 - 🐛 [Report an issue](https://github.com/lucastaonline/raycast-language-tool/issues)
 - 💬 [Discussions](https://github.com/lucastaonline/raycast-language-tool/discussions)
-- 📧 Contact: [your-email@example.com]
+- 📧 Contact: [lucassfbs@gmail.com]
 
 ## 🔗 Links
 
