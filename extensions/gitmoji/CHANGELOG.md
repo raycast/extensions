@@ -1,5 +1,10 @@
 # Gitmoji Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Upgrade gitmoji] - 2025-05-19
 
 - Add frecency sorting
