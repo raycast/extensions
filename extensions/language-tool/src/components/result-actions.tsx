@@ -27,7 +27,7 @@ export function ResultActions({
 
   return (
     <ActionPanel>
-      {/* Ação Principal */}
+      {/* Main Action */}
       {matchesCount > 0 ? (
         <ActionPanel.Section title="Quick Actions">
           <Action
