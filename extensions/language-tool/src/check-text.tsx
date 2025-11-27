@@ -252,7 +252,9 @@ export default function Command() {
             title="Mode"
             info="API mode: empty (default), 'allButTextLevelOnly', or 'textLevelOnly'."
             value={values.mode}
-            onChange={(newValue) => itemProps.mode.onChange?.(newValue as "" | "allButTextLevelOnly" | "textLevelOnly" | undefined)}
+            onChange={(newValue) =>
+              itemProps.mode.onChange?.(newValue as "" | "allButTextLevelOnly" | "textLevelOnly" | undefined)
+            }
           >
             <Form.Dropdown.Item value="" title="--" />
             <Form.Dropdown.Item value="allButTextLevelOnly" title="All But Text Level Only" />
@@ -273,7 +275,7 @@ export default function Command() {
             onChange={(newValue) => itemProps.useragent.onChange?.(newValue as "" | "standalone" | undefined)}
           >
             <Form.Dropdown.Item value="standalone" title="Standalone" />
-            <Form.Dropdown.Item value="" title="" />
+            <Form.Dropdown.Item value="" title="--" />
           </Form.Dropdown>
         </>
       )}

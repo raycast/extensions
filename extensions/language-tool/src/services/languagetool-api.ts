@@ -77,8 +77,7 @@ export async function checkTextWithAPI(options: CheckTextOptions): Promise<Check
   // Texto ou data (um deles é obrigatório)
   if (options.text && !isEmpty(options.text)) {
     params.text = options.text;
-  }
-  else if (options.data) {
+  } else if (options.data) {
     params.data = options.data;
   }
 
