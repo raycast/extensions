@@ -63,7 +63,7 @@
       "name": "toggle-play",
       "title": "Toggle Play/Pause",
       "subtitle": "NeteaseMusic",
-      "description": "Toggle play of pause in NeteaseMusic.",
+      "description": "Toggle play or pause in NeteaseMusic.",
       "mode": "no-view"
     },
     {
