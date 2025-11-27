@@ -86,7 +86,7 @@ export function ResultActions({
         </ActionPanel.Section>
       )}
 
-      {/* Correções Individuais */}
+      {/* Individual Corrections */}
       {result.matches &&
         result.matches.map((match, index) => {
           if (appliedSuggestions.has(index)) return null;
