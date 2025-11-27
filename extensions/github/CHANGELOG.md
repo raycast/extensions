@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Show organization projects when creating issues] - 2025-11-27
+
+- Include organization-level Projects in the Create Issue project picker
+
 ## [Add Download Repository command and copy markdown URL actions] - 2025-11-19
 
 - Search Repositories: Added "Download Repository" action to download a repository as a zip file
