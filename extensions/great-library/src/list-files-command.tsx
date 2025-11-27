@@ -7,7 +7,11 @@ export default function ListFilesCommand() {
   const { documents, isLoading, isRefreshing, refresh, deleteDocument, deleteAllDocuments } = useDocumentList();
 
   const openUploadCommand = async () => {
-    await launchCommand({ name: "upload-files", type: LaunchType.UserInitiated });
+    try {
+      await launchCommand({ name: "upload-files", type: LaunchType.UserInitiated });
+    } catch (error) {
+      console.error("Failed to launch upload command", error);
+    }
   };
 
   const handleDelete = async (documentId: string, documentName: string) => {
