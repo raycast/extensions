@@ -18,7 +18,7 @@
 ### Input Your Options
 Simply type your options. The list grows as you type.
 
-![Input Options](metadata/decide-1.png)
+![Input Options](metadata/random-picker-1.png)
 
 ### The Verdict
 See the winner clearly displayed, along with stats.
