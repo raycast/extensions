@@ -23,7 +23,7 @@ Simply type your options. The list grows as you type.
 ### The Verdict
 See the winner clearly displayed, along with stats.
 
-![Result View](metadata/decide-2.png)
+![Result View](metadata/random-picker-2.png)
 
 ## How to Use
 
