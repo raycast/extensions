@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## New Features - 2025-11-27
+## New Features - {PR_MERGE_DATE}
 
 ### Added
 
