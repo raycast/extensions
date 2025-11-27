@@ -45,5 +45,8 @@
       "mode": "view"
     }
   ],
-  "title": "Open Browsers Profiles"
+  "title": "Open Browsers Profiles",
+  "platforms": [
+    "macOS"
+  ]
 }
