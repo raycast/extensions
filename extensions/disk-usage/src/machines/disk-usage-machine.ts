@@ -1,19 +1,7 @@
 import { showToast, Toast, trash } from "@raycast/api";
-import {
-  assign,
-  createMachine,
-  fromCallback,
-  fromPromise,
-  type StateFrom,
-  type StateValueMap,
-} from "xstate";
+import { assign, createMachine, fromCallback, fromPromise, type StateFrom, type StateValueMap } from "xstate";
 import { homedir } from "node:os";
-import {
-  isSnapshotAvailable,
-  invalidateSnapshot,
-  hydrateSnapshot,
-  persistSnapshot,
-} from "../utils/cache";
+import { isSnapshotAvailable, invalidateSnapshot, hydrateSnapshot, persistSnapshot } from "../utils/cache";
 import fileSystemIndexStore from "../stores/file-system-index-store";
 import { fetchVolume, indexHomeDirectory } from "../utils/scan";
 import selectionStore from "../stores/selection-store";
@@ -30,8 +18,7 @@ export const matchStatus = <C, R>(
     _?: (ctx: C) => R;
   },
 ): R | null => {
-  const statusKey =
-    typeof stateValue === "string" ? stateValue : Object.keys(stateValue)[0];
+  const statusKey = typeof stateValue === "string" ? stateValue : Object.keys(stateValue)[0];
   const handler = patterns[statusKey] ?? patterns._;
   return handler ? handler(context) : null;
 };
@@ -98,21 +85,12 @@ export const diskUsageMachine = createMachine({
 
     scanning: {
       invoke: {
-        src: fromCallback(
-          ({
-            sendBack,
-          }: {
-            sendBack: DiskUsageSend;
-            input: { homeDir: string };
-          }) => {
-            indexHomeDirectory(homedir(), (path) =>
-              sendBack({ type: "SCAN_PROGRESS", path }),
-            )
-              .then((data) => sendBack({ type: "SCAN_SUCCESS", data }))
-              .catch((error) => sendBack({ type: "SCAN_FAILURE", error }));
-            return () => {};
-          },
-        ),
+        src: fromCallback(({ sendBack }: { sendBack: DiskUsageSend; input: { homeDir: string } }) => {
+          indexHomeDirectory(homedir(), (path) => sendBack({ type: "SCAN_PROGRESS", path }))
+            .then((data) => sendBack({ type: "SCAN_SUCCESS", data }))
+            .catch((error) => sendBack({ type: "SCAN_FAILURE", error }));
+          return () => {};
+        }),
       },
       on: {
         SCAN_PROGRESS: {
@@ -141,10 +119,7 @@ export const diskUsageMachine = createMachine({
       on: {
         REFRESH: {
           target: "loadingUsage",
-          actions: [
-            () => invalidateSnapshot(),
-            () => fileSystemIndexStore.set(null),
-          ],
+          actions: [() => invalidateSnapshot(), () => fileSystemIndexStore.set(null)],
         },
         RETRY: "loadingUsage",
       },
@@ -157,12 +132,10 @@ export const diskUsageMachine = createMachine({
         deleting: {
           entry: assign({ isProcessingDeletion: true }),
           invoke: {
-            src: fromPromise(
-              async ({ input }: { input: { paths: string[] } }) => {
-                await trash(input.paths);
-                return input.paths;
-              },
-            ),
+            src: fromPromise(async ({ input }: { input: { paths: string[] } }) => {
+              await trash(input.paths);
+              return input.paths;
+            }),
             input: ({ event }) => ({
               paths: event.type === "DELETE_ITEMS" ? event.paths : [],
             }),
@@ -175,11 +148,7 @@ export const diskUsageMachine = createMachine({
                     const currentFsIndex = fileSystemIndexStore.get();
                     if (!currentFsIndex) return context.volume;
 
-                    const { index, freedBytes } = pruneFileSystemIndex(
-                      context.fsIndex,
-                      event.output,
-                      homedir(),
-                    );
+                    const { index, freedBytes } = pruneFileSystemIndex(context.fsIndex, event.output, homedir());
                     const volume = adjustVolume(context.volume, freedBytes);
 
                     fileSystemIndexStore.set(index);

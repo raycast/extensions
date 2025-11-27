@@ -1,14 +1,7 @@
 import { FC } from "react";
 import { useFileSystemIndexStore } from "../hooks/use-file-system-index-store";
 import { useSelection } from "../hooks/use-selection";
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Icon,
-  List,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List } from "@raycast/api";
 import { createUsageBar } from "../utils/format";
 import selectionStore from "../stores/selection-store";
 import type { FileNode, FileSystemIndex } from "../types";
@@ -33,11 +26,7 @@ const FileRow: FC<{
       subtitle={node.name}
       title={isDeletingThis ? "Moving to Trash..." : node.formattedSize}
       icon={isSelected ? Icon.CheckCircle : { fileIcon: node.path }}
-      accessories={[
-        isDeletingThis
-          ? { icon: Icon.CircleProgress }
-          : { text: createUsageBar(node.bytes, maxSize) },
-      ]}
+      accessories={[isDeletingThis ? { icon: Icon.CircleProgress } : { text: createUsageBar(node.bytes, maxSize) }]}
       actions={
         <ActionPanel>
           {isFolderOrHaveChild ? (
@@ -47,14 +36,7 @@ const FileRow: FC<{
               onPush={() => {
                 selection.clear();
               }}
-              target={
-                <FolderView
-                  title={node.name}
-                  rootPath={node.path}
-                  send={send}
-                  isDeleting={isDeleting}
-                />
-              }
+              target={<FolderView title={node.name} rootPath={node.path} send={send} isDeleting={isDeleting} />}
             />
           ) : (
             <Action.ShowInFinder path={node.path} />
@@ -83,10 +65,7 @@ const FileRow: FC<{
                   },
                 })
               ) {
-                const paths =
-                  selectionStore.size > 0
-                    ? selectionStore.getAll()
-                    : [node.path];
+                const paths = selectionStore.size > 0 ? selectionStore.getAll() : [node.path];
                 send({ type: "DELETE_ITEMS", paths });
               }
             }}

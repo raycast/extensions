@@ -2,7 +2,6 @@ import { useMemo, type FC } from "react";
 import type { FileNode, FileSystemIndex } from "../types";
 import { FileSection } from "./FileSection";
 import { DiskUsageSend } from "../machines/disk-usage-machine";
-import { List } from "@raycast/api";
 
 export const SearchResultsView: FC<{
   fsIndex: FileSystemIndex;

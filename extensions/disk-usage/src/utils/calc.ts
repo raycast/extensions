@@ -6,8 +6,7 @@ export const adjustVolume = (volume: Volume, freedBytes: number): Volume => {
   const free = volume.freeBytes + freedBytes;
   const used = volume.totalBytes - free;
 
-  const usagePercent =
-    volume.totalBytes > 0 ? Math.round((used / volume.totalBytes) * 100) : 0;
+  const usagePercent = volume.totalBytes > 0 ? Math.round((used / volume.totalBytes) * 100) : 0;
 
   return {
     ...volume,
@@ -36,10 +35,7 @@ export const pruneFileSystemIndex = (
         let currentParent = path.normalize(path.dirname(node.path));
 
         while (currentParent.startsWith(normalizedHome)) {
-          sizeAdjustments.set(
-            currentParent,
-            (sizeAdjustments.get(currentParent) ?? 0) + node.bytes,
-          );
+          sizeAdjustments.set(currentParent, (sizeAdjustments.get(currentParent) ?? 0) + node.bytes);
 
           if (currentParent === normalizedHome) break;
 
@@ -73,9 +69,7 @@ export const pruneFileSystemIndex = (
       })
       .sort((a, b) => b.bytes - a.bytes);
 
-    const newRestricted = snapshot.restricted.filter(
-      (node) => !pathsSet.has(node.path),
-    );
+    const newRestricted = snapshot.restricted.filter((node) => !pathsSet.has(node.path));
 
     if (newAccessible.length > 0 || newRestricted.length > 0) {
       newIndex[folderPath] = {

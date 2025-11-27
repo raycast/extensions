@@ -2,17 +2,12 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import type { FC } from "react";
 import type { Volume } from "../types";
 import { formatSize } from "../utils/format";
-import {
-  type DiskUsageSend,
-  type DiskUsageState,
-  matchStatus,
-} from "../machines/disk-usage-machine";
+import { type DiskUsageSend, type DiskUsageState, matchStatus } from "../machines/disk-usage-machine";
 
 const VolumeSummary: FC<{
   volume: Volume;
   onRefresh?: () => void;
 }> = ({ volume, onRefresh }) => {
-  console.log({ volume });
   const free = `Free: ${formatSize(volume.freeBytes, 1000)}`;
   const total = `Total: ${formatSize(volume.totalBytes, 1000)}`;
   const usage = `${volume.usageLabel} Used`;
@@ -42,18 +37,9 @@ export const StatusView: FC<{
         state.value,
         { ...state.context, send },
         {
-          checkingCache: () => (
-            <List.Item title="Checking cache..." icon={Icon.CircleProgress} />
-          ),
-          restoringCache: () => (
-            <List.Item title="Restoring index..." icon={Icon.CircleProgress} />
-          ),
-          loadingUsage: () => (
-            <List.Item
-              title="Fetching volume stats..."
-              icon={Icon.CircleProgress}
-            />
-          ),
+          checkingCache: () => <List.Item title="Checking cache..." icon={Icon.CircleProgress} />,
+          restoringCache: () => <List.Item title="Restoring index..." icon={Icon.CircleProgress} />,
+          loadingUsage: () => <List.Item title="Fetching volume stats..." icon={Icon.CircleProgress} />,
           scanning: ({ volume, activePath }) => (
             <>
               <VolumeSummary volume={volume} />
@@ -73,12 +59,7 @@ export const StatusView: FC<{
               />
             </>
           ),
-          ready: ({ volume, send }) => (
-            <VolumeSummary
-              volume={volume}
-              onRefresh={() => send({ type: "REFRESH" })}
-            />
-          ),
+          ready: ({ volume, send }) => <VolumeSummary volume={volume} onRefresh={() => send({ type: "REFRESH" })} />,
           error: ({ error, send }) => (
             <List.Item
               title="Error"
@@ -86,10 +67,7 @@ export const StatusView: FC<{
               icon={Icon.Warning}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Retry"
-                    onAction={() => send({ type: "RETRY" })}
-                  />
+                  <Action title="Retry" onAction={() => send({ type: "RETRY" })} />
                 </ActionPanel>
               }
             />

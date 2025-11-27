@@ -19,10 +19,7 @@ export const isSnapshotAvailable = async (): Promise<boolean> => {
   }
 };
 
-export const persistSnapshot = async (
-  fsIndex: FileSystemIndex,
-  volume: Volume,
-) => {
+export const persistSnapshot = async (fsIndex: FileSystemIndex, volume: Volume) => {
   try {
     const payload: CachePayload = { fsIndex, volume };
     const compressed = zlibSync(strToU8(JSON.stringify(payload)));

@@ -1,12 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { homedir } from "node:os";
-import { useState, type FC } from "react";
+import { type FC } from "react";
 import type { FileSystemIndex } from "../types";
-import {
-  DiskUsageState,
-  matchStatus,
-  type DiskUsageSend,
-} from "../machines/disk-usage-machine";
+import { DiskUsageState, matchStatus, type DiskUsageSend } from "../machines/disk-usage-machine";
 import { useSelection } from "../hooks/use-selection";
 import { FileSection } from "./FileSection";
 import { RestrictedSection } from "./RestrictedSection";
@@ -23,16 +19,9 @@ export const HomeDirectoryComponent: FC<{
 
   const snapshot = fsIndex?.[homeDir] || { accessible: [], restricted: [] };
 
-  console.log(snapshot.restricted);
-
   return (
     <>
-      <FileSection
-        title="Home"
-        items={snapshot.accessible}
-        isDeleting={isProcessingDeletion}
-        send={send}
-      />
+      <FileSection title="Home" items={snapshot.accessible} isDeleting={isProcessingDeletion} send={send} />
 
       <RestrictedSection items={snapshot.restricted} />
 
@@ -86,13 +75,7 @@ export const HomeDirectoryView: FC<{
             );
           }
 
-          return (
-            <HomeDirectoryComponent
-              fsIndex={fsIndex}
-              isProcessingDeletion={isProcessingDeletion}
-              send={send}
-            />
-          );
+          return <HomeDirectoryComponent fsIndex={fsIndex} isProcessingDeletion={isProcessingDeletion} send={send} />;
         },
         _: () => null,
       })}

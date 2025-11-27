@@ -14,11 +14,7 @@ export const parseDuRecord = (line: string) => {
   return Number.isNaN(kb) ? null : { kb, path: filePath };
 };
 
-export const buildFileNode = (
-  kb: number,
-  rawPath: string,
-  rootPath: string,
-): FileNode | null => {
+export const buildFileNode = (kb: number, rawPath: string, rootPath: string): FileNode | null => {
   if (!rawPath.startsWith(rootPath)) return null;
 
   const bytes = kb * 1024;
@@ -31,10 +27,7 @@ export const buildFileNode = (
   };
 };
 
-export const indexHomeDirectory = (
-  homeDir: string,
-  onProgress: (path: string) => void,
-): Promise<FileSystemIndex> =>
+export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) => void): Promise<FileSystemIndex> =>
   new Promise((resolve, reject) => {
     const normalizedHome = path.normalize(homeDir);
 
@@ -68,8 +61,7 @@ export const indexHomeDirectory = (
       const normalizedPath = path.normalize(rawPath);
       const parent = path.normalize(path.dirname(normalizedPath));
 
-      if (!parent.startsWith(normalizedHome) && parent !== normalizedHome)
-        return;
+      if (!parent.startsWith(normalizedHome) && parent !== normalizedHome) return;
 
       const list = restrictedByParent.get(parent);
       if (list) list.add(normalizedPath);
@@ -94,15 +86,10 @@ export const indexHomeDirectory = (
 
       const result: FileSystemIndex = {};
 
-      const allParents = new Set([
-        ...accessibleByParent.keys(),
-        ...restrictedByParent.keys(),
-      ]);
+      const allParents = new Set([...accessibleByParent.keys(), ...restrictedByParent.keys()]);
 
       for (const parentPath of allParents) {
-        const accessible = (accessibleByParent.get(parentPath) || []).sort(
-          (a, b) => b.bytes - a.bytes,
-        );
+        const accessible = (accessibleByParent.get(parentPath) || []).sort((a, b) => b.bytes - a.bytes);
 
         const deniedPaths = restrictedByParent.get(parentPath);
 
@@ -135,10 +122,7 @@ export const indexHomeDirectory = (
     du.stderr.on("data", (chunk) => {
       const lines = chunk.toString("utf8").split("\n");
       for (const line of lines) {
-        if (
-          line.includes("Permission denied") ||
-          line.includes("Operation not permitted")
-        ) {
+        if (line.includes("Permission denied") || line.includes("Operation not permitted")) {
           const parts = line.split("du: ");
           if (parts.length > 1) {
             const pathPart = parts[1].split(":")[0];
@@ -166,9 +150,7 @@ export const fetchVolume = async (): Promise<Volume> => {
   const { stdout } = await execAsync("/usr/sbin/diskutil info /");
 
   const extractBytes = (pattern: string) =>
-    Number(
-      stdout.match(new RegExp(`${pattern}.*?\\((\\d+)\\s+Bytes\\)`))?.[1] ?? 0,
-    );
+    Number(stdout.match(new RegExp(`${pattern}.*?\\((\\d+)\\s+Bytes\\)`))?.[1] ?? 0);
 
   const total = extractBytes("Container Total Space:");
   const free = extractBytes("Container Free Space:");

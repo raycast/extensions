@@ -6,11 +6,7 @@ export const formatSize = (bytes: number, base: 1000 | 1024 = 1024): string => {
   return `${(bytes / base ** i).toFixed(2).replace(/\.?0+$/, "")} ${units[i]}`;
 };
 
-export const createUsageBar = (
-  size: number,
-  maxSize: number,
-  length = 10,
-): string => {
+export const createUsageBar = (size: number, maxSize: number, length = 10): string => {
   if (!maxSize || !size) return `|${"\u3000".repeat(length)}|`;
   const filled = Math.min(Math.round((size / maxSize) * length), length);
 

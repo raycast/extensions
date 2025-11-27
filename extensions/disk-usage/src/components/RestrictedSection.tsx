@@ -4,9 +4,7 @@ import type { FileNode } from "../types";
 
 export async function openDiskAccessPrefs(): Promise<void> {
   try {
-    await open(
-      "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles",
-    );
+    await open("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles");
   } catch {
     console.error("Failed to open preferences");
   }
@@ -24,11 +22,7 @@ export const RestrictedSection: FC<{ items: FileNode[] }> = ({ items }) => {
           accessories={[{ text: "Permission Denied" }]}
           actions={
             <ActionPanel>
-              <Action
-                title="Grant Full Disk Access"
-                icon={Icon.Shield}
-                onAction={openDiskAccessPrefs}
-              />
+              <Action title="Grant Full Disk Access" icon={Icon.Shield} onAction={openDiskAccessPrefs} />
               <Action.ShowInFinder path={node.path} />
             </ActionPanel>
           }

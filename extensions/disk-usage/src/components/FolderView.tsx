@@ -17,26 +17,15 @@ export const FolderView: FC<{
 
   const snapshot = fsIndex?.[rootPath] || { accessible: [], restricted: [] };
 
-  const selectionInfo =
-    selection.size > 0 ? `(${selection.size} selected)` : "";
+  const selectionInfo = selection.size > 0 ? `(${selection.size} selected)` : "";
 
   return (
-    <List
-      navigationTitle={`${title} ${selectionInfo}`}
-      searchBarPlaceholder={`Search in ${title}...`}
-    >
+    <List navigationTitle={`${title} ${selectionInfo}`} searchBarPlaceholder={`Search in ${title}...`}>
       {snapshot.accessible.length > 0 && (
-        <FileSection
-          title={title}
-          items={snapshot.accessible}
-          send={send}
-          isDeleting={isDeleting}
-        />
+        <FileSection title={title} items={snapshot.accessible} send={send} isDeleting={isDeleting} />
       )}
 
-      {snapshot.restricted.length > 0 && (
-        <RestrictedSection items={snapshot.restricted} />
-      )}
+      {snapshot.restricted.length > 0 && <RestrictedSection items={snapshot.restricted} />}
     </List>
   );
 };
