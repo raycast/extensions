@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-11-27
 
 - Fixed detecting if Spotify is installed on Windows
 - Fixed error message rendering when adding song to queue
