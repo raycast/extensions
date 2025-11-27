@@ -51,7 +51,7 @@ export function applyAllCorrections(textChecked: string, result: CheckTextRespon
     return textChecked;
   }
 
-  // Cria set com todos os índices
+  // Create set with all indices
   const allIndexes = new Set(result.matches.map((_, index) => index));
 
   return calculateCorrectedText(textChecked, result, allIndexes);
