@@ -12,9 +12,15 @@ export default async function Command() {
   try {
     let imagePath = "";
 
-    if (process.platform === "darwin") {
-      // We use AppleScript directly because getSelectedFinderItems throws if Finder isn't frontmost
-      imagePath = await runAppleScript(`
+    try {
+      const items = await getSelectedFinderItems();
+      if (items.length > 0) {
+        imagePath = items[0].path;
+      }
+    } catch {
+      if (process.platform === "darwin") {
+        // We use AppleScript as a fallback because getSelectedFinderItems throws if Finder isn't frontmost
+        imagePath = await runAppleScript(`
         tell application "Finder"
           set theSelection to selection
           if theSelection is {} then
@@ -24,11 +30,6 @@ export default async function Command() {
           return POSIX path of (theItem as alias)
         end tell
       `);
-    } else {
-      // On Windows, we rely on the standard API
-      const items = await getSelectedFinderItems();
-      if (items.length > 0) {
-        imagePath = items[0].path;
       }
     }
 
