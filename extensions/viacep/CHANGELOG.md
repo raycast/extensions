@@ -1,6 +1,6 @@
 # ViaCEP Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-11-27
 
 - Added Windows support.
 
