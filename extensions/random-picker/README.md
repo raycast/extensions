@@ -2,7 +2,7 @@
 
 **Random Picker** is a Raycast extension designed to help you make decisions effortlessly. Whether you're choosing where to eat, who goes first, or any other dilemma, simply list your options and let the extension pick a winner for you.
 
-![Decide Main Interface](metadata/decide-1.png)
+![Decide Main Interface](metadata/random-picker-1.png)
 
 ## Features
 
