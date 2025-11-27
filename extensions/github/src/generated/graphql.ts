@@ -39204,6 +39204,16 @@ export type DataForRepositoryQuery = {
       totalCount: number;
       nodes?: Array<{ __typename?: "Milestone"; id: string; title: string } | null> | null;
     } | null;
+    owner:
+      | {
+          __typename?: "Organization";
+          projectsV2: {
+            __typename?: "ProjectV2Connection";
+            totalCount: number;
+            nodes?: Array<{ __typename?: "ProjectV2"; id: string; title: string } | null> | null;
+          };
+        }
+      | { __typename?: "User" };
     pullRequestTemplates?: Array<{ __typename?: "PullRequestTemplate"; body?: string | null }> | null;
     issueTemplates?: Array<{
       __typename?: "IssueTemplate";
@@ -40557,6 +40567,18 @@ export const DataForRepositoryDocument = gql`
         nodes {
           id
           title
+        }
+      }
+      owner {
+        __typename
+        ... on Organization {
+          projectsV2(first: 50) {
+            totalCount
+            nodes {
+              id
+              title
+            }
+          }
         }
       }
       pullRequestTemplates {

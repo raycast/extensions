@@ -122,7 +122,16 @@ export function IssueForm({ draftValues }: IssueFormProps) {
 
   const labels = data?.repository?.labels?.nodes;
 
-  const projects = data?.repository?.projectsV2?.nodes;
+  const repositoryProjects = data?.repository?.projectsV2?.nodes ?? [];
+  const organizationProjects =
+    data?.repository?.owner?.__typename === "Organization" ? data.repository.owner.projectsV2?.nodes ?? [] : [];
+  const projects = [...repositoryProjects, ...organizationProjects].filter((project, index, list) => {
+    if (!project) {
+      return false;
+    }
+
+    return list.findIndex((item) => item?.id === project.id) === index;
+  });
 
   const milestones = data?.repository?.milestones?.nodes;
 
