@@ -1,6 +1,6 @@
 # Gitmoji Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-11-28
 
 - Add support for Windows platform.
 - Bump all dependencies to the latest.
