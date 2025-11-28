@@ -6,7 +6,10 @@
   "icon": "icon.png",
   "author": "jergensturdley",
   "license": "MIT",
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-ioc",
@@ -208,7 +211,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.69.0",
-    "@raycast/utils": "^1.12.0"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

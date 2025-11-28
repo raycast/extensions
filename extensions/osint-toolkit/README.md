@@ -27,7 +27,6 @@ OSINT Toolkit streamlines the process of investigating potential security threat
 
 ### Customizable
 - Enable or disable individual OSINT platforms
-- Configure optional API keys for enhanced features
 - Automatic clipboard copy on selection (optional)
 
 ## Commands
