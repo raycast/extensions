@@ -55,6 +55,7 @@ export enum ConnectionState {
 export class MusicAssistantApi {
   private ws?: Websocket;
   private commandCounter = 0;
+  private authToken?: string;
   public baseUrl?: string;
   public state: ConnectionState = ConnectionState.DISCONNECTED;
   public serverInfo?: ServerInfoMessage;
@@ -91,17 +92,25 @@ export class MusicAssistantApi {
     this.ws?.close();
   }
 
-  public initialize(baseUrl: string) {
+  public initialize(baseUrl: string, authToken: string) {
     if (this.ws) throw new Error("already initialized");
+    if (!authToken) throw new Error("Authentication token is required");
     if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
+    this.authToken = authToken;
     this.baseUrl = baseUrl;
     const wsUrl = baseUrl.replace("http", "ws") + "/ws";
     this.log(`Connecting to Music Assistant API ${wsUrl}`);
     this.state = ConnectionState.CONNECTING;
+    let isAuthenticated = false;
+    let authMessageId: string | null = null;
+    let pendingServerInfo: ServerInfoMessage | null = null;
     // connect to the websocket api
     const wsBuilder = new WebsocketBuilder(wsUrl)
       .onOpen((i, ev) => {
         this.log("connection opened");
+        isAuthenticated = false;
+        authMessageId = null;
+        pendingServerInfo = null;
         // state is updated on first message to be sure data is coming in
       })
       .onClose((i, ev) => {
@@ -124,6 +133,46 @@ export class MusicAssistantApi {
       .onMessage((i, ev) => {
         // Message retrieved on the websocket
         const msg = JSON.parse(ev.data);
+        if ("server_version" in msg && !pendingServerInfo && !isAuthenticated) {
+          pendingServerInfo = msg as ServerInfoMessage;
+          authMessageId = this._genCmdId();
+          const authCommand: CommandMessage = {
+            command: "auth",
+            message_id: authMessageId,
+            args: { token: this.authToken },
+          };
+          this.log("sending auth command", authMessageId);
+          i.send(JSON.stringify(authCommand));
+          return;
+        }
+
+        if (authMessageId && !isAuthenticated && "message_id" in msg && msg.message_id === authMessageId) {
+          if ("error_code" in msg || "error" in msg) {
+            const err =
+              (msg as ErrorResultMessage).details || (msg as ErrorResultMessage).error_code || (msg as any).error;
+            this.log("authentication failed", msg);
+            this.state = ConnectionState.DISCONNECTED;
+            this.signalEvent({
+              event: EventType.Error,
+              object_id: "",
+              data: err ?? "Authentication failed",
+            });
+            this.ws?.close();
+            return;
+          }
+          isAuthenticated = true;
+          if (pendingServerInfo) {
+            this.handleServerInfoMessage(pendingServerInfo);
+            pendingServerInfo = null;
+          }
+          return;
+        }
+
+        if (!isAuthenticated) {
+          this.log("received message before authentication", msg);
+          return;
+        }
+
         if ("event" in msg) {
           this.handleEventMessage(msg as EventMessage);
         } else if ("server_version" in msg) {

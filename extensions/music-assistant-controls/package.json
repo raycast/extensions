@@ -56,6 +56,13 @@
       "title": "Music Assistant Host",
       "placeholder": "http://192.168.0.166:8095",
       "description": "Enter the local address (IP, mDNS does not work well inside raycast) of your Music Assistant instance. This is usually the same as your Home Assistant URL, but with the port changed to 8095."
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Create a long-lived token in Music Assistant (Settings > Users > Tokens) and paste it here. Required for authentication."
     }
   ],
   "dependencies": {

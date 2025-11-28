@@ -5,7 +5,7 @@ import "./polyfills";
 import { Prefs } from "./preferences";
 
 export default function executeApiCommand<T>(command: (api: MusicAssistantApi) => Promise<T>) {
-  const { host } = getPreferenceValues<Prefs>();
+  const { host, token } = getPreferenceValues<Prefs>();
   const api = new MusicAssistantApi();
   return new Promise<T>((res, rej) => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -25,7 +25,7 @@ export default function executeApiCommand<T>(command: (api: MusicAssistantApi) =
       }
     });
     try {
-      api.initialize(host);
+      api.initialize(host, token);
     } catch (error) {
       rej(error);
     }

@@ -4,7 +4,8 @@
 
 ### ✅ Compatibility
 
-- Restores support for the latest Music Assistant release so playback controls, queue actions, and player commands work again without errors.
+- You can now paste your Music Assistant long-lived token in preferences so the extension signs in automatically.
+- Works again with the latest Music Assistant release — playback controls, queue actions, and player commands no longer fail with auth errors.
 
 ### 🧠 Reliability
 
