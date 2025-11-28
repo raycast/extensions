@@ -91,7 +91,7 @@ export function filterStates(states: State[] | undefined, options?: { include?: 
 }
 
 // Cache for devices to avoid repeated API calls
-let devicesCache: HADevice[] | null = null;
+let devicesCache: HADevice[] | undefined = undefined;
 
 /**
  * Get area name for an entity
