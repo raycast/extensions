@@ -275,12 +275,12 @@ export default function SearchIOCCommand(
                           shortcut={{ modifiers: ["cmd"], key: "c" }}
                         />
                         <Action.CopyToClipboard
-                          title="Copy Ioc"
+                          title="Copy IOC"
                           content={result.ioc}
                           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                         />
                         <Action.CopyToClipboard
-                          title="Copy Defanged Ioc"
+                          title="Copy Defanged IOC"
                           content={defangIOC(result.ioc, result.iocType)}
                           shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
                         />
