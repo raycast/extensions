@@ -85,13 +85,13 @@ async function getTabs() {
     dedent`
       tell application "Dia"
         set output to ""
-        set windowIndex to 1
         
         repeat with w in every window
           try
-            set tabIndex to 1
+            set wId to id of w
             
             repeat with t in every tab of w
+              set tId to id of t
               set tabTitle to title of t
               
               try
@@ -104,12 +104,8 @@ async function getTabs() {
               end try
               
               -- Output: windowId|||tabId|||title|||url
-              set output to output & windowIndex & "|||" & tabIndex & "|||" & tabTitle & "|||" & tabURL & "\\n"
-              
-              set tabIndex to tabIndex + 1
+              set output to output & wId & "|||" & tId & "|||" & tabTitle & "|||" & tabURL & "\\n"
             end repeat
-            
-            set windowIndex to windowIndex + 1
           end try
         end repeat
         
@@ -149,9 +145,17 @@ export async function focusTab(tab: Tab) {
       tell application "Dia"
         activate
 
-        tell window ${tab.windowId}
-          focus tab ${tab.tabId}
-        end tell
+        repeat with w in every window
+          if id of w is "${tab.windowId}" then
+            repeat with t in every tab of w
+              if id of t is "${tab.tabId}" then
+                focus t
+                exit repeat
+              end if
+            end repeat
+            exit repeat
+          end if
+        end repeat
       end tell
     `,
   );
