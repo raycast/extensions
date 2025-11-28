@@ -1,0 +1,67 @@
+{
+  "name": "arc-helper",
+  "title": "Arc Helper",
+  "description": "Search items, quests, events, and traders for Arc Raiders",
+  "icon": "icon.png",
+  "author": "pcho",
+  "categories": ["Fun"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-items",
+      "title": "Search Items",
+      "description": "Search Arc Raiders items",
+      "mode": "view"
+    },
+    {
+      "name": "search-arcs",
+      "title": "Search ARCs",
+      "description": "Browse ARC enemies and their descriptions",
+      "mode": "view"
+    },
+    {
+      "name": "search-quests",
+      "title": "Search Quests",
+      "description": "Browse Arc Raiders quests with requirements and rewards",
+      "mode": "view"
+    },
+    {
+      "name": "event-timers",
+      "title": "Event Timers",
+      "description": "View current and upcoming Arc Raiders events",
+      "mode": "view"
+    },
+    {
+      "name": "traders",
+      "title": "Traders",
+      "description": "Browse trader inventories",
+      "mode": "view"
+    },
+    {
+      "name": "open-map",
+      "title": "Open Map",
+      "description": "Open Arc Raiders interactive maps in browser",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.9",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
