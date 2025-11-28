@@ -1,6 +1,6 @@
 # WLED Controller Changelog
 
-## Scenes feature and Windows support - {PR_MERGE_DATE}
+## Scenes feature and Windows support - 2025-11-28
 
 ### What's new
 
