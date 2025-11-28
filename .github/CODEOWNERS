@@ -2240,6 +2240,7 @@
 /extensions/unblocked-answers                                       @the-snesler
 /extensions/unicode-symbols                                         @mmazzarolo @FezVrasta @pernielsentikaer @j3lte @xilopaint
 /extensions/unifi                                                   @tonka3000
+/extensions/unify-path-separator                                    @patrickdawson
 /extensions/united-nations                                          @LitoMore
 /extensions/unitex                                                  @jaymody
 /extensions/universal-commands                                      @cyxn
@@ -2373,7 +2374,7 @@
 /extensions/wise-accounts                                           @robsel118 @imvasen
 /extensions/wise-quotes                                             @HugoLiconV
 /extensions/wistia                                                  @ddoria921 @xmok
-/extensions/wled-controller                                         @Creative-koda-lab
+/extensions/wled-controller                                         @Creative-koda-lab @danulqua
 /extensions/wol                                                     @bxb100 @sanjevirau
 /extensions/wolfram-alpha                                           @mathieudutour
 /extensions/word-count                                              @itsmingjie @koayon
