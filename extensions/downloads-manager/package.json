@@ -10,7 +10,8 @@
     "Kimcha",
     "ridemountainpig",
     "nagauta",
-    "dead_hikikomori"
+    "dead_hikikomori",
+    "clins1994"
   ],
   "categories": [
     "Productivity",
@@ -53,6 +54,25 @@
             {
               "title": "Create Time",
               "value": "createTime"
+            }
+          ]
+        },
+        {
+          "type": "dropdown",
+          "name": "downloadsLayout",
+          "label": "Downloads Layout",
+          "title": "Downloads Layout",
+          "description": "The layout for displaying the downloads.",
+          "required": false,
+          "default": "list",
+          "data": [
+            {
+              "title": "List",
+              "value": "list"
+            },
+            {
+              "title": "Grid",
+              "value": "grid"
             }
           ]
         }

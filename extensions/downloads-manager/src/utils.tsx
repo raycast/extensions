@@ -11,6 +11,13 @@ export const downloadsFolder = untildify(preferences.downloadsFolder ?? "~/Downl
 const showHiddenFiles = preferences.showHiddenFiles;
 const fileOrder = preferences.fileOrder;
 const lastestDownloadOrder = preferences.lastestDownloadOrder;
+export const defaultDownloadsLayout = preferences.downloadsLayout ?? "list";
+const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff", ".heic", ".svg"];
+
+export function isImageFile(filename: string): boolean {
+  const ext = filename.toLowerCase().slice(filename.lastIndexOf("."));
+  return imageExtensions.includes(ext);
+}
 
 export function getDownloads() {
   const files = readdirSync(downloadsFolder);
