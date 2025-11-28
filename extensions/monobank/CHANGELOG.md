@@ -1,5 +1,9 @@
 # monobank Changelog
 
+## [Fix] - 2025-11-27
+
+- Added Windows support
+
 ## [Fix] - 2024-05-28
 
 - Fixed issue when extension was crashing if user has no jars

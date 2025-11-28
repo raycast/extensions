@@ -1,5 +1,15 @@
 # shadcn/ui Changelog
 
+## [Add registry items view and component installation commands] - 2025-11-26
+
+- Add registry items list view to browse all components in a registry
+- Add Copy Add Component commands for npm, pnpm, yarn, and bun in registry items view
+
+## [Add search registries command and fix GitHub URL] - 2025-11-24
+
+- Add "search registries" command
+- Fix shadcn-ui GitHub URL
+
 ## [Fix search examples and components commands] - 2025-06-05
 
 - Fix "search components" command by removing dependency on the deprecated /api endpoint and fetching data directly from GitHub

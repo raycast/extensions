@@ -1,11 +1,23 @@
 # NixPkgs Search Changelog
 
+## [Update] - 2025-11-26
+
+- **In-app branch switcher**: Added a dropdown in the search bar to switch between NixOS versions without going to preferences
+- **Updated available branches**: Removed unsupported branches (24.11, 24.05, 23.11) and kept only working versions (unstable, 25.05)
+- **Simplified preferences**: Removed static branch configuration from preferences in favor of runtime selection
+- **Improved localStorage handling**: Cleaned up storage logic with proper Promise handling
+- Bump dependencies to latest versions.
+- Added copy action to package details view.
+- Added Windows as supported platform.
+
 ## [Fix] - 2025-11-10
+
 - Change search URL by parsing frontend version to match the upstream change.
 
 ## [Fix] - 2025-05-13
+
 - Compose URL with a version number fetched from [NixOS/nixos-search](https://github.com/NixOS/nixos-search/tree/221d27a68edad8dc291de4bb3fa208d471c46947).
-    - This will prevent issues like [#18939](https://github.com/raycast/extensions/issues/18939).
+  - This will prevent issues like [#18939](https://github.com/raycast/extensions/issues/18939).
 
 ## [Enhancements] - 2024-11-13
 

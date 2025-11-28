@@ -7,16 +7,14 @@ describe("validateSelectedText", () => {
   });
 
   it("should throw error for empty string", () => {
-    expect(() => validateSelectedText("")).toThrow("No text selected - Select text and try again");
+    expect(() => validateSelectedText("")).toThrow("No text selected");
   });
 
   it("should throw error for whitespace-only string", () => {
-    expect(() => validateSelectedText("   ")).toThrow("No text selected - Select text and try again");
+    expect(() => validateSelectedText("   ")).toThrow("No text selected");
   });
 
   it("should throw error for null or undefined", () => {
-    expect(() => validateSelectedText(undefined as unknown as string)).toThrow(
-      "No text selected - Select text and try again",
-    );
+    expect(() => validateSelectedText(undefined as unknown as string)).toThrow("No text selected");
   });
 });

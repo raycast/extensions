@@ -25,6 +25,11 @@
       "description": "Gets the specified directory and checks if it's a git repository. Must be called first before other git operations."
     },
     {
+      "name": "get-current-branch",
+      "title": "Get Current Branch",
+      "description": "Returns the current branch name for the repository."
+    },
+    {
       "name": "get-git-changes",
       "title": "Get Git Changes",
       "description": "Gets all types of changes in a git repository including staged, unstaged, and untracked files."
@@ -38,6 +43,81 @@
       "name": "run-git-command",
       "title": "Run Git Command",
       "description": "Runs a git command directly without any analysis or commit. Use when user wants to run a git command directly."
+    },
+    {
+      "name": "get-git-status-summary",
+      "title": "Get Git Status Summary",
+      "description": "Returns a summarized view of the repository status including branch, ahead/behind and changed files."
+    },
+    {
+      "name": "get-git-log",
+      "title": "Get Git Log",
+      "description": "Returns recent commits for the repository with metadata suitable for summaries and explanations."
+    },
+    {
+      "name": "get-git-branches",
+      "title": "Get Git Branches",
+      "description": "Lists local and optionally remote branches for the repository."
+    },
+    {
+      "name": "create-branch",
+      "title": "Create Branch",
+      "description": "Creates a new branch in the repository, optionally based on another branch."
+    },
+    {
+      "name": "checkout-branch",
+      "title": "Checkout Branch",
+      "description": "Switches the current repository to another branch."
+    },
+    {
+      "name": "stage-files",
+      "title": "Stage Files",
+      "description": "Stages specific files in the repository for commit."
+    },
+    {
+      "name": "unstage-files",
+      "title": "Unstage Files",
+      "description": "Unstages specific files in the repository while keeping their changes."
+    },
+    {
+      "name": "get-git-diff-unstaged",
+      "title": "Get Git Diff Unstaged",
+      "description": "Shows the unstaged diff for the working directory with configurable context lines."
+    },
+    {
+      "name": "get-git-diff-staged",
+      "title": "Get Git Diff Staged",
+      "description": "Shows the staged diff for the working directory with configurable context lines."
+    },
+    {
+      "name": "get-git-diff-target",
+      "title": "Get Git Diff Target",
+      "description": "Shows the diff between the current state and a target branch or revision."
+    },
+    {
+      "name": "show-commit",
+      "title": "Show Commit",
+      "description": "Shows the details and patch for a specific commit revision."
+    },
+    {
+      "name": "reset-staged",
+      "title": "Reset Staged Changes",
+      "description": "Unstages all staged changes in the repository while keeping modifications in the working tree."
+    },
+    {
+      "name": "revert-commit",
+      "title": "Revert Commit",
+      "description": "Reverts a specific commit, optionally without creating a revert commit immediately."
+    },
+    {
+      "name": "push-current-branch",
+      "title": "Push Current Branch",
+      "description": "Pushes the current branch to its remote with safe defaults and confirmation."
+    },
+    {
+      "name": "pull-current-branch",
+      "title": "Pull Current Branch",
+      "description": "Pulls the latest changes for the current branch from its remote using fast-forward only by default."
     }
   ],
   "preferences": [
@@ -102,46 +182,65 @@
   "ai": {
     "evals": [
       {
-        "input": "@git-assistant Analyze my git changes and propose a commit message. Include scope and body",
+        "input": "@git-assistant Analyze my git changes and propose a commit message. Include scope and body.",
         "expected": [
           {
             "callsTool": "get-current-directory"
           },
           {
             "callsTool": {
-              "arguments": {
-                "path": "/projects/git-assistant/",
-                "onlyIncludeStagedChanges": false
-              },
               "name": "get-git-changes"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-git-log",
+              "arguments": {
+                "limit": 5
+              }
             }
           }
         ],
         "mocks": {
           "get-current-directory": {
-            "path": "/projects/git-assistant/",
+            "path": "/projects/git-assistant",
             "gitDir": ".git"
           },
           "get-git-changes": {
             "path": "/projects/git-assistant",
             "changes": {
-              "status": "M package.json",
+              "status": "M package.json\nA src/index.ts\n?? README.md",
               "stagedChanges": "",
-              "untrackedFiles": [],
-              "untrackedDiff": "",
+              "untrackedFiles": [
+                "README.md"
+              ],
+              "untrackedDiff": "README.md",
               "unstagedChanges": "diff --git a/package.json b/package.json"
             },
             "summary": {
               "hasUnstagedChanges": false,
               "hasStagedChanges": true,
-              "hasUntrackedFiles": false,
-              "totalFiles": 1,
+              "hasUntrackedFiles": true,
+              "totalFiles": 3,
               "stats": {
-                "deletions": 0,
-                "filesChanged": 1,
-                "insertions": 0
+                "deletions": 1,
+                "filesChanged": 3,
+                "insertions": 10
               }
             }
+          },
+          "get-git-log": {
+            "path": "/projects/git-assistant",
+            "commits": [
+              {
+                "hash": "aaaa1111",
+                "authorName": "Call Duck",
+                "authorEmail": "callduck@example.com",
+                "date": "2024-01-01T10:00:00Z",
+                "subject": "feat(core): initial setup",
+                "body": ""
+              }
+            ]
           }
         }
       },
@@ -153,42 +252,83 @@
           },
           {
             "callsTool": {
-              "name": "run-git-command",
-              "arguments": {
-                "isGitRepo": true,
-                "command": "git status"
-              }
+              "name": "get-git-status-summary"
             }
           }
         ],
         "mocks": {
           "get-current-directory": {
-            "path": "/projects/git-assistant/",
+            "path": "/projects/git-assistant",
             "gitDir": ".git"
           },
-          "run-git-command": {
-            "command": "git status",
-            "isGitRepo": true
+          "get-git-status-summary": {
+            "path": "/projects/git-assistant",
+            "branch": "main",
+            "ahead": 1,
+            "behind": 0,
+            "hasUnstagedChanges": true,
+            "hasStagedChanges": true,
+            "hasUntrackedFiles": true,
+            "totalChangedFiles": 4,
+            "stagedFiles": [
+              "src/index.ts"
+            ],
+            "unstagedFiles": [
+              "package.json"
+            ],
+            "untrackedFiles": [
+              "README.md",
+              "src/new-file.ts"
+            ]
           }
         },
-        "meetsCriteria": "Runs the git status command"
+        "meetsCriteria": "Shows the current repository status using get-git-status-summary"
       },
       {
-        "input": "@git-assistant Stage and commit only staged changes. Include body.",
+        "input": "@git-assistant Commit only staged changes. Include body.",
         "expected": [
           {
-            "callsTool": "get-current-directory"
+            "callsTool": {
+              "name": "get-current-directory",
+              "arguments": {
+                "path": ""
+              }
+            }
           },
           {
             "callsTool": {
               "name": "get-git-changes",
               "arguments": {
-                "onlyIncludeStagedChanges": true
+                "path": "/projects/git-assistant",
+                "onlyIncludeStagedChanges": true,
+                "maxDiffLines": 100
               }
             }
           },
           {
-            "callsTool": "commit-changes"
+            "callsTool": {
+              "name": "get-git-log",
+              "arguments": {
+                "path": "/projects/git-assistant",
+                "limit": 5,
+                "startTimestamp": "",
+                "endTimestamp": ""
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "commit-changes",
+              "arguments": {
+                "message": [
+                  {
+                    "includes": ":"
+                  }
+                ],
+                "path": "/projects/git-assistant",
+                "stageAll": false
+              }
+            }
           }
         ],
         "mocks": {
@@ -199,8 +339,8 @@
           "get-git-changes": {
             "path": "/projects/git-assistant",
             "changes": {
-              "status": "M  ai.yaml",
-              "stagedChanges": "diff --git a/ai.yaml b/ai.yaml",
+              "stagedChanges": "diff --git a/src/file-a.ts b/src/file-a.ts",
+              "status": "M src/file-a.ts",
               "untrackedFiles": [],
               "untrackedDiff": "",
               "unstagedChanges": ""
@@ -211,20 +351,479 @@
               "hasUntrackedFiles": false,
               "totalFiles": 1,
               "stats": {
-                "deletions": 0,
+                "deletions": 2,
                 "filesChanged": 1,
-                "insertions": 0
+                "insertions": 2
               }
             }
           },
+          "get-git-log": {
+            "path": "/projects/git-assistant",
+            "commits": [
+              {
+                "hash": "abcd1234",
+                "authorName": "Call Duck",
+                "authorEmail": "callduck@example.com",
+                "date": "2024-01-02T12:00:00Z",
+                "subject": "feat: add checkout branch tool",
+                "body": "Adds a new tool to switch branches using git switch, including confirmation support."
+              },
+              {
+                "hash": "1111111",
+                "authorName": "Call Duck",
+                "authorEmail": "callduck@example.com",
+                "date": "2024-01-01T10:00:00Z",
+                "subject": "Initial commit",
+                "body": ""
+              }
+            ]
+          },
           "commit-changes": {
             "success": true,
-            "message": "refactor: update instructions"
+            "message": "[main 0000000] fix: update file-a\n 1 file changed, 2 insertions(+), 2 deletions(-)",
+            "path": "/projects/git-assistant"
           }
         }
       },
       {
         "input": "@git-assistant Stage and commit all changes. Include body and scope.",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-directory",
+              "arguments": {
+                "path": ""
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-git-changes",
+              "arguments": {
+                "path": "/projects/git-assistant",
+                "onlyIncludeStagedChanges": false,
+                "maxDiffLines": 100
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-git-log",
+              "arguments": {
+                "path": "/projects/git-assistant",
+                "limit": 5,
+                "startTimestamp": "",
+                "endTimestamp": ""
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "commit-changes",
+              "arguments": {
+                "message": [
+                  {
+                    "includes": "("
+                  },
+                  {
+                    "includes": "):"
+                  }
+                ],
+                "path": "/projects/git-assistant",
+                "stageAll": true
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
+          "get-git-changes": {
+            "path": "/projects/git-assistant",
+            "changes": {
+              "stagedChanges": "",
+              "status": "M src/file-a.ts\nA src/file-b.ts\n D src/file-c.ts",
+              "unstagedChanges": "diff --git a/src/file-a.ts b/src/file-a.ts\n... redacted diff for eval ...",
+              "untrackedDiff": "src/file-d.ts\nsrc/file-e.ts",
+              "untrackedFiles": [
+                "src/file-d.ts",
+                "src/file-e.ts"
+              ]
+            },
+            "summary": {
+              "hasStagedChanges": true,
+              "hasUnstagedChanges": true,
+              "hasUntrackedFiles": true,
+              "totalFiles": 5,
+              "stats": {
+                "deletions": 5,
+                "filesChanged": 5,
+                "insertions": 10
+              }
+            }
+          },
+          "get-git-log": {
+            "path": "/projects/git-assistant",
+            "commits": [
+              {
+                "authorEmail": "callduck@example.com",
+                "authorName": "Call Duck",
+                "body": "Adds a safety check to ensure that a commit is only created when staged files exist, preventing accidental empty commits and improving error messaging.",
+                "date": "2025-11-20T14:58:08+03:00",
+                "hash": "a706798dc8779e2695b3ae2f28f47a2d55cf99cc",
+                "subject": "fix: validate presence of staged changes before commit"
+              },
+              {
+                "authorEmail": "callduck@example.com",
+                "authorName": "Call Duck",
+                "body": "",
+                "date": "2025-11-20T13:17:33+03:00",
+                "hash": "1961d7b3d4eadf1c3db23451fd034cd3fb997533",
+                "subject": "fix: improve branch name escaping Updated the checkout-branch tool to correctly escape single quotes and use safer git switch syntax."
+              },
+              {
+                "authorEmail": "callduck@example.com",
+                "authorName": "Call Duck",
+                "body": "Adds a new tool to switch branches using git switch, including confirmation support.",
+                "date": "2025-11-20T13:14:03+03:00",
+                "hash": "d9533ca330eec34d4927735d60bb83a88b97896b",
+                "subject": "feat: add checkout branch tool"
+              },
+              {
+                "authorEmail": "callduck@example.com",
+                "authorName": "Call Duck",
+                "body": "",
+                "date": "2025-11-19T23:26:07+03:00",
+                "hash": "3f1dc7f1abc343675568f848f931fe953adbd21e",
+                "subject": "Initial commit"
+              }
+            ]
+          },
+          "stage-files": {
+            "path": "/projects/git-assistant",
+            "stagedFiles": [
+              "src/file-a.ts",
+              "src/file-b.ts",
+              "src/file-c.ts",
+              "src/file-d.ts",
+              "src/file-e.ts"
+            ]
+          },
+          "commit-changes": {
+            "success": true,
+            "message": "[main 1234567] feat(tools): update and extend toolset\n 5 files changed, 10 insertions(+), 5 deletions(-)",
+            "path": "/projects/git-assistant"
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Can you create a new branch named test/call-ducks?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-directory",
+              "arguments": {
+                "path": ""
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-branch",
+              "arguments": {
+                "name": "test/call-ducks"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "create-branch": {
+            "path": "/projects/git-assistant",
+            "branch": "test/call-ducks",
+            "previousBranch": "main"
+          },
+          "git-assistant-create-branch": {
+            "path": "/projects/git-assistant",
+            "branch": "test/call-ducks",
+            "previousBranch": "main"
+          },
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Current status of the repo please.",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-directory"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-git-status-summary"
+            }
+          }
+        ],
+        "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
+          "get-git-status-summary": {
+            "path": "/projects/git-assistant",
+            "branch": "main",
+            "ahead": 0,
+            "behind": 0,
+            "hasUnstagedChanges": false,
+            "hasStagedChanges": false,
+            "hasUntrackedFiles": false,
+            "totalChangedFiles": 0,
+            "stagedFiles": [],
+            "unstagedFiles": [],
+            "untrackedFiles": []
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Run git reflog --date=iso",
+        "expected": [
+          {
+            "callsTool": "get-current-directory"
+          },
+          {
+            "callsTool": {
+              "name": "run-git-command",
+              "arguments": {
+                "isGitRepo": true,
+                "command": "git reflog --date=iso"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
+          "run-git-command": {
+            "command": "git reflog --date=iso",
+            "path": "/projects/git-assistant",
+            "isGitRepo": true,
+            "output": "deadbeef HEAD@{0}: commit: chore: cleanup"
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Show me the last 3 commits.",
+        "expected": [
+          {
+            "callsTool": "get-current-directory"
+          },
+          {
+            "callsTool": {
+              "name": "get-git-log",
+              "arguments": {
+                "limit": 3
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
+          "get-git-log": {
+            "path": "/projects/git-assistant",
+            "commits": [
+              {
+                "hash": "1111111",
+                "authorName": "White Call Duck",
+                "authorEmail": "whitecallduck@example.com",
+                "date": "2024-01-01T10:00:00Z",
+                "subject": "feat: add feature one",
+                "body": ""
+              },
+              {
+                "hash": "2222222",
+                "authorName": "Pekin Duck",
+                "authorEmail": "pekinduck@example.com",
+                "date": "2024-01-02T11:00:00Z",
+                "subject": "fix: bug fix",
+                "body": ""
+              },
+              {
+                "hash": "3333333",
+                "authorName": "Crested Duck",
+                "authorEmail": "crestedduck@example.com",
+                "date": "2024-01-03T12:00:00Z",
+                "subject": "chore: update deps",
+                "body": ""
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Show me the unstaged diff.",
+        "expected": [
+          {
+            "callsTool": "get-current-directory"
+          },
+          {
+            "callsTool": {
+              "name": "get-git-diff-unstaged"
+            }
+          }
+        ],
+        "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
+          "get-git-diff-unstaged": {
+            "path": "/projects/git-assistant",
+            "contextLines": 3,
+            "diff": "diff --git a/file.txt b/file.txt"
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Compare this branch to main.",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-directory",
+              "arguments": {
+                "path": ""
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-current-branch",
+              "arguments": {
+                "path": "/projects/git-assistant"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-git-diff-target",
+              "arguments": {
+                "path": "/projects/git-assistant",
+                "target": "main",
+                "contextLines": 3
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
+          "get-current-branch": {
+            "path": "/projects/git-assistant",
+            "branch": "test/call-ducks"
+          },
+          "git-assistant-get-current-branch": {
+            "path": "/projects/git-assistant",
+            "branch": "test/call-ducks"
+          },
+          "get-git-diff-target": {
+            "path": "/projects/git-assistant",
+            "target": "main",
+            "contextLines": 3,
+            "diff": "diff --git a/file.txt b/file.txt"
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Explain commit abc123.",
+        "expected": [
+          {
+            "callsTool": "get-current-directory"
+          },
+          {
+            "callsTool": {
+              "name": "show-commit",
+              "arguments": {
+                "revision": "abc123"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
+          "show-commit": {
+            "path": "/projects/git-assistant",
+            "revision": "abc123",
+            "output": "commit abc123\nAuthor: Duck <duck@example.com>\nDate: ...\n    feat: add feature\n"
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Unstage all staged changes.",
+        "expected": [
+          {
+            "callsTool": "get-current-directory"
+          },
+          {
+            "callsTool": {
+              "name": "reset-staged"
+            }
+          }
+        ],
+        "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
+          "reset-staged": {
+            "path": "/projects/git-assistant",
+            "message": "All staged changes have been reset."
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Revert commit abc123 without committing.",
+        "expected": [
+          {
+            "callsTool": "get-current-directory"
+          },
+          {
+            "callsTool": {
+              "name": "revert-commit",
+              "arguments": {
+                "revision": "abc123",
+                "noCommit": true
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
+          "revert-commit": {
+            "path": "/projects/git-assistant",
+            "revision": "abc123",
+            "output": "Revert applied without commit."
+          }
+        }
+      },
+      {
+        "input": "@git-assistant Create a commit for my changes.",
         "expected": [
           {
             "callsTool": "get-current-directory"
@@ -238,10 +837,22 @@
             }
           },
           {
+            "callsTool": {
+              "name": "get-git-log",
+              "arguments": {
+                "limit": 5
+              }
+            }
+          },
+          {
             "callsTool": "commit-changes"
           }
         ],
         "mocks": {
+          "get-current-directory": {
+            "path": "/projects/git-assistant",
+            "gitDir": ".git"
+          },
           "get-git-changes": {
             "path": "/projects/git-assistant",
             "changes": {
@@ -263,61 +874,66 @@
               }
             }
           },
-          "get-current-directory": {
+          "get-git-log": {
             "path": "/projects/git-assistant",
-            "gitDir": ".git"
+            "commits": [
+              {
+                "hash": "aaaaaaa",
+                "authorName": "White Call Duck",
+                "authorEmail": "whitecallduck@example.com",
+                "date": "2024-01-01T10:00:00Z",
+                "subject": "feat: initial",
+                "body": ""
+              },
+              {
+                "hash": "bbbbbbb",
+                "authorName": "Pekin Duck",
+                "authorEmail": "pekinduck@example.com",
+                "date": "2024-01-02T11:00:00Z",
+                "subject": "fix: bug",
+                "body": ""
+              },
+              {
+                "hash": "ccccccc",
+                "authorName": "Crested Duck",
+                "authorEmail": "crestedduck@example.com",
+                "date": "2024-01-03T12:00:00Z",
+                "subject": "chore: update deps",
+                "body": ""
+              }
+            ]
           },
           "commit-changes": {
             "success": true,
-            "message": "refactor(package): update package.json",
+            "message": "Commit created",
             "path": "/projects/git-assistant"
           }
         }
       },
       {
-        "input": "@git-assistant Can you create a new branch named test/call-ducks?",
+        "input": "@git-assistant Create a conventional commit for my changes",
         "expected": [
           {
             "callsTool": "get-current-directory"
           },
           {
             "callsTool": {
-              "name": "run-git-command",
+              "name": "get-git-changes",
               "arguments": {
-                "command": "git checkout -b test/call-ducks",
-                "isGitRepo": true
+                "onlyIncludeStagedChanges": false
               }
-            }
-          }
-        ],
-        "mocks": {
-          "run-git-command": {
-            "command": "git checkout -b test/call-ducks",
-            "path": "/projects/git-assistant",
-            "output": ""
-          },
-          "get-current-directory": {
-            "path": "/projects/git-assistant",
-            "gitDir": ".git"
-          }
-        }
-      },
-      {
-        "input": "@git-assistant Current status of the repo please",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-current-directory"
             }
           },
           {
             "callsTool": {
-              "name": "run-git-command",
+              "name": "get-git-log",
               "arguments": {
-                "path": "/projects/git-assistant",
-                "isGitRepo": true
+                "limit": 5
               }
             }
+          },
+          {
+            "callsTool": "commit-changes"
           }
         ],
         "mocks": {
@@ -325,26 +941,76 @@
             "path": "/projects/git-assistant",
             "gitDir": ".git"
           },
-          "run-git-command": {
-            "command": "git status",
+          "get-git-changes": {
             "path": "/projects/git-assistant",
-            "output": "Your branch is up to date"
+            "changes": {
+              "status": "M package.json",
+              "stagedChanges": "",
+              "untrackedFiles": [],
+              "untrackedDiff": "",
+              "unstagedChanges": "diff --git a/package.json b/package.json"
+            },
+            "summary": {
+              "hasUnstagedChanges": false,
+              "hasStagedChanges": true,
+              "hasUntrackedFiles": false,
+              "totalFiles": 1,
+              "stats": {
+                "deletions": 0,
+                "filesChanged": 1,
+                "insertions": 0
+              }
+            }
+          },
+          "get-git-log": {
+            "path": "/projects/git-assistant",
+            "commits": [
+              {
+                "hash": "1111111",
+                "authorName": "White Call Duck",
+                "authorEmail": "whitecallduck@example.com",
+                "date": "2024-01-01T10:00:00Z",
+                "subject": "feat: add feature one",
+                "body": ""
+              },
+              {
+                "hash": "2222222",
+                "authorName": "Pekin Duck",
+                "authorEmail": "pekinduck@example.com",
+                "date": "2024-01-02T11:00:00Z",
+                "subject": "fix: bug fix",
+                "body": ""
+              },
+              {
+                "hash": "3333333",
+                "authorName": "Crested Duck",
+                "authorEmail": "crestedduck@example.com",
+                "date": "2024-01-03T12:00:00Z",
+                "subject": "chore: update deps",
+                "body": ""
+              }
+            ]
+          },
+          "commit-changes": {
+            "success": true,
+            "message": "Conventional commit created",
+            "path": "/projects/git-assistant"
           }
         }
       }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.87.4",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
     "node-spotlight": "^1.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.6",
+    "eslint": "^9.17.0",
+    "prettier": "^3.6.2",
     "typescript": "^5.4.5"
   },
   "scripts": {
@@ -353,5 +1019,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
