@@ -51,11 +51,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^2.2.2",
     "microsoft-cognitiveservices-speech-sdk": "^1.46.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",

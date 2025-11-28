@@ -4,17 +4,12 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import * as os from "os";
 import * as path from "path";
+import { showFailureToast } from "@raycast/utils";
 
 const execAsync = promisify(exec);
 
-interface Preferences {
-  speechKey: string;
-  serviceRegion: string;
-  voiceName: string;
-}
-
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.AzureSpeech>();
   const { speechKey, serviceRegion, voiceName } = preferences;
   try {
     // Close Raycast window
@@ -116,23 +111,13 @@ export default async function Command() {
           }
         },
         async (error) => {
-          console.error("Speech synthesis error:", error);
           synthesizer.close();
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Error",
-            message: error,
-          });
+          await showFailureToast(error, { title: "Error Occurred" });
           reject(error);
         },
       );
     });
   } catch (error) {
-    console.error("Caught exception:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error Occurred",
-      message: String(error),
-    });
+    await showFailureToast(error, { title: "Error Occurred" });
   }
 }
