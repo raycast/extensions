@@ -80,7 +80,41 @@
     }
   ],
   "ai": {
-    "instructions": "When the user asks about the Great Library or their indexed documents, call the ask tool to respond. Reference citations when they are available."
+    "instructions": "When the user asks about the Great Library or their indexed documents, call the ask tool to respond. Reference citations when they are available.",
+    "evals": [
+      {
+        "input" : "@great-library what is agent definition",
+        "mocks" : {
+          "ask" : {
+            "answer" : "In the context of AI engineering, a widely accepted definition for an \"agent\" is an LLM (Large Language Model) that executes tools within a loop to achieve a specific goal. This concept involves a \"tools in a loop\" pattern, often integrated into LLM APIs, where the loop has defined stopping conditions, and the objective can be set by a user or another LLM.\n\nHistorically, the term \"agent\" has been subject to considerable definitional confusion and varied interpretations across different fields. This lack of a shared understanding has often hindered clear communication. For instance, in 1994, Michael Wooldridge, citing Carl Hewitt, noted the difficulty in unifying the definition of \"agent,\" comparing it to the ambiguity of \"intelligence\" in AI.\n\nWhile the technical implementation often refers to connecting tools to an LLM to achieve a goal within a bounded loop, other interpretations exist:\n*   **Memory:** Some definitions emphasize memory, though the \"tool loop\" inherently includes short-term memory (conversation history), and long-term memory can be incorporated via additional tools.\n*   **Non-technical analogies:** In non-technical contexts, \"agent\" is sometimes over-interpreted through analogies like travel agents, employee replacements, or notions of \"autonomy\".\n*   **Replacing human employees:** Business professionals might view an agent as something that replaces human workers, such as customer service agents. However, this is largely considered speculative fiction because AI currently lacks accountability, a crucial aspect of human responsibility and learning from errors. As early as 1979, IBM highlighted that computers cannot be held accountable and therefore should not make decisions. True autonomy is not attributed to AI agents, despite their naming.\n\nOpenAI has also contributed to the definitional inconsistencies, with various interpretations from Sam Altman calling an agent \"an AI system that independently completes work\" to the \"ChatGPT agent\" for browser automation, and the Agents SDK which aligns more closely with the \"tool loop\" concept.",
+            "citations" : [
+              {
+                "documentName" : "an-llm-runs-tools-in-a-loop-to-achieve-a-goal-5d339b2e.md",
+                "id" : "396e386f-c136-47e1-a434-7b6e778e407f",
+                "snippet" : "# \"An LLM runs tools in a loop to achieve a goal\"\n\n\"An LLM runs tools in a loop to achieve a goal\"\n"
+              },
+              {
+                "documentName" : "the-window-watcher-7d8f5df8.md",
+                "id" : "aafa9723-2fbe-4121-ad40-144a49311df1",
+                "snippet" : "never taking her eyes off the window. She had a job to do.\n\nBy noon, she had successfully monitored seventeen birds, three squirrels, two delivery trucks, and one suspicious butterfly. The neighborhood was safe, thanks to her vigilant watch.\n\nExhausted from her duties, Whiskers curled into a tight ball on her cushion, tucking her nose under her paw. She would rest now, but only for a moment. \n\nThe window would need watching again soon.\n"
+              }
+            ],
+            "question" : "agent definition",
+            "success" : true
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "question" : "agent definition"
+              },
+              "name" : "ask"
+            }
+          }
+        ]
+      }
+    ]
   },
   "scripts": {
     "build": "ray build",
