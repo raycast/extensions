@@ -1,6 +1,5 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "type": "module",
   "name": "react-docs",
   "title": "React Documentation",
   "description": "Quick links to the new React documentation",
