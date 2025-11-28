@@ -6,6 +6,8 @@ import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { sleep } from "@lib/utils";
 import { Color, Image, getPreferenceValues } from "@raycast/api";
+import { HAArea, getHAAreas } from "@components/area/utils";
+import { HADevice, getHADevices } from "@components/device/utils";
 
 /**
  * Sleep to get state changes
@@ -86,6 +88,52 @@ export function filterStates(states: State[] | undefined, options?: { include?: 
     result = result.filter((s) => !wildcardFilters(ex, s.entity_id));
   }
   return result;
+}
+
+// Cache for devices to avoid repeated API calls
+let devicesCache: HADevice[] | null = null;
+
+/**
+ * Get area name for an entity
+ * @param state The entity state
+ * @param areas Optional cached areas list
+ * @returns Area name or undefined if not found
+ */
+export async function getEntityAreaName(state: State, areas?: HAArea[]): Promise<string | undefined> {
+  // First check if entity has area_id in attributes
+  if (state.attributes.area_id) {
+    const areaList = areas || (await getHAAreas());
+    if (areaList) {
+      const area = areaList.find((a) => a.area_id === state.attributes.area_id);
+      return area?.name || area?.area_id;
+    }
+  }
+
+  // Check if entity has a device with area_id
+  if (state.attributes.device_id) {
+    if (!devicesCache) {
+      devicesCache = await getHADevices();
+    }
+    const device = devicesCache?.find((d) => d.id === state.attributes.device_id);
+    if (device?.area_id) {
+      const areaList = areas || (await getHAAreas());
+      if (areaList) {
+        const area = areaList.find((a) => a.area_id === device.area_id);
+        return area?.name || area?.area_id;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Check if area display is enabled in preferences
+ * @returns true if area display is enabled
+ */
+export function isAreaDisplayEnabled(): boolean {
+  const prefs = getPreferenceValues();
+  return prefs.showAreas === true;
 }
 
 export const PrimaryIconColor = Color.Blue;

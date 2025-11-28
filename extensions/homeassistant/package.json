@@ -10,7 +10,8 @@
     "amuelli",
     "xilopaint",
     "krsntn",
-    "mikikiv"
+    "mikikiv",
+    "0xdhrv"
   ],
   "license": "MIT",
   "description": "Manage your smart home with Raycast",
@@ -644,6 +645,15 @@
       "default": false,
       "title": "Style",
       "description": "Show Entity IDs as subtitle"
+    },
+    {
+      "name": "showAreas",
+      "type": "checkbox",
+      "label": "Show Areas",
+      "required": false,
+      "default": false,
+      "title": "Style",
+      "description": "Show area information in entity lists"
     },
     {
       "name": "camerarefreshinterval",

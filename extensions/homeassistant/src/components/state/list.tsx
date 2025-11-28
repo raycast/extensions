@@ -28,9 +28,9 @@ import { ha, shouldDisplayEntityID } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getStateTooltip } from "@lib/utils";
 import { ActionPanel, Color, Image, List, Toast, showToast } from "@raycast/api";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStateSearch } from "./hooks";
-import { getIcon, getStateValue } from "./utils";
+import { getIcon, getStateValue, getEntityAreaName, isAreaDisplayEnabled } from "./utils";
 
 export function StatesList(props: {
   domain: string;
@@ -68,6 +68,13 @@ export function StatesList(props: {
 
 export function StateListItem(props: { state: State }): React.ReactElement {
   const state = props.state;
+  const [areaName, setAreaName] = React.useState<string | undefined>();
+
+  useEffect(() => {
+    if (isAreaDisplayEnabled()) {
+      getEntityAreaName(state).then(setAreaName);
+    }
+  }, [state]);
 
   let icon: Image.ImageLike | undefined;
   const subtitle = (state: State): string | undefined => {
@@ -144,6 +151,15 @@ export function StateListItem(props: { state: State }): React.ReactElement {
       actions={<StateActionPanel state={state} />}
       icon={icon || getIcon(state)}
       accessories={[
+        ...(areaName && isAreaDisplayEnabled()
+          ? [
+              {
+                text: areaName,
+                icon: { source: "home.svg", tintColor: Color.SecondaryText },
+                tooltip: `Area: ${areaName}`,
+              },
+            ]
+          : []),
         {
           text: firstAccessoryTitle(state),
           icon: firstAccessoryIcon(state),

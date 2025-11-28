@@ -1,5 +1,13 @@
 # Home Assistant Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Added option to show area information in entity lists
+- Added "Show Areas" preference in Style settings (disabled by default)
+- Area information is displayed as an accessory with home icon when available
+- Supports both direct entity area assignment and device-based area inheritance
+- Performance optimized with caching to avoid repeated API calls
+
 ## [Fix] - 2025-11-14
 
 - Replaced deprecated `kelvin` attribute with `color_temp_kelvin` for lights actions
