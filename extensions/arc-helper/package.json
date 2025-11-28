@@ -10,36 +10,42 @@
     {
       "name": "search-items",
       "title": "Search Items",
+      "subtitle": "Arc Helper",
       "description": "Search Arc Raiders items",
       "mode": "view"
     },
     {
       "name": "search-arcs",
       "title": "Search ARCs",
+      "subtitle": "Arc Helper",
       "description": "Browse ARC enemies and their descriptions",
       "mode": "view"
     },
     {
       "name": "search-quests",
       "title": "Search Quests",
+      "subtitle": "Arc Helper",
       "description": "Browse Arc Raiders quests with requirements and rewards",
       "mode": "view"
     },
     {
       "name": "event-timers",
       "title": "Event Timers",
+      "subtitle": "Arc Helper",
       "description": "View current and upcoming Arc Raiders events",
       "mode": "view"
     },
     {
       "name": "traders",
       "title": "Traders",
+      "subtitle": "Arc Helper",
       "description": "Browse trader inventories",
       "mode": "view"
     },
     {
       "name": "open-map",
       "title": "Open Map",
+      "subtitle": "Arc Helper",
       "description": "Open Arc Raiders interactive maps in browser",
       "mode": "view"
     }
