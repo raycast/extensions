@@ -4,7 +4,7 @@ All notable changes to the OSINT Toolkit extension will be documented in this fi
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
-## [1.0.0] - 2025-01-26
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of OSINT Toolkit extension
