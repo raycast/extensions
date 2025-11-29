@@ -10,6 +10,7 @@
     "Communication"
   ],
   "license": "MIT",
+  "platforms": ["macOS", "Windows"],
   "commands": [
     {
       "name": "clock-in",
@@ -147,7 +148,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.98.0",
+    "@raycast/api": "^1.103.9",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {

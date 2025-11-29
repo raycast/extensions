@@ -423,7 +423,10 @@ export function EditForm({
               title="Add Entry"
               icon={Icon.Plus}
               onAction={addEntry}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "n" },
+                Windows: { modifiers: ["ctrl"], key: "n" },
+              }}
             />
           )}
           {entries.length > 1 && (
@@ -431,7 +434,10 @@ export function EditForm({
               title="Remove Entry"
               icon={Icon.Minus}
               onAction={removeLastEntry}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "backspace" },
+                Windows: { modifiers: ["ctrl"], key: "backspace" },
+              }}
             />
           )}
         </ActionPanel>

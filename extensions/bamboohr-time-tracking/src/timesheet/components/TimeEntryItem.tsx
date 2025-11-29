@@ -113,7 +113,10 @@ export function TimeEntryItem({
               <Action.Push
                 title="Split Entry"
                 icon={Icon.ArrowsExpand}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "s" },
+                  Windows: { modifiers: ["ctrl"], key: "s" },
+                }}
                 target={
                   <EditForm
                     mode="split"
@@ -157,7 +160,10 @@ export function TimeEntryItem({
                   onSave={onDaySave}
                 />
               }
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "d" },
+                Windows: { modifiers: ["ctrl"], key: "d" },
+              }}
             />
             <Action.Push
               title="Add Entry"
@@ -173,14 +179,20 @@ export function TimeEntryItem({
                   onSave={onDaySave}
                 />
               }
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "n" },
+                Windows: { modifiers: ["ctrl"], key: "n" },
+              }}
             />
             <Action
               title="Delete Entry"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={() => void onDelete(entry)}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "backspace" },
+                Windows: { modifiers: ["ctrl"], key: "backspace" },
+              }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Navigation">
@@ -188,14 +200,20 @@ export function TimeEntryItem({
               title="Previous Month"
               icon={Icon.ArrowLeft}
               onAction={goToPreviousMonth}
-              shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+                Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+              }}
             />
             {!isCurrentMonth ? (
               <Action
                 title="Next Month"
                 icon={Icon.ArrowRight}
                 onAction={goToNextMonth}
-                shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "arrowRight" },
+                  Windows: { modifiers: ["ctrl"], key: "arrowRight" },
+                }}
               />
             ) : null}
             {!isCurrentMonth ? (
@@ -203,7 +221,10 @@ export function TimeEntryItem({
                 title="Current Month"
                 icon={Icon.Calendar}
                 onAction={goToCurrentMonth}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "t" },
+                  Windows: { modifiers: ["ctrl"], key: "t" },
+                }}
               />
             ) : null}
             <Action

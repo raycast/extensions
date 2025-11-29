@@ -180,20 +180,29 @@ export default function Command() {
               title="Previous Month"
               icon={Icon.ArrowLeft}
               onAction={goToPreviousMonth}
-              shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+                Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+              }}
             />
             <Action
               title="Next Month"
               icon={Icon.ArrowRight}
               onAction={goToNextMonth}
-              shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "arrowRight" },
+                Windows: { modifiers: ["ctrl"], key: "arrowRight" },
+              }}
             />
             {!isCurrentMonth ? (
               <Action
                 title="Current Month"
                 icon={Icon.Calendar}
                 onAction={goToCurrentMonth}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "t" },
+                  Windows: { modifiers: ["ctrl"], key: "t" },
+                }}
               />
             ) : null}
           </ActionPanel.Section>
@@ -202,7 +211,10 @@ export default function Command() {
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={() => void loadTimesheet()}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "r" },
+                Windows: { modifiers: ["ctrl"], key: "r" },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>
