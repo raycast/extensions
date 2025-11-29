@@ -36,7 +36,12 @@ export default function Command() {
   }, [searchText]);
 
   return (
-    <List searchBarPlaceholder="Search HTTP status codes..." onSearchTextChange={setSearchText} isShowingDetail>
+    <List
+      searchBarPlaceholder="Search HTTP status codes..."
+      onSearchTextChange={setSearchText}
+      isShowingDetail
+      isLoading={false}
+    >
       {filteredStatusCodes.map((status) => (
         <List.Item
           key={status.code}
