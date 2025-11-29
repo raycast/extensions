@@ -90,11 +90,7 @@ export default function Command() {
               title="Save to Mem0"
               onSubmit={(values: { text: string }) => handleAddMemory(values.text)}
             />
-            <Action
-              title="Cancel"
-              onAction={() => setIsEditing(false)}
-              shortcut={{ modifiers: ["cmd"], key: "escape" }}
-            />
+            <Action title="Cancel" onAction={() => setIsEditing(false)} />
           </ActionPanel>
         }
       >
