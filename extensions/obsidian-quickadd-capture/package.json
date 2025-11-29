@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-quickadd-capture",
+  "type": "module",
+  "title": "Obsidian QuickAdd Capture",
+  "description": "Create Script Commands that capture to Obsidian QuickAdd without context switching.",
+  "icon": "icon.png",
+  "author": "avgvstvs",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "keywords": [
+    "obsidian",
+    "quickadd",
+    "capture",
+    "notes",
+    "pkm"
+  ],
+  "version": "1.0.0",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-script-command",
+      "title": "Create QuickAdd Capture",
+      "description": "Create a Script Command for capturing to QuickAdd",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "scriptCommandsPath",
+      "title": "Script Commands Folder",
+      "description": "Path to your Raycast Script Commands folder (e.g., ~/scripts/raycast)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "~/scripts/raycast"
+    },
+    {
+      "name": "defaultVault",
+      "title": "Default Vault (Optional)",
+      "description": "Default Obsidian vault name for all captures",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/bun": "latest",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.6",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build --output dist",
+    "dev": "ray develop",
+    "lint": "eslint src --fix",
+    "format": "prettier --write src",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
