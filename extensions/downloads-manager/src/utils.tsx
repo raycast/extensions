@@ -15,7 +15,9 @@ export const defaultDownloadsLayout = preferences.downloadsLayout ?? "list";
 const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff", ".heic", ".svg"];
 
 export function isImageFile(filename: string): boolean {
-  const ext = filename.toLowerCase().slice(filename.lastIndexOf("."));
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex === -1) return false;
+  const ext = filename.toLowerCase().slice(dotIndex);
   return imageExtensions.includes(ext);
 }
 
