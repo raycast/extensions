@@ -16,6 +16,12 @@
   - Dataclasses
   - Pydantic Models
 
+### 🎲 Bulk Generation with Realistic Data
+- Generate 1-10,000 records at once
+- Powered by Faker.js for realistic mock data
+- Smart field detection (emails, names, dates, ages, etc.)
+- Contextually appropriate values based on field names
+
 ### 🔧 Flexible Field Management
 - Add/remove fields dynamically
 - Support for 5 data types: `String`, `Integer`, `Boolean`, `Date`, `Array`
@@ -51,9 +57,10 @@ Install from the [Raycast Store](https://raycast.com/kiing-dom/mock-data-generat
 2. **Select language** - Choose between Java or Python
 3. **Choose output format** - Select POJO, Record, Builder, Dict, Dataclass, or Pydantic
 4. **Name your class** - Enter a name like "User", "Product", etc.
-5. **Add fields** - Customize field names and types
-6. **Generate** - Press `Cmd+G` (Mac) or `Ctrl+G` (Windows)
-7. **Copy & paste** - Use `Cmd+C` to copy the generated code
+5. **Set record count** - Enter 1 for single record, or up to 10,000 for bulk generation
+6. **Add fields** - Customize field names and types
+7. **Generate** - Press `Cmd+G` (Mac) or `Ctrl+G` (Windows)
+8. **Copy & paste** - Use `Cmd+C` to copy the generated code
 
 ### Screenshots
 
@@ -189,6 +196,50 @@ class User(BaseModel):
     username: str
     email: str
     isActive: bool
+```
+
+### Bulk Generation Example (5 Records)
+When you set the record count to more than 1, the extension generates realistic random data:
+
+**Java (POJO with 5 records):**
+```java
+import java.util.Arrays;
+import java.util.List;
+
+public class User {
+    private Integer id;
+    private String email;
+    // ... class definition ...
+}
+
+// Generated 5 sample instances
+List<User> userList = Arrays.asList(
+    new User(4521, "john.doe@example.com"),
+    new User(8734, "jane.smith@test.org"),
+    new User(1256, "alice.jones@demo.net"),
+    new User(9102, "bob.wilson@sample.io"),
+    new User(3847, "carol.brown@mail.com")
+);
+```
+
+**Python (Dataclass with 5 records):**
+```python
+from dataclasses import dataclass
+
+@dataclass
+class User:
+    id: int
+    email: str
+    name: str
+
+# Generated 5 sample instances
+user_list = [
+    User(id=4521, email="john.doe@example.com", name="John Doe"),
+    User(id=8734, email="jane.smith@test.org", name="Jane Smith"),
+    User(id=1256, email="alice.jones@demo.net", name="Alice Jones"),
+    User(id=9102, email="bob.wilson@sample.io", name="Bob Wilson"),
+    User(id=3847, email="carol.brown@mail.com", name="Carol Brown")
+]
 ```
 
 ## 🎨 Supported Data Types

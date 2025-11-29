@@ -1,5 +1,7 @@
 import type { IconType } from 'react-icons';
 
+export type GeneratorFunction = (className: string, fields: Field[], count?: number) => string;
+
 export interface Field {
     name: string;
     type: FieldType;

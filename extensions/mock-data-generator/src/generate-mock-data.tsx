@@ -18,10 +18,13 @@ const FIELD_TYPES: { id: FieldType; name: string }[] = [
   { id: "array", name: "Array" },
 ];
 
+const MAX_RECORD_COUNT = 10000;
+
 export default function Command() {
   const [language, setLanguage] = useState<LanguageId>("java");
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("class");
   const [className, setClassName] = useState<string>("MyClass");
+  const [recordCount, setRecordCount] = useState<number>(1);
   const [fields, setFields] = useState<FieldWithId[]>([
     { id: "1", name: "id", type: "integer" },
     { id: "2", name: "name", type: "string" },
@@ -29,12 +32,29 @@ export default function Command() {
   const [generatedCode, setGeneratedCode] = useState<string>("");
   const [showPreview, setShowPreview] = useState<boolean>(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     try {
+      // Show progress toast for large datasets
+      if (recordCount > 100) {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: "Generating...",
+          message: `Creating ${recordCount} records with random data`,
+        });
+      }
+
       const fieldsWithoutId = fields.map(({ name, type }) => ({ name, type }));
-      const code = generateMockData(language, outputFormat, className, fieldsWithoutId);
+      const code = generateMockData(language, outputFormat, className, fieldsWithoutId, recordCount);
       setGeneratedCode(code);
       setShowPreview(true);
+
+      if (recordCount > 100) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Generated!",
+          message: `${recordCount} records created successfully`,
+        });
+      }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -235,6 +255,19 @@ export default function Command() {
         placeholder="e.g., User, Product, BlogPost"
         value={className}
         onChange={setClassName}
+      />
+
+      <Form.TextField
+        id="recordCount"
+        title="Number of Records"
+        placeholder="1"
+        value={recordCount.toString()}
+        onChange={(value) => {
+          const num = Number.parseInt(value) || 1;
+          const capped = Math.min(Math.max(num, 1), MAX_RECORD_COUNT);
+          setRecordCount(capped);
+        }}
+        info="Generate 1-10,000 records with realistic random data"
       />
 
       <Form.Separator />
