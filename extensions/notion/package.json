@@ -21,7 +21,8 @@
     "zsidnam",
     "edomora97",
     "samuelkraft",
-    "abesto"
+    "abesto",
+    "xmok"
   ],
   "categories": [
     "Applications",
@@ -42,6 +43,28 @@
           "required": false,
           "default": false,
           "description": "This action will be set as the primary action (⌘ + ⏎)."
+        },
+        {
+          "name": "useClipboard",
+          "type": "dropdown",
+          "title": "Use Clipboard to autofill",
+          "required": false,
+          "data": [
+            {
+              "title": "Don't use Clipboard",
+              "value": ""
+            },
+            {
+              "title": "Name (Title)",
+              "value": "title"
+            },
+            {
+              "title": "Content",
+              "value": "content"
+            }
+          ],
+          "default": "none",
+          "description": "Specify if Clipboard is used to autofill Title or Content"
         }
       ]
     },
@@ -227,7 +250,7 @@
       "title": "Internal Integration Secret",
       "required": false,
       "description": "In Notion, go to Settings & members > My connections > Develop or manage integrations > New integration",
-      "placeholder": "secret_FGDeSrZNodQuaJEqWzvxcTyrPlpBHYvdLpTZykrWEu"
+      "placeholder": "ntn_FGDeSrZNodQuaJEqWzvxcTyrPlpBHYvdLpTZykrWEu"
     },
     {
       "name": "open_in",
@@ -250,28 +273,28 @@
   "dependencies": {
     "@mozilla/readability": "^0.5.0",
     "@notionhq/client": "^2.2.15",
-    "@raycast/api": "^1.71.3",
+    "@raycast/api": "^1.103.9",
     "@raycast/utils": "^1.18.1",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^3.3.1",
     "linkedom": "^0.16.8",
-    "node-fetch": "^3.3.2",
     "notion-to-md": "^3.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.11.20",
-    "@types/react": "18.2.58",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
