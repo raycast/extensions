@@ -1,6 +1,10 @@
 # Brew Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Improvements] - {PR_MERGE_DATE}
+
+- Update dependencies and replace node-fetch with native fetch API
+
+## [Bug Fix] - 2025-11-03
 
 - Fixed an issue where the the terminal command may be mis-typed in the Raycast window
 
