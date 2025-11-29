@@ -2,7 +2,7 @@ import { Clipboard, environment, Toast } from "@raycast/api";
 import path from "path";
 import fs from "fs";
 import { stat } from "fs/promises";
-import fetch, { FetchError } from "node-fetch";
+import { Readable } from "stream";
 import { chain } from "stream-chain";
 import { parser } from "stream-json";
 import { filter } from "stream-json/filters/Filter";
@@ -104,7 +104,8 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
     if (!response.ok || !response.body) {
       throw new Error(`Invalid response ${response.statusText}`);
     }
-    await streamPipeline(response.body, fs.createWriteStream(remote.cachePath));
+    const nodeStream = Readable.fromWeb(response.body as import("stream/web").ReadableStream);
+    await streamPipeline(nodeStream, fs.createWriteStream(remote.cachePath));
   }
 
   async function updateCache(): Promise<void> {
@@ -198,7 +199,7 @@ export async function showFailureToast(title: string, error: Error): Promise<voi
   }
 
   console.log(`${title}: ${error}`);
-  const stderr = (error as ExecError).stderr ?? (error as FetchError).message ?? `${error}`;
+  const stderr = (error as ExecError).stderr ?? error.message ?? `${error}`;
   const options: Toast.Options = {
     style: Toast.Style.Failure,
     title: title,
