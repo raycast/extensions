@@ -23,6 +23,8 @@ export type Tab = {
   tabId: string;
   title: string;
   url?: string;
+  isPinned: boolean;
+  isFocused: boolean;
 };
 
 function getActiveProfilePath() {
@@ -45,6 +47,10 @@ function getActiveProfilePath() {
 
 function getHistoryPath() {
   return resolve(getActiveProfilePath(), "History");
+}
+
+function parseAppleScriptBoolean(value: string): boolean {
+  return value.toLowerCase() === "true";
 }
 
 function getHistoryQuery(searchText?: string, limit = 200) {
@@ -91,7 +97,15 @@ async function getTabs() {
             set wId to id of w
             
             repeat with t in every tab of w
-              set tId to id of t
+              try
+                set tId to id of t
+                if tId is missing value then
+                  set tId to ""
+                end if
+              on error
+                set tId to ""
+              end try
+              
               set tabTitle to title of t
               
               try
@@ -103,8 +117,11 @@ async function getTabs() {
                 set tabURL to ""
               end try
               
+              set tabPinned to isPinned of t
+              set tabFocused to isFocused of t
+              
               -- Output: windowId|||tabId|||title|||url
-              set output to output & wId & "|||" & tId & "|||" & tabTitle & "|||" & tabURL & "\\n"
+              set output to output & wId & "|||" & tId & "|||" & tabTitle & "|||" & tabURL & "|||" & tabPinned & "|||" & tabFocused & "\\n"
             end repeat
           end try
         end repeat
@@ -118,15 +135,17 @@ async function getTabs() {
 
   for (const line of lines) {
     if (line) {
-      // Format: windowId|||tabId|||title|||url
+      // Format: windowId|||tabId|||title|||url|||isPinned|||isFocused
       const parts = line.split("|||");
-      if (parts.length === 4) {
-        const [windowId, tabId, title, url] = parts;
+      if (parts.length === 6) {
+        const [windowId, tabId, title, url, isPinned, isFocused] = parts;
         tabs.push({
           windowId,
           tabId,
           title,
           url: url || undefined, // Empty string becomes undefined
+          isPinned: parseAppleScriptBoolean(isPinned),
+          isFocused: parseAppleScriptBoolean(isFocused),
         });
       }
     }

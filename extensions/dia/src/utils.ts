@@ -1,3 +1,4 @@
+import { Color, Icon, List } from "@raycast/api";
 import { type HistoryItem, type Tab } from "./dia";
 
 export function getSubtitle(url: string) {
@@ -8,6 +9,14 @@ export function getSubtitle(url: string) {
   } catch {
     return url;
   }
+}
+
+export function getAccessories(tab: Tab) {
+  const accessories: List.Item.Accessory[] = [];
+  if (tab.isFocused) {
+    accessories.push({ icon: { source: Icon.Dot, tintColor: Color.Blue }, tooltip: "Focused tab" });
+  }
+  return accessories;
 }
 
 export function filterTabs(tabs: Tab[] | undefined, query: string) {

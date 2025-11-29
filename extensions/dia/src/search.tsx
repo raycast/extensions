@@ -27,8 +27,16 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
+      <List.Section title="Pinned Tabs">
+        {filteredTabs
+          ?.filter((tab) => tab.isPinned)
+          ?.map((tab, index) => <TabListItem key={`pinned-tab-${tab.windowId}-${tab.tabId}-${index}`} tab={tab} />)}
+      </List.Section>
+
       <List.Section title="Open Tabs">
-        {filteredTabs?.map((tab, index) => <TabListItem key={`tab-${tab.windowId}-${tab.tabId}-${index}`} tab={tab} />)}
+        {filteredTabs
+          ?.filter((tab) => !tab.isPinned)
+          ?.map((tab, index) => <TabListItem key={`open-tab-${tab.windowId}-${tab.tabId}-${index}`} tab={tab} />)}
       </List.Section>
 
       {!isLoadingTabs && (

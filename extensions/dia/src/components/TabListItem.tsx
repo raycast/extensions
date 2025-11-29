@@ -1,7 +1,7 @@
 import { Action, ActionPanel, closeMainWindow, Icon, Image, Keyboard, List } from "@raycast/api";
 import { getFavicon, showFailureToast } from "@raycast/utils";
 import { focusTab, type Tab } from "../dia";
-import { getSubtitle } from "../utils";
+import { getAccessories, getSubtitle } from "../utils";
 
 interface TabListItemProps {
   tab: Tab;
@@ -13,6 +13,7 @@ export function TabListItem({ tab }: TabListItemProps) {
       icon={tab.url ? getFavicon(tab.url, { mask: Image.Mask.Circle }) : Icon.Globe}
       title={tab.title}
       subtitle={tab.url ? { value: getSubtitle(tab.url), tooltip: tab.url } : undefined}
+      accessories={getAccessories(tab)}
       actions={
         <ActionPanel>
           <Action
