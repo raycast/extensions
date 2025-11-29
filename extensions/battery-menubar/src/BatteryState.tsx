@@ -50,7 +50,6 @@ export const getBatteryState = async () => {
     minutesRemaining: timeRemaining != null ? timeRemaining % 60 : null,
     temperature,
     connected,
-    charging: connected, // Keep for backward compatibility
     isCharging, // New: Actual charging status
     isFullyCharged, // New: Whether fully charged
     chargingStatus, // New: Charging status string

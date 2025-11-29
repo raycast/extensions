@@ -53,7 +53,7 @@ export default function Command() {
   });
 
   const wattDiff =
-    stats?.prev?.watts && stats.latest.watts && stats.prev.charging === stats.latest.charging
+    stats?.prev?.watts && stats.latest.watts && stats.prev.chargingStatus === stats.latest.chargingStatus
       ? Math.round((stats.latest.watts - stats.prev.watts) * 10) / 10
       : null;
 
@@ -70,7 +70,7 @@ export default function Command() {
     ? undefined
     : stats.latest.chargingStatus === "fully charged" || stats.latest.chargingStatus === "on hold"
     ? Color.Green
-    : stats.latest.charging
+    : stats.latest.chargingStatus === "charging"
     ? Color.Blue
     : stats.latest.capacity < 0.1
     ? Color.Red
@@ -81,7 +81,7 @@ export default function Command() {
     : undefined;
 
   const remainingColor =
-    !stats || stats.latest.charging
+    !stats || stats.latest.chargingStatus === "charging"
       ? undefined
       : stats.latest.timeRemaining == null
       ? Color.SecondaryText
@@ -94,7 +94,7 @@ export default function Command() {
       : undefined;
 
   const powerColor =
-    !stats || stats.latest.charging || !stats.latest.watts
+    !stats || stats.latest.chargingStatus === "charging" || !stats.latest.watts
       ? undefined
       : -stats.latest.watts > (Number(preferences.highPowerUsage) || 500)
       ? Color.Purple
@@ -169,7 +169,7 @@ export default function Command() {
             <MenuBarExtra.Item
               icon={{ source: Icon.Clock, tintColor: remainingColor }}
               title={timeRemaining || "--:--"}
-              subtitle={stats.latest.charging ? "Time until charged" : "Time remaining"}
+              subtitle={stats.latest.chargingStatus === "charging" ? "Time until charged" : "Time remaining"}
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
@@ -196,11 +196,11 @@ export default function Command() {
                 tintColor: powerColor,
               }}
               title={stats.latest.watts ? `${Math.round(Math.abs(stats.latest.watts))}W` : "--"}
-              subtitle={stats.latest.charging ? "Power input (~1 min)" : "Power draw (~1 min)"}
+              subtitle={stats.latest.chargingStatus === "charging" ? "Power input (~1 min)" : "Power draw (~1 min)"}
               onAction={openBatterySettings}
             />
 
-            {!stats.latest.charging && wattDiff ? (
+            {stats.latest.chargingStatus === "discharging" && wattDiff ? (
               <MenuBarExtra.Item
                 icon={{
                   source: wattDiff > 0 ? Icon.Minus : wattDiff < 0 ? Icon.Plus : Icon.Dot,
