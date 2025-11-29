@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "windows-audio-switcher",
+  "title": "Windows Audio Switcher",
+  "description": "Quickly switch between audio input/output devices and set default/communication devices",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-output-device",
+      "title": "Switch Output Device",
+      "description": "Change default audio output/playback device",
+      "mode": "view"
+    },
+    {
+      "name": "switch-input-device",
+      "title": "Switch Input Device",
+      "description": "Change default audio input/recording device",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-audio-devices",
+      "title": "Refresh Audio Devices",
+      "description": "Rescan and update the list of available audio devices",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm run publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "Inovvia",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ]
+}
