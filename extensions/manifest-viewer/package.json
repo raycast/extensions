@@ -9,6 +9,10 @@
     "Developer Tools",
     "Productivity"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -27,7 +31,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
+    "@raycast/api": "^1.103.9",
     "@raycast/utils": "^1.16.3",
     "node-fetch": "^3.3.2"
   },
