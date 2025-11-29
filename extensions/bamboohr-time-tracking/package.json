@@ -13,13 +13,13 @@
   "commands": [
     {
       "name": "clock-in",
-      "title": "Clock In",
+      "title": "Clock in",
       "description": "Start time tracking by clocking in.",
       "mode": "no-view"
     },
     {
       "name": "clock-out",
-      "title": "Clock Out",
+      "title": "Clock out",
       "description": "Stops time tracking by clocking out",
       "mode": "no-view"
     },
