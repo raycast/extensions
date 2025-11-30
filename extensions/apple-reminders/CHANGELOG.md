@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Fix Day Grouping option displays duplicate days] - {PR_MERGE_DATE}
+## [Fix Day Grouping option displays duplicate days] - 2025-11-30
 
 - Fix an issue where enabling `Use Time of Day Grouping` would cause duplicate day sections to appear in the `My Reminders` view (Today and Scheduled)
 
