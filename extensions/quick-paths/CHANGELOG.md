@@ -6,10 +6,10 @@
 
 - Initial release
 - Quick access to favorite file paths from a searchable catalog
-- Paste paths directly into frontmost application
+- Transition to Search Files with selected path (Enter)
+- Paste paths into frontmost application (Shift+Enter)
+- Toggle between tilde and expanded formats (TAB)
 - Copy paths to clipboard (both tilde and expanded formats)
-- Transition to Search Files with selected path (TAB)
-- Toggle between tilde and expanded formats (Shift+TAB)
 - Edit, add, delete, and reorder path entries
 - Support for both CSV and TSV file formats
 - Auto-detection of file format

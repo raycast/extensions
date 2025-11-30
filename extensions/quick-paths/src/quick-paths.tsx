@@ -284,9 +284,17 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
+                    <Action.Open
+                      title="Search Files in Path"
+                      target={`raycast://extensions/raycast/file-search/search-files?fallbackText=${encodeURIComponent(entry.path)}`}
+                      application="com.raycast.macos"
+                      icon={Icon.MagnifyingGlass}
+                      shortcut={{ modifiers: [], key: "return" }}
+                    />
                     <Action.Paste
                       title="Paste to App"
                       content={pathToUse}
+                      shortcut={{ modifiers: ["shift"], key: "return" }}
                       onPaste={async () => {
                         await closeMainWindow();
                         await showToast({
@@ -297,15 +305,8 @@ export default function Command() {
                     />
                     <Action
                       title="Toggle Tilde Expansion"
-                      shortcut={{ modifiers: ["shift"], key: "tab" }}
-                      onAction={() => setKeepTilde(!keepTilde)}
-                    />
-                    <Action.Open
-                      title="Search Files in Path"
-                      target={`raycast://extensions/raycast/file-search/search-files?fallbackText=${encodeURIComponent(entry.path)}`}
-                      application="com.raycast.macos"
-                      icon={Icon.MagnifyingGlass}
                       shortcut={{ modifiers: [], key: "tab" }}
+                      onAction={() => setKeepTilde(!keepTilde)}
                     />
                     <Action.CopyToClipboard
                       title="Copy to Clipboard"

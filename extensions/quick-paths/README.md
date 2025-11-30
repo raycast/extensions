@@ -9,10 +9,10 @@ A Raycast extension for quickly accessing and inserting your favorite file paths
 ## Features
 
 - Choose from your predefined list of frequently-used paths
-- Insert paths directly into frontmost application or copy to clipboard
-- Transition to Search Files with selected path (TAB)
-- Expand tilde with one key press (Shift+TAB)
-- Edit, add, delete, and reorder paths
+- Transition to Search Files with selected path (Enter)
+- Paste path into frontmost application (Shift+Enter)
+- Toggle tilde expansion (TAB)
+- Copy to clipboard, edit, add, delete, and reorder paths
 
 ## Setup
 
@@ -38,9 +38,9 @@ Configure the file path in Raycast preferences for this extension.
 
 1. Open Raycast and search for "Quick Paths"
 2. Add paths using `Cmd+N` or search for existing paths
-3. Press Enter to paste into frontmost app
-4. Press TAB to transition to Search Files with the selected path
-5. Press Shift+TAB to toggle between tilde (`~`) and expanded formats
+3. Press TAB to toggle between tilde (`~`) and expanded formats
+4. Press Enter to transition to Search Files with the selected path
+5. Press Shift+Enter to paste into frontmost app
 
 ### Additional Actions
 
