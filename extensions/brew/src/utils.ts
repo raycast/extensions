@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
+import { ReadableStream } from "stream/web";
 import { chain } from "stream-chain";
 import { parser } from "stream-json";
 import { filter } from "stream-json/filters/Filter";
@@ -15,7 +16,7 @@ import { ExecError } from "./brew";
 export const supportPath: string = (() => {
   try {
     fs.mkdirSync(environment.supportPath, { recursive: true });
-  } catch (err) {
+  } catch {
     console.log("Failed to create supportPath");
   }
   return environment.supportPath;
@@ -104,8 +105,7 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
     if (!response.ok || !response.body) {
       throw new Error(`Invalid response ${response.statusText}`);
     }
-    const nodeStream = Readable.fromWeb(response.body as import("stream/web").ReadableStream);
-    await streamPipeline(nodeStream, fs.createWriteStream(remote.cachePath));
+    await streamPipeline(Readable.fromWeb(response.body as ReadableStream), fs.createWriteStream(remote.cachePath));
   }
 
   async function updateCache(): Promise<void> {

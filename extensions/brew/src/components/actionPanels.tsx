@@ -21,7 +21,8 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
           markdown={"```json\n" + JSON.stringify(props.obj, null, 2) + "\n```"}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="Copy Json" content={JSON.stringify(props.obj, null, 2)} />
+              {}
+              <Action.CopyToClipboard title="Copy JSON" content={JSON.stringify(props.obj, null, 2)} />
             </ActionPanel>
           }
         />
