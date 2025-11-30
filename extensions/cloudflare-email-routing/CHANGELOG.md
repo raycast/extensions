@@ -1,6 +1,6 @@
-Cloudflare Email Routing Changelog
+# Cloudflare Email Routing Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Update README + Use SDK for List Aliases] - {PR_MERGE_DATE}
 
 - Update README to clarify which permissions are required
 - Change **Delete Alias** shortcut to prevent clash
