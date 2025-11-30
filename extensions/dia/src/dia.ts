@@ -53,7 +53,7 @@ function parseAppleScriptBoolean(value: string): boolean {
   return value.toLowerCase() === "true";
 }
 
-function getHistoryQuery(searchText?: string, limit = 200) {
+function getHistoryQuery(searchText?: string, limit = 100) {
   const whereClause = searchText
     ? searchText
         .split(" ")
