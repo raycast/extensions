@@ -1,5 +1,9 @@
 # Zotero Changelog
 
+## [Features] - {PR_MERGE_DATE}
+
+- Add search through the notes
+
 ## [Fixes] - 2024-04-03
 
 - If there are no results to a search, display "No Results" rather than "Type something...".
