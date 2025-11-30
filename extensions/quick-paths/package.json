@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-paths",
+  "title": "Quick Paths",
+  "description": "Quickly access and insert your favorite file paths from a searchable catalog",
+  "icon": "icon.png",
+  "author": "akinori",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "quick-paths",
+      "title": "Quick Paths",
+      "description": "Search and insert a path from your catalog",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "csvFilePath",
+      "type": "textfield",
+      "required": false,
+      "title": "CSV File Path",
+      "description": "Path to CSV file with slug,description,path columns",
+      "default": "~/.config/raycast/quick-paths/paths.csv",
+      "placeholder": "~/.config/raycast/quick-paths/paths.csv"
+    },
+    {
+      "name": "defaultExpandTilde",
+      "type": "checkbox",
+      "required": false,
+      "title": "Default Path Format",
+      "description": "Keep tilde (~) by default instead of expanding to absolute path",
+      "default": true,
+      "label": "Keep tilde (~) notation"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.2.2",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
+    "untildify": "^6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
