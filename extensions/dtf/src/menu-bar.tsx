@@ -666,11 +666,15 @@ export default function MenuBar() {
             icon={Icon.Warning}
             title={error}
             tooltip="Click to retry"
-            onAction={() => {
-              launchCommand({
-                name: "menu-bar",
-                type: LaunchType.UserInitiated,
-              });
+            onAction={async () => {
+              try {
+                await launchCommand({
+                  name: "menu-bar",
+                  type: LaunchType.UserInitiated,
+                });
+              } catch (error) {
+                console.error("Failed to launch command:", error);
+              }
             }}
           />
         </MenuBarExtra.Section>
@@ -682,51 +686,71 @@ export default function MenuBar() {
           <MenuBarExtra.Item
             title="Popular"
             icon={Icon.Star}
-            onAction={() => {
-              launchCommand({
-                name: "popular-posts",
-                type: LaunchType.UserInitiated,
-              });
+            onAction={async () => {
+              try {
+                await launchCommand({
+                  name: "popular-posts",
+                  type: LaunchType.UserInitiated,
+                });
+              } catch (error) {
+                console.error("Failed to launch command:", error);
+              }
             }}
           />
           <MenuBarExtra.Item
             title="Fresh"
             icon={Icon.Clock}
-            onAction={() => {
-              launchCommand({
-                name: "fresh-posts",
-                type: LaunchType.UserInitiated,
-              });
+            onAction={async () => {
+              try {
+                await launchCommand({
+                  name: "fresh-posts",
+                  type: LaunchType.UserInitiated,
+                });
+              } catch (error) {
+                console.error("Failed to launch command:", error);
+              }
             }}
           />
           <MenuBarExtra.Item
             title="News"
             icon={Icon.Megaphone}
-            onAction={() => {
-              launchCommand({
-                name: "news",
-                type: LaunchType.UserInitiated,
-              });
+            onAction={async () => {
+              try {
+                await launchCommand({
+                  name: "news",
+                  type: LaunchType.UserInitiated,
+                });
+              } catch (error) {
+                console.error("Failed to launch command:", error);
+              }
             }}
           />
           <MenuBarExtra.Item
             title="Topics"
             icon={Icon.Tag}
-            onAction={() => {
-              launchCommand({
-                name: "browse-subsites",
-                type: LaunchType.UserInitiated,
-              });
+            onAction={async () => {
+              try {
+                await launchCommand({
+                  name: "browse-subsites",
+                  type: LaunchType.UserInitiated,
+                });
+              } catch (error) {
+                console.error("Failed to launch command:", error);
+              }
             }}
           />
           <MenuBarExtra.Item
             title="Top Blogs"
             icon={Icon.Trophy}
-            onAction={() => {
-              launchCommand({
-                name: "top-blogs",
-                type: LaunchType.UserInitiated,
-              });
+            onAction={async () => {
+              try {
+                await launchCommand({
+                  name: "top-blogs",
+                  type: LaunchType.UserInitiated,
+                });
+              } catch (error) {
+                console.error("Failed to launch command:", error);
+              }
             }}
           />
         </MenuBarExtra.Section>
@@ -743,11 +767,15 @@ export default function MenuBar() {
                 macOS: { modifiers: ["cmd"], key: "f" },
                 Windows: { modifiers: ["ctrl"], key: "f" },
               }}
-              onAction={() => {
-                launchCommand({
-                  name: "search-posts",
-                  type: LaunchType.UserInitiated,
-                });
+              onAction={async () => {
+                try {
+                  await launchCommand({
+                    name: "search-posts",
+                    type: LaunchType.UserInitiated,
+                  });
+                } catch (error) {
+                  console.error("Failed to launch command:", error);
+                }
               }}
             />
           )}
@@ -765,11 +793,15 @@ export default function MenuBar() {
               icon={Icon.ArrowClockwise}
               shortcut={Keyboard.Shortcut.Common.Refresh}
               tooltip={getRefreshTooltip()}
-              onAction={() => {
-                launchCommand({
-                  name: "menu-bar",
-                  type: LaunchType.UserInitiated,
-                });
+              onAction={async () => {
+                try {
+                  await launchCommand({
+                    name: "menu-bar",
+                    type: LaunchType.UserInitiated,
+                  });
+                } catch (error) {
+                  console.error("Failed to launch command:", error);
+                }
               }}
             />
           )}
