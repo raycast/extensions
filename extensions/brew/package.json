@@ -147,7 +147,6 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.0.0",
     "@raycast/api": "^1.103.6",
     "@raycast/utils": "^1.18.1",
     "@types/stream-json": "^1.7.8",
