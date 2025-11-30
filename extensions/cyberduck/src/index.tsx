@@ -36,7 +36,7 @@ export default function Command() {
   }
   return (
     <List
-      searchBarPlaceholder="Search connections..."
+      searchBarPlaceholder="Search connections"
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Protocol" onChange={setProtocol}>

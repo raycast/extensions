@@ -5,7 +5,7 @@
 - Filter connections by **protocol**
 - Modernize extension to use latest Raycast configuration
 - Update `fast-xml-parser` for faster core
-- Add **README.md**
+- Add **README.md** & **metadata**
 
 ## [Fix missing property title] - 2024-03-15
 
