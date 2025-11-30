@@ -112,7 +112,7 @@ async function getTabs() {
               set tabPinned to isPinned of t
               set tabFocused to isFocused of t
               
-              -- Output: windowId|||tabId|||title|||url
+              -- Output: windowId|||tabId|||title|||url|||isPinned|||isFocused
               set output to output & wId & "|||" & tId & "|||" & tabTitle & "|||" & tabURL & "|||" & tabPinned & "|||" & tabFocused & "\\n"
             end repeat
           end try
