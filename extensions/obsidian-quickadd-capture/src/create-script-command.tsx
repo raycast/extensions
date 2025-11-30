@@ -33,7 +33,7 @@ function generateScriptContent(
   defaultVault?: string
 ): string {
   const vault = values.vaultName || defaultVault;
-  const placeholder = values.placeholder || "What's on your mind?";
+  const placeholder = values.placeholder || "QuickAdd Input";
   // biome-ignore lint/suspicious/noTemplateCurlyInString: bash variable syntax in generated script
   const vaultParam = vault ? "&vault=\\${VAULT}" : "";
 
