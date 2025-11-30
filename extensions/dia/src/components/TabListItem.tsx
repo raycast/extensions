@@ -5,9 +5,11 @@ import { getAccessories, getSubtitle } from "../utils";
 
 interface TabListItemProps {
   tab: Tab;
+  searchText?: string;
+  onTabAction?: () => void;
 }
 
-export function TabListItem({ tab }: TabListItemProps) {
+export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) {
   return (
     <List.Item
       icon={tab.url ? getFavicon(tab.url, { mask: Image.Mask.Circle }) : Icon.Globe}
@@ -23,6 +25,7 @@ export function TabListItem({ tab }: TabListItemProps) {
               try {
                 await focusTab(tab);
                 await closeMainWindow();
+                onTabAction?.();
               } catch (error) {
                 await showFailureToast(error, {
                   title: "Failed focusing tab",
@@ -30,7 +33,26 @@ export function TabListItem({ tab }: TabListItemProps) {
               }
             }}
           />
-          {tab.url && <Action.OpenInBrowser title="Open URL in New Tab" url={tab.url} />}
+          {tab.url && (
+            <Action.OpenInBrowser
+              title="Open URL in New Tab"
+              url={tab.url}
+              onOpen={() => {
+                onTabAction?.();
+              }}
+            />
+          )}
+          {searchText && (
+            <Action.OpenInBrowser
+              title="Search Google"
+              url={`https://www.google.com/search?q=${encodeURIComponent(searchText)}`}
+              icon={Icon.MagnifyingGlass}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              onOpen={() => {
+                onTabAction?.();
+              }}
+            />
+          )}
           <ActionPanel.Section>
             {tab.url && (
               <>

@@ -5,13 +5,15 @@ import { getSubtitle } from "../utils";
 
 interface HistoryListItemProps {
   item: HistoryItem;
+  searchText?: string;
+  onHistoryAction?: () => void;
 }
 
-export function HistoryListItem({ item }: HistoryListItemProps) {
+export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryListItemProps) {
   return (
     <List.Item
       icon={getFavicon(item.url, { mask: Image.Mask.Circle })}
-      title={item.title}
+      title={item.title ?? "Untitled"}
       subtitle={{ value: getSubtitle(item.url), tooltip: item.url }}
       accessories={[{ date: new Date(item.lastVisitedAt) }]}
       actions={
@@ -19,11 +21,31 @@ export function HistoryListItem({ item }: HistoryListItemProps) {
           <ActionPanel.Section>
             <Action.Open
               icon={Icon.Globe}
-              title="Open in Browser"
+              title="Open Tab"
               target={item.url}
               application="company.thebrowser.dia"
+              onOpen={() => {
+                onHistoryAction?.();
+              }}
             />
-            <Action.OpenWith icon={Icon.AppWindow} path={item.url} />
+            <Action.OpenWith
+              icon={Icon.AppWindow}
+              path={item.url}
+              onOpen={() => {
+                onHistoryAction?.();
+              }}
+            />
+            {searchText && (
+              <Action.OpenInBrowser
+                title="Search Google"
+                url={`https://www.google.com/search?q=${encodeURIComponent(searchText)}`}
+                icon={Icon.MagnifyingGlass}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                onOpen={() => {
+                  onHistoryAction?.();
+                }}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard content={item.url} title="Copy URL" shortcut={Keyboard.Shortcut.Common.Copy} />
@@ -32,12 +54,14 @@ export function HistoryListItem({ item }: HistoryListItemProps) {
               title="Copy Formatted URL"
               shortcut={Keyboard.Shortcut.Common.CopyPath}
             />
-            <Action.CopyToClipboard
-              content={item.title}
-              title="Copy Title"
-              shortcut={Keyboard.Shortcut.Common.CopyName}
-            />
-            <Action.CopyToClipboard content={`[${item.title}](${item.url})`} title="Copy as Markdown" />
+            {item.title && (
+              <Action.CopyToClipboard
+                content={item.title}
+                title="Copy Title"
+                shortcut={Keyboard.Shortcut.Common.CopyName}
+              />
+            )}
+            <Action.CopyToClipboard content={`[${item.title ?? "Untitled"}](${item.url})`} title="Copy as Markdown" />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CreateQuicklink

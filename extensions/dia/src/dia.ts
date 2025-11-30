@@ -14,7 +14,7 @@ type LocalState = {
 export type HistoryItem = {
   id: number;
   url: string;
-  title: string;
+  title?: string;
   lastVisitedAt: string;
 };
 
@@ -35,7 +35,7 @@ function getActiveProfilePath() {
     const localState: LocalState = JSON.parse(fileContent);
 
     // Get the last used profile
-    const lastUsedProfile = localState.profile.last_used;
+    const lastUsedProfile = localState.profile.last_used || "Default";
 
     return resolve(homedir(), `Library/Application Support/Dia/User Data/${lastUsedProfile}`);
   } catch (error) {
@@ -97,15 +97,7 @@ async function getTabs() {
             set wId to id of w
             
             repeat with t in every tab of w
-              try
-                set tId to id of t
-                if tId is missing value then
-                  set tId to ""
-                end if
-              on error
-                set tId to ""
-              end try
-              
+              set tId to id of t
               set tabTitle to title of t
               
               try

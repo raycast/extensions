@@ -1,11 +1,11 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
-import { useSearchHistory } from "./dia";
 import { HistoryListItem } from "./components/HistoryListItem";
+import { useSearchHistory } from "./dia";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
-  const { isLoading, data, permissionView } = useSearchHistory(searchText);
+  const { isLoading, data, permissionView, revalidate } = useSearchHistory(searchText);
 
   if (permissionView) {
     return permissionView;
@@ -18,7 +18,7 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {data?.map((item) => <HistoryListItem key={item.id} item={item} />)}
+      {data?.map((item) => <HistoryListItem key={item.id} item={item} onHistoryAction={revalidate} />)}
     </List>
   );
 }

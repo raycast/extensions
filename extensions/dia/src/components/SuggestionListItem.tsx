@@ -5,9 +5,10 @@ import { getSubtitle } from "../utils";
 
 interface SuggestionListItemProps {
   suggestion: Suggestion;
+  onSuggestionAction?: () => void;
 }
 
-export function SuggestionListItem({ suggestion }: SuggestionListItemProps) {
+export function SuggestionListItem({ suggestion, onSuggestionAction }: SuggestionListItemProps) {
   return (
     <List.Item
       icon={getFavicon(suggestion.url, { mask: Image.Mask.Circle })}
@@ -18,14 +19,27 @@ export function SuggestionListItem({ suggestion }: SuggestionListItemProps) {
           <ActionPanel.Section>
             <Action.Open
               icon={Icon.Globe}
-              title="Open in Browser"
+              title="Open Tab"
               target={suggestion.url}
               application="company.thebrowser.dia"
+              onOpen={() => {
+                onSuggestionAction?.();
+              }}
             />
-            <Action.OpenWith icon={Icon.AppWindow} path={suggestion.url} />
+            <Action.OpenWith
+              icon={Icon.AppWindow}
+              path={suggestion.url}
+              onOpen={() => {
+                onSuggestionAction?.();
+              }}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard content={suggestion.url} title="Copy URL" shortcut={Keyboard.Shortcut.Common.Copy} />
+            <Action.CopyToClipboard
+              content={suggestion.url}
+              title="Copy URL"
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
             <Action.CopyToClipboard
               content={{ html: `<a href="${suggestion.url}">${suggestion.query}</a>` }}
               title="Copy Formatted URL"
@@ -49,4 +63,3 @@ export function SuggestionListItem({ suggestion }: SuggestionListItemProps) {
     />
   );
 }
-
