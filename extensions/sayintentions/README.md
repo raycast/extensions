@@ -13,6 +13,7 @@ Set command aliases for quick access. For example, set "Talk to ATC (COM1)" to `
 
 Then it's just: `Win+Space` → `a` → `Space` → type your message → `Enter`
 
-## Logo
+## References
 
-Logo from [SayIntentions website](https://www.sayintentions.ai/).
+- [SayAs API Docs](https://sayintentionsai.freshdesk.com/support/solutions/articles/154000233373-sayas-api-make-the-co-pilot-cabin-crew-atc-say-whatever-you-want-or-automate-your-own-comms-to)
+- Logo from [SayIntentions website](https://www.sayintentions.ai/).
