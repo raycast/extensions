@@ -35,6 +35,7 @@ export function useStations() {
       } catch (err) {
         const error = err instanceof Error ? err : new Error("An unknown error occurred.");
         setError(error);
+        showErrorToast(error);
       } finally {
         setIsLoading(false);
       }

@@ -1,4 +1,4 @@
-# Lyft Bike Station Status Changelog
+# Bikeshare Station Status Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
