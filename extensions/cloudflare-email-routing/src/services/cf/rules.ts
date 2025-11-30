@@ -55,11 +55,6 @@ export async function getAccountDomain(): Promise<string> {
   const response = await fetchWithAuth(url);
   const data = (await response.json()) as CloudflareResponse<Zone>;
 
-  //   const client = new Cloudflare({
-  //   apiToken: 'Sn3lZJTBX6kkg7OdcBUAxOO963GEIyGQqnFTOFYY',
-  // });
-  // const zone = await client.emailRouting.rules.list("");
-
   if (!data.success) {
     throw new Error(
       `Failed to fetch zone information: ${data.errors?.map((e: { message: string }) => e.message).join(", ") || "Unknown error"}`

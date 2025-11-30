@@ -55,7 +55,7 @@ After installing the extension, you will need to configure the following prefere
 -   **Toggle Details**: Press `⌘D` to view detailed information for an alias.
 -   **Copy Email**: Press `⌘C` to copy the alias's email address.
 -   **Edit Alias**: Press `⌘E` to open the edit view for the selected alias.
--   **Delete Alias**: Press `⌘⇧D` to delete the selected alias (with confirmation).
+-   **Delete Alias**: Press `Ctrl+X` to delete the selected alias (with confirmation).
 -   **Copy Forwarding Address**: Press `⌘⇧C` to copy the destination email address.
 
 ### Create Email Alias Command
