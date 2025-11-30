@@ -2,6 +2,12 @@
 
 Fast access to [SayIntentions](https://www.sayintentions.ai/) via keyboard shortcuts. Great for flight sim sessions where you don't want to speak but still want quick ATC communication.
 
+Supports sending to:
+- COM1
+- COM2
+- Intercom 1
+- Intercom 2
+
 ## Setup
 
 1. Get your API key from the [Pilot Portal](https://p2.sayintentions.ai/#account) under "API Key (ACARS ID)"
@@ -12,6 +18,8 @@ Fast access to [SayIntentions](https://www.sayintentions.ai/) via keyboard short
 Set command aliases for quick access. For example, set "Talk to ATC (COM1)" to `a`.
 
 Then it's just: `Win+Space` → `a` → `Space` → type your message → `Enter`
+
+This is best for one-off messages, e.g. "Ready for pushback" as your Co-Pilot can do the readbacks. This extension also supports both intercoms, so messages like "Please announce to the cabin that we are going to land soon" would be a great fit for this extension.
 
 ## References
 
