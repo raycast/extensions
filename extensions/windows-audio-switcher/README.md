@@ -1,4 +1,4 @@
-# Audio Switcher
+# Windows Audio Switcher
 
 A professional Raycast extension for Windows that enables seamless switching between audio output and input devices through integration with the AudioDeviceCmdlets PowerShell module.
 
