@@ -1587,19 +1587,19 @@
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^61.0.0",
-    "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^1.0.0",
+    "@linear/sdk": "^65.1.0",
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.2.2",
     "date-fns": "^4.1.0",
-    "file-type": "^20.4.1",
+    "file-type": "^21.1.1",
     "lodash": "^4.17.21",
-    "nanoid": "^5.1.5",
+    "nanoid": "^5.1.6",
     "node-emoji": "^2.2.0",
-    "remove-markdown": "^0.6.0"
+    "remove-markdown": "^0.6.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/lodash": "^4.17.16",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.21",
     "@types/node": "^22.14.1",
     "@types/react": "^19.1.2",
     "@types/remove-markdown": "^0.3.4",

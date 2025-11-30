@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Patch: Windows desktop app detection] - {PR_MERGE_DATE}
+
+- Fixed detection Linear desktop app on Windows
+- Dependency upgrades
+
 ## [Notification improvements] - 2025-10-29
 
 - Improved notification display to support all notification types by reading directly from the API
