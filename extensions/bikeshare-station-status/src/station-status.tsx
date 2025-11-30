@@ -1,37 +1,18 @@
 import { Action, ActionPanel, List, Icon, Color, open, getPreferenceValues, updateCommandMetadata } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { type Station } from "./utils/gbfs";
-import { useStations, useFavorites, showErrorToast } from "./utils/hooks";
+import { useStations, useFavorites } from "./utils/hooks";
 import { formatRelativeTime } from "./utils/date";
 import { getBikeIcon } from "./utils/icon";
-
-const REGION_NAMES: { [key: string]: string } = {
-  BAY: "Bay Wheels",
-  BKN: "Citi Bike",
-  CHI: "Divvy",
-  DC: "Capital Bikeshare",
-  PDX: "Biketown",
-};
+import { Region, REGION_CONFIG } from "./utils/constants";
 
 export default function Command() {
-  const { stations, isLoading, error } = useStations();
+  const preferences = getPreferenceValues<{ region: Region }>();
+  const { stations, isLoading } = useStations();
   const { favorites, addFavorite, removeFavorite } = useFavorites();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
-  useEffect(() => {
-    const updateSubtitle = async () => {
-      const preferences = getPreferenceValues<{ region: string }>();
-      const regionName = REGION_NAMES[preferences.region];
-      await updateCommandMetadata({ subtitle: regionName });
-    };
-    updateSubtitle();
-  }, []);
-
-  useEffect(() => {
-    if (error) {
-      showErrorToast(error);
-    }
-  }, [error]);
+  updateCommandMetadata({ subtitle: REGION_CONFIG[preferences.region].name });
 
   const favoriteStations = stations.filter((station) => favorites.includes(station.station_id));
   const otherStations = stations.filter(

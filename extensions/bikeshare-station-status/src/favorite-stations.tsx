@@ -1,29 +1,14 @@
 import { MenuBarExtra, Icon, open, getPreferenceValues, updateCommandMetadata } from "@raycast/api";
-import { useEffect } from "react";
 import { useStations, useFavorites, usePinnedStation } from "./utils/hooks";
 import { getBikeIcon } from "./utils/icon";
-
-const REGION_NAMES: { [key: string]: string } = {
-  BAY: "Bay Wheels",
-  BKN: "Citi Bike",
-  CHI: "Divvy",
-  DC: "Capital Bikeshare",
-  PDX: "Biketown",
-};
+import { Region, REGION_CONFIG } from "./utils/constants";
 
 export default function Command() {
+  const preferences = getPreferenceValues<{ region: Region }>();
   const { stations, isLoading } = useStations();
   const { favorites } = useFavorites();
   const { pinnedStationId, pinStation, unpinStation } = usePinnedStation();
-
-  useEffect(() => {
-    const updateSubtitle = async () => {
-      const preferences = getPreferenceValues<{ region: string }>();
-      const regionName = REGION_NAMES[preferences.region];
-      await updateCommandMetadata({ subtitle: regionName });
-    };
-    updateSubtitle();
-  }, []);
+  updateCommandMetadata({ subtitle: REGION_CONFIG[preferences.region].name });
 
   const allFavoriteStations = stations.filter((station) => favorites.includes(station.station_id));
   const pinnedStation = stations.find((station) => station.station_id === pinnedStationId);

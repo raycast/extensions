@@ -1,10 +1,8 @@
-import { LocalStorage, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useEffect, useState, useCallback } from "react";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { getStationStatus, getStationInformation, type Station, type StationStatus, type StationInfo } from "./gbfs";
 import type { Preferences } from "./constants";
-
-const FAVORITES_KEY = "favorites";
-const PINNED_STATION_KEY = "pinnedStation";
 
 export function useStations() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -49,61 +47,29 @@ export function useStations() {
 }
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const { value: favorites = [], setValue: setFavorites } = useLocalStorage<string[]>("favorites", []);
 
-  useEffect(() => {
-    async function loadFavorites() {
-      const storedFavorites = await LocalStorage.getItem<string>(FAVORITES_KEY);
-      if (storedFavorites) {
-        setFavorites(JSON.parse(storedFavorites));
-      }
-    }
-    loadFavorites();
-  }, []);
+  const addFavorite = async (id: string) => {
+    await setFavorites([...favorites, id]);
+  };
 
-  const addFavorite = useCallback(
-    async (id: string) => {
-      const newFavorites = [...favorites, id];
-      setFavorites(newFavorites);
-      await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
-    },
-    [favorites],
-  );
-
-  const removeFavorite = useCallback(
-    async (id: string) => {
-      const newFavorites = favorites.filter((fav) => fav !== id);
-      setFavorites(newFavorites);
-      await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
-    },
-    [favorites],
-  );
+  const removeFavorite = async (id: string) => {
+    await setFavorites(favorites.filter((fav) => fav !== id));
+  };
 
   return { favorites, addFavorite, removeFavorite };
 }
 
 export function usePinnedStation() {
-  const [pinnedStationId, setPinnedStationId] = useState<string | null>(null);
+  const { value: pinnedStationId, setValue: setPinnedStationId } = useLocalStorage<string | undefined>("pinnedStation");
 
-  useEffect(() => {
-    async function loadPinned() {
-      const storedPinned = await LocalStorage.getItem<string>(PINNED_STATION_KEY);
-      if (storedPinned) {
-        setPinnedStationId(storedPinned);
-      }
-    }
-    loadPinned();
-  }, []);
+  const pinStation = async (stationId: string) => {
+    await setPinnedStationId(stationId);
+  };
 
-  const pinStation = useCallback(async (stationId: string) => {
-    await LocalStorage.setItem(PINNED_STATION_KEY, stationId);
-    setPinnedStationId(stationId);
-  }, []);
-
-  const unpinStation = useCallback(async () => {
-    await LocalStorage.removeItem(PINNED_STATION_KEY);
-    setPinnedStationId(null);
-  }, []);
+  const unpinStation = async () => {
+    await setPinnedStationId(undefined);
+  };
 
   return { pinnedStationId, pinStation, unpinStation };
 }
