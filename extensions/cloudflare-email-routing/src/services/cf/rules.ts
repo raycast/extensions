@@ -11,6 +11,7 @@ import {
   constructRuleName,
 } from "../../utils";
 import { Zone } from "cloudflare/resources/zones/zones";
+import { Address } from "cloudflare/resources/email-routing/addresses";
 
 // Rate limiting helper
 class RateLimiter {
@@ -120,7 +121,7 @@ export async function createRule(domain: string): Promise<AliasRule> {
     }),
   });
 
-  const data = await response.json();
+  const data = (await response.json()) as CloudflareResponse<EmailRoutingRule>;
 
   if (!data.success) {
     throw new Error(
@@ -137,7 +138,7 @@ export async function updateRule(id: string, label: string, description?: string
   // Get the current rule to preserve email
   const getRuleUrl = `https://api.cloudflare.com/client/v4/zones/${config.zoneId}/email/routing/rules/${id}`;
   const getRuleResponse = await fetchWithAuth(getRuleUrl);
-  const getRuleData = await getRuleResponse.json();
+  const getRuleData = (await getRuleResponse.json()) as CloudflareResponse<EmailRoutingRule>;
 
   if (!getRuleData.success) {
     throw new Error(
@@ -159,7 +160,7 @@ export async function updateRule(id: string, label: string, description?: string
     }),
   });
 
-  const updateData = await updateResponse.json();
+  const updateData = (await updateResponse.json()) as CloudflareResponse<EmailRoutingRule>;
 
   if (!updateData.success) {
     throw new Error(
@@ -175,8 +176,7 @@ export async function deleteRule(id: string): Promise<void> {
   const response = await fetchWithAuth(url, {
     method: "DELETE",
   });
-
-  const data = await response.json();
+  const data = (await response.json()) as CloudflareResponse<Address>;
 
   if (!data.success) {
     throw new Error(
