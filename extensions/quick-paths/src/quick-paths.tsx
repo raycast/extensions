@@ -22,6 +22,7 @@ import { stringify } from "csv-stringify/sync";
 interface Preferences {
   csvFilePath: string;
   defaultExpandTilde: boolean;
+  enterAction: "search" | "paste";
 }
 
 interface PathEntry {
@@ -136,6 +137,41 @@ export default function Command() {
   const [keepTilde, setKeepTilde] = useState(preferences.defaultExpandTilde);
   const [fileContent, setFileContent] = useState("");
   const { push } = useNavigation();
+
+  function createSearchAction(
+    shortcut: React.ComponentProps<typeof Action.Open>["shortcut"],
+    entry: PathEntry,
+  ) {
+    return (
+      <Action.Open
+        title="Search Files in Path"
+        target={`raycast://extensions/raycast/file-search/search-files?fallbackText=${encodeURIComponent(entry.path)}`}
+        application="com.raycast.macos"
+        icon={Icon.MagnifyingGlass}
+        shortcut={shortcut}
+      />
+    );
+  }
+
+  function createPasteAction(
+    shortcut: React.ComponentProps<typeof Action.Paste>["shortcut"],
+    pathToUse: string,
+  ) {
+    return (
+      <Action.Paste
+        title="Paste to App"
+        content={pathToUse}
+        shortcut={shortcut}
+        onPaste={async () => {
+          await closeMainWindow();
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Path pasted",
+          });
+        }}
+      />
+    );
+  }
 
   async function loadEntries() {
     try {
@@ -284,25 +320,29 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action.Open
-                      title="Search Files in Path"
-                      target={`raycast://extensions/raycast/file-search/search-files?fallbackText=${encodeURIComponent(entry.path)}`}
-                      application="com.raycast.macos"
-                      icon={Icon.MagnifyingGlass}
-                      shortcut={{ modifiers: [], key: "return" }}
-                    />
-                    <Action.Paste
-                      title="Paste to App"
-                      content={pathToUse}
-                      shortcut={{ modifiers: ["shift"], key: "return" }}
-                      onPaste={async () => {
-                        await closeMainWindow();
-                        await showToast({
-                          style: Toast.Style.Success,
-                          title: "Path pasted",
-                        });
-                      }}
-                    />
+                    {preferences.enterAction === "search" ? (
+                      <>
+                        {createSearchAction(
+                          { modifiers: [], key: "return" },
+                          entry,
+                        )}
+                        {createPasteAction(
+                          { modifiers: ["shift"], key: "return" },
+                          pathToUse,
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {createPasteAction(
+                          { modifiers: [], key: "return" },
+                          pathToUse,
+                        )}
+                        {createSearchAction(
+                          { modifiers: ["shift"], key: "return" },
+                          entry,
+                        )}
+                      </>
+                    )}
                     <Action
                       title="Toggle Tilde Expansion"
                       shortcut={{ modifiers: [], key: "tab" }}

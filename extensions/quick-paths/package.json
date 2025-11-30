@@ -37,6 +37,24 @@
       "description": "Keep tilde (~) by default instead of expanding to absolute path",
       "default": true,
       "label": "Keep tilde (~) notation"
+    },
+    {
+      "name": "enterAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Enter Key Behavior",
+      "description": "Choose what Enter does",
+      "default": "search",
+      "data": [
+        {
+          "title": "Search files (Shift+Enter for paste)",
+          "value": "search"
+        },
+        {
+          "title": "Paste path (Shift+Enter for search)",
+          "value": "paste"
+        }
+      ]
     }
   ],
   "dependencies": {
