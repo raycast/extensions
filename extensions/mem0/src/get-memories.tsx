@@ -1,5 +1,5 @@
 import { List, Action, ActionPanel, Icon, getPreferenceValues, Keyboard } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState, useFetch } from "@raycast/utils";
 
 const API_BASE_URL = "https://api.mem0.ai/v1";
 
@@ -30,28 +30,21 @@ export default function Command() {
     isLoading,
     data: memories,
     error,
-  } = useCachedPromise(
-    (mem0ApiKey: string, defaultUserId: string) => async (options) => {
-      const response = await fetch(
-        `${API_BASE_URL}/memories/?user_id=${defaultUserId}&page=${options.page + 1}&page_size=50`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Token ${mem0ApiKey}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      const data = (await response.json()) as ApiResponse;
-      setTotalCount(data.count);
-      return {
-        data: data.results,
-        hasMore: data.next !== null,
-      };
-    },
-    [mem0ApiKey, defaultUserId],
+  } = useFetch(
+    (options) => `${API_BASE_URL}/memories/?user_id=${defaultUserId}&page=${options.page + 1}&page_size=50`,
     {
+      headers: {
+        Authorization: `Token ${mem0ApiKey}`,
+        "Content-Type": "application/json",
+      },
+      mapResult(result) {
+        const data = result as ApiResponse;
+        setTotalCount(data.count);
+        return {
+          data: data.results,
+          hasMore: data.next !== null,
+        };
+      },
       initialData: [],
     },
   );
