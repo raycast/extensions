@@ -9,18 +9,21 @@
     {
       "name": "switch-output-device",
       "title": "Switch Output Device",
+      "subtitle": "Headphones, speakers, and other playback devices",
       "description": "Change default audio output/playback device",
       "mode": "view"
     },
     {
       "name": "switch-input-device",
       "title": "Switch Input Device",
+      "subtitle": "Microphones and other recording devices",
       "description": "Change default audio input/recording device",
       "mode": "view"
     },
     {
       "name": "refresh-audio-devices",
       "title": "Refresh Audio Devices",
+      "subtitle": "Detect newly connected hardware",
       "description": "Rescan and update the list of available audio devices",
       "mode": "view"
     }
