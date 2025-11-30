@@ -1,0 +1,10 @@
+# Markdown files
+*.md
+
+# Test files (if needed)
+**/__tests__/**
+
+# Build output
+dist/
+node_modules/
+

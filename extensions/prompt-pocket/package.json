@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prompt-pocket",
+  "title": "Prompt Pocket",
+  "description": "Save, edit, and reuse text prompts with ease",
+  "icon": "icon.png",
+  "author": "marty-martini",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "prompt",
+    "clipboard",
+    "template",
+    "text",
+    "snippet"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "prompt-pocket",
+      "title": "Prompt Pocket",
+      "description": "View, search, and manage your saved prompts",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^1.17.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
+    "@types/uuid": "^10.0.0",
+    "@vitest/ui": "^4.0.14",
+    "eslint": "^8.57.0",
+    "happy-dom": "^20.0.11",
+    "prettier": "^3.7.2",
+    "typescript": "^5.5.3",
+    "vitest": "^4.0.14"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "dev:clean": "npm run clean && npm run dev",
+    "clean": "rm -rf dist/ && rm -rf ~/Library/Caches/com.raycast.macos/extensions",
+    "clean:full": "rm -rf dist/ node_modules/ && rm -rf ~/Library/Caches/com.raycast.macos/extensions && npm install",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  }
+}
