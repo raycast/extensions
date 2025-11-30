@@ -1,15 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "0.0.1",
   "name": "winutils",
   "title": "Winutils",
-  "description": "Launches ChrisTitusTech's WinUtil installer/script from GitHub (runs the WinUtil bootstrap).",
+  "description": "Launches ChrisTitusTech's WinUtil bootstrap from GitHub.",
   "icon": "favicons.png",
   "license": "MIT",
   "commands": [
     {
       "name": "winutils",
-      "title": "Winutils",
-      "description": "This command launches ChrisTitusTech's WinUtil",
+      "title": "WinUtils",
+      "description": "Run the WinUtil bootstrap script from ChrisTitusTech's GitHub.",
       "mode": "no-view"
     }
   ],
