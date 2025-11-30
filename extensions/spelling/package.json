@@ -1,0 +1,101 @@
+{
+  "name": "spelling",
+  "title": "Spelling",
+  "description": "Check spelling and get suggestions for misspelled words using the macOS dictionary",
+  "icon": "command-icon.png",
+  "author": "serpico",
+  "categories": ["Productivity", "System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "spell",
+      "title": "Check Spelling",
+      "description": "Type a word to get spelling suggestions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What happens when you select a word",
+      "type": "dropdown",
+      "required": false,
+      "default": "paste",
+      "data": [
+        { "title": "Paste to Active App", "value": "paste" },
+        { "title": "Copy to Clipboard", "value": "copy" }
+      ]
+    },
+    {
+      "name": "showHud",
+      "title": "Confirmation",
+      "description": "Show a confirmation overlay after selecting a word",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show confirmation HUD"
+    },
+    {
+      "name": "closeAfterAction",
+      "title": "",
+      "description": "Close Raycast after selecting a word",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Close Raycast after action"
+    },
+    {
+      "name": "showSuggestionsForCorrectWords",
+      "title": "Suggestions",
+      "description": "Show similar word suggestions even when the word is spelled correctly",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show suggestions for correctly spelled words"
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Language for spell checking",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        { "title": "English", "value": "en" },
+        { "title": "Spanish", "value": "es" },
+        { "title": "French", "value": "fr" },
+        { "title": "German", "value": "de" },
+        { "title": "Italian", "value": "it" },
+        { "title": "Portuguese", "value": "pt" },
+        { "title": "Dutch", "value": "nl" },
+        { "title": "Swedish", "value": "sv" },
+        { "title": "Norwegian", "value": "nb" },
+        { "title": "Danish", "value": "da" },
+        { "title": "Finnish", "value": "fi" },
+        { "title": "Polish", "value": "pl" },
+        { "title": "Russian", "value": "ru" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
