@@ -34,7 +34,6 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^20.14.9",
-    "@types/react": "^18.3.3",
     "@types/uuid": "^10.0.0",
     "@vitest/ui": "^4.0.14",
     "eslint": "^8.57.0",

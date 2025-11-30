@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { usePrompts } from "./hooks/usePrompts";
 import { usePromptActions } from "./hooks/usePromptActions";
 import { hasPlaceholders } from "./lib/placeholder";

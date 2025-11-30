@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { useState } from "react";
 import { Prompt, PromptFormValues } from "../types/prompt";
 import { createPrompt, updatePrompt } from "../lib/promptStorage";
 import { showSuccessToast, showErrorToast } from "../lib/toastUtils";
