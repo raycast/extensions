@@ -28,7 +28,7 @@ export async function getSprints({ fieldName, fieldValue }: GetSprintsParams) {
     sprints.map((sprint) => {
       try {
         return request<DetailedSprint>(`/sprint/${sprint.value}`, { useAgileApi: true });
-      } catch (error) {
+      } catch {
         return null;
       }
     }),
