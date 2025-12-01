@@ -21,13 +21,6 @@
   ],
   "preferences": [
     {
-      "name": "cloudToken",
-      "title": "Public code on Sourcegraph.com: Access token",
-      "description": "Configures 'Sourcegraph.com' commands - available under 'Profile' -> 'Access token' on Sourcegraph.com",
-      "required": false,
-      "type": "password"
-    },
-    {
       "name": "customInstance",
       "title": "Sourcegraph connection: URL",
       "description": "Required to use 'Sourcegraph' commands - Sourcegraph URL you want to connect to.",
@@ -48,6 +41,13 @@
       "description": "Optional proxy to use when using a custom Sourcegraph connection - presently, only Unix domain sockets are supported.",
       "required": false,
       "type": "textfield"
+    },
+    {
+      "name": "cloudToken",
+      "title": "Public code on Sourcegraph.com: Access token",
+      "description": "Configures 'Sourcegraph.com' commands - available under 'Profile' -> 'Access token' on Sourcegraph.com",
+      "required": false,
+      "type": "password"
     },
     {
       "name": "featureSearchPatternDropdown",
@@ -97,6 +97,60 @@
       "disabledByDefault": false
     },
     {
+      "name": "searchInstance",
+      "title": "Search Code",
+      "subtitle": "Sourcegraph",
+      "description": "Search code on a Sourcegraph instance or workspace.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "code search",
+        "src"
+      ],
+      "preferences": [
+        {
+          "name": "customInstanceDefaultContext",
+          "title": "Default context",
+          "description": "Default search context to set on all queries",
+          "placeholder": "global",
+          "required": false,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "searchHistoryInstance",
+      "title": "Code Search History",
+      "subtitle": "Sourcegraph",
+      "description": "Browse and launch recent code searches.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "search code",
+        "history",
+        "recent"
+      ]
+    },
+    {
+      "name": "manageBatchChangesInstance",
+      "title": "Manage Batch Changes",
+      "subtitle": "Sourcegraph",
+      "description": "Manage Batch Changes in Sourcegraph.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "batch",
+        "changes",
+        "bc"
+      ],
+      "disabledByDefault": true,
+      "preferences": []
+    },
+    {
       "name": "searchDotCom",
       "title": "Search Public Code",
       "subtitle": "Sourcegraph",
@@ -122,30 +176,6 @@
       ]
     },
     {
-      "name": "searchInstance",
-      "title": "Search Code",
-      "subtitle": "Sourcegraph",
-      "description": "Search code on a Sourcegraph instance or workspace.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "search",
-        "code",
-        "code search",
-        "src"
-      ],
-      "preferences": [
-        {
-          "name": "customInstanceDefaultContext",
-          "title": "Default context",
-          "description": "Default search context to set on all queries",
-          "placeholder": "global",
-          "required": false,
-          "type": "textfield"
-        }
-      ]
-    },
-    {
       "name": "searchHistoryDotCom",
       "title": "Search Public Code History",
       "subtitle": "Sourcegraph",
@@ -160,36 +190,6 @@
         "history",
         "recent"
       ]
-    },
-    {
-      "name": "searchHistoryInstance",
-      "title": "Code Search History",
-      "subtitle": "Sourcegraph",
-      "description": "Browse and launch recent code searches.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "search",
-        "code",
-        "search code",
-        "history",
-        "recent"
-      ]
-    },
-    {
-      "name": "manageBatchChangesInstance",
-      "title": "Manage Batch Changes",
-      "subtitle": "Sourcegraph",
-      "description": "Manage batch changes in Sourcegraph.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "batch",
-        "changes",
-        "bc"
-      ],
-      "disabledByDefault": true,
-      "preferences": []
     }
   ],
   "dependencies": {

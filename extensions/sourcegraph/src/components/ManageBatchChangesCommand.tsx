@@ -48,14 +48,14 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
 
   const { push } = useNavigation();
   if (error) {
-    ExpandableToast(push, "Unexpected error", "Get batch changes failed", error.message).show();
+    ExpandableToast(push, "Unexpected error", "Get Batch Changes failed", error.message).show();
   }
 
   const showSuggestions = !loading && searchText === "";
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={`Manage batch changes on ${srcName}`}
+      searchBarPlaceholder={`Manage Batch Changes on ${srcName}`}
       onSearchTextChange={setSearchText}
       filtering={true}
       selectedItemId={showSuggestions ? "first-result" : undefined}
@@ -74,7 +74,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
         </List.Section>
       )}
 
-      <List.Section title={"Batch changes"}>
+      <List.Section title={"Batch Changes"}>
         {batchChanges.map((b, i) => (
           <BatchChangeItem
             id={i === 0 ? "first-result" : undefined}

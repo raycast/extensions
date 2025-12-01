@@ -93,7 +93,7 @@ Recent searches are persisted [locally through a native Raycast API](https://dev
 ### Manage Batch Changes
 
 Browse, view, publish, and merge changesets for [batch changes](https://about.sourcegraph.com/batch-changes) straight from Raycast.
-Batch changes automate large-scale code changes to keep your code up to date, fix critical security issues, and pay down tech debt across all of your repositories.
+Batch Changes automate large-scale code changes to keep your code up to date, fix critical security issues, and pay down tech debt across all of your repositories.
 
 > [!NOTE]
 > Batch Changes are currently only supported when connected to a [self-hosted Sourcegraph instance](https://sourcegraph.com/docs/admin/deploy)
