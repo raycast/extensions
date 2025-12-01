@@ -158,7 +158,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         }
 
         await showToast({ style: Toast.Style.Success, title: "Captured content to page" });
-      } catch (error) {
+      } catch {
         await showToast({ style: Toast.Style.Failure, title: "Failed capturing content to page" });
       }
     },

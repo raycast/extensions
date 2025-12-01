@@ -147,7 +147,9 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
         } else {
           reset(initialValues);
           const titleProperty = databaseProperties?.find((dp) => dp.type == "title");
-          titleProperty && focus(createPropertyId(titleProperty));
+          if (titleProperty) {
+            focus(createPropertyId(titleProperty));
+          }
         }
       } catch (error) {
         console.error(error);
