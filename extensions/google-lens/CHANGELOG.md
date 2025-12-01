@@ -1,6 +1,6 @@
 # Google Lens Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-12-01
 
 - Add support for Windows platform.
 - Bump all dependencies to the latest.
