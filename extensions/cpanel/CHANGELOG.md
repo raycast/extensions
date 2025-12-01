@@ -1,6 +1,6 @@
 # cPanel Changelog
 
-## [Add Windows Support + Improve Invalid URL check] - {PR_MERGE_DATE}
+## [Add Windows Support + Improve Invalid URL check] - 2025-12-01
 
 - Extension now works in Windows
 - Fix error where some URLs were still being treated as Valid (ref: [Issue #23294](https://github.com/raycast/extensions/issues/23294))
