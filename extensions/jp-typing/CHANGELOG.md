@@ -3,12 +3,12 @@
 ## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
-- 日本語タイピング練習機能
-- リアルタイムフィードバック（CPM/WPM、正確性、連続正打数）
-- 単語モードと文章モードの練習
-- JIS、ヘボン式、寛容なローマ字入力方式サポート
-- 練習履歴の保存と統計表示
-- 設定カスタマイズ機能（練習時間、ローマ字規則、読み表示）
-- 履歴保持数の調整機能（10〜300件）
-- 単体テスト（romanizer、scorer、session、corpus、prefs）
-- ESLintとPrettierによるコード品質管理
+- Japanese typing practice functionality
+- Real-time feedback (CPM/WPM, accuracy, consecutive correct strokes)
+- Word mode and sentence mode practice
+- Support for JIS, Hepburn, and liberal romanization input methods
+- Practice history saving and statistics display
+- Settings customization (practice time, romanization rules, reading display)
+- Adjustable history retention (10-300 entries)
+- Unit tests (romanizer, scorer, session, corpus, prefs)
+- Code quality management with ESLint and Prettier
