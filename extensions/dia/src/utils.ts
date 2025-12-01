@@ -1,6 +1,23 @@
 import { Color, Icon, List } from "@raycast/api";
 import { type HistoryItem, type Tab } from "./dia";
 
+/**
+ * Escapes a string for safe use in AppleScript string literals.
+ * Escapes backslashes and quotes.
+ */
+export function escapeAppleScriptString(str: string): string {
+  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+/**
+ * Escapes special characters in SQL LIKE patterns to prevent SQL injection.
+ * Escapes: %, _, \, and quotes
+ * Note: Backslashes are doubled for SQL string literals, then special chars are escaped
+ */
+export function escapeSQLLikePattern(pattern: string): string {
+  return pattern.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/"/g, '""');
+}
+
 export function getSubtitle(url: string) {
   try {
     const { hostname } = new URL(url);

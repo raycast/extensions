@@ -3,6 +3,7 @@ import { resolve } from "path";
 import { homedir } from "os";
 import { readFileSync } from "fs";
 import dedent from "dedent";
+import { escapeAppleScriptString, escapeSQLLikePattern } from "./utils";
 
 type LocalState = {
   profile: {
@@ -58,7 +59,10 @@ function getHistoryQuery(searchText?: string, limit = 100) {
     ? searchText
         .split(" ")
         .filter((word) => word.length > 0)
-        .map((term) => `(url LIKE "%${term}%" OR title LIKE "%${term}%")`)
+        .map((term) => {
+          const escapedTerm = escapeSQLLikePattern(term);
+          return `(url LIKE "%${escapedTerm}%" ESCAPE '\\' OR title LIKE "%${escapedTerm}%" ESCAPE '\\')`;
+        })
         .join(" AND ")
     : undefined;
 
@@ -78,8 +82,8 @@ function getHistoryQuery(searchText?: string, limit = 100) {
 export function useSearchHistory(searchText?: string, options: { limit?: number } = {}) {
   const historyPath = getHistoryPath();
 
-  const escapedSearchText = searchText?.replace(/"/g, '""') ?? "";
-  const historyQuery = getHistoryQuery(escapedSearchText, options?.limit);
+  // getHistoryQuery now handles escaping internally
+  const historyQuery = getHistoryQuery(searchText, options?.limit);
 
   return useSQL<HistoryItem>(historyPath, historyQuery, {
     permissionPriming: "This extension needs access to read your Dia browser history.",
@@ -151,15 +155,19 @@ export function useTabs() {
 }
 
 export async function focusTab(tab: Tab) {
+  // Escape user input to prevent AppleScript injection
+  const escapedWindowId = escapeAppleScriptString(tab.windowId);
+  const escapedTabId = escapeAppleScriptString(tab.tabId);
+
   await runAppleScript(
     dedent`
       tell application "Dia"
         activate
 
         repeat with w in every window
-          if id of w is "${tab.windowId}" then
+          if id of w is "${escapedWindowId}" then
             repeat with t in every tab of w
-              if id of t is "${tab.tabId}" then
+              if id of t is "${escapedTabId}" then
                 focus t
                 exit repeat
               end if
@@ -188,6 +196,9 @@ export async function openNewTab(url: string) {
 
 export async function createNewWindow(profile?: string) {
   if (profile) {
+    // Escape user input to prevent AppleScript injection
+    const escapedProfile = escapeAppleScriptString(profile);
+
     await runAppleScript(
       dedent`
         tell application "Dia"
@@ -199,7 +210,7 @@ export async function createNewWindow(profile?: string) {
                 tell menu item "New Window" of menu "File"
                   click
                   delay 0.1
-                  click menu item "New ${profile} Window" of menu 1
+                  click menu item "New ${escapedProfile} Window" of menu 1
                 end tell
               end tell
             end tell
