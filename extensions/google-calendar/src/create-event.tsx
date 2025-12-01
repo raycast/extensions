@@ -28,7 +28,7 @@ type FormValues = {
   attendees: string | undefined;
   conferencingProvider: string | undefined;
   description: string | undefined;
-  eventTime : string;  
+  eventTime: string;
 };
 
 const preferences: Preferences.CreateEvent = getPreferenceValues();
@@ -79,7 +79,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
 
   const [conferencingProviders] = useConferenceProviders();
   const { data: calendarData, isLoading } = useCalendar(calendarId);
-  const { focus, handleSubmit, itemProps, reset , values } = useForm<FormValues>({
+  const { focus, handleSubmit, itemProps, reset, values } = useForm<FormValues>({
     initialValues: {
       calendar: props.launchContext?.calendar ?? "primary",
       title: props.launchContext?.title ?? "",
@@ -88,7 +88,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       attendees: props.launchContext?.attendees,
       conferencingProvider: props.launchContext?.conferencingProvider,
       description: props.launchContext?.description,
-      eventTime : "timed",
+      eventTime: "timed",
     },
     validation: {
       title: FormValidation.Required,
@@ -120,22 +120,22 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         return;
       }
 
-      let start: calendar_v3.Schema$EventDateTime = {};
-      let end: calendar_v3.Schema$EventDateTime = {};
+      const start: calendar_v3.Schema$EventDateTime = {};
+      const end: calendar_v3.Schema$EventDateTime = {};
 
       const isAllDay = values.eventTime === "all_day";
 
-      if (isAllDay) { // for all day events use date only format
-      start.date = toLocalYMD(startDate);
-      const endDateExclusive = new Date(startDate);
-      endDateExclusive.setDate(endDateExclusive.getDate() + 1);
-      end.date = toLocalYMD(endDateExclusive);
-        
+      if (isAllDay) {
+        // for all day events use date only format
+        start.date = toLocalYMD(startDate);
+        const endDateExclusive = new Date(startDate);
+        endDateExclusive.setDate(endDateExclusive.getDate() + 1);
+        end.date = toLocalYMD(endDateExclusive);
       } else {
         start.dateTime = startDate.toISOString();
         end.dateTime = new Date(startDate.getTime() + parsedMilliseconds).toISOString();
       }
-      
+
       const requestBody: calendar_v3.Schema$Event = {
         summary: values.title,
         description: addSignature(values.description),
@@ -158,7 +158,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
               }
             : undefined,
       };
-      
+
       const resetForm = () => {
         setCalendarId("primary");
         focus("title");
@@ -240,24 +240,13 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         type={Form.DatePicker.Type.DateTime}
         {...itemProps.startDate}
       />
-    <Form.Dropdown
-      title="Event Time"
-      {...itemProps.eventTime}
-    >
-      <Form.Dropdown.Item value="timed" title="Default" />
-      <Form.Dropdown.Item value="all_day" title="All day Event" />
-    </Form.Dropdown>
-
-
-
-
-    {values.eventTime === "timed" && (
-      <Form.TextField
-        title="Duration"
-        placeholder="30min, 1h, 1h30m..."
-        {...itemProps.duration}
-      />
-    )}
+      <Form.Dropdown title="Event Time" {...itemProps.eventTime}>
+        <Form.Dropdown.Item value="timed" title="Default" />
+        <Form.Dropdown.Item value="all_day" title="All day Event" />
+      </Form.Dropdown>
+      {values.eventTime === "timed" && (
+        <Form.TextField title="Duration" placeholder="30min, 1h, 1h30m..." {...itemProps.duration} />
+      )}
       <Form.TextField
         title="Guests"
         placeholder="Event guests..."

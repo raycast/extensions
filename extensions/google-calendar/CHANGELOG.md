@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [1.3.2] - 2025-12-01 
+## [1.3.2] - {PR_MERGE_DATE}
 
 - Feat(create-event): Added All-day Event support to the Create Event form.
 - UI: Introduced new "Event Time" selector for switching between timed and all-day events.
