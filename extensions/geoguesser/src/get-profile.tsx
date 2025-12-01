@@ -1,0 +1,136 @@
+import { Detail, ActionPanel, Action } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { getProfile, getProfileStats } from "./api/client";
+import { ProfileResponse, StatsResponse } from "./types";
+
+export default function ViewProfile() {
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
+  const [stats, setStats] = useState<StatsResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [profileData, statsData] = await Promise.all([getProfile(), getProfileStats()]);
+        setProfile(profileData);
+        setStats(statsData);
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  const xpProgress = profile?.user?.progress
+    ? Math.round(
+        ((profile.user.progress.xp - profile.user.progress.levelXp) /
+          (profile.user.progress.nextLevelXp - profile.user.progress.levelXp)) *
+          100,
+      )
+    : 0;
+
+  const progressBar = "█".repeat(Math.floor(xpProgress / 5)) + "░".repeat(20 - Math.floor(xpProgress / 5));
+
+  const markdown = `
+# ${profile?.user?.nick || "Loading..."}
+
+${profile?.user?.isVerified ? "✅ Verified" : ""} ${profile?.user?.isProUser ? "⭐ **Pro**" : ""} ${profile?.user?.type ? `**${profile.user.type}**` : ""}
+
+---
+
+## Level Progress
+**Level ${profile?.user?.progress?.level || "—"}** ${progressBar} **${xpProgress}%**
+
+\`${profile?.user?.progress?.xp?.toLocaleString("de-DE") || "—"} / ${profile?.user?.progress?.nextLevelXp?.toLocaleString("de-DE") || "—"} XP\`
+  `;
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
+      metadata={
+        <Detail.Metadata>
+          {/* Profile Section */}
+          <Detail.Metadata.Label
+            title="Country"
+            text={profile?.user?.countryCode?.toUpperCase() || "—"}
+            icon={`https://flagcdn.com/48x36/${profile?.user?.countryCode?.toLowerCase() || "de"}.png`}
+          />
+          <Detail.Metadata.Label
+            title="Member Since"
+            text={profile?.user?.created ? new Date(profile.user.created).toLocaleDateString("de-DE") : "—"}
+          />
+
+          <Detail.Metadata.Separator />
+
+          {/* Game Stats */}
+          <Detail.Metadata.Label title="Games Played" text={`${stats?.gamesPlayed || "—"}`} icon="🎮" />
+          <Detail.Metadata.Label
+            title="Total Score"
+            text={stats?.totalScore?.toLocaleString("de-DE") || "—"}
+            icon="🏆"
+          />
+          <Detail.Metadata.Label
+            title="Daily Challenges"
+            text={`${profile?.user?.dailyChallengeProgress || 0}`}
+            icon="📅"
+          />
+
+          <Detail.Metadata.Separator />
+
+          {/* Streak Progress */}
+          <Detail.Metadata.Label title="🔥 Streak Progress" />
+          <Detail.Metadata.TagList title="">
+            <Detail.Metadata.TagList.Item text={`🥉 ${profile?.user?.streakProgress?.bronze || 0}`} color="#CD7F32" />
+            <Detail.Metadata.TagList.Item text={`🥈 ${profile?.user?.streakProgress?.silver || 0}`} color="#C0C0C0" />
+            <Detail.Metadata.TagList.Item text={`🥇 ${profile?.user?.streakProgress?.gold || 0}`} color="#FFD700" />
+            <Detail.Metadata.TagList.Item text={`💎 ${profile?.user?.streakProgress?.platinum || 0}`} color="#00CED1" />
+          </Detail.Metadata.TagList>
+
+          <Detail.Metadata.Separator />
+
+          {/* Battle Royale */}
+          <Detail.Metadata.TagList title="Battle Royale">
+            <Detail.Metadata.TagList.Item text={`Level ${profile?.user?.br?.level || "—"}`} color="#FFD700" />
+            <Detail.Metadata.TagList.Item text={`Division ${profile?.user?.br?.division || "—"}`} color="#C0C0C0" />
+            <Detail.Metadata.TagList.Item text={`Rating: ${profile?.user?.competitive?.rating || 0}`} color="#CD7F32" />
+          </Detail.Metadata.TagList>
+
+          <Detail.Metadata.Separator />
+
+          {/* Explorer Progress */}
+          <Detail.Metadata.Label title="🌍 Explorer Progress" />
+          <Detail.Metadata.TagList title="">
+            <Detail.Metadata.TagList.Item text={`🥉 ${profile?.user?.explorerProgress?.bronze || 0}`} color="#CD7F32" />
+            <Detail.Metadata.TagList.Item text={`🥈 ${profile?.user?.explorerProgress?.silver || 0}`} color="#C0C0C0" />
+            <Detail.Metadata.TagList.Item text={`🥇 ${profile?.user?.explorerProgress?.gold || 0}`} color="#FFD700" />
+            <Detail.Metadata.TagList.Item
+              text={`💎 ${profile?.user?.explorerProgress?.platinum || 0}`}
+              color="#00CED1"
+            />
+          </Detail.Metadata.TagList>
+
+          <Detail.Metadata.Separator />
+
+          <Detail.Metadata.Link
+            title="View Full Profile"
+            target={`https://www.geoguessr.com${profile?.user?.url || ""}`}
+            text="Open in Browser"
+          />
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url={`https://www.geoguessr.com${profile?.user?.url || "/me/profile"}`} />
+          <Action.CopyToClipboard
+            title="Copy Profile URL"
+            content={`https://www.geoguessr.com${profile?.user?.url || ""}`}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
