@@ -1,6 +1,8 @@
 import { Field, LanguageId, OutputFormat, GeneratorFunction } from "../types";
 import { generateJavaClass, generateJavaRecord, generateJavaBuilder } from "./java";
 import { generatePythonDict, generatePythonDataclass, generatePydanticModel } from "./python";
+import { generateTSInterface, generateTSClass, generateTSType, generateZodSchema } from "./typescript";
+import { generateJSClass, generateJSObject } from "./javascript";
 
 const GENERATOR_MAP: Record<LanguageId, Record<string, GeneratorFunction>> = {
   java: {
@@ -13,6 +15,16 @@ const GENERATOR_MAP: Record<LanguageId, Record<string, GeneratorFunction>> = {
     dataclass: generatePythonDataclass,
     pydantic: generatePydanticModel,
   },
+  javascript: {
+    object: generateJSObject,
+    "class-js": generateJSClass,
+  },
+  typescript: {
+    interface: generateTSInterface,
+    type: generateTSType,
+    "class-ts": generateTSClass,
+    zod: generateZodSchema,
+  },
 };
 
 export function generateMockData(
@@ -20,7 +32,7 @@ export function generateMockData(
   format: OutputFormat,
   className: string,
   fields: Field[],
-  count: number = 1
+  count: number = 1,
 ): string {
   const generator = GENERATOR_MAP[language]?.[format];
 

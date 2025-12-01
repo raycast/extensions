@@ -131,11 +131,16 @@ function generateArrayValue(lowerName: string): string[] {
  * format value according to the target language
  */
 export function formatValueForLanguage(value: RandomValue, language: LanguageId, fieldType: FieldType): string {
-  if (language === "java") {
-    return formatValueForJava(value, fieldType);
+  switch (language) {
+    case "java":
+      return formatValueForJava(value, fieldType);
+    case "python":
+      return formatValueForPython(value, fieldType);
+    case "javascript":
+      return formatValueForJavaScript(value, fieldType);
+    case "typescript":
+      return formatValueForTypeScript(value, fieldType);
   }
-
-  return formatValueForPython(value, fieldType);
 }
 
 function formatValueForJava(value: RandomValue, fieldType: FieldType): string {
@@ -176,4 +181,29 @@ function formatValueForPython(value: RandomValue, fieldType: FieldType): string 
     default:
       return `"${value}"`;
   }
+}
+
+function formatValueForTypeScript(value: RandomValue, fieldType: FieldType): string {
+  switch (fieldType) {
+    case "string":
+      return `"${value}"`;
+    case "integer":
+      return value.toString();
+    case "boolean":
+      return value ? "true" : "false";
+    case "date":
+      return `new Date("${value}")`;
+    case "array": {
+      const items = Array.isArray(value) ? value : [value];
+      const formattedItems = items.map((v) => `"${v}"`).join(", ");
+      return `[${formattedItems}]`;
+    }
+    default:
+      return `"${value}"`;
+  }
+}
+
+function formatValueForJavaScript(value: RandomValue, fieldType: FieldType): string {
+  // Same as TypeScript for most cases
+  return formatValueForTypeScript(value, fieldType);
 }
