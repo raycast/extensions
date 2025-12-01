@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-12-01
+
+- Added support for Dia browser.
+
 ## [AI Assistant] - 2025-11-17
 
 - Added Raycast AI tooling so you can mention `@raindrop-io` in Raycast AI to search, inspect, and summarize bookmarks.

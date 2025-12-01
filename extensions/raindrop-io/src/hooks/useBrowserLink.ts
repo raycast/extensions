@@ -80,6 +80,11 @@ export function useBrowserLink() {
                 get value of UI element 1 of combo box 1 of group 1 of navigation
             end tell
           `);
+        case "company.thebrowser.dia":
+          return runAppleScript(`
+            tell application "Dia"
+              return URL of (first tab of front window whose isFocused is true)
+            end tell`);
         default:
           break;
       }
