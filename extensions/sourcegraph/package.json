@@ -233,5 +233,8 @@
     "raycast-publish": ".scripts/raycast-publish.sh",
     "gql": "graphql-codegen --config graphql-codegen.yml && npm run fmt",
     "postinstall": "patch-package"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
