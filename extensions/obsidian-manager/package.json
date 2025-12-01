@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-manager",
+  "title": "Obsidian Manager",
+  "description": "Ingests content from URLs, PDFs, and files into your Obsidian vault using AI",
+  "icon": "extension-icon.png",
+  "author": "seanwessmith",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ingest",
+      "title": "Ingest to Obsidian",
+      "subtitle": "AI Research Assistant",
+      "description": "Ingest content from URL or file with customizable research modes",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "source",
+          "placeholder": "URL or file path",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "batch-ingest",
+      "title": "Batch Ingest to Obsidian",
+      "subtitle": "Multiple Sources",
+      "description": "Ingest multiple URLs or files at once",
+      "mode": "view"
+    },
+    {
+      "name": "ingest-clipboard",
+      "title": "Quick Ingest from Clipboard",
+      "subtitle": "Clipboard URL",
+      "description": "Quickly ingest URL from clipboard with default settings",
+      "mode": "no-view"
+    },
+    {
+      "name": "research",
+      "title": "Research Query",
+      "subtitle": "AI Research",
+      "description": "Ask a research question and generate notes with expert-level analysis",
+      "mode": "view"
+    },
+    {
+      "name": "undo",
+      "title": "Undo Ingestion",
+      "subtitle": "Rollback Changes",
+      "description": "Undo recent ingestions and restore previous state",
+      "mode": "view"
+    },
+    {
+      "name": "organize",
+      "title": "Organize Vault",
+      "subtitle": "AI Organization",
+      "description": "Analyze and reorganize notes - rename, rewrite, or split into atomic notes",
+      "mode": "view"
+    },
+    {
+      "name": "recommend",
+      "title": "Vault Recommendations",
+      "subtitle": "Find Gaps",
+      "description": "Analyze your vault to find gaps, shallow areas, and missing connections",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Obsidian Vault Path",
+      "description": "Path to your Obsidian vault",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Your Google Gemini API key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "geminiModel",
+      "title": "Gemini Model",
+      "description": "Which Gemini model to use",
+      "type": "dropdown",
+      "required": false,
+      "default": "gemini-2.0-flash",
+      "data": [
+        {
+          "title": "Gemini 2.0 Flash",
+          "value": "gemini-2.0-flash"
+        },
+        {
+          "title": "Gemini 1.5 Pro",
+          "value": "gemini-1.5-pro"
+        },
+        {
+          "title": "Gemini 1.5 Flash",
+          "value": "gemini-1.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "uvPath",
+      "title": "uv Path (for YouTube)",
+      "description": "Path to uv command for YouTube transcription. Leave empty to use 'uv' from PATH. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/Users/you/.local/bin/uv"
+    }
+  ],
+  "dependencies": {
+    "@google/genai": "^1.30.0",
+    "@google/generative-ai": "^0.24.1",
+    "@mozilla/readability": "^0.6.0",
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^1.17.0",
+    "epub2": "^3.0.2",
+    "linkedom": "^0.18.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
