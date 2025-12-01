@@ -13,7 +13,7 @@
     {
       "name": "create-calendar-event-from-url",
       "title": "Create Calendar Event / Reminder from URL",
-      "subtitle": "Paste URL to receive a calendar event or reminder",
+      "subtitle": "Smart Calendars AI – Create Events / Reminders Using AI",
       "description": "Seamlessly convert URLs into calendar events or reminders. When you paste a URL containing event information, this feature extracts the relevant details and generates a calendar event or reminder. It's perfect for quickly adding webinars, online meetings, or any event linked online to your calendar, ensuring you never miss out on important events.",
       "mode": "no-view",
       "icon": "logo.png"
@@ -21,7 +21,7 @@
     {
       "name": "create-calendar-event-from-text",
       "title": "Create Calendar Event / Reminder from Text",
-      "subtitle": "Paste text to receive a calendar event or reminder",
+      "subtitle": "Smart Calendars AI – Create Events / Reminders Using AI",
       "description": "Transform any text into a calendar event or reminder with ease. Simply paste text containing event details, such as date, time, and location, and this feature will automatically create a calendar event or reminder for you. It's an efficient way to organize meetings and appointments directly from your clipboard, saving you time and ensuring you stay on top of your schedule.",
       "mode": "no-view",
       "icon": "logo.png"
@@ -29,7 +29,7 @@
     {
       "name": "create-calendar-event-from-image",
       "title": "Create Calendar Event / Reminder from Image",
-      "subtitle": "Process image to receive a calendar event or reminder",
+      "subtitle": "Smart Calendars AI – Create Events / Reminders Using AI",
       "description": "Extract event details or reminders from images (JPEG, PNG, GIF, BMP, TIFF). Processes images from clipboard or file picker. Perfect for concert posters, event flyers, and screenshots.",
       "mode": "view",
       "icon": "logo.png"
