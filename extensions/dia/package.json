@@ -79,6 +79,13 @@
       "subtitle": "Dia",
       "description": "Search your browsing history",
       "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Dia",
+      "description": "Search your bookmarks",
+      "mode": "view"
     }
   ],
   "dependencies": {
