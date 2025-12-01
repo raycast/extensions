@@ -20,36 +20,28 @@
       "title": "Search Passwords",
       "subtitle": "Passbolt",
       "description": "Search for passwords in Passbolt",
-      "mode": "view",
-      "icon": "command-icon.png",
-      "entrypoint": "src/search.tsx"
+      "mode": "view"
     },
     {
       "name": "create",
       "title": "Create Password",
       "subtitle": "Passbolt",
       "description": "Create a new password in Passbolt",
-      "mode": "view",
-      "icon": "command-icon.png",
-      "entrypoint": "src/create.tsx"
+      "mode": "view"
     },
     {
       "name": "generate-password",
       "title": "Generate Password",
       "subtitle": "Passbolt",
       "description": "Generate a secure password with customizable options",
-      "mode": "view",
-      "icon": "command-icon.png",
-      "entrypoint": "src/generate-password.tsx"
+      "mode": "view"
     },
     {
       "name": "generate-password-quick",
-      "title": "Generate Password (Quick)",
+      "title": "Generate Quick Password",
       "subtitle": "Passbolt",
       "description": "Quickly generate and copy/paste a password",
       "mode": "no-view",
-      "icon": "command-icon.png",
-      "entrypoint": "src/generate-password-quick.tsx",
       "preferences": [
         {
           "name": "quickAction",
@@ -80,9 +72,7 @@
       "title": "Authenticator",
       "subtitle": "Passbolt",
       "description": "View all TOTP codes from your Passbolt vault",
-      "mode": "view",
-      "icon": "command-icon.png",
-      "entrypoint": "src/authenticator.tsx"
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -120,20 +110,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "latest",
-    "@raycast/utils": "latest",
-    "node-fetch": "^3.3.2",
+    "@raycast/api": "1.103.0",
+    "@raycast/utils": "2.2.2",
     "openpgp": "^5.11.2",
     "otpauth": "^9.4.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "latest",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "@types/react-dom": "18.2.14",
-    "eslint": "latest",
-    "prettier": "latest",
-    "typescript": "latest"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -142,9 +130,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "overrides": {
-    "@types/react": "18.2.27",
-    "@types/react-dom": "18.2.14"
   }
 }

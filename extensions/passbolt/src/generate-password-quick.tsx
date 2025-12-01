@@ -1,13 +1,9 @@
 import { showHUD, Clipboard, getPreferenceValues } from "@raycast/api";
 import { generatePassword, getDefaultPasswordOptions } from "./utils/password-generator";
 
-interface Preferences {
-  quickAction: "copy" | "paste" | "copyAndPaste";
-}
-
 export default async function GeneratePasswordQuick() {
   try {
-    const prefs = getPreferenceValues<Preferences>();
+    const prefs = getPreferenceValues<Preferences.GeneratePasswordQuick>();
     const options = getDefaultPasswordOptions();
     const password = generatePassword(options);
 

@@ -1,18 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import * as openpgp from "openpgp";
-import fetch, { RequestInit, Response } from "node-fetch";
 import * as fs from "fs/promises";
 import { TOTP } from "otpauth";
-
-// Raycast environment has global fetch.
-// We might need to define types for Passbolt API responses.
-
-interface Preferences {
-  passboltUrl: string;
-  privateKey: string;
-  passphrase: string;
-  totpSecret?: string;
-}
 
 interface PassboltResponse<T = unknown> {
   header: {
