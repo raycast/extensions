@@ -1,36 +1,15 @@
+import { Memory } from "mem0ai";
+
 export interface MemoryResult {
   memory: string;
   event?: string;
 }
 
-export interface Memory {
-  id: string;
-  memory?: string;
-  user_id?: string;
-  hash?: string;
-  categories?: string[];
-  created_at?: string;
-  updated_at?: string;
-  memory_type?: string;
-  score?: number;
-  metadata?: Record<string, unknown>;
-  event?: string;
-  messages?: Array<{ role: string; content: string }>;
-  data?: { memory: string } | null;
-}
+// Re-export Memory type from mem0ai SDK
+export type { Memory };
 
-export interface SearchResult {
-  id: string;
-  memory?: string;
-  score?: number;
-  user_id?: string;
-  metadata?: Record<string, unknown>;
-  categories?: string[];
-  created_at?: string;
-  updated_at?: string;
-  memory_type?: string;
-  event?: string;
-}
+// SearchResult is essentially the same as Memory from the SDK
+export type SearchResult = Memory;
 
 export interface SearchResponse {
   results: SearchResult[];
