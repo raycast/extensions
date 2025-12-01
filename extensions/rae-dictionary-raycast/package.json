@@ -65,5 +65,8 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch --config jest.config.ts",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --config jest.config.ts",
     "test:updateSnapshots": "NODE_OPTIONS=--experimental-vm-modules jest --updateSnapshot --config jest.config.ts"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
