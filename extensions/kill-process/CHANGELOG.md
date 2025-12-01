@@ -1,5 +1,9 @@
 # Kill Process Changelog
 
+## [Fixed Force Kill in MacOS] - {PR_MERGE_DATE}
+
+- Fixed force kill for MacOS by encapsulating the kill command within a zsh shell
+
 ## [AI Updates] - 2025-11-27
 
  - Extract AI instructions from package.json into dedicated `ai.yaml` file
