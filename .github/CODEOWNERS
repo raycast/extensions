@@ -1297,7 +1297,7 @@
 /extensions/mutedeck                                                @chadrwalters
 /extensions/my-daily-log                                            @frugoman
 /extensions/my-idlers                                               @xmok
-/extensions/myanimelist-search                                      @luknl
+/extensions/myanimelist-search                                      @luknl @TakenMC
 /extensions/myip                                                    @kkange @iwyvi @j3lte @HsuQ @pernielsentikaer @ViGeng @sebdanielsson
 /extensions/mymind                                                  @arian81
 /extensions/mynaui-icons                                            @praveenjuge
@@ -1736,7 +1736,7 @@
 /extensions/rdw-kentekencheck                                       @jeffreyvanhees
 /extensions/re-mind                                                 @daniloc1910 @peduarte
 /extensions/react-devtools                                          @gutenye
-/extensions/react-docs                                              @webdiego
+/extensions/react-docs                                              @webdiego @0xdhrv
 /extensions/react-icons                                             @yug2005
 /extensions/react-native-directory                                  @shubh73
 /extensions/read-ai                                                 @JungHoonGhae @zezhehh
