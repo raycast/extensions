@@ -1,4 +1,5 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface Preferences {
   apiKey: string;
@@ -49,11 +50,7 @@ export async function sendToSayIntentions({
       return false;
     }
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    await showFailureToast(error, { title: "Failed to send message" });
     return false;
   }
 }
