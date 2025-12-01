@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Copilot usage] - {PR_MERGE_DATE}
+## [Copilot usage] - 2025-12-01
 
 - Add a command to view GitHub Copilot usage details
 
