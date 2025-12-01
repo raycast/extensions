@@ -1,6 +1,6 @@
 # Mem0 Changelog
 
-## [Fix Crash on Add + Cache Search] - {PR_MERGE_DATE}
+## [Fix Crash on Add + Cache Search] - 2025-12-01
 
 - Fixed issue with crash on adding a memory (ref: [Issue #23209](https://github.com/raycast/extensions/issues/23209))
 - "Search" is now `cached` through `useFetch`
