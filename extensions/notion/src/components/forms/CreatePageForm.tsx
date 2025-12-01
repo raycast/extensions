@@ -106,7 +106,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   );
 
   const { itemProps, values, handleSubmit, reset, focus, setValue } = useForm<CreatePageFormValues>({
-    initialValues: { ...initialValues },
+    initialValues,
     validation,
     async onSubmit(values) {
       const { closeAfterSave, ...pageValues } = values;
