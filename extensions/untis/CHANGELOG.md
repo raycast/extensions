@@ -1,6 +1,6 @@
 # Untis Changelog
 
-## [Added Windows Support] - {PR_MERGE_DATE}
+## [Added Windows Support] - 2025-12-01
 
 ## [Scheduled Maintenance] - 2025-12-01
 
