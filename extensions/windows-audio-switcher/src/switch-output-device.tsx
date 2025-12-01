@@ -1,10 +1,10 @@
 import { List, Action, ActionPanel, showToast, Toast, LocalStorage } from "@raycast/api";
-import { AudioDevice } from "./utils/audioDeviceCmdlets";
+import { AudioDevice, getAllAudioDevices } from "./utils/audioDeviceCmdlets";
 import React from "react";
 
 import { setDefaultAudioDevice } from "./utils/audioDeviceCmdlets";
 
-async function setOutputDevice(device: AudioDevice, mode: "Both" | "Default" | "Comm") {
+async function setOutputDevice(device: AudioDevice, mode: "Both" | "Default" | "Comm"): Promise<boolean> {
   await showToast({
     style: Toast.Style.Animated,
     title: `Switching output device...`,
@@ -32,6 +32,7 @@ async function setOutputDevice(device: AudioDevice, mode: "Both" | "Default" | "
         title: "Output device set",
         message: `${device.Name} (${mode})`,
       });
+      return true;
     } else {
       throw new Error("Failed to set output device");
     }
@@ -41,11 +42,52 @@ async function setOutputDevice(device: AudioDevice, mode: "Both" | "Default" | "
       title: "Failed to set output device",
       message: err instanceof Error ? err.message : "An unknown error occurred.",
     });
+    return false;
   }
 }
 
 export default function Command() {
   const [devices, setDevices] = React.useState<AudioDevice[]>([]);
+  const latestRequestId = React.useRef(0);
+
+  const refreshDevices = async () => {
+    const requestId = latestRequestId.current;
+    const allDevices = await getAllAudioDevices();
+    if (requestId !== latestRequestId.current) return;
+
+    await LocalStorage.setItem("audio-devices", JSON.stringify(allDevices));
+    const outputDevices = allDevices
+      .filter((device: AudioDevice) => device.Type === "Playback")
+      .sort((a: AudioDevice, b: AudioDevice) => a.Index - b.Index);
+    setDevices(outputDevices);
+  };
+
+  const handleSetDevice = async (device: AudioDevice, mode: "Both" | "Default" | "Comm") => {
+    const requestId = ++latestRequestId.current;
+    const previousDevices = [...devices];
+
+    const optimisticDevices = devices.map((d) => {
+      const newDevice = { ...d };
+      if (mode === "Default" || mode === "Both") {
+        newDevice.Default = d.ID === device.ID;
+      }
+      if (mode === "Comm" || mode === "Both") {
+        newDevice.DefaultCommunication = d.ID === device.ID;
+      }
+      return newDevice;
+    });
+    setDevices(optimisticDevices);
+
+    const success = await setOutputDevice(device, mode);
+
+    if (requestId === latestRequestId.current) {
+      if (success) {
+        await refreshDevices();
+      } else {
+        setDevices(previousDevices);
+      }
+    }
+  };
 
   React.useEffect(() => {
     (async () => {
@@ -80,9 +122,9 @@ export default function Command() {
           ].filter((accessory) => accessory.text)}
           actions={
             <ActionPanel>
-              <Action title="Set as Default Output" onAction={() => setOutputDevice(device, "Default")} />
-              <Action title="Set as Communication Output" onAction={() => setOutputDevice(device, "Comm")} />
-              <Action title="Set as Both" onAction={() => setOutputDevice(device, "Both")} />
+              <Action title="Set as Default Output" onAction={() => handleSetDevice(device, "Default")} />
+              <Action title="Set as Communication Output" onAction={() => handleSetDevice(device, "Comm")} />
+              <Action title="Set as Both" onAction={() => handleSetDevice(device, "Both")} />
             </ActionPanel>
           }
         />
