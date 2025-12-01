@@ -1,6 +1,6 @@
 # Cyberduck Changelog
 
-## [Filter by Protocol + Add README] - {PR_MERGE_DATE}
+## [Filter by Protocol + Add README] - 2025-12-01
 
 - Filter connections by **protocol**
 - Modernize extension to use latest Raycast configuration
