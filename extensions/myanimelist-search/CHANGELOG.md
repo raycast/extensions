@@ -1,6 +1,6 @@
 # Myanimelist search Changelog
 
-## [New Addition] - {PR_MERGE_DATE}
+## [New Addition] - 2025-12-01
 
 - Added windows support
 
