@@ -1,5 +1,6 @@
 import { vCenter } from "./api/vCenter";
 import { GetServer, GetServerLocalStorage, GetSelectedServer } from "./api/function";
+import { Shortcut } from "./api/shortcut";
 import { Datastore } from "./api/types";
 import * as React from "react";
 import {
@@ -161,14 +162,10 @@ export default function Command(): JSX.Element {
           onAction={() => {
             setShowDetail((prevState) => !prevState);
           }}
+          shortcut={Shortcut.ToggleQuickLook}
         />
         {!IsLoadingDatastores && (
-          <Action
-            title="Refresh"
-            icon={Icon.Repeat}
-            onAction={GetDatastores}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <Action title="Refresh" icon={Icon.Repeat} onAction={GetDatastores} shortcut={Shortcut.Refresh} />
         )}
         <ActionPanel.Section title="vCenter Server">
           {!IsLoadingServerLocalStorage && (

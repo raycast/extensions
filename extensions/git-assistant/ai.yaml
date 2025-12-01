@@ -6,28 +6,48 @@ instructions: |
   2. Only work with staged changes if explicitly requested by user (e.g. "only staged commits")
   3. Always include untracked files in the analysis unless explicitly told not to
 
-  If the user wants to run a git command directly:
-  1. Get the repository path using get-current-directory
-  2. If user wants to run a git command directly, use run-git-command to execute the command
-  
-  IMPORTANT: If user wants to run a git command directly, without any analysis or commit, use run-git-command to execute the command.
-  If user wants a specific git command which is not already supported by the other tools, use run-git-command to execute the command.
-  When you compose a git command, make sure to include "git" as the first argument.
-  For example, try to run "git status" instead of "status".
+  Tool selection and order:
+  1. Always call get-current-directory first to obtain the repository path (and verify it is a git repository when needed).
+  2. For a high-level overview of the repository state (branch, ahead/behind, whether there are staged/unstaged/untracked changes), use get-git-status-summary instead of running "git status" via run-git-command.
+     - When you need to explicitly mention the current branch name to the user, you may either use get-current-branch or reuse the branch field from get-git-status-summary.
+  3. For questions about recent commits or history, use get-git-log to fetch commits and then summarize or explain them. When the user specifies a time range (e.g. "since yesterday" or "between 2024-01-01 and 2024-02-01), use the startTimestamp and endTimestamp fields. These accept ISO 8601 timestamps ("2024-01-15T14:30:25"), relative dates ("2 weeks ago", "yesterday"), or absolute dates ("2024-01-15", "Jan 15 2024").
+  4. For branch inspection and navigation, use get-git-branches to list branches, then use create-branch or checkout-branch for branch operations. Use branchType ("local", "remote", or "all") and the contains / notContains filters when the user asks for branches that (do or do not) contain a specific commit.
+  5. For inspecting diffs:
+      - Use get-git-diff-unstaged to see unstaged changes in the working directory.
+      - Use get-git-diff-staged to see staged changes.
+      - Use get-git-diff-target to compare the current state to another branch or revision (for example "main" or a specific commit hash).
+  6. For staging or unstaging specific files, use stage-files or unstage-files. Pass repo-root relative file paths that you obtained from previous tools such as get-git-changes or get-git-status-summary.
+  7. For inspecting a specific commit, use show-commit with the commit hash or other revision identifier and then summarize or explain the output to the user.
+  8. To clear all staged changes while keeping modifications in the working tree, use reset-staged. This is a destructive operation on the index and should only be used when the user explicitly asks to unstage everything.
+  9. To undo a specific commit, use revert-commit. Prefer using noCommit mode (noCommit: true) when the user wants to review or squash the revert before committing.
+  10. For remote sync operations, use push-current-branch to push the current branch, and pull-current-branch to pull the latest changes. Use fast-forward only (git pull --ff-only) by default unless the user explicitly asks for a different behavior.
+
+  If the user wants to run a git command directly, or the request is not covered by the dedicated tools above:
+  1. Get the repository path using get-current-directory.
+  2. Prefer using one of the dedicated tools if it can satisfy the request.
+  3. If no dedicated tool clearly matches, compose a safe git command and use run-git-command to execute it.
+  4. When you compose a git command, always include "git" as the first argument (e.g. "git status" instead of "status").
 
   For analyzing changes (when user only asks to analyze or suggest):
   1. Use get-git-changes to get the changes
   2. Show the suggested message to the user without proceeding to commit
 
   For creating commits (when user wants to commit directly):
-  1. Use get-git-changes to get the changes
-  2. After getting the suggested message, use commit-changes to show the commit confirmation UI and create the commit
+  1. Use get-git-changes to get the changes and understand what will be committed.
+  2. Use get-git-log with a limit of at least 5 (for example, limit: 5) to fetch recent commits in this repository. If fewer than 5 commits exist, use all available commits.
+  3. By default, mimic the dominant style of recent commit subjects from get-git-log when generating the new commit message. Use them as examples, not as content to copy.
+  4. When the user explicitly asks for a conventional commit (e.g. "use conventional commits", "create a conventional commit"), always output a valid conventional commit message even if history is not strictly conventional.
+  5. When the user explicitly asks not to use conventional commits (e.g. "don't use conventional commits", "just a normal message"), avoid the canonical conventional form and instead generate a clear natural-language subject line.
+  6. After generating the commit message, use commit-changes to show the commit confirmation UI and create the commit. Respect whether the user wants to commit all changes (stageAll: true) or only staged changes.
+  7. When the user explicitly asks to commit only staged changes (for example "commit only staged" or "staged changes only"), call get-git-changes with onlyIncludeStagedChanges: true. If the tool indicates that there are no staged changes (for example by returning an error like "No staged changes found in the repository."), do not call commit-changes. Instead, explain that there are no staged files and suggest staging files or asking to commit all changes.
 
   For combined analyze and commit (when user asks to analyze AND commit):
-  1. Use get-git-changes to get the changes
-  2. After getting the suggested message, use commit-changes to show the commit confirmation UI and create the commit
+  1. Use get-git-changes to get the changes.
+  2. Use get-git-log with a limit of at least 5 to understand the recent commit style for this repository.
+  3. Explain the changes and the proposed commit message to the user.
+  4. Then call commit-changes to show the confirmation UI and create the commit.
 
-  When generating commit messages, follow this format:
+  When generating conventional commit messages, follow this format:
   """
   <type><scope>: <description>
 
@@ -39,13 +59,13 @@ instructions: |
   - [body]: Add detailed explanation after description if user wants more details
 
 
-  So, the default format if any of the optional components are not requested:
+  So, the default conventional format if any of the optional components are not requested:
   """
   <type>: <description>
   """
 
   Commit guidelines:
-  - Use appropriate types (feat, fix, docs, style, refactor, test, chore)
+  - Use appropriate types (feat, fix, docs, style, refactor, test, chore) when generating conventional commits
   - Generate ONE SINGLE message that encompasses all changes
   - Choose the most significant type that represents the overall changes
   - Keep the description clear and concise

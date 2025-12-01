@@ -8,7 +8,8 @@
   "contributors": [
     "j3lte",
     "markusjura",
-    "fabitosh"
+    "fabitosh",
+    "geekyed"
   ],
   "categories": [
     "Productivity",
@@ -46,7 +47,18 @@
       "title": "List Events",
       "description": "View your upcoming Google Calendar events",
       "mode": "view",
-      "subtitle": "Google Calendar"
+      "subtitle": "Google Calendar",
+      "preferences": [
+        {
+          "name": "openCommandJoinsMeeting",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Join meeting",
+          "description": "Change the default behavior when opening an event to directly join the meeting (if a meeting link is available)",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "list-calendars",
