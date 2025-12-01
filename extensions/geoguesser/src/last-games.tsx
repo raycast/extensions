@@ -322,13 +322,16 @@ ${myTeam?.roundResults
               const plonkItUrl = getPlonkItUrl(round.panorama.countryCode);
               if (!plonkItUrl) return null;
 
+              const validKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
+              const shortcutKey = round.roundNumber <= 9 ? validKeys[round.roundNumber - 1] : undefined;
+
               return (
                 <Action.OpenInBrowser
                   key={round.roundNumber}
                   title={`Round ${round.roundNumber}: ${round.panorama.countryCode.toUpperCase()}`}
                   url={plonkItUrl}
                   icon={Icon.Globe}
-                  shortcut={{ modifiers: ["cmd"], key: `${round.roundNumber}` }}
+                  shortcut={shortcutKey ? { modifiers: ["cmd"], key: shortcutKey } : undefined}
                 />
               );
             })}
