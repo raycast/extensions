@@ -1,9 +1,8 @@
-import { showHUD, confirmAlert, getPreferenceValues } from "@raycast/api";
+import { showHUD, confirmAlert, getPreferenceValues, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { writeFile } from "fs/promises";
-import { tmpdir } from "os";
 import { join } from "path";
 
 const execAsync = promisify(exec);
@@ -12,13 +11,23 @@ interface Preferences {
   showConfirmation: boolean;
 }
 
-async function executeReboot() {
-  const batPath = join(tmpdir(), "reboot_to_bios.bat");
+async function ensureBatFile(): Promise<string> {
+  // Use Raycast's support directory instead of a temporary directory.
+  const batPath = join(environment.supportPath, "reboot_to_bios.bat");
+
   const batContent = `@echo off
 if not DEFINED IS_MINIMIZED set IS_MINIMIZED=1 && start "" /min "%~f0" %* && exit
 shutdown /r /fw /t 0
 `;
+
+  // Future-proof: always (re)write the file so the content is guaranteed up to date.
   await writeFile(batPath, batContent);
+
+  return batPath;
+}
+
+async function executeReboot() {
+  const batPath = await ensureBatFile();
 
   // Show success message before executing, as the system will reboot immediately
   await showHUD("Rebooting to BIOS...");
