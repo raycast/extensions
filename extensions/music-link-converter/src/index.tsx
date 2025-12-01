@@ -114,7 +114,12 @@ export default function MusicLinkConverter(props: LaunchProps<{ arguments: { tex
                   title="Manage Providers"
                   icon={Icon.Gear}
                   onAction={async () => {
-                    await launchCommand({ name: "manage-providers", type: LaunchType.UserInitiated });
+                    try {
+                      await launchCommand({ name: "manage-providers", type: LaunchType.UserInitiated });
+                    } catch (error) {
+                      console.error("Failed to launch manage-providers command:", error);
+                      await showToast(Toast.Style.Failure, "Failed to launch manage-providers command");
+                    }
                   }}
                   shortcut={{
                     macOS: { modifiers: ["cmd"], key: "m" },

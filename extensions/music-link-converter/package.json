@@ -15,7 +15,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "convert-music-link",
+      "name": "index",
       "title": "Convert Music Link to Other Providers",
       "description": "Convert a music link to another provider. For example you can convert Spotify links to Apple music links. Also works with many other providers. Using song.link service.",
       "mode": "view",
