@@ -18,7 +18,9 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {data?.map((item) => <HistoryListItem key={item.id} item={item} onHistoryAction={revalidate} />)}
+      {data?.map((item) => (
+        <HistoryListItem key={item.id} item={item} onHistoryAction={revalidate} />
+      ))}
     </List>
   );
 }

@@ -48,4 +48,3 @@ export function matchesBookmarkQuery(text: string, parsedQuery: BookmarkParsedQu
 
   return hasAllIncludeTerms && hasNoExcludeTerms;
 }
-
