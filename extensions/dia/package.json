@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dia",
   "title": "Dia",
-  "description": "Extension for The Browser Company's new browser, currently in alpha.",
+  "description": "Search your open tabs and browsing history in Dia",
   "icon": "appIcon.png",
   "author": "tleo19",
   "contributors": [
-    "Daat"
+    "Daat",
+    "thomas"
   ],
   "categories": [
     "Productivity"
@@ -14,17 +15,31 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Dia",
+      "description": "Search open tabs and browsing history in Dia",
+      "mode": "view"
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Dia",
+      "description": "Search open tabs in Dia",
+      "mode": "view"
+    },
+    {
       "name": "search-history",
       "title": "Search History",
       "subtitle": "Dia",
-      "description": "Search browser history and open pages in Dia browser.",
+      "description": "Search browsing history in Dia",
       "mode": "view"
     },
     {
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
       "subtitle": "Dia",
-      "description": "Search bookmarks and open pages in Dia browser.",
+      "description": "Search bookmarks in Dia",
       "mode": "view"
     },
     {
@@ -48,12 +63,27 @@
       "subtitle": "Dia",
       "description": "Create a new incognito window.",
       "mode": "no-view"
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Dia",
+      "description": "Search open tabs in Dia",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Dia",
+      "description": "Search your browsing history",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.96.0",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.17.0",
-    "run-applescript": "^7.0.0"
+    "dedent": "^1.7.0",
+    "nanoid": "^3.3.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
