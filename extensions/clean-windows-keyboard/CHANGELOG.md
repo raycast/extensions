@@ -1,6 +1,6 @@
 # Clean Windows Keyboard Changelog
 
-## [Initial Release] - 2025-12-01
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added ability to lock keyboard for specific durations (15s to 24h)
 - Added `Ctrl + U` shortcut to unlock immediately

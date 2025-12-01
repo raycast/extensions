@@ -128,13 +128,21 @@ function CleaningView({ duration, icon }: { duration: number; icon: string }) {
         if (err) {
           console.warn("Failed to kill by PID, trying by name...", err);
           // 2. Fallback: Kill by image name
-          exec("taskkill /IM KeyboardBlocker.exe /F");
+          exec("taskkill /IM KeyboardBlocker.exe /F", (err2) => {
+            if (err2) {
+              console.error("Failed to kill by name:", err2);
+            }
+          });
         }
       });
     } else {
       // 3. Fallback if no ref: Kill by image name
       console.log("No PID ref, killing by name...");
-      exec("taskkill /IM KeyboardBlocker.exe /F");
+      exec("taskkill /IM KeyboardBlocker.exe /F", (err) => {
+        if (err) {
+          console.error("Failed to kill by name:", err);
+        }
+      });
     }
   };
 

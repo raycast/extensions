@@ -1,11 +1,10 @@
-import js from "@eslint/js";
-import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
 import reactPlugin from "eslint-plugin-react";
 import globals from "globals";
+import raycastConfig from "@raycast/eslint-config";
 
-export default [
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
+export default defineConfig([
+  ...raycastConfig.flat(),
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -26,4 +25,4 @@ export default [
   {
     ignores: ["dist/**", "src/native/**", "assets/**"]
   }
-];
+]);
