@@ -125,5 +125,5 @@ This extension support a few sub commands.
 - paste reference using CSA style to the frontmost application
 - paste bibtex entry for the paper to the frontmost application
 
-Please note that in case a reference has multiple PDF files associated with it, only the first PDF
-file returned by the sqlite database will be opened.
+Please note that in case a reference has multiple PDF files associated with it, the primary (oldest)
+PDF file will be opened, matching Zotero's native behavior.

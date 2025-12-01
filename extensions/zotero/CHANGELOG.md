@@ -3,6 +3,7 @@
 ## [Features] - {PR_MERGE_DATE}
 
 - Add search through the notes
+- Update "Open PDF" priority to select the "Primary" PDF (oldest attachment)
 
 ## [Fixes] - 2024-04-03
 

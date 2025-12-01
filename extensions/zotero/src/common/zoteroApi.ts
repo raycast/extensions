@@ -118,6 +118,7 @@ FROM itemAttachments
         ON itemAttachments.itemID = items.itemID
 WHERE itemAttachments.parentItemID = :id
 AND itemAttachments.contentType = 'application/pdf'
+ORDER BY items.dateAdded ASC
 `;
 
 const CREATORS_SQL = `
