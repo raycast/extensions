@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-12-01
 
 - Actual temp fix for windows
 - Added loading state to prevent flashing of Prism Launcher not installed
