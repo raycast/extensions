@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Enhancements] - 2025-12-01
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Added support for Dia browser.
 
