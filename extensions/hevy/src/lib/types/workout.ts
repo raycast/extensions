@@ -25,7 +25,7 @@ export type WorkoutExercise = {
 export type Workout = {
   id: string;
   title: string;
-  date: string;
+  created_at: string;
   duration: number;
   total_volume: number;
   routine_id?: string;
