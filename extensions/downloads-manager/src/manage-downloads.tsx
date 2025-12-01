@@ -15,7 +15,7 @@ function Command() {
 
   function handleTrash(paths: PathLike | PathLike[]) {
     setDownloads((downloads) =>
-      downloads.filter((download) => (Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path))
+      downloads.filter((download) => (Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path)),
     );
   }
 
