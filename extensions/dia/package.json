@@ -4,11 +4,13 @@
   "title": "Dia",
   "description": "Search your open tabs and browsing history in Dia",
   "icon": "appIcon.png",
+  "owner": "the-browser-company",
   "author": "tleo19",
   "contributors": [
     "Daat",
     "thomas"
   ],
+  "access": "public",
   "categories": [
     "Productivity"
   ],
