@@ -1,6 +1,6 @@
 # Code Quarkus Changelog
 
-## [Improve UI/UX and enable save configuration] - {PR_MERGE_DATE}
+## [Improve UI/UX and enable save configuration] - 2025-12-01
 - Improve general ui
 - Allow saving preferred configuration
 ## [Allow to automatically unzip and open the IDE] - 2025-02-28
