@@ -17,7 +17,7 @@
     "search",
     "code",
     "codesearch",
-    "code search"
+    "ai"
   ],
   "preferences": [
     {
@@ -38,7 +38,7 @@
     {
       "name": "customInstanceToken",
       "title": "Sourcegraph connection: Access token",
-      "description": "Required to use 'Sourcegraph' commands - available under 'Profile' -> 'Access token' in Sourcegraph.",
+      "description": "If set, takes precedence over OAuth login. Available under 'Profile' -> 'Access token' in Sourcegraph.",
       "required": false,
       "type": "password"
     },
@@ -72,7 +72,7 @@
       "name": "deepSearchInstance",
       "title": "Ask Deep Search",
       "subtitle": "Sourcegraph",
-      "description": "Ask deep questions about code on your Sourcegraph instance.",
+      "description": "Agentic, natural language code search.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
@@ -84,7 +84,7 @@
     },
     {
       "name": "deepSearchConversationsInstance",
-      "title": "View Deep Search Conversations",
+      "title": "Deep Search Conversations",
       "subtitle": "Sourcegraph",
       "description": "List and manage Deep Search conversations.",
       "mode": "view",
@@ -175,21 +175,6 @@
         "history",
         "recent"
       ]
-    },
-    {
-      "name": "findNotebooksInstance",
-      "title": "Find Search Notebooks",
-      "subtitle": "Sourcegraph",
-      "description": "Browse search notebooks in Sourcegraph.",
-      "mode": "view",
-      "keywords": [
-        "sourcegraph",
-        "search",
-        "notebook",
-        "snb"
-      ],
-      "disabledByDefault": true,
-      "preferences": []
     },
     {
       "name": "manageBatchChangesInstance",

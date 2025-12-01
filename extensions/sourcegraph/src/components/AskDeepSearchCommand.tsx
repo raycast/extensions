@@ -10,9 +10,11 @@ import {
   Toast,
   showToast,
   Color,
+  popToRoot,
+  open,
 } from "@raycast/api";
 import { DateTime } from "luxon";
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Sourcegraph, instanceName, LinkBuilder } from "../sourcegraph";
 import { useTelemetry } from "../hooks/telemetry";
@@ -33,6 +35,18 @@ export default function AskDeepSearchCommand({ src }: { src: Sourcegraph; props?
   useEffect(() => recorder.recordEvent("askDeepSearch", "start"), []);
 
   const { push } = useNavigation();
+  const questionRef = useRef("");
+
+  const openInBrowserUrl = () => {
+    const trimmed = questionRef.current.trim();
+    if (trimmed) {
+      const params = new URLSearchParams();
+      params.set("q", trimmed);
+      params.set("template", "true");
+      return link.new(src, "/deepsearch", params);
+    }
+    return link.new(src, "/deepsearch");
+  };
 
   return (
     <Form
@@ -44,18 +58,35 @@ export default function AskDeepSearchCommand({ src }: { src: Sourcegraph; props?
             icon={Icon.MagnifyingGlass}
             title="Ask Deep Search"
             onSubmit={async (values: { question: string }) => {
-              const question = values.question.trim();
-              if (!question) {
+              const q = values.question.trim();
+              if (!q) {
                 await showToast({ title: "Please enter a question", style: Toast.Style.Failure });
                 return;
               }
-              push(<DeepSearchConversationDetail src={src} question={question} />);
+              push(<DeepSearchConversationDetail src={src} question={q} />, () => {
+                // Don't return to the form again on pop
+                popToRoot();
+              });
             }}
+          />
+          <Action
+            icon={Icon.Globe}
+            title="Open in Browser"
+            shortcut={tertiaryActionShortcut}
+            onAction={() => open(openInBrowserUrl())}
           />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="question" title="Question" placeholder="Explain how authentication works in..." autoFocus />
+      <Form.TextArea
+        id="question"
+        title="Question"
+        placeholder="Explain how authentication works in..."
+        autoFocus
+        enableMarkdown={true}
+        info="Ask, plan, or search your codebases."
+        onChange={(v) => (questionRef.current = v)}
+      />
     </Form>
   );
 }
@@ -73,8 +104,10 @@ export type DeepSearchResultDetailProps =
 
 function useDeepSearchConversation(src: Sourcegraph, props: DeepSearchResultDetailProps) {
   const [conversation, setConversation] = useState<DeepSearchConversation | null>(
-    "conversation" in props && props.conversation ? props.conversation : null,
+    props.conversation ? props.conversation : null,
   );
+  const startedRef = useRef<string | null>(null);
+  const cancelRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   // Derived values
@@ -84,25 +117,24 @@ function useDeepSearchConversation(src: Sourcegraph, props: DeepSearchResultDeta
   const isLoading = isStarting || status === "pending" || status === "processing";
 
   useEffect(() => {
-    let didCancel = false;
+    cancelRef.current = false;
 
     async function poll(id: number) {
-      while (!didCancel) {
+      while (!cancelRef.current) {
         await new Promise((r) => setTimeout(r, 1000));
-        if (didCancel) return;
+        if (cancelRef.current) return;
 
         try {
           const next = await fetchDeepSearchConversation(src, id);
-          if (didCancel) return;
+          if (cancelRef.current) return;
           setConversation(next);
 
           const latest = next.questions[next.questions.length - 1];
-          if (latest.status === "completed" || latest.status === "failed") {
+          if (latest.status === "completed" || latest.error) {
             return;
           }
         } catch (e) {
-          if (didCancel) return;
-          // If polling fails, we keep trying
+          if (cancelRef.current) return;
           console.error("Deep Search polling error:", e);
         }
       }
@@ -110,48 +142,50 @@ function useDeepSearchConversation(src: Sourcegraph, props: DeepSearchResultDeta
 
     async function run() {
       try {
-        if ("conversation" in props && props.conversation) {
+        if (props.conversation) {
           setConversation(props.conversation);
           const latest = props.conversation.questions.at(-1);
-          if (!latest || latest.status === "completed" || latest.status === "failed") {
+          if (!latest || latest.status === "completed" || latest.error) {
             return;
           }
           await poll(props.conversation.id);
           return;
         }
 
-        if ("conversationId" in props && props.conversationId != null) {
+        if (props.conversationId != null) {
           const initial = await fetchDeepSearchConversation(src, props.conversationId);
-          if (didCancel) return;
+          if (cancelRef.current) return;
           setConversation(initial);
 
           const latest = initial.questions.at(-1);
-          if (!latest || latest.status === "completed" || latest.status === "failed") {
+          if (!latest || latest.status === "completed" || latest.error) {
             return;
           }
           await poll(initial.id);
           return;
         }
 
-        // Start new deep search
-        if (!("question" in props) || !props.question) {
+        if (!props.question) {
           throw new Error("No question or conversation provided to DeepSearchResultDetail");
         }
 
-        const started = await startDeepSearch(src, { question: props.question });
-        if (didCancel) return;
+        if (startedRef.current === props.question) {
+          return;
+        }
+        startedRef.current = props.question;
 
+        const started = await startDeepSearch(src, { question: props.question });
         setConversation(started);
 
         const latestQuestion = started.questions[started.questions.length - 1];
-        if (latestQuestion.status === "completed" || latestQuestion.status === "failed") {
+        if (latestQuestion.status === "completed" || latestQuestion.error) {
           return;
         }
 
         await poll(started.id);
       } catch (e) {
         console.error("Deep Search error:", e);
-        if (didCancel) return;
+        if (cancelRef.current) return;
         setError(e instanceof Error ? e.message : String(e));
       }
     }
@@ -159,15 +193,9 @@ function useDeepSearchConversation(src: Sourcegraph, props: DeepSearchResultDeta
     run();
 
     return () => {
-      didCancel = true;
+      cancelRef.current = true;
     };
-  }, [
-    src,
-    "conversationId" in props ? props.conversationId : undefined,
-    "question" in props ? props.question : undefined,
-    // We don't include props.conversation because it's an object and might change refs.
-    // We assume if we are passed a conversation object, it's the initial state.
-  ]);
+  }, [props.conversationId, props.question]);
 
   return {
     conversation,
@@ -178,10 +206,16 @@ function useDeepSearchConversation(src: Sourcegraph, props: DeepSearchResultDeta
   };
 }
 
-function mapStatusToTag(status: DeepSearchStatus | "pending" | "processing" | "completed" | "failed" | "starting"): {
+function mapStatusToTag(
+  status: DeepSearchStatus | "starting",
+  hasError: boolean,
+): {
   value: string;
   color: Color.ColorLike;
 } {
+  if (hasError) {
+    return { value: "Failed", color: Color.Red };
+  }
   switch (status) {
     case "pending":
       return { value: "Queued", color: Color.SecondaryText };
@@ -189,8 +223,6 @@ function mapStatusToTag(status: DeepSearchStatus | "pending" | "processing" | "c
       return { value: "Processing", color: Color.Blue };
     case "completed":
       return { value: "Completed", color: Color.Green };
-    case "failed":
-      return { value: "Failed", color: Color.Red };
     default:
       return { value: "Starting", color: Color.SecondaryText };
   }
@@ -217,15 +249,16 @@ export function DeepSearchConversationDetail(props: DeepSearchResultDetailProps)
 
   // If we are still loading the conversation or have an error (and no conversation), show the basic detail view
   if (!conversation || !selectedQuestion) {
-    const question = ("question" in props && props.question) || conversation?.questions[0]?.question || "";
-    const statusTag = mapStatusToTag(status);
+    const question = props.question || conversation?.questions[0]?.question || "";
+    const hasError = !!conversation?.questions[0]?.error;
+    const statusTag = mapStatusToTag(status, hasError);
     const date = conversation?.created_at
       ? DateTime.fromISO(conversation.created_at).toLocaleString(DateTime.DATETIME_MED)
       : null;
 
     return (
       <Detail
-        navigationTitle="Deep Search Conversation"
+        navigationTitle={question}
         isLoading={isLoading}
         metadata={
           <Detail.Metadata>
@@ -289,7 +322,7 @@ function DeepSearchQuestionDetailView({
     }
   }, [question.error, push]);
 
-  const statusTag = mapStatusToTag(question.status);
+  const statusTag = mapStatusToTag(question.status, !!question.error);
   const questionText = question.question;
   const date = question.created_at ? DateTime.fromISO(question.created_at).toLocaleString(DateTime.DATETIME_MED) : null;
 
@@ -326,6 +359,7 @@ function DeepSearchQuestionDetailView({
         showMetadata ? (
           <Detail.Metadata>
             <Detail.Metadata.Label title="Question" text={questionText} />
+            <Detail.Metadata.Separator />
             {date && <Detail.Metadata.Label title="Date" text={date} />}
             <Detail.Metadata.TagList title="Status">
               <Detail.Metadata.TagList.Item text={statusTag.value} color={statusTag.color} />
@@ -383,18 +417,19 @@ function DeepSearchConversationListView({
     >
       <List.Section title="Questions">
         {conversation.questions.map((q) => {
-          const statusTag = mapStatusToTag(q.status);
+          const hasError = !!q.error;
+          const statusTag = mapStatusToTag(q.status, hasError);
           return (
             <List.Item
               key={q.id}
               title={q.question}
               subtitle={
-                q.status === "completed" && q.answer
+                q.status === "completed" && !hasError && q.answer
                   ? q.answer.slice(0, 200).replace(/\n/g, " ") + (q.answer.length > 200 ? "..." : "")
                   : statusTag.value
               }
               accessories={
-                q.status !== "completed"
+                q.status !== "completed" || hasError
                   ? [
                       {
                         tag: { value: statusTag.value, color: statusTag.color },

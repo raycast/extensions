@@ -1,5 +1,10 @@
-import { Toast, Detail, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Toast, Detail, useNavigation } from "@raycast/api";
 import { bold } from "../markdown";
+
+interface ExpandableToastAction {
+  title: string;
+  onAction: () => void;
+}
 
 /**
  * ExpandableToast creates a Raycast toast with the given navigationTitle and title,
@@ -13,6 +18,7 @@ export default function ExpandableToast(
   navigationTitle: string,
   title: string,
   description: string,
+  action?: ExpandableToastAction,
 ) {
   return new Toast({
     style: Toast.Style.Failure, // default
@@ -20,7 +26,19 @@ export default function ExpandableToast(
     primaryAction: {
       title: "View details",
       onAction: () => {
-        push(<Detail markdown={`${bold(title)}\n\n${description}`} navigationTitle={navigationTitle} />);
+        push(
+          <Detail
+            markdown={`${bold(title)}\n\n${description}`}
+            navigationTitle={navigationTitle}
+            actions={
+              action && (
+                <ActionPanel>
+                  <Action title={action.title} onAction={action.onAction} />
+                </ActionPanel>
+              )
+            }
+          />,
+        );
       },
     },
   });

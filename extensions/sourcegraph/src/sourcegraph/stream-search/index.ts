@@ -1,7 +1,8 @@
 import EventSource from "eventsource";
 
 import { getMatchUrl, SearchEvent, SearchMatch, AlertKind, LATEST_VERSION } from "./stream";
-import { LinkBuilder, Sourcegraph, getAnonymousUserID } from "..";
+import { LinkBuilder, Sourcegraph } from "..";
+import { getAPIHeaders } from "../api";
 import { getProxiedAgent } from "../gql/fetchProxy";
 
 export interface SearchResult {
@@ -70,17 +71,7 @@ export async function performSearch(
     ["display", "1500"],
   ]);
   const requestURL = link.new(src, "/.api/search/stream", parameters);
-  const headers: { [key: string]: string } = {
-    "X-Requested-With": "raycast-sourcegraph 0.0.0",
-  };
-  if (src.token) {
-    headers["Authorization"] = `token ${src.token}`;
-  }
-  // sourcegraphDotCom() constructor sets the anonymous user ID so only read it here.
-  const anonymousUserID = await getAnonymousUserID();
-  if (anonymousUserID) {
-    headers["X-Sourcegraph-Actor-Anonymous-UID"] = anonymousUserID;
-  }
+  const headers = getAPIHeaders(src);
 
   // There's a bit of TypeScript trickery here, as we've added the agent
   // override with a patch to the eventsource package.

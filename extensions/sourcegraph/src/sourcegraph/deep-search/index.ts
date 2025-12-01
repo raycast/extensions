@@ -1,9 +1,10 @@
-import { Sourcegraph, getAnonymousUserID } from "../";
+import { Sourcegraph } from "../";
+import { getAPIHeaders } from "../api";
 import { getProxiedFetch } from "../gql/fetchProxy";
 
 // Deep Search API Types
 // To modify just tell Amp to look at https://sourcegraph.com/docs/deep-search/api
-export type DeepSearchStatus = "pending" | "processing" | "completed" | "failed";
+export type DeepSearchStatus = "pending" | "processing" | "completed";
 
 export interface DeepSearchStats {
   time_millis: number;
@@ -66,34 +67,9 @@ export interface DeepSearchRequestBody {
 }
 
 async function buildDeepSearchHeaders(src: Sourcegraph): Promise<Record<string, string>> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    "X-Requested-With": "raycast-sourcegraph 0.0.0",
-  };
-
-  if (src.token) {
-    headers["Authorization"] = `token ${src.token}`;
-  }
-
-  // Mirror streaming search & dotCom anonymous ID usage
-  const anonymousUserID = await getAnonymousUserID();
-  if (anonymousUserID) {
-    headers["X-Sourcegraph-Actor-Anonymous-UID"] = anonymousUserID;
-  }
-
+  const headers = getAPIHeaders(src);
+  headers["Content-Type"] = "application/json";
   return headers;
-}
-
-// Helper to normalize Deep Search conversations
-// Currently, if a question has an error, we force the status to be "failed"
-function fixDeepSearchConversation(c: DeepSearchConversation): DeepSearchConversation {
-  if (!c.questions) return c;
-  for (const q of c.questions) {
-    if (q.error) {
-      q.status = "failed";
-    }
-  }
-  return c;
 }
 
 export async function startDeepSearch(src: Sourcegraph, body: DeepSearchRequestBody): Promise<DeepSearchConversation> {
@@ -111,8 +87,7 @@ export async function startDeepSearch(src: Sourcegraph, body: DeepSearchRequestB
     throw new Error(`Deep Search POST failed (${resp.status}): ${text || resp.statusText}`);
   }
 
-  const conv = (await resp.json()) as DeepSearchConversation;
-  return fixDeepSearchConversation(conv);
+  return (await resp.json()) as DeepSearchConversation;
 }
 
 export async function fetchDeepSearchConversation(src: Sourcegraph, id: number): Promise<DeepSearchConversation> {
@@ -129,8 +104,7 @@ export async function fetchDeepSearchConversation(src: Sourcegraph, id: number):
     throw new Error(`Deep Search GET failed (${resp.status}): ${text || resp.statusText}`);
   }
 
-  const conv = (await resp.json()) as DeepSearchConversation;
-  return fixDeepSearchConversation(conv);
+  return (await resp.json()) as DeepSearchConversation;
 }
 
 export async function deleteDeepSearchConversation(src: Sourcegraph, id: number): Promise<void> {
@@ -163,7 +137,7 @@ export async function listDeepSearchConversations(src: Sourcegraph): Promise<Dee
 
   const data = await resp.json();
   if (Array.isArray(data)) {
-    return data.map(fixDeepSearchConversation) as DeepSearchConversation[];
+    return data as DeepSearchConversation[];
   }
 
   // Handle potential wrapper objects (e.g. { conversations: [...] })
@@ -172,7 +146,7 @@ export async function listDeepSearchConversations(src: Sourcegraph): Promise<Dee
   };
 
   if (Array.isArray(listResponse.conversations)) {
-    return listResponse.conversations.map(fixDeepSearchConversation);
+    return listResponse.conversations;
   }
 
   // Fallback: if we can't find a list, throw an error to avoid UI crashes

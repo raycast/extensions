@@ -1,8 +1,10 @@
 # Changelog
 
-## Deep Search - TODO
+## [Deep Search and OAuth] - {PR_MERGE_DATE}
 
 - **deepsearch**: Added new commands 'Ask Deep Search' and 'View Deep Search Conversations' to interact with Sourcegraph's new [agentic, natural language code search](https://sourcegraph.com/deep-search).
+- **oauth**: When connected to a Sourcegraph instance with a version newer than v6.10.0, you can now authenticate the extension using [Sourcegraph OAuth Apps](https://sourcegraph.com/docs/admin/oauth_apps) by removing your access token from the extension preferences.
+- **notebooks**: The "Find Search Notebooks" command has been removed.
 
 ## [Branding updates and workspaces](https://github.com/raycast/extensions/pull/16793) - 2025-02-03
 

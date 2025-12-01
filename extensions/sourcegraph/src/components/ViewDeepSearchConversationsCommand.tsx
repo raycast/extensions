@@ -9,8 +9,9 @@ import {
   confirmAlert,
   showToast,
   Toast,
+  Cache,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { DateTime } from "luxon";
 
 import { Sourcegraph, instanceName, LinkBuilder } from "../sourcegraph";
@@ -23,17 +24,35 @@ import {
 import { ColorDefault } from "./colors";
 import { DeepSearchConversationDetail } from "./AskDeepSearchCommand";
 import { sentenceCase } from "../text";
-import { copyShortcut, deleteShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
+import { copyShortcut, deleteShortcut, drilldownShortcut, refreshShortcut, tertiaryActionShortcut } from "./shortcuts";
 import { useTelemetry } from "../hooks/telemetry";
 
 const link = new LinkBuilder("deep-search");
 const OLD_ITEM_THRESHOLD_MINUTES = 30;
 
+function getCacheKey(src: Sourcegraph): string {
+  return `deep-search-conversations-${src.instance}`;
+}
+
 export default function ViewDeepSearchConversationsCommand({ src }: { src: Sourcegraph; props?: LaunchProps }) {
   const { recorder } = useTelemetry(src);
   useEffect(() => recorder.recordEvent("viewDeepSearchConversations", "start"), []);
 
-  const [conversations, setConversations] = useState<DeepSearchConversation[]>([]);
+  // Loading past conversations is slow, so cache the last results.
+  const cache = useMemo(() => new Cache({ namespace: "deep-search" }), []);
+  const cacheKey = getCacheKey(src);
+  const [conversations, setConversations] = useState<DeepSearchConversation[]>(() => {
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      try {
+        return JSON.parse(cached) as DeepSearchConversation[];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   async function loadConversations() {
@@ -41,7 +60,7 @@ export default function ViewDeepSearchConversationsCommand({ src }: { src: Sourc
     try {
       const conversations = await listDeepSearchConversations(src);
       if (conversations && conversations.length > 0) {
-        // Optimize memory usage by stripping heavy fields that are not needed for the list view
+        // Track only a condensed version
         const newSummaries = conversations.map((c) => ({
           ...c,
           questions: c.questions.map((q) => ({
@@ -51,10 +70,11 @@ export default function ViewDeepSearchConversationsCommand({ src }: { src: Sourc
             sources: undefined,
           })),
         }));
-
         setConversations(newSummaries);
+        cache.set(cacheKey, JSON.stringify(newSummaries));
       } else {
         setConversations([]);
+        cache.remove(cacheKey);
       }
     } catch (e) {
       console.error("Failed to list conversations", e);
@@ -97,13 +117,21 @@ export default function ViewDeepSearchConversationsCommand({ src }: { src: Sourc
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={`Filter recent Deep Search conversations on ${instanceName(src)}`}
     >
-      <List.Section title="Conversations" subtitle={`${filtered.length} thread${filtered.length === 1 ? "" : "s"}`}>
+      {isLoading && conversations.length === 0 && (
+        <List.EmptyView title="Loading..." description="Fetching recent conversations" />
+      )}
+
+      <List.Section
+        title="Recent Conversations"
+        subtitle={`${filtered.length} thread${filtered.length === 1 ? "" : "s"}`}
+      >
         {filtered.map((conversation) => (
           <ConversationListItem
             key={conversation.id}
             src={src}
             conversation={conversation}
             onDelete={() => handleDelete(conversation.id)}
+            onRefresh={loadConversations}
           />
         ))}
       </List.Section>
@@ -111,12 +139,13 @@ export default function ViewDeepSearchConversationsCommand({ src }: { src: Sourc
   );
 }
 
-function statusColor(status: DeepSearchStatus): Color.ColorLike {
+function statusColor(status: DeepSearchStatus, hasError: boolean): Color.ColorLike {
+  if (hasError) {
+    return Color.Red;
+  }
   switch (status) {
     case "completed":
       return Color.Green;
-    case "failed":
-      return Color.Red;
     case "processing":
       return Color.Blue;
     case "pending":
@@ -129,10 +158,12 @@ function ConversationListItem({
   src,
   conversation,
   onDelete,
+  onRefresh,
 }: {
   src: Sourcegraph;
   conversation: DeepSearchConversation;
   onDelete: () => void;
+  onRefresh: () => void;
 }) {
   const latestQuestion = conversation.questions[conversation.questions.length - 1];
   const firstQuestion = conversation.questions[0];
@@ -149,6 +180,7 @@ function ConversationListItem({
     subtitle = "";
   }
   const status = latestQuestion?.status ?? "pending";
+  const hasError = !!latestQuestion?.error;
   const time = DateTime.fromISO(conversation.updated_at);
 
   const updatedRelative = time.toRelative() || conversation.updated_at;
@@ -160,11 +192,11 @@ function ConversationListItem({
     },
   ];
 
-  if (status !== "completed") {
+  if (status !== "completed" || hasError) {
     accessories.unshift({
       tag: {
-        value: sentenceCase(status),
-        color: statusColor(status),
+        value: hasError ? "Failed" : sentenceCase(status),
+        color: statusColor(status, hasError),
       },
     });
   }
@@ -192,7 +224,7 @@ function ConversationListItem({
         <ActionPanel>
           <Action.Push
             icon={Icon.Sidebar}
-            title="Open in Extension"
+            title="Open"
             target={<DeepSearchConversationDetail src={src} conversationId={conversation.id} />}
             shortcut={drilldownShortcut}
           />
@@ -207,6 +239,7 @@ function ConversationListItem({
               <Action.CopyToClipboard title="Copy Link" content={conversationUrl} shortcut={copyShortcut} />
             </>
           )}
+          <Action icon={Icon.ArrowClockwise} title="Refresh List" shortcut={refreshShortcut} onAction={onRefresh} />
           <Action
             style={Action.Style.Destructive}
             icon={Icon.Trash}
