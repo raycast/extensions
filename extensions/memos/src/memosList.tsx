@@ -11,7 +11,7 @@ import {
 } from "./api";
 import { MemoInfoResponse, ROW_STATUS } from "./types";
 
-export default function MemosListCommand(): JSX.Element {
+export default function MemosListCommand() {
   const [searchText, setSearchText] = useState("");
   const [currentUserId, setCurrentUserId] = useState<number>();
   const [state, setState] = useState(ROW_STATUS.NORMAL);
@@ -20,12 +20,12 @@ export default function MemosListCommand(): JSX.Element {
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
   useEffect(() => {
-    const user = userData.user || {};
-    if (!isLoadingUser && user.name) {
+    const user = userData?.user || {};
+    if (!isLoadingUser && user && user.name) {
       const userId = +user.name.split("/")[1];
       setCurrentUserId(userId);
     }
-  }, [isLoadingUser]);
+  }, [isLoadingUser, userData]);
 
   useEffect(() => {
     if (currentUserId) {
@@ -201,7 +201,7 @@ export default function MemosListCommand(): JSX.Element {
       navigationTitle="Search Memos"
       searchBarPlaceholder="Search your memo..."
       isShowingDetail
-      pagination={pagination}
+      pagination={pagination!}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Dropdown With Items"
@@ -226,7 +226,7 @@ export default function MemosListCommand(): JSX.Element {
               {(item.state === ROW_STATUS.ARCHIVED && deleteComponent(item)) || null}
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={item.markdown} />}
+          detail={<List.Item.Detail markdown={item.markdown ?? null} />}
         />
       ))}
     </List>

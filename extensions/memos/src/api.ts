@@ -159,7 +159,7 @@ export const postFile = (filePath: string, filename: string) => {
   const formData = new FormData();
   formData.append("file", readFile, {
     filename: path.basename(filePath),
-    contentType: mime.getType(filePath) || undefined,
+    contentType: mime.getType(filePath) || "application/octet-stream",
   });
 
   return getFetch<PostFileResponse>({
@@ -168,7 +168,7 @@ export const postFile = (filePath: string, filename: string) => {
     data: {
       content: readFile.toString("base64"),
       filename,
-      type: mime.getType(filePath) || undefined,
+      type: mime.getType(filePath) || "application/octet-stream",
     },
   });
 };

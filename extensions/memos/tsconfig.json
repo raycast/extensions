@@ -6,16 +6,24 @@
   ],
   "compilerOptions": {
     "lib": [
-      "ES2023"
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
     ],
-    "module": "commonjs",
-    "target": "ES2022",
+    "module": "esnext",
+    "target": "ES2023",
+    "moduleResolution": "bundler",
     "strict": true,
+    "exactOptionalPropertyTypes": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node", "react"],
+    "useDefineForClassFields": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
   }
 }
