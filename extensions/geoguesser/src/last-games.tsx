@@ -1,7 +1,16 @@
 import { List, ActionPanel, Action, Icon, Color, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getRecentGames, getGameDetails, getChallengeDetails, getDuelDetails } from "./api/client";
-import { FeedEntry, DailyChallengePayload, StreakPayload, DuelPayload, DuelDetails, GameDetails } from "./types";
+import {
+  FeedEntry,
+  DailyChallengePayload,
+  StreakPayload,
+  DuelPayload,
+  DuelDetails,
+  GameDetails,
+  GameGuess,
+  GameRound,
+} from "./types";
 import { getPlonkItUrl } from "./utils";
 
 interface ParsedGame {
@@ -363,7 +372,7 @@ function parseGameEntry(entry: FeedEntry): ParsedGame | null {
         url: `https://www.geoguessr.com/game/${firstGame?.gameToken || ""}`,
         token: firstGame?.gameToken || "",
         points: totalPoints,
-        icon: Icon.Flame,
+        icon: Icon.BarChart,
         iconTint: Color.Orange,
       };
     }

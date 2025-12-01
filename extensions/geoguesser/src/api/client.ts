@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { getPreferences } from "../preferences";
-import { StatsResponse, FeedResponse } from "../types";
+import { StatsResponse, FeedResponse, GameDetails, DuelDetails } from "../types";
 
 const BASE_URL = "https://www.geoguessr.com/api";
 const GAME_SERVER_URL = "https://game-server.geoguessr.com/api";
@@ -19,7 +19,8 @@ export async function apiRequest<T>(endpoint: string): Promise<T> {
     throw new Error(`API Error: ${response.status} ${response.statusText}`);
   }
 
-  return (await response.json()) as T;
+  const json = await response.json();
+  return json as T;
 }
 
 // API functions
@@ -51,15 +52,15 @@ export async function getRecentGames(count = 10) {
   return apiRequest<FeedResponse>(`/v4/feed/private?count=${count}&page=0`);
 }
 
-export async function getGameDetails(token: string) {
+export async function getGameDetails(token: string): Promise<GameDetails> {
   return apiRequest(`/v3/games/${token}`);
 }
 
-export async function getChallengeDetails(token: string) {
+export async function getChallengeDetails(token: string): Promise<GameDetails> {
   return apiRequest(`/v3/challenges/${token}`);
 }
 
-export async function getDuelDetails(gameId: string) {
+export async function getDuelDetails(gameId: string): Promise<DuelDetails> {
   const { ncfaToken } = getPreferenceValues<Preferences>();
 
   const response = await fetch(`${GAME_SERVER_URL}/duels/${gameId}`, {
@@ -73,5 +74,6 @@ export async function getDuelDetails(gameId: string) {
     throw new Error(`API Error: ${response.status} ${response.statusText}`);
   }
 
-  return response.json();
+  const json = await response.json();
+  return json as DuelDetails;
 }
