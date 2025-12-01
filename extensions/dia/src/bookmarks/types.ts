@@ -1,19 +1,9 @@
 import { ReactNode } from "react";
 
-export interface SearchResult<T> {
-  readonly isLoading: boolean;
-  readonly errorView?: ReactNode;
-  readonly data?: T[];
-  readonly revalidate?: () => void;
-}
-
-export interface HistoryEntry {
-  readonly id: string;
-  readonly url: string;
-  readonly title: string;
-  readonly lastVisited: Date;
-}
-
+/**
+ * Represents a bookmark directory node in the tree structure
+ * from the Bookmarks file
+ */
 export interface BookmarkDirectory {
   readonly id: string;
   readonly name: string;
@@ -23,6 +13,10 @@ export interface BookmarkDirectory {
   readonly children: BookmarkDirectory[];
 }
 
+/**
+ * Represents a bookmark item with navigation path information
+ * Used for display and navigation in the UI
+ */
 export interface BookmarkItem {
   readonly id: string;
   readonly name: string;
@@ -33,10 +27,21 @@ export interface BookmarkItem {
   readonly children?: BookmarkDirectory[];
 }
 
+/**
+ * Result returned by the bookmark search hook
+ */
 export interface BookmarkSearchResult {
   readonly isLoading: boolean;
   readonly errorView?: ReactNode;
   readonly items: BookmarkItem[];
   readonly currentPath: string[];
   readonly revalidate?: () => void;
+}
+
+/**
+ * Parsed search query with include and exclude terms
+ */
+export interface BookmarkParsedQuery {
+  includeTerms: string[];
+  excludeTerms: string[];
 }

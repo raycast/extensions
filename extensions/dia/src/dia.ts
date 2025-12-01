@@ -50,6 +50,10 @@ function getHistoryPath() {
   return resolve(getActiveProfilePath(), "History");
 }
 
+export function getBookmarksPath() {
+  return resolve(getActiveProfilePath(), "Bookmarks");
+}
+
 function parseAppleScriptBoolean(value: string): boolean {
   return value.toLowerCase() === "true";
 }

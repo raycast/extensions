@@ -1,5 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 import { type HistoryItem, type Tab } from "./dia";
+import { getFavicon } from "@raycast/utils";
 
 /**
  * Escapes a string for safe use in AppleScript string literals.
@@ -16,6 +17,17 @@ export function escapeAppleScriptString(str: string): string {
  */
 export function escapeSQLLikePattern(pattern: string): string {
   return pattern.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/"/g, '""');
+}
+
+export function getSafeFavicon(url: string): List.Item.Props["icon"] {
+  const invalidSchemes = ["javascript:", "data:", "about:", "chrome:", "file:"];
+  const urlLower = url.toLowerCase().trim();
+
+  if (invalidSchemes.some((scheme) => urlLower.startsWith(scheme))) {
+    return { source: Icon.Link, tintColor: Color.SecondaryText };
+  }
+
+  return getFavicon(url);
 }
 
 export function getSubtitle(url: string) {

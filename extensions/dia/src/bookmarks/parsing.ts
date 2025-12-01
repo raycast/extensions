@@ -1,3 +1,5 @@
+import { BookmarkParsedQuery } from "./types";
+
 /**
  * Parses search query to extract include and exclude terms.
  * Filters items where the url and title match all space-separated words in search query (case insensitive).
@@ -9,12 +11,7 @@
  * - "foo -bar" - Must contain "foo" but NOT "bar"
  * - "\-foo" - Literal search for "-foo"
  */
-export interface ParsedQuery {
-  includeTerms: string[];
-  excludeTerms: string[];
-}
-
-export function parseSearchQuery(query: string): ParsedQuery {
+export function parseBookmarkSearchQuery(query: string): BookmarkParsedQuery {
   if (!query) {
     return { includeTerms: [], excludeTerms: [] };
   }
@@ -42,7 +39,7 @@ export function parseSearchQuery(query: string): ParsedQuery {
 /**
  * Checks if a text matches the parsed query criteria
  */
-export function matchesQuery(text: string, parsedQuery: ParsedQuery): boolean {
+export function matchesBookmarkQuery(text: string, parsedQuery: BookmarkParsedQuery): boolean {
   const { includeTerms, excludeTerms } = parsedQuery;
 
   const hasAllIncludeTerms = includeTerms.length === 0 || includeTerms.every((term) => text.includes(term));
@@ -51,3 +48,4 @@ export function matchesQuery(text: string, parsedQuery: ParsedQuery): boolean {
 
   return hasAllIncludeTerms && hasNoExcludeTerms;
 }
+
