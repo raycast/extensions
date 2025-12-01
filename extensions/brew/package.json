@@ -159,7 +159,7 @@
     "@types/react": "^18.3.18",
     "eslint": "^9.39.1",
     "prettier": "^3.4.2",
-    "react": "^19.0.0",
+    "react": "^19.0.10",
     "typescript": "^5.9.3"
   },
   "scripts": {
