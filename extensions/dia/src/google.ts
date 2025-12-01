@@ -33,7 +33,7 @@ export function useGoogleSuggestions(searchText: string) {
       keepPreviousData: true,
       parseResponse: async (response) => {
         try {
-          const json: GoogleSuggestionParser = await response.json();
+          const json = (await response.json()) as GoogleSuggestionParser;
 
           // Validate the response structure
           if (!Array.isArray(json) || json.length < 5 || !Array.isArray(json[1]) || !json[4]) {
