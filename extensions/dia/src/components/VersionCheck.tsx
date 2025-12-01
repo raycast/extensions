@@ -2,7 +2,7 @@ import { Detail, environment } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { join } from "path";
 import { lt } from "semver";
-import { getVersion } from "..//dia";
+import { getVersion } from "../dia";
 
 // Version that introduced AppleScript API
 const MINIMUM_DIA_VERSION = "1.7.0";
