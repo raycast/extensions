@@ -1,5 +1,10 @@
 # Google Lens Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Enhancement] - 2025-08-18
 
 - Add a script to hide the toast notification when a screenshot is taken.
