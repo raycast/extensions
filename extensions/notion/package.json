@@ -63,7 +63,7 @@
               "value": "content"
             }
           ],
-          "default": "none",
+          "default": "",
           "description": "Specify if Clipboard is used to autofill Title or Content"
         }
       ]
