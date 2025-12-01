@@ -105,19 +105,21 @@ function GameDetailView({ game }: { game: ParsedGame }) {
     return <Detail isLoading={isLoading} markdown="# Loading game details..." />;
   }
 
-  if (game.type === "duel") {
-    return <DuelDetailView game={game} details={details} />;
+  // Check type early and render appropriate view
+  if (game.type === "duel" && "teams" in details) {
+    return <DuelDetailView game={game} details={details as DuelDetails} />;
   }
 
-  // Regular game details
-  const totalScore = details.player?.totalScore?.amount || game.points || 0;
-  const guesses = details.player?.guesses || [];
-  const rounds = details.rounds || [];
+  // Regular game details - cast to GameDetails
+  const gameDetails = details as GameDetails;
+  const totalScore = gameDetails.player?.totalScore?.amount || game.points || 0;
+  const guesses = gameDetails.player?.guesses || [];
+  const rounds = gameDetails.rounds || [];
 
   const markdown = `
 # ${game.title}
 
-**${details.mapName || details.map?.name || "Unknown Map"}**
+**${gameDetails.mapName || gameDetails.map?.name || "Unknown Map"}**
 
 ---
 
@@ -127,7 +129,7 @@ function GameDetailView({ game }: { game: ParsedGame }) {
 ## 📍 Rounds
 
 ${rounds
-  .map((round, idx) => {
+  .map((round: GameRound, idx: number) => {
     const guess = guesses[idx];
     if (!guess) return `### Round ${idx + 1}\nNo guess data`;
 
@@ -154,7 +156,7 @@ ${rounds
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Total Score" text={`${totalScore.toLocaleString("de-DE")} pts`} icon="🎯" />
-          {guesses.map((guess, idx) => (
+          {guesses.map((guess: GameGuess, idx: number) => (
             <Detail.Metadata.Label
               key={idx}
               title={`Round ${idx + 1}`}
@@ -176,13 +178,16 @@ ${rounds
                 const plonkItUrl = getPlonkItUrl(round.countryCode);
                 if (!plonkItUrl) return null;
 
+                const validKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
+                const shortcutKey = idx < 9 ? validKeys[idx] : undefined;
+
                 return (
                   <Action.OpenInBrowser
                     key={idx}
                     title={`Round ${idx + 1}: ${round.countryCode.toUpperCase()}`}
                     url={plonkItUrl}
                     icon={Icon.Globe}
-                    shortcut={{ modifiers: ["cmd"], key: `${idx + 1}` }}
+                    shortcut={shortcutKey ? { modifiers: ["cmd"], key: shortcutKey } : undefined}
                   />
                 );
               })}

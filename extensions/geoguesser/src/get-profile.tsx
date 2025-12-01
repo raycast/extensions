@@ -69,11 +69,6 @@ ${profile?.user?.isVerified ? "✅ Verified" : ""} ${profile?.user?.isProUser ? 
           {/* Game Stats */}
           <Detail.Metadata.Label title="Games Played" text={`${stats?.gamesPlayed || "—"}`} icon="🎮" />
           <Detail.Metadata.Label
-            title="Total Score"
-            text={stats?.totalScore?.toLocaleString("de-DE") || "—"}
-            icon="🏆"
-          />
-          <Detail.Metadata.Label
             title="Daily Challenges"
             text={`${profile?.user?.dailyChallengeProgress || 0}`}
             icon="📅"

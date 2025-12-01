@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "get-profile",
-      "title": "Get your Profile",
+      "title": "Get Your Profile",
       "subtitle": "Check your personal geoguesser stats",
       "description": "Show you your current profile including stats",
       "mode": "view"
@@ -29,7 +29,7 @@
     },
     {
       "name": "last-games",
-      "title": "Show your recent Games",
+      "title": "Show Your Recent Games",
       "subtitle": "View your recent games",
       "description": "Show your recent GeoGuessr game history",
       "mode": "view"

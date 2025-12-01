@@ -19,7 +19,7 @@ export async function apiRequest<T>(endpoint: string): Promise<T> {
     throw new Error(`API Error: ${response.status} ${response.statusText}`);
   }
 
-  return response.json() as Promise<T>;
+  return (await response.json()) as T;
 }
 
 // API functions
