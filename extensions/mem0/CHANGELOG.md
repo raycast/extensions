@@ -1,6 +1,6 @@
 # Mem0 Changelog
 
-## [Update Extension] - 2025-12-01
+## [Update Extension] - {PR_MERGE_DATE}
 
 - Refactored code to use the official `mem0ai` SDK and centralized API logic in `src/utils.ts`.
 - Added custom hooks in `src/hooks.ts` (`useClipboardText`, `useGetMemories`, `useSearchMemories`) for data fetching and state management.
