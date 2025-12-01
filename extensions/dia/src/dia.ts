@@ -234,3 +234,15 @@ export async function createNewIncognitoWindow() {
     `,
   );
 }
+
+export async function getVersion() {
+  const response = await runAppleScript(`
+    set _output to ""
+
+    tell application "Dia"
+      return version
+    end tell
+  `);
+
+  return response;
+}

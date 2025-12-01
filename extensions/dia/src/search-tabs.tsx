@@ -1,8 +1,9 @@
 import { List } from "@raycast/api";
 import { TabListItem } from "./components/TabListItem";
+import withVersionCheck from "./components/VersionCheck";
 import { useTabs } from "./dia";
 
-export default function Command() {
+function Command() {
   const { isLoading, data, revalidate } = useTabs();
 
   return (
@@ -13,3 +14,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default withVersionCheck(Command);

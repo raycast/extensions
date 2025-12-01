@@ -4,13 +4,14 @@ import { useMemo, useState } from "react";
 import { HistoryListItem } from "./components/HistoryListItem";
 import { SuggestionListItem } from "./components/SuggestionListItem";
 import { TabListItem } from "./components/TabListItem";
+import withVersionCheck from "./components/VersionCheck";
 import { useSearchHistory, useTabs } from "./dia";
 import { useGoogleSuggestions } from "./google";
 import { filterHistory, filterTabs } from "./utils";
 
 type ViewMode = "all" | "pinned-tabs" | "open-tabs" | "history" | "suggestions";
 
-export default function Command() {
+function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [viewMode, setViewMode] = useCachedState<ViewMode>("view-mode", "all");
 
@@ -104,3 +105,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default withVersionCheck(Command);
