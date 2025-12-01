@@ -138,9 +138,11 @@ function completeExpression(expression: string): string {
   const closeParens = (completed.match(/\)/g) || []).length;
 
   // Check if we're in the middle of an incomplete operation
-  // If ends with an operator (+, -, *, /), assume the next number is 1
-  if (/[+\-*/]\s*$/.test(completed)) {
-    completed += "1";
+  // Use identity element: 0 for +/-, 1 for */
+  if (/[+-]\s*$/.test(completed)) {
+    completed += "0"; // Identity for addition/subtraction
+  } else if (/[*/]\s*$/.test(completed)) {
+    completed += "1"; // Identity for multiplication/division
   }
 
   // If we have unclosed parentheses and the last char isn't an operator or comma
@@ -252,10 +254,12 @@ export default function Command() {
       return functionDefinitions;
     }
 
-    const lowerSearch = searchText.toLowerCase();
-    return functionDefinitions.filter(
-      (func) => func.name.toLowerCase().includes(lowerSearch) || func.description.toLowerCase().includes(lowerSearch),
-    );
+    // Extract the last incomplete function name from the expression
+    // Match patterns like "fac", "sum(1, fac", "sum(1, max(5, fa"
+    const match = searchText.match(/([a-zA-Z]+)(?:\()?$/);
+    const partialFunction = match ? match[1].toLowerCase() : searchText.toLowerCase();
+
+    return functionDefinitions.filter((func) => func.name.toLowerCase().startsWith(partialFunction));
   };
 
   const filteredFunctions = getFilteredFunctions();
@@ -297,8 +301,8 @@ export default function Command() {
         />
       )}
 
-      {/* Show error if there is one */}
-      {result && result.error && (
+      {/* Show error only if there are no matching functions */}
+      {result && result.error && filteredFunctions.length === 0 && (
         <List.Item
           title="Error"
           subtitle={result.error}
@@ -332,28 +336,34 @@ export default function Command() {
         </List.Section>
       )}
 
-      {/* Show filtered functions when searching */}
-      {searchText && filteredFunctions.length > 0 && !result?.value && (
+      {/* Show filtered functions when searching or when there's an error */}
+      {searchText && filteredFunctions.length > 0 && (!result?.value || result?.error) && (
         <List.Section title="Matching Functions">
-          {filteredFunctions.map((func) => (
-            <List.Item
-              key={func.name}
-              title={func.name}
-              subtitle={func.description}
-              accessories={[{ text: func.example }]}
-              icon={getTextIcon(func.icon)}
-              actions={
-                <ActionPanel>
-                  <Action title="Use This Function" onAction={() => setSearchText(func.name + "(")} />
-                  <Action.CopyToClipboard
-                    title="Copy Example"
-                    content={func.example}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
+          {filteredFunctions.map((func) => {
+            // Replace the partial function name with the complete one
+            const match = searchText.match(/([a-zA-Z]+)(?:\()?$/);
+            const replacement = match ? searchText.slice(0, -match[1].length) + func.name + "(" : func.name + "(";
+
+            return (
+              <List.Item
+                key={func.name}
+                title={func.name}
+                subtitle={func.description}
+                accessories={[{ text: func.example }]}
+                icon={getTextIcon(func.icon)}
+                actions={
+                  <ActionPanel>
+                    <Action title="Use This Function" onAction={() => setSearchText(replacement)} />
+                    <Action.CopyToClipboard
+                      title="Copy Example"
+                      content={func.example}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       )}
     </List>
