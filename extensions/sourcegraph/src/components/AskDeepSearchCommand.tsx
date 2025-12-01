@@ -4,7 +4,6 @@ import {
   Detail,
   Form,
   Icon,
-  LaunchProps,
   List,
   useNavigation,
   Toast,
@@ -30,7 +29,7 @@ import { copyShortcut, tertiaryActionShortcut } from "./shortcuts";
 
 const link = new LinkBuilder("deep-search");
 
-export default function AskDeepSearchCommand({ src }: { src: Sourcegraph; props?: LaunchProps }) {
+export default function AskDeepSearchCommand({ src }: { src: Sourcegraph }) {
   const { recorder } = useTelemetry(src);
   useEffect(() => recorder.recordEvent("askDeepSearch", "start"), []);
 

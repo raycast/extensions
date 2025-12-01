@@ -64,7 +64,7 @@ You can set up access through the 'Sourcegraph' variants of this extensions's co
 
 - **Access token**: You can create an access token (`sgp_...`) under the "Access tokens" tab in your user settings in Sourcegraph, and set it in the "Sourcegraph Instance: Access token" field in the extension preferences.
   - For example, you can configure `example.sourcegraph.app` as a URL and go to `https://example.sourcegraph.app/user/settings/tokens/new` to create an access token for use in this extension.
-- **OAuth**: If your Sourcegraph version supports it (any version newer than v6.10.0), you can authenticate via OAuth without additional configuration by omitting the "Sourcegraph Instance: Access token" field in the extension preferences..
+- **OAuth**: If your Sourcegraph version supports it (any version newer than v6.10.0), you can authenticate via OAuth without additional configuration by omitting the "Sourcegraph Instance: Access token" field in the extension preferences.
 
 <br />
 

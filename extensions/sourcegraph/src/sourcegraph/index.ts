@@ -139,7 +139,6 @@ export async function sourcegraphInstance(): Promise<Sourcegraph | null> {
     client: newApolloClient(src),
     featureFlags: newFeatureFlags(prefs),
     hasCustomSourcegraphConnection: true,
-    oauth,
   };
 }
 

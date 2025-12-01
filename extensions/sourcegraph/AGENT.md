@@ -1,4 +1,4 @@
-This an extension for Raycast that adds integrations with Sourcegraph.
+This is an extension for Raycast that adds integrations with Sourcegraph.
 
 - For more information about building a Raycast extension, refer to https://developers.raycast.com and related pages.
 - The various APIs that Sourcegraph has available are integrated in `src/sourcegraph`.
