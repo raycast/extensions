@@ -1,8 +1,9 @@
 # cPanel Changelog
 
-## [Add Windows Support] - {PR_MERGE_DATE}
+## [Add Windows Support + Improve Invalid URL check] - {PR_MERGE_DATE}
 
 - Extension now works in Windows
+- Fix error where some URLs were still being treated as Valid (ref: [Issue #23294](https://github.com/raycast/extensions/issues/23294))
 
 ## [Delete DNS Zone] - 2025-08-18
 
