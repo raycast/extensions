@@ -1,6 +1,6 @@
 # AirPods Noise Control Changelog
 
-## [Major Update] - 2025-11-30
+## [Major Update] - {PR_MERGE_DATE}
 
 > **Note:** This update has only been tested on macOS Tahoe (26).
 
