@@ -1,4 +1,4 @@
-# winutils (Raycast extension)
+# Winutils (Raycast extension)
 
 This Raycast extension provides a single command to launch the WinUtil script from ChrisTitusTech:
 https://github.com/ChrisTitusTech/winutil
