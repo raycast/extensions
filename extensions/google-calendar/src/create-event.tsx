@@ -28,7 +28,7 @@ type FormValues = {
   attendees: string | undefined;
   conferencingProvider: string | undefined;
   description: string | undefined;
-  allDay : boolean;  
+  eventTime : string;  
 };
 
 const preferences: Preferences.CreateEvent = getPreferenceValues();
@@ -49,6 +49,13 @@ function parseDurationAsMinutesForPlainNumbers(value: string | undefined): numbe
   } else {
     return parse(trimmedValue);
   }
+}
+
+function toLocalYMD(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 function Command(props: LaunchProps<{ launchContext: FormValues }>) {
@@ -81,7 +88,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       attendees: props.launchContext?.attendees,
       conferencingProvider: props.launchContext?.conferencingProvider,
       description: props.launchContext?.description,
-      allDay : false,
+      eventTime : "timed",
     },
     validation: {
       title: FormValidation.Required,
@@ -113,16 +120,16 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         return;
       }
 
-      let start: any = {};
-      let end: any = {};
-      
-      if (values.allDay) { // for all day events use date only format
-        const yyyyMMdd = startDate.toISOString().split("T")[0];
-        start.date = yyyyMMdd;
-        const endDateExclusive = new Date(startDate);
-        endDateExclusive.setDate(endDateExclusive.getDate() + 1);
-        const endYyyyMMdd = endDateExclusive.toISOString().split("T")[0];
-        end.date = endYyyyMMdd;
+      let start: calendar_v3.Schema$EventDateTime = {};
+      let end: calendar_v3.Schema$EventDateTime = {};
+
+      const isAllDay = values.eventTime === "all_day";
+
+      if (isAllDay) { // for all day events use date only format
+      start.date = toLocalYMD(startDate);
+      const endDateExclusive = new Date(startDate);
+      endDateExclusive.setDate(endDateExclusive.getDate() + 1);
+      end.date = toLocalYMD(endDateExclusive);
         
       } else {
         start.dateTime = startDate.toISOString();
@@ -235,17 +242,16 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       />
     <Form.Dropdown
       title="Event Time"
-      id="allDaySelect"
-      value={values.allDay ? "all_day" : "none"}
-      onChange={(value) => itemProps.allDay.onChange?.(value === "all_day")}
+      {...itemProps.eventTime}
     >
-      <Form.Dropdown.Item value="none" title="Default" />
+      <Form.Dropdown.Item value="timed" title="Default" />
       <Form.Dropdown.Item value="all_day" title="All day Event" />
     </Form.Dropdown>
 
 
 
-    {!values.allDay && (
+
+    {values.eventTime === "timed" && (
       <Form.TextField
         title="Duration"
         placeholder="30min, 1h, 1h30m..."
