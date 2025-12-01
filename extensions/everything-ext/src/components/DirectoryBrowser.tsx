@@ -70,7 +70,7 @@ export function DirectoryBrowser({
               {dirname(directoryPath) !== directoryPath &&
                 (previousDir && dirname(directoryPath) === previousDir ? (
                   <Action
-                    title="Navigate Up"
+                    title="Navigate up"
                     icon={Icon.ArrowUp}
                     onAction={() => pop()}
                     shortcut={{
@@ -80,7 +80,7 @@ export function DirectoryBrowser({
                   />
                 ) : (
                   <Action.Push
-                    title="Navigate Up"
+                    title="Navigate up"
                     icon={Icon.ArrowUp}
                     target={
                       <DirectoryBrowser

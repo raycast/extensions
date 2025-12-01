@@ -81,7 +81,7 @@ export function SearchResult({ preferences, searchText, onSearchTextChange }: Se
             <FileActionPanel file={file} preferences={preferences} onToggleDetails={onToggleDetails}>
               {dirname(file.commandline) !== file.commandline && (
                 <Action.Push
-                  title="Navigate Up"
+                  title="Navigate up"
                   icon={Icon.ArrowUp}
                   target={
                     <DirectoryBrowser
