@@ -1,114 +1,63 @@
-import { Form, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useState } from "react";
-import fetch from "node-fetch";
-import { showFailureToast } from "@raycast/utils";
-
-const API_URL = "https://api.mem0.ai/v1/memories/search/";
-
-interface SearchResult {
-  id: string;
-  memory: string;
-  user_id: string;
-  metadata: object;
-  categories: object;
-  immutable: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-interface SearchResponse {
-  results: SearchResult[];
-}
-
-interface Preferences {
-  mem0ApiKey: string;
-  defaultUserId: string;
-}
+import { useSearchMemories } from "./hooks";
+import { SearchResult } from "./types";
 
 export default function Command() {
-  const { mem0ApiKey, defaultUserId } = getPreferenceValues<Preferences>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState<string>("");
-  const [showResults, setShowResults] = useState(false);
-  const [query, setQuery] = useState<string>("");
+  const [searchText, setSearchText] = useState<string>("");
+  const { results, isLoading, error } = useSearchMemories(searchText, {
+    execute: searchText.length > 0,
+  });
 
-  async function handleSubmit(values: { query: string }) {
-    setIsLoading(true);
-    setQuery(values.query);
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Token ${mem0ApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: values.query,
-          user_id: defaultUserId,
-          output_format: "v1.1",
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = (await response.json()) as SearchResponse;
-      const concatenatedMemories = data.results.map((result) => result.memory).join("\n\n");
-
-      setSearchResults(concatenatedMemories);
-      setShowResults(true);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Search completed",
-        message: `Found ${data.results.length} results`,
-      });
-    } catch (error) {
-      showFailureToast("Search failed", {
-        primaryAction: {
-          title: "Retry",
-          onAction: () => handleSubmit({ query }),
-        },
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  if (showResults) {
+  if (error) {
     return (
-      <Detail
-        navigationTitle={`Search Results: ${query}`}
-        markdown={`# Search Results for "${query}"\n\n${searchResults}`}
-        actions={
-          <ActionPanel>
-            <Action.CopyToClipboard
-              title="Copy Results"
-              content={searchResults}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
-            <Action
-              title="New Search"
-              onAction={() => setShowResults(false)}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-            />
-          </ActionPanel>
-        }
-      />
+      <List>
+        <List.Item title={`Error: ${error.message}`} icon={Icon.ExclamationMark} />
+      </List>
     );
   }
 
   return (
-    <Form
+    <List
       isLoading={isLoading}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Search Memories" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="What would you like to search for?"
+      throttle
     >
-      <Form.TextField id="query" title="Search Query" placeholder="What would you like to search for?" autoFocus />
-    </Form>
+      {searchText.length === 0 ? (
+        <List.EmptyView title="Start typing to search" description="Enter a search query to find memories" />
+      ) : results.length === 0 && !isLoading ? (
+        <List.EmptyView title="No results found" description={`No memories found for "${searchText}"`} />
+      ) : (
+        <List.Section title="Search Results" subtitle={`${results.length} results`}>
+          {results.map((result: SearchResult) => (
+            <List.Item
+              key={result.id}
+              title={result.memory || "No memory content"}
+              subtitle={result.user_id || "Unknown user"}
+              accessories={[
+                { text: result.score ? `Score: ${result.score.toFixed(2)}` : undefined },
+                { text: result.created_at ? new Date(result.created_at).toLocaleDateString() : undefined },
+                { icon: Icon.Clipboard, tooltip: "Copy Memory" },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Memory"
+                    content={result.memory || "No memory content"}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy All Results"
+                    content={results.map((r: SearchResult) => r.memory || "No memory content").join("\n\n")}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+    </List>
   );
 }

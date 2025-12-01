@@ -1,77 +1,25 @@
-import { Clipboard, List, ActionPanel, Action, Form, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
-import fetch from "node-fetch";
+import { List, ActionPanel, Action, Form, getPreferenceValues } from "@raycast/api";
+import { useState } from "react";
 import { showFailureToast } from "@raycast/utils";
-
-const API_BASE_URL = "https://api.mem0.ai/v1/memories/";
-
-interface MemoryResult {
-  memory: string;
-  event: string;
-}
-
-interface ApiResponse {
-  results?: MemoryResult[];
-}
-
-interface Preferences {
-  mem0ApiKey: string;
-  defaultUserId: string;
-}
+import { addMemory } from "./utils";
+import { useClipboardText } from "./hooks";
+import { MemoryResult, Preferences } from "./types";
 
 export default function Command() {
   const { mem0ApiKey, defaultUserId } = getPreferenceValues<Preferences>();
-  const [clipboardText, setClipboardText] = useState<string>("");
+  const { clipboardText, isLoading: clipboardLoading } = useClipboardText();
   const [results, setResults] = useState<MemoryResult[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    async function getClipboardContent() {
-      try {
-        const text = await Clipboard.readText();
-        if (text) {
-          setClipboardText(text);
-        } else {
-          setClipboardText("Clipboard is empty");
-        }
-      } catch (error) {
-        setClipboardText("Failed to read clipboard");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    getClipboardContent();
-  }, []);
 
   async function handleAddMemory(text: string) {
     setIsLoading(true);
     try {
-      const response = await fetch(API_BASE_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${mem0ApiKey}`,
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: text,
-            },
-          ],
-          user_id: defaultUserId,
-          output_format: "v1.1",
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = (await response.json()) as ApiResponse;
-      setResults(data.results || []);
+      const memoryResults = await addMemory(mem0ApiKey, text, defaultUserId);
+      setResults(memoryResults);
       setIsEditing(false);
     } catch (error) {
+      void error;
       showFailureToast("Failed to store in Mem0", {
         primaryAction: {
           title: "Retry",
@@ -105,7 +53,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading || clipboardLoading}>
       <List.Section title="Original Text">
         <List.Item
           title={clipboardText}
@@ -123,7 +71,7 @@ export default function Command() {
       </List.Section>
       <List.Section title="Extracted Memories">
         {results.map((result, index) => (
-          <List.Item key={index} title={result.memory} accessories={[{ text: result.event }]} />
+          <List.Item key={index} title={result.memory} accessories={[{ text: result.event || "" }]} />
         ))}
       </List.Section>
     </List>
