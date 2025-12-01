@@ -1,6 +1,6 @@
 # Ship24 Package Tracker Changelog
 
-## [1.1.2] - {PR_MERGE_DATE}
+## [1.1.2] - 2025-12-01
 
 ### Fixed
 - Improved error messages for Ship24 API errors (422 responses)
