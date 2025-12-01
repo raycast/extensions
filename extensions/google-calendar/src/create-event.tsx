@@ -28,6 +28,7 @@ type FormValues = {
   attendees: string | undefined;
   conferencingProvider: string | undefined;
   description: string | undefined;
+  allDay : boolean;  
 };
 
 const preferences: Preferences.CreateEvent = getPreferenceValues();
@@ -71,7 +72,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
 
   const [conferencingProviders] = useConferenceProviders();
   const { data: calendarData, isLoading } = useCalendar(calendarId);
-  const { focus, handleSubmit, itemProps, reset } = useForm<FormValues>({
+  const { focus, handleSubmit, itemProps, reset , values } = useForm<FormValues>({
     initialValues: {
       calendar: props.launchContext?.calendar ?? "primary",
       title: props.launchContext?.title ?? "",
@@ -80,6 +81,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       attendees: props.launchContext?.attendees,
       conferencingProvider: props.launchContext?.conferencingProvider,
       description: props.launchContext?.description,
+      allDay : false,
     },
     validation: {
       title: FormValidation.Required,
@@ -111,15 +113,27 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         return;
       }
 
+      let start: any = {};
+      let end: any = {};
+      
+      if (values.allDay) { // for all day events use date only format
+        const yyyyMMdd = startDate.toISOString().split("T")[0];
+        start.date = yyyyMMdd;
+        const endDateExclusive = new Date(startDate);
+        endDateExclusive.setDate(endDateExclusive.getDate() + 1);
+        const endYyyyMMdd = endDateExclusive.toISOString().split("T")[0];
+        end.date = endYyyyMMdd;
+        
+      } else {
+        start.dateTime = startDate.toISOString();
+        end.dateTime = new Date(startDate.getTime() + parsedMilliseconds).toISOString();
+      }
+      
       const requestBody: calendar_v3.Schema$Event = {
         summary: values.title,
         description: addSignature(values.description),
-        start: {
-          dateTime: startDate.toISOString(),
-        },
-        end: {
-          dateTime: new Date(startDate.getTime() + parsedMilliseconds).toISOString(),
-        },
+        start,
+        end,
         attendees: values.attendees ? values.attendees.split(",").map((email) => ({ email })) : undefined,
         location:
           values.conferencingProvider === "none" || values.conferencingProvider === "hangoutsMeet"
@@ -137,7 +151,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
               }
             : undefined,
       };
-
+      
       const resetForm = () => {
         setCalendarId("primary");
         focus("title");
@@ -219,13 +233,25 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         type={Form.DatePicker.Type.DateTime}
         {...itemProps.startDate}
       />
+    <Form.Dropdown
+      title="Event Time"
+      id="allDaySelect"
+      value={values.allDay ? "all_day" : "none"}
+      onChange={(value) => itemProps.allDay.onChange?.(value === "all_day")}
+    >
+      <Form.Dropdown.Item value="none" title="Default" />
+      <Form.Dropdown.Item value="all_day" title="All day Event" />
+    </Form.Dropdown>
+
+
+
+    {!values.allDay && (
       <Form.TextField
         title="Duration"
-        placeholder="30min, 1h, 1h30m, ..."
-        info="Defaults to minutes without specified unit. Valid examples: 30, 45m, 1h, 1h30m."
-        storeValue
+        placeholder="30min, 1h, 1h30m..."
         {...itemProps.duration}
-      ></Form.TextField>
+      />
+    )}
       <Form.TextField
         title="Guests"
         placeholder="Event guests..."
