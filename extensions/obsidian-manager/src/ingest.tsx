@@ -85,7 +85,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
 
     // Check if source is an EPUB file
     if (!isUrl(values.source) && isEpubFile(values.source)) {
-      push(<EpubChapterSelector filePath={values.source} mode={mode} forceReprocess={values.forceReprocess} />);
+      push(<EpubChapterSelector filePath={values.source} mode={mode} />);
     } else {
       push(<IngestPreview source={values.source} mode={mode} forceReprocess={values.forceReprocess} />);
     }
@@ -381,10 +381,9 @@ function IngestPreview({ source, mode, forceReprocess }: IngestPreviewProps) {
 interface EpubChapterSelectorProps {
   filePath: string;
   mode: ResearchMode;
-  forceReprocess: boolean;
 }
 
-function EpubChapterSelector({ filePath, mode, forceReprocess }: EpubChapterSelectorProps) {
+function EpubChapterSelector({ filePath, mode }: EpubChapterSelectorProps) {
   const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [epubInfo, setEpubInfo] = useState<EpubInfo | null>(null);
@@ -471,15 +470,7 @@ function EpubChapterSelector({ filePath, mode, forceReprocess }: EpubChapterSele
     if (!epubInfo || selectedChapters.size === 0) return;
 
     const chaptersToIngest = epubInfo.chapters.filter((ch) => selectedChapters.has(ch.id));
-    push(
-      <EpubIngestPreview
-        epubInfo={epubInfo}
-        chapters={chaptersToIngest}
-        filePath={filePath}
-        mode={mode}
-        forceReprocess={forceReprocess}
-      />,
-    );
+    push(<EpubIngestPreview epubInfo={epubInfo} chapters={chaptersToIngest} filePath={filePath} mode={mode} />);
   }
 
   if (error) {

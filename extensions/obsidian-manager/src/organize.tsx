@@ -67,7 +67,6 @@ export default function Command() {
     });
 
     for (let i = 0; i < notes.length; i++) {
-      setCurrentIndex(i);
       toast.message = `${i + 1}/${notes.length}`;
 
       setNotes((prev) => {

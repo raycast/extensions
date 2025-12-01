@@ -9,7 +9,8 @@ import { existsSync } from "fs";
 import { getResearchPrompt, getResearchQueryPrompt, ResearchMode, modeToString } from "./prompts";
 import EPub from "epub2";
 
-export { ResearchMode, modeToString, stringToMode, getModeDescription } from "./prompts";
+export type { ResearchMode } from "./prompts";
+export { modeToString, stringToMode, getModeDescription } from "./prompts";
 
 interface Preferences {
   vaultPath: string;

@@ -93,11 +93,11 @@ export default function Command() {
         />
         <List.Item
           title="Analyze Specific Area"
-          icon={{ source: Icon.Target, tintColor: Color.Purple }}
+          icon={{ source: Icon.MagnifyingGlass, tintColor: Color.Purple }}
           subtitle="Focus analysis on a particular topic"
           actions={
             <ActionPanel>
-              <Action title="Choose Focus Area" icon={Icon.Target} onAction={focusedAnalysis} />
+              <Action title="Choose Focus Area" icon={Icon.MagnifyingGlass} onAction={focusedAnalysis} />
             </ActionPanel>
           }
         />

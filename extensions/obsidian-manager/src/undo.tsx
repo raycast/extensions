@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, confirmAlert, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, confirmAlert, Icon, Alert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { loadUndoRecords, performUndo, UndoRecord } from "./lib/ingest";
 
@@ -32,7 +32,7 @@ export default function Command() {
       message: `This will delete ${record.createdFiles.length} files and restore ${record.modifiedFiles.length} files to their previous state.`,
       primaryAction: {
         title: "Undo",
-        style: "destructive" as const,
+        style: Alert.ActionStyle.Destructive,
       },
     });
 
