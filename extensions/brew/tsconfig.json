@@ -14,6 +14,9 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "react": [ "./node_modules/@types/react" ]
+    }
   }
 }
