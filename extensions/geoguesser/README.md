@@ -6,3 +6,9 @@
 2. Open DevTools (F12) → Application → Cookies → www.geoguessr.com
 3. Find the `_ncfa` cookie and copy its value
 4. Paste it in Raycast extension preferences
+
+## ⚠️ Disclaimer
+
+This extension is **not affiliated with GeoGuessr**.
+
+This is an unofficial, community-built tool for personal use.
