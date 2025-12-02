@@ -4,6 +4,7 @@ import { Cache } from "@raycast/api";
 import { StrippedAsset } from "../types/strippedAsset";
 import AssetStream from "../connection/assets/AssetsStream";
 import { StreamedIdentifier } from "@pieces.app/pieces-os-client";
+import UserStream from "../connection/user/UserStream";
 
 export default class AssetsController {
   private static instance: AssetsController;
@@ -26,6 +27,7 @@ export default class AssetsController {
     this.controller.add(this.assets);
 
     AssetStream.getInstance(); // initialize the assets stream
+    UserStream.getInstance(); // at some point we might want separate controller for it
   }
 
   /**

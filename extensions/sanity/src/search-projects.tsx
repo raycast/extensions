@@ -29,8 +29,8 @@ export default function SearchProjects() {
               project.metadata.externalStudioHost
                 ? [project.metadata.externalStudioHost]
                 : project.studioHost
-                ? [project.studioHost]
-                : []
+                  ? [project.studioHost]
+                  : []
             }
             actions={
               <ActionPanel>
@@ -64,7 +64,7 @@ function SearchDatasets({ project }: { project: SanityProject }) {
   const { isLoading, data: datasets } = useCachedPromise(
     async () => await projectClient(project.id).datasets.list(),
     [],
-    { initialData: [] }
+    { initialData: [] },
   );
 
   return (

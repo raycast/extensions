@@ -26,6 +26,15 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "respectAppearance",
+          "title": "Appearance",
+          "description": "Only show wallpapers that match the system appearance.",
+          "type": "checkbox",
+          "default": false,
+          "required": false,
+          "label": "Respect System Appearance"
+        },
+        {
           "name": "layout",
           "type": "dropdown",
           "description": "Set the layout of the wallpaper items.",
@@ -96,7 +105,7 @@
               "value": "current"
             },
             {
-              "title": "Every Monitor",
+              "title": "Monitor",
               "value": "every"
             }
           ],
@@ -122,6 +131,15 @@
       "interval": "5m",
       "preferences": [
         {
+          "name": "respectAppearance",
+          "title": "Appearance",
+          "description": "Respect system appearance when setting wallpaper.",
+          "type": "checkbox",
+          "default": true,
+          "required": false,
+          "label": "Respect System Appearance"
+        },
+        {
           "name": "applyTo",
           "title": "Apply Wallpaper To",
           "description": "Apply the wallpaper to which monitor. Valid only when you are using an extended monitor.",
@@ -132,7 +150,7 @@
               "value": "current"
             },
             {
-              "title": "Every Monitor",
+              "title": "Monitor",
               "value": "every"
             }
           ],
@@ -148,23 +166,47 @@
           "default": "3600",
           "data": [
             {
-              "title": "Every 5 Minutes",
+              "title": "5 Minutes",
               "value": "300"
             },
             {
-              "title": "Every 15 Minutes",
+              "title": "15 Minutes",
               "value": "900"
             },
             {
-              "title": "Every 30 Minutes",
+              "title": "30 Minutes",
               "value": "1800"
             },
             {
-              "title": "Every Hour",
+              "title": "1 Hour",
               "value": "3600"
             },
             {
-              "title": "Every Day",
+              "title": "2 Hour",
+              "value": "7200"
+            },
+            {
+              "title": "3 Hour",
+              "value": "10800"
+            },
+            {
+              "title": "6 Hour",
+              "value": "21600"
+            },
+            {
+              "title": "9 Hour",
+              "value": "32400"
+            },
+            {
+              "title": "12 Hour",
+              "value": "43200"
+            },
+            {
+              "title": "18 Hour",
+              "value": "64800"
+            },
+            {
+              "title": "1 Day",
               "value": "86400"
             }
           ]
@@ -172,21 +214,10 @@
       ]
     }
   ],
-  "preferences": [
-    {
-      "name": "respectAppearance",
-      "title": "Appearance",
-      "description": "Respect system appearance when setting wallpaper.",
-      "type": "checkbox",
-      "default": true,
-      "required": false,
-      "label": "Respect System Appearance"
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.96.3",
-    "@raycast/utils": "^1.19.1",
-    "axios": "^1.9.0",
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.1",
+    "axios": "^1.10.0",
     "file-url": "^4.0.0",
     "fs-extra": "^11.3.0"
   },

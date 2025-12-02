@@ -27,12 +27,17 @@
     "jonas_list",
     "xilopaint",
     "lachero",
-    "pascal_burkhard"
+    "pascal_burkhard",
+    "roberto.cinetto",
+    "emiliocantuc",
+    "raxityo"
   ],
   "keywords": [
     "vscode",
+    "antigravity",
     "cursor",
     "codium",
+    "kiro",
     "positron",
     "windsurf",
     "trae",
@@ -88,8 +93,16 @@
       "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
         {
+          "title": "Antigravity",
+          "value": "Antigravity"
+        },
+        {
           "title": "Cursor",
           "value": "Cursor"
+        },
+        {
+          "title": "Kiro",
+          "value": "Kiro"
         },
         {
           "title": "Positron",

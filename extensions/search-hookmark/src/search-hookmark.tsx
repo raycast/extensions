@@ -1,9 +1,11 @@
-import { LaunchProps, ActionPanel, List, Action, closeMainWindow } from "@raycast/api";
-import { useCachedPromise, getFavicon } from "@raycast/utils";
+import { LaunchProps, ActionPanel, List, Action } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { getBookmarks, openInHook, getHookIconPath, ShowHookedSubmenu } from "./utils/hookmark";
+import { getBookmarks, openInHook, getHookIconPath } from "./utils/hookmark";
+import BookmarkListSection from "./utils/BookmarkListSection";
 import { checkHookmarkInstallation } from "./utils/checkInstall";
 import { showHookmarkNotOpenToast } from "./utils/checkOpen";
+import { ShowHookedSubmenu } from "./show-hooked-link";
 
 export default function Command(props: LaunchProps) {
   checkHookmarkInstallation();
@@ -32,18 +34,9 @@ export default function Command(props: LaunchProps) {
     );
   });
 
-  // console.log(bookmarks.length)
-  // console.log(uniqueBookmarks.length)
-
-  const numberOfBookmarksFile = useMemo(() => {
-    const files = uniqueBookmarks?.filter((bookmark) => bookmark.path !== "missing value");
-    return files?.length ?? 0;
-  }, [uniqueBookmarks]);
-
-  const numberOfBookmarksURL = useMemo(() => {
-    const urls = uniqueBookmarks?.filter((bookmark) => bookmark.path.includes("missing value"));
-    return urls?.length ?? 0;
-  }, [uniqueBookmarks]);
+  const missingPathValue = "missing value";
+  const files = uniqueBookmarks?.filter((bookmark) => bookmark.path !== missingPathValue) ?? [];
+  const urls = uniqueBookmarks?.filter((bookmark) => bookmark.path.includes(missingPathValue)) ?? [];
 
   return (
     <List
@@ -53,138 +46,67 @@ export default function Command(props: LaunchProps) {
       onSearchTextChange={setSearchText}
       isShowingDetail
     >
-      <List.Section title={`Files:`} subtitle={`${numberOfBookmarksFile} bookmarks`}>
-        {uniqueBookmarks
-          ?.filter((bookmark) => bookmark.path !== "missing value")
-          .map((bookmark) => (
-            <List.Item
-              title={bookmark.title}
-              key={bookmark.address}
-              icon={{ fileIcon: bookmark.path }}
-              detail={
-                <List.Item.Detail
-                  isLoading={false}
-                  markdown={
-                    bookmark.path.endsWith(".pdf") ||
-                    bookmark.path.endsWith(".jpg") ||
-                    bookmark.path.endsWith(".jpeg") ||
-                    bookmark.path.endsWith(".png")
-                      ? `<img src="${encodeURIComponent(bookmark.path)}" alt="${bookmark.title}" height="190" />`
-                      : `[${bookmark.title}](${bookmark.address})`
-                  }
-                  // markdown={`<img src="${encodeURIComponent(bookmark.path)}" alt="${bookmark.title}" height="190" />`}
-                  // markdown={`[${bookmark.title}](${encodeURIComponent(bookmark.address)})`}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Title"
-                        text={bookmark.title}
-                        icon={{ fileIcon: bookmark.path }}
-                      />
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Link
-                        title="Address"
-                        text={bookmark.address}
-                        target={bookmark.address}
-                      />
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label title="Path" text={bookmark.path} />
-                      <List.Item.Detail.Metadata.Separator />
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action
-                    icon={{ fileIcon: `${iconPath}` }}
-                    title="Open in Hookmark"
-                    onAction={() => openInHook(bookmark.title, bookmark.address)}
-                  />
-                  <Action.Push title="Show Hooked Bookmarks" target={<ShowHookedSubmenu {...bookmark} />} />
-
-                  <Action.OpenInBrowser title="Open in Finder" url={bookmark.address} />
-                  <Action.CopyToClipboard
-                    title="Copy as Markdown Link"
-                    content={`[${bookmark.title}](${bookmark.address})`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy as Hook Link"
-                    content={bookmark.address}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy as File Path"
-                    content={bookmark.path}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                  />
-                  <Action.Paste
-                    title="Paste Markdown Link"
-                    content={`[${bookmark.title}](${bookmark.address})`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-                  />
-                </ActionPanel>
-              }
+      <BookmarkListSection
+        title="Files:"
+        bookmarks={files}
+        isFileSection={true}
+        renderActions={(bookmark) => (
+          <ActionPanel>
+            <Action
+              icon={{ fileIcon: iconPath }}
+              onAction={() => openInHook(bookmark.title, bookmark.address)}
+              title="Open in Hookmark"
             />
-          ))}
-      </List.Section>
-
-      <List.Section title={`URLs:`} subtitle={`${numberOfBookmarksURL} bookmarks`}>
-        {uniqueBookmarks
-          ?.filter((bookmark) => bookmark.path.includes("missing value"))
-          .map((bookmark) => (
-            <List.Item
-              title={bookmark.title}
-              key={bookmark.address}
-              icon={getFavicon(bookmark.address)}
-              detail={
-                <List.Item.Detail
-                  isLoading={false}
-                  markdown={`[${bookmark.title}](${bookmark.address})`}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Title"
-                        text={bookmark.title}
-                        icon={getFavicon(bookmark.address)}
-                      />
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Link
-                        title="Address"
-                        text={bookmark.address}
-                        target={bookmark.address}
-                      />
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label title="Path" text={bookmark.path} />
-                      <List.Item.Detail.Metadata.Separator />
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action
-                    icon={{ fileIcon: `${iconPath}` }}
-                    title="Open in Hookmark"
-                    onAction={() => openInHook(bookmark.title, bookmark.address)}
-                  />
-                  <Action.Push title="Show Hooked Bookmarks" target={<ShowHookedSubmenu {...bookmark} />} />
-                  <Action.CopyToClipboard
-                    title="Copy As Markdown Link"
-                    content={`[${bookmark.title}](${bookmark.address})`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                  />
-                  <Action.Paste
-                    title="Paste Markdown Link"
-                    content={`[${bookmark.title}](${bookmark.address})`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-                  />
-                </ActionPanel>
-              }
+            <Action.Push title="Show Hooked Bookmarks" target={<ShowHookedSubmenu {...bookmark} />} />
+            <Action.OpenInBrowser title="Open in Finder" url={bookmark.address} />
+            <Action.CopyToClipboard
+              title="Copy as Markdown Link"
+              content={`[${bookmark.title}](${bookmark.address})`}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
-          ))}
-      </List.Section>
+            <Action.CopyToClipboard
+              title="Copy as Hook Link"
+              content={bookmark.address}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+            />
+            <Action.CopyToClipboard
+              title="Copy as File Path"
+              content={bookmark.path}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            />
+            <Action.Paste
+              title="Paste Markdown Link"
+              content={`[${bookmark.title}](${bookmark.address})`}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            />
+          </ActionPanel>
+        )}
+      />
+      <BookmarkListSection
+        title="URLs:"
+        bookmarks={urls}
+        isFileSection={false}
+        renderActions={(bookmark) => (
+          <ActionPanel>
+            <Action
+              icon={{ fileIcon: `${iconPath}` }}
+              title="Open in Hookmark"
+              onAction={() => openInHook(bookmark.title, bookmark.address)}
+            />
+            <Action.Push title="Show Hooked Bookmarks" target={<ShowHookedSubmenu {...bookmark} />} />
+            <Action.CopyToClipboard
+              title="Copy as Markdown Link"
+              content={`[${bookmark.title}](${bookmark.address})`}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+            <Action.Paste
+              title="Paste Markdown Link"
+              content={`[${bookmark.title}](${bookmark.address})`}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            />
+          </ActionPanel>
+        )}
+      />
     </List>
   );
 }

@@ -1,39 +1,72 @@
-// export enum Topic {
-//   Active = "active",
-//   AskHN = "ask",
-//   Best = "best",
-//   BestComments = "bestcomments",
-//   Classic = "classic",
-//   FrontPage = "frontpage",
-//   Invited = "invited",
-//   Jobs = "jobs",
-//   Launches = "launches",
-//   NewComments = "newcomments",
-//   Newest = "newest",
-//   Polls = "polls",
-//   Pool = "pool",
-//   ShowHN = "show",
-//   WhoIsHiring = "whoishiring",
-// }
-
-// export type EndOfLifeProduct = {
-//     name: string;
-//     age: number;
-// };
-
-interface EndOfLifeProductDetails {
-  cycle: string; // this is the only constant property always defined
-  [key: string]: string | boolean | number;
+interface AllProducts {
+  name: string;
+  aliases: string[];
+  label: string;
+  category: string;
+  tags: string[];
+  uri: string;
 }
 
-interface EndOfLifeProductDetailsCache {
-  timestamp: number;
-  cycles: EndOfLifeProductDetails[];
+interface AllProductsResponse {
+  schema_version: string;
+  generated_at: string;
+  total: number;
+  result: AllProducts[];
 }
 
-interface EndOfLifeProductsCache {
-  timestamp: number;
-  products: string[];
+interface ProductRelease {
+  name: string;
+  codename: string | null;
+  label: string;
+  releaseDate: string;
+  isLts: boolean;
+  ltsFrom: string | null;
+  isEoas: boolean;
+  eoasFrom: string | null;
+  isEol: boolean;
+  eolFrom: string | null;
+  isDiscontinued: boolean;
+  discontinuedFrom: string | null;
+  isEoes: boolean | null;
+  eoesFrom: string | null;
+  isMaintained: boolean;
+  latest: {
+    name: string;
+    date: string | null;
+    link: string | null;
+  } | null;
+  custom: {
+    [key: string]: string | null;
+  } | null;
 }
 
-export type { EndOfLifeProductDetails, EndOfLifeProductDetailsCache, EndOfLifeProductsCache };
+interface Product {
+  name: string;
+  aliases: string[];
+  label: string;
+  category: string;
+  tags: string[];
+  versionCommand: string | null;
+  identifiers: string[];
+  labels: {
+    eoas: string | null;
+    discontinued: string | null;
+    eol: string | null;
+    eoes: string | null;
+  };
+  links: {
+    icon: string | null;
+    html: string;
+    releasePolicy: string | null;
+  };
+  releases: ProductRelease[];
+}
+
+interface ProductResponse {
+  schema_version: string;
+  generated_at: string;
+  last_modified: string;
+  result: Product;
+}
+
+export type { AllProducts, AllProductsResponse, ProductRelease, Product, ProductResponse };

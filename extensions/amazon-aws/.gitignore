@@ -1,2 +1,4 @@
 node_modules
 .idea
+.claude/settings.local.json
+CLAUDE.local.md

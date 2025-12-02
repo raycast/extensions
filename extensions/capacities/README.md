@@ -1,6 +1,6 @@
 # Capacities for Raycast
 
-The Capacities extension for Raycast offers quick access to your Capacities data, improving productivity and reducing context switching. 
+The [Capacities](https://capacities.io/) extension for **Raycast** offers quick access to your Capacities data, improving productivity and reducing context switching. 
 
 ## Setup
 

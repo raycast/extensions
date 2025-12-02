@@ -11,7 +11,8 @@ export function pluralize(
   { suffix = "s", withNumber = false }: { suffix?: string; withNumber?: boolean } = {},
 ): string {
   let pluralizedNoun;
-  if (noun.endsWith("y") && count !== 1) {
+  const shouldUseIes = noun.endsWith("y") && !/[aeiou]y$/i.test(noun) && count !== 1;
+  if (shouldUseIes) {
     pluralizedNoun = `${noun.slice(0, -1)}ies`;
   } else {
     pluralizedNoun = `${noun}${count !== 1 ? suffix : ""}`;

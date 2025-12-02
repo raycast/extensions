@@ -1,4 +1,4 @@
-import markdownToAdf from "md-to-adf";
+import { markdownToAdf } from "marklassian";
 
 import { request } from "./request";
 import { User } from "./users";

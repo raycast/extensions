@@ -39,7 +39,12 @@ export default async function Command() {
       const decodedBody = decodeHexString(message.body);
 
       // 1) Gather all digit sequences of length >= 4
-      const potentialMatches = decodedBody.match(/\b\d{4,}\b/g);
+      const plainDigits = decodedBody.match(/\b\d{4,}\b/g) || [];
+      // 2) Gather all hyphenated digit sequences like 123-456 (min 3 digits on both sides)
+      const hyphenatedDigits = decodedBody.match(/\b\d{3,}-\d{3,}\b/g) || [];
+      // 3) Combine both sets
+      const potentialMatches = [...plainDigits, ...hyphenatedDigits];
+
       let phoneFilteredOTP: string | null = null;
 
       if (potentialMatches) {
@@ -63,7 +68,10 @@ export default async function Command() {
             continue;
           }
 
-          validCodes.push(code);
+          // Normalize hyphenated codes for length checking and comparison
+          const normalized = code.replace(/-/g, "");
+
+          validCodes.push(normalized);
         }
 
         // If any valid codes remain retrieve the "best"

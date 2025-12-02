@@ -5,8 +5,11 @@
   "subtitle": "Manage your Google Cloud resources without opening a browser",
   "description": "A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.",
   "icon": "icon.png",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "author": "ojowwalker77",
+  "contributors": [
+    "ben_selleslagh"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -59,6 +62,13 @@
       "title": "Vpc Network",
       "subtitle": "Google Cloud CLI",
       "description": "Manage Google Cloud VPC networks",
+      "mode": "view"
+    },
+    {
+      "name": "secrets",
+      "title": "Secret Manager",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud secrets securely",
       "mode": "view"
     }
   ],

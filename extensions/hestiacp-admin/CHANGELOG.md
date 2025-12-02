@@ -1,5 +1,11 @@
 # HestiaCP Admin Changelog
 
+## [View, Create Cron Jobs + Modernize] - 2025-08-04
+
+- View Cron Jobs (List Users > Cron Jobs)
+- Add Cron Jobs (List Users > Cron Jobs > Add)
+- Modernize extension to use latest Raycast config
+
 ## [Add Mail Domains + View User Backups] - 2025-03-17
 
 - Add Mail Domain in `Mail Domains` (List Users > Mail Domains > Add)

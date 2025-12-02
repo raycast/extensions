@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { WorkItem, Youtrack } from "youtrack-rest-client";
-import { IssueListItem } from "./components";
-import { createWorkItem, fetchIssueDetails, fetchIssues, getEmptyIssue } from "./utils";
-import { State, Issue } from "./interfaces";
+import { IssueListItem } from "./components/IssueListItem";
+import { getEmptyIssue } from "./utils";
+import type { State, Issue, WorkItem, Command } from "./interfaces";
 import _ from "lodash";
 import { loadCache, saveCache } from "./cache";
+import { YouTrackApi } from "./api/youtrack-api";
 
 interface Preferences {
   instance: string;
@@ -16,13 +16,13 @@ interface Preferences {
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
+  const youTrackApi = YouTrackApi.getInstance();
 
-  const [state, setState] = useState<State>({ isLoading: true, items: [], project: null, yt: null });
+  const [state, setState] = useState<State>({ isLoading: true, items: [], project: null });
 
   useEffect(() => {
     try {
-      const yt = new Youtrack({ baseUrl: prefs.instance, token: prefs.token });
-      setState({ isLoading: false, items: [], project: null, yt });
+      setState({ isLoading: false, items: [], project: null });
     } catch (error) {
       setState((previous) => ({
         ...previous,
@@ -31,13 +31,10 @@ export default function Command() {
         items: [getEmptyIssue()],
       }));
     }
-  }, [prefs.instance, prefs.token]);
+  }, []);
 
   useEffect(() => {
     async function fetchItems() {
-      if (state.yt === null) {
-        return;
-      }
       setState((previous) => ({ ...previous, isLoading: true }));
       try {
         const cache = await loadCache<Issue>("youtrack-issues");
@@ -46,7 +43,7 @@ export default function Command() {
           setState((previous) => ({ ...previous, items: cache, isLoading: true }));
         }
 
-        const feed = await fetchIssues(prefs.query, Number(prefs.maxIssues), state.yt);
+        const feed = await youTrackApi.fetchIssues(prefs.query, Number(prefs.maxIssues));
         if (cache.length && _.isEqual(cache, feed)) {
           setState((previous) => ({ ...previous, isLoading: false }));
           return;
@@ -65,7 +62,7 @@ export default function Command() {
     }
 
     fetchItems();
-  }, [state.yt]);
+  }, [prefs.maxIssues, prefs.query, youTrackApi]);
 
   useEffect(() => {
     if (state.error) {
@@ -77,19 +74,65 @@ export default function Command() {
     }
   }, [state.error]);
 
-  const getIssueDetails = useCallback((issue: Issue, yt: Youtrack | null) => {
-    if (!yt) {
-      return null;
-    }
-    return fetchIssueDetails(issue, yt);
-  }, []);
+  const getIssueDetails = useCallback(
+    async (issue: Issue) => {
+      return await youTrackApi.fetchIssueDetails(issue);
+    },
+    [youTrackApi],
+  );
 
-  const createWorkItemCb = useCallback((issue: Issue, workItem: WorkItem, yt: Youtrack | null) => {
-    if (!yt) {
-      return null;
-    }
-    return createWorkItem(issue, workItem, yt);
-  }, []);
+  const createWorkItemCb = useCallback(
+    async (issue: Issue, workItem: WorkItem) => {
+      return await youTrackApi.createWorkItem(issue, workItem);
+    },
+    [youTrackApi],
+  );
+
+  const applyCommandCb = useCallback(
+    async (issue: Issue, command: Command) => await youTrackApi.applyCommandToIssue(issue.id, command),
+    [youTrackApi],
+  );
+
+  const getCommandSuggestions = useCallback(
+    async (issue: Issue, command: string) => await youTrackApi.getCommandSuggestions(issue.id, { command }),
+    [youTrackApi],
+  );
+
+  const getLastCommentCb = useCallback(
+    async (issueId: string) => {
+      const comments = await youTrackApi.fetchComments(issueId);
+      return comments.at(-1) ?? null;
+    },
+    [youTrackApi],
+  );
+
+  const deleteIssueCb = useCallback(
+    async (issueId: string) => {
+      try {
+        await youTrackApi.deleteIssue(issueId);
+        setState((previous) => ({
+          ...previous,
+          items: previous.items.filter((item) => item.id !== issueId),
+        }));
+        await saveCache(
+          "youtrack-issues",
+          state.items.filter((item) => item.id !== issueId),
+        );
+        showToast({
+          style: Toast.Style.Success,
+          title: "Issue deleted",
+        });
+      } catch (error) {
+        console.error(error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed deleting issue",
+          message: error instanceof Error ? error.message : "Something went wrong",
+        });
+      }
+    },
+    [state.items, youTrackApi],
+  );
 
   return (
     <List isLoading={(!state.items && !state.error) || state.isLoading}>
@@ -100,8 +143,12 @@ export default function Command() {
           index={index}
           instance={prefs.instance}
           resolved={item.resolved}
-          getIssueDetailsCb={() => getIssueDetails(item, state.yt)}
-          createWorkItemCb={(workItem: WorkItem) => createWorkItemCb(item, workItem, state.yt)}
+          getIssueDetailsCb={() => getIssueDetails(item)}
+          createWorkItemCb={(workItem: WorkItem) => createWorkItemCb(item, workItem)}
+          applyCommandCb={(command: Command) => applyCommandCb(item, command)}
+          getCommandSuggestions={(command: string) => getCommandSuggestions(item, command)}
+          getLastCommentCb={() => getLastCommentCb(item.id)}
+          deleteIssueCb={() => deleteIssueCb(item.id)}
         />
       ))}
     </List>

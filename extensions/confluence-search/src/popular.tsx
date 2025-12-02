@@ -1,29 +1,28 @@
 import "cross-fetch/polyfill";
 
 import { Color, Icon, Image, List } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthorizeSite } from "./util/hooks";
 import { Content, fetchHydratedPopularFeed } from "./api/confluence";
-import { useAsyncEffect } from "use-async-effect";
 import { SearchActions } from "./SearchResults";
 
 export default function Command() {
   const site = useAuthorizeSite();
   const [popular, setPopular] = useState<Content[]>();
 
-  useAsyncEffect(async () => {
-    if (!site) {
-      return;
-    }
-    const popularContent = await fetchHydratedPopularFeed(site);
-    setPopular(popularContent);
+  useEffect(() => {
+    (async () => {
+      if (!site) {
+        return;
+      }
+      const popularContent = await fetchHydratedPopularFeed(site);
+      setPopular(popularContent);
+    })();
   }, [site]);
 
   return (
     <List isLoading={!popular}>
-      {popular?.map((content) => (
-        <PopularListItem key={content.id} content={content} />
-      ))}
+      {popular?.map((content) => <PopularListItem key={content.id} content={content} />)}
     </List>
   );
 }

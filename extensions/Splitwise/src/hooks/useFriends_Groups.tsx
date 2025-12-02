@@ -1,6 +1,7 @@
 import { useFetch } from "@raycast/utils";
 import { HEADER } from "./userPreferences";
-import { GetFriends, GetGroups, Friend, Group, ExpenseParams } from "../types/friends_groups.types";
+import { GetFriends, GetGroups, Friend, Group } from "../types/friends_groups.types";
+import { ExpenseParams } from "../types/get_expenses.types";
 import axios from "axios";
 import { showToast, Toast } from "@raycast/api";
 

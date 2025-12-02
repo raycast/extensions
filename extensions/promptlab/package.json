@@ -6,6 +6,9 @@
   "description": "Create custom AI commands using powerful placeholders",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
+  "contributors": [
+    "litomore"
+  ],
   "categories": [
     "Productivity",
     "Data",
@@ -384,22 +387,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.0",
     "exifr": "^7.1.3",
-    "mammoth": "^1.6.0",
+    "mammoth": "^1.9.1",
     "node-fetch": "^3.3.2",
     "pptx-text-parser": "^1.1.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz",
     "placeholders-toolkit": "^0.1.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.3",
+    "@types/react": "19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

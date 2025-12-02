@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anytype",
   "title": "Anytype",
-  "description": "Create, browse and search in Anytype - right at your fingertips, anywhere on your Mac.",
+  "description": "Create, browse, search and edit within Anytype - right at your fingertips, anywhere on your Mac.",
   "icon": "anytype-icon.png",
   "author": "jmetrikat",
   "owner": "any",
@@ -776,7 +776,6 @@
     "lint-staged": "^15.4.3",
     "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "react-devtools": "^5.2.0",
     "typescript": "^5.4.5"
   },
   "scripts": {

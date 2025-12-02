@@ -1,10 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { existsSync } from "fs";
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { NotInstalledError } from "../components";
 import { HistoryEntry, Preferences, SearchResult } from "../interfaces";
-import { getHistoryDbPath } from "../util";
+import { getPlacesDbPath } from "../util";
+import { useRetrySQLError } from "./useRetrySQLError";
 
 const whereClauses = (terms: string[]) => {
   return terms.map((t) => `b.title LIKE '%${t}%'`).join(" AND ");
@@ -34,25 +35,14 @@ const getBookmarkQuery = (query?: string) => {
 
 export function useBookmarkSearch(query: string | undefined): SearchResult<HistoryEntry> {
   const inQuery = getBookmarkQuery(query);
-  const dbPath = getHistoryDbPath();
-  const [retryCount, setRetryCount] = useState(0);
+  const dbPath = getPlacesDbPath();
 
   if (!existsSync(dbPath)) {
     return { data: [], isLoading: false, errorView: <NotInstalledError /> };
   }
 
-  const { isLoading, data, permissionView } = useSQL<HistoryEntry>(dbPath, inQuery, {
-    onError: (error) => {
-      const isRetryableError =
-        error.message?.includes("database is locked") || error.message?.includes("disk image is malformed");
-
-      if (isRetryableError && retryCount < 3) {
-        setTimeout(() => {
-          setRetryCount(retryCount + 1);
-        }, 100 * (retryCount + 1));
-      }
-    },
-  });
+  const { data, isLoading, error, permissionView, revalidate } = useSQL<HistoryEntry>(dbPath, inQuery);
+  useRetrySQLError({ error, onRetry: revalidate });
 
   return { data, isLoading, errorView: permissionView as ReactElement };
 }

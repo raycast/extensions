@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "˙",
+        "upper": "！"
+    },
+    "Digit2": {
+        "lower": "ˊ",
+        "upper": "\""
+    },
+    "Digit3": {
+        "lower": "ˇ",
+        "upper": "＃"
+    },
+    "Digit4": {
+        "lower": "ˋ",
+        "upper": "＄"
+    },
+    "Digit5": {
+        "lower": "5",
+        "upper": "％"
+    },
+    "Digit6": {
+        "lower": "6",
+        "upper": "^"
+    },
+    "Digit7": {
+        "lower": "ㄑ",
+        "upper": "ʻ"
+    },
+    "Digit8": {
+        "lower": "ㄢ",
+        "upper": "("
+    },
+    "Digit9": {
+        "lower": "ㄣ",
+        "upper": "（"
+    },
+    "Digit0": {
+        "lower": "ㄤ",
+        "upper": "）"
+    },
+    "Minus": {
+        "lower": "ㄥ",
+        "upper": "＿"
+    },
+    "Equal": {
+        "lower": "ㄦ",
+        "upper": "~"
+    },
+    "KeyQ": {
+        "lower": "ㄟ",
+        "upper": "ｑ"
+    },
+    "KeyW": {
+        "lower": "ㄝ",
+        "upper": "ｗ"
+    },
+    "KeyE": {
+        "lower": "ㄧ",
+        "upper": "ｅ"
+    },
+    "KeyR": {
+        "lower": "ㄜ",
+        "upper": "ｒ"
+    },
+    "KeyT": {
+        "lower": "ㄊ",
+        "upper": "ｔ"
+    },
+    "KeyY": {
+        "lower": "ㄡ",
+        "upper": "ｙ"
+    },
+    "KeyU": {
+        "lower": "ㄩ",
+        "upper": "ｕ"
+    },
+    "KeyI": {
+        "lower": "ㄞ",
+        "upper": "ｉ"
+    },
+    "KeyO": {
+        "lower": "ㄛ",
+        "upper": "ｏ"
+    },
+    "KeyP": {
+        "lower": "ㄆ",
+        "upper": "ｐ"
+    },
+    "BracketLeft": {
+        "lower": "「",
+        "upper": "『"
+    },
+    "BracketRight": {
+        "lower": "[",
+        "upper": "{"
+    },
+    "KeyA": {
+        "lower": "ㄚ",
+        "upper": "ａ"
+    },
+    "KeyS": {
+        "lower": "ㄙ",
+        "upper": "ｓ"
+    },
+    "KeyD": {
+        "lower": "ㄉ",
+        "upper": "ｄ"
+    },
+    "KeyF": {
+        "lower": "ㄈ",
+        "upper": "ｆ"
+    },
+    "KeyG": {
+        "lower": "ㄐ",
+        "upper": "ｇ"
+    },
+    "KeyH": {
+        "lower": "ㄏ",
+        "upper": "ｈ"
+    },
+    "KeyJ": {
+        "lower": "ㄖ",
+        "upper": "ｊ"
+    },
+    "KeyK": {
+        "lower": "ㄎ",
+        "upper": "ｋ"
+    },
+    "KeyL": {
+        "lower": "ㄌ",
+        "upper": "ｌ"
+    },
+    "Semicolon": {
+        "lower": "ㄗ",
+        "upper": "："
+    },
+    "Quote": {
+        "lower": ":",
+        "upper": "*"
+    },
+    "Backquote": {
+        "lower": "·",
+        "upper": "～"
+    },
+    "Backslash": {
+        "lower": "、",
+        "upper": "}"
+    },
+    "KeyZ": {
+        "lower": "ㄠ",
+        "upper": "ｚ"
+    },
+    "KeyX": {
+        "lower": "ㄨ",
+        "upper": "ｘ"
+    },
+    "KeyC": {
+        "lower": "ㄒ",
+        "upper": "ｃ"
+    },
+    "KeyV": {
+        "lower": "ㄍ",
+        "upper": "ｖ"
+    },
+    "KeyB": {
+        "lower": "ㄅ",
+        "upper": "ｂ"
+    },
+    "KeyN": {
+        "lower": "ㄋ",
+        "upper": "ｎ"
+    },
+    "KeyM": {
+        "lower": "ㄇ",
+        "upper": "ｍ"
+    },
+    "Comma": {
+        "lower": "ㄓ",
+        "upper": "，"
+    },
+    "Period": {
+        "lower": "ㄔ",
+        "upper": "。"
+    },
+    "Slash": {
+        "lower": "ㄕ",
+        "upper": "？"
+    }
+}

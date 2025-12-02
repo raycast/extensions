@@ -7,15 +7,16 @@ import { parse } from "path";
 import { ActionNewTemplateFileHere } from "./action-new-template-file-here";
 import { NewFileHereItem } from "./new-file-here-item";
 import { layout, showCode, showDocument, showScript } from "../types/preferences";
+import { MutatePromise } from "@raycast/utils";
 
 export function NewFileHereListLayout(props: {
   navigationTitle: string;
   isLoading: boolean;
   templateFiles: TemplateType[];
   folder: string;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  mutate: MutatePromise<TemplateType[]>;
 }) {
-  const { navigationTitle, isLoading, templateFiles, folder, setRefresh } = props;
+  const { navigationTitle, isLoading, templateFiles, folder, mutate } = props;
 
   return (
     <List
@@ -29,7 +30,7 @@ export function NewFileHereListLayout(props: {
         layout={layout}
         title={"No Templates"}
         description={"You can add template from the Action Panel"}
-        setRefresh={setRefresh}
+        mutate={mutate}
       />
       <List.Section title={"Template"}>
         {!isLoading &&
@@ -54,7 +55,7 @@ export function NewFileHereListLayout(props: {
                     index={index}
                     templateFiles={templateFiles}
                     folder={folder}
-                    setRefresh={setRefresh}
+                    mutate={mutate}
                   />
                 }
               />
@@ -72,7 +73,7 @@ export function NewFileHereListLayout(props: {
                 newFileType={{ section: "Document", index: index }}
                 templateFiles={templateFiles}
                 folder={folder}
-                setRefresh={setRefresh}
+                mutate={mutate}
               />
             );
           })}
@@ -89,7 +90,7 @@ export function NewFileHereListLayout(props: {
                 newFileType={{ section: "Code", index: index }}
                 templateFiles={templateFiles}
                 folder={folder}
-                setRefresh={setRefresh}
+                mutate={mutate}
               />
             );
           })}
@@ -106,7 +107,7 @@ export function NewFileHereListLayout(props: {
                 newFileType={{ section: "Script", index: index }}
                 templateFiles={templateFiles}
                 folder={folder}
-                setRefresh={setRefresh}
+                mutate={mutate}
               />
             );
           })}

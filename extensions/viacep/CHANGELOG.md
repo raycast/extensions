@@ -1,5 +1,9 @@
 # ViaCEP Changelog
 
+## [Enhancements] - 2025-11-27
+
+- Added Windows support.
+
 ## [Enhancements] - 2025-02-21
 
 - Changed `State Code` dropdown in the Find CEP command to start with `–` as default and added field validation.

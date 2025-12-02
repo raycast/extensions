@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zshrc-manager",
+  "title": "Zshrc Manager",
+  "description": "View and manage your ~/.zshrc from Raycast",
+  "icon": "extension-icon.png",
+  "author": "TurboCoder13",
+  "keywords": [
+    "raycast",
+    "zsh",
+    "shell",
+    "configuration",
+    "aliases",
+    "exports",
+    "terminal",
+    "productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Zshrc Manager",
+      "description": "View and manage your ~/.zshrc configuration (use dropdown to switch views)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableDefaults",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable Default Section Patterns",
+      "title": "Enable Default Section Patterns",
+      "description": "Enable built-in section detection patterns (recommended)"
+    },
+    {
+      "name": "enableCustomHeaderPattern",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Custom Header Pattern",
+      "title": "Enable Custom Header Pattern",
+      "description": "Use a custom regex pattern for section headers"
+    },
+    {
+      "name": "customHeaderPattern",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Header Pattern",
+      "description": "Regex pattern for section headers (must include one capture group for section name)",
+      "placeholder": "^#\\s+(.+)$"
+    },
+    {
+      "name": "enableCustomStartEndPatterns",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Custom Start/End Patterns",
+      "title": "Enable Custom Start/End Patterns",
+      "description": "Use custom regex patterns for section start/end markers"
+    },
+    {
+      "name": "customStartPattern",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Start Pattern",
+      "description": "Regex pattern for section start markers (must include one capture group for section name)",
+      "placeholder": "^#\\s*start\\s+(.+)$"
+    },
+    {
+      "name": "customEndPattern",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom End Pattern",
+      "description": "Regex pattern for section end markers",
+      "placeholder": "^#\\s*end\\s+(.+)$"
+    },
+    {
+      "name": "enableCustomZshrcPath",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use Custom Zshrc Path",
+      "title": "Use Custom Zshrc Path",
+      "description": "Specify a custom location for your zshrc file"
+    },
+    {
+      "name": "customZshrcPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Zshrc Path",
+      "description": "Full path to your zshrc file (e.g., /Users/username/.config/zshrc)",
+      "placeholder": "~/.zshrc"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0",
+    "simple-icons": "^15.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/react-test-renderer": "^19.0.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9.22.0",
+    "jsdom": "^27.0.1",
+    "prettier": "^3.5.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-test-renderer": "^19.0.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=18.17.0 <23"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run typecheck && npm run test:coverage"
+  },
+  "bugs": {
+    "url": "https://github.com/raycast/extensions/issues"
+  },
+  "homepage": "https://github.com/raycast/extensions/tree/main/extensions/zshrc-manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raycast/extensions.git",
+    "directory": "extensions/zshrc-manager"
+  }
+}

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard, open } from '@raycast/api'
 import { Project } from '../project'
 import { openUrl, preferences, resizeEditorWindow } from '../helpers'
-import { withToast } from '../ui/toast'
+import { showSuccessToast, showErrorToast } from '../ui/toast'
 
 type OpenProps = {
     project: Project
@@ -13,54 +13,100 @@ type ActionProps = {
 }
 
 export function OpenInEditor({ project }: OpenProps) {
+    async function handleOpenInEditor() {
+        try {
+            if (!preferences.editorApp?.name || !preferences.editorApp?.path) {
+                throw new Error('Editor app not configured')
+            }
+
+            await open(project.fullPath, preferences.editorApp.path)
+            await resizeEditorWindow(preferences.editorApp)
+            await showSuccessToast(`Opening project in ${preferences.editorApp.name}`)
+        } catch (error) {
+            if (error instanceof Error && error.message === 'Editor app not configured') {
+                await showErrorToast('Please configure your preferred editor in preferences')
+            } else {
+                await showErrorToast(`Failed to open project in ${preferences.editorApp?.name || 'editor'}`)
+            }
+        }
+    }
+
+    if (!preferences.editorApp?.name || !preferences.editorApp?.path) {
+        return (
+            <Action
+                title="Open in Editor"
+                icon={Icon.Code}
+                onAction={() => showErrorToast('Please configure your preferred editor in preferences')}
+            />
+        )
+    }
+
     return (
         <Action
             title={`Open in ${preferences.editorApp.name}`}
             key={`open-${preferences.editorApp.name}`}
             icon={{ fileIcon: preferences.editorApp.path }}
-            onAction={withToast({
-                action: () => {
-                    open(project.fullPath, preferences.editorApp.path)
-                    return resizeEditorWindow(preferences.editorApp)
-                },
-                onSuccess: () => `Opening project in ${preferences.editorApp.name}`,
-                onFailure: () => `Failed to open project in ${preferences.editorApp.name}`,
-            })}
+            onAction={handleOpenInEditor}
         />
     )
 }
 
 export function OpenInTerminal({ project }: OpenProps) {
+    async function handleOpenInTerminal() {
+        try {
+            if (!preferences.terminalApp?.name || !preferences.terminalApp?.path) {
+                throw new Error('Terminal app not configured')
+            }
+
+            await open(project.fullPath, preferences.terminalApp.path)
+            await showSuccessToast(`Opening project in ${preferences.terminalApp.name}`)
+        } catch (error) {
+            if (error instanceof Error && error.message === 'Terminal app not configured') {
+                await showErrorToast('Please configure your preferred terminal in preferences')
+            } else {
+                await showErrorToast(`Failed to open project in ${preferences.terminalApp?.name || 'terminal'}`)
+            }
+        }
+    }
+
+    if (!preferences.terminalApp?.name || !preferences.terminalApp?.path) {
+        return (
+            <Action
+                title="Open in Terminal"
+                icon={Icon.Terminal}
+                shortcut={{ modifiers: ['cmd'], key: 't' }}
+                onAction={() => showErrorToast('Please configure your preferred terminal in preferences')}
+            />
+        )
+    }
+
     return (
         <Action
             title={`Open in ${preferences.terminalApp.name}`}
             key={`open-${preferences.terminalApp.name}`}
             icon={{ fileIcon: preferences.terminalApp.path }}
             shortcut={{ modifiers: ['cmd'], key: 't' }}
-            onAction={withToast({
-                action: () => {
-                    return open(project.fullPath, preferences.terminalApp.path)
-                },
-                onSuccess: () => `Opening project in ${preferences.terminalApp.name}`,
-                onFailure: () => `Failed to open project in ${preferences.terminalApp.name}`,
-            })}
+            onAction={handleOpenInTerminal}
         />
     )
 }
 
 function OpenUrlAction(key: string, value: string, props: ActionProps = {}) {
+    async function handleOpenUrl() {
+        try {
+            await openUrl(value)
+            await showSuccessToast(`Opening ${key} URL`)
+        } catch (error) {
+            await showErrorToast(`Failed to open ${key} URL`)
+        }
+    }
+
     return (
         <Action
             key={key}
             title={`Open ${key} URL`}
             {...props}
-            onAction={withToast({
-                action: async () => {
-                    await openUrl(value)
-                },
-                onSuccess: () => `Opening ${key} URL`,
-                onFailure: () => `Failed to open ${key} URL`,
-            })}
+            onAction={handleOpenUrl}
         />
     )
 }
@@ -75,14 +121,23 @@ export function OpenUrl({ project }: OpenProps) {
             return null
         }
 
-        return OpenUrlAction(key, value, { icon: Icon.Globe, shortcut: { modifiers: ['cmd'] as Keyboard.KeyModifier[], key: 'o' as Keyboard.KeyEquivalent } })
+        return OpenUrlAction(key, value, {
+            icon: Icon.Globe,
+            shortcut: {
+                modifiers: ['cmd'] as Keyboard.KeyModifier[],
+                key: 'o' as Keyboard.KeyEquivalent,
+            },
+        })
     }
 
     return (
         <ActionPanel.Submenu
             title="Open in Browser"
             icon={Icon.Globe}
-            shortcut={{ modifiers: ['cmd'] as Keyboard.KeyModifier[], key: 'o' as Keyboard.KeyEquivalent }}
+            shortcut={{
+                modifiers: ['cmd'] as Keyboard.KeyModifier[],
+                key: 'o' as Keyboard.KeyEquivalent,
+            }}
         >
             {urlEntries.map(([key, value]) => value && OpenUrlAction(key, value))}
         </ActionPanel.Submenu>

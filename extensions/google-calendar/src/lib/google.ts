@@ -2,16 +2,14 @@ import { auth, calendar_v3 } from "@googleapis/calendar";
 import { OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
 import { people_v1 } from "@googleapis/people";
 import { Tool } from "@raycast/api";
-import { isInternal } from "./utils";
+import { getClientId } from "./utils";
 
 let calendar: calendar_v3.Calendar | null = null;
 let people: people_v1.People | null = null;
 
 const google = OAuthService.google({
   // Google Cloud Project: https://ray.so/6eAXUYf
-  clientId: isInternal()
-    ? "690234628480-4h8a6h78482ks82g3s1ghrqa0ce8qgo3.apps.googleusercontent.com"
-    : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com",
+  clientId: getClientId(),
   authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
   tokenUrl: "https://oauth2.googleapis.com/token",
   scope:

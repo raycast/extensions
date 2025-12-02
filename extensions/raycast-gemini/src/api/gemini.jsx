@@ -16,6 +16,7 @@ import fs from "fs";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
+import { getSafetySettings } from "./safetySettings";
 import { useCommandHistory } from "./useCommandHistory";
 
 export default (props, { context = undefined, allowPaste = false, useSelected = false, buffer = [] }) => {
@@ -69,6 +70,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           }
         },
         data: data ?? buffer,
+        safetySettings: getSafetySettings(),
       });
       setMarkdown(response);
       setLastResponse(response);

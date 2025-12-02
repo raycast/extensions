@@ -37,7 +37,7 @@ class TwentySDK {
 
       return response.statusText;
     } catch (err) {
-      return err as string;
+      return err instanceof Error ? err.message : String(err);
     }
   }
 
@@ -66,7 +66,7 @@ class TwentySDK {
 
       return response.statusText;
     } catch (err) {
-      return err as string;
+      return err instanceof Error ? err.message : String(err);
     }
   }
 

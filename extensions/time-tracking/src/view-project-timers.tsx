@@ -25,7 +25,7 @@ import {
   TimerList,
 } from "./Timers";
 
-function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date) => void }) {
+function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date, name: string) => void }) {
   const [error, setError] = useState("");
   return (
     <Form
@@ -34,6 +34,7 @@ function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date) => v
           <Action.SubmitForm
             title="Submit"
             onSubmit={(input) => {
+              const name: string = input.name;
               const start: Date = input["start-date"];
               const end: Date = input["end-date"];
               if (start >= end) {
@@ -44,12 +45,13 @@ function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date) => v
                 setError("End Date must be a date in the past");
                 return false;
               }
-              props.onUpdate(start, end);
+              props.onUpdate(start, end, name);
             }}
           />
         </ActionPanel>
       }
     >
+      <Form.TextField title="Name" id="name" defaultValue={props.timer.name || undefined} placeholder="Unnamed timer" />
       <Form.DatePicker
         title="Start Date"
         id={"start-date"}
@@ -103,8 +105,8 @@ export default function Command() {
     return (
       <EditForm
         timer={editingTimer}
-        onUpdate={async (start, end) => {
-          await editTimer({ ...editingTimer, start: start.getTime(), end: end.getTime() });
+        onUpdate={async (start, end, name) => {
+          await editTimer({ ...editingTimer, start: start.getTime(), end: end.getTime(), name });
           getTimers().then(refresh);
           setEditingTimer(undefined);
         }}
@@ -201,6 +203,7 @@ export default function Command() {
               />
               <Action
                 icon={Icon.Download}
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title="Export Timers as CSV"
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
                 onAction={exportTimers}

@@ -24,7 +24,7 @@ axios.interceptors.response.use(
     const data = error.response?.data;
     if (data) return Promise.reject(new Error(data.message));
     return Promise.reject(error);
-  }
+  },
 );
 
 export class MattermostClient {
@@ -63,7 +63,7 @@ export class MattermostClient {
         login_id: username,
         password: password,
       }),
-      MattermostClient.config()
+      MattermostClient.config(),
     );
     const token = response.headers["token"];
     console.log(response.statusText);
@@ -139,7 +139,7 @@ export class MattermostClient {
           user_id: user_id,
           status: status,
         }),
-        this.config()
+        this.config(),
       )
       .then((response) => response.data);
   }
@@ -164,7 +164,7 @@ export class MattermostClient {
           duration: status.duration,
           expires_at: status.expires_at ?? (status.duration && durationToExpireDate(status.duration)),
         }),
-        this.config()
+        this.config(),
       )
       .then((response) => response.data);
   }

@@ -81,6 +81,8 @@ export const useTerminalApp = () => {
     terminalIcon: data ? icons[preferences.terminalApp] : icons.terminal,
     terminalName: data ? names[preferences.terminalApp] : names.terminal,
     runCommandInTerminal: async (command: string) => {
+      await closeMainWindow(); // Close Raycast in case the brew cmd typed in raycast window
+      await new Promise((resolve) => setTimeout(resolve, 400)); // Wait for Raycast to close
       const cmd = data ? appleScripts[preferences.terminalApp](command) : appleScripts.terminal(command);
       await runAppleScript(cmd);
       await closeMainWindow();

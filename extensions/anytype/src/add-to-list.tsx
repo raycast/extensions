@@ -8,9 +8,9 @@ import { AddObjectsToListRequest } from "./models";
 import { bundledTypeKeys } from "./utils";
 
 export interface AddToListValues {
-  space: string;
-  list: string;
-  object: string;
+  spaceId: string;
+  listId: string;
+  objectId: string;
 }
 
 export default function Command() {
@@ -25,38 +25,15 @@ export function AddToList() {
   const [loading, setLoading] = useState(false);
   const [listSearchText, setListSearchText] = useState("");
   const [objectSearchText, setObjectSearchText] = useState("");
-  const [selectedSpace, setSelectedSpace] = useState<string>("");
-  const [selectedList, setSelectedList] = useState<string>("");
-  const [selectedObject, setSelectedObject] = useState<string>("");
 
   const { spaces, spacesError, isLoadingSpaces } = useSpaces();
-  const {
-    objects: lists,
-    objectsError: listsError,
-    isLoadingObjects: isLoadingLists,
-  } = useSearch(selectedSpace, listSearchText, [bundledTypeKeys.collection]);
-  const { objects, objectsError, isLoadingObjects } = useSearch(selectedSpace, objectSearchText, []);
-  const {
-    objects: listItems,
-    objectsError: listItemsError,
-    isLoadingObjects: isLoadingListItems,
-  } = useObjectsInList(selectedSpace, selectedList, "");
-
-  useEffect(() => {
-    if (spacesError || objectsError || listsError || listItemsError) {
-      showFailureToast(spacesError || objectsError || listsError || listItemsError, {
-        title: "Failed to fetch latest data",
-      });
-    }
-  }, [spacesError, objectsError, listsError, listItemsError]);
-
-  const { handleSubmit, itemProps } = useForm<AddToListValues>({
+  const { handleSubmit, itemProps, values } = useForm<AddToListValues>({
     onSubmit: async (values) => {
       setLoading(true);
       try {
         await showToast(Toast.Style.Animated, "Adding object to list...");
-        const request: AddObjectsToListRequest = { objects: [values.object] };
-        const response = await addObjectsToList(values.space, values.list, request);
+        const request: AddObjectsToListRequest = { objects: [values.objectId] };
+        const response = await addObjectsToList(values.spaceId, values.listId, request);
         if (response.payload) {
           await showToast(Toast.Style.Success, "Object added to list successfully", response.payload);
           popToRoot();
@@ -70,23 +47,43 @@ export function AddToList() {
       }
     },
     validation: {
-      space: (value) => {
+      spaceId: (value) => {
         if (!value) {
           return "Space is required";
         }
       },
-      list: (value) => {
+      listId: (value) => {
         if (!value) {
           return "List is required";
         }
       },
-      object: (value) => {
+      objectId: (value) => {
         if (!value) {
           return "Object is required";
         }
       },
     },
   });
+
+  const {
+    objects: lists,
+    objectsError: listsError,
+    isLoadingObjects: isLoadingLists,
+  } = useSearch(values.spaceId, listSearchText, [bundledTypeKeys.collection]);
+  const { objects, objectsError, isLoadingObjects } = useSearch(values.spaceId, objectSearchText, []);
+  const {
+    objects: listItems,
+    objectsError: listItemsError,
+    isLoadingObjects: isLoadingListItems,
+  } = useObjectsInList(values.spaceId, values.listId, "");
+
+  useEffect(() => {
+    if (spacesError || objectsError || listsError || listItemsError) {
+      showFailureToast(spacesError || objectsError || listsError || listItemsError, {
+        title: "Failed to fetch latest data",
+      });
+    }
+  }, [spacesError, objectsError, listsError, listItemsError]);
 
   return (
     <Form
@@ -99,10 +96,8 @@ export function AddToList() {
       }
     >
       <Form.Dropdown
-        {...itemProps.space}
+        {...itemProps.spaceId}
         title="Space"
-        value={selectedSpace}
-        onChange={setSelectedSpace}
         storeValue={true}
         placeholder="Search spaces..."
         info="The space containing the list"
@@ -113,10 +108,8 @@ export function AddToList() {
       </Form.Dropdown>
 
       <Form.Dropdown
-        {...itemProps.list}
+        {...itemProps.listId}
         title="Collection"
-        value={selectedList}
-        onChange={setSelectedList}
         onSearchTextChange={setListSearchText}
         storeValue={true}
         placeholder="Search collections..."
@@ -127,12 +120,10 @@ export function AddToList() {
         ))}
       </Form.Dropdown>
 
-      {selectedList && (
+      {values.listId && (
         <Form.Dropdown
-          {...itemProps.object}
+          {...itemProps.objectId}
           title="Object"
-          value={selectedObject}
-          onChange={setSelectedObject}
           onSearchTextChange={setObjectSearchText}
           throttle={true}
           storeValue={true}
@@ -140,7 +131,7 @@ export function AddToList() {
           info="The object to add to the list"
         >
           {objects
-            .filter((object) => !listItems.some((item) => item.id === object.id) && object.id !== selectedList)
+            .filter((object) => !listItems.some((item) => item.id === object.id) && object.id !== values.listId)
             .map((object) => (
               <Form.Dropdown.Item key={object.id} value={object.id} title={object.name} icon={object.icon} />
             ))}

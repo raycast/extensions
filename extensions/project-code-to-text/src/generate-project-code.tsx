@@ -47,6 +47,7 @@ interface AppState {
   useDirectoryInsteadOfFiles: boolean; // If true, use directory even if files are selected
   outputFileName: string;
   maxFileSizeMbString: string;
+  additionalIgnorePatterns: string;
   includeAiInstructions: boolean;
   outputToClipboard: boolean; // Whether to also copy output to clipboard
   progress: { message: string; details?: string } | null; // Progress message for long operations.
@@ -99,6 +100,7 @@ const INITIAL_STATE: AppState = {
   useDirectoryInsteadOfFiles: false,
   outputFileName: "project_code.txt",
   maxFileSizeMbString: (DEFAULT_MAX_FILE_SIZE_BYTES / 1024 / 1024).toString(),
+  additionalIgnorePatterns: "",
   includeAiInstructions: true, // AI instructions are included by default.
   outputToClipboard: false, // Don't copy to clipboard by default
   progress: null,
@@ -446,6 +448,20 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
   }, []);
 
   /**
+   * Updates the processing mode based on user selection.
+   */
+  const updateProcessingMode = useCallback(() => {
+    setState((prev) => {
+      const shouldUseFiles = Boolean(prev.finderSelectionInfo?.hasFiles && !prev.useDirectoryInsteadOfFiles);
+      return {
+        ...prev,
+        processOnlySelectedFiles: shouldUseFiles,
+        selectedFilePaths: shouldUseFiles ? prev.finderSelectionInfo?.selectedFiles || [] : [],
+      };
+    });
+  }, []);
+
+  /**
    * Validates the output configuration form (filename, max file size).
    * @returns True if the form is valid, false otherwise.
    */
@@ -553,6 +569,7 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
     const processorConfig: FileProcessorConfig = {
       projectDirectory: state.projectDirectory,
       maxFileSizeBytes: parseFloat(state.maxFileSizeMbString) * 1024 * 1024,
+      additionalIgnorePatterns: state.additionalIgnorePatterns,
       includeAiInstructions: state.includeAiInstructions,
       processOnlySelectedFiles: state.processOnlySelectedFiles,
       selectedFilePaths: state.selectedFilePaths,
@@ -845,6 +862,26 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
             setState((prev) => ({ ...prev, maxFileSizeMbString: newValue, estimatedStats: null }));
             if (state.formErrors.maxFileSizeMbString)
               setState((prev) => ({ ...prev, formErrors: { ...prev.formErrors, maxFileSizeMbString: undefined } }));
+          }}
+        />
+        <Form.TextField
+          id="additionalIgnorePatterns"
+          title="Additional Ignore Patterns"
+          placeholder="e.g., dist/, package-lock.json, coverage/, .gitignore"
+          info={`Specify additional ignore patterns separated by commas. (.gitignore rules and common folders like node_modules/, .git/, build/, and IDE files are already excluded.)`}
+          value={state.additionalIgnorePatterns}
+          error={state.formErrors.additionalIgnorePatterns}
+          onChange={(newValue) => {
+            setState((prev) => ({
+              ...prev,
+              additionalIgnorePatterns: newValue,
+            }));
+            if (state.formErrors.additionalIgnorePatterns) {
+              setState((prev) => ({
+                ...prev,
+                formErrors: { ...prev.formErrors, additionalIgnorePatterns: undefined },
+              }));
+            }
           }}
         />
         <Form.Checkbox

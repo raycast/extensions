@@ -6,7 +6,7 @@ global.fetch = nodeFetch;
 import fs from "fs/promises";
 import path from "path";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 interface Preferences {
   geminiApiKey: string;
@@ -17,7 +17,7 @@ interface Preferences {
 const preferences = getPreferenceValues<Preferences>();
 
 // Initialize Gemini client
-const geminiAI = preferences.geminiApiKey ? new GoogleGenerativeAI(preferences.geminiApiKey) : null;
+const geminiAI = preferences.geminiApiKey ? new GoogleGenAI({ apiKey: preferences.geminiApiKey }) : null;
 
 interface RenameResult {
   originalPath: string;
@@ -71,11 +71,6 @@ async function renameScreenshot(filePath: string): Promise<RenameResult> {
         };
       }
       throw error; // Re-throw other errors
-      return {
-        originalPath: filePath,
-        newPath: newFilePath,
-        success: true,
-      };
     }
   } catch (error) {
     console.error(`Error renaming ${filePath}:`, error);
@@ -141,9 +136,6 @@ async function generateNameWithGemini(imageBuffer: Buffer, filePath: string): Pr
     throw new Error("Gemini client not initialized");
   }
 
-  // Get Gemini model (using the latest flash model since pro-vision is deprecated)
-  const model = geminiAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
   // Convert buffer to base64 for Gemini API
   const base64Image = imageBuffer.toString("base64");
 
@@ -152,19 +144,26 @@ async function generateNameWithGemini(imageBuffer: Buffer, filePath: string): Pr
     "Create a concise, descriptive filename for this screenshot. Use lowercase, separate words with underscores, and be specific about what's shown. Focus on content (charts, UI elements, pages, etc). Return only the filename without extension.";
 
   // Call Gemini API
-  const result = await model.generateContent([
-    prompt,
-    {
-      inlineData: {
-        mimeType: `image/${getImageMimeType(filePath)}`,
-        data: base64Image,
+  const response = await geminiAI.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: prompt },
+          {
+            inlineData: {
+              mimeType: `image/${getImageMimeType(filePath)}`,
+              data: base64Image,
+            },
+          },
+        ],
       },
-    },
-  ]);
+    ],
+  });
 
   // Extract response text
-  const response = await result.response;
-  const description = response.text().trim().toLowerCase() || "screenshot";
+  const description = response.text?.trim().toLowerCase() || "screenshot";
 
   // Process the description into a valid filename
   return processDescription(description);

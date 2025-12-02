@@ -6,7 +6,8 @@
   "icon": "icon-tw-logo.png",
   "author": "magicjaqk",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "SebDanielsson"
   ],
   "categories": [
     "Developer Tools",
@@ -24,23 +25,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "culori": "^4.0.1"
+    "@raycast/api": "^1.101.1",
+    "culori": "^4.0.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/culori": "^2.1.1",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.1",
-    "prettier": "^3.5.3",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/culori": "^4.0.0",
+    "@types/node": "^22.15.34",
+    "@types/react": "^19.1.9",
+    "eslint": "^9.32.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "~5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "prettier": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,5 +1,23 @@
 # Zeabur Changelog
 
+## [Feature] - 2025-10-10
+
+- Added the menu bar projects command to see your Zeabur projects at a glance.
+- Added project usage information to the project list.
+
+## [Maintenance] - 2025-09-03
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
+## [Fix] - 2025-06-30
+
+- Fixed the issue where the provider information in the project list may be null.
+
+## [Feature] - 2025-06-18
+
+- Added the manage projects command to manage the projects on Zeabur.
+
 ## [Update] - 2025-05-26
 
 - Updated the deploy script for the "Deploy Project" command.

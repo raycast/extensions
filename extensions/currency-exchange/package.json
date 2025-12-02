@@ -6,7 +6,8 @@
   "icon": "currency.png",
   "author": "xeric",
   "contributors": [
-    "daudln"
+    "daudln",
+    "taken"
   ],
   "license": "MIT",
   "commands": [
@@ -38,7 +39,7 @@
     "@typescript-eslint/parser": "^5.57.1",
     "eslint": "^8.38.0",
     "eslint-config-prettier": "^8.8.0",
-    "react-devtools": "^4.27.4",
+    "prettier": "^3.5.3",
     "typescript": "^5.0.4"
   },
   "scripts": {
@@ -46,5 +47,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }

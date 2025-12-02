@@ -5,6 +5,10 @@
   "description": "Download media from Instagram with ease",
   "icon": "extension-icon.png",
   "author": "ridemountainpig",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Applications",
     "Media"
@@ -14,40 +18,72 @@
     {
       "name": "download-instagram-media",
       "title": "Download Instagram Media",
-      "description": "Download Instagram media with URL",
+      "description": "Download Instagram post and reels with URL",
       "mode": "no-view",
       "arguments": [
         {
           "name": "instagramUrl",
-          "description": "Instagram URL",
+          "description": "Post or reel URL",
           "type": "text",
-          "placeholder": "Instagram URL",
+          "placeholder": "Post or reel URL",
           "required": true
         }
-      ],
-      "preferences": [
+      ]
+    },
+    {
+      "name": "download-instagram-story",
+      "title": "Download Instagram Story",
+      "description": "Download Instagram story with URL",
+      "mode": "no-view",
+      "arguments": [
         {
-          "name": "mediaDownloadPath",
-          "title": "Media Download Path",
-          "description": "Path to save downloaded media",
-          "type": "directory",
-          "required": false
+          "name": "instagramUrl",
+          "description": "Story URL",
+          "type": "text",
+          "placeholder": "Story URL",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "download-instagram-highlight-story",
+      "title": "Download Instagram Highlight Story",
+      "description": "Download Instagram highlight story with URL",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "instagramUrl",
+          "description": "Highlight story URL",
+          "type": "text",
+          "placeholder": "Highlight story URL",
+          "required": true
         }
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "mediaDownloadPath",
+      "title": "Media Download Path",
+      "description": "Path to save downloaded media",
+      "type": "directory",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.94.3",
-    "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4"
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
+    "@types/cheerio": "^1.0.0",
+    "axios": "^1.11.0",
+    "cheerio": "^1.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build",

@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { Domain } from '@scaleway/sdk'
+import { Domainv2beta1 } from '@scaleway/sdk'
 
-export const DOMAIN_STATUSES = Domain.v2beta1.DOMAIN_TRANSIENT_STATUSES.reduce(
+export const DOMAIN_STATUSES = Domainv2beta1.DOMAIN_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -28,5 +28,5 @@ export const DOMAIN_STATUSES = Domain.v2beta1.DOMAIN_TRANSIENT_STATUSES.reduce(
   }
 )
 
-export const getDomainStatusIcon = (domain: Domain.v2beta1.DomainSummary) =>
+export const getDomainStatusIcon = (domain: Domainv2beta1.DomainSummary) =>
   DOMAIN_STATUSES[domain.status]

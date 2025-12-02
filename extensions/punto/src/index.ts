@@ -4,15 +4,22 @@ import {
   getSelectedText,
   getPreferenceValues,
 } from "@raycast/api";
-import { en_ru, ru_en } from "./Dict";
-import { exec as Exec } from "child_process";
-import { promisify } from "util";
+import {
+  en_ru,
+  ru_en,
+  ru_en_phonetic,
+  en_ru_phonetic,
+  uk_en_phonetic,
+  en_uk_phonetic,
+} from "./Dict";
+import {
+  getAvailableInputSourceIds,
+  selectInputSource,
+} from "swift:../swift/Punto";
 
-const exec = promisify(Exec);
 interface Preferences {
-  layoutSwitchModifier: string;
-  latLayoutName: string;
-  cyrLayoutName: string;
+  latLayoutID: string;
+  cyrLayoutID: string;
   showSuccessHUD: boolean;
 }
 
@@ -36,107 +43,76 @@ export default async function main() {
     return;
   }
 
-  const switchedText = switchStringLayout(input);
+  const preferences = getPreferenceValues<Preferences>();
+  const switchedText = switchStringLayout(input, preferences);
   // console.log(switchedText);
   await Clipboard.paste(switchedText);
 
-  const preferences = getPreferenceValues<Preferences>();
   await switchKeyboardLayout(preferences, detectLayout(switchedText));
 }
 
-function switchStringLayout(string: string): string {
+function switchStringLayout(string: string, preferences: Preferences): string {
   const chars: string[] = string.split("");
-  return chars.map((ch) => switchCharacterLayout(ch)).join("");
+  return chars.map((ch) => switchCharacterLayout(ch, preferences)).join("");
 }
 
 async function switchKeyboardLayout(
   preferences: Preferences,
   targetLayout: Layout,
 ): Promise<void> {
-  const languages = await getInstalledLayoutNames();
-  // console.log("installed layout names are " + languages.join(", "));
+  const languageIds =
+    (await getAvailableInputSourceIds()) as unknown as string[];
+  // console.log("installed layout names are " + languageIds.join(", "));
   // console.log("target layout is " + targetLayout);
-  const targetLayoutName =
+
+  const targetLayoutID =
     targetLayout === Layout.LAT
-      ? preferences.latLayoutName
-      : preferences.cyrLayoutName;
-  if (!languages.includes(targetLayoutName)) {
+      ? preferences.latLayoutID
+      : preferences.cyrLayoutID;
+
+  if (!languageIds.includes(targetLayoutID)) {
     await showHUD(
       "Layout " +
-        targetLayoutName +
-        " is not installed. Please install it or update the preferences",
+        targetLayoutID +
+        " is not installed. Please install it or update the preferences." +
+        `Available layouts include: ${languageIds.join(", ")}`,
     );
     return;
   }
 
-  const currentLayoutName = await getActiveLayoutName();
-  // console.log("current layout name is " + currentLayoutName);
+  // console.log("switching to " + targetLayoutID);
 
-  if (currentLayoutName === targetLayoutName) {
-    // console.log("already in target layout");
-    return;
-  }
-
-  // console.log("switching to " + targetLayoutName);
-  let attempts = languages.length;
-
-  while (attempts > 0) {
-    const modifierKey = preferences.layoutSwitchModifier;
-    await exec(
-      `osascript -e 'tell application "System Events" to keystroke " " using ` +
-        modifierKey +
-        ` down'`,
-    );
-    const activeLayoutName = await getActiveLayoutName();
-    // console.log("active layout after switch is " + activeLayoutName);
-    if (activeLayoutName === targetLayoutName) {
-      if (preferences.showSuccessHUD) await showHUD("Layout switched!");
-      // console.log("layout switched");
-      return;
-    }
-    if (currentLayoutName === activeLayoutName) {
-      break;
-    }
-    attempts--;
-  }
-
-  await showHUD("Failed to switch layout, please check the preferences");
-  // console.log("failed to switch layout");
+  await selectInputSource(targetLayoutID);
 }
 
 function detectLayout(input: string): Layout {
   const array = input.split("");
-  const enChars = array.filter((c) => en_ru.has(c)).length;
-  const ruChars = array.filter((c) => ru_en.has(c)).length;
-  return enChars > ruChars ? Layout.LAT : Layout.CYR;
+
+  const latChars = array.filter((c) => /[a-zA-Z]/.test(c)).length;
+  const cyrChars = array.filter((c) => /[а-яА-ЯёЁіІїЇєЄґҐ]/.test(c)).length;
+
+  return latChars > cyrChars ? Layout.LAT : Layout.CYR;
 }
 
-function switchCharacterLayout(char: string): string {
-  if (en_ru.has(char)) {
+function switchCharacterLayout(char: string, preferences: Preferences): string {
+  let cyrToLatMap = ru_en;
+  let latToCyrMap = en_ru;
+
+  if (preferences.cyrLayoutID === "com.apple.keylayout.Russian-Phonetic") {
+    cyrToLatMap = ru_en_phonetic;
+    latToCyrMap = en_ru_phonetic;
+  } else if (
+    preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-QWERTY"
+  ) {
+    cyrToLatMap = uk_en_phonetic;
+    latToCyrMap = en_uk_phonetic;
+  }
+
+  if (latToCyrMap.has(char)) {
     // console.log(char + " detected in en dict")
-    return en_ru.get(char) ?? char;
+    return latToCyrMap.get(char) ?? char;
   } else {
     // console.log(char + " is probably detected in ru dict"),
-    return ru_en.get(char) ?? char;
+    return cyrToLatMap.get(char) ?? char;
   }
-}
-
-async function getInstalledLayoutNames(): Promise<string[]> {
-  const result = await exec(
-    `defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleEnabledInputSources`,
-  );
-  return result.stdout
-    .split("\n")
-    .filter((line) => line.includes("KeyboardLayout Name"))
-    .map((line) => line.split("=")[1].trim().replace(/;/g, ""));
-}
-
-async function getActiveLayoutName(): Promise<string> {
-  const result = await exec(
-    `defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleSelectedInputSources`,
-  );
-  return result.stdout
-    .split("\n")
-    .filter((line) => line.includes("KeyboardLayout Name"))
-    .map((line) => line.split("=")[1].trim().replace(/;/g, ""))[0];
 }

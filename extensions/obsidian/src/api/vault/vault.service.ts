@@ -2,7 +2,7 @@ import { getPreferenceValues, Icon } from "@raycast/api";
 import * as fs from "fs";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
-import { default as fsPath, default as path } from "path";
+import path from "path";
 import { performance } from "perf_hooks";
 import { AUDIO_FILE_EXTENSIONS, LATEX_INLINE_REGEX, LATEX_REGEX, VIDEO_FILE_EXTENSIONS } from "../../utils/constants";
 import { Media } from "../../utils/interfaces";
@@ -13,14 +13,7 @@ import { Note } from "./notes/notes.types";
 import { ObsidianJSON, Vault } from "./vault.types";
 
 function getVaultNameFromPath(vaultPath: string): string {
-  const name = vaultPath
-    .split(fsPath.sep)
-    .filter((i) => {
-      if (i != "") {
-        return i;
-      }
-    })
-    .pop();
+  const name = path.basename(vaultPath);
   if (name) {
     return name;
   } else {
@@ -39,7 +32,9 @@ export function parseVaults(): Vault[] {
 }
 
 export async function loadObsidianJson(): Promise<Vault[]> {
-  const obsidianJsonPath = fsPath.resolve(`${homedir()}/Library/Application Support/obsidian/obsidian.json`);
+  const obsidianJsonPath = path.resolve(
+    path.join(homedir(), "Library", "Application Support", "obsidian", "obsidian.json")
+  );
   try {
     const obsidianJson = JSON.parse(await readFile(obsidianJsonPath, "utf8")) as ObsidianJSON;
     return Object.values(obsidianJson.vaults).map(({ path }) => ({
@@ -123,7 +118,7 @@ function getFilePaths(vault: Vault): string[] {
 /** Gets a list of folders that are ignored by the user inside of Obsidian */
 function getUserIgnoreFilters(vault: Vault): string[] {
   const { configFileName } = getPreferenceValues<GlobalPreferences>();
-  const appJSONPath = `${vault.path}/${configFileName || ".obsidian"}/app.json`;
+  const appJSONPath = path.join(vault.path, configFileName || ".obsidian", "app.json");
   if (!fs.existsSync(appJSONPath)) {
     return [];
   } else {

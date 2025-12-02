@@ -5,9 +5,11 @@ import getList from "./getList";
 export default async function getItemByIndex(index: number): Promise<App> {
   const list = await getList();
 
-  if (!list[index]) {
+  const item = list.at(index);
+
+  if (!item) {
     throw new HarpoonError(ErrorCode.itemNotFound);
   }
 
-  return list[index];
+  return item;
 }

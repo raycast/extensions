@@ -1,5 +1,9 @@
 # Gmail Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
+
 ## [Unread MenuBar unread fix] - 2025-03-11
 
 - Unread menubar list now only show unread emails in your Inbox.

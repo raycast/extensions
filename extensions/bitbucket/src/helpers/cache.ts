@@ -3,7 +3,6 @@ import { resolve } from "path";
 import { LocalStorage } from "node-localstorage";
 import { Middleware } from "swr";
 import { useEffect } from "react";
-import { Repository } from "../components/repository/interface";
 
 const SWR_CACHE_KEY = "swr-cache";
 
@@ -11,6 +10,7 @@ const location = resolve(environment.supportPath, "local-storage");
 const localStorage = new LocalStorage(location);
 
 const cache = localStorage.getItem(SWR_CACHE_KEY);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cacheProvider = new Map<string, any>(cache ? JSON.parse(cache) : []);
 
 const persistCacheMiddleware: Middleware = (useSWRNext) => {

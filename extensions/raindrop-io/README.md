@@ -1,6 +1,14 @@
-# Raindrop.io extension for Raycast
+<p align="center">
+    <img src="./assets/raindrop-icon-big.png" width="150" height="150" />
+</p>
+
+# Raindrop.io
+
+This is a [Raycast](https://raycast.com/) extension for [Raindrop.io](https://raindrop.io).
 
 ## Instructions
+
+### API Access Token
 
 For this extension we need a test access token, for this you need to create an app in Raindrop's [settings](https://app.raindrop.io/settings/integrations).
 
@@ -11,3 +19,25 @@ For this extension we need a test access token, for this you need to create an a
 5. Copy the created token.
 
 Install the extension and the first time you run any command it will ask you for your new token.
+
+### Browser Extension (Recommended)
+
+For enhanced functionality when capturing URLs and titles, we recommend installing the [Raycast Browser Extension](https://www.raycast.com/browser-extension). This extension provides better integration with your browser for a smoother experience.
+
+### Open in Browser Configuration
+
+The primary `Action` will open links in default browser. In `Preferences` you can select a secondary browser which will add a new `Action` for opening in that browser, instead. If you selected an invalid app (i.e. an app that is not a browser), link will open in default browser.
+
+## AI Assistant
+
+You can now talk to your Raindrop.io account with Raycast AI. Mention `@raindrop-io` inside Raycast AI to:
+
+- Search bookmarks with natural language queries and get back summaries that include the collection and tags.
+- Inspect the note, highlights, or excerpt of a specific bookmark.
+- Save new links by telling Raycast AI the URL together with the desired collection and tags.
+
+### Tips
+
+1. Make sure you have Raycast AI enabled on your account.
+2. When you ask to save a link, specify the collection name (e.g. "Research"). The assistant will resolve it automatically, otherwise the bookmark goes to **Unsorted**.
+3. Ask follow-up questions like "What tags did I use?" or "Add this article to the same collection"—the assistant keeps the previous tool results in the conversation.

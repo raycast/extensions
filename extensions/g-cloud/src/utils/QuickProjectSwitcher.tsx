@@ -94,7 +94,7 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
       const bIndex = recentlyUsed.indexOf(b.id);
 
       if (aIndex === -1 && bIndex === -1) {
-        return a.name.localeCompare(b.name);
+        return (a.name || "").localeCompare(b.name || "");
       }
 
       if (aIndex === -1) return 1;

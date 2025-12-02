@@ -1,21 +1,21 @@
-import { Action, Clipboard, Icon, Keyboard, showToast, Toast, showHUD } from "@raycast/api";
-import { execFileSync } from "child_process";
+import { Action, Clipboard, Icon, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
+import { execFileSync } from "node:child_process";
 
 import { ExtensionError, getCliPath, handleErrors } from "../utils";
 
-export function ShareItem({ id, title, shortcut }: { id: string; shortcut: Keyboard.Shortcut; title: string }) {
+export function ShareItem({ id, shortcut, title }: { id: string; shortcut: Keyboard.Shortcut; title: string }) {
   return (
     <Action
       icon={Icon.Link}
-      title={`Share Item`}
-      shortcut={shortcut}
       onAction={async () => {
         const toast = await showToast({
           style: Toast.Style.Animated,
           title: `Sharing ${title}...`,
         });
+
         try {
           const stdout = execFileSync(getCliPath(), ["item", "share", id]);
+
           await Clipboard.copy(stdout.toString().trim(), { concealed: true });
 
           toast.style = Toast.Style.Success;
@@ -32,28 +32,31 @@ export function ShareItem({ id, title, shortcut }: { id: string; shortcut: Keybo
                 if (err.title != err.message) {
                   toast.message = err.message;
                 }
+
                 toast.title = err.title;
                 toast.primaryAction = {
-                  title: "Copy logs",
                   onAction: async (toast) => {
                     await Clipboard.copy((err as Error).message);
                     toast.hide();
                   },
+                  title: "Copy logs",
                 };
               } else if (err instanceof Error) {
                 toast.title = err.message;
                 toast.primaryAction = {
-                  title: "Copy logs",
                   onAction: async (toast) => {
                     await Clipboard.copy((err as Error).message);
                     toast.hide();
                   },
+                  title: "Copy logs",
                 };
               }
             }
           }
         }
       }}
+      shortcut={shortcut}
+      title={`Share Item`}
     />
   );
 }

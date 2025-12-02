@@ -16,11 +16,7 @@ import * as yup from "yup";
 import path from "path";
 import os from "os";
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
-
-// Logging configuration
-const LOG_ENABLED = false; // Set to true to enable all logging
-const LOG_LEVEL: "debug" | "error" = "debug"; // Set to "debug" for verbose logging or "error" for less noise
-const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
+import { LOG_ENABLED, LOG_LEVEL, LOG_CACHE_OPERATIONS } from "./hooks/useFolderSearch";
 
 // Create a plugins cache instance with namespace
 const pluginsCache = new Cache({
@@ -67,6 +63,33 @@ const getPluginPathsFromCache = () => {
         });
       }
       return null;
+    }
+
+    // Check if plugins directory has been modified since cache was created
+    try {
+      const { pluginsFolder } = getPreferenceValues<SpotlightSearchPreferences>();
+      if (pluginsFolder) {
+        const normalizedPath = pluginsFolder.replace(/\/$/, "").replace(/^~/, os.homedir());
+        const dirStats = fs.statSync(normalizedPath);
+        const dirModTime = dirStats.mtime.getTime();
+
+        if (dirModTime > timestamp) {
+          if (LOG_CACHE_OPERATIONS) {
+            log("debug", "getPluginPathsFromCache", "Plugins directory modified since cache, invalidating", {
+              cacheTime: new Date(timestamp).toISOString(),
+              dirModTime: new Date(dirModTime).toISOString(),
+            });
+          }
+          return null;
+        }
+      }
+    } catch (error) {
+      // If we can't check the directory, just use the cache
+      if (LOG_CACHE_OPERATIONS) {
+        log("debug", "getPluginPathsFromCache", "Could not check plugins directory modification time", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
 
     // Get plugin paths from cache
@@ -132,7 +155,10 @@ const pluginSchema = yup
     title: yup.string().required(),
     icon: yup.string().required(),
     shortcut: PluginShortcutSchema.required(),
-    appleScript: yup.object().required(),
+    appleScript: yup
+      .mixed()
+      .required()
+      .test("is-function", "appleScript must be a function", (value) => typeof value === "function"),
   })
   .required()
   .strict()
@@ -329,9 +355,10 @@ const CLOUD_STORAGE_PATHS = [
   `${userHomeDir}/Library/CloudStorage/Dropbox`,
   // Google Drive
   `${userHomeDir}/Library/CloudStorage/GoogleDrive`,
-  // OneDrive
-  `${userHomeDir}/Library/CloudStorage/OneDrive-Personal`,
-  `${userHomeDir}/Library/CloudStorage/OneDrive-Microsoft`,
+  // OneDrive (dynamic tenant name)
+  `${userHomeDir}/Library/CloudStorage/OneDrive`,
+  // Synology Drive (dynamic server name)
+  `${userHomeDir}/Library/CloudStorage/SynologyDrive`,
 ];
 
 export function isCloudStoragePath(path: string): boolean {
@@ -453,3 +480,16 @@ export function fixDoubleConcat(text: string): string {
 
   return text;
 }
+
+// Function to manually clear the plugin cache (useful when new plugins are added)
+export const clearPluginCache = () => {
+  try {
+    pluginsCache.remove(PLUGINS_CACHE_KEY);
+    pluginsCache.remove(PLUGINS_CACHE_TIMESTAMP_KEY);
+    log("debug", "clearPluginCache", "Plugin cache cleared manually");
+  } catch (error) {
+    log("error", "clearPluginCache", "Error clearing plugin cache", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};

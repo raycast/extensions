@@ -1,6 +1,6 @@
 import { MenuBarExtra, launchCommand, LaunchType, Icon, getPreferenceValues } from "@raycast/api";
 import moment from "moment";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getFormattedList } from "./list";
 
 export default function Command() {
@@ -43,7 +43,7 @@ export default function Command() {
                 try {
                   await launchCommand({ name: "list", type: LaunchType.UserInitiated });
                 } catch (error) {
-                  console.error("Failed to launch command:", error);
+                  await showFailureToast(error, { title: "Failed to launch command" });
                 }
               }}
             />
@@ -58,7 +58,7 @@ export default function Command() {
             try {
               await launchCommand({ name: "index", type: LaunchType.UserInitiated });
             } catch (error) {
-              console.error("Failed to launch command:", error);
+              await showFailureToast(error, { title: "Failed to launch command" });
             }
           }}
         />

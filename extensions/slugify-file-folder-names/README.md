@@ -4,15 +4,37 @@ A Raycast extension that converts selected files and folders in Finder to URL-fr
 
 ## Features
 
-- 🌍 **International Characters**: Handles accented and special characters from multiple languages
-- 📁 **Batch Processing**: Rename multiple files and folders at once
-- 🔄 **Extension Preservation**: Keeps file extensions intact
-- ⚡ **Conflict Resolution**: Automatically handles filename conflicts
-- 📋 **Rename Log**: Copies a summary of renamed items to clipboard
+- **International Characters**: Handles accented and special characters from multiple languages
+- **Transliterate German Umlauts**: Optional proper transliteration of German umlauts (ä→ae, ö→oe, ü→ue, ß→ss)
+- **Batch Processing**: Rename multiple files and folders at once
+- **Extension Preservation**: Keeps file extensions intact
+- **Conflict Resolution**: Automatically handles filename conflicts
+- **Rename Log**: Copies a summary of renamed items to clipboard
+- **Configurable**: Customizable preferences via Raycast settings
+
+## Preferences
+
+Access preferences by pressing `⌘,` (Command + Comma) when selecting the command, or via Raycast Settings > Extensions > Slugify File / Folder Names.
+
+### Transliterate German Umlauts
+- **Enable German umlaut translation**: When enabled, German umlauts are properly transliterated instead of simplified
+- **Default**: Disabled (maintains backward compatibility)
+- **Examples**:
+  - **Disabled**: `Müller.txt` → `muller.txt`
+  - **Enabled**: `Müller.txt` → `mueller.txt`
 
 ## Character Mappings
 
-### International Characters
+### German Characters (when German Umlaut Transliteration is enabled)
+- **ä** → ae
+- **ö** → oe  
+- **ü** → ue
+- **Ä** → Ae
+- **Ö** → Oe
+- **Ü** → Ue
+- **ß** → ss
+
+### International Characters (default behavior)
 - **á à â ä æ ã å ā** → a
 - **é è ê ë ē ė ę** → e
 - **í ì î ï ī į ı İ** → i
@@ -37,15 +59,17 @@ A Raycast extension that converts selected files and folders in Finder to URL-fr
 
 ## Usage
 
-1. **Select Files/Folders**: In Finder, select one or more files or folders you want to rename
-2. **Run Command**: Open Raycast and type "Slugify Selected Files & Folders" or use the configured shortcut
-3. **View Results**: The extension will:
+1. **Configure Preferences** (optional): Set German umlaut transliteration preference via command preferences (`⌘,`)
+2. **Select Files/Folders**: In Finder, select one or more files or folders you want to rename
+3. **Run Command**: Open Raycast and type "Slugify Selected Files & Folders" or use the configured shortcut
+4. **View Results**: The extension will:
    - Show progress toast during processing
    - Display success/failure summary
    - Copy rename log to clipboard (format: `original-name → new-name`)
 
 ## Examples
 
+### Standard Examples
 | Original Name | Slugified Name |
 |---------------|----------------|
 | `Çılgın %50 İndirim! (Şimdi Başla)` | `cilgin-50-indirim-simdi-basla` |
@@ -54,6 +78,15 @@ A Raycast extension that converts selected files and folders in Finder to URL-fr
 | `naïve piñata.docx` | `naive-pinata.docx` |
 | `Hello World!` | `hello-world` |
 
+### German Umlaut Transliteration Examples
+| Original Name | Default Behavior | German Umlauts Transliterated |
+|---------------|------------------|---------------------------|
+| `Müller.txt` | `muller.txt` | `mueller.txt` |
+| `Größe.pdf` | `grosse.pdf` | `groesse.pdf` |
+| `Bär Höhle.jpg` | `bar-hohle.jpg` | `baer-hoehle.jpg` |
+| `Tür Öffnung.docx` | `tur-offnung.docx` | `tuer-oeffnung.docx` |
+| `Köln Düsseldorf.txt` | `koln-dusseldorf.txt` | `koeln-duesseldorf.txt` |
+
 ## Error Handling
 
 - **No Selection**: Shows error if no files/folders are selected in Finder
@@ -61,23 +94,6 @@ A Raycast extension that converts selected files and folders in Finder to URL-fr
 - **Naming Conflicts**: Automatically appends numbers (`-1`, `-2`, etc.) to avoid overwrites
 - **Already Slugified**: Skips files that are already in slug format
 
-## Development
-
-### Building
-```bash
-npm run build
-```
-
-### Development Mode
-```bash
-npm run dev
-```
-
-### Testing
-The extension includes comprehensive test cases for the slugify function covering:
-- International character mappings
-- Special character handling
-- Edge cases and file extensions
 
 ## Technical Details
 
@@ -85,13 +101,4 @@ The extension includes comprehensive test cases for the slugify function coverin
 - **Language**: TypeScript
 - **File Operations**: Node.js `fs.promises`
 - **Mode**: No-view command for quick execution
-
-## Changelog
-
-## [Initial Version] - {PR_MERGE_DATE}
-- Initial release
-- International character support
-- Batch file processing
-- Extension preservation
-- Conflict resolution
-- Clipboard integration
+- **Preferences**: Raycast Preferences API for persistent settings

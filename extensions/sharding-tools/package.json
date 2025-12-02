@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sharding-tools",
+  "title": "Sharding Tools",
+  "description": "ShardingTools is a professional Raycast extension tool designed specifically for database sharding and sharding scenarios. It provides complete sharding configuration management, real-time computation and SQL generation, which greatly improves the efficiency of developers in sharding scenarios.",
+  "icon": "extension-icon.png",
+  "author": "KevinWang0224",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "addtable",
+      "title": "Add Shard Config",
+      "subtitle": "Sharding Tools",
+      "description": "Add shard config, set shard parameters",
+      "mode": "view"
+    },
+    {
+      "name": "list",
+      "title": "List Shard Configs",
+      "subtitle": "Sharding Tools",
+      "description": "List saved shard configs and generated shard lists",
+      "mode": "view"
+    },
+    {
+      "name": "calculator",
+      "title": "Shard Calculator",
+      "subtitle": "Sharding Tools",
+      "description": "Input shard factor value to calculate corresponding database and table",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

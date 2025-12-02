@@ -4,7 +4,13 @@
   "title": "Pipedrive Search",
   "description": "Search Pipedrive deals, people and organizations",
   "icon": "command-icon.png",
+  "categories": [
+    "Productivity"
+  ],
   "author": "ahp",
+  "contributors": [
+    "xmok"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -42,22 +48,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.89.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.18.0",
-    "@types/node": "^20.11.5",
-    "@types/react": "^18.2.48",
-    "@typescript-eslint/eslint-plugin": "^8.21.0",
-    "@typescript-eslint/parser": "^8.21.0",
-    "eslint": "^9.18.0",
-    "eslint-config-prettier": "^10.0.1",
-    "globals": "^15.14.0",
-    "prettier": "^3.4.2",
-    "react": "^19.0.0",
-    "typescript": "^5.7.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
@@ -66,5 +66,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

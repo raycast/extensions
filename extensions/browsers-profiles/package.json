@@ -10,7 +10,8 @@
   "author": "skydiver",
   "contributors": [
     "kytta",
-    "emilshr"
+    "emilshr",
+    "chingweih"
   ],
   "scripts": {
     "build": "ray build",
@@ -44,5 +45,8 @@
       "mode": "view"
     }
   ],
-  "title": "Open Browsers Profiles"
+  "title": "Open Browsers Profiles",
+  "platforms": [
+    "macOS"
+  ]
 }

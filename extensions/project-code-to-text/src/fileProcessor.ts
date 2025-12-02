@@ -27,9 +27,14 @@ import { Stats } from "fs";
  */
 async function loadIgnoreFilter(
   projectRoot: string,
+  additionalIgnorePatterns?: string[],
 ): Promise<{ filter: ReturnType<typeof ignore>; gitignoreUsed: boolean }> {
   // Start with hardcoded base ignore patterns
   const ig = ignore().add(HARDCODED_BASE_IGNORE_PATTERNS as string[]);
+
+  if (additionalIgnorePatterns) {
+    ig.add(additionalIgnorePatterns as string[]);
+  }
 
   const gitignorePath = path.join(projectRoot, ".gitignore");
   let gitignoreUsed = false;

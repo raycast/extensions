@@ -29,7 +29,7 @@ export interface NoteListProps {
   notes: Note[];
   isLoading?: boolean;
   searchArguments: SearchArguments;
-  action?: (note: Note, vault: Vault) => React.ReactFragment;
+  action?: (note: Note, vault: Vault) => React.ReactNode;
   onDelete?: (note: Note, vault: Vault) => void;
   onSearchChange?: (search: string) => void;
 }
