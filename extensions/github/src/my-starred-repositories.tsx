@@ -77,23 +77,27 @@ function MyStarredRepositories() {
   );
 
   useEffect(
-    () =>  history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))), 
-    [data]
+    () => history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))),
+    [data],
   );
 
   const validHistory = useMemo(
     () => history.filter((repository) => data?.find((r) => r.id === repository.id)),
-    [data, history]
+    [data, history],
   );
-  
+
   const myStarredRepositories = useMemo(
-    () => data?.filter((repository: ExtendedRepositoryFieldsFragment) => !validHistory.find((r) => r.id === repository.id)),
+    () =>
+      data?.filter((repository: ExtendedRepositoryFieldsFragment) => !validHistory.find((r) => r.id === repository.id)),
     [data, validHistory],
   );
 
   return (
     <List isLoading={isLoading} throttle>
-      <List.Section title="Visited Starred Repositories" subtitle={validHistory ? String(validHistory.length) : undefined}>
+      <List.Section
+        title="Visited Starred Repositories"
+        subtitle={validHistory ? String(validHistory.length) : undefined}
+      >
         {validHistory.map((repository) => (
           <RepositoryListItem
             key={repository.id}

@@ -50,15 +50,15 @@ function SearchRepositories() {
   );
 
   useEffect(
-    () =>  history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))), 
-    [data]
+    () => history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))),
+    [data],
   );
 
   const validHistory = useMemo(
     () => history.filter((repository) => data?.find((r) => r.id === repository.id)),
-    [data, history]
+    [data, history],
   );
-  
+
   const foundRepositories = useMemo(
     () => data?.filter((repository) => !validHistory.find((r) => r.id === repository.id)),
     [data, validHistory],
