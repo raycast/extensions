@@ -1,5 +1,9 @@
 # monobank Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Used country flags in .png format so they look the same on both macOS and Windows platforms
+
 ## [Fix] - 2025-11-27
 
 - Added Windows support
