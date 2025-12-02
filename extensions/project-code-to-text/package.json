@@ -52,5 +52,8 @@
     "export",
     "text",
     "analysis"
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
