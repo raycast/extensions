@@ -280,7 +280,11 @@ async function processMixedSelection(
 
   // Load ignore filter once for the entire process
   progressCallback("Loading ignore rules...");
-  const { filter: ignoreFilter } = await loadIgnoreFilter(projectRoot);
+  // Parse additional ignore patterns from string (comma-separated)
+  const additionalPatterns = config.additionalIgnorePatterns
+    ? config.additionalIgnorePatterns.split(",").map((p) => p.trim()).filter((p) => p.length > 0)
+    : undefined;
+  const { filter: ignoreFilter } = await loadIgnoreFilter(projectRoot, additionalPatterns);
 
   // Initialize safety limits for directory processing
   const safetyLimits = {
@@ -409,8 +413,14 @@ export async function generateProjectCodeString(
   config: FileProcessorConfig,
   onProgress?: (progress: { message: string; details?: string }) => void,
 ): Promise<string> {
-  const { projectDirectory, maxFileSizeBytes, includeAiInstructions, processOnlySelectedFiles, selectedFilePaths } =
-    config;
+  const {
+    projectDirectory,
+    maxFileSizeBytes,
+    includeAiInstructions,
+    processOnlySelectedFiles,
+    selectedFilePaths,
+    additionalIgnorePatterns,
+  } = config;
   const projectRoot = path.resolve(projectDirectory);
 
   const progressCallback = (message: string, details?: string) => {
@@ -427,7 +437,11 @@ export async function generateProjectCodeString(
   } else {
     // Process entire directory structure
     progressCallback("Loading ignore rules...");
-    const ignoreResult = await loadIgnoreFilter(projectRoot);
+    // Parse additional ignore patterns from string (comma-separated)
+    const additionalPatterns = config.additionalIgnorePatterns
+      ? config.additionalIgnorePatterns.split(",").map((p) => p.trim()).filter((p) => p.length > 0)
+      : undefined;
+    const ignoreResult = await loadIgnoreFilter(projectRoot, additionalPatterns);
     gitignoreUsed = ignoreResult.gitignoreUsed;
 
     progressCallback("Scanning project files...");
