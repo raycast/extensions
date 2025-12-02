@@ -11,7 +11,7 @@ import {
   GameGuess,
   GameRound,
 } from "./types";
-import { formatNumber, getPlonkItUrl } from "./utils";
+import { formatNumber, getPlonkItUrl, getUserCountryCode } from "./utils";
 
 interface ParsedGame {
   type: "daily" | "streak" | "duel" | "unknown";
@@ -209,14 +209,15 @@ ${rounds
 }
 
 function DuelDetailView({ game, details }: { game: ParsedGame; details: DuelDetails }) {
-  const myTeam = details.teams.find((team) => team.players.some((player) => player.countryCode === "de"));
+  const userCountryCode = getUserCountryCode();
+  const myTeam = details.teams.find((team) => team.players.some((player) => player.countryCode === userCountryCode));
   const enemyTeam = details.teams.find((team) => team.id !== myTeam?.id);
 
   const didWin = details.result.winningTeamId === myTeam?.id;
   const isDraw = details.result.isDraw;
 
   const markdown = `
-# ⚔️ Team Duel ${isDraw ? "DRAW" : didWin ? "VICTORY!" : "DEFEAT"}
+# ⚔️ Duel ${isDraw ? "DRAW" : didWin ? "VICTORY!" : "DEFEAT"}
 
 **${details.options.map.name}**
 

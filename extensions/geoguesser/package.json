@@ -45,6 +45,15 @@
       "placeholder": "Paste your _ncfa cookie value here"
     },
     {
+      "name": "countryCode",
+      "type": "textfield",
+      "required": false,
+      "title": "Your Country Code",
+      "description": "Your 2-letter country code (e.g., DE, US, FR)",
+      "default": "de",
+      "placeholder": "de"
+    },
+    {
       "name": "locale",
       "type": "dropdown",
       "required": false,
