@@ -1,5 +1,11 @@
 # Ente Auth Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- Change the "Copy Next" `shortcut` to be cross-platform
+- Remove unecessary deps
+- Mention default values the extension uses for reference
+
 ## [Windows Support] - 2025-08-25
 
 - Added windows support
