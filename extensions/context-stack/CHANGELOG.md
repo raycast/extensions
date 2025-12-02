@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - 2025-11-26
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of Context Stack
 - **Stack Push**: Capture context with support for Browser URLs and iTerm2 sessions.
