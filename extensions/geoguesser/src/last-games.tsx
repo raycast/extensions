@@ -11,7 +11,7 @@ import {
   GameGuess,
   GameRound,
 } from "./types";
-import { getPlonkItUrl } from "./utils";
+import { formatNumber, getPlonkItUrl } from "./utils";
 
 interface ParsedGame {
   type: "daily" | "streak" | "duel" | "unknown";
@@ -56,7 +56,7 @@ export default function LastGamesCommand() {
           subtitle={game.subtitle}
           icon={{ source: game.icon, tintColor: game.iconTint }}
           accessories={[
-            game.points !== undefined ? { text: `${game.points.toLocaleString("de-DE")} pts` } : {},
+            game.points !== undefined ? { text: `${formatNumber(game.points)} pts` } : {},
             { date: new Date(game.time) },
           ]}
           actions={
@@ -133,7 +133,7 @@ function GameDetailView({ game }: { game: ParsedGame }) {
 ---
 
 ## 🎯 Final Score
-**${totalScore.toLocaleString("de-DE")} points**
+**${formatNumber(totalScore)} points**
 
 ## 📍 Rounds
 
@@ -149,7 +149,7 @@ ${rounds
       : "—";
 
     return `### Round ${idx + 1}
-- **Score:** ${guess.roundScore?.amount?.toLocaleString("de-DE") || 0} pts
+- **Score:** ${formatNumber(guess.roundScore?.amount || 0)} pts
 - **Distance:** ${distance}
 - **Time:** ${guess.time}s
 - **Location:** [${round.lat.toFixed(4)}, ${round.lng.toFixed(4)}](https://www.google.com/maps?q=${round.lat},${round.lng})
@@ -164,12 +164,12 @@ ${rounds
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Total Score" text={`${totalScore.toLocaleString("de-DE")} pts`} icon="🎯" />
+          <Detail.Metadata.Label title="Total Score" text={`${formatNumber(totalScore)} pts`} icon="🎯" />
           {guesses.map((guess: GameGuess, idx: number) => (
             <Detail.Metadata.Label
               key={idx}
               title={`Round ${idx + 1}`}
-              text={`${guess.roundScore?.amount?.toLocaleString("de-DE") || 0} pts`}
+              text={`${formatNumber(guess.roundScore?.amount || 0)} pts`}
             />
           ))}
         </Detail.Metadata>
@@ -249,7 +249,7 @@ ${myTeam?.roundResults
         : `${Math.round(round.bestGuess.distance)} m`;
 
     return `### Round ${round.roundNumber} ${location?.panorama.countryCode.toUpperCase() || ""}
-- **Score:** ${round.score.toLocaleString("de-DE")} pts
+- **Score:** ${formatNumber(round.score)} pts
 - **Distance:** ${distance}
 - **Damage Dealt:** ${round.damageDealt}
 - **Multiplier:** ${round.multiplier}x
@@ -351,7 +351,7 @@ function parseGameEntry(entry: FeedEntry): ParsedGame | null {
         type: "daily",
         time: entry.time,
         title: payload.isDailyChallenge ? "📅 Daily Challenge" : `🎮 ${payload.gameMode}`,
-        subtitle: `${payload.mapName} • ${payload.points.toLocaleString("de-DE")} pts`,
+        subtitle: `${payload.mapName} • ${formatNumber(payload.points)} pts`,
         url: `https://www.geoguessr.com/challenge/${payload.challengeToken}`,
         token: payload.challengeToken,
         points: payload.points,

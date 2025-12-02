@@ -43,6 +43,64 @@
       "title": "NCFA Token",
       "description": "Your GeoGuessr _ncfa cookie value (valid for 1 year)",
       "placeholder": "Paste your _ncfa cookie value here"
+    },
+    {
+      "name": "locale",
+      "type": "dropdown",
+      "required": false,
+      "title": "Number & Date Format",
+      "description": "Choose your preferred locale for formatting numbers and dates",
+      "default": "de-DE",
+      "data": [
+        {
+          "title": "German (Germany)",
+          "value": "de-DE"
+        },
+        {
+          "title": "English (US)",
+          "value": "en-US"
+        },
+        {
+          "title": "English (UK)",
+          "value": "en-GB"
+        },
+        {
+          "title": "French (France)",
+          "value": "fr-FR"
+        },
+        {
+          "title": "Spanish (Spain)",
+          "value": "es-ES"
+        },
+        {
+          "title": "Italian (Italy)",
+          "value": "it-IT"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "Dutch (Netherlands)",
+          "value": "nl-NL"
+        },
+        {
+          "title": "Swedish (Sweden)",
+          "value": "sv-SE"
+        },
+        {
+          "title": "Norwegian (Norway)",
+          "value": "nb-NO"
+        },
+        {
+          "title": "Danish (Denmark)",
+          "value": "da-DK"
+        },
+        {
+          "title": "Finnish (Finland)",
+          "value": "fi-FI"
+        }
+      ]
     }
   ],
   "dependencies": {

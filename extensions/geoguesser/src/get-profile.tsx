@@ -2,6 +2,7 @@ import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getProfile, getProfileStats } from "./api/client";
 import { ProfileResponse, StatsResponse } from "./types";
+import { formatDate, formatNumber } from "./utils";
 
 export default function ViewProfile() {
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
@@ -44,8 +45,8 @@ ${profile?.user?.isVerified ? "✅ Verified" : ""} ${profile?.user?.isProUser ? 
 ## Level Progress
 **Level ${profile?.user?.progress?.level || "—"}** ${progressBar} **${xpProgress}%**
 
-\`${profile?.user?.progress?.xp?.toLocaleString("de-DE") || "—"} / ${profile?.user?.progress?.nextLevelXp?.toLocaleString("de-DE") || "—"} XP\`
-  `;
+\`${formatNumber(profile?.user?.progress?.xp || 0)} / ${formatNumber(profile?.user?.progress?.nextLevelXp || 0)} XP\`
+`;
 
   return (
     <Detail
@@ -61,7 +62,7 @@ ${profile?.user?.isVerified ? "✅ Verified" : ""} ${profile?.user?.isProUser ? 
           />
           <Detail.Metadata.Label
             title="Member Since"
-            text={profile?.user?.created ? new Date(profile.user.created).toLocaleDateString("de-DE") : "—"}
+            text={profile?.user?.created ? formatDate(new Date(profile.user.created)) : "—"}
           />
 
           <Detail.Metadata.Separator />

@@ -1,4 +1,26 @@
-// Map ISO country codes to Plonk It country names
+import { getPreferenceValues } from "@raycast/api";
+
+interface Preferences {
+  locale: string;
+}
+
+export function getLocale(): string {
+  const { locale } = getPreferenceValues<Preferences>();
+  return locale || "de-DE";
+}
+
+export function formatNumber(num: number): string {
+  return num.toLocaleString(getLocale());
+}
+
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString(getLocale());
+}
+
+export function formatDateTime(date: Date): string {
+  return date.toLocaleString(getLocale());
+}
+
 const COUNTRY_CODE_TO_NAME: Record<string, string> = {
   ad: "andorra",
   ae: "united-arab-emirates",

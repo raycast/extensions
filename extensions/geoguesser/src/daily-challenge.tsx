@@ -2,6 +2,7 @@ import { Detail, ActionPanel, Action, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getDailyChallenge, getMyDailyChallengeScore } from "./api/client";
 import { DailyChallengeResponse, MyDailyChallengeScore } from "./types";
+import { formatDateTime, formatNumber } from "./utils";
 
 export default function DailyChallengeCommand() {
   const [challenge, setChallenge] = useState<DailyChallengeResponse | null>(null);
@@ -55,9 +56,9 @@ ${
   myScore
     ? `
 ## 🎯 Your Score
-- **Score:** ${myScore.totalScore.toLocaleString("de-DE")} pts
+- **Score:** ${formatNumber(myScore.totalScore)} pts
 - **Time:** ${Math.floor(myScore.totalTime / 60)}m ${myScore.totalTime % 60}s
-- **Distance:** ${Math.round(myScore.totalDistance / 1000).toLocaleString("de-DE")} km off
+- **Distance:** ${formatNumber(Math.round(myScore.totalDistance / 1000))} km off
 - **Streak:** 🔥 ${myScore.currentStreak}
 
 ${myScore.isOnLeaderboard ? "✅ **You're on the leaderboard!**" : "📊 Keep practicing to reach the leaderboard!"}
@@ -72,7 +73,7 @@ You haven't played today's challenge yet!
 `
 }
 
-**${challenge.participants.toLocaleString("de-DE")} participants** have played today
+**${formatNumber(challenge.participants)} participants** have played today
 
 ## ⏰ Time Remaining
 **${hours}h ${minutes}m** until next challenge
@@ -82,7 +83,7 @@ You haven't played today's challenge yet!
 ${topPlayers
   .map(
     (player, idx) =>
-      `${idx + 1}. **${player.nick}** ${player.countryCode.toUpperCase()} - ${player.totalScore.toLocaleString("de-DE")} pts`,
+      `${idx + 1}. **${player.nick}** ${player.countryCode.toUpperCase()} - ${formatNumber(player.totalScore)} pts`,
   )
   .join("\n")}
 
@@ -99,11 +100,7 @@ ${topPlayers
         <Detail.Metadata>
           {myScore && (
             <>
-              <Detail.Metadata.Label
-                title="Your Score"
-                text={`${myScore.totalScore.toLocaleString("de-DE")} pts`}
-                icon="🎯"
-              />
+              <Detail.Metadata.Label title="Your Score" text={`${formatNumber(myScore.totalScore)} pts`} icon="🎯" />
               <Detail.Metadata.Label
                 title="Time"
                 text={`${Math.floor(myScore.totalTime / 60)}m ${myScore.totalTime % 60}s`}
@@ -111,7 +108,7 @@ ${topPlayers
               />
               <Detail.Metadata.Label
                 title="Distance"
-                text={`${Math.round(myScore.totalDistance / 1000).toLocaleString("de-DE")} km`}
+                text={`${formatNumber(Math.round(myScore.totalDistance / 1000))} km`}
                 icon="📏"
               />
               <Detail.Metadata.TagList title="Status">
@@ -128,18 +125,18 @@ ${topPlayers
 
           <Detail.Metadata.Label title="Challenge Token" text={challenge.token} icon="🎲" />
           <Detail.Metadata.Label title="Time Remaining" text={`${hours}h ${minutes}m`} icon="⏰" />
-          <Detail.Metadata.Label title="Participants" text={challenge.participants.toLocaleString("de-DE")} icon="👥" />
+          <Detail.Metadata.Label title="Participants" text={formatNumber(challenge.participants)} icon="👥" />
 
           <Detail.Metadata.Separator />
 
-          <Detail.Metadata.Label title="Started" text={startDate.toLocaleString("de-DE")} icon="🕐" />
-          <Detail.Metadata.Label title="Expires" text={expiresDate.toLocaleString("de-DE")} icon="⏱️" />
+          <Detail.Metadata.Label title="Started" text={formatDateTime(startDate)} icon="🕐" />
+          <Detail.Metadata.Label title="Expires" text={formatDateTime(expiresDate)} icon="⏱️" />
 
           <Detail.Metadata.Separator />
 
           <Detail.Metadata.Label
             title="Top Player"
-            text={`${topPlayers[0]?.nick} - ${topPlayers[0]?.totalScore.toLocaleString("de-DE")} pts`}
+            text={`${topPlayers[0]?.nick} - ${formatNumber(topPlayers[0]?.totalScore)} pts`}
             icon="🥇"
           />
 
@@ -166,7 +163,7 @@ function LeaderboardView({ challenge }: { challenge: DailyChallengeResponse }) {
         <List.Item
           key={player.id}
           title={`${idx + 1}. ${player.nick}`}
-          subtitle={`${player.totalScore.toLocaleString("de-DE")} pts`}
+          subtitle={`${formatNumber(player.totalScore)} pts`}
           accessories={[
             { text: `${Math.round(player.totalDistance)}m` },
             { text: player.countryCode.toUpperCase() },
