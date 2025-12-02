@@ -1,3 +1,4 @@
+import { showFailureToast } from "@raycast/utils";
 import z from "zod";
 
 export const IpAddress = z.object({
@@ -27,18 +28,22 @@ export class AddressType {
   async getAddress(): Promise<AddressResponse> {
     const response: AddressResponse = {};
 
-    if (this.isIPv4) {
-      const resp = await fetch("https://api.ipify.org?format=json");
-      const ipResponse = await resp.json().then((v) => z.parseAsync(IpAddress, v));
-      response.v4 = ipResponse.ip;
-    }
-
-    if (this.isIPv6) {
-      const resp = await fetch("https://api64.ipify.org?format=json");
-      const ipResponse = await resp.json().then((v) => z.parseAsync(IpAddress, v));
-      if ((response.v4 && ipResponse.ip != response.v4) || !response.v4) {
-        response.v6 = ipResponse.ip;
+    try {
+      if (this.isIPv4) {
+        const resp = await fetch("https://api.ipify.org?format=json");
+        const ipResponse = await resp.json().then((v) => z.parseAsync(IpAddress, v));
+        response.v4 = ipResponse.ip;
       }
+
+      if (this.isIPv6) {
+        const resp = await fetch("https://api64.ipify.org?format=json");
+        const ipResponse = await resp.json().then((v) => z.parseAsync(IpAddress, v));
+        if ((response.v4 && ipResponse.ip != response.v4) || !response.v4) {
+          response.v6 = ipResponse.ip;
+        }
+      }
+    } catch (e) {
+      showFailureToast(e);
     }
 
     return response;

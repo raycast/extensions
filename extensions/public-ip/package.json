@@ -19,24 +19,28 @@
     {
       "name": "get-ipv4-address",
       "title": "Copy IPv4 Address",
+      "subtitle": "IP Grabber",
       "description": "Copies your IPv4 address to clipboard",
       "mode": "no-view"
     },
     {
       "name": "get-ipv6-address",
       "title": "Copy IPv6 Address",
+      "subtitle": "IP Grabber",
       "description": "Copies your IPv6 address to clipboard",
       "mode": "no-view"
     },
     {
       "name": "gets-your-ip-addresses",
       "title": "Copy Both IP Addresses",
+      "subtitle": "IP Grabber",
       "description": "Copies both your IPv4 and IPv6 addresses to clipboard",
       "mode": "no-view"
     },
     {
       "name": "get-ip-address",
       "title": "Grab Your IP Address(es)",
+      "subtitle": "IP Grabber",
       "description": "Show your IP Address(es)",
       "mode": "view"
     }

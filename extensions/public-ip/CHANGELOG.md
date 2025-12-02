@@ -1,6 +1,6 @@
 # IP Grabber Changelog
 
-## [Initial Version] - 2025-12-02
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 
