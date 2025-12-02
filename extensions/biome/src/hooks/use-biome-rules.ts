@@ -1,11 +1,7 @@
 import { usePromise } from "@raycast/utils";
 import { BiomeRule } from "../types/biome-schema";
 import { fetchLatestBiomeRules } from "../api/fetch-biome-rules";
-import {
-  getCachedRules,
-  setCachedRules,
-  clearCache,
-} from "../api/cache-manager";
+import { getCachedRules, setCachedRules } from "../api/cache-manager";
 import { biomeRulesFallback } from "../fallback/biome-rules-fallback";
 
 type UseBiomeRulesResult = {
@@ -20,21 +16,12 @@ type UseBiomeRulesResult = {
 
 export function useBiomeRules(): UseBiomeRulesResult {
   const { data, isLoading, error } = usePromise(async () => {
-    // Step 1: Check cache first, but validate it has proper metadata
+    // Step 1: Check cache first
     const cached = getCachedRules();
 
-    if (cached && cached.rules.length > 0) {
-      // Check if at least one rule has varied metadata (some should have recommended: false)
-      const hasVariedMetadata = cached.rules.some((rule) => !rule.recommended);
-      if (hasVariedMetadata) {
-        console.log("Using cached rules with valid metadata");
-        return { ...cached, isFallback: false };
-      } else {
-        console.log(
-          "Cache exists but has invalid metadata structure, clearing and refetching",
-        );
-        clearCache();
-      }
+    if (cached?.rules.length > 0) {
+      console.log("Using cached rules");
+      return { ...cached, isFallback: false };
     }
 
     // Step 2: Fetch fresh data

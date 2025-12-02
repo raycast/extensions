@@ -1,5 +1,7 @@
 import { writeFileSync } from 'fs'
 import { resolve } from 'path'
+import { compareVersions } from '../src/utils/version'
+import { camelToKebab } from '../src/utils/string'
 
 type BiomeSchema = {
   $defs?: Record<string, { properties?: Record<string, { description?: string }> }>
@@ -24,25 +26,6 @@ async function fetchSchema(): Promise<BiomeSchema> {
     throw new Error(`Failed to fetch schema: ${response.status}`)
   }
   return await response.json()
-}
-
-function camelToKebab(str: string): string {
-  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-}
-
-function compareVersions(a: string, b: string): number {
-  const aParts = a.split('.').map(Number)
-  const bParts = b.split('.').map(Number)
-
-  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-    const aPart = aParts[i] || 0
-    const bPart = bParts[i] || 0
-
-    if (aPart > bPart) return 1
-    if (aPart < bPart) return -1
-  }
-
-  return 0
 }
 
 async function generateFallback() {
@@ -123,20 +106,6 @@ export const biomeRulesFallback: BiomeRule[] = ${JSON.stringify(sorted, null, 2)
 
 export function getCategories(): BiomeRule["category"][] {
   return ["A11y", "Complexity", "Correctness", "Nursery", "Performance", "Security", "Style", "Suspicious"];
-}
-
-export function getCategoryRules(category: BiomeRule["category"]): BiomeRule[] {
-  return biomeRulesFallback.filter((rule) => rule.category === category);
-}
-
-export function searchRules(query: string): BiomeRule[] {
-  const lowerQuery = query.toLowerCase();
-  return biomeRulesFallback.filter(
-    (rule) =>
-      rule.id.toLowerCase().includes(lowerQuery) ||
-      rule.name.toLowerCase().includes(lowerQuery) ||
-      rule.description.toLowerCase().includes(lowerQuery),
-  );
 }
 `
 

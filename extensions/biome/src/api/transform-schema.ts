@@ -1,6 +1,8 @@
 import { BiomeSchema, BiomeRule } from "../types/biome-schema";
 import ruleVersionsJson from "../data/rules-versions.json";
 import ruleMetadataJson from "../data/rules-metadata.json";
+import { compareVersions } from "../utils/version";
+import { camelToKebab } from "../utils/string";
 
 type RuleVersionMap = Record<string, string>;
 type RuleMetadataMap = Record<
@@ -87,23 +89,4 @@ export function transformSchemaToRules(
   );
 
   return sorted;
-}
-
-function camelToKebab(str: string): string {
-  return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-}
-
-function compareVersions(a: string, b: string): number {
-  const aParts = a.split(".").map(Number);
-  const bParts = b.split(".").map(Number);
-
-  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-    const aPart = aParts[i] || 0;
-    const bPart = bParts[i] || 0;
-
-    if (aPart > bPart) return 1;
-    if (aPart < bPart) return -1;
-  }
-
-  return 0;
 }

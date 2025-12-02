@@ -8,12 +8,12 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import {
-  useBiomeRules,
-  getCategories,
-  type BiomeRule,
-} from "./utils/biome-rules";
+import { useBiomeRules } from "./hooks/use-biome-rules";
+import { getCategories } from "./fallback/biome-rules-fallback";
+import type { BiomeRule } from "./types/biome-schema";
 import { clearCache } from "./api/cache-manager";
+import { searchInFields } from "./utils/search";
+import { ErrorEmptyView, NoResultsEmptyView } from "./components/EmptyStates";
 
 export default function BiomeRulesSearch() {
   const {
@@ -32,21 +32,16 @@ export default function BiomeRulesSearch() {
 
   const categories = getCategories();
 
-  const filterRules = (rulesToFilter: BiomeRule[]): BiomeRule[] => {
-    if (!searchText) return rulesToFilter;
-    const lowerQuery = searchText.toLowerCase();
-    return rulesToFilter.filter(
-      (rule) =>
-        rule.id.toLowerCase().includes(lowerQuery) ||
-        rule.name.toLowerCase().includes(lowerQuery) ||
-        rule.description.toLowerCase().includes(lowerQuery),
-    );
-  };
-
-  const rules =
+  const filteredByCategory =
     selectedCategory === "all"
-      ? filterRules(allRules)
-      : filterRules(allRules.filter((r) => r.category === selectedCategory));
+      ? allRules
+      : allRules.filter((r) => r.category === selectedCategory);
+
+  const rules = searchInFields(filteredByCategory, searchText, (rule) => [
+    rule.id,
+    rule.name,
+    rule.description,
+  ]);
 
   const categoryFilters: Array<{
     title: string;
@@ -88,11 +83,7 @@ export default function BiomeRulesSearch() {
       }
     >
       {error && (
-        <List.EmptyView
-          title="Failed to load rules"
-          description={error.message}
-          icon={Icon.ExclamationMark}
-        />
+        <ErrorEmptyView message={error.message} title="Failed to load rules" />
       )}
 
       {!error && rules.length > 0 && (
@@ -211,11 +202,7 @@ export default function BiomeRulesSearch() {
       )}
 
       {!error && rules.length === 0 && searchText.length > 0 && (
-        <List.EmptyView
-          title="No rules found"
-          description="Try a different search query or filter"
-          icon={Icon.MagnifyingGlass}
-        />
+        <NoResultsEmptyView message="Try a different search query or filter" />
       )}
     </List>
   );

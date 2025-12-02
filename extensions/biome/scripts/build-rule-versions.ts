@@ -1,5 +1,6 @@
 import { writeFileSync } from 'fs'
 import { resolve } from 'path'
+import { compareVersions } from '../src/utils/version'
 
 type GitHubRelease = {
   id: number
@@ -81,21 +82,6 @@ function extractRuleIds(schema: BiomeSchema | null): Set<string> {
   }
 
   return ruleIds
-}
-
-function compareVersions(a: string, b: string): number {
-  const aParts = a.split('.').map(Number)
-  const bParts = b.split('.').map(Number)
-
-  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-    const aPart = aParts[i] || 0
-    const bPart = bParts[i] || 0
-
-    if (aPart > bPart) return 1
-    if (aPart < bPart) return -1
-  }
-
-  return 0
 }
 
 function inferMetadata(ruleId: string, description: string, category: string): RuleMetadata {

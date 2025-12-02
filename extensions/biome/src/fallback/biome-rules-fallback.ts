@@ -4362,17 +4362,3 @@ export function getCategories(): BiomeRule["category"][] {
     "Suspicious",
   ];
 }
-
-export function getCategoryRules(category: BiomeRule["category"]): BiomeRule[] {
-  return biomeRulesFallback.filter((rule) => rule.category === category);
-}
-
-export function searchRules(query: string): BiomeRule[] {
-  const lowerQuery = query.toLowerCase();
-  return biomeRulesFallback.filter(
-    (rule) =>
-      rule.id.toLowerCase().includes(lowerQuery) ||
-      rule.name.toLowerCase().includes(lowerQuery) ||
-      rule.description.toLowerCase().includes(lowerQuery),
-  );
-}
