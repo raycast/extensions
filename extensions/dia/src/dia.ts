@@ -99,15 +99,15 @@ async function getTabs() {
     dedent`
       tell application "Dia"
         set output to ""
-        
+
         repeat with w in every window
           try
             set wId to id of w
-            
+
             repeat with t in every tab of w
               set tId to id of t
               set tabTitle to title of t
-              
+
               try
                 set tabURL to URL of t
                 if tabURL is missing value then
@@ -116,16 +116,16 @@ async function getTabs() {
               on error
                 set tabURL to ""
               end try
-              
+
               set tabPinned to isPinned of t
               set tabFocused to isFocused of t
-              
+
               -- Output: windowId|||tabId|||title|||url|||isPinned|||isFocused
               set output to output & wId & "|||" & tId & "|||" & tabTitle & "|||" & tabURL & "|||" & tabPinned & "|||" & tabFocused & "\\n"
             end repeat
           end try
         end repeat
-        
+
         return output
       end tell
     `,
@@ -185,13 +185,14 @@ export async function focusTab(tab: Tab) {
 }
 
 export async function openNewTab(url: string) {
+  const escapedUrl = escapeAppleScriptString(url);
+
   await runAppleScript(
     dedent`
       tell application "Dia"
         activate
-
         tell window 1
-          make new tab with properties {URL:"${url}"}
+          open location "${escapedUrl}"
         end tell
       end tell
     `,
@@ -241,7 +242,7 @@ export async function createNewIncognitoWindow() {
     dedent`
       tell application "Dia"
         activate
-        
+
         tell application "System Events"
           keystroke "n" using {command down, shift down}
         end tell

@@ -1,5 +1,9 @@
 # Dia Changelog
 
+## Fix Open New Tab - {PR_MERGE_DATE}
+
+- Fixed an error that occurred when opening a new tab due to an unsupported AppleScript command
+
 ## Search Open and Pinned Tabs - 2025-12-01
 
 - Added support for Dia's new AppleScript API to search open and pinned tabs.
