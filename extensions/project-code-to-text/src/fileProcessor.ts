@@ -281,8 +281,12 @@ async function processMixedSelection(
   // Load ignore filter once for the entire process
   progressCallback("Loading ignore rules...");
   // Parse additional ignore patterns from string (comma-separated)
-  const additionalPatterns = config.additionalIgnorePatterns
-    ? config.additionalIgnorePatterns.split(",").map((p) => p.trim()).filter((p) => p.length > 0)
+  const { additionalIgnorePatterns: configAdditionalPatterns } = config;
+  const additionalPatterns = configAdditionalPatterns
+    ? configAdditionalPatterns
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0)
     : undefined;
   const { filter: ignoreFilter } = await loadIgnoreFilter(projectRoot, additionalPatterns);
 
@@ -438,8 +442,11 @@ export async function generateProjectCodeString(
     // Process entire directory structure
     progressCallback("Loading ignore rules...");
     // Parse additional ignore patterns from string (comma-separated)
-    const additionalPatterns = config.additionalIgnorePatterns
-      ? config.additionalIgnorePatterns.split(",").map((p) => p.trim()).filter((p) => p.length > 0)
+    const additionalPatterns = additionalIgnorePatterns
+      ? additionalIgnorePatterns
+          .split(",")
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0)
       : undefined;
     const ignoreResult = await loadIgnoreFilter(projectRoot, additionalPatterns);
     gitignoreUsed = ignoreResult.gitignoreUsed;
