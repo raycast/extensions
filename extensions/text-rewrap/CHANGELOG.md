@@ -1,6 +1,6 @@
 # Text Rewrap Changelog
 
-## 0.0.0 - {PR_MERGE_DATE}
+## 0.0.0 - 2025-12-02
 
 ### Features
 
