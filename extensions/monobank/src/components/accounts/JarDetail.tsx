@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { Jar } from "../../types";
-import { formatCurrency } from "../../utils";
+import { formatCurrency, getFlagImage } from "../../utils";
 
 export default function JarDetail(props: { jar: Jar }) {
   const { jar } = props;
@@ -19,7 +19,11 @@ export default function JarDetail(props: { jar: Jar }) {
           <List.Item.Detail.Metadata.Label title="Description" text={jar.description} />
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label title="Currency" text={`${jar.currency.code}, ${jar.currency.name}`} />
+          <List.Item.Detail.Metadata.Label
+            title="Currency"
+            icon={getFlagImage(jar.currency.code)}
+            text={`${jar.currency.code}, ${jar.currency.name}`}
+          />
           <List.Item.Detail.Metadata.Separator />
 
           <List.Item.Detail.Metadata.Label title="Balance" text={formatCurrency(jar.balance, jar.currency.code)} />

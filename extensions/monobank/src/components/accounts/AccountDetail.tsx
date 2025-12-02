@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { Account } from "../../types";
 import { accountTypeColors } from "../../data/constants";
-import { formatCurrency } from "../../utils";
+import { formatCurrency, getFlagImage } from "../../utils";
 
 export default function AccountDetail(props: { account: Account }) {
   const { account } = props;
@@ -31,6 +31,7 @@ export default function AccountDetail(props: { account: Account }) {
           <List.Item.Detail.Metadata.Separator />
 
           <List.Item.Detail.Metadata.Label
+            icon={getFlagImage(account.currency.code)}
             title="Currency"
             text={`${account.currency.code}, ${account.currency.name}`}
           />

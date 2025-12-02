@@ -3,7 +3,6 @@
 ## [Fix] - {PR_MERGE_DATE}
 
 - Fixed issue with build
-- Added Currency.flag; fix getPreferenceValues generic for token
 
 ## [Fix] - 2025-12-02
 
