@@ -1,5 +1,15 @@
-import { MenuBarExtra, Icon, Color, open, getPreferenceValues, openExtensionPreferences, Cache } from "@raycast/api";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  MenuBarExtra,
+  Icon,
+  Color,
+  open,
+  getPreferenceValues,
+  openExtensionPreferences,
+  Cache,
+  environment,
+  LaunchType,
+} from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { fetchReviewRequests, notifyError, webSearchURL } from "./api";
 import type { Preferences, ReviewRequest } from "./types";
 
@@ -22,12 +32,6 @@ function relativeTime(iso: string): string {
 
 const cache = new Cache();
 
-type CachedData = {
-  ts: number;
-  count: number;
-  items: ReviewRequest[];
-};
-
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
   const [count, setCount] = useState<number | null>(null);
@@ -35,56 +39,7 @@ export default function Command() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // TTL in ms
-  const refreshInterval = Math.max(10, Number(prefs.refreshInterval ?? 300)) * 1000;
-
-  // Build a stable cache key (exclude the token).
-  const cacheKey = useMemo(() => {
-    const endpoint = prefs.graphqlEndpoint || "https://api.github.com/graphql";
-    const exclude = prefs.excludeDrafts ? "1" : "0";
-    const extra = prefs.extraQuery || "";
-    const max = Math.min(Math.max(Number(prefs.maxItems ?? 20), 1), 100);
-    return `review-requests:v1:${endpoint}|${exclude}|${extra}|${max}`;
-  }, [prefs.graphqlEndpoint, prefs.excludeDrafts, prefs.extraQuery, prefs.maxItems]);
-
-  // Track last fetch time and a single refresh timer.
-  const lastFetchedRef = useRef<number | null>(null);
-  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  function clearRefreshTimer() {
-    if (refreshTimerRef.current) {
-      clearTimeout(refreshTimerRef.current);
-      refreshTimerRef.current = null;
-    }
-  }
-
-  function scheduleNextRefresh(baseTs?: number) {
-    clearRefreshTimer();
-
-    const base = baseTs ?? lastFetchedRef.current ?? 0;
-    const now = Date.now();
-    const effectiveBase = base > 0 ? base : now;
-    const dueAt = effectiveBase + refreshInterval;
-    const delay = Math.max(0, dueAt - now);
-
-    refreshTimerRef.current = setTimeout(() => {
-      void fetchAll(true);
-    }, delay);
-  }
-
-  function isStale(ts?: number | null) {
-    const refTs = ts ?? lastFetchedRef.current;
-    if (!refTs) return true;
-    return Date.now() - refTs >= refreshInterval;
-  }
-
-  const fetchAll = async (force?: boolean) => {
-    // Do not refetch unless TTL expired, unless forced (e.g., "Refresh Now" or initial stale).
-    if (!force && !isStale()) {
-      setLoading(false);
-      return;
-    }
-
+  const fetchAll = async (force = false) => {
     if (!prefs.githubToken) {
       const msg = "Set your GitHub token in the extension preferences.";
       setError(msg);
@@ -95,83 +50,40 @@ export default function Command() {
     try {
       // Keep UI responsive if we already have data
       setLoading(items.length === 0);
+      const cached = cache.get("reviews");
 
-      const res = await fetchReviewRequests({
-        graphqlEndpoint: prefs.graphqlEndpoint || "https://api.github.com/graphql",
-        token: prefs.githubToken,
-        excludeDrafts: prefs.excludeDrafts,
-        extraQuery: prefs.extraQuery,
-        first: Math.min(Math.max(Number(prefs.maxItems ?? 20), 1), 100),
-      });
+      if (!force && cached && environment.launchType === LaunchType.UserInitiated) {
+        const { items, count } = JSON.parse(cached);
+        setCount(count);
+        setItems(items);
+        setError(null);
+      } else {
+        const res = await fetchReviewRequests({
+          graphqlEndpoint: prefs.graphqlEndpoint || "https://api.github.com/graphql",
+          token: prefs.githubToken,
+          excludeDrafts: prefs.excludeDrafts,
+          extraQuery: prefs.extraQuery,
+          first: Math.min(Math.max(Number(prefs.maxItems ?? 20), 1), 100),
+        });
 
-      setCount(res.count);
-      setItems(res.items);
-      setError(null);
-
-      const now = Date.now();
-      lastFetchedRef.current = now;
-      cache.set(cacheKey, JSON.stringify({ ts: now, count: res.count, items: res.items } as CachedData));
-
-      // Align the next refresh to this fetch
-      scheduleNextRefresh(now);
+        setCount(res.count);
+        setItems(res.items);
+        setError(null);
+        cache.set("reviews", JSON.stringify({ count: res.count, items: res.items, timestamp: new Date() }));
+      }
     } catch (e) {
       const msg = typeof e?.message === "string" ? e.message : "Unknown error";
       setError(msg);
       notifyError(msg);
-      // Even on error, schedule another attempt after the full TTL
-      scheduleNextRefresh(Date.now());
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    clearRefreshTimer();
-
-    // Prime UI from cache immediately.
-    const raw = cache.get(cacheKey);
-    let cached: CachedData | null = null;
-
-    if (raw) {
-      try {
-        cached = JSON.parse(raw) as CachedData;
-      } catch {
-        cached = null;
-      }
-    }
-
-    if (cached && typeof cached.ts === "number" && Array.isArray(cached.items)) {
-      setCount(cached.count);
-      setItems(cached.items);
-      setError(null);
-      lastFetchedRef.current = cached.ts;
-
-      if (isStale(cached.ts)) {
-        // Cache is stale — fetch now and realign timers
-        void fetchAll(true);
-      } else {
-        // Cache is fresh — schedule next refresh exactly at TTL expiry
-        setLoading(false);
-        scheduleNextRefresh(cached.ts);
-      }
-    } else {
-      // No cache — fetch immediately and schedule next refresh from now
-      setLoading(true);
-      void fetchAll(true);
-    }
-
-    return () => {
-      clearRefreshTimer();
-    };
-  }, [
-    cacheKey,
-    prefs.githubToken,
-    prefs.graphqlEndpoint,
-    prefs.extraQuery,
-    prefs.excludeDrafts,
-    refreshInterval,
-    prefs.maxItems,
-  ]);
+    setLoading(true);
+    void fetchAll();
+  }, [prefs.githubToken, prefs.graphqlEndpoint, prefs.extraQuery, prefs.excludeDrafts, prefs.maxItems]);
 
   const title = useMemo(() => {
     if (error) return "!";

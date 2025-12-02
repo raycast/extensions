@@ -16,6 +16,7 @@
       "title": "GitHub PR Review Requests",
       "description": "Reads pending review requests assigned to you periodically and reveals them in the menu bar",
       "mode": "menu-bar",
+      "interval": "5m",
       "preferences": [
         {
           "name": "githubToken",
@@ -54,14 +55,6 @@
           "type": "textfield",
           "description": "How many items max to list in the menu",
           "default": "20",
-          "required": false
-        },
-        {
-          "name": "refreshInterval",
-          "title": "Refresh Interval (seconds)",
-          "description": "Refresh Interval",
-          "type": "textfield",
-          "default": "300",
           "required": false
         }
       ]
