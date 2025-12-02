@@ -1,6 +1,6 @@
 # Toggle Grayscale Changelog
 
-## [Supports macOS Tahoe] - {PR_MERGE_DATE}
+## [Supports macOS Tahoe] - 2025-12-02
 - Updated UI element path to correctly locate the Color Filters checkbox in macOS Tahoe
 
 ## [Reliable & Fast] - 2025-05-30
