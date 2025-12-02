@@ -11,24 +11,42 @@
     "Windows"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultWidth",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Width",
+      "description": "Default width for text wrapping (leave blank for no wrapping)",
+      "default": "80"
+    },
+    {
+      "name": "defaultCopyToClipboard",
+      "type": "checkbox",
+      "required": false,
+      "title": "Default Copy to Clipboard",
+      "description": "Whether to copy the result to clipboard by default",
+      "default": true
+    }
+  ],
   "commands": [
     {
       "name": "text-rewrap-form",
-      "title": "Text Rewrap Form",
+      "title": "Text Rewrap from Form",
       "description": "Rewraps Text provided in the form at the chosen width",
       "icon": "text-rewrap-form.png",
       "mode": "view"
     },
     {
       "name": "text-rewrap-clipboard",
-      "title": "Text Rewrap Clipboard",
+      "title": "Text Rewrap from Clipboard",
       "description": "Rewraps text from clipboard at the chosen width",
       "icon": "text-rewrap-clipboard.png",
       "mode": "view"
     },
     {
       "name": "text-rewrap-selection",
-      "title": "Text Rewrap Selection",
+      "title": "Text Rewrap from Selection",
       "description": "Rewraps text from currently highlighted selection at the chosen width",
       "icon": "text-rewrap-clipboard.png",
       "mode": "view"

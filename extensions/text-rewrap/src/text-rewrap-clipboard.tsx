@@ -1,4 +1,4 @@
-import { Form, Clipboard, showToast, Toast } from "@raycast/api";
+import { Form, Clipboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { rewrapText } from "./utils/rewrapText";
 import { validateWidth, formatWrappingMessage } from "./utils/validation";
@@ -11,6 +11,7 @@ interface FormValues {
 }
 
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
   const [rewrappedText, setRewrappedText] = useState<string>("");
 
   async function handleSubmit(values: FormValues) {
@@ -63,9 +64,13 @@ export default function Command() {
         id="width"
         title="Width"
         placeholder="Leave blank for no wrapping, or enter a number like 80"
-        defaultValue="80"
+        defaultValue={preferences.defaultWidth || "80"}
       />
-      <Form.Checkbox id="copyResultToClipboard" label="Copy result to Clipboard?" defaultValue={true} />
+      <Form.Checkbox
+        id="copyResultToClipboard"
+        label="Copy result to Clipboard?"
+        defaultValue={preferences.defaultCopyToClipboard ?? true}
+      />
       {rewrappedText && <Form.Description title="Rewrapped Text" text={rewrappedText} />}
     </Form>
   );
