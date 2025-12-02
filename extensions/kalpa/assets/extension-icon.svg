@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512px" height="512px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>extension-icon</title>
+    <defs>
+        <path d="M70,0 L442,0 C480.659932,0 512,31.3400675 512,70 L512,442 C512,480.659932 480.659932,512 442,512 L70,512 C31.3400675,512 0,480.659932 0,442 L0,70 C0,31.3400675 31.3400675,0 70,0 Z" id="path-1"></path>
+    </defs>
+    <g id="extension-icon" stroke="none" fill="none" xlink:href="#path-1">
+        <use fill="#1F1F1F" fillRule="evenodd" xlink:href="#path-1"></use>
+        <path d="M405.370358,418.025316 C405.370358,418.025316 353.81795,336.233316 395.092281,256 C441.21441,166.348152 403.506256,93.9746835 403.506256,93.9746835 L118.370365,93.9746835 C118.370365,93.9746835 156.011764,166.33519 109.927064,255.974886 C68.6685544,336.226025 120.473454,418.025316 120.473454,418.025316 L405.370358,418.025316 Z" id="Path" stroke="#FFD700" stroke-width="20"></path>
+    </g>
+</svg>

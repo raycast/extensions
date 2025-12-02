@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kalpa",
+  "version": "1.0.1",
+  "title": "Kalpa",
+  "description": "Search and manage your saved links in Kalpa - your cosmic link manager",
+  "icon": "extension-icon.png",
+  "author": "usekalpa",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "login",
+      "title": "Login to Kalpa",
+      "subtitle": "Kalpa",
+      "description": "Connect your Kalpa account to the extension",
+      "mode": "view",
+      "keywords": [
+        "login",
+        "auth",
+        "connect",
+        "token",
+        "setup"
+      ]
+    },
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "subtitle": "Kalpa",
+      "description": "Search and open your saved links",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "find",
+        "links",
+        "bookmarks"
+      ]
+    },
+    {
+      "name": "browse-universes",
+      "title": "Browse Universes",
+      "subtitle": "Kalpa",
+      "description": "Browse links organized by universe",
+      "mode": "view",
+      "keywords": [
+        "universes",
+        "collections",
+        "folders",
+        "organize"
+      ]
+    },
+    {
+      "name": "quick-save",
+      "title": "Quick Save",
+      "subtitle": "Kalpa",
+      "description": "Save the current browser URL to Kalpa",
+      "mode": "no-view",
+      "keywords": [
+        "save",
+        "add",
+        "bookmark",
+        "capture"
+      ]
+    },
+    {
+      "name": "recent-links",
+      "title": "Recent Links",
+      "subtitle": "Kalpa",
+      "description": "View your most recently saved links",
+      "mode": "view",
+      "keywords": [
+        "recent",
+        "latest",
+        "new"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Kalpa API token for authentication (get from usekalpa.com/settings)",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.13.2",
+    "convex": "^1.24.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.4",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@raycast/api": {
+      "@types/react": "18.3.3"
+    }
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
