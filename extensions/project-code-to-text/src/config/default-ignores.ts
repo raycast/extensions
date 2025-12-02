@@ -192,4 +192,3 @@ export const HARDCODED_BASE_IGNORE_PATTERNS: readonly string[] = [
   "**/*.out",
   "**/*.app",
 ];
-

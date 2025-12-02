@@ -5,7 +5,6 @@ import {
   Action,
   showToast,
   Toast,
-  popToRoot,
   showInFinder,
   Detail,
   Icon,
@@ -291,7 +290,14 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
     }
 
     calculatePreviewStats();
-  }, [state.currentStep, state.projectDirectory, state.processOnlySelectedFiles, state.selectedFilePaths, state.includeAiInstructions, state.maxFileSizeMbString]);
+  }, [
+    state.currentStep,
+    state.projectDirectory,
+    state.processOnlySelectedFiles,
+    state.selectedFilePaths,
+    state.includeAiInstructions,
+    state.maxFileSizeMbString,
+  ]);
 
   /**
    * Finds the common parent directory for an array of paths.
@@ -827,14 +833,10 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           <Form.Description text={`Processing Mode: Selected files only (${state.selectedFilePaths.length} items)`} />
         )}
         {!state.processOnlySelectedFiles && <Form.Description text="Processing Mode: Entire directory" />}
-        {state.isCalculatingStats && (
-          <Form.Description text="Calculating preview statistics..." />
-        )}
+        {state.isCalculatingStats && <Form.Description text="Calculating preview statistics..." />}
         {state.estimatedStats && !state.isCalculatingStats && (
           <>
-            <Form.Description
-              text={`Estimated size: ${(state.estimatedStats.size / 1024 / 1024).toFixed(2)} MB`}
-            />
+            <Form.Description text={`Estimated size: ${(state.estimatedStats.size / 1024 / 1024).toFixed(2)} MB`} />
             <Form.Description text={`Estimated tokens: ~${state.estimatedStats.tokens.toLocaleString()}`} />
           </>
         )}
@@ -941,11 +943,7 @@ Use the actions below to open the file or copy its path.`;
         markdown={markdown}
         actions={
           <ActionPanel>
-            <Action
-              title="Show in Finder"
-              icon={Icon.Finder}
-              onAction={() => showInFinder(result.filePath)}
-            />
+            <Action title="Show in Finder" icon={Icon.Finder} onAction={() => showInFinder(result.filePath)} />
             <Action
               title="Copy Path to Clipboard"
               icon={Icon.Clipboard}
