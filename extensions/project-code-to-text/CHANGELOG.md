@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - 2025-01-27
+## [Update] - {PR_MERGE_DATE}
 
 ### Added
 - Multiple file and directory selection support in the file picker

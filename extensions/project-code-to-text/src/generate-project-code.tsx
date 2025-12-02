@@ -913,7 +913,7 @@ Use the actions below to open the file or copy its path.`;
               title="Copy Path to Clipboard"
               icon={Icon.Clipboard}
               onAction={async () => {
-                await Action.CopyToClipboard({ content: result.filePath });
+                await Clipboard.copy(result.filePath);
                 await showToast(Toast.Style.Success, "Path Copied!");
               }}
             />
