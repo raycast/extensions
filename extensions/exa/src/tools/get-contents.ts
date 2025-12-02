@@ -2,20 +2,20 @@ import exa from "../exa";
 
 type Input = {
   /**
-   * The URLs of the webpages to retrieve the contents of.
+   * The URL of the webpage to retrieve the contents of.
    */
-  urls: string[];
+  url: string;
 };
 
 /**
- * Retrieves the full contents of the webpages.
+ * Retrieves the full contents of the webpage.
  *
- * @returns The contents of the webpages, including the title, url, and text of the content of the similar results.
+ * @returns The contents of the webpage, including the title, url, and text of the content.
  */
 export default async function (input: Input) {
-  const { urls } = input;
+  const { url } = input;
 
-  const { results } = await exa.getContents(urls, { text: true, useAutoprompt: true });
+  const { results } = await exa.getContents([url], { text: true, useAutoprompt: true });
 
   return results.map((result) => ({
     title: result.title,
