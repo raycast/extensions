@@ -222,7 +222,7 @@ export default function Command() {
 
     const safeUrl = sanitizeUrl(url);
     if (!safeUrl) {
-      await showHUD("Link inválida!");
+      await showHUD("Invalid link!");
       return;
     }
 
