@@ -60,7 +60,10 @@ interface AppState {
     copiedToClipboard: boolean;
   } | null; // Result of generation for results screen
   formErrors: Partial<
-    Record<"projectDirectoryField" | "outputFileName" | "maxFileSizeMbString" | "additionalIgnorePatterns" | "general", string>
+    Record<
+      "projectDirectoryField" | "outputFileName" | "maxFileSizeMbString" | "additionalIgnorePatterns" | "general",
+      string
+    >
   >;
 }
 
