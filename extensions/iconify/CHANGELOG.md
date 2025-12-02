@@ -1,4 +1,9 @@
-# Changelog
+# Iconify Changelog
+
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add error handling in "Search Icons"
+- Add README.md
 
 ## [Improvements] - 2025-03-20
 
