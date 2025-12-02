@@ -19,7 +19,8 @@ type Input = {
 const tool = async (input: Input) => {
   const { query } = input;
 
-  const { answer, citations } = await exa.answer(query, { model: input.model || "exa" });
+  const options = input.model === "exa" ? { model: "exa" as const } : undefined;
+  const { answer, citations } = await exa.answer(query, options);
 
   return {
     answer,

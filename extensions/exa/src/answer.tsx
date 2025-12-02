@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List, Detail, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import exa from "./exa";
-import type { SearchResult } from "exa-js";
+import type { SearchResult, ContentsOptions } from "exa-js";
 
 export default function Ask() {
   const [query, setQuery] = useState("");
@@ -28,7 +28,7 @@ export default function Ask() {
 
 function AnswerResult({ query }: { query: string }) {
   const [answer, setAnswer] = useState("");
-  const [citations, setCitations] = useState<SearchResult<unknown>[]>([]);
+  const [citations, setCitations] = useState<SearchResult<ContentsOptions>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
