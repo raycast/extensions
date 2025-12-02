@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iqair",
+  "title": "Air Quality",
+  "description": "Check air quality (AQI, PM2.5, PM10 and other pollutants) for cities worldwide using IQAir data.",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultCity",
+      "type": "textfield",
+      "required": false,
+      "title": "Default City",
+      "description": "Default city to use when no city is specified (e.g., Moscow, London, Tashkent)",
+      "placeholder": "Enter default city name"
+    }
+  ],
+  "commands": [
+    {
+      "name": "iqair",
+      "title": "Check Air Quality",
+      "description": "Check air quality for any city using IQAir data.",
+      "mode": "view",
+      "subtitle": "IQAir",
+      "arguments": [
+        {
+          "name": "city",
+          "type": "text",
+          "required": false,
+          "placeholder": "City name (optional, uses default city if empty)"
+        }
+      ]
+    },
+    {
+      "name": "iqair-top",
+      "title": "Top Polluted Cities",
+      "description": "View the most polluted cities ranked by current AQI.",
+      "mode": "view",
+      "subtitle": "IQAir"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/cheerio": "^0.22.35",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "IceFinger",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "News",
+    "Data"
+  ]
+}
