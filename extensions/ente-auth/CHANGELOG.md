@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Handle double-encoded TOTP + Maintenance] - {PR_MERGE_DATE}
+## [Handle double-encoded TOTP + Maintenance] - 2025-12-02
 
 - Handle double-encoded TOTP
 - Change the "Copy Next" `shortcut` to be cross-platform
