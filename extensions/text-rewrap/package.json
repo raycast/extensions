@@ -24,7 +24,7 @@
       "name": "defaultCopyToClipboard",
       "type": "checkbox",
       "required": false,
-      "title": "Default Copy to Clipboard",
+      "label": "Default Copy to Clipboard",
       "description": "Whether to copy the result to clipboard by default",
       "default": true
     }
