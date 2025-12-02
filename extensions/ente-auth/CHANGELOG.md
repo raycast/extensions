@@ -4,7 +4,7 @@
 
 - Handle double-encoded TOTP
 - Change the "Copy Next" `shortcut` to be cross-platform
-- Remove unecessary deps
+- Remove unnecessary deps
 - Mention default values the extension uses for reference
 
 ## [Windows Support] - 2025-08-25

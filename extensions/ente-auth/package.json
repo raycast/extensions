@@ -59,6 +59,7 @@
       "type": "textfield",
       "required": true,
       "title": "Ente CLI Path",
+      "default": "/usr/local/bin/ente",
       "description": "If you wish to use your own CLI, type here the location of your local installation.",
       "placeholder": "CLI Path"
     },
