@@ -11,6 +11,7 @@ import {
   LocalStorage,
   showInFinder,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { exec } from "child_process";
 import { writeFile, unlink } from "fs/promises";
@@ -365,9 +366,8 @@ export default function ProfileShader() {
           message: "Choose shader type manually",
         });
       }
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
+    } catch (error) {
+      await showFailureToast(error, {
         title: "Failed to get selected text",
         message: "Select shader text and try again",
       });
@@ -381,8 +381,7 @@ export default function ProfileShader() {
       shaderContent = await getSelectedText();
       if (!shaderContent.trim()) throw new Error("No text selected.");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not get selected text.";
-      await showToast({ style: Toast.Style.Failure, title: "Error Getting Text", message });
+      await showFailureToast(error, { title: "Error Getting Text" });
       setIsLoading(false);
       return;
     }
@@ -399,8 +398,7 @@ export default function ProfileShader() {
       const result = await processShader(shaderContent, shaderType, gpuCore, outputMode);
       push(<ResultView output={result} mode={outputMode} />);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "An unknown error occurred.";
-      await showToast({ style: Toast.Style.Failure, title: "MaliOC Failed", message });
+      await showFailureToast(error, { title: "MaliOC Failed" });
     } finally {
       setIsLoading(false);
     }
