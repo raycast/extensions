@@ -59,7 +59,9 @@ interface AppState {
     size: number;
     copiedToClipboard: boolean;
   } | null; // Result of generation for results screen
-  formErrors: Partial<Record<"projectDirectoryField" | "outputFileName" | "maxFileSizeMbString" | "general", string>>;
+  formErrors: Partial<
+    Record<"projectDirectoryField" | "outputFileName" | "maxFileSizeMbString" | "additionalIgnorePatterns" | "general", string>
+  >;
 }
 
 /**
@@ -438,20 +440,6 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
     },
     [findCommonParent],
   );
-
-  /**
-   * Updates the processing mode based on user selection.
-   */
-  const updateProcessingMode = useCallback(() => {
-    setState((prev) => {
-      const shouldUseFiles = Boolean(prev.finderSelectionInfo?.hasFiles && !prev.useDirectoryInsteadOfFiles);
-      return {
-        ...prev,
-        processOnlySelectedFiles: shouldUseFiles,
-        selectedFilePaths: shouldUseFiles ? prev.finderSelectionInfo?.selectedFiles || [] : [],
-      };
-    });
-  }, []);
 
   /**
    * Updates the processing mode based on user selection.
