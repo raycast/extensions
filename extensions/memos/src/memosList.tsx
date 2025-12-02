@@ -9,7 +9,7 @@ import {
   getAttachmentBinToBase64,
   restoreMemo,
 } from "./api";
-import { MemoInfoResponse, ROW_STATUS } from "./types";
+import { MemoInfoResponse, MeResponse, ROW_STATUS } from "./types";
 
 export default function MemosListCommand() {
   const [searchText, setSearchText] = useState("");
@@ -20,10 +20,12 @@ export default function MemosListCommand() {
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
   useEffect(() => {
-    const user = userData?.user || {};
-    if (!isLoadingUser && user && user.name) {
-      const userId = +user.name.split("/")[1];
-      setCurrentUserId(userId);
+    if (!isLoadingUser && userData && "user" in userData) {
+      const user = (userData as MeResponse).user;
+      if (user && user.name) {
+        const userId = +user.name.split("/")[1];
+        setCurrentUserId(userId);
+      }
     }
   }, [isLoadingUser, userData]);
 

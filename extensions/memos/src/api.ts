@@ -12,14 +12,14 @@ import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse } from "
 
 const cache = new Cache();
 
-const parseResponse = async (response: Response) => {
+const parseResponse = async <T>(response: Response): Promise<T> => {
   const cookie = response.headers.get("Set-Cookie");
 
   if (cookie) {
     cache.set("cookie", cookie);
   }
   const data = await response.json();
-  return data;
+  return data as T;
 };
 
 const getHost = () => {
@@ -201,27 +201,22 @@ export const getAllMemos = (currentUserId?: number, { state = ROW_STATUS.NORMAL 
     },
     MemoInfoResponse[],
     MemoInfoResponse[]
-  >(
-    (options) => {
-      return `${url}&pageToken=${options?.cursor || ""}`;
+  >(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
     },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
-      },
-      parseResponse,
-      mapResult(result) {
-        return {
-          data: result?.memos || [],
-          cursor: result?.nextPageToken || "",
-          hasMore: !!result.nextPageToken || false,
-        };
-      },
-      keepPreviousData: true,
-      initialData: [],
+    parseResponse,
+    mapResult(result) {
+      return {
+        data: result?.memos || [],
+        cursor: result?.nextPageToken || "",
+        hasMore: !!result.nextPageToken || false,
+      };
     },
-  );
+    keepPreviousData: true,
+    initialData: [],
+  });
 
   return { isLoading, data: currentUserId ? data : [], revalidate, pagination };
 };

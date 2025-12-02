@@ -9,6 +9,10 @@
     "littlequartz",
     "0xdhrv"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -76,7 +80,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "type-check": "tsc --noEmit"
+    "type-check": "./node_modules/.bin/tsc -p tsconfig.json --noEmit"
   },
   "preferences": [
     {
@@ -95,9 +99,5 @@
       "required": false,
       "title": "Token (memo >= 0.22.0)"
     }
-  ],
-  "platforms": [
-    "macOS",
-    "Windows"
   ]
 }
