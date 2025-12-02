@@ -3,11 +3,8 @@ import RaycastSwiftMacros
 import Vision
 
 @raycast
-func recognizeTextFromScreenshot(
-  playSound: Bool,
-  language: String
-) -> String {
-  let imgRef = captureSelectedArea(playSound: playSound)
+func recognizeTextFromScreenshot() -> String {
+  let imgRef = captureSelectedArea()
   
   guard let capturedImage = imgRef else {
     return "Error: failed to capture image"
@@ -33,7 +30,7 @@ func recognizeTextFromScreenshot(
   // Use fast mode for better performance
   request.recognitionLevel = .fast
   request.usesLanguageCorrection = true
-  request.recognitionLanguages = [language]
+  // Automatically detect language
   if #available(macOS 13.0, *) {
     request.automaticallyDetectsLanguage = true
   }
@@ -47,16 +44,12 @@ func recognizeTextFromScreenshot(
   return recognizedText
 }
 
-func captureSelectedArea(playSound: Bool) -> CGImage? {
+func captureSelectedArea() -> CGImage? {
   let filePath = randomPngPath()
   let task = Process()
   task.launchPath = "/usr/sbin/screencapture"
-  var arguments: [String] = ["-i"]
-  // Only add -x (no sound) if playSound is false
-  if !playSound {
-    arguments.append("-x")
-  }
-  arguments.append(filePath)
+  // Capture without sound (-x flag)
+  let arguments: [String] = ["-i", "-x", filePath]
   task.arguments = arguments
   task.launch()
   task.waitUntilExit()
