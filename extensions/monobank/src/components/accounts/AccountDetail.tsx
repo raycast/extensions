@@ -32,7 +32,7 @@ export default function AccountDetail(props: { account: Account }) {
 
           <List.Item.Detail.Metadata.Label
             title="Currency"
-            text={`${account.currency.flag} ${account.currency.code}, ${account.currency.name}`}
+            text={`${account.currency.code}, ${account.currency.name}`}
           />
           <List.Item.Detail.Metadata.Separator />
 
