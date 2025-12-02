@@ -1,0 +1,175 @@
+import { Detail, ActionPanel, Action, Icon, showToast, Toast, environment } from "@raycast/api";
+import { useState } from "react";
+import { WordData } from "./api";
+import { exec } from "child_process";
+import { promisify } from "util";
+import * as fs from "fs";
+import * as path from "path";
+
+const execAsync = promisify(exec);
+
+interface WordDetailsProps {
+  wordData: WordData;
+  onBack: () => void;
+}
+
+export function WordDetails({ wordData, onBack }: WordDetailsProps) {
+  const [audioLoading, setAudioLoading] = useState<string | null>(null);
+
+  const playAudio = async (audioUrl: string, label: string) => {
+    if (!audioUrl) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No audio available",
+        message: `No audio file for ${label}`,
+      });
+      return;
+    }
+
+    setAudioLoading(audioUrl);
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Playing pronunciation...",
+    });
+
+    try {
+      // Download the audio file
+      const response = await fetch(audioUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to download audio: ${response.statusText}`);
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Save to temporary file
+      const tempDir = environment.supportPath;
+      const tempFilePath = path.join(tempDir, `pronunciation_${Date.now()}.mp3`);
+      fs.writeFileSync(tempFilePath, buffer);
+
+      // Play using macOS afplay command
+      await execAsync(`afplay "${tempFilePath}"`);
+
+      // Clean up
+      fs.unlinkSync(tempFilePath);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Played pronunciation";
+      setAudioLoading(null);
+    } catch (error) {
+      console.error("Audio error:", error);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Audio error";
+      toast.message = error instanceof Error ? error.message : "Unknown error";
+      setAudioLoading(null);
+    }
+  };
+
+  const markdown = generateMarkdown(wordData);
+
+  return (
+    <Detail
+      markdown={markdown}
+      navigationTitle={`Pronunciation: ${wordData.word}`}
+      actions={
+        <ActionPanel>
+          {wordData.phonetics
+            .filter((p) => p.audio)
+            .map((phonetic, index) => {
+              const parts = [];
+              if (phonetic.accent) {
+                parts.push(phonetic.accent);
+              }
+              if (phonetic.text) {
+                parts.push(phonetic.text);
+              }
+              const label = parts.length > 0 ? parts.join(" ") : `Pronunciation ${index + 1}`;
+              const isLoading = audioLoading === phonetic.audio;
+
+              return (
+                <Action
+                  key={index}
+                  title={isLoading ? `Playing ${label}...` : `Play: ${label}`}
+                  icon={Icon.Speaker}
+                  onAction={() => playAudio(phonetic.audio, label)}
+                  shortcut={{ modifiers: ["cmd"], key: String(index + 1) }}
+                />
+              );
+            })}
+          <Action title="Go Back" icon={Icon.ArrowLeft} onAction={onBack} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function generateMarkdown(wordData: WordData): string {
+  let markdown = `# ${wordData.word}\n\n`;
+
+  // Audio shortcuts section at the top
+  const audioPhonetics = wordData.phonetics.filter((p) => p.audio);
+  if (audioPhonetics.length > 0) {
+    markdown += `> 🔊 **Quick Play:** `;
+    audioPhonetics.forEach((phonetic, index) => {
+      if (index > 0) markdown += " • ";
+      markdown += `⌘${index + 1}`;
+
+      // Show accent and phonetic text
+      const parts = [];
+      if (phonetic.accent) {
+        parts.push(phonetic.accent);
+      }
+      if (phonetic.text) {
+        parts.push(phonetic.text);
+      }
+
+      if (parts.length > 0) {
+        markdown += ` (${parts.join(" ")})`;
+      }
+    });
+    markdown += `\n\n`;
+  }
+
+  // Phonetics section
+  if (wordData.phonetics.length > 0) {
+    markdown += `## Pronunciation\n\n`;
+
+    wordData.phonetics.forEach((phonetic) => {
+      if (phonetic.text) {
+        markdown += `**${phonetic.text}**`;
+        if (phonetic.accent) {
+          markdown += ` *(${phonetic.accent})*`;
+        }
+        markdown += `\n\n`;
+      }
+    });
+  }
+
+  // Meanings section
+  if (wordData.meanings.length > 0) {
+    markdown += `## Meanings\n\n`;
+
+    wordData.meanings.forEach((meaning) => {
+      markdown += `### ${meaning.partOfSpeech}\n\n`;
+
+      meaning.definitions.forEach((def, defIndex) => {
+        markdown += `${defIndex + 1}. ${def.definition}\n\n`;
+
+        if (def.example) {
+          markdown += `   *Example:* "${def.example}"\n\n`;
+        }
+
+        if (def.synonyms && def.synonyms.length > 0) {
+          markdown += `   **Synonyms:** ${def.synonyms.join(", ")}\n\n`;
+        }
+
+        if (def.antonyms && def.antonyms.length > 0) {
+          markdown += `   **Antonyms:** ${def.antonyms.join(", ")}\n\n`;
+        }
+      });
+    });
+  }
+
+  return markdown;
+}
