@@ -1,7 +1,8 @@
 # Ente Auth Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Handle double-encoded TOTP + Maintenance] - {PR_MERGE_DATE}
 
+- Handle double-encoded TOTP
 - Change the "Copy Next" `shortcut` to be cross-platform
 - Remove unecessary deps
 - Mention default values the extension uses for reference
