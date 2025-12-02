@@ -1,6 +1,6 @@
 # Odesli Changelog
 
-## [Add argument support to the command] - {PR_MERGE_DATE}
+## [Add argument support to the command] - 2025-12-02
 
 - Updated the command to accept an optional URL argument.
 - Enhanced clipboard text retrieval logic for better user experience.
