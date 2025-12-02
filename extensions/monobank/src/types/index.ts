@@ -5,6 +5,7 @@ export interface Currency {
   name: string;
   code: string;
   number: string;
+  flag?: string;
 }
 
 export interface CurrencyRate {
