@@ -10,7 +10,10 @@ export const fetchRoutines = async () => {
     const response = await getRoutines();
     return {
       routines: response.routines,
-      pagination: response.pagination,
+      pagination: {
+        page: response.page,
+        page_count: response.page_count,
+      },
     };
   } catch (error) {
     throw new Error(`Failed to fetch routines: ${error instanceof Error ? error.message : String(error)}`);

@@ -8,36 +8,39 @@ export type WorkoutsRequest = {
 };
 
 export type WorkoutSet = {
-  weight_kg: number;
-  reps: number;
-  rpe?: number;
-  type?: "normal" | "warmup" | "dropset" | "failure";
-  duration_seconds?: number;
+  index: number;
+  type: "normal" | "warmup" | "dropset" | "failure";
+  weight_kg: number | null;
+  reps: number | null;
+  distance_meters: number | null;
+  duration_seconds: number | null;
+  rpe: number | null;
+  custom_metric: unknown | null;
 };
 
 export type WorkoutExercise = {
-  name: string;
+  index: number;
+  title: string;
+  notes: string;
   exercise_template_id: string;
+  superset_id: string | null;
   sets: WorkoutSet[];
-  thumbnail_url?: string;
 };
 
 export type Workout = {
   id: string;
   title: string;
+  routine_id: string | null;
+  description: string;
+  start_time: string;
+  end_time: string;
+  updated_at: string;
   created_at: string;
-  duration: number;
-  total_volume: number;
-  routine_id?: string;
   exercises: WorkoutExercise[];
-  note?: string;
 };
 
 export type WorkoutsResponse = {
+  page: number;
+  page_count: number;
   workouts: Workout[];
-  pagination: {
-    total_workouts: number;
-    current_page: number;
-    total_pages: number;
-  };
 };

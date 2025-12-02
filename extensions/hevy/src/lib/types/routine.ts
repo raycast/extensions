@@ -7,32 +7,36 @@ export type RoutinesRequest = {
 };
 
 export type RoutineSet = {
-  sets: number;
-  reps: string;
-  rest_period: number;
+  index: number;
+  type: "normal" | "warmup" | "dropset" | "failure";
+  weight_kg: number | null;
+  reps: number | null;
+  distance_meters: number | null;
+  duration_seconds: number | null;
+  custom_metric: unknown | null;
 };
 
 export type RoutineExercise = {
-  name: string;
-  sets: RoutineSet;
+  index: number;
+  title: string;
+  notes: string | null;
   exercise_template_id: string;
+  superset_id: string | null;
+  sets: RoutineSet[];
+  rest_seconds: number;
 };
 
 export type Routine = {
   id: string;
   title: string;
-  description?: string;
-  folder_id?: string;
-  exercises: RoutineExercise[];
-  created_at: string;
+  folder_id: string | null;
   updated_at: string;
+  created_at: string;
+  exercises: RoutineExercise[];
 };
 
 export type RoutinesResponse = {
+  page: number;
+  page_count: number;
   routines: Routine[];
-  pagination: {
-    total_routines: number;
-    current_page: number;
-    total_pages: number;
-  };
 };
