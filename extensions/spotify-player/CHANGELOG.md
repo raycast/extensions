@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Enhancements] - 2025-12-01
+## [Enhancements] - {PR_MERGE_DATE}
 
 - The `Your Library` command now stores your library in a local SQLite database to support search and instant pagination. Previously it would only show the first 50 playlists, artists, albums etc.
 
