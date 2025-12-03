@@ -1,5 +1,11 @@
 # Brand Icons Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add Windows support
+- Add affiliate parameter to Raycast links
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-11-03
 
 - Fix typos
