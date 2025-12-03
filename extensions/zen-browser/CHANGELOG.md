@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Added error handling and new private window command. Refactor actions] - {PR_MERGE_DATE}
+## [Added error handling and new private window command. Refactor actions] - 2025-12-03
 
 - Added error handling to the new window and private window commands.
 - Added a command to create a new private window in Zen Browser.
