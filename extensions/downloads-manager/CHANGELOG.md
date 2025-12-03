@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add Windows support] - {PR_MERGE_DATE}
+
+- Added support for Windows
+
 ## [Add Grid layout] - 2025-12-01
 
 - Added a Grid layout to the Manage Downloads command. Comes with an Action to toggle between layouts as well as a Preference for setting the default layout

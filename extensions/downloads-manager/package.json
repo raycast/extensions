@@ -11,7 +11,8 @@
     "ridemountainpig",
     "nagauta",
     "dead_hikikomori",
-    "clins1994"
+    "clins1994",
+    "YourMCGeek"
   ],
   "categories": [
     "Productivity",
@@ -187,6 +188,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
