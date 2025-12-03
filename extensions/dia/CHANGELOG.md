@@ -1,5 +1,9 @@
 # Dia Changelog
 
+## Add Bookmarks in Search command - 2025-12-03
+
+- Added bookmarks in the Search command (in addition to tabs, browser history and google suggestions)
+
 ## Search Open and Pinned Tabs - 2025-12-01
 
 - Added support for Dia's new AppleScript API to search open and pinned tabs.

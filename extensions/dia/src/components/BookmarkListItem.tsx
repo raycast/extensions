@@ -3,8 +3,19 @@ import { openNewTab } from "../dia";
 import { getSafeFavicon } from "../utils";
 import { BookmarkItem } from "../bookmarks/types";
 
-export function BookmarkListItem({ item, onNavigate }: { item: BookmarkItem; onNavigate: (idPath: string[]) => void }) {
+export function BookmarkListItem({
+  item,
+  onNavigate,
+}: {
+  item: BookmarkItem;
+  onNavigate?: (idPath: string[]) => void;
+}) {
   if (item.type === "folder") {
+    // If no navigation handler, don't render folders
+    if (!onNavigate) {
+      return null;
+    }
+
     const childCount = item.children?.length || 0;
     return (
       <List.Item
