@@ -125,9 +125,6 @@ interface UniverseLinksViewProps {
 
 function UniverseLinksView({ universe, onBack, onRefresh }: UniverseLinksViewProps) {
   const [searchText, setSearchText] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const client = getKalpaClient();
-
   const {
     data: links,
     isLoading,
