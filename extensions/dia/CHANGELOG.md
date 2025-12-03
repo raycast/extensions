@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## Add Bookmarks in Search command - 2025-12-03
+## Add Bookmarks in Search command - {PR_MERGE_DATE}
 
 - Added bookmarks in the Search command (in addition to tabs, browser history and google suggestions)
 
