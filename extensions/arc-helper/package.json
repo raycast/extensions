@@ -4,7 +4,9 @@
   "description": "Search items, quests, events, and traders for Arc Raiders",
   "icon": "icon.png",
   "author": "pcho",
-  "categories": ["Fun"],
+  "categories": [
+    "Fun"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -37,7 +39,7 @@
     },
     {
       "name": "traders",
-      "title": "Traders",
+      "title": "Browse Traders",
       "subtitle": "Arc Helper",
       "description": "Browse trader inventories",
       "mode": "view"
@@ -51,14 +53,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.9",
     "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
+    "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },

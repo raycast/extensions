@@ -5,9 +5,7 @@ import { API, Item, PaginatedResponse, getRarityColor } from "./api";
 
 function ItemDetail({ item }: { item: Item }) {
   const stats = item.stat_block || {};
-  const relevantStats = Object.entries(stats).filter(
-    ([, value]) => value !== 0 && value !== "" && value !== null,
-  );
+  const relevantStats = Object.entries(stats).filter(([, value]) => value !== 0 && value !== "" && value !== null);
 
   const markdown = `
 # ${item.name}
@@ -52,18 +50,11 @@ ${relevantStats.map(([key, value]) => `| ${formatStatName(key)} | ${value} |`).j
         <Detail.Metadata>
           <Detail.Metadata.Label title="Type" text={item.item_type} />
           <Detail.Metadata.TagList title="Rarity">
-            <Detail.Metadata.TagList.Item
-              text={item.rarity}
-              color={getRarityColor(item.rarity)}
-            />
+            <Detail.Metadata.TagList.Item text={item.rarity} color={getRarityColor(item.rarity)} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Value" text={String(item.value)} />
-          {item.workbench && (
-            <Detail.Metadata.Label title="Workbench" text={item.workbench} />
-          )}
-          {item.loot_area && (
-            <Detail.Metadata.Label title="Loot Area" text={item.loot_area} />
-          )}
+          {item.workbench && <Detail.Metadata.Label title="Workbench" text={item.workbench} />}
+          {item.loot_area && <Detail.Metadata.Label title="Loot Area" text={item.loot_area} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
@@ -74,9 +65,7 @@ ${relevantStats.map(([key, value]) => `| ${formatStatName(key)} | ${value} |`).j
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            url={`https://metaforge.app/arc-raiders/items/${item.id}`}
-          />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
           <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
         </ActionPanel>
       }
@@ -95,19 +84,16 @@ export default function SearchItems() {
   const [searchText, setSearchText] = useState("");
   const [itemType, setItemType] = useState<string>("all");
 
-  const { isLoading, data, pagination } = useFetch(
-    (options) => `${API.items}?page=${options.page + 1}`,
-    {
-      mapResult(result: PaginatedResponse<Item>) {
-        return {
-          data: result.data,
-          hasMore: result.pagination.hasNextPage,
-        };
-      },
-      keepPreviousData: true,
-      initialData: [],
+  const { isLoading, data, pagination } = useFetch((options) => `${API.items}?page=${options.page + 1}`, {
+    mapResult(result: PaginatedResponse<Item>) {
+      return {
+        data: result.data,
+        hasMore: result.pagination.hasNextPage,
+      };
     },
-  );
+    keepPreviousData: true,
+    initialData: [],
+  });
 
   const items = data || [];
 
@@ -134,11 +120,7 @@ export default function SearchItems() {
       onSearchTextChange={setSearchText}
       pagination={pagination}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Type"
-          value={itemType}
-          onChange={setItemType}
-        >
+        <List.Dropdown tooltip="Filter by Type" value={itemType} onChange={setItemType}>
           <List.Dropdown.Item title="All Types" value="all" />
           <List.Dropdown.Section title="Item Types">
             {itemTypes.map((type) => (
@@ -165,18 +147,9 @@ export default function SearchItems() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Details"
-                icon={Icon.Eye}
-                target={<ItemDetail item={item} />}
-              />
-              <Action.OpenInBrowser
-                url={`https://metaforge.app/arc-raiders/items/${item.id}`}
-              />
-              <Action.CopyToClipboard
-                title="Copy Item Name"
-                content={item.name}
-              />
+              <Action.Push title="View Details" icon={Icon.Eye} target={<ItemDetail item={item} />} />
+              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+              <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
             </ActionPanel>
           }
         />

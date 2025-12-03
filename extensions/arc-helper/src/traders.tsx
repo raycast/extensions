@@ -3,13 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { API, TradersResponse, TraderItem, getRarityColor } from "./api";
 
-function TraderItemDetail({
-  item,
-  trader,
-}: {
-  item: TraderItem;
-  trader: string;
-}) {
+function TraderItemDetail({ item, trader }: { item: TraderItem; trader: string }) {
   const markdown = `
 # ${item.name}
 
@@ -38,18 +32,11 @@ ${item.description || "No description available."}
           <Detail.Metadata.Label title="Trader" text={trader} />
           <Detail.Metadata.Label title="Type" text={item.item_type} />
           <Detail.Metadata.TagList title="Rarity">
-            <Detail.Metadata.TagList.Item
-              text={item.rarity}
-              color={getRarityColor(item.rarity)}
-            />
+            <Detail.Metadata.TagList.Item text={item.rarity} color={getRarityColor(item.rarity)} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Base Value" text={String(item.value)} />
-          <Detail.Metadata.Label
-            title="Trader Price"
-            text={String(item.trader_price)}
-            icon={Icon.Coins}
-          />
+          <Detail.Metadata.Label title="Trader Price" text={String(item.trader_price)} icon={Icon.Coins} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
@@ -60,9 +47,7 @@ ${item.description || "No description available."}
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            url={`https://metaforge.app/arc-raiders/items/${item.id}`}
-          />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
           <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
         </ActionPanel>
       }
@@ -81,10 +66,7 @@ export default function Traders() {
   const tradersData = data?.data || {};
   const traderNames = Object.keys(tradersData).sort();
 
-  const filteredTraders =
-    traderFilter === "all"
-      ? traderNames
-      : traderNames.filter((t) => t === traderFilter);
+  const filteredTraders = traderFilter === "all" ? traderNames : traderNames.filter((t) => t === traderFilter);
 
   return (
     <List
@@ -93,11 +75,7 @@ export default function Traders() {
       filtering={false}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Trader"
-          value={traderFilter}
-          onChange={setTraderFilter}
-        >
+        <List.Dropdown tooltip="Filter by Trader" value={traderFilter} onChange={setTraderFilter}>
           <List.Dropdown.Item title="All Traders" value="all" />
           <List.Dropdown.Section title="Traders">
             {traderNames.map((trader) => (
@@ -122,11 +100,7 @@ export default function Traders() {
         if (filteredItems.length === 0 && searchText !== "") return null;
 
         return (
-          <List.Section
-            key={trader}
-            title={trader}
-            subtitle={`${filteredItems.length} items`}
-          >
+          <List.Section key={trader} title={trader} subtitle={`${filteredItems.length} items`}>
             {filteredItems.map((item) => (
               <List.Item
                 key={`${trader}-${item.id}`}
@@ -149,13 +123,8 @@ export default function Traders() {
                       icon={Icon.Eye}
                       target={<TraderItemDetail item={item} trader={trader} />}
                     />
-                    <Action.OpenInBrowser
-                      url={`https://metaforge.app/arc-raiders/items/${item.id}`}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Item Name"
-                      content={item.name}
-                    />
+                    <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+                    <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
                   </ActionPanel>
                 }
               />

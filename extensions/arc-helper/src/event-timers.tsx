@@ -82,9 +82,7 @@ function formatTimeUntil(minutes: number | null): string {
 }
 
 function EventDetail({ event }: { event: EventWithStatus }) {
-  const timesList = event.times
-    .map((t) => `| ${t.start} UTC | ${t.end} UTC |`)
-    .join("\n");
+  const timesList = event.times.map((t) => `| ${t.start} UTC | ${t.end} UTC |`).join("\n");
 
   const markdown = `
 # ${event.name}
@@ -118,13 +116,7 @@ ${event.minutesUntil !== null && event.minutesUntil > 0 ? `**Next in:** ${format
           <Detail.Metadata.Label title="Map" text={event.map} />
           <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item
-              text={
-                event.status === "active"
-                  ? "Active"
-                  : event.status === "upcoming"
-                    ? "Soon"
-                    : "Later"
-              }
+              text={event.status === "active" ? "Active" : event.status === "upcoming" ? "Soon" : "Later"}
               color={
                 event.status === "active"
                   ? Color.Green
@@ -134,23 +126,14 @@ ${event.minutesUntil !== null && event.minutesUntil > 0 ? `**Next in:** ${format
               }
             />
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label
-            title="Next In"
-            text={formatTimeUntil(event.minutesUntil)}
-          />
+          <Detail.Metadata.Label title="Next In" text={formatTimeUntil(event.minutesUntil)} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Times Today"
-            text={`${event.times.length} occurrence(s)`}
-          />
+          <Detail.Metadata.Label title="Times Today" text={`${event.times.length} occurrence(s)`} />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Event Name"
-            content={event.name}
-          />
+          <Action.CopyToClipboard title="Copy Event Name" content={event.name} />
         </ActionPanel>
       }
     />
@@ -160,12 +143,9 @@ ${event.minutesUntil !== null && event.minutesUntil > 0 ? `**Next in:** ${format
 export default function EventTimers() {
   const [mapFilter, setMapFilter] = useState<string>("all");
 
-  const { isLoading, data, revalidate } = useFetch<EventTimersResponse>(
-    API.eventTimers,
-    {
-      keepPreviousData: true,
-    },
-  );
+  const { isLoading, data, revalidate } = useFetch<EventTimersResponse>(API.eventTimers, {
+    keepPreviousData: true,
+  });
 
   const events = data?.data || [];
   const maps = [...new Set(events.map((e) => e.map))].sort();
@@ -186,9 +166,7 @@ export default function EventTimers() {
   }, [events, mapFilter]);
 
   const activeEvents = eventsWithStatus.filter((e) => e.status === "active");
-  const upcomingEvents = eventsWithStatus.filter(
-    (e) => e.status === "upcoming",
-  );
+  const upcomingEvents = eventsWithStatus.filter((e) => e.status === "upcoming");
   const laterEvents = eventsWithStatus.filter((e) => e.status === "later");
 
   return (
@@ -196,11 +174,7 @@ export default function EventTimers() {
       isLoading={isLoading}
       searchBarPlaceholder="Search events..."
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Map"
-          value={mapFilter}
-          onChange={setMapFilter}
-        >
+        <List.Dropdown tooltip="Filter by Map" value={mapFilter} onChange={setMapFilter}>
           <List.Dropdown.Item title="All Maps" value="all" />
           <List.Dropdown.Section title="Maps">
             {maps.map((map) => (
@@ -231,11 +205,7 @@ export default function EventTimers() {
               accessories={[{ tag: { value: "ACTIVE", color: Color.Green } }]}
               actions={
                 <ActionPanel>
-                  <Action.Push
-                    title="View Details"
-                    icon={Icon.Eye}
-                    target={<EventDetail event={event} />}
-                  />
+                  <Action.Push title="View Details" icon={Icon.Eye} target={<EventDetail event={event} />} />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
@@ -267,11 +237,7 @@ export default function EventTimers() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.Push
-                    title="View Details"
-                    icon={Icon.Eye}
-                    target={<EventDetail event={event} />}
-                  />
+                  <Action.Push title="View Details" icon={Icon.Eye} target={<EventDetail event={event} />} />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
@@ -296,11 +262,7 @@ export default function EventTimers() {
               accessories={[{ text: formatTimeUntil(event.minutesUntil) }]}
               actions={
                 <ActionPanel>
-                  <Action.Push
-                    title="View Details"
-                    icon={Icon.Eye}
-                    target={<EventDetail event={event} />}
-                  />
+                  <Action.Push title="View Details" icon={Icon.Eye} target={<EventDetail event={event} />} />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}

@@ -28,9 +28,7 @@ ${arc.description || "No description available."}
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            url={`https://metaforge.app/arc-raiders/arcs/${arc.id}`}
-          />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/arcs/${arc.id}`} />
           <Action.CopyToClipboard title="Copy Arc Name" content={arc.name} />
         </ActionPanel>
       }
@@ -51,10 +49,7 @@ export default function SearchArcs() {
     return arcs.filter((arc) => {
       if (searchText === "") return true;
       const search = searchText.toLowerCase();
-      return (
-        arc.name.toLowerCase().includes(search) ||
-        arc.description?.toLowerCase().includes(search)
-      );
+      return arc.name.toLowerCase().includes(search) || arc.description?.toLowerCase().includes(search);
     });
   }, [arcs, searchText]);
 
@@ -73,18 +68,9 @@ export default function SearchArcs() {
           subtitle={arc.description?.slice(0, 60) + "..."}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Details"
-                icon={Icon.Eye}
-                target={<ArcDetail arc={arc} />}
-              />
-              <Action.OpenInBrowser
-                url={`https://metaforge.app/arc-raiders/arcs/${arc.id}`}
-              />
-              <Action.CopyToClipboard
-                title="Copy Arc Name"
-                content={arc.name}
-              />
+              <Action.Push title="View Details" icon={Icon.Eye} target={<ArcDetail arc={arc} />} />
+              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/arcs/${arc.id}`} />
+              <Action.CopyToClipboard title="Copy Arc Name" content={arc.name} />
             </ActionPanel>
           }
         />

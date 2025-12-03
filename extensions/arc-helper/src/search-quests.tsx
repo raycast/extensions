@@ -7,10 +7,7 @@ function QuestDetail({ quest }: { quest: Quest }) {
   const objectivesList = quest.objectives.map((obj) => `- ${obj}`).join("\n");
 
   const rewardsList = quest.rewards
-    .map(
-      (reward) =>
-        `| ![](${reward.item.icon}) | ${reward.item.name} | ${reward.quantity} | ${reward.item.rarity} |`,
-    )
+    .map((reward) => `| ![](${reward.item.icon}) | ${reward.item.name} | ${reward.quantity} | ${reward.item.rarity} |`)
     .join("\n");
 
   const markdown = `
@@ -62,17 +59,9 @@ ${quest.locations.map((loc) => `- ${loc}`).join("\n")}
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Objectives"
-            text={`${quest.objectives.length} objective(s)`}
-          />
-          {quest.xp > 0 && (
-            <Detail.Metadata.Label title="XP" text={String(quest.xp)} />
-          )}
-          <Detail.Metadata.Label
-            title="Rewards"
-            text={`${quest.rewards.length} item(s)`}
-          />
+          <Detail.Metadata.Label title="Objectives" text={`${quest.objectives.length} objective(s)`} />
+          {quest.xp > 0 && <Detail.Metadata.Label title="XP" text={String(quest.xp)} />}
+          <Detail.Metadata.Label title="Rewards" text={`${quest.rewards.length} item(s)`} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
@@ -83,13 +72,8 @@ ${quest.locations.map((loc) => `- ${loc}`).join("\n")}
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            url={`https://metaforge.app/arc-raiders/quests/${quest.id}`}
-          />
-          <Action.CopyToClipboard
-            title="Copy Quest Name"
-            content={quest.name}
-          />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/quests/${quest.id}`} />
+          <Action.CopyToClipboard title="Copy Quest Name" content={quest.name} />
         </ActionPanel>
       }
     />
@@ -99,19 +83,16 @@ ${quest.locations.map((loc) => `- ${loc}`).join("\n")}
 export default function SearchQuests() {
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading, data, pagination } = useFetch(
-    (options) => `${API.quests}?page=${options.page + 1}`,
-    {
-      mapResult(result: PaginatedResponse<Quest>) {
-        return {
-          data: result.data,
-          hasMore: result.pagination.hasNextPage,
-        };
-      },
-      keepPreviousData: true,
-      initialData: [],
+  const { isLoading, data, pagination } = useFetch((options) => `${API.quests}?page=${options.page + 1}`, {
+    mapResult(result: PaginatedResponse<Quest>) {
+      return {
+        data: result.data,
+        hasMore: result.pagination.hasNextPage,
+      };
     },
-  );
+    keepPreviousData: true,
+    initialData: [],
+  });
 
   const quests = data || [];
 
@@ -122,9 +103,7 @@ export default function SearchQuests() {
       return (
         quest.name.toLowerCase().includes(search) ||
         quest.objectives.some((obj) => obj.toLowerCase().includes(search)) ||
-        quest.rewards.some((reward) =>
-          reward.item.name.toLowerCase().includes(search),
-        )
+        quest.rewards.some((reward) => reward.item.name.toLowerCase().includes(search))
       );
     });
   }, [quests, searchText]);
@@ -148,24 +127,13 @@ export default function SearchQuests() {
               icon: Icon.Gift,
               text: `${quest.rewards.length} rewards`,
             },
-            ...(quest.xp > 0
-              ? [{ icon: Icon.Star, text: `${quest.xp} XP` }]
-              : []),
+            ...(quest.xp > 0 ? [{ icon: Icon.Star, text: `${quest.xp} XP` }] : []),
           ]}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Details"
-                icon={Icon.Eye}
-                target={<QuestDetail quest={quest} />}
-              />
-              <Action.OpenInBrowser
-                url={`https://metaforge.app/arc-raiders/quests/${quest.id}`}
-              />
-              <Action.CopyToClipboard
-                title="Copy Quest Name"
-                content={quest.name}
-              />
+              <Action.Push title="View Details" icon={Icon.Eye} target={<QuestDetail quest={quest} />} />
+              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/quests/${quest.id}`} />
+              <Action.CopyToClipboard title="Copy Quest Name" content={quest.name} />
             </ActionPanel>
           }
         />
