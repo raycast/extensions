@@ -19,7 +19,7 @@ export default function Command() {
     );
   }, [searchText]);
 
-  const projectsPerTeam = groupByTeam(projects || []);
+  const projectsPerTeam = groupByTeam(filteredProjects || []);
   const teamNames = Object.keys(projectsPerTeam);
 
   return (
@@ -65,20 +65,6 @@ export default function Command() {
               />
             ))}
         </List.Section>
-      ))}
-      {filteredProjects.map((project) => (
-        <List.Item
-          key={project.id}
-          title={project.name}
-          subtitle={project.teamName}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                url={`https://design.penpot.app/#/dashboard/team/${project.teamId}/projects/${project.id}`}
-              />
-            </ActionPanel>
-          }
-        />
       ))}
     </List>
   );
