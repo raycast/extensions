@@ -78,7 +78,6 @@ npm run fix-lint
 lemniscate-monitor/
 ├── src/
 │   ├── show-information.tsx    # Main command implementation
-│   └── types.ts               # TypeScript type definitions
 ├── package.json               # Project configuration
 ├── tsconfig.json             # TypeScript configuration
 ├── eslint.config.js          # ESLint configuration
