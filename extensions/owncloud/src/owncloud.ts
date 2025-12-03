@@ -68,17 +68,21 @@ export const search = async (pattern: string) => {
     },
     body,
   });
-  if (!response.ok) throw new Error(response.statusText);
   const result = await response.text();
-  const parsed = (await parser.parse(result)) as FailureResult | SuccessResult;
-  if ("error" in parsed) throw new Error(parsed.error.message);
-  return (
-    parsed.multistatus.response?.map((res) => {
-      const href = res.href;
-      const propstat = res.propstat[0].prop;
-      const { fileid, resourcetype, size } = propstat;
-      const name = decodeURIComponent(href.split("/").pop() ?? "");
-      return { id: fileid, href, name, size: +size, isCollection: typeof resourcetype !== "string" };
-    }) ?? []
-  );
+  let parsed: FailureResult | SuccessResult;
+  try {
+    parsed = await parser.parse(result);
+  } catch {
+    throw new Error(response.statusText); // Fail to parse
+  }
+  if ("error" in parsed) throw new Error(parsed.error.message); // ownCloud error
+  if (!response.ok) throw new Error(response.statusText); // Unknown error
+  if (!parsed.multistatus.response) return []; // Empty result
+  return parsed.multistatus.response.map((res) => {
+    const href = res.href;
+    const propstat = res.propstat[0].prop;
+    const { fileid, resourcetype, size } = propstat;
+    const name = decodeURIComponent(href.split("/").pop() ?? "");
+    return { id: fileid, href, name, size: +size, isCollection: typeof resourcetype !== "string" };
+  });
 };
