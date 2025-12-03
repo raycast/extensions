@@ -175,16 +175,6 @@ export default function Command() {
                 }
               }}
             />
-            <Action
-              title="Generate Port"
-              onAction={async () => {
-                try {
-                  await launchCommand({ name: "generate-port", type: LaunchType.UserInitiated });
-                } catch (error) {
-                  await showFailureToast(error, { title: "Failed to launch command" });
-                }
-              }}
-            />
             <Action title="Clear History" onAction={handleClearAll} style={Action.Style.Destructive} />
           </ActionPanel>
         }
