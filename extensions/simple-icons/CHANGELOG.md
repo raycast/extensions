@@ -3,6 +3,7 @@
 ## [Enhancement] - {PR_MERGE_DATE}
 
 - Add Windows support
+- Use default AI model for searching icons
 - Add affiliate parameter to Raycast links
 - Bump all dependencies to the latest
 
