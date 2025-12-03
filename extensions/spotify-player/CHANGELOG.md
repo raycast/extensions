@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Minor Fixes] - {PR_MERGE_DATE}
+
+- Fixed error toast "Menu Bar Player must be activated" when using Next/Previous in Now Playing without the Menu Bar Player command enabled
+
 ## [Enhancements] - 2025-11-27
 
 - Fixed detecting if Spotify is installed on Windows
