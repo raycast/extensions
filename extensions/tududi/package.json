@@ -22,18 +22,11 @@
       "description": "The base URL for the Tududi API"
     },
     {
-      "name": "email",
-      "type": "textfield",
-      "required": true,
-      "title": "Email",
-      "description": "Your Tududi email"
-    },
-    {
-      "name": "password",
+      "name": "token",
       "type": "password",
       "required": true,
-      "title": "Password",
-      "description": "Your Tududi password"
+      "title": "API Token",
+      "description": "Your Tududi API token"
     }
   ],
   "commands": [

@@ -50,7 +50,7 @@ export const CreateBookmarkForm = ({ url, isLoading }: Props) => {
   useEffect(() => {
     if (!metadata) return;
     if (didSetMetadata) return;
-    setValue("title", metadata.title);
+    if (metadata.title) setValue("title", metadata.title);
     if (metadata.description) setValue("description", metadata.description);
   }, [metadata, didSetMetadata, setValue]);
 

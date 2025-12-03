@@ -9,8 +9,10 @@ import {
   open,
   Image,
   List,
+  Keyboard,
 } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
+import { JSX } from "react";
 
 import {
   DatabaseProperty,
@@ -182,14 +184,14 @@ export function PageListItem({
               <Action.Push
                 title="Append Content to Page"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<AppendToPageForm page={page} />}
               />
             ) : (
               <Action.Push
                 title="Create New Page"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<CreatePageForm defaults={{ database: page.id }} mutate={mutate} />}
               />
             )}
@@ -200,7 +202,7 @@ export function PageListItem({
               title={`Delete ${pageWord}`}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={async () => {
                 if (
                   await confirmAlert({
@@ -264,7 +266,7 @@ export function PageListItem({
               <Action.CopyToClipboard
                 title={`Copy ${pageWord} URL`}
                 content={page.url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <Action.CopyToClipboard
                 title="Copy Formatted URL"
@@ -272,7 +274,7 @@ export function PageListItem({
                   html: `<a href="${page.url}" title="${title}">${title}</a>`,
                   text: title,
                 }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                shortcut={Keyboard.Shortcut.Common.CopyName}
               />
               <Action.Paste
                 title={`Paste ${pageWord} URL`}
@@ -282,7 +284,7 @@ export function PageListItem({
               <Action.CopyToClipboard
                 title={`Copy ${pageWord} Title`}
                 content={title}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                shortcut={Keyboard.Shortcut.Common.CopyPath}
               />
             </ActionPanel.Section>
           ) : null}

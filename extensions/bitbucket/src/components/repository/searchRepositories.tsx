@@ -154,7 +154,10 @@ function SearchListItem({ repo, isFavorite, onToggleFavorite }: SearchListItemPr
               title="Open Pull Requests in Browser"
               url={repo.url + "/pull-requests"}
               icon={{ source: icon.pr, tintColor: Color.PrimaryText }}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "." },
+                Windows: { modifiers: ["ctrl"], key: "." },
+              }}
             />
             <Action.OpenInBrowser
               title="Open Pipelines in Browser"
@@ -170,7 +173,10 @@ function SearchListItem({ repo, isFavorite, onToggleFavorite }: SearchListItemPr
               title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
               icon={isFavorite ? { source: Icon.Star } : Icon.Star}
               onAction={onToggleFavorite}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "f" },
+                Windows: { modifiers: ["ctrl"], key: "f" },
+              }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy Links">

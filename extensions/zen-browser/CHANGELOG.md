@@ -6,6 +6,10 @@
 - Added a command to create a new private window in Zen Browser.
 - Refactor actions: centralize AppleScript activation/keystroke helpers to remove duplication and improve reliability when focusing Zen.
 
+## [Fix New Tab and History For Windows] - 2025-11-10
+
+- Fix the new tab and history commands for Windows by using the PowerShell script to open the URL in Zen Browser.
+
 ## [Added Create New Window Command] - 2025-10-29
 
 - Added a command to create a new window in Zen Browser.

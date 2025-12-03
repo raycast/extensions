@@ -14,13 +14,35 @@
       "name": "projects",
       "title": "Projects",
       "description": "Manage Local Projects and View Services",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sort_order",
+          "title": "Sort Order",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Updated At (ASC)",
+              "value": "updated_at_asc"
+            },
+            {
+              "title": "Updated At (DESC)",
+              "value": "updated_at_des"
+            }
+          ],
+          "required": true,
+          "description": "Default Sort Order",
+          "default": "updated_at_des"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.2.0",
-    "node-appwrite": "^17.0.0"
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
+    "dayjs": "^1.11.18",
+    "filesize": "^11.0.13",
+    "node-appwrite": "^20.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -37,5 +59,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

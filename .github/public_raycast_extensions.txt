@@ -17,6 +17,7 @@ vercast
 ohdear
 devutils
 arc
+dia
 netlify
 pinata
 plane
@@ -66,4 +67,5 @@ v0-by-vercel
 github-copilot
 cursor-agents
 circleback
+sound-search
 pieces-raycast

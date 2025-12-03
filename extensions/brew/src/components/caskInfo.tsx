@@ -11,7 +11,7 @@ export function CaskInfo({
   cask: Cask;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { pop } = useNavigation();
 
   return (

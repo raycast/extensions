@@ -2,7 +2,8 @@ import { Clipboard, environment, Toast } from "@raycast/api";
 import path from "path";
 import fs from "fs";
 import { stat } from "fs/promises";
-import fetch, { FetchError } from "node-fetch";
+import { Readable } from "stream";
+import { ReadableStream } from "stream/web";
 import { chain } from "stream-chain";
 import { parser } from "stream-json";
 import { filter } from "stream-json/filters/Filter";
@@ -15,7 +16,7 @@ import { ExecError } from "./brew";
 export const supportPath: string = (() => {
   try {
     fs.mkdirSync(environment.supportPath, { recursive: true });
-  } catch (err) {
+  } catch {
     console.log("Failed to create supportPath");
   }
   return environment.supportPath;
@@ -104,7 +105,7 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
     if (!response.ok || !response.body) {
       throw new Error(`Invalid response ${response.statusText}`);
     }
-    await streamPipeline(response.body, fs.createWriteStream(remote.cachePath));
+    await streamPipeline(Readable.fromWeb(response.body as ReadableStream), fs.createWriteStream(remote.cachePath));
   }
 
   async function updateCache(): Promise<void> {
@@ -198,7 +199,7 @@ export async function showFailureToast(title: string, error: Error): Promise<voi
   }
 
   console.log(`${title}: ${error}`);
-  const stderr = (error as ExecError).stderr ?? (error as FetchError).message ?? `${error}`;
+  const stderr = (error as ExecError).stderr ?? error.message ?? `${error}`;
   const options: Toast.Options = {
     style: Toast.Style.Failure,
     title: title,

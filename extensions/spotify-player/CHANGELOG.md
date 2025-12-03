@@ -1,5 +1,17 @@
 # Spotify Player Changelog
 
+## [Enhancements] - 2025-11-27
+
+- Fixed detecting if Spotify is installed on Windows
+- Fixed error message rendering when adding song to queue
+- Added delay after skipping to next/previous track to ensure the track has actually changed before proceeding
+
+## [Add Windows support] - 2025-11-14
+
+- Added Windows to platforms
+- Added check for not running menu bar commands on Windows
+- Changed all shortcuts to support both macOS and Windows
+
 ## [Improvement] - 2025-10-30
 
 - Increase the number of songs you can view in a Playlist when using the `Show All Songs` command. You can view at least 500 songs and this fixes issues with old public playlists that are accessible via Raycast.

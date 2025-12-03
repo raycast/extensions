@@ -16,3 +16,5 @@ export async function parseResponse(response: Response) {
   }
   return result;
 }
+
+export const KOYEB_LIMIT = 20;

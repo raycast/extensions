@@ -1,5 +1,10 @@
 # Scheduler Changelog
 
+## [Background Refresh Alert] - 2025-11-18
+
+- Added warning banner to alert users when background refresh is not enabled for scheduled commands
+- Fixes issue where users couldn't understand why scheduled commands weren't executing automatically
+
 ## [Run missed schedules immediately] - 2025-10-10
 
 - ▶️ Added an option to immediately run a scheduled command if it was missed (e.g., the machine was asleep). Note: in this case "immediately" means within one minute of Raycast starting.

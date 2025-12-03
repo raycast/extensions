@@ -1,7 +1,7 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-
 import { useMemo, useState } from "react";
+
 import { Item } from "../types";
 import {
   actionsForItem,
@@ -19,13 +19,12 @@ import { ItemActionPanel } from "./ItemActionPanel";
 export function Items({ flags }: { flags?: string[] }) {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
   const [passwords, setPasswords] = useState<Item[]>([]);
-
   const { data: account, error: accountError, isLoading: accountIsLoading } = useAccount();
   const {
     data: items,
     error: itemsError,
     isLoading: itemsIsLoading,
-  } = usePasswords2({ flags, account: account?.account_uuid ?? "", execute: !accountError && !accountIsLoading });
+  } = usePasswords2({ account: account?.account_uuid ?? "", execute: !accountError && !accountIsLoading, flags });
 
   useMemo(() => {
     if (!items) return;
@@ -44,9 +43,9 @@ export function Items({ flags }: { flags?: string[] }) {
     return (
       <List>
         <List.EmptyView
-          title={(itemsError as ExtensionError)?.title || (accountError as ExtensionError)?.title}
           description={itemsError?.message || accountError?.message}
           icon={Icon.WifiDisabled}
+          title={(itemsError as ExtensionError)?.title || (accountError as ExtensionError)?.title}
         />
       </List>
     );
@@ -54,34 +53,34 @@ export function Items({ flags }: { flags?: string[] }) {
 
   return (
     <List
-      searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}
       isLoading={itemsIsLoading || accountIsLoading}
+      searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}
     >
       <List.EmptyView
-        title="No items found"
-        icon="1password-noview.png"
         description="Any items you have added in 1Password app will be listed here."
+        icon="1password-noview.png"
+        title="No items found"
       />
-      <List.Section title="Items" subtitle={`${passwords?.length}`}>
+      <List.Section subtitle={`${passwords?.length}`} title="Items">
         {passwords?.length
           ? passwords.map((item) => (
               <List.Item
-                key={item.id}
-                id={item.id}
-                icon={{
-                  value: { source: getCategoryIcon(item.category), tintColor: Color.Blue },
-                  tooltip: item.category,
-                }}
-                title={item.title}
-                subtitle={item.additional_information}
                 accessories={[
                   item?.favorite
                     ? { icon: { source: Icon.Stars, tintColor: Color.Yellow }, tooltip: "Favorite item" }
                     : {},
                   { text: item.vault?.name },
                 ]}
+                actions={<ItemActionPanel account={account} actions={actionsForItem(item)} item={item} />}
+                icon={{
+                  tooltip: item.category,
+                  value: { source: getCategoryIcon(item.category), tintColor: Color.Blue },
+                }}
+                id={item.id}
+                key={item.id}
                 keywords={item.additional_information ? [item.additional_information] : []}
-                actions={<ItemActionPanel account={account} item={item} actions={actionsForItem(item)} />}
+                subtitle={item.additional_information}
+                title={item.title}
               />
             ))
           : null}

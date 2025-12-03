@@ -1,5 +1,13 @@
 # Raycast Browsers Profiles
 
+## [Fix Chromium invalid profile names] - 2025-11-27
+
+- Read chromium profiles from `Local State` file to get their custom names
+
+## [Add Helium browser support] - 2025-11-27
+
+- Adding Helium browser to supported browser list
+
 ## [Add sorting on profile names] - 2025-02-03
 
 - Adding a simple sort on the profile names

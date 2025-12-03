@@ -1,5 +1,11 @@
 # Font Awesome Changelog
 
+## [Added Custom Kits Support for Pro accounts] - 2025-11-25
+
+- Added support for browsing and searching custom kit icons
+- Added "Remember Last Used Kit" preference to restore your previous selection on launch
+- Added "Filter Custom Kits" preference to limit which kits appear in the dropdown
+
 ## [Improvements] - 2025-10-13
 
 - Fixed issue where the search would sometimes fail and the cached state gets corrupted (ref: [Issue #22051](https://github.com/raycast/extensions/issues/22051))

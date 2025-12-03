@@ -11,6 +11,21 @@ for (let season = endYear; season >= startYear; season--) {
   seasons.push({ season, title });
 }
 
+const competitions = [
+  {
+    title: "Ligue 1 McDonald's",
+    value: "1",
+    icon: "ligue1.png",
+  },
+  {
+    title: "Ligue 2 BKT",
+    value: "4",
+    icon: "ligue2.png",
+  },
+];
+
+export { seasons };
+
 export default function CompetitionDropdown(props: {
   type?: string;
   selected: string;
@@ -27,11 +42,18 @@ export default function CompetitionDropdown(props: {
     >
       {seasons.map((season) => {
         return (
-          <DropdownComponent.Item
-            key={season.season}
-            value={season.season.toString()}
-            title={season.title}
-          />
+          <DropdownComponent.Section title={season.title} key={season.season}>
+            {competitions.map((competition) => {
+              return (
+                <DropdownComponent.Item
+                  key={`${season.season}_${competition.value}`}
+                  value={`${season.season}_${competition.value}`}
+                  title={`${competition.title} ${season.title}`}
+                  icon={competition.icon}
+                />
+              );
+            })}
+          </DropdownComponent.Section>
         );
       })}
     </DropdownComponent>

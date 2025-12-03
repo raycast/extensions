@@ -11,7 +11,7 @@ import { useQueryParser } from "@/hooks/useQueryParser";
 import { useSearchAPIData } from "@/hooks/useSearchAPIData";
 
 export const useJSRSearch = (queryString: string, scoped: string | null) => {
-  const { query, scope, triggerQuery, runtimes } = useQueryParser(queryString, scoped);
+  const { query, scope, triggerQuery, runtimes, searchQueryURL } = useQueryParser(queryString, scoped);
   const { data: apiData, isLoading: isLoadingAPIData, error: apiDataError } = useSearchAPIData();
   const abortable = useRef<AbortController>(null);
 
@@ -57,5 +57,5 @@ export const useJSRSearch = (queryString: string, scoped: string | null) => {
     },
   );
 
-  return { isLoading: isLoading || isLoadingAPIData, error: dataError || apiDataError, ...rest };
+  return { isLoading: isLoading || isLoadingAPIData, error: dataError || apiDataError, ...rest, searchQueryURL };
 };

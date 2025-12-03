@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Image, Keyboard, List } from "@raycast/api";
 import { getFavicon, useFrecencySorting } from "@raycast/utils";
 import { useState } from "react";
 import { useBookmarks } from "./atlas";
@@ -7,7 +7,7 @@ import { getSubtitle } from "./utils";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading, data } = useBookmarks();
+  const { isLoading, data, error } = useBookmarks();
   const { data: sortedData, visitItem, resetRanking } = useFrecencySorting(data);
 
   const filteredData = sortedData?.filter(
@@ -15,6 +15,10 @@ export default function Command() {
       bookmark.name.toLowerCase().includes(searchText.toLowerCase()) ||
       bookmark.url.toLowerCase().includes(searchText.toLowerCase()),
   );
+
+  if (error) {
+    return <Detail markdown={`# ERROR \n\n ${error} \n\n Are you sure **ChatGPT Atlas** is installed?`} />;
+  }
 
   return (
     <List

@@ -9,7 +9,7 @@
 </h1>
 
 <p align="center">
-  Search code, manage batch changes, and browse notebooks on <a href="https://about.sourcegraph.com">Sourcegraph</a> with <a href="https://www.raycast.com">Raycast</a>.
+  Deep Search, Code Search, and Batch Changes on <a href="https://about.sourcegraph.com">Sourcegraph</a> with <a href="https://www.raycast.com">Raycast</a>.
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
   <a href="#contributing"><strong>Contributing</strong></a>
 </p>
 
-![search demo](metadata/1-search.png)
+![deepsearch demo](metadata/0-deepsearch.png)
 
 <br />
 
@@ -45,7 +45,7 @@ Some configuration is required to use certain features, most notably the [varian
 ### Sourcegraph.com
 
 No setup is required to connect to [Sourcegraph.com](https://sourcegraph.com/search) through the 'Sourcegraph.com' variants of this extensions's commands.
-To configure your own [search contexts](#search-contexts), create search notebooks, and more, [sign up for a Sourcegraph.com account](https://sourcegraph.com/sign-up)!
+To configure your own [search contexts](#search-contexts), [sign up for a Sourcegraph.com account](https://sourcegraph.com/sign-up)!
 
 Once you have an account, you can create an access token under the ["Access tokens" tab in your user settings on Sourcegraph.com](https://sourcegraph.com/user/settings/tokens/new).
 Copy that access token to the "Sourcegraph.com: Access token" field in the Sourcegraph Raycast extension preferences to authenticate your search queries.
@@ -54,16 +54,17 @@ To search your private code, please reach out [get a demo of the single-tenant s
 
 ### Sourcegraph instance or workspace
 
-To start searching code on a custom Sourcegraph instance or workspace:
+To start searching code on your own Sourcegraph instance or workspace:
 
 - [Sourcegraph workspace](https://workspaces.sourcegraph.com/)
-- [self-hosted Sourcegraph instance](https://sourcegraph.com/docs/admin/deploy)
-- [Sourcegraph Cloud instance](https://sourcegraph.com/docs/cloud)
+- [Sourcegraph Cloud](https://sourcegraph.com/docs/cloud)
+- [Self-Hosted Sourcegraph](https://sourcegraph.com/docs/admin/deploy)
 
-You can set up access through the 'Sourcegraph' variants of this extensions's commands by configuring the "Sourcegraph: URL" and "Sourcegraph Instance: Access token" fields in the Sourcegraph Raycast extension preferences.
-You can create an access token under the "Access tokens" tab in your user settings in Sourcegraph.
+You can set up access through the 'Sourcegraph' variants of this extensions's commands by configuring the "Sourcegraph: URL" in the Sourcegraph Raycast extension preferences, as well as one of the following:
 
-For example, you can configure `example.sourcegraph.app` as a URL and go to `https://example.sourcegraph.app/user/settings/tokens/new` to create an access token for use in this extension.
+- **Access token**: You can create an access token (`sgp_...`) under the "Access tokens" tab in your user settings in Sourcegraph, and set it in the "Sourcegraph Instance: Access token" field in the extension preferences.
+  - For example, you can configure `example.sourcegraph.app` as a URL and go to `https://example.sourcegraph.app/user/settings/tokens/new` to create an access token for use in this extension.
+- **OAuth**: If your Sourcegraph version supports it (any version newer than v6.10.0), you can authenticate via OAuth without additional configuration by omitting the "Sourcegraph Instance: Access token" field in the extension preferences.
 
 <br />
 
@@ -92,7 +93,7 @@ Recent searches are persisted [locally through a native Raycast API](https://dev
 ### Manage Batch Changes
 
 Browse, view, publish, and merge changesets for [batch changes](https://about.sourcegraph.com/batch-changes) straight from Raycast.
-Batch changes automate large-scale code changes to keep your code up to date, fix critical security issues, and pay down tech debt across all of your repositories.
+Batch Changes automate large-scale code changes to keep your code up to date, fix critical security issues, and pay down tech debt across all of your repositories.
 
 > [!NOTE]
 > Batch Changes are currently only supported when connected to a [self-hosted Sourcegraph instance](https://sourcegraph.com/docs/admin/deploy)
@@ -100,16 +101,6 @@ or [Sourcegraph Cloud instance](https://sourcegraph.com/docs/cloud).
 > To use this command, you must also enable it in the Raycast Sourcegraph extension preferences.
 
 ![batch changes](metadata/3-batch-change-manage.png)
-
-### Find Search Notebooks
-
-Browse and preview [search notebooks](https://sourcegraph.com/docs/notebooks) straight from Raycast.
-Notebooks enable powerful live – and persistent – documentation, shareable with your organization or the world.
-
-> [!NOTE]
-> Notebooks are currently only supported when connected to a [self-hosted Sourcegraph instance](https://sourcegraph.com/docs/admin/deploy)
-or [Sourcegraph Cloud instance](https://sourcegraph.com/docs/cloud).
-> To use this command, you must also enable it in the Raycast Sourcegraph extension preferences.
 
 <br />
 
