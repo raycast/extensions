@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Improved Bookmarks Search] - {PR_MERGE_DATE}
+
+- Enhanced bookmark search to also match URLs, not just bookmark titles.
+
 ## [Added error handling and new private window command. Refactor actions] - 2025-12-03
 
 - Added error handling to the new window and private window commands.
