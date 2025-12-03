@@ -1,6 +1,6 @@
 # Penpot Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows] - 2025-12-03
 
 - Add Windows support
 - Add Icons for files
