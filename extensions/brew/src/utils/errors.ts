@@ -252,6 +252,8 @@ const BREW_LOCK_PATTERNS = [
   /Error: Another.*brew.*process/i,
   /waiting for lock/i,
   /lock file/i,
+  /has already locked/i, // Homebrew 5.0: "A `brew upgrade` process has already locked ..."
+  /brew upgrade.*process has already/i,
 ];
 
 /**

@@ -8,6 +8,7 @@ import { Cask, Nameable, OutdatedCask, OutdatedFormula } from "../types";
 import { actionsLogger } from "../logger";
 import { execBrewWithProgress, ProgressCallback, BrewProgress } from "./progress";
 import { brewIdentifier, brewCaskOption, isCask } from "./helpers";
+import { formatCount } from "../text";
 
 /// Upgrade Types
 
@@ -110,7 +111,7 @@ export async function brewUpgradeWithProgress(
     outdated = JSON.parse(result.stdout);
     checkStep.status = "completed";
     checkStep.endTime = Date.now();
-    checkStep.message = `Found ${outdated.formulae.length} formulae and ${outdated.casks.length} casks`;
+    checkStep.message = `Found ${formatCount(outdated.formulae.length, "formula", "formulae")} and ${formatCount(outdated.casks.length, "cask")}`;
     onProgress?.(steps, outputLog);
   } catch (error) {
     checkStep.status = "failed";

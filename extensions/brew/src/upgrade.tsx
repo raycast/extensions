@@ -1,15 +1,9 @@
-import { showToast, Toast } from "@raycast/api";
-import { brewUpgradeAll } from "./utils/brew";
-import { preferences } from "./preferences";
-import { showActionToast, showFailureToast, wait } from "./utils";
+/**
+ * Upgrade command entry point.
+ *
+ * This is a view-mode command that displays upgrade progress.
+ */
 
-export default async (): Promise<void> => {
-  try {
-    const handle = showActionToast({ title: "Upgrading formulae & casks" + String.ellipsis, cancelable: true });
-    await brewUpgradeAll(preferences.greedyUpgrades, handle.abort);
-    showToast(Toast.Style.Success, "Upgrade completed");
-  } catch (err) {
-    await showFailureToast("Upgrade failed", err as Error);
-    await wait(3000);
-  }
-};
+import UpgradeView from "./views/UpgradeView";
+
+export default UpgradeView;

@@ -69,6 +69,9 @@ import "./array";
 // Async utilities
 export { wait } from "./async";
 
+// Text utilities
+export { pluralize, formatCount } from "./text";
+
 // Brew utilities
 export * from "./brew";
 
