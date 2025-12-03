@@ -176,7 +176,12 @@ export default function Command() {
                 }
               }}
             />
-            <Action title="Clear History" icon={Icon.XMarkCircle} onAction={handleClearAll} style={Action.Style.Destructive} />
+            <Action
+              title="Clear History"
+              icon={Icon.XMarkCircle}
+              onAction={handleClearAll}
+              style={Action.Style.Destructive}
+            />
           </ActionPanel>
         }
       >
