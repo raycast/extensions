@@ -1,15 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-
-export interface HistoryItem {
-  id: string;
-  originalUrl: string;
-  odesliUrl: string;
-  title?: string;
-  artist?: string;
-  thumbnailUrl?: string;
-  timestamp: number;
-  isFavorite: boolean;
-}
+import { HistoryItem } from "./types";
 
 const HISTORY_KEY = "odesli-history";
 const MAX_HISTORY_ITEMS = 100;

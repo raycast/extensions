@@ -8,7 +8,7 @@ import { FormulaList } from "./components/list";
 
 type Installable = Cask | Formula;
 
-export default function Main(): JSX.Element {
+export default function Main() {
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState(InstallableFilterType.all);
 
@@ -21,7 +21,7 @@ export default function Main(): JSX.Element {
   const latestInstalled = useRef(installed);
   latestInstalled.current = installed;
 
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(new AbortController());
   const {
     isLoading: isLoadingSearch,
     data: results,

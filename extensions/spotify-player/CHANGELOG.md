@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Enhancements] - 2025-11-27
+
+- Fixed detecting if Spotify is installed on Windows
+- Fixed error message rendering when adding song to queue
+- Added delay after skipping to next/previous track to ensure the track has actually changed before proceeding
+
 ## [Add Windows support] - 2025-11-14
 
 - Added Windows to platforms

@@ -1,5 +1,9 @@
 # GitHub Copilot Changelog
 
+## [Copilot usage] - 2025-12-01
+
+- Add a command to view GitHub Copilot usage details
+
 ## [Refactor data loading] - 2025-09-12
 
 - Load pull request data using the pull request ID returned from the GitHub API
