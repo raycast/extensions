@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add Windows support] - {PR_MERGE_DATE}
+
+- Added support for Windows
+
 ## [Fixes] - 2025-12-10
 
 - Fixes [#23514](https://github.com/raycast/extensions/issues/23514)

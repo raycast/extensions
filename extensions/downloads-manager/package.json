@@ -12,6 +12,7 @@
     "nagauta",
     "dead_hikikomori",
     "clins1994",
+    "YourMCGeek",
     "0xdhrv"
   ],
   "categories": [
@@ -188,6 +189,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
