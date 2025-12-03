@@ -1,6 +1,6 @@
 # Port from Project Name Changelog
 
-## [Edit Port Feature] - {PR_MERGE_DATE}
+## [Edit Port Feature] - 2025-12-03
 
 - Add ability to manually edit ports to any value (1000-9999)
 - Prevent duplicate port assignments with validation
