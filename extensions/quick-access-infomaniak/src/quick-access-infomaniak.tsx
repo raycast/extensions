@@ -1,10 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, openExtensionPreferences } from "@raycast/api";
 import API from "./api/api";
 import { useEffect, useState } from "react";
 import { Organization } from "./types/Organization";
@@ -22,8 +16,7 @@ function BrowseOrganizations() {
         const organizations = response?.data?.data ?? [];
 
         organizations.sort((a, b) => {
-          if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase())
-            return -1;
+          if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1;
           if (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) return 1;
           return 0;
         });
@@ -49,10 +42,7 @@ function BrowseOrganizations() {
           description="Please setup your access token in the settings."
           actions={
             <ActionPanel>
-              <Action
-                title="Open Extension Settings"
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Settings" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -90,9 +80,7 @@ function BrowseOrganizations() {
               <Action.Push
                 title="Browse Organization"
                 icon="domain.png"
-                target={
-                  <BrowseOrganizationProducts organization={organization} />
-                }
+                target={<BrowseOrganizationProducts organization={organization} />}
               />
             </ActionPanel>
           }

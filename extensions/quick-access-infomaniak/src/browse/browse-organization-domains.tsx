@@ -1,16 +1,11 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, openExtensionPreferences } from "@raycast/api";
 import API from "../api/api";
 import { useState } from "react";
 import { Organization } from "../types/Organization";
 import { InfomaniakResponse } from "../types/InfomaniakResponse";
 import { usePromise } from "@raycast/utils";
 import { Domain } from "../types/Domain";
+import { AxiosError } from "axios";
 
 type MetadataProps = {
   organization: Organization;
@@ -31,15 +26,16 @@ export default function BrowseOrganizationDomains(props: MetadataProps) {
             "&order_by=customer_name&per_page=100&order=asc&service_name=domain&page=" +
             (options.page + 1).toString(),
         );
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-      } catch (error: any) {
-        if (error.response?.status === 401) {
-          setStatus(401);
-          return { data: [], hasMore: false };
-        }
-        if (error.response?.status === 429) {
-          setStatus(429);
-          return { data: [], hasMore: false };
+      } catch (error: unknown) {
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 401) {
+            setStatus(401);
+            return { data: [], hasMore: false };
+          }
+          if (error.response?.status === 429) {
+            setStatus(429);
+            return { data: [], hasMore: false };
+          }
         }
         throw error;
       }
@@ -61,10 +57,7 @@ export default function BrowseOrganizationDomains(props: MetadataProps) {
           description="Please setup your access token in the settings."
           actions={
             <ActionPanel>
-              <Action
-                title="Open Extension Settings"
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Settings" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />

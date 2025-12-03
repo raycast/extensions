@@ -18,11 +18,7 @@ export default function BrowseOrganizationProducts(props: MetadataProps) {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
-              url={
-                "https://manager.infomaniak.com/v3/" +
-                props.organization.id.toString() +
-                "/ng/home"
-              }
+              url={"https://manager.infomaniak.com/v3/" + props.organization.id.toString() + "/ng/home"}
             />
           </ActionPanel>
         }
@@ -30,46 +26,32 @@ export default function BrowseOrganizationProducts(props: MetadataProps) {
       <List.Item
         key="open-domains"
         icon={"domain.png"}
-        title="List domains"
+        title="List Domains"
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Browse"
-              target={
-                <BrowseOrganizationDomains organization={props.organization} />
-              }
-            />
+            <Action.Push title="Browse" target={<BrowseOrganizationDomains organization={props.organization} />} />
           </ActionPanel>
         }
       />
       <List.Item
         key="open-hostings"
         icon={"hosting.png"}
-        title="List hostings"
+        title="List Hostings"
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Browse"
-              target={
-                <BrowseOrganizationHostings organization={props.organization} />
-              }
-            />
+            <Action.Push title="Browse" target={<BrowseOrganizationHostings organization={props.organization} />} />
           </ActionPanel>
         }
       />
       <List.Item
         key="open-email-hostings"
         icon={"email-hosting.png"}
-        title="List email hostings"
+        title="List Email Hostings"
         actions={
           <ActionPanel>
             <Action.Push
               title="Browse"
-              target={
-                <BrowseOrganizationEmailHostings
-                  organization={props.organization}
-                />
-              }
+              target={<BrowseOrganizationEmailHostings organization={props.organization} />}
             />
           </ActionPanel>
         }
