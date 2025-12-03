@@ -2,7 +2,7 @@
 
 ## [Generate Playlist Improvements] - {PR_MERGE_DATE}
 
-- Updated AI model from **4o Nano** to **GPT-5 Mini** for higher-quality playlist generation  
+- Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation  
 - Strengthened prompt to enforce a **hard minimum of 20 songs** and a **maximum of 75 songs**  
 - Added strict validation requiring the returned JSON to include a correctly structured `playlist` array  
 - Improved cultural and thematic vibe inference when no artists are explicitly listed  
