@@ -31,7 +31,7 @@ import {
 import NoInstall from "./no-install";
 
 export default function ManageInstances() {
-  const { data: isPrismInstalledData } = usePromise(isPrismLauncherInstalled, []);
+  const { data: isPrismInstalledData, isLoading: isPrismInstalledLoading } = usePromise(isPrismLauncherInstalled, []);
   const isPrismInstalled = isPrismInstalledData ?? false;
 
   const [instances, setInstances] = useState<Instance[]>();
@@ -74,7 +74,7 @@ export default function ManageInstances() {
   return (
     <List
       searchBarPlaceholder={"Search by instance name"}
-      {...(isPrismInstalled ? { isLoading: instances === undefined } : {})}
+      {...(isPrismInstalled ? { isLoading: instances === undefined } : { isLoading: isPrismInstalledLoading })}
     >
       <When condition={isPrismInstalled}>
         {instances?.map((instance, index) => (

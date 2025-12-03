@@ -8,10 +8,12 @@
   "contributors": [
     "sven",
     "koseduhemak",
-    "ryanp",
     "LunaticMuch",
     "nick318",
     "marinsokol"
+  ],
+  "pastContributors": [
+    "ryanp"
   ],
   "license": "MIT",
   "commands": [

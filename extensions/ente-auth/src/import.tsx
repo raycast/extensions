@@ -13,7 +13,10 @@ export default async function Command() {
 	const toast = await showToast({ style: Toast.Style.Animated, title: "Importing secrets" });
 
 	if (!checkEnteBinary()) {
-		showToast(Toast.Style.Failure, "Ente binary not found");
+		toast.style = Toast.Style.Failure;
+		toast.title = "Ente binary not found";
+		toast.message = "Please install the Ente binary.";
+		return;
 	}
 
 	try {
@@ -43,7 +46,7 @@ export default async function Command() {
 		toast.title = "Error importing secrets";
 		toast.message = error instanceof Error ? error.message : "Unknown error";
 	}
-	if (getPreferenceValues().deleteExport === true) {
+	if (getPreferenceValues<Preferences>().deleteExport === true) {
 		deleteEnteExport();
 	}
 }

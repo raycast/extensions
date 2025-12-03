@@ -1,50 +1,25 @@
 import { List } from "@raycast/api";
-import { useState, ReactElement } from "react";
-import { useHistorySearch } from "./hooks/useHistorySearch";
-import { HistoryEntry } from "./interfaces";
-import { DiaListItems } from "./components/DiaListItems";
+import { useState } from "react";
+import { HistoryListItem } from "./components/HistoryListItem";
+import { useSearchHistory } from "./dia";
 
-/**
- * Group history entries by date
- */
-export const groupEntriesByDate = (allEntries?: HistoryEntry[]): Map<string, HistoryEntry[]> =>
-  allEntries
-    ? allEntries.reduce((acc, cur) => {
-        const title = new Date(cur.lastVisited).toLocaleDateString(undefined, {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        const groupEntries = acc.get(title) ?? [];
-        groupEntries.push(cur);
-        acc.set(title, groupEntries);
-        return acc;
-      }, new Map<string, HistoryEntry[]>())
-    : new Map<string, HistoryEntry[]>();
+export default function Command() {
+  const [searchText, setSearchText] = useState<string>("");
+  const { isLoading, data, permissionView, revalidate } = useSearchHistory(searchText);
 
-export default function Command(): ReactElement {
-  const [searchText, setSearchText] = useState<string>();
-  const { data, isLoading, errorView } = useHistorySearch(searchText);
-
-  if (errorView) {
-    return errorView as ReactElement;
+  if (permissionView) {
+    return permissionView;
   }
-
-  const groupedEntries = groupEntriesByDate(data);
-  const groups = Array.from(groupedEntries.keys());
 
   return (
     <List
-      onSearchTextChange={setSearchText}
       isLoading={isLoading}
-      throttle={true}
       searchBarPlaceholder="Search history..."
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
     >
-      {groups?.map((group) => (
-        <List.Section title={group} key={group}>
-          {groupedEntries?.get(group)?.map((e) => <DiaListItems.TabHistory key={e.id} entry={e} type="History" />)}
-        </List.Section>
+      {data?.map((item) => (
+        <HistoryListItem key={item.id} item={item} onHistoryAction={revalidate} />
       ))}
     </List>
   );
