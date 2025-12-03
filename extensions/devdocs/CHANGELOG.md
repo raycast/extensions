@@ -1,5 +1,12 @@
 # DevDocs Extension
 
+## [Update] - {PR_MERGE_DATE}
+
+- Update to the latest dependencies  
+-  Migrate the ESLint configuration to a flat file  
+-  Enhance the TypeScript configuration for stricter type checking  
+-  Update icon fetching to use CDN links for improved performance  
+
 ## [Changes] - 2025-02-26
 
 - Add support for search aliases (filtering on exact match)
