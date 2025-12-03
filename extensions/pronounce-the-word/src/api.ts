@@ -132,8 +132,8 @@ async function getSuggestions(word: string): Promise<string[]> {
     if (!response.ok) {
       return [];
     }
-    const data = await response.json();
-    return data.map((item: { word: string }) => item.word);
+    const data = (await response.json()) as Array<{ word: string }>;
+    return data.map((item) => item.word);
   } catch (error) {
     console.error("Suggestions API error:", error);
     return [];

@@ -87,13 +87,17 @@ export function WordDetails({ wordData, onBack }: WordDetailsProps) {
               const label = parts.length > 0 ? parts.join(" ") : `Pronunciation ${index + 1}`;
               const isLoading = audioLoading === phonetic.audio;
 
+              // Map index to valid keyboard key
+              const keyMap = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
+              const shortcutKey = index < keyMap.length ? keyMap[index] : undefined;
+
               return (
                 <Action
                   key={index}
                   title={isLoading ? `Playing ${label}...` : `Play: ${label}`}
                   icon={Icon.Speaker}
                   onAction={() => playAudio(phonetic.audio, label)}
-                  shortcut={{ modifiers: ["cmd"], key: String(index + 1) }}
+                  {...(shortcutKey && { shortcut: { modifiers: ["cmd"], key: shortcutKey } })}
                 />
               );
             })}
