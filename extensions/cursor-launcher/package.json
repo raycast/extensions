@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cursor-launcher",
+  "title": "Cursor Launcher",
+  "description": "Create projects, open recent projects, and launch any directory in Cursor IDE",
+  "icon": "assets/icon.png",
+  "author": "glenn_svanberg",
+  "version": "1.3.0",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "cursor",
+    "ide",
+    "editor",
+    "project",
+    "launcher",
+    "developer",
+    "workspace",
+    "folder",
+    "directory"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Create a new project folder and open it in Cursor",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "projectName",
+          "type": "text",
+          "required": false,
+          "placeholder": "my-awesome-project",
+          "title": "Project Name"
+        }
+      ]
+    },
+    {
+      "name": "recent-projects",
+      "title": "Recent Projects",
+      "description": "View and open recently opened projects in Cursor",
+      "mode": "view"
+    },
+    {
+      "name": "open-directory",
+      "title": "Open Directory",
+      "description": "Open any directory in Cursor",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "folderName",
+          "type": "text",
+          "required": false,
+          "placeholder": "project-folder-name",
+          "title": "Folder Name"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseDirectory",
+      "type": "textfield",
+      "required": true,
+      "title": "Base Directory",
+      "description": "Directory where new projects will be created",
+      "default": "C:\\git",
+      "placeholder": "C:\\git"
+    },
+    {
+      "name": "maxRecentProjects",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Recent Projects",
+      "description": "Maximum number of recent projects to keep (default: 20)",
+      "default": "20"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.28",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.0",
+    "sharp": "^0.34.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
