@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Improved Bookmarks Search] - {PR_MERGE_DATE}
+## [Improved Bookmarks Search] - 2025-12-03
 
 - Enhanced bookmark search to also match URLs, not just bookmark titles.
 
