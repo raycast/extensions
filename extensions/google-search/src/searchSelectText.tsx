@@ -31,7 +31,7 @@ export default async function Command() {
       }
       searchText = clipboardText;
     }
-    await open("https://www.google.com/search?q=" + searchText);
+    await open("https://www.google.com/search?q=" + searchText, preferences.targetBrowser);
     await closeMainWindow();
     await popToRoot({ clearSearchBar: true });
 

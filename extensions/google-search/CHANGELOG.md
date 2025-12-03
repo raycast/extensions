@@ -1,5 +1,11 @@
 # Google Search Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add support for selecting target browser in preferences
+- Use preferred browser when opening search results from selected text
+- Use preferred browser when opening search results from main command
+
 ## [Windows] - 2025-11-06
 
 - Release extension for Windows

@@ -12,4 +12,5 @@ export interface SearchResult {
 export interface Preferences {
   rememberSearchHistory: boolean;
   useClipboardFallback: boolean;
+  targetBrowser: string;
 }

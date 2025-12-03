@@ -1,9 +1,11 @@
-import { ActionPanel, closeMainWindow, Action, Icon, List, open } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Action, Icon, List, open, getPreferenceValues } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
+import { Preferences } from "./utils/types";
 
 export default function Command() {
   const { isLoading, results, search, searchText, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
+  const preferences = getPreferenceValues<Preferences>();
 
   return (
     <List
@@ -26,7 +28,7 @@ export default function Command() {
                     title="Open in Browser"
                     onAction={async () => {
                       await addHistory(item);
-                      await open(item.url);
+                      await open(item.url, preferences.targetBrowser);
                       await closeMainWindow();
                     }}
                     icon={{ source: Icon.ArrowRight }}

@@ -9,7 +9,8 @@
     "VBenny42",
     "ridemountainpig",
     "jlokos",
-    "YourMCGeek"
+    "YourMCGeek",
+    "vincenoman"
   ],
   "license": "MIT",
   "categories": [
@@ -45,6 +46,20 @@
       "default": false,
       "label": "Use Clipboard Fallback",
       "description": "When no text is selected, fall back to using clipboard content for search."
+    },
+    {
+      "name": "targetBrowser",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "title": "Open With",
+      "description": "Select the browser to open Google search results in.",
+      "data": [
+        { "value": "default", "title": "Default Browser" },
+        { "value": "com.google.Chrome", "title": "Google Chrome" },
+        { "value": "org.mozilla.firefox", "title": "Mozilla Firefox" },
+        { "value": "com.apple.Safari", "title": "Apple Safari" }
+      ]
     }
   ],
   "dependencies": {
