@@ -1,7 +1,7 @@
 {
   "name": "exr-converter-tool",
   "title": "EXR Converter",
-  "description": "Convert, resize, and compress images (EXR, JPG, PNG, TX)",
+  "description": "Professional image conversion tool for VFX, motion graphics, and game development. Convert between EXR, JPG, PNG, TIFF, and TX formats with advanced compression options, batch processing, and intelligent resizing—all powered by OpenImageIO.",
   "icon": "icon.png",
   "author": "chad",
   "categories": [
@@ -13,14 +13,14 @@
     {
       "name": "convert-image",
       "title": "Convert Image",
-      "description": "Convert images to various formats (EXR, JPG, PNG, TIFF, TX)",
+      "description": "Convert, resize, and compress images with professional-grade options. Supports EXR, JPG, PNG, TIFF, and TX formats with format-specific compression algorithms and batch processing from Finder.",
       "mode": "view",
       "icon": "icon.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.3"
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

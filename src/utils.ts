@@ -69,12 +69,43 @@ export async function checkOiiotoolInstalled(): Promise<boolean> {
     return true;
   } catch (error) {
     // Fallback: check if the file exists at common locations
-    // This handles cases where PATH might not be propagating correctly in the Raycast environment
     try {
       const fs = await import("fs/promises");
       const commonPaths = [
         "/opt/homebrew/bin/oiiotool",
         "/usr/local/bin/oiiotool",
+      ];
+      for (const p of commonPaths) {
+        try {
+          await fs.access(p);
+          return true;
+        } catch {
+          continue;
+        }
+      }
+    } catch {
+      // Ignore fs errors
+    }
+    return false;
+  }
+}
+
+export async function checkExiftoolInstalled(): Promise<boolean> {
+  try {
+    await execAsync("exiftool -ver", {
+      env: {
+        ...process.env,
+        PATH: `/opt/homebrew/bin:/usr/local/bin:${process.env.PATH}`,
+      },
+    });
+    return true;
+  } catch (error) {
+    // Fallback: check if the file exists at common locations
+    try {
+      const fs = await import("fs/promises");
+      const commonPaths = [
+        "/opt/homebrew/bin/exiftool",
+        "/usr/local/bin/exiftool",
       ];
       for (const p of commonPaths) {
         try {

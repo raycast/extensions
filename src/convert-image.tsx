@@ -7,163 +7,91 @@ import {
   Action,
   useNavigation,
   Detail,
+  LocalStorage,
 } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
-import { useState, useEffect } from "react";
-import { getImageMetadata, checkOiiotoolInstalled } from "./utils";
+import { useState } from "react";
+import { getImageMetadata } from "./utils";
+import { FORMATS, RESIZE_MODES, FILTER_OPTIONS } from "./constants";
+import { FormValues } from "./types";
+import { useDependencyCheck } from "./hooks";
 
 const execAsync = promisify(exec);
 
-const FORMATS: Record<
-  string,
-  { title: string; compressions: { value: string; title: string }[] }
-> = {
-  exr: {
-    title: "EXR",
-    compressions: [
-      { value: "dwaa", title: "DWAA" },
-      { value: "dwab", title: "DWAB" },
-      { value: "zip", title: "Zip" },
-      { value: "zips", title: "Zips" },
-      { value: "rle", title: "RLE" },
-      { value: "piz", title: "PIZ" },
-      { value: "pxr24", title: "PXR24" },
-      { value: "b44", title: "B44" },
-      { value: "b44a", title: "B44A" },
-      { value: "none", title: "None" },
-    ],
-  },
-  jpg: {
-    title: "JPG",
-    compressions: [
-      { value: "jpeg:100", title: "Best (100)" },
-      { value: "jpeg:90", title: "High (90)" },
-      { value: "jpeg:80", title: "Good (80)" },
-      { value: "jpeg:50", title: "Medium (50)" },
-      { value: "jpeg:20", title: "Low (20)" },
-    ],
-  },
-  png: {
-    title: "PNG",
-    compressions: [
-      { value: "zip", title: "Zip" },
-      { value: "none", title: "None" },
-    ],
-  },
-  tiff: {
-    title: "TIFF",
-    compressions: [
-      { value: "lzw", title: "LZW" },
-      { value: "zip", title: "Zip" },
-      { value: "none", title: "None" },
-      { value: "packbits", title: "Packbits" },
-    ],
-  },
-  tx: {
-    title: "TX (Arnold)",
-    compressions: [
-      { value: "zip", title: "Zip (Default)" },
-      { value: "none", title: "None" },
-      { value: "lzw", title: "LZW" },
-    ],
-  },
-};
-
-const RESIZE_MODES = [
-  { value: "none", title: "None" },
-  { value: "scale", title: "Scale Percentage" },
-  { value: "width", title: "Set Width" },
-  { value: "height", title: "Set Height" },
-  { value: "fit", title: "Set Longest Side" },
-];
-
-const FILTER_OPTIONS = [
-  { value: "lanczos3", title: "Lanczos3" },
-  { value: "cubic", title: "Cubic" },
-  { value: "box", title: "Box" },
-  { value: "triangle", title: "Triangle" },
-];
-
-interface FormValues {
-  format: string;
-  compression: string;
-  addSuffix: boolean;
-  resizeMode: string;
-  resizeValue: string;
-  resizeFilter: string;
-  addResolutionSuffix: boolean;
-  compressionLevel?: string;
-}
-
 export default function Command() {
   const { pop } = useNavigation();
-  const [selectedFormat, setSelectedFormat] = useState<string>("exr");
-  const [hasOiiotool, setHasOiiotool] = useState<boolean | null>(null);
+  const {
+    isLoading,
+    hasOiiotool,
+    hasExiftool,
+    selectedFormat,
+    setSelectedFormat,
+    selectedCompression,
+    setSelectedCompression,
+    checkDependencies,
+  } = useDependencyCheck();
+
   const [resizeMode, setResizeMode] = useState<string>("none");
   const [compressionLevel, setCompressionLevel] = useState<string>("45");
-  const [selectedCompression, setSelectedCompression] = useState<string>("");
-
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  async function check() {
-    setIsLoading(true);
-    const installed = await checkOiiotoolInstalled();
-    setHasOiiotool(installed);
-    setIsLoading(false);
-    if (!installed) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "OIIO Tool not found",
-        message: "Please install OpenImageIO to use this extension.",
-      });
-    }
-  }
-
-  useEffect(() => {
-    check();
-  }, []);
-
-  useEffect(() => {
-    if (FORMATS[selectedFormat]) {
-      setSelectedCompression(FORMATS[selectedFormat].compressions[0].value);
-    }
-  }, [selectedFormat]);
 
   if (isLoading) {
-    return <Detail markdown="Loading..." />;
+    return <Detail markdown="Checking dependencies..." />;
   }
 
-  if (hasOiiotool === false) {
-    const markdown = `
-# 🛠️ Setup Required
+  if (!hasOiiotool) {
+    return (
+      <Detail
+        markdown={`
+# OpenImageIO Not Found
 
-**EXR Converter** relies on the powerful **OpenImageIO** library to process your images. 
+This extension requires **OpenImageIO** to convert images.
 
-It looks like it's not installed on your system yet. No worries, it's easy to fix!
-
-### How to Install
-
-1.  Copy the command below.
-2.  Paste it into your Terminal and hit Enter.
-3.  Come back here and click **Check Again**.
+Please install it using Homebrew:
 
 \`\`\`bash
 brew install openimageio
 \`\`\`
-`;
 
-    return (
-      <Detail
-        markdown={markdown}
+After installing, try running this command again.
+`}
         actions={
           <ActionPanel>
             <Action.CopyToClipboard
               title="Copy Install Command"
               content="brew install openimageio"
             />
-            <Action title="Check Again" onAction={check} />
+            <Action title="Check Again" onAction={checkDependencies} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  if (!hasExiftool) {
+    return (
+      <Detail
+        markdown={`
+# ExifTool Not Found
+
+This extension requires **ExifTool** to process RAW images.
+
+Please install it using Homebrew:
+
+\`\`\`bash
+brew install exiftool
+\`\`\`
+
+After installing, try running this command again.
+`}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard
+              title="Copy Install Command"
+              content="brew install exiftool"
+            />
+            <Action title="Check Again" onAction={checkDependencies} />
           </ActionPanel>
         }
       />
@@ -228,7 +156,7 @@ brew install openimageio
               );
               targetWidth = Math.round(metadata.width * ratio);
               targetHeight = Math.round(metadata.height * ratio);
-              resizeArgs = `--fit:filter=${values.resizeFilter} ${val}x${val}`;
+              resizeArgs = `--resize:filter=${values.resizeFilter} ${targetWidth}x${targetHeight}`;
             }
           }
         }
@@ -273,7 +201,46 @@ brew install openimageio
           outputArg = `-otex "${outputPath}"`;
         }
 
-        const command = `oiiotool "${inputPath}" ${resizeArgs} ${compressionArg} ${outputArg}`;
+        // Handle Color Space Conversion for DNG (RAW) -> sRGB formats
+        // DNGs are typically linear, so we need to convert to sRGB for display formats.
+
+        const isOutputSrgb = ["jpg", "png", "tiff", "webp", "heic"].includes(
+          values.format,
+        );
+
+        const isInputRaw = [
+          ".cr3",
+          ".cr2",
+          ".dng",
+          ".nef",
+          ".arw",
+          ".raf",
+          ".orf",
+          ".rw2",
+        ].includes(parsedPath.ext.toLowerCase());
+
+        let command = "";
+
+        if (isInputRaw) {
+          // Use exiftool to extract embedded JPEG from RAW files
+          // Step 1: Extract JpgFromRaw to output path
+          // Step 2: Set Orientation=1 on the OUTPUT file (not input) to ensure it displays correctly
+          // We chain these commands.
+          const extractCommand = `exiftool -b -JpgFromRaw "${inputPath}" > "${outputPath}"`;
+          const orientCommand = `exiftool -orientation=1 -overwrite_original "${outputPath}"`;
+          command = `${extractCommand} && ${orientCommand}`;
+        } else {
+          // Standard OIIO conversion for non-RAW files
+          let bitDepthArg = "";
+          const colorConvertArg = "";
+
+          if (isOutputSrgb) {
+            // Ensure 8-bit output for sRGB formats (standard for display)
+            bitDepthArg = "-d uint8";
+          }
+
+          command = `oiiotool "${inputPath}" ${resizeArgs} ${colorConvertArg} ${bitDepthArg} ${compressionArg} ${outputArg}`;
+        }
 
         try {
           await execAsync(command, {
@@ -330,7 +297,15 @@ brew install openimageio
         id="format"
         title="Output Format"
         value={selectedFormat}
-        onChange={setSelectedFormat}
+        onChange={(newValue) => {
+          setSelectedFormat(newValue);
+          LocalStorage.setItem("selectedFormat", newValue);
+          if (FORMATS[newValue]) {
+            const defaultCompression = FORMATS[newValue].compressions[0].value;
+            setSelectedCompression(defaultCompression);
+            LocalStorage.setItem("selectedCompression", defaultCompression);
+          }
+        }}
       >
         {Object.entries(FORMATS).map(([key, format]) => (
           <Form.Dropdown.Item key={key} value={key} title={format.title} />
@@ -341,7 +316,10 @@ brew install openimageio
         id="compression"
         title="Compression"
         value={selectedCompression}
-        onChange={setSelectedCompression}
+        onChange={(newValue) => {
+          setSelectedCompression(newValue);
+          LocalStorage.setItem("selectedCompression", newValue);
+        }}
       >
         {FORMATS[selectedFormat].compressions.map((option) => (
           <Form.Dropdown.Item

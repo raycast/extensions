@@ -1,75 +1,46 @@
 # EXR Converter
 
-Convert, resize, and compress images (EXR, JPG, PNG, TIFF, TX) using OpenImageIO.
+**Professional image conversion tool for VFX, motion graphics, and game development.**
 
-## Features
+EXR Converter brings the power of **OpenImageIO** directly to Raycast. Batch convert, resize, and compress images with industry-standard formats and controls.
 
-- **Multiple Format Support**: Convert between EXR, JPG, PNG, TIFF, and TX (Arnold) formats
-- **Compression Options**: Choose from various compression algorithms for each format
-- **Resize Images**: Resize images with multiple modes (width, height, percentage, longest edge)
-- **Batch Processing**: Convert multiple images at once from Finder selection
-- **Quality Control**: Adjustable compression levels for optimal file size vs quality
+## ✨ Features
 
-## Requirements
+-   **Multi-Format Support**: Convert between **EXR**, **JPG**, **PNG**, **TIFF**, and **TX** (Arnold).
+-   **Advanced Compression**: Full control over compression methods (DWAA, DWAB, Zip, RLE, etc.) and quality levels.
+-   **Smart Resizing**: Resize by percentage, specific width/height, or fit within a bounding box using high-quality filters (Lanczos3, Cubic, etc.).
+-   **Batch Processing**: Select multiple images in Finder and convert them all at once.
+-   **VFX Ready**: Specifically designed for high-end workflows involving EXR and TX textures.
 
-This extension requires **OpenImageIO** to be installed on your system. OpenImageIO provides the `oiiotool` command-line utility that powers all image conversions.
+## �️ Prerequisites
 
-### Installation
+This extension relies on external tools to perform image conversions. You must install them before using the extension.
 
-Install OpenImageIO using Homebrew:
+1.  **Homebrew**: If you don't have Homebrew installed, visit [brew.sh](https://brew.sh).
+2.  **OpenImageIO & ExifTool**: Run the following command in your terminal:
+    ```bash
+    brew install openimageio exiftool
+    ```
 
-```bash
-brew install openimageio
-```
+## 🚀 Getting Started
 
-After installation, restart Raycast and the extension will automatically detect the installation.
+1.  **Select Images**: Select one or more images in Finder.
+3.  **Run Command**: Open Raycast and run **Convert Image**.
+4.  **Configure**: Choose your desired format, compression, and resize options.
 
-## Usage
+## 📦 Supported Formats
 
-1. **Select Images**: Select one or more images in Finder
-2. **Run Command**: Open Raycast and run the "Convert Image" command
-3. **Configure Options**:
-   - Choose output format (EXR, JPG, PNG, TIFF, TX)
-   - Select compression method (format-specific options available)
-   - Optionally resize the image
-   - Choose output location
-4. **Convert**: Press `Cmd+Enter` to start the conversion
+| Format | Compressions |
+| :--- | :--- |
+| **EXR** | DWAA, DWAB, Zip, RLE, PIZ, PXR24, B44, B44A |
+| **JPG** | Quality 20-100 |
+| **PNG** | Zip, None |
+| **TIFF** | LZW, Zip, Packbits, None |
+| **TX** | Zip, LZW, None |
+| **RAW** | *Input only* (CR3, CR2, DNG, NEF, ARW, RAF, ORF, RW2) |
 
-## Supported Formats
+## 🔧 Requirements
 
-### EXR
-- Compression: DWAA, DWAB, Zip, Zips, RLE, PIZ, PXR24, B44, B44A, None
-
-### JPG
-- Quality levels: 100 (Best), 90 (High), 80 (Good), 50 (Medium), 20 (Low)
-
-### PNG
-- Compression: Zip, None
-
-### TIFF
-- Compression: LZW, Zip, None, Packbits
-
-### TX (Arnold)
-- Specialized format for Arnold renderer texture files
-
-## Resize Options
-
-- **None**: Keep original dimensions
-- **Width**: Resize to specific width (maintains aspect ratio)
-- **Height**: Resize to specific height (maintains aspect ratio)
-- **Percentage**: Scale by percentage (e.g., 50% = half size)
-- **Longest Edge**: Resize longest edge to specific size (maintains aspect ratio)
-
-## Output Options
-
-- **Same Folder**: Save converted images in the same folder as originals
-- **Custom Folder**: Choose a specific output directory
-- **Replace Original**: Overwrite the original file (use with caution)
-
-## Notes
-
-- The extension automatically detects if OpenImageIO is installed
-- If OpenImageIO is not found, you'll see installation instructions
-- All conversions preserve image quality and metadata where possible
-- Large images may take some time to process
-
+-   **OpenImageIO**: Must be installed via Homebrew (`brew install openimageio`).
+-   **ExifTool**: Required for RAW image support (`brew install exiftool`).
+-   **macOS**: Silicon or Intel.
