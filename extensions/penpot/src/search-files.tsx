@@ -3,6 +3,7 @@ import type { Project, ProjectFile } from "../types";
 import { formatDate, usePenpotFetch } from "../utils";
 import { useEffect, useState } from "react";
 import FileThumbnail from "./file-thumbnail";
+import { iconAssetUri } from "./utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -56,7 +57,7 @@ export default function Command() {
         return (
           <List.Item
             key={file.id}
-            icon={file.isShared ? Icon.Person : Icon.Document}
+            icon={file.thumbnailId ? iconAssetUri(file.thumbnailId) : file.isShared ? Icon.Person : Icon.Document}
             title={file.name}
             subtitle={`Modified ${formatDate(file.modifiedAt)}`}
             actions={
