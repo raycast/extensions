@@ -26,7 +26,7 @@ const preferences = getPreferenceValues();
 function getCachedOrDetectDownloadsFolder(): string {
   // If preference is set, use it
   if (preferences.downloadsFolder && preferences.downloadsFolder.trim()) {
-    return preferences.downloadsFolder;
+    return untildify(preferences.downloadsFolder);
   }
 
   // Check cache first
@@ -70,6 +70,7 @@ export function getCustomDownloadsFolder(): string {
         `powershell -Command "(New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path"`,
         { encoding: "utf-8" },
       );
+      console.log("result", result);
       return result.trim();
     } catch (error) {
       // Fallback to default location if registry query fails
