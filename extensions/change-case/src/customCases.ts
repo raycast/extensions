@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { SMALL_WORDS, titleCase as titleCaseLib } from "title-case";
 import * as changeCase from "change-case";
-import { spongeCase as spongeCaseLib } from "sponge-case";
 import { swapCase as swapCaseLib } from "swap-case";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -10,8 +9,27 @@ function isAlphabetic(char: string) {
   return /\p{L}/u.test(char);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const spongeCase = (input: string, _options?: changeCase.Options) => spongeCaseLib(input);
+// Sponge Case: SpOnGeCaSe (alternating case pattern)
+export const spongeCase = (input: string) => {
+  return input
+    .split("")
+    .map((char, index) => {
+      if (!isAlphabetic(char)) return char;
+      return index % 2 === 0 ? char.toUpperCase() : char.toLowerCase();
+    })
+    .join("");
+};
+
+// Random Case: RANdoMcASe (random capitalization)
+export const randomCase = (input: string) => {
+  return input
+    .split("")
+    .map((char) => {
+      if (!isAlphabetic(char)) return char;
+      return Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase();
+    })
+    .join("");
+};
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const swapCase = (input: string, _options?: changeCase.Options) => swapCaseLib(input);

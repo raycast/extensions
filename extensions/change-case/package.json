@@ -15,7 +15,8 @@
     "nagauta",
     "PWrzesinski",
     "yug2005",
-    "ridemountainpig"
+    "ridemountainpig",
+    "degouville"
   ],
   "keywords": [
     "text",
@@ -272,6 +273,14 @@
       "required": false
     },
     {
+      "name": "SpongeCase",
+      "type": "checkbox",
+      "description": "Enable the \"SpOnGeCaSe\" Transformation (alternating case)",
+      "label": "Sponge Case",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "SwapCase",
       "type": "checkbox",
       "description": "Enable the \"sWAP cASE\" Transformation",
@@ -307,7 +316,6 @@
   "dependencies": {
     "@raycast/api": "^1.75.2",
     "change-case": "^5.4.4",
-    "sponge-case": "^2.0.3",
     "swap-case": "^3.0.3",
     "title-case": "^4.3.1"
   },
