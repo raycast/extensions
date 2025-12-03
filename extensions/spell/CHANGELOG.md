@@ -1,5 +1,8 @@
 # Spell Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+ - Fix for request error
+
 ## [Windows Support and Various Improvements] - 2025-11-06
 
 - Add windows support
