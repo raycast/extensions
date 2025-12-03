@@ -25,6 +25,7 @@ export const OpenWith = ({ icon, version }: ActionProps) => {
 };
 
 export const MakeBadge = ({ icon, version }: ActionProps) =>
+  // [TODO] The Badge extension cannot work properly on Windows yet.
   process.platform === "darwin" ? (
     <Action icon="shieldsdotio.svg" title="Make Badge" onAction={() => launchSocialBadge(icon, version)} />
   ) : null;
