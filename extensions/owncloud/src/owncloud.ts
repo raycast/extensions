@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { XMLParser } from "fast-xml-parser";
+import { XMLBuilder, XMLParser } from "fast-xml-parser";
 
 interface WebDAVProp {
   fileid: string;
@@ -17,7 +17,7 @@ interface WebDAVResponse {
 }
 interface WebDAVMultistatus {
   multistatus: {
-    response: WebDAVResponse[];
+    response?: WebDAVResponse[];
   };
 }
 type SuccessResult = WebDAVMultistatus;
@@ -34,22 +34,32 @@ const parser = new XMLParser({
   removeNSPrefix: true,
   isArray: (name) => ["response", "propstat"].includes(name),
 });
+const builder = new XMLBuilder({
+  ignoreAttributes: false,
+  suppressEmptyNode: true,
+  format: true,
+});
 export const search = async (pattern: string) => {
   const url_ = new URL(`remote.php/dav/files/${username}`, url);
-  const body = `<?xml version="1.0" encoding="UTF-8"?>
-    <oc:search-files
-        xmlns:a="DAV:"
-        xmlns:oc="http://owncloud.org/ns">
-        <a:prop>
-            <oc:fileid />
-            <a:getcontenttype />
-            <a:resourcetype />
-            <oc:size />
-        </a:prop>
-        <oc:search>
-            <oc:pattern>${pattern}</oc:pattern>
-        </oc:search>
-    </oc:search-files>`;
+  const body = builder.build({
+    "?xml": {
+      "@_version": "1.0",
+      "@_encoding": "UTF-8",
+    },
+    "oc:search-files": {
+      "@_xmlns:a": "DAV:",
+      "@_xmlns:oc": "http://owncloud.org/ns",
+      "a:prop": {
+        "oc:fileid": "",
+        "a:getcontenttype": "",
+        "a:resourcetype": "",
+        "oc:size": "",
+      },
+      "oc:search": {
+        "oc:pattern": pattern,
+      },
+    },
+  });
   const response = await fetch(url_, {
     method: "REPORT",
     headers: {
@@ -58,14 +68,17 @@ export const search = async (pattern: string) => {
     },
     body,
   });
+  if (!response.ok) throw new Error(response.statusText);
   const result = await response.text();
   const parsed = (await parser.parse(result)) as FailureResult | SuccessResult;
   if ("error" in parsed) throw new Error(parsed.error.message);
-  return parsed.multistatus.response.map((res) => {
-    const href = res.href;
-    const propstat = res.propstat[0].prop;
-    const { fileid, resourcetype, size } = propstat;
-    const name = decodeURIComponent(href.split("/").pop() ?? "");
-    return { id: fileid, href, name, size: +size, isCollection: typeof resourcetype !== "string" };
-  });
+  return (
+    parsed.multistatus.response?.map((res) => {
+      const href = res.href;
+      const propstat = res.propstat[0].prop;
+      const { fileid, resourcetype, size } = propstat;
+      const name = decodeURIComponent(href.split("/").pop() ?? "");
+      return { id: fileid, href, name, size: +size, isCollection: typeof resourcetype !== "string" };
+    }) ?? []
+  );
 };

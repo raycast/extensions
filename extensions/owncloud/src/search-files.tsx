@@ -54,7 +54,7 @@ export default function SearchFiles() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                url={new URL(`index.php/apps/files/?dir=${getPath(result.href)}`, url).toString()}
+                url={new URL(`index.php/apps/files/?dir=${encodeURIComponent(getPath(result.href))}`, url).toString()}
               />
             </ActionPanel>
           }
