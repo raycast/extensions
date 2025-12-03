@@ -1,0 +1,254 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-insert",
+  "title": "Quick Insert",
+  "description": "Quickly insert common data like dates, clipboard content, system info, and favorite text snippets",
+  "icon": "command-icon.png",
+  "author": "duccuong2808",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "insert-date",
+      "title": "Insert Date",
+      "description": "Insert current date with various formats",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "format",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Select format",
+          "data": [
+            {
+              "title": "ISO 8601 (2025-12-03)",
+              "value": "iso"
+            },
+            {
+              "title": "Full (December 3, 2025)",
+              "value": "full"
+            },
+            {
+              "title": "Short (12/03/2025)",
+              "value": "short"
+            },
+            {
+              "title": "Vietnamese",
+              "value": "vi"
+            },
+            {
+              "title": "Custom",
+              "value": "custom"
+            }
+          ]
+        },
+        {
+          "name": "customFormat",
+          "type": "text",
+          "required": false,
+          "placeholder": "Custom format (e.g., dd-MM-yyyy)"
+        }
+      ]
+    },
+    {
+      "name": "insert-year",
+      "title": "Insert Year",
+      "description": "Insert current year",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "format",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Select format",
+          "data": [
+            {
+              "title": "Full (2025)",
+              "value": "full"
+            },
+            {
+              "title": "Short (25)",
+              "value": "short"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "insert-clipboard",
+      "title": "Insert Clipboard",
+      "description": "Insert clipboard content with transformations",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "transform",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Select transformation",
+          "data": [
+            {
+              "title": "No Transform",
+              "value": "none"
+            },
+            {
+              "title": "UPPERCASE",
+              "value": "uppercase"
+            },
+            {
+              "title": "lowercase",
+              "value": "lowercase"
+            },
+            {
+              "title": "Title Case",
+              "value": "titlecase"
+            },
+            {
+              "title": "Trim",
+              "value": "trim"
+            }
+          ]
+        },
+        {
+          "name": "prefix",
+          "type": "text",
+          "required": false,
+          "placeholder": "Prefix"
+        },
+        {
+          "name": "suffix",
+          "type": "text",
+          "required": false,
+          "placeholder": "Suffix"
+        }
+      ]
+    },
+    {
+      "name": "insert-system-info",
+      "title": "Insert System Info",
+      "description": "Insert system information",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "type",
+          "type": "dropdown",
+          "required": true,
+          "placeholder": "Select info type",
+          "data": [
+            {
+              "title": "OS Name & Version",
+              "value": "os"
+            },
+            {
+              "title": "Username",
+              "value": "username"
+            },
+            {
+              "title": "Hostname",
+              "value": "hostname"
+            },
+            {
+              "title": "Local IP",
+              "value": "local-ip"
+            },
+            {
+              "title": "All Info",
+              "value": "all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "insert-id",
+      "title": "Insert ID",
+      "description": "Insert unique identifier (UUID, ULID, NanoID)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "type",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Select ID type",
+          "data": [
+            {
+              "title": "UUID (v4)",
+              "value": "uuid"
+            },
+            {
+              "title": "ULID",
+              "value": "ulid"
+            },
+            {
+              "title": "NanoID",
+              "value": "nanoid"
+            },
+            {
+              "title": "NanoID (Short - 10 chars)",
+              "value": "nanoid-short"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "insert-ip",
+      "title": "Insert IP Address",
+      "description": "Insert IP address (local or public)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "type",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Select IP type",
+          "data": [
+            {
+              "title": "Local IP",
+              "value": "local"
+            },
+            {
+              "title": "Public IP",
+              "value": "public"
+            },
+            {
+              "title": "Both (Local & Public)",
+              "value": "both"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "insert-snippet",
+      "title": "Insert Snippet",
+      "description": "Manage and insert favorite text snippets",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0",
+    "nanoid": "^5.1.6",
+    "ulid": "^3.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
