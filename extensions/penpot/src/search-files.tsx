@@ -3,7 +3,7 @@ import type { Project, ProjectFile } from "../types";
 import { formatDate, usePenpotFetch } from "../utils";
 import { useEffect, useState } from "react";
 import FileThumbnail from "./file-thumbnail";
-import { iconAssetUri } from "./utils";
+import { groupByTeam, iconAssetUri } from "./utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -21,6 +21,9 @@ export default function Command() {
     filterFiles((files || []).filter((file) => file.name.toLowerCase().includes(searchText.toLowerCase())));
   }, [searchText, files]);
 
+  const projectsPerTeam = groupByTeam(projects || []);
+  const teamNames = Object.keys(projectsPerTeam);
+
   return (
     <List
       searchText={searchText}
@@ -34,8 +37,12 @@ export default function Command() {
           storeValue={true}
           onChange={setSelectedProjectId}
         >
-          {(projects || []).map((project) => (
-            <List.Dropdown.Item key={project.id} title={project.name} value={project.id} />
+          {teamNames.map((teamName) => (
+            <List.Dropdown.Section key={teamName} title={teamName}>
+              {projectsPerTeam[teamName].map((project) => (
+                <List.Dropdown.Item key={project.id} title={project.name} value={project.id} />
+              ))}
+            </List.Dropdown.Section>
           ))}
         </List.Dropdown>
       }
@@ -59,7 +66,7 @@ export default function Command() {
             key={file.id}
             icon={file.thumbnailId ? iconAssetUri(file.thumbnailId) : file.isShared ? Icon.Person : Icon.Document}
             title={file.name}
-            subtitle={`Modified ${formatDate(file.modifiedAt)}`}
+            accessories={[{ date: new Date(file.modifiedAt), tooltip: `Modified ${formatDate(file.modifiedAt)}` }]}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={url} />

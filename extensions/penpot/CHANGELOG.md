@@ -4,6 +4,7 @@
 
 - Add Windows support
 - Add Icons for files
+- Group by Teams
 
 ## [Initial Version] - 2024-11-17
 

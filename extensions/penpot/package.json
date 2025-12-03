@@ -12,6 +12,9 @@
     "macOS",
     "Windows"
   ],
+  "contributors": [
+    "tonka3000"
+  ],
   "license": "MIT",
   "commands": [
     {
