@@ -1,6 +1,7 @@
+import React from "react";
 import { Detail, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
-import { Cask, brewName } from "../brew";
+import { Cask, brewName } from "../utils";
 import { Dependencies } from "./dependencies";
 
 export function CaskInfo({
@@ -59,6 +60,7 @@ function CaskDependencies({ cask }: { cask: Cask }) {
         if (values) {
           return <Detail.Metadata.TagList.Item key={key} text={`${key} ${values.join(", ")}`} />;
         }
+        return null;
       })}
     </Detail.Metadata.TagList>
   );

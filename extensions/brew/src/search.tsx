@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { brewFetchInstalled, brewSearch, Cask, Formula, InstallableResults, InstalledMap } from "./brew";
+import { brewFetchInstalled, brewSearch, Cask, Formula, InstallableResults, InstalledMap } from "./utils/brew";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
 

@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { OutdatedCask, OutdatedFormula, OutdatedResults, brewFetchOutdated } from "./brew";
+import { OutdatedCask, OutdatedFormula, OutdatedResults, brewFetchOutdated } from "./utils/brew";
 import { OutdatedActionPanel } from "./components/actionPanels";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { preferences } from "./preferences";

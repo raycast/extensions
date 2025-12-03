@@ -48,7 +48,7 @@
       "title": "Upgrade",
       "subtitle": "Brew",
       "description": "Upgrade brew formulae & casks",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "clean-up",
@@ -137,13 +137,30 @@
       "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask.\nWARNING: This may remove files shared with other applications."
     },
     {
-      "name": "quarantine",
-      "type": "checkbox",
-      "required": false,
-      "default": true,
-      "title": "Quarantine",
-      "label": "Enable quarantine of downloads",
-      "description": "Enable or disable quarantine of files downloaded by brew"
+      "default" : false,
+      "description" : "Show detailed logs in the console for debugging",
+      "label" : "Enable detailed logging",
+      "name" : "verboseLogging",
+      "required" : false,
+      "title" : "Verbose Logging",
+      "type" : "checkbox"
+    },
+    {
+      "default" : false,
+      "description" : "Homebrew 5.0 enables parallel downloads by default. Enable this option to disable concurrent downloads if you experience issues.",
+      "label" : "Disable concurrent downloads",
+      "name" : "disableDownloadConcurrency",
+      "required" : false,
+      "title" : "Homebrew 5.0 Options",
+      "type" : "checkbox"
+    },
+    {
+      "default" : false,
+      "description" : "Opt-in to Homebrew's new smaller internal JSON API. This will become the default in a future version of Homebrew.",
+      "label" : "Use internal API (experimental)",
+      "name" : "useInternalApi",
+      "required" : false,
+      "type" : "checkbox"
     }
   ],
   "dependencies": {
@@ -151,7 +168,8 @@
     "@raycast/utils": "^1.18.1",
     "@types/stream-json": "^1.7.8",
     "stream-chain": "^2.2.5",
-    "stream-json": "^1.9.1"
+    "stream-json": "^1.9.1",
+    "@chrismessina/raycast-logger": "^1.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

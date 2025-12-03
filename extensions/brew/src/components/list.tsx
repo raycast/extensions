@@ -1,7 +1,6 @@
-import { ReactElement } from "react";
-
+import React from "react";
 import { Color, Icon, List } from "@raycast/api";
-import { brewFormatVersion, brewIsInstalled, brewName, Cask, Formula } from "../brew";
+import { brewFormatVersion, brewIsInstalled, brewName, Cask, Formula } from "../utils";
 import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
 
 const tertiaryTextColor: Color.Dynamic = {
@@ -14,7 +13,7 @@ export interface FormulaListProps {
   formulae: Formula[];
   casks: Cask[];
   searchBarPlaceholder: string;
-  searchBarAccessory?: ReactElement<List.Dropdown.Props, string>;
+  searchBarAccessory?: React.ComponentProps<typeof List>["searchBarAccessory"];
   onSearchTextChange?: (q: string) => void;
   isInstalled: (name: string) => boolean;
   onAction: () => void;
@@ -29,6 +28,8 @@ export function FormulaList(props: FormulaListProps) {
       searchBarAccessory={props.searchBarAccessory}
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
+      filtering={false}
+      throttle
     >
       <List.Section title="Formulae">
         {formulae.map((formula) => (

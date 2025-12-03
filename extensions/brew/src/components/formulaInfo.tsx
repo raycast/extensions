@@ -1,6 +1,7 @@
+import React from "react";
 import { Detail, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
-import { Formula, brewIsInstalled, brewPrefix } from "../brew";
+import { Formula, brewIsInstalled, brewPrefix } from "../utils";
 import { Dependencies } from "./dependencies";
 
 export function FormulaInfo(props: {

@@ -1,3 +1,4 @@
+import React from "react";
 import { List } from "@raycast/api";
 
 export enum InstallableFilterType {

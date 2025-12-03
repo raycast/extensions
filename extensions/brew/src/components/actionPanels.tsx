@@ -1,3 +1,4 @@
+import React from "react";
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import {
   brewIsInstalled,
@@ -5,12 +6,15 @@ import {
   brewInstallCommand,
   brewUninstallCommand,
   brewUpgradeCommand,
-} from "../brew";
-import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
+  Cask,
+  Formula,
+  OutdatedCask,
+  OutdatedFormula,
+} from "../utils";
 import { FormulaInfo } from "./formulaInfo";
 import { CaskInfo } from "./caskInfo";
 import * as Actions from "./actions";
-import { useTerminalApp } from "./runInTerminal";
+import { useTerminalApp } from "../utils/terminal";
 
 const DebugSection = (props: { obj: Cask | Formula }) => (
   <ActionPanel.Section>

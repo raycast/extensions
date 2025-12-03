@@ -1,20 +1,33 @@
-import { Color, Detail } from "@raycast/api";
+/**
+ * Dependencies component for displaying package dependencies.
+ *
+ * Shows a list of dependencies with installation status indicators.
+ */
 
-export function Dependencies(props: {
+import React from "react";
+import { Detail, Color } from "@raycast/api";
+
+interface DependenciesProps {
   title: string;
-  dependencies: string[] | undefined;
+  dependencies?: string[];
   isInstalled: (name: string) => boolean;
-}) {
-  if (!props.dependencies || props.dependencies.length == 0) {
+}
+
+/**
+ * Display a list of dependencies with installation status.
+ */
+export function Dependencies({ title, dependencies, isInstalled }: DependenciesProps) {
+  if (!dependencies || dependencies.length === 0) {
     return null;
   }
+
   return (
-    <Detail.Metadata.TagList title={props.title}>
-      {props.dependencies.map((dependency) => (
+    <Detail.Metadata.TagList title={title}>
+      {dependencies.map((dep) => (
         <Detail.Metadata.TagList.Item
-          key={dependency}
-          text={dependency}
-          color={props.isInstalled(dependency) ? Color.Green : Color.PrimaryText}
+          key={dep}
+          text={dep}
+          color={isInstalled(dep) ? Color.Green : Color.SecondaryText}
         />
       ))}
     </Detail.Metadata.TagList>
