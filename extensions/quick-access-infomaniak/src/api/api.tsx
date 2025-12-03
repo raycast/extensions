@@ -1,8 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 
-const personalAccessToken =
-  getPreferenceValues<Preferences>().personalAccessToken;
+const { personalAccessToken } = getPreferenceValues<Preferences>();
 
 if (!personalAccessToken) {
   console.error("Personal Access Token missing");
