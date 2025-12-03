@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudflare-r2",
+  "title": "Cloudflare R2",
+  "description": "Manage Cloudflare R2 bucket files",
+  "icon": "Cloudflare.png",
+  "author": "Aboceder",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Cloudflare R2 Manager",
+      "description": "Browse and manage R2 bucket files",
+      "mode": "view"
+    },
+    {
+      "name": "upload-clipboard",
+      "title": "Upload from Clipboard",
+      "description": "Quick upload clipboard image to R2",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accountId",
+      "title": "Account ID",
+      "description": "Cloudflare Account ID",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "accessKeyId",
+      "title": "Access Key ID",
+      "description": "R2 API Token Access Key ID",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "secretAccessKey",
+      "title": "Secret Access Key",
+      "description": "R2 API Token Secret Access Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "bucketName",
+      "title": "Bucket Name",
+      "description": "R2 bucket name",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "publicDomain",
+      "title": "Public Domain",
+      "description": "Public access domain (e.g. https://assets.example.com) for preview URLs",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.700.0",
+    "@aws-sdk/s3-request-presigner": "^3.700.0",
+    "@raycast/api": "^1.93.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.1",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
