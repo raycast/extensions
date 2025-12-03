@@ -167,6 +167,7 @@ export default function Command() {
           <ActionPanel>
             <Action
               title="Generate Port"
+              icon={Icon.Plus}
               onAction={async () => {
                 try {
                   await launchCommand({ name: "generate-port", type: LaunchType.UserInitiated });
@@ -175,7 +176,7 @@ export default function Command() {
                 }
               }}
             />
-            <Action title="Clear History" onAction={handleClearAll} style={Action.Style.Destructive} />
+            <Action title="Clear History" icon={Icon.XMarkCircle} onAction={handleClearAll} style={Action.Style.Destructive} />
           </ActionPanel>
         }
       >
