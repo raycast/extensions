@@ -54,7 +54,7 @@ export default function ProjectsList() {
       } catch (error) {
         console.error(error);
         console.log("err64");
-        showToast(ToastStyle.Failure, (error as ErrorEvent).message);
+        showToast(ToastStyle.Failure, (error as Error).message);
       }
     }
     otherThings();
@@ -84,8 +84,8 @@ export default function ProjectsList() {
         await setLocalStorageItem("allWorkspaces", JSON.stringify(fetchedWorkspaces?.data.me));
         console.log("✓ storing all workspace names and identifiers");
       } catch (error) {
-        console.error((error as ErrorEvent).message);
-        showToast(ToastStyle.Failure, (error as ErrorEvent).message);
+        console.error((error as Error).message);
+        showToast(ToastStyle.Failure, (error as Error).message);
       }
     }
     otherThings();
@@ -101,7 +101,7 @@ export default function ProjectsList() {
       console.log("caching...");
       await setLocalStorageItem(
         "cachedProjects",
-        JSON.stringify({ identifier: selectedWorkspace?.identifier, projects: projects })
+        JSON.stringify({ identifier: selectedWorkspace?.identifier, projects: projects }),
       );
       console.log("caching done");
     }
@@ -141,8 +141,8 @@ export default function ProjectsList() {
         setToken(fetchedToken);
         console.log("✓ logged in");
       } catch (error) {
-        console.log((error as ErrorEvent).message);
-        setLoginError((error as ErrorEvent).message);
+        console.log((error as Error).message);
+        setLoginError((error as Error).message);
       }
     }
     fetch();

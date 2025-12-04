@@ -34,6 +34,7 @@ export function Actions(props: {
             />
           }
         />
+        <Action.CopyToClipboard content={props.item.id} title="Copy ID" />
 
         <Action.Push
           icon={Icon.Clock}
@@ -48,8 +49,6 @@ export function Actions(props: {
             />
           }
         />
-
-        <Action.CopyToClipboard content={props.item.id} title="Copy ID" />
 
         <Action.CopyToClipboard
           content={link}

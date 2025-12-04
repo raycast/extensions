@@ -36,8 +36,12 @@ async function getFirefoxProfiles() {
     .filter((key) => {
       if (key.startsWith("Profile")) {
         const path = iniFile[key].Path;
-        const profileDirectory = readdirSync(`${FIREFOX_FOLDER}/${path}`);
-        return profileDirectory.includes("places.sqlite");
+        try {
+          const profileDirectory = readdirSync(`${FIREFOX_FOLDER}/${path}`);
+          return profileDirectory.includes("places.sqlite");
+        } catch (error) {
+          return false;
+        }
       }
     })
     .map((key) => ({ name: iniFile[key].Name, path: iniFile[key].Path }));

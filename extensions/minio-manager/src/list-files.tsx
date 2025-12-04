@@ -10,6 +10,7 @@ import {
   confirmAlert,
   open,
   Detail,
+  Alert,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as Minio from "minio";
@@ -360,6 +361,7 @@ export default function Command() {
         message: `Delete ${path.basename(objectName)}?`,
         primaryAction: {
           title: "Delete",
+          style: Alert.ActionStyle.Destructive,
         },
       });
 

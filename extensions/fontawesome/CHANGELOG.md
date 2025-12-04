@@ -1,5 +1,31 @@
 # Font Awesome Changelog
 
+## [Added Custom Kits Support for Pro accounts] - 2025-11-25
+
+- Added support for browsing and searching custom kit icons
+- Added "Remember Last Used Kit" preference to restore your previous selection on launch
+- Added "Filter Custom Kits" preference to limit which kits appear in the dropdown
+
+## [Improvements] - 2025-10-13
+
+- Fixed issue where the search would sometimes fail and the cached state gets corrupted (ref: [Issue #22051](https://github.com/raycast/extensions/issues/22051))
+- Refactored code to use hooks/components/utils for better readability
+
+## [Fix: Search would get stuck] - 2025-09-29
+
+- Fixed issue where search would get stuck since token was not persisted (ref: [Issue #21781](https://github.com/raycast/extensions/issues/21781))
+- Simplified some code by replacing `useEffect` with `useLocalStorage`
+
+## [Fix: Unused Dependencies deleted] - 2025-09-15
+
+- Remove `svg-to-png` and `change-case` dependencies
+- Bump `@types/node`
+
+## [Feat: Add Support for Windows] - 2025-09-09
+
+- Add support for Raycast Windows
+- Bump dependencies to latest versions
+
 ## [Added AI icon search, Sharp Duotone and Duotone families] - 2025-06-22
 
 - The extension now supports v6.7.2.

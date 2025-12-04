@@ -1,5 +1,25 @@
 # Dust.tt Changelog
 
+## [Fixes] - 2025-11-27
+
+- Tighten auth flow for people with multiple accounts
+- Solved a bug where people would log out but being unable to re-log in on the same account
+
+## [Fixes] - 2025-10-14
+
+- Move gpt4 and claude3 defaults to gpt5 and claude4
+- Fix a login bug for users in EU workspaces
+
+## [Update] - 2025-10-07
+
+- Remove deprecated API Key flow.
+- OAuth flow without setup.
+- Allow workspace switch between regions.
+
+## [Maintenance] - 2025-10-07
+
+- Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
+
 ## [Update] - 2025-06-18
 
 - Move Oauth connexion flow from Auth0 to WorkOS.

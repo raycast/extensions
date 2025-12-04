@@ -1,7 +1,6 @@
-import { Form, ActionPanel, closeMainWindow, showToast, Action, Toast, Color } from "@raycast/api";
+import { Form, ActionPanel, closeMainWindow, open, showToast, Action, Toast, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import open from "open";
-import { encodeURI } from "js-base64";
+import { encodeForRayso } from "./utils";
 
 interface Values {
   title: string;
@@ -49,12 +48,13 @@ export default function CreateSnippet() {
     }
 
     const parsedTitle = values.title ? values.title.replace(/ /g, "%20") : defaultTitle;
+    const encodedCode = encodeForRayso(values.snippet);
 
     const url = `https://ray.so/#theme=${values.color}&background=${values.background}&darkMode=${values.darkMode}&padding=${
       values.padding
-    }&title=${parsedTitle}&code=${encodeURI(values.snippet)}&language=${values.language}`;
+    }&title=${parsedTitle}&code=${encodedCode}&language=${values.language}`;
 
-    open(url);
+    await open(url);
     closeMainWindow();
   };
 
@@ -139,5 +139,5 @@ function getGradientIconDataURL({ from, to }: Data["themes"][0]["background"]) {
   </defs>
   <circle cx="12" cy="12" r="12" fill="url(#gradient)" />
 </svg>`;
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg, "utf8").toString("base64")}`;
 }

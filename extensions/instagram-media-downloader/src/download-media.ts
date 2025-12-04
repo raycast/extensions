@@ -78,7 +78,7 @@ export async function getInstagramStoryURL(username: string): Promise<string[]> 
 
     const downloadUrls: string[] = [];
 
-    $('a[title="Download"]').each((index: number, element: cheerio.Element) => {
+    $('a[title="Download"]').each((index: number, element) => {
       const href = $(element).attr("href");
       if (href) {
         downloadUrls.push(decodeURIComponent(href.split("media=")[1]));
@@ -99,7 +99,7 @@ export async function getInstagramHighlightStoryURL(url: string) {
 
     const highlightUrls: { img: string; url: string }[] = [];
 
-    $('a[title="Download"]').each((index: number, element: cheerio.Element) => {
+    $('a[title="Download"]').each((index: number, element) => {
       const href = $(element).attr("href");
 
       let $current = $(element);

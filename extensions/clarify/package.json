@@ -14,30 +14,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "add-new-company",
-      "title": "Add a new Company",
-      "description": "Add new company to the default list",
-      "mode": "view"
-    },
-    {
-      "name": "add-new-person",
-      "title": "Add a new Person",
-      "description": "Add new person to the default list",
-      "mode": "view"
-    },
-    {
-      "name": "go-to-people",
-      "title": "Go to People",
-      "description": "Open a People list",
-      "mode": "view"
-    },
-    {
-      "name": "go-to-companies",
-      "title": "Go to Company",
-      "description": "Open a Company list",
-      "mode": "view"
-    },
-    {
       "name": "search",
       "title": "Search Everywhere",
       "description": "Lookup company or person",
@@ -69,9 +45,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "@raycast/utils": "^1.16.2",
-    "axios": "^1.8.4"
+    "@raycast/api": "^1.78.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -88,5 +62,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

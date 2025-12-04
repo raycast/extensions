@@ -164,7 +164,7 @@ export class Client {
       },
       function (err) {
         return Promise.reject(err);
-      }
+      },
     );
     this.httpClient.interceptors.response.use(
       (response) => {
@@ -175,7 +175,7 @@ export class Client {
       },
       (err) => {
         return Promise.reject(err);
-      }
+      },
     );
   }
 }

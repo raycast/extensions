@@ -1,6 +1,19 @@
 # Kill Process Changelog
 
-## [Added force kill] - 2025-06-10
+## [Windows Fix] - 2025-12-02
+
+ - Fix CPU and Memory values on Windows
+
+## [AI Updates] - 2025-11-27
+
+ - Extract AI instructions from package.json into dedicated `ai.yaml` file
+ - Fix and clarify AI eval criteria wording, and improve the instructions for some edge cases
+
+## [Windows Support] - 2025-08-29
+
+- Add support for Windows
+
+## [Added Force Kill] - 2025-06-10
 
 - Force kills the chosen process with sudo (requires enabling sudo authentication with fingerprint)
 

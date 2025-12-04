@@ -22,7 +22,7 @@ export default function Command() {
               subtitle={file.path}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Copy SSH Key" content={file.readFile()} />
+                  <Action.CopyToClipboard title="Copy Ssh Key" content={file.readFile()} />
                   <Action.ShowInFinder path={file.path} />
                 </ActionPanel>
               }

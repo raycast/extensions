@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import fetch from "cross-fetch";
 import { useEffect } from "react";
 
 export const enum PveVmStatus {
@@ -63,13 +62,13 @@ async function pveFetch<T = unknown>(url: string, options?: RequestInit) {
 function usePveFetch<T>(url: string, options?: RequestInit) {
   const preferences = getPreferenceValues<Preferences>();
   const fetchUrl = new URL(url, preferences.serverUrl).toString();
-  const fetchOptions: FetchOptions<T> = Object.assign({}, options, {
+  const fetchOptions: FetchOptions<T> = {
+    ...options,
     headers: buildHeaders(),
-    async parseResponse(response: Response) {
-      const apiResponse = (await response.json()) as ApiResponse<T>;
-      return apiResponse.data;
+    mapResult(result) {
+      return { data: (result as ApiResponse<T>).data };
     },
-  });
+  };
 
   const result = useFetch<T>(fetchUrl, fetchOptions);
 

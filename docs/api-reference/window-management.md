@@ -8,6 +8,8 @@ Some users might not have access to this API. If a user doesn't have access to R
 
 You can check if a user has access to the API using [`environment.canAccess(WindowManagement)`](./environment.md).
 
+The API is not accessible on Windows for now.
+
 {% endhint %}
 
 ## API Reference

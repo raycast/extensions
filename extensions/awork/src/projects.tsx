@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, LocalStorag
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { getProjects, project } from "./composables/FetchData";
-import { authorizationInProgress, getTokens } from "./composables/WebClient";
+import { getTokens } from "./composables/WebClient";
 
 const Actions = (props: { projectID: string; isBillable: boolean }) => {
   const { data: BaseUrl } = useCachedPromise(() => LocalStorage.getItem<string>("URL"));
@@ -59,9 +59,26 @@ const Actions = (props: { projectID: string; isBillable: boolean }) => {
 };
 
 const ProjectItem = (props: { project: project }) => {
+  let icon;
+  switch (props.project.projectStatus.type) {
+    case "not-started":
+      icon = "icon_todo.png";
+      break;
+    case "progress":
+      icon = "icon_progress.png";
+      break;
+    case "stuck":
+      icon = "icon_stuck.png";
+      break;
+    case "closed":
+      icon = "icon_done.png";
+      break;
+    default:
+      icon = Icon.Folder;
+  }
   return (
     <List.Item
-      icon={Icon.Folder}
+      icon={{ source: icon }}
       title={props.project.name}
       subtitle={props.project.company?.name}
       actions={<Actions projectID={props.project.id} isBillable={props.project.isBillableByDefault} />}
@@ -86,7 +103,7 @@ export default function Command() {
   } = useCachedPromise(getProjects, [token?.accessToken as string, searchText, 100], {
     execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
-      if ((!data || (data.length === 0 && !searchText)) && !authorizationInProgress) {
+      if (!data || (data.length === 0 && !searchText)) {
         updateSearch();
       }
     },

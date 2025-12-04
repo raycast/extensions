@@ -1,5 +1,17 @@
 # GitLab Changelog
 
+## [Show Readme] - 2025-12-03
+
+- Add "Show Readme" action to project list
+
+## [Search projects preferences] - 2025-10-23
+
+Add Search projects preference that allows to search only active projects
+
+## [AI Extension] - 2025-09-18
+
+## [Added support for Windows] - 2025-08-07
+
 ## [Group milestones in MRs and Issues] - 2025-06-27
 
 - Add group milestones to the issue create form

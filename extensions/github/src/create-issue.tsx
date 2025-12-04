@@ -18,6 +18,7 @@ type IssueFormValues = {
   labels: string[];
   projects: string[];
   milestone: string;
+  issueType: string;
 };
 
 type IssueFormProps = {
@@ -41,6 +42,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           assigneeIds: values.assignees,
           labelIds: values.labels,
           milestoneId: values.milestone || null,
+          issueTypeId: values.issueType || null,
         });
 
         const issue = createResult?.createIssue?.issue;
@@ -75,6 +77,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           labels: [],
           projects: [],
           milestone: "",
+          issueType: "",
         });
 
         focus("repository");
@@ -93,6 +96,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
       labels: draftValues?.labels ?? [],
       projects: draftValues?.projects ?? [],
       milestone: draftValues?.milestone ?? "",
+      issueType: draftValues?.issueType ?? "",
     },
     validation: {
       repository: FormValidation.Required,
@@ -122,12 +126,15 @@ export function IssueForm({ draftValues }: IssueFormProps) {
 
   const milestones = data?.repository?.milestones?.nodes;
 
+  const issueTypes = data?.repository?.issueTypes?.nodes?.filter((t) => t && t.isEnabled);
+
   useEffect(() => {
     setValue("description", "");
     setValue("assignees", []);
     setValue("labels", []);
     setValue("projects", []);
     setValue("milestone", "");
+    setValue("issueType", "");
   }, [values.repository]);
 
   return (
@@ -203,6 +210,25 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           return <Form.TagPicker.Item key={project.id} title={project.title} value={project.id} />;
         })}
       </Form.TagPicker>
+
+      <Form.Dropdown {...itemProps.issueType} title="Issue Type">
+        <Form.Dropdown.Item value="" title="None" />
+
+        {issueTypes?.map((issueType) => {
+          if (!issueType) {
+            return null;
+          }
+
+          return (
+            <Form.Dropdown.Item
+              icon={{ source: Icon.Dot, tintColor: issueType.color }}
+              key={issueType.id}
+              title={issueType.name}
+              value={issueType.id}
+            />
+          );
+        })}
+      </Form.Dropdown>
 
       <Form.Dropdown {...itemProps.milestone} title="Milestone">
         <Form.Dropdown.Item value="" title="None" />

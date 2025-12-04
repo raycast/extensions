@@ -37,6 +37,7 @@ type CollectionParent = {
 export type Collection = {
   _id: number;
   title: string;
+  cover: [string];
   parent: CollectionParent;
   children?: Collection[];
 };
@@ -53,12 +54,27 @@ export interface CollectionsResponse {
   items: Collection[];
 }
 
+export interface CollectionResponse {
+  result: boolean;
+  item: Collection;
+}
+
 export interface CollectionCreationResponse {
   result: boolean;
   item: Collection;
 }
 
 export interface BookmarksResponse {
+  items: Bookmark[];
+}
+
+export interface BookmarkDetailResponse {
+  result: boolean;
+  item: Bookmark;
+}
+
+export interface CreateBookmarksResponse {
+  result: boolean;
   items: Bookmark[];
 }
 
@@ -97,6 +113,7 @@ export interface CollectionItem {
   value?: number;
   label: string;
   name?: string;
+  cover?: string;
 }
 
 export type BookmarksParams = {
@@ -110,4 +127,5 @@ export interface FormValues {
   collection?: string;
   tags: string[];
   newCollection?: string;
+  note?: string;
 }

@@ -12,6 +12,7 @@ export type DomainInfo = {
   autoRenew: boolean;
   registrationDate: string;
   expirationDate: string;
+  lifecycleStatus: "creating" | "registered" | "grace1" | "grace2" | "redemption";
   privacyProtection: {
     level: "public" | "high";
     contactForm: boolean;
@@ -61,6 +62,11 @@ export type ResourceRecordsListCreateOrUpdateItem = (
 ) & {
   name: string;
   ttl?: number;
+};
+
+export type CheckDomainAvailabilityResult = {
+  domain: string;
+  result: "available" | "taken" | "invalidDomainName" | "tldNotSupported" | "unexpectedError";
 };
 
 export type SuccessResult<T> = {

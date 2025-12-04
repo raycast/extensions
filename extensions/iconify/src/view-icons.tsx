@@ -10,17 +10,14 @@ import {
   Toast,
   Clipboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createGlobalState } from "react-hooks-global-state";
 import Service, { Icon, Set } from "./service";
 import { copyToClipboard, toDataURI, toSvg, toURL } from "./utils";
 import { iconColorEnum, primaryActionEnum } from "./types/perferenceValues";
+import { usePromise } from "@raycast/utils";
 
-const { primaryAction } = getPreferenceValues<{
-  primaryAction: primaryActionEnum;
-}>();
-
-const { iconColor, customColor } = getPreferenceValues<{ iconColor: iconColorEnum; customColor?: string }>();
+const { primaryAction, iconColor, customColor } = getPreferenceValues<Preferences>();
 
 const service = new Service();
 const cache = new Cache({
@@ -33,80 +30,64 @@ const isExpired = (time: number) => Date.now() - time > day;
 const { useGlobalState } = createGlobalState({ page: 0, itemsPerPage: 800 });
 
 const useSets = () => {
-  const [state, setState] = useState<{ isLoading: boolean; sets: Set[] }>({
-    isLoading: true,
-    sets: [],
-  });
-  useEffect(() => {
-    setState((p) => ({ ...p, isLoading: true }));
-    const cacheId = "sets";
-    async function fetchSets() {
+  const { isLoading, data } = usePromise(
+    async () => {
+      const cacheId = "sets";
+      const cached = cache.get(cacheId);
+      if (cached) {
+        try {
+          const { time, data }: { time: number; data: Set[] } = await JSON.parse(cached);
+          if (!isExpired(time) && "total" in data) return data;
+        } catch (e) {
+          console.log("Couldn't parse cache: ", e);
+        }
+      }
       const sets = await service.listSets();
       cache.set(cacheId, JSON.stringify({ time: Date.now(), data: sets }));
-      setState({ isLoading: false, sets });
-    }
-
-    const cached = cache.get(cacheId);
-    if (!cached) {
-      fetchSets();
-      return;
-    }
-    try {
-      const { time, data }: { time: number; data: Set[] } = JSON.parse(cached);
-      if (isExpired(time) || !("total" in data)) {
-        fetchSets();
-        return;
-      }
-      setState({ isLoading: false, sets: data });
-    } catch (e) {
-      console.log("Couldn't parse cache: ", e);
-      fetchSets();
-    }
-  }, []);
-  return state;
+      return sets;
+    },
+    [],
+    {
+      failureToastOptions: {
+        title: "Couldn't fetch icon sets",
+      },
+    },
+  );
+  return {
+    isLoading,
+    sets: data ?? [],
+  };
 };
 
 const useIcons = (set?: Set) => {
-  const [state, setState] = useState<{ isLoading: boolean; icons: Icon[] }>({
-    isLoading: true,
-    icons: [],
-  });
-  useEffect(() => {
-    if (!set) {
-      setState((p) => ({ ...p, isLoading: false }));
-      return;
-    }
-    setState((p) => ({ ...p, isLoading: true }));
-    const cacheId = `set-${set.id}`;
-    async function fetchIcons() {
-      if (!set) {
-        setState({ isLoading: false, icons: [] });
-        return;
+  const { isLoading, data } = usePromise(
+    async (set?: Set) => {
+      if (!set) return [];
+      const cacheId = `set-${set.id}`;
+      const cached = cache.get(cacheId);
+      if (cached) {
+        try {
+          const { time, data }: { time: number; data: Icon[] } = await JSON.parse(cached);
+          if (!isExpired(time)) return data;
+        } catch (e) {
+          console.log("Couldn't parse cache: ", e);
+        }
       }
       const icons = await service.listIcons(set.id, set.name);
       cache.set(cacheId, JSON.stringify({ time: Date.now(), data: icons }));
-      setState({ isLoading: false, icons });
-    }
-
-    const cached = cache.get(cacheId);
-    if (!cached) {
-      fetchIcons();
-      return;
-    }
-
-    try {
-      const { time, data }: { time: number; data: Icon[] } = JSON.parse(cached);
-      if (isExpired(time)) {
-        fetchIcons();
-        return;
-      }
-      setState({ isLoading: false, icons: data });
-    } catch (e) {
-      console.log("Couldn't parse cache: ", e);
-      fetchIcons();
-    }
-  }, [set]);
-  return state;
+      return icons;
+    },
+    [set],
+    {
+      failureToastOptions: {
+        title: "Couldn't fetch icons",
+      },
+    },
+  );
+  return {
+    isLoading,
+    icons: data ?? [],
+  };
 };
 
 function Command() {
@@ -116,7 +97,7 @@ function Command() {
   const { sets, isLoading: isSetsLoading } = useSets();
   const { icons, isLoading: isIconsLoading } = useIcons(sets.find((set) => set.id == activeSetId));
 
-  const isLoading = isSetsLoading || isIconsLoading || icons.length === 0;
+  const isLoading = isSetsLoading || isIconsLoading;
 
   const [filter, setFilter] = useState("");
 
@@ -166,11 +147,11 @@ function Command() {
             );
             const dataURIIcon = toDataURI(svgIcon);
 
-            const paste = <Action.Paste title="Paste Svg String" content={svgIcon} />;
-            const copy = <Action.CopyToClipboard title="Copy Svg String" content={svgIcon} />;
+            const paste = <Action.Paste title="Paste SVG String" content={svgIcon} />;
+            const copy = <Action.CopyToClipboard title="Copy SVG String" content={svgIcon} />;
             const pasteFile = (
               <Action
-                title="Paste Svg File"
+                title="Paste SVG File"
                 icon={RaycastIcon.Clipboard}
                 onAction={async () => {
                   await copyToClipboard(svgIcon, id);
@@ -183,7 +164,7 @@ function Command() {
             );
             const copyFile = (
               <Action
-                title="Copy Svg File"
+                title="Copy SVG File"
                 icon={RaycastIcon.Clipboard}
                 onAction={async () => {
                   await copyToClipboard(svgIcon, id);

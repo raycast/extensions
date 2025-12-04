@@ -4,11 +4,11 @@ import {
   Alert,
   Color,
   Icon,
+  LocalStorage,
   Toast,
   confirmAlert,
   getPreferenceValues,
   showToast,
-  LocalStorage,
 } from "@raycast/api";
 import { Preferences } from "../lib/types";
 import { VideoActionProps } from "./video";
@@ -17,6 +17,8 @@ const { griditemsize } = getPreferenceValues<Preferences>();
 
 export const getRecentVideos = () => getLocalStorageVideos("recent-videos");
 export const getPinnedVideos = () => getLocalStorageVideos("pinned-videos");
+export const getRecentLiveVideos = () => getLocalStorageVideos("recent-live-videos");
+export const getPinnedLiveVideos = () => getLocalStorageVideos("pinned-live-videos");
 
 const getLocalStorageVideos = async (key: string): Promise<string[]> => {
   const videos = (await LocalStorage.getItem(key)) as string;
@@ -31,11 +33,26 @@ export const addRecentVideo = async (videoId: string) => {
   await LocalStorage.setItem("recent-videos", JSON.stringify(filterRecent));
 };
 
+export const addRecentLiveVideo = async (videoId: string) => {
+  const recent = await getRecentLiveVideos();
+  const filterRecent = recent.filter((id) => id !== videoId);
+  filterRecent.unshift(videoId);
+  filterRecent.splice(griditemsize * 2);
+  await LocalStorage.setItem("recent-live-videos", JSON.stringify(filterRecent));
+};
+
 export const addPinnedVideo = async (videoId: string) => {
   const pinned = await getPinnedVideos();
   const filterPinned = pinned.filter((id) => id !== videoId);
   filterPinned.unshift(videoId);
   await LocalStorage.setItem("pinned-videos", JSON.stringify(filterPinned));
+};
+
+export const addPinnedLiveVideo = async (videoId: string) => {
+  const pinned = await getPinnedLiveVideos();
+  const filterPinned = pinned.filter((id) => id !== videoId);
+  filterPinned.unshift(videoId);
+  await LocalStorage.setItem("pinned-live-videos", JSON.stringify(filterPinned));
 };
 
 const removeVideo = async (key: string, id: string) => {
@@ -44,11 +61,15 @@ const removeVideo = async (key: string, id: string) => {
 };
 
 const removePinnedVideo = (id: string) => removeVideo("pinned-videos", id);
+const removePinnedLiveVideo = (id: string) => removeVideo("pinned-live-videos", id);
 const clearPinnedVideos = () => LocalStorage.removeItem("pinned-videos");
+const clearPinnedLiveVideos = () => LocalStorage.removeItem("pinned-live-videos");
 const removeRecentVideo = (id: string) => removeVideo("recent-videos", id);
+const removeRecentLiveVideo = (id: string) => removeVideo("recent-live-videos", id);
 const clearRecentVideos = () => LocalStorage.removeItem("recent-videos");
+const clearRecentLiveVideos = () => LocalStorage.removeItem("recent-live-videos");
 
-const handleClearRecentVideos = async (refresh?: () => void) => {
+const handleClearRecentVideos = async (refresh?: () => void, useLiveStorage?: boolean) => {
   const confirmed = await confirmAlert({
     title: "Clear all recent videos?",
     icon: Icon.Trash,
@@ -60,20 +81,28 @@ const handleClearRecentVideos = async (refresh?: () => void) => {
   });
 
   if (confirmed) {
-    clearRecentVideos();
-    showToast(Toast.Style.Success, "Cleared All Recent Videos");
+    if (useLiveStorage) {
+      clearRecentLiveVideos();
+    } else {
+      clearRecentVideos();
+    }
+    showToast(Toast.Style.Success, "Cleared all Recent Videos");
     if (refresh) refresh();
   }
 };
 
-export const PinVideo = ({ video, refresh }: VideoActionProps): JSX.Element => {
+export const PinVideo = ({ video, refresh, useLiveStorage }: VideoActionProps) => {
   return (
     <Action
       title="Pin Video"
       icon={{ source: Icon.Pin, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       onAction={() => {
-        addPinnedVideo(video.id);
+        if (useLiveStorage) {
+          addPinnedLiveVideo(video.id);
+        } else {
+          addPinnedVideo(video.id);
+        }
         showToast(Toast.Style.Success, "Pinned Video");
         if (refresh) refresh();
       }}
@@ -81,24 +110,32 @@ export const PinVideo = ({ video, refresh }: VideoActionProps): JSX.Element => {
   );
 };
 
-export const PinnedVideoActions = ({ video, refresh }: VideoActionProps) => (
+export const PinnedVideoActions = ({ video, refresh, useLiveStorage }: VideoActionProps) => (
   <ActionPanel.Section>
     <Action
       title="Remove from Pinned Videos"
       onAction={() => {
-        removePinnedVideo(video.id);
+        if (useLiveStorage) {
+          removePinnedLiveVideo(video.id);
+        } else {
+          removePinnedVideo(video.id);
+        }
         showToast(Toast.Style.Success, "Removed from Pinned Videos");
         if (refresh) refresh();
       }}
-      icon={Icon.XMarkCircle}
+      icon={Icon.PinDisabled}
       style={Action.Style.Destructive}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
     />
     <Action
       title="Clear All Pinned Videos"
       onAction={() => {
-        clearPinnedVideos();
-        showToast(Toast.Style.Success, "Cleared All Pinned Videos");
+        if (useLiveStorage) {
+          clearPinnedLiveVideos();
+        } else {
+          clearPinnedVideos();
+        }
+        showToast(Toast.Style.Success, "Cleared all Pinned Videos");
         if (refresh) refresh();
       }}
       icon={Icon.Trash}
@@ -108,14 +145,18 @@ export const PinnedVideoActions = ({ video, refresh }: VideoActionProps) => (
   </ActionPanel.Section>
 );
 
-export const RecentVideoActions = ({ video, refresh }: VideoActionProps) => {
+export const RecentVideoActions = ({ video, refresh, useLiveStorage }: VideoActionProps) => {
   return (
     <ActionPanel.Section>
-      <PinVideo video={video} refresh={refresh} />
+      <PinVideo video={video} refresh={refresh} useLiveStorage={useLiveStorage} />
       <Action
         title="Remove from Recent Videos"
         onAction={() => {
-          removeRecentVideo(video.id);
+          if (useLiveStorage) {
+            removeRecentLiveVideo(video.id);
+          } else {
+            removeRecentVideo(video.id);
+          }
           showToast(Toast.Style.Success, "Removed from Recent Videos");
           if (refresh) refresh();
         }}
@@ -125,7 +166,7 @@ export const RecentVideoActions = ({ video, refresh }: VideoActionProps) => {
       />
       <Action
         title="Clear All Recent Videos"
-        onAction={() => handleClearRecentVideos(refresh)}
+        onAction={() => handleClearRecentVideos(refresh, useLiveStorage)}
         icon={Icon.Trash}
         style={Action.Style.Destructive}
         shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}

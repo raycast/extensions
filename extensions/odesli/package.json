@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "odesli",
   "title": "Odesli",
-  "description": "Get an Odesli link for the currently copied link of a song/album. Odesli is a service that provides smart music links. These links show a list of platforms you can hear the song/album on.",
+  "description": "Convert song/album links to Odesli links. Odesli is a service that provides smart music links. These links show a list of platforms you can hear the song/album on.",
   "icon": "command-icon.png",
   "author": "annedouwe",
+  "contributors": [
+    "0xdhrv"
+  ],
   "categories": [
     "Media"
   ],
@@ -13,27 +16,46 @@
     {
       "name": "index",
       "title": "Copy Odesli Link",
-      "description": "Convert currently copied song/album link to Odesli link.",
-      "mode": "no-view"
+      "description": "Convert song/album link to Odesli link.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Song URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "View History",
+      "description": "View and manage your Odesli link conversion history and favorites.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

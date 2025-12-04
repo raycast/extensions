@@ -1,5 +1,40 @@
 # Media Converter Changelog
 
+## [1.5.2] - 2025-10-31
+
+### Added
+
+- `Copy FFmpeg Command` action in the Converter Form, to allow the user to inspect the command or run it by themselves in terminal.
+
+### Fixed
+
+- CRF option removed from AVI as it is not actually available
+- Applied `-pix_fmt yuv420p` to all videos except `.mov` to broaden support when converting from specific/unsupported video codecs
+
+### API Changes
+
+- Simplified/centralized a `buildVideoQuality` factory for the AI tool
+  - Tidied up some logic in `convert-media.ts` (the AI tool)
+- Tidied up some unused exports (some were left because they will definitely come in handy in future updates)
+
+## [1.5.1] - 2025-08-25
+
+### Fixed
+
+- Simple quality not being properly applied
+
+## [1.5.0] - 2025-08-12
+
+### Added
+
+- Video conversion quality settings
+- "More Conversion Settings (Advanced)": by default, video and audio will only show "lowest", "low", "medium", "high" and "highest" quality settings. By enabling "More Conversion Settings (Advanced)" in the extension preferences, the user will be shown a more fully-featured quality settings page, including CRF/VBR/VBR-2-PASS encoding mode, bitrate and more for video; bitrate, sample rate, bit depth, and more for audio
+- Added lots more of supported formats as inputs
+
+### API Changes
+
+- New type system for centralized values
+
 ## [1.4.2] - 2025-06-27
 
 ### Added

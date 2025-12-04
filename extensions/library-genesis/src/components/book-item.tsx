@@ -32,7 +32,7 @@ function BookItemF({ book }: BookItemProps) {
               {book.publisher && <List.Item.Detail.Metadata.Label title="Publisher" text={book.publisher} />}
               {book.year && <List.Item.Detail.Metadata.Label title="Year" text={book.year} />}
               {book.language && <List.Item.Detail.Metadata.Label title="Language" text={book.language} />}
-              {book.pages && <List.Item.Detail.Metadata.Label title="Pages" text={book.pages} />}
+              {book.pages && book.pages !== "0" && <List.Item.Detail.Metadata.Label title="Pages" text={book.pages} />}
 
               {/* file details */}
               <List.Item.Detail.Metadata.Separator />

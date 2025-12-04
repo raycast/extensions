@@ -1,9 +1,9 @@
 import { List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 import { useAllApplicationsQuery, useAllUsersQuery } from '../../queries'
 
 type GroupProps = {
-  group: IAM.v1alpha1.Group
+  group: Iamv1alpha1.Group
 }
 
 export const Group = ({ group }: GroupProps) => {

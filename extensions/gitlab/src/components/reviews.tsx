@@ -9,11 +9,11 @@ import { MRListItem } from "./mr";
 import { useCachedState } from "@raycast/utils";
 import { GitLabIcons } from "../icons";
 
-function ReviewListEmptyView(): JSX.Element {
+function ReviewListEmptyView() {
   return <List.EmptyView title="No Reviews" icon={{ source: GitLabIcons.review, tintColor: Color.PrimaryText }} />;
 }
 
-export function ReviewList(): JSX.Element {
+export function ReviewList() {
   const [project, setProject] = useState<Project>();
   const { mrs, error, isLoading, performRefetch } = useMyReviews(project);
 
@@ -50,7 +50,7 @@ export function ReviewList(): JSX.Element {
 
 export function useMyReviews(
   project?: Project | undefined,
-  labels: string[] | undefined = undefined
+  labels: string[] | undefined = undefined,
 ): {
   mrs: MergeRequest[] | undefined;
   isLoading: boolean;
@@ -74,7 +74,7 @@ export function useMyReviews(
       deps: [labels],
       secondsToRefetch: 5,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   useEffect(() => {
     const filtered = project ? data?.filter((m) => m.project_id === project?.id) : data;

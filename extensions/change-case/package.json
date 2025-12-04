@@ -73,6 +73,14 @@
       "required": true
     },
     {
+      "name": "hideHUD",
+      "type": "checkbox",
+      "default": false,
+      "description": "Check this to hide the HUD after the action.",
+      "label": "Hide HUD After Action",
+      "required": false
+    },
+    {
       "name": "exceptions",
       "type": "textfield",
       "title": "Title and Sentence Case Exceptions",

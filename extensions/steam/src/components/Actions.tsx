@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import {
   Action,
   ActionPanel,
@@ -45,7 +46,7 @@ export const DefaultActions = () => {
       />
       <Action icon={Icon.List} title="View Random Games" onAction={() => replaceWith(<RandomGamesList />)} />
       <Action
-        icon={Icon.XmarkCircle}
+        icon={Icon.XMarkCircle}
         title="Clear Recent History"
         onAction={async () => {
           await LocalStorage.clear();
@@ -91,7 +92,7 @@ export const LaunchActions = ({ name = "", appid = 0 }) => {
       <Action
         icon={Icon.StarCircle}
         // eslint-disable-next-line @raycast/prefer-title-case
-        title="View ProtonDB Scroe"
+        title="View ProtonDB Score"
         onAction={() => {
           crossLaunchCommand({
             name: "browse",

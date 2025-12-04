@@ -2,8 +2,8 @@ import { List, ActionPanel, Action, Icon, closeMainWindow, PopToRootType, Detail
 import { useFrecencySorting } from "@raycast/utils";
 import execPromise from "./utils/execPromise";
 import { useState, useEffect, useMemo } from "react";
-import { useIsDefbroInstalled } from "./hooks/useIsDefbroInstalled";
-import { DEFBRO_PATH, DEFBRO_URL, notInstalledMarkdown } from "./constants";
+import { useDefbro } from "./hooks/useDefbro";
+import { DEFBRO_URL, notInstalledMarkdown } from "./constants";
 import { getBrowsers } from "./utils/getBrowsers";
 import { Browser } from "./types";
 
@@ -12,19 +12,21 @@ export default function BrowserList() {
   const [browsers, setBrowsers] = useState<Browser[]>([]);
   const { data: sortedBrowsers, visitItem } = useFrecencySorting(browsers);
   const [isLoading, setIsLoading] = useState(true);
-  const isInstalled = useIsDefbroInstalled();
+  const { isInstalled, defbroPath } = useDefbro();
 
   useEffect(() => {
     const fetchData = async () => {
-      const browserData = await getBrowsers();
+      const browserData = await getBrowsers(defbroPath!);
       setBrowsers(browserData);
       setIsLoading(false);
     };
 
-    if (isInstalled) {
+    if (defbroPath) {
       fetchData();
+    } else if (isInstalled === false) {
+      setIsLoading(false);
     }
-  }, [isInstalled]);
+  }, [defbroPath, isInstalled]);
 
   const filteredBrowsers = useMemo(() => {
     return sortedBrowsers.filter((browser: Browser) => browser.title.toLowerCase().includes(searchText.toLowerCase()));
@@ -60,7 +62,10 @@ export default function BrowserList() {
               <Action
                 title="Set as Default"
                 onAction={async () => {
-                  await execPromise(`${DEFBRO_PATH} ${browser.id}`);
+                  if (!defbroPath) {
+                    throw new Error("defbro executable not found");
+                  }
+                  await execPromise(`${defbroPath} ${browser.id}`);
                   visitItem(browser);
                   await closeMainWindow({ popToRootType: PopToRootType.Immediate, clearRootSearch: true });
                 }}

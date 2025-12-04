@@ -1,19 +1,8 @@
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  getPreferenceValues,
-  Form,
-  Icon,
-  showHUD,
-  popToRoot,
-  closeMainWindow,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { API_URL, axiosErrorHandler, useCapacitiesStore } from "./helpers/storage";
+import { useEffect, useRef } from "react";
+import { API_HEADERS, API_URL, fetchErrorHandler, useCapacitiesStore } from "./helpers/storage";
 import ErrorView from "./components/ErrorView";
 
 interface SaveToDailyNoteBody {
@@ -23,7 +12,6 @@ interface SaveToDailyNoteBody {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   useEffect(() => {
     checkCapacitiesApp();
   }, []);
@@ -36,11 +24,9 @@ export default function Command() {
 
   const spacesDropdown = useRef(null);
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const { handleSubmit, itemProps, setValue } = useForm<SaveToDailyNoteBody>({
     async onSubmit(values) {
-      setIsLoading(true);
+      const toast = await showToast(Toast.Style.Animated, "Saving");
       const body = {
         spaceId: store?.spaces.length === 1 ? store.spaces[0].id : values.spaceId,
         mdText: values.mdText,
@@ -48,22 +34,21 @@ export default function Command() {
         noTimeStamp: values.noTimeStamp,
       };
 
-      axios
-        .post(`${API_URL}/save-to-daily-note`, body, {
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${preferences.bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        })
-        .then(() => {
-          popToRoot();
-        })
-        .catch((e) => {
-          showHUD(axiosErrorHandler(e));
+      try {
+        const response = await fetch(`${API_URL}/save-to-daily-note`, {
+          method: "POST",
+          headers: API_HEADERS,
+          body: JSON.stringify(body),
         });
-
-      closeMainWindow();
+        if (!response.ok) throw new Error(fetchErrorHandler(response.status));
+        setValue("mdText", "");
+        toast.style = Toast.Style.Success;
+        toast.title = "Saved";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = `${error}`;
+      }
     },
     validation: {
       mdText: FormValidation.Required,
@@ -73,8 +58,6 @@ export default function Command() {
 
   return error ? (
     <ErrorView error={error} />
-  ) : isLoading ? (
-    <Detail markdown="Saving weblink ..." isLoading />
   ) : (
     <Form
       isLoading={storeIsLoading}

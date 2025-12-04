@@ -11,6 +11,7 @@ import CopyWordmarkSvgUrlAction from "./actions/copy-wordmark-svg-url-actions";
 import SvgInfoActions from "./actions/svg-info-actions";
 import { Svg, SvgActionKey } from "../type";
 import PinSvgAction from "./actions/pin-svg-action";
+import CopyShadcnRegistryActions from "./actions/copy-shadcn-registry-actions";
 
 interface SvgActionProps {
   svg: Svg;
@@ -35,6 +36,11 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
     copySvgWordmark: (
       <ActionPanel.Section title="Copy SVG Wordmark" key="copySvgWordmark">
         <CopyWordmarkSvgActions svg={svg} />
+      </ActionPanel.Section>
+    ),
+    copyShadcnRegistry: (
+      <ActionPanel.Section title="Copy shadcn/ui Registry" key="copyShadcnRegistry">
+        <CopyShadcnRegistryActions svg={svg} />
       </ActionPanel.Section>
     ),
     copyReactComponent: (

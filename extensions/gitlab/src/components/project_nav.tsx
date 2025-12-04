@@ -18,7 +18,7 @@ export function ProjectNavMenuItem(props: {
   target: ReactNode;
   icon?: Image.ImageLike;
   url?: string;
-}): JSX.Element {
+}) {
   return (
     <List.Item
       title={props.title}
@@ -43,7 +43,7 @@ export function ProjectNavMenuBrowserItem(props: {
   shortcut?: Keyboard.Shortcut | undefined;
   url: string;
   icon?: Image.ImageLike;
-}): JSX.Element {
+}) {
   return (
     <List.Item
       title={props.title}
@@ -61,7 +61,7 @@ function webUrl(project: Project, partial: string) {
   return getGitLabGQL().urlJoin(`${project.fullPath}/${partial}`);
 }
 
-export function ProjectNavMenusList(props: { project: Project }): JSX.Element {
+export function ProjectNavMenusList(props: { project: Project }) {
   const project = props.project;
   return (
     <List navigationTitle={`${project.name_with_namespace}`}>

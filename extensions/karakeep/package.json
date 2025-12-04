@@ -7,7 +7,8 @@
   "author": "luolei",
   "contributors": [
     "kdurek",
-    "edequalsawesome"
+    "edequalsawesome",
+    "chrismessina"
   ],
   "categories": [
     "Web"
@@ -41,20 +42,35 @@
       "subtitle": "Karakeep",
       "description": "Create a new bookmark",
       "mode": "view"
+    },
+    {
+      "name": "createNote",
+      "title": "Create Note",
+      "subtitle": "Karakeep",
+      "description": "Create a new note",
+      "mode": "view"
+    },
+    {
+      "name": "quickBookmark",
+      "title": "Quick Bookmark",
+      "subtitle": "Karakeep",
+      "description": "Quickly bookmark the current browser tab",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.0",
-    "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.2"
+    "@chrismessina/raycast-logger": "^1.0.0",
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist -o dist",
@@ -146,22 +162,13 @@
       ]
     },
     {
-      "name": "createBookmarkType",
-      "type": "dropdown",
-      "label": "default create bookmark type",
-      "title": "Default Create Bookmark Type",
-      "required": false,
-      "description": "Select the default type when you create a new bookmark",
-      "data": [
-        {
-          "title": "Plain Text",
-          "value": "text"
-        },
-        {
-          "title": "URL Link",
-          "value": "link"
-        }
-      ]
+      "name": "prefillUrlFromBrowser",
+      "type": "checkbox",
+      "label": "Prefill URL from Browser",
+      "title": "Prefill URL from Active Browser Tab",
+      "description": "Automatically prefill the URL field with the active browser tab when creating a bookmark",
+      "default": true,
+      "required": false
     },
     {
       "label": "Show Website Icon",
@@ -229,5 +236,8 @@
       "default": false,
       "required": false
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { CollectionItem } from "../types";
 
 type CollectionsDropdownProps = {
@@ -27,6 +27,7 @@ const CollectionsDropdown = React.memo(function CollectionsDropdown({
             key={`${collection.value}_${Math.random().toString(16).substring(2, 8)}`}
             title={collection.name ? `${collection.name} (${collection.label})` : collection.label}
             value={`${collection.value}`}
+            icon={collection.cover ? { source: collection.cover } : { source: Icon.Folder }}
           />
         ))}
       </List.Dropdown.Section>

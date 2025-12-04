@@ -1,21 +1,19 @@
 import {
   ActionPanel,
   Action,
-  getPreferenceValues,
   Form,
   Icon,
   closeMainWindow,
-  popToRoot,
-  showHUD,
-  Detail,
   Clipboard,
+  showToast,
+  Toast,
+  PopToRootType,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useActiveTab } from "./helpers/useActiveTab";
-import axios from "axios";
-import { API_URL, axiosErrorHandler, useCapacitiesStore } from "./helpers/storage";
+import { API_HEADERS, API_URL, fetchErrorHandler, useCapacitiesStore } from "./helpers/storage";
 
 interface SaveWeblinkBody {
   spaceId: string;
@@ -28,13 +26,12 @@ function isValidURL(url: string) {
   try {
     new URL(url);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   useEffect(() => {
     checkCapacitiesApp();
   }, []);
@@ -47,11 +44,9 @@ export default function Command() {
 
   const spacesDropdown = useRef(null);
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const { handleSubmit, itemProps, setValue } = useForm<SaveWeblinkBody>({
     async onSubmit(values) {
-      setIsLoading(true);
+      const toast = await showToast(Toast.Style.Animated, "Saving");
       const body = {
         spaceId: store?.spaces.length === 1 ? store.spaces[0].id : values.spaceId,
         url: values.value,
@@ -59,28 +54,23 @@ export default function Command() {
         tags: values.tags ? values.tags.split(",") : [],
       };
 
-      let errorMessage: string | undefined = undefined;
-      axios
-        .post(`${API_URL}/save-weblink`, body, {
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${preferences.bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        })
-        .then(() => {
-          popToRoot();
-        })
-        .catch((e) => {
-          errorMessage = axiosErrorHandler(e);
+      try {
+        const response = await fetch(`${API_URL}/save-weblink`, {
+          method: "POST",
+          headers: API_HEADERS,
+          body: JSON.stringify(body),
         });
+        if (!response.ok) throw new Error(fetchErrorHandler(response.status));
 
-      closeMainWindow();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      if (errorMessage) {
-        showHUD(errorMessage);
-      } else {
-        popToRoot();
+        toast.style = Toast.Style.Success;
+        toast.title = "Saved";
+        await closeMainWindow({
+          popToRootType: PopToRootType.Immediate,
+        });
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = `${error}`;
       }
     },
     validation: {
@@ -91,19 +81,12 @@ export default function Command() {
         if (!isValidURL(value)) {
           return "Invalid URL";
         }
-        try {
-          new URL(value);
-        } catch (_) {
-          return "Invalid URL";
-        }
-        return undefined;
       },
       spaceId: spacesDropdown.current ? FormValidation.Required : undefined,
       tags(value) {
         if (value && value.split(",").length > 10) {
           return "Maximum of 10 tags allowed.";
         }
-        return undefined;
       },
     },
   });
@@ -130,9 +113,7 @@ export default function Command() {
     }
   }, [activeTab]);
 
-  return isLoading ? (
-    <Detail markdown="Saving weblink ..." isLoading />
-  ) : (
+  return (
     <Form
       isLoading={storeIsLoading}
       actions={

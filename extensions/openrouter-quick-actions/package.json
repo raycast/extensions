@@ -1,0 +1,324 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openrouter-quick-actions",
+  "title": "Openrouter Quick Actions",
+  "description": "Performs one-shot actions using LLMs and OpenRouter",
+  "icon": "openrouter-quick-actions.png",
+  "author": "hugo_gresse",
+  "contributors": [],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_summarize",
+          "title": "Summarize Prompt",
+          "description": "The prompt for the summarize command",
+          "type": "textfield",
+          "default": "Summarize the following text as concise as possible: \n\n",
+          "required": false
+        },
+        {
+          "name": "model_summarize",
+          "description": "Override the global preferred model for this command",
+          "type": "textfield",
+          "required": false,
+          "title": "Model ID Override",
+          "placeholder": "Follow global model"
+        },
+        {
+          "name": "provider_sort_summarize",
+          "description": "Override the global preferred provider sorting for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Provider Sort Override",
+          "placeholder": "Follow global provider sort",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "price",
+              "value": "price"
+            },
+            {
+              "title": "throughput",
+              "value": "throughput"
+            },
+            {
+              "title": "latency",
+              "value": "latency"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "proofread",
+      "title": "Proofread",
+      "description": "Proofread selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_proofread",
+          "title": "Proofread Prompt",
+          "description": "The prompt for the proofread command",
+          "type": "textfield",
+          "default": "Fix the grammar and typo of the text, only return the given text. Respect line breaks.",
+          "required": false
+        },
+        {
+          "name": "model_proofread",
+          "description": "Override the global preferred model for this command",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model"
+        },
+        {
+          "name": "provider_sort_proofread",
+          "description": "Override the global preferred provider sorting for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Provider Sort Override",
+          "placeholder": "Follow global provider sort",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "price",
+              "value": "price"
+            },
+            {
+              "title": "throughput",
+              "value": "throughput"
+            },
+            {
+              "title": "latency",
+              "value": "latency"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "proofread-no-ui",
+      "title": "Proofread (no Ui)",
+      "description": "Proofread selected text (no UI)",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "prompt_proofread_no_ui",
+          "title": "Proofread Prompt",
+          "description": "The prompt for the proofread command (no UI)",
+          "type": "textfield",
+          "default": "Fix the grammar and typo of the text, only return the given text. Respect line breaks.",
+          "required": false
+        },
+        {
+          "name": "model_proofread_no_ui",
+          "description": "Override the global preferred model for this command",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model"
+        },
+        {
+          "name": "provider_sort_proofread_no_ui",
+          "description": "Override the global preferred provider sorting for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Provider Sort Override",
+          "placeholder": "Follow global provider sort",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "price",
+              "value": "price"
+            },
+            {
+              "title": "throughput",
+              "value": "throughput"
+            },
+            {
+              "title": "latency",
+              "value": "latency"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Ask a LLM based on a custom prompt",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_custom",
+          "title": "Custom Prompt",
+          "description": "The prompt for the custom action command",
+          "type": "textfield",
+          "default": "Refine the writing and correct grammar mistakes: \n\n",
+          "required": false
+        },
+        {
+          "name": "model_custom",
+          "description": "Override the global preferred model for this command",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model"
+        },
+        {
+          "name": "provider_sort_custom",
+          "description": "Override the global preferred provider sorting for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Provider Sort Override",
+          "placeholder": "Follow global provider sort",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "price",
+              "value": "price"
+            },
+            {
+              "title": "throughput",
+              "value": "throughput"
+            },
+            {
+              "title": "latency",
+              "value": "latency"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "execute",
+      "title": "Execute",
+      "description": "Replace selected text with LLM output",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "model_execute",
+          "description": "Override the global preferred model for this command",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model"
+        },
+        {
+          "name": "provider_sort_execute",
+          "description": "Override the global preferred provider sorting for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Provider Sort Override",
+          "placeholder": "Follow global provider sort",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "price",
+              "value": "price"
+            },
+            {
+              "title": "throughput",
+              "value": "throughput"
+            },
+            {
+              "title": "latency",
+              "value": "latency"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "openai": "^5.12.2"
+  },
+  "preferences": [
+    {
+      "name": "apikey",
+      "description": "Your OpenRouter API Key",
+      "type": "password",
+      "required": true,
+      "title": "OpenRouter API Key"
+    },
+    {
+      "name": "model",
+      "description": "OpenRouter LLM to use for your commands",
+      "type": "textfield",
+      "required": true,
+      "default": "google/gemini-2.5-flash",
+      "title": "OpenRouter Model ID"
+    },
+    {
+      "name": "provider_sort",
+      "description": "Global preferred provider sorting",
+      "type": "dropdown",
+      "required": true,
+      "title": "Provider Sort",
+      "placeholder": "Follow global provider sort",
+      "default": "global",
+      "data": [
+        {
+          "title": "default (uptime + price, decided by OpenRouter)",
+          "value": "global"
+        },
+        {
+          "title": "price",
+          "value": "price"
+        },
+        {
+          "title": "throughput",
+          "value": "throughput"
+        },
+        {
+          "title": "latency",
+          "value": "latency"
+        }
+      ]
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-package": "node scripts/build-package.js",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

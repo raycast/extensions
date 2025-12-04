@@ -20,7 +20,12 @@
     "riadhrebei",
     "islam_hassan",
     "shashank_rm",
-    "heyflorentin"
+    "heyflorentin",
+    "ridemountainpig"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -768,18 +773,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.2",
-    "@sindresorhus/transliterate": "^1.6.0",
-    "got": "^14.3.0",
+    "@raycast/api": "^1.103.6",
+    "@sindresorhus/transliterate": "^2.2.0",
+    "got": "^14.6.3",
     "http-status-codes": "^2.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.12.13",
-    "@types/react": "18.3.3",
-    "eslint": "^8.53.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.0",
+    "@types/react": "19.2.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

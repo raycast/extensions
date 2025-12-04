@@ -1,13 +1,13 @@
-import { useFetch } from '@raycast/utils';
-import { Cast, FeedCastsResponse } from '../utils/types';
-import { ApiUrls } from '../utils/endpoints';
-import { Toast, showToast } from '@raycast/api';
-import { headers } from '../utils/helpers';
+import { useFetch } from "@raycast/utils";
+import { Cast, FeedCastsResponse } from "../utils/types";
+import { ApiUrls } from "../utils/endpoints";
+import { Toast, showToast } from "@raycast/api";
+import { headers } from "../utils/helpers";
 
 /** includes casts and recasts by the author */
 export function useGetProfileCasts(fids: number) {
   return useFetch<FeedCastsResponse>(({ cursor }) => ApiUrls.getProfileCasts(fids, cursor), {
-    method: 'GET',
+    method: "GET",
     headers: headers,
     execute: !!fids,
     keepPreviousData: true,

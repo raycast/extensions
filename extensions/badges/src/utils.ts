@@ -38,3 +38,26 @@ export const getSvgFromFile = async (file: string, color?: string) => {
   if (color) svg = svg.replace("<svg ", `<svg fill="#${color}" `);
   return svg;
 };
+
+export const pickLogo = async () => {
+  try {
+    await crossLaunchCommand(
+      {
+        name: "index",
+        type: LaunchType.UserInitiated,
+        extensionName: "simple-icons",
+        ownerOrAuthorName: "litomore",
+        context: {
+          launchFromExtensionTitle: "Badges - shields.io",
+        },
+      },
+      {
+        context: {
+          launchFromExtensionName: "simple-icons",
+        },
+      },
+    );
+  } catch {
+    open("raycast://extensions/litomore/simple-icons");
+  }
+};

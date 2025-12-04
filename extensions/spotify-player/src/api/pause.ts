@@ -1,6 +1,5 @@
-import { runAppleScript } from "@raycast/utils";
-import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
+import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 export async function pause() {
@@ -14,8 +13,7 @@ export async function pause() {
       error?.toLocaleLowerCase().includes("restricted device") ||
       error?.toLocaleLowerCase().includes("premium required")
     ) {
-      const script = buildScriptEnsuringSpotifyIsRunning("pause");
-      await runAppleScript(script);
+      await runSpotifyScript(SpotifyScriptType.Pause);
       return;
     }
     console.log("pause.ts Error: ", error);

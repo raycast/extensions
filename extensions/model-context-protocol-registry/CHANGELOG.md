@@ -1,5 +1,21 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Nuxt MCP Server URL] - 2025-11-17
+
+## [Update Nuxt UI MCP Server URL] - 2025-09-23
+
+## [Add Nuxt UI MCP Server] - 2025-09-10
+
+Add official Nuxt UI MCP Server to registry
+
+## [Add Rube MCP Server] - 2025-08-26
+
+Add official Rube MCP Server to registry to connect AI tools to 500+ apps
+
+## [Add Linear MCP Server] - 2025-08-11
+
+Add official Linear MCP Server to registry to manage projects
+
 ## [Updated Apify] - 2025-08-04
 
 Updated Apify MCP server configuration from `APIFY_API_TOKEN` to `APIFY_TOKEN`

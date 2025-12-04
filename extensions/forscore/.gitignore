@@ -1,0 +1,15 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode
+.idea
+
+# Raycast
+.raycast

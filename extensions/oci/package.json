@@ -18,6 +18,13 @@
       "mode": "view"
     },
     {
+      "name": "nosql-database",
+      "title": "Manage NoSQL Databases",
+      "subtitle": "Oracle Cloud",
+      "description": "Manage NoSQL Databases",
+      "mode": "view"
+    },
+    {
       "name": "object-storage",
       "title": "Manage Object Storage Services",
       "subtitle": "Oracle Cloud",
@@ -28,6 +35,7 @@
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^2.2.0",
+    "filesize": "^11.0.2",
     "oci-sdk": "^2.112.1"
   },
   "devDependencies": {
