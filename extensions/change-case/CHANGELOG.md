@@ -1,5 +1,11 @@
 # Change Case Changelog
 
+## [Add real spongeCase transformation] - 2025-12-03
+- Added a proper `spongeCase` transformation alongside the existing `randomCase` option
+- The spongeCase creates an alternating case pattern (SpOnGeCaSe) that's deterministic and visually distinctive
+- Previously, spongeCase was aliased to randomCase, but now provides its own unique transformation
+- Added preference to enable/disable the Sponge Case transformation
+
 ## [Add `hide HUD` preference] - 2025-08-18
 - Added a preference to hide the HUD after the action
 
