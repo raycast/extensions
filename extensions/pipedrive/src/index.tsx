@@ -100,7 +100,7 @@ export default function PipedriveSearch() {
                   <Action.OpenInBrowser
                     title="Open Activities"
                     url={openActivitiesURL}
-                    shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                     icon={emojiMap["activities"]}
                   />
                 </ActionPanel.Section>
