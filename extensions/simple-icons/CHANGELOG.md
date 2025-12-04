@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-12-04
 
 - Add Windows support
 - Use default AI model for searching icons
