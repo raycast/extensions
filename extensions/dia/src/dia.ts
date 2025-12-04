@@ -241,20 +241,6 @@ export async function focusTab(tab: Tab) {
   );
 }
 
-export async function openNewTab(url: string) {
-  await runAppleScript(
-    dedent`
-      tell application "Dia"
-        activate
-
-        tell window 1
-          make new tab with properties {URL:"${url}"}
-        end tell
-      end tell
-    `,
-  );
-}
-
 export async function createNewWindow(profile?: string) {
   if (profile) {
     // Escape user input to prevent AppleScript injection
