@@ -54,5 +54,8 @@
     "publish": "ray publish",
     "clone": "rm -rf repository && git clone https://github.com/radix-ui/website.git --single-branch --no-tags repository",
     "generate": "node src/generate-data.mjs"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
