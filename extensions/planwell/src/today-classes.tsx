@@ -22,7 +22,7 @@ import { getDay, set, isAfter, isBefore, formatDistanceToNow } from "date-fns";
 import { ClassDetail } from "./components/ClassDetail";
 import { QuickAddClass } from "./components/QuickAddClass";
 import path from "path";
-import { designTokens } from "../../../../shared/design-system/tokens";
+import { designTokens } from "./utils/design-tokens";
 
 interface Preferences {
   vaultPath: string;

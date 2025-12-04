@@ -17,7 +17,7 @@ import {
 } from "date-fns";
 import { EventDetail } from "./components/EventDetail";
 import path from "path";
-import { designTokens } from "../../../../shared/design-system/tokens";
+import { designTokens } from "./utils/design-tokens";
 
 interface Preferences {
   externalEditor?: { name: string; path: string };

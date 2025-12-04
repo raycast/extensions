@@ -9,7 +9,7 @@ import {
 import { useState } from "react";
 import { getTodos, toggleTodoComplete } from "./utils/vault";
 import { TodoDetail } from "./components/TodoDetail";
-import { designTokens } from "../../../../shared/design-system/tokens";
+import { designTokens } from "./utils/design-tokens";
 
 export default function Command() {
   const { accent } = designTokens.colors;
