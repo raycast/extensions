@@ -93,7 +93,6 @@ export function isSameEntry(a: EntryLike, b: EntryLike) {
 export function filterEntriesByType(filter: EntryType | null) {
   switch (filter) {
     case "All Types":
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       return (entry: EntryLike) => true;
     case "Workspaces":
       return isWorkspaceEntry;
@@ -106,7 +105,6 @@ export function filterEntriesByType(filter: EntryType | null) {
     case "Files":
       return isFileEntry;
     default:
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       return (entry: EntryLike) => false;
   }
 }

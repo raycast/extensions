@@ -173,7 +173,7 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
         const extFsPath =
           typeof e.location === "string"
             ? path.join(extensionsRootFolder, e.location)
-            : e.location.fsPath ?? e.location.path;
+            : (e.location.fsPath ?? e.location.path);
         const packageFilename = path.join(extFsPath, "package.json");
         const pkgInfo = await getPackageJSONInfo(packageFilename);
         result.push({

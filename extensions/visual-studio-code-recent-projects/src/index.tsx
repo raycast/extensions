@@ -147,7 +147,7 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & 
 }
 
 function LocalItem(
-  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean } & PinMethods & RemoveMethods
+  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean } & PinMethods & RemoveMethods,
 ) {
   const name = decodeURIComponent(basename(props.uri));
   const path = fileURLToPath(props.uri);
@@ -265,7 +265,7 @@ function LocalItem(
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 onAction={() =>
                   open(path, terminalApp).catch(() =>
-                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`)
+                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`),
                   )
                 }
               />
@@ -288,7 +288,7 @@ function LocalItem(
 }
 
 function RemoteItem(
-  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods
+  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods,
 ) {
   const remotePath = decodeURI(basename(props.uri));
   const scheme = getBuildScheme();
