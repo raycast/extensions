@@ -29,7 +29,9 @@ export default function Domains() {
     <List.EmptyView title="No domain name" actions={<ActionPanel>
       <Action.Push icon={Icon.Plus} title="Add Domain" target={<AddDomain />} onPop={mutate} />
     </ActionPanel>} />
-    {domains.map(domain => <List.Item key={domain.id} icon={getFavicon(domain.name, {fallback: Icon.Globe})} title={domain.name} actions={<ActionPanel>
+    {domains.map(domain => <List.Item key={domain.id} icon={getFavicon(domain.name, {fallback: Icon.Globe})} title={domain.name} accessories={[
+      domain.date_expiration ? {date: new Date(domain.date_expiration)} : {text: "N/A (external domain name)"}
+    ]} actions={<ActionPanel>
       <Action.Push title="DNS Records" target={<DNSRecords domainId={domain.id} />} />
       <Action.Push icon={Icon.Plus} title="Add Domain" target={<AddDomain />} onPop={mutate} />
     </ActionPanel>} />)}
@@ -77,7 +79,7 @@ function DNSRecords({domainId}: {domainId: number}) {
     initialData: []
   })
 
-  return <List isLoading={isLoading}>
-    {records.map(record => <List.Item key={record.id} title={record.type} />)}
+  return <List isLoading={isLoading} isShowingDetail>
+    {records.map(record => <List.Item key={record.id} title={record.name} accessories={[{tag: record.type}]} detail={<List.Item.Detail markdown={record.value} />} />)}
   </List>
 }

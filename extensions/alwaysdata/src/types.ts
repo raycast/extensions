@@ -1,6 +1,7 @@
 export type Domain = {
     id: number
     name: string
+    date_expiration: number | null
 }
 export type DNSRecord = {
     id: number;
@@ -16,6 +17,8 @@ export type DNSRecord = {
 |"SOA"
 |"SRV"
 |"TXT"
+name: string;
+value: string
 }
 
 export type ErrorResult = string | {
