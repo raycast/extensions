@@ -76,31 +76,31 @@ export default function PipedriveSearch() {
                   <Action.OpenInBrowser
                     title="Add New Person"
                     url={addNewPersonURL}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     icon={emojiMap["person"]}
                   />
                   <Action.OpenInBrowser
                     title="Add New Deal"
                     url={addNewDealURL}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
                     icon={emojiMap["deal"]}
                   />
                   <Action.OpenInBrowser
                     title="Add New Organization"
                     url={addNewOrganizationURL}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     icon={emojiMap["organization"]}
                   />
                   <Action.OpenInBrowser
                     title="Open Email"
                     url={openEmailURL}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "e" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
                     icon={emojiMap["email"]}
                   />
                   <Action.OpenInBrowser
                     title="Open Activities"
                     url={openActivitiesURL}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
                     icon={emojiMap["activities"]}
                   />
                 </ActionPanel.Section>
