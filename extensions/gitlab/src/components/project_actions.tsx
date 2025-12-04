@@ -308,7 +308,7 @@ export function ShowProjectReadmeAction(props: { project: Project }): React.Reac
 
   return (
     <Action.Push
-      title="Show README"
+      title="Show Readme"
       icon={{ source: Icon.Document, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
       target={<ProjectReadmeDetail project={project} />}

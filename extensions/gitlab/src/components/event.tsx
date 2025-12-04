@@ -165,7 +165,6 @@ export function EventListItem(props: { event: Event }) {
                 break;
               case "opened":
                 {
-                  console.log(ev);
                   icon = { source: GitLabIcons.issue, tintColor: Color.Green };
                   subtitle = shortify(ev.target_title, 50);
                 }
