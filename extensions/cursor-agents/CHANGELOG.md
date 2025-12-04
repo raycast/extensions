@@ -1,5 +1,11 @@
 # Cursor Agents Changelog
 
+## [Windows Support] - 2025-10-30
+
+- Added Windows platform support
+- Updated keyboard shortcuts to be cross-platform compatible (cmd → cmd on macOS, ctrl on Windows)
+- Updated dependencies to @raycast/api v1.103.0 for Windows support
+
 ## [AI Improvements] - 2025-09-03
 
 - Added a new tool to get all available repositories

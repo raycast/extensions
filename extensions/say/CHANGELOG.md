@@ -1,5 +1,16 @@
 # Say - Text to Speech Changelog
 
+## [Bugfix] - 2025-10-06
+
+- Fix missing await for say function to keep the command process alive
+- Say the error message with its error name
+
+## [Enhancement] - 2025-10-06
+
+- Add Stop Say command to stop the current running Say process
+- Add config option to allow silent on error
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-08-22
 
 - Add support for stopping the text-to-speech process

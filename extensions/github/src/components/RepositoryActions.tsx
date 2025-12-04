@@ -8,6 +8,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { cloneAndOpen, buildCloneCommand, WEB_IDES } from "../helpers/repository";
 
 import CloneRepositoryForm from "./CloneRepositoryForm";
+import DownloadRepositoryForm from "./DownloadRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
@@ -133,6 +134,12 @@ export default function RepositoryActions({
             shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
           />
         )}
+        <Action.Push
+          icon={Icon.Download}
+          title="Download with Options"
+          target={<DownloadRepositoryForm repository={repository} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        />
         <Action.OpenInBrowser
           icon={{ source: "vscode.svg", tintColor: Color.PrimaryText }}
           title="Clone in VS Code"

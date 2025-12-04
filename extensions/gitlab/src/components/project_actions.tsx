@@ -14,6 +14,7 @@ import { MRList, MRScope } from "./mr";
 import { PipelineList } from "./pipelines";
 import { ProjectLabelList } from "./project_label";
 import { ProjectNavMenusList } from "./project_nav";
+import { ProjectReadmeDetail } from "./project_readme";
 
 function CloneURLInVSCodeListItem(props: { url?: string }) {
   const clone = async (url: string) => {
@@ -294,6 +295,23 @@ export function OpenProjectSettingsInBrowserAction(props: { project: Project }) 
       title="Settings"
       icon={{ source: GitLabIcons.settings, tintColor: Color.PrimaryText }}
       url={webUrl(props.project, "edit")}
+    />
+  );
+}
+
+export function ShowProjectReadmeAction(props: { project: Project }): React.ReactElement | null {
+  const { project } = props;
+
+  if (!project.readme_url) {
+    return null;
+  }
+
+  return (
+    <Action.Push
+      title="Show README"
+      icon={{ source: Icon.Document, tintColor: Color.PrimaryText }}
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      target={<ProjectReadmeDetail project={project} />}
     />
   );
 }

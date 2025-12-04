@@ -14,14 +14,14 @@ import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { ExtensionMetadata, Option } from "./types";
 import { extensionTypes } from "./constants";
-import { formatItem, formatOutput } from "./utils";
+import { formatItem, formatOutput, isWindows } from "./utils";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
 
 async function getPackageJsonFiles() {
   try {
-    const extensionsDir = path.join(os.homedir(), ".config", "raycast", "extensions");
+    const extensionsDir = path.join(os.homedir(), ".config", isWindows ? "raycast-x" : "raycast", "extensions");
     const extensions = await fs.readdir(extensionsDir);
     const packageJsonFiles = await Promise.all(
       extensions.map(async (extension) => {
@@ -81,7 +81,7 @@ export default function IndexCommand() {
         const access: string | undefined = json?.access;
         const name: string = json.name;
         const link = `https://raycast.com/${owner ?? author}/${name}`;
-        const cleanedPath = file.replace("/package.json", "");
+        const cleanedPath = path.dirname(file);
 
         return {
           path: cleanedPath,
@@ -184,7 +184,7 @@ export default function IndexCommand() {
             return (
               <List.Item
                 key={index}
-                icon={`${item.path}/assets/${item.icon}`}
+                icon={path.join(item.path, "assets", item.icon)}
                 title={item.title}
                 keywords={[item.author]}
                 actions={

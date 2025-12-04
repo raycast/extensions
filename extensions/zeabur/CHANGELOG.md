@@ -1,5 +1,10 @@
 # Zeabur Changelog
 
+## [Feature] - 2025-10-10
+
+- Added the menu bar projects command to see your Zeabur projects at a glance.
+- Added project usage information to the project list.
+
 ## [Maintenance] - 2025-09-03
 
 - Add support for Windows platform.

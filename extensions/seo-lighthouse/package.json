@@ -69,7 +69,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {
-    "tar-fs": ">=3.0.9"
+    "tar-fs": ">=3.1.1"
   },
   "platforms": [
     "macOS"

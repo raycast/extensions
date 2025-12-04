@@ -46,7 +46,12 @@
         "input": "@meme-generator search for drake meme",
         "mocks": {
           "search-meme-templates": [
-            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 }
+            {
+              "id": "181913649",
+              "title": "Drake Hotline Bling",
+              "url": "https://i.imgflip.com/30b1gx.jpg",
+              "boxCount": 2
+            }
           ]
         },
         "expected": [
@@ -69,13 +74,30 @@
         "input": "@meme-generator create drake hotline bling meme with text 'Searching templates' and 'Generating the meme'",
         "mocks": {
           "find-meme-template": [
-            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 },
-            { "id": "87743020", "title": "Two Buttons", "url": "https://i.imgflip.com/1g8my4.jpg", "boxCount": 3 }
+            {
+              "id": "181913649",
+              "title": "Drake Hotline Bling",
+              "url": "https://i.imgflip.com/30b1gx.jpg",
+              "boxCount": 2
+            },
+            {
+              "id": "87743020",
+              "title": "Two Buttons",
+              "url": "https://i.imgflip.com/1g8my4.jpg",
+              "boxCount": 3
+            }
           ],
           "search-meme-templates": [
-            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 }
+            {
+              "id": "181913649",
+              "title": "Drake Hotline Bling",
+              "url": "https://i.imgflip.com/30b1gx.jpg",
+              "boxCount": 2
+            }
           ],
-          "generate-meme-from-template": { "url": "https://i.imgflip.com/generated_meme.jpg" }
+          "generate-meme-from-template": {
+            "url": "https://i.imgflip.com/generated_meme.jpg"
+          }
         },
         "expected": [
           {
@@ -96,8 +118,18 @@
         "input": "@meme-generator list available templates",
         "mocks": {
           "find-meme-template": [
-            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 },
-            { "id": "87743020", "title": "Two Buttons", "url": "https://i.imgflip.com/1g8my4.jpg", "boxCount": 3 }
+            {
+              "id": "181913649",
+              "title": "Drake Hotline Bling",
+              "url": "https://i.imgflip.com/30b1gx.jpg",
+              "boxCount": 2
+            },
+            {
+              "id": "87743020",
+              "title": "Two Buttons",
+              "url": "https://i.imgflip.com/1g8my4.jpg",
+              "boxCount": 3
+            }
           ]
         },
         "expected": [
@@ -141,7 +173,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "react-devtools": "^6.1.1",
     "typescript": "^5.4.5"
   },
   "scripts": {

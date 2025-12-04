@@ -7,7 +7,20 @@ import { CommitDiff, ForkedExtension } from "./types.js";
 export const { gitExecutableFilePath, gitRemoteType, githubPersonalAccessToken, repositoryConfigurationPath } =
   getPreferenceValues<ExtensionPreferences>();
 
+/**
+ * A cache instance to store data temporarily.
+ */
 export const cache = new Cache();
+
+/**
+ * Returns true if the current platform is macOS.
+ */
+export const isMac = process.platform === "darwin";
+
+/**
+ * Returns true if the current platform is Windows.
+ */
+export const isWindows = process.platform === "win32";
 
 /**
  * Simplifies a file path by replacing the home directory with a tilde.
@@ -88,4 +101,13 @@ export const getCommitDiffMessage = (
   const leftParenthese = options?.includeParentheses ? "(" : "";
   const rightParenthese = options?.includeParentheses ? ")" : "";
   return hasDiff ? `${prefix}${leftParenthese}${aheadMessage}${behindMessage}${rightParenthese}` : "";
+};
+
+/**
+ * Adds quotes to a path if it is in Windows and contains spaces and is not already quoted.
+ * @param path The path to add quotes to.
+ * @returns The path with quotes added if necessary.
+ */
+export const addQuotesIfInWindows = (path: string) => {
+  return isWindows && path.includes(" ") && !(path.startsWith('"') && path.endsWith('"')) ? `"${path}"` : path;
 };

@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { JSX } from "react/jsx-runtime";
 import { useForm } from "@raycast/utils";
 import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
 
@@ -19,7 +20,11 @@ interface PasswordForm {
  *
  * @returns {JSX.Element} The form interface for unlocking the KeePass database.
  */
-export default function UnlockDatabase({ setIsUnlocked }: { setIsUnlocked: (isUnlocked: boolean) => void }) {
+export default function UnlockDatabase({
+  setIsUnlocked,
+}: {
+  setIsUnlocked: (isUnlocked: boolean) => void;
+}): JSX.Element {
   const { handleSubmit, itemProps } = useForm<PasswordForm>({
     onSubmit(value) {
       showToast({

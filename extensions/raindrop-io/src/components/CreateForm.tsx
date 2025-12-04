@@ -126,7 +126,9 @@ export const CreateForm = (props: CreateFormProps) => {
         <Form.TextField {...itemProps.newCollection} title="New Collection" placeholder="Name" />
       )}
       <Form.TagPicker {...itemProps.tags} title="Tags">
-        {tags?.items?.map(({ _id }) => <Form.TagPicker.Item key={_id} value={_id} title={_id} />)}
+        {tags?.items?.map(({ _id }) => (
+          <Form.TagPicker.Item key={_id} value={_id} title={_id} />
+        ))}
       </Form.TagPicker>
     </Form>
   );

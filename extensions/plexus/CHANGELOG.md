@@ -1,5 +1,10 @@
 # Plexus Changelog
 
+## [1.1.0] - 2025-10-01
+
+### Added
+- **Kill Process**: Added an action to terminate running processes directly from the Raycast interface with a confirmation dialog.
+
 ## [1.0.0] - 2025-09-04
 
 ### Added

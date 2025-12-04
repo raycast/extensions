@@ -146,6 +146,9 @@ const browserBundleIds = new Set([
   "com.microsoft.edgemac.beta",
   "com.vivaldi.vivaldi",
   "com.kagi.kagimacos", // Orion
+  "app.zen-browser.zen",
+  "company.thebrowser.dia",
+  "ai.perplexity.comet",
 ]);
 
 function OpenInOtherBrowserAction(props: { url: string }) {

@@ -6,12 +6,13 @@ Control [Music Assistant](https://github.com/music-assistant/server) from anywhe
 
 ## Features
 
-| Command               | What it does                                   |
-| --------------------- | ---------------------------------------------- |
-| **Toggle**            | Pauses/resumes playback on the selected player |
-| **Next / Previous**   | Skips tracks                                   |
-| **Menu Bar Player**   | Displays title - artist in the macOS menu bar  |
-| **Set Active Player** | Chooses what player to run other commands on   |
+| Command               | What it does                                                       |
+| --------------------- | ------------------------------------------------------------------ |
+| **Toggle**            | Pauses/resumes playback on the selected player                     |
+| **Next / Previous**   | Skips tracks                                                       |
+| **Set Volume**        | Sets volume level (0-100) for the active player                    |
+| **Menu Bar Player**   | Displays title - artist in the macOS menu bar with volume controls |
+| **Set Active Player** | Chooses what player to run other commands on                       |
 
 Works with:
 

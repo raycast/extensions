@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Nuxt MCP Server URL] - 2025-11-17
+
+## [Update Nuxt UI MCP Server URL] - 2025-09-23
+
 ## [Add Nuxt UI MCP Server] - 2025-09-10
 
 Add official Nuxt UI MCP Server to registry

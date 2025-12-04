@@ -1,0 +1,70 @@
+# Cursor Rules for Raycast Git Client Extension Development
+
+## General Development Principles
+
+### Architecture and Data Flow
+- **Commands are entry points**: Each command file in `/src` (e.g., `open-repository.tsx`) is a Raycast entry point. It's responsible for initializing state hooks and rendering the main UI view.
+- **Views for UI**: UI is organized into `View` components (e.g., `BranchesView.tsx`) located in `/src/components/views/`. Commands render these views as the primary interface.
+- **Actions for Operations**: All user operations are implemented as `Action` components in `/src/components/actions/`. They are used within the `ActionPanel` of `View` components.
+- **Context for State Passing**: A shared `RepositoryContext` (containing state hooks and the `gitManager` instance) is passed down from the command to all child `View` and `Action` components. This avoids prop drilling.
+- **Hooks for Logic**: All state management and data fetching logic is encapsulated in custom hooks within `/src/hooks/`.
+
+### Naming Conventions
+- **Commands**: `kebab-case` (e.g., `open-repository.tsx`)
+- **Components**: `PascalCase` (e.g., `FileActions.tsx`, `BranchesView.tsx`)
+- **Utilities**: `kebab-case` (e.g., `git-manager.ts`)
+- **Hooks**: `camelCase` with a `use` prefix (e.g., `useGitRepository.ts`)
+- **Types**: `PascalCase` (e.g., `Repository`, `GitBranch`)
+- **Constants**: `UPPER_SNAKE_CASE`
+
+## Raycast API Best Practices
+
+### State Management and Data Fetching
+- **Use `useCachedPromise` for Git Data**: All hooks that fetch data from Git (e.g., `useGitBranches`, `useGitStatus`) must use `useCachedPromise` from `@raycast/utils`. The repository path (`gitManager.repoPath`) must be part of the dependency array to ensure a separate cache for each repository.
+- **Revalidate Data After Mutations**: After any Git operation that changes repository state (e.g., checkout, commit, push), call the `.revalidate()` function on the relevant data hooks (`branches.revalidate()`, `status.revalidate()`) to refresh the UI.
+- **Use `useCachedState` for UI State**: For simple, persistent UI state (like filters or dropdown selections), use `useCachedState`.
+
+### Error Handling and Toast Notifications
+- **`GitManager` Handles Errors**: The `GitManager` class is responsible for catching errors from `simple-git` and displaying a failure toast.
+- **Avoid Double Toasts**: `Action` components that call `GitManager` should not have their own `catch` blocks for showing error toasts, as this would result in duplicate notifications. A `try...catch` block can be used for cleanup or navigation on failure, but should not show a toast for a Git error.
+- **Use Streaming Toasts for Long Operations**: For long-running commands, `GitManager`'s `outputHandler` provides real-time feedback using an animated toast that updates with `stdout`.
+
+### Icons and UI
+- **Use Both Built-in and Custom Icons**: Use built-in icons from `@raycast/api`'s `Icon` where appropriate. For Git-specific concepts, use custom SVG icons from the `/assets` directory.
+- **Create Semantic Icon Components**: For icons that change based on state (e.g., file status, remote provider), create a dedicated component in `/src/components/icons/` (e.g., `StatusIcons.tsx`) that returns the correct icon.
+
+### Confirming Destructive Operations
+- **Use `confirmAlert()` for All Destructive Operations**: Any action that results in data loss or is hard to reverse (e.g., deleting a branch, discarding changes) must be wrapped in `confirmAlert()`.
+- **Use `Alert.ActionStyle.Destructive`**: The primary confirmation button for a destructive action must use the `Destructive` style.
+
+### Preferences and Settings
+- **Use `getPreferenceValues()` Directly**: Access user preferences directly via `getPreferenceValues()` from `@raycast/api`. Do not create wrapper utilities or config files.
+
+## TypeScript and Typing
+
+### JSDoc Comments
+- **Document All Public Types**: All exported interfaces, types, and complex functions must have clear JSDoc comments explaining their purpose, properties, and parameters. This is crucial for maintainability.
+
+### Error Handling
+- **Safely Access Error Messages**: Always check `error instanceof Error` before accessing `error.message` to avoid runtime errors. Provide a fallback for unknown error types.
+
+## Git Operations
+
+### The `GitManager` Class
+- **Single Source of Truth**: All Git commands must be executed through the `GitManager` class (`/src/utils/git-manager.ts`). Do not use `simple-git` directly in components, hooks, or actions. This ensures consistent error handling, logging, and toast notifications.
+
+### Performance
+- **Limit Data Loading**: When fetching lists that can be large (commits, branches, tags), use preferences to set a limit (e.g., `maxCommitsToLoad`) and implement pagination where appropriate.
+- **Cache Results**: Rely on `useCachedPromise` to cache the results of expensive Git commands.
+
+## What NOT to Do
+- ❌ Do not call `simple-git` directly from UI components. Use `GitManager`.
+- ❌ Do not show error toasts in an `Action` if the error originates from `GitManager`.
+- ❌ Do not create separate `toast-utils` or similar helpers.
+- ❌ Do not use emojis instead of built-in or custom SVG icons.
+- ❌ Do not create separate storage managers for frecency data; use `useCachedPromise` or `useCachedState`.
+- ❌ Do not create config files for preferences (use the API).
+- ❌ Do not create `NavigationActions` (they are available in the Raycast API).
+- ❌ Do not use non-English localization in the code; use only English with commonly accepted Git GUI client terminology.
+- ❌ Do not use the following shortcut combinations in Actions: `cmd+enter`, `cmd+k`, `cmd+p`.
+- ❌ Do not assign a shortcut to the first Action in an ActionPanel.

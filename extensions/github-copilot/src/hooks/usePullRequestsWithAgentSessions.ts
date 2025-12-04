@@ -11,6 +11,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
   {
     key: "1",
     pullRequest: {
+      globalId: "foo",
       title: "Refactor homepage layout into discrete components",
       state: "OPEN",
       url: "https://github.com/user/repo/pull/1",
@@ -34,6 +35,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
         repo_id: 1,
         resource_type: "pull",
         resource_id: 1,
+        resource_global_id: "foo",
         last_updated_at: minutesAgoISO8601Timestamp(5),
         created_at: minutesAgoISO8601Timestamp(10),
         completed_at: null,
@@ -48,6 +50,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
   {
     key: "2",
     pullRequest: {
+      globalId: "foo",
       title: "Implement dark/light mode switcher",
       state: "OPEN",
       url: "https://github.com/user/repo/pull/1",
@@ -70,6 +73,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
         owner_id: 1,
         repo_id: 1,
         resource_type: "pull",
+        resource_global_id: "foo",
         resource_id: 1,
         last_updated_at: minutesAgoISO8601Timestamp(10),
         created_at: minutesAgoISO8601Timestamp(15),
@@ -85,6 +89,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
   {
     key: "3",
     pullRequest: {
+      globalId: "foo",
       title: "Fix bug in authentication flow",
       state: "OPEN",
       url: "https://github.com/user/repo/pull/2",
@@ -107,6 +112,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
         owner_id: 2,
         repo_id: 2,
         resource_type: "pull",
+        resource_global_id: "foo",
         resource_id: 2,
         last_updated_at: minutesAgoISO8601Timestamp(180),
         created_at: minutesAgoISO8601Timestamp(185),
@@ -122,6 +128,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
   {
     key: "3.1",
     pullRequest: {
+      globalId: "foo",
       title: "Increase test coverage for product page",
       state: "OPEN",
       url: "https://github.com/user/repo/pull/2",
@@ -144,6 +151,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
         owner_id: 2,
         repo_id: 2,
         resource_type: "pull",
+        resource_global_id: "foo",
         resource_id: 2,
         last_updated_at: minutesAgoISO8601Timestamp(5 * 60),
         created_at: minutesAgoISO8601Timestamp(5 * 60),
@@ -159,6 +167,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
   {
     key: "4",
     pullRequest: {
+      globalId: "foo",
       title: "Update copy for sold out books",
       state: "MERGED",
       url: "https://github.com/user/repo/pull/2",
@@ -181,6 +190,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
         owner_id: 2,
         repo_id: 2,
         resource_type: "pull",
+        resource_global_id: "foo",
         resource_id: 2,
         last_updated_at: minutesAgoISO8601Timestamp(60 * 8),
         created_at: minutesAgoISO8601Timestamp(60 * 8),
@@ -196,6 +206,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
   {
     key: "5",
     pullRequest: {
+      globalId: "foo",
       title: "Upgrade to Ruby 3.4.1",
       state: "MERGED",
       url: "https://github.com/user/repo/pull/2",
@@ -218,6 +229,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
         owner_id: 2,
         repo_id: 2,
         resource_type: "pull",
+        resource_global_id: "foo",
         resource_id: 2,
         last_updated_at: minutesAgoISO8601Timestamp(60 * 11),
         created_at: minutesAgoISO8601Timestamp(60 * 11),
@@ -233,6 +245,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
   {
     key: "6",
     pullRequest: {
+      globalId: "foo",
       title: "Migrate <ProductImage> to use styled-components",
       state: "MERGED",
       url: "https://github.com/user/repo/pull/2",
@@ -255,6 +268,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
         owner_id: 2,
         repo_id: 2,
         resource_type: "pull",
+        resource_global_id: "foo",
         resource_id: 2,
         last_updated_at: minutesAgoISO8601Timestamp(60 * 35),
         created_at: minutesAgoISO8601Timestamp(60 * 35),
@@ -270,6 +284,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
   {
     key: "7",
     pullRequest: {
+      globalId: "foo",
       title: "Refresh documentation for build process",
       state: "MERGED",
       url: "https://github.com/user/repo/pull/2",
@@ -292,6 +307,7 @@ const DUMMY_PULL_REQUESTS_WITH_AGENT_SESSION: PullRequestWithAgentSessions[] = [
         owner_id: 2,
         repo_id: 2,
         resource_type: "pull",
+        resource_global_id: "foo",
         resource_id: 2,
         last_updated_at: minutesAgoISO8601Timestamp(60 * 50),
         created_at: minutesAgoISO8601Timestamp(60 * 50),

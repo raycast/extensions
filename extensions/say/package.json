@@ -3,7 +3,7 @@
   "name": "say",
   "title": "Say - Text to Speech",
   "type": "module",
-  "description": "Use the macOS built-in TTS (Spoken Content) to say the text you provide.",
+  "description": "Use the macOS built-in TTS (Live Speech) to say the text you provide.",
   "icon": "say-icon.png",
   "author": "litomore",
   "categories": [
@@ -34,6 +34,12 @@
       "mode": "no-view"
     },
     {
+      "name": "stopRunningSay",
+      "title": "Stop Running Say",
+      "description": "Stop the current running Say.",
+      "mode": "no-view"
+    },
+    {
       "name": "textToSay",
       "title": "Text to Say",
       "description": "Input your text or paragraph and say.",
@@ -55,19 +61,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.5",
+    "@raycast/api": "^1.103.2",
     "@raycast/utils": "^2.2.1",
     "bplist-parser": "^0.3.2",
     "lodash": "^4.17.21",
     "mac-say": "^0.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/lodash": "^4.17.20",
-    "@types/node": "^24.3.0",
-    "@types/react": "^19.1.10",
-    "eslint": "^9.33.0",
+    "@types/node": "^24.6.2",
+    "@types/react": "^19.2.0",
+    "eslint": "^9.37.0",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.2"
-  }
+    "typescript": "^5.9.3"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

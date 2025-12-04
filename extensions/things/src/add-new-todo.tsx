@@ -13,7 +13,7 @@ import {
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-import { addTodo, getLists, getTags } from './api';
+import { addTodo, getListsAndTags } from './api';
 import TodoList from './components/TodoList';
 import ErrorView from './components/ErrorView';
 import { getChecklistItemsWithAI, listItems } from './helpers';
@@ -40,8 +40,9 @@ type AddNewTodoProps = {
 
 export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoProps) {
   const { push } = useNavigation();
-  const { data: tags, isLoading: isLoadingTags, error: tagsError } = useCachedPromise(getTags);
-  const { data: lists, isLoading: isLoadingLists, error: listsError } = useCachedPromise(getLists);
+  const { data, isLoading, error } = useCachedPromise(getListsAndTags);
+  const tags = data?.tags;
+  const lists = data?.lists;
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit() {
       const json = {
@@ -127,9 +128,6 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
       await showToast({ style: Toast.Style.Failure, title: 'Failed to generate check-list', message: errorMessage });
     }
   }
-
-  const isLoading = isLoadingTags || isLoadingLists;
-  const error = tagsError || listsError;
 
   if (error) {
     return <ErrorView error={error} />;

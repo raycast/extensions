@@ -34,6 +34,159 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-feeds",
+      "title": "Get Feeds",
+      "description": "Get all RSS feed subscriptions."
+    },
+    {
+      "name": "get-stories",
+      "title": "Get Stories",
+      "description": "Get RSS stories from subscribed feeds."
+    },
+    {
+      "name": "add-feed",
+      "title": "Add Feed",
+      "description": "Subscribe to a new RSS feed."
+    },
+    {
+      "name": "remove-feed",
+      "title": "Remove Feed",
+      "description": "Unsubscribe from an RSS feed."
+    },
+    {
+      "name": "rename-feed",
+      "title": "Rename Feed",
+      "description": "Rename an RSS feed subscription."
+    },
+    {
+      "name": "mark-as-read",
+      "title": "Mark Story as Read",
+      "description": "Mark an RSS story as read."
+    }
+  ],
+  "ai": {
+    "instructions": "When displaying stories, include links in markdown format using the story's link URL. Example: Instead of saying \"Here are your latest stories: 1. Story Title\", say \"Here are your latest stories: 1. [Story Title](https://example.com/story)\"\\n- Keep feed URLs accurate and use the exact URL provided by the user\\n- When a user asks for news or stories without specifying a feed, return stories from all feeds\\n- If a user wants to subscribe to a feed, validate that the URL is a valid RSS feed\\n- Do not ask for optional information if not necessary for the task\\n- When listing stories, include the feed title to show which feed each story is from\\n- Use markdown formatting for better readability of story lists",
+    "evals": [
+      {
+        "input": "@rss-reader What's the latest news?",
+        "mocks": {
+          "get-stories": [
+            {
+              "guid": "story-1",
+              "title": "Breaking: AI Makes Major Breakthrough",
+              "link": "https://example.com/ai-breakthrough",
+              "pubDate": "2025-01-21T10:00:00Z",
+              "feedTitle": "Tech News",
+              "feedUrl": "https://technews.com/feed"
+            },
+            {
+              "guid": "story-2",
+              "title": "New Study on Climate Change",
+              "link": "https://example.com/climate-study",
+              "pubDate": "2025-01-21T09:00:00Z",
+              "feedTitle": "Science Daily",
+              "feedUrl": "https://sciencedaily.com/feed"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-stories"
+          },
+          {
+            "meetsCriteria": "The answer includes a list of stories with markdown links."
+          },
+          {
+            "meetsCriteria": "The answer includes the feed title for each story."
+          }
+        ]
+      },
+      {
+        "input": "@rss-reader Subscribe to https://example.com/feed.xml",
+        "mocks": {
+          "add-feed": {
+            "url": "https://example.com/feed.xml",
+            "title": "Example News",
+            "link": "https://example.com",
+            "originalTitle": "Example News"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-feed",
+              "arguments": {
+                "url": "https://example.com/feed.xml"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "The answer confirms subscription to the feed."
+          }
+        ]
+      },
+      {
+        "input": "@rss-reader What feeds am I subscribed to?",
+        "mocks": {
+          "get-feeds": [
+            {
+              "url": "https://technews.com/feed",
+              "title": "Tech News",
+              "link": "https://technews.com"
+            },
+            {
+              "url": "https://sciencedaily.com/feed",
+              "title": "Science Daily",
+              "link": "https://sciencedaily.com"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-feeds"
+          },
+          {
+            "meetsCriteria": "The answer lists all subscribed feeds with their titles."
+          }
+        ]
+      },
+      {
+        "input": "@rss-reader Rename Tech News feed to My Tech Feed",
+        "mocks": {
+          "get-feeds": [
+            {
+              "url": "https://technews.com/feed",
+              "title": "Tech News",
+              "link": "https://technews.com",
+              "originalTitle": "Tech News"
+            }
+          ],
+          "rename-feed": {
+            "url": "https://technews.com/feed",
+            "oldTitle": "Tech News",
+            "newTitle": "My Tech Feed",
+            "originalTitle": "Tech News"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "rename-feed",
+              "arguments": {
+                "url": "https://technews.com/feed",
+                "newTitle": "My Tech Feed"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "The answer confirms the feed has been renamed."
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.19.1",
@@ -58,5 +211,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

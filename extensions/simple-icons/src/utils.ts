@@ -236,7 +236,7 @@ export const useSearch = ({ icons }: { icons: IconData[] }) => {
     "(icon slugs only, split with comma, up to 500 items, no markdown format, don't change data structure, no addition text, no spaces, do not return non-exist slugs)",
   ].join("\n");
   const execute = enableAiSearch && Boolean(searchString) && hasAccessToAi && filteredIcons.length === 0;
-  const { data, isLoading: aiIsLoading } = useAI(searchPrompt, { execute, model: AI.Model["OpenAI_GPT4o-mini"] });
+  const { data, isLoading: aiIsLoading } = useAI(searchPrompt, { execute });
   const searchResult = execute ? icons.filter((icon) => data.split(",").includes(icon.slug)) : filteredIcons;
   return { aiIsLoading, searchResult, setSearchString };
 };

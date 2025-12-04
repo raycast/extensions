@@ -1,6 +1,6 @@
 import { showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { makeFriendly } from "@utils/path-helpers";
+import { makeFriendly, pathFor } from "@utils/path-helpers";
 import { promisify } from "util";
 import { exec } from "child_process";
 import { base64ShellSanitize } from "@utils/misc";
@@ -42,7 +42,7 @@ export default async function Command() {
 
     const { stderr } = await asyncExec(`zoxide add "${base64ShellSanitize(finderPath)}"`, {
       env: {
-        PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/homebrew/sbin",
+        PATH: pathFor("zoxide"),
       },
     });
     if (stderr.length) throw new Error(stderr);

@@ -10,7 +10,8 @@
   "icon": "icon.png",
   "author": "rauno",
   "contributors": [
-    "peduarte"
+    "peduarte",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -46,26 +47,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "@raycast/utils": "^1.12.5",
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^2.2.1",
     "@supabase/supabase-js": "^2.39.7",
-    "color-string": "^1.9.1",
-    "node-fetch": "^3.3.2"
+    "color-string": "^1.9.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/color-string": "^1.5.5",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

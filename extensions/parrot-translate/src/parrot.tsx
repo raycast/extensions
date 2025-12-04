@@ -74,7 +74,7 @@ export default function () {
             const formattedDataItemResultLength = formattedDataItem.children[0].title.length
             const resultLengthLimit = formattedDataItemResultLength > 50
             setShowListDetail(
-                formattedData.length === 1 && formattedDataItem.children.length === 1 && resultLengthLimit
+                formattedData.length === 1 && formattedDataItem.children.length === 1 && resultLengthLimit,
             )
 
             updateTranslateResultState(formattedData)

@@ -21,6 +21,7 @@ import {
   ShowProjectLabels,
   CopyProjectUrlToClipboardAction,
   CreateNewProjectIssuePushAction,
+  ShowProjectReadmeAction,
 } from "./project_actions";
 import { GitLabIcons, getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
@@ -66,6 +67,7 @@ export function ProjectListItem(props: { project: Project; nameOnly?: boolean })
             <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <ShowProjectReadmeAction project={project} />
             <OpenProjectIssuesPushAction project={project} />
             <OpenProjectMergeRequestsPushAction project={project} />
             <OpenProjectBranchesPushAction project={project} />

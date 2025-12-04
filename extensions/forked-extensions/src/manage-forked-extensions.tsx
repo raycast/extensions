@@ -23,7 +23,6 @@ import { extensionLink, getActualIconPath, userLink } from "./utils.js";
 function ManageForkedExtensions() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [forkedRepository, setForkedRepository] = useState<string>();
-  const [lastCommitHash, setLastCommitHash] = useState<string>();
   const { push } = useNavigation();
 
   const {
@@ -39,8 +38,6 @@ function ManageForkedExtensions() {
       setForkedRepository(forkedRepository);
       const extensions = await git.getExtensionList();
       const forkedExtensionFolders = extensions.map((x) => x.folderName);
-      const lastCommitHash = await git.getLastCommitHash();
-      setLastCommitHash(lastCommitHash);
       return { extensions, forkedExtensionFolders };
     },
     [],
@@ -74,11 +71,7 @@ function ManageForkedExtensions() {
               />
               <CreateExtension />
               <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
-              <SyncFork
-                forkedRepository={forkedRepository}
-                lastCommitHash={lastCommitHash}
-                onSyncFinished={revalidate}
-              />
+              <SyncFork forkedRepository={forkedRepository} onSyncFinished={revalidate} />
             </ActionPanel.Section>
             <ActionPanel.Section>
               <Action.Push icon={Icon.WrenchScrewdriver} title="Run Diagnostics" target={<Diagnostics />} />
@@ -116,7 +109,7 @@ function ManageForkedExtensions() {
                 <Action.OpenWith path={x.folderPath} />
                 <Action.CopyToClipboard
                   title="Copy Extension Path to Clipboard"
-                  content={x.folderName}
+                  content={x.folderPath}
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action.Push
@@ -126,11 +119,7 @@ function ManageForkedExtensions() {
                   target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
                 />
                 <CreateExtension />
-                <SyncFork
-                  forkedRepository={forkedRepository}
-                  lastCommitHash={lastCommitHash}
-                  onSyncFinished={revalidate}
-                />
+                <SyncFork forkedRepository={forkedRepository} onSyncFinished={revalidate} />
                 <Action.ShowInFinder title="Show Extension in Finder" path={x.folderPath} />
                 <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
                 <Action.OpenInBrowser url={extensionLink(x.author, x.name)} shortcut={Keyboard.Shortcut.Common.Open} />

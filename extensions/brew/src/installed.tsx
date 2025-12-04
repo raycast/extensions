@@ -4,7 +4,7 @@ import { brewFetchInstalled, Cask, Formula } from "./brew";
 import { FormulaList } from "./components/list";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 
-export default function Main(): JSX.Element {
+export default function Main() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
   const { isLoading, data: installed, revalidate } = useCachedPromise(() => brewFetchInstalled(true));
 

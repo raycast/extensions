@@ -706,13 +706,16 @@ export class GitLab {
     });
   }
 
-  async getProjects(args = { searchText: "", searchIn: "", membership: "true" }): Promise<Project[]> {
+  async getProjects(args = { searchText: "", searchIn: "", membership: "true", active: false }): Promise<Project[]> {
     const params: { [key: string]: string } = {};
     if (args.searchText) {
       params.search = args.searchText;
       params.in = args.searchIn || "title";
     }
     params.membership = args.membership;
+    if (args.active) {
+      params.active = "true";
+    }
     const issueItems: Project[] = await this.fetch("projects", params).then((projects) => {
       return projects.map((project: any) => dataToProject(project));
     });
@@ -978,6 +981,19 @@ export class GitLab {
       emoji: status.emoji,
       message: status.message,
     });
+  }
+
+  async getProjectReadme(project: Project): Promise<string> {
+    const filePath = project.readme_url?.split("/-/blob/")[1]?.split("/").slice(1).join("/") || "README.md";
+    const fullUrl = `${this.url}/api/v4/projects/${project.id}/repository/files/${encodeURIComponent(filePath)}/raw`;
+
+    logAPI(`send GET request: ${fullUrl}`);
+    const fetcher = this.getFetcher();
+    const response = await fetcher(fullUrl, { method: "GET" });
+    if (!response.ok) {
+      throw new Error(`unexpected response ${response.statusText}`);
+    }
+    return await response.text();
   }
 }
 
