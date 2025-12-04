@@ -32,6 +32,21 @@
       "title": "End Date",
       "description": "Maximum date for random generation (YYYY-MM-DD format)",
       "placeholder": "2030-12-31"
+    },
+    {
+      "name": "dateFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Date Format",
+      "description": "Output format for the generated date",
+      "default": "DD.MM.YYYY",
+      "data": [
+        { "title": "DD.MM.YYYY (31.12.2025)", "value": "DD.MM.YYYY" },
+        { "title": "MM/DD/YYYY (12/31/2025)", "value": "MM/DD/YYYY" },
+        { "title": "YYYY-MM-DD (2025-12-31)", "value": "YYYY-MM-DD" },
+        { "title": "DD-MM-YYYY (31-12-2025)", "value": "DD-MM-YYYY" },
+        { "title": "DD/MM/YYYY (31/12/2025)", "value": "DD/MM/YYYY" }
+      ]
     }
   ],
   "dependencies": {
