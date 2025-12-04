@@ -1,5 +1,9 @@
 # Time Tracking Changelog
 
+## [Add Tags] - {PR_MERGE_DATE}
+
+- Add support for tagging timers
+
 ## [Rename Timers + Modernize] - 2025-08-14
 
 - Rename timers using Edit Form (ref: [Issue #20915](https://github.com/raycast/extensions/issues/20915))

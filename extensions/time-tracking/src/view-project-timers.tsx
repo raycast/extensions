@@ -25,18 +25,20 @@ import {
   TimerList,
 } from "./Timers";
 
-function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date, name: string) => void }) {
+function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date, name: string, tag: string) => void }) {
   const [error, setError] = useState("");
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm
+          icon={Icon.EditShape}
             title="Submit"
             onSubmit={(input) => {
               const name: string = input.name;
               const start: Date = input["start-date"];
               const end: Date = input["end-date"];
+              const tag: string = input.tag;
               if (start >= end) {
                 setError("End Date must be after Start Date");
                 return false;
@@ -45,7 +47,7 @@ function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date, name
                 setError("End Date must be a date in the past");
                 return false;
               }
-              props.onUpdate(start, end, name);
+              props.onUpdate(start, end, name, tag);
             }}
           />
         </ActionPanel>
@@ -69,6 +71,7 @@ function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date, name
         // will send stale values.
         onChange={() => setError("")}
       />
+      <Form.TextField title="Tag" id="tag" defaultValue={props.timer.tag || undefined} placeholder="Tag" />
     </Form>
   );
 }
@@ -105,8 +108,8 @@ export default function Command() {
     return (
       <EditForm
         timer={editingTimer}
-        onUpdate={async (start, end, name) => {
-          await editTimer({ ...editingTimer, start: start.getTime(), end: end.getTime(), name });
+        onUpdate={async (start, end, name, tag) => {
+          await editTimer({ ...editingTimer, start: start.getTime(), end: end.getTime(), name, tag });
           getTimers().then(refresh);
           setEditingTimer(undefined);
         }}
@@ -134,6 +137,9 @@ export default function Command() {
             {
               text: (timer.end ? "✅ " : "⏳ ") + formatDuration(getDuration(timer)),
             },
+            {
+              tag: timer.tag
+            }
           ]}
           actions={
             <ActionPanel>
