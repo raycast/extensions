@@ -1,6 +1,6 @@
 # NixPkgs Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-12-04
 
 - Consolidate actions for opening package homepage and source code
 - Add keyboard shortcuts for improved accessibility
