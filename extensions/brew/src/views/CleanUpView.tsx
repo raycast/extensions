@@ -2,7 +2,7 @@
  * Clean up command for removing old brew files and packages.
  */
 
-import { brewCleanup, preferences, showActionToast, showFailureToast, wait } from "../utils";
+import { brewCleanup, preferences, showActionToast } from "../utils";
 
 export default async (): Promise<void> => {
   const handle = showActionToast({
@@ -13,9 +13,7 @@ export default async (): Promise<void> => {
   try {
     await brewCleanup(preferences.withoutThreshold, handle.abort);
     await handle.showSuccessHUD("Cleanup completed");
-  } catch (err) {
+  } catch {
     await handle.showFailureHUD("Cleanup failed");
-    await showFailureToast("Cleaning failed", err as Error);
-    await wait(3000);
   }
 };

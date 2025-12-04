@@ -6,7 +6,7 @@ import { useState } from "react";
 import { OutdatedCask, OutdatedFormula, OutdatedResults, brewFetchOutdated } from "./utils/brew";
 import { OutdatedActionPanel } from "./components/actionPanels";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
-import { preferences } from "./preferences";
+import { preferences } from "./utils";
 
 export default function Main() {
   const [filter, setFilter] = useState(InstallableFilterType.all);

@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { brewCleanup } from "./utils/brew";
 import { showActionToast, showFailureToast, wait } from "./utils";
-import { preferences } from "./preferences";
+import { preferences } from "./utils";
 
 export default async (): Promise<void> => {
   try {

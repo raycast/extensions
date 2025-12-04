@@ -92,7 +92,7 @@ export async function showFailureToast(
   error: Error,
   options?: { retryAction?: () => Promise<void> },
 ): Promise<void> {
-  if (error.name == "AbortError") {
+  if (error.name === "AbortError") {
     uiLogger.log("Operation aborted by user");
     return;
   }
@@ -131,6 +131,7 @@ export async function showFailureToast(
 
   // Add retry action for recoverable errors (including lock errors)
   if (isRecoverableError(error) && options?.retryAction) {
+    const retryAction = options.retryAction;
     toastOptions.secondaryAction = {
       title: "Retry",
       onAction: async (toast) => {
@@ -138,7 +139,7 @@ export async function showFailureToast(
         toast.title = "Retrying...";
         toast.message = undefined;
         try {
-          await options.retryAction!();
+          await retryAction();
           toast.style = Toast.Style.Success;
           toast.title = "Success";
         } catch (retryError) {

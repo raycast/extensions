@@ -5,7 +5,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { brewFetchOutdated, OutdatedResults, isBrewLockError, getErrorMessage, brewLogger } from "../utils";
-import { preferences } from "../preferences";
+import { preferences } from "../utils";
 
 /**
  * Hook to fetch and cache outdated brew packages.
