@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Optimize Windows Experience] - 2025-09-11
+## [Optimize Windows Experience] - {PR_MERGE_DATE}
 
 - Better milestones view
 - Add subtitles to `Recent Activities`
