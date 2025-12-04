@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Dependency Upgrades and Windows support] - {PR_MERGE_DATE}
 - Upgrade dependencies to latest versions
 - Add support for Windows
 

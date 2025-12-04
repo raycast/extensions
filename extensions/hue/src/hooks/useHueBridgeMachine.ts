@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { GroupedLight, Light, Room, Scene, Zone } from "../lib/types";
 import { useMachine } from "@xstate/react";
 import { HueMessage, SendHueMessage } from "./useHue";
-import hueBridgeMachine from "../lib/hueBridgeMachine";
+import hueBridgeMachine, { MachineEvent } from "../lib/hueBridgeMachine";
 
 export function useHueBridgeMachine(
   setLights: React.Dispatch<React.SetStateAction<Light[]>>,
@@ -15,9 +15,7 @@ export function useHueBridgeMachine(
 
   const [hueBridgeState, send] = useMachine(machine);
   const sendHueMessage: SendHueMessage = (message: HueMessage) => {
-    // xstate expects an event object; wrap the message string as a `{ type: ... }` event
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    send({ type: message.toUpperCase() } as any);
+    send({ type: message } as MachineEvent);
   };
 
   return {

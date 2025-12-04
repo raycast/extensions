@@ -1,12 +1,11 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, environment, Icon, Toast } from "@raycast/api";
-// `hueBridgeMachine` returns a machine instance with complex types; use a loose type here.
 import { SendHueMessage } from "../hooks/useHue";
 import { pathToFileURL } from "url";
-import { State, AnyEventObject } from "xstate";
-import { HueContext } from "../lib/hueBridgeMachine";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
 import React from "react";
+import { SnapshotFrom } from "xstate";
+import hueBridgeMachine from "../lib/hueBridgeMachine";
 
 const successImagePath = pathToFileURL(`${environment.assetsPath}/bridge-success.png`).href;
 const failureImagePath = pathToFileURL(`${environment.assetsPath}/bridge-failure.png`).href;
@@ -82,7 +81,7 @@ You can remove your saved Hue Bridge by using the ‘Unlink Hue Bridge’ action
  * otherwise it will return null.
  */
 export default function ManageHueBridge(
-  hueBridgeState: State<HueContext, AnyEventObject>,
+  hueBridgeState: SnapshotFrom<ReturnType<typeof hueBridgeMachine>>,
   sendHueMessage: SendHueMessage,
 ): React.JSX.Element | null {
   const unlinkSavedBridge = async () => {
@@ -96,7 +95,14 @@ export default function ManageHueBridge(
   let markdown = "";
   const toast = new Toast({ style: Style.Animated, title: "" });
 
-  switch (hueBridgeState.value) {
+  const stateValue =
+    typeof hueBridgeState.value === "string"
+      ? hueBridgeState.value
+      : typeof hueBridgeState.value === "object" && hueBridgeState.value !== null
+        ? Object.keys(hueBridgeState.value)[0] || ""
+        : "";
+
+  switch (stateValue) {
     case "loadingPreferences":
     case "loadingCredentials":
     case "discoveringUsingPublicApi":
@@ -168,7 +174,5 @@ export default function ManageHueBridge(
       break;
   }
 
-  return (
-    <Detail key={`${hueBridgeState.value}`} markdown={markdown} actions={<ActionPanel>{contextActions}</ActionPanel>} />
-  );
+  return <Detail key={`${stateValue}`} markdown={markdown} actions={<ActionPanel>{contextActions}</ActionPanel>} />;
 }
