@@ -1,12 +1,12 @@
 # GitHub Changelog
 
-## [Fix Create Pull Request branch selection] - 2025-11-27
+## [Fix Create Pull Request branch selection] - {PR_MERGE_DATE}
 
 - Create Pull Request: Fixed issue where the default branch wasn't appearing in the "From" dropdown options
 - Create Pull Request: Fixed validation errors when searching for branches while a branch is already selected
 - Create Pull Request: Prevented selecting the same branch for both "From" and "Into" fields
 
-## [Show organization projects when creating issues] - 2025-11-27
+## [Show organization projects when creating issues] - {PR_MERGE_DATE}
 
 - Include organization-level Projects in the Create Issue project picker
 
