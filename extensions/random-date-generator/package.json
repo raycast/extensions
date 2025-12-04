@@ -23,7 +23,8 @@
       "required": true,
       "title": "Start Date",
       "description": "Minimum date for random generation (YYYY-MM-DD format)",
-      "placeholder": "2025-01-01"
+      "placeholder": "2025-01-01",
+      "default": "2025-01-01"
     },
     {
       "name": "endDate",
@@ -31,7 +32,8 @@
       "required": true,
       "title": "End Date",
       "description": "Maximum date for random generation (YYYY-MM-DD format)",
-      "placeholder": "2030-12-31"
+      "placeholder": "2030-12-31",
+      "default": "2030-12-31"
     },
     {
       "name": "dateFormat",
