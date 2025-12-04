@@ -1,6 +1,6 @@
 # Pokédex Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-12-04
 
 - Added Windows support; migrate ESLint to flat config and TS to ES2023.
 - Upgraded to the latest dependencies for improved security and stability.
