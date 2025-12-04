@@ -15,7 +15,9 @@ export function useHueBridgeMachine(
 
   const [hueBridgeState, send] = useMachine(machine);
   const sendHueMessage: SendHueMessage = (message: HueMessage) => {
-    send(message.toUpperCase());
+    // xstate expects an event object; wrap the message string as a `{ type: ... }` event
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    send({ type: message.toUpperCase() } as any);
   };
 
   return {

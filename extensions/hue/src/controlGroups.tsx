@@ -36,7 +36,7 @@ export default function ControlGroups() {
         const groupColors = groupLights
           .filter((light) => uniqueColors.has(getColorFromLight(light)))
           .map((light) => getColorFromLight(light))
-          .sort((a, b) => chroma.hex(b).get("hsl.h") - chroma.hex(a).get("hsl.h"));
+          .sort((a, b) => chroma(b).get("hsl.h") - chroma(a).get("hsl.h"));
         return [group.id, groupColors];
       }),
     );

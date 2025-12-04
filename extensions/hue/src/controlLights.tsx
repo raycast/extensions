@@ -274,10 +274,12 @@ async function handleToggle(
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
+    try {
+      await hueBridgeState.context.hueClient.updateLight(light, changes);
+    } catch (error) {
       undoOptimisticUpdate();
       throw error;
-    });
+    }
 
     toast.style = Style.Success;
     toast.title = light.on.on ? `Turned ${light.metadata.name} off` : `Turned ${light.metadata.name} on`;
@@ -310,10 +312,12 @@ async function handleSetBrightness(
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
+    try {
+      await hueBridgeState.context.hueClient.updateLight(light, changes);
+    } catch (error) {
       undoOptimisticUpdate();
       throw error;
-    });
+    }
 
     toast.style = Style.Success;
     toast.title = `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", {
@@ -352,10 +356,12 @@ async function handleBrightnessChange(
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
+    try {
+      await hueBridgeState.context.hueClient.updateLight(light, changes);
+    } catch (error) {
       undoOptimisticUpdate();
       throw error;
-    });
+    }
 
     toast.style = Style.Success;
     toast.title = `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${light.metadata.name} to ${(
@@ -392,10 +398,12 @@ async function handleSetColor({ hueBridgeState, setLights }: ReturnType<typeof u
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
+    try {
+      await hueBridgeState.context.hueClient.updateLight(light, changes);
+    } catch (error) {
       undoOptimisticUpdate();
       throw error;
-    });
+    }
 
     toast.style = Style.Success;
     toast.title = `Set color of ${light.metadata.name} to ${color.name}`;
@@ -431,10 +439,12 @@ async function handleColorTemperatureChange(
     } as Partial<Light>;
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
+    try {
+      await hueBridgeState.context.hueClient.updateLight(light, changes);
+    } catch (error) {
       undoOptimisticUpdate();
       throw error;
-    });
+    }
 
     toast.style = Style.Success;
     toast.title = `${direction === "increase" ? "Increased" : "Decreased"} color temperature of ${light.metadata.name}`;

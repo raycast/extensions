@@ -49,7 +49,7 @@ export default class RateLimitedQueue {
       const request = this.queue.shift();
       if (request) {
         this.lastRequestTimestamp = Date.now();
-        request().then();
+        void request();
       }
     }, delay);
   }

@@ -1,14 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  AnyEventObject,
-  assign,
-  BaseActionObject,
-  createMachine,
-  ResolveTypegenMeta,
-  ServiceMap,
-  State,
-  TypegenDisabled,
-} from "xstate";
+import { assign, createMachine, AnyEventObject } from "xstate";
 import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
@@ -20,14 +10,6 @@ import { linkWithBridge } from "./linkWithBridge";
 import * as net from "net";
 import Style = Toast.Style;
 
-export type HueBridgeState = State<
-  HueContext,
-  AnyEventObject,
-  any,
-  { value: any; context: HueContext },
-  ResolveTypegenMeta<TypegenDisabled, AnyEventObject, BaseActionObject, ServiceMap>
->;
-
 export interface Preferences {
   transitionTime?: string;
   toggleAllLights?: "off" | "on";
@@ -35,6 +17,14 @@ export interface Preferences {
   bridgeUsername?: string;
 }
 
+type MachineEvent = AnyEventObject;
+const getField = (event?: MachineEvent, key?: string) => {
+  if (!event) return undefined;
+  const d = event.data;
+  if (typeof d === "object" && d !== null) return (d as Record<string, unknown>)[key as string];
+  return undefined;
+};
+const getString = (v?: unknown) => (typeof v === "string" ? v : undefined);
 export type HueContext = {
   bridgeIpAddress?: string;
   bridgeUsername?: string;
@@ -53,7 +43,7 @@ export default function hueBridgeMachine(
   setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
   setScenes: React.Dispatch<React.SetStateAction<Scene[]>>,
 ) {
-  return createMachine<HueContext>({
+  return createMachine<HueContext, AnyEventObject>({
     id: "manage-hue-bridge",
     initial: "loadingPreferences",
     predictableActionArguments: true,
@@ -79,7 +69,7 @@ export default function hueBridgeMachine(
             const bridgeUsername = preferences.bridgeUsername;
 
             if (bridgeIpAddress && !net.isIP(bridgeIpAddress)) {
-              throw Error("Bridge IP address is not a valid IPv4 address");
+              throw new Error("Bridge IP address is not a valid IPv4 address");
             }
 
             if (bridgeIpAddress && bridgeUsername) {
@@ -98,20 +88,20 @@ export default function hueBridgeMachine(
           onDone: {
             target: "loadingConfiguration",
             actions: assign({
-              bridgeIpAddress: (_context, event) => event.data.bridgeIpAddress,
-              bridgeUsername: (_context, event) => event.data.bridgeUsername,
+              bridgeIpAddress: (_context: HueContext, event: MachineEvent) =>
+                getString(getField(event, "bridgeIpAddress")),
+              bridgeUsername: (_context: HueContext, event: MachineEvent) =>
+                getString(getField(event, "bridgeUsername")),
             }),
           },
           onError: {
             target: "failedToLoadPreferences",
-            actions: (_context, event) => {
-              new Toast({
+            actions: (_context: HueContext, event: MachineEvent) => {
+              void new Toast({
                 style: Style.Failure,
                 title: "Failed to load preferences",
-                message: event.data.message,
-              })
-                .show()
-                .then();
+                message: String(event?.data ?? ""),
+              }).show();
             },
           },
         },
@@ -120,7 +110,7 @@ export default function hueBridgeMachine(
       loadingConfiguration: {
         invoke: {
           id: "loadingConfiguration",
-          src: async (context) => {
+          src: async (context: HueContext) => {
             console.log("Loading configuration…");
             const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
 
@@ -143,13 +133,14 @@ export default function hueBridgeMachine(
             {
               target: "connecting",
               actions: assign({
-                bridgeConfig: (_context, event) => event.data.bridgeConfig,
+                bridgeConfig: (_context: HueContext, event: MachineEvent) =>
+                  getField(event, "bridgeConfig") as BridgeConfig | undefined,
               }),
-              cond: (_context, event) => event.data.bridgeConfig !== undefined,
+              cond: (_context: HueContext, event: MachineEvent) => getField(event, "bridgeConfig") !== undefined,
             },
             {
               target: "linking",
-              cond: (context) => !!context.bridgeIpAddress,
+              cond: (context: HueContext) => !!context.bridgeIpAddress,
             },
             {
               target: "discoveringUsingPublicApi",
@@ -160,9 +151,9 @@ export default function hueBridgeMachine(
       connecting: {
         invoke: {
           id: "connecting",
-          src: async (context) => {
+          src: async (context: HueContext) => {
             if (context.bridgeConfig === undefined) {
-              throw Error("Bridge configuration is undefined when trying to connect");
+              throw new Error("Bridge configuration is undefined when trying to connect");
             }
 
             const hueClient = await createHueClient(
@@ -174,24 +165,25 @@ export default function hueBridgeMachine(
               setScenes,
             );
 
-            new Toast({ title: "" }).hide().then();
+            void new Toast({ title: "" }).hide();
 
             return hueClient;
           },
           onDone: {
-            actions: assign({ hueClient: (_context, event) => event.data }),
+            actions: assign({
+              hueClient: (_context: HueContext, event: MachineEvent) =>
+                getField(event, "hueClient") as HueClient | undefined,
+            }),
             target: "connected",
           },
           onError: {
-            actions: (_, event) => {
-              console.error(event.data);
-              new Toast({
+            actions: (_: unknown, event: MachineEvent) => {
+              console.error(event?.data);
+              void new Toast({
                 title: "Failed to connect to bridge",
-                message: event.data,
+                message: String(event?.data ?? ""),
                 style: Style.Failure,
-              })
-                .show()
-                .then();
+              }).show();
             },
             target: "failedToConnect",
           },
@@ -213,21 +205,21 @@ export default function hueBridgeMachine(
             {
               target: "linking",
               actions: assign({
-                bridgeIpAddress: (_context, event) => event.data.ipAddress,
-                bridgeId: (_context, event) => event.data.id,
+                bridgeIpAddress: (_context: HueContext, event: MachineEvent) => getString(getField(event, "ipAddress")),
+                bridgeId: (_context: HueContext, event: MachineEvent) => getString(getField(event, "id")),
               }),
-              cond: (context) => !!context.bridgeUsername,
+              cond: (context: HueContext) => !!context.bridgeUsername,
             },
             {
               target: "linkWithBridge",
               actions: assign({
-                bridgeIpAddress: (_context, event) => event.data.ipAddress,
-                bridgeId: (_context, event) => event.data.id,
+                bridgeIpAddress: (_context: HueContext, event: MachineEvent) => getString(getField(event, "ipAddress")),
+                bridgeId: (_context: HueContext, event: MachineEvent) => getString(getField(event, "id")),
               }),
             },
           ],
           onError: {
-            actions: (_, event) => console.error(event.data),
+            actions: (_: unknown, event: MachineEvent) => console.error(event?.data),
             target: "discoveringUsingMdns",
           },
         },
@@ -240,22 +232,22 @@ export default function hueBridgeMachine(
             {
               target: "linking",
               actions: assign({
-                bridgeIpAddress: (_context, event) => event.data.ipAddress,
-                bridgeId: (_context, event) => event.data.id,
+                bridgeIpAddress: (_context: HueContext, event: MachineEvent) => getString(getField(event, "ipAddress")),
+                bridgeId: (_context: HueContext, event: MachineEvent) => getString(getField(event, "id")),
               }),
-              cond: (context) => !!context.bridgeUsername,
+              cond: (context: HueContext) => !!context.bridgeUsername,
             },
             {
               actions: assign({
-                bridgeIpAddress: (_context, event) => event.data.ipAddress,
-                bridgeId: (_context, event) => event.data.id,
+                bridgeIpAddress: (_context: HueContext, event: MachineEvent) => getString(getField(event, "ipAddress")),
+                bridgeId: (_context: HueContext, event: MachineEvent) => getString(getField(event, "id")),
               }),
               target: "linkWithBridge",
             },
           ],
 
           onError: {
-            actions: (_, event) => console.error(event.data),
+            actions: (_: unknown, event: MachineEvent) => console.error(event?.data),
             target: "noBridgeFound",
           },
         },
@@ -277,9 +269,9 @@ export default function hueBridgeMachine(
       linking: {
         invoke: {
           id: "linking",
-          src: async (context) => {
-            if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
-            if (context.bridgeId === undefined) throw Error("No bridge ID");
+          src: async (context: HueContext) => {
+            if (context.bridgeIpAddress === undefined) throw new Error("No bridge IP address");
+            if (context.bridgeId === undefined) throw new Error("No bridge ID");
 
             console.log("Linking with Hue Bridge and saving configuration…");
 
@@ -303,14 +295,16 @@ export default function hueBridgeMachine(
           onDone: {
             target: "linked",
             actions: assign({
-              bridgeConfig: (_context, event) => event.data.bridgeConfig,
-              hueClient: (_context, event) => event.data.hueClient,
+              bridgeConfig: (_context: HueContext, event: MachineEvent) =>
+                getField(event, "bridgeConfig") as BridgeConfig | undefined,
+              hueClient: (_context: HueContext, event: MachineEvent) =>
+                getField(event, "hueClient") as HueClient | undefined,
             }),
           },
           onError: {
-            actions: (_, event) => {
-              new Toast({ title: "Failed to link with bridge", message: event.data?.toString() }).show().then();
-              console.error(event.data);
+            actions: (_: unknown, event: MachineEvent) => {
+              void new Toast({ title: "Failed to link with bridge", message: String(event?.data ?? "") }).show();
+              console.error(event?.data);
             },
             target: "failedToLink",
           },
@@ -326,9 +320,9 @@ export default function hueBridgeMachine(
       linked: {
         invoke: {
           id: "linked",
-          src: async (context) => {
+          src: async (context: HueContext) => {
             if (context.bridgeConfig === undefined) {
-              throw Error("Bridge configuration is undefined when trying to save it");
+              throw new Error("Bridge configuration is undefined when trying to save it");
             }
             await LocalStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(context.bridgeConfig));
           },

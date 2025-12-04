@@ -1,7 +1,9 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, environment, Icon, Toast } from "@raycast/api";
-import { HueBridgeState } from "../lib/hueBridgeMachine";
+// `hueBridgeMachine` returns a machine instance with complex types; use a loose type here.
 import { SendHueMessage } from "../hooks/useHue";
 import { pathToFileURL } from "url";
+import { State, AnyEventObject } from "xstate";
+import { HueContext } from "../lib/hueBridgeMachine";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
 import React from "react";
@@ -80,7 +82,7 @@ You can remove your saved Hue Bridge by using the ‘Unlink Hue Bridge’ action
  * otherwise it will return null.
  */
 export default function ManageHueBridge(
-  hueBridgeState: HueBridgeState,
+  hueBridgeState: State<HueContext, AnyEventObject>,
   sendHueMessage: SendHueMessage,
 ): React.JSX.Element | null {
   const unlinkSavedBridge = async () => {
@@ -105,7 +107,7 @@ export default function ManageHueBridge(
       break;
     case "connecting":
       toast.message = "Connecting to Hue Bridge…";
-      toast.show().then();
+      void toast.show();
       return null;
     case "failedToConnect":
       contextActions = [
@@ -123,26 +125,26 @@ export default function ManageHueBridge(
     case "discoveringUsingMdns":
       markdown = discoveringMessage;
       toast.title = "Discovering Hue Bridges…";
-      toast.show().then();
+      void toast.show();
       break;
     case "noBridgeFound":
       contextActions = [
         <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
       ];
       markdown = noBridgeFoundMessage;
-      toast.hide().then();
+      void toast.hide();
       break;
     case "linkWithBridge":
       contextActions = [
         <Action key="link" title="Link with Hue Bridge" onAction={() => sendHueMessage("LINK")} icon={Icon.Plug} />,
       ];
       markdown = linkWithBridgeMessage;
-      toast.hide().then();
+      void toast.hide();
       break;
     case "linking":
       markdown = linkWithBridgeMessage;
       toast.title = `Linking with Hue Bridge…`;
-      toast.show().then();
+      void toast.show();
       break;
     case "failedToLink":
       contextActions = [
@@ -162,7 +164,7 @@ export default function ManageHueBridge(
         />,
       ];
       markdown = linkedMessage;
-      toast.hide().then();
+      void toast.hide();
       break;
   }
 

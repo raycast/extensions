@@ -1,5 +1,9 @@
 # Hue Changelog
 
+## [] - {PR_MERGE_DATE}
+- Upgrade dependencies to latest versions
+- Add support for Windows
+
 ## [Update HTTPS support] - 2025-06-13
 
 - Add CA Certificate

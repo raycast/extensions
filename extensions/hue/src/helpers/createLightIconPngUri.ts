@@ -1,4 +1,6 @@
-import Jimp from "jimp";
+import * as JimpImport from "jimp";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Jimp: any = (JimpImport as any).default ?? JimpImport;
 import chroma from "chroma-js";
 import { PngUri } from "../lib/types";
 import { environment } from "@raycast/api";
@@ -12,13 +14,14 @@ export function createLightOnIconPngUri(
   height: number,
 ): Promise<PngUri> {
   return new Promise((resolve, reject) => {
-    new Jimp(width, height, async (error, image) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    new Jimp(width, height, async (error: Error | null, image: any) => {
       if (error) {
         return reject(error);
       }
 
-      const color = chroma.hex(colorHex);
-      image.scan(0, 0, width, height, (x, y) => {
+      const color = chroma(colorHex);
+      image.scan(0, 0, width, height, (x: number, y: number) => {
         const factor = (y / height) * 2.3;
         const rgba = color.darken(factor * (factor * 0.5)).rgba(true);
 
@@ -33,7 +36,7 @@ export function createLightOnIconPngUri(
         opacityDest: 1,
       });
 
-      image.getBase64(Jimp.MIME_PNG, (error, base64) => {
+      image.getBase64(Jimp.MIME_PNG, (error: Error | null, base64: string) => {
         if (error) {
           return reject(error);
         }
@@ -50,7 +53,8 @@ export function createLightOffIconPngUri(
   height: number,
 ): Promise<PngUri> {
   return new Promise((resolve, reject) => {
-    new Jimp(width, height, async (error, image) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    new Jimp(width, height, async (error: Error | null, image: any) => {
       if (error) {
         return reject(error);
       }
@@ -68,7 +72,7 @@ export function createLightOffIconPngUri(
         opacityDest: 1,
       });
 
-      image.getBase64(Jimp.MIME_PNG, (error, base64) => {
+      image.getBase64(Jimp.MIME_PNG, (error: Error | null, base64: string) => {
         if (error) {
           return reject(error);
         }

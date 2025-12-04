@@ -41,13 +41,11 @@ export function useHue() {
           setScenes(await hueBridgeState.context.hueClient.getScenes());
         } catch (error) {
           const message = error instanceof Error ? error.message : (error as string);
-          new Toast({
+          void new Toast({
             title: "Error",
             style: Style.Failure,
             message: message,
-          })
-            .show()
-            .then();
+          }).show();
         }
 
         setIsLoading(false);
