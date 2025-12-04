@@ -81,7 +81,8 @@ const cliPaths: Record<string, string> = {
 
 const cliPathsWindows: Record<string, string> = {
   Code: `${os.homedir()}\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code.cmd`,
-  "Code - Insiders": "C:\\Program Files\\Microsoft VS Code Insiders\\bin\\code-insiders.cmd",
+  "Code - Insiders": "${os.homedir()}\\AppData\\Local\\Programs\\Microsoft VS Code Insiders\\bin\\code-insiders.cmd",
+  /*
   Cursor: "C:\\Program Files\\Cursor\\bin\\cursor.cmd",
   Kiro: "C:\\Program Files\\Kiro\\bin\\kiro.cmd",
   Positron: "C:\\Program Files\\Positron\\bin\\code.cmd",
@@ -90,13 +91,14 @@ const cliPathsWindows: Record<string, string> = {
   VSCodium: "C:\\Program Files\\VSCodium\\bin\\codium.cmd",
   "VSCodium - Insiders": "C:\\Program Files\\VSCodium - Insiders\\bin\\codium-insiders.cmd",
   Windsurf: "C:\\Program Files (x86)\\Windsurf IDE for JavaScript and TypeScript (x64)\\bin\\windsurf.cmd",
+  */
 };
 
 export function getVSCodeCLIFilename(): string {
   if (isWin) {
     const name = cliPathsWindows[getBuildNamePreference()];
     if (!name || name.length <= 0) {
-      return cliPaths.Code;
+      return cliPathsWindows.Code;
     }
     return name;
   }
