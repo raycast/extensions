@@ -128,7 +128,7 @@ export function tryClone(url: string, name?: string): string {
   mkdirSync(tryPath, { recursive: true });
 
   // Clone the repository
-  execSync(`git clone '${url}' '${fullPath}'`, {
+  execSync(`git clone ${JSON.stringify(url)} ${JSON.stringify(fullPath)}`, {
     encoding: "utf8",
     stdio: "pipe",
   });
