@@ -1,7 +1,6 @@
 export interface Class {
   id: string;
   name: string;
-  color: string;
   occurrences: Occurrence[];
   content: string;
 }
@@ -24,7 +23,6 @@ export interface Event {
   name: string;
   startDate: string;
   endDate: string;
-  color: string;
   content: string;
 }
 
@@ -32,6 +30,5 @@ export interface Todo {
   id: string;
   name: string;
   isCompleted: boolean;
-  color: string;
   content: string;
 }
