@@ -36,12 +36,14 @@
     {
       "name": "copy-formatted-link",
       "title": "Copy Formatted Link",
+      "subtitle": "Pretty Plain Link",
       "description": "Copy the formatted link without urgency indicator",
       "mode": "no-view"
     },
     {
       "name": "copy-formatted-urgent-link",
       "title": "Copy Formatted Urgent Link",
+      "subtitle": "Pretty Plain Link",
       "description": "Copy the formatted link with urgency indicator",
       "mode": "no-view"
     }
