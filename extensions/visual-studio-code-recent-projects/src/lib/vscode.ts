@@ -81,7 +81,7 @@ const cliPaths: Record<string, string> = {
 
 const cliPathsWindows: Record<string, string> = {
   Code: `${os.homedir()}\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code.cmd`,
-  "Code - Insiders": "${os.homedir()}\\AppData\\Local\\Programs\\Microsoft VS Code Insiders\\bin\\code-insiders.cmd",
+  "Code - Insiders": `${os.homedir()}\\AppData\\Local\\Programs\\Microsoft VS Code Insiders\\bin\\code-insiders.cmd`,
   /*
   Cursor: "C:\\Program Files\\Cursor\\bin\\cursor.cmd",
   Kiro: "C:\\Program Files\\Kiro\\bin\\kiro.cmd",

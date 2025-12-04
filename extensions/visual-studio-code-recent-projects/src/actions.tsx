@@ -1,4 +1,4 @@
-import { Action } from "@raycast/api";
+import { Action, open } from "@raycast/api";
 import { isWin } from "./utils";
 
 export function OpenInWindowsExplorerAction({ uri }: { uri: string }) {

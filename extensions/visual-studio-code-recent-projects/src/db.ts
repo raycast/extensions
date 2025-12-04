@@ -86,7 +86,7 @@ export function useRecentEntries() {
 function getPath() {
   const build = getBuildNamePreference();
   if (isWin) {
-    return `${homedir()}\\AppData\\Roaming\\Code\\User\\globalStorage\\state.vscdb`;
+    return `${homedir()}\\AppData\\Roaming\\${build}\\User\\globalStorage\\state.vscdb`;
   }
   return `${homedir()}/Library/Application Support/${build}/User/globalStorage/state.vscdb`;
 }
