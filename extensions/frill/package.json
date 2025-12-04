@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "frill",
+  "title": "Frill",
+  "description": "Capture, organize, and announce product feedback in one place",
+  "icon": "frill.png",
+  "author": "xmok",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "description": "API Key from Frill Dashboard",
+      "type": "password",
+      "required": true,
+      "placeholder": "f273f...cdf06e7"
+    },
+    {
+      "name": "frill_url",
+      "title": "Frill URL",
+      "description": "The URL of your Frill",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://[example].frill.co"
+    }
+  ],
+  "commands": [
+    {
+      "name": "announcements",
+      "title": "Announcements",
+      "subtitle": "Frill",
+      "description": "Manage Announcements",
+      "mode": "view"
+    },
+    {
+      "name": "ideas",
+      "title": "Ideas",
+      "subtitle": "Frill",
+      "description": "Manage Ideas",
+      "mode": "view"
+    },
+    {
+      "name": "statuses",
+      "title": "Statuses",
+      "subtitle": "Frill",
+      "description": "Manage Statuses",
+      "mode": "view"
+    },
+    {
+      "name": "topics",
+      "title": "Topics",
+      "subtitle": "Frill",
+      "description": "Manage Topics",
+      "mode": "view"
+    },
+    {
+      "name": "followers",
+      "title": "Followers",
+      "subtitle": "Frill",
+      "description": "Manage Followers",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

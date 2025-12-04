@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nu-nieuws",
+  "title": "NU Nieuws",
+  "description": "Used to display the latest (Dutch) news from nu.nl",
+  "icon": "command-icon.png",
+  "author": "j3lte",
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-nu-news",
+      "title": "Show NU News",
+      "subtitle": "View the latest news and articles",
+      "description": "Displays the latest news and articles from nu.nl",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "show",
+          "title": "Show List or Grid",
+          "description": "Choose between a list or grid view for the news articles",
+          "required": false,
+          "type": "dropdown",
+          "defaultValue": "list",
+          "data": [
+            {
+              "title": "List",
+              "value": "list"
+            },
+            {
+              "title": "Grid",
+              "value": "grid"
+            }
+          ]
+        },
+        {
+          "name": "gridSize",
+          "title": "Grid Size",
+          "description": "Choose the amount of columns to show in the grid view",
+          "type": "dropdown",
+          "required": false,
+          "defaultValue": "4",
+          "data": [
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            }
+          ]
+        },
+        {
+          "name": "ignoreVideos",
+          "label": "Ignore Videos",
+          "description": "Ignore articles that only contain videos",
+          "type": "checkbox",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
+    "rss-parser": "^3.13.0",
+    "timeago.js": "^4.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

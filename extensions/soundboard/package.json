@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "soundboard",
+  "title": "Soundboard",
+  "description": "Use Raycast as a soundboard and bind sounds to hotkeys",
+  "icon": "command-icon.png",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "andreaselia",
+    "anh_nguyen",
+    "jor"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Sounds",
+      "subtitle": "Soundboard",
+      "description": "Use Raycast as a soundboard",
+      "mode": "view"
+    },
+    {
+      "name": "favorite1",
+      "title": "Play Favourite 1",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    },
+    {
+      "name": "favorite2",
+      "title": "Play Favourite 2",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    },
+    {
+      "name": "favorite3",
+      "title": "Play Favourite 3",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    },
+    {
+      "name": "favorite4",
+      "title": "Play Favourite 4",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    },
+    {
+      "name": "favorite5",
+      "title": "Play Favourite 5",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    },
+    {
+      "name": "favorite6",
+      "title": "Play Favourite 6",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    },
+    {
+      "name": "favorite7",
+      "title": "Play Favourite 7",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    },
+    {
+      "name": "favorite8",
+      "title": "Play Favourite 8",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    },
+    {
+      "name": "favorite9",
+      "title": "Play Favourite 9",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    },
+    {
+      "name": "favorite10",
+      "title": "Play Favourite 10",
+      "description": "Plays favorite one",
+      "mode": "no-view",
+      "subtitle": "Soundboard"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.43.0",
+    "@raycast/utils": "^1.4.10",
+    "nanoid": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

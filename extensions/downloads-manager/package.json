@@ -1,0 +1,192 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "downloads-manager",
+  "title": "Downloads Manager",
+  "description": "Search and organize your downloads",
+  "icon": "downloads.png",
+  "author": "thomas",
+  "contributors": [
+    "ron-myers",
+    "Kimcha",
+    "ridemountainpig",
+    "nagauta",
+    "dead_hikikomori",
+    "clins1994"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-downloads",
+      "title": "Manage Downloads",
+      "description": "Search and organize your downloaded files",
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "name": "showHiddenFiles",
+          "label": "Show Hidden Files",
+          "title": "Show Hidden Files",
+          "description": "Show hidden files in the folder",
+          "required": false,
+          "default": false
+        },
+        {
+          "type": "dropdown",
+          "name": "fileOrder",
+          "label": "File Order",
+          "title": "File Order",
+          "description": "The order of the files in the folder",
+          "required": false,
+          "default": "modifiedTime",
+          "data": [
+            {
+              "title": "Modified Time",
+              "value": "modifiedTime"
+            },
+            {
+              "title": "Add Time",
+              "value": "addTime"
+            },
+            {
+              "title": "Create Time",
+              "value": "createTime"
+            }
+          ]
+        },
+        {
+          "type": "dropdown",
+          "name": "downloadsLayout",
+          "label": "Downloads Layout",
+          "title": "Downloads Layout",
+          "description": "The layout for displaying the downloads.",
+          "required": false,
+          "default": "list",
+          "data": [
+            {
+              "title": "List",
+              "value": "list"
+            },
+            {
+              "title": "Grid",
+              "value": "grid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "open-latest-download",
+      "title": "Open Latest Download",
+      "description": "Opens the last downloaded file or folder",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-latest-download",
+      "title": "Copy Latest Download",
+      "description": "Copies the last downloaded file or folder",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-latest-download",
+      "title": "Paste Latest Download",
+      "description": "Pastes the last downloaded file or folder to the foremost active app",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-latest-download",
+      "title": "Show Latest Download",
+      "description": "Show the last downloaded file or folder in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "delete-latest-download",
+      "title": "Delete Latest Download",
+      "description": "Delete the last downloaded file or folder",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "directory",
+      "name": "downloadsFolder",
+      "title": "Downloads Folder",
+      "description": "The folder where your downloads are stored",
+      "default": "~/Downloads",
+      "required": true
+    },
+    {
+      "type": "dropdown",
+      "name": "lastestDownloadOrder",
+      "label": "Lastest Download Order",
+      "title": "Lastest Download Order",
+      "description": "The order of the lastest download",
+      "required": false,
+      "default": "modifiedTime",
+      "data": [
+        {
+          "title": "Modified Time",
+          "value": "modifiedTime"
+        },
+        {
+          "title": "Add Time",
+          "value": "addTime"
+        },
+        {
+          "title": "Create Time",
+          "value": "createTime"
+        },
+        {
+          "title": "Birth Time",
+          "value": "birthTime"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "name": "deletionBehavior",
+      "label": "Deletion Behavior",
+      "title": "Deletion Behavior",
+      "description": "Whether to trash or permanently delete",
+      "required": false,
+      "default": "trash",
+      "data": [
+        {
+          "title": "Trash",
+          "value": "trash"
+        },
+        {
+          "title": "Permanently Delete",
+          "value": "permaDel"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^2.2.2",
+    "untildify": "^6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

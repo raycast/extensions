@@ -1,0 +1,190 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "window-layouts",
+  "title": "Window Layouts",
+  "description": "Tile open windows into layouts",
+  "icon": "icons/grid.png",
+  "author": "teemu_suvinen",
+  "contributors": [
+    "Undolog"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "horizontal-50-50",
+      "title": "Horizontal 50 / 50",
+      "description": "Two windows - 50% width, 100% height.",
+      "mode": "no-view",
+      "icon": "icons/horizontal-50-50.png"
+    },
+    {
+      "name": "horizontal-70-30",
+      "title": "Horizontal 70 / 30",
+      "description": "Two windows - 70% and 30% width, 100% height.",
+      "mode": "no-view",
+      "icon": "icons/horizontal-70-30.png"
+    },
+    {
+      "name": "horizontal-30-70",
+      "title": "Horizontal 30 / 70",
+      "description": "Two windows - 30% and 70% width, 100% height.",
+      "mode": "no-view",
+      "icon": "icons/horizontal-30-70.png"
+    },
+    {
+      "name": "horizontal-3",
+      "title": "Horizontal 3 Columns",
+      "description": "Three windows - 1/3 width and 100% height.",
+      "mode": "no-view",
+      "icon": "icons/horizontal-3.png"
+    },
+    {
+      "name": "horizontal-1-2",
+      "title": "Horizontal 1 + 2",
+      "description": "Three windows - first 50% width and 100% height, aligned to the left. Other two 50% width and 50% height, aligned to the right.",
+      "mode": "no-view",
+      "icon": "icons/horizontal-1-2.png"
+    },
+    {
+      "name": "horizontal-2-1",
+      "title": "Horizontal 2 + 1",
+      "description": "Three windows - first 50% width and 100% height, aligned to the right. Other two 50% width and 50% height, aligned to the left.",
+      "mode": "no-view",
+      "icon": "icons/horizontal-2-1.png"
+    },
+    {
+      "name": "grid",
+      "title": "Grid of 4",
+      "description": "Even grid of 4 windows - 50% width and 50% height",
+      "mode": "no-view",
+      "icon": "icons/grid.png"
+    },
+    {
+      "name": "vertical-50-50",
+      "title": "Vertical 50 / 50",
+      "description": "Two windows - 100% width and 50% heigth.",
+      "mode": "no-view",
+      "icon": "icons/vertical-50-50.png"
+    },
+    {
+      "name": "vertical-70-30",
+      "title": "Vertical 70 / 30",
+      "description": "Two windows - 100% width, 70% and 30% height.",
+      "mode": "no-view",
+      "icon": "icons/vertical-70-30.png"
+    },
+    {
+      "name": "vertical-30-70",
+      "title": "Vertical 30 / 70",
+      "description": "Two windows - 100% width, 30% and 70% height.",
+      "mode": "no-view",
+      "icon": "icons/vertical-30-70.png"
+    },
+    {
+      "name": "vertical-3",
+      "title": "Vertical 3 Rows",
+      "description": "Three windows - 100% width, 1/3 height.",
+      "mode": "no-view",
+      "icon": "icons/vertical-3.png"
+    },
+    {
+      "name": "vertical-1-2",
+      "title": "Vertical 1 + 2",
+      "description": "Three windows - first 100% width and 50% height, aligned to the top. Other two 50% width and 50% height, aligned to the bottom.",
+      "mode": "no-view",
+      "icon": "icons/vertical-1-2.png"
+    },
+    {
+      "name": "vertical-2-1",
+      "title": "Vertical 2 + 1",
+      "description": "Three windows - first 100% width and 50% height, aligned to the bottom. Other two 50% width and 50% height, aligned to the top.",
+      "mode": "no-view",
+      "icon": "icons/vertical-2-1.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gap",
+      "description": "Gap between and around windows",
+      "title": "Gap",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "None",
+          "value": "0"
+        },
+        {
+          "title": "Tiny (8px)",
+          "value": "8"
+        },
+        {
+          "title": "Small (16px)",
+          "value": "16"
+        },
+        {
+          "title": "Small-M (24px)",
+          "value": "24"
+        },
+        {
+          "title": "Medium (32px)",
+          "value": "32"
+        },
+        {
+          "title": "Medium-M (40px)",
+          "value": "40"
+        },
+        {
+          "title": "Large (64px)",
+          "value": "64"
+        },
+        {
+          "title": "Extra Large (128px)",
+          "value": "128"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "name": "disableToasts",
+      "required": false,
+      "label": "Disable notifications",
+      "default": false,
+      "title": "Disable success notifications",
+      "description": "By default, 'Windows arranged' message will briefly show after successful tiling. This option will disable the behavior."
+    },
+    {
+      "type": "checkbox",
+      "name": "keepWindowOpenAfterTiling",
+      "required": false,
+      "label": "Keep open",
+      "default": false,
+      "title": "Keep Raycast open after tiling",
+      "description": "By default, Raycast window will close after tiling is complete. This option will disable the behavior."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

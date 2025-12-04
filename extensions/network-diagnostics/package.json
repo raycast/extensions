@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "network-diagnostics",
+  "title": "Network Diagnostics",
+  "description": "View diagnostic information about your network to help figure out why it's playing up.",
+  "icon": "command-icon.png",
+  "author": "hmarr",
+  "contributors": [
+    "3e9b"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "diagnostics",
+      "title": "Network Diagnostics",
+      "description": "View diagnostic information about your network",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.41.1",
+    "@raycast/utils": "^1.4.9",
+    "execa": "^6.1.0",
+    "node-fetch": "^3.2.10",
+    "ping": "^0.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.3",
+    "@types/ping": "^0.4.1",
+    "@types/react": "^18.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.40.1",
+    "@typescript-eslint/parser": "^5.40.1",
+    "eslint": "^8.26.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

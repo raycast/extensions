@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ulid",
+  "title": "ULID",
+  "description": "some basic ulid tools",
+  "categories": [
+    "Developer Tools"
+  ],
+  "icon": "logo_512.png",
+  "author": "entwine7250",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generator",
+      "title": "Generate ULID Based on Exact Current Time",
+      "description": "Generate a ULID based on the exact current time",
+      "mode": "no-view"
+    },
+    {
+      "name": "decode",
+      "title": "Translate ULID On Clipboard to Time",
+      "description": "decode the ULID on clipboard to exact time",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "format",
+      "type": "dropdown",
+      "required": false,
+      "title": "Format",
+      "description": "Format of the timestamp",
+      "default": "milliseconds",
+      "data": [
+        {
+          "title": "Seconds",
+          "value": "seconds"
+        },
+        {
+          "title": "Milliseconds",
+          "value": "milliseconds"
+        }
+      ]
+    },
+    {
+      "name": "isUTC",
+      "type": "checkbox",
+      "required": false,
+      "title": "Timezone",
+      "description": "If checked, UTC timezone will be used. Otherwise, local timezone will be used.",
+      "default": true,
+      "label": "Use UTC"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "run-applescript": "^6.1.0",
+    "ulidx": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

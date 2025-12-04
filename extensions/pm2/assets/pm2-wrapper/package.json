@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "bin": "index.js",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "meow": "^13.2.0",
+    "pm2": "^6.0.5"
+  }
+}

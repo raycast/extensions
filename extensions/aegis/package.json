@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aegis",
+  "title": "Aegis Authenticator",
+  "description": "Search, sync and use your Aegis 2FA database with Raycast",
+  "icon": "command-icon.png",
+  "author": "bfayers",
+  "contributors": [
+    "gdsmith",
+    "pernielsentikaer",
+    "litomore",
+    "guga4ka",
+    "kanoto"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-aegis-otp",
+      "title": "Search Token",
+      "subtitle": "Aegis - Android 2FA App",
+      "description": "Search OTPs in your Aegis database",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": true,
+      "name": "aegisDbPath",
+      "title": "Aegis Database Path",
+      "type": "file",
+      "description": "Your Aegis Database",
+      "placeholder": "Enter path to your Aegis Database"
+    },
+    {
+      "required": true,
+      "name": "aegisPassword",
+      "title": "Aegis Password",
+      "type": "password",
+      "description": "Your Aegis Encryption Password",
+      "placeholder": "Enter your Aegis encryption password"
+    },
+    {
+      "required": false,
+      "name": "excludeNames",
+      "title": "Exclude Names",
+      "type": "textfield",
+      "description": "Names to exclude, separated by commas",
+      "placeholder": "account1, otherAccount, ..."
+    },
+    {
+      "required": false,
+      "name": "primaryActionIsCopy",
+      "label": "Copy as primary action, Output as secondary",
+      "type": "checkbox",
+      "description": "Primary action copies pin to clipboard instead of outp utting to front application",
+      "default": true
+    },
+    {
+      "required": false,
+      "name": "recentlyUsedOrder",
+      "label": "Sort OTP list by recent usage",
+      "type": "checkbox",
+      "description": "This option enables different list order based on last usage of OTP",
+      "default": false
+    },
+    {
+      "required": false,
+      "name": "fallbackIconColor",
+      "label": "Fallback Icon Color",
+      "description": "Color of the fallback icon",
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "black",
+          "title": "Black"
+        },
+        {
+          "value": "blue",
+          "title": "Blue"
+        },
+        {
+          "value": "green",
+          "title": "Green"
+        },
+        {
+          "value": "orange",
+          "title": "Orange"
+        },
+        {
+          "value": "purple",
+          "title": "Purple"
+        },
+        {
+          "value": "red",
+          "title": "Red"
+        }
+      ],
+      "title": "Fallback Icon Color",
+      "default": "blue"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.1",
+    "@raycast/utils": "^1.16.1",
+    "fast-fuzzy": "^1.12.0",
+    "hi-base32": "^0.5.1",
+    "node-fetch": "^3.3.2",
+    "node-forge": "^1.3.1",
+    "protobufjs": "^7.3.2",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "@primer/octicons": "^17.0.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "@types/node-forge": "^1.0.1",
+    "@types/qrcode": "^1.5.5",
+    "eslint": "^8.11.0",
+    "fast-glob": "^3.2.11",
+    "sharp": "^0.33.4",
+    "simple-icons": "^6.14.0",
+    "typescript": "^4.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "make-assets": "./make-assets.js",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

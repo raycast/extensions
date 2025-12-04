@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "myidlers",
+  "title": "MyIdlers",
+  "description": "View Summary and details of your idlers",
+  "icon": "my-idlers.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "url",
+      "title": "URL",
+      "type": "textfield",
+      "required": true,
+      "description": "MyIdlers instance URL",
+      "placeholder": "https://demo.myidlers.com"
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "type": "password",
+      "required": true,
+      "description": "API Key from Account",
+      "placeholder": "xxx...xXX"
+    },
+    {
+      "name": "max_num_as_unlimited",
+      "label": "Replace '999999' with 'Unlimited'",
+      "type": "checkbox",
+      "required": false,
+      "description": "This will replace '999999' with the word 'Unlimited'",
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "description": "Tally, Costings and Averages",
+      "mode": "view"
+    },
+    {
+      "name": "items",
+      "title": "Items",
+      "description": "Servers, Resellers, Shared, Locations, OS, Providers",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "item",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Servers",
+              "value": "servers"
+            },
+            {
+              "title": "Reseller",
+              "value": "reseller"
+            },
+            {
+              "title": "Shared",
+              "value": "shared"
+            },
+            {
+              "title": "Domains",
+              "value": "domains"
+            },
+            {
+              "title": "Labels",
+              "value": "labels"
+            },
+            {
+              "title": "Locations",
+              "value": "locations"
+            },
+            {
+              "title": "OS",
+              "value": "os"
+            },
+            {
+              "title": "Providers",
+              "value": "providers"
+            }
+          ],
+          "placeholder": "Item"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
+    "dayjs": "^1.11.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

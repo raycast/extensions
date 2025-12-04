@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vanguard-backup",
+  "title": "Vanguard Backup",
+  "categories": ["Developer Tools"],
+  "description": "Open Source Backup Solution",
+  "icon": "extension_icon.png",
+  "author": "xmok",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "vanguard_url",
+      "title": "Vanguard URL",
+      "placeholder": "https://app.vanguardbackup.com/",
+      "description": "URL of your Vanguard Instance",
+      "required": true,
+      "default": "https://app.vanguardbackup.com/",
+      "type": "textfield"
+    },
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "placeholder": "XXX...xxx",
+      "description": "API Token from Vanguard Dashboard",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-backup-destinations",
+      "title": "Search Backup Destinations",
+      "subtitle": "Vanguard Backup",
+      "description": "Manage Backup Destinations",
+      "mode": "view"
+    },
+    {
+      "name": "search-backup-tasks",
+      "title": "Search Backup Tasks",
+      "subtitle": "Vanguard Backup",
+      "description": "Manage Backup Tasks",
+      "mode": "view"
+    },
+    {
+      "name": "search-remote-servers",
+      "title": "Search Remote Servers",
+      "subtitle": "Vanguard Backup",
+      "description": "Manage Remote Servers",
+      "mode": "view"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

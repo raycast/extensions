@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "git-co-authors",
+  "title": "Git Co-Authors",
+  "description": "Manage and copy co-authors for git commits",
+  "icon": "extension_icon.png",
+  "author": "nickradford",
+  "contributors": [
+    "pernielsentikaer",
+    "mateusjunges"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "choose-coauthor",
+      "title": "Choose Co-Author",
+      "description": "Choose and copy the 'Co-author-by:' line for your commit",
+      "mode": "view"
+    },
+    {
+      "name": "add-or-edit-author",
+      "title": "Add Author",
+      "description": "Add an author to the list of authors to select from",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.0",
+    "@raycast/utils": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

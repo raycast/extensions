@@ -1,0 +1,226 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mail",
+  "title": "Apple Mail",
+  "description": "Extension for Apple Mail.",
+  "icon": "mail.png",
+  "author": "yug2005",
+  "contributors": [
+    "ikupenov",
+    "pernielsentikaer",
+    "fengtianze",
+    "tleo19",
+    "lukah",
+    "stelo",
+    "StevenRCE0",
+    "ridemountainpig",
+    "ViGeng",
+    "dante",
+    "5z99tsb75z",
+    "xilopaint"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "The primary action to be performed on the selected message.",
+      "type": "dropdown",
+      "default": "seeMessage",
+      "required": false,
+      "data": [
+        {
+          "title": "See Message",
+          "value": "seeMessage"
+        },
+        {
+          "title": "Open in Mail",
+          "value": "openMessage"
+        }
+      ]
+    },
+    {
+      "name": "saveDirectory",
+      "title": "Save Attachments To",
+      "description": "Directory to save mail attachments.",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "messageLimit",
+      "title": "Message Limit",
+      "description": "The amount of messages to retrieve.",
+      "type": "dropdown",
+      "default": "10",
+      "required": false,
+      "data": [
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "check-for-mail",
+      "title": "Check for New Mail",
+      "description": "Check for new mail for all accounts.",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-latest-otp-code",
+      "title": "Paste Latest OTP Code",
+      "description": "Paste the latest OTP code from your emails.",
+      "mode": "no-view",
+      "keywords": [
+        "2fa"
+      ]
+    },
+    {
+      "name": "compose-new-message",
+      "title": "Compose New Message",
+      "description": "Compose a new message.",
+      "mode": "view"
+    },
+    {
+      "name": "see-recent-mail",
+      "title": "See Recent Mail",
+      "description": "See recent unread messages.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "unreadonly",
+          "label": "Only show unread messages",
+          "title": "Unread-Only",
+          "description": "Only show unread messages.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "see-important-mail",
+      "title": "See Important Mail",
+      "description": "See messages in the important mailboxes.",
+      "mode": "view"
+    },
+    {
+      "name": "see-mail-accounts",
+      "title": "See Mail Accounts",
+      "description": "See mail accounts.",
+      "mode": "view"
+    },
+    {
+      "name": "share-with-mail",
+      "title": "Share with Mail",
+      "description": "Share selected Finder items with Mail.",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-mail",
+      "title": "Refresh Mail",
+      "description": "Refresh all mailboxes.",
+      "mode": "no-view",
+      "interval": "30m"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "description": "Clears the cache for all accounts.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mark-all-as-read",
+      "title": "Mark All as Read",
+      "description": "Mark all your emails as read.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-foreground-mail-deeplink",
+      "title": "Copy Mail Deeplink",
+      "description": "Copy the deeplink of the selected email in Apple Mail.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-emails",
+      "title": "Search Emails",
+      "description": "Search for emails in Apple Mail."
+    },
+    {
+      "name": "read-email",
+      "title": "Read Email",
+      "description": "Read the full content of an email."
+    },
+    {
+      "name": "list-addresses",
+      "title": "List Addresses",
+      "description": "List addresses in Apple Mail."
+    },
+    {
+      "name": "send-email",
+      "title": "Send Email",
+      "description": "Send an email with Apple Mail."
+    },
+    {
+      "name": "copy-email-link",
+      "title": "Copy Email Link",
+      "description": "Copy the local link (URI) of the selected Apple Mail email so you can jump directly to that message. This makes it convenient to locate a specific email for context."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "execa": "^9.5.2",
+    "got": "^14.4.6",
+    "javascript-time-ago": "^2.5.10",
+    "json2md": "^1.13.0",
+    "juice": "^9.1.0",
+    "mailparser": "^3.7.2",
+    "mime-types": "^2.1.35",
+    "plist": "^3.1.0",
+    "string-strip-html": "^13.4.12",
+    "turndown": "^7.2.0",
+    "utf8": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/got": "^9.6.12",
+    "@types/json2md": "^1.5.4",
+    "@types/mailparser": "^3.4.4",
+    "@types/mime-types": "^2.1.4",
+    "@types/plist": "^3.0.5",
+    "@types/turndown": "^5.0.5",
+    "@types/utf8": "^3.0.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

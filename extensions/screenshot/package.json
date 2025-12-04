@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenshot",
+  "title": "Screenshot",
+  "description": "Capture your screen with macOS native tools",
+  "icon": "command-icon.png",
+  "author": "Aayush9029",
+  "contributors": [
+    "nirtamir2"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "all-in-one",
+      "title": "All in One",
+      "subtitle": "Screenshot",
+      "description": "Capture and Crop All in One",
+      "icon": "all-in-one.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "Screenshot",
+      "description": "Capture Area of Screen",
+      "icon": "capture-area.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "Screenshot",
+      "description": "Capture App Window",
+      "icon": "capture-window.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window-to-clipboard",
+      "title": "Capture Window to Clipboard",
+      "subtitle": "Screenshot",
+      "description": "Capture App Window To Clipboard",
+      "icon": "capture-window-to-clipboard.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-screen",
+      "title": "Capture Screen",
+      "subtitle": "Screenshot",
+      "description": "Capture Screen",
+      "icon": "capture-fullscreen.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-timer",
+      "title": "Capture Timer",
+      "subtitle": "Screenshot",
+      "description": "Capture Screen after a Timer (default 5 seconds)",
+      "icon": "capture-timer.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "time",
+          "placeholder": "Delay (default 5 sec)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "capture-to-clipboard",
+      "title": "Capture to Clipboard",
+      "subtitle": "Screenshot",
+      "description": "Capture Area of Screen to Clipboard",
+      "icon": "clipboard.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "annotate",
+      "title": "Capture and Annotate",
+      "subtitle": "Screenshot",
+      "description": "Capture Screen and Annotate",
+      "icon": "annotate.png",
+      "mode": "no-view"
+    }
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.42.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.3",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.46.1",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  },
+  "version": "1.0.0",
+  "main": "index.js"
+}

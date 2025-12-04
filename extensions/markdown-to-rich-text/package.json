@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "markdown-to-rich-text",
+  "title": "Markdown to Rich Text",
+  "description": "Converts Markdown text from the clipboard to Rich text and pastes it.",
+  "icon": "command-icon.png",
+  "author": "ning_cao_cabeza",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert Clipboard To Rich Text",
+      "description": "This command reads Markdown text from the clipboard, converts it to Rich text, and pastes it.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@contentful/rich-text-from-markdown": "^15.18.1",
+    "@contentful/rich-text-html-renderer": "^16.6.1",
+    "@contentful/rich-text-plain-text-renderer": "^16.2.1",
+    "@raycast/api": "^1.77.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

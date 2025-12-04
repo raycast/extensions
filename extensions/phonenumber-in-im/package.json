@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phonenumber-in-im",
+  "title": "Fast Chat With Phone Number in IM Apps",
+  "description": "A Raycast extension enables faster chatting with a target phone number in IM apps like WhatsApp and Telegram, eliminating the need to add contacts beforehand.",
+  "icon": "logo.png",
+  "author": "timonpeng",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "clipboard",
+      "title": "Use Clipboard",
+      "label": "Use the text from Clipboard",
+      "description": "During the execution, prioritize the Phone Number that passed in, even if this option checked.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "chat-in-telegram",
+      "title": "Chat With A Phone Number in Telegram",
+      "description": "Faster chatting with a target phone number in Telegram, eliminating the need to add contacts beforehand.",
+      "icon": "telegram.png",
+      "mode": "no-view",
+      "keywords": [
+        "telegram"
+      ],
+      "preferences": [
+        {
+          "name": "bundleId",
+          "title": "Telegram Release Version to Use",
+          "description": "Choose the release version you have installed and wish to use.",
+          "type": "dropdown",
+          "required": false,
+          "default": "ru.keepcoder.Telegram",
+          "data": [
+            {
+              "title": "Telegram for macOS",
+              "value": "ru.keepcoder.Telegram"
+            },
+            {
+              "title": "Telegram Desktop",
+              "value": "org.telegram.desktop"
+            }
+          ]
+        }
+      ],
+      "arguments": [
+        {
+          "name": "phoneNumber",
+          "placeholder": "Phone Number",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "chat-in-whatsapp",
+      "title": "Chat With A Phone Number in WhatsApp",
+      "description": "Faster chatting with a target phone number in WhatsApp, eliminating the need to add contacts beforehand.",
+      "icon": "whatsapp.png",
+      "mode": "no-view",
+      "keywords": [
+        "whatsapp"
+      ],
+      "preferences": [
+        {
+          "name": "bundleId",
+          "title": "WhatsApp Release Version to Use",
+          "description": "Choose the release version you have installed and wish to use.",
+          "type": "dropdown",
+          "required": false,
+          "default": "net.whatsapp.WhatsApp",
+          "data": [
+            {
+              "title": "WhatsApp Messenger",
+              "value": "net.whatsapp.WhatsApp"
+            },
+            {
+              "title": "WhatsApp Desktop",
+              "value": "desktop.WhatsApp"
+            }
+          ]
+        }
+      ],
+      "arguments": [
+        {
+          "name": "phoneNumber",
+          "placeholder": "Phone Number",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

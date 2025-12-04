@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "figma-files-raycast-extension",
+  "title": "Figma File Search",
+  "description": "Lists Figma files allowing you to search and navigate to them.",
+  "icon": "command-icon.png",
+  "author": "michaelschultz",
+  "contributors": [
+    "pernielsentikaer",
+    "GLaDO8"
+  ],
+  "version": "1.6.2",
+  "license": "MIT",
+  "keywords": [
+    "figma",
+    "search",
+    "design"
+  ],
+  "preferences": [
+    {
+      "name": "PERSONAL_ACCESS_TOKEN",
+      "type": "password",
+      "required": false,
+      "title": "Personal Access Token",
+      "description": "[Deprecated] You can optionally use a personal access token to login, otherwise you will be prompted to login via the browser."
+    },
+    {
+      "name": "TEAM_ID",
+      "type": "textfield",
+      "required": true,
+      "title": "Team ID/s",
+      "description": "Find this in the url after navigating to your team page. Add multiple Team IDs separated by a comma."
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Files",
+      "subtitle": "Figma",
+      "description": "Lists Figma files allowing you to search and navigate to them.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Quicklook",
+      "subtitle": "Figma",
+      "description": "See your Figma most recent files at a glance",
+      "mode": "menu-bar",
+      "interval": "2h"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.18.6",
+    "@types/react": "^19.1.13",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tip-calculator",
+  "title": "Tip Calculator",
+  "description": "Calculate the total per person based on the Bill, Tip %, and Number of People.",
+
+  "icon": "command-icon.png",
+  "author": "Visual-Studio-Coder",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calculate-tip",
+      "title": "Calculate Tip",
+      "description": "Input values to calculate tips.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "bill",
+          "type": "text",
+          "placeholder": "Bill (Currency)",
+          "required": true
+        },
+        {
+          "name": "tip",
+          "type": "text",
+          "placeholder": "Tip %",
+          "required": true
+        },
+        {
+          "name": "people",
+          "type": "text",
+          "placeholder": "Number of People",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "currency",
+      "description": "Enter the symbol of the currency you use.",
+      "type": "textfield",
+      "title": "Currency's Symbol",
+      "placeholder": "Exmples: $, €, ₹, etc...",
+      "required": true
+    },
+    {
+      "name": "currencyPosition",
+      "description": "Should the currency be placed before or after the values?",
+      "type": "dropdown",
+      "required": true,
+      "title": "Prepend or Append the Currency",
+      "placeholder": "Should currency be pre- or appended?",
+      "data": [
+        {
+          "title": "Append",
+          "value": "append"
+        },
+        {
+          "title": "Prepend",
+          "value": "prepend"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

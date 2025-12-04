@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "collected-notes",
+  "title": "Collected Notes",
+  "description": "Manage your Collected Notes blog",
+  "icon": "command-icon.png",
+  "author": "txemaleon",
+  "categories": [
+    "Web",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-notes",
+      "title": "List Collected Notes",
+      "description": "Manage your Collected Notes posts",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Collected Note",
+      "description": "Create a new Note",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "email",
+      "description": "Your Collected Notes Email",
+      "subtitle": "Collected Notes",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "placeholder": "your_email@collectednotes.com"
+    },
+    {
+      "name": "apiKey",
+      "description": "Your Collected Notes API Key",
+      "subtitle": "Collected Notes",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "placeholder": "secret_123123123"
+    }
+  ]
+}

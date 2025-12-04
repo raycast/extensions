@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "doutu",
+  "title": "DouTu",
+  "description": "Easy retrieval of web emoji and GIF images while chatting.",
+  "icon": "icon.png",
+  "author": "gaoyang",
+  "categories": [
+    "Media",
+    "Fun",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "DouTu",
+      "description": "Easy retrieval of web emoji and GIF images while chatting.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.0",
+    "cheerio": "1.0.0-rc.12",
+    "image-type": "^5.2.0",
+    "node-fetch": "^3.3.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.11.16",
+    "@types/react": "18.2.51",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

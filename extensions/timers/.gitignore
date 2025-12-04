@@ -1,0 +1,8 @@
+node_modules/*
+.eslintcache
+**/.DS_Store
+.vscode/
+.idea/
+raycast-env.d.ts
+assets/TimersNotifHelper.app/
+*.swp

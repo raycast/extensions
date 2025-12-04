@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "namecheap",
+  "title": "Namecheap",
+  "description": "View your Namecheap Domains and their DNS",
+  "icon": "namecheap.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "ApiUser",
+      "title": "API User",
+      "description": "Username required to access the API",
+      "placeholder": "ncuser",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "ApiKey",
+      "title": "API Key",
+      "description": "Password required to access the API",
+      "placeholder": "56b4c87ef4fd49cb96d915c0db681944",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "UserName",
+      "title": "Username",
+      "description": "The Username on which a command is executed",
+      "placeholder": "ncuser",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "ClientIp",
+      "title": "Client IP",
+      "description": "IP address from which the system makes API calls",
+      "placeholder": "192.168.1.109",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "Sandbox",
+      "label": "Sandbox",
+      "description": "Whether to use Prod or Dev environment",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "domains",
+      "title": "List Domains",
+      "subtitle": "Namecheap",
+      "description": "List Domains in your Namecheap Account",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.17.0",
+    "@types/xml2js": "^0.4.14",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

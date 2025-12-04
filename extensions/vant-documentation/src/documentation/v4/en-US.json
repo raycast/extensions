@@ -1,0 +1,770 @@
+[
+  {
+    "title": "Essentials",
+    "items": [
+      {
+        "title": "Introduction",
+        "component": "home",
+        "describe": "A lightweight, customizable Vue UI library for mobile web apps.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/home.en-US.md?ref=main"
+      },
+      {
+        "title": "Quickstart",
+        "component": "quickstart",
+        "describe": "Using npm to install:",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/quickstart.en-US.md?ref=main"
+      },
+      {
+        "title": "Advanced Usage",
+        "component": "advanced-usage",
+        "describe": "Through this chapter, you can learn about some advanced usages of Vant.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/advanced-usage.en-US.md?ref=main"
+      },
+      {
+        "title": "FAQ",
+        "component": "faq",
+        "describe": "Vant provides the ability to customize the theme based on CSS variables, and can uniformly modify the component style. For details, see ConfigProvider Global Configuration component.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/faq.en-US.md?ref=main"
+      },
+      {
+        "title": "Changelog",
+        "component": "changelog",
+        "describe": "Vant follows Semantic Versioning 2.0.0.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/changelog.en-US.md?ref=main"
+      },
+      {
+        "title": "4.0 Release Note",
+        "component": "release-note-v4",
+        "describe": "After a year of iterations, Vant 4.0 has been officially released, which is the fourth major version of Vant since it was open-sourced in 2017.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/release-note-v4.en-US.md?ref=main"
+      },
+      {
+        "title": "Upgrade from v2 to v3",
+        "component": "migrate-from-v2",
+        "describe": "This document provides an upgrade guide from Vant 2 to Vant 3.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/migrate-from-v2.en-US.md?ref=main"
+      },
+      {
+        "title": "Upgrade from v3 to v4",
+        "component": "migrate-from-v3",
+        "describe": "This document provides an upgrade guide from Vant 3 to Vant 4.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/migrate-from-v3.en-US.md?ref=main"
+      },
+      {
+        "title": "Contribution Guide",
+        "component": "contribution",
+        "describe": "Thank you for using Vant.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/contribution.en-US.md?ref=main"
+      },
+      {
+        "title": "Design Resources",
+        "component": "design",
+        "describe": "You can download Vant's design resources here.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/design.en-US.md?ref=main"
+      },
+      {
+        "title": "Internationalization",
+        "component": "locale",
+        "describe": "Vant uses Chinese as the default language. If you want to use other languages, please follow the instructions below.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/locale.en-US.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "Basic Components",
+    "items": [
+      {
+        "title": "Button",
+        "component": "button",
+        "describe": "Buttons are used to trigger an action, such as submitting a form.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/button/README.md?ref=main"
+      },
+      {
+        "title": "Cell",
+        "component": "cell",
+        "describe": "The cell is a single display item in the list.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/cell/README.md?ref=main"
+      },
+      {
+        "title": "ConfigProvider",
+        "component": "config-provider",
+        "describe": "Used to configure Vant components globally, providing dark mode, theme customization and other capabilities.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/config-provider/README.md?ref=main"
+      },
+      {
+        "title": "Icon",
+        "component": "icon",
+        "describe": "The font-based icon set that can be used via the Icon component or referenced in other components via the icon attribute.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/icon/README.md?ref=main"
+      },
+      {
+        "title": "Image",
+        "component": "image",
+        "describe": "Enhanced img tag with multiple image fill modes, support for image lazy loading, loading hint, loading failure hint.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/image/README.md?ref=main"
+      },
+      {
+        "title": "Layout",
+        "component": "col",
+        "describe": "Quickly and easily create layouts with van-row and van-col.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/col/README.md?ref=main"
+      },
+      {
+        "title": "Popup",
+        "component": "popup",
+        "describe": "Used to display pop-up windows, information prompts, etc., and supports multiple pop-up layers to display.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/popup/README.md?ref=main"
+      },
+      {
+        "title": "Space",
+        "component": "space",
+        "describe": "Set the spacing between elements.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/space/README.md?ref=main"
+      },
+      {
+        "title": "Built-in style",
+        "component": "style",
+        "describe": "Vant contains some common styles that can be used directly by the className.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/style/README.md?ref=main"
+      },
+      {
+        "title": "Toast",
+        "component": "toast",
+        "describe": "Black semi-transparent pop-up hint in the middle of the page, used for message notification, loading hint, operation result hint and other scenarios.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/toast/README.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "Form Components",
+    "items": [
+      {
+        "title": "Calendar",
+        "component": "calendar",
+        "describe": "Calendar component for selecting dates or date ranges.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/calendar/README.md?ref=main"
+      },
+      {
+        "title": "Cascader",
+        "component": "cascader",
+        "describe": "The cascader component is used for the selection of multi-level data. The typical scene is the selection of provinces and cities.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/cascader/README.md?ref=main"
+      },
+      {
+        "title": "Checkbox",
+        "component": "checkbox",
+        "describe": "A group of options for multiple choices.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/checkbox/README.md?ref=main"
+      },
+      {
+        "title": "DatePicker",
+        "component": "date-picker",
+        "describe": "Used to select date, usually used with the Popup component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/date-picker/README.md?ref=main"
+      },
+      {
+        "title": "Field",
+        "component": "field",
+        "describe": "Field component let users enter and edit text.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/field/README.md?ref=main"
+      },
+      {
+        "title": "Form",
+        "component": "form",
+        "describe": "Used for data entry and verification, and supports input boxes, radio buttons, check boxes, file uploads and other types. Should be used with Field component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/form/README.md?ref=main"
+      },
+      {
+        "title": "NumberKeyboard",
+        "component": "number-keyboard",
+        "describe": "The NumberKeyboard component can be used with PasswordInput component or custom input box components.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/number-keyboard/README.md?ref=main"
+      },
+      {
+        "title": "PasswordInput",
+        "component": "password-input",
+        "describe": "The PasswordInput component is usually used with NumberKeyboard Component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/password-input/README.md?ref=main"
+      },
+      {
+        "title": "Picker",
+        "component": "picker",
+        "describe": "The picker component is usually used with Popup Component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/picker/README.md?ref=main"
+      },
+      {
+        "title": "PickerGroup",
+        "component": "picker-group",
+        "describe": "Used to combine multiple Picker components, allow users to select multiple value.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/picker-group/README.md?ref=main"
+      },
+      {
+        "title": "Radio",
+        "component": "radio",
+        "describe": "Single selection among multiple options.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/radio/README.md?ref=main"
+      },
+      {
+        "title": "Rate",
+        "component": "rate",
+        "describe": "The rate component is used for rating things.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/rate/README.md?ref=main"
+      },
+      {
+        "title": "Search",
+        "component": "search",
+        "describe": "Input box component for search scenarios.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/search/README.md?ref=main"
+      },
+      {
+        "title": "Slider",
+        "component": "slider",
+        "describe": "Used to select a value within a given range.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/slider/README.md?ref=main"
+      },
+      {
+        "title": "Signature",
+        "component": "signature",
+        "describe": "Component for signature scene, based on Canvas. Please upgrade vant to >= v4.3.0 before using this component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/signature/README.md?ref=main"
+      },
+      {
+        "title": "Stepper",
+        "component": "stepper",
+        "describe": "The stepper component consists of an increase button, a decrease button and an input box, which are used to input and adjust numbers within a certain range.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/stepper/README.md?ref=main"
+      },
+      {
+        "title": "Switch",
+        "component": "switch",
+        "describe": "Used to switch between open and closed states.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/switch/README.md?ref=main"
+      },
+      {
+        "title": "TimePicker",
+        "component": "time-picker",
+        "describe": "Used to select time, usually used with the Popup component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/time-picker/README.md?ref=main"
+      },
+      {
+        "title": "Uploader",
+        "component": "uploader",
+        "describe": "Used to upload a local image or file to the server and display a preview image and upload progress during the upload process. The Uploader component does not currently contain the interface logic for uploading files to the server, this step needs to be implemented by the user.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/uploader/README.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "Action Components",
+    "items": [
+      {
+        "title": "ActionSheet",
+        "component": "action-sheet",
+        "describe": "The pop-up modal panel at the bottom contains multiple options related to the current situation.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/action-sheet/README.md?ref=main"
+      },
+      {
+        "title": "Barrage",
+        "component": "barrage",
+        "describe": "To realize the critical subtitle function when watching the video. Please upgrade vant to >= v4.4.0 before using this component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/barrage/README.md?ref=main"
+      },
+      {
+        "title": "Dialog",
+        "component": "dialog",
+        "describe": "A modal box pops up on the page, which is often used for message prompts, message confirmation, or to complete specific interactive operations in the current page. It supports two methods: component call and function call.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/dialog/README.md?ref=main"
+      },
+      {
+        "title": "DropdownMenu",
+        "component": "dropdown-menu",
+        "describe": "The menu list that pops down downwards.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/dropdown-menu/README.md?ref=main"
+      },
+      {
+        "title": "FloatingPanel",
+        "component": "floating-panel",
+        "describe": "A panel that floats at the bottom of a page, which can be dragged up and down to browse content, often used to provide additional functionality or information. Please upgrade vant to >= v4.5.0 before using this component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/floating-panel/README.md?ref=main"
+      },
+      {
+        "title": "FloatingBubble",
+        "component": "floating-bubble",
+        "describe": "Clickable bubbles that hover around the edge of the page. Please upgrade vant to >= v4.6.0 before using this component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/floating-bubble/README.md?ref=main"
+      },
+      {
+        "title": "Loading",
+        "component": "loading",
+        "describe": "Used to indicate the transition state during loading.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/loading/README.md?ref=main"
+      },
+      {
+        "title": "Notify",
+        "component": "notify",
+        "describe": "The display message prompt is at the top of the page, and supports two methods: component call and function call.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/notify/README.md?ref=main"
+      },
+      {
+        "title": "Overlay",
+        "component": "overlay",
+        "describe": "Create a mask layer to emphasize specific page elements and prevent users from performing other operations.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/overlay/README.md?ref=main"
+      },
+      {
+        "title": "PullRefresh",
+        "component": "pull-refresh",
+        "describe": "Used to provide interactive operations for pull-down refresh.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/pull-refresh/README.md?ref=main"
+      },
+      {
+        "title": "ShareSheet",
+        "component": "share-sheet",
+        "describe": "A pop-up sharing panel at the bottom for displaying the action buttons corresponding to each sharing channel, without specific sharing logic.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/share-sheet/README.md?ref=main"
+      },
+      {
+        "title": "SwipeCell",
+        "component": "swipe-cell",
+        "describe": "Used for cell components that can slide left and right to display operation buttons.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/swipe-cell/README.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "Display Components",
+    "items": [
+      {
+        "title": "Badge",
+        "component": "badge",
+        "describe": "Display a small badge or a red dot to the top-right of its child.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/badge/README.md?ref=main"
+      },
+      {
+        "title": "Circle",
+        "component": "circle",
+        "describe": "Circular progress bar component, and supports gradient color animation.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/circle/README.md?ref=main"
+      },
+      {
+        "title": "Collapse",
+        "component": "collapse",
+        "describe": "Place a group of content in multiple collapsible panels, click the title of the panel to expand or contract its content.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/collapse/README.md?ref=main"
+      },
+      {
+        "title": "CountDown",
+        "component": "count-down",
+        "describe": "Place a group of content in multiple collapsible panels, click the title of the panel to expand or contract its content.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/count-down/README.md?ref=main"
+      },
+      {
+        "title": "Divider",
+        "component": "divider",
+        "describe": "Separate content into multiple areas.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/divider/README.md?ref=main"
+      },
+      {
+        "title": "Empty",
+        "component": "empty",
+        "describe": "Occupation reminder when empty.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/empty/README.md?ref=main"
+      },
+      {
+        "title": "Highlight",
+        "component": "highlight",
+        "describe": "Highlight the specified text content. Please upgrade vant to >= v4.8.0 before using this component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/highlight/README.md?ref=main"
+      },
+      {
+        "title": "ImagePreview",
+        "component": "image-preview",
+        "describe": "Used to zoom in and preview the picture, and it supports two methods: function call and component call.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/image-preview/README.md?ref=main"
+      },
+      {
+        "title": "Lazyload",
+        "component": "lazyload",
+        "describe": "When the page needs to load a large amount of content, delay loading the content outside the visible area of the page to make the page load smoother.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/lazyload/README.md?ref=main"
+      },
+      {
+        "title": "List",
+        "component": "list",
+        "describe": "A list component to show items and control loading status.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/list/README.md?ref=main"
+      },
+      {
+        "title": "NoticeBar",
+        "component": "notice-bar",
+        "describe": "Used to display a group of message notifications in a continuons loop.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/notice-bar/README.md?ref=main"
+      },
+      {
+        "title": "Popover",
+        "component": "popover",
+        "describe": "Used to display some content on top of another.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/popover/README.md?ref=main"
+      },
+      {
+        "title": "Progress",
+        "component": "progress",
+        "describe": "Used to show the current progress of the operation.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/progress/README.md?ref=main"
+      },
+      {
+        "title": "RollingText",
+        "component": "rolling-text",
+        "describe": "Rolling text animation, which can roll numbers and other types of text. Please upgrade vant to >= v4.6.0 before using this component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/rolling-text/README.md?ref=main"
+      },
+      {
+        "title": "Skeleton",
+        "component": "skeleton",
+        "describe": "Used to display a set of placeholder graphics during the content loading process.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/skeleton/README.md?ref=main"
+      },
+      {
+        "title": "Steps",
+        "component": "steps",
+        "describe": "Used to show the various parts of the action flow and let the user know where the current action fits into the overall flow.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/steps/README.md?ref=main"
+      },
+      {
+        "title": "Sticky",
+        "component": "sticky",
+        "describe": "The sticky component is consistent with the effect achieved by the position: sticky property in CSS, in that when the component is within screen range, it will follow the normal layout arrangement, and when the component rolls out of screen range, it will always be fixed at the top of the screen.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/sticky/README.md?ref=main"
+      },
+      {
+        "title": "Swipe",
+        "component": "swipe",
+        "describe": "Used to loop a group of pictures or content.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/swipe/README.md?ref=main"
+      },
+      {
+        "title": "Tag",
+        "component": "tag",
+        "describe": "Used to mark keywords and summarize the main content.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/tag/README.md?ref=main"
+      },
+      {
+        "title": "TextEllipsis",
+        "component": "text-ellipsis",
+        "describe": "Display ellipsis for long text and support for expanding or collapsing text. Please upgrade vant to >= v4.1.0 before using this component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/text-ellipsis/README.md?ref=main"
+      },
+      {
+        "title": "Watermark",
+        "component": "watermark",
+        "describe": "Add specific text or patterns on the page as watermarks, which can be used to prevent information theft. Please upgrade vant to >= v4.2.0 before using this component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/watermark/README.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "Navigation Components",
+    "items": [
+      {
+        "title": "ActionBar",
+        "component": "action-bar",
+        "describe": "Used to provide convenient interaction for page-related operations.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/action-bar/README.md?ref=main"
+      },
+      {
+        "title": "BackTop",
+        "component": "back-top",
+        "describe": "A button to back to top.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/back-top/README.md?ref=main"
+      },
+      {
+        "title": "Grid",
+        "component": "grid",
+        "describe": "Used to divide the page into blocks of equal width in the horizontal direction for displaying content or page navigation.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/grid/README.md?ref=main"
+      },
+      {
+        "title": "IndexBar",
+        "component": "index-bar",
+        "describe": "Used for indexed sorting display and quick positioning of lists.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/index-bar/README.md?ref=main"
+      },
+      {
+        "title": "NavBar",
+        "component": "nav-bar",
+        "describe": "Provide navigation function for the page, often used at the top of the page.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/nav-bar/README.md?ref=main"
+      },
+      {
+        "title": "Pagination",
+        "component": "pagination",
+        "describe": "When the amount of data is too much, use pagination to separate the data, and load only one page at a time.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/pagination/README.md?ref=main"
+      },
+      {
+        "title": "Sidebar",
+        "component": "sidebar",
+        "describe": "When the amount of data is too much, use pagination to separate the data, and load only one page at a time.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/sidebar/README.md?ref=main"
+      },
+      {
+        "title": "Tab",
+        "component": "tab",
+        "describe": "Used to switch between different content areas.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/tab/README.md?ref=main"
+      },
+      {
+        "title": "Tabbar",
+        "component": "tabbar",
+        "describe": "Used to switch between different pages.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/tabbar/README.md?ref=main"
+      },
+      {
+        "title": "TreeSelect",
+        "component": "tree-select",
+        "describe": "Used to select from a set of related data sets.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/tree-select/README.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "Business Components",
+    "items": [
+      {
+        "title": "AddressEdit",
+        "component": "address-edit",
+        "describe": "Used to create, update, and delete receiving addresses.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/address-edit/README.md?ref=main"
+      },
+      {
+        "title": "AddressList",
+        "component": "address-list",
+        "describe": "Display a list of receiving addresses.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/address-list/README.md?ref=main"
+      },
+      {
+        "title": "Area",
+        "component": "area",
+        "describe": "A three-level linkage selection of provinces and cities, usually used in conjunction with Popup component.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/area/README.md?ref=main"
+      },
+      {
+        "title": "Card",
+        "component": "card",
+        "describe": "Used to display product pictures, prices and other information.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/card/README.md?ref=main"
+      },
+      {
+        "title": "ContactCard",
+        "component": "contact-card",
+        "describe": "Display contact information in the form of cards.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/contact-card/README.md?ref=main"
+      },
+      {
+        "title": "ContactEdit",
+        "component": "contact-edit",
+        "describe": "Edit and save the contact information.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/contact-edit/README.md?ref=main"
+      },
+      {
+        "title": "ContactList",
+        "component": "contact-list",
+        "describe": "Used to display the contact list.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/contact-list/README.md?ref=main"
+      },
+      {
+        "title": "Coupon",
+        "component": "coupon-list",
+        "describe": "Used for redemption and selection of coupons.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/coupon-list/README.md?ref=main"
+      },
+      {
+        "title": "SubmitBar",
+        "component": "submit-bar",
+        "describe": "Used to display the order amount and submit the order.",
+        "version": "v4",
+        "filePath": "/packages/vant/src/submit-bar/README.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "Composables",
+    "items": [
+      {
+        "title": "Intro",
+        "component": "vant-use-intro",
+        "describe": "Vant provide some built-in composition APIs, you can directly use these APIs for development.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/vant-use-intro.en-US.md?ref=main"
+      },
+      {
+        "title": "useClickAway",
+        "component": "use-click-away",
+        "describe": "Triggers a callback when user clicks outside of the target element.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-click-away.en-US.md?ref=main"
+      },
+      {
+        "title": "useCountDown",
+        "component": "use-count-down",
+        "describe": "Used to manage the countdown.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-count-down.en-US.md?ref=main"
+      },
+      {
+        "title": "useCustomFieldValue",
+        "component": "use-custom-field-value",
+        "describe": "Used to custom Field value.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-custom-field-value.en-US.md?ref=main"
+      },
+      {
+        "title": "useEventListener",
+        "component": "use-event-listener",
+        "describe": "Attaching an event when the component is mounted and activated, then removing the event when the component is unmounted and deactivated.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-event-listener.en-US.md?ref=main"
+      },
+      {
+        "title": "usePageVisibility",
+        "component": "use-page-visibility",
+        "describe": "Get the visible state of the page.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-page-visibility.en-US.md?ref=main"
+      },
+      {
+        "title": "useRect",
+        "component": "use-rect",
+        "describe": "Get the size of an element and its position relative to the viewport, equivalent to Element.getBoundingClientRect.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-rect.en-US.md?ref=main"
+      },
+      {
+        "title": "useRelation",
+        "component": "use-relation",
+        "describe": "Establish the association relationship between parent and child components, perform data communication and method invocation, based on provide and inject implementation.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-relation.en-US.md?ref=main"
+      },
+      {
+        "title": "useScrollParent",
+        "component": "use-scroll-parent",
+        "describe": "Get the closest parent element that is scrollable.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-scroll-parent.en-US.md?ref=main"
+      },
+      {
+        "title": "useToggle",
+        "component": "use-toggle",
+        "describe": "Used to switch between true and false.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-toggle.en-US.md?ref=main"
+      },
+      {
+        "title": "useWindowSize",
+        "component": "use-window-size",
+        "describe": "Get the viewport width and height of the browser window, and update it automatically when the window size changes.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-window-size.en-US.md?ref=main"
+      },
+      {
+        "title": "useRaf",
+        "component": "use-raf",
+        "describe": "Provide convenient call and cancellation of requestAnimationFrame.",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-raf.en-US.md?ref=main"
+      }
+    ]
+  }
+]

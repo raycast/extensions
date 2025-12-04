@@ -1,0 +1,95 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "easy-ocr",
+    "title": "Easy OCR",
+    "description": "Use Tesseract OCR to extract text from screenshot",
+    "icon": "command-icon.png",
+    "author": "Rafo94",
+    "contributors": [
+        "quiknull"
+    ],
+    "categories": [
+        "Productivity"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "index",
+            "title": "Area OCR",
+            "description": "Select screen area which you want to extract the text",
+            "mode": "no-view"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "tesseract_path",
+            "type": "textfield",
+            "required": false,
+            "title": "Tesseract binary path",
+            "description": "Absolute path to your tesseract binary - check documentation if default path is not correct",
+            "placeholder": "Tesseract binary path",
+            "default": "/opt/homebrew/bin/tesseract"
+        },
+        {
+            "name": "autodetect_lang",
+            "title": "Autodetect language",
+            "label": "Enable language autodetect",
+            "description": "Enable auto detection fo language, Tesseract language will be used as a fallback language if autodetect fails or doesn't find suitable lang",
+            "type": "checkbox",
+            "required": true,
+            "default": false
+        },
+        {
+            "name": "tesseract_lang",
+            "type": "textfield",
+            "required": false,
+            "title": "Tesseract language",
+            "description": "Language which will be used for OCR. Run tesseract --list-langs in your terminal for list of available languages.",
+            "placeholder": "Tesseract language",
+            "default": "eng"
+        },
+        {
+            "name": "newLine",
+            "type": "dropdown",
+            "required": false,
+            "title": "How to treat new lines (\\n)?",
+            "description": "OCR engines can read new lines and they interpret them as \\n, this option gives you ability to swap them out",
+            "data": [
+                {
+                    "title": "Replace with empty space",
+                    "value": "replaceSpace"
+                },
+                {
+                    "title": "Don't change anything",
+                    "value": "keep"
+                },
+                {
+                    "title": "Replace with <br>",
+                    "value": "replaceBreak"
+                }
+            ],
+            "default": "replaceSpace"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.56.1",
+        "@raycast/utils": "^1.10.0",
+        "node-tesseract-ocr": "^2.2.1",
+        "raycast-language-detector": "^0.2.3"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "1.0.5",
+        "@types/node": "18.8.3",
+        "@types/react": "18.0.9",
+        "eslint": "^7.32.0",
+        "prettier": "^2.5.1",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

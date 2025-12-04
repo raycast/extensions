@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jsr",
+  "title": "JSR",
+  "description": "Search through JSR, the Open Source Package Registry for Javascript/Typescript",
+  "icon": "command-icon.png",
+  "author": "j3lte",
+  "contributors": [
+    "litomore"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-jsr",
+      "title": "Search Packages",
+      "description": "Search for packages on JSR.io",
+      "subtitle": "JSR",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openWebsiteByDefault",
+      "description": "Open JSR.io instead of showing the details",
+      "type": "checkbox",
+      "defaultValue": false,
+      "required": false,
+      "label": "Open Website by Default"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.1",
+    "cheerio": "^1.1.2",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "24.7.0",
+    "@types/react": "19.2.2",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

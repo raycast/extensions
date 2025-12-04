@@ -1,0 +1,25 @@
+fragment OperationID on BulkOperation {
+  id
+}
+
+fragment ChangesetID on Changeset {
+  id
+}
+
+mutation PublishChangeset($batchChange: ID!, $changeset: ID!) {
+  publishChangesets(batchChange: $batchChange, changesets: [$changeset]) {
+    ...OperationID
+  }
+}
+
+mutation ReenqueueChangeset($changeset: ID!) {
+  reenqueueChangeset(changeset: $changeset) {
+    ...ChangesetID
+  }
+}
+
+mutation MergeChangeset($batchChange: ID!, $changeset: ID!, $squash: Boolean) {
+  mergeChangesets(batchChange: $batchChange, changesets: [$changeset], squash: $squash) {
+    ...OperationID
+  }
+}

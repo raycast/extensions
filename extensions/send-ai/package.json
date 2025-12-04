@@ -1,0 +1,761 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "send-ai",
+  "title": "SendAI",
+  "description": "Your shortcut to everything Solana. At your command bar.",
+  "icon": "icon.png",
+  "author": "kanishq_khandelwal",
+  "access": "public",
+  "owner": "sendai",
+  "contributors": [],
+  "categories": [
+    "Productivity",
+    "Finance",
+    "Web",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "buy-token",
+      "title": "Buy Token",
+      "subtitle": "SendAI",
+      "description": "Buy a specific token",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "outputMint",
+          "type": "text",
+          "title": "Token Address",
+          "placeholder": "Enter token CA",
+          "required": true
+        },
+        {
+          "name": "inputAmount",
+          "type": "text",
+          "title": "Amount (in SOL)",
+          "placeholder": "Enter amount in SOL",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "transfer-spl",
+      "title": "Transfer Tokens",
+      "subtitle": "SendAI",
+      "description": "Transfer SPL tokens to another wallet address. If user mentions the token address then use that address to transfer the token, if user mentions the token ticker then get the token info of that ticker and then transfer the token",
+      "mode": "view"
+    },
+    {
+      "name": "get-wallet",
+      "title": "Wallet",
+      "subtitle": "SendAI",
+      "description": "Get your SendAI wallet",
+      "mode": "view"
+    },
+    {
+      "name": "sell-token",
+      "title": "Sell Token",
+      "subtitle": "SendAI",
+      "description": "Sell a specific token",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "inputMint",
+          "type": "text",
+          "title": "Token Address",
+          "placeholder": "enter token address"
+        },
+        {
+          "name": "inputAmount",
+          "type": "text",
+          "title": "Amount",
+          "placeholder": "enter number of tokens"
+        }
+      ]
+    },
+    {
+      "name": "get-token-overview",
+      "title": "Token Overview",
+      "subtitle": "SendAI",
+      "description": "Get information about a specific token",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "tokenAddress",
+          "type": "text",
+          "title": "Token Address",
+          "placeholder": "Enter token CA or ticker",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-trending-tokens",
+      "title": "Trending Tokens",
+      "subtitle": "SendAI",
+      "description": "Get list of trending tokens",
+      "mode": "view"
+    },
+    {
+      "name": "get-portfolio",
+      "title": "Portfolio",
+      "subtitle": "SendAI",
+      "description": "Get your token portfolio",
+      "mode": "view"
+    },
+    {
+      "name": "create-dca",
+      "title": "Create DCA",
+      "subtitle": "SendAI",
+      "description": "Create a DCA order",
+      "mode": "view",
+      "arguments": []
+    },
+    {
+      "name": "create-limit-order",
+      "title": "Create Limit Order",
+      "subtitle": "SendAI",
+      "description": "Create a limit order",
+      "mode": "view"
+    },
+    {
+      "name": "show-limit-orders",
+      "title": "Show Limit Orders",
+      "subtitle": "SendAI",
+      "description": "Show all limit orders",
+      "mode": "view"
+    },
+    {
+      "name": "show-dca-orders",
+      "title": "Show DCA Orders",
+      "subtitle": "SendAI",
+      "description": "Show all DCA orders",
+      "mode": "view"
+    },
+    {
+      "name": "launch-token",
+      "title": "Launch Token",
+      "subtitle": "SendAI",
+      "description": "Launch a new token",
+      "mode": "view"
+    },
+    {
+      "name": "transaction-history",
+      "title": "Transaction History",
+      "subtitle": "SendAI",
+      "description": "Get the transaction history of your wallet",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "balance",
+      "title": "Balance",
+      "description": "This action/tool is used to check the balance of a the user's wallet. The balance is in SOL, the native token of Solana. When using this action, the user is aware that they are checking the balance of their wallet and not the balance of a specific token.",
+      "keywords": [
+        "check balance",
+        "check solana balance",
+        "get wallet balance",
+        "view balance",
+        "show balance",
+        "balance",
+        "solana",
+        "wallet",
+        "sol in wallet"
+      ]
+    },
+    {
+      "name": "buy-token",
+      "title": "Buy Token",
+      "description": "This tool can be used to buy tokens. This buys tokens using SOL. User is aware that they are buying tokens using SOL and don't need to be told that. this function acess token address and not the ticker if ticker is given then get the token info of that ticker and then buy the token. This function takes input amount in sol and not in usdc",
+      "keywords": [
+        "buy tokens",
+        "buy sol",
+        "buy",
+        "token",
+        "purchase",
+        "crypto",
+        "solana"
+      ]
+    },
+    {
+      "name": "transfer",
+      "title": "Transfer SOL",
+      "description": "This action/tool is used to transfer SOL, the native token of Solana, to another wallet address which is a solana public key. Address of SOL is So11111111111111111111111111111111111111112. When using this action, the user is aware that they are transferring SOL and not any other token.",
+      "keywords": [
+        "transfer funds",
+        "send money",
+        "send sol",
+        "transfer sol",
+        "transfer",
+        "send",
+        "sol",
+        "wallet",
+        "transaction"
+      ]
+    },
+    {
+      "name": "transfer-spl",
+      "title": "Transfer SPL Token",
+      "description": "This action/tool is used to transfer SPL tokens to another wallet address which is a solana public key. This action also handles the creation of a new token account for the recipient if they don't already have one. When using this action, the user is aware that they are transferring SPL tokens and not SOL.",
+      "keywords": [
+        "send tokens",
+        "transfer tokens",
+        "transfer spl token",
+        "spl token to wallet",
+        "spl token to address",
+        "transfer",
+        "spl",
+        "token",
+        "send",
+        "transaction"
+      ]
+    },
+    {
+      "name": "get-wallet-address",
+      "title": "Get Wallet Address",
+      "description": "This action/tool is used to get the wallet address of the user, which is a solana public key",
+      "keywords": [
+        "get wallet address",
+        "show wallet address",
+        "display wallet address",
+        "my wallet address",
+        "my solana wallet address",
+        "wallet",
+        "address",
+        "public key",
+        "account"
+      ]
+    },
+    {
+      "name": "get-token-balance",
+      "title": "Get Token Balance",
+      "description": "This action/tool is used to check the token balances of a the user's wallet. The response contains the name, symbol, balance and decimals of the token. When using this action, the user is aware that they are checking the token balances of their wallet and not the token balances of a specific token.",
+      "keywords": [
+        "check token balances",
+        "get wallet token balances",
+        "view token balances",
+        "show token balances",
+        "check token balance",
+        "get token balance",
+        "view token balance",
+        "show token balance",
+        "token",
+        "balance",
+        "amount",
+        "holdings"
+      ]
+    },
+    {
+      "name": "get-token-data-by-ticker",
+      "title": "Get Token Data by Ticker",
+      "description": "Get the token data for a given token ticker or symbol",
+      "keywords": [
+        "token data by ticker",
+        "lookup token ticker info",
+        "get token info by ticker",
+        "get token data by ticker",
+        "token",
+        "ticker",
+        "symbol",
+        "info",
+        "data"
+      ]
+    },
+    {
+      "name": "sell-token",
+      "title": "Sell Token",
+      "description": "This tool can be used to sell tokens. This sells tokens for SOL. User is aware that they are selling tokens for SOL and don't need to be told that.",
+      "keywords": [
+        "sell tokens",
+        "sell sol",
+        "sell",
+        "token",
+        "trade",
+        "exchange"
+      ]
+    },
+    {
+      "name": "fetch-price",
+      "title": "Fetch Price",
+      "description": "Fetch the current price of a Solana token in USDC using Jupiter API. This function takes token address as input and returns the price of the token in USDC.",
+      "keywords": [
+        "get token price",
+        "check price",
+        "token value",
+        "price check",
+        "get price in usd",
+        "price",
+        "token",
+        "value",
+        "market"
+      ]
+    },
+    {
+      "name": "get-token",
+      "title": "Get Token Overview",
+      "description": "Get information about a specific token",
+      "keywords": [
+        "token",
+        "info",
+        "details",
+        "metadata"
+      ]
+    },
+    {
+      "name": "get-trending-tokens",
+      "title": "Get Trending Tokens",
+      "description": "This action/tool fetches the list of trending tokens on Solana using the Birdeye public API. The response contains the top trending tokens, their stats, price, market cap, and more.",
+      "keywords": [
+        "get trending tokens",
+        "fetch trending tokens",
+        "show trending tokens",
+        "trending tokens list",
+        "top tokens",
+        "hot tokens",
+        "popular tokens",
+        "token leaderboard",
+        "trending",
+        "popular",
+        "tokens",
+        "market"
+      ]
+    },
+    {
+      "name": "bridge",
+      "title": "Bridge Tokens",
+      "description": "This action/tool generates a URL for bridging a specified amount of tokens to a target chain using the Sendai bridge. The user should visit the generated URL to complete the bridging process.",
+      "keywords": [
+        "get bridge url",
+        "bridge tokens",
+        "send tokens cross-chain",
+        "bridge assets",
+        "cross-chain transfer",
+        "bridge to chain",
+        "send to another chain",
+        "bridge amount",
+        "bridge",
+        "cross-chain",
+        "transfer",
+        "migrate"
+      ]
+    },
+    {
+      "name": "onramp",
+      "title": "Onramp",
+      "description": "This action/tool is used to generate a MoonPay onramp URL for purchasing SOL directly to the user's wallet. The user can optionally specify an amount to purchase. The generated URL will redirect to MoonPay's interface where they can complete the purchase using fiat currency.",
+      "keywords": [
+        "buy crypto",
+        "buy sol",
+        "buy solana",
+        "purchase crypto",
+        "add funds",
+        "fund wallet",
+        "moonpay",
+        "buy tokens",
+        "deposit crypto",
+        "onramp",
+        "fiat",
+        "deposit"
+      ]
+    },
+    {
+      "name": "lulo-get-apy",
+      "title": "Get Lulo APY",
+      "description": "Get current APY rates from Lulo protocol for a given SPL token (defaults to USDC).",
+      "keywords": [
+        "get APY from lulo",
+        "what is the lulo APY",
+        "fetch lulo APY rates",
+        "lulo",
+        "apy",
+        "yield",
+        "interest"
+      ]
+    },
+    {
+      "name": "get-portfolio",
+      "title": "Get Portfolio",
+      "description": "This action/tool is used to fetch the full portfolio of the user's wallet using the Birdeye public API. The response contains all tokens, their balances, and USD values. When using this action, the user is aware that they are checking the entire portfolio of their wallet, not just a specific token or SOL balance.",
+      "keywords": [
+        "check portfolio",
+        "get wallet portfolio",
+        "view portfolio",
+        "show portfolio",
+        "portfolio overview",
+        "wallet holdings",
+        "get asset list",
+        "show wallet assets",
+        "portfolio",
+        "holdings",
+        "tokens",
+        "assets"
+      ]
+    },
+    {
+      "name": "get-top-lst",
+      "title": "Get Top LST",
+      "description": "Fetch the top 10 Liquid Staking Tokens (LSTs) by daily trading volume from Jupiter's token list.",
+      "keywords": [
+        "get top LST tokens",
+        "fetch top LSTs",
+        "top liquid staking tokens",
+        "top LSTs by volume",
+        "top 10 LST tokens",
+        "top LST by daily volume",
+        "lst",
+        "liquid",
+        "staking",
+        "tokens"
+      ]
+    },
+    {
+      "name": "sanctum-get-lst-apy",
+      "title": "Get Sanctum LST APY",
+      "description": "Fetch the APY of a LST(Liquid Staking Token) on Sanctum with specified mint addresses or symbols",
+      "keywords": [
+        "get sanctum LST APY",
+        "fetch sanctum LST APY",
+        "sanctum",
+        "lst",
+        "apy",
+        "yield",
+        "get LST APY"
+      ]
+    },
+    {
+      "name": "rugcheck",
+      "title": "Rugcheck",
+      "description": "Check if a token is a rug pull",
+      "keywords": [
+        "check rug pull",
+        "rug pull check",
+        "rug pull detector",
+        "rug pull scanner",
+        "rug pull alert",
+        "rug",
+        "safety",
+        "check",
+        "verify"
+      ]
+    },
+    {
+      "name": "launch-meteora-token",
+      "title": "Launch Meteora Token",
+      "description": "Launch a new token on Meteora with customizable metadata and initial liquidity",
+      "keywords": [
+        "create token",
+        "launch token",
+        "deploy token",
+        "create meme token",
+        "launch memecoin",
+        "launch",
+        "token",
+        "create"
+      ]
+    },
+    {
+      "name": "get-sol-balance",
+      "title": "Get SOL Balance",
+      "description": "Get your SOL balance",
+      "keywords": [
+        "sol",
+        "balance",
+        "amount",
+        "holdings"
+      ]
+    },
+    {
+      "name": "lulo-lend",
+      "title": "Lulo Lend",
+      "description": "Lend SPL tokens using Lulo protocol",
+      "keywords": [
+        "lend USDC with lulo",
+        "lulo",
+        "lend",
+        "loan",
+        "borrow"
+      ]
+    },
+    {
+      "name": "get-price-history",
+      "title": "Get Price History",
+      "description": "Get the price history of a token",
+      "keywords": [
+        "get price history of sol",
+        "fetch price history",
+        "sol price history",
+        "token price history",
+        "token price chart",
+        "token price",
+        "price chart",
+        "24hour price history"
+      ]
+    },
+    {
+      "name": "get-transaction-history",
+      "title": "Get Transaction History",
+      "description": "Get the transaction history of your wallet. This action/tool retrieves all transactions including transfers, swaps, token mints, and other activities associated with your wallet address.",
+      "keywords": [
+        "get transaction history",
+        "fetch transaction history",
+        "wallet transactions",
+        "transaction list",
+        "show transactions",
+        "transaction log",
+        "wallet history"
+      ]
+    }
+  ],
+  "ai": {
+    "instructions": "if asked to buy or sell tokens, then do a deep think, check if user is asking to buy which token, is it a token address (token address is usually 44 or more characters long) or a ticker (ticker is usually 3-8 characters long), if ticker then get token info of that ticker then fetch the price of token in usdc and then find how many sol is required for that usdc amount and then buy the token, if user mentions the number of tokens to be bought then first fetch the price of token calculate the input amount in sol by multiplying the number of tokens by the priceInSol and then pass it to buy or sell token function if user mentions input amount in sol then pass it to buy or sell token function directly/\n do not render the images in the response for anything except the price history chart, if you are not sure about anything reask the user for more information. if user says staking he means buying/n before calling launch-meteora-token tool, ask the user for the name, symbol, description and image url of the token don't fill those fields with any default values",
+    "evals": [
+      {
+        "input": "@send-ai buy 10 Send coins",
+        "mocks": {
+          "getTokenDataByTicker": {
+            "status": "success",
+            "message": "Token data retrieved successfully",
+            "result": {
+              "address": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa",
+              "symbol": "SEND",
+              "decimals": 9,
+              "name": "Send",
+              "logoURI": "https://assets.coingecko.com/coins/images/19663/large/SEND.png?1696501628"
+            }
+          },
+          "fetchPrice": {
+            "result": {
+              "price": 0.02,
+              "priceInSol": 0.000098
+            },
+            "status": "success",
+            "message": "Token price retrieved successfully"
+          },
+          "buy-token": {
+            "status": "success",
+            "message": "Trade executed successfully",
+            "result": "<transaction-id>"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "getTokenDataByTicker",
+              "arguments": {
+                "ticker": "SEND"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "fetchPrice",
+              "arguments": {
+                "tokenId": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "buy-token",
+              "arguments": {
+                "inputMint": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa",
+                "inputAmount": "0.00098"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@send-ai buy SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa 1 sol",
+        "mocks": {
+          "buy-token": {
+            "status": "success",
+            "message": "Trade executed successfully",
+            "result": "<transaction-id>"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "buy-token",
+              "arguments": {
+                "inputMint": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa",
+                "inputAmount": "1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@send-ai buy send for 0.07sol",
+        "mocks": {
+          "getTokenDataByTicker": {
+            "status": "success",
+            "message": "Token data retrieved successfully",
+            "result": {
+              "address": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa",
+              "symbol": "SEND",
+              "decimals": 9,
+              "name": "Send",
+              "logoURI": "https://assets.coingecko.com/coins/images/19663/large/SEND.png?1696501628"
+            }
+          },
+          "buy-token": {
+            "status": "success",
+            "message": "Trade executed successfully",
+            "result": "<transaction-id>"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "getTokenDataByTicker",
+              "arguments": {
+                "ticker": "SEND"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "buy-token",
+              "arguments": {
+                "inputMint": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa",
+                "inputAmount": "0.07"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@send-ai sell 69 send coins",
+        "mocks": {
+          "getTokenDataByTicker": {
+            "status": "success",
+            "message": "Token data retrieved successfully",
+            "result": {
+              "address": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa",
+              "symbol": "SEND",
+              "decimals": 9,
+              "name": "Send",
+              "logoURI": "https://assets.coingecko.com/coins/images/19663/large/SEND.png?1696501628"
+            }
+          },
+          "sell-token": {
+            "status": "success",
+            "message": "Trade executed successfully",
+            "result": "<transaction-id>"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "getTokenDataByTicker",
+              "arguments": {
+                "ticker": "SEND"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "sell-token",
+              "arguments": {
+                "inputMint": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa",
+                "inputAmount": "69"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@send-ai sell 1sol worth of send",
+        "mocks": {
+          "getTokenDataByTicker": {
+            "status": "success",
+            "message": "Token data retrieved successfully",
+            "result": {
+              "address": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa",
+              "symbol": "SEND",
+              "decimals": 9,
+              "name": "Send",
+              "logoURI": "https://assets.coingecko.com/coins/images/19663/large/SEND.png?1696501628"
+            }
+          },
+          "fetchPrice": {
+            "result": {
+              "price": 0.035,
+              "priceInSol": 0.0002
+            },
+            "status": "success",
+            "message": "Token price retrieved successfully"
+          },
+          "sell-token": {
+            "status": "success",
+            "message": "Trade executed successfully",
+            "result": "<transaction-id>"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "getTokenDataByTicker",
+              "arguments": {
+                "ticker": "SEND"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "fetchPrice",
+              "arguments": {
+                "tokenId": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "sell-token",
+              "arguments": {
+                "inputMint": "SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa",
+                "inputAmount": "5000"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "keywords": [
+    "chat",
+    "solana",
+    "solana agent",
+    "SendAI"
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.17.0",
+    "@solana/web3.js": "^1.98.0",
+    "axios": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/axios": "^0.14.4",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "20.8.10",
+    "@types/plist": "^3.0.5",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
+  }
+}

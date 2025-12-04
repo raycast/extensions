@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fork-repositories",
+  "title": "Fork Repositories",
+  "description": "Search and open Fork repositories",
+  "icon": "icon.png",
+  "author": "sxn",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "fork-repositories",
+      "title": "Search Repositories",
+      "subtitle": "Fork",
+      "description": "Navigate your Fork repositories and open them in Fork or other applications.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Show Repositories",
+      "subtitle": "Fork",
+      "description": "Show your Fork repositories on the menu bar and open them in Fork or other applications.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "type": "appPicker",
+          "name": "application",
+          "description": "Application used to open repositories when clicked",
+          "title": "Open With…",
+          "default": "Fork",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.53.4",
+    "@raycast/utils": "1.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "eslint": "8.23.0",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "typescript": "4.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "media-converter",
+  "title": "Media Converter",
+  "description": "This extension converts video, image, and audio files using FFmpeg",
+  "icon": "extension-icon.png",
+  "author": "leandro.maia",
+  "contributors": [
+    "wattmalsh",
+    "samuelkraft",
+    "sacha_crispin"
+  ],
+  "categories": [
+    "Productivity",
+    "Design Tools",
+    "Media"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert Media",
+      "subtitle": "Media Converter",
+      "description": "Converts a media file to a different file format",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "convert-media",
+      "title": "Convert Media",
+      "description": "Convert an image, video or audio file to a different file format"
+    }
+  ],
+  "ai": {
+    "description": "- Always use absolute paths for the input path. \n- Never guess the input path or use placeholder values. If you are unsure, ask the user for the input path. \n- After a successful conversion, return a link to the absolute path of the converted file.",
+    "evals": [
+      {
+        "input": "@media-converter convert the last mp3 file in @finder downloads to wav",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": "convert-media"
+          }
+        ]
+      },
+      {
+        "input": "@media-converter convert all png files on my @finder desktop to webp",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": "convert-media"
+          }
+        ]
+      },
+      {
+        "input": "@media-converter convert my last screen recording in @finder downloads to webm",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": "convert-media"
+          }
+        ]
+      },
+      {
+        "input": "@media-converter convert the heic photos in @finder desktop to jpg",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": "convert-media"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.1",
+    "axios": "^1.10.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.27.0",
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^24.0.14",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "ffmpeg_path",
+      "type": "textfield",
+      "placeholder": "path/to/ffmpeg/binary",
+      "required": false,
+      "title": "Custom FFmpeg Path (Advanced)",
+      "description": "OPTIONAL - If left empty, the extension will look for a valid FFmpeg binary executable at common paths. If not found (expected for most users), you will be prompted to download a lightweight FFmpeg binary only available to this extension."
+    },
+    {
+      "name": "moreConversionSettings",
+      "type": "checkbox",
+      "title": "More Conversion Settings (Advanced)",
+      "label": "More granular control over the conversion",
+      "default": false,
+      "required": false,
+      "description": "Will allow you to choose precise encoding mode, bitrate and more for videos, sample rate, bit depth and more for audios."
+    }
+  ]
+}

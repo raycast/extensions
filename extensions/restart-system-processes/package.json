@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "restart-system-processes",
+  "title": "Restart System Processes",
+  "description": "Restart system processes such as Finder, Dock, Menu Bar, Audio and more!",
+  "icon": "main-icon.png",
+  "author": "muzhen_gaming",
+  "contributors": [
+    "hrueger"
+  ],
+  "categories": [
+    "Productivity",
+    "System",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Restart System Processes",
+      "description": "Restart system processes",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useSudo",
+      "default": false,
+      "description": "This is required for some processes. See README for more info.",
+      "type": "checkbox",
+      "label": "Use sudo when running the command.",
+      "required": true,
+      "title": "Use sudo"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5",
+    "react": "^18.3.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

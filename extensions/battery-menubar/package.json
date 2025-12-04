@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "battery-menubar",
+  "title": "Battery Menu Bar",
+  "description": "Battery capacity and power-draw information in the Menu Bar",
+  "icon": "command-icon.png",
+  "author": "panrafal",
+  "contributors": [
+    "iaroslav_naiden",
+    "ViGeng"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Battery Info in Menu Bar",
+      "description": "Battery capacity and power-draw information in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "30s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showInfo",
+      "title": "Show additional info in Menu Bar",
+      "description": "This info will be rendered next to the battery icon",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "No info",
+          "value": ""
+        },
+        {
+          "title": "Remaining time",
+          "value": "remaining"
+        },
+        {
+          "title": "Power usage",
+          "value": "watts"
+        },
+        {
+          "title": "Percent sign",
+          "value": "percent"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "name": "remainingYellow",
+      "title": "Optimal remaining time (h)",
+      "description": "Battery percentage will turn yellow if there's less than this many hours remaining",
+      "placeholder": "0.0",
+      "default": "3.0",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "remainingOrange",
+      "title": "Low remaining time (h)",
+      "description": "Battery percentage will turn orange if there's less than this many hours remaining",
+      "placeholder": "0.0",
+      "default": "2.0",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "remainingRed",
+      "title": "Critical remaining time (h)",
+      "description": "Battery percentage will turn red if there's less than this many hours remaining",
+      "placeholder": "0.0",
+      "default": "1.0",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "highPowerUsage",
+      "title": "High power usage (W)",
+      "description": "Battery percentage will turn yellow if more than this many watts are being drawn",
+      "placeholder": "20",
+      "default": "",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.1",
+    "@raycast/utils": "^1.4.8",
+    "plist": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/plist": "^3.0.2",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

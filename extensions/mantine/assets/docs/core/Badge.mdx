@@ -1,0 +1,64 @@
+---
+group: "mantine-core"
+package: "@mantine/core"
+title: Badge
+order: 1
+slug: /core/badge/
+category: "data-display"
+description: "Display badge, pill or tag"
+props: ["Badge"]
+import: "import { Badge } from '@mantine/core';"
+source: "mantine-core/src/components/Badge/Badge.tsx"
+docs: "core/Badge.mdx"
+styles: ["Badge"]
+---
+
+import { BadgeDemos } from "@mantine/demos";
+
+## Usage
+
+<Demo data={BadgeDemos.configurator} />
+
+## Gradient variant
+
+To use gradient as Badge background:
+
+- set `variant` to `gradient`
+- set `gradient` to `{ from: 'color-from', to: 'color-to', deg: 135 }`, where
+  - `color-from` and `color-to` are color from `theme.colors`
+  - `deg` is linear gradient deg
+
+<Demo data={BadgeDemos.gradient} />
+
+## Full width and overflow
+
+Badge will take full width of container if `fullWidth` prop is `true`.
+If badge cannot fit in its container, overflow content will be hidden with ellipsis:
+
+<Demo data={BadgeDemos.overflow} />
+
+## Right and left sections
+
+<Demo data={BadgeDemos.sections} />
+
+## Custom component
+
+To change badge root element pass React element to `component` prop:
+
+<Demo data={BadgeDemos.component} />
+
+To use custom component with TypeScript provide type:
+
+```tsx
+import { Badge } from "@mantine/core";
+import { Link } from "react-router-dom";
+
+function Demo() {
+  return (
+    <>
+      <Badge<"a"> component="a" href="#" />
+      <Badge<typeof Link> component={Link} to="/hello" />
+    </>
+  );
+}
+```

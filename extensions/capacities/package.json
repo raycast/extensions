@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "capacities",
+  "title": "Capacities",
+  "description": "Interact with Capacities from your command bar. Search your notes, capture content & more.",
+  "icon": "capacities.png",
+  "author": "steffenble",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "bearerToken",
+      "type": "password",
+      "title": "API Key",
+      "description": "Your personal API key to access Capacities API. It can be created in the app settings.",
+      "placeholder": "API Key",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "open-spaces",
+      "title": "Open Space",
+      "description": "Open a space in the Capacities app",
+      "mode": "view"
+    },
+    {
+      "name": "search-content",
+      "title": "Search Content",
+      "description": "Search content in Capacities",
+      "mode": "view"
+    },
+    {
+      "name": "create-weblink",
+      "title": "Save Weblink",
+      "description": "Create a weblink in Capacities",
+      "mode": "view"
+    },
+    {
+      "name": "save-to-daily-note",
+      "title": "Save to Daily Note",
+      "description": "Saves a text to today's daily note in Capacities. The text can be formatted in markdown.",
+      "mode": "view"
+    },
+    {
+      "name": "load-space-info",
+      "title": "Synchronize Data",
+      "description": "If your spaces or object types are outdated, you can reload them with this command.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

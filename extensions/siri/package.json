@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "siri",
+  "title": "Siri",
+  "description": "Interact with Siri through Raycast",
+  "icon": "siri-icon.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "System",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "type-to-siri",
+      "title": "Type to Siri",
+      "description": "Ask Siri to do something",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "prompt",
+          "placeholder": "Prompt"
+        }
+      ]
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@siri how do I say \"Thank You\" in Spanish?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "ask-siri",
+              "arguments": {
+                "command": {
+                  "includes": "thank you"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "ask-siri": "message sent"
+        }
+      },
+      {
+        "input": "@siri tell Steve we have a meeting at 2PM today",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "ask-siri",
+              "arguments": {
+                "command": {
+                  "includes": "steve"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "ask-siri": "message sent"
+        }
+      },
+      {
+        "input": "@siri mute my computer",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "ask-siri",
+              "arguments": {
+                "command": {
+                  "includes": "mute"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "ask-siri": "message sent"
+        }
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "ask-siri",
+      "title": "Ask Siri",
+      "description": "Send a command to Siri"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

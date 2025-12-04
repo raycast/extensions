@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "memory",
+  "title": "Memory",
+  "description": "Knowledge Graph Memory for Raycast AI",
+  "icon": "memory.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-memory",
+      "title": "View Memory",
+      "description": "View current memory",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-entities",
+      "title": "Create Entities",
+      "description": "Create new entities in the knowledge graph."
+    },
+    {
+      "name": "create-relations",
+      "title": "Create Relations",
+      "description": "Create new relations between entities"
+    },
+    {
+      "name": "add-observations",
+      "title": "Add Observations",
+      "description": "Add new observations to existing entities"
+    },
+    {
+      "name": "delete-entities",
+      "title": "Delete Entities",
+      "description": "Remove entities and their relations"
+    },
+    {
+      "name": "delete-observations",
+      "title": "Delete Observations",
+      "description": "Remove specific observations from entities"
+    },
+    {
+      "name": "delete-relations",
+      "title": "Delete Relations",
+      "description": "Remove specific relations from the graph"
+    },
+    {
+      "name": "read-graph",
+      "title": "Read Graph",
+      "description": "Read the entire knowledge graph"
+    },
+    {
+      "name": "search-nodes",
+      "title": "Search Nodes",
+      "description": "Search for nodes based on query"
+    },
+    {
+      "name": "open-nodes",
+      "title": "Open Nodes",
+      "description": "Retrieve specific nodes by name"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@memory Remember my favorite color is blue",
+        "expected": [],
+        "usedAsExample": true
+      },
+      {
+        "input": "@memory What's my phone number?",
+        "expected": [],
+        "usedAsExample": true
+      },
+      {
+        "input": "@memory Tell me all that you know",
+        "expected": [],
+        "usedAsExample": true
+      },
+      {
+        "input": "@memory Remember I have a pet dog",
+        "expected": [],
+        "usedAsExample": true
+      }
+    ],
+    "instructions": "Follow these steps for each interaction:\n\n1. User Identification:\n   - You should assume that you are interacting with default_user\n   - If you have not identified default_user, proactively try to do so.\n\n2. Memory Retrieval:\n   - Always begin your chat by retrieving all relevant information from your knowledge graph\n   - Always refer to your knowledge graph as your \"memory\"\n\n3. Memory\n   - While conversing with the user, be attentive to any new information that falls into these categories:\n     a) Basic Identity (age, gender, location, job title, education level, etc.)\n     b) Behaviors (interests, habits, etc.)\n     c) Preferences (communication style, preferred language, etc.)\n     d) Goals (goals, targets, aspirations, etc.)\n     e) Relationships (personal and professional relationships up to 3 degrees of separation)\n\n4. Memory Update:\n   - If any new information was gathered during the interaction, update your memory as follows:\n     a) Always create new entities for recurring organizations, people, and significant events\n     b) Then, connect them to the current entities using relations\n     c) Store facts about them as observations\n     d) Always use the correct category of tool (Observation, Relation, Entity) for each task. Never create one category in another."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "evals": "npx ray evals",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

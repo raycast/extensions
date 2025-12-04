@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-web",
+  "title": "Quick Web",
+  "description": "Quick Web is a configurable URL autocompletion tool",
+  "icon": "rocket.png",
+  "author": "ShawYoungTang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List URLs",
+      "description": "List all added URLs",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "customizedInput",
+          "placeholder": "customized input",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "add_url",
+      "title": "Add URL Config",
+      "description": "Open a page where users can add url pattern configs",
+      "mode": "view"
+    },
+    {
+      "name": "edit_url_list",
+      "title": "Edit URL Config",
+      "description": "Open list of URL patterns and jump to edit page or delete URL configs",
+      "mode": "view"
+    },
+    {
+      "name": "edit_arg_list",
+      "title": "Edit Arg Config",
+      "description": "Open list of args and arg values for update or deletion",
+      "mode": "view"
+    },
+    {
+      "name": "export_configs",
+      "title": "Export Configs",
+      "description": "Export all configs in JSON which can be imported by users",
+      "mode": "view"
+    },
+    {
+      "name": "import_configs",
+      "title": "Import Config",
+      "description": "Import all configs, this will override the old configs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

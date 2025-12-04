@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openai-gpt",
+  "version": "1.7.0",
+  "title": "OpenAI GPT",
+  "description": "Interact with OpenAI GPT AI",
+  "icon": "openai-logo.png",
+  "author": "simicvm",
+  "contributors": [
+    "DorukAkinci",
+    "evilmouth"
+  ],
+  "categories": [
+    "Productivity",
+    "Fun",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ai",
+      "title": "Query OpenAI GPT",
+      "description": "Interact with OpenAI GPT AI",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openAiApiKey",
+          "title": "OpenAI API Key",
+          "description": "API Key is used to authenticate with OpenAI API",
+          "type": "password",
+          "required": true
+        },
+        {
+          "name": "openAiBasePath",
+          "title": "OpenAI Base Path (Optional)",
+          "description": "Base Path is used to override base path with OpenAI API",
+          "type": "textfield",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.2",
+    "openai": "3.2.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

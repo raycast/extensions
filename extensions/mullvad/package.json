@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mullvad",
+  "title": "Mullvad VPN",
+  "description": "Fastest way to connect, disconnect, and check if you are connected to Mullvad VPN.",
+  "icon": "mullvad-icon.png",
+  "author": "0x46616c6b",
+  "contributors": [
+    "sebastiankranz",
+    "svenhofman"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mullvad",
+      "title": "Check Connection",
+      "subtitle": "Mullvad",
+      "description": "Check whether you are connected to Mullvad VPN",
+      "mode": "view"
+    },
+    {
+      "name": "selectLocation",
+      "title": "Select Mullvad Location",
+      "subtitle": "Mullvad",
+      "description": "Sets the destination Mullvad server.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "selectByRanking",
+          "title": "Select by Ranking",
+          "label": "Use the highest ranked server for location",
+          "description": "If enabled, the highest ranked server for the given location will be used when a location is selected. If no server is ranked, Mullvad will determine the server used.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "connect",
+      "title": "Connect",
+      "subtitle": "Mullvad",
+      "description": "Activates the VPN connection.",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect",
+      "subtitle": "Mullvad",
+      "description": "Deactivates the VPN connection.",
+      "mode": "no-view"
+    },
+    {
+      "name": "reconnect",
+      "title": "Reconnect",
+      "subtitle": "Mullvad",
+      "description": "Reactivates the VPN connection.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "8.40.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

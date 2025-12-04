@@ -1,0 +1,18 @@
+export default [
+  { title: "🇺🇸 English (US)", value: "en-US" },
+  { title: "🇫🇷 French (France)", value: "fr-FR" },
+  { title: "🇮🇹 Italian (Italy)", value: "it-IT" },
+  { title: "🇩🇪 German (Germany)", value: "de-DE" },
+  { title: "🇪🇸 Spanish (Spain)", value: "es-ES" },
+  { title: "🇧🇷 Portuguese (Brazil)", value: "pt-BR" },
+  { title: "🇨🇳 Chinese (Simplified)", value: "zh-Hans" },
+  { title: "🇹🇼 Chinese (Traditional)", value: "zh-Hant" },
+  { title: "🇨🇳 Cantonese (Simplified)", value: "yue-Hans" },
+  { title: "🇭🇰 Cantonese (Traditional)", value: "yue-Hant" },
+  { title: "🇰🇷 Korean (South Korea)", value: "ko-KR" },
+  { title: "🇯🇵 Japanese (Japan)", value: "ja-JP" },
+  { title: "🇷🇺 Russian (Russia)", value: "ru-RU" },
+  { title: "🇺🇦 Ukrainian (Ukraine)", value: "uk-UA" },
+  { title: "🇹🇭 Thai (Thailand)", value: "th-TH" },
+  { title: "🇻🇳 Vietnamese (Vietnam)", value: "vi-VT" },
+] as const;

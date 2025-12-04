@@ -1,0 +1,517 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gif-search",
+  "title": "GIF Search",
+  "description": "Search the Internet for animated GIFs",
+  "icon": "command-icon.png",
+  "author": "josephschmitt",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "tm.wrnr",
+    "j3lte",
+    "samuelkraft",
+    "ridemountainpig",
+    "spookywy",
+    "seanparkross",
+    "YourMCGeek"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Media",
+    "Fun",
+    "Web"
+  ],
+  "keywords": [
+    "Tenor",
+    "Giphy",
+    "Finer",
+    "clips"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search for GIFs",
+      "description": "Search for GIFs across multiple services…",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gridItemSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Item Size",
+      "description": "Control the size of individual grid cells",
+      "default": "medium",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
+      "name": "gridTrendingItemSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Trending Item Size",
+      "description": "Control the size of individual grid cells in the Trending view",
+      "default": "medium",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
+      "name": "maxResults",
+      "type": "textfield",
+      "required": false,
+      "default": "20",
+      "title": "Max Results",
+      "description": "Max number of results to return for a search"
+    },
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "description": "Customize what happens when hitting ENTER on a Gif",
+      "default": "copyFile",
+      "data": [
+        {
+          "title": "Copy GIF",
+          "value": "copyFile"
+        },
+        {
+          "title": "Paste GIF",
+          "value": "pasteFile"
+        },
+        {
+          "title": "Copy GIF Link",
+          "value": "copyGifUrl"
+        },
+        {
+          "title": "Copy GIF Markdown",
+          "value": "copyGifMarkdown"
+        },
+        {
+          "title": "Paste GIF Markdown",
+          "value": "pasteGifMarkdown"
+        },
+        {
+          "title": "Add or Remove from Favorites",
+          "value": "toggleFav"
+        },
+        {
+          "title": "View GIF Details",
+          "value": "viewDetails"
+        },
+        {
+          "title": "Copy Page Link",
+          "value": "copyPageUrl"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "openUrlInBrowser"
+        },
+        {
+          "title": "Download GIF",
+          "value": "downloadFile"
+        }
+      ]
+    },
+    {
+      "name": "downloadPath",
+      "title": "GIF Download Path",
+      "description": "Path to save downloaded GIFs",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "hideFilename",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Filename on Copy or Download",
+      "description": "Hide the original filename when copying or downloading GIFs",
+      "default": false,
+      "label": "Hide Filename"
+    },
+    {
+      "name": "giphyLocale",
+      "type": "dropdown",
+      "required": false,
+      "title": "Giphy Locale",
+      "description": "Select the locale for the Giphy API",
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Chinese Simplified",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Chinese Traditional",
+          "value": "zh-TW"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Farsi",
+          "value": "fa"
+        },
+        {
+          "title": "Filipino",
+          "value": "tl"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "Hebrew",
+          "value": "he"
+        },
+        {
+          "title": "Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Norwegian",
+          "value": "no"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        }
+      ]
+    },
+    {
+      "name": "tenorLocale",
+      "type": "dropdown",
+      "required": false,
+      "title": "Tenor Locale",
+      "description": "Select the locale for the Tenor API",
+      "default": "en",
+      "data": [
+        {
+          "title": "Albanian",
+          "value": "sq"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Belarusian",
+          "value": "be"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "Bosnian",
+          "value": "bs"
+        },
+        {
+          "title": "Cantonese",
+          "value": "zh_HK"
+        },
+        {
+          "title": "Catalan",
+          "value": "ca"
+        },
+        {
+          "title": "Chinese Simplified",
+          "value": "zh_CN"
+        },
+        {
+          "title": "Chinese Traditional",
+          "value": "zh_TW"
+        },
+        {
+          "title": "Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Farsi",
+          "value": "fa"
+        },
+        {
+          "title": "Filipino",
+          "value": "fil"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Greek",
+          "value": "el"
+        },
+        {
+          "title": "Hebrew",
+          "value": "he"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Laos",
+          "value": "lo"
+        },
+        {
+          "title": "Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Mongolian",
+          "value": "mn"
+        },
+        {
+          "title": "Norwegian Bokmal",
+          "value": "no"
+        },
+        {
+          "title": "Norwegian Nynorsk",
+          "value": "nn"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Tagalog",
+          "value": "tl"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@giphy/js-fetch-api": "^5.4.0",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "@saekitominaga/file-size-format": "^1.1.3",
+    "date-fns": "^3.6.0",
+    "node-fetch": "^3.3.2",
+    "tempy": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.79",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

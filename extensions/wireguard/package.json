@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wireguard",
+  "title": "Wireguard",
+  "description": "Control Wireguard connections.",
+  "icon": "wireguard.png",
+  "author": "sbugzhu",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Applications",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Wireguard",
+      "subtitle": "Control Wireguard",
+      "description": "Control Wireguard connections.",
+      "mode": "view"
+    },
+    {
+      "name": "disconnectAllWireguardConnections",
+      "title": "Disconnect All Connections",
+      "subtitle": "Wireguard",
+      "description": "Disconnect all Wireguard connections.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showFlag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Options",
+      "label": "Show national flag.",
+      "description": "If checked, raycast will show the national flag. The country code needs to be included at the beginning of the Wireguard configuration name, eg: us-xxx, gb09-xxx, etc. Ignore the number after the country code.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

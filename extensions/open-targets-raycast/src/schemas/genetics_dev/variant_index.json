@@ -1,0 +1,127 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "name": "variantId",
+      "type": "string",
+      "nullable": false,
+      "metadata": {}
+    },
+    {
+      "name": "chromosome",
+      "type": "string",
+      "nullable": false,
+      "metadata": {}
+    },
+    {
+      "name": "position",
+      "type": "integer",
+      "nullable": false,
+      "metadata": {}
+    },
+    {
+      "name": "referenceAllele",
+      "type": "string",
+      "nullable": false,
+      "metadata": {}
+    },
+    {
+      "name": "alternateAllele",
+      "type": "string",
+      "nullable": false,
+      "metadata": {}
+    },
+    {
+      "name": "chromosomeB37",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "positionB37",
+      "type": "integer",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "alleleType",
+      "type": "string",
+      "nullable": false,
+      "metadata": {}
+    },
+    {
+      "name": "alleleFrequencies",
+      "type": {
+        "type": "array",
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "name": "alleleFrequency",
+              "type": "double",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "populationName",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            }
+          ]
+        },
+        "containsNull": true
+      },
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "cadd",
+      "type": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "phred",
+            "type": "float",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "raw",
+            "type": "float",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      },
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "mostSevereConsequence",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "filters",
+      "type": {
+        "type": "array",
+        "elementType": "string",
+        "containsNull": true
+      },
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "rsIds",
+      "type": {
+        "type": "array",
+        "elementType": "string",
+        "containsNull": true
+      },
+      "nullable": true,
+      "metadata": {}
+    }
+  ]
+}

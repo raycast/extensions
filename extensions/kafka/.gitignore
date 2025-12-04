@@ -1,0 +1,10 @@
+# node
+node_modules
+
+# intellij
+.idea
+
+# macos
+.DS_Store
+
+raycast-env.d.ts

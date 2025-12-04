@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hetrixtools",
+  "title": "HetrixTools",
+  "description": "Uptime Monitor & Blacklist Monitor",
+  "icon": "hetrixtools.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "subtitle": "HetrixTools",
+      "type": "password",
+      "required": true,
+      "description": "API Key from HetrixTools account",
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  ],
+  "commands": [
+    {
+      "name": "uptime-monitors",
+      "title": "Uptime Monitors",
+      "description": "Get Uptime Monitors and their details",
+      "mode": "view"
+    },
+    {
+      "name": "blacklist-monitors",
+      "title": "Blacklist Monitors",
+      "description": "Get Blacklist Monitors and their details",
+      "mode": "view"
+    },
+    {
+      "name": "contact-lists",
+      "title": "Contact Lists",
+      "description": "Get Contact Lists and their details",
+      "mode": "view"
+    },
+    {
+      "name": "status-pages",
+      "title": "Status Pages",
+      "description": "Get Status Pages and their details",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

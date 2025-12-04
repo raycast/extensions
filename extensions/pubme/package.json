@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pubme",
+  "title": "PubMe Search",
+  "description": "Search PubMed (https://pubmed.ncbi.nlm.nih.gov/)",
+  "icon": "pubme.png",
+  "author": "spacedog",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "PubMe",
+      "description": "Search PubMed (https://pubmed.ncbi.nlm.nih.gov/)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "Specify how often you want to reload the home page.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "always",
+          "value": "0"
+        },
+        {
+          "title": "every 1 minute",
+          "value": "60000"
+        },
+        {
+          "title": "every 5 minutes",
+          "value": "300000"
+        },
+        {
+          "title": "every 10 minutes",
+          "value": "600000"
+        },
+        {
+          "title": "every 15 minutes",
+          "value": "900000"
+        },
+        {
+          "title": "every 30 minutes",
+          "value": "1800000"
+        },
+        {
+          "title": "hourly",
+          "value": "3600000"
+        },
+        {
+          "title": "every 3 hours",
+          "value": "10800000"
+        },
+        {
+          "title": "every 12 hours",
+          "value": "43200000"
+        },
+        {
+          "title": "daily",
+          "value": "86400000"
+        }
+      ],
+      "default": "86400000",
+      "required": false
+    },
+    {
+      "name": "historyItemsNumber",
+      "title": "Number of history items on the home page",
+      "description": "Choose how many history items you want to see.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "history turned off",
+          "value": "0"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "15",
+          "value": "15"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "25",
+          "value": "25"
+        }
+      ],
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "retmax",
+      "type": "textfield",
+      "default": "20",
+      "placeholder": "20",
+      "required": true,
+      "title": "RetMax",
+      "description": "Set the maximum number of results to be returned in a query. The default value is 20, but it can be increased up to 100,000. Be aware that increasing RetMax may result in longer query times and higher resource usage from PubMed (https://pubmed.ncbi.nlm.nih.gov/). It is recommended to set RetMax to a value that meets your needs without compromising the performance of the API."
+    },
+    {
+      "name": "apikey",
+      "type": "password",
+      "required": true,
+      "title": "NIH API Key",
+      "description": "Without an API key, you can only make 3 requests per second. Unfortunately, when listing multiple articles, an additional request is sent for each item, so you may receive `Error 429` (too many requests). It is therefore recommended to set an API key to increase the limit to 10 requests/second. Further information at https://support.nlm.nih.gov/knowledgebase/article/KA-05317/en-us\n\nYou can enter \"0\" here if you do not have an API key.",
+      "placeholder": "ABCD0042"
+    },
+    {
+      "name": "scihubinstance",
+      "type": "textfield",
+      "required": false,
+      "title": "sci-hub Instance",
+      "description": "By entering anything here, you agree that you are completely responsible for your actions on the instance. The developer of the app and the extension are not responsible for the files listed on or distributed through the entered instance.",
+      "placeholder": "https://mysci-hub.com/"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.2",
+    "@raycast/utils": "^1.5.2",
+    "cheerio": "^1.0.0-rc.12",
+    "node-html-markdown": "^1.3.0",
+    "xml2js": "^0.4.23",
+    "xmldom": "^0.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "china-ip-address",
+  "title": "China IP Address",
+  "description": "Get your China public network IP",
+  "icon": "command-icon.png",
+  "author": "ErlichLiu",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ip",
+      "title": "Lookup China IP Address",
+      "description": "Get your China public network IP Address",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.1",
+    "@types/ip": "^1.1.0",
+    "axios": "^1.8.4",
+    "ip": "^1.1.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

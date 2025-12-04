@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paperless-ngx",
+  "title": "Paperless-ngx",
+  "description": "Search Paperless-ngx for documents and upload",
+  "icon": "command-icon.png",
+  "author": "damdam",
+  "contributors": [
+    "igor_brikin",
+    "csigritz"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Documents",
+      "subtitle": "Paperless-ngx",
+      "description": "Search your self-hosted Paperless-ngx instance for documents",
+      "mode": "view"
+    },
+    {
+      "name": "documentForm",
+      "title": "Upload Document",
+      "subtitle": "Paperless-ngx",
+      "description": "Upload document to your Paperless-ngx instance",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.51.1",
+    "axios": "^1.8.4",
+    "moment": "2.29.4",
+    "form-data-encoder": "2.1.4",
+    "formdata-node": "5.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3",
+    "node-fetch": "3.3.1"
+  },
+  "preferences": [
+    {
+      "name": "paperlessURL",
+      "title": "Paperless URL",
+      "placeholder": "https://paperless.example.com",
+      "description": "URL of your self-hosted instance of Paperless-ngx",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Token to query the API of your Paperless-ngx instance (can be found in admin tools).",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "gridMode",
+      "title": "Grid Mode",
+      "description": "Display documents in Grid instead of List",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "label": "Enable Grid View"
+    },
+    {
+      "name": "showCorrespondentInSubtitle",
+      "title": "Show Correspondent",
+      "description": "Show Correspondent in Search Results",
+      "type": "checkbox",
+      "default": true,
+      "required": true,
+      "label": "Show Correspondent in Search Results"
+    },
+    {
+      "name": "showDateInSubtitle",
+      "title": "Show Date",
+      "description": "Show Date in Search Results",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "label": "Show Date in Search Results"
+    },
+    {
+      "name": "dateFormat",
+      "title": "Date format",
+      "description": "Select your preferred date format",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "YYYY-MM-DD 12:mm",
+          "value": "YYYY-MM-DD HH:MM"
+        },
+        {
+          "title": "DD.MM.YYYY 24:mm",
+          "value": "DD.MM.YYYY HH:MM"
+        },
+        {
+          "title": "DD/MM/YYYY 24:mm",
+          "value": "DD/MM/YYYY HH:MM"
+        },
+        {
+          "title": "MM/DD/YYYY 12:mm",
+          "value": "MM/DD/YYYY  hh:MM"
+        }
+      ],
+      "required": true,
+      "label": "Date format"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

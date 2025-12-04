@@ -1,0 +1,344 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "word-search",
+  "title": "Word Search",
+  "description": "Search for synonyms, antonyms, spellings, rhymes and more",
+  "icon": "command-icon.png",
+  "author": "rishabswift",
+  "contributors": [
+    "thomas",
+    "bkeys818",
+    "j3lte"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "description": "The default action to perform you hit Return on your keyboard",
+      "required": false,
+      "title": "Primary Action",
+      "type": "dropdown",
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste Word in Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy Word to Clipboard",
+          "value": "copy"
+        }
+      ]
+    },
+    {
+      "name": "capitalizeResults",
+      "description": "Whether or not a capitalized search will cause the results to be capitalized.",
+      "required": false,
+      "title": "Search Results",
+      "label": "Capitalize results when search is capitalized.",
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "useSelection",
+      "description": "Use selection as the search term.",
+      "required": false,
+      "title": "Use Selection",
+      "label": "Use selection as search term",
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "maxResults",
+      "description": "The maximum number of results to display (max 1000). Defaults to 50",
+      "required": false,
+      "title": "Max Results",
+      "type": "textfield"
+    }
+  ],
+  "commands": [
+    {
+      "name": "word-synonym-search",
+      "title": "Search Word Synonym",
+      "subtitle": "Datamuse",
+      "description": "Search for synonyms given a word",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectionHere",
+          "description": "Use selection as the search term.",
+          "required": false,
+          "title": "Use Selection",
+          "label": "Use selection as search term",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Global Setting",
+              "value": "global"
+            },
+            {
+              "title": "Yes",
+              "value": "true"
+            },
+            {
+              "title": "No",
+              "value": "false"
+            }
+          ],
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "word-antonym-search",
+      "title": "Search Word Antonym",
+      "subtitle": "Datamuse",
+      "description": "Search for antonyms given a word",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectionHere",
+          "description": "Use selection as the search term.",
+          "required": false,
+          "title": "Use Selection",
+          "label": "Use selection as search term",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Global Setting",
+              "value": "global"
+            },
+            {
+              "title": "Yes",
+              "value": "true"
+            },
+            {
+              "title": "No",
+              "value": "false"
+            }
+          ],
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "word-rhyme-search",
+      "title": "Search Word Rhyme",
+      "subtitle": "Datamuse",
+      "description": "Search for rhymes given a word",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectionHere",
+          "description": "Use selection as the search term.",
+          "required": false,
+          "title": "Use Selection",
+          "label": "Use selection as search term",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Global Setting",
+              "value": "global"
+            },
+            {
+              "title": "Yes",
+              "value": "true"
+            },
+            {
+              "title": "No",
+              "value": "false"
+            }
+          ],
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "word-spell",
+      "title": "Spell a Word",
+      "subtitle": "Datamuse",
+      "description": "Find the correct spelling for a word that sounds similar to the given word",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectionHere",
+          "description": "Use selection as the search term.",
+          "required": false,
+          "title": "Use Selection",
+          "label": "Use selection as search term",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Global Setting",
+              "value": "global"
+            },
+            {
+              "title": "Yes",
+              "value": "true"
+            },
+            {
+              "title": "No",
+              "value": "false"
+            }
+          ],
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "word-adjective-search",
+      "title": "Search Word Adjective",
+      "subtitle": "Datamuse",
+      "description": "Search for adjectives given a word",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectionHere",
+          "description": "Use selection as the search term.",
+          "required": false,
+          "title": "Use Selection",
+          "label": "Use selection as search term",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Global Setting",
+              "value": "global"
+            },
+            {
+              "title": "Yes",
+              "value": "true"
+            },
+            {
+              "title": "No",
+              "value": "false"
+            }
+          ],
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "word-missing-letters-search",
+      "title": "Search Word with Missing Letters",
+      "subtitle": "Datamuse",
+      "description": "Search for word with missing letters",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectionHere",
+          "description": "Use selection as the search term.",
+          "required": false,
+          "title": "Use Selection",
+          "label": "Use selection as search term",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Global Setting",
+              "value": "global"
+            },
+            {
+              "title": "Yes",
+              "value": "true"
+            },
+            {
+              "title": "No",
+              "value": "false"
+            }
+          ],
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "word-sound-like-search",
+      "title": "Search Word That Sounds Like",
+      "subtitle": "Datamuse",
+      "description": "Search for word that sounds like the given word",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectionHere",
+          "description": "Use selection as the search term.",
+          "required": false,
+          "title": "Use Selection",
+          "label": "Use selection as search term",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Global Setting",
+              "value": "global"
+            },
+            {
+              "title": "Yes",
+              "value": "true"
+            },
+            {
+              "title": "No",
+              "value": "false"
+            }
+          ],
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "word-suggest",
+      "title": "Suggest a Word",
+      "subtitle": "Datamuse",
+      "description": "Suggest words based on the given word",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectionHere",
+          "description": "Use selection as the search term.",
+          "required": false,
+          "title": "Use Selection",
+          "label": "Use selection as search term",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Global Setting",
+              "value": "global"
+            },
+            {
+              "title": "Yes",
+              "value": "true"
+            },
+            {
+              "title": "No",
+              "value": "false"
+            }
+          ],
+          "default": "global"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,204 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "atlassian-data-center",
+  "version": "1.0.0",
+  "title": "Atlassian Data Center",
+  "description": "Search and manage Confluence and Jira Data Center",
+  "icon": "logo-atlassian.png",
+  "author": "tofrankie",
+  "homepage": "https://github.com/tofrankie/raycast-atlassian-data-center",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tofrankie/raycast-atlassian-data-center.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tofrankie/raycast-atlassian-data-center/issues"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "atlassian",
+    "atlassian data center",
+    "confluence",
+    "confluence data center",
+    "jira",
+    "jira data center"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^1.19.1",
+    "@tanstack/react-query": "~5.90.7",
+    "dayjs": "^1.11.18",
+    "ky": "^1.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "type-fest": "^5.2.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "confluenceBaseUrl",
+      "title": "Confluence Base URL",
+      "description": "Base URL of your Confluence Data Center instance (e.g. https://confluence.example.com)",
+      "required": true,
+      "placeholder": "e.g. https://confluence.example.com"
+    },
+    {
+      "type": "password",
+      "name": "confluencePAT",
+      "title": "Confluence PAT",
+      "description": "Personal Access Token for Confluence API authentication. Create it from: Profile → Personal Access Tokens → Create token",
+      "required": true,
+      "placeholder": "Your Confluence Personal Access Token"
+    },
+    {
+      "type": "textfield",
+      "name": "jiraBaseUrl",
+      "title": "Jira Base URL",
+      "description": "Base URL of your Jira Data Center instance (e.g. https://jira.example.com)",
+      "required": true,
+      "placeholder": "e.g. https://jira.example.com"
+    },
+    {
+      "type": "password",
+      "name": "jiraPAT",
+      "title": "Jira PAT",
+      "description": "Personal Access Token for Jira API authentication. Create it from: Profile → Personal Access Tokens → Create token",
+      "required": true,
+      "placeholder": "Your Jira Personal Access Token"
+    },
+    {
+      "type": "checkbox",
+      "name": "replaceCurrentUser",
+      "title": "Replace currentUser",
+      "description": "Replace currentUser() with username when copying CQL/JQL",
+      "label": "Replace currentUser() with username when copying CQL/JQL",
+      "required": true,
+      "default": true
+    },
+    {
+      "type": "textfield",
+      "name": "paginationSize",
+      "title": "Results per Page",
+      "description": "Number of search results per page. Default: 20",
+      "required": true,
+      "default": "20",
+      "placeholder": "20"
+    },
+    {
+      "type": "textfield",
+      "name": "jiraWorkingHoursPerDay",
+      "title": "Working Hours per Day",
+      "description": "Working hours per day for worklog progress calculation. Default: 8h (max 1 decimal place)",
+      "required": true,
+      "default": "8",
+      "placeholder": "8"
+    },
+    {
+      "type": "textfield",
+      "name": "jiraWorkingDaysPerWeek",
+      "title": "Working Days per Week",
+      "description": "Working days per week for worklog progress calculation. Default: 5",
+      "required": true,
+      "default": "5",
+      "placeholder": "5"
+    },
+    {
+      "type": "checkbox",
+      "name": "debugEnable",
+      "title": "Enable Debug",
+      "description": "Enable debug mode for troubleshooting",
+      "label": "Enable debug mode for troubleshooting",
+      "required": true,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "confluence-search-content",
+      "title": "Search Contents",
+      "subtitle": "Confluence Data Center",
+      "description": "Search Confluence contents, including pages, blog posts, comments, and attachments",
+      "mode": "view",
+      "icon": "logo-confluence.png"
+    },
+    {
+      "name": "confluence-search-user",
+      "title": "Search Users",
+      "subtitle": "Confluence Data Center",
+      "description": "Search Confluence users",
+      "mode": "view",
+      "icon": "logo-confluence.png"
+    },
+    {
+      "name": "confluence-search-space",
+      "title": "Search Spaces",
+      "subtitle": "Confluence Data Center",
+      "description": "Search Confluence spaces",
+      "mode": "view",
+      "icon": "logo-confluence.png"
+    },
+    {
+      "name": "jira-search-issue",
+      "title": "Search Issues",
+      "subtitle": "Jira Data Center",
+      "description": "Search Jira issues",
+      "mode": "view",
+      "icon": "logo-jira.png"
+    },
+    {
+      "name": "jira-board-view",
+      "title": "Board View",
+      "subtitle": "Jira Data Center",
+      "description": "View Jira board",
+      "mode": "view",
+      "icon": "logo-jira.png"
+    },
+    {
+      "name": "jira-worklog-view",
+      "title": "Worklog View",
+      "subtitle": "Jira Data Center",
+      "description": "View Jira worklog",
+      "mode": "view",
+      "icon": "logo-jira.png"
+    },
+    {
+      "name": "jira-notification-view",
+      "title": "Notification View",
+      "subtitle": "Jira Data Center",
+      "description": "View Jira notifications",
+      "mode": "view",
+      "icon": "logo-jira.png"
+    },
+    {
+      "name": "jira-manage-field",
+      "title": "Manage Fields",
+      "subtitle": "Jira Data Center",
+      "description": "Manage custom fields for Jira issue search",
+      "mode": "view",
+      "icon": "logo-jira.png"
+    }
+  ]
+}

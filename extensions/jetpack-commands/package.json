@@ -1,0 +1,535 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jetpack-commands",
+  "title": "Jetpack Commands",
+  "description": "Manage your Jetpack-connected WordPress sites.",
+  "icon": "jetpack-logo.png",
+  "author": "Automattic_Inc",
+  "categories": [
+    "Web",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-new-site",
+      "title": "Add New Site",
+      "description": "Create a new site on WordPress.com",
+      "keywords": [
+        "create site"
+      ],
+      "subtitle": "Jetpack Commands",
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "import-site",
+      "title": "Import Site",
+      "subtitle": "Jetpack Commands",
+      "description": "Migrate an existing WordPress site to WordPress.com",
+      "keywords": [
+        "migrate site"
+      ],
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-my-profile",
+      "title": "Open My Profile",
+      "subtitle": "Jetpack Commands",
+      "description": "Access your personal profile on WordPress.com",
+      "keywords": [
+        "account",
+        "profile",
+        "display name"
+      ],
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-reader",
+      "title": "Open Reader",
+      "subtitle": "Jetpack Commands",
+      "description": "Discover new blogs and keep up with the latest posts from sites you follow",
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-account-settings",
+      "title": "Open Account Settings",
+      "subtitle": "Jetpack Commands",
+      "description": "Adjust your WordPress.com account preferences and settings",
+      "keywords": [
+        "profile",
+        "email",
+        "language",
+        "color scheme"
+      ],
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "view-my-purchases",
+      "title": "View My Purchases",
+      "subtitle": "Jetpack Commands",
+      "description": "Manage your Jetpack and WordPress.com purchases",
+      "keywords": [
+        "manage purchases",
+        "billing history",
+        "credit card",
+        "payment methods",
+        "subscriptions",
+        "upgrades"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "view-my-sites",
+      "title": "View My Sites",
+      "subtitle": "Jetpack Commands",
+      "description": "View your Jetpack-connected WordPress sites",
+      "keywords": [
+        "manage sites",
+        "sites dashboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "add-jetpack",
+      "title": "Add Jetpack To Self-Hosted Site",
+      "subtitle": "Jetpack Commands",
+      "description": "Connect Jetpack to a self-hosted WordPress site",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-domains",
+      "title": "Manage Domains",
+      "subtitle": "Jetpack Commands",
+      "description": "Manage and configure your domains on WordPress.com",
+      "keywords": [
+        "dns",
+        "domain mapping",
+        "domain registration",
+        "domain transfer",
+        "email forwarding",
+        "nameservers",
+        "subdomains",
+        "whois"
+      ],
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-dns-records",
+      "title": "Manage DNS Records",
+      "subtitle": "Jetpack Commands",
+      "description": "Manage the DNS records for a WordPress.com site",
+      "keywords": [
+        "cname",
+        "mx",
+        "txt"
+      ],
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-site-dashboard",
+      "title": "Open Site Dashboard",
+      "subtitle": "Jetpack Commands",
+      "description": "Open the dashboard for a Jetpack-connected WordPress site",
+      "keywords": [
+        "admin",
+        "wp-admin"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "open-stats",
+      "title": "Open Jetpack Stats",
+      "subtitle": "Jetpack Commands",
+      "description": "Open the stats page for a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "register-domain",
+      "title": "Register Domain",
+      "subtitle": "Jetpack Commands",
+      "description": "Register a new domain on WordPress.com",
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-activity-log",
+      "title": "Open Activity Log",
+      "subtitle": "Jetpack Commands",
+      "description": "Open the activity log for a Jetpack-connected site",
+      "mode": "view"
+    },
+    {
+      "name": "open-backups",
+      "title": "Open Jetpack Backup",
+      "subtitle": "Jetpack Commands",
+      "description": "Open the backups page for a Jetpack-connected site",
+      "mode": "view"
+    },
+    {
+      "name": "open-jetpack-scan",
+      "title": "Open Jetpack Scan",
+      "subtitle": "Jetpack Commands",
+      "description": "Open the security scanning page for a Jetpack-connected site",
+      "mode": "view"
+    },
+    {
+      "name": "open-jetpack-social",
+      "title": "Open Jetpack Social",
+      "subtitle": "Jetpack Commands",
+      "description": "Open the social connections page for a Jetpack-connected site",
+      "mode": "view"
+    },
+    {
+      "name": "open-site-monitoring-metrics",
+      "title": "Open Site Monitoring Metrics",
+      "subtitle": "Jetpack Commands",
+      "description": "View the performance and related metrics for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-php-logs",
+      "title": "Open PHP Logs",
+      "subtitle": "Jetpack Commands",
+      "description": "Open the PHP logs for a WordPress.com site",
+      "keywords": [
+        "error logs",
+        "fatal errors",
+        "php errors",
+        "php warnings"
+      ],
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-phpmyadmin",
+      "title": "Open Database in PhpMyAdmin",
+      "subtitle": "Jetpack Commands",
+      "description": "Open phpMyAdmin for a WordPress.com site",
+      "keywords": [
+        "database",
+        "mysql",
+        "phpMyAdmin"
+      ],
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-web-server-logs",
+      "title": "Open Web Server Logs",
+      "subtitle": "Jetpack Commands",
+      "description": "Open the web server logs for a WordPress.com site",
+      "keywords": [
+        "access logs",
+        "apache logs",
+        "nginx logs",
+        "request logs"
+      ],
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-hosting-configuration",
+      "title": "Manage Hosting Configuration",
+      "subtitle": "Jetpack Commands",
+      "description": "Configure hosting features for a WordPress.com site",
+      "keywords": [
+        "admin interface style",
+        "cache",
+        "database",
+        "global edge cache",
+        "hosting",
+        "mysql",
+        "phpMyAdmin",
+        "php version",
+        "sftp/ssh credentials",
+        "staging sites",
+        "wp-cli"
+      ],
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-staging-sites",
+      "title": "Manage Staging Sites",
+      "subtitle": "Jetpack Commands",
+      "description": "Manage the staging sites for a WordPress.com site",
+      "keywords": [
+        "add staging site",
+        "create staging site",
+        "delete staging site",
+        "sync staging site"
+      ],
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "change-php-version",
+      "title": "Change PHP Version",
+      "subtitle": "Jetpack Commands",
+      "description": "Change the PHP version for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-cache-settings",
+      "title": "Manage Cache Settings",
+      "subtitle": "Jetpack Commands",
+      "description": "Manage the cache settings for a WordPress.com site",
+      "keywords": [
+        "clear cache",
+        "disable cache",
+        "enable cache",
+        "global edge cache",
+        "purge cache"
+      ],
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "change-admin-interface-style",
+      "title": "Change Admin Interface Style",
+      "subtitle": "Jetpack Commands",
+      "description": "Manage the admin interface style for a WordPress.com site",
+      "keywords": [
+        "wp-admin"
+      ],
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-ssh-credentials",
+      "title": "Open SFTP/SSH Credentials",
+      "subtitle": "Jetpack Commands",
+      "description": "View the SFTP/SSH credentials for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "copy-ssh-connection",
+      "title": "Copy SSH/SFTP Connection String",
+      "description": "Copy the SSH/SFTP connection string for a WordPress.com site",
+      "subtitle": "Jetpack Commands",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "reset-ssh-password",
+      "title": "Reset SSH/SFTP Password",
+      "subtitle": "Jetpack Commands",
+      "description": "Reset the SSH/SFTP password for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-posts",
+      "title": "Manage Posts",
+      "subtitle": "Jetpack Commands",
+      "description": "Access and edit the posts of a Jetpack-connected WordPress site",
+      "keywords": [
+        "edit posts",
+        "delete posts"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "manage-pages",
+      "title": "Manage Pages",
+      "subtitle": "Jetpack Commands",
+      "description": "Access and edit the pages of a Jetpack-connected WordPress site",
+      "keywords": [
+        "edit pages",
+        "delete pages"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "manage-comments",
+      "title": "Manage Comments",
+      "subtitle": "Jetpack Commands",
+      "description": "Access and edit the comments of a Jetpack-connected WordPress site",
+      "keywords": [
+        "edit comments",
+        "delete comments"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "view-media-uploads",
+      "title": "View Media Uploads",
+      "subtitle": "Jetpack Commands",
+      "description": "Manage uploaded media files on a Jetpack-connected WordPress site",
+      "keywords": [
+        "manage uploads"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "upload-media",
+      "title": "Upload Media",
+      "subtitle": "Jetpack Commands",
+      "description": "Upload and manage media files on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "manage-themes",
+      "title": "Manage Themes",
+      "subtitle": "Jetpack Commands",
+      "description": "Access and customize themes for a Jetpack-connected WordPress site",
+      "keywords": [
+        "activate theme",
+        "delete theme",
+        "install theme"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "install-theme",
+      "title": "Install Theme",
+      "subtitle": "Jetpack Commands",
+      "description": "Install a theme on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "manage-plugins",
+      "title": "Manage Plugins",
+      "subtitle": "Jetpack Commands",
+      "description": "Access and manage plugins for a Jetpack-connected WordPress site",
+      "keywords": [
+        "activate plugin",
+        "deactivate plugin",
+        "delete plugin",
+        "install plugin",
+        "update plugin"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "install-plugin",
+      "title": "Install Plugin",
+      "subtitle": "Jetpack Commands",
+      "description": "Install a plugin on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "manage-users",
+      "title": "Manage Users",
+      "subtitle": "Jetpack Commands",
+      "description": "Manage user accounts and roles on a Jetpack-connected WordPress site",
+      "keywords": [
+        "add user",
+        "delete user",
+        "edit user",
+        "remove user",
+        "update user"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "open-general-settings",
+      "title": "Open General Settings",
+      "subtitle": "Jetpack Commands",
+      "description": "Open the general settings page of a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "add-new-post",
+      "title": "Add New Post",
+      "subtitle": "Jetpack Commands",
+      "description": "Create a new post on a Jetpack-connected WordPress site",
+      "keywords": [
+        "create post",
+        "write post"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "add-new-page",
+      "title": "Add New Page",
+      "subtitle": "Jetpack Commands",
+      "description": "Create a new page on a Jetpack-connected WordPress site",
+      "keywords": [
+        "create page",
+        "write page"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "add-new-user",
+      "title": "Add New User",
+      "subtitle": "Jetpack Commands",
+      "description": "Register a new user on a Jetpack-connected WordPress site",
+      "keywords": [
+        "create user",
+        "invite user"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "disable-global-edge-cache",
+      "title": "Disable Edge Cache",
+      "subtitle": "Jetpack Commands",
+      "description": "Disable the edge cache for a WordPress.com site",
+      "keywords": [
+        "disable cache",
+        "disable edge cache"
+      ],
+      "icon": "wpcom-logo.png",
+      "mode": "view"
+    },
+    {
+      "name": "enable-global-edge-cache",
+      "title": "Enable Edge Cache",
+      "subtitle": "Jetpack Commands",
+      "description": "Enable the edge cache for a WordPress.com site",
+      "keywords": [
+        "enable cache",
+        "enable edge cache"
+      ],
+      "icon": "wpcom-logo.png",
+      "mode": "view"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "subtitle": "Jetpack Commands",
+      "description": "Clear the cache for a WordPress.com site",
+      "keywords": [
+        "clear edge cache",
+        "purge edge cache",
+        "purge cache"
+      ],
+      "icon": "wpcom-logo.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "node-fetch": "^3.3.2",
+    "wpcom": "^5.4.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

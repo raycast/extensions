@@ -1,0 +1,150 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stripe",
+  "title": "Stripe",
+  "description": "Quick Stripe dashboard functionality and quick link access",
+  "icon": "stripe.png",
+  "author": "pradeepb28",
+  "contributors": [
+    "farisaziz12",
+    "bradgarropy",
+    "xmorse",
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Finance"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "fill-checkout",
+      "title": "Fill Checkout",
+      "subtitle": "Stripe",
+      "description": "Fills a checkout form with a Stripe test card.",
+      "mode": "view"
+    },
+    {
+      "name": "balance-transactions",
+      "title": "View Balance Transactions",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent balance transactions",
+      "mode": "view"
+    },
+    {
+      "name": "balance",
+      "title": "View Balance",
+      "subtitle": "Stripe",
+      "description": "Shows an overview of your latest account balances",
+      "mode": "view"
+    },
+    {
+      "name": "charges",
+      "title": "View Charges",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent charges",
+      "mode": "view"
+    },
+    {
+      "name": "connected-accounts",
+      "title": "View Connected Accounts",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your connected accounts",
+      "mode": "view"
+    },
+    {
+      "name": "events",
+      "title": "View Events",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent events",
+      "mode": "view"
+    },
+    {
+      "name": "payment-intents",
+      "title": "View Payment Intents",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent payment intents",
+      "mode": "view"
+    },
+    {
+      "name": "create-a-new-invoice",
+      "title": "Create New Invoice",
+      "subtitle": "Stripe",
+      "description": "It creates an invoice for your business on your stripe account",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-a-new-payment",
+      "title": "Create New Payment",
+      "subtitle": "Stripe",
+      "description": "Send and accept payments",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-a-new-product",
+      "title": "Create New Product",
+      "subtitle": "Stripe",
+      "description": "Add a new offering to your stripe product catalog",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-a-new-subscription",
+      "title": "Create New Subscription",
+      "subtitle": "Stripe",
+      "description": "Create new subscription accounts for your customers",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-customers",
+      "title": "Manage Customers & Subscriptions",
+      "subtitle": "Stripe",
+      "description": "Search and manage your Stripe customers and their active subscriptions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "stripeLiveApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Live Env API Key",
+      "description": "API Key for Live Environment. This can be found in your Stripe Dashboard under Developers > API Keys > Secret key",
+      "placeholder": "Enter your Stripe Live API Key"
+    },
+    {
+      "name": "stripeTestApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Test Env API Key",
+      "description": "API Key for Test Environment. This can be found in your Stripe Dashboard under Developers > API Keys > Secret key",
+      "placeholder": "Enter your Stripe Test API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "lodash": "^4.17.21",
+    "stripe": "^17.3.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.182",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "ray lint"
+  }
+}

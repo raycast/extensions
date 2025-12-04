@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ricescore",
+  "title": "RICE Score",
+  "description": "Calculate RICE Score and output value or markdown table",
+  "icon": "rice.png",
+  "author": "tonka3000",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "RICE score",
+      "description": "Calculate the RICE score",
+      "mode": "view"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "markdown-table": "^3.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/markdown-table": "^3.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}

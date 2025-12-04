@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cnpj-lookup",
+  "title": "CNPJ Lookup",
+  "description": "Instantly access Brazilian CNPJ information",
+  "icon": "cnpj-lookup-icon.png",
+  "author": "xilopaint",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "find-cnpj-information",
+      "title": "Find CNPJ Information",
+      "description": "Look up information from the Brazilian National Registry of Legal Entities (CNPJ)",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "cnpj",
+          "type": "text",
+          "required": true,
+          "placeholder": "CNPJ"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

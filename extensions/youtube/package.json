@@ -1,0 +1,183 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "youtube",
+  "title": "YouTube",
+  "description": "Search Videos, Channels, and more",
+  "icon": "youtube.png",
+  "author": "tonka3000",
+  "contributors": [
+    "HelloImSteven",
+    "madza",
+    "xilopaint",
+    "yug2005",
+    "ridemountainpig"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-videos",
+      "title": "Search Videos",
+      "subtitle": "YouTube",
+      "description": "Search YouTube videos",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "search-channel",
+      "title": "Search Channels",
+      "subtitle": "YouTube",
+      "description": "Search YouTube channels",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "popular-videos",
+      "title": "Popular Videos",
+      "subtitle": "YouTube",
+      "description": "Show popular YouTube videos",
+      "mode": "view"
+    },
+    {
+      "name": "search-live",
+      "title": "Search Live Streams",
+      "subtitle": "YouTube",
+      "description": "Search live YouTube broadcasts",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "type": "password",
+      "title": "API Key",
+      "placeholder": "Your YouTube enabled Google API key",
+      "required": true,
+      "description": "YouTube enabled Google API key"
+    },
+    {
+      "name": "view",
+      "type": "dropdown",
+      "title": "View Layout",
+      "required": false,
+      "default": "grid",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "grid"
+        },
+        {
+          "title": "List",
+          "value": "list"
+        }
+      ],
+      "description": "Set the default view"
+    },
+    {
+      "name": "griditemsize",
+      "type": "dropdown",
+      "title": "Grid Item Size",
+      "required": false,
+      "default": "5",
+      "data": [
+        {
+          "title": "Small",
+          "value": "6"
+        },
+        {
+          "title": "Medium",
+          "value": "5"
+        },
+        {
+          "title": "Large",
+          "value": "4"
+        }
+      ],
+      "description": "Set the default grid item size"
+    },
+    {
+      "name": "primaryaction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "required": false,
+      "default": "detail",
+      "data": [
+        {
+          "title": "Show Details",
+          "value": "detail"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "browser"
+        }
+      ],
+      "description": "Set the default action"
+    },
+    {
+      "title": "Recent Videos and Channels",
+      "name": "showRecentVideos",
+      "label": "Show Recent Videos",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show recent videos in the video search."
+    },
+    {
+      "name": "showRecentChannels",
+      "label": "Show Recent Channels",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show recent channels in the channel search."
+    }
+  ],
+  "dependencies": {
+    "@googleapis/youtube": "^29.0.0",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
+    "duration-iso-8601": "^1.1.0",
+    "he": "^1.2.0",
+    "javascript-time-ago": "^2.3.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/he": "^1.1.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

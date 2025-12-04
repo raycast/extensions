@@ -1,0 +1,163 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mercury",
+  "title": "Mercury",
+  "description": "Quickly see your Mercury accounts and transactions directly in Raycast",
+  "icon": "extension-icon.png",
+  "author": "atkinsmatt101",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-transactions",
+      "title": "View Accounts & Transactions",
+      "subtitle": "Mercury",
+      "description": "View accounts and transactions for your Mercury Account",
+      "mode": "view"
+    },
+    {
+      "name": "ai-account-summary",
+      "title": "AI Account Summary",
+      "subtitle": "Get an AI-generated summary of your accounts",
+      "description": "Fetches all accounts and transactions, and provides an AI-generated summary",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Mercury API Key",
+      "description": "Your Mercury API key"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-accounts",
+      "title": "Get Accounts",
+      "description": "Retrieves all Mercury accounts and their balances"
+    },
+    {
+      "name": "get-transactions",
+      "title": "Get Transactions",
+      "description": "Retrieves transactions for a specific account or all accounts"
+    },
+    {
+      "name": "analyze-finances",
+      "title": "Analyze Finances",
+      "description": "Analyzes financial data from Mercury accounts and provides insights"
+    }
+  ],
+  "ai": {
+    "instructions": "You are a helpful assistant for Mercury Banking. You can help users check their account balances, view transactions, and analyze their financial data.",
+    "evals": [
+      {
+        "input": "@mercury what is my current balance",
+        "mocks": {
+          "get-accounts": [
+            {
+              "accountNumber": "3419732837",
+              "availableBalance": 1000000,
+              "currentBalance": 1000000,
+              "legalBusinessName": "Not A Real Company Inc.",
+              "name": "Mercury Savings ••2837",
+              "status": "active"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-accounts",
+              "arguments": {}
+            }
+          },
+          {
+            "includes": "1000000"
+          }
+        ]
+      },
+      {
+        "input": "@mercury Show me my latest transactions",
+        "mocks": {
+          "get-transactions": [
+            {
+              "id": "tx_001",
+              "amount": -50.25,
+              "counterpartyName": "Superstore",
+              "createdAt": "2025-02-26T14:00:00Z",
+              "status": "completed",
+              "kind": "debitCardTransaction"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-transactions",
+              "arguments": {
+                "limit": 5
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "Analyze my finances",
+        "mocks": {
+          "analyze-finances": {
+            "accounts": {
+              "count": 7,
+              "totalAvailableBalance": 5470041.54,
+              "totalBalance": 5470045.04
+            },
+            "cashFlow": {
+              "inflows": 0,
+              "netCashFlow": 0,
+              "outflows": 0
+            },
+            "period": "month",
+            "topExpenses": [],
+            "topIncome": [],
+            "transactionsByType": {}
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "analyze-finances",
+              "arguments": {
+                "period": "month"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
+    "@types/node-fetch": "^2.6.11",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

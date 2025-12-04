@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unix-timestamp",
+  "title": "Unix Timestamp",
+  "description": "Convert between unix timestamp and human readable form date",
+  "icon": "command-icon.png",
+  "author": "destiner",
+  "contributors": [
+    "maathis",
+    "sebdanielsson"
+  ],
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "current-timestamp",
+      "title": "Get Current Timestamp",
+      "description": "Saves current timestamp to the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "timestamp-to-date",
+      "title": "Convert Timestamp to Date",
+      "description": "Converts unix timestamp to date",
+      "mode": "view"
+    },
+    {
+      "name": "date-to-timestamp",
+      "title": "Convert Date to Timestamp",
+      "description": "Converts date to unix timestamp",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "format",
+      "type": "dropdown",
+      "required": false,
+      "title": "Format",
+      "description": "Format of the timestamp",
+      "default": "seconds",
+      "data": [
+        {
+          "title": "Seconds",
+          "value": "seconds"
+        },
+        {
+          "title": "Milliseconds",
+          "value": "milliseconds"
+        }
+      ]
+    },
+    {
+      "name": "isUTC",
+      "type": "checkbox",
+      "required": false,
+      "title": "Timezone",
+      "description": "If checked, UTC timezone will be used. Otherwise, local timezone will be used.",
+      "default": true,
+      "label": "Use UTC"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3"
+  },
+  "devDependencies": {
+    "@types/node": "~22.17.0",
+    "@types/react": "^19.1.9",
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.2"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

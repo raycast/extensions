@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cratecast",
+  "title": "crates.io Search",
+  "description": "Explore crates.io",
+  "icon": "icon.png",
+  "author": "matt",
+  "contributors": [
+    "BalliAsghar",
+    "sennav_"
+  ],
+  "keywords": [
+    "rust",
+    "cargo",
+    "package manager"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Crates",
+      "subtitle": "crates.io",
+      "description": "Search for crates on crates.io",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultOpenAction",
+      "type": "dropdown",
+      "title": "Default Open Action",
+      "description": "How to open the selected package when Enter is pressed",
+      "required": false,
+      "default": "copyToClipboard",
+      "data": [
+        {
+          "title": "Copy Dependency Line",
+          "value": "copyToClipboard"
+        },
+        {
+          "title": "View on crates.io",
+          "value": "viewOnCratesIo"
+        },
+        {
+          "title": "Open Crate Documentation",
+          "value": "openCrateDocumentation"
+        },
+        {
+          "title": "Open Homepage",
+          "value": "openHomepage"
+        },
+        {
+          "title": "Open Repository",
+          "value": "openRepository"
+        },
+        {
+          "title": "View Symbols",
+          "value": "viewSymbols"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "node-fetch": "^3.0.0",
+    "node-html-parser": "^6.1.10"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.3",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spike",
+  "title": "Spike",
+  "description": "Resolve incidents, check who is on-call, and add overrides from Raycast.",
+  "icon": "spike-logo.png",
+  "author": "damanpreet_singh",
+  "owner": "spike",
+  "access": "public",
+  "categories": [
+    "Developer Tools"
+  ],
+  "contributors": [
+    "kaushik_from_spike_sh"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "incidents",
+      "title": "Open Incidents",
+      "description": "Search and discover open incidents",
+      "mode": "view",
+      "keywords": [
+        "triggered",
+        "acknowledge",
+        "incident",
+        "open"
+      ]
+    },
+    {
+      "name": "oncall",
+      "title": "My Oncall",
+      "description": "Browse your on-call schedules",
+      "mode": "view",
+      "keywords": [
+        "oncall",
+        "schedule",
+        "on-call",
+        "rotation"
+      ]
+    },
+    {
+      "name": "whoIsOnCall",
+      "title": "Who Is Oncall",
+      "description": "Lists every active on-call member",
+      "mode": "view",
+      "keywords": [
+        "oncall",
+        "schedule",
+        "on-call",
+        "rotation"
+      ]
+    },
+    {
+      "name": "favorites",
+      "title": "Favorites",
+      "description": "Quickly access your favorites",
+      "mode": "view"
+    },
+    {
+      "name": "addOverride",
+      "title": "Add Oncall Override",
+      "description": "Add override on any on-call schedule",
+      "mode": "view"
+    },
+    {
+      "name": "openIncidents",
+      "title": "Open Incidents in Menu Bar",
+      "subtitle": "Spike",
+      "description": "Access open incidents from your menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4",
+    "crypto-js": "^4.2.0",
+    "moment-timezone": "^0.5.46"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "cross-env NODE_ENV=production ray build -e dist",
+    "dev": "cross-env NODE_ENV=development ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

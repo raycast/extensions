@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "parallels-virtual-machines",
+  "title": "Parallels Virtual Machines",
+  "description": "Launch and control virtual machines in Parallels Desktop.",
+  "icon": "command-icon.png",
+  "author": "danpalmer",
+  "contributors": [
+    "jacpd",
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Virtual Machines",
+      "subtitle": "Parallels Desktop",
+      "description": "Shows virtual machines in Parallels Desktop.",
+      "keywords": [
+        "open",
+        "parallels",
+        "vm"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "shutdown",
+      "title": "Shut Down",
+      "subtitle": "Parallels Desktop",
+      "description": "Correctly shuts down Parallels Desktop and hard-stops services.",
+      "keywords": [
+        "shutdown",
+        "parallels",
+        "vm"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

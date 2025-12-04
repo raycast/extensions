@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "monorepo-manager",
+  "version": "0.0.1",
+  "title": "Manage Monorepo Projects/Workspaces",
+  "description": "A Raycast extension helps to manage monorepo projects/workspaces in your machine. It also list all packages in each monorepo project/workspace",
+  "icon": "command-icon.png",
+  "author": "tung-dang",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manageMonorepo",
+      "title": "Manage Monorepo",
+      "description": "Manage packages/workspaces",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rootSourceFolder",
+      "title": "Root Source Folder Path",
+      "description": "A absolute folder path contains all workspaces/projects",
+      "type": "directory",
+      "required": true,
+      "placeholder": "/Uers/your-name/sources/",
+      "default": ""
+    },
+    {
+      "name": "cacheDuration",
+      "title": "Cache Duration",
+      "description": "Cache duration (ms). Default is 1 day",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "86400000",
+      "default": "86400000"
+    },
+    {
+      "name": "slackRedirectLink",
+      "title": "Slack Channel Redirection Link",
+      "description": "A Slack link is used to redirect to a specific channel, which is gotten from package information",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://<your-workspace>.slack.com/app_redirect?channel={query}",
+      "default": ""
+    },
+    {
+      "name": "mainFieldName",
+      "title": "Field in `package.json` File Containing Detail of a Package",
+      "description": "If the field name is not specified, some detail info of current package will be omitted",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.1",
+    "@yarnpkg/core": "^4.0.0-rc.37",
+    "fs-extra": "^11.1.0",
+    "lodash": "^4.17.21",
+    "parse-git-config": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/lodash": "^4.14.191",
+    "@types/node": "18.11.18",
+    "@types/parse-git-config": "^3.0.1",
+    "@types/react": "18.0.27",
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
+    "@typescript-eslint/parser": "^5.50.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint": "^8.33.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

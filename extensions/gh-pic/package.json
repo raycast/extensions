@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gh-pic",
+  "title": "GHPic",
+  "description": "A simple extension of Raycast to upload images to GitHub from clipboard.",
+  "icon": "ghpic-icon.png",
+  "author": "xiangsanliu",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Upload Image to Github",
+      "description": "Upload images to GitHub from clipboard",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "githubToken",
+      "title": "Github Token",
+      "type": "password",
+      "required": true,
+      "description": "Your Github Token."
+    },
+    {
+      "name": "repo",
+      "title": "Repo Name",
+      "type": "textfield",
+      "required": true,
+      "description": "Github Repository name."
+    },
+    {
+      "name": "owner",
+      "title": "Repo Owner",
+      "type": "textfield",
+      "required": true,
+      "description": "Owner of Github Repository."
+    },
+    {
+      "name": "committer",
+      "title": "Committer",
+      "type": "textfield",
+      "required": false,
+      "description": "Username to display in commit message.",
+      "placeholder": "Default valule is same to Repo Owner.",
+      "default": ""
+    },
+    {
+      "name": "email",
+      "title": "Email",
+      "type": "textfield",
+      "required": true,
+      "description": "Email of committer."
+    },
+    {
+      "name": "path",
+      "title": "Path of Repo",
+      "type": "textfield",
+      "required": true,
+      "description": "Path to store pictures in repo.",
+      "default": "gh-pic"
+    }
+  ],
+  "dependencies": {
+    "@octokit/core": "^4.0.5",
+    "@raycast/api": "^1.69.0",
+    "dayjs": "^1.11.5",
+    "file-type": "^19.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

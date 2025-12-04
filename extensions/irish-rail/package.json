@@ -1,0 +1,39 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "irish-rail",
+  "title": "Irish Rail",
+  "description": "Irish Rail departure information",
+  "icon": "command-icon.png",
+  "author": "dave-kav",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Irish Rail Departures",
+      "description": "Queries the Irish Rail API for trains due in the next 90 minutes by station and destination.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.5",
+    "axios": "^1.8.4",
+    "cross-fetch": "^4.0.0",
+    "fast-xml-parser": "^4.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/cli-color": "^2.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

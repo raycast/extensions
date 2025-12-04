@@ -1,0 +1,12 @@
+# System files
+.DS_Store
+
+# Modules
+node_modules
+
+# Editor directories and files
+.idea
+.vscode
+
+# Raycast specific files
+raycast-env.d.ts

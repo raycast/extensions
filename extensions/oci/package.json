@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "oci",
+  "title": "Oracle Cloud",
+  "description": "Manage Oracle Cloud Infrastructure",
+  "icon": "red-cloud-white-bg-blue-b.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "core",
+      "title": "Manage Core Services",
+      "subtitle": "Oracle Cloud",
+      "description": "Manage Instances and more",
+      "mode": "view"
+    },
+    {
+      "name": "nosql-database",
+      "title": "Manage NoSQL Databases",
+      "subtitle": "Oracle Cloud",
+      "description": "Manage NoSQL Databases",
+      "mode": "view"
+    },
+    {
+      "name": "object-storage",
+      "title": "Manage Object Storage Services",
+      "subtitle": "Oracle Cloud",
+      "description": "Manage Object Storage & Archive Storage",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
+    "filesize": "^11.0.2",
+    "oci-sdk": "^2.112.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

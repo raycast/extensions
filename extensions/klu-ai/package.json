@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "klu-ai",
+  "title": "Klu",
+  "description": "Klu AI extension for Raycast",
+  "icon": "spark.png",
+  "author": "abielzulio",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-actions",
+      "title": "Search Actions",
+      "description": "Search for actions in your workspace",
+      "mode": "view"
+    },
+    {
+      "name": "send-prompt",
+      "title": "Send Prompt",
+      "description": "Send a prompt to your action",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "label": "API Key",
+      "description": "Enter your Klu's workspace API",
+      "type": "password",
+      "title": "API",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@kluai/core": "^0.0.58",
+    "@raycast/api": "^1.66.1",
+    "@raycast/utils": "^1.11.1",
+    "date-fns": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

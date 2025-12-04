@@ -1,0 +1,218 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-blockchain",
+  "title": "Search Blockchain",
+  "description": "Search Bitcoin (BTC), Cardano (ADA), EOS, Ethereum (ETH), Monero (XMR), NEO, Ontology (ONT), Polygon (DOT), Solana (SOL), Stellar (XLM), Tron (TRX), XRP and more cryptocurrency blockchain explorer",
+  "icon": "command-icon.png",
+  "author": "gutenye",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bitcoin-command",
+      "title": "Search Bitcoin (BTC) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "cardano-command",
+      "title": "Search Cardano (ADA) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "eos-command",
+      "title": "Search EOS (EOS) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ethereum-command",
+      "title": "Search Ethereum (ETH) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "neo-command",
+      "title": "Search NEO (NEO) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ontology-command",
+      "title": "Search Ontology (ONT) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "polygon-command",
+      "title": "Search Polygon (MATIC) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "solana-command",
+      "title": "Search Solana (SOL) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "stellar-command",
+      "title": "Search Stellar (XLM) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "polkadot-command",
+      "title": "Search Polkadot (DOT) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "tron-command",
+      "title": "Search Tron (TRX) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "monero-command",
+      "title": "Search Monero (XMR) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "xrp-command",
+      "title": "Search XRP (XRP) Blockchain Explorer",
+      "description": "Search Blockchain Explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@scure/base": "^1.1.6",
+    "lodash-es": "^4.17.21",
+    "tiny-invariant": "^1.3.3"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

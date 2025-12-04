@@ -1,0 +1,414 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "promptlab",
+  "title": "PromptLab",
+  "version": "1.3.0",
+  "description": "Create custom AI commands using powerful placeholders",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "contributors": [
+    "litomore"
+  ],
+  "categories": [
+    "Productivity",
+    "Data",
+    "Developer Tools",
+    "Fun"
+  ],
+  "keywords": [
+    "AI",
+    "LLM",
+    "context",
+    "placeholders",
+    "experiment",
+    "commands"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "General Settings",
+      "name": "pdfOCR",
+      "label": "Use OCR For PDFs",
+      "type": "checkbox",
+      "default": true,
+      "description": "If checked, PromptLab will use OCR to extract text from PDFs. This takes longer but enables analysis of more PDF content types.",
+      "required": false
+    },
+    {
+      "title": "Export Location",
+      "name": "exportLocation",
+      "type": "directory",
+      "default": "~/Downloads",
+      "description": "The folder where exported commands and chats will be saved.",
+      "required": false
+    },
+    {
+      "title": "Custom Placeholder Files",
+      "name": "customPlaceholderFiles",
+      "type": "textfield",
+      "default": "",
+      "description": "A comma-separated list of JSON files containing custom placeholders. These files must follow the format of the original custom_placeholders.json file. See the documentation for more information.",
+      "required": false
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Command Action",
+      "type": "dropdown",
+      "default": "copy-to-clipboard",
+      "description": "The top action of the actions menu in command response views.",
+      "required": false,
+      "data": [
+        {
+          "title": "Copy Response To Clipboard",
+          "value": "copy-response-to-clipboard"
+        },
+        {
+          "title": "Paste To Active App",
+          "value": "paste-to-active-app"
+        },
+        {
+          "title": "Copy Prompt To Clipboard",
+          "value": "copy-prompt-to-clipboard"
+        },
+        {
+          "title": "Open Chat",
+          "value": "open-chat"
+        },
+        {
+          "title": "Regenerate",
+          "value": "regenerate"
+        }
+      ]
+    },
+    {
+      "name": "condenseAmount",
+      "title": "Level of Automatic Input Condensing",
+      "type": "dropdown",
+      "default": "high",
+      "description": "The amount of automatic input condensing to apply to the input text. Higher levels will remove more characters and cut out excess verbiage, resulting in far fewer tokens. However, this may result in less accurate results. Adjust this value according to the model's token limit. For Raycast AI, use 'Medium' or 'High'.",
+      "required": false,
+      "data": [
+        {
+          "title": "High",
+          "value": "high"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "None",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "title": "Prompt Prefix",
+      "name": "promptPrefix",
+      "type": "textfield",
+      "default": "",
+      "description": "Text to prepend at the start of every prompt. This can be used to set context for all commands.",
+      "required": false
+    },
+    {
+      "title": "Prompt Suffix",
+      "name": "promptSuffix",
+      "type": "textfield",
+      "default": "",
+      "description": "Text to append and the end of every prompt. This can be used to set context for all commands.",
+      "required": false
+    },
+    {
+      "name": "modelEndpoint",
+      "title": "Model Endpoint",
+      "type": "textfield",
+      "required": false,
+      "default": "Raycast AI",
+      "description": "The API endpoint of the model used to generate PromptLab command output. Set to 'Raycast AI' to use the Raycast AI API."
+    },
+    {
+      "name": "authType",
+      "title": "API Authorization Type",
+      "type": "dropdown",
+      "required": false,
+      "default": "bearer",
+      "description": "The authorization type for the model endpoint, e.g. API Key or Bearer. This is only used if the model source is set to something other than Raycast AI.",
+      "data": [
+        {
+          "title": "API Key",
+          "value": "apiKey"
+        },
+        {
+          "title": "Bearer Token",
+          "value": "bearerToken"
+        },
+        {
+          "title": "X-API-Key",
+          "value": "x-api-key"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "type": "password",
+      "required": false,
+      "default": "",
+      "description": "The API key for the model source. This is only used if the model source is set to something other than Raycast AI."
+    },
+    {
+      "name": "inputSchema",
+      "title": "Input Schema",
+      "type": "textfield",
+      "required": false,
+      "default": "N/A",
+      "description": "The JSON schema of the endpoint used to generate PromptLab command output. This is only used if the model source is set to something other than Raycast AI. Use {prompt} to represent PromptLab's entire input to the model.",
+      "placeholder": "{ \"prompt\": \"{input}\" }"
+    },
+    {
+      "name": "includeTemperature",
+      "label": "Include Creativity Parameter",
+      "type": "checkbox",
+      "default": true,
+      "description": "If checked, PromptLab will include a temperature (creativity) parameter in the model input, using the value specified during command creation. You may need to disable this if the model does not support temperature. Disabling this will also disable the 'Creativity' textfield in the command creation view.",
+      "required": false
+    },
+    {
+      "name": "outputKeyPath",
+      "title": "Output Key Path",
+      "type": "textfield",
+      "required": false,
+      "default": "N/A",
+      "description": "The key path to the text output in the JSON response from the model endpoint. For example, choices[0].message.content, for the OpenAI API. This is only used if the model source is set to something other than Raycast AI."
+    },
+    {
+      "name": "outputTiming",
+      "title": "Output Timing",
+      "type": "dropdown",
+      "required": false,
+      "default": "sync",
+      "description": "Whether output from the model endpoint should be processed synchronously or asynchronously. Often, this is also an option on the model API. This is only used if the model source is set to something other than Raycast AI.",
+      "data": [
+        {
+          "title": "Synchronous",
+          "value": "sync"
+        },
+        {
+          "title": "Asynchronous",
+          "value": "async"
+        }
+      ]
+    },
+    {
+      "name": "lengthLimit",
+      "title": "Prompt Length Limit",
+      "type": "textfield",
+      "required": false,
+      "default": "2500",
+      "description": "The maximum length of the prompt that will be sent to the model endpoint, beyond which it will be truncated. Larger values will support more content, but may result in token count errors. Adjust this value according to the model's token limit (but leave some space, e.g. 1000 characters, for additional input and placeholders)."
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-command",
+      "title": "New PromptLab Command",
+      "description": "Create a custom PromptLab command accessible via 'Search PromptLab Commands'",
+      "mode": "view"
+    },
+    {
+      "name": "search-commands",
+      "title": "My PromptLab Commands",
+      "description": "Search your installed PromptLab commands",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "commandName",
+          "placeholder": "Command Name",
+          "required": false,
+          "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "groupByCategory",
+          "title": "Search Settings",
+          "label": "Group Commands By Category",
+          "type": "checkbox",
+          "default": false,
+          "description": "If checked, each command category will have its own section in the search results.",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "chat",
+      "title": "PromptLab Chat",
+      "description": "Start an interactive chat with the context of selected files provided'",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "initialQuery",
+          "placeholder": "Initial Query",
+          "required": false,
+          "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "title": "Default Chat Settings",
+          "name": "useSelectedFiles",
+          "label": "Selected Files",
+          "type": "checkbox",
+          "default": false,
+          "description": "If checked, the selected files will be used as context for conversations by default.",
+          "required": false
+        },
+        {
+          "name": "useConversationHistory",
+          "label": "Conversation History",
+          "type": "checkbox",
+          "default": true,
+          "description": "If checked, the conversation history will be used as context for conversations by default.",
+          "required": false
+        },
+        {
+          "name": "autonomousFeatures",
+          "label": "Autonomous Agent Features",
+          "type": "checkbox",
+          "default": false,
+          "description": "If checked, autonomous agent features such as 'Allow AI To Run Commands' will be enabled by default.",
+          "required": false
+        },
+        {
+          "name": "basePrompt",
+          "title": "Base Prompt",
+          "type": "textfield",
+          "required": false,
+          "default": "I want you to act as an interactive information engine. When I supply a question, you will respond with an answer based on any information I've provided and your own inferences.",
+          "description": "The base prompt that provides the initial context for conversations."
+        }
+      ]
+    },
+    {
+      "name": "import-commands",
+      "title": "Import PromptLab Commands",
+      "description": "Import custom PromptLab commands from a JSON string",
+      "mode": "view"
+    },
+    {
+      "name": "discover-commands",
+      "title": "PromptLab Command Store",
+      "description": "Discover commands from the PromptLab community",
+      "mode": "view"
+    },
+    {
+      "name": "manage-models",
+      "title": "Manage Models",
+      "description": "Manage the models used to generate PromptLab command output",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-item",
+      "title": "PromptLab Menu Item",
+      "description": "Show PromptLab shortcut in the menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "title": "Shortcuts To Show",
+          "name": "showNewChatShortcut",
+          "label": "New Chat",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to show the 'New Chat' shortcut in the menu.",
+          "required": false
+        },
+        {
+          "name": "showAllCommandsShortcut",
+          "label": "All Commands",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to show the 'All Commands' shortcut in the menu.",
+          "required": false
+        },
+        {
+          "name": "showPromptLabStoreShortcut",
+          "label": "PromptLab Store",
+          "type": "checkbox",
+          "default": false,
+          "description": "Whether to show the 'PromptLab Store' shortcut in the menu.",
+          "required": false
+        },
+        {
+          "name": "showNewCommandShortcut",
+          "label": "New Command",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to show the 'New Command' shortcut in the menu.",
+          "required": false
+        },
+        {
+          "title": "Display Settings",
+          "name": "displayIcons",
+          "label": "Display Icons",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to display icons next to the menu items.",
+          "required": false
+        },
+        {
+          "name": "displayColors",
+          "label": "Display Icon Colors",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to display colors in the menu item icons.",
+          "required": false
+        },
+        {
+          "name": "displayFavorites",
+          "label": "Display Favorites",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to separate favorite commands from the rest of the menu items.",
+          "required": false
+        },
+        {
+          "name": "displayCategories",
+          "label": "Display Categories",
+          "type": "checkbox",
+          "default": false,
+          "description": "Whether to separate commands by category.",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.0",
+    "exifr": "^7.1.3",
+    "mammoth": "^1.9.1",
+    "node-fetch": "^3.3.2",
+    "pptx-text-parser": "^1.1.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz",
+    "placeholders-toolkit": "^0.1.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.3",
+    "@types/react": "19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

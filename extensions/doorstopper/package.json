@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "doorstopper",
+  "title": "Doorstopper",
+  "description": "Prevent your MacBook from going to sleep when you close the lid",
+  "categories": [
+    "System"
+  ],
+  "icon": "icon.png",
+  "author": "roele",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "enable",
+      "title": "Enable Doorstopper",
+      "description": "Prevent the MacBook from going to sleep when closing the lid",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable",
+      "title": "Disable Doorstopper",
+      "description": "Allow the MacBook to go to sleep when closing the lid",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Doorstopper",
+      "subtitle": "Doorstopper",
+      "description": "Toggle Doorstopper",
+      "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Doorstopper Status",
+      "description": "Check if Doorstopper is enabled or disabled",
+      "mode": "no-view"
+    },
+    {
+      "name": "statusmenu",
+      "title": "Doorstopper Status Menu Bar",
+      "description": "Get the Doorstopper status in your menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "hiddenWhenDisabled",
+          "description": "Hide the icon when disabled",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "When Disabled",
+          "label": "Hide the icon"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "icon",
+      "description": "Select icon set for Menu Bar",
+      "type": "dropdown",
+      "required": false,
+      "default": "door",
+      "title": "Menu Bar Icon",
+      "data": [
+        {
+          "title": "None",
+          "value": ""
+        },
+        {
+          "title": "Door",
+          "value": "door"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "pull": "npx @raycast/api@latest pull-contributions"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ftrack",
+  "title": "ftrack",
+  "description": "Interacting with ftrack",
+  "icon": "ftrack-logo-white.png",
+  "author": "lucaas",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "assigned_tasks",
+      "title": "Assigned Tasks",
+      "description": "Show assigned tasks",
+      "mode": "view"
+    },
+    {
+      "name": "search_entities",
+      "title": "Search",
+      "description": "Search ftrack",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ftrackServerUrl",
+      "title": "Server URL",
+      "description": "URL to your ftrack workspace",
+      "placeholder": "https://my-workspace.ftrackapp.com",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "ftrackApiUser",
+      "title": "Username",
+      "description": "ftrack Username - Copy it from 'My account' in ftrack Studio",
+      "placeholder": "name@example.com",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "ftrackApiKey",
+      "title": "API Key",
+      "description": "ftrack API Key - Copy it from 'My account' in ftrack Studio",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "assignedTasksFilter",
+      "title": "Additional Filter",
+      "placeholder": "ancestors.id is \"2465912c-2441-11ed-8edb-9e89dc32fb4f\"",
+      "description": "Optional filter to limit assigned tasks results, e.g. to a project",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@ftrack/api": "^1.4.7",
+    "@raycast/api": "^1.50.0",
+    "@raycast/utils": "^1.5.2",
+    "cross-fetch": "^3.1.5",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.16.2",
+    "@types/react": "18.2.0",
+    "eslint": "^8.39.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

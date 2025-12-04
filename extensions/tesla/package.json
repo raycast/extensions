@@ -1,0 +1,214 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tesla",
+  "title": "Tesla",
+  "description": "Control and view your Tesla",
+  "icon": "icon.png",
+  "author": "williamwelsh",
+  "categories": [
+    "Data",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "viewCar",
+      "title": "View Car",
+      "subtitle": "Tesla",
+      "description": "View information about your Tesla",
+      "mode": "view"
+    },
+    {
+      "name": "turnClimateOn",
+      "title": "Turn Climate On",
+      "subtitle": "Tesla",
+      "description": "Turn your AC on",
+      "mode": "view"
+    },
+    {
+      "name": "turnClimateOff",
+      "title": "Turn Climate Off",
+      "subtitle": "Tesla",
+      "description": "Turn your AC off",
+      "mode": "view"
+    },
+    {
+      "name": "turnSentryOn",
+      "title": "Turn Sentry On",
+      "subtitle": "Tesla",
+      "description": "Turn sentry mode on",
+      "mode": "view"
+    },
+    {
+      "name": "turnSentryOff",
+      "title": "Turn Sentry Off",
+      "subtitle": "Tesla",
+      "description": "Turn sentry mode off",
+      "mode": "view"
+    },
+    {
+      "name": "honk",
+      "title": "Honk",
+      "subtitle": "Tesla",
+      "description": "Honk the horn",
+      "mode": "view"
+    },
+    {
+      "name": "fart",
+      "title": "Fart",
+      "subtitle": "Tesla",
+      "description": "Start an emissions test",
+      "mode": "view"
+    },
+    {
+      "name": "openChargeDoor",
+      "title": "Open Charge Door",
+      "subtitle": "Tesla",
+      "description": "Open the chargeport",
+      "mode": "view"
+    },
+    {
+      "name": "closeChargeDoor",
+      "title": "Close Charge Door",
+      "subtitle": "Tesla",
+      "description": "Close the chargeport",
+      "mode": "view"
+    },
+    {
+      "name": "startCharging",
+      "title": "Start Charging",
+      "subtitle": "Tesla",
+      "description": "Start charging your car",
+      "mode": "view"
+    },
+    {
+      "name": "stopCharging",
+      "title": "Stop Charging",
+      "subtitle": "Tesla",
+      "description": "Stop charging your car",
+      "mode": "view"
+    },
+    {
+      "name": "viewCharges",
+      "title": "View Charges",
+      "subtitle": "Tesla",
+      "description": "View historical charges",
+      "mode": "view"
+    },
+    {
+      "name": "viewDrives",
+      "title": "View Drives",
+      "subtitle": "Tesla",
+      "description": "View historical drives",
+      "mode": "view"
+    },
+    {
+      "name": "changeImage",
+      "title": "Change Car Image",
+      "subtitle": "Tesla",
+      "description": "Change the car image displayed",
+      "mode": "view"
+    },
+    {
+      "name": "flashLights",
+      "title": "Flash Lights",
+      "subtitle": "Tesla",
+      "description": "Flash the lights",
+      "mode": "view"
+    },
+    {
+      "name": "tires",
+      "title": "Tire Pressure",
+      "subtitle": "Tesla",
+      "description": "Get the pressure for your tires",
+      "mode": "view"
+    },
+    {
+      "name": "startDefrost",
+      "title": "Start Defrosting",
+      "subtitle": "Tesla",
+      "description": "Start defrosting",
+      "mode": "view"
+    },
+    {
+      "name": "stopDefrost",
+      "title": "Stop Defrosting",
+      "subtitle": "Tesla",
+      "description": "Stop defrosting",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "tessieApiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Tessie API Key",
+      "placeholder": "Tessie API Key"
+    },
+    {
+      "name": "VIN",
+      "type": "password",
+      "required": true,
+      "title": "VIN",
+      "description": "Your Car's VIN",
+      "placeholder": "VIN"
+    },
+    {
+      "name": "temperature",
+      "type": "dropdown",
+      "required": true,
+      "title": "Temperature Type",
+      "description": "Fahrenheit or Celsius",
+      "data": [
+        {
+          "title": "Fahrenheit",
+          "value": "fahrenheit"
+        },
+        {
+          "title": "Celsius",
+          "value": "celsius"
+        }
+      ]
+    },
+    {
+      "name": "distance",
+      "type": "dropdown",
+      "required": true,
+      "title": "Distance Type",
+      "description": "Miles or Kilometers",
+      "data": [
+        {
+          "title": "Miles",
+          "value": "miles"
+        },
+        {
+          "title": "Kilometers",
+          "value": "km"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.1",
+    "@raycast/utils": "^1.9.1",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

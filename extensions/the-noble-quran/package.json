@@ -1,0 +1,533 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "the-noble-quran",
+  "title": "The Noble Quran",
+  "description": "Explore The Noble Quran",
+  "icon": "quran_logo.png",
+  "author": "BalliAsghar",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quran",
+      "title": "Quran",
+      "subtitle": "The Noble Quran",
+      "description": "Explore The Noble Quran",
+      "mode": "view"
+    },
+    {
+      "name": "favorite",
+      "title": "Favorite Ayah",
+      "subtitle": "The Noble Quran",
+      "description": "Favorite Ayah",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "edition",
+      "title": "Edition",
+      "description": "Select Quran Edition",
+      "type": "dropdown",
+      "default": "en.maududi",
+      "required": true,
+      "data": [
+        {
+          "value": "az.mammadaliyev",
+          "title": "Vasim Mammadaliyev and Ziya Bunyadov (Arabic)"
+        },
+        {
+          "value": "az.musayev",
+          "title": "Alikhan Musayev (Arabic)"
+        },
+        {
+          "value": "bn.bengali",
+          "title": "Muhiuddin Khan (Bengali)"
+        },
+        {
+          "value": "cs.hrbek",
+          "title": "Preklad I. Hrbek (Czech)"
+        },
+        {
+          "value": "cs.nykl",
+          "title": "A. R. Nykl (Czech)"
+        },
+        {
+          "value": "de.aburida",
+          "title": "Abu Rida Muhammad ibn Ahmad ibn Rassoul (German)"
+        },
+        {
+          "value": "de.bubenheim",
+          "title": "A. S. F. Bubenheim and N. Elyas (German)"
+        },
+        {
+          "value": "de.khoury",
+          "title": "Adel Theodor Khoury (German)"
+        },
+        {
+          "value": "de.zaidan",
+          "title": "Amir Zaidan (German)"
+        },
+        {
+          "value": "dv.divehi",
+          "title": "Office of the President of Maldives (Divehi)"
+        },
+        {
+          "value": "en.ahmedali",
+          "title": "Ahmed Ali (English)"
+        },
+        {
+          "value": "en.ahmedraza",
+          "title": "Ahmed Raza Khan (English)"
+        },
+        {
+          "value": "en.arberry",
+          "title": "A. J. Arberry (English)"
+        },
+        {
+          "value": "en.asad",
+          "title": "Muhammad Asad (English)"
+        },
+        {
+          "value": "en.daryabadi",
+          "title": "Abdul Majid Daryabadi (English)"
+        },
+        {
+          "value": "en.hilali",
+          "title": "Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan (English)"
+        },
+        {
+          "value": "en.pickthall",
+          "title": "Mohammed Marmaduke William Pickthall (English)"
+        },
+        {
+          "value": "en.qaribullah",
+          "title": "Hasan al-Fatih Qaribullah and Ahmad Darwish (English)"
+        },
+        {
+          "value": "en.sahih",
+          "title": "Saheeh International (English)"
+        },
+        {
+          "value": "en.sarwar",
+          "title": "Muhammad Sarwar (English)"
+        },
+        {
+          "value": "en.yusufali",
+          "title": "Abdullah Yusuf Ali (English)"
+        },
+        {
+          "value": "fa.ayati",
+          "title": "AbdolMohammad Ayati (Persian)"
+        },
+        {
+          "value": "fa.fooladvand",
+          "title": "Mohammad Mahdi Fooladvand (Persian)"
+        },
+        {
+          "value": "fa.ghomshei",
+          "title": "Mahdi Elahi Ghomshei (Persian)"
+        },
+        {
+          "value": "fa.makarem",
+          "title": "Naser Makarem Shirazi (Persian)"
+        },
+        {
+          "value": "fr.hamidullah",
+          "title": "Muhammad Hamidullah (French)"
+        },
+        {
+          "value": "ha.gumi",
+          "title": "Abubakar Mahmoud Gumi (Hausa)"
+        },
+        {
+          "value": "hi.hindi",
+          "title": "Suhel Farooq Khan and Saifur Rahman Nadwi (Hindi)"
+        },
+        {
+          "value": "id.indonesian",
+          "title": "Unknown (indonesian)"
+        },
+        {
+          "value": "it.piccardo",
+          "title": "Hamza Roberto Piccardo (Italian)"
+        },
+        {
+          "value": "ja.japanese",
+          "title": "Unknown (Japanese)"
+        },
+        {
+          "value": "ko.korean",
+          "title": "Unknown (Korean)"
+        },
+        {
+          "value": "ku.asan",
+          "title": "Burhan Muhammad-Amin (Kurdish)"
+        },
+        {
+          "value": "ml.abdulhameed",
+          "title": "Cheriyamundam Abdul Hameed and Kunhi Mohammed Parappoor (Malayalam)"
+        },
+        {
+          "value": "nl.keyzer",
+          "title": "Salomo Keyzer (Dutch, Flemish)"
+        },
+        {
+          "value": "no.berg",
+          "title": "Einar Berg (Norwegian)"
+        },
+        {
+          "value": "pl.bielawskiego",
+          "title": "Józefa Bielawskiego (Polish)"
+        },
+        {
+          "value": "pt.elhayek",
+          "title": "Samir El-Hayek (Portuguese)"
+        },
+        {
+          "value": "ro.grigore",
+          "title": "George Grigore (Romanian, Moldavian,)"
+        },
+        {
+          "value": "ru.kuliev",
+          "title": "Elmir Kuliev (Russian)"
+        },
+        {
+          "value": "ru.osmanov",
+          "title": "Magomed-Nuri Osmanovich Osmanov (Russian)"
+        },
+        {
+          "value": "ru.porokhova",
+          "title": "V. Porokhova (Russian)"
+        },
+        {
+          "value": "sd.amroti",
+          "title": "Taj Mehmood Amroti (Sindhi)"
+        },
+        {
+          "value": "so.abduh",
+          "title": "Mahmud Muhammad Abduh (Somali)"
+        },
+        {
+          "value": "sq.ahmeti",
+          "title": "Sherif Ahmeti (Albanian)"
+        },
+        {
+          "value": "sq.mehdiu",
+          "title": "Feti Mehdiu (Albanian)"
+        },
+        {
+          "value": "sq.nahi",
+          "title": "Hasan Efendi Nahi (Albanian)"
+        },
+        {
+          "value": "sv.bernstrom",
+          "title": "Knut Bernström (Swedish)"
+        },
+        {
+          "value": "sw.barwani",
+          "title": "Ali Muhsin Al-Barwani (Swahili)"
+        },
+        {
+          "value": "ta.tamil",
+          "title": "Jan Turst Foundation (Tamil)"
+        },
+        {
+          "value": "tg.ayati",
+          "title": "AbdolMohammad Ayati (Tajik)"
+        },
+        {
+          "value": "th.thai",
+          "title": "King Fahad Quran Complex (Thai)"
+        },
+        {
+          "value": "tr.ates",
+          "title": "Suleyman Ates (Turkish)"
+        },
+        {
+          "value": "tr.bulac",
+          "title": "Alİ Bulaç (Turkish)"
+        },
+        {
+          "value": "tr.diyanet",
+          "title": "Diyanet Isleri (Turkish)"
+        },
+        {
+          "value": "tr.golpinarli",
+          "title": "Abdulbaki Golpinarli (Turkish)"
+        },
+        {
+          "value": "tr.ozturk",
+          "title": "Yasar Nuri Ozturk (Turkish)"
+        },
+        {
+          "value": "tr.vakfi",
+          "title": "Diyanet Vakfi (Turkish)"
+        },
+        {
+          "value": "tr.yazir",
+          "title": "Elmalili Hamdi Yazir (Turkish)"
+        },
+        {
+          "value": "tr.yildirim",
+          "title": "Suat Yildirim (Turkish)"
+        },
+        {
+          "value": "tr.yuksel",
+          "title": "Edip Yüksel (Turkish)"
+        },
+        {
+          "value": "tt.nugman",
+          "title": "Yakub Ibn Nugman (Tatar)"
+        },
+        {
+          "value": "ug.saleh",
+          "title": "Muhammad Saleh (Uighur, Uyghur)"
+        },
+        {
+          "value": "ur.ahmedali",
+          "title": "Ahmed Ali (Urdu)"
+        },
+        {
+          "value": "ur.jalandhry",
+          "title": "Fateh Muhammad Jalandhry (Urdu)"
+        },
+        {
+          "value": "ur.jawadi",
+          "title": "Syed Zeeshan Haider Jawadi (Urdu)"
+        },
+        {
+          "value": "ur.kanzuliman",
+          "title": "Ahmed Raza Khan (Urdu)"
+        },
+        {
+          "value": "ur.qadri",
+          "title": "Tahir ul Qadri (Urdu)"
+        },
+        {
+          "value": "uz.sodik",
+          "title": "Muhammad Sodik Muhammad Yusuf (Uzbek)"
+        },
+        {
+          "value": "en.maududi",
+          "title": "Abul Ala Maududi (English)"
+        },
+        {
+          "value": "en.shakir",
+          "title": "Mohammad Habib Shakir (English)"
+        },
+        {
+          "value": "es.cortes",
+          "title": "Julio Cortes (Spanish, Castilian)"
+        },
+        {
+          "value": "fa.ansarian",
+          "title": "Hussain Ansarian (Persian)"
+        },
+        {
+          "value": "bg.theophanov",
+          "title": "Tzvetan Theophanov (Bulgarian)"
+        },
+        {
+          "value": "bs.mlivo",
+          "title": "Mustafa Mlivo (Bosnian)"
+        },
+        {
+          "value": "fa.bahrampour",
+          "title": "Abolfazl Bahrampour (Persian)"
+        },
+        {
+          "value": "es.asad",
+          "title": "Muhammad Asad - Abdurrasak Pérez (Spanish, Castilian)"
+        },
+        {
+          "value": "fa.khorramshahi",
+          "title": "Baha'oddin Khorramshahi (Persian)"
+        },
+        {
+          "value": "fa.mojtabavi",
+          "title": "Sayyed Jalaloddin Mojtabavi (Persian)"
+        },
+        {
+          "value": "hi.farooq",
+          "title": "Muhammad Farooq Khan and Muhammad Ahmed (Hindi)"
+        },
+        {
+          "value": "id.muntakhab",
+          "title": "Muhammad Quraish Shihab et al. (Indonesian)"
+        },
+        {
+          "value": "ms.basmeih",
+          "title": "Abdullah Muhammad Basmeih (Malay)"
+        },
+        {
+          "value": "ru.abuadel",
+          "title": "Abu Adel (Russian)"
+        },
+        {
+          "value": "ru.krachkovsky",
+          "title": "Ignaty Yulianovich Krachkovsky (Russian)"
+        },
+        {
+          "value": "ru.muntahab",
+          "title": "Ministry of Awqaf (Egypt) (Russian)"
+        },
+        {
+          "value": "ru.sablukov",
+          "title": "Gordy Semyonovich Sablukov (Russian)"
+        },
+        {
+          "value": "ur.junagarhi",
+          "title": "Muhammad Junagarhi (Urdu)"
+        },
+        {
+          "value": "ur.maududi",
+          "title": "Abul A'ala Maududi (Urdu)"
+        },
+        {
+          "value": "zh.jian",
+          "title": "Ma Jian (Chinese)"
+        },
+        {
+          "value": "zh.majian",
+          "title": "Ma Jian (Chinese)"
+        },
+        {
+          "value": "fa.khorramdel",
+          "title": "Mostafa Khorramdel (Persian)"
+        },
+        {
+          "value": "fa.moezzi",
+          "title": "Mohammad Kazem Moezzi (Persian)"
+        },
+        {
+          "value": "bs.korkut",
+          "title": "Besim Korkut (Bosnian)"
+        },
+        {
+          "value": "ar.abdulbasitmurattal",
+          "title": "Abdul Basit (Murattal) (Arabic)"
+        },
+        {
+          "value": "ar.minshawi",
+          "title": "Minshawi (Arabic)"
+        },
+        {
+          "value": "ar.minshawimujawwad",
+          "title": "Minshawy (Mujawwad) (Arabic)"
+        },
+        {
+          "value": "fa.hedayatfarfooladvand",
+          "title": "Fooladvand - Hedayatfar (Persian)"
+        },
+        {
+          "value": "si.naseemismail",
+          "title": "Naseem Isamil and Masoor Maulana (Sinhala)"
+        },
+        {
+          "value": "zh.mazhonggang",
+          "title": "马仲刚 (Chinese)"
+        },
+        {
+          "value": "ba.mehanovic",
+          "title": "Quran translation by Muhamed Mehanovic (Bosnian)"
+        },
+        {
+          "value": "en.itani",
+          "title": "Clear Qur'an by Talal Itani (English)"
+        },
+        {
+          "value": "my.ghazi",
+          "title": "Translation by Ghazi Muhammed Hashim (Burmese)"
+        },
+        {
+          "value": "en.mubarakpuri",
+          "title": "Mubarakpuri (English)"
+        },
+        {
+          "value": "am.sadiq",
+          "title": "ሳዲቅ & ሳኒ ሐቢብ (Amharic)"
+        },
+        {
+          "value": "bn.hoque",
+          "title": "জহুরুল হক (Bengali)"
+        },
+        {
+          "value": "en.qarai",
+          "title": "Qarai (English)"
+        },
+        {
+          "value": "en.wahiduddin",
+          "title": "Wahiduddin Khan (English)"
+        },
+        {
+          "value": "es.bornez",
+          "title": "Bornez (Spanish, Castilian)"
+        },
+        {
+          "value": "es.garcia",
+          "title": "Garcia (Spanish, Castilian)"
+        },
+        {
+          "value": "ur.najafi",
+          "title": "محمد حسین نجفی (Urdu)"
+        },
+        {
+          "value": "fa.gharaati",
+          "title": "قرائتی (Persian)"
+        },
+        {
+          "value": "fa.sadeqi",
+          "title": "صادقی تهرانی (Persian)"
+        },
+        {
+          "value": "fa.safavi",
+          "title": "صفوی (Persian)"
+        },
+        {
+          "value": "id.jalalayn",
+          "title": "Tafsir Jalalayn (Indonesian)"
+        },
+        {
+          "value": "ml.karakunnu",
+          "title": "കാരകുന്ന് & എളയാവൂര് (Malayalam)"
+        },
+        {
+          "value": "nl.leemhuis",
+          "title": "Leemhuis (Dutch, Flemish)"
+        },
+        {
+          "value": "nl.siregar",
+          "title": "Siregar (Dutch, Flemish)"
+        },
+        {
+          "value": "ps.abdulwali",
+          "title": "عبدالولي (Pashto, Pushto)"
+        },
+        {
+          "value": "ru.kuliev-alsaadi",
+          "title": "Кулиев + ас-Саади (Russian)"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.1",
+    "@raycast/utils": "^1.8.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

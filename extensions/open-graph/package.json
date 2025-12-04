@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-graph",
+  "title": "Open Graph",
+  "description": "Preview Open Graph meta tags of a website",
+  "icon": "command-icon.png",
+  "author": "1weiho",
+  "contributors": [
+    "ridemountainpig",
+    "tm.wrnr",
+    "j3lte"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-graph",
+      "title": "Preview Open Graph",
+      "description": "Preview Open Graph meta tags of a website",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-graph-extension",
+      "title": "Preview Open Graph (Browser Extension)",
+      "description": "Preview Open Graph meta tags of a website using the browser extension",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "node-fetch": "^3.3.2",
+    "node-html-parser": "^6.1.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

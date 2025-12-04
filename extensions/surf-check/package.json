@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "surf-check",
+  "title": "Surf Check",
+  "description": "Get real-time surfing reports and forecasts for nearby locations",
+  "icon": "extension_icon.png",
+  "author": "john_alexander",
+  "license": "MIT",
+  "categories": [
+    "Web",
+    "Fun"
+  ],
+  "commands": [
+    {
+      "name": "surf-check",
+      "title": "Surf Check",
+      "description": "Check nearby surfing conditions and forecasts",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "spotId",
+          "type": "textfield",
+          "required": true,
+          "title": "Spot ID",
+          "description": "Enter the Spot ID for your preferred surf spot."
+        },
+        {
+          "name": "surfHeightUnit",
+          "type": "dropdown",
+          "required": true,
+          "title": "Surf Height Unit",
+          "description": "Choose unit for wave heights",
+          "default": "ft",
+          "data": [
+            {
+              "title": "Feet (ft)",
+              "value": "ft"
+            },
+            {
+              "title": "Meters (m)",
+              "value": "m"
+            }
+          ]
+        },
+        {
+          "name": "swellHeightUnit",
+          "type": "dropdown",
+          "required": true,
+          "title": "Swell Height Unit",
+          "description": "Choose unit for swell measurements",
+          "default": "ft",
+          "data": [
+            {
+              "title": "Feet (ft)",
+              "value": "ft"
+            },
+            {
+              "title": "Meters (m)",
+              "value": "m"
+            }
+          ]
+        },
+        {
+          "name": "tideHeightUnit",
+          "type": "dropdown",
+          "required": true,
+          "title": "Tide Height Unit",
+          "description": "Choose unit for tide measurements",
+          "default": "ft",
+          "data": [
+            {
+              "title": "Feet (ft)",
+              "value": "ft"
+            },
+            {
+              "title": "Meters (m)",
+              "value": "m"
+            }
+          ]
+        },
+        {
+          "name": "windSpeedUnit",
+          "type": "dropdown",
+          "required": true,
+          "title": "Wind Speed Unit",
+          "description": "Choose your preferred wind speed unit",
+          "default": "kts",
+          "data": [
+            {
+              "title": "Knots (kts)",
+              "value": "kts"
+            },
+            {
+              "title": "Kilometers per hour (km/h)",
+              "value": "kph"
+            },
+            {
+              "title": "Meters per second (m/s)",
+              "value": "ms"
+            }
+          ]
+        },
+        {
+          "name": "temperatureUnit",
+          "type": "dropdown",
+          "required": true,
+          "title": "Temperature Unit",
+          "description": "Choose temperature unit",
+          "default": "F",
+          "data": [
+            {
+              "title": "Fahrenheit (°F)",
+              "value": "F"
+            },
+            {
+              "title": "Celsius (°C)",
+              "value": "C"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

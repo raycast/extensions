@@ -1,0 +1,3 @@
+# Tarot
+
+Draw a card.

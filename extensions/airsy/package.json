@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "airsy",
+  "title": "Airsy",
+  "description": "Check air pollution in Poland",
+  "icon": "logo.png",
+  "author": "piotrzaborow",
+  "version": "0.1.1",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "All Stations",
+      "description": "Check indexes from all stations",
+      "mode": "view"
+    },
+    {
+      "name": "city",
+      "title": "City Stations",
+      "description": "Check indexes from selected city",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "city",
+          "description": "Provide city name",
+          "type": "textfield",
+          "required": true,
+          "title": "City"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.3",
+    "@raycast/utils": "^1.4.8",
+    "leaflet": "^1.9.2",
+    "node-fetch": "^3.2.10",
+    "react-leaflet": "^4.1.0",
+    "remove-accents": "^0.4.3"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.8.0",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.39.0",
+    "@typescript-eslint/parser": "^5.39.0",
+    "eslint": "^8.25.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

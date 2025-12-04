@@ -1,0 +1,91 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "sublime",
+    "title": "Sublime",
+    "description": "Search, discover, and add cards to your library.",
+    "icon": "icon.png",
+    "author": "sublime.app",
+    "access": "public",
+    "owner": "sublime",
+    "categories": [
+        "Web",
+        "Media",
+        "Productivity"
+    ],
+    "license": "MIT",
+    "type": "module",
+    "commands": [
+        {
+            "name": "save-link",
+            "title": "Save Link",
+            "description": "Save a link to Sublime",
+            "mode": "view"
+        },
+        {
+            "name": "save-file",
+            "title": "Save Image or File",
+            "description": "Save an image or file to Sublime",
+            "mode": "view"
+        },
+        {
+            "name": "search-library",
+            "title": "Search",
+            "description": "Search your Sublime Library",
+            "mode": "view"
+        },
+        {
+            "name": "search-collections",
+            "title": "Search My Collections",
+            "description": "Search your Sublime Collections",
+            "mode": "view"
+        },
+        {
+            "name": "see-related",
+            "title": "Related Cards",
+            "description": "Find Sublime Cards related to a link or text",
+            "mode": "view"
+        },
+        {
+            "name": "open-library",
+            "title": "Open Library",
+            "description": "Open your Sublime Library",
+            "mode": "no-view"
+        },
+        {
+            "name": "save-text",
+            "title": "Save Text",
+            "description": "Save a text to Sublime",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.81.2",
+        "@raycast/utils": "^1.16.5",
+        "dayjs": "^1.11.13",
+        "formdata-node": "^6.0.3",
+        "lodash": "^4.17.21",
+        "mime": "^4.0.4",
+        "node-fetch": "^3.3.2",
+        "react": "^18.3.1",
+        "turndown": "^7.2.0"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.11",
+        "@types/lodash": "^4.17.7",
+        "@types/node": "22.4.2",
+        "@types/react": "18.3.4",
+        "@types/turndown": "^5.0.5",
+        "eslint": "^8.57.0",
+        "prettier": "^3.3.3",
+        "typescript": "^5.5.4"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "patch-prod": "node scripts/patch-prod.js",
+        "publish-staging": "ray publish",
+        "publish-prod": "./scripts/publish-prod.sh"
+    }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ping",
+  "title": "Ping",
+  "description": "Pings a domain to see if it is alive",
+  "icon": "command-icon.png",
+  "author": "stevensd2m",
+  "categories": [
+    "Developer Tools",
+    "Web",
+    "Applications",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Ping Domain",
+      "description": "Run ping on terminal for given domain",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "domain",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.2",
+    "@raycast/utils": "^1.9.1",
+    "ping": "^0.4.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/ping": "^0.4.1",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

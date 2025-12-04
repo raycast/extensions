@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pick-your-wallpaper",
+  "title": "Pick Your Wallpaper",
+  "subtitle": "Wallpaper Management",
+  "description": "Lets you pick a wallpaper from a folder of finder.",
+  "icon": "command-icon.png",
+  "author": "hugomarfani",
+  "contributors": [
+    "heytommy"
+  ],
+  "pastContributors": [
+    "danulqua",
+    "marcjulian"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "choose-wallpaper",
+      "title": "Choose Wallpaper",
+      "description": "Pick a wallpaper from a folder of finder.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "wallpaperFolder",
+          "title": "Wallpaper Folder Directory",
+          "description": "The directory where your wallpapers are stored",
+          "type": "directory",
+          "required": true
+        },
+        {
+          "name": "displaySize",
+          "title": "Display Size",
+          "description": "Grid size of the wallpaper picker",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ],
+          "default": "medium",
+          "required": false
+        },
+        {
+          "name": "showTitle",
+          "label": "Show Wallpaper Titles",
+          "title": "Shows Wallpaper Titles",
+          "description": "Shows the wallpaper titles in the picker",
+          "type": "checkbox",
+          "defaultValue": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "set-as-wallpaper",
+      "title": "Set as Wallpaper",
+      "description": "Set selected picture as a desktop wallpaper.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.0",
+    "ESLint": "npm:eslint@^7.32.0",
+    "raycast": "^1.0.8",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/parser": "^5.59.2",
+    "eslint": "^7.32.0",
+    "eslint-plugin-react": "^7.32.2",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "val-town",
+  "title": "Val Town",
+  "description": "View and run your vals and search others' vals",
+  "icon": "command-icon.png",
+  "author": "KevinBatdorf",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Fun",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-vals",
+      "title": "Search Vals",
+      "subtitle": "Val Town",
+      "description": "Search and run vals from your account and others.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Val Town API Token",
+      "description": "Your API token for Val Town.",
+      "placeholder": "API Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "date-fns": "^2.30.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

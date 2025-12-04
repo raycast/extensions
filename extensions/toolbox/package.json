@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toolbox",
+  "title": "ToolBox",
+  "description": "Collection of scripts that process data",
+  "icon": "icon.png",
+  "author": "Kang",
+  "contributors": [
+    "Saafo",
+    "pernielsentikaer",
+    "yakitrak",
+    "Podles"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "ToolBox",
+      "subtitle": "Tools",
+      "description": "Collection of scripts that process data",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "copy",
+      "description": "After copying the values, select where to move the toolbox screen.",
+      "type": "dropdown",
+      "required": false,
+      "title": "Action after copy",
+      "default": "none",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Pop to list",
+          "value": "back"
+        },
+        {
+          "title": "Pop to root",
+          "value": "exit"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "esrever": "^0.2.0",
+    "js-base64": "^3.7.2",
+    "js-yaml": "^4.1.0",
+    "json5": "^2.2.3",
+    "lodash": "^4.17.21",
+    "prettier": "^3.2.4",
+    "sql-formatter": "^15.0.2",
+    "vkbeautify": "^0.99.3"
+  },
+  "devDependencies": {
+    "@types/esrever": "^0.2.0",
+    "@types/js-yaml": "^4.0.5",
+    "@types/lodash": "^4.14.177",
+    "@types/vkbeautify": "^0.99.2",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

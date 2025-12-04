@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "eagle",
+  "title": "Eagle",
+  "description": "Eagle Extension for Raycast",
+  "icon": "command-icon.png",
+  "author": "Yukai",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "layout",
+      "type": "dropdown",
+      "required": false,
+      "title": "Layout",
+      "description": "Choose between list view and grid view",
+      "default": "list",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Item",
+      "subtitle": "Eagle",
+      "description": "Search Item from Library",
+      "mode": "view"
+    },
+    {
+      "name": "folder",
+      "title": "Navigate Folder",
+      "subtitle": "Eagle",
+      "description": "Navigate Folder",
+      "mode": "view"
+    },
+    {
+      "name": "trash",
+      "title": "View Trash",
+      "subtitle": "Eagle",
+      "description": "View items in trash",
+      "mode": "view"
+    },
+    {
+      "name": "library",
+      "title": "Switch Library",
+      "subtitle": "Eagle",
+      "description": "Switch between Eagle libraries",
+      "mode": "view"
+    },
+    {
+      "name": "add-from-url",
+      "title": "Add Item from URL",
+      "subtitle": "Eagle",
+      "description": "Add image or file from URL to Eagle",
+      "mode": "view"
+    },
+    {
+      "name": "add-from-clipboard",
+      "title": "Add from Clipboard",
+      "subtitle": "Eagle",
+      "description": "Add URL or file path from clipboard to Eagle",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2",
+    "axios": "^0.26.1",
+    "file-url": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

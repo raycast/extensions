@@ -1,0 +1,159 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "0.5.0",
+  "name": "pieces-raycast",
+  "title": "Pieces for Raycast",
+  "description": "Pieces for Developers Raycast Extension",
+  "icon": "piecesVector.png",
+  "author": "pieces_dev",
+  "owner": "pieces",
+  "access": "public",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "save-clipboard-to-pieces",
+      "title": "Save Clipboard to Pieces",
+      "description": "Save your Current Clipboard to Pieces",
+      "mode": "no-view",
+      "icon": "piecesVector.png"
+    },
+    {
+      "name": "signin",
+      "title": "Sign in to Pieces",
+      "mode": "no-view",
+      "description": "Sign in to Pieces",
+      "icon": "piecesVector.png"
+    },
+    {
+      "name": "signout",
+      "title": "Sign out of Pieces",
+      "mode": "no-view",
+      "description": "Sign out of Pieces",
+      "icon": "piecesVector.png"
+    },
+    {
+      "name": "test",
+      "title": "Test Pieces Extension",
+      "description": "Run Unit Tests for the Pieces Extension",
+      "mode": "no-view",
+      "icon": "piecesVector.png",
+      "disabledByDefault": true
+    },
+    {
+      "name": "save-selection-to-pieces",
+      "title": "Save Selection in Frontmost Application to Pieces",
+      "description": "Save selection in frontmost application to Pieces",
+      "mode": "no-view",
+      "icon": "piecesVector.png"
+    },
+    {
+      "name": "save-finder-selection-to-pieces",
+      "title": "Save Finder Selection to Pieces",
+      "description": "Highlight some files, and save them to Pieces",
+      "mode": "no-view",
+      "icon": "piecesVector.png"
+    },
+    {
+      "name": "save-clipboard-history-to-pieces",
+      "title": "Save Clipboard History to Pieces",
+      "description": "Select items from your clipboard history to save to Pieces",
+      "mode": "view",
+      "icon": "piecesVector.png"
+    },
+    {
+      "name": "save-browser-history-to-pieces",
+      "title": "Save Browser History to Pieces",
+      "description": "Select code blocks to save from your browsing history",
+      "mode": "view",
+      "icon": "piecesVector.png"
+    },
+    {
+      "name": "search-materials",
+      "title": "Search Saved Materials",
+      "description": "Search for a saved material in your Pieces Drive",
+      "mode": "view",
+      "icon": "piecesVector.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "material-enrichment-levels",
+      "description": "Choose how much metadata should be automatically added to materials when you save them.",
+      "title": "Material Enrichment Levels",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "NONE",
+          "value": "0"
+        },
+        {
+          "title": "LOW",
+          "value": "3"
+        },
+        {
+          "title": "MEDIUM",
+          "value": "6"
+        },
+        {
+          "title": "HIGH",
+          "value": "9"
+        }
+      ],
+      "required": false,
+      "default": "9"
+    },
+    {
+      "name": "cloudCapabilities",
+      "description": "Select if you'd like to utilize local only or blended capabilities",
+      "title": "Cloud Capabilities",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Blended",
+          "value": "blended"
+        },
+        {
+          "title": "Local",
+          "value": "local"
+        }
+      ],
+      "required": false,
+      "default": "blended"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@pieces.app/pieces-os-client": "^4.1.0",
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
+    "node-fetch": "^3.3.2",
+    "semver": "^7.6.2",
+    "utf8": "^3.0.0",
+    "ws": "^8.17.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/chai": "^4.3.16",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/utf8": "^3.0.3",
+    "@types/ws": "^8.5.10",
+    "chai": "^5.1.1",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

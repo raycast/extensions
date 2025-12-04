@@ -1,0 +1,1268 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-gemini",
+  "title": "Google Gemini",
+  "description": "Use the Google Gemini from the comfort of Raycast.",
+  "icon": "gemini-icon.png",
+  "author": "EvanZhouDev",
+  "contributors": [
+    "ridemountainpig",
+    "d0zingcat",
+    "ViGeng",
+    "anwarulislam",
+    "DanielPFitzsimmons"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "history",
+      "title": "Command History",
+      "subtitle": "Google Gemini",
+      "description": "View your command history",
+      "mode": "view",
+      "icon": "gemini-icon.png"
+    },
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "subtitle": "Google Gemini",
+      "description": "Ask Google's Gemini Pro",
+      "mode": "view",
+      "icon": "gemini-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "You may be given a text or a query or a picture as input, please provide a detailed and informative response."
+        }
+      ]
+    },
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "subtitle": "Google Gemini",
+      "description": "Chat with Google's Gemini Pro",
+      "icon": "chat-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "askAboutScreen",
+      "title": "Ask About Screen Content",
+      "subtitle": "Google Gemini",
+      "description": "Ask Google's Gemini Pro about what's on your screen",
+      "mode": "no-view",
+      "icon": "screen-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Please analyze this screenshot and describe what you see. Include any relevant details about the content, layout, and any text or important elements visible in the image."
+        }
+      ]
+    },
+    {
+      "name": "askAboutSelectedScreen",
+      "title": "Ask About Selected Screen Area",
+      "subtitle": "Google Gemini",
+      "description": "Ask Google's Gemini about your selected screen area",
+      "mode": "no-view",
+      "icon": "screen-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Please analyze this screenshot and describe what you see. Include any relevant details about the content, layout, and any text or important elements visible in the image."
+        }
+      ]
+    },
+    {
+      "name": "askAboutSelectedText",
+      "title": "Ask About Selected Text",
+      "subtitle": "Google Gemini",
+      "description": "Ask Google's Gemini Pro about your selected text",
+      "mode": "view",
+      "icon": "clipboard-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Given the selected text or my query, please provide a detailed and informative response."
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize text",
+      "icon": "summarize-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Summarize the given text."
+        }
+      ]
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "description": "Explain text",
+      "icon": "explain-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Explain the following text as best as you can."
+        }
+      ]
+    },
+    {
+      "name": "comment",
+      "title": "Add Comments to Code",
+      "description": "Add comments to code",
+      "icon": "code-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Add comments to the given code. ONLY return the commented code and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to friendly",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text seem more friendly. ONLY return the modified text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to professional",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "In the following text, change it to use advanced vocabulary but do not overuse it. Make sure to use proper grammar and spell check thoroughly. Show expertise in the subject provided, but do not add any extra information. Try to keep your response at the same length of words as the original. ONLY return the modified text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "synonym",
+      "title": "Find Synonym",
+      "icon": "synonym-icon.png",
+      "description": "Find synonym of selected word",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Find one synonym for the given word. Only return that the synonym, and add nothing else. Keep the casing of the word the same. Your response should only have ONE WORD"
+        }
+      ]
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "icon": "grammar-icon.png",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Fix the grammar in the following text. Try to keep all of the words from the given text and try to only add punctuation and correct any spelling errors. ONLY return the modified text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "icon": "longer-icon.png",
+      "description": "Make selected text longer",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text longer without providing any extra information than what's given. ONLY return the elongated text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "icon": "shorten-icon.png",
+      "description": "Make selected text shorter",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text shorter while keeping the core idea. ONLY return the shortened text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "icon": "translate-icon.png",
+      "description": "Translate selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "TranslateLanguage",
+          "placeholder": "Translate Language",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Try to keep all of the words from the given text and maintain the original meaning as closely as possible. ONLY return the translated text and nothing else."
+        },
+        {
+          "name": "defaultTargetLanguage",
+          "title": "First Target Language",
+          "description": "Translate all other languages to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "English"
+        },
+        {
+          "name": "secondTargetLanguage",
+          "title": "Second Target Language",
+          "description": "Translate the first target language to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "Chinese"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Gemini API Key",
+      "name": "apiKey",
+      "required": true,
+      "title": "Gemini API Key",
+      "type": "password"
+    },
+    {
+      "description": "Which model Gemini for Raycast uses by default (unless overriden by individual commands).",
+      "name": "defaultModel",
+      "title": "Model",
+      "type": "dropdown",
+      "required": false,
+      "default": "gemini-2.5-flash",
+      "data": [
+        {
+          "title": "Gemini 1.5 Flash (Deprecated Sep25)",
+          "value": "gemini-1.5-flash-latest"
+        },
+        {
+          "title": "Gemini 1.5 Pro (Deprecated Sep25)",
+          "value": "gemini-1.5-pro-latest"
+        },
+        {
+          "title": "LearnLM 1.5 Pro Experimental",
+          "value": "learnlm-1.5-pro-experimental"
+        },
+        {
+          "title": "Gemini 2.0 Flash-Lite",
+          "value": "gemini-2.0-flash-lite"
+        },
+        {
+          "title": "Gemini 2.0 Flash",
+          "value": "gemini-2.0-flash"
+        },
+        {
+          "title": "Gemini 2.0 Flash Thinking Experimental",
+          "value": "gemini-2.0-flash-thinking-exp"
+        },
+        {
+          "title": "Gemini Experimental 1206",
+          "value": "gemini-exp-1206"
+        },
+        {
+          "title": "Gemini 2.0 Pro Experimental",
+          "value": "gemini-2.0-pro-exp"
+        },
+        {
+          "title": "Gemini 2.5 Flash-Lite",
+          "value": "gemini-2.5-flash-lite"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "gemini-2.5-flash"
+        },
+        {
+          "title": "Gemini 2.5 Pro",
+          "value": "gemini-2.5-pro"
+        }
+      ]
+    },
+    {
+      "name": "customModel",
+      "title": "Custom Model",
+      "description": "Custom model in case you use a special model that is not listed in the dropdown. It will override the default model. Keep this empty if you don't have a custom model.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "safetyThreshold",
+      "title": "Safety Threshold",
+      "description": "Control how strictly Gemini filters potentially harmful content. BLOCK_NONE allows all content, while higher levels increase filtering.",
+      "type": "dropdown",
+      "required": false,
+      "default": "BLOCK_ONLY_HIGH",
+      "data": [
+        {
+          "title": "Block None (Allow All Content)",
+          "value": "BLOCK_NONE"
+        },
+        {
+          "title": "Block Only High Risk Content",
+          "value": "BLOCK_ONLY_HIGH"
+        },
+        {
+          "title": "Block Medium and High Risk Content",
+          "value": "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          "title": "Block Low, Medium and High Risk Content",
+          "value": "BLOCK_LOW_AND_ABOVE"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.9.0",
+    "gemini-ai": "^2.0.1",
+    "jimp": "^0.22.10",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "pull": "ray pull-contributions",
+    "publish": "ray publish"
+  }
+}

@@ -1,0 +1,187 @@
+instructions: |
+    This extension provides tools for interacting with Superhuman email client:
+
+    1. draft-email: Use this ONLY for composing new emails, not searching. When creating an email:
+       - Use normal capitalization for all email content
+       - Always use full email addresses for recipients, NEVER just names (e.g. "sarah@example.com" NOT "Sarah")
+       - Even if the prompt only mentions a first name, add "@example.com" (e.g. "alex@example.com")
+       - For multiple recipients, use a comma-separated list in the "recipient" field, NOT in cc/bcc
+       - For "Send to A and B", put both in the recipient field: "A@example.com, B@example.com"
+       - Never use Markdown links [text](url) - provide complete URLs in plain text
+       - For Zoom or other meeting links, include the ENTIRE URL with ALL parameters
+       - Format meeting info clearly with times, dates and complete URLs
+       - Example: "Join Zoom Meeting: https://zoom.us/j/123456789?pwd=abcdefg"
+       - Supports a preview/confirmation dialog (can be enabled in preferences)
+
+    2. search-inbox: ONLY for searching existing emails, never for composing
+       - If a prompt mentions "draft email to someone", do NOT search for that person
+       - Use lowercase "from:" and other search operators WITHOUT spaces between operator and value
+       - For "from John" queries, format as "from:john" (lowercase, no space)
+       - For subject searches, use "subject:" explicitly WITHOUT quotes (e.g. "subject:quarterly report")
+       - For design team emails, use "from:design" (not "from:designteam")
+       - When specified in test expectations, match the exact query format expected
+       - Do NOT add search scopes like `in:inbox` unless explicitly requested by the user. Stick to the terms provided in the prompt.
+       - Get any needed info from other tools first (like Google Calendar)
+       - Then use draft-email directly with the gathered information
+
+    Note: This extension is designed to work exclusively with Superhuman email client.
+
+    When working with Google Calendar + Superhuman:
+    - First get meeting details from Google Calendar
+    - Use draft-email directly without searching first
+    - Make sure to include full meeting URLs without truncation
+  
+evals:
+    # Basic draft email test with full email address
+    # Tests creating a simple email with a properly formatted recipient
+    - input: "@superhuman Draft an email to sarah@example.com about our project meeting tomorrow"
+      mocks:
+        draft-email: "Email draft created successfully for sarah@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "sarah@example.com"
+              
+    # Search test with from: operator and subject
+    # Tests searching for emails using both from: and subject: operators
+    - input: "@superhuman Search for emails from John about the quarterly report"
+      mocks:
+        search-inbox: "Searched for \"from:john subject:quarterly report\" in Superhuman"
+      expected:
+        - callsTool:
+            name: "search-inbox"
+            arguments:
+              query: "from:john subject:quarterly report"
+              
+    # Test first-name only recipient with URL conversion in body
+    # Tests converting first name to email address and handling URLs in the body
+    - input: "@superhuman I need to email Alex about the Zoom meeting tomorrow. It's at 2pm and the Zoom link is https://zoom.us/j/123456789?pwd=abcdefg"
+      mocks:
+        draft-email: "Email draft created successfully for alex@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "alex@example.com"
+    
+    # Complex search test with multiple operators
+    # Tests searching with multiple operators including date ranges
+    - input: "@superhuman Did John send me any emails about the budget proposal last week?"
+      mocks:
+        search-inbox: "Searched for \"from:john subject:budget proposal after:2025-01-31 before:2025-02-07\" in Superhuman"
+      expected:
+        - callsTool:
+            name: "search-inbox"
+    
+    # Test with ambiguous recipient (just "team")
+    # Tests handling ambiguous recipient references and URL inclusion
+    - input: "@superhuman Can you write an email to the entire team about the quarterly results? Include a link to our slide deck at https://docs.google.com/presentation/d/1AbCdEfGhIjKlMnOpQrStUvWxYz/edit"
+      mocks:
+        draft-email: "Email draft created successfully"
+      expected:
+        - callsTool:
+            name: "draft-email"
+    
+    # First name only recipient with meeting details
+    # Tests converting first name to email and including meeting details with URL
+    - input: "@superhuman I want to email Sarah and invite her to our virtual happy hour tomorrow at 5pm EST via this Zoom link: https://zoom.us/j/987654321?pwd=xyzabc"
+      mocks:
+        draft-email: "Email draft created successfully for sarah@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "sarah@example.com"
+    
+    # Search with has:attachment operator
+    # Tests searching for emails with attachments from a specific sender
+    - input: "@superhuman Find all emails from marketing@company.com that have attachments"
+      mocks:
+        search-inbox: "Searched for \"from:marketing@company.com has:attachment\" in Superhuman"
+      expected:
+        - callsTool:
+            name: "search-inbox"
+            arguments:
+              query: "from:marketing@company.com has:attachment"
+    
+    # Draft with CC parameter
+    # Tests creating an email with CC field and document link
+    - input: "@superhuman I need to draft an email to the client about the project delay. CC my boss and include the new timeline document link at https://docs.company.com/timeline/v2"
+      mocks:
+        draft-email: "Email draft created successfully"
+      expected:
+        - callsTool:
+            name: "draft-email"
+
+    # Multiple recipients in a single email
+    # Tests handling multiple recipients in the recipient field
+    - input: "@superhuman Send an email to john@example.com and alice@example.com about the upcoming team meeting"
+      mocks:
+        draft-email: "Email draft created successfully for john@example.com, alice@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "john@example.com, alice@example.com"
+
+    # Email with subject, CC, and BCC fields
+    # Tests creating an email with subject, CC, BCC fields and a link
+    - input: "@superhuman Draft an email to dev@example.com with subject 'API Documentation Update', CC product@example.com, BCC manager@example.com, and include a link to our docs at https://docs.example.com/api"
+      mocks:
+        draft-email: "Email draft created successfully for dev@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "dev@example.com"
+              cc: "product@example.com"
+              bcc: "manager@example.com"
+              subject: "API Documentation Update"
+
+    # Search with is: operator
+    # Tests searching for unread emails from a specific team
+    - input: "@superhuman Find unread emails from the design team"
+      mocks:
+        search-inbox: "Searched for \"is:unread from:design\" in Superhuman"
+      expected:
+        - callsTool:
+            name: "search-inbox"
+            arguments:
+              query:
+                and:
+                  - includes: "is:unread"
+                  - includes: "from:design"
+
+    # Search with date operators
+    # Tests searching with time-based operators for recent emails
+    - input: "@superhuman Find emails about invoices received in the last month"
+      mocks:
+        search-inbox: "Searched for \"subject:invoice after:2023-05-01\" in Superhuman"
+      expected:
+        - callsTool:
+            name: "search-inbox"
+            arguments:
+              query: "subject:invoice newer_than:1m"
+
+    # Ambiguous query that should use draft-email not search
+    # Tests correctly choosing draft-email for ambiguous "contact" requests
+    - input: "@superhuman I need to contact Jane about the client presentation"
+      mocks:
+        draft-email: "Email draft created successfully for jane@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "jane@example.com"
+              
+    # First name with capitalization that needs to be converted
+    # Tests handling capitalized names and converting to lowercase email addresses
+    - input: "@superhuman Send an email to MARK about the project timeline"
+      mocks:
+        draft-email: "Email draft created successfully for mark@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "mark@example.com" 

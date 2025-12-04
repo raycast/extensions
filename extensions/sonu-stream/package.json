@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sonu-stream",
+  "title": "Sonu",
+  "description": "Search sonu.stream for songs, artists, and vibes",
+  "icon": "raycast-sona-icon.png",
+  "author": "bobringer",
+  "categories": [
+    "Fun",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-artists",
+      "title": "Sonu Stream",
+      "subtitle": "sonu.stream",
+      "description": "Search sonu.stream",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.68.1",
+    "@raycast/utils": "1.12.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.11.24",
+    "@types/react": "18.2.63",
+    "eslint": "8.57.0",
+    "prettier": "3.2.5",
+    "typescript": "5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

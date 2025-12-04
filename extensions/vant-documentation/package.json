@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vant-documentation",
+  "title": "Search Vant Documentation",
+  "description": "Search Vant documentation",
+  "icon": "vant-icon.png",
+  "author": "cai_aisen",
+  "categories": [
+    "Developer Tools",
+    "Web",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Vant Documentation",
+      "subtitle": "Vant",
+      "description": "Search Vant UI library documentation",
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "title": "Preferred Action",
+          "data": [
+            {
+              "title": "Read Document",
+              "value": "read"
+            },
+            {
+              "title": "Open in Browser",
+              "value": "open"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ],
+          "required": false,
+          "default": "read",
+          "name": "preferredAction",
+          "description": "Choose what you want to do with the result first"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.3",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

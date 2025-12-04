@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-system-monitor",
+  "title": "System Monitor",
+  "description": "Show information and usage related to CPU, memory, power and network",
+  "icon": "command-icon.png",
+  "author": "hossammourad",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "contributors": [
+    "crehan144",
+    "pernielsentikaer",
+    "lucasmezencio",
+    "ridemountainpig"
+  ],
+  "commands": [
+    {
+      "name": "system-monitor",
+      "title": "System Monitor",
+      "description": "Show information and usage related to CPU, memory, power and network",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-system-monitor",
+      "title": "Menubar System Monitor",
+      "description": "Show information and usage related to CPU, memory, power and network on the menubar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "customIconUrl",
+          "description": "Custom icon URL for the menubar icon",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Icon URL",
+          "placeholder": "https://example.com/icon.png"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.13.6",
+    "os-utils": "0.0.14",
+    "plist": "^3.1.0",
+    "systeminformation": "^5.22.7",
+    "usehooks-ts": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/os-utils": "0.0.4",
+    "@types/plist": "^3.0.5",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "defaultView",
+      "description": "Select active tab upon launch",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default tab",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "System Info",
+          "value": "system-info"
+        },
+        {
+          "title": "CPU",
+          "value": "cpu"
+        },
+        {
+          "title": "Memory",
+          "value": "memory"
+        },
+        {
+          "title": "Power",
+          "value": "power"
+        },
+        {
+          "title": "Network",
+          "value": "network"
+        }
+      ]
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

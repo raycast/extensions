@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gmail",
+  "title": "Gmail",
+  "description": "Raycast Extension to manage Gmail",
+  "icon": "gmail.png",
+  "author": "tonka3000",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mails",
+      "title": "List Mails",
+      "description": "Get the inbox",
+      "subtitle": "Gmail",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "unread",
+      "title": "List Unread",
+      "subtitle": "Gmail",
+      "description": "Get unread Mails",
+      "mode": "view"
+    },
+    {
+      "name": "drafts",
+      "title": "List Drafts",
+      "subtitle": "Gmail",
+      "description": "Get unread Mails",
+      "mode": "view"
+    },
+    {
+      "name": "trash",
+      "title": "List Trash",
+      "subtitle": "Gmail",
+      "description": "Get Mails from Trash",
+      "mode": "view"
+    },
+    {
+      "name": "archive",
+      "title": "List Archive",
+      "subtitle": "Gmail",
+      "description": "Get Mails from Archive",
+      "mode": "view"
+    },
+    {
+      "name": "spam",
+      "title": "List Spam",
+      "subtitle": "Gmail",
+      "description": "Get Mails from Spam Folder",
+      "mode": "view"
+    },
+    {
+      "name": "newwebmail",
+      "title": "New Web Mail",
+      "subtitle": "Gmail",
+      "description": "Open a new EMail in the Browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "openinbrowser",
+      "title": "Open in Browser",
+      "subtitle": "Gmail",
+      "description": "Open your account in the Browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "unreadmailsmenu",
+      "title": "Unread Menu",
+      "subtitle": "Gmail",
+      "description": "Show unread Mails in the Menubar",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showAlways",
+          "description": "Always show the menu, regardless of the number of unread emails",
+          "type": "checkbox",
+          "required": false,
+          "title": "Appearance",
+          "label": "Show Always",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientid",
+      "description": "Client ID",
+      "type": "textfield",
+      "required": true,
+      "title": "OAuth Client ID"
+    }
+  ],
+  "dependencies": {
+    "@googleapis/gmail": "^5.0.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.10.0",
+    "cross-fetch": "^4.0.0",
+    "googleapis": "^123.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^3.0.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "fields": [
+    { "metadata": {}, "name": "chr_id", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "position", "nullable": true, "type": "integer" },
+    {
+      "metadata": {},
+      "name": "ref_allele",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "alt_allele",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "chr_id_b37",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "position_b37",
+      "nullable": true,
+      "type": "integer"
+    },
+    { "metadata": {}, "name": "rs_id", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "most_severe_consequence",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "cadd",
+      "nullable": true,
+      "type": {
+        "fields": [
+          { "metadata": {}, "name": "raw", "nullable": true, "type": "double" },
+          {
+            "metadata": {},
+            "name": "phred",
+            "nullable": true,
+            "type": "double"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "af",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "gnomad_afr",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_amr",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_asj",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_eas",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_fin",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_nfe",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_nfe_est",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_nfe_nwe",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_nfe_onf",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_nfe_seu",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "gnomad_oth",
+            "nullable": true,
+            "type": "double"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "gene_id_any_distance",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "gene_id_any",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "gene_id_prot_coding_distance",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "gene_id_prot_coding",
+      "nullable": true,
+      "type": "string"
+    }
+  ],
+  "type": "struct"
+}

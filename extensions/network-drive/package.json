@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "network-drive",
+  "title": "Network Drive",
+  "description": "List the available drive of a specified IP address (via SMB), mount and unmount those drives.",
+  "icon": "icon.png",
+  "author": "SuoweiHu",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Network Drive",
+      "description": "Show available network drives present on the specified IP/Domain",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "pref_smb_ip",
+      "title": "Domain / IP",
+      "description": "The doamin or IP address of the network drive.",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "pref_smb_usr",
+      "title": "Username",
+      "description": "The username to authenticate with.",
+      "required": true
+    },
+    {
+      "type": "password",
+      "name": "pref_smb_pwd",
+      "title": "Passowrd",
+      "description": "The password to authenticate with.",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

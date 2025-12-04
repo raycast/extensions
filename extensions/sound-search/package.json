@@ -1,0 +1,183 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sound-search",
+  "title": "Sound Search",
+  "description": "Search for sounds across multiple services",
+  "icon": "icon.png",
+  "author": "clins1994",
+  "owner": "soundraw",
+  "access": "public",
+  "contributors": [
+    "ravi_s",
+    "caio-soundraw",
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun",
+    "Media",
+    "Other",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-sounds",
+      "title": "Search for Sounds",
+      "description": "Search for sounds by genres",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ask-sounds",
+      "title": "Ask for Sounds",
+      "description": "Allows searching sounds via prompt by automagically guessing which genres the user wants from the pool of possible genres"
+    }
+  ],
+  "ai": {
+    "instructions": "Use the ask-sounds tool to search for audio samples. When a user asks for music, sounds, or samples, interpret their natural language query and use the tool to find matching samples. The tool automatically maps queries to appropriate genres from the available pool.",
+    "evals": [
+      {
+        "input" : "@sound-search find me some energetic electronic music",
+        "mocks" : {
+          "ask-sounds" : {
+            "message" : "drum-bass,house,techno,trap",
+            "success" : true
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "query" : "energetic electronic music"
+              },
+              "name" : "ask-sounds"
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input" : "@sound-search looking for ambient background music for my video",
+        "mocks" : {
+          "ask-sounds" : {
+            "message" : "ambient,lo-fi",
+            "success" : true
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "query" : "ambient background music"
+              },
+              "name" : "ask-sounds"
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input" : "@sound-search rock background music",
+        "mocks" : {
+          "ask-sounds" : {
+            "message" : "rock",
+            "success" : true
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "query" : "rock background music"
+              },
+              "name" : "ask-sounds"
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input" : "@sound-search give me some hip hop type beats",
+        "mocks" : {
+          "ask-sounds" : {
+            "message" : "hip-hop,trap,lo-fi",
+            "success" : true
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "query" : "hip hop type beats"
+              },
+              "name" : "ask-sounds"
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input" : "@sound-search i'm looking for cinematic music for my film",
+        "mocks" : {
+          "ask-sounds" : {
+            "message" : "ambient,orchestra",
+            "success" : true
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "query" : "cinematic music"
+              },
+              "name" : "ask-sounds"
+            }
+          }
+        ],
+        "usedAsExample": true
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "soundrawToken",
+      "title": "API Token",
+      "description": "Your Soundraw API token",
+      "type": "password",
+      "placeholder": "8bf36ea4-6e85-4c46-814a-eb9c5676b03d",
+      "required": true
+    },
+    {
+      "name": "soundrawApiUrl",
+      "title": "API URL",
+      "description": "Your Soundraw API URL",
+      "type": "textfield",
+      "placeholder": "https://api.example.com/api/v1",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.2",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

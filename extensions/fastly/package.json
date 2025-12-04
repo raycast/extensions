@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fastly",
+  "title": "Fastly",
+  "description": "Access your Fastly account from Raycast",
+  "icon": "icon.png",
+  "author": "JonathanSpeek",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Fastly API Token",
+      "description": "Your Fastly API token from https://manage.fastly.com/account/tokens",
+      "placeholder": "Enter your Fastly API token"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Services",
+      "description": "View and manage your Fastly services",
+      "mode": "view"
+    },
+    {
+      "name": "invite",
+      "title": "Invite Team Member",
+      "description": "Invite a new member to your Fastly team",
+      "mode": "view"
+    },
+    {
+      "name": "create-service",
+      "title": "Create Service",
+      "description": "Create a new Fastly service",
+      "mode": "view"
+    },
+    {
+      "name": "docs",
+      "title": "Fastly Docs",
+      "description": "Helpful Fastly documentation",
+      "mode": "view"
+    },
+    {
+      "name": "support",
+      "title": "Get Support",
+      "description": "Access Fastly support resources",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/node-fetch": "^2.6.12",
+    "@typescript-eslint/eslint-plugin": "^8.14.0",
+    "@typescript-eslint/parser": "^8.14.0",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

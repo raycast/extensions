@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ars-technica",
+  "title": "Ars Technica",
+  "description": "Get the latest Ars Technica stories.",
+  "icon": "ars_logo.png",
+  "author": "edwin-dd-ong",
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Read Stories",
+      "subtitle": "Ars Technica",
+      "description": "Get the latest Ars Technica stories.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
+    "html-react-parser": "^5.1.0",
+    "jsdom": "^23.2.0",
+    "node-fetch": "^3.3.2",
+    "react-dom-parser": "^0.1.7",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/jsdom": "^21.1.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

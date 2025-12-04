@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ns-nl-search",
+  "version": "0.0.2",
+  "title": "Netherlands Railways Train Search",
+  "description": "With the Raycast extension for Netherlands Railways, you can easily find train schedules, routes, and real-time updates for the Dutch railway system. This extension simplifies the process of planning your journey by providing quick access to essential information directly from your Raycast interface. Whether you're commuting or traveling, stay informed with the latest train updates and ensure a smooth trip with just a few clicks.",
+  "icon": "ns.png",
+  "author": "flaticols",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ns",
+      "title": "Train Search",
+      "description": "Netherlands Railways Find a train",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ns-api-key",
+      "required": true,
+      "type": "textfield",
+      "title": "NS API Key",
+      "description": "Your NS API key"
+    },
+    {
+      "name": "result-limit",
+      "default": "7",
+      "type": "textfield",
+      "title": "Search Result Limit",
+      "description": "How many results will be shown in search",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

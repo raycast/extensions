@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keepassxc",
+  "title": "KeePassXC",
+  "description": "Access a KeePass database through KeePassXC.",
+  "icon": "keepassxc.png",
+  "author": "pabroux",
+  "contributors": [
+    "zkytech",
+    "CT-7567",
+    "Ygnas"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "KeePassXC",
+      "description": "Search in KeePassXC",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "database",
+      "type": "file",
+      "required": true,
+      "title": "KeePass Database",
+      "description": "KeePass database to access"
+    },
+    {
+      "name": "lockAfterInactivity",
+      "type": "dropdown",
+      "required": false,
+      "title": "Database Locking after Inactivity",
+      "description": "Time after which the database will be locked",
+      "data": [
+        {
+          "title": "Never",
+          "value": "-1"
+        },
+        {
+          "title": "2 minutes",
+          "value": "2"
+        },
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "20 minutes",
+          "value": "20"
+        },
+        {
+          "title": "25 minutes",
+          "value": "25"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "45 minutes",
+          "value": "45"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        }
+      ],
+      "default": "-1"
+    },
+    {
+      "name": "userInterfaceFavicon",
+      "type": "checkbox",
+      "required": false,
+      "title": "User Interface",
+      "description": "Whether to display favicons in the user interface",
+      "label": "Favicon",
+      "default": false
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^1.19.1",
+    "@types/crypto-js": "^4.2.2",
+    "crypto-js": "^4.2.0",
+    "csv-parse": "^5.6.0",
+    "otpauth": "^9.4.1",
+    "run-applescript": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.18.9",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "whoop",
+  "title": "WHOOP",
+  "description": "Your WHOOP data, now at your fingertips. Monitor your recovery, sleep, strain, workouts and more! Favourite the Overview command for quick access to your WHOOP data.",
+  "icon": "extension-icon.png",
+  "author": "josha1len",
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "units",
+      "title": "Units",
+      "description": "Choose between metric and imperial units.",
+      "type": "dropdown",
+      "default": "metric",
+      "data": [
+        {
+          "value": "metric",
+          "title": "Metric"
+        },
+        {
+          "value": "imperial",
+          "title": "Imperial"
+        }
+      ],
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "overview",
+      "title": "Overview",
+      "subtitle": "WHOOP",
+      "description": "Displays your WHOOP overview.",
+      "mode": "no-view",
+      "interval": "1h",
+      "preferences": [
+        {
+          "name": "recovery",
+          "title": "Recovery",
+          "description": "Show or hide recovery.",
+          "type": "dropdown",
+          "default": "show",
+          "data": [
+            {
+              "value": "show",
+              "title": "Show"
+            },
+            {
+              "value": "hide",
+              "title": "Hide"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "strain",
+          "title": "Strain",
+          "description": "Show or hide strain.",
+          "type": "dropdown",
+          "default": "show",
+          "data": [
+            {
+              "value": "show",
+              "title": "Show"
+            },
+            {
+              "value": "hide",
+              "title": "Hide"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "sleepPerformance",
+          "title": "Sleep Performance",
+          "description": "Show or hide sleep performance.",
+          "type": "dropdown",
+          "default": "show",
+          "data": [
+            {
+              "value": "show",
+              "title": "Show"
+            },
+            {
+              "value": "hide",
+              "title": "Hide"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "calories",
+          "title": "Calories",
+          "description": "Show or hide calories.",
+          "type": "dropdown",
+          "default": "show",
+          "data": [
+            {
+              "value": "show",
+              "title": "Show"
+            },
+            {
+              "value": "hide",
+              "title": "Hide"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "rhr",
+          "title": "Resting Heart Rate",
+          "description": "Show or hide resting heart rate.",
+          "type": "dropdown",
+          "default": "show",
+          "data": [
+            {
+              "value": "show",
+              "title": "Show"
+            },
+            {
+              "value": "hide",
+              "title": "Hide"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "hrv",
+          "title": "Heart Rate Variability",
+          "description": "Show or hide heart rate variability.",
+          "type": "dropdown",
+          "default": "hide",
+          "data": [
+            {
+              "value": "show",
+              "title": "Show"
+            },
+            {
+              "value": "hide",
+              "title": "Hide"
+            }
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "biometrics",
+      "title": "Biometrics",
+      "subtitle": "WHOOP",
+      "description": "View your recent biometrics.",
+      "mode": "view",
+      "keywords": [
+        "sleep",
+        "recovery",
+        "strain",
+        "performance",
+        "health",
+        "fitness",
+        "today",
+        "history",
+        "metrics",
+        "calories",
+        "hrv",
+        "rhr"
+      ]
+    },
+    {
+      "name": "workouts",
+      "title": "Workouts",
+      "subtitle": "WHOOP",
+      "description": "View your recent workouts.",
+      "mode": "view",
+      "keywords": [
+        "sessions",
+        "run",
+        "running",
+        "cycle",
+        "cycling",
+        "swim",
+        "swimming",
+        "gym"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.10.1",
+    "date-fns": "^2.30.0",
+    "node-fetch": "^3.3.2",
+    "oazapfts": "^4.10.0",
+    "object-hash": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/object-hash": "^3.0.6",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

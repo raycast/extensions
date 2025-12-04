@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-private-npm-packages",
+  "title": "Private npm Packages Search",
+  "description": "Search private npm packages.",
+  "icon": "npm-icon.png",
+  "author": "HCJackyLee",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add",
+      "title": "Add Tracking Account",
+      "subtitle": "npm",
+      "description": "Add private packages owner to tracking list.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Private Packages",
+      "subtitle": "npm",
+      "description": "Search package from an account.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.4",
+    "@raycast/utils": "^1.14.0",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.22.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
