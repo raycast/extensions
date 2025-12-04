@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-12-04
 
 - Introduce the system level limitation in readme
 - Update all dependencies to the latest
