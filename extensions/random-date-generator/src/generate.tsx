@@ -4,6 +4,7 @@ import { Detail, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 interface Preferences {
   startDate: string;
   endDate: string;
+  dateFormat: string;
 }
 
 function generateRandomDate(start: Date, end: Date): Date {
@@ -13,11 +14,24 @@ function generateRandomDate(start: Date, end: Date): Date {
   return new Date(randomTime);
 }
 
-function formatDate(date: Date): string {
+function formatDate(date: Date, format: string): string {
   const day = date.getDate().toString().padStart(2, "0");
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}.${month}.${year}`;
+  const year = date.getFullYear().toString();
+
+  switch (format) {
+    case "MM/DD/YYYY":
+      return `${month}/${day}/${year}`;
+    case "YYYY-MM-DD":
+      return `${year}-${month}-${day}`;
+    case "DD-MM-YYYY":
+      return `${day}-${month}-${year}`;
+    case "DD/MM/YYYY":
+      return `${day}/${month}/${year}`;
+    case "DD.MM.YYYY":
+    default:
+      return `${day}.${month}.${year}`;
+  }
 }
 
 function parseDateString(dateStr: string): Date | null {
@@ -34,6 +48,7 @@ export default function Command() {
 
   const startDate = parseDateString(preferences.startDate);
   const endDate = parseDateString(preferences.endDate);
+  const dateFormat = preferences.dateFormat || "DD.MM.YYYY";
 
   const regenerate = useCallback(() => {
     setRefreshKey((prev) => prev + 1);
@@ -67,7 +82,7 @@ Start date must be before end date.
 
   // Generate random date
   const randomDate = generateRandomDate(startDate, endDate);
-  const formattedDate = formatDate(randomDate);
+  const formattedDate = formatDate(randomDate, dateFormat);
 
   return (
     <Detail
@@ -76,13 +91,13 @@ Start date must be before end date.
 
 ## ${formattedDate}
 
-*DD.MM.YYYY format*
+*Format: ${dateFormat}*
 
 ---
 
 **Date Range:**
-- Start: ${formatDate(startDate)}
-- End: ${formatDate(endDate)}`}
+- Start: ${formatDate(startDate, dateFormat)}
+- End: ${formatDate(endDate, dateFormat)}`}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Date" content={formattedDate} />
