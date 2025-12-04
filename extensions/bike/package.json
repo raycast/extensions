@@ -81,7 +81,9 @@
       "name": "extract-links",
       "title": "Extract Links",
       "description": "Copies all links in the currently selected document to the clipboard.",
-      "keywords": ["copy"],
+      "keywords": [
+        "copy"
+      ],
       "mode": "view"
     },
     {
@@ -119,5 +121,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

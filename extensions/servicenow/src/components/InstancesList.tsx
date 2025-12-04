@@ -95,7 +95,7 @@ export default function InstancesList() {
                   />
                   <Action.OpenInBrowser
                     icon={{ source: "servicenow.svg" }}
-                    title="Login to Servicenow Instance"
+                    title="Login to ServiceNow Instance"
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
                     url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
                   />

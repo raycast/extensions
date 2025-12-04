@@ -1,61 +1,18 @@
-import { Detail, List, Action, ActionPanel } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { List } from "@raycast/api";
+import sportInfo from "./utils/getSportInfo";
+import getArticles from "./utils/getArticles";
+import DisplayNews from "./templates/news";
 
-interface Article {
-  headline: string;
-  published: string;
-  images: { url: string }[];
-  links: { web: { href: string } };
-}
+sportInfo.setSportAndLeague("soccer", "ENG.1");
 
-interface ArticlesResponse {
-  articles: Article[];
-}
-
-export default function scoresAndSchedule() {
-  // Fetch Soccer Articles
-
-  const { isLoading: soccerArticlesStatus, data: soccerArticlesData } = useFetch<ArticlesResponse>(
-    "https://site.api.espn.com/apis/site/v2/sports/soccer/ENG.1/news",
-  );
-
-  const soccerArticles = soccerArticlesData?.articles || [];
-  const soccerItems = soccerArticles.map((soccerArticle, index) => {
-    const articleDate = new Date(soccerArticle.published).toLocaleDateString([], {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-
-    const accessoryTitle = articleDate;
-    const accessoryToolTip = "Date Published";
-
-    return (
-      <List.Item
-        key={index}
-        title={`${soccerArticle.headline}`}
-        icon={
-          soccerArticle.images && soccerArticle.images[0]?.url ? { source: soccerArticle.images[0].url } : undefined
-        }
-        accessories={[{ text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip }]}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="View Article on ESPN" url={`${soccerArticle.links.web.href}`} />
-          </ActionPanel>
-        }
-      />
-    );
-  });
-
-  if (soccerArticlesStatus) {
-    return <Detail isLoading={true} />;
-  }
+const displaySchedule = () => {
+  const { articleLoading } = getArticles();
 
   return (
-    <List searchBarPlaceholder="Search for an article" isLoading={soccerArticlesStatus}>
-      <List.Section title={`${soccerArticles.length} Article${soccerArticles.length !== 1 ? "s" : ""}`}>
-        {soccerItems}
-      </List.Section>
+    <List isLoading={articleLoading} searchBarPlaceholder="Search for an article">
+      <DisplayNews />
     </List>
   );
-}
+};
+
+export default displaySchedule;

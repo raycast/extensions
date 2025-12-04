@@ -1,22 +1,23 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import { createContext, PropsWithChildren, ReactNode, useContext, useState } from "react";
 import { Bitwarden } from "~/api/bitwarden";
 import { LoadingFallback } from "~/components/LoadingFallback";
 import TroubleshootingGuide from "~/components/TroubleshootingGuide";
 import { InstalledCLINotFoundError } from "~/utils/errors";
+import useOnceEffect from "~/utils/hooks/useOnceEffect";
 
 const BitwardenContext = createContext<Bitwarden | null>(null);
 
 export type BitwardenProviderProps = PropsWithChildren<{
-  loadingFallback?: JSX.Element;
+  loadingFallback?: ReactNode;
 }>;
 
 export const BitwardenProvider = ({ children, loadingFallback = <LoadingFallback /> }: BitwardenProviderProps) => {
   const [bitwarden, setBitwarden] = useState<Bitwarden>();
   const [error, setError] = useState<Error>();
 
-  useEffect(() => {
+  useOnceEffect(() => {
     void new Bitwarden().initialize().then(setBitwarden).catch(handleBwInitError);
-  }, []);
+  });
 
   function handleBwInitError(error: Error) {
     if (error instanceof InstalledCLINotFoundError) {

@@ -25,13 +25,21 @@ export function getAccessories(issue: Issue): List.Item.Accessory[] {
 
   return [
     { icon: Icon.ArrowClockwise, text: eventsCount, tooltip: `Events: ${issue.count}` },
-    { icon: Icon.Person, text: affectedUsersCount, tooltip: `Affected Users: ${issue.userCount}` },
+    issue.userCount
+      ? { icon: Icon.Person, text: affectedUsersCount, tooltip: `Affected Users: ${issue.userCount}` }
+      : null,
     { icon: Icon.Clock, date: new Date(issue.lastSeen), tooltip: `Last Seen: ${issue.lastSeen.toLocaleString()}` },
-    {
-      icon: assigneeIcon,
-      tooltip: issue.assignedTo ? `Assignee: ${issue.assignedTo.name}` : "Unassigned",
-    },
-  ];
+    issue.assignedTo
+      ? {
+          icon: assigneeIcon,
+          tooltip: `Assignee: ${issue.assignedTo.name}`,
+        }
+      : null,
+  ].filter(isTruthy);
+}
+
+export function isTruthy<T>(value: T | null | undefined): value is T {
+  return Boolean(value);
 }
 
 export function getIcon(issue: Issue) {
@@ -76,6 +84,6 @@ export function getKeywords(issue: Issue) {
   return keywords;
 }
 
-export function getBaseUrl() {
+export function getDefaultBaseUrl() {
   return url.replace(/\/$/, "") || "https://sentry.io";
 }

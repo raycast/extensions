@@ -1,5 +1,5 @@
-import axios from "axios";
-import { SHORTEN_LINK_API } from "./constants";
+import axios, { AxiosError } from "axios";
+import { ADD_DOMAIN_API, SHORTEN_LINK_API } from "./constants";
 import { ShortLink } from "../types/types";
 import { isEmpty } from "./common-utils";
 import { apiKey } from "../types/preferences";
@@ -124,6 +124,33 @@ export const deleteShortLink = async (linkId: string) => {
       });
   } catch (e) {
     console.error(String(e));
+    return { success: false, message: String(e) };
+  }
+};
+
+export const addDomain = async (hostname: string, hideReferer: boolean) => {
+  try {
+    return await axios({
+      method: "POST",
+      url: ADD_DOMAIN_API,
+      headers: {
+        authorization: apiKey,
+        "Content-Type": "application/json",
+      },
+      data: {
+        hostname,
+        hideReferer,
+      },
+    })
+      .then(function (response) {
+        return { success: response.data, message: response.data ? "" : response.data.error };
+      })
+      .catch(function (response: AxiosError<{ error: string; message?: string }>) {
+        const err = response.response?.data;
+        const messaage = err?.message ?? err?.error ?? String(response);
+        return { success: false, message: messaage };
+      });
+  } catch (e) {
     return { success: false, message: String(e) };
   }
 };

@@ -9,24 +9,26 @@ import { useSearch } from "@/hooks/useSearch";
 import Actions from "@/components/Actions";
 
 // Types
+import { Orientation, SearchResult } from "@/types";
 interface SearchListItemProps {
   searchResult: SearchResult;
 }
 
 const UnsplashImages: React.FC = () => {
-  const [orientation, setOrientation] = useState<"all" | "landscape" | "portrait" | "squarish">("landscape");
-  const { state, search } = useSearch("photos", orientation);
+  const [orientation, setOrientation] = useState<Orientation>("landscape");
+  const [search, setSearch] = useState("");
+  const { state } = useSearch(search, "photos", orientation);
   const itemSize = getGridItemSize();
 
   const handleOrientationChange = (value: string) => {
-    setOrientation(value as "all" | "landscape" | "portrait" | "squarish");
+    setOrientation(value as Orientation);
   };
 
   return (
     <Grid
       isLoading={state.isLoading}
       itemSize={itemSize}
-      onSearchTextChange={search}
+      onSearchTextChange={setSearch}
       searchBarPlaceholder="Search wallpapers..."
       searchBarAccessory={
         <Grid.Dropdown
@@ -44,6 +46,7 @@ const UnsplashImages: React.FC = () => {
         </Grid.Dropdown>
       }
       throttle
+      pagination={state.pagination}
     >
       <Grid.Section title="Results" subtitle={String(state?.results?.length)}>
         {state.results.map((result) => (

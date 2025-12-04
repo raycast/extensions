@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ray-code",
+  "title": "Ray Code",
+  "description": "Turn AI Chat into a vibe coding agent",
+  "icon": "extension-icon.png",
+  "author": "1weiho",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-started",
+      "title": "Get Started with Ray Code",
+      "description": "Learn how to configure the Ray Code extension",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workspaceRoot",
+      "title": "Workspace Root Directory",
+      "description": "Specify the root directory for all file-based operations.",
+      "type": "directory",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "tools": [
+    {
+      "name": "read-file",
+      "title": "Read File",
+      "description": "Read a file from the workspace"
+    },
+    {
+      "name": "list-dir",
+      "title": "List Directory",
+      "description": "List a directory from the workspace"
+    },
+    {
+      "name": "grep",
+      "title": "Grep",
+      "description": "Grep a file from the workspace"
+    },
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "description": "Search for files by name using fuzzy matching"
+    },
+    {
+      "name": "apply-edit",
+      "title": "Apply Edit",
+      "description": "Apply text replacements to a file (search and replace)"
+    },
+    {
+      "name": "delete-file",
+      "title": "Delete File",
+      "description": "Delete a file from the workspace"
+    },
+    {
+      "name": "create-file",
+      "title": "Create File",
+      "description": "Create a new file in the workspace"
+    }
+  ]
+}

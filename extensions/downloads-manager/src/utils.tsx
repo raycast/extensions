@@ -1,5 +1,7 @@
-import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Detail, getPreferenceValues, showToast, Toast, trash } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { accessSync, constants, readdirSync, statSync } from "fs";
+import { rm } from "fs/promises";
 import { join } from "path";
 import { ComponentType } from "react";
 import untildify from "untildify";
@@ -9,6 +11,15 @@ export const downloadsFolder = untildify(preferences.downloadsFolder ?? "~/Downl
 const showHiddenFiles = preferences.showHiddenFiles;
 const fileOrder = preferences.fileOrder;
 const lastestDownloadOrder = preferences.lastestDownloadOrder;
+export const defaultDownloadsLayout = preferences.downloadsLayout ?? "list";
+const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff", ".heic", ".svg"];
+
+export function isImageFile(filename: string): boolean {
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex === -1) return false;
+  const ext = filename.toLowerCase().slice(dotIndex);
+  return imageExtensions.includes(ext);
+}
 
 export function getDownloads() {
   const files = readdirSync(downloadsFolder);
@@ -65,6 +76,40 @@ export function hasAccessToDownloadsFolder() {
   } catch (error) {
     console.error(error);
     return false;
+  }
+}
+
+export async function deleteFileOrFolder(filePath: string) {
+  if (preferences.deletionBehavior === "trash") {
+    try {
+      await trash(filePath);
+      await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+    } catch (error) {
+      await showFailureToast(error, { title: "Move to Trash Failed" });
+    }
+    return;
+  }
+
+  const shouldDelete = await confirmAlert({
+    title: "Delete Item?",
+    message: `Are you sure you want to permanently delete:\n${filePath}?`,
+    primaryAction: {
+      title: "Delete",
+    },
+  });
+
+  if (!shouldDelete) {
+    await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
+    return;
+  }
+
+  try {
+    rm(filePath, { recursive: true, force: true });
+    await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
+  } catch (error) {
+    if (error instanceof Error) {
+      await showFailureToast(error, { title: "Deletion Failed" });
+    }
   }
 }
 

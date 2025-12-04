@@ -1,15 +1,24 @@
-import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard, Color } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
-import { trpc } from "@/utils/trpc.util";
 import { NewSpaceForm } from "./NewSpaceForm";
 import { SpaceItemActionPanel } from "../components/SpaceItemActionPanel";
 import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
+import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
+import { useMe } from "../hooks/use-me.hook";
+import { trpc } from "../utils/trpc.util";
 
 function Body() {
-  const { data, isFetching, refetch, isLoading } = trpc.user.me.useQuery();
+  const { data, isFetching, refetch: refetchMe, isLoading } = useMe();
   const spaces = useSortedSpaces(data?.associatedSpaces);
+  const { enabledSpaceIds, confirmAndToggleEnableDisableSpace } = useEnabledSpaces();
+  const { data: authenticatedSpaceIds, refetch: refetchAuthenticatedSpaceIds } =
+    trpc.spaceAuth.listAuthenticatedSpaceIds.useQuery();
 
-  if (isLoading || !spaces) {
+  const refetch = async () => {
+    await Promise.all([refetchMe(), refetchAuthenticatedSpaceIds()]);
+  };
+
+  if (isLoading || !spaces || !enabledSpaceIds || !authenticatedSpaceIds) {
     return <List isLoading />;
   }
 
@@ -39,7 +48,36 @@ function Body() {
           title={s.name}
           subtitle={s.type === "PERSONAL" ? "This is a private space for you" : undefined}
           icon={s.image || (s.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
-          actions={<SpaceItemActionPanel spaceId={s.id} refetch={refetch} type={s.type} />}
+          accessories={[
+            !authenticatedSpaceIds.includes(s.id)
+              ? {
+                  tag: {
+                    value: "Requires Re-Authentication",
+                    color: enabledSpaceIds.includes(s.id) ? Color.Orange : Color.SecondaryText,
+                  },
+                }
+              : {},
+            {
+              tag: {
+                value: enabledSpaceIds.includes(s.id) ? "Enabled" : "Disabled",
+                color: enabledSpaceIds.includes(s.id)
+                  ? authenticatedSpaceIds.includes(s.id)
+                    ? Color.Green
+                    : Color.SecondaryText
+                  : undefined,
+              },
+            },
+          ]}
+          actions={
+            <SpaceItemActionPanel
+              spaceId={s.id}
+              refetch={refetch}
+              type={s.type}
+              enabled={enabledSpaceIds.includes(s.id)}
+              authenticated={authenticatedSpaceIds.includes(s.id)}
+              toggleSpace={confirmAndToggleEnableDisableSpace}
+            />
+          }
         />
       ))}
     </List>

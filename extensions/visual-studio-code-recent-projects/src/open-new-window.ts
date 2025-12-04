@@ -7,11 +7,14 @@ import { VSCodeBuild } from "./types";
  * The index of the `New Window` menu item in the `File` menu.
  */
 const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
+  [VSCodeBuild.Antigravity]: 3,
   [VSCodeBuild.Code]: 3,
   [VSCodeBuild.CodeInsiders]: 3,
   [VSCodeBuild.Cursor]: 2,
+  [VSCodeBuild.Kiro]: 3,
   [VSCodeBuild.Positron]: 3,
   [VSCodeBuild.Trae]: 3,
+  [VSCodeBuild.TraeCN]: 3,
   [VSCodeBuild.VSCodium]: 3,
   [VSCodeBuild.VSCodiumInsiders]: 3,
   [VSCodeBuild.Windsurf]: 3,

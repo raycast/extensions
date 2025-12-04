@@ -23,6 +23,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "type": "checkbox",
+      "label": "Auto Insert Selected Prompt",
+      "name": "autoInsertSelectedPrompt",
+      "title": "Auto Insert Selected Prompt",
+      "description": "Automatically insert the selected prompt into the prompt content input field when creating a prompt.",
+      "default": false,
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.84.7",
     "@raycast/utils": "^1.17.0"

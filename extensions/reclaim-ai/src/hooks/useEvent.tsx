@@ -176,29 +176,29 @@ export const useEventActions = () => {
 
     switch (event.assist?.eventType) {
       case "TASK_ASSIGNMENT":
-        showStart &&
+        if (showStart)
           eventActions.push({
             icon: Icon.Play,
             title: "Start",
             action: async () => {
-              event.assist?.taskId && (await startTask(String(event.assist.taskId)));
+              if (event.assist?.taskId) await startTask(String(event.assist.taskId));
             },
           });
 
-        showRestartStop &&
+        if (showRestartStop)
           eventActions.push(
             {
               icon: Icon.Rewind,
               title: "Restart",
               action: async () => {
-                event.assist?.taskId && (await restartTask(String(event.assist.taskId)));
+                if (event.assist?.taskId) await restartTask(String(event.assist.taskId));
               },
             },
             {
               icon: Icon.Stop,
               title: "Stop",
               action: async () => {
-                event.assist?.taskId && (await stopTask(String(event.assist.taskId)));
+                if (event.assist?.taskId) await stopTask(String(event.assist.taskId));
               },
             }
           );
@@ -236,32 +236,32 @@ export const useEventActions = () => {
         });
         break;
       case "HABIT_ASSIGNMENT":
-        isActive
-          ? eventActions.push(
-              {
-                icon: Icon.Rewind,
-                title: "Restart",
-                action: async () => {
-                  event.assist?.dailyHabitId &&
-                    (await handleRestartHabit(String(event.assist?.dailyHabitId), event.title));
-                },
-              },
-              {
-                icon: Icon.Stop,
-                title: "Stop",
-                action: async () => {
-                  event.assist?.dailyHabitId &&
-                    (await handleStopHabit(String(event.assist?.dailyHabitId), event.title));
-                },
-              }
-            )
-          : eventActions.push({
-              icon: Icon.Play,
-              title: "Start",
+        if (isActive)
+          eventActions.push(
+            {
+              icon: Icon.Rewind,
+              title: "Restart",
               action: async () => {
-                event.assist?.dailyHabitId && (await handleStartHabit(String(event.assist?.dailyHabitId), event.title));
+                if (event.assist?.dailyHabitId)
+                  await handleRestartHabit(String(event.assist?.dailyHabitId), event.title);
               },
-            });
+            },
+            {
+              icon: Icon.Stop,
+              title: "Stop",
+              action: async () => {
+                if (event.assist?.dailyHabitId) await handleStopHabit(String(event.assist?.dailyHabitId), event.title);
+              },
+            }
+          );
+        else
+          eventActions.push({
+            icon: Icon.Play,
+            title: "Start",
+            action: async () => {
+              if (event.assist?.dailyHabitId) await handleStartHabit(String(event.assist?.dailyHabitId), event.title);
+            },
+          });
 
         eventActions.push({
           icon: Icon.Calendar,
@@ -274,33 +274,33 @@ export const useEventActions = () => {
         });
         break;
       case "SMART_HABIT":
-        showRestartStop &&
+        if (showRestartStop)
           eventActions.push(
             {
               icon: Icon.Rewind,
               title: "Restart",
               action: async () => {
-                event.assist?.seriesLineageId &&
-                  (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
+                if (event.assist?.seriesLineageId)
+                  await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title);
               },
             },
             {
               icon: Icon.Stop,
               title: "Stop",
               action: async () => {
-                event.assist?.seriesLineageId &&
-                  (await handleStopSmartHabit(String(event.assist?.seriesLineageId), event.title));
+                if (event.assist?.seriesLineageId)
+                  await handleStopSmartHabit(String(event.assist?.seriesLineageId), event.title);
               },
             }
           );
 
-        showStart &&
+        if (showStart)
           eventActions.push({
             icon: Icon.Play,
             title: "Start",
             action: async () => {
-              event.assist?.seriesLineageId &&
-                (await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title));
+              if (event.assist?.seriesLineageId)
+                await handleStartOrRestartSmartHabit(String(event.assist?.seriesLineageId), event.title);
             },
           });
 

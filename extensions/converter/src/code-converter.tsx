@@ -21,28 +21,28 @@ export default function CodeConverter() {
               shortcut={{ modifiers: ["cmd"], key: "2" }}
             />
             <Action.CopyToClipboard
+              title="Copy Base64"
+              content={converter.get("base64")}
+              shortcut={{ modifiers: ["cmd"], key: "3" }}
+            />
+            <Action.CopyToClipboard
               title="Copy Utf-8"
               content={converter.get("utf8")}
-              shortcut={{ modifiers: ["cmd"], key: "3" }}
+              shortcut={{ modifiers: ["cmd"], key: "4" }}
             />
             <Action.CopyToClipboard
               title="Copy Ascii"
               content={converter.get("ascii")}
-              shortcut={{ modifiers: ["cmd"], key: "4" }}
+              shortcut={{ modifiers: ["cmd"], key: "5" }}
             />
             <Action.CopyToClipboard
               title="Copy Hex"
               content={converter.get("hex")}
-              shortcut={{ modifiers: ["cmd"], key: "5" }}
-            />
-            <Action.CopyToClipboard
-              title="Copy Entity"
-              content={converter.get("entity")}
               shortcut={{ modifiers: ["cmd"], key: "6" }}
             />
             <Action.CopyToClipboard
-              title="Copy Base64"
-              content={converter.get("base64")}
+              title="Copy Decimal"
+              content={converter.get("decimal")}
               shortcut={{ modifiers: ["cmd"], key: "7" }}
             />
             <Action.CopyToClipboard
@@ -51,7 +51,7 @@ export default function CodeConverter() {
               shortcut={{ modifiers: ["cmd"], key: "8" }}
             />
             <Action.CopyToClipboard
-              title="Copy Html Entity"
+              title="Copy Entity"
               content={converter.get("entity")}
               shortcut={{ modifiers: ["cmd"], key: "9" }}
             />
@@ -111,6 +111,13 @@ export default function CodeConverter() {
         value={converter.get("hex")}
         placeholder="0x0"
         onChange={(v) => converter.set("hex", v)}
+      />
+      <Form.TextField
+        id="Decimal"
+        title="Decimal"
+        value={converter.get("decimal")}
+        placeholder="0"
+        onChange={(v) => converter.set("decimal", v)}
       />
       <Form.TextField
         id="Encoded URL"

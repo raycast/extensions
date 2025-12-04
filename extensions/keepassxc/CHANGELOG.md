@@ -1,5 +1,60 @@
 # KeePassXC Extension Changelog
 
+## [1.8.0] - 2025-10-27
+
+### Added
+
+- Support for KeePassXC placeholders in copy and paste actions.
+
+## [1.7.1] - 2025-10-14
+
+### Fixed
+
+- Find KeePassXC app location using Raycast API for macOS (#22043).
+
+## [1.7.0] - 2025-09-29
+
+### Added
+
+- Support for Windows (#21352).
+
+### Removed
+
+- App picker `KeePassXC App` in the extension preferences.
+
+## [1.6.0] - 2025-04-07
+
+### Added
+
+- Optional favicon support for the user interface.
+- New image with favicons.
+
+### Fixed
+
+- Better descriptions for the preferences.
+
+## [1.5.6] - 2025-03-12
+
+### Fixed
+
+- Use a `raw.githubusercontent.com` link for the KeePassXC image in the README.
+
+## [1.5.5] - 2025-03-12
+
+### Changed
+
+- Use a global info message about security when the database is locked.
+- Update screenshot about the database being locked.
+- Use more explicit error messages when unable to execute the `keepassxc-cli` command.
+
+### Fixed
+
+- Use a blob link for the KeePassXC image in the README.
+
+### Removed
+
+- The test guide.
+
 ## [1.5.4] - 2025-02-10
 
 ### Fixed
@@ -99,4 +154,4 @@
 
 ### Added
 
-- Add support for Key File protected database file.
+- Initial release.

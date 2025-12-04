@@ -25,6 +25,8 @@ export function useMe() {
       }
     } catch (error) {
       errorHandler(error as MastodonError);
+    } finally {
+      setIsLoading(false);
     }
   };
 

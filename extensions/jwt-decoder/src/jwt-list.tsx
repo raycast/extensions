@@ -33,7 +33,7 @@ const JwtView = () => {
 
     const section = selected?.type;
     const definition = (selected?.type === "head" ? headerItems : dataItems).find(
-      (item) => item.key === selected?.value
+      (item) => item.key === selected?.value,
     );
 
     const markdown = showDetail
@@ -49,15 +49,15 @@ const JwtView = () => {
                   section,
                   definition,
                 }}
-              />
-            )
+              />,
+            ),
           )}" />`,
         ]
       : [];
 
     const detail = !!showDetail && <List.Item.Detail markdown={markdown.join("\n\n")} />;
 
-    const selectionChange = (id?: string | undefined) => {
+    const selectionChange = (id?: string | null) => {
       const parts = id ? id.split(".") : [];
       setSelected({ type: parts[0] ?? "", value: parts[1] ?? "" });
     };

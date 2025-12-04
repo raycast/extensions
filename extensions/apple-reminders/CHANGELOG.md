@@ -1,5 +1,25 @@
 # Apple Reminders Changelog
 
+## [Fix Day Grouping option displays duplicate days] - 2025-11-30
+
+- Fix an issue where enabling `Use Time of Day Grouping` would cause duplicate day sections to appear in the `My Reminders` view (Today and Scheduled)
+
+## [Add ability to move reminders between lists] - 2025-10-17
+
+- Add list selection dropdown in the Edit Reminder form
+- Implement `moveToList` function to change reminder's list
+- Allow users to move reminders to different lists when editing
+- Added logic to only update title/notes and list if they have changed
+
+## [Add Creation Date option for sorting] - 2025-06-13
+
+- Retrieve the Creation Date from the EventKit API
+- Add an option to sort reminders by Creation Date, as this is available in the native app
+
+## [✨ Add option to show list name in menu bar reminders] - 2025-06-04
+
+- Add an option that allows users to choose whether to display the list name next to each reminder’s name in the menu bar.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add new "Upcoming" grouping option] - 2025-02-10
@@ -29,7 +49,7 @@ The Create Reminder command will automatically pre-fill the title with the initi
 
 ## [Change AI model for Quick Add Reminder] - 2024-05-23
 
-Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo. 
+Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo.
 
 ## [Add Saved Locations] - 2024-04-16
 

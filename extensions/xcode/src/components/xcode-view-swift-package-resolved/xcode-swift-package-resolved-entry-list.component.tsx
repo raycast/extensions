@@ -10,7 +10,7 @@ import { XcodeSwiftPackageResolved } from "../../models/swift-package-resolved/x
  */
 export function XcodeSwiftPackageResolvedEntryList(props: { xcodeProject: XcodeProject }) {
   const packageResolved = usePromise(
-    () => XcodeSwiftPackageResolvedService.getPackageResolved(props.xcodeProject),
+    () => XcodeSwiftPackageResolvedService.getPackageResolved(props.xcodeProject.directoryPath),
     [],
     {
       onError: () => Promise.resolve(),

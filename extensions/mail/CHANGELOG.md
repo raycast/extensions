@@ -1,5 +1,42 @@
 # Mail Changelog
 
+## [Improvement] - 2025-09-19
+
+- Reduce distraction by removing the background HUD for intermittent "Failed to refresh messages" in `Refresh Mail`; now logs to console instead.
+- Standardize capitalization/copy in `Refresh Mail` to keep toasts consistent.
+
+## [🌟 New Feature] - 2025-05-19
+
+- 📧 Add the copy-foreground-mail-deeplink command to copy the foreground mail deeplink to the clipboard.
+- 🔥 Add new AI tool to get email link
+
+## [Fix] - 2025-05-12
+
+- "Paste Latest OTP Code" now correctly gets the latest OTP code across multiple mail accounts.
+
+## [New Feature] - 2025-04-30
+
+- Add "Paste Latest OTP Code" command
+
+## [New Feature] - 2025-04-07
+
+- Add russian aliases for folders
+
+## [Fix] - 2025-04-02
+
+- Support for mail accounts with multiple sender addresses.
+
+## [Add AI Tools] - 2025-03-21
+
+This release turns this extension into an AI extension.
+
+Supported tools:
+- Search emails
+- List addresses
+- Send email
+
+Added support for setting the default mail account, which is now used as the default in `Compose New Message` and by the AI when sending an email.
+
 ## [Improvement] - 2025-01-15
 
 - Add preference for `See Recent Mail`: `unreadonly` to show whether only unread messages.

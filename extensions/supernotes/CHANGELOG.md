@@ -1,6 +1,11 @@
 # Supernotes Changelog
 
-## [Daily Append Local Time]
+## [AI Extension Support] - 2025-04-03
+- Added in a tool to search cards
+- Added in a tool to append to a card
+- Added in a tool to create a new card
+
+## [Daily Append Local Time] - 2024-12-16
 - Use the local day when appending content to a daily card
 
 ## [Quick Daily Command] - 2024-11-27

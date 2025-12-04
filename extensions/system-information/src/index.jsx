@@ -1,4 +1,3 @@
-// (c) 2024 Aaron Ma (@aaronhma), Vaibhav Satishkumar (@Visual-Studio-Coder), Michitoshi Yano (@nagauta)
 import { Action, ActionPanel, environment, Icon, List } from "@raycast/api";
 import { exec } from "child_process";
 import macosRelease from "macos-release";
@@ -7,15 +6,7 @@ import os from "os";
 import { useEffect, useState } from "react";
 import si from "systeminformation";
 
-async function calculateDiskStorage() {
-  const disks = await si.fsSize();
-
-  const diskObj = disks[0];
-  const totalSize = (diskObj.size / (1024 * 1024 * 1024)).toFixed(2);
-  const totalAvailableStorage = (diskObj.available / (1024 * 1024 * 1024)).toFixed(2);
-
-  return `${totalAvailableStorage} GB available of ${totalSize} GB`;
-}
+import { getStorageInfo } from "swift:../swift";
 
 export default function Command() {
   const [storageInfo, setStorageInfo] = useState("");
@@ -37,9 +28,18 @@ export default function Command() {
   };
 
   useEffect(() => {
-    calculateDiskStorage().then((size) => {
-      setStorageInfo(size);
-    });
+    // Use the getStorageInfo function (either from Swift or the fallback)
+    getStorageInfo()
+      .then((info) => {
+        const totalFormatted = info.total.toFixed(2) + " GB";
+        const usedFormatted = info.used.toFixed(2) + " GB";
+        const freeFormatted = info.free.toFixed(2) + " GB";
+        setStorageInfo(`${usedFormatted} used of ${totalFormatted} (${freeFormatted} available)`);
+      })
+      .catch((error) => {
+        console.error("Failed to get storage info:", error);
+        setStorageInfo("Failed to retrieve storage information");
+      });
 
     exec("/usr/sbin/system_profiler SPHardwareDataType", (error, stdout, stderr) => {
       if (error) {
@@ -125,6 +125,21 @@ export default function Command() {
           }
         />
       </List.Section>
+      <List.Section title="Storage">
+        <List.Item
+          icon={Icon.HardDrive}
+          title="Macintosh HD"
+          accessories={[{ text: storageInfo, tooltip: "Storage information from native Swift API" }]}
+          actions={
+            <ActionPanel>
+              <Action.Open
+                target="x-apple.systempreferences:com.apple.settings.Storage"
+                title="Open Storage Settings"
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
       <List.Section title="macOS">
         <List.Item
           icon={releaseImage()}
@@ -151,21 +166,6 @@ export default function Command() {
           }
         />
       </List.Section>
-      <List.Section title="Storage">
-        <List.Item
-          icon={Icon.HardDrive}
-          title="Macintosh HD"
-          accessories={[{ text: storageInfo, tooltip: "This information may be inaccurate" }]}
-          actions={
-            <ActionPanel>
-              <Action.Open
-                target="x-apple.systempreferences:com.apple.settings.Storage"
-                title="Open Storage Settings"
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
       <List.Section title="Network">
         {networkDevices.map((device) => (
           <List.Item
@@ -175,7 +175,7 @@ export default function Command() {
             accessories={[{ text: device.ip }]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy IP Address" content={device.ip} />
+                <Action.CopyToClipboard title="Copy Ip Address" content={device.ip} />
               </ActionPanel>
             }
           />
@@ -193,7 +193,7 @@ export default function Command() {
               <ActionPanel>
                 <Action title="Quit Process" onAction={() => quitProcess(proc.pid)} />
                 <Action.CopyToClipboard title="Copy Process Name" content={proc.name} />
-                <Action.CopyToClipboard title="Copy PID" content={proc.pid.toString()} />
+                <Action.CopyToClipboard title="Copy Pid" content={proc.pid.toString()} />
               </ActionPanel>
             }
           />

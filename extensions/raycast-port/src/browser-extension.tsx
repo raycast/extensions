@@ -13,7 +13,7 @@ type LaunchContext = {
 
 type Result = {
   content?: string;
-  tabs?: string | Awaited<ReturnType<typeof BrowserExtension.getTabs>>;
+  tabs?: Awaited<ReturnType<typeof BrowserExtension.getTabs>>;
   errors?: string[];
 };
 

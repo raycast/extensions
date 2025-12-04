@@ -2,24 +2,31 @@ import { ha } from "@lib/common";
 import getEntity from "./get-entities";
 
 type Input = {
-  /** The service to call (e.g., 'turn_on', 'turn_off', 'toggle').
+  /** The service to call (e.g., 'turn_on', 'turn_off', 'start', 'stop', 'toggle').
    * Do not include the domain prefix.
    */
   service: string;
   /**
    * Additional data to pass to the service.
-   * Note: While only entity_id is typed here,
-   * you can pass any service-specific attributes at runtime
-   * (e.g., temperature, fan_modes, hvac_modes, etc.)
+   * IMPORTANT: All entities must require the SAME operation.
+   * Do NOT mix entities that need different operations (e.g., don't mix 'turn_on' and 'turn_off' entities).
+   * Make separate calls to run-service for different operations.
    */
   data: {
-    /** The entity IDs to control. Can include entities from multiple domains */
+    /**
+     * The entity IDs to control with this service operation.
+     * All entities must require the SAME operation (e.g., all need to be turned on, or all need to be turned off).
+     * For different operations, make separate calls.
+     */
     entity_id: string[];
   };
 };
 
 /**
  * Run a Home Assistant service.
+ * IMPORTANT: Each call should only contain entities that need the SAME operation.
+ * For different operations (e.g., turn_on and turn_off), make separate calls to this tool.
+ *
  * @param {Input} input The input object containing the service operation
  * @returns {Promise<object>} An empty object if successful, throws an error otherwise
  * @example
@@ -28,8 +35,14 @@ type Input = {
  *   service: "turn_on",
  *   data: { entity_id: ["climate.ac1", "climate.ac2"] }
  * }
+ *
+ * // In a separate call, turn off lights
+ * {
+ *   service: "turn_off",
+ *   data: { entity_id: ["light.living_room", "light.bedroom"] }
+ * }
  */
-export default async function (input: Input): Promise<object> {
+export default async function tool(input: Input): Promise<object> {
   try {
     const { service, data } = input;
 

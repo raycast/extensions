@@ -12,6 +12,7 @@ export type DomainInfo = {
   autoRenew: boolean;
   registrationDate: string;
   expirationDate: string;
+  lifecycleStatus: "creating" | "registered" | "grace1" | "grace2" | "redemption";
   privacyProtection: {
     level: "public" | "high";
     contactForm: boolean;
@@ -23,6 +24,11 @@ export type DomainInfo = {
   };
 };
 
+export type DomainAuthCode = {
+  authCode: string;
+  expires?: string | null;
+};
+
 export type ResourceRecord = {
   type: string;
   name: string;
@@ -32,6 +38,35 @@ export type ResourceRecord = {
   };
   value?: string;
   address?: string;
+  exchange?: string;
+};
+
+export type ResourceRecordsListCreateOrUpdateItem = (
+  | {
+      type: "TXT";
+      value: string;
+    }
+  | {
+      type: "MX";
+      exchange: string;
+      preference: number;
+    }
+  | {
+      type: "A" | "AAAA";
+      address: string;
+    }
+  | {
+      type: "CNAME";
+      cname: string;
+    }
+) & {
+  name: string;
+  ttl?: number;
+};
+
+export type CheckDomainAvailabilityResult = {
+  domain: string;
+  result: "available" | "taken" | "invalidDomainName" | "tldNotSupported" | "unexpectedError";
 };
 
 export type SuccessResult<T> = {

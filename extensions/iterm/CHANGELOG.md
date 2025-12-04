@@ -1,5 +1,8 @@
 # iTerm Changelog
 
+## [Extension improvement] - 2025-11-19
+- Added configuration to open iTerm in a new window or a new tab for `Open iTerm Here` command
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Extension improvement] - 2024-04-17

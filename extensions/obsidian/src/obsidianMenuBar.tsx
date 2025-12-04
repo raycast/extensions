@@ -1,8 +1,9 @@
 import { MenuBarExtra, open } from "@raycast/api";
+import { vaultPluginCheck } from "./api/vault/plugins/plugins.service";
+import { Vault } from "./api/vault/vault.types";
 import { ObsidianIcon } from "./utils/constants";
-import { useNotes } from "./utils/hooks";
-import { Vault } from "./utils/interfaces";
-import { getObsidianTarget, ObsidianTargetType, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
+import { useNotes, useObsidianVaults } from "./utils/hooks";
+import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
 
 function BookmarkedNotesList(props: { vault: Vault }) {
   const [notes] = useNotes(props.vault, true);

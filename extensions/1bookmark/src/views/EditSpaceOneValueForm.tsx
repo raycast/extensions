@@ -3,7 +3,10 @@ import { useState } from "react";
 import { trpc } from "@/utils/trpc.util";
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 
-export type KeyToEdit = "name" | "image" | "description";
+const userAndSpaceFields = ["myNickname", "myImage"] as const;
+const spaceFields = ["name", "image", "description"] as const;
+
+export type KeyToEdit = (typeof userAndSpaceFields)[number] | (typeof spaceFields)[number];
 
 function Body(props: { spaceId: string; keyToEdit: KeyToEdit; value: string }) {
   const { spaceId, keyToEdit, value } = props;
@@ -12,20 +15,19 @@ function Body(props: { spaceId: string; keyToEdit: KeyToEdit; value: string }) {
   const { pop } = useNavigation();
   const update = trpc.space.update.useMutation();
 
-  async function handleSubmit() {
-    try {
-      await update.mutateAsync({ spaceId, [keyToEdit]: editingValue });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Updated space",
-      });
-      pop();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update space",
-      });
-    }
+  function handleSubmit() {
+    update.mutate(
+      { spaceId, [keyToEdit]: editingValue },
+      {
+        onSuccess: () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Updated space",
+          });
+          pop();
+        },
+      },
+    );
   }
 
   return (

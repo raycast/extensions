@@ -43,7 +43,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.65.0",
-    "axios": "^1.6.5",
+    "axios": "^1.8.4",
     "cheerio": "^1.0.0-rc.12",
     "env-cmd": "^10.1.0",
     "jsonwebtoken": "^9.0.2"

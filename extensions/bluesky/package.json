@@ -104,10 +104,10 @@
     }
   ],
   "dependencies": {
-    "@atproto/api": "^0.13.26",
+    "@atproto/api": "^0.14.7",
     "@atproto/uri": "^0.1.1",
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
     "cross-fetch": "^3.1.5",
     "use-debounce": "^9.0.4"
   },

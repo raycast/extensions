@@ -1,0 +1,14 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+To debug if package compiled use command:
+```bash
+npm exec ray build
+```
+
+To check if raycast api has desired feature, check api declaratings:
+- [index.d.ts](/node_modules/@raycast/api/types/index.d.ts) of @raycast/api
+- [index.d.ts](/node_modules/@raycast/utils/dist/types.d.ts) of @raycast/utils
+- [llms-full.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt) of Raycast Development API

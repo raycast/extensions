@@ -1,10 +1,11 @@
-import { updateTodo, TodoParams } from '../api';
+import { updateTodo } from '../api';
+import { UpdateTodoParams } from '../types';
 
 type Input = {
-  /** The todo id to update */
+  /** The to-do id to update */
   todoId: string;
   /** The parameters to update */
-  todoParams: TodoParams;
+  todoParams: UpdateTodoParams;
 };
 
 export default async function ({ todoId, todoParams }: Input) {

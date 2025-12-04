@@ -22,3 +22,17 @@ export interface Category {
   category: string;
   total: number;
 }
+
+export type SvgActionKey =
+  | "copySvg"
+  | "copySvgFile"
+  | "copySvgWordmark"
+  | "copyShadcnRegistry"
+  | "copyReactComponent"
+  | "copyVueComponent"
+  | "copySvelteComponent"
+  | "copyAngularComponent"
+  | "copySvgUrl"
+  | "copySvgWordmarkUrl"
+  | "operation"
+  | "svgInfo";

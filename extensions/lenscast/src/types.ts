@@ -1,76 +1,57 @@
-export enum PublicationMainFocus {
-  Article = "ARTICLE",
-  Audio = "AUDIO",
-  Embed = "EMBED",
-  Image = "IMAGE",
-  Link = "LINK",
-  TextOnly = "TEXT_ONLY",
-  Video = "VIDEO",
-}
-
 export type Media = {
-  altTag?: string;
-  cover?: string;
-  url: string;
-  mimeType?: string;
+  raw: {
+    uri: string;
+  };
 };
 
-export type MediaSet = {
-  original: Media;
-};
+type MediaSet =
+  | {
+      image: Media;
+    }
+  | {
+      video: Media;
+    };
 
 export type ProfileData = {
   profileId: string;
-  bio: string;
-  name: string;
-  handle: string;
-  picture: {
-    original: {
-      url: string;
-    };
+  handle: {
+    fullHandle: string;
+    localName: string;
   };
   stats: {
     totalFollowers: string;
     totalFollowing: string;
     totalPosts: string;
     totalComments: string;
-    totalMirrors: string;
     totalPublications: string;
-    totalCollects: string;
+    totalMirrors: string;
+    // totalCollects: string;
   };
-  metadata: string;
+  metadata: {
+    bio: string | null;
+    displayName: string;
+    picture: Media;
+  } | null;
 };
 
 export type MetadataOutput = {
-  __typename?: "MetadataOutput";
-  animatedUrl?: string;
   content?: string;
-  cover?: MediaSet;
-  description?: string;
-  image?: string;
-  locale?: string;
-  mainContentFocus: PublicationMainFocus;
-  media: Array<MediaSet>;
-  name?: string;
+  asset?: MediaSet;
+  attachments: Array<MediaSet>;
+  rawURI?: string;
 };
 
 export type PublicationStats = {
   id: string;
-  totalAmountOfCollects: number;
-  totalAmountOfComments: number;
-  totalAmountOfMirrors: number;
-  totalDownvotes: number;
-  totalUpvotes: number;
+  bookmarks: number;
+  comments: number;
+  mirrors: number;
+  upvotes: number;
 };
 
 export type Post = {
-  appId?: string;
   createdAt: string;
-  hasCollectedByMe: boolean;
-  hidden: boolean;
   id: string;
   metadata: MetadataOutput;
-  onChainContentURI: string;
-  profile: ProfileData;
   stats: PublicationStats;
 };

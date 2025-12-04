@@ -1,12 +1,15 @@
-import nodeFetch, { RequestInit, Response } from "node-fetch";
-
+import APIError from "./APIError";
 import preferences from "../preferences";
 
-const fetch = async (pathname: string, init: RequestInit = {}): Promise<Response> => {
-  const response = await nodeFetch(`https://app.addy.io/api/v1/${pathname.replace(/^\//, "")}`, {
+type Init = { body?: Record<string, unknown> | null | undefined } & Omit<RequestInit, "body">;
+
+const fetch = async (path: string, init: Init = {}): Promise<Response> => {
+  const url = new URL(path, "https://app.addy.io/api/v1/");
+
+  const response = await global.fetch(url.toString(), {
     ...init,
+    body: JSON.stringify(init.body),
     headers: {
-      ...init?.headers,
       Accept: "application/json",
       Authorization: `Bearer ${preferences.apiKey}`,
       "Content-Type": "application/json",
@@ -14,8 +17,8 @@ const fetch = async (pathname: string, init: RequestInit = {}): Promise<Response
     },
   });
 
-  if (response.status === 401) {
-    throw new Error("Addy API credentials are invalid");
+  if (!response.ok) {
+    throw new APIError(response);
   }
 
   return response;

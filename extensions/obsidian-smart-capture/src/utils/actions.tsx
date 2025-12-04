@@ -1,4 +1,4 @@
-import { Action, getPreferenceValues, Icon, Color, List, ActionPanel, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, getPreferenceValues, Icon, List } from "@raycast/api";
 
 import React from "react";
 
@@ -7,11 +7,11 @@ import { EditNote } from "../components/EditNote";
 import { Note, Vault } from "./interfaces";
 
 import { NoteQuickLook } from "../components/NoteQuickLook";
-import { appendSelectedTextTo, getObsidianTarget, vaultPluginCheck, getCodeBlocks, ObsidianTargetType } from "./utils";
 import { ObsidianIcon, PrimaryAction } from "./constants";
-import { SearchNotePreferences } from "./preferences";
 import { NoteReducerActionType } from "./data/reducers";
 import { useNotesDispatchContext } from "./hooks";
+import { SearchNotePreferences } from "./preferences";
+import { appendSelectedTextTo, getCodeBlocks, getObsidianTarget, ObsidianTargetType, vaultPluginCheck } from "./utils";
 
 //--------------------------------------------------------------------------------
 // All actions for all commands should be defined here.
@@ -248,7 +248,7 @@ export function CopyCodeAction(props: { note: Note }) {
 }
 
 export function NoteActions(props: { notes: Note[]; note: Note; vault: Vault }) {
-  const { notes, note, vault } = props;
+  const { note, vault } = props;
 
   return (
     <React.Fragment>

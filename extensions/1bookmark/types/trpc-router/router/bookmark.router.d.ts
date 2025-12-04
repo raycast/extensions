@@ -55,6 +55,7 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             url: string;
             tags: string[];
             author: string;
+            authorEmail: string;
             deletedAt: Date | null;
             updatedAt: Date;
         };
@@ -64,15 +65,16 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             spaceIds: string[];
         };
         output: {
-            description: string | null;
-            spaceId: string;
             id: string;
-            createdAt: Date;
+            authorEmail: string;
+            authorName: string;
+            spaceId: string;
+            spaceName: string;
+            tags: string[];
             name: string;
             url: string;
-            tags: string[];
-            author: string;
-            deletedAt: Date | null;
+            description: string | null;
+            createdAt: Date;
             updatedAt: Date;
         }[];
     }>;
@@ -87,6 +89,7 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             url: string;
             tags: string[];
             author: string;
+            authorEmail: string;
             deletedAt: Date | null;
             updatedAt: Date;
         }[];
@@ -119,8 +122,22 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             url: string;
             tags: string[];
             author: string;
+            authorEmail: string;
             deletedAt: Date | null;
             updatedAt: Date;
         };
+    }>;
+    import: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+            tags: string[];
+            bookmarks: {
+                name: string;
+                url: string;
+                description?: string | undefined;
+            }[];
+            browserName: string;
+        };
+        output: void;
     }>;
 }>;

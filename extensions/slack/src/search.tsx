@@ -8,6 +8,7 @@ import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenI
 import { convertSlackEmojiToUnicode } from "./shared/utils";
 import { toZonedTime } from "date-fns-tz";
 import { differenceInMinutes } from "date-fns";
+import SendMessage from "./send-message";
 
 const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
 
@@ -43,6 +44,19 @@ function searchItemAccessories(
   }
 
   return searchMetadata;
+}
+
+function CopyIdAction({ id }: { id: string }) {
+  return (
+    <Action.CopyToClipboard
+      title="Copy ID to Clipboard"
+      content={id}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "c" },
+        windows: { modifiers: ["ctrl", "shift"], key: "c" },
+      }}
+    />
+  );
 }
 
 function Search() {
@@ -84,6 +98,13 @@ function Search() {
                     {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => visitItem(item) }}
                   />
 
+                  <Action.Push
+                    title="Send Message"
+                    icon={Icon.Message}
+                    target={<SendMessage recipient={userId} />}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  />
+
                   <Action.CreateQuicklink
                     quicklink={{
                       name: `Open Chat with ${name}`,
@@ -99,6 +120,8 @@ function Search() {
                     content={`https://app.slack.com/huddle/${workspaceId}/${conversationId}`}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />
+
+                  <CopyIdAction id={userId} />
 
                   <ActionPanel.Section>
                     <Action
@@ -134,6 +157,8 @@ function Search() {
                     }}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
                   />
+
+                  <CopyIdAction id={channelId} />
 
                   <ActionPanel.Section>
                     <Action

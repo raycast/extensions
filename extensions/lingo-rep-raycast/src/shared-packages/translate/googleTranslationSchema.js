@@ -1,10 +1,17 @@
 import { z } from "zod";
-// Define the schema for translation sentences
-const translationSchema = z.object({
-  trans: z.string(),
-  orig: z.string(),
-  backend: z.number(),
-});
+export const translationSchema = z
+  .object({
+    trans: z.string(),
+    orig: z.string(),
+    backend: z.number(),
+  })
+  .optional();
+export const translitSchema = z
+  .object({
+    translit: z.string().optional(),
+    src_translit: z.string().optional(),
+  })
+  .optional();
 // Define the schema for reverse translation entries
 const reverseTranslationEntrySchema = z.object({
   word: z.string(),
@@ -30,7 +37,7 @@ const ldResult = z
   .optional();
 // Define the top-level schema combining all parts
 export const googleTranslationSchema = z.object({
-  sentences: z.array(translationSchema).optional(),
+  sentences: z.array(z.union([translationSchema, translitSchema]).optional()).optional(),
   dict: z.array(dictionaryEntrySchema).optional(),
   src: z.string().optional(),
   ld_result: ldResult,

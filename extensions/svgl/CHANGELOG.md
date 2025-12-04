@@ -1,6 +1,27 @@
 # svgl Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Add shadcn/ui Registry Features] - 2025-09-29
+
+- Add the action `Copy shadcn/ui Registry Install Command` to copy the install command to the clipboard.
+- Add the command `Setup shadcn/ui Registry` to copy the `svgl` registry JSON to the clipboard and open docs.
+- Add the preference `Default Package Manager` to choose `pnpm`, `npm`, `yarn`, or `bun` for the install command.
+- Add the default action option `Copy shadcn Registry`.
+
+## [Update] - 2025-08-08
+
+- Add the script to prefix the SVG IDs to avoid conflicts with other SVGs.
+
+## [✨ AI Enhancements] - 2025-04-02
+
+AI Tools to:
+- Get SVG Logo
+- Get SVG Component
+
+## [Update] - 2025-03-27
+
+- Added a default action preference that allows users to choose the default action when selecting an SVG.
+
+## [Update] - 2025-02-21
 
 - Updated the SVG logo request form.  
 - Added the action `Visit SVG Brand Website` to open the SVG brand website in the browser.
@@ -59,9 +80,11 @@ You can use the `Request SVG Logo` command to request SVGs you want to add to th
 - Remove the category subtitle below the SVG name to make it cleaner.
 
 ## [Copy React Component] - 2024-04-10
+
 - Add copy React component feature.
 
 ## [SVG Wordmark Features] - 2024-03-18
+
 - Add SVG wordmark copy actions.
 - Fix SVG error in multiple categories.
 

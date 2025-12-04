@@ -18,6 +18,7 @@ const Invoice = `
     amountDue {
         value
         currency {
+            code
             symbol
         }
     }
@@ -79,6 +80,7 @@ export const NODES = {
         lastName
         email
         website
+        phone
         currency {
             ${OBJECTS.Currency}
         }

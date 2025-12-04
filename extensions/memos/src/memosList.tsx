@@ -1,18 +1,29 @@
 import { useEffect, useState } from "react";
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
-import { archiveMemo, deleteMemo, getAllMemos, getMe, getRequestUrl, restoreMemo } from "./api";
+import {
+  archiveMemo,
+  deleteMemo,
+  getAllMemos,
+  getMe,
+  getRequestUrl,
+  getAttachmentBinToBase64,
+  restoreMemo,
+} from "./api";
 import { MemoInfoResponse, ROW_STATUS } from "./types";
 
 export default function MemosListCommand(): JSX.Element {
   const [searchText, setSearchText] = useState("");
   const [currentUserId, setCurrentUserId] = useState<number>();
-  const { isLoading, data, revalidate, pagination } = getAllMemos(currentUserId);
-  const { isLoading: isLoadingUser, data: user } = getMe();
+  const [state, setState] = useState(ROW_STATUS.NORMAL);
+  const { isLoading, data, revalidate, pagination } = getAllMemos(currentUserId, { state });
+  const { isLoading: isLoadingUser, data: userData } = getMe();
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
   useEffect(() => {
-    if (!isLoadingUser && user.id) {
-      setCurrentUserId(user.id);
+    const user = userData.user || {};
+    if (!isLoadingUser && user.name) {
+      const userId = +user.name.split("/")[1];
+      setCurrentUserId(userId);
     }
   }, [isLoadingUser]);
 
@@ -25,35 +36,62 @@ export default function MemosListCommand(): JSX.Element {
   useEffect(() => {
     const dataList = data || [];
 
-    setFilterList(dataList.filter((item) => item.content.includes(searchText)) || []);
+    setFilterList(
+      dataList
+        .filter((item) => item.content.includes(searchText))
+        .map((item) => {
+          item.markdown = item.content;
+          if (item.attachments.length > 0) {
+            getItemMarkdown(item);
+          }
+          return item;
+        }) || [],
+    );
   }, [searchText]);
 
   useEffect(() => {
     const dataList = data || [];
-    setFilterList(dataList);
+    setFilterList(
+      dataList.map((item) => {
+        item.markdown = item.content;
+
+        if (item.attachments.length > 0) {
+          getItemMarkdown(item);
+        }
+
+        return item;
+      }),
+    );
   }, [data]);
 
   function getItemUrl(item: MemoInfoResponse) {
-    const url = getRequestUrl(`/m/${item.uid}`);
+    const url = getRequestUrl(`/${item.name}`);
 
     return url;
   }
 
-  function getItemMarkdown(item: MemoInfoResponse) {
-    const { content, resources } = item;
+  async function getItemMarkdown(item: MemoInfoResponse) {
+    const { content, attachments } = item;
     let markdown = content;
 
-    resources.forEach((resource, index) => {
-      const resourceUrl = getRequestUrl(`/file/${resource.name}/${resource.filename}`);
+    const attachmentMarkdowns = await Promise.all(
+      attachments.map(async (attachment) => {
+        const attachmentBlobUrl = await getAttachmentBinToBase64(attachment.name, attachment.filename);
+        return `\n\n![${attachment.filename}](${attachmentBlobUrl})`;
+      }),
+    );
 
-      if (index === 0) {
-        markdown += "\n\n";
-      }
+    markdown += attachmentMarkdowns.join("");
 
-      markdown += ` ![${resource.filename}](${resourceUrl})`;
+    setFilterList((prevList) => {
+      const updatedList = prevList.map((prevItem) => {
+        if (prevItem.name === item.name) {
+          return { ...prevItem, markdown };
+        }
+        return prevItem;
+      });
+      return updatedList;
     });
-
-    return markdown;
   }
 
   async function onArchive(item: MemoInfoResponse) {
@@ -71,7 +109,7 @@ export default function MemosListCommand(): JSX.Element {
         style: Toast.Style.Animated,
         title: "Archive...",
       });
-      const res = await archiveMemo(item.uid).catch(() => {
+      const res = await archiveMemo(item.name).catch(() => {
         //
       });
 
@@ -100,7 +138,7 @@ export default function MemosListCommand(): JSX.Element {
         style: Toast.Style.Animated,
         title: "Delete...",
       });
-      const res = await deleteMemo(item.uid).catch(() => {
+      const res = await deleteMemo(item.name).catch(() => {
         //
       });
 
@@ -129,7 +167,7 @@ export default function MemosListCommand(): JSX.Element {
         style: Toast.Style.Animated,
         title: "Restore...",
       });
-      const res = await restoreMemo(item.uid).catch(() => {
+      const res = await restoreMemo(item.name).catch(() => {
         //
       });
 
@@ -164,20 +202,31 @@ export default function MemosListCommand(): JSX.Element {
       searchBarPlaceholder="Search your memo..."
       isShowingDetail
       pagination={pagination}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Dropdown With Items"
+          onChange={(newValue) => {
+            setState(newValue as ROW_STATUS);
+          }}
+        >
+          <List.Dropdown.Item title={ROW_STATUS.NORMAL} value={ROW_STATUS.NORMAL} />
+          <List.Dropdown.Item title={ROW_STATUS.ARCHIVED} value={ROW_STATUS.ARCHIVED} />
+        </List.Dropdown>
+      }
     >
       {filterList.map((item) => (
         <List.Item
-          key={item.uid}
+          key={item.name}
           title={item.content}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={getItemUrl(item)} />
-              {(item.rowStatus === ROW_STATUS.NORMAL && archiveComponent(item)) || null}
-              {(item.rowStatus === ROW_STATUS.ARCHIVED && restoreComponent(item)) || null}
-              {(item.rowStatus === ROW_STATUS.ARCHIVED && deleteComponent(item)) || null}
+              {(item.state === ROW_STATUS.NORMAL && archiveComponent(item)) || null}
+              {(item.state === ROW_STATUS.ARCHIVED && restoreComponent(item)) || null}
+              {(item.state === ROW_STATUS.ARCHIVED && deleteComponent(item)) || null}
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={getItemMarkdown(item)} />}
+          detail={<List.Item.Detail markdown={item.markdown} />}
         />
       ))}
     </List>

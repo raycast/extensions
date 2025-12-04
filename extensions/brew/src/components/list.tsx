@@ -1,3 +1,5 @@
+import { ReactElement } from "react";
+
 import { Color, Icon, List } from "@raycast/api";
 import { brewFormatVersion, brewIsInstalled, brewName, Cask, Formula } from "../brew";
 import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
@@ -12,13 +14,13 @@ export interface FormulaListProps {
   formulae: Formula[];
   casks: Cask[];
   searchBarPlaceholder: string;
-  searchBarAccessory?: JSX.Element;
+  searchBarAccessory?: ReactElement<List.Dropdown.Props, string>;
   onSearchTextChange?: (q: string) => void;
   isInstalled: (name: string) => boolean;
   onAction: () => void;
 }
 
-export function FormulaList(props: FormulaListProps): JSX.Element {
+export function FormulaList(props: FormulaListProps) {
   const formulae = props.formulae;
   const casks = props.casks;
   return (
@@ -58,7 +60,7 @@ export function FormulaListItem(props: {
   formula: Formula;
   isInstalled: (name: string) => boolean;
   onAction: () => void;
-}): JSX.Element {
+}) {
   const formula = props.formula;
   let version = formula.versions.stable;
   let tintColor: Color.ColorLike = tertiaryTextColor;
@@ -92,11 +94,7 @@ export function FormulaListItem(props: {
   );
 }
 
-export function CaskListItem(props: {
-  cask: Cask;
-  isInstalled: (name: string) => boolean;
-  onAction: () => void;
-}): JSX.Element {
+export function CaskListItem(props: { cask: Cask; isInstalled: (name: string) => boolean; onAction: () => void }) {
   const cask = props.cask;
   let version = cask.version;
   let tintColor: Color.ColorLike = tertiaryTextColor;
@@ -125,6 +123,6 @@ export function CaskListItem(props: {
   );
 }
 
-export function MoreListItem(): JSX.Element {
+export function MoreListItem() {
   return <List.Item title="" icon={Icon.Dot} />;
 }

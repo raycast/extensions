@@ -8,13 +8,14 @@ type ActionsProps = {
   isFavorite: boolean;
   onAction: () => void;
   onSave: () => void;
+  primaryActionTitle: string;
 };
 
-export function Actions({ venue, isFavorite, onAction, onSave }: ActionsProps) {
+export function Actions({ venue, isFavorite, onAction, onSave, primaryActionTitle }: ActionsProps) {
   const webPlannerConfig = getWebPlannerConfig();
   return (
     <ActionPanel>
-      <Action title="View Departures" icon={Icon.ArrowRight} onAction={onAction} />
+      <Action title={primaryActionTitle} icon={Icon.ArrowRight} onAction={onAction} />
       <Action
         title={
           isFavorite

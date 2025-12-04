@@ -1,11 +1,11 @@
 import { confirmAlert, LocalStorage, showToast, Toast } from "@raycast/api";
-import { ReplacementOption } from "../types";
+import { Entry } from "../types";
 
-export async function getSavedItems(): Promise<ReplacementOption[]> {
+export async function getSavedItems(): Promise<Entry[]> {
   return JSON.parse((await LocalStorage.getItem("regexOptions")) ?? JSON.stringify([]));
 }
 
-export async function setSavedItems(options: ReplacementOption[] | undefined) {
+export async function setSavedItems(options: Entry[] | undefined) {
   if (!options) {
     await showToast({
       style: Toast.Style.Failure,
@@ -17,7 +17,22 @@ export async function setSavedItems(options: ReplacementOption[] | undefined) {
   return LocalStorage.setItem("regexOptions", JSON.stringify(options));
 }
 
-export async function deleteSavedItem(item: ReplacementOption) {
+export async function moveItem(fromIndex: number, toIndex: number, callbackFn?: () => void) {
+  const savedItems = await getSavedItems();
+  const len = savedItems.length;
+  if (len === 0 || fromIndex === toIndex) return;
+  if (fromIndex < 0 || fromIndex >= len || toIndex < 0 || toIndex >= len) return;
+
+  const updatedEntries = savedItems.slice();
+  const [movedItem] = updatedEntries.splice(fromIndex, 1);
+  if (movedItem === undefined) return;
+  updatedEntries.splice(toIndex, 0, movedItem);
+
+  await setSavedItems(updatedEntries);
+  callbackFn?.();
+}
+
+export async function deleteSavedItem(item: Entry) {
   if (
     await confirmAlert({
       title: "Really delete the item?",
@@ -29,4 +44,12 @@ export async function deleteSavedItem(item: ReplacementOption) {
   } else {
     console.log("canceled");
   }
+}
+
+export async function updateSavedItemDate(item: Entry) {
+  const savedItems = await getSavedItems();
+
+  const updatedItems = savedItems.map((e) => (e.id === item.id ? { ...e, lastUsed: new Date() } : e));
+
+  setSavedItems(updatedItems);
 }

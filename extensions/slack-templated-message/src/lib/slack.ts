@@ -200,7 +200,7 @@ export async function fetchAllChannels(client: WebClient): Promise<Channel[]> {
       const result = await client.conversations.list({
         types: "public_channel,private_channel",
         exclude_archived: true,
-        limit: 200,
+        limit: 1000,
         cursor: cursor,
       });
 

@@ -10,6 +10,7 @@ export function focusOrOpenUrl(url: string, matchUrl: string, browser: Supported
   const scripts = {
     'Google Chrome': `
       tell application "Google Chrome"
+        activate
         set targetUrl to "${url}"
         set matchUrl to "${matchUrl}"
         repeat with win in windows
@@ -25,13 +26,20 @@ export function focusOrOpenUrl(url: string, matchUrl: string, browser: Supported
             end if
           end repeat
         end repeat
+        if not (exists window 1) then
+          make new window
+        end if
         tell window 1 to make new tab with properties {URL:targetUrl}
         return "New tab: " & targetUrl
       end tell`,
     Safari: `
       tell application "Safari"
+        activate
         set targetUrl to "${url}"
         set matchUrl to "${matchUrl}"
+        if not (exists document 1) then
+          make new document
+        end if
         repeat with win in windows
           repeat with t in tabs of win
             if URL of t starts with matchUrl then
@@ -42,7 +50,10 @@ export function focusOrOpenUrl(url: string, matchUrl: string, browser: Supported
             end if
           end repeat
         end repeat
-        tell window 1 to make new tab with properties {URL:targetUrl}
+        tell window 1
+          set newTab to make new tab with properties {URL:targetUrl}
+          set current tab to newTab
+        end tell
         return "New tab: " & targetUrl
       end tell`
   };

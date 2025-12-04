@@ -1,6 +1,7 @@
 name: "🧬 💎 API Feature Request"
 description: Suggest a new API or an improvement of an existing API
 labels: ["api", "feature request"]
+type: "Feature"
 body:
   - type: markdown
     attributes:

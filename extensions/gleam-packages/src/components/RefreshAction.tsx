@@ -1,7 +1,7 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
 
 type RefreshPackagesActionProps = {
-  refreshPackages: () => Promise<void>;
+  refreshPackages: () => void;
 };
 export default function RefreshPackagesAction({ refreshPackages: reloadPackages }: RefreshPackagesActionProps) {
   return (
@@ -14,14 +14,14 @@ export default function RefreshPackagesAction({ refreshPackages: reloadPackages 
   );
 }
 
-async function onRefresh(refreshPackages: () => Promise<void>) {
+async function onRefresh(refreshPackages: () => void) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Refreshing packages",
   });
 
   try {
-    await refreshPackages();
+    refreshPackages();
     toast.style = Toast.Style.Success;
     toast.title = "Refreshed packages";
   } catch (err) {

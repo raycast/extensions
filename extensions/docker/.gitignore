@@ -1,4 +1,5 @@
 /node_modules
+/.idea
 .DS_Store
 
 raycast-env.d.ts

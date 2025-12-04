@@ -1,11 +1,15 @@
-import { getPreferenceValues } from "@raycast/api";
-import https from "https";
+import { getPreferenceValues, Icon } from "@raycast/api";
 
 interface Preferences {
   apiKey: string;
 }
 
-interface Event {
+export enum FilterMode {
+  ACTIVE = "active",
+  RECENT = "recent",
+}
+
+export interface Event {
   event: string;
   date: string;
   location?: string;
@@ -25,10 +29,15 @@ export interface Delivery {
   timestamp_expected_end?: number;
 }
 
-interface ParcelApiResponse {
+export interface ParcelApiResponse {
   success: boolean;
   error_message?: string;
   deliveries: Delivery[];
+}
+
+export interface Carrier {
+  code: string;
+  name: string;
 }
 
 // Status code descriptions
@@ -44,73 +53,131 @@ export const STATUS_DESCRIPTIONS: Record<number, string> = {
   8: "Info Received",
 };
 
-// Map status codes to icons
-export const STATUS_ICONS: Record<number, string> = {
-  0: "✅",
-  1: "❄️",
-  2: "🚚",
-  3: "📦",
-  4: "🚚",
-  5: "❓",
-  6: "⚠️",
-  7: "⛔️",
-  8: "ℹ️",
+export function getStatusDescription(statusCode: number): string {
+  return STATUS_DESCRIPTIONS[statusCode] || "Unknown Status";
+}
+
+const STATUS_ICONS: Record<number, Icon> = {
+  0: Icon.CheckCircle,
+  1: Icon.Snowflake,
+  2: Icon.Lorry,
+  3: Icon.Box,
+  4: Icon.Lorry,
+  5: Icon.QuestionMark,
+  6: Icon.Warning,
+  7: Icon.ExclamationMark,
+  8: Icon.Dot,
 };
 
-export async function fetchDeliveries(filterMode: "active" | "recent" = "active"): Promise<Delivery[]> {
+export function getStatusIcon(statusCode: number): Icon {
+  return STATUS_ICONS[statusCode] || Icon.QuestionMark;
+}
+
+export function getApiKey(): string {
   const preferences = getPreferenceValues<Preferences>();
 
   if (!preferences.apiKey) {
     throw new Error("API key not found. Please add your Parcel API key in extension preferences.");
   }
 
-  const url = `https://api.parcel.app/external/deliveries/?filter_mode=${filterMode}`;
+  return preferences.apiKey;
+}
 
-  return new Promise<Delivery[]>((resolve, reject) => {
-    const req = https.get(
-      url,
-      {
-        headers: {
-          "api-key": preferences.apiKey,
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
+function getSystemLanguage(): string {
+  return Intl.DateTimeFormat().resolvedOptions().locale.slice(0, 2);
+}
 
-        res.on("data", (chunk) => {
-          chunks.push(chunk);
-        });
+export function getDeliveriesUrl(filterMode: FilterMode): string {
+  return `https://api.parcel.app/external/deliveries/?filter_mode=${filterMode}`;
+}
 
-        res.on("end", () => {
-          const body = Buffer.concat(chunks).toString();
+export function getAPIHeaders(): Record<string, string> {
+  return {
+    "api-key": getApiKey(),
+  };
+}
 
-          if (res.statusCode !== 200) {
-            reject(new Error(`API request failed with status ${res.statusCode}`));
-            return;
-          }
+export function getSupportedCarriersUrl(): string {
+  return "https://api.parcel.app/external/supported_carriers.json";
+}
 
-          try {
-            const data = JSON.parse(body) as ParcelApiResponse;
-
-            if (!data.success) {
-              reject(new Error(data.error_message || "Unknown API error"));
-              return;
-            }
-
-            resolve(data.deliveries);
-          } catch (error) {
-            console.error("Error parsing JSON:", error);
-            reject(new Error("Invalid response from Parcel API"));
-          }
-        });
-      },
-    );
-
-    req.on("error", (error) => {
-      console.error("Error fetching deliveries:", error);
-      reject(error);
-    });
-
-    req.end();
+export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[]> {
+  const url = getDeliveriesUrl(filterMode);
+  const response = await fetch(url, {
+    headers: getAPIHeaders(),
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Failed to fetch deliveries: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ""}`,
+    );
+  }
+
+  const data = (await response.json()) as ParcelApiResponse;
+
+  const err = getAPIError(data);
+  if (err) {
+    throw err;
+  }
+
+  return data.deliveries;
+}
+
+export async function addDelivery(
+  trackingNumber: string,
+  carrierCode: string,
+  description: string,
+  confirmationNotification: boolean,
+): Promise<void> {
+  const url = "https://api.parcel.app/external/add-delivery/";
+  const response = await fetch(url, {
+    headers: {
+      ...getAPIHeaders(),
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      tracking_number: trackingNumber,
+      carrier_code: carrierCode,
+      description: description,
+      send_push_confirmation: confirmationNotification,
+      language: getSystemLanguage(),
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = `Failed to add delivery: ${response.status} ${response.statusText}`;
+
+    // Parse JSON error response for better error message
+    try {
+      const errorData = JSON.parse(errorText);
+      if (errorData.error_message) {
+        errorMessage = errorData.error_message;
+      }
+    } catch {
+      // Otherwise use the raw error text
+      if (errorText) {
+        errorMessage = errorText;
+      }
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const data = (await response.json()) as ParcelApiResponse;
+
+  const err = getAPIError(data);
+  if (err) {
+    throw err;
+  }
+}
+
+export function getAPIError(data: ParcelApiResponse): Error | null {
+  if (!data.success) {
+    return new Error(data?.error_message || "API request failed. Please check your API key and try again.");
+  }
+
+  return null;
 }

@@ -468,7 +468,7 @@ export class Ollama {
     const parameters = this._OllamaApiShowParseModelfileParameterSplit(show.parameters);
 
     return {
-      from: this._OllamaApiShowParseModelfileFrom(show.template),
+      from: show.template && this._OllamaApiShowParseModelfileFrom(show.template),
       parameter: {
         mirostat: parameters.length > 0 ? this._OllamaApiShowParseModelfileParameterMirostat(parameters) : 0,
         mirostat_eta: parameters.length > 0 ? this._OllamaApiShowParseModelfileParameterMirostatEta(parameters) : 0.1,
@@ -489,9 +489,9 @@ export class Ollama {
         top_p: parameters.length > 0 ? this._OllamaApiShowParseModelfileParameterTopP(parameters) : 0.9,
       },
       template: show.template,
-      system: this._OllamaApiShowParseModelfileSystem(show.template),
+      system: show.template && this._OllamaApiShowParseModelfileSystem(show.template),
       adapter: this._OllamaApiShowParseModelfileParameterAdapter(parameters),
-      license: this._OllamaApiShowParseModelfileLicense(show.template),
+      license: show.template && this._OllamaApiShowParseModelfileLicense(show.template),
     };
   }
 
@@ -690,6 +690,14 @@ export class Ollama {
   }
 
   /**
+   * Perform test generation with the selected model with out stream output.
+   * @param body - Ollama Generate Body Request.
+   */
+  async OllamaApiGenerateNoStream(body: Types.OllamaApiGenerateRequestBody): Promise<Types.OllamaApiGenerateResponse> {
+    return (await this._OllamaApiNoStream(this._RouteApiGenerate, body)) as Types.OllamaApiGenerateResponse;
+  }
+
+  /**
    * Perform conversation with the selected model.
    * @param body - Ollama Chat Body Request.
    * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiChatResponse` object contains all metadata of inference.
@@ -701,13 +709,24 @@ export class Ollama {
   }
 
   /**
+   * Perform test generation with the selected model with out stream output.
+   * @param body - Ollama Generate Body Request.
+   */
+  async OllamaApiChatNoStream(body: Types.OllamaApiChatRequestBody): Promise<Types.OllamaApiChatResponse> {
+    return (await this._OllamaApiNoStream(this._RouteApiChat, body)) as Types.OllamaApiChatResponse;
+  }
+
+  /**
    * Perform text generation with the selected model without stream.
+   * @param route - Route path of the API.
    * @param body - Ollama Generate Body Request.
    * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponse` object contains all metadata of inference.
    */
-  async OllamaApiGenerateNoStream(body: Types.OllamaApiGenerateRequestBody): Promise<Types.OllamaApiGenerateResponse> {
+  private async _OllamaApiNoStream(
+    route: string,
+    body: Types.OllamaApiGenerateRequestBody | Types.OllamaApiChatRequestBody
+  ): Promise<Types.OllamaApiGenerateResponse | Types.OllamaApiChatResponse> {
     body.stream = false;
-    const route = this._RouteApiGenerate;
     const url = `${this._server}${route}`;
     const req: RequestInit = {
       method: "POST",
@@ -715,7 +734,7 @@ export class Ollama {
       body: JSON.stringify(body),
     };
 
-    const response: Types.OllamaApiGenerateResponse | undefined = await fetch(url, req)
+    const response: Types.OllamaApiGenerateResponse | Types.OllamaApiChatResponse | undefined = await fetch(url, req)
       .then(async (response) => {
         if (!response.ok) {
           const message = (await response.json()) as Types.OllamaErrorResponse;

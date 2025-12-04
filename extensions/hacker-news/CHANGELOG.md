@@ -1,5 +1,11 @@
 # Hacker News Changelog
 
+## [Routine Maintenance] - 2025-03-20
+
+- Migrate to `@raycast/api@1.94.0`
+- Use ESLint 9 flag config
+- Bump all dependencies to the latest
+
 ## [🚀 Add Readwise Reader integration] - 2025-03-03
 
 - Add ability to save articles to Readwise Reader

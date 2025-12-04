@@ -1,7 +1,8 @@
-import { getWordCompletions, translateMixedText, processWithModel } from "./ai";
+import { getWordCompletions, translateMixedText, processWithModel } from "./aiService";
 import { AIRequestOptions, Suggestion } from "../utils/types";
-import { AI } from "@raycast/api";
+import { AI, showToast, Toast } from "@raycast/api";
 import { getPolishPrompt } from "../utils/prompts";
+import { logger } from "../utils/logger";
 
 // Helper functions
 function containsChinese(text: string): boolean {
@@ -24,10 +25,8 @@ function needsCompletion(text: string): boolean {
 
 // Main input processing function
 export async function processInput(input: string, options?: AIRequestOptions): Promise<Suggestion[]> {
-  console.log("processInput - received input:", input);
-
   if (!input.trim() || input.length > 1000) {
-    console.log("processInput - empty input or too long, returning empty array");
+    // Input is empty or too long, return empty array directly, do not log details
     return [];
   }
 
@@ -39,14 +38,11 @@ export async function processInput(input: string, options?: AIRequestOptions): P
   try {
     // If contains Chinese, return translation and refinement results
     if (containsChinese(input)) {
-      console.log("processInput - Chinese text detected, getting translations");
       const translatedTexts = await translateMixedText(input, aiOptions);
-      console.log("processInput - received translations:", translatedTexts);
       const results = translatedTexts.map((text) => ({
         text: text.toString(),
         type: "translation" as const,
       }));
-      console.log("processInput - returning translation results:", JSON.stringify(results, null, 2));
       return results;
     }
 
@@ -56,22 +52,17 @@ export async function processInput(input: string, options?: AIRequestOptions): P
 
     // If the last word is incomplete and total words <= 2, only return completion suggestions
     if (needsCompletion(input) && totalWords <= 2) {
-      console.log("processInput - getting word completions for:", lastSegment);
       const completions = await getWordCompletions(lastSegment, aiOptions);
-      console.log("processInput - received completions:", completions);
-      const results = completions.slice(0, 5).map((text) => ({
+      const results = completions.map((text) => ({
         text: text.toString(),
         type: "completion" as const,
       }));
-      console.log("processInput - returning completion results:", JSON.stringify(results, null, 2));
       return results;
     }
 
     // Other cases, return both completion and refinement suggestions
     if (needsCompletion(input)) {
-      console.log("processInput - getting word completions for:", lastSegment);
       const completions = await getWordCompletions(lastSegment, aiOptions);
-      console.log("processInput - received completions:", completions);
       suggestions.push(
         ...completions.slice(0, 3).map((text) => ({
           text: text.toString(),
@@ -82,9 +73,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
 
     // If not a simple completion scenario, add refinement suggestions
     if (totalWords > 1) {
-      console.log("processInput - getting polish suggestions for:", input);
       const polishResults = await polishText(input, aiOptions);
-      console.log("processInput - received polish results:", polishResults);
       suggestions.push(
         ...polishResults.map((text) => ({
           text: text.toString(),
@@ -93,23 +82,23 @@ export async function processInput(input: string, options?: AIRequestOptions): P
       );
     }
 
-    console.log("processInput - returning final suggestions:", JSON.stringify(suggestions, null, 2));
     return suggestions;
   } catch (error) {
-    console.error("Error processing input:", error);
+    logger.error("Error processing input:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not process input",
+      message: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 }
 
 // New refinement function
 async function polishText(text: string, options?: AIRequestOptions): Promise<string[]> {
-  console.log("polishText - received text:", text);
-
   try {
     const messages = getPolishPrompt(text);
-    console.log("polishText - using prompt:", messages);
     const response = await processWithModel(messages, options);
-    console.log("polishText - received response:", response);
 
     // Parse all variants
     const results = response
@@ -118,10 +107,9 @@ async function polishText(text: string, options?: AIRequestOptions): Promise<str
       .map((line: string) => line.split(": ")[1].trim());
 
     const finalResults = results.length >= 3 ? results : [response];
-    console.log("polishText - returning results:", finalResults);
     return finalResults;
   } catch (error) {
-    console.error("Error polishing text:", error);
+    logger.error("Error polishing text:", error);
     throw error;
   }
 }

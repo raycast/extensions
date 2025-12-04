@@ -1,5 +1,4 @@
 import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch, { Headers } from "node-fetch";
 import type {
   Team,
   Deployment,
@@ -14,11 +13,11 @@ import type {
 } from "./types";
 
 export const token = getPreferenceValues().accessToken;
-const headers = new Headers({
+const headers = {
   Authorization: "Bearer " + token,
-});
+};
 
-export const FetchHeaders = [...headers];
+export const FetchHeaders = Object.entries(headers);
 
 const apiURL = "https://api.vercel.com/";
 
@@ -320,4 +319,16 @@ export async function fetchDomains(teamId?: string, limit = 100) {
   });
   const json = (await response.json()) as { domains: Domain[] };
   return json.domains;
+}
+
+export async function checkDomainAvailability(domain: string) {
+  const response = await fetch(apiURL + `v4/domains/status?name=${domain}`, {
+    method: "get",
+    headers: headers,
+  });
+  const json = (await response.json()) as { available: string; error?: { code: string; message: string } };
+  if (json.error) {
+    return "Check domain availability failed. Please verify that the domain is valid or try again later.";
+  }
+  return json.available;
 }

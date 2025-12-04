@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { IssuePriorityValue, User } from "@linear/sdk";
 import {
   Clipboard,
   Form,
@@ -11,33 +11,31 @@ import {
   showToast,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { IssuePriorityValue, User } from "@linear/sdk";
+import { useEffect, useState } from "react";
 
-import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
-import { createIssue, CreateIssuePayload } from "../api/createIssue";
 import { attachLinkUrl, createAttachment } from "../api/attachments";
-
-import useLabels from "../hooks/useLabels";
-import useStates from "../hooks/useStates";
-import useTeams from "../hooks/useTeams";
+import { createIssue, CreateIssuePayload } from "../api/createIssue";
+import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
+import { getCycleOptions } from "../helpers/cycles";
+import { getErrorMessage } from "../helpers/errors";
+import { getEstimateScale } from "../helpers/estimates";
+import { getLinksFromNewLines } from "../helpers/links";
+import { getMilestoneIcon } from "../helpers/milestones";
+import { priorityIcons } from "../helpers/priorities";
+import { getProjectIcon } from "../helpers/projects";
+import { getOrderedStates, getStatusIcon } from "../helpers/states";
+import { getTeamIcon } from "../helpers/teams";
+import { getUserIcon } from "../helpers/users";
 import useCycles from "../hooks/useCycles";
 import useIssues from "../hooks/useIssues";
-import useProjects from "../hooks/useProjects";
+import useLabels from "../hooks/useLabels";
 import useMilestones from "../hooks/useMilestones";
-
-import { getEstimateScale } from "../helpers/estimates";
-import { getOrderedStates, getStatusIcon } from "../helpers/states";
-import { getErrorMessage } from "../helpers/errors";
-import { priorityIcons } from "../helpers/priorities";
-import { getUserIcon } from "../helpers/users";
-import { getCycleOptions } from "../helpers/cycles";
-import { getProjectIcon, projectStatusText } from "../helpers/projects";
-import { getTeamIcon } from "../helpers/teams";
+import useProjects from "../hooks/useProjects";
+import useStates from "../hooks/useStates";
+import useTeams from "../hooks/useTeams";
+import useUsers from "../hooks/useUsers";
 
 import IssueDetail from "./IssueDetail";
-import { getMilestoneIcon } from "../helpers/milestones";
-import useUsers from "../hooks/useUsers";
-import { getLinksFromNewLines } from "../helpers/links";
 
 type CreateIssueFormProps = {
   assigneeId?: string;
@@ -173,7 +171,11 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             links: "",
           });
 
-          hasMoreThanOneTeam && autofocusField ? focus(autofocusField) : focus("title");
+          if (hasMoreThanOneTeam && autofocusField) {
+            focus(autofocusField);
+          } else {
+            focus("title");
+          }
 
           const links = getLinksFromNewLines(values.links);
           if (links.length > 0) {
@@ -521,7 +523,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           {projects.map((project) => {
             return (
               <Form.Dropdown.Item
-                title={`${project.name} (${projectStatusText[project.state]})`}
+                title={`${project.name} (${project.status.name})`}
                 value={project.id}
                 key={project.id}
                 icon={getProjectIcon(project)}

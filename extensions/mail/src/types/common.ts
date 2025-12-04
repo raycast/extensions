@@ -11,7 +11,7 @@ export type Account = {
   name: string;
   userName: string;
   fullName: string;
-  email: string;
+  emails: string[];
   numUnread: number;
   mailboxes: Mailbox[];
   messages?: Message[];

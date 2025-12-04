@@ -1,5 +1,5 @@
 import { withCache } from "@raycast/utils";
-import { searchContacts, withGoogleAPIs } from "../google";
+import { searchContacts, withGoogleAPIs } from "../lib/google";
 
 type Input = {
   /**

@@ -12,7 +12,7 @@ export function generateToken(secret: string) {
     });
 
     return totp.generate();
-  } catch (err) {
+  } catch {
     throw new Error('Invalid secret');
   }
 }

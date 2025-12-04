@@ -1,18 +1,78 @@
 # Things Changelog
 
+## [Timeout increasing in AppleScript] - 2025-10-30
+
+- Increased timeout to 60 seconds in AppleScript
+
+## [Fix Timeout on macOS Tahoe] - 2025-10-15
+
+- Fixed timeout errors when opening "Add New To-Do" command on macOS Tahoe (26.x)
+- Consolidated concurrent JXA queries into single execution to prevent race conditions
+- Improved error reporting to show which operation timed out
+- Added operation context to all error messages for better debugging
+
+## [Improved Project Handling] - 2025-09-09
+
+- Added Update and Delete project tools with proper Things URL scheme support
+- Areas now return their tags and to-dos, and projects include their to-dos
+- Improved project data handling and type safety with separate parameter types for add/update operations
+- Restricted `Move To` command for projects to list only Areas (prevents invalid moves)
+- Enhanced code organization by extracting types to dedicated types.ts file
+
+## [Fix Error on Task Update] - 2025-07-09
+
+- Fix JXA errors when updating to-dos via actions
+
+## [Improved Project Detection] - 2025-07-09
+
+- Improve detection mechanism for projects to not depend on the existence of a project
+- Prevent crashes when receiving an `undefined` value from Things via JavaScript for Automation (JXA)
+- Improve detection of `PERMISSION_DENIED` errors (`-1743` error code)
+
+## [Enhanced Error Handling] - 2025-07-07
+
+- Improved error messages with specific troubleshooting steps for Things connection issues
+- Added detailed guidance for permission errors and automation setup in System Settings
+- Replaced generic "Things Not Running" message with actionable error screens and retry functionality
+
+## [Fix Project Updates] - 2025-07-02
+
+- Fixed update actions failing when used on projects in lists. Projects now use the correct `things:///update-project` URL scheme instead of the regular `things:///update` scheme used for to-dos.
+
+## [✨ Reminders] - 2025-05-06
+
+- Update the "Today" and "Upcoming" lists to allow updating to-do's reminders.
+- Fixed issue with the Deadline action to correctly remove a deadline from a to-do.
+
+## [✨ Fix Complete Menu Bar Action] - 2025-04-25
+
+- Fix `Complete` menu bar action to mark the first incomplete to-do as complete, rather than completing the first item in the list, even if it is already marked as completed.
+
+## [✨ Menu Bar To-Do] - 2025-04-25
+
+- Update the menu bar to display only incomplete to-dos from today’s list
+
+## [Detect URL in Notes] - 2025-04-11
+
+- Detect a URL in to-do notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
+
+## [✨ Improved Error Handling] - 2025-04-07
+
+- Fixed an issue that caused the application to crash when users attempted to update a to-do item from the menu bar without a valid authentication token.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Focus Input Fields] - 2024-10-25
 
 - Add shortcuts to focus the input fields in both the `Add New To-Do` and `Add New Project` commands.
 
-## [Quick ToDo Fixes] - 2024-08-19
+## [Quick To-Do Fixes] - 2024-08-19
 
-- Quick ToDo Command: Disable Automatic Date (when & deadline), List parsing when AI is not enabled in preferences/is not available via environment.
+- Quick To-Do Command: Disable Automatic Date (when & deadline), List parsing when AI is not enabled in preferences/is not available via environment.
 
 ## [Quick To-do Improvements] - 2024-08-05
 
-- Preference to disable date parsing for todo classification, sending all todo(s) to inbox.
+- Preference to disable date parsing for to-do classification, sending all to-do(s) to inbox.
 - The title input will still be parsed for assigning deadlines and list name followed with '#' (case-insensitive).
 
 ## [Fix Generate Checklist with AI] - 2024-07-30
@@ -23,7 +83,7 @@
 
 ## [Fix tags for new issues] - 2024-07-24
 
-- [#13560](https://github.com/raycast/extensions/issues/13560): Tags are correctly appended to the deeplink while creating new todo(s).
+- [#13560](https://github.com/raycast/extensions/issues/13560): Tags are correctly appended to the deeplink while creating new to-do(s).
 - Updated dependencies and resolved security vulnerabilities.
 
 ## [Add Status Icons in Menu Bar] - 2024-04-16
@@ -40,6 +100,7 @@
 Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go.
 
 Under the hood, it'll analyze and process your text to extract these parameters:
+
 - The title
 - The start date
 - The project or area the to-do belongs to
@@ -49,6 +110,7 @@ Under the hood, it'll analyze and process your text to extract these parameters:
 - If it's completed or canceled
 
 Here are some examples:
+
 - Book flights today in my Trips list
 - Add milk to my groceries list for tomorrow with Errand tag
 - Respond to mails
@@ -65,6 +127,7 @@ A big update has been released for the Things extension. Here's what's new:
 ### New actions
 
 You now have additional actions for your to-dos:
+
 - Schedule
 - Move to a project/area
 - Edit the title or notes
@@ -126,7 +189,7 @@ Added support for Things beta.
 ## [Fixes and Updates] - 2022-03-02
 
 - Updated the API
-- Fixed a todo creation bug
+- Fixed a to-do creation bug
 
 ## [Improvements] - 2021-12-03
 
@@ -136,8 +199,8 @@ Added support for Things beta.
 - Add complete action
 - Add "Mark as Completed"/"Mark as Canceled"/"Delete" actions
 - Add "Add New To-Do" command
-- Add fallback commands in show-list (search + create todo)
-- AddNewTodo: separate form handling in 2 actions
+- Add fallback commands in show-list (search + create to-do)
+- AddNewToDo: separate form handling in 2 actions
 - Better error handling: catch and display markdown error if things is not running
 - Fix TypeScript error
 

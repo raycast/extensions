@@ -5,6 +5,9 @@
   "description": "View and modify your Deno Deploy projects",
   "icon": "command-icon.png",
   "author": "j3lte",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "keywords": [
     "deno",
@@ -44,11 +47,166 @@
     },
     {
       "name": "create-playground-quick",
-      "title": "Create Playground (Quick)",
+      "title": "Create Playground (quick)",
       "subtitle": "Deno Deploy",
       "description": "Create a new playground for Deno Deploy",
       "icon": "command-icon.png",
       "mode": "no-view"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@deno-deploy list my projects",
+        "mocks": {
+          "get-organizations": [
+            {
+              "createdAt": "",
+              "features": {},
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "Sample Organization",
+              "pro": false,
+              "subscription": {
+                "currentPeriodEnd": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "currentPeriodStart": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "plan": "free"
+              },
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            },
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "features": {
+                "database": true
+              },
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "Personal",
+              "pro": false,
+              "subscription": {
+                "currentPeriodEnd": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "currentPeriodStart": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "plan": "free"
+              },
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            }
+          ],
+          "get-projects": [
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "description": "",
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "deno-project-1",
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            },
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "description": "",
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "deno-project-2",
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-organizations"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "organizationId": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              },
+              "name": "get-projects"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@deno-deploy create playground in my sample organization",
+        "mocks": {
+          "create-playground-snippet": "Successfully called \"create-playground-snippet\"",
+          "get-organizations": [
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "features": {},
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "Sample Organization",
+              "pro": false,
+              "subscription": {
+                "currentPeriodEnd": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "currentPeriodStart": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "plan": "free"
+              },
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            },
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "features": {
+                "database": true
+              },
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "Personal",
+              "pro": false,
+              "subscription": {
+                "currentPeriodEnd": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "currentPeriodStart": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "plan": "free"
+              },
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-organizations"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "organizationId": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              },
+              "name": "create-playground-snippet"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "get-organizations",
+      "title": "Get Organizations",
+      "description": "Get all organizations for the user"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Get all projects for the user"
+    },
+    {
+      "name": "create-playground-snippet",
+      "title": "Create Playground (snippet)",
+      "description": "Create a new playground for Deno Deploy"
+    },
+    {
+      "name": "open-project",
+      "title": "Open Project",
+      "description": "Open a project in the browser"
+    },
+    {
+      "name": "delete-project",
+      "title": "Delete Project",
+      "description": "Delete a project"
+    },
+    {
+      "name": "rename-project",
+      "title": "Rename Project",
+      "description": "Rename a project"
     }
   ],
   "preferences": [
@@ -63,19 +221,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.4",
-    "@raycast/utils": "^1.14.0",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
     "node-fetch": "^3.3.2",
-    "swr": "^2.2.5"
+    "swr": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "20.12.7",
-    "@types/react": "18.2.79",
-    "eslint": "^8.56.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

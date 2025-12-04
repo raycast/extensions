@@ -1,19 +1,24 @@
 import * as Types from "./types";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { usePromise, useLocalStorage } from "@raycast/utils";
 import React from "react";
 import { FormatOllamaPsModelExpireAtFormat, GetServerArray } from "../function";
 import { GetModels } from "./function";
+import { Shortcut } from "../shortcut";
 
 export function PsView(): React.JSX.Element {
-  const [SelectedServer, setSelectedServer]: [string, React.Dispatch<React.SetStateAction<string>>] =
-    React.useState("Local");
+  const abort = React.useRef(new AbortController());
+  const {
+    value: SelectedServer,
+    setValue: setSelectedServer,
+    isLoading: isLoadingSelectedServer,
+  } = useLocalStorage<string>("ollama_server_selected", "Local");
   const { data: Servers, isLoading: IsLoadingServers } = usePromise(GetServerArray);
   const {
     data: Models,
     isLoading: IsLoadingModels,
     revalidate: RevalidateModels,
-  } = usePromise(GetModels, [SelectedServer]);
+  } = usePromise(GetModels, [SelectedServer], { abortable: abort });
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
 
   function SearchBarAccessory(): JSX.Element {
@@ -36,7 +41,7 @@ export function PsView(): React.JSX.Element {
             title={showDetail ? "Hide Detail" : "Show Detail"}
             icon={showDetail ? Icon.EyeDisabled : Icon.Eye}
             onAction={() => setShowDetail((prevState) => !prevState)}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
+            shortcut={Shortcut.ToggleQuickLook}
           />
           <Action.CopyToClipboard title="Copy Model Name" content={prop.model.detail.name as string} />
         </ActionPanel.Section>
@@ -79,7 +84,7 @@ export function PsView(): React.JSX.Element {
     );
   }
 
-  function ModelAccessories(SelectedServer: string, Model: Types.UiModel) {
+  function ModelAccessories(SelectedServer: string | undefined, Model: Types.UiModel) {
     const accessories = [];
 
     if (SelectedServer === "All") accessories.push({ tag: Model.server.name, icon: Icon.HardDrive });
@@ -110,11 +115,11 @@ export function PsView(): React.JSX.Element {
 
   return (
     <List
-      isLoading={IsLoadingModels || IsLoadingServers}
+      isLoading={isLoadingSelectedServer || IsLoadingModels || IsLoadingServers}
       isShowingDetail={showDetail}
       searchBarAccessory={SearchBarAccessory()}
     >
-      {Models &&
+      {Models && Models.length > 0 ? (
         Models.map((item) => {
           return (
             <List.Item
@@ -127,7 +132,14 @@ export function PsView(): React.JSX.Element {
               accessories={ModelAccessories(SelectedServer, item)}
             />
           );
-        })}
+        })
+      ) : (
+        <List.EmptyView
+          icon={Icon.MemoryChip}
+          title="No Model is Loaded in Memory"
+          description="No model is currently loaded."
+        />
+      )}
     </List>
   );
 }

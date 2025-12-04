@@ -1,5 +1,68 @@
 # GitHub Changelog
 
+## [Fix Create Pull Request branch selection] - 2025-11-27
+
+- Create Pull Request: Fixed issue where the default branch wasn't appearing in the "From" dropdown options
+- Create Pull Request: Fixed validation errors when searching for branches while a branch is already selected
+- Create Pull Request: Prevented selecting the same branch for both "From" and "Into" fields
+
+## [Add Download Repository command and copy markdown URL actions] - 2025-11-19
+
+- Search Repositories: Added "Download Repository" action to download a repository as a zip file
+- Added "Copy Markdown URL" actions to copy an issue's markdown URL
+
+## [Checkout PR project action] - 2025-10-24
+
+- My Pull Requests: Added "Check Out PR" action to clone repository and switch to PR branch locally
+
+## [Unified handle notification icon retrieval error] - 2025-10-02
+
+- Notifications Command and Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
+## [Fix clone with options action] - 2025-09-08
+
+- Fix the clone action by adding the quote to the command to prevent issues with spaces in the path
+
+## [Add My Starred Repositories command] - 2025-08-25
+
+- Add new "My Starred Repositories" command to view starred repositories
+- Displays starred repositories with support for sorting and visiting history
+- Integrated with existing repository list components for consistent experience
+
+## [Issue type specification] - 2025-08-22
+
+- Adds the ability to specify the issue type when creating a new issue.
+
+## [Fix repository filtering] - 2025-06-26
+
+- Correct the repository filtering for exclude mode
+
+## [Add repository filtering] - 2025-06-05
+
+- my-issues, my-pull-requests and menu counterparts can now specify repositories to include / exclude
+
+## [Filter recently closed PRs by last update date] - 2025-04-16
+
+- Fixed a bug where active pull requests could be hidden: the `updated` filter is now only applied to closed PRs, so all active PRs are always shown in `My Pull Requests`.
+
+## [Add support for merge queues and auto-merge] - 2025-04-15
+
+- Adds PR actions for repositories that use merge queues
+- Adds the ability to enable auto-merge
+- Fix codegen lint hook
+
+## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
+
+- Add the ability to search for collaborators in the pull request actions, instead of just showing the first 25.
+
+## [Add repository filtering for menu bar commands] - 2025-03-11
+
+- Add the ability to include or exclude specific repositories from the results for the `My Pull Requests` and `Unread Notifications` Menu Bar commands.
+
+## [Chore] - 2025-03-10
+
+- Fix typo in setting label
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Fix base clone path] - 2025-01-19
@@ -15,9 +78,9 @@
 
 - Use a new icon with indicator for unread state
 
-## [Support specifying git clone protocol] - 2024-12-12
+## [Support specifying Git clone protocol] - 2024-12-12
 
-- Added support to specify the git clone protocol (SSH or HTTPS) in extension preferences.
+- Added support to specify the Git clone protocol (SSH or HTTPS) in extension preferences.
 - `Copy Clone Command` and `Clone And Open` now respect the clone protocol from the preferences.
 
 ## [Update GraphQL generated types] - 2024-12-09

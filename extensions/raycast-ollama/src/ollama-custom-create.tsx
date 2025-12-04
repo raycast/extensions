@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { Creativity } from "./lib/enum";
-import { GetModelsName } from "./lib/ui/function";
+import { GetModels } from "./lib/ui/function";
 import * as React from "react";
 import { ValidationKeepAlive } from "./lib/ui/valitadion";
 import { InfoKeepAlive } from "./lib/ui/info";
@@ -18,7 +18,7 @@ interface FormData {
 }
 
 export default function Command(): JSX.Element {
-  const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModelsName, []);
+  const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, []);
   const { itemProps } = useForm<FormData>({
     onSubmit() {
       () => {
@@ -89,7 +89,7 @@ The following tags are supported:
             .filter((v) => v[0] === itemProps.server.value)[0][1]
             .sort()
             .map((s) => (
-              <Form.Dropdown.Item title={s} value={s} key={s} />
+              <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />
             ))}
         </Form.Dropdown>
       )}

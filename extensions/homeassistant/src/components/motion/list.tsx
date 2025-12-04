@@ -2,9 +2,9 @@ import { useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
 import { List, Toast, showToast } from "@raycast/api";
-import { useState } from "react";
+import React, { useState } from "react";
 
-export function MotionsList(): JSX.Element {
+export function MotionsList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, "binary_sensor", "motion", allStates);
@@ -27,10 +27,14 @@ export function MotionsList(): JSX.Element {
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
       <List.Section title="Motion detected" subtitle={`${updateRequiredStates?.length}`}>
-        {updateRequiredStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+        {updateRequiredStates?.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
       </List.Section>
       <List.Section title="No Motion" subtitle={`${otherStates?.length}`}>
-        {otherStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+        {otherStates?.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
       </List.Section>
     </List>
   );

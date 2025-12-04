@@ -38,8 +38,10 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
         };
         output: void;
     }>;
-    leave: import("@trpc/server").TRPCQueryProcedure<{
-        input: string;
+    leave: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+        };
         output: void;
     }>;
     get: import("@trpc/server").TRPCQueryProcedure<{
@@ -47,10 +49,30 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             spaceId: string;
         };
         output: ({
+            users: {
+                status: import(".prisma/client").$Enums.TeamMemberStatus;
+                spaceId: string;
+                createdAt: Date;
+                email: string;
+                tags: string[];
+                updatedAt: Date;
+                image: string | null;
+                nickname: string | null;
+                authEmail: string | null;
+                role: import(".prisma/client").$Enums.TeamRole;
+            }[];
+            memberAuthPolicies: {
+                spaceId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                emailPattern: string;
+                authCheckIntervalSec: number;
+            }[];
             _count: {
                 tags: number;
                 bookmarks: number;
                 users: number;
+                memberAuthPolicies: number;
             };
         } & {
             type: import(".prisma/client").$Enums.SpaceType;
@@ -69,6 +91,8 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             description?: string | undefined;
             name?: string | undefined;
             image?: string | undefined;
+            myNickname?: string | undefined;
+            myImage?: string | undefined;
         };
         output: void;
     }>;

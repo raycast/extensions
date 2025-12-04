@@ -1,11 +1,9 @@
 import { memo, useMemo } from "react";
-
 import { Grid } from "@raycast/api";
-
+import { gridColumnNumber } from "@/lib/preferences";
+import { useListContext } from "@/context/ListContext";
 import DataSetSelector from "@/components/DataSetSelector";
 import { GridItem } from "@/components/GridItem";
-import { useListContext } from "@/context/ListContext";
-import { gridColumnNumber } from "@/lib/preferences";
 
 export const ItemGrid = memo(() => {
   const columnNumber = useMemo(() => gridColumnNumber(), []);
@@ -30,7 +28,13 @@ export const ItemGrid = memo(() => {
             if (item.a?.length) {
               accessories.push({ icon: "⌨️", text: `${item.a.join(", ")}` });
             }
-            return <GridItem item={item} key={`${section.sectionTitle}-${item.c}-${item.n}`} />;
+            return (
+              <GridItem
+                item={item}
+                key={`${section.sectionTitle}-${item.c}-${item.n}`}
+                section={section.sectionTitle}
+              />
+            );
           })}
         </Grid.Section>
       ))}

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "g-cloud",
+  "title": "Google Cloud CLI",
+  "subtitle": "Manage your Google Cloud resources without opening a browser",
+  "description": "A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.",
+  "icon": "icon.png",
+  "version": "0.1.32",
+  "author": "ojowwalker77",
+  "contributors": [
+    "ben_selleslagh"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Your Google Cloud",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Your Google Cloud resources",
+      "mode": "view",
+      "screenshots": [
+        {
+          "path": "./metadata/g-cloud-1.png",
+          "title": "Google Cloud CLI Overview"
+        },
+        {
+          "path": "./metadata/g-cloud-2.png",
+          "title": "Project Selection"
+        },
+        {
+          "path": "./metadata/g-cloud-3.png",
+          "title": "Resource Management"
+        }
+      ]
+    },
+    {
+      "name": "storage",
+      "title": "Cloud Storage",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud Storage buckets",
+      "mode": "view"
+    },
+    {
+      "name": "compute",
+      "title": "Compute Engine",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud Compute instances",
+      "mode": "view"
+    },
+    {
+      "name": "iam",
+      "title": "Iam & Admin",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud IAM permissions",
+      "mode": "view"
+    },
+    {
+      "name": "network",
+      "title": "Vpc Network",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud VPC networks",
+      "mode": "view"
+    },
+    {
+      "name": "secrets",
+      "title": "Secret Manager",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud secrets securely",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gcloudPath",
+      "title": "gcloud CLI Path",
+      "description": "Path to the gcloud CLI executable",
+      "type": "textfield",
+      "required": true,
+      "default": "gcloud"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.5.6",
+    "@types/react": "^18.2.21",
+    "eslint": "^8.48.0",
+    "prettier": "^3.0.2",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

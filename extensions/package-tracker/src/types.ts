@@ -56,7 +56,7 @@ export interface MiscInfo {
   pieces: string | null;
   dimensions: string | null;
   customer_number: string | null;
-  reference_number?: any | null;
+  reference_number?: string | null;
   local_number: string | null;
   local_provider: string | null;
   local_key?: number;
@@ -115,9 +115,14 @@ export interface Errors {
   message: string;
 }
 
+export interface IRejected {
+  number: string;
+  error: Errors;
+}
+
 export interface Data {
   accepted: Accepted[];
-  rejected: any[];
+  rejected: IRejected[];
   errors?: Errors[];
 }
 

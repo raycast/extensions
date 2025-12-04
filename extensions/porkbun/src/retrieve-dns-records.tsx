@@ -66,7 +66,7 @@ export default function RetrieveDNSRecord(props: LaunchProps<{ launchContext: { 
         response = await retrieveRecordsByDomainSubdomainAndType(
           values.domain,
           values.name,
-          values.type as DNSRecordType
+          values.type as DNSRecordType,
         );
       }
       if (response?.status === "SUCCESS") {
@@ -191,7 +191,7 @@ export default function RetrieveDNSRecord(props: LaunchProps<{ launchContext: { 
           <Form.Dropdown
             title="Type"
             info={`The type of record being retrieved. Valid types are: ${DNS_RECORD_TYPES.map(
-              (record) => record.type
+              (record) => record.type,
             ).join(", ")}`}
             {...itemProps.type}
           >

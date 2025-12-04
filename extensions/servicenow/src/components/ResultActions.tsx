@@ -1,29 +1,23 @@
 import { Action, ActionPanel, Keyboard } from "@raycast/api";
 
+import { ReactNode } from "../../node_modules/@raycast/api/node_modules/@types/react/index";
 import { Record } from "../types";
 import useInstances from "../hooks/useInstances";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
-export default function ResultActions({ result, children }: { result: Record; children?: React.ReactNode }) {
+export default function ResultActions({ result, children }: { result: Record; children?: ReactNode }) {
   const { selectedInstance } = useInstances();
 
-  const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
+  const url = buildServiceNowUrl(selectedInstance?.name || "", result.record_url);
 
   return (
     <>
       <ActionPanel.Section title={result.metadata.title}>
-        <Action.OpenInBrowser
-          title="Open in Servicenow"
-          url={`${instanceUrl}${result.record_url}`}
-          icon={{ source: "servicenow.svg" }}
-        />
+        <Action.OpenInBrowser title="Open in ServiceNow" url={url} icon={{ source: "servicenow.svg" }} />
         {children}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.CopyToClipboard
-          title="Copy URL"
-          content={`${instanceUrl}${result.record_url}`}
-          shortcut={Keyboard.Shortcut.Common.CopyPath}
-        />
+        <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
         <Action.CopyToClipboard
           title="Copy Title"
           content={`${result.metadata.title}`}

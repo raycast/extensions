@@ -1,6 +1,7 @@
 import { closeMainWindow, getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
 
 import optimizeItems from "./utils";
+import { configHelper } from "./utils-2";
 
 const command = async () => {
   const toast = await showToast({
@@ -9,9 +10,10 @@ const command = async () => {
   });
 
   try {
+    const plugins = configHelper.getEnabledPlugins();
     const items = await getSelectedFinderItems();
 
-    await optimizeItems(items);
+    await optimizeItems(items, plugins);
     await closeMainWindow();
     showHUD("🎉 Success");
   } catch (error) {

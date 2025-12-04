@@ -1,19 +1,19 @@
+import { IssuePriorityValue, User } from "@linear/sdk";
 import { List, Action, Icon, ActionPanel } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { IssueResult } from "../api/getIssues";
+import { formatCycle } from "../helpers/cycles";
+import { getDateIcon } from "../helpers/dates";
+import { getEstimateLabel } from "../helpers/estimates";
+import { priorityIcons } from "../helpers/priorities";
+import { getProjectIcon } from "../helpers/projects";
 import { getStatusIcon } from "../helpers/states";
 import { getUserIcon } from "../helpers/users";
-import { priorityIcons } from "../helpers/priorities";
 
-import IssueDetail from "./IssueDetail";
 import IssueActions from "./IssueActions";
-import { formatCycle } from "../helpers/cycles";
-import { getProjectIcon } from "../helpers/projects";
-import { getEstimateLabel } from "../helpers/estimates";
-import { getDateIcon } from "../helpers/dates";
+import IssueDetail from "./IssueDetail";
 
 type IssueListItemProps = {
   issue: IssueResult;

@@ -1,12 +1,12 @@
-import { trpc } from "@/utils/trpc.util";
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { SpaceTagItemActionPanel } from "../components/SpaceTagItemActionPanel";
 import { NewTagForm } from "./NewTagForm";
+import { useTags } from "../hooks/use-tags.hook";
 
 export const Body = (props: { spaceId: string }) => {
   const { spaceId } = props;
-  const { data, refetch, isLoading, isFetching } = trpc.tag.list.useQuery({ spaceIds: [spaceId] });
+  const { data, refetch, isLoading, isFetching } = useTags(spaceId);
 
   if (isLoading || !data) {
     return <List isLoading />;

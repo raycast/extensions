@@ -77,6 +77,8 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
         "com.vivaldi.Vivaldi",
         "company.thebrowser.Browser",
         "com.sigmaos.sigmaos.macos",
+        "company.thebrowser.dia",
+        "ai.perplexity.comet",
       ];
 
       const browsers = installedApplications.filter((app) => browserIds.includes(String(app.bundleId)));

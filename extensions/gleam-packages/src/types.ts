@@ -1,11 +1,10 @@
+export type ApiResponse = {
+  data: Package[];
+};
+
 export type Package = {
-  id: number;
   name: string;
   description: string;
-  inserted_in_hex_at: string;
-  updated_in_hex_at: string;
-  docs_url: string;
-  links: string;
 };
 
 export type PackageInterface = {

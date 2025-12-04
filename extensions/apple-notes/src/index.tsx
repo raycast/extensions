@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { match } from "pinyin-pro";
 import { useMemo, useState } from "react";
 
 import { createNote } from "./api/applescript";
@@ -14,19 +15,26 @@ export default function Command() {
   const { data, isLoading, permissionView, mutate } = useNotes();
   const [searchText, setSearchText] = useState<string>("");
 
-  if (permissionView) {
-    return permissionView;
-  }
-
   const filteredNotes = useMemo(() => {
-    return [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? [])].filter(
-      (note) =>
+    return [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? [])].filter((note) => {
+      const chineseMatch = (text: string | null) =>
+        text && /[\u4e00-\u9fa5]/.test(text) ? match(text, searchText) !== null : false;
+      return (
+        chineseMatch(note.title) ||
+        chineseMatch(note.snippet) ||
+        chineseMatch(note.folder) ||
+        note.tags.some((tag) => chineseMatch(tag.text)) ||
         note.title.toLowerCase().includes(searchText.toLowerCase()) ||
         note.snippet?.toLowerCase().includes(searchText.toLowerCase()) ||
         note.folder.toLowerCase().includes(searchText.toLowerCase()) ||
-        note.tags.some((tag) => tag.text?.toLowerCase().includes(searchText.toLowerCase())),
-    );
+        note.tags.some((tag) => tag.text?.toLowerCase().includes(searchText.toLowerCase()))
+      );
+    });
   }, [searchText, data]);
+
+  if (permissionView) {
+    return permissionView;
+  }
 
   // Limit the number of notes displayed (for example, to 100)
   const limitedNotes = filteredNotes.slice(0, 100);
@@ -36,7 +44,6 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       searchBarPlaceholder="Search notes by title, folder, description, tags, or accessories"
-      filtering={{ keepSectionOrder: true }}
     >
       <List.Section title="Pinned">
         {limitedNotes

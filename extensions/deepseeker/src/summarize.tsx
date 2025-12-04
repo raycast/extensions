@@ -1,10 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import ResultView from "./common";
 
-const prompt = getPreferenceValues().prompt_summarize;
-const model_override = getPreferenceValues().model_summarize;
-const toast_title = "Summarizing...";
-
 export default function Summarize() {
-  return ResultView(prompt, model_override, toast_title, true);
+  const { prompt_summarize, model_summarize } = getPreferenceValues();
+  const toastTitle = "Summarizing...";
+  return ResultView(prompt_summarize, model_summarize, toastTitle, true);
 }

@@ -1,7 +1,8 @@
-import { Package } from "../package";
-import { Delivery } from "../delivery";
+import { packagesFromOfflineCarrier } from "../package";
+import { Package } from "../types/package";
+import { Delivery } from "../types/delivery";
 
-export async function ableToTrackUspsRemotely(): Promise<boolean> {
+export function ableToTrackUspsRemotely(): boolean {
   // doesn't support remote tracking yet.
   return false;
 }
@@ -17,13 +18,5 @@ export async function updateUspsTracking(delivery: Delivery): Promise<Package[]>
 
   console.log(`Updated tracking for ${trackingNumber}`);
 
-  return [
-    {
-      delivered: delivery.manualDeliveryDate
-        ? new Date().setHours(0, 0, 0, 0) > delivery.manualDeliveryDate.setHours(0, 0, 0, 0)
-        : false, // truncate the time from both now and the manual delivery date
-      deliveryDate: delivery.manualDeliveryDate,
-      activity: [],
-    },
-  ];
+  return packagesFromOfflineCarrier(delivery);
 }

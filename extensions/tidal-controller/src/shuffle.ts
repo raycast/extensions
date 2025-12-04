@@ -7,11 +7,12 @@ export default async function doShuffle() {
   await runTidalCommand(async () => {
     // Close the main window
     await closeMainWindow();
+    const menuOptions = getMenuOptions();
     // Send shuffle command
     const result = await runAppleScript(`
       tell application "System Events"
         tell process "TIDAL"
-          set shuffleMenuItem to menu item "${getMenuOptions().shuffle}" of menu "${getMenuOptions().playback}" of menu bar 1
+          set shuffleMenuItem to menu item "${menuOptions.shuffle}" of menu "${menuOptions.playback}" of menu bar 1
           set wasShuffled to value of attribute "AXMenuItemMarkChar" of shuffleMenuItem is not missing value
           click shuffleMenuItem
           return wasShuffled

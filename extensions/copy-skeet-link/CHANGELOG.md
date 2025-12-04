@@ -1,7 +1,3 @@
-# copy-skeet-link Changelog
+## [Deprecated extension] - 2025-03-25
 
-## [Update] - 2023-06-12
-
-- Now showing prettier links
-
-## [Initial Version] - 2023-05-15
+The website used in this extension is no longer available. You can uninstall from Preferences.

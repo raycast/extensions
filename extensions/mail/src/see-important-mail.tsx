@@ -1,14 +1,14 @@
-import { useCallback, useRef, useState } from "react";
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useCallback, useRef, useState } from "react";
 
 import { MessageListItem } from "./components";
 import { getAccounts } from "./scripts/accounts";
 import { getMessages } from "./scripts/messages";
 import { Account, Mailbox } from "./types";
 import { invoke } from "./utils";
-import { isImportantMailbox } from "./utils/mailbox";
 import { Cache } from "./utils/cache";
+import { isImportantMailbox } from "./utils/mailbox";
 
 export default function SeeImportantMail() {
   const [account, setAccount] = useState<Account>();
@@ -109,7 +109,7 @@ export default function SeeImportantMail() {
           .map((account) => {
             const importantMailbox = account.mailboxes.find(isImportantMailbox);
             return importantMailbox ? (
-              <List.Section key={account.id} title={account.name} subtitle={account.email}>
+              <List.Section key={account.id} title={account.name} subtitle={account.emails[0]}>
                 {account.messages?.map((message) => (
                   <MessageListItem
                     key={message.id}

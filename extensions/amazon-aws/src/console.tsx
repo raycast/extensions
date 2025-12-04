@@ -16,27 +16,43 @@ export default function Console() {
     sortUnvisited: (a, b) => a.title.localeCompare(b.title),
   });
 
+  const isValidUrl = (arg: string) => {
+    try {
+      new URL(arg);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter services by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
-      {sortedServices?.map((service) => (
-        <List.Item
-          key={service.id}
-          title={service.title}
-          subtitle={service.subtitle}
-          icon={{ source: service.icon.path, mask: Image.Mask.RoundedRectangle }}
-          keywords={service.match.split(" ")}
-          actions={
-            <ActionPanel>
-              <AwsAction.Console url={`${AWS_URL_BASE}${service.arg}`} onAction={() => visitItem(service)} />
-              <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(service)} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {sortedServices?.map((service) => {
+        const consoleUrl = isValidUrl(service.arg) ? service.arg : `${AWS_URL_BASE}${service.arg}`;
+        return (
+          <List.Item
+            key={service.id}
+            title={service.title}
+            subtitle={service.subtitle}
+            icon={{ source: service.icon.path, mask: Image.Mask.RoundedRectangle }}
+            keywords={service.match.split(" ")}
+            actions={
+              <ActionPanel>
+                <AwsAction.Console url={consoleUrl} onAction={() => visitItem(service)} />
+                <Action
+                  title="Reset Ranking"
+                  icon={Icon.ArrowCounterClockwise}
+                  onAction={() => resetRanking(service)}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

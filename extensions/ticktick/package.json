@@ -135,9 +135,97 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Get tasks in smart list"
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add task to TickTick"
+    },
+    {
+      "name": "get-lists",
+      "title": "Get Lists",
+      "description": "Get Lists in TickTick"
+    }
+  ],
+  "ai": {
+    "instructions": "",
+    "evals": [
+      {
+        "input": "@ticktick get tasks in today",
+        "mocks": {
+          "get-tasks": [
+            {
+              "id": "6821491f8e31d12726fb9992",
+              "title": "Buy oat milk",
+              "content": "",
+              "desc": "",
+              "priority": 3,
+              "projectId": "6821491f8e31d12726fb9993",
+              "kind": "TEXT",
+              "startDate": "2025-05-11T16:00:00+0000",
+              "dueDate": "",
+              "isAllDay": true,
+              "isFloating": false,
+              "timeZone": "Asia/Shanghai",
+              "items": [],
+              "tags": []
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tasks",
+              "arguments": {
+                "smartProjectId": "today"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ticktick get tasks in next 7 days",
+        "mocks": {
+          "get-tasks": [
+            {
+              "id": "6821491f8e31d12726fb9992",
+              "title": "Buy oat milk",
+              "content": "",
+              "desc": "",
+              "priority": 3,
+              "projectId": "6821491f8e31d12726fb9993",
+              "kind": "TEXT",
+              "startDate": "2025-05-11T16:00:00+0000",
+              "dueDate": "",
+              "isAllDay": true,
+              "isFloating": false,
+              "timeZone": "Asia/Shanghai",
+              "items": [],
+              "tags": []
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tasks",
+              "arguments": {
+                "smartProjectId": "next7Days"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.36.0",
-    "@raycast/utils": "^1.8.0",
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.44",
@@ -145,9 +233,10 @@
     "similarity": "^1.2.1"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
     "@types/lodash": "^4.14.194",
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.2.46",
     "@types/similarity": "^1.2.1",
     "@types/sql.js": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

@@ -1,4 +1,4 @@
-import { getSlackWebClient } from "../shared/client/WebClient";
+import { getSlackWebClient, slack } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
 
 type Input = {
@@ -11,6 +11,8 @@ type Input = {
   /**
    * A Slack-compatible string for single emoji matching the text of the status. Emojis should be in the form: :<emoji identifier>:. If the user doesn't specify an emoji, come up with one that matches the text.
    *
+   * You can call the `get-emojis` tool to get a list of all custom emojis in the workspace. Do this only if you think the user is using a custom emoji.
+   *
    * To unset the status, provide an empty string.
    */
   emoji: string;
@@ -19,6 +21,8 @@ type Input = {
    */
   duration?: number;
 };
+
+let retried = false;
 
 async function setStatus(input: Input) {
   const slackWebClient = getSlackWebClient();
@@ -32,6 +36,11 @@ async function setStatus(input: Input) {
   });
 
   if (res.error) {
+    if (res.error?.includes("missing_scope") && !retried) {
+      retried = true;
+      await slack.client.removeTokens();
+      return withSlackClient(setStatus)(input);
+    }
     throw new Error(res.error);
   }
 

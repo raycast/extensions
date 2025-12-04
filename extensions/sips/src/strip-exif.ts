@@ -103,7 +103,7 @@ export async function setExifToolLocation() {
   try {
     execSync("exiftool -ver");
     await LocalStorage.setItem("exifToolLocation", ExifToolLocation.ON_PATH);
-  } catch (error) {
+  } catch {
     // If not, prompt the user to install it
     await installExifTool();
   }
@@ -130,7 +130,7 @@ export async function getExifToolLocation() {
     try {
       execSync("exiftool -ver");
       return ExifToolLocation.ON_PATH;
-    } catch (error) {
+    } catch {
       await setExifToolLocation();
     }
   }

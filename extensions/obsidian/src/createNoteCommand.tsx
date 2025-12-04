@@ -2,11 +2,12 @@ import { getPreferenceValues, List, open, popToRoot } from "@raycast/api";
 
 import { CreateNoteForm } from "./components/CreateNoteForm";
 import { VaultSelection } from "./components/VaultSelection";
-import { Vault } from "./utils/interfaces";
-import { getObsidianTarget, ObsidianTargetType, useObsidianVaults } from "./utils/utils";
+import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
 import { NoteFormPreferences } from "./utils/preferences";
+import { useObsidianVaults } from "./utils/hooks";
+import { Vault } from "./api/vault/vault.types";
 
 export default function Command() {
   const { vaults, ready } = useObsidianVaults();

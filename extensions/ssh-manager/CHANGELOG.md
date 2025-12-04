@@ -1,4 +1,24 @@
-# ssh-manager Changelog
+# SSH Manager Changelog
+
+## [Select SSH Config File] - 2025-08-04
+
+- Select SSH Config File (ref: [Issue #19941](https://github.com/raycast/extensions/issues/19941))
+- Replace `useEffect` with `usePromise`
+- In Create, "name" is now `Required`
+- Add README.md
+- Add metadata images
+- Remove `Preferences` type
+- Remove `.trunk` folder
+- Use Raycast Utils `run-applescript`
+
+## [Add Ghostty Support] - 2025-04-04
+
+- Added support for Ghostty as an option to open ssh connections.
+
+## [Improvements] - 2025-03-25
+
+- ⚠️ Add Confirmation Dialog to Delete Connectionssd
+- 📦 Bump all dependencies to the latest
 
 ## [New Feature and Improvements] - 2025-02-27
 
@@ -35,7 +55,7 @@
 
 - Fixed a bug where a connection with a remote command did not work properly while saving.
 
-## [Modify hosts from  ~/.ssh/config] - 2023-09-20
+## [Modify hosts from ~/.ssh/config] - 2023-09-20
 
 - This change adds the ability to view/modify ssh hosts from ~/.ssh/config file in addition to localStorage
 

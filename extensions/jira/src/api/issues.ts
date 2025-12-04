@@ -2,7 +2,7 @@ import fs from "fs";
 
 import { format } from "date-fns";
 import FormData from "form-data";
-import markdownToAdf from "md-to-adf";
+import { markdownToAdf } from "marklassian";
 
 import { IssueFormValues } from "../components/CreateIssueForm";
 import { CustomFieldSchema, getCustomFieldValue } from "../helpers/issues";
@@ -42,12 +42,6 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
   };
 
   if (values.description) {
-    // This library is the most reliable one I could find that does the job.
-    // However, it doesn't seem to be actively maintained and makes use of an
-    // obsolete NPM package called adf-builder. This could break at some point.
-    // In the meantime, writing a markdown to ADF util seems overkill so let's
-    // wait for any status updates on the following issue:
-    // https://jira.atlassian.com/browse/JRACLOUD-77436
     jsonValues.description = markdownToAdf(values.description);
   }
 
@@ -153,26 +147,42 @@ export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
 };
 
 type GetIssuesResponse = {
-  issues: Issue[];
+  issues?: Issue[];
+  searchResults?: Issue[];
+  values?: Issue[];
 };
 
 export async function getIssues({ jql } = { jql: "" }) {
-  const params = {
-    fields: "summary,updated,issuetype,status,priority,assignee,project,watches,subtasks,parent",
-    startAt: "0",
-    maxResults: "200",
-    validateQuery: "warn",
+  const body = {
     jql,
+    maxResults: 200,
+    fields: [
+      "summary",
+      "updated",
+      "issuetype",
+      "status",
+      "priority",
+      "assignee",
+      "project",
+      "watches",
+      "subtasks",
+      "parent",
+    ],
   };
 
-  const result = await request<GetIssuesResponse>("/search", { params });
+  const result = await request<GetIssuesResponse>("/search/jql", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 
-  if (!result?.issues) {
-    return result?.issues;
+  const rawIssues = result?.issues ?? result?.searchResults ?? result?.values;
+
+  if (!rawIssues) {
+    return rawIssues;
   }
 
   const resolvedIssues = await Promise.all(
-    result.issues.map(async (issue) => {
+    rawIssues.map(async (issue) => {
       issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
       return issue;
     }),
@@ -182,17 +192,24 @@ export async function getIssues({ jql } = { jql: "" }) {
 }
 
 export async function getIssuesForAI({ jql } = { jql: "" }) {
-  const params = {
-    fields: "summary,updated,issuetype,status,priority,assignee,project,parent",
-    startAt: "0",
-    maxResults: "50",
-    validateQuery: "warn",
+  const body = {
     jql,
+    maxResults: 50,
+    fields: ["summary", "updated", "issuetype", "status", "priority", "assignee", "project", "parent"],
   };
 
-  const result = await request<GetIssuesResponse>("/search", { params });
+  const result = await request<GetIssuesResponse>("/search/jql", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 
-  return result?.issues ?? [];
+  const issues =
+    result?.issues ??
+    (result as unknown as { searchResults?: Issue[] }).searchResults ??
+    (result as unknown as { values?: Issue[] }).values ??
+    [];
+
+  return issues;
 }
 
 export type Schema = {

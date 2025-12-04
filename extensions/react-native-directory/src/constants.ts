@@ -25,7 +25,6 @@ export const sortDropdownItems = [
     title: "Platform",
     items: [
       { value: "android", title: "Android" },
-      { value: "expo", title: "Expo Go" },
       { value: "ios", title: "iOS" },
       { value: "macos", title: "macOS" },
       { value: "tvos", title: "tvOS" },
@@ -37,14 +36,21 @@ export const sortDropdownItems = [
   {
     title: "Status",
     items: [
+      { value: "newArchitecture", title: "Supports New Architecture" },
+      { value: "hasNativeCode", title: "Uses native code" },
       { value: "hasExample", title: "Has example" },
       { value: "hasImage", title: "Has image preview" },
       { value: "hasTypes", title: "Has TypeScript types" },
-      { value: "newArchitecture", title: "Supports New Architecture" },
+      { value: "wasRecentlyUpdated", title: "Recently updated" },
       { value: "isMaintained", title: "Maintained" },
       { value: "isPopular", title: "Popular" },
-      { value: "wasRecentlyUpdated", title: "Recently updated" },
-      { value: "isRecommended", title: "Recommended" },
+    ],
+  },
+  {
+    title: "Compatibility",
+    items: [
+      { value: "expoGo", title: "Works with Expo Go" },
+      { value: "fireos", title: "Works with Fire OS" },
     ],
   },
   {
@@ -74,3 +80,6 @@ export const platformColors: { [key: string]: Color } = {
   tvOS: Color.PrimaryText,
   visionOS: Color.PrimaryText,
 };
+
+export const MUL = 1000;
+export const SUFFIXES = ["B", "kB", "MB"];

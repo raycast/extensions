@@ -16,7 +16,7 @@ export function isValidUrl(url: string) {
     try {
       new URL(url);
       return true;
-    } catch (_) {
+    } catch {
       return false;
     }
   }
@@ -88,15 +88,6 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
     } else {
       throw new Error("An unknown error occurred");
     }
-  }
-}
-
-export function getFaviconUrl(url: string) {
-  try {
-    const hostname = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?domain=${hostname}`;
-  } catch (error) {
-    return Icon.Globe;
   }
 }
 

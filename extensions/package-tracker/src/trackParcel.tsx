@@ -46,7 +46,7 @@ export default function Command(props: { arguments: { packageNumber: string } })
         trackData?.map((acceptedPKG: Accepted) => {
           return makeMetaData(
             acceptedPKG.track_info.shipping_info as ShippingInfo,
-            acceptedPKG.track_info.time_metrics as TimeMetrics
+            acceptedPKG.track_info.time_metrics as TimeMetrics,
           );
         })[0]
       }

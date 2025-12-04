@@ -44,3 +44,60 @@ export type PullRequest = {
   url: string;
   supportsIterations: boolean;
 };
+
+export type AdoIdentityResponse = {
+  value: AdoIdentity[];
+};
+export type AdoIdentity = {
+  id: string;
+};
+
+export interface AdoWorkItemsResponse {
+  queryType: string;
+  queryResultType: string;
+  asOf: string;
+  workItems: WorkItemReference[];
+}
+
+export interface WorkItemReference {
+  id: number;
+  url: string;
+}
+
+export interface AdoWorkItemDetailsResponse {
+  value: WorkItemDetails[];
+}
+
+export interface WorkItemDetails {
+  id: number;
+  fields: {
+    "System.Title": string;
+    "System.State": string;
+    "System.WorkItemType": string;
+    "System.AssignedTo"?: {
+      displayName: string;
+      uniqueName: string;
+    };
+  };
+}
+
+export type AdoPipeline = {
+  _links: {
+    self: {
+      href: string;
+    };
+    web: {
+      href: string;
+    };
+  };
+  url: string;
+  id: number;
+  revision: number;
+  name: string;
+  folder: string;
+};
+
+export type AdoPipelinesResponse = {
+  count: number;
+  value: AdoPipeline[];
+};

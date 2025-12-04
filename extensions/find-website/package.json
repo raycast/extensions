@@ -5,6 +5,9 @@
   "description": "Quickly find the website you are looking for.",
   "icon": "logo.png",
   "author": "nahuel_andreoli",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity"
   ],

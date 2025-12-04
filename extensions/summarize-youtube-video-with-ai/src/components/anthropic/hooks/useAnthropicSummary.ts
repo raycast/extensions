@@ -1,10 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { ANTHROPIC_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-
-import { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
+import type { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 type GetAnthropicSummaryProps = {
@@ -18,8 +17,9 @@ export const useAnthropicSummary = async ({
   setSummaryIsLoading,
   setSummary,
 }: GetAnthropicSummaryProps) => {
+  const abortController = new AbortController();
   const preferences = getPreferenceValues() as AnthropicPreferences;
-  const { anthropicApiToken, language, anthropicModel } = preferences;
+  const { anthropicApiToken, language, anthropicModel, creativity } = preferences;
 
   if (anthropicApiToken === "") {
     showToast({
@@ -31,6 +31,7 @@ export const useAnthropicSummary = async ({
     return;
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
 
@@ -48,21 +49,25 @@ export const useAnthropicSummary = async ({
       message: SUMMARIZING_VIDEO.message,
     });
 
-    const chatCompletion = anthropic.messages.stream({
-      model: anthropicModel || ANTHROPIC_MODEL,
-      max_tokens: 8192,
-      stream: true,
-      messages: [{ role: "user", content: aiInstructions }],
-    });
+    const stream = anthropic.messages.stream(
+      {
+        model: anthropicModel || ANTHROPIC_MODEL,
+        max_tokens: 8192,
+        stream: true,
+        messages: [{ role: "user", content: aiInstructions }],
+        temperature: Number.parseInt(creativity),
+      },
+      { signal: abortController.signal },
+    );
 
-    chatCompletion.on("text", (delta) => {
+    stream.on("text", (delta) => {
       setSummary((result) => {
         if (result === undefined) return delta || undefined;
         return result + delta || result;
       });
     });
 
-    chatCompletion.finalMessage().then(() => {
+    stream.finalMessage().then(() => {
       setSummaryIsLoading(false);
       showToast({
         style: Toast.Style.Success,
@@ -71,7 +76,8 @@ export const useAnthropicSummary = async ({
       });
     });
 
-    chatCompletion.on("error", (error) => {
+    stream.on("error", (error) => {
+      if (abortController.signal.aborted) return;
       setSummaryIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
@@ -79,5 +85,9 @@ export const useAnthropicSummary = async ({
         message: error.message,
       });
     });
-  }, [transcript]);
+
+    return () => {
+      abortController.abort();
+    };
+  }, [transcript, anthropicApiToken, anthropicModel, creativity, language, setSummary, setSummaryIsLoading]);
 };

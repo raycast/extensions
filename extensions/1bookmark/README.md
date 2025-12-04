@@ -37,3 +37,24 @@ and then entering the 6-digit code sent to your email.
 ## Sign-Out
 
 You can sign out by **'My Account'** -> **'Sign Out'** Action in Action Panel.
+
+## Features
+
+- Search and open bookmarks
+- Add new bookmarks by one shortcut key
+- Share bookmarks with your team
+- Filter bookmarks by tags, spaces, and creators
+- Import bookmarks from browsers
+
+## Advanced Search Pattern
+
+You can use special characters in your search query to filter results:
+
+- `!space` - Filter by space name. Example: `!raycast api` searches for "api" in the "raycast" space
+- `@user` - Filter by bookmark creator name. Example: `@john documentation` searches for "documentation" created by "john"
+- `#tag#` - Filter by tag. Example: `#dev# tools` searches for "tools" with the "dev" tag
+
+This allows you to first narrow down your bookmarks by space, creator, or tag, and then find specific items within that filtered set. The filtering and searching are handled by separate systems, making the process more efficient and the results more accurate.
+
+You can combine multiple filters:
+- `!raycast #api# @john documentation` searches for "documentation" in the "raycast" space with the "api" tag created by "john"

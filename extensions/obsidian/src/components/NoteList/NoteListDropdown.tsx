@@ -1,17 +1,15 @@
-import { SearchArguments } from "../../utils/interfaces";
 import { List } from "@raycast/api";
-import React from "react";
-
-import { NoteReducerActionType } from "../../utils/data/reducers";
+import { useEffect, useState } from "react";
 import { useNotesContext, useNotesDispatchContext } from "../../utils/hooks";
+import { SearchArguments } from "../../utils/interfaces";
+import { NoteReducerActionType } from "../../utils/reducers";
 
 export function NoteListDropdown(props: { tags: string[]; searchArguments: SearchArguments }) {
   const allNotes = useNotesContext();
   const dispatch = useNotesDispatchContext();
-
   const { tags, searchArguments } = props;
 
-  function defaultTagValue() {
+  const [selectedTag, setSelectedTag] = useState<string>(() => {
     if (searchArguments.tagArgument) {
       if (searchArguments.tagArgument.startsWith("#")) {
         return searchArguments.tagArgument;
@@ -19,52 +17,34 @@ export function NoteListDropdown(props: { tags: string[]; searchArguments: Searc
         return "#" + searchArguments.tagArgument;
       }
     }
-  }
+    return "all";
+  });
 
-  function handleChange(value: string) {
+  // Apply the filter whenever selectedTag changes or allNotes changes
+  useEffect(() => {
     if (allNotes) {
-      if (value != "all") {
-        dispatch({ type: NoteReducerActionType.Set, payload: allNotes.filter((note) => note.tags.includes(value)) });
+      if (selectedTag !== "all") {
+        dispatch({
+          type: NoteReducerActionType.Set,
+          payload: allNotes.filter((note) => note.tags.includes(selectedTag)),
+        });
+      } else {
+        dispatch({ type: NoteReducerActionType.Set, payload: allNotes });
       }
     }
+  }, [selectedTag, allNotes, dispatch]);
+
+  function handleChange(tag: string) {
+    setSelectedTag(tag);
   }
 
-  function dropdownContent() {
-    return (
-      <React.Fragment>
-        <List.Dropdown.Item title="All" value="all" />
-        <List.Dropdown.Section title="Tags" />
-        {tags.map((tag: string) => (
-          <List.Dropdown.Item title={tag} value={tag} key={tag} />
-        ))}
-      </React.Fragment>
-    );
-  }
-
-  function dropdownWithDefault() {
-    return (
-      <List.Dropdown tooltip="Search For" defaultValue={defaultTagValue() ?? ""} onChange={handleChange}>
-        {dropdownContent()}
-      </List.Dropdown>
-    );
-  }
-
-  function dropdownWithoutDefault() {
-    return (
-      <List.Dropdown tooltip="Search For" defaultValue="all" onChange={handleChange}>
-        {dropdownContent()}
-      </List.Dropdown>
-    );
-  }
-
-  function DropDownList() {
-    const defaultValue = defaultTagValue();
-    if (defaultValue) {
-      return dropdownWithDefault();
-    } else {
-      return dropdownWithoutDefault();
-    }
-  }
-
-  return <DropDownList />;
+  return (
+    <List.Dropdown tooltip="Search For" value={selectedTag} onChange={handleChange}>
+      <List.Dropdown.Item title="All" value="all" />
+      <List.Dropdown.Section title="Tags" />
+      {tags.map((tag: string) => (
+        <List.Dropdown.Item title={tag} value={tag} key={tag} />
+      ))}
+    </List.Dropdown>
+  );
 }

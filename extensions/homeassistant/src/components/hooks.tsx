@@ -43,9 +43,9 @@ export function useHAStates(): {
   isLoading: boolean;
 } {
   const [states, setStates] = useCachedState<State[]>("states");
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const hawsRef = useRef<Connection>();
+  const hawsRef = useRef<Connection | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -59,10 +59,8 @@ export function useHAStates(): {
           const entityRegistry = await getEntityRegistry(con);
 
           subscribeEntities(con, (entities) => {
-            console.log("incoming entities changes");
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const haStates = Object.entries(entities).map(([k, v]) => v as State);
-            console.log("set new entities");
             if (haStates.length > 0) {
               // Home Assistant often send empty states array in the beginning of an connection. This cause empty state flickering in raycast.
               const filteredStates = haStates.filter((s) => entityRegistry.isUserVisible(s.entity_id));

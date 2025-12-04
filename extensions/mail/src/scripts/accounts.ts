@@ -44,13 +44,13 @@ export const getAccounts = async (): Promise<Account[] | undefined> => {
 
       accounts = await Promise.all(
         response.map(async (line: string) => {
-          const [id, name, userName, fullName, email, numUnread] = line.split(",");
+          const [id, name, userName, fullName, emails, numUnread] = line.split(",");
           return {
             id,
             name,
             userName,
             fullName,
-            email,
+            emails: emails.split(" | "),
             numUnread: parseInt(numUnread),
             mailboxes: await getMailboxes(name),
           };

@@ -11,3 +11,4 @@ export const openai = new OpenAI(config);
 
 export const global_model = prefs.model;
 export const enable_streaming: boolean = prefs.enableStreaming;
+export const show_metadata: boolean = prefs.showMetadata;

@@ -18,7 +18,10 @@ export const useShortLinks = (query?: string) => {
       return { shortLinks, hasMoreLinks: linksCount > shortLinks.length } as ShortLinksResponse;
     },
     [query],
-    { failureToastOptions: { title: "❗ Failed to fetch short links" } },
+    {
+      keepPreviousData: true,
+      failureToastOptions: { title: "❗ Failed to fetch short links" },
+    },
   );
 
   return {

@@ -27,15 +27,21 @@
     "jonas_list",
     "xilopaint",
     "lachero",
-    "pascal_burkhard"
+    "pascal_burkhard",
+    "roberto.cinetto",
+    "emiliocantuc",
+    "raxityo"
   ],
   "keywords": [
     "vscode",
+    "antigravity",
     "cursor",
     "codium",
+    "kiro",
     "positron",
     "windsurf",
-    "trae"
+    "trae",
+    "trae-cn"
   ],
   "license": "MIT",
   "commands": [
@@ -87,8 +93,16 @@
       "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
         {
+          "title": "Antigravity",
+          "value": "Antigravity"
+        },
+        {
           "title": "Cursor",
           "value": "Cursor"
+        },
+        {
+          "title": "Kiro",
+          "value": "Kiro"
         },
         {
           "title": "Positron",
@@ -97,6 +111,10 @@
         {
           "title": "Trae",
           "value": "Trae"
+        },
+        {
+          "title": "Trae CN",
+          "value": "Trae CN"
         },
         {
           "title": "VSCodium",
@@ -209,5 +227,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

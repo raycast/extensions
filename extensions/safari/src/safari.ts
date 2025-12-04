@@ -61,17 +61,17 @@ export async function addToReadingList(url: string) {
 }
 
 export async function getCurrentTabName() {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return name of front document`);
+  return await runAppleScript(`tell application "${safariAppIdentifier}" to return name of current tab in window 1`);
 }
 
 export async function getCurrentTabURL() {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return URL of front document`);
+  return await runAppleScript(`tell application "${safariAppIdentifier}" to return URL of current tab in window 1`);
 }
 
 export type ContentType = "text" | "source";
 
 export async function getCurrentTabContents(type: ContentType) {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return ${type} of front document`);
+  return await runAppleScript(`tell application "${safariAppIdentifier}" to return ${type} of current tab in window 1`);
 }
 
 export async function getTabContents(windowId: number, tabIndex: number, type: ContentType) {
@@ -167,5 +167,24 @@ export async function getFocusedTab() {
     throw new Error("Could not get focused tab information");
   } catch (error) {
     throw new Error(`Failed to get focused tab: ${error}`);
+  }
+}
+
+export async function closeOtherTabs() {
+  try {
+    const script = `
+      tell application "${safariAppIdentifier}"
+        tell front window
+          set currentTabIndex to index of current tab
+          close (every tab whose index is not currentTabIndex)
+          return "Other tabs closed successfully"
+        end tell
+      end tell
+    `;
+
+    const result = await runAppleScript(script);
+    return result;
+  } catch (error) {
+    return `Error: ${error}`;
   }
 }

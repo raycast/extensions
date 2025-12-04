@@ -1,16 +1,15 @@
-import { Action, ActionPanel, List } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useMemo } from "react";
 
 import { getProjectIssues } from "../api/getIssues";
-
-import useIssues from "../hooks/useIssues";
-
-import StateIssueList from "./StateIssueList";
-import CreateIssueForm from "./CreateIssueForm";
-import { useMemo } from "react";
-import useMilestones from "../hooks/useMilestones";
-import { useCachedState } from "@raycast/utils";
 import { getMilestoneIcon } from "../helpers/milestones";
+import useIssues from "../hooks/useIssues";
+import useMilestones from "../hooks/useMilestones";
+
+import CreateIssueForm from "./CreateIssueForm";
+import StateIssueList from "./StateIssueList";
 
 type ProjectIssuesProps = {
   projectId: string;

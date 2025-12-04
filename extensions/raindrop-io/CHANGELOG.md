@@ -1,12 +1,55 @@
 # Raindrop.io Extension Changelog
 
+## [AI Assistant] - 2025-11-17
+
+- Added Raycast AI tooling so you can mention `@raindrop-io` in Raycast AI to search, inspect, and summarize bookmarks.
+- Added AI support for saving links via natural language, including automatic collection lookups and confirmation prompts.
+- Documented the new functionality in the README.
+
+## [Enhancements] - 2025-11-03
+
+- Add a "Note" field to the bookmark creation and editing forms.
+
+## [Open in Secondary Browser] - 2025-10-01
+
+- Specify a secondary browser for opening bookmarks (ref: [Issue #21699](https://github.com/raycast/extensions/issues/21699))
+- Modernize to use latest eslint configuration
+- Removed `node-fetch`
+
+## [Enhancements] - 2025-09-09
+
+- Show collection cover icons in dropdowns (search filter and add/edit forms); fall back to folder icon when no cover is available.
+
+## [Moved contributor] - 2025-09-09
+
+## [Enhancements] - 2025-08-30
+
+- Prefill Add form from launch context (URL/title) for smoother adding from external sources; increases universality and works well with minimal/keyboard-centric browsers like QuteBrowser.
+
+## [Enhancements] - 2025-08-06
+
+- Use Browser Extension API when available for retrieving URL and title
+
+## [Enhancements] - 2025-08-04
+
+- Add support for Zen Browser.
+
+## [Enhancements] - 2025-05-05
+
+- Add Edit Bookmark action ([#18855](https://github.com/raycast/extensions/issues/18855))
+
+## [Enhancements] - 2025-04-22
+
+- Add option to fetch all results, i.e. perform multiple API requests for each result page
+- Set maximum items for raindrop requests
+
 ## [Enhancements] - 2025-02-05
 
-Add option to specify sorting behavior
+- Add option to specify sorting behavior
 
 ## [Enhancements] - 2025-01-05
 
-Add tags display preference and update bookmark item rendering
+- Add tags display preference and update bookmark item rendering
 
 ## [Enhancements] - 2025-01-02
 

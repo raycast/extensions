@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "antigravity",
+  "title": "Antigravity",
+  "description": "Control Antigravity directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "icon": "antigravity-icon.png",
+  "author": "meshal",
+  "contributors": [],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "antigravity",
+    "vscode",
+    "cursor",
+    "ide"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Recent Projects",
+      "subtitle": "Antigravity",
+      "description": "Search and open recent projects from Antigravity.",
+      "mode": "view"
+    },
+    {
+      "name": "open-with-antigravity",
+      "title": "Open with Antigravity",
+      "subtitle": "Antigravity",
+      "description": "Opens the currently selected Finder item with Antigravity.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "subtitle": "Antigravity",
+      "description": "Opens a new Antigravity window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "extensions",
+      "title": "Show Installed Extensions",
+      "description": "Manage Installed Extensions",
+      "mode": "view"
+    },
+    {
+      "name": "install-extension",
+      "title": "Install Extension",
+      "description": "Install Extensions from the Antigravity Marketplace",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "layout",
+      "title": "View Layout",
+      "type": "dropdown",
+      "required": false,
+      "default": "list",
+      "description": "Select the layout of the view",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    },
+    {
+      "name": "keepSectionOrder",
+      "type": "checkbox",
+      "title": "Advanced",
+      "required": false,
+      "label": "Keep Section Order",
+      "default": false,
+      "description": "Keep the order of the sections while searching folders, files, etc."
+    },
+    {
+      "name": "closeOtherWindows",
+      "type": "checkbox",
+      "title": "Usability",
+      "required": false,
+      "label": "Close Other Antigravity Windows",
+      "default": false,
+      "description": "Close other Antigravity windows when opening a project"
+    },
+    {
+      "name": "terminalApp",
+      "type": "appPicker",
+      "default": "com.apple.Terminal",
+      "required": false,
+      "title": "Terminal App",
+      "description": "Select which Terminal App to use when opening with a terminal"
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "title": "Git Integration",
+      "required": false,
+      "label": "Show Git Branch",
+      "default": true,
+      "description": "Display the current Git branch for files and folders in Git repositories"
+    },
+    {
+      "name": "gitBranchColor",
+      "type": "textfield",
+      "title": "Git Integration Color",
+      "required": false,
+      "label": "Git Branch Color",
+      "default": "",
+      "description": "Hexadecimal color code for Git branch tag (e.g., #00FF00). Leave empty to use default green"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0",
+    "lodash.get": "^4.4.2",
+    "raycast-cross-extension": "^0.2.3",
+    "run-applescript": "^6.1.0",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "@types/lodash.get": "^4.4.9",
+    "@types/sql.js": "^1.4.9",
+    "eslint-plugin-react": "^7.36.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

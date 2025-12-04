@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Form, PopToRootType, showHUD, showToast, Toast, LocalStorage } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { Action, ActionPanel, Form, showToast, Toast, LocalStorage } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import Style = Toast.Style;
 import { StorageDefines } from "./utils/Defines";
 import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
+import { closeMainWindowAndShowSuccessToast } from "./utils/NotificationUtils";
 
 interface CommandForm {
   content: string;
@@ -100,17 +101,23 @@ export default function Command() {
         "make new draft with properties {content: item 1 of argv, flagged: false, tags: {" + tagsString + "}}";
     }
 
-    const res = await runAppleScript(
-      `
+    try {
+      await runAppleScript(
+        `
       on run argv
         tell application "Drafts"
           ${appleScriptPart}
         end tell
       end run
       `,
-      [values.content]
-    );
-    await showHUD("Created Draft 👍", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+        [values.content]
+      );
+
+      await closeMainWindowAndShowSuccessToast("Created Draft 👍");
+    } catch (error) {
+      await showFailureToast("Failed to create Draft");
+      return;
+    }
   }
 
   return (

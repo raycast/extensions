@@ -26,6 +26,10 @@
     "lorem",
     "ipsum"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "paragraphs",

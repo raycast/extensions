@@ -3,7 +3,7 @@ import { join } from "path";
 import { homedir } from "os";
 import { apiRequest } from "@/functions/apiRequest";
 
-const preferences = getPreferenceValues<UnsplashPreferences>();
+const preferences = getPreferenceValues<Preferences>();
 
 export const getGridItemSize = (): Grid.ItemSize => {
   const { gridItemSize } = preferences;
@@ -31,7 +31,7 @@ export const resolveHome = (filepath: string) => {
 };
 
 export const likeOrDislike = async (id: number, liked?: boolean) => {
-  const toast = await showToast(Toast.Style.Animated, "Liking photo...");
+  const toast = await showToast(Toast.Style.Animated, `${liked ? "Unliking" : "Liking"} photo...`);
 
   try {
     await apiRequest(`/photos/${id}/like`, {
@@ -40,7 +40,7 @@ export const likeOrDislike = async (id: number, liked?: boolean) => {
 
     toast.style = Toast.Style.Success;
     toast.title = `Photo ${liked ? "unliked" : "liked"}!`;
-  } catch (err) {
+  } catch {
     toast.style = Toast.Style.Failure;
     toast.title = "An error occured";
   }

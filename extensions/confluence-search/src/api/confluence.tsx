@@ -12,6 +12,7 @@ function parseDate(date?: string) {
 
 export async function fetchHydratedPopularFeed(site: Site): Promise<Content[]> {
   const popularContent = (await fetchPopularFeed(site)) as PopularResponse;
+  if (!popularContent.nodes.length) return [];
   const contentIds = popularContent.nodes.map((i: any) => i.id);
   const cql = `content in (${contentIds.join(",")})`;
   const expand = "content.metadata.currentuser.viewed,content.metadata.likes,content.children.comment,content.history";
@@ -65,7 +66,7 @@ interface CqlResponse {
 export async function fetchPopularFeed(site: Site, limit = 25) {
   await apiAuthorize();
   return get(
-    `https://api.atlassian.com/ex/confluence/${site.id}/analytics/rest/cloud/${site.id}/feed/popular?first=${limit}`
+    `https://api.atlassian.com/ex/confluence/${site.id}/analytics/rest/cloud/${site.id}/feed/popular?first=${limit}`,
   );
 }
 

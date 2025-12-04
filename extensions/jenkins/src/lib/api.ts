@@ -89,8 +89,13 @@ export class JenkinsAPI {
     const api = `${this.jenkins.url}/search/suggest?query=${q}`;
     const resp = await this.request(api);
     const result = (await resp.json()) as SearchResponse;
+
     return result.suggestions.map((s) => {
-      s.url = `${this.jenkins.url}/search/?q=${encodeURIComponent(s.name)}`;
+      // use the suggestion URL if Jenkins provided one, construct our own if not
+      const suggestionUrl = s.url || `/search/?q=${encodeURIComponent(s.name)}`;
+
+      s.url = `${this.jenkins.url}${suggestionUrl}`;
+
       return s;
     });
   }

@@ -5,24 +5,13 @@ export interface LinkdingBookmark {
   description?: string;
   website_title?: string;
   website_description?: string;
+  tag_names: string[];
 }
 
 export interface GetLinkdingBookmarkResponse {
   count: number;
   results: LinkdingBookmark[];
 }
-
-export interface LinkdingAccount {
-  serverUrl: string;
-  apiKey: string;
-  ignoreSSL: boolean;
-}
-
-export interface LinkdingAccountForm extends LinkdingAccount {
-  name?: string;
-}
-
-export type LinkdingAccountMap = { [name: string]: LinkdingAccount };
 
 export interface WebsiteMetadata {
   title: string;
@@ -37,5 +26,9 @@ export interface PostLinkdingBookmarkPayload {
   is_archived: boolean;
   unread: boolean;
   shared: boolean;
-  tag_names: string[];
+  tag_names?: string[];
+}
+
+export interface CreateLinkdingBookmarkFormValues extends Omit<PostLinkdingBookmarkPayload, "tag_names"> {
+  tags: string;
 }

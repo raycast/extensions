@@ -68,7 +68,7 @@ export default function StatsPomodoro() {
   showDailyStats
     ? (markdown += `
   > 📊 Daily Stats\n
-   - Pomodoro cycles completed: **${dailyStats.completedCycles}** cycles${dailyStats.completedCycles > 1 ? "s" : ""}. ✨\n
+   - Pomodoro cycles completed: **${dailyStats.completedCycles}** cycle${dailyStats.completedCycles > 1 ? "s" : ""}. ✨\n
    - Total focus time: **${dailyStats.totalFocusTime / 60}m**. ⏱️\n
    - Back to back Pomodoro cycle${dailyStats.backToBackCycles > 1 ? "s" : ""}: **${dailyStats.backToBackCycles}**. 👑\n
     `)

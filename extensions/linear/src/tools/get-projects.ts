@@ -1,6 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-import { getLinearClient, linear } from "../api/linearClient";
 import { Project } from "@linear/sdk";
+import { withAccessToken } from "@raycast/utils";
+
+import { getLinearClient, linear } from "../api/linearClient";
 
 export type ProjectResult = Pick<
   Project,

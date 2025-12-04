@@ -1,5 +1,11 @@
 # Azure DevOps Repository Search
 
+## [Add PBI Copy Work Item Id] - 2025-09-01
+Added the ability to copy the work item ID of a PBI.
+
+## [Add PBI, PR, and pipeline search] - 2025-03-27
+Added PBI, PR, and pipeline search
+
 ## [Add Menu PR items] - 2025-02-17
 Added the projectfilter
 

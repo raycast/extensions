@@ -1,5 +1,10 @@
 # Google Workspace Changelog
 
+## [Add list home and open home quicklink] - 2025-03-07
+
+- 🔗 Quickly open the Google drive home page in browser
+- 🔧 Minor fix action conflicts
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add file path info to the file list] - 2024-10-21

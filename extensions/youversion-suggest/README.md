@@ -1,6 +1,6 @@
 # YouVersion Bible Suggest for Raycast
 
-_Copyright 2022-2024 Caleb Evans_  
+_Copyright 2022-2025 Caleb Evans_  
 _Released under the MIT license_
 
 This [Raycast][raycast] extension allows you to search the YouVersion Bible
@@ -12,17 +12,19 @@ quickly and easily. You can:
 - Choose an alternate language (other than English) and/or pick your preferred
   version/translation (e.g. ESV, NKJV)
 
-**Warning: This extension is not compliant with the Terms of Service of YouVersion. Use at your own risk.**
+## Disclaimer
+
+This project is not affiliated with YouVersion, and all Bible content is
+copyright of the respective publishers.
+
+This tool also retrieves Bible content directly from YouVersion for personal
+use. However, please be aware that this functionality does not fully comply with
+YouVersion's Terms of Use.
 
 ## [Download Extension][extension-in-store]
 
-## Screenshots
-
 [raycast]: https://www.raycast.com/
 [extension-in-store]: https://www.raycast.com/caleb531/youversion-suggest
-
-![Filter Bible Reference](./media/screenshot-filter.png)
-![Search the Bible by Phrase](./media/screenshot-search.png)
 
 ## Commands
 
@@ -88,9 +90,3 @@ clipboard. This preference is off by default.
 If checked, preserves the line breaks that are part of some Bible content. For
 example, if you want to copy a verse from the Psalms to your clipboard all on
 one line, then turn this preference off. This preference is on by default.
-
-## Disclaimer
-
-This project is not affiliated with YouVersion, and all Bible content is
-copyright of the respective publishers. The Bible app icon used in this
-extension is property of YouVersion.

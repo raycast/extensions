@@ -1,16 +1,16 @@
 import { List, Detail, Action, ActionPanel, Icon, Color, getPreferenceValues } from "@raycast/api";
-import { announcement, Preferences } from "../utils/types";
+import { announcement, Preferences, apiAnnouncement } from "../utils/types";
 import { Icons, convertHTMLToMD, getFormattedTime } from "../utils/utils";
 import { useState, useEffect } from "react";
 import { api } from "../utils/api";
 
-export const Announcement = (props: announcement) => {
+export const Announcement = ({ announcement }: { announcement: announcement }) => {
   const preferences: Preferences = getPreferenceValues();
 
-  const [apiAnnouncement, setApiAnnouncement] = useState<any>({});
+  const [apiAnnouncement, setApiAnnouncement] = useState<apiAnnouncement>({ title: "", message: "", created_at: "" });
   useEffect(() => {
     async function load() {
-      const apiAnnouncement = await api.courses[props.course_id].discussion_topics[props.id].get();
+      const apiAnnouncement = await api.courses[announcement.course_id].discussion_topics[announcement.id].get();
       setApiAnnouncement(apiAnnouncement);
     }
     load();
@@ -18,9 +18,9 @@ export const Announcement = (props: announcement) => {
 
   return (
     <List.Item
-      title={props.title}
-      subtitle={props.course}
-      icon={{ source: Icons["Announcement"], tintColor: props.color }}
+      title={announcement.title}
+      subtitle={announcement.course}
+      icon={{ source: Icons["Announcement"], tintColor: announcement.color }}
       actions={
         <ActionPanel>
           <Action.Push
@@ -36,7 +36,7 @@ export const Announcement = (props: announcement) => {
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
-                      url={`https://${preferences.domain}/courses/${props.course_id}/discussion_topics/${props.id}`}
+                      url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
                     />
                   </ActionPanel>
                 }
@@ -44,13 +44,13 @@ export const Announcement = (props: announcement) => {
                   <Detail.Metadata>
                     <Detail.Metadata.Label
                       title="Posted"
-                      text={new Date(props.date).toDateString() + " at " + getFormattedTime(props.date)}
+                      text={new Date(announcement.date).toDateString() + " at " + getFormattedTime(announcement.date)}
                     />
                     <Detail.Metadata.Separator />
                     <Detail.Metadata.TagList title="Course">
                       <Detail.Metadata.TagList.Item
-                        text={props.course}
-                        color={props.course_color ?? Color.PrimaryText}
+                        text={announcement.course}
+                        color={announcement.course_color ?? Color.PrimaryText}
                       />
                     </Detail.Metadata.TagList>
                   </Detail.Metadata>
@@ -59,11 +59,15 @@ export const Announcement = (props: announcement) => {
             }
           />
           <Action.OpenInBrowser
-            url={`https://${preferences.domain}/courses/${props.course_id}/discussion_topics/${props.id}`}
+            url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
           />
         </ActionPanel>
       }
-      accessories={props?.time ? [{ text: props.pretty_date }] : [{ text: props.pretty_date, icon: Icon.Calendar }]}
+      accessories={
+        announcement?.time
+          ? [{ text: announcement.pretty_date }]
+          : [{ text: announcement.pretty_date, icon: Icon.Calendar }]
+      }
     />
   );
 };

@@ -1,22 +1,16 @@
 import { Color, Icon } from "@raycast/api";
+import { Delivery } from "./types/delivery";
+import { Package, PackageMap } from "./types/package";
+import { formatDayDifference } from "./utils/dateUtils";
 
-interface Activity {
-  time: Date;
-  description: string;
-  location: string;
-}
-
-export interface Package {
-  deliveryDate?: Date;
-  delivered: boolean;
-  activity: Activity[];
-}
-
-export interface PackageMap {
-  [key: string]: {
-    packages: Package[];
-    lastUpdated?: Date;
-  };
+export function packagesFromOfflineCarrier(delivery: Delivery): Package[] {
+  return [
+    {
+      delivered: delivery.manualMarkedAsDelivered ?? false,
+      deliveryDate: delivery.manualDeliveryDate,
+      activity: [],
+    },
+  ];
 }
 
 export function deliveryIcon(packages?: Package[]): Icon {
@@ -69,7 +63,8 @@ export function deliveryStatus(packages?: Package[]): { value: string; color?: C
   let accessoryText = "En route";
   if (closestPackage?.deliveryDate) {
     const now = new Date();
-    accessoryText = calculateDayDifference(closestPackage.deliveryDate, now).toString() + " days until delivery";
+    const dayDifference = calculateDayDifference(closestPackage.deliveryDate, now);
+    accessoryText = formatDayDifference(dayDifference);
   }
 
   let accessoryColor = undefined;
@@ -89,7 +84,7 @@ export function getPackageWithEarliestDeliveryDate(packages: Package[]): Package
     return null;
   }
 
-  const now = new Date();
+  const nowTime = new Date().getTime();
 
   return packages.reduce((closest, current) => {
     const closestDeliveryDate = closest.deliveryDate;
@@ -105,9 +100,7 @@ export function getPackageWithEarliestDeliveryDate(packages: Package[]): Package
       return current;
     }
 
-    if (
-      Math.abs(currentDeliveryDate.getTime() - now.getTime()) < Math.abs(closestDeliveryDate.getTime() - now.getTime())
-    ) {
+    if (Math.abs(currentDeliveryDate.getTime() - nowTime) < Math.abs(closestDeliveryDate.getTime() - nowTime)) {
       return current;
     } else {
       return closest;
@@ -126,4 +119,12 @@ export function calculateDayDifference(deliveryDate: Date, comparisonDate: Date)
   }
 
   return dayDifference;
+}
+
+export function allPackagesDeliveredForDeliveryId(deliveryId: string, packages: PackageMap): boolean {
+  const deliveryPackages = packages[deliveryId]?.packages;
+  if (!deliveryPackages) {
+    return false;
+  }
+  return deliveryPackages.every((aPackage) => aPackage.delivered); // all the packages of this delivery have been delivered
 }

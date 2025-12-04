@@ -44,6 +44,10 @@ Got the answer that you wanted? Great.
 
 # Models available
 
+## Claude 4
+
+- `claude-sonnet-4-20250514`
+
 ## Claude 3.7
 
 - `claude-3-7-sonnet-latest`

@@ -1,26 +1,26 @@
 import { Action, ActionPanel, Form, Icon, open, Toast, showToast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-
-import useTeams from "../hooks/useTeams";
-import useUsers from "../hooks/useUsers";
+import { useState } from "react";
 
 import { getLinearClient } from "../api/linearClient";
-import { getTeamIcon } from "../helpers/teams";
-import { getUserIcon } from "../helpers/users";
-import { projectStatuses, projectStatusIcon, projectStatusText } from "../helpers/projects";
 import { getErrorMessage } from "../helpers/errors";
 import { isLinearInstalled } from "../helpers/isLinearInstalled";
-import { useState } from "react";
+import { projectStatusIcon } from "../helpers/projects";
+import { getTeamIcon } from "../helpers/teams";
+import { getUserIcon } from "../helpers/users";
+import useProjectStatuses from "../hooks/useProjectStatuses";
+import useTeams from "../hooks/useTeams";
+import useUsers from "../hooks/useUsers";
 
 export type CreateProjectValues = {
   teamIds: string[];
   name: string;
   description: string;
-  state: string;
   leadId: string;
   memberIds: string[];
   startDate: Date | null;
   targetDate: Date | null;
+  statusId: string;
 };
 
 export default function CreateProjectForm({ draftValues }: { draftValues?: CreateProjectValues }) {
@@ -31,6 +31,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
   const [leadQuery, setLeadQuery] = useState<string>("");
   const { users: leads, supportsUserTypeahead, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
+  const { states, isLoadingStates } = useProjectStatuses();
 
   const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
     async onSubmit(values) {
@@ -41,7 +42,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
           teamIds: values.teamIds,
           name: values.name,
           description: values.description,
-          state: values.state,
+          statusId: values.statusId,
           ...(values.leadId ? { leadId: values.leadId } : {}),
           memberIds: values.memberIds,
           ...(values.startDate ? { startDate: values.startDate } : {}),
@@ -58,7 +59,11 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
             title: isLinearInstalled ? "Open Project in Linear" : "Open Project in Browser",
             shortcut: { modifiers: ["cmd", "shift"], key: "o" },
             onAction: () => {
-              isLinearInstalled ? open(projectResult.url, "Linear") : open(projectResult.url);
+              if (isLinearInstalled) {
+                open(projectResult.url, "Linear");
+              } else {
+                open(projectResult.url);
+              }
             },
           };
 
@@ -87,7 +92,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
       teamIds: draftValues?.teamIds || [],
       name: draftValues?.name,
       description: draftValues?.description,
-      state: draftValues?.state,
+      statusId: draftValues?.statusId,
       leadId: draftValues?.leadId,
       memberIds: draftValues?.memberIds || [],
       startDate: draftValues?.startDate,
@@ -98,7 +103,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
   return (
     <Form
       enableDrafts
-      isLoading={isLoadingTeams || isLoadingUsers || isLoadingLeads}
+      isLoading={isLoadingTeams || isLoadingUsers || isLoadingLeads || isLoadingStates}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Project" onSubmit={handleSubmit} />
@@ -123,13 +128,13 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
       <Form.Separator />
 
-      <Form.Dropdown title="Status" storeValue {...itemProps.state}>
-        {projectStatuses.map((status) => (
+      <Form.Dropdown title="Status" storeValue {...itemProps.statusId}>
+        {states?.map((status) => (
           <Form.Dropdown.Item
-            key={status}
-            value={status}
-            title={projectStatusText[status]}
-            icon={{ source: projectStatusIcon[status] }}
+            key={status.id}
+            value={status.id}
+            title={status.name}
+            icon={{ source: projectStatusIcon[status.type], tintColor: status.color }}
           />
         ))}
       </Form.Dropdown>

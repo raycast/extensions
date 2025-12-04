@@ -1,15 +1,17 @@
 import { ActionPanel, List, Action, Image, showToast, Toast, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BASE_URL } from "./lib/constants";
-import { getAuthHeaders } from "./lib/utils";
+import { isObjectEmpty } from "./lib/utils";
 import { ErrorResponse } from "./lib/types";
 import ProjectEnvs from "./views/ProjectEnvs";
 import AccountPicker from "./components/AccountPicker";
 import { ProjectsResponse } from "./lib/types/projects.types";
+import AuthWrapper from "./components/AuthWrapper";
+import useAuth from "./hooks/useAuth";
 
 export default function Command() {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+  const { authHeaders } = useAuth();
 
   const [accountName, setAccountName] = useState("");
 
@@ -31,8 +33,8 @@ export default function Command() {
   const { isLoading, data } = useFetch(BASE_URL, {
     body: ProjectsPayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null ? false : true,
+    headers: authHeaders,
+    execute: !isObjectEmpty(authHeaders),
     parseResponse: async (resp) => {
       const data = (await resp.json()) as ProjectsResponse;
       if ("errors" in data) {
@@ -44,7 +46,6 @@ export default function Command() {
       return data[0].data.account.byName.appsPaginated.edges;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching projects",
         message: (error as Error)?.message || "",
@@ -54,50 +55,44 @@ export default function Command() {
     initialData: [],
   });
 
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
-
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Enviroment Variables"
-      searchBarPlaceholder="Pick a Project"
-      searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
-    >
-      {data ? (
-        <>
-          {data.map((project) => (
-            <List.Item
-              key={project.node.id}
-              icon={
-                project.node.iconUrl
-                  ? {
-                      source: project.node.iconUrl,
-                      mask: Image.Mask.Circle,
-                    }
-                  : Icon.MemoryChip
-              }
-              title={project.node.name}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="View Enviroment Variables"
-                    target={<ProjectEnvs appFullName={project.node.fullName} />}
-                    icon={Icon.LineChart}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </>
-      ) : (
-        <List.EmptyView />
-      )}
-    </List>
+    <AuthWrapper>
+      <List
+        isLoading={isLoading}
+        navigationTitle="Enviroment Variables"
+        searchBarPlaceholder="Pick a Project"
+        searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
+      >
+        {data ? (
+          <>
+            {data.map((project) => (
+              <List.Item
+                key={project.node.id}
+                icon={
+                  project.node.iconUrl
+                    ? {
+                        source: project.node.iconUrl,
+                        mask: Image.Mask.Circle,
+                      }
+                    : Icon.MemoryChip
+                }
+                title={project.node.name}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="View Enviroment Variables"
+                      target={<ProjectEnvs appFullName={project.node.fullName} />}
+                      icon={Icon.LineChart}
+                    />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </>
+        ) : (
+          <List.EmptyView />
+        )}
+      </List>
+    </AuthWrapper>
   );
 }

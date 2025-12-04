@@ -17,6 +17,10 @@ export interface ListItem {
   override_statuses: boolean;
   permission_level: string;
 }
+export interface List {
+  id: string;
+  statuses: Omit<Status, "hide_label">[];
+}
 interface Status {
   status: string;
   color: string;

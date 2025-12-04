@@ -11,6 +11,7 @@ import {
   SearchConfigs,
   Suggestion,
 } from "./types";
+import { isURL } from "./utils";
 
 const config: SearchConfigs = {
   google: {
@@ -83,6 +84,11 @@ const config: SearchConfigs = {
       });
     },
   },
+  unduck: {
+    search: "https://unduck.link?q=",
+    suggestions: null,
+    suggestionParser: null,
+  },
 };
 
 async function parseResponse(response: Response) {
@@ -109,7 +115,17 @@ function getDefaultSuggestions(searchText?: string): Suggestion[] {
   if (!searchText) {
     return [];
   }
+  const openUrl = isURL(searchText)
+    ? [
+        {
+          id: nanoid(),
+          query: `Open URL ${searchText}`,
+          url: searchText,
+        },
+      ]
+    : [];
   return [
+    ...openUrl,
     {
       id: nanoid(),
       query: searchText,

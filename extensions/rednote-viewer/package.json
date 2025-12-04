@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rednote-viewer",
+  "title": "RedNote Viewer",
+  "type": "module",
+  "description": "Easy to view RedNote post in Raycast",
+  "icon": "rednote-viewer-icon.png",
+  "author": "orangelckc",
+  "contributors": [
+    "litomore"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Productivity"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view",
+      "title": "View RedNote Post",
+      "description": "Easy to view RedNote post",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cookies",
+      "title": "RedNote Cookies",
+      "type": "password",
+      "required": true,
+      "description": "Please copy your cookie from browser"
+    },
+    {
+      "name": "columnsOfGrid",
+      "title": "Columns of Grid",
+      "type": "dropdown",
+      "required": true,
+      "default": "4",
+      "description": "Number of columns in the grid view",
+      "data": [
+        {
+          "title": "4 columns",
+          "value": "4"
+        },
+        {
+          "title": "5 columns",
+          "value": "5"
+        },
+        {
+          "title": "6 columns",
+          "value": "6"
+        },
+        {
+          "title": "7 columns",
+          "value": "7"
+        },
+        {
+          "title": "8 columns",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "name": "translateToEnglish",
+      "title": "Translate to English (require Raycast Pro)",
+      "label": "Enable",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "description": "Translate posts to English"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.1",
+    "got": "^14.4.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.12",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  }
+}

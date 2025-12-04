@@ -35,7 +35,11 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     isLoading: isLoadingTimeline,
   } = useLocalStorage<Period>('timeline', 'month');
 
-  const { data: transactions = [], isLoading: isLoadingTransactions } = useTransactions(activeBudgetId, timeline);
+  const {
+    data: transactions = [],
+    isLoading: isLoadingTransactions,
+    mutate,
+  } = useTransactions(activeBudgetId, timeline);
   const { data: scheduledTransactions = [], isLoading: isLoadingScheduled } = useScheduledTransactions(activeBudgetId);
 
   const [state, dispatch] = useReducer(
@@ -135,6 +139,13 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     ? 'Search scheduled transactions'
     : `Search ${dropDownValue === 'unreviewed' ? 'unreviewed ' : ''}transactions in the last ${timeline}`;
 
+  const handleTransactionDeleted = async () => {
+    // Wait for mutate to complete and get the updated transactions
+    const updatedTransactions = await mutate();
+    // Reset the view state with the updated transactions
+    dispatch({ type: 'reset', initialCollection: updatedTransactions });
+  };
+
   return (
     <TransactionProvider
       dispatch={dispatch}
@@ -160,6 +171,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
           displayScheduled={displayScheduled}
           currency={activeBudgetCurrency}
           activeFilter={dropDownValue}
+          onTransactionDeleted={handleTransactionDeleted}
         />
       </List>
     </TransactionProvider>
@@ -187,6 +199,7 @@ interface TransactionViewItemsProps {
   displayScheduled: boolean;
   currency: CurrencyFormat;
   activeFilter: 'unreviewed' | 'all';
+  onTransactionDeleted: () => void;
 }
 
 function TransactionViewItems({
@@ -195,6 +208,7 @@ function TransactionViewItems({
   displayScheduled: displaySchedule,
   currency,
   activeFilter,
+  onTransactionDeleted,
 }: TransactionViewItemsProps) {
   if (displaySchedule) {
     return scheduledTransactions.length > 0 ? (
@@ -235,11 +249,13 @@ function TransactionViewItems({
         })}
         key={group.id}
         children={group.items.map((t) => (
-          <TransactionItem transaction={t} key={t.id} />
+          <TransactionItem transaction={t} key={t.id} onTransactionDeleted={onTransactionDeleted} />
         ))}
       />
     ));
   }
 
-  return transactions.map((t) => <TransactionItem transaction={t} key={t.id} />);
+  return transactions.map((t) => (
+    <TransactionItem transaction={t} key={t.id} onTransactionDeleted={onTransactionDeleted} />
+  ));
 }

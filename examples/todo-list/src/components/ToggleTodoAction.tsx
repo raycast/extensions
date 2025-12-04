@@ -4,7 +4,7 @@ import { Todo } from "../types";
 export function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
   return (
     <Action
-      icon={props.todo.isCompleted ? Icon.Circle : Icon.Checkmark}
+      icon={props.todo.isCompleted ? Icon.Circle : Icon.CheckCircle}
       title={props.todo.isCompleted ? "Mark as Uncompleted" : "Mark as Completed"}
       onAction={props.onToggle}
     />

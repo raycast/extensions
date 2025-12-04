@@ -9,9 +9,16 @@
     "tleo19",
     "jylamont",
     "pernielsentikaer",
-    "tm.wrnr"
+    "tm.wrnr",
+    "true-real-michael",
+    "xmorse"
   ],
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -52,29 +59,44 @@
         {
           "value": "Zed Preview",
           "title": "Zed Preview"
+        },
+        {
+          "value": "Zed Dev",
+          "title": "Zed Dev"
         }
       ]
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "title": "Git Integration",
+      "required": false,
+      "label": "Show Git Branch",
+      "default": true,
+      "description": "Display the current Git branch for files and folders in Git repositories"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.1",
-    "@raycast/utils": "^1.16.0",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.6"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
+    "create-fixtures": "./scripts/create-fixtures.sh",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest"
   }
 }

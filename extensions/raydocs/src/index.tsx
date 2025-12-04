@@ -1,8 +1,8 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
-import LinkItem from "./components/LinkItem";
-import { Link } from "./types";
-import { getLinks } from "./utils";
+import LinkItem from "@/components/LinkItem";
+import { Link } from "@/types";
+import { getLinks } from "@/utils/links";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);

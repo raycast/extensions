@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { JSX } from "react/jsx-runtime";
 import {
   Action,
   ActionPanel,
   Color,
   Clipboard,
   closeMainWindow,
+  getPreferenceValues,
   Icon,
   List,
   open,
@@ -12,8 +14,15 @@ import {
   showHUD,
   Toast,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
+import { arrayToEntry, processPlaceholders } from "../utils/placeholder-processor";
 import { getTOTPCode } from "../utils/totp";
+import { isValidUrl } from "../utils/url-checker";
+
+const preferences: ExtensionPreferences = getPreferenceValues();
+// Whether to display favicons in the user interface
+const userInterfaceFavicon = Boolean(preferences.userInterfaceFavicon);
 
 /**
  * Get an array of unique folder names from the given entries.
@@ -27,7 +36,7 @@ import { getTOTPCode } from "../utils/totp";
  */
 function getFolders(entries: string[][]): string[] {
   return Array.from(new Set(entries.map((entry: string[]) => entry[0]).filter((v: string) => v !== ""))).sort((a, b) =>
-    (a as string).localeCompare(b as string)
+    (a as string).localeCompare(b as string),
   );
 }
 
@@ -40,7 +49,7 @@ function getFolders(entries: string[][]): string[] {
  *
  * @returns {JSX.Element} The dropdown component.
  */
-function FolderFilterDropdown(props: { folders: string[]; onFolderChange: (newValue: string) => void }) {
+function FolderFilterDropdown(props: { folders: string[]; onFolderChange: (newValue: string) => void }): JSX.Element {
   const { folders, onFolderChange } = props;
   return (
     <List.Dropdown
@@ -73,7 +82,11 @@ function FolderFilterDropdown(props: { folders: string[]; onFolderChange: (newVa
  * pasting or copying passwords, usernames, and TOTP, as well as opening URLs associated
  * with entries. If an error occurs, the database is locked, and an error message is shown.
  */
-export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUnlocked: boolean) => void }) {
+export default function SearchDatabase({
+  setIsUnlocked,
+}: {
+  setIsUnlocked: (isUnlocked: boolean) => void;
+}): JSX.Element {
   const [entries, setEntries] = useState<string[][]>([]);
   const [folders, setFolders] = useState<string[]>([]);
   const [entriesFolder, setEntriesFolder] = useState<string>("");
@@ -114,6 +127,13 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
             <List.Item
               key={i}
               title={entry[1]}
+              icon={
+                userInterfaceFavicon
+                  ? isValidUrl(entry[4])
+                    ? getFavicon(entry[4], { fallback: Icon.QuestionMarkCircle })
+                    : { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText }
+                  : undefined
+              }
               subtitle={{ value: entry[2], tooltip: "Username" }}
               accessories={[
                 entry[0] !== ""
@@ -139,9 +159,12 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       title="Paste Password"
                       icon={Icon.BlankDocument}
                       onAction={() => {
-                        entry[3] !== ""
-                          ? Clipboard.paste(entry[3]).then(() => closeMainWindow())
-                          : showToast(Toast.Style.Failure, "Error", "No Password Set");
+                        if (entry[3] !== "") {
+                          const processedPassword = processPlaceholders(entry[3], arrayToEntry(entry));
+                          Clipboard.paste(processedPassword).then(() => closeMainWindow());
+                        } else {
+                          showToast(Toast.Style.Failure, "Error", "No Password Set");
+                        }
                       }}
                     />
                     <Action
@@ -149,9 +172,12 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       icon={Icon.BlankDocument}
                       shortcut={{ modifiers: ["shift"], key: "enter" }}
                       onAction={() => {
-                        entry[2] !== ""
-                          ? Clipboard.paste(entry[2]).then(() => closeMainWindow())
-                          : showToast(Toast.Style.Failure, "Error", "No Username Set");
+                        if (entry[2] !== "") {
+                          const processedUsername = processPlaceholders(entry[2], arrayToEntry(entry));
+                          Clipboard.paste(processedUsername).then(() => closeMainWindow());
+                        } else {
+                          showToast(Toast.Style.Failure, "Error", "No Username Set");
+                        }
                       }}
                     />
                     <Action
@@ -178,7 +204,8 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       shortcut={{ modifiers: ["cmd"], key: "g" }}
                       onAction={() => {
                         if (entry[3] !== "") {
-                          Clipboard.copy(entry[3], { concealed: true });
+                          const processedPassword = processPlaceholders(entry[3], arrayToEntry(entry));
+                          Clipboard.copy(processedPassword, { concealed: true });
                           showHUD("Password has been copied to clipboard");
                         } else showToast(Toast.Style.Failure, "Error", "No Password Set");
                       }}
@@ -189,7 +216,8 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       shortcut={{ modifiers: ["cmd"], key: "b" }}
                       onAction={() => {
                         if (entry[2] !== "") {
-                          Clipboard.copy(entry[2]);
+                          const processedUsername = processPlaceholders(entry[2], arrayToEntry(entry));
+                          Clipboard.copy(processedUsername);
                           showHUD("Username has been copied to clipboard");
                         } else showToast(Toast.Style.Failure, "Error", "No Username Set");
                       }}
@@ -215,13 +243,17 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                     icon={Icon.Globe}
                     shortcut={{ modifiers: ["shift", "cmd"], key: "u" }}
                     onAction={() => {
-                      entry[4] !== "" ? open(entry[4]) : showToast(Toast.Style.Failure, "Error", "No URL Set");
+                      if (entry[4] !== "") {
+                        open(entry[4]);
+                      } else {
+                        showToast(Toast.Style.Failure, "Error", "No URL Set");
+                      }
                     }}
                   />
                 </ActionPanel>
               }
             />
-          )
+          ),
       )}
       <List.EmptyView
         title="No Entries Found"

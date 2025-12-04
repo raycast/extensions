@@ -1,9 +1,12 @@
-import isValidToken from "./utils/is-valid-token";
 import DeploymentsList from "./pages/lists/deployments-list";
+import WithValidToken from "./pages/with-valid-token";
 
 function Main() {
-  isValidToken();
-  return <DeploymentsList />;
+  return (
+    <WithValidToken>
+      <DeploymentsList />
+    </WithValidToken>
+  );
 }
 
 export default Main;

@@ -117,7 +117,7 @@ export default function CreateDNSRecord(props: LaunchProps<{ launchContext: { do
       <Form.Dropdown
         title="Type"
         info={`The type of record being created. Valid types are: ${DNS_RECORD_TYPES.map((record) => record.type).join(
-          ", "
+          ", ",
         )}`}
         {...itemProps.type}
       >

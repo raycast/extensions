@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "slowed-reverb",
+  "title": "Slowed + Reverb",
+  "description": "Turn any song into a Slowed + Reverb version",
+  "icon": "extension_icon.png",
+  "author": "tomo_myrman",
+  "scripts": {
+    "ray": "ray",
+    "build": "ray build -e dist -o ./dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "generate-slowed",
+      "title": "Generate Slowed Version",
+      "description": "Turn any song into a Slowed version",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-reverb",
+      "title": "Generate Reverb Version",
+      "description": "Add Reverb to any song",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-slowed-reverb",
+      "title": "Generate Slowed + Reverb Version",
+      "description": "Turn any song into a Slowed + Reverb version",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-nightcore",
+      "title": "Generate Nightcore Version",
+      "description": "Turn any song into a Nightcore version",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customSoxPath",
+      "title": "Custom Sox Path (install with Homebrew first)",
+      "description": "Custom path to Sox",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/sox",
+      "placeholder": "/opt/homebrew/bin/sox",
+      "required": true
+    },
+    {
+      "name": "defaultSlowedSpeed",
+      "title": "Default Slowed Speed",
+      "description": "Default speed for the Slowed version",
+      "type": "dropdown",
+      "default": "0.8",
+      "required": true,
+      "data": [
+        {
+          "title": "0.5",
+          "value": "0.5"
+        },
+        {
+          "title": "0.55",
+          "value": "0.55"
+        },
+        {
+          "title": "0.6",
+          "value": "0.6"
+        },
+        {
+          "title": "0.65",
+          "value": "0.65"
+        },
+        {
+          "title": "0.7",
+          "value": "0.7"
+        },
+        {
+          "title": "0.75",
+          "value": "0.75"
+        },
+        {
+          "title": "0.8",
+          "value": "0.8"
+        },
+        {
+          "title": "0.85",
+          "value": "0.85"
+        },
+        {
+          "title": "0.9",
+          "value": "0.9"
+        },
+        {
+          "title": "0.95",
+          "value": "0.95"
+        }
+      ]
+    },
+    {
+      "name": "defaultNightcoreSpeed",
+      "title": "Default Nightcore Speed",
+      "description": "Default speed for the Nightcore version",
+      "type": "dropdown",
+      "default": "1.2",
+      "required": true,
+      "data": [
+        {
+          "title": "1.1",
+          "value": "1.1"
+        },
+        {
+          "title": "1.15",
+          "value": "1.15"
+        },
+        {
+          "title": "1.2",
+          "value": "1.2"
+        },
+        {
+          "title": "1.25",
+          "value": "1.25"
+        },
+        {
+          "title": "1.3",
+          "value": "1.3"
+        },
+        {
+          "title": "1.35",
+          "value": "1.35"
+        },
+        {
+          "title": "1.4",
+          "value": "1.4"
+        },
+        {
+          "title": "1.45",
+          "value": "1.45"
+        },
+        {
+          "title": "1.5",
+          "value": "1.5"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "Fun",
+    "Media"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  }
+}

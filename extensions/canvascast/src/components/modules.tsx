@@ -4,7 +4,7 @@ import { ModuleItem } from "./module-item";
 import { HomePage } from "./home-page";
 import { getModules } from "../utils/api";
 import { modulesection, moduleitem } from "../utils/types";
-import { showRecent, getRecentModuleItems, getPinnedModuleItems } from "../utils/recent";
+import { showRecent, useModuleStore } from "../utils/store";
 
 export const Modules = (props: { id: number; url: string }) => {
   const [searchText, setSearchText] = useState<string>("");
@@ -12,59 +12,47 @@ export const Modules = (props: { id: number; url: string }) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const { refreshModuleItems, recentItems, pinnedItems } = useModuleStore();
+
   useEffect(() => {
-    const getItems = async () => {
-      try {
-        const modules = await getModules(props.id);
-        for (const m of modules) {
-          console.log(m);
-        }
+    getModules(props.id)
+      .then((modules) => {
         setModules(modules);
-      } catch {
+        setIsLoading(false);
+      })
+      .catch(() => {
         setModules(undefined);
-      }
-      setIsLoading(false);
-    };
-    getItems();
+        setIsLoading(false);
+      });
   }, []);
 
-  const [pinnedItems, setPinnedItems] = useState<moduleitem[]>();
-  const [recentItems, setRecentItems] = useState<moduleitem[]>();
-
-  const [refresh, setRefresh] = useState<boolean>(false);
-  const triggerRefresh = () => setRefresh(!refresh);
-
-  const getStoredItems = async (): Promise<void> => {
-    setPinnedItems(await getPinnedModuleItems(props.id));
-    setRecentItems(await getRecentModuleItems(props.id));
-  };
-
   useEffect(() => {
-    getStoredItems();
-  }, [refresh]);
+    refreshModuleItems(props.id);
+  }, [props.id]);
+
+  const pinned = pinnedItems[props.id] || [];
+  const recent = recentItems[props.id] || [];
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} enableFiltering={true}>
       {!isLoading && searchText.length === 0 && (
         <List.Section title="Pinned">
-          {pinnedItems?.map((item: moduleitem, index: number) => (
-            <ModuleItem key={index} {...props} item={item} refresh={triggerRefresh} pinned={true} />
+          {pinned.map((item) => (
+            <ModuleItem key={item.id} id={props.id} url={props.url} item={item} pinned={true} />
           ))}
         </List.Section>
       )}
       {!isLoading && showRecent && searchText.length === 0 && (
         <List.Section title="Recent">
-          {recentItems?.map((item: moduleitem, index: number) => (
-            <ModuleItem key={index} {...props} item={item} refresh={triggerRefresh} recent={true} />
+          {recent.map((item) => (
+            <ModuleItem key={item.id} id={props.id} url={props.url} item={item} recent={true} />
           ))}
         </List.Section>
       )}
       {modules !== undefined ? (
         modules.map((module: modulesection, index: number) => (
-          <List.Section title={module.name} key={index}>
-            {module.items?.map((item: moduleitem, index: number) => (
-              <ModuleItem key={index} {...props} item={item} refresh={triggerRefresh} />
-            ))}
+          <List.Section key={index} title={module.name}>
+            {module.items?.map((item: moduleitem) => <ModuleItem key={item.id} {...props} item={item} />)}
           </List.Section>
         ))
       ) : (

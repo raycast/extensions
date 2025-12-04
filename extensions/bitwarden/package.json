@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitwarden",
   "title": "Bitwarden Vault",
-  "description": "Access a Bitwarden account. Requires installing the Bitwarden CLI.",
+  "description": "Access your Bitwarden vault directly from Raycast",
   "icon": "bitwarden-512.png",
   "author": "jomifepe",
   "contributors": [
@@ -16,12 +16,17 @@
     "samuel_ivarsson",
     "gaspihabif",
     "marinsokol",
-    "jose-elias-alvarez"
+    "jose-elias-alvarez",
+    "krambono"
   ],
   "pastContributors": [
     "pomdtr"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "keywords": [
     "bitwarden",
     "secrets",
@@ -49,12 +54,12 @@
           "default": "copy",
           "data": [
             {
-              "title": "Paste to Active App",
-              "value": "paste"
-            },
-            {
               "title": "Copy to Clipboard",
               "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
             }
           ]
         },
@@ -79,15 +84,38 @@
               "value": "never"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "name": "authenticator",
+      "title": "Authenticator",
+      "subtitle": "Bitwarden",
+      "description": "Search all items with TOTP and generate codes.",
+      "icon": "authenticator.png",
+      "mode": "view",
+      "keywords": [
+        "totp",
+        "otp"
+      ],
+      "preferences": [
         {
-          "name": "shouldCacheVaultItems",
-          "type": "checkbox",
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action to perform on an authenticator code.",
           "required": false,
-          "default": true,
-          "title": "Improved Load Times",
-          "label": "Enable Caching",
-          "description": "Whether to cache vault items for faster access. This will NOT cache the actual passwords and other sensitive values, only usernames/emails and other labels."
+          "title": "Primary Code Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            }
+          ]
         }
       ]
     },
@@ -178,6 +206,14 @@
       "mode": "view"
     },
     {
+      "name": "create-login",
+      "title": "Create Login",
+      "subtitle": "Bitwarden",
+      "description": "Create a new login item in the authenticated Bitwarden vault.",
+      "icon": "create-login.png",
+      "mode": "view"
+    },
+    {
       "name": "lock-vault",
       "title": "Lock Vault",
       "subtitle": "Bitwarden",
@@ -240,7 +276,7 @@
       "type": "password",
       "required": true,
       "title": "Client ID",
-      "description": "The client_id value seen in the My Account section of a Bitwarden web vault.",
+      "description": "The client_id value seen in your Bitwarden account settings.",
       "placeholder": "client_id"
     },
     {
@@ -248,8 +284,50 @@
       "type": "password",
       "required": true,
       "title": "Client Secret",
-      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.",
+      "description": "The client_secret value seen in your Bitwarden account settings.",
       "placeholder": "client_secret"
+    },
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Bitwarden CLI Path",
+      "description": "If you would like to use your own CLI, please enter the path to your local installation here. For macOS, the typical installation locations are '/usr/local/bin/bw' for Intel-based Macs and '/opt/homebrew/bin/bw' for M1/Apple Silicon Macs. On Windows, if you installed via Chocolatey, the usual path is 'C:\\ProgramData\\chocolatey\bin\\bw.exe'. You can find the path by executing 'where bw' in your terminal.",
+      "placeholder": "CLI Path"
+    },
+    {
+      "name": "serverUrl",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Bitwarden Server URL",
+      "description": "Optional: URL to use for self-hosted servers.",
+      "placeholder": "https://bitwarden.com"
+    },
+    {
+      "name": "serverCertsPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-signed Certificates Path",
+      "description": "Advanced: Path to self-signed TLS certificate for self-hosted instances.",
+      "placeholder": "absolute/path/to/your/certs.pem"
+    },
+    {
+      "name": "syncOnLaunch",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Customization",
+      "label": "Sync Vault on Launch",
+      "description": "Sync the vault on command launch. If unchecked, the vault will only be synced when the Sync Vault action is used."
+    },
+    {
+      "name": "fetchFavicons",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "label": "Fetch Vault Icons",
+      "description": "Use the Bitwarden icon server (icons.bitwarden.net) to fetch icons for vault items. If unchecked, built-in icons will be used."
     },
     {
       "name": "repromptIgnoreDuration",
@@ -296,11 +374,11 @@
           "value": "86400000"
         },
         {
-          "title": "On system lock (experimental)",
+          "title": "On system lock (experimental & macOS only)",
           "value": "-2"
         },
         {
-          "title": "On system sleep (experimental)",
+          "title": "On system sleep (experimental & macOS only)",
           "value": "-3"
         },
         {
@@ -308,40 +386,6 @@
           "value": "-1"
         }
       ]
-    },
-    {
-      "name": "fetchFavicons",
-      "type": "checkbox",
-      "required": true,
-      "default": true,
-      "title": "Privacy",
-      "label": "Fetch Vault Items Icons",
-      "description": "Whether to use a remote service owned by Bitwarden to fetch icons for vault items. If unchecked, built-in icons will be used."
-    },
-    {
-      "name": "cliPath",
-      "type": "textfield",
-      "required": false,
-      "title": "Bitwarden CLI Path",
-      "description": "If you wish to use your own CLI, type here the location of your local installation. The typical location of it is '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1/Apple Silicon macs.",
-      "placeholder": "CLI Path"
-    },
-    {
-      "name": "serverUrl",
-      "type": "textfield",
-      "required": false,
-      "default": "",
-      "title": "Bitwarden Server URL",
-      "description": "Optional: URL to use for self-hosted servers.",
-      "placeholder": "https://bitwarden.com"
-    },
-    {
-      "name": "serverCertsPath",
-      "type": "textfield",
-      "required": false,
-      "title": "Self-signed Certificates Path",
-      "description": "Advanced: Path to self-signed TLS certificate for self-hosted instances.",
-      "placeholder": "absolute/path/to/your/certs.pem"
     },
     {
       "name": "windowActionOnCopy",
@@ -364,21 +408,30 @@
           "value": "closeAndPopToRoot"
         }
       ]
+    },
+    {
+      "name": "shouldCacheVaultItems",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Performance",
+      "label": "Enable Caching",
+      "description": "Whether to cache vault items for faster load times. This will NOT cache the actual passwords and other sensitive values, only usernames/emails and other non-sensitive labels."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
     "execa": "^7.0.0",
     "fast-fuzzy": "^1.12.0",
-    "node-fetch": "^3.3.2",
-    "node-stream-zip": "^1.15.0"
+    "node-stream-zip": "^1.15.0",
+    "otpauth": "^9.4.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@types/jest": "^29.5.0",
-    "@types/node": "~18.14.2",
-    "@types/react": "^18.0.28",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
     "@typescript-eslint/parser": "^7.17.0",
     "eslint": "^8.56.0",
@@ -388,10 +441,10 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.5.0",
     "prettier": "^2.8.4",
-    "react-devtools": "^5.2.0",
+    "react-devtools": "^6.1.1",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.5.4"
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -400,6 +453,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "jest --verbose",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "tsc:watch": "tsc --noEmit --watch"
   }
 }

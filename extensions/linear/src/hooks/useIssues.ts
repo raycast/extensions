@@ -1,5 +1,6 @@
-import { IssueResult } from "../api/getIssues";
 import { useCachedPromise } from "@raycast/utils";
+
+import { IssueResult } from "../api/getIssues";
 
 export default function useIssues<T>(
   fetcher: (...args: T[]) => Promise<IssueResult[] | undefined>,

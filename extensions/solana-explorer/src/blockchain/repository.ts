@@ -37,8 +37,8 @@ export class Repository {
     const filteredTokens = tokens.filter((token) => token.name.indexOf(query) > -1).slice(0, 10);
     result.push(
       ...filteredTokens.map(
-        (token) => new TokenSearchResult(token.address, token.name, token.logoURI, this.config.solanaExplorerUrl)
-      )
+        (token) => new TokenSearchResult(token.address, token.name, token.logoURI, this.config.solanaExplorerUrl),
+      ),
     );
 
     if (isNumeric(query)) {

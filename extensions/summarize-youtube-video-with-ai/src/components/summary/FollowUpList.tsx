@@ -1,36 +1,41 @@
 /* Copy All Q&A would be weirdly formatted otherwise */
 /* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, AI, List, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FINDING_ANSWER } from "../../const/toast_messages";
-import { Question } from "../../hooks/useQuestions";
+import type { Question } from "../../hooks/useQuestions";
 import { generateQuestionId } from "../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
 
 type FollowUpListProps = {
   transcript: string;
   questions: Question[];
+  onQuestionsUpdate?: (updatedQuestions: Question[]) => void;
 };
 
-export default function FollowUpList({ transcript, questions: initialQuestions }: FollowUpListProps) {
+export default function FollowUpList({
+  transcript,
+  questions: initialQuestions,
+  onQuestionsUpdate,
+}: FollowUpListProps) {
   const [question, setQuestion] = useState("");
   const [selectedQuestionId, setSelectedQuestionId] = useState(initialQuestions[0]?.id ?? "");
-  const [questions, setQuestions] = useState(
-    initialQuestions[0]?.question === "Initial Summary of the video"
-      ? initialQuestions
-      : [
-          {
-            id: generateQuestionId(),
-            question: "Initial Summary of the video",
-            answer: initialQuestions[0]?.answer ?? "",
-          },
-          ...initialQuestions.slice(1),
-        ],
-  );
+  const [questions, setQuestions] = useState(initialQuestions);
+
+  useEffect(() => {
+    if (onQuestionsUpdate) {
+      onQuestionsUpdate(questions);
+    }
+  }, [questions, onQuestionsUpdate]);
+
+  const updateQuestions = useCallback((updatedQuestions: Question[]) => {
+    setQuestions(updatedQuestions);
+  }, []);
 
   const handleAdditionalQuestion = async () => {
     if (!question) return;
     const qID = generateQuestionId();
+    const questionText = question;
 
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -38,16 +43,17 @@ export default function FollowUpList({ transcript, questions: initialQuestions }
       message: FINDING_ANSWER.message,
     });
 
-    const answer = AI.ask(getFollowUpQuestionSnippet(question, transcript));
+    const answer = AI.ask(getFollowUpQuestionSnippet(questionText, transcript));
 
-    setQuestions((prevQuestions) => [
+    const updatedQuestions = [
       {
         id: qID,
-        question,
+        question: questionText,
         answer: "",
       },
-      ...prevQuestions,
-    ]);
+      ...questions,
+    ];
+    updateQuestions(updatedQuestions);
 
     setQuestion("");
     let isFirstChunk = true;
@@ -56,7 +62,9 @@ export default function FollowUpList({ transcript, questions: initialQuestions }
         toast.show();
         isFirstChunk = false;
       }
-      setQuestions((prevQuestions) => prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + data } : q)));
+      setQuestions((prevQuestions) => {
+        return prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + data } : q));
+      });
     });
 
     answer.finally(() => {

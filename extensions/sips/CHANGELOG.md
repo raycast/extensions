@@ -1,10 +1,31 @@
 # Image Modification Changelog
 
+## [Bug Fixes] - 2025-07-07
+
+- Added support for detecting file selection in ForkLift's List and Icon views
+- Improve performance of "Apply Filter" AI Tool by supplying filter definitions
+- Fix vignette filter never getting applied
+- Fixed AVIF installation appearing to fail on the first try
+- Fixed AVIF encoder/decoder failing to run due to not following symlinks
+- Fixed selection detection scripts not raising Automation permission dialogs (and thus failing without reason)
+- Fixed ForkLift script not raising Accessibility permission dialog (and thus failing without reason)
+
+## [Bug Fix] - 2025-06-29
+
+- Remove `-lossless` flag from `dwebp` command.
+
+## [Improved Selection Detection] - 2025-05-12
+
+- Added full support for QSpace Pro
+- Added experimental support for ForkLift
+- Rewrote file selection detection scripts to improve performance
+
 ## [Remove Background] - 2025-02-24
 
 - Added 'Remove Background' command to remove the background from selected images
 - Added two new metadata images showcases AI Tools and `Remove Background` command
 - Set 'Strip EXIF Data' command to be disabled by default
+- Updated to ExifTool version 13.21
 - Fixed ExifTool failing to install or not recognizing current install (Resolve #16884)
 - Fixed crash when trying to generate live preview for filters on PDFs (Resolve #16971)
 

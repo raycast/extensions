@@ -4,6 +4,7 @@ import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvide
 import { Bookmark } from "@/types";
 import { trpc } from "@/utils/trpc.util";
 import { NewTagForm } from "./NewTagForm";
+import { useTags } from "../hooks/use-tags.hook";
 
 interface FormValues {
   titleField: string;
@@ -28,11 +29,11 @@ function Body(props: Props) {
 
   const bookmarkUpdate = trpc.bookmark.update.useMutation();
 
-  const { data: spaceTags, refetch: spaceTagsRefetch } = trpc.tag.list.useQuery({ spaceIds: [bookmark.spaceId] });
+  const { data: spaceTags, refetch: spaceTagsRefetch } = useTags(bookmark.spaceId);
 
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: FormValues) {
+  function handleSubmit(values: FormValues) {
     if (!values.titleField) {
       setTitleError("Title is required");
       return;
@@ -43,21 +44,25 @@ function Body(props: Props) {
       return;
     }
 
-    await bookmarkUpdate.mutateAsync({
-      id: bookmark.id,
-      name: values.titleField,
-      url: values.urlField,
-      description: values.descriptionField,
-      tags: values.tags,
-    });
-
-    showToast({
-      style: Toast.Style.Success,
-      title: "Bookmark updated",
-    });
-
-    refetch();
-    pop();
+    bookmarkUpdate.mutate(
+      {
+        id: bookmark.id,
+        name: values.titleField,
+        url: values.urlField,
+        description: values.descriptionField,
+        tags: values.tags,
+      },
+      {
+        onSuccess: () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Bookmark updated",
+          });
+          refetch();
+          pop();
+        },
+      },
+    );
   }
 
   return (

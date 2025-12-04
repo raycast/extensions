@@ -12,13 +12,13 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "httpdAddress",
-      "description": "On which address is radicle-httpd listening.",
+      "name": "seedNodeAddress",
+      "description": "Which seed node should be used.",
       "type": "textfield",
       "required": false,
-      "title": "Radicle HTTPD Address",
-      "placeholder": "http://127.0.0.1:8080",
-      "default": "http://127.0.0.1:8080"
+      "title": "Radicle Seed Node Address",
+      "placeholder": "iris.radicle.xyz",
+      "default": "iris.radicle.xyz"
     },
     {
       "name": "webUrl",
@@ -40,23 +40,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.10.1",
-    "bs58": "^5.0.0"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.19.1",
+    "bs58": "^6.0.0",
+    "heartwood-ts": "^0.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.29.0",
+    "prettier": "^3.6.1",
+    "typescript": "^5.8.3",
+    "zod": "^3.25.67"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

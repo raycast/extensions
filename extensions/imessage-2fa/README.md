@@ -5,6 +5,7 @@ View 2FA codes from iMessage and Email (Apple Mail or Gmail) in Raycast.
 ## Features
 
 - Find 2FA codes in iMessage and Email messages
+- Detect and open verification or sign-in links in emails directly
 - Support for both Apple Mail and Gmail as email sources
 - Configurable search window (minutes, hours, or days)
 - Option to ignore already read messages

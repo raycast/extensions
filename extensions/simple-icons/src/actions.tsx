@@ -1,10 +1,11 @@
 /* eslint @raycast/prefer-title-case: off */
+import process from "node:process";
 import { useEffect, useState } from "react";
 import { Action, Icon } from "@raycast/api";
 import { callbackLaunchCommand } from "raycast-cross-extension";
-import { getIconSlug } from "simple-icons/sdk";
+import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { IconData, LaunchContext } from "./types.js";
-import { copySvg, makeCopyToDownload } from "./utils.js";
+import { copySvg, getAbsoluteFileLink, launchSocialBadge, makeCopyToDownload } from "./utils.js";
 import Releases from "./views/releases.js";
 
 type ActionProps = {
@@ -17,11 +18,17 @@ export const OpenWith = ({ icon, version }: ActionProps) => {
   useEffect(() => {
     (async () => {
       const path = await makeCopyToDownload({ version, icon, slug: getIconSlug(icon) });
-      setDestinationPath(path);
+      if (path) setDestinationPath(path);
     })();
   }, []);
   return destinationPath ? <Action.OpenWith path={destinationPath} /> : null;
 };
+
+export const MakeBadge = ({ icon, version }: ActionProps) =>
+  // [TODO] The Badge extension cannot work properly on Windows yet.
+  process.platform === "darwin" ? (
+    <Action icon="shieldsdotio.svg" title="Make Badge" onAction={() => launchSocialBadge(icon, version)} />
+  ) : null;
 
 export const CopySvg = ({ icon, version }: ActionProps) => {
   return <Action title="Copy SVG" onAction={() => copySvg({ version, icon })} icon={Icon.Clipboard} />;
@@ -45,12 +52,12 @@ export const CopyCdn = ({ icon }: ActionProps) => {
 };
 
 export const CopyJsdelivr = ({ icon, version }: ActionProps) => {
-  const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${getIconSlug(icon)}.svg`;
+  const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/${version}/icons/${getIconSlug(icon)}.svg`;
   return <Action.CopyToClipboard title="Copy jsDelivr CDN Link" content={jsdelivrCdnLink} />;
 };
 
 export const CopyUnpkg = ({ icon, version }: ActionProps) => {
-  const unpkgCdnLink = `https://unpkg.com/simple-icons@${version}/icons/${getIconSlug(icon)}.svg`;
+  const unpkgCdnLink = `https://unpkg.com/${version}/icons/${getIconSlug(icon)}.svg`;
   return <Action.CopyToClipboard title="Copy unpkg CDN Link" content={unpkgCdnLink} />;
 };
 
@@ -70,24 +77,27 @@ export const Supports = () => (
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=new+icon&template=icon_request.yml"
     />
     <Action.OpenInBrowser
-      title="Report an Oudated Icon"
+      title="Report an Outdated Icon"
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=update+icon%2Fdata&template=icon_update.yml"
     />
   </>
 );
 
-export const LaunchCommand = ({ callbackLaunchOptions, icon }: LaunchContext & ActionProps) => (
+export const LaunchCommand = ({ callbackLaunchOptions, icon, version }: LaunchContext & ActionProps) => (
   <Action
     title="Use This Icon"
     icon={Icon.Checkmark}
     onAction={async () => {
-      callbackLaunchCommand(callbackLaunchOptions, { icon });
+      callbackLaunchCommand(callbackLaunchOptions, {
+        icon: { ...icon, file: getAbsoluteFileLink(icon.slug, version) },
+      });
     }}
   />
 );
 
 export const actions = {
   OpenWith,
+  MakeBadge,
   CopySvg,
   CopyColor,
   CopyTitle,
@@ -102,6 +112,7 @@ export type ActionType = keyof typeof actions;
 
 export const defaultActionsOrder: ActionType[] = [
   "OpenWith",
+  "MakeBadge",
   "CopySvg",
   "CopyColor",
   "CopyTitle",

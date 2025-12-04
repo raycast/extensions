@@ -1,15 +1,15 @@
-import { Package } from "../package";
+import { packagesFromOfflineCarrier } from "../package";
 import { getPreferenceValues, Cache } from "@raycast/api";
-import fetch from "node-fetch";
-import { randomUUID } from "node:crypto";
-import { Delivery } from "../delivery";
+import { randomUUID } from "crypto";
+import { Package } from "../types/package";
+import { Delivery } from "../types/delivery";
 
 const cache = new Cache();
 const cacheKey = "upsLogin";
 const host = "onlinetools.ups.com";
 const deliveredStatusCode = "011";
 
-export async function ableToTrackUpsRemotely(): Promise<boolean> {
+export function ableToTrackUpsRemotely(): boolean {
   const preferences = getPreferenceValues<Preferences.TrackDeliveries>();
   const clientId = preferences.upsClientId;
   const clientSecret = preferences.upsClientSecret;
@@ -31,8 +31,8 @@ export async function updateUpsTracking(delivery: Delivery): Promise<Package[]> 
   const clientSecret = preferences.upsClientSecret;
 
   if (!clientId || !clientSecret) {
-    console.log(`Unable to update tracking for ${trackingNumber} because clientId or clientSecret is missing`);
-    throw new Error("UPS client ID or client secret is missing.  Ensure they are filled in this extension's settings.");
+    console.log(`Unable to update remote tracking for ${trackingNumber} because clientId or clientSecret is missing`);
+    return packagesFromOfflineCarrier(delivery);
   }
 
   const loginResponse = await loginWithCachedData(clientId, clientSecret);
@@ -109,27 +109,21 @@ async function login(clientId: string, clientSecret: string): Promise<LoginRespo
 
 interface UpsTrackingInfo {
   trackResponse: {
-    shipment: [
-      {
-        inquiryNumber: string;
-        package: [
-          {
-            trackingNumber: string;
-            deliveryDate: [
-              {
-                type: string;
-                date: string;
-              },
-            ];
-            activity: [object];
-            currentStatus: {
-              description: string;
-              code: string;
-            };
-          },
-        ];
-      },
-    ];
+    shipment: {
+      inquiryNumber: string;
+      package: {
+        trackingNumber: string;
+        deliveryDate?: {
+          type: string;
+          date: string;
+        }[];
+        activity: object[];
+        currentStatus: {
+          description: string;
+          code: string;
+        };
+      }[];
+    }[];
   };
 }
 
@@ -165,9 +159,9 @@ function convertUpsTrackingToPackages(upsTrackingInfo: UpsTrackingInfo): Package
   return upsTrackingInfo.trackResponse.shipment
     .flatMap((shipment) => shipment.package)
     .map((aPackage) => {
-      const deliveryDate = aPackage.deliveryDate.find((deliveryDate) => deliveryDate.type === "DEL")?.date;
-      const rescheduledDeliveryDate = aPackage.deliveryDate.find((deliveryDate) => deliveryDate.type === "RDD")?.date;
-      const scheduledDeliveryDate = aPackage.deliveryDate.find((deliveryDate) => deliveryDate.type === "SDD")?.date;
+      const deliveryDate = aPackage.deliveryDate?.find((deliveryDate) => deliveryDate.type === "DEL")?.date;
+      const rescheduledDeliveryDate = aPackage.deliveryDate?.find((deliveryDate) => deliveryDate.type === "RDD")?.date;
+      const scheduledDeliveryDate = aPackage.deliveryDate?.find((deliveryDate) => deliveryDate.type === "SDD")?.date;
 
       return {
         delivered: aPackage.currentStatus.code === deliveredStatusCode,

@@ -16,8 +16,9 @@ import axios from "axios";
 import ResultView from "./views/Result";
 import RequestDetails from "./views/RequestDetails";
 import { methodColors } from "../utils";
+import { JSONPath } from "jsonpath-plus";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const curlString = require("curl-string");
 
 export interface Values {
@@ -76,9 +77,13 @@ export default function Requests() {
     axios({ ...payloadWithoutMeta })
       .then(async (res) => {
         response = res;
+
+        const jsonPathQuery = meta?.jsonPathQuery || "";
+        const jsonPathQueryResult = JSONPath({ wrap: false, path: jsonPathQuery, json: response.data });
+
         const result = { method: payload.method, response };
 
-        push(<ResultView result={result as never} curl={generatedCurl} />);
+        push(<ResultView result={result as never} curl={generatedCurl} jsonPathResult={jsonPathQueryResult} />);
       })
       .catch((err) => {
         showToast({
@@ -149,7 +154,7 @@ export default function Requests() {
               <ActionPanel>
                 <ActionPanel.Section title="Actions">
                   <Action.CopyToClipboard
-                    title="Copy cURL"
+                    title="Copy Curl"
                     content={generateCurl({ url: req.key, payload: req.value })}
                   />
                   <Action
@@ -161,22 +166,31 @@ export default function Requests() {
                     title="Add Metadata"
                     target={<RequestDetails req={req} />}
                     icon={Icon.AppWindowList}
-                    shortcut={{ modifiers: ["cmd"], key: "m" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "m" },
+                      windows: { modifiers: ["ctrl"], key: "m" },
+                    }}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Delete">
                   <Action
-                    title="Delete From History"
+                    title="Delete from History"
                     icon={Icon.Trash}
                     onAction={() => handleDeleteItem(req.key)}
-                    shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "delete" },
+                      windows: { modifiers: ["ctrl", "shift"], key: "delete" },
+                    }}
                     style={Action.Style.Destructive}
                   />
                   <Action
                     title="Delete All History"
                     icon={Icon.Trash}
                     onAction={handleDeleteAll}
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "delete" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "opt"], key: "delete" },
+                      windows: { modifiers: ["ctrl", "alt"], key: "delete" },
+                    }}
                     style={Action.Style.Destructive}
                   />
                 </ActionPanel.Section>

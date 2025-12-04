@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anonaddy",
   "title": "Addy",
-  "description": "Generate and manage your Addy aliases from your keyboard.",
+  "description": "Easily generate and manage your Addy email aliases directly from your keyboard.",
   "icon": "icon.png",
   "author": "http.james",
   "contributors": [
@@ -15,45 +15,44 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "create-alias",
+      "title": "Create Alias",
+      "description": "Create a new Addy email alias with customizable options.",
+      "mode": "view"
+    },
+    {
       "name": "generate-alias",
       "title": "Generate Alias",
-      "subtitle": "Addy",
-      "description": "Generate a random Addy alias",
+      "description": "Quickly generate an Addy email alias using your default settings.",
       "mode": "no-view"
     },
     {
       "name": "list-aliases",
-      "title": "List Aliases",
-      "subtitle": "Addy",
-      "description": "List and search Addy aliases",
-      "mode": "view"
-    },
-    {
-      "name": "edit-alias",
-      "title": "Edit Alias",
-      "subtitle": "Addy",
-      "description": "Edit an Addy alias",
+      "title": "My Aliases",
+      "description": "View, search, and manage your existing Addy email aliases.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "utility-types": "^3.11.0"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "preferences": [
     {

@@ -1,14 +1,16 @@
-import "@/polyfills/fetch";
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { ShortLinksResponse, useShortLinks } from "@hooks/use-short-links";
-import { DUB_CO_URL } from "@utils/constants";
+import { DUB_APP_URL, DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
-import { MutatePromise, showFailureToast } from "@raycast/utils";
+import { MutatePromise, showFailureToast, useCachedState } from "@raycast/utils";
 import { withDubClient } from "./with-dub-client";
 import { useState } from "react";
 
 export function SearchLinks() {
   const [query, setQuery] = useState<string | undefined>(undefined);
+  const [showDetails, setShowDetails] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "dub-search-links",
+  });
   const {
     shortLinks,
     supportsLinksTypeahead,
@@ -27,7 +29,7 @@ export function SearchLinks() {
             searchBarPlaceholder: "Search links by short link slug or destination url",
             throttle: true,
           })}
-      isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0}
+      isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0 && showDetails}
       filtering
     >
       {linksError && (
@@ -55,6 +57,7 @@ export function SearchLinks() {
           expiresAt,
           expiredUrl,
           updatedAt,
+          workspaceId,
         } = value;
         const shortUrl = `${domain}/${key}`;
         return (
@@ -154,7 +157,10 @@ export function SearchLinks() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title={"Copy Link"} content={shortLink} />
-                <Action.OpenInBrowser title={"Open Link"} url={shortLink} />
+                <Action.OpenInBrowser
+                  title={"Open Link Page"}
+                  url={`${DUB_CO_URL}/${workspaceId}/links/${domain}/${key}`}
+                />
                 <Action
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title={"Delete Link"}
@@ -162,10 +168,21 @@ export function SearchLinks() {
                   onAction={() => deleteLink(id, mutate)}
                 />
                 <ActionPanel.Section>
+                  <Action
+                    title={showDetails ? "Hide Details" : "Show Details"}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    onAction={() => setShowDetails(!showDetails)}
+                    icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
+                  />
                   <Action.OpenInBrowser
-                    title="Go to Dub.co"
-                    shortcut={Keyboard.Shortcut.Common.Open}
-                    url={DUB_CO_URL}
+                    title="Open Analytics Page"
+                    shortcut={{ modifiers: ["cmd"], key: "v" }}
+                    url={`${DUB_APP_URL}/${workspaceId}/analytics?domain=${domain}&key=${key}&interval=30d`}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open Events Page"
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    url={`${DUB_APP_URL}/${workspaceId}/events?domain=${domain}&key=${key}&interval=30d`}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

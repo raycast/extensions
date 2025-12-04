@@ -8,7 +8,10 @@
   "contributors": [
     "mike182uk"
   ],
-  "categories": ["Finance", "Web"],
+  "categories": [
+    "Finance",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -284,7 +287,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.51.1",
-    "axios": "^1.4.0",
+    "axios": "^1.8.4",
     "fuse.js": "^6.6.2"
   },
   "devDependencies": {
@@ -295,7 +298,6 @@
     "eslint": "^8.40.0",
     "eslint-config-prettier": "^8.8.0",
     "prettier": "^2.8.8",
-    "react-devtools": "^4.27.7",
     "typescript": "5.0.4"
   },
   "scripts": {

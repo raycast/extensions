@@ -1,8 +1,10 @@
 import { readFile } from "fs/promises";
 import path from "path";
+
 import { UploadFile } from "@linear/sdk";
-import { getLinearClient } from "./linearClient";
 import { fileTypeFromFile } from "file-type";
+
+import { getLinearClient } from "./linearClient";
 
 export async function uploadFile(filePath: string) {
   const { graphQLClient } = getLinearClient();

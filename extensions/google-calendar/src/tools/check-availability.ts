@@ -1,4 +1,4 @@
-import { withGoogleAPIs, getCalendarClient } from "../google";
+import { withGoogleAPIs, getCalendarClient } from "../lib/google";
 import { tool as getCurrentUser } from "./get-current-user";
 
 type Input = {

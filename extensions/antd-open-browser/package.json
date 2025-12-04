@@ -5,6 +5,9 @@
   "description": "Quickly open Antd components",
   "icon": "logo.png",
   "author": "crazyair",
+  "contributors": [
+    "ErBlack"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,6 +18,25 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "title": "Language",
+      "description": "Select documentation language.",
+      "required": false,
+      "data": [
+        {
+          "value": "en-US",
+          "title": "en-US"
+        },
+        {
+          "value": "zh-CN",
+          "title": "zh-CN"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.31.0"
   },
@@ -23,6 +45,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "md-front-matter": "^1.0.4",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
@@ -31,6 +54,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "clone": "rm -rf repository && git clone https://github.com/ant-design/ant-design.git --single-branch --no-tags repository",
+    "generate": "node src/generate-data.mjs"
   }
 }
