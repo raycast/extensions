@@ -1,11 +1,16 @@
-import { AI } from "@raycast/api";
-import { preferences } from "../preferences";
+import { AI, environment, getPreferenceValues } from "@raycast/api";
+
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export const raycastTranslate = async (text: string): Promise<string> => {
   if (!text.trim()) return "";
 
   if (!preferences.enableRaycastTranslate) {
     return "";
+  }
+
+  if (!environment.canAccess(AI)) {
+    throw new Error("This feature requires Raycast Pro subscription");
   }
 
   try {

@@ -1,7 +1,9 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
+import { getPreferenceValues } from "@raycast/api";
 import { HttpsProxyAgent } from "https-proxy-agent";
-import { preferences } from "../preferences";
+
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export const openaiTranslate = async (text: string): Promise<string> => {
   if (!text.trim()) return "";

@@ -41,7 +41,10 @@ export function FormatList({ text }: FormatListProps) {
                 <Action
                   title="Paste"
                   icon={Icon.TextInput}
-                  shortcut={{ key: String(index + 1) as Keyboard.KeyEquivalent, modifiers: ["cmd"] }}
+                  shortcut={{
+                    macOS: { key: String(index + 1) as Keyboard.KeyEquivalent, modifiers: ["cmd"] },
+                    Windows: { key: String(index + 1) as Keyboard.KeyEquivalent, modifiers: ["ctrl"] },
+                  }}
                   onAction={async () => await Clipboard.paste(format.format(text))}
                 />
                 <Action

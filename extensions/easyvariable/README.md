@@ -5,6 +5,7 @@ EasyVariable is a Raycast extension that helps developers quickly generate stand
 ## Features
 
 - Support multiple variable naming styles
+
   - CONSTANT_CASE
   - camelCase
   - PascalCase
@@ -13,7 +14,7 @@ EasyVariable is a Raycast extension that helps developers quickly generate stand
 
 - Multiple translation engines support
   - Youdao Translate (Enabled by default, no configuration needed)
-  - Raycast Pro AI
+  - Raycast AI (Requires [Raycast Pro](https://raycast.com/pro) subscription)
   - Google Translate (Proxy required in certain regions)
   - OpenAI (Custom API supported)
   - Tencent Translate
@@ -31,12 +32,14 @@ EasyVariable is a Raycast extension that helps developers quickly generate stand
 ## Configuration
 
 ### Basic Settings
+
 - HTTP Proxy: Required for services like Google Translate
 - Translation Source Selection: Enable/disable different translation services
 
 ### API Configuration (Optional)
+
 - OpenAI API Baseurl/API Key/Model
-- Tencent Translate(Tencent Cloud tmt Service) SecretId/SecretKey
+- Tencent Translate (Tencent Cloud tmt Service) SecretId/SecretKey
 - GLM(ZhipuAI) API Key
 - Deepseek API Key
 
@@ -44,6 +47,7 @@ EasyVariable is a Raycast extension that helps developers quickly generate stand
 
 Input：`用户名称`
 Output：
+
 - CONSTANT: USER_NAME
 - camelCase: userName
 - PascalCase: UserName
