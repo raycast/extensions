@@ -1,6 +1,6 @@
 # Pipedrive Changelog
 
-## [Windows Support + Fix CHANGELOG Dates] - {PR_MERGE_DATE}
+## [Windows Support + Fix CHANGELOG Dates] - 2025-12-04
 
 - Update `shortcut`s to be cross platform
 - Fix Invalid Dates in CHANGELOG
