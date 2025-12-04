@@ -1,6 +1,6 @@
 # PlanWell Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2025-12-04
 
 ### Changed
 - Updated vault schema to use modern format (`occurrence 1` with space, not hyphen)
