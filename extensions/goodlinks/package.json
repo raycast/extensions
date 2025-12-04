@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "goodlinks",
+  "title": "GoodLinks",
+  "description": "Save, list, and open articles in GoodLinks",
+  "icon": "extension-icon.png",
+  "author": "nicolas-marien",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "subtitle": "GoodLinks",
+      "description": "Get a link from your clipboard and save it to GoodLinks.",
+      "mode": "no-view"
+    },
+    {
+      "name": "list-unread",
+      "title": "List Unread Links",
+      "subtitle": "GoodLinks",
+      "description": "List the unread links of your GoodLinks database.",
+      "mode": "view"
+    },
+    {
+      "name": "random-link",
+      "title": "Random Link",
+      "subtitle": "GoodLinks",
+      "description": "Open a random link from GoodLinks.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -11,7 +11,7 @@ jobs:
     if: ${{ !github.event.issue.pull_request }} && github.repository == 'raycast/extensions'
     runs-on: ubuntu-latest
     steps:
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
       - name: Setup Bot

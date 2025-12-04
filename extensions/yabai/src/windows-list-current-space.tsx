@@ -93,7 +93,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action title="Focus window" onAction={() => selectWindow(item.id)} />
+                <Action title="Focus Window" onAction={() => selectWindow(item.id)} />
               </ActionPanel.Section>
             </ActionPanel>
           }

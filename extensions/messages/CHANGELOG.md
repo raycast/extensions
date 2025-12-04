@@ -1,5 +1,9 @@
 # Messages Changelog
 
+## [Added Keyword] - 2025-02-26
+
+Added a "2FA" keyword for improved discovery
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Fix `Paste Latest OTP Code` Command for Phone numbers] - 2025-02-10

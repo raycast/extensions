@@ -272,6 +272,21 @@ export default function TaskActions({
           }
         />
 
+        {data?.user?.premium_status !== "not_premium" ? (
+          <Action.PickDate
+            icon={Icon.BullsEye}
+            title="Schedule Task Deadline"
+            type={Action.PickDate.Type.Date}
+            shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
+            onChange={(date) =>
+              updateTask({
+                id: task.id,
+                deadline: date ? { date: date.toISOString() } : { string: "no date" },
+              })
+            }
+          />
+        ) : null}
+
         <ActionPanel.Submenu
           icon={Icon.LevelMeter}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}

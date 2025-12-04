@@ -9,7 +9,8 @@
     "LenoxFro",
     "otatoPotato",
     "shelken",
-    "emiara"
+    "emiara",
+    "ViGeng"
   ],
   "license": "MIT",
   "preferences": [
@@ -57,7 +58,7 @@
         {
           "title": "Hyper",
           "value": "Hyper"
-        } 
+        }
       ],
       "default": "Terminal"
     },

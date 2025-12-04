@@ -44,6 +44,11 @@ Got the answer that you wanted? Great.
 
 # Models available
 
+## Claude 3.7
+
+- `claude-3-7-sonnet-latest`
+- `claude-3-7-sonnet-20250219`
+
 ## Claude 3.5
 
 - `claude-3-5-haiku-latest`

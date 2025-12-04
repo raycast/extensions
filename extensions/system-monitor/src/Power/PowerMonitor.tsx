@@ -27,7 +27,7 @@ export default function PowerMonitor() {
       icon={Icon.Plug}
       accessories={[{ text: data?.batteryData ? `${data?.batteryData?.batteryLevel} %` : "Loading…" }]}
       detail={<PowerMonitorDetail batteryData={data?.batteryData} isOnAC={data?.isOnAC} />}
-      actions={<Actions />}
+      actions={<Actions radioButtonNumber={3} />}
     />
   );
 }

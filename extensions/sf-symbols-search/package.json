@@ -4,9 +4,12 @@
   "title": "SF Symbols Search",
   "description": "Search and copy SF Symbols",
   "icon": "command-icon.png",
-  "author": "peteschaffner",
+  "author": "jffrykkn",
   "contributors": [
     "xilopaint"
+  ],
+  "pastContributors": [
+    "peteschaffner"
   ],
   "license": "MIT",
   "commands": [

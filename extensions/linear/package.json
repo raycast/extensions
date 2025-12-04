@@ -14,7 +14,8 @@
     "pernielsentikaer",
     "clemb8",
     "stelo",
-    "fil"
+    "fil",
+    "joeb"
   ],
   "pastContributors": [
     "mil3na"
@@ -1602,6 +1603,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

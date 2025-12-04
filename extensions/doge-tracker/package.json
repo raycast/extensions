@@ -1,0 +1,37 @@
+{
+  "name": "doge-tracker",
+  "title": "Department of Government Efficiency Tracker",
+  "description": "Track DOGE cost-saving initiatives and their progress via www.doge-tracker.com/",
+  "icon": "DOGE.png",
+  "author": "Osprey",
+  "categories": ["News", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "DOGE Initiatives Tracker",
+      "description": "Search all DOGE cost-saving initiatives",
+      "icon": "DOGE.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "eslint": "^8.57.0",
+    "@raycast/eslint-config": "1.0.6",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+} 

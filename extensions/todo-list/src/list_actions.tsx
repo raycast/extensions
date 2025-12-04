@@ -4,7 +4,7 @@ import _ from "lodash";
 import { editingAtom, newTodoTextAtom, searchBarTextAtom, searchModeAtom, todoAtom } from "./atoms";
 import DeleteAllAction from "./delete_all";
 import SearchModeAction from "./search_mode_action";
-import { compare, insertIntoSection } from "./utils";
+import { compare, insertIntoSection, parseTodoItem } from "./utils";
 
 const ListActions = () => {
   const [searchMode] = useAtom(searchModeAtom);
@@ -18,17 +18,8 @@ const ListActions = () => {
       await showToast(Toast.Style.Failure, "Empty todo", "Todo items cannot be empty.");
       return;
     }
-    todoSections.todo = [
-      ...insertIntoSection(
-        todoSections.todo,
-        {
-          title: newTodoText,
-          completed: false,
-          timeAdded: Date.now(),
-        },
-        compare
-      ),
-    ];
+    const newItem = parseTodoItem(newTodoText);
+    todoSections.todo = [...insertIntoSection(todoSections.todo, newItem, compare)];
     await clearSearchBar();
     setTodoSections(_.cloneDeep(todoSections));
   };

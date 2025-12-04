@@ -4,7 +4,7 @@ export async function generateUuids(
   uuidGenerator: () => string,
   numberOfUuids: number,
   upperCaseLetters = false,
-  type: UUIDType = UUIDType.UUIDV4
+  type: UUIDType = UUIDType.UUIDV4,
 ): Promise<string[]> {
   const uuids = Array.from(Array(numberOfUuids)).map(() => {
     const newUuid = uuidGenerator();

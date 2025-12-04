@@ -24,6 +24,10 @@ export const ITEM_TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
     icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.NOTE], tintColor: Color.PrimaryText },
     tooltip: ITEM_TYPE_TO_LABEL[ItemType.NOTE],
   },
+  [ItemType.SSH_KEY]: {
+    icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.SSH_KEY], tintColor: Color.SecondaryText },
+    tooltip: ITEM_TYPE_TO_LABEL[ItemType.SSH_KEY],
+  },
 };
 
 export function useItemAccessories(item: Item, folder: Folder | undefined) {
@@ -54,6 +58,9 @@ export function useItemAccessories(item: Item, folder: Folder | undefined) {
         });
       }
 
+      if (!ITEM_TYPE_TO_ACCESSORY_MAP[item.type]) {
+        throw new Error(`No accessory defined for item ${item.name} with type ${item.type}`);
+      }
       accessories.push(ITEM_TYPE_TO_ACCESSORY_MAP[item.type]);
 
       return accessories;

@@ -124,6 +124,20 @@
       ]
     },
     {
+      "name": "parseTypeID",
+      "title": "Parse TypeIDs",
+      "description": "Parse TypeID and copy resulting UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "typeID",
+          "type": "text",
+          "placeholder": "prefix_1234567890",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "viewHistory",
       "title": "View History",
       "description": "View the UUID history",
@@ -160,19 +174,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.0",
-    "typeid-js": "^1.1.0",
-    "ulidx": "^2.0.0",
-    "uuid": "^10.0.0"
+    "@raycast/api": "^1.90.0",
+    "typeid-js": "^1.2.0",
+    "ulidx": "^2.4.1",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^20.4.2",
     "@types/uuid": "^10.0.0",
-    "eslint": "^8.45.0",
-    "eslint-plugin-import": "^2.27.5",
-    "react-devtools": "^4.28.0",
-    "typescript": "^5.1.6"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

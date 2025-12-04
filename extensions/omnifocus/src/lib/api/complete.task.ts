@@ -10,4 +10,7 @@ export async function completeTask(taskId: string) {
     omnifocus.markComplete(task)
     return true
   `);
+
+  // NOTE: the task is not immediately removed from perspectives
+  await new Promise((r) => setTimeout(r, 500));
 }

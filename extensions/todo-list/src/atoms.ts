@@ -13,6 +13,7 @@ export interface TodoSections {
 export interface TodoItem {
   title: string;
   tag?: string;
+  dueDate?: number;
   completed: boolean;
   priority?: 1 | 2 | 3;
   timeAdded: number;
@@ -64,6 +65,7 @@ export const searchModeAtom = atom(false);
 export const searchBarTextAtom = atom("");
 export const newTodoTextAtom = atom((get) => get(searchBarTextAtom).trim());
 export const editingTagNameAtom = atom("");
+export const editingDueDateValueAtom = atom(0);
 export const editingAtom = atom<
   | false
   | {
@@ -72,6 +74,13 @@ export const editingAtom = atom<
     }
 >(false);
 export const editingTagAtom = atom<
+  | false
+  | {
+      sectionKey: keyof TodoSections;
+      index: number;
+    }
+>(false);
+export const editingDueDateAtom = atom<
   | false
   | {
       sectionKey: keyof TodoSections;

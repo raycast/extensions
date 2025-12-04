@@ -1,5 +1,7 @@
 # Slack Changelog
 
+## [Added new scope] - 2025-02-26
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [New "Copy Message URL" action] - 2025-02-10

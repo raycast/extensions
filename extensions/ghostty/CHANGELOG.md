@@ -1,5 +1,9 @@
 # Ghostty Changelog
 
+## [Command] - 2025-02-23
+
+- Run launch configurations split pane bug fix
+
 ## [Command] - 2025-02-21
 
 - Add new command to store and run launch configurations

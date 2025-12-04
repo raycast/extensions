@@ -1,9 +1,9 @@
-import { execFile } from "child_process";
-import { fileURLToPath } from "url";
-import * as path from "path";
-import { promisify } from "util";
 import { showToast, Toast } from "@raycast/api";
+import { execFile } from "child_process";
 import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 

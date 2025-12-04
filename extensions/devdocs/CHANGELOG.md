@@ -1,5 +1,9 @@
 # DevDocs Extension
 
+## [Changes] - 2025-02-26
+
+- Add support for search aliases (filtering on exact match)
+
 ## [Fix] - 2024-10-02
 
 - Account for settings file imports with multiple preferences set

@@ -17,7 +17,7 @@ const RepromptForm = (props: RepromptFormProps) => {
       navigationTitle="Confirmation Required"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Confirm" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
+          <Action.SubmitForm title="Confirm" onSubmit={onSubmit} />
         </ActionPanel>
       }
     >

@@ -9,6 +9,9 @@
   ],
   "icon": "icon.png",
   "author": "jwickers",
+  "contributors": [
+    "ViGeng"
+  ],
   "license": "MIT",
   "commands": [
     {

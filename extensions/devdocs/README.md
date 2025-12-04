@@ -6,6 +6,8 @@ Browse [DevDocs](https://devdocs.io/) documenation from Raycast.
 
 ### Search Documentations
 
+When searching, some of the official aliases from DevDocs will work for an exact match. For example "js" will filter just to the "JavaScript" documentation.
+
 With a selected documentation, you may use the "Save as Quicklink" action to scope future entries search to just this documentation.
 
 ### Search Entries

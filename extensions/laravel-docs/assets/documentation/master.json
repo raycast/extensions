@@ -133,6 +133,14 @@
       "url": "https://laravel.com/docs/master/collections"
     },
     {
+      "title": "Concurrency",
+      "url": "https://laravel.com/docs/master/concurrency"
+    },
+    {
+      "title": "Context",
+      "url": "https://laravel.com/docs/master/context"
+    },
+    {
       "title": "Contracts",
       "url": "https://laravel.com/docs/master/contracts"
     },
@@ -239,6 +247,10 @@
     {
       "title": "Redis",
       "url": "https://laravel.com/docs/master/redis"
+    },
+    {
+      "title": "MongoDB",
+      "url": "https://laravel.com/docs/master/mongodb"
     }
   ],
   "Eloquent ORM": [

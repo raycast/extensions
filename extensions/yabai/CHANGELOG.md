@@ -1,5 +1,14 @@
 # Yabai Changelog
 
+## [Added search windows command] - 2025-02-25
+
+- Adds "Focus Next Same App" command
+  - Focuses on the next window with the same application name
+  - MacOS has same feature, but it is only available in the current space
+- Adds "Search Windows" command
+  - Searches for windows managed by Yabai
+  - Allows to search by window title or application name, it is really useful when windows have the same app name
+
 ## [Added window movement commands] - 2024-11-25
 
 - Adds "Focus Active Window" commands

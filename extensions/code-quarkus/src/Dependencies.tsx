@@ -15,7 +15,7 @@ import { writeFileSync } from "fs";
 import { QuarkusVersion } from "./models/QuarkusVersion";
 import { Configuration } from "./models/Configuration";
 import { Dependency } from "./models/Dependency";
-import { getCodeQuarkusUrl, getParams } from "./utils";
+import { getCodeQuarkusUrl, getParams, openInIDE, unzipFile } from "./utils";
 import { showInFinder } from "@raycast/api";
 import { BASE_URL, fetchQuarkusExtensions } from "./api";
 import { getPreferenceValues } from "@raycast/api";
@@ -94,7 +94,9 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
       console.log("configured directory:", downloadsPath);
 
       writeFileSync(downloadsPath, buffer);
-      await showInFinder(downloadsPath);
+
+      await afterDownload(dir);
+
       await popToRoot();
 
       await showToast({
@@ -111,6 +113,40 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
         message: error instanceof Error ? error.message : "Failed to generate project",
       });
     }
+  }
+
+  async function afterDownload(dir: string): Promise<void> {
+    const directoryPath = path.join(dir, configuration.artifact);
+    const downloadsPath = `${directoryPath}.zip`;
+    if (!preferences.unzip) return;
+    const success = unzipFile(downloadsPath, dir);
+    if (!success) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Failed to unzip project",
+      });
+      return;
+    }
+
+    if (preferences.showInFinder) {
+      console.debug("opening finder", directoryPath);
+      await showInFinder(directoryPath);
+    }
+    if (!preferences.openInIDE) {
+      console.debug("Not opening an IDE");
+      return;
+    }
+    if (!preferences.ide) {
+      console.warn("Not IDE configured");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No IDE selected",
+        message: "Please select an IDE in extension preferences",
+      });
+      return;
+    }
+    await openInIDE(directoryPath, preferences.ide);
   }
 
   function setConfigDependencies(deps: string[]) {

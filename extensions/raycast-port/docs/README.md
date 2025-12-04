@@ -2,8 +2,8 @@
 
 ## APIs
 
-- [AI.ask](./ai-ask.md)
-- [BrowserExtension](./brower-extension.md)
+- [AI.ask](https://github.com/raycast/extensions/blob/main/extensions/raycast-port/docs/ai-ask.md)
+- [BrowserExtension](https://github.com/raycast/extensions/blob/main/extensions/raycast-port/docs/browser-extension.md)
 
 ## Tips
 

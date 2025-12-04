@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.93.0 - 2025-02-26
+
+### ✨ New
+
+- **Tools**: We are introducing a new type of entry points for extensions: Tools. They turn a regular extension into an AI Extension. As opposed to a command, they don’t show up in the root search and the user can’t directly interact with them. Instead, they are functionalities that the AI can use to interact with an extension.
+
 ## 1.91.0 - 2025-02-05
 
 ### ✨ New

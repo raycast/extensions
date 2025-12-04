@@ -8,5 +8,9 @@ declare module "openai" {
     interface ChatCompletionChunk {
       citations?: string[];
     }
+    interface ChatCompletionCreateParamsNonStreaming {
+      search_domain_filter?: string[];
+      search_recency_filter?: string;
+    }
   }
 }

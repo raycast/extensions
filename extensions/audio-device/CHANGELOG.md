@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Update] - 2025-02-25
+
+- Added icons for AirPods, AirPlay, and Bluetooth devices
+
 ## [Update] - 2024-06-26
 
 - Added keywords for better discovery

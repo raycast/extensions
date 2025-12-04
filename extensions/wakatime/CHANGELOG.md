@@ -1,5 +1,11 @@
 # WakaTime Changelog
 
+## [Customizing API Endpoint] - 2025-02-28
+
+### Added
+
+- Add support for customizing the API endpoint
+
 ## [Fixes Data Range Names] - 2023-02-18
 
 ### Fixed

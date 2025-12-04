@@ -1,14 +1,15 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { stopTracking } from "./tasks";
+import { showErrorHUD } from "./utils";
 
 async function StopTracking() {
-  closeMainWindow();
-
-  const successfullyStopped = await stopTracking();
-
-  const message = successfullyStopped ? "Successfully stopped tracking ⏸️" : "Could not stop tracking task";
-
-  await showHUD(message);
+  try {
+    closeMainWindow();
+    const successfullyStopped = await stopTracking();
+    await showHUD(successfullyStopped ? "Stopped tracking" : "Could not stop tracking task");
+  } catch (error) {
+    await showErrorHUD("stopping tracking", error);
+  }
 }
 
 export default StopTracking;

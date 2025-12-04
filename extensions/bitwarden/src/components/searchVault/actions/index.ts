@@ -13,3 +13,4 @@ export { default as CopyCardFieldsActions } from "./CopyCardFieldsActions";
 export { default as CopyLoginUrisActions } from "./CopyLoginUrisActions";
 export { default as CopyNotesAction } from "./CopyNotesAction";
 export { default as CopyCustomFieldsActions } from "./CopyCustomFieldsActions";
+export { default as CopyPublicKeyAction } from "./CopyPublicKeyAction";

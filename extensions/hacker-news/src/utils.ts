@@ -1,5 +1,6 @@
 import { List, Icon, Image } from "@raycast/api";
 import Parser from "rss-parser";
+import { isUrlSaved } from "./readwise";
 
 export function getIcon(index: number): Image.ImageLike {
   const svg = `
@@ -21,17 +22,31 @@ export function getIcon(index: number): Image.ImageLike {
   };
 }
 
-export function getAccessories(item: Parser.Item) {
-  const accessories = new Array<List.Item.Accessory>();
+/**
+ * Get all accessories for a story item
+ *
+ * @param item - The story item to get accessories for
+ * @param isSaved - Optional parameter to override the saved status check
+ * @returns An array of accessories to display
+ */
+export function getAccessories(item: Parser.Item, isSaved?: boolean): List.Item.Accessory[] {
+  const accessories: List.Item.Accessory[] = [];
 
-  const comments = getComments(item);
-  if (comments) {
-    accessories.push({ icon: Icon.Bubble, text: comments });
+  // Saved Document
+  if ((isSaved !== undefined && isSaved) || (isSaved === undefined && item.link && isUrlSaved(item.link))) {
+    accessories.push({ icon: Icon.SaveDocument, tooltip: "Saved to Readwise" });
   }
 
+  // Points
   const points = getPoints(item);
   if (points) {
     accessories.push({ icon: Icon.ArrowUpCircle, text: points });
+  }
+
+  // Comments
+  const comments = getComments(item);
+  if (comments) {
+    accessories.push({ icon: Icon.Bubble, text: comments });
   }
 
   return accessories;

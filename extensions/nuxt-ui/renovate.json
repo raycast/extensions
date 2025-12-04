@@ -1,0 +1,9 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>HugoRCD/renovate-config"
+  ],
+  "ignoreDeps": [
+    "eslint"
+  ]
+}

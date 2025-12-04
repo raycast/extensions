@@ -166,7 +166,8 @@ compiled_raycast_swift
 # VSCode
 .vscode
 
-# Root lockfiles
+# Root unused files
+/package.json
 /package-lock.json
 
 # Non-npm lockfiles

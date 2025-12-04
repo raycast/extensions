@@ -1,11 +1,10 @@
 import fetch, { HeadersInit } from "node-fetch";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, PreferenceValues } from "@raycast/api";
 
 import {
   MinifluxApiError,
   MinifluxEntries,
   MinifluxEntry,
-  // IconInfo,
   OriginArticle,
   Category,
   EntryStatus,
@@ -15,6 +14,7 @@ import {
   ReadwiseRequest,
   ReadwiseResponse,
   ReadwiseError,
+  MinifluxApiErrorResponse,
 } from "./types";
 
 const removeTrailingSlash = (baseUrl: string): string => (baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl);
@@ -25,10 +25,10 @@ const requestApi = async <T>(
   method: "GET" | "POST" | "PUT" = "GET",
   body?: object
 ): Promise<T> => {
-  const { baseUrl, apiKey }: Preferences = getPreferenceValues();
+  const { baseUrl, apiKey }: PreferenceValues = getPreferenceValues();
 
   if (!baseUrl || !apiKey) {
-    throw new Error("baseUrl and apikey are required!");
+    throw new Error("baseUrl and apikey are required");
   }
 
   const apiUrl = removeTrailingSlash(baseUrl);
@@ -49,7 +49,8 @@ const requestApi = async <T>(
   }
 
   if (!response.ok) {
-    throw (await response.json()) as MinifluxApiError;
+    const errorJson = (await response.json()) as MinifluxApiErrorResponse;
+    throw new MinifluxApiError(errorJson);
   }
 
   return (await response.json()) as T;
@@ -58,25 +59,25 @@ const requestApi = async <T>(
 const getEntriesWithParams = async <T>(queryParams: string): Promise<T> => requestApi<T>("/v1/entries", queryParams);
 
 const search = async (query: string): Promise<MinifluxEntries> => {
-  const { searchLimit }: Preferences.Search = getPreferenceValues();
+  const preferences: PreferenceValues = getPreferenceValues();
+  const searchLimit = preferences.searchLimit;
 
   return getEntriesWithParams<MinifluxEntries>(`?search=${query}${searchLimit ? "&limit=" + searchLimit : ""}`);
 };
 
 const getRecentEntries = async (): Promise<MinifluxEntries> => {
-  const { feedLimit }: Preferences.ReadRecentEntries = getPreferenceValues();
+  const preferences: PreferenceValues = getPreferenceValues();
+  const feedLimit = preferences.feedLimit;
+
   return getEntriesWithParams<MinifluxEntries>(`?status=unread&direction=desc&limit=${feedLimit}`);
 };
 
 const getEntryUrlInMiniflux = ({ id, status }: MinifluxEntry): string => {
-  const { baseUrl }: Preferences = getPreferenceValues();
+  const { baseUrl }: PreferenceValues = getPreferenceValues();
   const entryStatus = status === "read" ? "history" : status;
 
   return `${baseUrl}/${entryStatus}/entry/${id}`;
 };
-
-// const getIconForFeed = async ({ feed_id }: MinifluxEntry): Promise<IconInfo> =>
-//   requestApi<IconInfo>(`/v1/feeds/${feed_id}/icon`);
 
 const getOriginArticle = async ({ id }: MinifluxEntry): Promise<OriginArticle> =>
   requestApi<OriginArticle>(`/v1/entries/${id}/fetch-content`);
@@ -86,9 +87,15 @@ const getCategories = async (): Promise<Category[]> => requestApi<Category[]>("/
 const toggleBookmark = async ({ id }: MinifluxEntry): Promise<boolean> =>
   (await requestApi<number>(`/v1/entries/${id}/bookmark`, "", "PUT")) === 204;
 
-const updateEntries = async (id: number, status: EntryStatus): Promise<boolean> =>
+const updateEntry = async (id: number, status: EntryStatus): Promise<boolean> =>
   (await requestApi<number>(`/v1/entries`, "", "PUT", {
     entry_ids: [id],
+    status,
+  })) === 204;
+
+export const updateEntries = async (ids: number[], status: EntryStatus): Promise<boolean> =>
+  (await requestApi<number>(`/v1/entries`, "", "PUT", {
+    entry_ids: ids,
     status,
   })) === 204;
 
@@ -102,7 +109,7 @@ const refreshAllFeed = async (): Promise<boolean> => (await requestApi<number>(`
 
 // Readwise API
 const saveToReadwise = async (body: ReadwiseRequest): Promise<ReadwiseResponse> => {
-  const { readwiseToken }: Preferences = getPreferenceValues();
+  const { readwiseToken }: PreferenceValues = getPreferenceValues();
 
   const response = await fetch("https://readwise.io/api/v3/save/", {
     method: "POST",
@@ -114,7 +121,7 @@ const saveToReadwise = async (body: ReadwiseRequest): Promise<ReadwiseResponse> 
   });
 
   if (response.status === 201) {
-    throw new Error("Document already exist");
+    throw new Error("Document already exists");
   }
 
   if (!response.ok) {
@@ -131,6 +138,7 @@ export default {
   getOriginArticle,
   getCategories,
   toggleBookmark,
+  updateEntry,
   updateEntries,
   discoverFeed,
   createFeed,

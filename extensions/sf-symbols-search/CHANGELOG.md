@@ -1,5 +1,9 @@
 # SF Symbols Changelog
 
+## [Bugfix] - 2025-02-26
+
+- Fixes an issue that caused the extension not to load with pinned and recently used symbols from a previous version
+
 ## [UI/UX Improvements] - 2025-02-21
 
 - Added confirmation dialog with destructive style when clearing all recent symbols.

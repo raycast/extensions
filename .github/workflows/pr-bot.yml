@@ -17,7 +17,7 @@ jobs:
         with:
           github_event_name: ${{ github.event_name }}
 
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
       - name: Setup Bot
