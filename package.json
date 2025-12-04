@@ -8,6 +8,9 @@
     "Productivity",
     "Design Tools"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {

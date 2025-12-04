@@ -1,6 +1,6 @@
 # Changelog
 
-## [Updated] - 2025-12-02
+## [Updated] - {PR_MERGE_DATE}
 
 - Updated extension icon
 - Added persistence for last used format and compression settings
