@@ -2,7 +2,7 @@
 
 All notable changes to the **Text Editor** extension will be documented here.
 
-## [1.0.0] - 2025-11-29
+## [1.0.0] - {PR_MERGE_DATE}
 ### Added
 - Initial release of **Text Editor** (formerly QuickDraft).
 - Core editor form with **Title** and **Contents** fields.
