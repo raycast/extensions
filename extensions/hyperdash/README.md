@@ -3,71 +3,122 @@
 <div align="center">
   <img src="icon.png" width="128" height="128" alt="hyperDASH Icon">
 
-  **A Raycast extension for managing Obsidian Projects and Tasks**
+  **A standalone todo manager for Raycast, fully compatible with Obsidian**
 
-  ![Version](https://img.shields.io/badge/version-1.0.7-green)
+  ![Version](https://img.shields.io/badge/version-1.0.14-green)
   ![License](https://img.shields.io/badge/license-MIT-blue)
   ![TaskNotes](https://img.shields.io/badge/TaskNotes-4.0.1-orange)
 </div>
 
 ---
 
-A powerful Raycast extension for managing Obsidian Projects and Tasks with full TaskNotes 4.0.1 compatibility. Seamlessly browse, filter, and organize your Obsidian vault's tasks and projects directly from Raycast.
+Your lightweight, file-based todo manager in Raycast. Manage tasks and projects using simple markdown files with YAML frontmatter - use it standalone or sync with Obsidian.
+
+**Works anywhere** - uses base files for configuration and `.md` files for todos. No Obsidian required, but fully compatible with TaskNotes 4.0.1 and Bases plugin when you want the integration.
 
 ![Hyperdash Screenshot](metadata/hyperdash-1.png)
 
-## Features
+## Quick Start
 
-- **Tag-based filtering** via Obsidian Bases files
-- **TaskNotes 4.0.1 Support**:
-  - Recurrence patterns with `recurrence` and `recurrence_anchor` fields
-  - Alphabetical priority sorting (use `1-urgent`, `2-high`, `3-medium`, `4-low`)
-  - Time tracking with `time_tracked` and `time_estimate` fields
-- **Smart sorting**: Priority → Due Date → Modified Time
-- **Performance optimized**: Configurable result limits for large vaults
-- **Customizable display**: Show/hide recurrence, priority, and time tracking
+**New to Hyperdash?** Start here:
+1. Download the **[examples folder](examples/)** - includes a Things 3-style onboarding experience
+2. Open `sample-vault/` in Obsidian and explore the interactive examples
+3. Each example task demonstrates a different feature while being genuinely useful
+4. When ready, check the **[Setup Guide](SETUP_GUIDE.md)** to customize for your workflow
+
+The examples teach by doing - just like Things 3's excellent first-time experience!
+
+## Use It Your Way
+
+### Standalone Mode
+Use hyperDASH without Obsidian! Just need:
+- A `.base` configuration file (defines your todo/project filters)
+- Markdown files with YAML frontmatter for tasks and projects
+- Any text editor or sync service (Dropbox, iCloud, Git, etc.)
+
+**Getting Started Standalone:**
+1. Download the **[examples folder](examples/)** - includes ready-to-use sample vault
+2. You'll get a complete Obsidian vault with `.base` files and interactive examples
+3. Open `sample-vault/` in Obsidian
+4. Point hyperDASH preferences at the base files (already in the vault!)
+5. Explore the examples, then delete them and add your own tasks!
+
+Your tasks live in simple `.md` files you can edit anywhere. HyperDASH reads the base file to know what to display and where to save new tasks. The examples are designed like Things 3's onboarding - immediately useful while teaching you the system.
+
+### With Obsidian
+Already using Obsidian? Perfect! HyperDASH integrates seamlessly:
+- Works with existing TaskNotes 4.0.1 setups
+- Leverages Bases plugin configurations
+- Two-way sync - edit in Raycast or Obsidian
+- All your plugins and themes still work
+
+## What You Get
+
+### Standalone Todo Management
+- **Quick actions**: Mark as Done (Cmd+D), Edit Title, Set Priority, Delete tasks
+- **@ mentions**: Type `@project-name` to quickly filter and assign projects
+- **File-based**: Simple `.md` files with YAML frontmatter - edit anywhere, sync everywhere
+- **Smart filtering**: Configure views with base files (no Obsidian plugin required)
+- **Create on the fly**: Add new tasks and projects directly from Raycast
+
+### Obsidian Integration (Optional)
+- **Full TaskNotes 4.0.1 compatibility** when using with Obsidian:
+  - Recurrence patterns (`recurrence` and `recurrence_anchor`)
+  - Alphabetical priority sorting (`1-urgent`, `2-high`, `3-medium`, `4-low`)
+  - Time tracking (`time_tracked` and `time_estimate`)
+- **Bases plugin support**: Leverage existing base file configurations
+- **Bidirectional sync**: Edit in Raycast or Obsidian, changes reflected everywhere
+
+### Performance & Flexibility
+- **Intelligent sorting**: Priority → Due Date → Modified Time
+- **Fast performance**: Handles large collections (30K+ files) with configurable limits
+- **Your way**: Show or hide recurrence, priority, and time tracking
+- **Instant cache**: Subsequent loads are blazing fast
 
 ## Setup
 
-### Required Preferences
+### What to Configure
 
-1. **Task Notes Path**: Path to scan for todos (e.g., `/path/to/vault/todos`)
-2. **Project Path**: Path to scan for projects (e.g., `/path/to/vault`)
-3. **Todo Base Path**: Path to your Bases .base file with todo tag definitions
-4. **Project Base Path**: Path to your Bases .base file with project tag definitions
+Point Hyperdash at your base files:
+
+1. **Todo Base File**: Your `.base` file for todos (vault gets auto-detected)
+2. **Todo View Name**: Which view to show (like 'Todo' or 'Done')
+3. **Project Base File**: Your `.base` file for projects
+4. **Project View Name**: Which view to show (like 'All' or 'Current')
 
 ### Display Options
 
-- **Show recurrence info**: Display recurrence patterns for recurring tasks (default: enabled)
-- **Show priority**: Display task priority with alphabetical sorting (default: enabled)
-- **Show time tracking**: Display time tracked and estimates (default: disabled)
+Toggle what you see:
+- **Recurrence info**: Show when tasks repeat (on by default)
+- **Priority**: Show task priority (on by default)
+- **Time tracking**: Show tracked time and estimates (on by default)
 
-### Performance
+### Performance Tuning
 
-- **Maximum Results**: Limit number of tasks displayed (default: 500)
-  - Helps with large vaults (30,000+ tasks)
-  - Adjust based on your vault size
+- **Maximum Results**: Cap displayed tasks at 500 (default) or whatever works for your vault
+  - Got 30K+ tasks? Dial this down to 200-300
+  - Smaller vault? Crank it up
 
 ## TaskNotes 4.0.1 Compatibility
 
-### Priority Naming Convention
+### Priority Naming
 
-**IMPORTANT**: TaskNotes 4.0.1 uses **alphabetical sorting** for priorities.
+TaskNotes sorts priorities alphabetically, so use numbers to keep them in order:
 
-Use naming like:
 - `1-urgent` or `1-high`
 - `2-high` or `2-important`
 - `3-medium` or `3-normal`
 - `4-low` or `4-someday`
 
-The numbers ensure proper alphabetical sorting (1 comes before 2, etc.).
+Numbers first = proper sorting. Simple.
 
-### Recurrence Fields
+### Recurrence
 
-- **`recurrence`**: Recurrence pattern (e.g., "weekly", "monthly", "every 2 weeks")
+Set tasks to repeat:
+- **`recurrence`**: Pattern like "weekly", "monthly", "every 2 weeks"
 - **`recurrence_anchor`**: When to recur from
-  - `"completion"`: Recur from completion date (TaskNotes 4.0.1 feature)
-  - Not set or other value: Recur from original due date
+  - `"completion"`: Next occurrence from when you finish it
+  - Leave blank: Next occurrence from original due date
 
 Example frontmatter:
 ```yaml
@@ -84,10 +135,11 @@ time_estimate: 2
 
 ### Time Tracking
 
-- **`time_tracked`**: Hours spent (number)
-- **`time_estimate`**: Estimated hours (number)
+Track your hours:
+- **`time_tracked`**: Hours you've spent
+- **`time_estimate`**: Hours you think it'll take
 
-Display format: `2h tracked` or `2h / 4h` (tracked/estimate)
+Shows as `2h tracked` or `2h / 4h` (tracked/estimate)
 
 ## Supported Fields
 
@@ -106,50 +158,80 @@ Display format: `2h tracked` or `2h / 4h` (tracked/estimate)
 ## Commands
 
 ### Task Notes
-Browse and manage all todos with smart grouping by status:
-- In Progress
-- Up Next
-- Todo
-- Hold/Stuck
-- Waiting
-- Someday
+Browse and manage todos grouped by status:
+- **In Progress** - Active tasks
+- **Up Next** - Queued for action
+- **Todo** - Your backlog
+- **Hold/Stuck** - Blocked tasks
+- **Waiting** - Awaiting external input
+- **Someday** - Future ideas
+
+**Quick Actions:**
+- `Cmd+D` - Mark as Done
+- `Cmd+K` → Edit Title - Rename task and file
+- `Cmd+K` → Set Priority - Choose 1-urgent through 4-low
+- `Cmd+K` → Set Status - Change task status
+- `Cmd+K` → Set Project - Assign to project (use @ to filter)
+- `Cmd+K` → Delete - Remove task with confirmation
 
 ### Project Notes
-Browse and manage project notes
+Manage projects grouped by status:
+- **Planning** - Early stage
+- **Research** - Gathering info
+- **Up Next** - Ready to start
+- **In Progress** - Currently active
+- **On Hold** - Paused
+- **Someday** - Future projects
 
-## Performance Tips
+**Same quick actions** as tasks, plus project-specific date tracking
 
-For vaults with 1000+ tasks:
-1. Set "Maximum Results" to 200-500
-2. Use specific "Vault Path" (e.g., `/vault/tc/todo` instead of `/vault`)
-3. Disable time tracking display if not needed
+## Tips & Tricks
 
-## Migration from Earlier Versions
+### Refreshing Your Lists
+Made changes to notes outside of Raycast? Just hit `Cmd+R` to refresh and clear the cache. Works from:
+- Any todo or project item
+- The "Create New" section when searching
+- The empty view when no items are found
 
-If upgrading from a version before TaskNotes 4.0.1 compatibility:
+This ensures you always see the latest data from your vault, especially handy after deleting or modifying notes elsewhere.
 
-1. **Update priority names**: Rename priorities to use alphabetical sorting (e.g., `high` → `1-high`)
-2. **Review recurrence**: Check if any tasks use `recurrence` field and add `recurrence_anchor` if needed
-3. **Adjust max results**: If experiencing slowness, lower the maximum results setting
+## If Things Are Slow
+
+Got a massive vault? Drop "Maximum Results" to 200-300.
+
+## Upgrading from Earlier Versions
+
+Coming from pre-4.0.1?
+
+1. **Priorities**: Add numbers - `high` becomes `1-high`
+2. **Recurrence**: Add `recurrence_anchor` if you want tasks to recur from completion
+3. **Performance**: Lower max results if things feel sluggish
 
 ## Installation
 
-### From Source (Current)
+### From Raycast Store (Recommended)
 
-1. Clone or download this repository
-2. Open Terminal and navigate to the extension folder
-3. Run `npm install` to install dependencies
-4. Run `./build.sh` to build the extension
-5. Open Raycast → Extensions → '+' → Add Script Directory
-6. Select the `hyperdash-raycast` folder
+Search for "hyperDASH" in the Raycast Store and hit Install.
 
-### From Raycast Store (Coming Soon)
+**Note:** The extension has been submitted to the Raycast Store and is currently under review. Once approved, this will be the easiest way to install and get automatic updates.
 
-Search for "hyperDASH" in the Raycast Store and click Install.
+### From Source (Advanced)
+
+Want to run the latest development version?
+
+1. Clone this repo
+2. `npm install`
+3. `npm run build`
+4. Raycast → Extensions → '+' → Add Script Directory
+5. Point it at the `hyperdash-raycast` folder
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Contributors
+
+- [Jeremy Allen](https://github.com/jeremysallen) - Creator & Primary Developer
 
 ## License
 
