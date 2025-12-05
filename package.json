@@ -4,6 +4,7 @@
   "title": "Reboot to BIOS",
   "description": "Quickly reboot your Windows PC directly to BIOS firmware settings",
   "icon": "extension-icon.png",
+  "version": "1.0.0",
   "license": "MIT",
   "commands": [
     {
@@ -20,10 +21,42 @@
           "title": "Confirmation Dialog",
           "description": "Show confirmation before rebooting. Disable for instant hotkey execution.",
           "default": true,
-          "label": "Show confirmation before rebooting",
-          "icon": "extension-icon.png"
+          "label": "Show confirmation before rebooting"
+        },
+        {
+          "name": "rebootDelay",
+          "type": "dropdown",
+          "required": false,
+          "title": "Reboot Delay",
+          "description": "Seconds to wait before restarting. Use 0 for immediate reboot.",
+          "default": "10",
+          "data": [
+            {
+              "title": "Immediate (0s)",
+              "value": "0"
+            },
+            {
+              "title": "3 seconds",
+              "value": "3"
+            },
+            {
+              "title": "5 seconds",
+              "value": "5"
+            },
+            {
+              "title": "10 seconds",
+              "value": "10"
+            }
+          ]
         }
       ]
+    },
+    {
+      "name": "cancel-reboot",
+      "title": "Cancel Reboot",
+      "description": "Cancel any pending reboot to BIOS",
+      "mode": "no-view",
+      "subtitle": "System"
     }
   ],
   "dependencies": {
@@ -51,5 +84,15 @@
   ],
   "categories": [
     "System"
+  ],
+  "keywords": [
+    "bios",
+    "uefi",
+    "firmware",
+    "reboot",
+    "restart",
+    "boot",
+    "settings",
+    "cancel"
   ]
 }
