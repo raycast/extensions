@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { SessionState, SessionResult, SessionConfig } from "../types";
 import { createSessionResult } from "../engine/session";
 import { Practice } from "../views/Practice";
@@ -22,12 +23,8 @@ export default function TypingCommand() {
       try {
         const userConfig = await getConfig();
         setConfig(userConfig);
-      } catch {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Failed to load preferences",
-        });
+      } catch (error) {
+        await showFailureToast(error, { title: "Failed to load preferences" });
       }
     };
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { ActionPanel, Action, showToast, Toast, List, Form } from "@raycast/api";
+import { ActionPanel, Action, List, Form } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { SessionState, SessionEvent, SessionConfig, RomanizerState } from "../types";
 import { createInitialSession, reduceSession, getRemainingSeconds } from "../engine/session";
 import { formatTime } from "../utils/time";
@@ -94,11 +95,7 @@ export function Practice({ config, onComplete }: PracticeProps) {
     const { target, usedSet } = pickTarget({ reset: true });
 
     if (!target) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "No available items",
-      });
+      showFailureToast("No available items");
       return;
     }
 
@@ -133,11 +130,7 @@ export function Practice({ config, onComplete }: PracticeProps) {
     if (sessionConfig.practiceMode === "word") {
       const { target, usedSet } = pickTarget();
       if (!target) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "No available items",
-        });
+        showFailureToast("No available items");
         setSessionState((prev) => reduceSession(prev, { type: "finish" }));
         return;
       }
@@ -251,11 +244,7 @@ export function Practice({ config, onComplete }: PracticeProps) {
     const { target: nextTarget, usedSet } = pickTarget();
 
     if (!nextTarget) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "No available items",
-      });
+      showFailureToast("No available items");
       setSessionState((prev) => reduceSession(prev, { type: "finish" }));
       return;
     }

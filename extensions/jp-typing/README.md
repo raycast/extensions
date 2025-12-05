@@ -1,96 +1,96 @@
-# 日本語タイピング練習 (Raycast Extension)
+# Japanese Typing Practice (Raycast Extension)
 
-日本語のローマ字タイピングを練習するためのRaycast拡張機能です。リアルタイムフィードバックと履歴管理機能を備えています。
+A Raycast extension for practicing Japanese romaji typing with real-time feedback and history management.
 
-## 概要
+## Overview
 
-### 主な機能
-- **リアルタイムタイピング練習**: 日本語の単語・短文を題材にローマ字入力を練習
-- **表記ゆれ対応**: JIS、ヘボン式、寛容な入力方式をサポート
-- **進捗可視化**: CPM/WPM、正確性、連続正打数をリアルタイム表示
-- **履歴管理**: 練習結果をローカル保存し、統計情報を表示
-- **設定可能**: 練習時間、ローマ字規則、読み表示などをカスタマイズ
-- **練習モード**: 単語モードと文章モードを選択可能
-- **履歴保持設定**: 保存する履歴数を調整可能（10〜300件）
+### Key Features
+- **Real-time Typing Practice**: Practice romaji input with Japanese words and sentences
+- **Notation Variation Support**: Supports JIS, Hepburn, and liberal input methods
+- **Progress Visualization**: Real-time display of CPM/WPM, accuracy, and consecutive correct hits
+- **History Management**: Locally saves practice results and displays statistics
+- **Customizable Settings**: Configure practice time, romaji rules, reading display, and more
+- **Practice Modes**: Choose between word mode and sentence mode
+- **History Retention Settings**: Adjustable number of saved history items (10-300)
 
-### 対応プラットフォーム
+### Supported Platforms
 - macOS 13+
 - Windows 10+
-- Raycast 最新安定版
+- Latest stable version of Raycast
 
-## リポジトリ構成
+## Repository Structure
 
 ```
 src/
 ├── commands/
-│   └── typing.tsx          # メインコマンドのエントリーポイント
+│   └── typing.tsx          # Main command entry point
 ├── views/
-│   ├── Practice.tsx        # 練習画面コンポーネント
-│   ├── Result.tsx          # 結果表示画面コンポーネント
-│   └── components/         # UIサブコンポーネント
+│   ├── Practice.tsx        # Practice screen component
+│   ├── Result.tsx          # Result display component
+│   └── components/         # UI sub-components
 ├── engine/
-│   ├── romanizer.ts        # ローマ字変換エンジン
-│   ├── scorer.ts           # 採点・メトリクス計算
-│   └── session.ts          # セッション状態管理 (FSM)
+│   ├── romanizer.ts        # Romaji conversion engine
+│   ├── scorer.ts           # Scoring and metrics calculation
+│   └── session.ts          # Session state management (FSM)
 ├── storage/
-│   ├── history.ts          # 履歴保存・取得
-│   ├── prefs.ts            # 設定管理
-│   └── schema.ts           # スキーマ定義
+│   ├── history.ts          # History saving and retrieval
+│   ├── prefs.ts            # Settings management
+│   └── schema.ts           # Schema definitions
 ├── data/
-│   └── corpus.ts           # 内蔵コーパス（単語・短文）
+│   └── corpus.ts           # Built-in corpus (words and sentences)
 ├── types/
-│   └── index.ts            # 型定義
+│   └── index.ts            # Type definitions
 ├── utils/
-│   └── time.ts             # 時間関連ユーティリティ
+│   └── time.ts             # Time-related utilities
 └── test/
-    ├── romanizer.test.ts   # ローマ字変換のテスト
-    ├── scorer.test.ts      # 採点機能のテスト
-    ├── session.test.ts     # セッション状態のテスト
-    ├── corpus.test.ts      # コーパス機能のテスト
-    ├── prefs.test.ts       # 設定機能のテスト
-    └── __mocks__/          # テスト用モック
+    ├── romanizer.test.ts   # Romaji conversion tests
+    ├── scorer.test.ts      # Scoring function tests
+    ├── session.test.ts     # Session state tests
+    ├── corpus.test.ts      # Corpus function tests
+    ├── prefs.test.ts       # Settings function tests
+    └── __mocks__/          # Test mocks
 ```
 
 documents/
 ├── plan/
-│   ├── requirements.md     # 要件定義
-│   ├── basic-design.md     # 基本設計
-│   ├── practice-ui-redesign.md # UI設計
-│   └── sentence-mode.md    # 文章モード設計
+│   ├── requirements.md     # Requirements definition
+│   ├── basic-design.md     # Basic design
+│   ├── practice-ui-redesign.md # UI design
+│   └── sentence-mode.md    # Sentence mode design
 
-## セットアップ
+## Setup
 
-### リポジトリクローン後の最初のコマンド群
+### Initial Commands After Repository Clone
 
 ```bash
-# 1. Raycastドキュメントの準備（初回のみ、推奨）
+# 1. Prepare Raycast documentation (first time only, recommended)
 git clone --depth=1 --filter=blob:none --sparse https://github.com/raycast/extensions.git raycast-ext
 cd raycast-ext
 git sparse-checkout set docs
 cd ..
 
-# 2. 依存パッケージのインストール
+# 2. Install dependency packages
 npm install
 
-# 3. 開発環境の確認
+# 3. Verify development environment
 npm run build
 npm run test
 npm run lint
 
-# 4. 公開前の全項目チェック（必須）
+# 4. Pre-publish comprehensive check (required)
 npm run pre-publish-check
 
-# 5. 開発モードで起動
+# 5. Start in development mode
 npm run dev
 ```
 
-## デバッグ
+## Debugging
 
-### 開発環境のセットアップ
+### Development Environment Setup
 
-1. Raycastドキュメントの準備（初回のみ）
+1. Prepare Raycast documentation (first time only)
 
-開発前にRaycastのAPIドキュメントをローカルにダウンロードしておくことを推奨します：
+It's recommended to download Raycast's API documentation locally before development:
 
 ```bash
 git clone --depth=1 --filter=blob:none --sparse https://github.com/raycast/extensions.git raycast-ext
@@ -98,187 +98,187 @@ cd raycast-ext
 git sparse-checkout set docs
 ```
 
-これにより `raycast-ext/docs/` にAPIリファレンスが展開され、オフラインで参照できます。
+This will extract the API reference to `raycast-ext/docs/` for offline reference.
 
-2. 依存パッケージのインストール
+2. Install dependency packages
 ```bash
 npm install
 ```
 
-3. 開発モードで起動
+3. Start in development mode
 ```bash
 npm run dev
 ```
 
-### デバッグ手順
+### Debugging Steps
 
-1. **ビルドエラーの確認**
+1. **Check build errors**
 ```bash
 npm run build
 ```
 
-2. **TypeScript型チェック**
+2. **TypeScript type checking**
 ```bash
 npx tsc --noEmit
 ```
 
-3. **ESLintによる静的解析**
+3. **ESLint static analysis**
 ```bash
 npm run lint
 ```
 
-4. **Raycastでのテスト**
-   - Raycastを起動
-   - "Japanese Typing Practice" を検索
-   - 拡張機能を直接実行して動作確認
+4. **Testing in Raycast**
+   - Start Raycast
+   - Search for "Japanese Typing Practice"
+   - Run the extension directly to verify functionality
 
-### ログの確認
+### Log Viewing
 
-開発中のログはRaycastの開発者コンソールで確認できます：
-- Raycastメニュー → Developer → Show Developer Console
+Development logs can be viewed in Raycast's developer console:
+- Raycast menu → Developer → Show Developer Console
 
-## テスト
+## Testing
 
-### 単体テストの実行
+### Running Unit Tests
 
 ```bash
-# テスト実行
+# Run tests
 npm run test
 
-# ウォッチモードでテスト
+# Run tests in watch mode
 npm run test:watch
 ```
 
-### テスト対象
+### Test Targets
 
-- **romanizer**: ローマ字変換エンジンの表記ゆれ対応
-- **scorer**: 採点計算の正確性
-- **session**: セッション状態遷移のテスト
+- **romanizer**: Romaji conversion engine's notation variation support
+- **scorer**: Scoring calculation accuracy
+- **session**: Session state transition tests
 
-### カバレッジ
+### Coverage
 
 ```bash
 npm run test -- --coverage
 ```
 
-### 手動テスト項目
+### Manual Test Items
 
-1. **基本フロー**
-   - 起動 → 練習開始 → 終了 → 結果表示
-   - 一時停止/再開機能
-   - スキップ機能
+1. **Basic Flow**
+   - Start → Practice → Finish → Result display
+   - Pause/Resume functionality
+   - Skip functionality
 
-2. **入力判定**
-   - JIS/ヘボン式の表記ゆれ
-   - 拗音・促音・長音の処理
-   - 大文字小文字の区別なし
+2. **Input Validation**
+   - JIS/Hepburn notation variations
+   - Yoon, sokuon, and chōon processing
+   - Case-insensitive input
 
-3. **設定機能**
-   - 各種設定の反映
-   - 履歴保存・取得
+3. **Settings Functionality**
+   - Reflection of various settings
+   - History saving and retrieval
 
-## リリース手順
+## Release Process
 
-### 1. バージョン更新
+### 1. Version Update
 
 ```bash
-# package.json のバージョンを更新
-npm version patch  # または minor, major
+# Update version in package.json
+npm version patch  # or minor, major
 ```
 
-### 2. ビルド
+### 2. Build
 
 ```bash
 npm run build
 ```
 
-### 3. テスト実行
+### 3. Run Tests
 
 ```bash
 npm run test
 npm run lint
 ```
 
-### 4. 公開前の全項目チェック（必須）
+### 4. Pre-publish Comprehensive Check (Required)
 
-**アップデートや公開前には必ず実行してください**:
+**Always run this before updates or publication**:
 
 ```bash
 npm run pre-publish-check
 ```
 
-このコマンドは以下を自動検証します：
-- 依存関係のインストール
-- Lintチェック（ESLint + Prettier）
-- 全テストの実行（54テスト）
-- ビルドの成功確認
-- package.jsonの必須項目検証
-- 必須ファイルの存在確認（LICENSE, README.en.md, CHANGELOG.md, アイコン）
-- CHANGELOG形式の検証
+This command automatically verifies:
+- Dependency installation
+- Lint check (ESLint + Prettier)
+- All test execution (54 tests)
+- Build success confirmation
+- Required items validation in package.json
+- Required file existence check (LICENSE, README.en.md, CHANGELOG.md, icon)
+- CHANGELOG format validation
 
-### 5. Raycast Storeへの公開
+### 5. Publish to Raycast Store
 
 ```bash
 npm run publish
 ```
 
-### 6. CHANGELOGの更新
+### 6. Update CHANGELOG
 
-`CHANGELOG.md` に変更内容を記載：
+Document changes in `CHANGELOG.md`:
 
 ```markdown
 ## [1.0.0] - 2025-11-07
 
 ### Added
-- 日本語タイピング練習機能
-- リアルタイムフィードバック
-- 履歴管理機能
-- 設定カスタマイズ機能
+- Japanese typing practice functionality
+- Real-time feedback
+- History management functionality
+- Settings customization functionality
 
 ### Fixed
-- 修正内容を記載
+- Describe fixes here
 ```
 
-### 7. Gitタグの作成
+### 7. Create Git Tag
 
 ```bash
 git tag -a v1.0.0 -m "Release version 1.0.0"
 git push origin v1.0.0
 ```
 
-## 開発ガイドライン
+## Development Guidelines
 
-### コーディング規約
-- TypeScriptを使用
-- ESLintとPrettierでコード整形
-- 機能ごとにファイルを分割
-- 型定義を明確に記述
+### Coding Conventions
+- Use TypeScript
+- Code formatting with ESLint and Prettier
+- Split files by functionality
+- Write clear type definitions
 
-### コミットメッセージ
-- `feat`: 新機能
-- `fix`: バグ修正
-- `docs`: ドキュメント更新
-- `style`: コード整形
-- `refactor`: リファクタリング
-- `test`: テスト関連
+### Commit Messages
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation update
+- `style`: Code formatting
+- `refactor`: Refactoring
+- `test`: Test-related
 
-### ブランチ戦略
-- `main`: 安定版
-- `develop`: 開発版
-- `feature/*`: 機能開発
+### Branch Strategy
+- `main`: Stable version
+- `develop`: Development version
+- `feature/*`: Feature development
 
-## ライセンス
+## License
 
 MIT License
 
-## 貢献
+## Contributing
 
-1. Forkする
-2. 機能ブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. コミットする (`git commit -m 'Add amazing feature'`)
-4. プッシュする (`git push origin feature/amazing-feature`)
-5. Pull Requestを作成
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Create a Pull Request
 
-## サポート
+## Support
 
-問題が見つかった場合は、GitHub Issuesで報告してください。
+If you encounter any issues, please report them via GitHub Issues.
