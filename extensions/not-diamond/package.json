@@ -104,6 +104,11 @@
     "@raycast/utils": "^1.17.0",
     "notdiamond": "^0.3.9"
   },
+  "overrides": {
+    "@langchain/community": "^0.3.58",
+    "@langchain/openai": "^0.6.16",
+    "@types/react": "18.3.3"
+  },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",

@@ -13,46 +13,29 @@ export function SearchListItem({ searchResult }: SearchListItemProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Package Attr Name" content={searchResult.attrName} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Open Package Source Code"
+              url={searchResult.source!}
+              shortcut={Keyboard.Shortcut.Common.Open}
+            />
+            <Action.CopyToClipboard
+              title="Copy Package Attr Name"
+              content={searchResult.attrName}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "c" },
+                Windows: { modifiers: ["ctrl"], key: "c" },
+              }}
+            />
             {searchResult.homepage[0] ? (
-              <>
-                <Action.OpenInBrowser
-                  title="Open Package Homepage"
-                  url={searchResult.homepage[0]}
-                  shortcut={Keyboard.Shortcut.Common.Open}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Package Homepage URL"
-                  content={searchResult.homepage[0]}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "h" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "h" },
-                  }}
-                />
-              </>
+              <Action.OpenInBrowser
+                title="Open Package Homepage"
+                url={searchResult.homepage[0]}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "h" },
+                  Windows: { modifiers: ["ctrl"], key: "h" },
+                }}
+              />
             ) : null}
-            {searchResult.source && (
-              <>
-                <Action.OpenInBrowser
-                  title="Open Package Source Code"
-                  url={searchResult.source!}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "o" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "o" },
-                  }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Package Source URL"
-                  content={searchResult.source!}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-                  }}
-                />
-              </>
-            )}
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -38,7 +38,7 @@ export function getClasses(): Class[] {
         if (dayPart && periodPart) {
           occurrences.push({
             dayOfWeek: parseInt(dayPart.split(":")[1]),
-            period: periodPart.split(":")[1],
+            period: periodPart.split(":")[1]?.replace(/^period-/, ""),
           });
         }
       }
@@ -47,7 +47,6 @@ export function getClasses(): Class[] {
     return {
       id: file.replace(".md", ""),
       name: data.name || file.replace(".md", ""),
-      color: data.color || "#808080",
       occurrences,
       content,
     };
@@ -112,7 +111,6 @@ export function getEvents(): Event[] {
       name: data.name || file.replace(".md", ""),
       startDate: data.startDate,
       endDate: data.endDate || data.startDate,
-      color: data.color || "#808080",
       content,
     };
   });
@@ -136,7 +134,6 @@ export function getTodos(): Todo[] {
       id: file.replace(".md", ""),
       name: data.name || file.replace(".md", ""),
       isCompleted: data.isDone || false,
-      color: data.color || "#808080",
       content,
     };
   });
@@ -184,13 +181,22 @@ export function createClass(
     counter++;
   }
 
+  const now = new Date();
+  const createdIso = now.toISOString();
+  const startDate = createdIso.split("T")[0];
+  const safePeriod = period.startsWith("period-")
+    ? period.replace("period-", "")
+    : period;
+
   const frontmatter = {
     name,
     isImportant: false,
-    created: new Date().toISOString().split("T")[0],
+    created: createdIso,
     isRecurring: false,
-    color: "#808080",
-    [`occurrence-1`]: `dayOfWeek:${dayOfWeek}, period:${period}`,
+    startDate,
+    date: startDate,
+    periodId: `period-${safePeriod}`,
+    [`occurrence 1`]: `dayOfWeek:${dayOfWeek}, period:${safePeriod}`,
   };
 
   const content = matter.stringify(note || "", frontmatter);
