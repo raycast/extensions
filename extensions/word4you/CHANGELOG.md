@@ -1,5 +1,11 @@
 # Word4you Changelog
 
+## [Add compose command] - 2025-12-05
+
+- Add a new command "Compose" to generate sentences with random 2 words using LLM providers
+- Bump cli version to support the new compose feature
+- Move preferences to extension preferences for better user experience
+
 ## [Initial Version] - 2025-08-14
 
 - Add Wrapper to consume word4you CLI
