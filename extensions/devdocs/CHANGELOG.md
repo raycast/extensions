@@ -1,6 +1,6 @@
 # DevDocs Extension
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-12-05
 
 - Update to the latest dependencies  
 -  Migrate the ESLint configuration to a flat file  
