@@ -2,7 +2,7 @@
 
 ## [Add Tags] - {PR_MERGE_DATE}
 
-- Add support for tagging timers
+- Add support for tagging timers (ref: [Issue #23323](https://github.com/raycast/extensions/issues/23323))
 - More robust error handling in Edit Form
 
 ## [Rename Timers + Modernize] - 2025-08-14
