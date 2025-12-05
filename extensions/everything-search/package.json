@@ -4,12 +4,12 @@
   "title": "Everything Search",
   "description": "Search files using Everything on Windows.",
   "icon": "extension-icon.png",
-  "author": "doug_fernando",
+  "author": "anastasiy_safari",
   "contributors": [
     "laurynas_gailius"
   ],
   "pastContributors": [
-    "anastasiy_safari"
+    "doug_fernando"
   ],
   "license": "MIT",
   "commands": [
