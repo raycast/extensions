@@ -171,6 +171,7 @@ export default function Command() {
                       type: LaunchType.UserInitiated,
                       arguments: {
                         name: timer.name,
+                        tag: timer.tag,
                       },
                     });
                   }}

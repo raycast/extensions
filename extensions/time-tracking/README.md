@@ -17,3 +17,8 @@ This extension allows you to track your working time on a per-project basis.
 7. Assign tags to timers
 
 > You can optionally set a default tag to apply to future timers.
+
+### Exporting
+
+- You can export timers as CSV by selecting the "Export Timers as CSV" `Action` in the "View Project Times" view.
+- You can specify which character to replace commas in your _name_ and _tag_ fields in `Preferences`.

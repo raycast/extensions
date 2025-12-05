@@ -139,7 +139,7 @@ export async function deleteTimer(timerId: string): Promise<TimerList> {
 }
 
 export async function exportTimers() {
-  const exportDirectory = getPreferenceValues<ExtensionPreferences>().exportDirectory;
+  const { exportDirectory, commaReplacement } = getPreferenceValues<ExtensionPreferences>();
   if (!exportDirectory) {
     await showToast({
       title: "Export directory not set",
@@ -163,7 +163,11 @@ export async function exportTimers() {
     Object.values(timers)
       .map((timer) => {
         const duration = getDuration(timer);
-        return [...Object.values(timer), duration, formatDuration(duration)].join();
+        return [
+          ...Object.values(timer).map((v) => `${v}`.replaceAll(",", commaReplacement)),
+          duration,
+          formatDuration(duration),
+        ].join(",");
       })
       .join("\n");
 

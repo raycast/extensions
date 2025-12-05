@@ -21,6 +21,32 @@
       "type": "directory",
       "required": false,
       "description": "CSVs will be exported here"
+    },
+    {
+      "name": "commaReplacement",
+      "title": "Replace Commas w/ Character",
+      "type": "dropdown",
+      "required": false,
+      "description": "Replace commas with a character in exported CSVs",
+      "data": [
+        {
+          "title": "+ (Plus)",
+          "value": "+"
+        },
+        {
+          "title": "- (Dash)",
+          "value": "-"
+        },
+        {
+          "title": "_ (Underscore)",
+          "value": "_"
+        },
+        {
+          "title": "(Space)",
+          "value": " "
+        }
+      ],
+      "default": "+"
     }
   ],
   "commands": [
