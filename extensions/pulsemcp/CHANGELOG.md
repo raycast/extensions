@@ -1,3 +1,3 @@
-# pulsemcp-search Changelog
+# PulseMCP Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
