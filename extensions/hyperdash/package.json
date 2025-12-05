@@ -105,14 +105,16 @@
       "title": "Task Notes",
       "subtitle": "hyperDASH",
       "description": "List Todos (tag-only) and Projects (Bases-compatible)",
-      "mode": "view"
+      "mode": "view",
+      "entrypoint": "src/browse.tsx"
     },
     {
       "name": "projects",
       "title": "Project Notes",
       "subtitle": "hyperDASH",
       "description": "List Projects (Bases-compatible)",
-      "mode": "view"
+      "mode": "view",
+      "entrypoint": "src/projects.tsx"
     }
   ],
   "dependencies": {
