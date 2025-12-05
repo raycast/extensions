@@ -3,6 +3,7 @@
 ## [Add Tags] - {PR_MERGE_DATE}
 
 - Add support for tagging timers
+- More robust error handling in Edit Form
 
 ## [Rename Timers + Modernize] - 2025-08-14
 

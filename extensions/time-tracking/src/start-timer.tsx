@@ -1,7 +1,7 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { startTimer } from "./Timers";
 
-export default async function Command(options: LaunchProps<{arguments: Arguments.StartTimer}>) {
+export default async function Command(options: LaunchProps<{ arguments: Arguments.StartTimer }>) {
   let name = options.arguments.name;
   if (name?.trim().length === 0) {
     name = "Unnamed timer";
