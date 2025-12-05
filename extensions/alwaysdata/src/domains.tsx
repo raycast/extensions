@@ -1,27 +1,10 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, getFavicon, useFetch, useForm } from "@raycast/utils";
-import { DNSRecord, Domain, ErrorResult } from "./types";
+import { List, ActionPanel, Action, Icon, confirmAlert, Color, Alert, showToast, Toast, Keyboard, useNavigation, Form } from "@raycast/api";
+import { useCachedPromise, getFavicon, useForm, FormValidation } from "@raycast/utils";
+import { alwaysdata } from "./alwaysdata";
+import DNSRecords from "./views/dns-records";
 
-const {api_token} = getPreferenceValues<Preferences>();
-const API_URL = "https://api.alwaysdata.com/v1";
-const buildApiUrl = (endpoint: string, params?: { [key: string]: string | number }) => `${API_URL}/${endpoint}/${params ? `?${Object.entries(params).map(([key, value]) => `${key}=${value}`).join("&")}` : ""}`;
-const headers = {
-  "Accept-Language": "en",
-  Authorization: `Basic ${Buffer.from(`${api_token}:`).toString("base64")}`
-};
-const parseResponse = async <T,>(response: Response) => {
-  if (response.status===201) return undefined as T;
-  const result = await response.json();
-  if (!response.ok) {
-    const err = result as ErrorResult;
-    throw new Error(typeof err==="string" ? err : Object.values(err).flat().join(", "));
-  }
-  return result as T;
-}
 export default function Domains() {
-  const {isLoading, data: domains, mutate} = useFetch(buildApiUrl("domain"), {
-    headers,
-    parseResponse: parseResponse<Domain[]>,
+  const {isLoading, data: domains, mutate} = useCachedPromise(alwaysdata.domains.list, [], {
     initialData: []
   })
 
@@ -32,8 +15,38 @@ export default function Domains() {
     {domains.map(domain => <List.Item key={domain.id} icon={getFavicon(domain.name, {fallback: Icon.Globe})} title={domain.name} accessories={[
       domain.date_expiration ? {date: new Date(domain.date_expiration)} : {text: "N/A (external domain name)"}
     ]} actions={<ActionPanel>
-      <Action.Push title="DNS Records" target={<DNSRecords domainId={domain.id} />} />
+      <Action.Push icon={Icon.List} title="DNS Records" target={<DNSRecords domain={domain} />} />
       <Action.Push icon={Icon.Plus} title="Add Domain" target={<AddDomain />} onPop={mutate} />
+      <Action icon={Icon.Trash} title="Delete Domain" onAction={() => {
+        confirmAlert({
+          icon: {source: Icon.Trash, tintColor: Color.Red},
+          title: `Are you sure you want to delete the domain ${domain.name}?`,
+          message: "This will also delete all the domain's mailboxes and their contents.",
+          primaryAction: {
+            style: Alert.ActionStyle.Destructive,
+            title: "Delete",
+            async onAction() {
+              const toast = await showToast(Toast.Style.Animated, "Deleting", domain.name);
+              try {
+                await mutate(
+                  alwaysdata.domains.delete({id: domain.id}), {
+                    optimisticUpdate(data) {
+                      return data.filter(d => d.id !== domain.id)
+                    },
+                    shouldRevalidateAfter: false
+                  }
+                )
+                toast.style = Toast.Style.Success;
+                toast.title = "Deleted";
+              } catch (error) {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Failed"
+                toast.message = `${error}`
+              }
+            },
+          }
+        })
+      }} shortcut={Keyboard.Shortcut.Common.Remove} style={Action.Style.Destructive} />
     </ActionPanel>} />)}
   </List>
 }
@@ -44,12 +57,7 @@ function AddDomain() {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Adding", values.name)
       try {
-        const response = await fetch(buildApiUrl("domain"), {
-          method: "POST",
-          headers,
-          body: JSON.stringify(values)
-        })
-        await parseResponse(response);
+        await alwaysdata.domains.add(values)
         toast.style = Toast.Style.Success;
         toast.title = "Added";
         pop()
@@ -70,16 +78,3 @@ function AddDomain() {
   </Form>
 }
 
-function DNSRecords({domainId}: {domainId: number}) {
-  const {isLoading, data: records} = useFetch(buildApiUrl("record", {
-    domain: domainId
-  }), {
-    headers,
-    parseResponse: parseResponse<DNSRecord[]>,
-    initialData: []
-  })
-
-  return <List isLoading={isLoading} isShowingDetail>
-    {records.map(record => <List.Item key={record.id} title={record.name} accessories={[{tag: record.type}]} detail={<List.Item.Detail markdown={record.value} />} />)}
-  </List>
-}
