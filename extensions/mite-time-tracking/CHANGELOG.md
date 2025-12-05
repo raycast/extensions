@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - 2025-12-03
+## [Initial Release] - {PR_MERGE_DATE}
 
 Initial release of the Mite extension for Raycast.
 
