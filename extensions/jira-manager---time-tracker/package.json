@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira-manager---time-tracker",
+  "title": "Jira Manager & Time Tracker",
+  "description": "Allow you to track you work, create and manage issues",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-jira-issue",
+      "title": "Create Jira Issue",
+      "description": "Create a new issue in a given project",
+      "mode": "view"
+    },
+    {
+      "name": "search-for-issues",
+      "title": "Search for Issues",
+      "description": "Search for issues with different filters",
+      "mode": "view"
+    },
+    {
+      "name": "list-my-issues",
+      "title": "List My Issues",
+      "description": "List all your assigned or watched issues",
+      "mode": "view"
+    },
+    {
+      "name": "track-work",
+      "title": "Track Work",
+      "description": "Track time working on a given issue",
+      "mode": "view"
+    },
+    {
+      "name": "start-issue",
+      "title": "Start Issue",
+      "description": "Begin or continue working on an issue",
+      "mode": "view"
+    },
+    {
+      "name": "pause-an-issue",
+      "title": "Pause an Issue",
+      "description": "Pause clock on a given issue",
+      "mode": "view"
+    },
+    {
+      "name": "stop-issue",
+      "title": "Stop Issue",
+      "description": "Stop work tracking on an issue",
+      "mode": "view"
+    },
+    {
+      "name": "resume-issue",
+      "title": "Resume Issue",
+      "description": "Resume work on the last active issue",
+      "mode": "view"
+    },
+    {
+      "name": "daily-summary",
+      "title": "Daily Summary",
+      "description": "View time logged today",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "View unread Jira notifications",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "jiraDomain",
+      "title": "Jira Domain",
+      "description": "Your Jira instance domain (e.g., company.atlassian.net)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "company.atlassian.net"
+    },
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Your Jira account email (for Basic Auth)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "user@example.com"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Jira API Token (for Basic Auth)",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your API Token"
+    },
+    {
+      "name": "clientId",
+      "title": "Client ID",
+      "description": "Your Jira App Client ID (for OAuth)",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your OAuth Client ID"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "cesar_gomez",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ]
+}
