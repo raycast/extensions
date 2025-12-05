@@ -1,5 +1,9 @@
 # Silent Mention Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Add Windows support
+
 ## [Feature] - 2023-09-03
 
 - Add "Copy Zero Width Space" Command, which copies a zero width space to the clipboard.
