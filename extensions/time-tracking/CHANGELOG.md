@@ -1,6 +1,6 @@
 # Time Tracking Changelog
 
-## [Add Tags] - {PR_MERGE_DATE}
+## [Add Tags] - 2025-12-05
 
 - Add support for tagging timers (ref: [Issue #23323](https://github.com/raycast/extensions/issues/23323))
 - More robust error handling in Edit Form
