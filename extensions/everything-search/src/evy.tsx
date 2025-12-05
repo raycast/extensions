@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, getPreferenceValues, showToast, Toast, LaunchProps } from "@raycast/api";
 import * as ftp from "basic-ftp";
 

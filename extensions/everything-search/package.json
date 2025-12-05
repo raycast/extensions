@@ -20,7 +20,7 @@
       "mode": "view"
     },
     {
-      "name": "search-servers",
+      "name": "evy",
       "title": "Search Files on Servers",
       "subtitle": "Everything",
       "description": "Find Files from Everything ETP/FTP servers by Mask",
