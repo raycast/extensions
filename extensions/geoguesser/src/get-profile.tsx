@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action } from "@raycast/api";
+import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getProfile, getProfileStats } from "./api/client";
 import { ProfileResponse, StatsResponse } from "./types";
@@ -12,11 +12,26 @@ export default function ViewProfile() {
   useEffect(() => {
     async function fetchData() {
       try {
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Loading profile...",
+        });
+
         const [profileData, statsData] = await Promise.all([getProfile(), getProfileStats()]);
         setProfile(profileData);
         setStats(statsData);
+
+        showToast({
+          style: Toast.Style.Success,
+          title: "Profile loaded",
+        });
       } catch (error) {
         console.error("Failed to fetch profile:", error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load profile",
+          message: error instanceof Error ? error.message : "Please check your authentication token",
+        });
       } finally {
         setIsLoading(false);
       }

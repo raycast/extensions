@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Color, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, Detail, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getRecentGames, getGameDetails, getChallengeDetails, getDuelDetails } from "./api/client";
 import {
@@ -32,13 +32,28 @@ export default function LastGamesCommand() {
   useEffect(() => {
     async function fetchGames() {
       try {
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Loading games...",
+        });
+
         const feed = await getRecentGames(25);
         const parsedGames = feed.entries
           .map((entry) => parseGameEntry(entry))
           .filter((game): game is ParsedGame => game !== null);
         setGames(parsedGames);
+
+        showToast({
+          style: Toast.Style.Success,
+          title: `Loaded ${parsedGames.length} games`,
+        });
       } catch (error) {
         console.error("Failed to fetch games:", error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load games",
+          message: error instanceof Error ? error.message : "Please check your authentication",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -75,13 +90,17 @@ export default function LastGamesCommand() {
 function GameDetailView({ game }: { game: ParsedGame }) {
   const [details, setDetails] = useState<GameDetails | DuelDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchDetails() {
       try {
-        let data;
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Loading game details...",
+        });
 
+        let data;
         if (game.type === "duel") {
           data = await getDuelDetails(game.token);
         } else if (game.type === "daily" || game.type === "unknown") {
@@ -95,9 +114,18 @@ function GameDetailView({ game }: { game: ParsedGame }) {
         }
 
         setDetails(data);
+
+        showToast({
+          style: Toast.Style.Success,
+          title: "Game details loaded",
+        });
       } catch (err) {
-        setError("Failed to load game details");
         console.error("Failed to fetch game details:", err);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load game details",
+          message: err instanceof Error ? err.message : "Could not retrieve game information",
+        });
       } finally {
         setIsLoading(false);
       }

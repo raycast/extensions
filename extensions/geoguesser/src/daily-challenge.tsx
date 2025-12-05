@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, List } from "@raycast/api";
+import { Detail, ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getDailyChallenge, getMyDailyChallengeScore } from "./api/client";
 import { DailyChallengeResponse, MyDailyChallengeScore } from "./types";
@@ -8,25 +8,38 @@ export default function DailyChallengeCommand() {
   const [challenge, setChallenge] = useState<DailyChallengeResponse | null>(null);
   const [myScore, setMyScore] = useState<MyDailyChallengeScore | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchChallenge() {
       try {
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Loading daily challenge...",
+        });
+
         const [challengeData, myScoreData] = await Promise.all([
           getDailyChallenge(),
           getMyDailyChallengeScore().catch(() => null),
         ]);
         setChallenge(challengeData);
         setMyScore(myScoreData);
+
+        showToast({
+          style: Toast.Style.Success,
+          title: "Daily challenge loaded",
+        });
       } catch (err) {
-        setError("Failed to fetch daily challenge");
         console.error("Failed to fetch daily challenge:", err);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load daily challenge",
+          message: err instanceof Error ? err.message : "Please check your connection",
+        });
       } finally {
         setIsLoading(false);
       }
     }
-
     fetchChallenge();
   }, []);
 

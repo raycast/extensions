@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  locale: string;
-  countryCode: string;
-}
-
 export function getUserCountryCode(): string {
   const { countryCode } = getPreferenceValues<Preferences>();
   return (countryCode || "de").toLowerCase();
