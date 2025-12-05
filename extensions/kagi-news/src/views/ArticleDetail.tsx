@@ -6,41 +6,6 @@ interface ArticleDetailProps {
   article: Article;
 }
 
-interface Preferences {
-  showBusinessAnglePoints: boolean;
-  showBusinessAngleText: boolean;
-  showCulinarySignificance: boolean;
-  showDesignPrinciples: boolean;
-  showDestinationHighlights: boolean;
-  showDidYouKnow: boolean;
-  showDiyTips: boolean;
-  showEconomicImplications: boolean;
-  showFutureOutlook: boolean;
-  showGameplayMechanics: boolean;
-  showGeopoliticalContext: boolean;
-  showHistoricalBackground: boolean;
-  showHumanitarianImpact: boolean;
-  showIndustryImpact: boolean;
-  showInternationalReactions: boolean;
-  showKeyPlayers: boolean;
-  showLeagueStandings: boolean;
-  showLocation: boolean;
-  showPerformanceStatistics: boolean;
-  showPerspectives: boolean;
-  showPrimaryImage: boolean;
-  showQuote: boolean;
-  showScientificSignificance: boolean;
-  showSecondaryImage: boolean;
-  showSuggestedQna: boolean;
-  showTalkingPoints: boolean;
-  showTechnicalDetails: boolean;
-  showTechnicalSpecifications: boolean;
-  showTimeline: boolean;
-  showTravelAdvisory: boolean;
-  showUserActionItems: boolean;
-  showUserExperienceImpact: boolean;
-}
-
 export function ArticleDetail({ article }: ArticleDetailProps) {
   const preferences = getPreferenceValues<Preferences>();
   const visibleSources = article.sources || [];
@@ -341,7 +306,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
               return sourcesForDomain.map((source, idx) => {
                 const title = `${domain}#${idx + 1}`;
                 const text = source.name && source.name.trim().length > 0 ? source.name : undefined;
-                return <Detail.Metadata.Link key={source.url} title={title} target={source.url} text={text} />;
+                return <Detail.Metadata.Link key={source.url} title={title} target={source.url} text={text || ""} />;
               });
             })}
           </Detail.Metadata>
