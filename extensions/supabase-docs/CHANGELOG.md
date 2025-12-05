@@ -2,7 +2,7 @@
 
 ## [Window Support] - {PR_MERGE_DATE}
 
-Add window support
+Add window support (ref: [Issue #23412](https://github.com/raycast/extensions/issues/23412))
 
 ## [Update links] - 2023-02-15
 
