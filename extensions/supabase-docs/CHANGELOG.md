@@ -1,6 +1,10 @@
 # Supabase Docs Changelog
 
-## [Update links]- 2023-02-15
+## [Window Support] - {PR_MERGE_DATE}
+
+Add window support
+
+## [Update links] - 2023-02-15
 
 Update links to match the new supabase docs site.
 
