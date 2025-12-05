@@ -94,10 +94,7 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
-    "@typescript-eslint/eslint-plugin": "^8.48.1",
-    "@typescript-eslint/parser": "^8.48.1",
     "eslint": "^9.22.0",
-    "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
