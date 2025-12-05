@@ -7,15 +7,13 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast, popToRoot } f
 import { getProgressIcon } from "@raycast/utils";
 import { brewUpgradeWithProgress, preferences, showFailureToast, actionsLogger } from "../utils";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import type { UpgradeStep, UpgradeStepStatus } from "../utils/brew/upgrade";
+import type { UpgradeStep } from "../utils/brew/upgrade";
 
 /**
  * Get the icon for a step based on its status.
  */
-function getStepIcon(
-  status: UpgradeStepStatus,
-): { source: Icon; tintColor?: Color } | ReturnType<typeof getProgressIcon> {
-  switch (status) {
+function getStepIcon(step: UpgradeStep): { source: Icon; tintColor?: Color } | ReturnType<typeof getProgressIcon> {
+  switch (step.status) {
     case "pending":
       return { source: Icon.Circle, tintColor: Color.SecondaryText };
     case "running":
@@ -23,6 +21,10 @@ function getStepIcon(
     case "completed":
       return { source: Icon.CheckCircle, tintColor: Color.Green };
     case "failed":
+      // Use warning icon for recoverable errors
+      if (step.isRecoverable) {
+        return { source: Icon.ExclamationMark, tintColor: Color.Orange };
+      }
       return { source: Icon.XMarkCircle, tintColor: Color.Red };
     case "skipped":
       return { source: Icon.MinusCircle, tintColor: Color.SecondaryText };
@@ -60,6 +62,7 @@ function UpgradeViewContent() {
   const [isRunning, setIsRunning] = useState(true);
   const [currentOutput, setCurrentOutput] = useState<string>("");
   const [error, setError] = useState<Error | undefined>();
+  const [wasCancelled, setWasCancelled] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const hasStartedRef = useRef(false);
   const isMountedRef = useRef(true);
@@ -123,7 +126,14 @@ function UpgradeViewContent() {
       if (error.name === "AbortError") {
         toast.style = Toast.Style.Failure;
         toast.title = "Upgrade cancelled";
-        actionsLogger.log("Upgrade was cancelled by user");
+        setWasCancelled(true);
+        // Log cancellation with current state (steps is captured in closure)
+        actionsLogger.log("Upgrade cancelled by user", {
+          completedSteps: steps.filter((s) => s.status === "completed").length,
+          runningStep: steps.find((s) => s.status === "running")?.title,
+          pendingSteps: steps.filter((s) => s.status === "pending").length,
+          totalSteps: steps.length,
+        });
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Upgrade failed";
@@ -160,11 +170,19 @@ function UpgradeViewContent() {
   const runningStep = steps.find((s) => s.status === "running");
   const completedCount = steps.filter((s) => s.status === "completed").length;
   const failedCount = steps.filter((s) => s.status === "failed").length;
+  const recoverableCount = steps.filter((s) => s.status === "failed" && s.isRecoverable).length;
+
+  // Count skipped steps (for cancelled detection)
+  const skippedCount = steps.filter((s) => s.status === "skipped").length;
+  const cancelledStepCount = steps.filter((s) => s.message === "Cancelled by user" || s.message === "Cancelled").length;
+  const isCancelledState = wasCancelled || cancelledStepCount > 0;
 
   // Determine navigation title based on state
   let navigationTitle = "Upgrading...";
   if (!isRunning) {
-    if (error || failedCount > 0) {
+    if (isCancelledState) {
+      navigationTitle = "Upgrade Cancelled";
+    } else if (error || failedCount > 0) {
       navigationTitle = "Upgrade Failed";
     } else {
       navigationTitle = "Upgrade Complete";
@@ -193,11 +211,38 @@ function UpgradeViewContent() {
             {steps.map((step) => (
               <List.Item
                 key={step.id}
-                icon={getStepIcon(step.status)}
+                icon={getStepIcon(step)}
                 title={step.title}
                 subtitle={step.subtitle}
                 accessories={[
-                  ...(step.message ? [{ text: step.message, tooltip: step.message }] : []),
+                  // Show current phase for running steps
+                  ...(step.status === "running" && step.currentPhase
+                    ? [
+                        {
+                          tag: { value: step.currentPhase, color: Color.Blue },
+                          tooltip: `Current phase: ${step.currentPhase}`,
+                        },
+                      ]
+                    : []),
+                  // Show message (use "Cancelled" instead of "Aborted" for abort errors)
+                  ...(step.message
+                    ? [
+                        {
+                          text: step.message === "Aborted" ? "Cancelled" : step.message,
+                          tooltip: step.message === "Aborted" ? "Cancelled by user" : step.message,
+                        },
+                      ]
+                    : []),
+                  // Show recoverable indicator for failed steps
+                  ...(step.status === "failed" && step.isRecoverable
+                    ? [
+                        {
+                          tag: { value: "Retry", color: Color.Orange },
+                          tooltip: "This error may be resolved by retrying",
+                        },
+                      ]
+                    : []),
+                  // Show duration
                   ...(step.status === "running" || step.status === "completed" || step.status === "failed"
                     ? [{ text: formatDuration(step.startTime, step.endTime), tooltip: "Duration" }]
                     : []),
@@ -255,18 +300,47 @@ function UpgradeViewContent() {
                   />
                 ))}
               {/* Show totals if there were packages */}
-              {(completedCount > 2 || failedCount > 0) && (
+              {(completedCount > 2 || failedCount > 0 || isCancelledState) && (
                 <List.Item
-                  icon={{ source: Icon.Document, tintColor: Color.SecondaryText }}
+                  icon={{
+                    source: isCancelledState ? Icon.XMarkCircle : Icon.Document,
+                    tintColor: isCancelledState ? Color.Orange : Color.SecondaryText,
+                  }}
                   title="Total"
                   accessories={[
-                    { text: `${completedCount - 2} upgraded`, tooltip: "Packages upgraded" },
-                    ...(failedCount > 0 ? [{ text: `${failedCount} failed`, tooltip: "Packages failed" }] : []),
+                    // Show upgraded count only if we actually upgraded packages (completedCount > 2 means more than just update+check)
+                    ...(completedCount > 2
+                      ? [{ text: `${completedCount - 2} upgraded`, tooltip: "Packages upgraded" }]
+                      : []),
+                    // Show cancelled info if cancelled
+                    ...(isCancelledState
+                      ? [
+                          {
+                            text:
+                              cancelledStepCount > 0
+                                ? `${cancelledStepCount} cancelled`
+                                : skippedCount > 0
+                                  ? `${skippedCount} skipped`
+                                  : "Cancelled",
+                            tooltip: "Upgrade was cancelled by user",
+                          },
+                        ]
+                      : []),
+                    // Show failed count (excluding cancellation-related failures)
+                    ...(failedCount > 0 && !isCancelledState
+                      ? [
+                          {
+                            text: `${failedCount} failed${recoverableCount > 0 ? ` (${recoverableCount} retryable)` : ""}`,
+                            tooltip:
+                              recoverableCount > 0 ? "Some failures may be resolved by retrying" : "Packages failed",
+                          },
+                        ]
+                      : []),
                   ]}
                 />
               )}
-              {/* Show message when nothing to upgrade */}
-              {completedCount <= 2 && failedCount === 0 && (
+              {/* Show message when nothing to upgrade (only if not cancelled) */}
+              {completedCount <= 2 && failedCount === 0 && !isCancelledState && (
                 <List.Item
                   icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
                   title="All packages are up to date"

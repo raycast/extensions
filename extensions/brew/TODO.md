@@ -194,11 +194,34 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
 
 ## 🎨 UI/UX Improvements
 
+- [ ] Refactor `formulaInfo.tsx` and `caskInfo.tsx` to reduce duplication
+  - [ ] Create `usePackageInfo<T>()` hook for shared lazy-loading logic
+  - [ ] Extract common patterns: `hasMinimalData()`, loading state, toast handling
+  - [ ] Keep type-specific metadata rendering in separate components
+  - [ ] Consider a shared `PackageInfoDetail` wrapper component
 - [ ] Add more detailed cask information panels
-  - [ ] Show download size
-  - [ ] Show installation date
-  - [ ] Show SHA256 checksum
-  - [ ] Add screenshots/app icons where available
+  - [ ] Show download URL and size (from `url` field)
+  - [ ] Show installation date/time (from `installed_time` field)
+  - [ ] Show SHA256 checksum (from `sha256` field)
+  - [ ] Show bundle version info (`bundle_version`, `bundle_short_version`)
+  - [ ] Show app artifacts (what gets installed: `.app`, binaries, etc.)
+  - [ ] Show zap paths (files removed on full uninstall)
+  - [ ] Show deprecation/disabled status with reason and replacement
+  - [ ] Show old tokens/aliases (from `old_tokens` field)
+  - [ ] Show supported languages (from `languages` field)
+  - [ ] Add app icon from installed `.app` bundle
+- [ ] Add more detailed formula information panels
+  - [ ] Show installation date/time (from `installed[].time` - Unix timestamp)
+  - [ ] Show bottle info (pre-built binary availability per architecture)
+  - [ ] Show if poured from bottle vs built from source
+  - [ ] Show runtime dependencies with versions (richer than just names)
+  - [ ] Show test dependencies
+  - [ ] Show `uses_from_macos` system dependencies
+  - [ ] Show deprecation/disabled status with reason and replacement
+  - [ ] Show if formula has post-install script (`post_install_defined`)
+  - [ ] Show service info if formula provides a service
+  - [ ] Show link overwrite paths
+  - [ ] Show conflicts with reasons (not just names)
 - [ ] Improve icons for outdated packages
   - [ ] Use distinct icons for outdated vs up-to-date (currently both use `CheckCircle`)
   - [ ] Add visual indicator for pinned packages in list view

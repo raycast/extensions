@@ -1,8 +1,16 @@
-import React from "react";
-import { Detail, useNavigation } from "@raycast/api";
+import React, { useEffect, useState } from "react";
+import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
-import { Formula, brewIsInstalled, brewPrefix } from "../utils";
+import { Formula, brewIsInstalled, brewPrefix, brewFetchFormulaInfo, uiLogger } from "../utils";
 import { Dependencies } from "./dependencies";
+
+/**
+ * Check if a formula has minimal data (from fast list) vs full data.
+ */
+function hasMinimalData(formula: Formula): boolean {
+  // Minimal formulae have empty homepage and tap
+  return !formula.homepage || !formula.tap || !formula.desc;
+}
 
 export function FormulaInfo(props: {
   formula: Formula;
@@ -10,13 +18,73 @@ export function FormulaInfo(props: {
   onAction: (result: boolean) => void;
 }) {
   const { pop } = useNavigation();
-  const formula = props.formula;
+  const [formula, setFormula] = useState<Formula>(props.formula);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Log when viewing formula info
+  useEffect(() => {
+    uiLogger.log("Viewing formula info", {
+      name: props.formula.name,
+      hasMinimalData: hasMinimalData(props.formula),
+      installed: props.formula.installed?.length > 0,
+      version: props.formula.versions.stable,
+    });
+  }, [props.formula]);
+
+  // Lazy load full formula data if we only have minimal data
+  useEffect(() => {
+    if (!hasMinimalData(props.formula)) {
+      return;
+    }
+
+    const loadFullData = async () => {
+      setIsLoading(true);
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Loading ${props.formula.name} info...`,
+      });
+
+      try {
+        const fullFormula = await brewFetchFormulaInfo(props.formula.name);
+        if (fullFormula) {
+          // Preserve installed info from initial formula
+          if (props.formula.installed?.length > 0) {
+            fullFormula.installed = props.formula.installed;
+          }
+          setFormula(fullFormula);
+          uiLogger.log("Formula info loaded", {
+            name: fullFormula.name,
+            desc: fullFormula.desc?.substring(0, 50),
+            dependencies: fullFormula.dependencies?.length ?? 0,
+          });
+          toast.hide();
+        } else {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed to load formula info";
+        }
+      } catch (err) {
+        uiLogger.error("Failed to load formula info", { name: props.formula.name, error: err });
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to load formula info";
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadFullData();
+  }, [props.formula]);
+
   return (
     <Detail
+      isLoading={isLoading}
       markdown={formatInfo(formula)}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
+          {formula.homepage ? (
+            <Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
+          ) : (
+            <Detail.Metadata.Label title="Homepage" text="Loading..." />
+          )}
           {formula.license && <Detail.Metadata.Label title="License" text={formula.license} />}
           <Detail.Metadata.Label title="Versions" text={formatVersions(formula)} />
           {formula.versions.head && <Detail.Metadata.Label title="" text={formula.versions.head} />}
@@ -33,7 +101,7 @@ export function FormulaInfo(props: {
       }
       actions={
         <FormulaActionPanel
-          formula={props.formula}
+          formula={formula}
           showDetails={false}
           isInstalled={props.isInstalled}
           onAction={(result) => {

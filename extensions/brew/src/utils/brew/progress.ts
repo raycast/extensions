@@ -8,8 +8,22 @@ import { spawn } from "child_process";
 import { brewExecutable } from "./paths";
 import { execBrewEnv } from "./commands";
 import { brewLogger } from "../logger";
-import { BrewLockError, isBrewLockMessage, BrewCommandError } from "../errors";
+import { BrewLockError, isBrewLockMessage, BrewCommandError, StaleProcessError } from "../errors";
 import { ExecResult } from "../types";
+
+/// Configuration
+
+/**
+ * Default timeout for stale process detection (5 minutes).
+ * If no progress is made for this duration, the process is considered stuck.
+ */
+export const DEFAULT_STALE_TIMEOUT_MS = 5 * 60 * 1000;
+
+/**
+ * Timeout for download phase specifically (10 minutes).
+ * Downloads can take longer, especially for large packages like LLVM.
+ */
+export const DOWNLOAD_PHASE_TIMEOUT_MS = 10 * 60 * 1000;
 
 /// Progress Types
 
@@ -116,17 +130,43 @@ export function formatBytes(bytes: number): string {
 }
 
 /**
- * Execute a brew command with real-time progress updates.
+ * Options for executing brew commands with progress tracking.
+ */
+export interface ExecBrewWithProgressOptions {
+  /** Callback for progress updates */
+  onProgress?: ProgressCallback;
+  /** AbortController for cancellation */
+  cancel?: AbortController;
+  /** Timeout for stale process detection (ms). Default: 5 minutes */
+  staleTimeoutMs?: number;
+  /** Package name for error context */
+  packageName?: string;
+  /** Enable detailed phase logging */
+  verboseLogging?: boolean;
+}
+
+/**
+ * Execute a brew command with real-time progress updates and stale process detection.
+ *
+ * Features:
+ * - Real-time progress parsing from stdout/stderr
+ * - Stale process detection (kills process if no progress for timeout period)
+ * - Detailed phase logging for debugging stuck operations
+ * - Lock error detection and proper error handling
  */
 export async function execBrewWithProgress(
   cmd: string,
   onProgress?: ProgressCallback,
   cancel?: AbortController,
+  options?: Omit<ExecBrewWithProgressOptions, "onProgress" | "cancel">,
 ): Promise<ExecResult> {
   const env = await execBrewEnv();
   const args = cmd.split(/\s+/).filter(Boolean);
+  const staleTimeoutMs = options?.staleTimeoutMs ?? DEFAULT_STALE_TIMEOUT_MS;
+  const packageName = options?.packageName;
+  const verboseLogging = options?.verboseLogging ?? false;
 
-  brewLogger.log("Executing brew with progress", { command: cmd });
+  brewLogger.log("Executing brew with progress", { command: cmd, packageName, staleTimeoutMs });
 
   return new Promise((resolve, reject) => {
     const proc = spawn(brewExecutable(), args, {
@@ -136,12 +176,69 @@ export async function execBrewWithProgress(
 
     let stdout = "";
     let stderr = "";
+    let lastProgressTime = Date.now();
+    let currentPhase: BrewPhase = "starting";
+    let staleCheckInterval: NodeJS.Timeout | null = null;
+    let isRejected = false;
+
+    // Helper to clean up and reject
+    const cleanup = () => {
+      if (staleCheckInterval) {
+        clearInterval(staleCheckInterval);
+        staleCheckInterval = null;
+      }
+    };
+
+    const rejectOnce = (error: Error) => {
+      if (isRejected) return;
+      isRejected = true;
+      cleanup();
+      proc.kill("SIGTERM");
+      reject(error);
+    };
+
+    // Stale process detection - check every 30 seconds
+    staleCheckInterval = setInterval(() => {
+      const now = Date.now();
+      const staleDuration = now - lastProgressTime;
+
+      // Use longer timeout for download phase
+      const effectiveTimeout = currentPhase === "downloading" ? DOWNLOAD_PHASE_TIMEOUT_MS : staleTimeoutMs;
+
+      if (staleDuration > effectiveTimeout) {
+        brewLogger.warn("Stale process detected", {
+          command: cmd,
+          packageName,
+          lastPhase: currentPhase,
+          staleDurationMs: staleDuration,
+          timeoutMs: effectiveTimeout,
+        });
+
+        rejectOnce(
+          new StaleProcessError(`Process appears stuck during ${currentPhase}`, {
+            packageName,
+            lastPhase: currentPhase,
+            staleDurationMs: staleDuration,
+          }),
+        );
+      } else if (verboseLogging) {
+        brewLogger.log("Stale check passed", {
+          command: cmd,
+          phase: currentPhase,
+          timeSinceLastProgress: staleDuration,
+          timeout: effectiveTimeout,
+        });
+      }
+    }, 30000);
 
     // Handle cancellation
     if (cancel) {
       cancel.signal.addEventListener("abort", () => {
+        if (isRejected) return;
+        isRejected = true;
+        cleanup();
         proc.kill("SIGTERM");
-        const error = new Error("Aborted");
+        const error = new Error("Cancelled");
         error.name = "AbortError";
         reject(error);
       });
@@ -150,18 +247,37 @@ export async function execBrewWithProgress(
     // Report starting
     onProgress?.({ phase: "starting", message: `Running: brew ${cmd}` });
 
-    proc.stdout?.on("data", (data: Buffer) => {
-      const text = data.toString();
-      stdout += text;
+    // Helper to process output and update progress
+    const processOutput = (text: string, source: "stdout" | "stderr") => {
+      lastProgressTime = Date.now();
 
-      // Parse each line for progress
       const lines = text.split("\n");
       for (const line of lines) {
         const progress = parseBrewOutput(line);
         if (progress) {
+          // Track phase transitions for detailed logging
+          if (progress.phase !== currentPhase) {
+            brewLogger.log("Phase transition", {
+              command: cmd,
+              packageName,
+              from: currentPhase,
+              to: progress.phase,
+              message: progress.message,
+            });
+            currentPhase = progress.phase;
+          }
           onProgress?.(progress);
+        } else if (verboseLogging && line.trim()) {
+          // Log unparsed output for debugging
+          brewLogger.log(`Unparsed ${source}`, { line: line.trim() });
         }
       }
+    };
+
+    proc.stdout?.on("data", (data: Buffer) => {
+      const text = data.toString();
+      stdout += text;
+      processOutput(text, "stdout");
     });
 
     proc.stderr?.on("data", (data: Buffer) => {
@@ -170,8 +286,7 @@ export async function execBrewWithProgress(
 
       // Check for lock errors
       if (isBrewLockMessage(text)) {
-        proc.kill("SIGTERM");
-        reject(
+        rejectOnce(
           new BrewLockError("Another brew process is already running", {
             command: cmd,
           }),
@@ -180,16 +295,20 @@ export async function execBrewWithProgress(
       }
 
       // Parse stderr for progress too (brew outputs some progress to stderr)
-      const lines = text.split("\n");
-      for (const line of lines) {
-        const progress = parseBrewOutput(line);
-        if (progress) {
-          onProgress?.(progress);
-        }
-      }
+      processOutput(text, "stderr");
     });
 
     proc.on("close", (code) => {
+      cleanup();
+      if (isRejected) return;
+
+      brewLogger.log("Command completed", {
+        command: cmd,
+        packageName,
+        exitCode: code,
+        finalPhase: currentPhase,
+      });
+
       if (code === 0) {
         onProgress?.({ phase: "complete", message: "Operation completed successfully" });
         resolve({ stdout, stderr });
@@ -206,6 +325,8 @@ export async function execBrewWithProgress(
     });
 
     proc.on("error", (err) => {
+      cleanup();
+      if (isRejected) return;
       onProgress?.({ phase: "error", message: err.message });
       reject(err);
     });

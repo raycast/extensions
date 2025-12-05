@@ -37,6 +37,8 @@ export {
   BrewNotFoundError,
   CacheError,
   BrewLockError,
+  DownloadTimeoutError,
+  StaleProcessError,
   PackageNotFoundError,
   PackageDisabledError,
   PackageConflictError,
@@ -44,6 +46,8 @@ export {
   isBrewError,
   isNetworkError,
   isBrewLockError,
+  isDownloadTimeoutError,
+  isStaleProcessError,
   isPackageDisabledError,
   isPackageConflictError,
   isUnsupportedMacOSError,
@@ -78,5 +82,9 @@ export * from "./brew";
 // Re-export upgrade types for convenience
 export type { UpgradeStep, UpgradeStepStatus, UpgradeProgressCallback, UpgradeResult } from "./brew/upgrade";
 
-// Re-export progress types for convenience
-export type { BrewPhase, BrewProgress, ProgressCallback } from "./brew/progress";
+// Re-export progress types and constants for convenience
+export type { BrewPhase, BrewProgress, ProgressCallback, ExecBrewWithProgressOptions } from "./brew/progress";
+export { DEFAULT_STALE_TIMEOUT_MS, DOWNLOAD_PHASE_TIMEOUT_MS } from "./brew/progress";
+
+// Re-export upgrade options
+export type { UpgradeOptions } from "./brew/upgrade";

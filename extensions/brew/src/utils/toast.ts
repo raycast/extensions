@@ -4,10 +4,11 @@
  * Provides functions for displaying toast notifications.
  */
 
-import { Clipboard, Toast, showHUD } from "@raycast/api";
+import { Clipboard, PopToRootType, Toast, showHUD } from "@raycast/api";
 import { ExecError } from "./types";
 import { uiLogger } from "./logger";
 import { isRecoverableError, getErrorMessage, isBrewLockError } from "./errors";
+import { preferences } from "./preferences";
 
 /// Toast Types
 
@@ -72,11 +73,21 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
     },
     showSuccessHUD: async (message: string) => {
       toast.hide();
-      await showHUD(`✅ ${message}`);
+      if (preferences.closeAfterAction) {
+        await showHUD(`✅ ${message}`);
+      } else {
+        // Keep window open by using Suspended pop behavior
+        await showHUD(`✅ ${message}`, { popToRootType: PopToRootType.Suspended });
+      }
     },
     showFailureHUD: async (message: string) => {
       toast.hide();
-      await showHUD(`❌ ${message}`);
+      if (preferences.closeAfterAction) {
+        await showHUD(`❌ ${message}`);
+      } else {
+        // Keep window open by using Suspended pop behavior
+        await showHUD(`❌ ${message}`, { popToRootType: PopToRootType.Suspended });
+      }
     },
     hide: () => {
       toast.hide();

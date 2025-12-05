@@ -106,6 +106,61 @@ export class BrewLockError extends BrewError {
 }
 
 /**
+ * Error when a download or operation times out.
+ * This is a recoverable error - the user can retry.
+ */
+export class DownloadTimeoutError extends BrewError {
+  readonly packageName?: string;
+  readonly phase?: string;
+  readonly timeoutMs?: number;
+  readonly elapsedMs?: number;
+
+  constructor(
+    message: string,
+    options?: {
+      cause?: Error;
+      packageName?: string;
+      phase?: string;
+      timeoutMs?: number;
+      elapsedMs?: number;
+    },
+  ) {
+    super(message, { cause: options?.cause });
+    this.name = "DownloadTimeoutError";
+    this.packageName = options?.packageName;
+    this.phase = options?.phase;
+    this.timeoutMs = options?.timeoutMs;
+    this.elapsedMs = options?.elapsedMs;
+  }
+}
+
+/**
+ * Error when a brew process appears to be stale/stuck.
+ * This happens when no progress is made for an extended period.
+ */
+export class StaleProcessError extends BrewError {
+  readonly packageName?: string;
+  readonly lastPhase?: string;
+  readonly staleDurationMs?: number;
+
+  constructor(
+    message: string,
+    options?: {
+      cause?: Error;
+      packageName?: string;
+      lastPhase?: string;
+      staleDurationMs?: number;
+    },
+  ) {
+    super(message, { cause: options?.cause });
+    this.name = "StaleProcessError";
+    this.packageName = options?.packageName;
+    this.lastPhase = options?.lastPhase;
+    this.staleDurationMs = options?.staleDurationMs;
+  }
+}
+
+/**
  * Error when a package is not found.
  */
 export class PackageNotFoundError extends BrewError {
@@ -208,6 +263,20 @@ export function isBrewLockError(error: unknown): error is BrewLockError {
 }
 
 /**
+ * Check if an error is a DownloadTimeoutError.
+ */
+export function isDownloadTimeoutError(error: unknown): error is DownloadTimeoutError {
+  return error instanceof DownloadTimeoutError;
+}
+
+/**
+ * Check if an error is a StaleProcessError.
+ */
+export function isStaleProcessError(error: unknown): error is StaleProcessError {
+  return error instanceof StaleProcessError;
+}
+
+/**
  * Check if an error is a PackageDisabledError.
  */
 export function isPackageDisabledError(error: unknown): error is PackageDisabledError {
@@ -230,11 +299,11 @@ export function isUnsupportedMacOSError(error: unknown): error is UnsupportedMac
 
 /**
  * Check if an error is recoverable (can be retried).
- * Network errors and lock errors are typically recoverable.
+ * Network errors, lock errors, timeout errors, and stale process errors are typically recoverable.
  * Disabled packages, conflicts, and macOS version errors are NOT recoverable.
  */
 export function isRecoverableError(error: unknown): boolean {
-  return isNetworkError(error) || isBrewLockError(error);
+  return isNetworkError(error) || isBrewLockError(error) || isDownloadTimeoutError(error) || isStaleProcessError(error);
 }
 
 /// Message Detection
@@ -332,6 +401,18 @@ export function getErrorMessage(error: unknown): string {
     return "Another brew process is already running. Please wait for it to finish and try again.";
   }
 
+  if (error instanceof DownloadTimeoutError) {
+    const pkg = error.packageName ? ` for "${error.packageName}"` : "";
+    const phase = error.phase ? ` during ${error.phase}` : "";
+    return `Download timed out${pkg}${phase}. Please try again.`;
+  }
+
+  if (error instanceof StaleProcessError) {
+    const pkg = error.packageName ? ` for "${error.packageName}"` : "";
+    const phase = error.lastPhase ? ` (stuck at ${error.lastPhase})` : "";
+    return `Process appears stuck${pkg}${phase}. The operation was cancelled.`;
+  }
+
   if (error instanceof PackageDisabledError) {
     const type = error.packageType ?? "package";
     const typeName = type.charAt(0).toUpperCase() + type.slice(1);
@@ -375,6 +456,10 @@ export function getErrorMessage(error: unknown): string {
   }
 
   if (error instanceof BrewCommandError) {
+    // Check for null exit code (process was killed/cancelled)
+    if (error.exitCode === undefined || error.exitCode === null) {
+      return "Cancelled";
+    }
     // Check if the stderr contains a known error pattern for better messages
     if (error.stderr) {
       // Check for disabled package
@@ -398,6 +483,11 @@ export function getErrorMessage(error: unknown): string {
   }
 
   if (error instanceof Error) {
+    // Handle abort errors with user-friendly message
+    if (error.name === "AbortError") {
+      return "Cancelled";
+    }
+
     // Check for ExecError-like objects
     const execError = error as { stderr?: string; stdout?: string };
     if (execError.stderr) {

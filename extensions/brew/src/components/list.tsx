@@ -17,6 +17,7 @@ export interface FormulaListProps {
   onSearchTextChange?: (q: string) => void;
   isInstalled: (name: string) => boolean;
   onAction: () => void;
+  filtering?: boolean;
 }
 
 export function FormulaList(props: FormulaListProps) {
@@ -28,7 +29,7 @@ export function FormulaList(props: FormulaListProps) {
       searchBarAccessory={props.searchBarAccessory}
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
-      filtering={false}
+      filtering={props.filtering ?? true}
       throttle
     >
       <List.Section title="Formulae">

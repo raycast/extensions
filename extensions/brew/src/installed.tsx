@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
-import { brewFetchInstalled, Cask, Formula } from "./utils/brew";
+import { Cask, Formula } from "./utils/brew";
+import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { FormulaList } from "./components/list";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 
 export default function Main() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
-  const { isLoading, data: installed, revalidate } = useCachedPromise(() => brewFetchInstalled(true));
+  const { isLoading, data: installed, revalidate } = useBrewInstalled();
 
   let formulae: Formula[] = [];
   if (filter != InstallableFilterType.casks && installed?.formulae instanceof Map) {

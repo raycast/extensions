@@ -96,7 +96,7 @@ export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; on
 
 async function install(formula: Cask | Formula): Promise<boolean> {
   const name = brewName(formula);
-  const handle = showActionToast({ title: `Installing ${name}`, message: "Preparing...", cancelable: true });
+  const handle = showActionToast({ title: `Installing ${name}`, message: "", cancelable: true });
   try {
     // Use progress-enabled install to show download progress
     await brewInstallWithProgress(
@@ -121,7 +121,7 @@ async function install(formula: Cask | Formula): Promise<boolean> {
 
 async function uninstall(formula: Cask | Nameable): Promise<boolean> {
   const name = brewName(formula);
-  const handle = showActionToast({ title: `Uninstalling ${name}`, message: "Removing...", cancelable: true });
+  const handle = showActionToast({ title: `Uninstalling ${name}`, message: "", cancelable: true });
   try {
     await brewUninstall(formula, handle.abort);
     await handle.showSuccessHUD(`Uninstalled ${name}`);
@@ -136,7 +136,7 @@ async function uninstall(formula: Cask | Nameable): Promise<boolean> {
 
 async function upgrade(formula: Cask | Nameable): Promise<boolean> {
   const name = brewName(formula);
-  const handle = showActionToast({ title: `Upgrading ${name}`, message: "Preparing...", cancelable: true });
+  const handle = showActionToast({ title: `Upgrading ${name}`, message: "", cancelable: true });
   try {
     // Use progress-enabled upgrade to show download progress
     await brewUpgradeSingleWithProgress(

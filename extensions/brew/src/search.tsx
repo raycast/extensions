@@ -59,6 +59,7 @@ export default function Main() {
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={isLoadingInstalled || isLoadingSearch}
       onSearchTextChange={(searchText) => setSearchText(searchText.trim())}
+      filtering={false}
       isInstalled={(name) => {
         return isInstalled(name, installed);
       }}

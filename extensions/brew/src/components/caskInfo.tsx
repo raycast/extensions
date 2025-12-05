@@ -1,11 +1,19 @@
-import React from "react";
-import { Detail, useNavigation } from "@raycast/api";
+import React, { useEffect, useState } from "react";
+import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
-import { Cask, brewName } from "../utils";
+import { Cask, brewName, brewFetchCaskInfo, uiLogger } from "../utils";
 import { Dependencies } from "./dependencies";
 
+/**
+ * Check if a cask has minimal data (from fast list) vs full data.
+ */
+function hasMinimalData(cask: Cask): boolean {
+  // Minimal casks have empty homepage and tap
+  return !cask.homepage || !cask.tap || !cask.desc;
+}
+
 export function CaskInfo({
-  cask,
+  cask: initialCask,
   isInstalled,
   onAction,
 }: {
@@ -14,15 +22,76 @@ export function CaskInfo({
   onAction: (result: boolean) => void;
 }) {
   const { pop } = useNavigation();
+  const [cask, setCask] = useState<Cask>(initialCask);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Log when viewing cask info
+  useEffect(() => {
+    uiLogger.log("Viewing cask info", {
+      token: initialCask.token,
+      name: brewName(initialCask),
+      hasMinimalData: hasMinimalData(initialCask),
+      installed: initialCask.installed,
+      version: initialCask.version,
+    });
+  }, [initialCask]);
+
+  // Lazy load full cask data if we only have minimal data
+  useEffect(() => {
+    if (!hasMinimalData(initialCask)) {
+      return;
+    }
+
+    const loadFullData = async () => {
+      setIsLoading(true);
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Loading ${brewName(initialCask)} info...`,
+      });
+
+      try {
+        const fullCask = await brewFetchCaskInfo(initialCask.token);
+        if (fullCask) {
+          // Preserve installed version from initial cask
+          if (initialCask.installed) {
+            fullCask.installed = initialCask.installed;
+          }
+          setCask(fullCask);
+          uiLogger.log("Cask info loaded", {
+            token: fullCask.token,
+            name: brewName(fullCask),
+            desc: fullCask.desc?.substring(0, 50),
+          });
+          toast.hide();
+        } else {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed to load cask info";
+        }
+      } catch (err) {
+        uiLogger.error("Failed to load cask info", { token: initialCask.token, error: err });
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to load cask info";
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadFullData();
+  }, [initialCask]);
 
   return (
     <Detail
+      isLoading={isLoading}
       markdown={formatInfo(cask)}
       navigationTitle={`Cask Info: ${brewName(cask)}`}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link title="Homepage" text={cask.homepage} target={cask.homepage} />
-          <Detail.Metadata.Label title="Tap" text={cask.tap} />
+          {cask.homepage ? (
+            <Detail.Metadata.Link title="Homepage" text={cask.homepage} target={cask.homepage} />
+          ) : (
+            <Detail.Metadata.Label title="Homepage" text="Loading..." />
+          )}
+          <Detail.Metadata.Label title="Tap" text={cask.tap || "Loading..."} />
           <CaskVersion cask={cask} />
           <CaskDependencies cask={cask} />
           <Dependencies title="Conflicts With" dependencies={cask.conflicts_with?.cask} isInstalled={isInstalled} />

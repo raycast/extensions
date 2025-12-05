@@ -138,15 +138,6 @@
     },
     {
       "default" : false,
-      "description" : "Show detailed logs in the console for debugging",
-      "label" : "Enable detailed logging",
-      "name" : "verboseLogging",
-      "required" : false,
-      "title" : "Verbose Logging",
-      "type" : "checkbox"
-    },
-    {
-      "default" : false,
       "description" : "Homebrew 5.0 enables parallel downloads by default. Enable this option to disable concurrent downloads if you experience issues.",
       "label" : "Disable concurrent downloads",
       "name" : "disableDownloadConcurrency",
@@ -160,6 +151,24 @@
       "label" : "Use internal API (experimental)",
       "name" : "useInternalApi",
       "required" : false,
+      "type" : "checkbox"
+    },
+    {
+      "default" : false,
+      "description" : "Close the Raycast window after performing actions like install, uninstall, or upgrade.",
+      "label" : "Close immediately after action",
+      "name" : "closeAfterAction",
+      "required" : false,
+      "title" : "Window Behavior",
+      "type" : "checkbox"
+    },
+    {
+      "default" : false,
+      "description" : "Show detailed logs in the console for debugging",
+      "label" : "Enable detailed logging",
+      "name" : "verboseLogging",
+      "required" : false,
+      "title" : "Verbose Logging",
       "type" : "checkbox"
     }
   ],

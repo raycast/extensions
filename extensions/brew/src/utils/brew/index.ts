@@ -33,7 +33,16 @@ export { execBrewWithProgress, parseBrewOutput, formatBytes } from "./progress";
 export type { BrewPhase, BrewProgress, ProgressCallback } from "./progress";
 
 // Fetching
-export { brewFetchInstalled, brewFetchOutdated, brewUpdate, brewFetchFormulae, brewFetchCasks } from "./fetch";
+export {
+  brewFetchInstalled,
+  brewFetchInstalledFast,
+  brewFetchOutdated,
+  brewUpdate,
+  brewFetchFormulae,
+  brewFetchCasks,
+  brewFetchFormulaInfo,
+  brewFetchCaskInfo,
+} from "./fetch";
 
 // Search
 export { brewSearch } from "./search";
