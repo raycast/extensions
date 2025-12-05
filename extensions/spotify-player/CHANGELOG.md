@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Generate Playlist Improvements] - {PR_MERGE_DATE}
+## [Generate Playlist Improvements] - 2025-12-05
 
 - Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation  
 - Strengthened prompt to enforce a **hard minimum of 20 songs** and a **maximum of 75 songs**  
