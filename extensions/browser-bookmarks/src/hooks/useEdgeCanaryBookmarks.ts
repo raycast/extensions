@@ -1,9 +1,13 @@
-import { homedir } from "os";
+import { homedir, platform } from "os";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 import useChromiumBookmarks from "./useChromiumBookmarks";
 
-const EDGECANARY_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/Microsoft Edge Canary`;
+const isMacOS = platform() === "darwin";
+
+const EDGECANARY_BOOKMARKS_PATH = isMacOS
+  ? `${homedir()}/Library/Application Support/Microsoft Edge Canary`
+  : `${homedir()}\\AppData\\Local\\Microsoft\\Edge SxS\\User Data`;
 
 export default function useEdgeBookmarks(enabled: boolean) {
   return useChromiumBookmarks(enabled, {

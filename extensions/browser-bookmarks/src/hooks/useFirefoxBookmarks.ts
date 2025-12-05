@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFile } from "fs";
-import { homedir } from "os";
+import { homedir, platform } from "os";
 import path from "path";
 import { promisify } from "util";
 
@@ -13,7 +13,11 @@ import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 
 const read = promisify(readFile);
 
-const FIREFOX_FOLDER = `${homedir()}/Library/Application Support/Firefox`;
+const isMacOS = platform() === "darwin";
+
+const FIREFOX_FOLDER = isMacOS
+  ? `${homedir()}/Library/Application Support/Firefox`
+  : `${homedir()}\\AppData\\Roaming\\Mozilla\\Firefox`;
 
 const folderNames: Record<string, string> = {
   menu: "Bookmark Menu",
@@ -24,20 +28,23 @@ const folderNames: Record<string, string> = {
 };
 
 async function getFirefoxProfiles() {
-  if (!existsSync(`${FIREFOX_FOLDER}/profiles.ini`)) {
+  const separator = isMacOS ? "/" : "\\";
+  const profilesIniPath = `${FIREFOX_FOLDER}${separator}profiles.ini`;
+
+  if (!existsSync(profilesIniPath)) {
     return { profiles: [], defaultProfile: "" };
   }
 
-  const file = await read(`${FIREFOX_FOLDER}/profiles.ini`, "utf-8");
+  const file = await read(profilesIniPath, "utf-8");
   const iniFile = ini.parse(file);
 
   const profiles = Object.keys(iniFile)
     // Only keep profiles that have bookmarks
     .filter((key) => {
       if (key.startsWith("Profile")) {
-        const path = iniFile[key].Path;
+        const profilePath = iniFile[key].Path;
         try {
-          const profileDirectory = readdirSync(`${FIREFOX_FOLDER}/${path}`);
+          const profileDirectory = readdirSync(`${FIREFOX_FOLDER}${separator}${profilePath}`);
           return profileDirectory.includes("places.sqlite");
         } catch (error) {
           return false;
@@ -141,12 +148,16 @@ export default function useFirefoxBookmarks(enabled: boolean) {
 
   const { data, isLoading, mutate } = useCachedPromise(
     async (profile, enabled) => {
-      if (!profile || !enabled || !existsSync(`${FIREFOX_FOLDER}/${profile}/places.sqlite`)) {
+      const separator = isMacOS ? "/" : "\\";
+      const placesPath = `${FIREFOX_FOLDER}${separator}${profile}${separator}places.sqlite`;
+
+      if (!profile || !enabled || !existsSync(placesPath)) {
         return;
       }
 
-      const buffer = new Uint8Array(await read(`${FIREFOX_FOLDER}/${profile}/places.sqlite`));
-      const wasmBinary = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const buffer = new Uint8Array(await read(placesPath));
+      const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinary = new Uint8Array(wasmBinaryBuffer).buffer;
       const SQL = await initSqlJs({ wasmBinary });
       const db = new SQL.Database(buffer);
 

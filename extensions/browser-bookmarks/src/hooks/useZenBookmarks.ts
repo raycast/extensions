@@ -1,5 +1,6 @@
 import fs from "fs";
 import { readFile } from "fs";
+import { homedir, platform } from "os";
 import path from "path";
 import { promisify } from "util";
 
@@ -13,7 +14,11 @@ import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 
 const read = promisify(readFile);
 
-const ZEN_FOLDER = path.join(process.env.HOME || "", "Library", "Application Support", "zen");
+const isMacOS = platform() === "darwin";
+
+const ZEN_FOLDER = isMacOS
+  ? path.join(homedir(), "Library", "Application Support", "zen")
+  : path.join(homedir(), "AppData", "Roaming", "zen");
 
 const folderNames: Record<string, string> = {
   menu: "Bookmark Menu",
@@ -206,7 +211,8 @@ export default function useZenBookmarks(enabled: boolean) {
       }
 
       const buffer = new Uint8Array(await read(dbPath));
-      const wasmBinary = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinary = new Uint8Array(wasmBinaryBuffer).buffer;
       const SQL = await initSqlJs({ wasmBinary });
       const db = new SQL.Database(buffer);
 

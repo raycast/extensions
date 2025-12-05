@@ -1,6 +1,13 @@
 import { exec } from "child_process";
+import { platform } from "os";
+
+const isMacOS = platform() === "darwin";
 
 export function getMacOSDefaultBrowser() {
+  if (!isMacOS) {
+    return Promise.resolve("");
+  }
+
   return new Promise<string>((resolve, reject) => {
     const command = `defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | awk -F'"' '/http;/{print window[(NR)-1]}{window[NR]=$2}'`;
     exec(command, (error, stdout) => {

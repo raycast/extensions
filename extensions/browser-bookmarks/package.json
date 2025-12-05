@@ -18,7 +18,8 @@
     "zhsks311",
     "daniel-nagy",
     "gewoonseba",
-    "ridemountainpig"
+    "ridemountainpig",
+    "adityavardhansharma"
   ],
   "pastContributors": [
     "danulqua"
@@ -83,6 +84,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

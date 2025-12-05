@@ -1,9 +1,13 @@
-import { homedir } from "os";
+import { homedir, platform } from "os";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 import useChromiumBookmarks from "./useChromiumBookmarks";
 
-const CHROME_PATH = `${homedir()}/Library/Application Support/Google/Chrome`;
+const isMacOS = platform() === "darwin";
+
+const CHROME_PATH = isMacOS
+  ? `${homedir()}/Library/Application Support/Google/Chrome`
+  : `${homedir()}\\AppData\\Local\\Google\\Chrome\\User Data`;
 
 export default function useChromeBookmarks(enabled: boolean) {
   return useChromiumBookmarks(enabled, {

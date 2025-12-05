@@ -1,9 +1,13 @@
-import { homedir } from "os";
+import { homedir, platform } from "os";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 import useChromiumBookmarks from "./useChromiumBookmarks";
 
-const SIDEKICK_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/Sidekick`;
+const isMacOS = platform() === "darwin";
+
+const SIDEKICK_BOOKMARKS_PATH = isMacOS
+  ? `${homedir()}/Library/Application Support/Sidekick`
+  : `${homedir()}\\AppData\\Local\\Sidekick\\User Data`;
 
 export default function useSidekickBookmarks(enabled: boolean) {
   return useChromiumBookmarks(enabled, {

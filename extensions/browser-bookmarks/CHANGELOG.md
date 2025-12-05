@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Windows Compatibility] - {PR_MERGE_DATE}
+
+- Added Windows compatibility for all browsers except macOS-only browsers like Dia, Safari, Atlas.
+
 ## [Bug Fixes] - 2025-11-10
 
 - Improved error handling for directory reading.

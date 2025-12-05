@@ -1,9 +1,13 @@
-import { homedir } from "os";
+import { homedir, platform } from "os";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 import useChromiumBookmarks from "./useChromiumBookmarks";
 
-const GHOST_BROWSER_PATH = `${homedir()}/Library/Application Support/GhostBrowser`;
+const isMacOS = platform() === "darwin";
+
+const GHOST_BROWSER_PATH = isMacOS
+  ? `${homedir()}/Library/Application Support/GhostBrowser`
+  : `${homedir()}\\AppData\\Local\\GhostBrowser\\User Data`;
 
 export default function useGhostBrowserBookmarks(enabled: boolean) {
   return useChromiumBookmarks(enabled, {

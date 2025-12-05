@@ -1,3 +1,5 @@
+import { platform } from "os";
+
 import { getApplications } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
@@ -28,15 +30,48 @@ export const BROWSERS_BUNDLE_ID = {
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);
 
-export default function useAvailableBrowsers() {
-  return useCachedPromise(async () => {
-    const apps = await getApplications();
+export type SimpleBrowser = {
+  name: string;
+  bundleId: string;
+};
 
-    return (
-      apps
-        // The default macOS browser's bundle ID is lowercased, so let's lowercase all bundleIds
-        .map((app) => ({ ...app, bundleId: app.bundleId?.toLowerCase() }))
-        .filter((app) => availableBrowsers.includes(app.bundleId?.toLowerCase() as string))
-    );
+const isMacOS = platform() === "darwin";
+
+export default function useAvailableBrowsers() {
+  return useCachedPromise(async (): Promise<SimpleBrowser[]> => {
+    // On macOS, use the real installed applications list (original behavior).
+    if (isMacOS) {
+      const apps = await getApplications();
+
+      return apps
+        .map((app) => ({
+          name: app.name,
+          bundleId: app.bundleId?.toLowerCase() ?? "",
+        }))
+        .filter((app) => availableBrowsers.includes(app.bundleId));
+    }
+
+    // On Windows and other non-macOS platforms, Raycast app metadata isn't available,
+    // so return a synthetic list of supported browsers with stable IDs.
+    return [
+      { name: "Brave", bundleId: BROWSERS_BUNDLE_ID.brave },
+      { name: "Brave Beta", bundleId: BROWSERS_BUNDLE_ID.braveBeta },
+      { name: "Brave Nightly", bundleId: BROWSERS_BUNDLE_ID.braveNightly },
+      { name: "Chrome", bundleId: BROWSERS_BUNDLE_ID.chrome },
+      { name: "Chrome Beta", bundleId: BROWSERS_BUNDLE_ID.chromeBeta },
+      { name: "Chrome Dev", bundleId: BROWSERS_BUNDLE_ID.chromeDev },
+      { name: "Edge", bundleId: BROWSERS_BUNDLE_ID.edge },
+      { name: "Edge Dev", bundleId: BROWSERS_BUNDLE_ID.edgeDev },
+      { name: "Edge Canary", bundleId: BROWSERS_BUNDLE_ID.edgeCanary },
+      { name: "Firefox", bundleId: BROWSERS_BUNDLE_ID.firefox },
+      { name: "Firefox Dev", bundleId: BROWSERS_BUNDLE_ID.firefoxDev },
+      { name: "Ghost Browser", bundleId: BROWSERS_BUNDLE_ID.ghostBrowser },
+      { name: "Island", bundleId: BROWSERS_BUNDLE_ID.island },
+      { name: "Sidekick", bundleId: BROWSERS_BUNDLE_ID.sidekick },
+      { name: "Prisma Access", bundleId: BROWSERS_BUNDLE_ID.prismaAccess },
+      { name: "Vivaldi", bundleId: BROWSERS_BUNDLE_ID.vivaldi },
+      { name: "Zen", bundleId: BROWSERS_BUNDLE_ID.zen },
+      { name: "Whale", bundleId: BROWSERS_BUNDLE_ID.whale },
+    ];
   });
 }

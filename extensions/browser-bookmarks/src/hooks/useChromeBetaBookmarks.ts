@@ -1,9 +1,13 @@
-import { homedir } from "os";
+import { homedir, platform } from "os";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 import useChromiumBookmarks from "./useChromiumBookmarks";
 
-const CHROME_BETA_PATH = `${homedir()}/Library/Application Support/Google/Chrome Beta`;
+const isMacOS = platform() === "darwin";
+
+const CHROME_BETA_PATH = isMacOS
+  ? `${homedir()}/Library/Application Support/Google/Chrome Beta`
+  : `${homedir()}\\AppData\\Local\\Google\\Chrome Beta\\User Data`;
 
 export default function useChromeBetaBookmarks(enabled: boolean) {
   return useChromiumBookmarks(enabled, {

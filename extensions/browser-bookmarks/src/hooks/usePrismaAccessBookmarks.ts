@@ -1,9 +1,13 @@
-import { homedir } from "os";
+import { homedir, platform } from "os";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 import useChromiumBookmarks from "./useChromiumBookmarks";
 
-const PRISMA_ACCESS_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/PAB/Prisma Access Browser`;
+const isMacOS = platform() === "darwin";
+
+const PRISMA_ACCESS_BOOKMARKS_PATH = isMacOS
+  ? `${homedir()}/Library/Application Support/PAB/Prisma Access Browser`
+  : `${homedir()}\\AppData\\Local\\PAB\\Prisma Access Browser\\User Data`;
 
 export default function usePrismaAccessBookmarks(enabled: boolean) {
   return useChromiumBookmarks(enabled, {
