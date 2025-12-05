@@ -1,5 +1,12 @@
 # Brand Icons Changelog
 
+## [Enhancement] - 2025-12-04
+
+- Add Windows support
+- Use default AI model for searching icons
+- Add affiliate parameter to Raycast links
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-11-03
 
 - Fix typos

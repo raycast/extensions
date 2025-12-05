@@ -1,5 +1,12 @@
 # Ente Auth Changelog
 
+## [Handle double-encoded TOTP + Maintenance] - 2025-12-02
+
+- Handle double-encoded TOTP
+- Change the "Copy Next" `shortcut` to be cross-platform
+- Remove unnecessary deps
+- Mention default values the extension uses for reference
+
 ## [Windows Support] - 2025-08-25
 
 - Added windows support

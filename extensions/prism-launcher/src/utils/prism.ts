@@ -9,14 +9,8 @@ import { getPreferences } from "./preferences";
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
 
-/**
- * Get the PrismLauncher installation path dynamically
- */
 export async function getPrismLauncherPath(): Promise<string | null> {
   const { path: installPath, bundleId, name } = getPreferences("installPath");
-  const executableName = path.basename(installPath);
-
-  if (!(await fs.pathExists(installPath))) return null;
 
   // Workaround for Windows: appPicker preference does not return full path on Windows, looking for common path for now
   const commonWindowsPrismPath = path.join(
@@ -29,6 +23,10 @@ export async function getPrismLauncherPath(): Promise<string | null> {
   );
 
   if (isWin && name === "Prism Launcher" && (await fs.exists(commonWindowsPrismPath))) return commonWindowsPrismPath;
+
+  const executableName = path.basename(installPath);
+
+  if (!(await fs.pathExists(installPath))) return null;
 
   // Checks to verify it's actually PrismLauncher
   if (isMac && bundleId !== "org.prismlauncher.PrismLauncher") return null;
@@ -115,7 +113,6 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
       id: instanceId,
       icon: iconPath,
       favorite: favoriteIds.includes(instanceId),
-
       ...(onlyWithServers ? { hasServers } : {}),
     };
   });

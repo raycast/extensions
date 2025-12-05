@@ -57,7 +57,10 @@ export default function PullRequestActions({
 
   async function reopenPullRequest() {
     try {
-      await showToast({ style: Toast.Style.Animated, title: `Reopening pull request #${pullRequest.number}` });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Reopening pull request #${pullRequest.number}`,
+      });
 
       await github.reopenPullRequest({ nodeId: pullRequest.id });
 
@@ -78,7 +81,10 @@ export default function PullRequestActions({
 
   async function closePullRequest() {
     try {
-      await showToast({ style: Toast.Style.Animated, title: `Closing pull request #${pullRequest.number}` });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Closing pull request #${pullRequest.number}`,
+      });
 
       await github.closePullRequest({ nodeId: pullRequest.id });
 
@@ -99,7 +105,10 @@ export default function PullRequestActions({
 
   async function mergePullRequest(method: PullRequestMergeMethod) {
     try {
-      await showToast({ style: Toast.Style.Animated, title: `Merging pull request #${pullRequest.number}` });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Merging pull request #${pullRequest.number}`,
+      });
 
       await github.mergePullRequest({ nodeId: pullRequest.id, method });
 
@@ -215,7 +224,10 @@ export default function PullRequestActions({
 
   async function assignToMe(id: string) {
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Assigning to me" });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Assigning to me",
+      });
 
       const assigneeIds = (pullRequest.assignees.nodes
         ?.filter((assignee) => !!assignee)
@@ -242,7 +254,10 @@ export default function PullRequestActions({
 
   async function unassignFromMe(id: string) {
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Un-assigning from me" });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Un-assigning from me",
+      });
 
       const assigneeIds = (pullRequest.assignees.nodes
         ?.filter((assignee) => !!assignee)
@@ -320,7 +335,10 @@ export default function PullRequestActions({
               {pullRequest.autoMergeRequest && (
                 <Action
                   title="Disable Auto Merge"
-                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  icon={{
+                    source: "pull-request-merged.svg",
+                    tintColor: Color.PrimaryText,
+                  }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                   onAction={() => disableAutoMerge()}
                 />
@@ -329,7 +347,10 @@ export default function PullRequestActions({
               {!pullRequest.autoMergeRequest && (
                 <Action
                   title="Merge When Ready"
-                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  icon={{
+                    source: "pull-request-merged.svg",
+                    tintColor: Color.PrimaryText,
+                  }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                   onAction={() => enableAutoMerge()}
                 />
@@ -340,7 +361,10 @@ export default function PullRequestActions({
           {pullRequest.isMergeQueueEnabled && canMerge && !pullRequest.isInMergeQueue && (
             <Action
               title="Add to Merge Queue"
-              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+              icon={{
+                source: "pull-request-merged.svg",
+                tintColor: Color.PrimaryText,
+              }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               onAction={() => addPullRequestToMergeQueue()}
             />
@@ -348,7 +372,10 @@ export default function PullRequestActions({
           {pullRequest.isMergeQueueEnabled && pullRequest.isInMergeQueue && (
             <Action
               title="Remove from Merge Queue"
-              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+              icon={{
+                source: "pull-request-merged.svg",
+                tintColor: Color.PrimaryText,
+              }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               onAction={() => removePullRequestFromMergeQueue()}
             />
@@ -359,7 +386,10 @@ export default function PullRequestActions({
               {pullRequest.repository.mergeCommitAllowed ? (
                 <Action
                   title="Create Merge Commit"
-                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  icon={{
+                    source: "pull-request-merged.svg",
+                    tintColor: Color.PrimaryText,
+                  }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                   onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
                 />
@@ -368,7 +398,10 @@ export default function PullRequestActions({
               {pullRequest.repository.squashMergeAllowed ? (
                 <Action
                   title="Squash and Merge"
-                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  icon={{
+                    source: "pull-request-merged.svg",
+                    tintColor: Color.PrimaryText,
+                  }}
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
                   onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
                 />
@@ -377,7 +410,10 @@ export default function PullRequestActions({
               {pullRequest.repository.rebaseMergeAllowed ? (
                 <Action
                   title="Rebase and Merge"
-                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  icon={{
+                    source: "pull-request-merged.svg",
+                    tintColor: Color.PrimaryText,
+                  }}
                   shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
                   onAction={() => mergePullRequest(PullRequestMergeMethod.Rebase)}
                 />
@@ -412,7 +448,10 @@ export default function PullRequestActions({
         {pullRequest.closed && !pullRequest.merged ? (
           <Action
             title="Reopen Pull Request"
-            icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
+            icon={{
+              source: "pull-request-open.svg",
+              tintColor: Color.PrimaryText,
+            }}
             onAction={() => reopenPullRequest()}
           />
         ) : null}
@@ -499,7 +538,11 @@ function RequestReviewSubmenu({ pullRequest, mutate }: SubmenuProps) {
 
   async function requestReview({ id, text }: { id: string; text: string }) {
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Requesting review", message: text });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Requesting review",
+        message: text,
+      });
 
       await github.requestReview({
         pullRequestId: pullRequest.id,
@@ -571,7 +614,11 @@ function AddAssigneeSubmenu({ pullRequest, mutate }: SubmenuProps) {
 
   async function addAssignee({ id, text }: { id: string; text: string }) {
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Adding assignee", message: text });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Adding assignee",
+        message: text,
+      });
 
       const assigneeIds =
         data?.repository?.pullRequest?.assignees.nodes
@@ -648,7 +695,11 @@ function AddProjectSubmenu({ pullRequest, mutate }: SubmenuProps) {
 
   async function addProject({ id, text }: { id: string; text: string }) {
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Adding to project", message: text });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Adding to project",
+        message: text,
+      });
 
       await github.addPullRequestToProject({
         pullRequestId: pullRequest.id,
@@ -716,7 +767,10 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
 
   async function unsetMilestone() {
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Removing milestone" });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Removing milestone",
+      });
 
       await github.changePullRequestMilestone({
         pullRequestId: pullRequest.id,
@@ -739,7 +793,11 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
 
   async function setMilestone({ id, text }: { id: string; text: string }) {
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Setting milestone", message: text });
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Setting milestone",
+        message: text,
+      });
 
       await github.changePullRequestMilestone({
         pullRequestId: pullRequest.id,

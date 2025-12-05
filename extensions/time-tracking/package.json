@@ -21,6 +21,32 @@
       "type": "directory",
       "required": false,
       "description": "CSVs will be exported here"
+    },
+    {
+      "name": "commaReplacement",
+      "title": "Replace Commas w/ Character",
+      "type": "dropdown",
+      "required": false,
+      "description": "Replace commas with a character in exported CSVs",
+      "data": [
+        {
+          "title": "+ (Plus)",
+          "value": "+"
+        },
+        {
+          "title": "- (Dash)",
+          "value": "-"
+        },
+        {
+          "title": "_ (Underscore)",
+          "value": "_"
+        },
+        {
+          "title": "(Space)",
+          "value": " "
+        }
+      ],
+      "default": "+"
     }
   ],
   "commands": [
@@ -36,6 +62,20 @@
           "name": "name",
           "type": "text",
           "placeholder": "Timer name"
+        },
+        {
+          "name": "tag",
+          "type": "text",
+          "placeholder": "Default tag"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "default_tag",
+          "title": "Default Tag",
+          "type": "textfield",
+          "required": false,
+          "description": "Enter a default tag to apply to timers"
         }
       ]
     },
@@ -57,7 +97,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.3"
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -74,5 +115,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

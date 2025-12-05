@@ -6,6 +6,10 @@
 - Create Pull Request: Fixed validation errors when searching for branches while a branch is already selected
 - Create Pull Request: Prevented selecting the same branch for both "From" and "Into" fields
 
+## [Show organization projects when creating issues] - {PR_MERGE_DATE}
+
+- Include organization-level Projects in the Create Issue project picker
+
 ## [Add Download Repository command and copy markdown URL actions] - 2025-11-19
 
 - Search Repositories: Added "Download Repository" action to download a repository as a zip file

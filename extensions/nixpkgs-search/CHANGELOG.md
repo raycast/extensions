@@ -1,5 +1,12 @@
 # NixPkgs Search Changelog
 
+## [Update] - 2025-12-04
+
+- Consolidate actions for opening package homepage and source code
+- Add keyboard shortcuts for improved accessibility
+- Remove redundant sections for cleaner UI
+- Addesses feedback from [Issues #23406](https://github.com/raycast/extensions/issues/23406)
+
 ## [Update] - 2025-11-26
 
 - **In-app branch switcher**: Added a dropdown in the search bar to switch between NixOS versions without going to preferences
