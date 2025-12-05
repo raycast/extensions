@@ -1,5 +1,9 @@
 # Dungeons & Dragons Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Linting fixes] - 2024-06-13
 - Fixing linting errors
 
