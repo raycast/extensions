@@ -8,8 +8,8 @@ import { Dependencies } from "./dependencies";
  * Check if a cask has minimal data (from fast list) vs full data.
  */
 function hasMinimalData(cask: Cask): boolean {
-  // Minimal casks have empty homepage and tap
-  return !cask.homepage || !cask.tap || !cask.desc;
+  // Minimal casks have empty strings for homepage and tap, or missing desc
+  return cask.homepage === "" || cask.tap === "" || cask.desc === undefined || cask.desc === "";
 }
 
 export function CaskInfo({
@@ -49,8 +49,13 @@ export function CaskInfo({
         title: `Loading ${brewName(initialCask)} info...`,
       });
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       try {
-        const fullCask = await brewFetchCaskInfo(initialCask.token);
+        const fullCask = await brewFetchCaskInfo(initialCask.token, controller);
+        clearTimeout(timeoutId);
+
         if (fullCask) {
           // Preserve installed version from initial cask
           if (initialCask.installed) {
@@ -68,9 +73,15 @@ export function CaskInfo({
           toast.title = "Failed to load cask info";
         }
       } catch (err) {
-        uiLogger.error("Failed to load cask info", { token: initialCask.token, error: err });
+        clearTimeout(timeoutId);
+        const isTimeout = (err as Error).name === "AbortError";
+        uiLogger.error("Failed to load cask info", {
+          token: initialCask.token,
+          error: err,
+          timeout: isTimeout,
+        });
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to load cask info";
+        toast.title = isTimeout ? "Cask info load timed out" : "Failed to load cask info";
       } finally {
         setIsLoading(false);
       }

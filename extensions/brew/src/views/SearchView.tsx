@@ -2,10 +2,9 @@
  * Search view for browsing and searching brew packages.
  */
 
-import React, { useEffect, useState } from "react";
-import { InstallableResults } from "../utils";
+import React, { useState } from "react";
 import { useBrewInstalled } from "../hooks/useBrewInstalled";
-import { useBrewSearch, updateInstalled, isInstalled } from "../hooks/useBrewSearch";
+import { useBrewSearch, isInstalled } from "../hooks/useBrewSearch";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "../components/filter";
 import { FormulaList } from "../components/list";
 import { ErrorBoundary } from "../components/ErrorBoundary";
@@ -16,19 +15,9 @@ function SearchViewContent() {
 
   const { isLoading: isLoadingInstalled, data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
 
-  const { isLoading: isLoadingSearch, data: results, mutate } = useBrewSearch({ searchText, installed });
-
-  // when the installed casks and formulaes have been fetched, we update the results
-  // to show if they are installed
-  useEffect(() => {
-    mutate(undefined, {
-      optimisticUpdate(data: InstallableResults | undefined) {
-        updateInstalled(data, installed);
-        return data;
-      },
-      shouldRevalidateAfter: false,
-    });
-  }, [installed]);
+  // useBrewSearch now automatically applies installed status via useMemo
+  // whenever either search results or installed data changes
+  const { isLoading: isLoadingSearch, data: results } = useBrewSearch({ searchText, installed });
 
   const formulae = filter != InstallableFilterType.casks ? (results?.formulae ?? []) : [];
   const casks = filter != InstallableFilterType.formulae ? (results?.casks ?? []) : [];

@@ -8,8 +8,8 @@ import { Dependencies } from "./dependencies";
  * Check if a formula has minimal data (from fast list) vs full data.
  */
 function hasMinimalData(formula: Formula): boolean {
-  // Minimal formulae have empty homepage and tap
-  return !formula.homepage || !formula.tap || !formula.desc;
+  // Minimal formulae have empty strings for homepage and tap, or missing desc
+  return formula.homepage === "" || formula.tap === "" || formula.desc === undefined || formula.desc === "";
 }
 
 export function FormulaInfo(props: {
@@ -44,8 +44,13 @@ export function FormulaInfo(props: {
         title: `Loading ${props.formula.name} info...`,
       });
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       try {
-        const fullFormula = await brewFetchFormulaInfo(props.formula.name);
+        const fullFormula = await brewFetchFormulaInfo(props.formula.name, controller);
+        clearTimeout(timeoutId);
+
         if (fullFormula) {
           // Preserve installed info from initial formula
           if (props.formula.installed?.length > 0) {
@@ -63,9 +68,15 @@ export function FormulaInfo(props: {
           toast.title = "Failed to load formula info";
         }
       } catch (err) {
-        uiLogger.error("Failed to load formula info", { name: props.formula.name, error: err });
+        clearTimeout(timeoutId);
+        const isTimeout = (err as Error).name === "AbortError";
+        uiLogger.error("Failed to load formula info", {
+          name: props.formula.name,
+          error: err,
+          timeout: isTimeout,
+        });
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to load formula info";
+        toast.title = isTimeout ? "Formula info load timed out" : "Failed to load formula info";
       } finally {
         setIsLoading(false);
       }

@@ -5,6 +5,7 @@
 import React, { useState } from "react";
 import { Cask, Formula, uiLogger } from "../utils";
 import { useBrewInstalled } from "../hooks/useBrewInstalled";
+import { isInstalled } from "../hooks/useBrewSearch";
 import { FormulaList } from "../components/list";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "../components/filter";
 import { ErrorBoundary } from "../components/ErrorBoundary";
@@ -21,16 +22,6 @@ function InstalledViewContent() {
   if (filter != InstallableFilterType.formulae && installed?.casks instanceof Map) {
     casks = Array.from(installed.casks.values());
   }
-
-  const isInstalled = (name: string) => {
-    if (!installed) {
-      return false;
-    }
-    return (
-      (installed.formulae instanceof Map && installed.formulae.get(name) != undefined) ||
-      (installed.casks instanceof Map && installed.casks.get(name) != undefined)
-    );
-  };
 
   // Log rendering statistics
   if (installed && !isLoading) {
@@ -50,7 +41,7 @@ function InstalledViewContent() {
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
-      isInstalled={isInstalled}
+      isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => {
         uiLogger.log("Revalidating installed packages");
         revalidate();

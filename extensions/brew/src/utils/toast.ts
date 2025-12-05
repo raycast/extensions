@@ -4,7 +4,7 @@
  * Provides functions for displaying toast notifications.
  */
 
-import { Clipboard, PopToRootType, Toast, showHUD } from "@raycast/api";
+import { Clipboard, Toast, showHUD } from "@raycast/api";
 import { ExecError } from "./types";
 import { uiLogger } from "./logger";
 import { isRecoverableError, getErrorMessage, isBrewLockError } from "./errors";
@@ -72,21 +72,29 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
       toast.title = title;
     },
     showSuccessHUD: async (message: string) => {
-      toast.hide();
       if (preferences.closeAfterAction) {
+        toast.hide();
+        // Close window and show HUD
         await showHUD(`✅ ${message}`);
       } else {
-        // Keep window open by using Suspended pop behavior
-        await showHUD(`✅ ${message}`, { popToRootType: PopToRootType.Suspended });
+        // Keep window open - update existing toast in-place to avoid stale detail HUD
+        toast.style = Toast.Style.Success;
+        toast.title = message;
+        toast.message = undefined;
+        toast.primaryAction = undefined;
       }
     },
     showFailureHUD: async (message: string) => {
-      toast.hide();
       if (preferences.closeAfterAction) {
+        toast.hide();
+        // Close window and show HUD
         await showHUD(`❌ ${message}`);
       } else {
-        // Keep window open by using Suspended pop behavior
-        await showHUD(`❌ ${message}`, { popToRootType: PopToRootType.Suspended });
+        // Keep window open - update existing toast in-place to avoid stale detail HUD
+        toast.style = Toast.Style.Failure;
+        toast.title = message;
+        toast.message = undefined;
+        toast.primaryAction = undefined;
       }
     },
     hide: () => {

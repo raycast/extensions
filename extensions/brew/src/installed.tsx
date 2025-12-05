@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Cask, Formula } from "./utils/brew";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
+import { isInstalled } from "./hooks/useBrewSearch";
 import { FormulaList } from "./components/list";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 
@@ -17,16 +18,6 @@ export default function Main() {
     casks = Array.from(installed.casks.values());
   }
 
-  const isInstalled = (name: string) => {
-    if (!installed) {
-      return false;
-    }
-    return (
-      (installed.formulae instanceof Map && installed.formulae.get(name) != undefined) ||
-      (installed.casks instanceof Map && installed.casks.get(name) != undefined)
-    );
-  };
-
   return (
     <FormulaList
       formulae={formulae}
@@ -34,7 +25,7 @@ export default function Main() {
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
-      isInstalled={isInstalled}
+      isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => revalidate()}
     />
   );

@@ -2,7 +2,7 @@
  * Hook for searching brew packages.
  */
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise, MutatePromise } from "@raycast/utils";
 import {
@@ -30,19 +30,26 @@ interface UseBrewSearchResult {
 
 /**
  * Hook to search brew packages with caching and abort support.
+ *
+ * Uses a two-layer approach to handle the race condition between search results
+ * and installed data:
+ * 1. Search results are fetched and cached without installed status
+ * 2. Installed status is applied via useMemo when either search results or
+ *    installed data changes, ensuring we always have the latest combination
  */
 export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResult {
   const { searchText, limit = 200, installed } = options;
 
-  const latestInstalled = useRef(installed);
-  latestInstalled.current = installed;
-
   const abortable = useRef<AbortController>(null);
-  const { isLoading, data, mutate } = useCachedPromise(
+  const {
+    isLoading,
+    data: rawData,
+    mutate,
+  } = useCachedPromise(
     async (query: string) => {
-      const results = await brewSearch(query, limit, abortable.current?.signal);
-      updateInstalled(results, latestInstalled.current);
-      return results;
+      // Fetch search results without installed status
+      // Installed status will be applied separately via useMemo
+      return await brewSearch(query, limit, abortable.current?.signal);
     },
     [searchText],
     {
@@ -72,6 +79,22 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     },
   );
 
+  // Apply installed status to search results whenever either changes
+  // This ensures we always have the latest installed data, even if it
+  // arrives after the search completes
+  const data = useMemo(() => {
+    if (!rawData) return undefined;
+
+    // Create a shallow copy to avoid mutating cached data
+    const results: InstallableResults = {
+      formulae: rawData.formulae.map((f) => ({ ...f })),
+      casks: rawData.casks.map((c) => ({ ...c })),
+    };
+
+    applyInstalledStatus(results, installed);
+    return results;
+  }, [rawData, installed]);
+
   return {
     isLoading,
     data,
@@ -80,9 +103,10 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
 }
 
 /**
- * Update search results with installed status.
+ * Apply installed status to search results.
+ * Mutates the results in place.
  */
-export function updateInstalled(results?: InstallableResults, installed?: InstalledMap): void {
+function applyInstalledStatus(results: InstallableResults, installed?: InstalledMap): void {
   if (!results || !installed) {
     return;
   }

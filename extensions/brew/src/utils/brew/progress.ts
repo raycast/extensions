@@ -245,7 +245,7 @@ export async function execBrewWithProgress(
     }
 
     // Report starting
-    onProgress?.({ phase: "starting", message: `Running: brew ${cmd}` });
+    onProgress?.({ phase: "starting", message: `Running: brew ${cmd.trim()}` });
 
     // Helper to process output and update progress
     const processOutput = (text: string, source: "stdout" | "stderr") => {
