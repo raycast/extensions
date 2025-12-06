@@ -250,7 +250,7 @@ export default function Command() {
     <List navigationTitle="Hugeicons Preferences">
       <List.Section title="Display">
         <List.Item
-          icon={Icon.Grid}
+          icon={Icon.AppWindowGrid3x3}
           title="Grid Size"
           subtitle={currentGridSizeName}
           actions={
