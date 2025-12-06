@@ -22,8 +22,12 @@ export const {
 } = getPreferenceValues<ExtensionPreferences>();
 
 export async function getWingetPath() {
-  const defaultPath = (await execa("where winget")).stdout.trim().split("\n")[0];
-  return defaultPath;
+  try {
+    const { stdout } = await execa("where", ["winget"]);
+    return stdout.trim().split("\n")[0];
+  } catch {
+    throw new Error("Winget not found. Please ensure winget is installed and available in your PATH.");
+  }
 }
 
 export const getytdlPath = () => {

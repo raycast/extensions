@@ -124,7 +124,7 @@ async function getVersions() {
 function parseWingetVersion(output: string): string {
   const lines = output.split("\n");
   for (const line of lines) {
-    if (line.includes("yt-dlp") || line.includes("FFmpeg")) {
+    if (line.includes("yt-dlp")) {
       const versionMatch = line.match(/(\d+\.)+\d+/);
       if (versionMatch) {
         return versionMatch[0];
