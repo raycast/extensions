@@ -26,7 +26,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Select Device" icon={Icon.Check} onAction={() => handleSelectDevice(device.id)} />
-              <Action.CopyToClipboard title="Copy UUID" content={device.id} />
+              <Action.CopyToClipboard title="Copy ID" content={device.id} />
             </ActionPanel>
           }
         />
