@@ -54,98 +54,98 @@
   "ai": {
     "evals": [
       {
-        "input" : "@hevy fetch my routines",
-        "mocks" : {
-          "fetch-routines" : {
-            "routines" : [
+        "input": "@hevy fetch my routines",
+        "mocks": {
+          "fetch-routines": {
+            "routines": [
               {
-                "created_at" : "2025-10-13T10:20:22.894Z",
-                "exercises" : [
+                "created_at": "2025-10-13T10:20:22.894Z",
+                "exercises": [
                   {
-                    "exercise_template_id" : "AC1BB830",
-                    "index" : 0,
-                    "notes" : null,
-                    "rest_seconds" : 120,
-                    "sets" : [
+                    "exercise_template_id": "AC1BB830",
+                    "index": 0,
+                    "notes": null,
+                    "rest_seconds": 120,
+                    "sets": [
                       {
-                        "custom_metric" : null,
-                        "distance_meters" : 1280,
-                        "duration_seconds" : 667,
-                        "index" : 0,
-                        "reps" : null,
-                        "type" : "normal",
-                        "weight_kg" : null
+                        "custom_metric": null,
+                        "distance_meters": 1280,
+                        "duration_seconds": 667,
+                        "index": 0,
+                        "reps": null,
+                        "type": "normal",
+                        "weight_kg": null
                       }
                     ],
-                    "superset_id" : null,
-                    "title" : "Running"
+                    "superset_id": null,
+                    "title": "Running"
                   }
                 ],
-                "folder_id" : null,
-                "id" : "4eb84f40-290c-4da5-aab2-316a9273da00",
-                "title" : "UpperA",
-                "updated_at" : "2025-10-28T08:46:08.005Z"
+                "folder_id": null,
+                "id": "4eb84f40-290c-4da5-aab2-316a9273da00",
+                "title": "UpperA",
+                "updated_at": "2025-10-28T08:46:08.005Z"
               }
             ]
           }
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {},
-              "name" : "fetch-routines"
+            "callsTool": {
+              "arguments": {},
+              "name": "fetch-routines"
             }
           }
         ],
         "usedAsExample": true
       },
       {
-        "input" : "@hevy fetch my workouts",
-        "mocks" : {
-          "fetch-workouts" : {
-            "workouts" : [
+        "input": "@hevy fetch my workouts",
+        "mocks": {
+          "fetch-workouts": {
+            "workouts": [
               {
-                "created_at" : "2025-11-17T11:53:45.173Z",
-                "description" : "",
-                "end_time" : "2025-11-17T11:53:35+00:00",
-                "exercises" : [
+                "created_at": "2025-11-17T11:53:45.173Z",
+                "description": "",
+                "end_time": "2025-11-17T11:53:35+00:00",
+                "exercises": [
                   {
-                    "exercise_template_id" : "79EF4E4F",
-                    "index" : 0,
-                    "notes" : "",
-                    "sets" : [
+                    "exercise_template_id": "79EF4E4F",
+                    "index": 0,
+                    "notes": "",
+                    "sets": [
                       {
-                        "custom_metric" : null,
-                        "distance_meters" : null,
-                        "duration_seconds" : 324,
-                        "index" : 0,
-                        "reps" : null,
-                        "rpe" : null,
-                        "type" : "normal",
-                        "weight_kg" : null
+                        "custom_metric": null,
+                        "distance_meters": null,
+                        "duration_seconds": 324,
+                        "index": 0,
+                        "reps": null,
+                        "rpe": null,
+                        "type": "normal",
+                        "weight_kg": null
                       }
                     ],
-                    "superset_id" : null,
-                    "title" : "Warm Up"
+                    "superset_id": null,
+                    "title": "Warm Up"
                   }
                 ],
-                "id" : "40e69507-2fe3-4425-a117-32ee18074b5c",
-                "routine_id" : "4eb84f40-290c-4da5-aab2-316a9273da00",
-                "start_time" : "2025-11-17T10:57:07+00:00",
-                "title" : "UpperA",
-                "updated_at" : "2025-11-18T12:02:22.260Z"
+                "id": "40e69507-2fe3-4425-a117-32ee18074b5c",
+                "routine_id": "4eb84f40-290c-4da5-aab2-316a9273da00",
+                "start_time": "2025-11-17T10:57:07+00:00",
+                "title": "UpperA",
+                "updated_at": "2025-11-18T12:02:22.260Z"
               }
             ]
           }
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-                "page" : 1,
-                "pageSize" : 10
+            "callsTool": {
+              "arguments": {
+                "page": 1,
+                "pageSize": 10
               },
-              "name" : "fetch-workouts"
+              "name": "fetch-workouts"
             }
           }
         ],
@@ -155,7 +155,8 @@
   },
   "dependencies": {
     "@raycast/api": "^1.103.9",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/utils": "^2.2.2",
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
