@@ -1,0 +1,10 @@
+node_modules
+dist
+assets/wasm/*.wasm
+assets/wasm/*.js
+assets/wasm/*.d.ts
+assets/wasm/*.ts
+assets/wasm/package.json
+assets/wasm/snippets
+*.log
+.DS_Store
