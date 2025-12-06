@@ -1,6 +1,6 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
-import isUrlSuperb from "is-url-superb";
+import validator from "validator";
 import { Format, Video } from "./types.js";
 import { existsSync } from "fs";
 import { execa } from "execa";
@@ -23,15 +23,6 @@ export const {
 
 export async function getWingetPath() {
   const defaultPath = (await execa("where winget")).stdout.trim().split("\n")[0];
-
-  if (!existsSync(defaultPath)) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Winget path not found",
-      message: "Please set the correct path in preferences.",
-    });
-  }
-
   return defaultPath;
 }
 
@@ -46,8 +37,7 @@ export const getytdlPath = () => {
         : "/usr/bin/yt-dlp";
 
     return defaultPath;
-  } catch (error) {
-    console.error(error);
+  } catch {
     return "";
   }
 };
@@ -63,8 +53,7 @@ export const getffmpegPath = () => {
         : "/usr/bin/ffmpeg";
 
     return defaultPath;
-  } catch (error) {
-    console.error(error);
+  } catch {
     return "";
   }
 };
@@ -79,9 +68,7 @@ export const getffprobePath = () => {
         ? execSync("where ffprobe").toString().trim().split("\n")[0]
         : "/usr/bin/ffprobe";
     return defaultPath;
-  } catch (error) {
-    console.error(error);
-
+  } catch {
     return "";
   }
 };
@@ -131,7 +118,7 @@ export function isValidHHMM(input: string) {
 }
 
 export function isValidUrl(url: string) {
-  return isUrlSuperb(url, { lenient: true });
+  return validator.isURL(url, { require_protocol: false });
 }
 
 export function formatTbr(tbr: number | null) {
