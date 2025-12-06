@@ -4,7 +4,7 @@ Access over 40,000+ icons in 9 different styles from [Hugeicons](https://hugeico
 
 ## Features
 
-- **Search Icons** — Instantly search through 27,000+ icons across multiple styles
+- **Search Icons** — Instantly search through 40,000+ icons across multiple styles
 - **Copy Formats** — Copy as SVG, JSX (React), Vue SFC, or Svelte components
 - **Download** — Save icons as SVG or PNG files
 - **Bookmarks** — Organize your favorite icons into custom folders
@@ -12,13 +12,13 @@ Access over 40,000+ icons in 9 different styles from [Hugeicons](https://hugeico
 
 ## Setup
 
-This extension requires a Hugeicons API key (Universal License Token).
+This extension requires a Hugeicons API key (Universal License Key).
 
 ### Getting Your API Key
 
 1. Go to [hugeicons.com](https://hugeicons.com) and sign in to your account
-2. Navigate to your account settings or API section
-3. Generate or copy your Universal License Token
+2. Navigate to Profile > License
+3. Copy your Universal License Key
 4. Open Raycast, search for "Hugeicons", and paste your API key in the preferences
 
 ## Commands

@@ -237,7 +237,12 @@ async function svgToPng(svg: string, outputPath: string, size: number = 256): Pr
   await writeFile(tempSvgPath, resizedSvg, "utf-8");
 
   try {
-    await execAsync(`/usr/bin/qlmanage -t -s ${size} -o "${environment.supportPath}" "${tempSvgPath}"`);
+    try {
+      await execAsync("which qlmanage");
+    } catch {
+      throw new Error("qlmanage not found. PNG export requires macOS Quick Look.");
+    }
+    await execAsync(`qlmanage -t -s ${size} -o "${environment.supportPath}" "${tempSvgPath}"`);
     const generatedPng = `${tempSvgPath}.png`;
     await execAsync(`mv "${generatedPng}" "${outputPath}"`);
   } finally {
