@@ -111,7 +111,7 @@ async function getVersions() {
       const { stdout: ytdlpOutput } = await execa(wingetPath, ["list", "--id", "yt-dlp.yt-dlp", "--exact"]);
       ytdlpVersion = parseWingetVersion(ytdlpOutput);
     } catch {
-      // Package not installed
+      // Ignore errors
     }
 
     return {
@@ -122,11 +122,9 @@ async function getVersions() {
 }
 
 function parseWingetVersion(output: string): string {
-  // Parse winget list output to extract version
   const lines = output.split("\n");
   for (const line of lines) {
     if (line.includes("yt-dlp") || line.includes("FFmpeg")) {
-      // Match version pattern (e.g., 2024.12.06 or 7.1.0)
       const versionMatch = line.match(/(\d+\.)+\d+/);
       if (versionMatch) {
         return versionMatch[0];
@@ -155,14 +153,13 @@ async function getOutdated() {
         if (line.includes("yt-dlp.yt-dlp")) {
           const versionMatch = line.match(/(\d+\.)+\d+/g);
           if (versionMatch && versionMatch.length >= 2) {
-            outdatedVersions["yt-dlp"] = versionMatch[1]; // Available version
+            outdatedVersions["yt-dlp"] = versionMatch[1];
           }
         }
       }
 
       return outdatedVersions;
     } catch {
-      // If no updates available or error, return empty
       return {};
     }
   }
@@ -174,7 +171,6 @@ async function upgrade() {
     return execa(homebrewPath, ["upgrade", "yt-dlp", "ffmpeg"]);
   } else if (isWindows) {
     const wingetPath = await getWingetPath();
-    // Upgrade yt-dlp (ffmpeg is bundled with yt-dlp)
     await execa(wingetPath, [
       "upgrade",
       "--id",
