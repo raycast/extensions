@@ -15,7 +15,10 @@
     *   Find the UUID of the specific device.
     *   Enter it in the **Aranet UUID** preference in Raycast Settings.
 
+### Compatibility
+- This extension has only been tested with the Aranet4 Home device.
+
 ## Troubleshooting
 
 *   **"Aranet service not found"**: Ensure your device firmware is up to date using the official Aranet Home app.
-*   **Connection Issues**: Toggle Bluetooth on your Mac or restart the Aranet (remove/insert batteries).
+*   **Connection Issues**: Toggle Bluetooth on your Mac or restart the Aranet (remove/insert batteries). Ensure you are close enough to the Aranet device.
