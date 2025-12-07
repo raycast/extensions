@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Feat: Windows Update Libraries Support] - {PR_MERGE_DATE}
+## [Feat: Windows Update Libraries Support] - 2025-12-07
 
 - Added support for updating yt-dlp and FFmpeg on Windows using winget
 
