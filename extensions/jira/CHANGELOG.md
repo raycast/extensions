@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Add Windows support and credential fallback] - 2025-12-07
+## [Add Windows support and credential fallback] - {PR_MERGE_DATE}
 
 - Add Windows to supported platforms in `package.json`.
 - Add environment-variable fallback and robust Base64 handling in `src/api/jiraCredentials.ts` for better Windows compatibility.

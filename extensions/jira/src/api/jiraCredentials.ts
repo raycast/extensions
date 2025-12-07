@@ -19,7 +19,20 @@ export const jiraWithApiToken = {
       email?: string;
     }>();
 
-    // Fallback to environment variables on Windows if preferences are empty
+    // Use environment variables to fill missing fields only when at least one preference is provided.
+    // This preserves the existing flow where empty preferences imply OAuth in withJiraCredentials.tsx.
+    const hasAnyPreference =
+      Boolean(prefs.siteUrl && prefs.siteUrl.trim()) ||
+      Boolean(prefs.email && prefs.email.trim()) ||
+      Boolean(prefs.token && prefs.token.trim());
+
+    if (!hasAnyPreference) {
+      // No preferences provided: this path should not be used (OAuth flow will be selected).
+      throw new Error(
+        "API token authentication requires preferences. Please set Site URL, Email, and API Token in the extension preferences.",
+      );
+    }
+
     const rawSite = (prefs.siteUrl || process.env.JIRA_DOMAIN || process.env.JIRA_SITE_URL || "").trim();
     const email = (prefs.email || process.env.JIRA_EMAIL || "").trim();
     const token = (prefs.token || process.env.JIRA_API_TOKEN || "").trim();
