@@ -34,7 +34,8 @@ export async function getWingetPath() {
 }
 
 export const getytdlPath = () => {
-  if (ytdlPathPreference && existsSync(ytdlPathPreference)) return ytdlPathPreference;
+  const cleanedYtdlPath = isWindows ? sanitizeWindowsPath(ytdlPathPreference || "") : ytdlPathPreference;
+  if (cleanedYtdlPath && existsSync(cleanedYtdlPath)) return cleanedYtdlPath;
 
   try {
     const defaultPath = isMac
@@ -50,7 +51,8 @@ export const getytdlPath = () => {
 };
 
 export const getffmpegPath = () => {
-  if (ffmpegPathPreference && existsSync(ffmpegPathPreference)) return ffmpegPathPreference;
+  const cleanedFfmpegPath = isWindows ? sanitizeWindowsPath(ffmpegPathPreference || "") : ffmpegPathPreference;
+  if (cleanedFfmpegPath && existsSync(cleanedFfmpegPath)) return cleanedFfmpegPath;
 
   try {
     const defaultPath = isMac
@@ -66,7 +68,9 @@ export const getffmpegPath = () => {
 };
 
 export const getffprobePath = () => {
-  if (ffprobePathPreference && existsSync(ffprobePathPreference)) return ffprobePathPreference;
+  const cleanedFfprobePath = isWindows ? sanitizeWindowsPath(ffprobePathPreference || "") : ffprobePathPreference;
+
+  if (cleanedFfprobePath && existsSync(cleanedFfprobePath)) return cleanedFfprobePath;
 
   try {
     const defaultPath = isMac
