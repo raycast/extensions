@@ -13,17 +13,34 @@ type JiraCredentials = {
 
 export const jiraWithApiToken = {
   authorize: async () => {
-    const { siteUrl, token, email } = getPreferenceValues();
+    const prefs = getPreferenceValues<{
+      siteUrl?: string;
+      token?: string;
+      email?: string;
+    }>();
+
+    // Fallback to environment variables on Windows if preferences are empty
+    const rawSite =
+      (prefs.siteUrl || process.env.JIRA_DOMAIN || process.env.JIRA_SITE_URL || "").trim();
+    const email = (prefs.email || process.env.JIRA_EMAIL || "").trim();
+    const token = (prefs.token || process.env.JIRA_API_TOKEN || "").trim();
+
+    if (!rawSite || !email || !token) {
+      throw new Error(
+        "Missing Jira credentials. Please configure site URL, email, and API token in Raycast preferences or via environment variables (JIRA_DOMAIN/JIRA_SITE_URL, JIRA_EMAIL, JIRA_API_TOKEN).",
+      );
+    }
 
     let hostname;
     try {
-      hostname = new URL(siteUrl).host;
+      hostname = new URL(rawSite).host;
     } catch (error) {
       // If the URL isn't valid, assume a hostname was entered directly
-      hostname = siteUrl;
+      hostname = rawSite.replace(/^https?:\/\//i, "");
     }
 
-    const authorizationHeader = `Basic ${btoa(`${email}:${token}`)}`;
+    // Use Buffer for robust base64 across platforms/environments
+    const authorizationHeader = `Basic ${Buffer.from(`${email}:${token}`).toString("base64")}`;
     const myselfResponse = await fetch(`https://${hostname}/rest/api/3/myself`, {
       headers: {
         Authorization: authorizationHeader,
