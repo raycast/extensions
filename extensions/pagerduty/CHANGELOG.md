@@ -1,6 +1,6 @@
 # PagerDuty Changelog
 
-## [Pagination + Modernize] - {PR_MERGE_DATE}
+## [Pagination + Modernize] - 2025-12-07
 
 - Fetch more than the first 25 incidents
 - Modernize to use latest Raycast configuration
