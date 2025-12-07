@@ -1,3 +1,5 @@
+import { ReactElement } from "react";
+
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
@@ -6,7 +8,7 @@ import { OutdatedActionPanel } from "./components/actionPanels";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { preferences } from "./preferences";
 
-export default function Main(): JSX.Element {
+export default function Main() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
   const { isLoading, data, revalidate } = useCachedPromise(() => brewFetchOutdated(preferences.greedyUpgrades));
 
@@ -58,7 +60,7 @@ function OutdatedFormulaeListItem(props: { outdated: OutdatedFormula; onAction: 
 interface OutdatedListProps {
   outdated?: OutdatedResults;
   isLoading: boolean;
-  searchBarAccessory?: JSX.Element;
+  searchBarAccessory?: ReactElement<List.Dropdown.Props, string>;
   filterType: InstallableFilterType;
   onAction: () => void;
 }

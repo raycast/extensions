@@ -99,6 +99,16 @@ export interface Word {
   word: string;
 }
 
+export interface SearchDoc {
+  id: string;
+  raw: string;
+}
+
+export interface SearchResult {
+  doc: SearchDoc;
+  hits: number;
+}
+
 export interface ApiResponse<T = unknown> {
   ok: boolean;
   data: T;
@@ -168,4 +178,27 @@ export const getRandomWord = async (minLength?: number, maxLength?: number): Pro
 
   const res = await makeApiRequest<Word>(url);
   return searchWord(res.word);
+};
+
+// Search for suggestions when a word is not found
+export const searchSuggestions = async (query: string, limit = 5): Promise<string[]> => {
+  try {
+    const url = `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const results = (await response.json()) as SearchResult[];
+
+    if (!Array.isArray(results)) {
+      return [];
+    }
+
+    // Extract word IDs and return top results
+    return results.slice(0, limit).map((result) => result.doc.id);
+  } catch {
+    return [];
+  }
 };

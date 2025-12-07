@@ -4,16 +4,30 @@ import {
   Alert,
   Color,
   confirmAlert,
+  Form,
   getPreferenceValues,
   Icon,
   Keyboard,
   List,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { compareDesc, endOfMonth, format, getISOWeek, startOfMonth, subDays } from "date-fns";
-import { useFetch } from "@raycast/utils";
+import {
+  addDays,
+  addMonths,
+  addWeeks,
+  compareDesc,
+  endOfMonth,
+  format,
+  getISOWeek,
+  startOfMonth,
+  subDays,
+  subMonths,
+  subWeeks,
+} from "date-fns";
+import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import {
   buildPostizApiUrl,
   buildPostizPlatformUrl,
@@ -51,7 +65,7 @@ const getProviderIdentifierIcon = (providerIdentifier: string) => `platforms/${p
 export default function SearchPosts() {
   type Display = "day" | "week" | "month";
   const [display, setDisplay] = useState<Display>("week");
-  const date = useMemo(() => new Date(), []);
+  const [date, setDate] = useState(new Date());
   const { startDate, endDate } = useMemo(() => {
     switch (display) {
       case "day":
@@ -135,6 +149,41 @@ export default function SearchPosts() {
     }
   };
   const subtitle = `${format(postiz_version === "1" ? subDays(date, 6) : startDate, "MM/dd/yyyy")} - ${format(endDate, "MM/dd/yyyy")}`;
+
+  const ChangePeriodActions = () => {
+    return (
+      postiz_version === "2" && (
+        <ActionPanel.Section>
+          <Action
+            icon={Icon.ArrowRightCircle}
+            title="Go to Next Period"
+            onAction={() =>
+              setDate((prev) =>
+                display === "day" ? addDays(prev, 1) : display === "week" ? addWeeks(prev, 1) : addMonths(prev, 1),
+              )
+            }
+            shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+          />
+          <Action
+            icon={Icon.ArrowLeftCircle}
+            title="Go to Previous Period"
+            onAction={() =>
+              setDate((prev) =>
+                display === "day" ? subDays(prev, 1) : display === "week" ? subWeeks(prev, 1) : subMonths(prev, 1),
+              )
+            }
+            shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+          />
+          <Action.Push
+            icon={Icon.Calendar}
+            title="Go to Specific Date"
+            target={<ChooseDate onPick={setDate} />}
+            shortcut={{ modifiers: ["cmd"], key: "g" }}
+          />
+        </ActionPanel.Section>
+      )
+    );
+  };
   return (
     <List
       isLoading={isLoading}
@@ -149,7 +198,15 @@ export default function SearchPosts() {
         )
       }
     >
-      <List.EmptyView title="No Results" description={subtitle} />
+      <List.EmptyView
+        title="No Results"
+        description={subtitle}
+        actions={
+          <ActionPanel>
+            <ChangePeriodActions />
+          </ActionPanel>
+        }
+      />
       <List.Section title="Today" subtitle={subtitle}>
         {posts.map((post) => (
           <List.Item
@@ -216,11 +273,36 @@ export default function SearchPosts() {
                   style={Action.Style.Destructive}
                   shortcut={Keyboard.Shortcut.Common.Remove}
                 />
+                <ChangePeriodActions />
               </ActionPanel>
             }
           />
         ))}
       </List.Section>
     </List>
+  );
+}
+
+function ChooseDate({ onPick }: { onPick: (date: Date) => void }) {
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<{ date: Date | null }>({
+    onSubmit(values) {
+      onPick(values.date!);
+      pop();
+    },
+    validation: {
+      date: FormValidation.Required,
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Pick Date" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.DatePicker title="Date" type={Form.DatePicker.Type.Date} {...itemProps.date} />
+    </Form>
   );
 }

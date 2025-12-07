@@ -1,102 +1,54 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
-import buildPrompt from "../utils/buildPrompt";
-import { creativity, FormValues, tones } from "../types";
-import PreviewPrompt from "./PreviewPrompt";
-import { validateForm } from "../utils/validation";
-import { usePersistentForm } from "../hooks/usePersistentForm";
+import { Form } from "@raycast/api";
+import { useState } from "react";
+import { creativity, tones } from "../types";
+import PromptFormActions from "./PromptFormActions";
+import { useTemplate } from "../hooks/useTemplate";
 
 const PromptForm = () => {
-  const { push } = useNavigation();
   const [taskError, setTaskError] = useState<string | undefined>();
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
-  const { formValues, handleChange, resetForm } = usePersistentForm({
-    role: "",
-    task: "",
-    reference: "",
-    format: "",
-    tone: "None",
-    audience: "",
-    creativity: "None",
-    example: "",
-    meta: "",
-    reasoning: false,
-    sources: false,
-    summary: false,
-    followup: false,
-  });
+  const {
+    templates,
+    formValues,
+    selectedTemplateId,
+    setSelectedTemplateId,
+    handleChange,
+    openTemplate,
+    addTemplate,
+    updateTemplate,
+    deleteTemplate,
+    resetFormValues,
+    deleteAllTemplates,
+  } = useTemplate();
 
-  useEffect(() => {
-    const hasAdvancedValues =
-      formValues.example ||
-      formValues.meta ||
-      formValues.reasoning ||
-      formValues.sources ||
-      formValues.summary ||
-      formValues.followup;
-
-    if (hasAdvancedValues) setShowAdvanced(true);
-  }, []);
-
-  const validateAndGetPrompt = (values: FormValues): string | undefined => {
-    const errors = validateForm(values);
-    if (errors.task) {
-      setTaskError(errors.task);
-      return;
-    }
-    const generatedPrompt = buildPrompt(values);
-    return generatedPrompt;
-  };
-
-  const handlePreviewPrompt = async (values: FormValues) => {
-    const prompt = validateAndGetPrompt(values);
-    if (!prompt) return;
-
-    push(<PreviewPrompt prompt={prompt} />);
-  };
-
-  const handleCopyToClipboard = async (values: FormValues) => {
-    try {
-      const prompt = validateAndGetPrompt(values);
-      if (!prompt) return;
-
-      await Clipboard.copy(prompt);
-      await showHUD("Copied to Clipboard");
-    } catch (error) {
-      await showHUD("Failed to Copy Prompt");
-      console.log("Clipboard error:", error);
-    }
+  const formState = { formValues, resetFormValues, setTaskError };
+  const templateState = {
+    selectedTemplateId,
+    setSelectedTemplateId,
+    templates,
+    addTemplate,
+    updateTemplate,
+    deleteTemplate,
+    deleteAllTemplates,
   };
 
   return (
     <Form
       navigationTitle="Prompt Builder"
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Copy to Clipboard" onSubmit={handleCopyToClipboard} />
-          <Action.SubmitForm
-            title="Preview Prompt"
-            icon={Icon.Eye}
-            onSubmit={handlePreviewPrompt}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
-          />
-          <Action
-            title="Clear All"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={async () => {
-              resetForm();
-              setTaskError(undefined);
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Form cleared",
-              });
-            }}
-          />
-        </ActionPanel>
-      }
+      actions={<PromptFormActions formState={formState} templateState={templateState} />}
     >
+      <Form.Dropdown
+        id="template"
+        title="Use Template"
+        value={selectedTemplateId}
+        onChange={(templateId) => {
+          openTemplate(templateId);
+        }}
+      >
+        {templates.map((template) => {
+          return <Form.Dropdown.Item key={template.id} value={template.id} title={template.title} />;
+        })}
+      </Form.Dropdown>
+
       <Form.Description text="Build your prompt (Preview with ⌘Y)" />
 
       <Form.TextField
@@ -130,6 +82,8 @@ const PromptForm = () => {
         value={formValues.reference}
         onChange={(v) => handleChange("reference", v)}
       />
+
+      <Form.Separator />
 
       <Form.TextArea
         id="format"
@@ -173,68 +127,57 @@ const PromptForm = () => {
         ))}
       </Form.Dropdown>
 
-      <Form.Checkbox
-        id="showAdvanced"
-        label="Show advanced options"
-        value={showAdvanced}
-        onChange={(checked) => setShowAdvanced(checked)}
+      <Form.Separator />
+
+      <Form.TextArea
+        id="example"
+        title="Example"
+        placeholder="E.g. Input → Output"
+        info="Show the style you want"
+        value={formValues.example}
+        onChange={(v) => handleChange("example", v)}
       />
 
-      {showAdvanced && (
-        <>
-          <Form.Separator />
+      <Form.TextArea
+        id="meta"
+        title="Meta Instructions"
+        placeholder="E.g. Always think step-by-step before answering"
+        info="Force extra rules or logic."
+        value={formValues.meta}
+        onChange={(v) => handleChange("meta", v)}
+      />
 
-          <Form.TextArea
-            id="example"
-            title="Example"
-            placeholder="E.g. Input → Output"
-            info="Show the style you want"
-            value={formValues.example}
-            onChange={(v) => handleChange("example", v)}
-          />
+      <Form.Checkbox
+        id="noEmDash"
+        label="Avoid em-dashes"
+        info="AI tends to insert em-dashes. Enable this to avoid them."
+        value={formValues.noEmDash}
+        onChange={(v) => handleChange("noEmDash", v)}
+      />
 
-          <Form.TextArea
-            id="meta"
-            title="Meta Instructions"
-            placeholder="E.g. Always think step-by-step before answering"
-            info="Force extra rules or logic."
-            value={formValues.meta}
-            onChange={(v) => handleChange("meta", v)}
-          />
+      <Form.Checkbox
+        id="reasoning"
+        label="Include reasoning style"
+        info="AI explains its thought process"
+        value={formValues.reasoning}
+        onChange={(v) => handleChange("reasoning", v)}
+      />
 
-          <Form.Checkbox
-            id="reasoning"
-            label="Include reasoning style"
-            info="AI explains its thought process"
-            value={formValues.reasoning}
-            onChange={(v) => handleChange("reasoning", v)}
-          />
+      <Form.Checkbox
+        id="sources"
+        label="Include sources"
+        info="AI provides sources or citations when possible"
+        value={formValues.sources}
+        onChange={(v) => handleChange("sources", v)}
+      />
 
-          <Form.Checkbox
-            id="sources"
-            label="Include sources"
-            info="AI provides sources or citations when possible"
-            value={formValues.sources}
-            onChange={(v) => handleChange("sources", v)}
-          />
-
-          <Form.Checkbox
-            id="summary"
-            label="End with a summary"
-            info="AI concludes its answer with a brief recap"
-            value={formValues.summary}
-            onChange={(v) => handleChange("summary", v)}
-          />
-
-          <Form.Checkbox
-            id="followup"
-            label="Include follow-up suggestion"
-            info="AI suggests next topic"
-            value={formValues.followup}
-            onChange={(v) => handleChange("followup", v)}
-          />
-        </>
-      )}
+      <Form.Checkbox
+        id="summary"
+        label="End with a summary"
+        info="AI concludes its answer with a brief recap"
+        value={formValues.summary}
+        onChange={(v) => handleChange("summary", v)}
+      />
     </Form>
   );
 };

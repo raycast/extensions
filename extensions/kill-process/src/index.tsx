@@ -18,8 +18,8 @@ import prettyBytes from "pretty-bytes";
 import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
-import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp } from "./utils/platform";
-import { fetchRunningProcesses } from "./utils/process";
+import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
+import { fetchRunningProcesses, fetchProcessPerformance } from "./utils/process";
 
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
@@ -39,10 +39,38 @@ export default function ProcessList() {
   const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.sortByMem ? "memory" : "cpu");
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
+  // Cache CPU data from WMI queries (persists across refreshes)
+  const [cpuCache, setCpuCache] = useState<Map<number, number>>(new Map());
+
   const fetchProcesses = () => {
     fetchRunningProcesses()
       .then((processes) => {
+        // Apply cached CPU values to new process list
+        if (isWindows && cpuCache.size > 0) {
+          processes = processes.map((proc) => {
+            const cachedCpu = cpuCache.get(proc.id);
+            return cachedCpu !== undefined ? { ...proc, cpu: cachedCpu } : proc;
+          });
+        }
+
         setFetchResult(processes);
+
+        // On Windows, fetch accurate CPU data in the background
+        if (isWindows) {
+          fetchProcessPerformance().then((cpuData) => {
+            if (cpuData.size > 0) {
+              // Update cache with new CPU data
+              setCpuCache(cpuData);
+              // Update displayed processes
+              setFetchResult((currentProcesses) =>
+                currentProcesses.map((proc) => {
+                  const cpu = cpuData.get(proc.id);
+                  return cpu !== undefined ? { ...proc, cpu } : proc;
+                }),
+              );
+            }
+          });
+        }
       })
       .catch((err) => {
         console.error("Failed to fetch processes:", err);

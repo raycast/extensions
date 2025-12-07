@@ -31,6 +31,7 @@ import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useGhostBrowserBookmarks from "./hooks/useGhostBrowserBookmarks";
 import useIslandBookmarks from "./hooks/useIslandBookmarks";
+import useLibreWolfBookmarks from "./hooks/useLibreWolfBookmarks";
 import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
@@ -122,12 +123,13 @@ export default function Command() {
   const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
   const hasGhostBrowser = browsers.includes(BROWSERS_BUNDLE_ID.ghostBrowser) ?? false;
   const hasIsland = browsers.includes(BROWSERS_BUNDLE_ID.island) ?? false;
+  const hasLibreWolf = browsers.includes(BROWSERS_BUNDLE_ID.libreWolf) ?? false;
   const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
-  const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
   const hasWhale = browsers.includes(BROWSERS_BUNDLE_ID.whale) ?? false;
+  const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
 
   const arc = useArcBookmarks(hasArc);
   const brave = useBraveBookmarks(hasBrave);
@@ -144,6 +146,7 @@ export default function Command() {
   const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
   const ghostBrowser = useGhostBrowserBookmarks(hasGhostBrowser);
   const island = useIslandBookmarks(hasIsland);
+  const libreWolf = useLibreWolfBookmarks(hasLibreWolf);
   const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
   const sidekick = useSidekickBookmarks(hasSidekick);
@@ -171,6 +174,7 @@ export default function Command() {
       ...firefox.bookmarks,
       ...ghostBrowser.bookmarks,
       ...island.bookmarks,
+      ...libreWolf.bookmarks,
       ...prismaAccess.bookmarks,
       ...safari.bookmarks,
       ...sidekick.bookmarks,
@@ -226,6 +230,7 @@ export default function Command() {
     firefox.bookmarks,
     ghostBrowser.bookmarks,
     island.bookmarks,
+    libreWolf.bookmarks,
     prismaAccess.bookmarks,
     safari.bookmarks,
     sidekick.bookmarks,
@@ -253,6 +258,7 @@ export default function Command() {
       ...firefox.folders,
       ...ghostBrowser.folders,
       ...island.folders,
+      ...libreWolf.folders,
       ...prismaAccess.folders,
       ...safari.folders,
       ...sidekick.folders,
@@ -278,6 +284,7 @@ export default function Command() {
     firefox.folders,
     ghostBrowser.folders,
     island.folders,
+    libreWolf.folders,
     prismaAccess.folders,
     safari.folders,
     sidekick.folders,
@@ -404,6 +411,9 @@ export default function Command() {
     if (hasIsland) {
       island.mutate();
     }
+    if (hasLibreWolf) {
+      libreWolf.mutate();
+    }
     if (hasPrismaAccess) {
       prismaAccess.mutate();
     }
@@ -478,6 +488,7 @@ export default function Command() {
         firefox.isLoading ||
         ghostBrowser.isLoading ||
         island.isLoading ||
+        libreWolf.isLoading ||
         prismaAccess.isLoading ||
         safari.isLoading ||
         sidekick.isLoading ||
@@ -671,6 +682,15 @@ export default function Command() {
                     profiles={island.profiles}
                     currentProfile={island.currentProfile}
                     setCurrentProfile={island.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.libreWolf}
+                    name="LibreWolf"
+                    icon="LibreWolf.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    profiles={libreWolf.profiles}
+                    currentProfile={libreWolf.currentProfile}
+                    setCurrentProfile={libreWolf.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.prismaAccess}

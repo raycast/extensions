@@ -1,5 +1,9 @@
 # Dia Changelog
 
+## Search Open and Pinned Tabs - 2025-12-01
+
+- Added support for Dia's new AppleScript API to search open and pinned tabs.
+
 ## New Features - 2025-11-27
 
 ### Added
