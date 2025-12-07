@@ -22,8 +22,9 @@ _IPScan_ is a powerful and lightweight Raycast extension for scanning IP address
 - macOS 12 or newer
 - Raycast version 1.68+
 - # Network permissions enabled for Raycast
+
 <p align="center">
-  <img src="images/store-logo.webp" height="128">
+  <img src="assets/extension_icon.png" height="128" alt="IPScan">
   <h1 align="center">Raycast Extensions</h1>
 </p>
 
@@ -37,8 +38,6 @@ _IPScan_ is a powerful and lightweight Raycast extension for scanning IP address
 </p>
 
 [Raycast](https://raycast.com/) lets you control your tools with a few keystrokes. This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples of how to extend Raycast using React.
-
-![Header](images/header.webp)
 
 ## Getting Started
 
