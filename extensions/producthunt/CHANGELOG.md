@@ -4,7 +4,7 @@
 
 - Fix scraper to use `latestScore`/`launchDayScore` fields for vote counts (Product Hunt API changed from `votesCount`)
 - Use browser-like headers for all fetch requests to avoid Cloudflare blocking
-- Migrate all `console.log`/`console.error` calls to structured `@chrismessina/raycast-logger`
+- Implement custom structured logger with emoji-prefixed output
 - Update dependencies
 - Removed .eslintrc.json in favor of eslint.config.mjs
 

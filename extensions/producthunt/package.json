@@ -33,10 +33,10 @@
     {
       "name": "verboseLogging",
       "title": "Debug Logging",
-      "description": "Enable extra diagnostics for troubleshooting and bug reports.",
       "type": "checkbox",
       "required": false,
-      "label": "Enable",
+      "description": "Show detailed logs in the console for debugging.",
+      "label": "Enable extra diagnostics in the console",
       "default": false
     }
   ],
@@ -168,7 +168,6 @@
     ]
   },
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.0.0",
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^2.2.2",
     "cheerio": "^1.1.2"
