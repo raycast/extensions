@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Fix: Windows Path Resolution Issues] - {PR_MERGE_DATE}
+## [Fix: Windows Path Resolution Issues] - 2025-12-07
 
 - Resolved error with `winget` command detection on Windows systems
 - Fixed path validation issue where `fs.existsSync()` incorrectly returned false for existing Windows paths
