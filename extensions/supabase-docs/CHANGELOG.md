@@ -1,6 +1,6 @@
 # Supabase Docs Changelog
 
-## [Window Support] - {PR_MERGE_DATE}
+## [Window Support] - 2025-12-07
 
 Add window support (ref: [Issue #23412](https://github.com/raycast/extensions/issues/23412))
 
