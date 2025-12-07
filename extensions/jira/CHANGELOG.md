@@ -1,8 +1,13 @@
 # Jira Changelog
 
+## [Add Windows support and credential fallback] - 2025-12-07
+
+- Add Windows to supported platforms in `package.json`.
+- Add environment-variable fallback and robust Base64 handling in `src/api/jiraCredentials.ts` for better Windows compatibility.
+
 ## [Fix unbounded JQL error when no project filter] - 2025-09-08
 
-- Added a fallback `created >= -30d` clause in the *Search Issues* command when no project is selected to prevent Jira’s “Unbounded JQL queries are not allowed” error.
+- Added a fallback `created >= -30d` clause in the _Search Issues_ command when no project is selected to prevent Jira’s “Unbounded JQL queries are not allowed” error.
 
 ## [Fix deprecated Jira search API] - 2025-08-20
 

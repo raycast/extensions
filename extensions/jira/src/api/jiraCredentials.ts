@@ -20,8 +20,7 @@ export const jiraWithApiToken = {
     }>();
 
     // Fallback to environment variables on Windows if preferences are empty
-    const rawSite =
-      (prefs.siteUrl || process.env.JIRA_DOMAIN || process.env.JIRA_SITE_URL || "").trim();
+    const rawSite = (prefs.siteUrl || process.env.JIRA_DOMAIN || process.env.JIRA_SITE_URL || "").trim();
     const email = (prefs.email || process.env.JIRA_EMAIL || "").trim();
     const token = (prefs.token || process.env.JIRA_API_TOKEN || "").trim();
 
