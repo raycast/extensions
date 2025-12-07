@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for libreWolf] - {PR_MERGE_DATE}
+## [Support for libreWolf] - 2025-12-07
 
 - Added support for `LibreWolf` browser.
 
