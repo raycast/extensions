@@ -1,6 +1,6 @@
 # Postiz Changelog
 
-## [Go to Different Periods in v2] - {PR_MERGE_DATE}
+## [Go to Different Periods in v2] - 2025-12-07
 
 In Search Posts **v2**:
 - "Go to Next Period" takes you to the next period e.g. _next month_
