@@ -1,6 +1,6 @@
 # dict.cc Changelog
 
-## [v.1.4.0] - {PR_MERGE_DATE}
+## [v.1.4.0] - 2025-12-07
 
 - Added support for Windows
 
