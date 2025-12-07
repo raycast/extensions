@@ -1,6 +1,6 @@
 # NixPkgs Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-12-07
 
 - Update shortcuts to use Raycast's common keyboard shortcuts
 - Add submenu for the Open action
