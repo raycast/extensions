@@ -44,6 +44,20 @@ const formulaRemote: Remote<Formula> = { url: formulaURL, cachePath: formulaCach
 const caskRemote: Remote<Cask> = { url: caskURL, cachePath: caskCachePath };
 
 /**
+ * Check if the search cache files exist (formula.json and cask.json).
+ * Used to determine if this is a cold start (no cache) or warm start (cache exists).
+ */
+export async function hasSearchCache(): Promise<boolean> {
+  try {
+    const [formulaStats, caskStats] = await Promise.all([fs.stat(formulaCachePath), fs.stat(caskCachePath)]);
+    // Both files must exist and have content
+    return formulaStats.size > 0 && caskStats.size > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Minimal installed package info parsed from `brew list --versions`.
  * This is much faster than `brew info --json=v2 --installed`.
  */

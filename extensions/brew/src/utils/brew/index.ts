@@ -42,6 +42,7 @@ export {
   brewFetchCasks,
   brewFetchFormulaInfo,
   brewFetchCaskInfo,
+  hasSearchCache,
 } from "./fetch";
 
 // Search

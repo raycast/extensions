@@ -6,7 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
-import { useBrewSearch, isInstalled, FileDownloadProgress } from "./hooks/useBrewSearch";
+import { useBrewSearch, isInstalled } from "./hooks/useBrewSearch";
+import type { FileDownloadProgress } from "./hooks/useBrewSearch";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
 
@@ -113,20 +114,31 @@ export default function Main() {
 
   // useBrewSearch automatically applies installed status via useMemo
   // whenever either search results or installed data changes
-  const { isLoading: isLoadingSearch, loadingState, data: results } = useBrewSearch({ searchText, installed });
+  const {
+    isLoading: isLoadingSearch,
+    hasCacheFiles,
+    loadingState,
+    data: results,
+  } = useBrewSearch({
+    searchText,
+    installed,
+  });
 
   const formulae = filter != InstallableFilterType.casks ? (results?.formulae ?? []) : [];
   const casks = filter != InstallableFilterType.formulae ? (results?.casks ?? []) : [];
 
-  // Track if we've shown the completion toast
+  // Track if we've shown the completion toast (persists across renders)
   const hasShownCompletionToast = useRef(false);
 
-  // Show completion toast when initial load finishes
+  // Extract primitive for stable dependency (avoids render loops from object changes)
+  const phase = loadingState.phase;
+
+  // Show completion toast when download AND processing are fully complete
+  // Wait for phase === "complete" to ensure we have accurate totals
   useEffect(() => {
-    if (!loadingState.isInitialLoad && !hasShownCompletionToast.current && results) {
+    if (phase === "complete" && !hasShownCompletionToast.current && results) {
       hasShownCompletionToast.current = true;
-      // Use totalLength from results (actual count before limit) - this is the most reliable source
-      // totalLength is set in brewSearch before slicing to limit
+      // Use totalLength from results (set before slicing) for accurate counts
       const totalFormulae = results.formulae?.totalLength || results.formulae?.length || 0;
       const totalCasks = results.casks?.totalLength || results.casks?.length || 0;
       showToast({
@@ -135,12 +147,30 @@ export default function Main() {
         message: `${formatNumber(totalFormulae)} formulae and ${formatNumber(totalCasks)} casks loaded`,
       });
     }
-  }, [loadingState, results]);
+  }, [phase, results]);
 
-  // Show download progress view during initial load
-  if (loadingState.isInitialLoad) {
-    const { casksProgress, formulaeProgress, phase } = loadingState;
+  // Determine which loading UI to show during initial load:
+  // - hasCacheFiles === null: Still checking if cache exists, show simple loading
+  // - hasCacheFiles === true: Cache exists (warm start), show normal list with spinner
+  // - hasCacheFiles === false: No cache (cold start), show download progress UI
 
+  // While checking cache existence, show a simple loading state
+  if (loadingState.isInitialLoad && hasCacheFiles === null) {
+    return (
+      <List navigationTitle="Search" searchBarPlaceholder="Checking cache..." isLoading={true}>
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Loading..." />
+      </List>
+    );
+  }
+
+  // Show download progress UI only when cache files don't exist (first run / cold start)
+  // Keep showing until phase is "complete" to ensure user sees full download and processing progress
+  const showDownloadProgress = hasCacheFiles === false && phase !== "complete";
+
+  if (showDownloadProgress) {
+    const { phase, casksProgress, formulaeProgress } = loadingState;
+
+    // Cold start: show detailed download progress
     // Detect processing state: download is at 100% but phase hasn't moved on
     // This happens because processing takes a long time after download completes
     const isProcessingCasks = phase === "casks" && casksProgress.percent === 100 && !casksProgress.complete;
@@ -196,7 +226,7 @@ export default function Main() {
 
     return (
       <List navigationTitle="First-time setup" searchBarPlaceholder={statusMessage} isLoading={true}>
-        <List.Section title="Loading Package Index">
+        <List.Section title="Initializing...">
           <List.Item
             icon={getDownloadIcon(casksProgress, isProcessingCasks)}
             title={isProcessingCasks ? "Processing Casks" : "Downloading Casks"}

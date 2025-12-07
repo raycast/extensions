@@ -16,6 +16,7 @@ import {
   searchLogger,
   SearchDownloadProgress,
   DownloadProgress,
+  hasSearchCache,
 } from "../utils";
 
 interface UseBrewSearchOptions {
@@ -59,6 +60,8 @@ export interface SearchLoadingState {
 interface UseBrewSearchResult {
   isLoading: boolean;
   isInitialLoad: boolean;
+  /** True if cache files exist, false if not, null if not yet checked */
+  hasCacheFiles: boolean | null;
   loadingState: SearchLoadingState;
   data: InstallableResults | undefined;
   mutate: MutatePromise<InstallableResults | undefined>;
@@ -90,10 +93,32 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
   // Track if we've ever received data (for initial load detection)
   const hasEverLoadedRef = useRef(false);
 
+  // Track if cache exists (checked once at startup)
+  // null = not checked yet, true = cache exists (warm start), false = no cache (cold start)
+  const [cacheExists, setCacheExists] = useState<boolean | null>(null);
+
+  // Check cache existence once on mount
+  useEffect(() => {
+    let mounted = true;
+    hasSearchCache().then((exists) => {
+      if (mounted) {
+        setCacheExists(exists);
+        searchLogger.log("Cache check complete", { cacheExists: exists });
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Track download progress for each file
   const [downloadProgress, setDownloadProgress] = useState<SearchDownloadProgress>({
     phase: "casks",
   });
+
+  // Throttle progress updates to avoid render loops (max once per 100ms)
+  const lastProgressUpdateRef = useRef(0);
+  const PROGRESS_THROTTLE_MS = 100;
 
   const abortable = useRef<AbortController>(null);
   const {
@@ -104,12 +129,18 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     async (query: string) => {
       searchLogger.log("Starting search", { query, isInitialLoad: !hasEverLoadedRef.current });
 
-      // Reset progress at start
+      // Reset progress at start of search
       setDownloadProgress({ phase: "casks" });
 
       // Fetch search results with progress tracking
+      // Always track progress - the UI decides whether to show it based on hasCacheFiles
       const result = await brewSearch(query, limit, abortable.current?.signal, (progress) => {
-        setDownloadProgress(progress);
+        // Throttle UI updates to avoid excessive re-renders
+        const now = Date.now();
+        if (progress.phase === "complete" || now - lastProgressUpdateRef.current >= PROGRESS_THROTTLE_MS) {
+          lastProgressUpdateRef.current = now;
+          setDownloadProgress(progress);
+        }
       });
 
       // brewSearch reports phase: "complete" with final totals via onProgress
@@ -246,9 +277,14 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     };
   }, [isLoading, isInitialLoad, downloadProgress]);
 
+  // hasCacheFiles: true if cache files exist, false if not
+  // null means we haven't checked yet - UI should wait before deciding which view to show
+  const hasCacheFiles = cacheExists;
+
   return {
     isLoading,
     isInitialLoad,
+    hasCacheFiles,
     loadingState,
     data,
     mutate,
