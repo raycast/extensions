@@ -17,9 +17,12 @@ export default async function (input: Input) {
 
   const { results } = await exa.getContents([url], { text: true, useAutoprompt: true });
 
-  return results.map((result) => ({
-    title: result.title,
-    url: result.url,
-    text: result.text,
-  }));
+  const first = results[0];
+  if (!first) return null;
+
+  return {
+    title: first.title,
+    url: first.url,
+    text: first.text,
+  };
 }
