@@ -1,6 +1,6 @@
 # Google Tasks Changelog
 
-## [Update] - 2025-11-30
+## [Update] - {PR_MERGE_DATE}
 
 - Add "Create Task" command for quick task creation
 
