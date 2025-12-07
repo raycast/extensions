@@ -19,7 +19,6 @@ interface BroadcastDetailProps {
 
 function buildMarkdown(broadcast: Broadcast, metrics: CalculatedMetrics | null): string {
   let md = `# ${broadcast.name}\n\n`;
-  md += `**ID:** ${broadcast.id}\n\n`;
 
   // Don't show metrics for drafts
   if (broadcast.state?.toLowerCase() === "draft") {
@@ -90,6 +89,8 @@ export default function BroadcastDetail({ id }: BroadcastDetailProps) {
 
   const metadata = broadcast ? (
     <Detail.Metadata>
+      <Detail.Metadata.Label title="ID" text={broadcast.id.toString()} />
+
       {/* Status & Info */}
       <Detail.Metadata.TagList title="Status">
         <Detail.Metadata.TagList.Item text={formatState(broadcast.state)} color={getStateColor(broadcast.state)} />

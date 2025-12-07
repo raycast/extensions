@@ -51,24 +51,28 @@
     {
       "name": "campaign-list",
       "title": "Campaigns",
+      "subtitle": "Customer.io",
       "description": "List and manage campaigns",
       "mode": "view"
     },
     {
       "name": "broadcast-list",
       "title": "Broadcasts",
+      "subtitle": "Customer.io",
       "description": "List and manage broadcasts",
       "mode": "view"
     },
     {
       "name": "segment-list",
       "title": "Segments",
+      "subtitle": "Customer.io",
       "description": "List and explore segments",
       "mode": "view"
     },
     {
       "name": "customer-search",
       "title": "Search Customers",
+      "subtitle": "Customer.io",
       "description": "Search customers by email",
       "mode": "view"
     }

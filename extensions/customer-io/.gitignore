@@ -12,3 +12,7 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# project docs
+prd.md
+cio_journeys_app_api.json

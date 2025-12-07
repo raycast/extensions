@@ -25,7 +25,6 @@ const PERIOD_OPTIONS: { value: MetricPeriod; label: string; shortcut: Keyboard.S
 
 function buildMarkdown(campaign: Campaign, metrics: CalculatedMetrics | null, periodLabel: string): string {
   let md = `# ${campaign.name}\n\n`;
-  md += `**ID:** ${campaign.id}\n\n`;
 
   if (campaign.description) {
     md += `${campaign.description}\n\n`;
@@ -111,6 +110,8 @@ export default function CampaignDetail({ id }: CampaignDetailProps) {
 
   const metadata = campaign ? (
     <Detail.Metadata>
+      <Detail.Metadata.Label title="ID" text={campaign.id.toString()} />
+
       {/* Status & Info */}
       <Detail.Metadata.TagList title="Status">
         <Detail.Metadata.TagList.Item text={formatState(campaign.state)} color={getStateColor(campaign.state)} />
