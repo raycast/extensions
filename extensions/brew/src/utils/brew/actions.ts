@@ -15,14 +15,14 @@ import { ExecError } from "../types";
 /**
  * Install a package.
  */
-export async function brewInstall(installable: Cask | Formula, cancel?: AbortController): Promise<void> {
+export async function brewInstall(installable: Cask | Formula, cancel?: AbortSignal): Promise<void> {
   const identifier = brewIdentifier(installable);
   const isCaskType = isCask(installable);
   actionsLogger.log("Installing package", {
     identifier,
     type: isCaskType ? "cask" : "formula",
   });
-  await execBrew(`install ${brewCaskOption(installable)} ${identifier}`, cancel);
+  await execBrew(`install ${brewCaskOption(installable)} ${identifier}`, cancel ? { signal: cancel } : undefined);
   if (isCaskType) {
     (installable as Cask).installed = (installable as Cask).version;
   } else {
@@ -39,7 +39,7 @@ export async function brewInstall(installable: Cask | Formula, cancel?: AbortCon
 export async function brewInstallWithProgress(
   installable: Cask | Formula,
   onProgress?: ProgressCallback,
-  cancel?: AbortController,
+  cancel?: AbortSignal,
 ): Promise<void> {
   const identifier = brewIdentifier(installable);
   const isCaskType = isCask(installable);
@@ -61,27 +61,27 @@ export async function brewInstallWithProgress(
 /**
  * Uninstall a package.
  */
-export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortController): Promise<void> {
+export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortSignal): Promise<void> {
   const identifier = brewIdentifier(installable);
   actionsLogger.log("Uninstalling package", {
     identifier,
     type: isCask(installable) ? "cask" : "formula",
     zap: preferences.zapCask,
   });
-  await execBrew(`rm ${brewCaskOption(installable, true)} ${identifier}`, cancel);
+  await execBrew(`rm ${brewCaskOption(installable, true)} ${identifier}`, cancel ? { signal: cancel } : undefined);
   actionsLogger.log("Package uninstalled successfully", { identifier });
 }
 
 /**
  * Upgrade a package.
  */
-export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortController): Promise<void> {
+export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortSignal): Promise<void> {
   const identifier = brewIdentifier(upgradable);
   actionsLogger.log("Upgrading package", {
     identifier,
     type: isCask(upgradable) ? "cask" : "formula",
   });
-  await execBrew(`upgrade ${brewCaskOption(upgradable)} ${identifier}`, cancel);
+  await execBrew(`upgrade ${brewCaskOption(upgradable)} ${identifier}`, cancel ? { signal: cancel } : undefined);
   actionsLogger.log("Package upgraded successfully", { identifier });
 }
 
@@ -91,7 +91,7 @@ export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortCon
 export async function brewUpgradeSingleWithProgress(
   upgradable: Cask | Nameable,
   onProgress?: ProgressCallback,
-  cancel?: AbortController,
+  cancel?: AbortSignal,
 ): Promise<void> {
   const identifier = brewIdentifier(upgradable);
   actionsLogger.log("Upgrading package with progress", {
@@ -105,26 +105,26 @@ export async function brewUpgradeSingleWithProgress(
 /**
  * Upgrade all packages.
  */
-export async function brewUpgradeAll(greedy: boolean, cancel?: AbortController): Promise<void> {
+export async function brewUpgradeAll(greedy: boolean, cancel?: AbortSignal): Promise<void> {
   actionsLogger.log("Upgrading all packages", { greedy });
   let cmd = `upgrade`;
   if (greedy) {
     cmd += " --greedy";
   }
-  await execBrew(cmd, cancel);
+  await execBrew(cmd, cancel ? { signal: cancel } : undefined);
   actionsLogger.log("All packages upgraded successfully");
 }
 
 /**
  * Run cleanup to remove old versions.
  */
-export async function brewCleanup(withoutThreshold: boolean, cancel?: AbortController): Promise<void> {
+export async function brewCleanup(withoutThreshold: boolean, cancel?: AbortSignal): Promise<void> {
   actionsLogger.log("Running cleanup", { pruneAll: withoutThreshold });
   let cmd = `cleanup`;
   if (withoutThreshold) {
     cmd += " --prune=all";
   }
-  await execBrew(cmd, cancel);
+  await execBrew(cmd, cancel ? { signal: cancel } : undefined);
   actionsLogger.log("Cleanup completed successfully");
 }
 

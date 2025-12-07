@@ -88,14 +88,14 @@ export interface UpgradeOptions {
  *
  * @param greedy - Include auto-updating casks (legacy parameter)
  * @param onProgress - Callback for progress updates
- * @param cancel - AbortController for cancellation
+ * @param cancel - AbortSignal for cancellation
  * @param options - Additional upgrade options
  * @returns Result of the upgrade operation
  */
 export async function brewUpgradeWithProgress(
   greedy: boolean,
   onProgress?: UpgradeProgressCallback,
-  cancel?: AbortController,
+  cancel?: AbortSignal,
   options?: Omit<UpgradeOptions, "greedy">,
 ): Promise<UpgradeResult> {
   const steps: UpgradeStep[] = [];
@@ -288,7 +288,7 @@ export async function brewUpgradeWithProgress(
 
   for (let i = 0; i < packageSteps.length; i++) {
     // Check for cancellation
-    if (cancel?.signal.aborted) {
+    if (cancel?.aborted) {
       const remainingCount = packageSteps.length - i;
       actionsLogger.log("Upgrade cancelled by user", {
         completedPackages: i,
@@ -412,7 +412,7 @@ export async function brewUpgradeWithProgress(
 export async function brewUpgradeSingleWithProgress(
   upgradable: Cask | Nameable,
   onProgress?: ProgressCallback,
-  cancel?: AbortController,
+  cancel?: AbortSignal,
 ): Promise<void> {
   const identifier = brewIdentifier(upgradable);
   actionsLogger.log("Upgrading package with progress", {

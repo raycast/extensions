@@ -116,3 +116,26 @@ export interface Remote<T> {
   /** in flight fetch of the remote */
   fetch?: Promise<T[]>;
 }
+
+/// Download Progress Types
+
+export interface DownloadProgress {
+  /** URL being downloaded */
+  url: string;
+  /** Bytes downloaded so far */
+  bytesDownloaded: number;
+  /** Total bytes (from Content-Length header, may be 0 if unknown) */
+  totalBytes: number;
+  /** Download percentage (0-100), or -1 if total is unknown */
+  percent: number;
+  /** Whether download is complete */
+  complete: boolean;
+  /** Current phase: downloading or processing */
+  phase?: "downloading" | "processing";
+  /** Number of items processed so far (during processing phase) */
+  itemsProcessed?: number;
+  /** Total number of items (known after processing completes) */
+  totalItems?: number;
+}
+
+export type DownloadProgressCallback = (progress: DownloadProgress) => void;

@@ -241,6 +241,7 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
 - [ ] Improve keyboard shortcuts for Actions
 - [ ] Improve loading states with more informative messages
 - [ ] Add helpful empty states with actionable suggestions
+  - [ ] Look into why EmptyView doesn't appear on first cold start of SearchViewContent
 
 ## 📚 Documentation
 

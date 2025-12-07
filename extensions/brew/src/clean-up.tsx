@@ -9,7 +9,7 @@ export default async (): Promise<void> => {
       title: "Cleaning files & packages from the cache" + String.ellipsis,
       cancelable: true,
     });
-    await brewCleanup(preferences.withoutThreshold, handle.abort);
+    await brewCleanup(preferences.withoutThreshold, handle.abort?.signal);
     showToast(Toast.Style.Success, "Cleaning completed");
   } catch (err) {
     await showFailureToast("Cleaning failed", err as Error);

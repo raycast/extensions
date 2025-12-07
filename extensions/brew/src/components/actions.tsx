@@ -104,7 +104,7 @@ async function install(formula: Cask | Formula): Promise<boolean> {
       (progress: BrewProgress) => {
         handle.updateMessage(progress.message);
       },
-      handle.abort,
+      handle.abort?.signal,
     );
     // Use HUD for success - persists even if Raycast is closed
     await handle.showSuccessHUD(`Installed ${name}`);
@@ -123,7 +123,7 @@ async function uninstall(formula: Cask | Nameable): Promise<boolean> {
   const name = brewName(formula);
   const handle = showActionToast({ title: `Uninstalling ${name}`, message: "", cancelable: true });
   try {
-    await brewUninstall(formula, handle.abort);
+    await brewUninstall(formula, handle.abort?.signal);
     await handle.showSuccessHUD(`Uninstalled ${name}`);
     return true;
   } catch (err) {
@@ -144,7 +144,7 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean> {
       (progress: BrewProgress) => {
         handle.updateMessage(progress.message);
       },
-      handle.abort,
+      handle.abort?.signal,
     );
     await handle.showSuccessHUD(`Upgraded ${name}`);
     return true;
@@ -163,7 +163,7 @@ async function upgradeAll(): Promise<boolean> {
     cancelable: true,
   });
   try {
-    await brewUpgradeAll(preferences.greedyUpgrades, handle.abort);
+    await brewUpgradeAll(preferences.greedyUpgrades, handle.abort?.signal);
     await handle.showSuccessHUD("All packages upgraded");
     return true;
   } catch (err) {

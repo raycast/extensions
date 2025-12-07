@@ -4,17 +4,30 @@
  * Provides functions for fetching installed and outdated packages.
  *
  * Performance optimization: Uses a two-phase loading strategy:
- * 1. Fast initial load with `brew list --json` (returns minimal data quickly)
+ * 1. Fast initial load with `brew list --versions` (returns minimal data quickly)
  * 2. Background fetch with `brew info --json=v2 --installed` for full metadata
+ *
+ * When `useInternalApi` preference is enabled, uses Homebrew's internal API:
+ * - Formula: ~1 MB vs ~30 MB (96% smaller, much faster)
+ * - Cask: Similar size but in JWS format
  */
 
 import * as fs from "fs/promises";
-import { Cask, Formula, InstallableResults, InstalledMap, OutdatedResults, Remote } from "../types";
+import {
+  Cask,
+  Formula,
+  InstallableResults,
+  InstalledMap,
+  OutdatedResults,
+  Remote,
+  DownloadProgressCallback,
+} from "../types";
 import { cachePath, fetchRemote } from "../cache";
 import { brewPath } from "./paths";
 import { execBrew } from "./commands";
 import { brewLogger, cacheLogger } from "../logger";
 import { preferences } from "../preferences";
+import { fetchInternalFormulae, fetchInternalCasks, logInternalApiConfig } from "./internal-api";
 
 /// Cache Paths
 
@@ -31,7 +44,7 @@ const formulaRemote: Remote<Formula> = { url: formulaURL, cachePath: formulaCach
 const caskRemote: Remote<Cask> = { url: caskURL, cachePath: caskCachePath };
 
 /**
- * Minimal installed package info from `brew list --json`.
+ * Minimal installed package info parsed from `brew list --versions`.
  * This is much faster than `brew info --json=v2 --installed`.
  */
 interface InstalledListItem {
@@ -41,12 +54,41 @@ interface InstalledListItem {
 }
 
 /**
+ * Parse `brew list --versions` output into InstalledListItem array.
+ * Format: "package_name version1 version2 ..." (one per line)
+ */
+function parseListVersionsOutput(output: string): InstalledListItem[] {
+  const items: InstalledListItem[] = [];
+  const lines = output
+    .trim()
+    .split("\n")
+    .filter((line) => line.length > 0);
+
+  for (const line of lines) {
+    const parts = line.split(/\s+/);
+    if (parts.length >= 2) {
+      const name = parts[0];
+      // Use the first (most recent) version
+      const version = parts[1];
+      items.push({
+        name,
+        version,
+        // We don't know this from list output, default to true
+        installed_on_request: true,
+      });
+    }
+  }
+
+  return items;
+}
+
+/**
  * Fetch a fast list of installed packages (names and versions only).
- * Uses `brew list --json` which is significantly faster than `brew info --json=v2 --installed`.
+ * Uses `brew list --versions` which is significantly faster than `brew info --json=v2 --installed`.
  *
  * @returns Minimal installed package data for quick initial display
  */
-export async function brewFetchInstalledFast(cancel?: AbortController): Promise<InstalledMap | undefined> {
+export async function brewFetchInstalledFast(cancel?: AbortSignal): Promise<InstalledMap | undefined> {
   const startTime = Date.now();
 
   try {
@@ -68,14 +110,15 @@ export async function brewFetchInstalledFast(cancel?: AbortController): Promise<
     const listStartTime = Date.now();
 
     try {
-      // brew list --json is much faster than brew info --json=v2 --installed
+      // brew list --versions is fast and gives us name + version
+      // Note: --versions output is "name version1 version2 ..." per line
       const [formulaeOutput, casksOutput] = await Promise.all([
-        execBrew(`list --formula --json`, cancel),
-        execBrew(`list --cask --json`, cancel),
+        execBrew(`list --formula --versions`, cancel ? { signal: cancel } : undefined),
+        execBrew(`list --cask --versions`, cancel ? { signal: cancel } : undefined),
       ]);
 
-      const formulaeList = JSON.parse(formulaeOutput.stdout) as InstalledListItem[];
-      const casksList = JSON.parse(casksOutput.stdout) as InstalledListItem[];
+      const formulaeList = parseListVersionsOutput(formulaeOutput.stdout);
+      const casksList = parseListVersionsOutput(casksOutput.stdout);
 
       // Create minimal Formula/Cask objects for display
       const formulae = new Map<string, Formula>();
@@ -151,10 +194,7 @@ function createMinimalCask(item: InstalledListItem): Cask {
 /**
  * Fetch all installed packages with full metadata.
  */
-export async function brewFetchInstalled(
-  useCache: boolean,
-  cancel?: AbortController,
-): Promise<InstalledMap | undefined> {
+export async function brewFetchInstalled(useCache: boolean, cancel?: AbortSignal): Promise<InstalledMap | undefined> {
   const startTime = Date.now();
   const results = await brewFetchInstallableResults(useCache, cancel);
   const mapped = brewMapInstalled(results);
@@ -175,10 +215,10 @@ export async function brewFetchInstalled(
 
 async function brewFetchInstallableResults(
   useCache: boolean,
-  cancel?: AbortController,
+  cancel?: AbortSignal,
 ): Promise<InstallableResults | undefined> {
   async function installed(): Promise<string> {
-    return (await execBrew(`info --json=v2 --installed`, cancel)).stdout;
+    return (await execBrew(`info --json=v2 --installed`, cancel ? { signal: cancel } : undefined)).stdout;
   }
 
   if (!useCache) {
@@ -296,7 +336,7 @@ function brewMapInstalled(installed?: InstallableResults): InstalledMap | undefi
  */
 export async function brewFetchOutdated(
   greedy: boolean,
-  cancel?: AbortController,
+  cancel?: AbortSignal,
   skipUpdate = false,
 ): Promise<OutdatedResults> {
   brewLogger.log("Fetching outdated packages", { greedy, skipUpdate });
@@ -309,7 +349,7 @@ export async function brewFetchOutdated(
   if (!skipUpdate) {
     await brewUpdate(cancel);
   }
-  const output = await execBrew(cmd, cancel);
+  const output = await execBrew(cmd, cancel ? { signal: cancel } : undefined);
   const results = JSON.parse(output.stdout) as OutdatedResults;
   brewLogger.log("Outdated packages fetched", {
     formulaeCount: results.formulae.length,
@@ -322,36 +362,64 @@ export async function brewFetchOutdated(
 /**
  * Run brew update.
  */
-export async function brewUpdate(cancel?: AbortController): Promise<void> {
+export async function brewUpdate(cancel?: AbortSignal): Promise<void> {
   brewLogger.log("Running brew update");
-  await execBrew(`update`, cancel);
+  await execBrew(`update`, cancel ? { signal: cancel } : undefined);
   brewLogger.log("Brew update completed");
 }
 
+// Track if we've logged internal API config (only log once per session)
+let hasLoggedInternalApiConfig = false;
+
 /**
  * Fetch all formulae from the remote API.
+ * Uses internal API when `useInternalApi` preference is enabled.
+ *
+ * Internal API benefits:
+ * - ~1 MB download vs ~30 MB (96% smaller)
+ * - Much faster initial load
+ * - Note: No description field (search by name only)
  */
-export async function brewFetchFormulae(): Promise<Formula[]> {
-  return await fetchRemote(formulaRemote);
+export async function brewFetchFormulae(onProgress?: DownloadProgressCallback): Promise<Formula[]> {
+  if (preferences.useInternalApi) {
+    if (!hasLoggedInternalApiConfig) {
+      logInternalApiConfig();
+      hasLoggedInternalApiConfig = true;
+    }
+    return await fetchInternalFormulae(onProgress);
+  }
+  return await fetchRemote(formulaRemote, onProgress);
 }
 
 /**
  * Fetch all casks from the remote API.
+ * Uses internal API when `useInternalApi` preference is enabled.
+ *
+ * Internal API benefits:
+ * - JWS format with full metadata
+ * - Same data as public API but wrapped differently
  */
-export async function brewFetchCasks(): Promise<Cask[]> {
-  return await fetchRemote(caskRemote);
+export async function brewFetchCasks(onProgress?: DownloadProgressCallback): Promise<Cask[]> {
+  if (preferences.useInternalApi) {
+    if (!hasLoggedInternalApiConfig) {
+      logInternalApiConfig();
+      hasLoggedInternalApiConfig = true;
+    }
+    return await fetchInternalCasks(onProgress);
+  }
+  return await fetchRemote(caskRemote, onProgress);
 }
 
 /**
  * Fetch info for a single formula by name.
  * Much faster than fetching all installed packages.
  */
-export async function brewFetchFormulaInfo(name: string, cancel?: AbortController): Promise<Formula | undefined> {
+export async function brewFetchFormulaInfo(name: string, cancel?: AbortSignal): Promise<Formula | undefined> {
   const startTime = Date.now();
   brewLogger.log("Fetching formula info", { name });
 
   try {
-    const output = await execBrew(`info --json=v2 ${name}`, cancel);
+    const output = await execBrew(`info --json=v2 ${name}`, cancel ? { signal: cancel } : undefined);
     const results = JSON.parse(output.stdout) as InstallableResults;
     const duration = Date.now() - startTime;
 
@@ -372,12 +440,12 @@ export async function brewFetchFormulaInfo(name: string, cancel?: AbortControlle
  * Fetch info for a single cask by token.
  * Much faster than fetching all installed packages.
  */
-export async function brewFetchCaskInfo(token: string, cancel?: AbortController): Promise<Cask | undefined> {
+export async function brewFetchCaskInfo(token: string, cancel?: AbortSignal): Promise<Cask | undefined> {
   const startTime = Date.now();
   brewLogger.log("Fetching cask info", { token });
 
   try {
-    const output = await execBrew(`info --json=v2 ${token}`, cancel);
+    const output = await execBrew(`info --json=v2 ${token}`, cancel ? { signal: cancel } : undefined);
     const results = JSON.parse(output.stdout) as InstallableResults;
     const duration = Date.now() - startTime;
 

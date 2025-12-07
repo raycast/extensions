@@ -9,6 +9,15 @@ import { brewUpgradeWithProgress, preferences, showFailureToast, actionsLogger }
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import type { UpgradeStep } from "../utils/brew/upgrade";
 
+/// Status Messages
+
+const STATUS_MESSAGES = {
+  UPGRADING: "Upgrading...",
+  NOTHING_TO_UPGRADE: "Nothing to upgrade!",
+  UPGRADE_CANCELLED: "Upgrade Cancelled",
+  UPGRADE_FAILED: "Upgrade Failed",
+} as const;
+
 /**
  * Get the icon for a step based on its status.
  */
@@ -96,18 +105,22 @@ function UpgradeViewContent() {
     });
 
     try {
-      const result = await brewUpgradeWithProgress(preferences.greedyUpgrades, handleProgress, controller);
+      const result = await brewUpgradeWithProgress(preferences.greedyUpgrades, handleProgress, controller.signal);
 
       if (result.success) {
         const completedCount = result.steps.filter((s) => s.status === "completed").length;
         const skippedCount = result.steps.filter((s) => s.status === "skipped").length;
 
-        if (skippedCount > 0 && completedCount <= 2) {
+        if (completedCount <= 2) {
           toast.style = Toast.Style.Success;
-          toast.title = "All packages up to date";
+          toast.title = STATUS_MESSAGES.NOTHING_TO_UPGRADE;
         } else {
+          const upgradedCount = completedCount - 2;
           toast.style = Toast.Style.Success;
-          toast.title = `Upgraded ${completedCount - 2} package${completedCount - 2 === 1 ? "" : "s"}`;
+          toast.title = `${upgradedCount} package${upgradedCount === 1 ? "" : "s"} upgraded.`;
+          if (skippedCount > 0) {
+            toast.title += ` ${skippedCount} skipped.`;
+          }
         }
       } else {
         toast.style = Toast.Style.Failure;
@@ -178,24 +191,41 @@ function UpgradeViewContent() {
   const isCancelledState = wasCancelled || cancelledStepCount > 0;
 
   // Determine navigation title based on state
-  let navigationTitle = "Upgrading...";
+  let navigationTitle: string = STATUS_MESSAGES.UPGRADING;
   if (!isRunning) {
     if (isCancelledState) {
-      navigationTitle = "Upgrade Cancelled";
+      navigationTitle = STATUS_MESSAGES.UPGRADE_CANCELLED;
     } else if (error || failedCount > 0) {
-      navigationTitle = "Upgrade Failed";
+      navigationTitle = STATUS_MESSAGES.UPGRADE_FAILED;
+    } else if (completedCount <= 2) {
+      // No packages were actually upgraded (only update + check steps)
+      navigationTitle = STATUS_MESSAGES.NOTHING_TO_UPGRADE;
     } else {
-      navigationTitle = "Upgrade Complete";
+      navigationTitle = `Upgraded ${completedCount - 2} package${completedCount - 2 === 1 ? "" : "s"}`;
     }
   } else if (runningStep) {
     navigationTitle = `Upgrading ${runningStep.title}...`;
+  }
+
+  // Determine search bar placeholder based on state
+  let searchBarPlaceholder: string = STATUS_MESSAGES.UPGRADING;
+  if (!isRunning) {
+    if (isCancelledState) {
+      searchBarPlaceholder = STATUS_MESSAGES.UPGRADE_CANCELLED;
+    } else if (error || failedCount > 0) {
+      searchBarPlaceholder = STATUS_MESSAGES.UPGRADE_FAILED;
+    } else if (completedCount <= 2) {
+      searchBarPlaceholder = STATUS_MESSAGES.NOTHING_TO_UPGRADE;
+    } else {
+      searchBarPlaceholder = "Upgrade Complete";
+    }
   }
 
   return (
     <List
       isLoading={isRunning && steps.length === 0}
       navigationTitle={navigationTitle}
-      searchBarPlaceholder="Upgrade progress"
+      searchBarPlaceholder={searchBarPlaceholder}
     >
       {steps.length === 0 && isRunning && (
         <List.EmptyView
@@ -281,8 +311,8 @@ function UpgradeViewContent() {
                     key={`summary-${step.id}`}
                     icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
                     title={step.title}
-                    subtitle={step.subtitle}
                     accessories={[
+                      ...(step.subtitle ? [{ text: step.subtitle, tooltip: "Version change" }] : []),
                       { text: "Upgraded", tooltip: `Upgraded in ${formatDuration(step.startTime, step.endTime)}` },
                     ]}
                   />
@@ -295,8 +325,10 @@ function UpgradeViewContent() {
                     key={`summary-${step.id}`}
                     icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
                     title={step.title}
-                    subtitle={step.subtitle}
-                    accessories={[{ text: step.message || "Failed", tooltip: step.message }]}
+                    accessories={[
+                      ...(step.subtitle ? [{ text: step.subtitle, tooltip: "Version change" }] : []),
+                      { text: step.message || "Failed", tooltip: step.message },
+                    ]}
                   />
                 ))}
               {/* Show totals if there were packages */}
@@ -344,7 +376,6 @@ function UpgradeViewContent() {
                 <List.Item
                   icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
                   title="All packages are up to date"
-                  subtitle="No upgrades needed"
                 />
               )}
             </List.Section>

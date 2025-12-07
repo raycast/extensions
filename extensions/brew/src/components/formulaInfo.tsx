@@ -8,8 +8,8 @@ import { Dependencies } from "./dependencies";
  * Check if a formula has minimal data (from fast list) vs full data.
  */
 function hasMinimalData(formula: Formula): boolean {
-  // Minimal formulae have empty strings for homepage and tap, or missing desc
-  return formula.homepage === "" || formula.tap === "" || formula.desc === undefined || formula.desc === "";
+  // Minimal formulae have missing or empty homepage, tap, or desc
+  return !formula.homepage || !formula.tap || !formula.desc;
 }
 
 export function FormulaInfo(props: {
@@ -48,7 +48,7 @@ export function FormulaInfo(props: {
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
       try {
-        const fullFormula = await brewFetchFormulaInfo(props.formula.name, controller);
+        const fullFormula = await brewFetchFormulaInfo(props.formula.name, controller.signal);
         clearTimeout(timeoutId);
 
         if (fullFormula) {

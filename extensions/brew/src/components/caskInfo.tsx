@@ -8,8 +8,8 @@ import { Dependencies } from "./dependencies";
  * Check if a cask has minimal data (from fast list) vs full data.
  */
 function hasMinimalData(cask: Cask): boolean {
-  // Minimal casks have empty strings for homepage and tap, or missing desc
-  return cask.homepage === "" || cask.tap === "" || cask.desc === undefined || cask.desc === "";
+  // Minimal casks have missing or empty homepage, tap, or desc
+  return !cask.homepage || !cask.tap || !cask.desc;
 }
 
 export function CaskInfo({
@@ -53,7 +53,7 @@ export function CaskInfo({
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
       try {
-        const fullCask = await brewFetchCaskInfo(initialCask.token, controller);
+        const fullCask = await brewFetchCaskInfo(initialCask.token, controller.signal);
         clearTimeout(timeoutId);
 
         if (fullCask) {

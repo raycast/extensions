@@ -1,17 +1,25 @@
 # Brew Extension for Raycast
 
-Search and manage your brew formulae and casks from [Raycast](https://raycast.com).
+Search and manage your brew casks and formulae from [Raycast](https://raycast.com).
 
 ## Homebrew 5.0 Compatibility
 
 This extension is compatible with Homebrew 5.0 and later. Key changes in Homebrew 5.0:
 
 - **Concurrent Downloads**: Homebrew 5.0 enables parallel downloads by default. If you experience issues, you can disable this in the extension preferences.
-- **Internal API**: Homebrew 5.0 introduces a new smaller internal JSON API. You can opt-in to this experimental feature in preferences.
+- **Internal API**: Homebrew 5.0 introduces a more efficient internal JSON API. You can opt-in to this experimental feature in preferences.
 - **Deprecated Flags**: The `--no-quarantine` and `--quarantine` flags are deprecated in Homebrew 5.0.
 - **macOS Support**: Homebrew 5.0 no longer supports macOS Mojave (10.14) and older.
 
 For more details, see the [Homebrew 5.0 release notes](https://brew.sh/2025/11/12/homebrew-5.0.0/).
+
+## Performance
+
+This extension uses several optimizations to provide a fast experience:
+
+- **Two-Phase Loading**: Installed packages load quickly with basic info, then fetch full metadata in the background.
+- **Lazy Loading**: Package details are fetched on-demand when viewing, not upfront.
+- **Internal API Option**: When enabled, downloads are 96% smaller (~1 MB vs ~30 MB for formulae).
 
 ## Issue Tracker
 

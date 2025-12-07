@@ -20,6 +20,8 @@ export type {
   OutdatedResults,
   InstalledMap,
   Remote,
+  DownloadProgress,
+  DownloadProgressCallback,
 } from "./types";
 
 // Preferences

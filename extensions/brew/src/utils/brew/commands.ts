@@ -31,10 +31,14 @@ let homebrewEnvLogged = false;
 /**
  * Execute a brew command.
  */
-export async function execBrew(cmd: string, cancel?: AbortController): Promise<ExecResult> {
+export async function execBrew(cmd: string, options?: { signal?: AbortSignal }): Promise<ExecResult> {
   try {
     const env = await execBrewEnv();
-    return await execp(`${brewExecutable()} ${cmd}`, { signal: cancel?.signal, env: env, maxBuffer: 10 * 1024 * 1024 });
+    return await execp(`${brewExecutable()} ${cmd}`, {
+      signal: options?.signal,
+      env: env,
+      maxBuffer: 10 * 1024 * 1024,
+    });
   } catch (err) {
     const execErr = err as ExecError;
 

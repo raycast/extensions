@@ -3,9 +3,16 @@
 ## [Homebrew 5.0 Support] - {PR_MERGE_DATE}
 
 - Added compatibility with Homebrew 5.0
-- Added preference to disable concurrent downloads (enabled by default in Homebrew 5.0)
-- Added preference to opt-in to Homebrew's new internal API
-- Updated documentation with Homebrew 5.0 compatibility information
+  - Added preference to disable concurrent downloads (enabled by default in Homebrew 5.0)
+  - Added preference to opt-in to Homebrew's new internal API (96% smaller downloads)
+  - Updated documentation with Homebrew 5.0 compatibility information
+- Improved first-run experience with download progress indicators for large downloads (30 MB+)
+- Added hidden-by-default "Clear Cache" command for troubleshooting
+- Reordered Casks over Formulae in Search for better readability and discoverability
+- Optimized package loading with two-phase strategy (fast list, then full metadata)
+- Added lazy loading for package details to reduce initial load time
+- Added Upgrade view with clearer progress indicators and easier cancellation
+- Refactored codebase with improved error handling and logging
 
 ## [Improvements] - 2025-12-01
 

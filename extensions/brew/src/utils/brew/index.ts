@@ -46,6 +46,7 @@ export {
 
 // Search
 export { brewSearch } from "./search";
+export type { SearchProgressCallback, SearchDownloadProgress } from "./search";
 
 // Actions
 export {
@@ -79,3 +80,13 @@ export {
   brewUninstallCommand,
   brewUpgradeCommand,
 } from "./helpers";
+
+// Internal API (experimental)
+export {
+  getSystemTag,
+  getInternalFormulaUrl,
+  getInternalCaskUrl,
+  fetchInternalFormulae,
+  fetchInternalCasks,
+  logInternalApiConfig,
+} from "./internal-api";

@@ -15,7 +15,7 @@ import { parser } from "stream-json";
 import { filter } from "stream-json/filters/Filter";
 import { streamArray } from "stream-json/streamers/StreamArray";
 import { pipeline as streamPipeline } from "stream/promises";
-import { Remote } from "./types";
+import { Remote, DownloadProgressCallback } from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
 import { NetworkError, ParseError, isNetworkError, isRecoverableError } from "./errors";
 import { wait } from "./async";
@@ -79,13 +79,21 @@ const MAX_FETCH_RETRIES = 2;
 /** Delay between retry attempts in milliseconds */
 const RETRY_DELAY_MS = 1000;
 
-export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
+export async function fetchRemote<T>(remote: Remote<T>, onProgress?: DownloadProgressCallback): Promise<T[]> {
   if (remote.value) {
+    // Already cached in memory
+    onProgress?.({
+      url: remote.url,
+      bytesDownloaded: 0,
+      totalBytes: 0,
+      percent: 100,
+      complete: true,
+    });
     return remote.value;
   } else if (remote.fetch) {
     return remote.fetch;
   } else {
-    remote.fetch = _fetchRemoteWithRetry(remote)
+    remote.fetch = _fetchRemoteWithRetry(remote, onProgress)
       .then((value) => {
         remote.value = value;
         return value;
@@ -100,12 +108,12 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
 /**
  * Fetch remote data with automatic retry for transient network errors.
  */
-async function _fetchRemoteWithRetry<T>(remote: Remote<T>): Promise<T[]> {
+async function _fetchRemoteWithRetry<T>(remote: Remote<T>, onProgress?: DownloadProgressCallback): Promise<T[]> {
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= MAX_FETCH_RETRIES; attempt++) {
     try {
-      return await _fetchRemote(remote, attempt);
+      return await _fetchRemote(remote, attempt, onProgress);
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
@@ -129,12 +137,25 @@ async function _fetchRemoteWithRetry<T>(remote: Remote<T>): Promise<T[]> {
   throw lastError;
 }
 
-async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]> {
+async function _fetchRemote<T>(
+  remote: Remote<T>,
+  attempt: number,
+  onProgress?: DownloadProgressCallback,
+): Promise<T[]> {
+  const fetchStartTime = Date.now();
   fetchLogger.log("Fetching remote", { url: remote.url, attempt });
 
   async function fetchURL(): Promise<void> {
+    const downloadStartTime = Date.now();
+    fetchLogger.log("Starting download", { url: remote.url });
+
     try {
-      const response = await fetch(remote.url);
+      // Request uncompressed data so Content-Length matches actual bytes for accurate progress
+      const response = await fetch(remote.url, {
+        headers: {
+          "Accept-Encoding": "identity",
+        },
+      });
       if (!response.ok || !response.body) {
         throw new NetworkError(`HTTP ${response.status}: ${response.statusText}`, {
           statusCode: response.status,
@@ -142,21 +163,82 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
         });
       }
 
-      // Track response size for internal API metrics
+      // Track response size for progress reporting
+      // With Accept-Encoding: identity, Content-Length should match actual bytes
       const contentLength = response.headers.get("content-length");
-      const contentLengthBytes = contentLength ? parseInt(contentLength, 10) : undefined;
+      const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
 
-      await streamPipeline(Readable.fromWeb(response.body as ReadableStream), fs.createWriteStream(remote.cachePath));
+      // Track bytes for progress reporting
+      let bytesDownloaded = 0;
+
+      // Report initial progress
+      onProgress?.({
+        url: remote.url,
+        bytesDownloaded: 0,
+        totalBytes,
+        percent: 0,
+        complete: false,
+      });
+
+      // If we have a progress callback, use a transform stream to track progress
+      // Otherwise, stream directly to avoid overhead
+      if (onProgress) {
+        // Throttle progress updates to avoid render loops (max once per 100ms)
+        let lastProgressUpdate = 0;
+        const PROGRESS_THROTTLE_MS = 100;
+
+        const progressStream = new TransformStream({
+          transform(chunk, controller) {
+            bytesDownloaded += chunk.length;
+            const now = Date.now();
+
+            // Only report progress if enough time has passed
+            if (now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
+              const percent = totalBytes > 0 ? Math.round((bytesDownloaded / totalBytes) * 100) : -1;
+              lastProgressUpdate = now;
+
+              onProgress({
+                url: remote.url,
+                bytesDownloaded,
+                totalBytes,
+                percent,
+                complete: false,
+              });
+            }
+
+            controller.enqueue(chunk);
+          },
+        });
+
+        // Pipe through progress tracker
+        const progressBody = response.body.pipeThrough(progressStream);
+        await streamPipeline(Readable.fromWeb(progressBody as ReadableStream), fs.createWriteStream(remote.cachePath));
+      } else {
+        // Direct stream without progress tracking
+        await streamPipeline(Readable.fromWeb(response.body as ReadableStream), fs.createWriteStream(remote.cachePath));
+      }
+
+      // Report completion
+      onProgress?.({
+        url: remote.url,
+        bytesDownloaded,
+        totalBytes,
+        percent: 100,
+        complete: true,
+      });
+
+      const downloadDurationMs = Date.now() - downloadStartTime;
 
       // Log cache update with size metrics
       const logData: Record<string, unknown> = {
         path: remote.cachePath,
         url: remote.url,
+        downloadDurationMs,
       };
 
-      if (contentLengthBytes) {
-        const contentLengthKb = (contentLengthBytes / 1024).toFixed(2);
-        logData.responseSizeBytes = contentLengthBytes;
+      if (totalBytes > 0) {
+        const contentLengthKb = (totalBytes / 1024).toFixed(2);
+        logData.responseSizeBytes = totalBytes;
         logData.responseSizeKb = `${contentLengthKb} KB`;
       }
 
@@ -166,6 +248,9 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
 
       cacheLogger.log("Cache updated from remote", logData);
     } catch (error) {
+      const downloadDurationMs = Date.now() - downloadStartTime;
+      fetchLogger.error("Download failed", { url: remote.url, durationMs: downloadDurationMs, error });
+
       if (isNetworkError(error)) {
         throw error;
       }
@@ -189,14 +274,40 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
     }
     if (!cacheInfo || cacheInfo.size == 0 || lastModified > cacheInfo.mtimeMs) {
       await fetchURL();
+    } else {
+      fetchLogger.log("Using cached data (up to date)", {
+        url: remote.url,
+        cacheAgeMs: Date.now() - cacheInfo.mtimeMs,
+      });
     }
   }
 
   async function readCache(): Promise<T[]> {
+    const parseStartTime = Date.now();
+    fetchLogger.log("Parsing cache", { path: remote.cachePath });
+
     const keysRe = new RegExp(`\\b(${valid_keys.join("|")})\\b`);
 
     return new Promise<T[]>((resolve, reject) => {
       const value: T[] = [];
+      // Throttle processing progress updates (max once per 100ms)
+      let lastProgressUpdate = 0;
+      const PROGRESS_THROTTLE_MS = 100;
+
+      /** Report processing progress to callback */
+      const reportProgress = (complete: boolean) => {
+        onProgress?.({
+          url: remote.url,
+          bytesDownloaded: 0,
+          totalBytes: 0,
+          percent: 100, // Download is complete
+          complete,
+          phase: "processing",
+          itemsProcessed: value.length,
+          totalItems: complete ? value.length : undefined,
+        });
+      };
+
       // stream-json/chain is quite slow, so unfortunately not suitable for real-time queries.
       // migrating to a sqlite backend _might_ help, although the bootstrap cost
       // (each time json response changes) will probably be high.
@@ -209,16 +320,34 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
       pipeline.on("data", (data) => {
         if (data && typeof data === "object" && "value" in data) {
           value.push(data.value);
+
+          // Report processing progress (throttled)
+          const now = Date.now();
+          if (onProgress && now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
+            lastProgressUpdate = now;
+            reportProgress(false);
+          }
         }
       });
       pipeline.on("end", () => {
+        const parseDurationMs = Date.now() - parseStartTime;
+        const totalDurationMs = Date.now() - fetchStartTime;
+        fetchLogger.log("Fetch completed", {
+          url: remote.url,
+          itemCount: value.length,
+          parseDurationMs,
+          totalDurationMs,
+        });
+        reportProgress(true);
         resolve(value);
       });
       pipeline.on("error", (err) => {
+        const parseDurationMs = Date.now() - parseStartTime;
         // Cache parsing failed, remove corrupted cache and retry
         cacheLogger.warn("Cache parse error, removing corrupted cache", {
           path: remote.cachePath,
           error: err.message,
+          parseDurationMs,
         });
         fs.rmSync(remote.cachePath);
         reject(

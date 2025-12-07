@@ -135,8 +135,8 @@ export function formatBytes(bytes: number): string {
 export interface ExecBrewWithProgressOptions {
   /** Callback for progress updates */
   onProgress?: ProgressCallback;
-  /** AbortController for cancellation */
-  cancel?: AbortController;
+  /** AbortSignal for cancellation */
+  cancel?: AbortSignal;
   /** Timeout for stale process detection (ms). Default: 5 minutes */
   staleTimeoutMs?: number;
   /** Package name for error context */
@@ -157,7 +157,7 @@ export interface ExecBrewWithProgressOptions {
 export async function execBrewWithProgress(
   cmd: string,
   onProgress?: ProgressCallback,
-  cancel?: AbortController,
+  cancel?: AbortSignal,
   options?: Omit<ExecBrewWithProgressOptions, "onProgress" | "cancel">,
 ): Promise<ExecResult> {
   const env = await execBrewEnv();
@@ -233,7 +233,7 @@ export async function execBrewWithProgress(
 
     // Handle cancellation
     if (cancel) {
-      cancel.signal.addEventListener("abort", () => {
+      cancel.addEventListener("abort", () => {
         if (isRejected) return;
         isRejected = true;
         cleanup();

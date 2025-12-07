@@ -17,7 +17,7 @@ export const logger = new Logger({
 /**
  * Child logger for brew command operations.
  */
-export const brewLogger = logger.child("[Brew]");
+export const brewLogger = logger.child("[Commands]");
 
 /**
  * Child logger for cache operations.

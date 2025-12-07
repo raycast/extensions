@@ -11,7 +11,7 @@ export default async (): Promise<void> => {
     cancelable: true,
   });
   try {
-    await brewCleanup(preferences.withoutThreshold, handle.abort);
+    await brewCleanup(preferences.withoutThreshold, handle.abort?.signal);
     await handle.showSuccessHUD("Cleanup completed");
   } catch {
     await handle.showFailureHUD("Cleanup failed");
