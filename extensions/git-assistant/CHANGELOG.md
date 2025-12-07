@@ -1,6 +1,6 @@
 # Git Assistant Changelog
 
-## [Clone Repository Tool] - {PR_MERGE_DATE}
+## [Clone Repository Tool] - 2025-12-07
 - Added `clone-repository` tool.
 
 ## [Git Tools Enhancements] - 2025-11-24
