@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { List, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, open } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, open, Color } from "@raycast/api";
 import { getCustomersByEmail, CustomerProfile } from "./api";
 import CustomerDetail from "./customer-detail";
 
@@ -52,14 +52,14 @@ export default function CustomerSearch() {
         customers.map((customer) => (
           <List.Item
             key={customer.id}
-            icon={{ source: Icon.Person, tintColor: "#00ff00" }}
+            icon={{ source: Icon.Person, tintColor: Color.Green }}
             title={customer.email || customer.id}
             subtitle={customer.cio_id ? `CIO: ${customer.cio_id}` : undefined}
             accessories={[
               {
                 tag: {
                   value: customer.unsubscribed ? "Unsubscribed" : "Subscribed",
-                  color: customer.unsubscribed ? "#ff6b6b" : "#00ff00",
+                  color: customer.unsubscribed ? Color.Red : Color.Green,
                 },
               },
             ]}
