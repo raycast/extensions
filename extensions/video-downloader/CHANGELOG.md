@@ -1,8 +1,9 @@
 # Video Downloader Changelog
 
-## [Fix: Windows Where Winget Error] - {PR_MERGE_DATE}
+## [Fix: Windows Path Resolution Issues] - {PR_MERGE_DATE}
 
-- Fixed an error "where winget" command would throw an error
+- Resolved error with `winget` command detection on Windows systems
+- Fixed path validation issue where `fs.existsSync()` incorrectly returned false for existing Windows paths
 
 ## [Feat: Windows Update Libraries Support] - 2025-12-07
 
