@@ -1,7 +1,3 @@
-
-
-
-.github\instructions\codacy.instructions.md
 # Ignore Codacy artifacts (generated locally)
 .codacy/
 .codacy/logs/
