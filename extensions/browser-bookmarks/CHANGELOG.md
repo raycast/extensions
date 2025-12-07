@@ -2,7 +2,7 @@
 
 ## [Support for libreWolf] - {PR_MERGE_DATE}
 
-- Added support for `libreWolf` browser.
+- Added support for `LibreWolf` browser.
 
 ## [Fix Zen Support] - 2025-08-19
 
