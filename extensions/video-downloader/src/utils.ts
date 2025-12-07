@@ -3,7 +3,6 @@ import { formatDuration, intervalToDuration } from "date-fns";
 import validator from "validator";
 import { Format, Video } from "./types.js";
 import { existsSync } from "fs";
-import { execa } from "execa";
 import { execSync } from "child_process";
 
 export const isWindows = process.platform === "win32";
@@ -23,8 +22,8 @@ export const {
 
 export async function getWingetPath() {
   try {
-    const { stdout } = await execa("where", ["winget"]);
-    return stdout.trim().split("\n")[0];
+    const wingetPath = execSync("where winget").toString().trim().split("\n")[0];
+    return wingetPath;
   } catch {
     throw new Error("Winget not found. Please ensure winget is installed and available in your PATH.");
   }
