@@ -1,6 +1,6 @@
 # Send To Memos Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-12-07
 
 - update dependencies and improve type safety.
 - fix: correct indentation in `filterList` mapping.
