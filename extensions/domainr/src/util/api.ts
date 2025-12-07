@@ -4,7 +4,6 @@ import { ISearchResponse, IStatusResult } from "./types";
 const { rapidApiKey } = getPreferenceValues<Preferences.Domainr>();
 const API_URL = "https://api.fastly.com/domain-management/v1/tools/";
 const API_HEADERS = {
-  Accept: "application/json",
   "Fastly-Key": rapidApiKey,
 };
 const makeRequest = async <T>(endpoint: string) => {

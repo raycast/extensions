@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, openCommandPreferences } from "@raycas
 import { useState } from "react";
 import { DomainStatus, getStatusIcon } from "./util/types";
 import { QUERY_MIN_LENGTH, SEARCH_SUGGESTIONS, STATUS_DESCRIPTIONS, STATUS_MAPPING } from "./util/costants";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { getFavicon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getDomainStatus, search } from "./util/api";
 
 function DomainrSearch() {
@@ -46,10 +46,12 @@ function DomainrSearch() {
         <List.Item
           icon={Icon.ExclamationMark}
           title="Invalid API Key"
-          accessories={[{ text: "Go to Extensions -> Domainr" }]}
-          actions={<ActionPanel>
-            <Action icon={Icon.Gear} title="Open Command Preferences" onAction={openCommandPreferences} />
-          </ActionPanel>}
+          accessories={[{ text: "Go to Extensions -> Domainr (Fastly Domain Search)" }]}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.Gear} title="Open Command Preferences" onAction={openCommandPreferences} />
+            </ActionPanel>
+          }
         />
       )}
 
@@ -63,12 +65,18 @@ function DomainrSearch() {
           actions={
             <ActionPanel>
               {[DomainStatus.Available, DomainStatus.Aftermarket].includes(STATUS_MAPPING[result.status]) && (
-                <Action.OpenInBrowser title="Register" url={`https://domainr.com/${result.domain}`} />
+                <Action.OpenInBrowser icon="icon.png" title="Register" url={`https://domainr.com/${result.domain}`} />
               )}
 
               {![DomainStatus.Disallowed, DomainStatus.Reserved, DomainStatus.Invalid].includes(
                 STATUS_MAPPING[result.status],
-              ) && <Action.OpenInBrowser title="Visit" url={`https://${result.domain}`} />}
+              ) && (
+                <Action.OpenInBrowser
+                  icon={getFavicon(`https://${result.domain}`, { fallback: Icon.Globe })}
+                  title="Visit"
+                  url={`https://${result.domain}`}
+                />
+              )}
             </ActionPanel>
           }
         />
