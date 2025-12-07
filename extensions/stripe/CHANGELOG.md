@@ -1,6 +1,6 @@
 # Stripe Changelog
 
-## [V2 Overhaul] - {PR_MERGE_DATE}
+## [V2 Overhaul] - 2025-12-07
 
 Major update introducing multi-account management, enhanced coupon workflows, and significantly improved user experience. This release maintains full backward compatibility with existing setups.
 
