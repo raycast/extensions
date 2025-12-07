@@ -13,12 +13,6 @@ import { CityData, findFromCityStateProvince } from "city-timezones";
 import getUnicodeFlagIcon from "country-flag-icons/unicode";
 import { useEffect, useState, useMemo } from "react";
 
-interface Preferences {
-  showUtc: boolean;
-  twentyFourFormat: boolean;
-  showFlags: boolean;
-}
-
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
