@@ -33,7 +33,12 @@ export async function getEngine(): Promise<WasmEngine> {
 export async function syncAliasesToStorage(): Promise<void> {
   if (!engine) return;
   const aliases = engine.getAliases();
-  await saveAliases(aliases);
+
+  // Convert Map to plain object for JSON serialization
+  const aliasesObj =
+    aliases instanceof Map ? Object.fromEntries(aliases) : aliases;
+
+  await saveAliases(aliasesObj);
 }
 
 export async function resetEngine(): Promise<void> {

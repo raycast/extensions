@@ -1,6 +1,6 @@
 // Reset Context command - clears all aliases and history
 
-import { showToast, Toast, closeMainWindow } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { resetEngine } from "./engine";
 import { resetAll } from "./engine/storage";
 
@@ -13,7 +13,6 @@ export default async function ResetCommand() {
       title: "Context Reset",
       message: "All aliases and history cleared",
     });
-    await closeMainWindow();
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

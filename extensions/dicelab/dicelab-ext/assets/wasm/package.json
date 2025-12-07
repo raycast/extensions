@@ -1,0 +1,11 @@
+{
+  "name": "dicebook",
+  "version": "0.1.0",
+  "files": [
+    "dicebook_bg.wasm",
+    "dicebook.js",
+    "dicebook.d.ts"
+  ],
+  "main": "dicebook.js",
+  "types": "dicebook.d.ts"
+}

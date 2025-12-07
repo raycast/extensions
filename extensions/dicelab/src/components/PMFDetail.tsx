@@ -2,8 +2,13 @@
 
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import React from "react";
-import { generatePMFBarChart, svgToDataUri } from "../utils/svg-chart";
+import {
+  generatePMFBarChart,
+  generateCombinedPMFBarChart,
+  svgToDataUri,
+} from "../utils/svg-chart";
 import { normalizePmfPayload, summarizePmfPayload } from "../utils/pmf";
+import { buildCombinedChartData } from "../utils/chart-helpers";
 
 interface PMFDetailProps {
   expression: string;
@@ -20,31 +25,43 @@ export function PMFDetail({ expression, pmf }: PMFDetailProps) {
     );
   }
 
-  // Generate charts for each PMF (usually 1, but analyze can have multiple)
-  const charts = normalized.pmfs
-    .map((pmfData, index) => {
-      const bins = pmfData.bins.map((bin) => ({
-        label: bin.label,
-        probability: bin.probability,
-      }));
+  // Generate charts - combined for multiple PMFs, simple for single PMF
+  let charts: string;
 
-      const svg = generatePMFBarChart(bins, {
-        width: 500,
-        height: 250,
-        title:
-          normalized.pmfs.length > 1 ? `Distribution #${index + 1}` : undefined,
-      });
-
-      const dataUri = svgToDataUri(svg);
-      return `![PMF Chart](${dataUri}?raycast-width=500&raycast-height=250)`;
-    })
-    .join("\n\n");
+  if (normalized.pmfs.length > 1) {
+    // Multiple PMFs - use combined chart
+    const chartData = buildCombinedChartData(normalized.pmfs);
+    const svg = generateCombinedPMFBarChart(chartData, {
+      width: 600,
+      height: 300,
+      title: `Combined Distribution Analysis (${normalized.pmfs.length} distributions)`,
+      showLegend: true,
+    });
+    const dataUri = svgToDataUri(svg);
+    charts = `![Combined PMF Chart](${dataUri}?raycast-width=600&raycast-height=300)`;
+  } else {
+    // Single PMF - use existing simple chart
+    const bins = normalized.pmfs[0].bins.map((bin) => ({
+      label: bin.label,
+      probability: bin.probability,
+    }));
+    const svg = generatePMFBarChart(bins, {
+      width: 500,
+      height: 250,
+    });
+    const dataUri = svgToDataUri(svg);
+    charts = `![PMF Chart](${dataUri}?raycast-width=500&raycast-height=250)`;
+  }
 
   // Build statistics table
+  const colorEmojis = ["🔵", "🔴", "🟢", "🟠", "🟣", "🟡", "⚪", "⚫"];
   const stats = normalized.pmfs
     .map((pmfData, index) => {
+      const colorEmoji = colorEmojis[index % colorEmojis.length];
       const prefix =
-        normalized.pmfs.length > 1 ? `**Distribution #${index + 1}**\n` : "";
+        normalized.pmfs.length > 1
+          ? `**${colorEmoji} Distribution #${index + 1}**\n`
+          : "";
       const minLabel = pmfData.bins[0]?.label ?? "?";
       const maxLabel = pmfData.bins[pmfData.bins.length - 1]?.label ?? "?";
       return `${prefix}| Statistic | Value |

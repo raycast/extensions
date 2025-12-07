@@ -2,10 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dicelab",
   "title": "Dicelab",
-  "description": "Roll dice with the Dicelab. Full D&D 5e support with variables, probability charts, D&D Beyond import, and more.",
-  "icon": "extension_icon.png",
+  "description": "Roll dice with the Dicelab DSL. Full D&D 5e support with variables, probability charts, D&D Beyond import, and more.",
+  "icon": "extension-icon.png",
   "author": "egeucak",
-  "categories": ["Fun", "Productivity", "Other"],
+  "categories": [
+    "Fun",
+    "Productivity"
+  ],
   "license": "MIT",
   "homepage": "https://try.dicelab.dev",
   "repository": {
@@ -27,7 +30,13 @@
           "required": false
         }
       ],
-      "keywords": ["dice", "repl", "calculator", "roll", "analyze"]
+      "keywords": [
+        "dice",
+        "repl",
+        "calculator",
+        "roll",
+        "analyze"
+      ]
     },
     {
       "name": "aliases",
@@ -35,7 +44,11 @@
       "subtitle": "Dicelab",
       "description": "View and manage saved variables",
       "mode": "view",
-      "keywords": ["variables", "aliases", "context"]
+      "keywords": [
+        "variables",
+        "aliases",
+        "context"
+      ]
     },
     {
       "name": "import-character",
@@ -43,7 +56,12 @@
       "subtitle": "Dicelab",
       "description": "Import a D&D Beyond character",
       "mode": "view",
-      "keywords": ["ddb", "dndbeyond", "character", "import"]
+      "keywords": [
+        "ddb",
+        "dndbeyond",
+        "character",
+        "import"
+      ]
     },
     {
       "name": "examples",
@@ -51,7 +69,11 @@
       "subtitle": "Dicelab",
       "description": "Browse example dice expressions",
       "mode": "view",
-      "keywords": ["examples", "help", "learn"]
+      "keywords": [
+        "examples",
+        "help",
+        "learn"
+      ]
     },
     {
       "name": "history",
@@ -59,7 +81,10 @@
       "subtitle": "Dicelab",
       "description": "View and re-roll past expressions",
       "mode": "view",
-      "keywords": ["history", "recent"]
+      "keywords": [
+        "history",
+        "recent"
+      ]
     },
     {
       "name": "reset",
@@ -67,7 +92,17 @@
       "subtitle": "Dicelab",
       "description": "Clear all aliases and history",
       "mode": "no-view",
-      "keywords": ["reset", "clear"]
+      "keywords": [
+        "reset",
+        "clear"
+      ]
+    },
+    {
+      "name": "fallback",
+      "title": "Roll with Dicelab",
+      "subtitle": "Dicelab",
+      "description": "Roll dice or analyze expressions from root search",
+      "mode": "view"
     }
   ],
   "dependencies": {

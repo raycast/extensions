@@ -1,9 +1,8 @@
 // Dicelab Examples command
 
 import { List, ActionPanel, Action, LaunchType } from "@raycast/api";
-import React from "react";
 import { EXAMPLES } from "./utils/constants";
-import RollCommand from "./roll";
+import EvaluateCommand from "./evaluate";
 
 export default function ExamplesCommand() {
   return (
@@ -18,7 +17,7 @@ export default function ExamplesCommand() {
               <Action.Push
                 title="Try Example"
                 target={
-                  <RollCommand
+                  <EvaluateCommand
                     launchType={LaunchType.UserInitiated}
                     arguments={{ expression: example.code }}
                   />

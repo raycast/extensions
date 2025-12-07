@@ -1,9 +1,9 @@
 // Roll History command
 
 import { List, ActionPanel, Action, LaunchType } from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { loadHistory, clearHistory, type HistoryEntry } from "./engine/storage";
-import RollCommand from "./roll";
+import EvaluateCommand from "./evaluate";
 
 export default function HistoryCommand() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -56,7 +56,7 @@ export default function HistoryCommand() {
                 <Action.Push
                   title="Re-roll"
                   target={
-                    <RollCommand
+                    <EvaluateCommand
                       launchType={LaunchType.UserInitiated}
                       arguments={{ expression: entry.expression }}
                     />

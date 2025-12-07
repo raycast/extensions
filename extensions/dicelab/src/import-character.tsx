@@ -11,6 +11,7 @@ import {
 import React, { useState } from "react";
 import { getEngine, syncAliasesToStorage } from "./engine";
 import { extractDdbInput } from "./utils/ddb";
+import { fetchDdbCharacter } from "./utils/ddb-fetch";
 
 export default function ImportCharacterCommand() {
   const [input, setInput] = useState("");
@@ -32,26 +33,58 @@ export default function ImportCharacterCommand() {
 
     try {
       const engine = await getEngine();
+      let jsonData: string;
 
+      // Handle inline JSON - pass directly to WASM
       if (parsed.kind === "inline") {
         await showToast({
           style: Toast.Style.Animated,
           title: "Importing...",
           message: "Detected inline D&D Beyond JSON",
         });
-      } else if (parsed.kind === "url") {
+        jsonData = parsed.value;
+      } else {
+        // For character ID/URL - fetch the JSON first
+        await showToast({
+          style: Toast.Style.Animated,
+          title: "Fetching...",
+          message: `Fetching character ${parsed.value} from D&D Beyond`,
+        });
+
+        jsonData = await fetchDdbCharacter(parsed.value);
+
+        // Debug logging
+        console.log("[DEBUG] Fetched JSON length:", jsonData.length);
+        console.log(
+          "[DEBUG] JSON starts with {:",
+          jsonData.trim().startsWith("{"),
+        );
+        console.log("[DEBUG] First 150 chars:", jsonData.substring(0, 150));
+
         await showToast({
           style: Toast.Style.Animated,
           title: "Importing...",
-          message: `Using character ID ${parsed.value}`,
+          message: "Processing character data",
         });
       }
 
-      await engine.importDdb(parsed.value);
+      // Pass the JSON to WASM for parsing
+      console.log(
+        "[DEBUG] Calling engine.importDdb with JSON length:",
+        jsonData.length,
+      );
+      const wasmResult = await engine.importDdb(jsonData);
+      console.log("[DEBUG] WASM importDdb returned:", wasmResult);
+
       await syncAliasesToStorage();
 
       const aliases = engine.getAliases();
-      const count = Object.keys(aliases).length;
+      console.log("[DEBUG] getAliases() returned:", aliases);
+
+      // Fix: aliases is a Map, not an Object, so use .size instead of Object.keys().length
+      const count =
+        aliases instanceof Map ? aliases.size : Object.keys(aliases).length;
+      console.log("[DEBUG] Alias count:", count);
 
       await showToast({
         style: Toast.Style.Success,

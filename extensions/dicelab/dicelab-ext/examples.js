@@ -1,0 +1,53 @@
+"use strict";var st=Object.create;var D=Object.defineProperty;var lt=Object.getOwnPropertyDescriptor;var ct=Object.getOwnPropertyNames;var dt=Object.getPrototypeOf,ut=Object.prototype.hasOwnProperty;var mt=(t,e)=>{for(var n in e)D(t,n,{get:e[n],enumerable:!0})},B=(t,e,n,r)=>{if(e&&typeof e=="object"||typeof e=="function")for(let i of ct(e))!ut.call(t,i)&&i!==n&&D(t,i,{get:()=>e[i],enumerable:!(r=lt(e,i))||r.enumerable});return t};var pt=(t,e,n)=>(n=t!=null?st(dt(t)):{},B(e||!t||!t.__esModule?D(n,"default",{value:t,enumerable:!0}):n,t)),ft=t=>B(D({},"__esModule",{value:!0}),t);var wt={};mt(wt,{default:()=>at});module.exports=ft(wt);var x=require("@raycast/api");var j=[{title:"Single d20 roll",code:"d20"},{title:"Percentile roll (d100)",code:"d100"},{title:"Advantage on a d20 (adv)",code:"d20adv"},{title:"Disadvantage on a d20 (dis)",code:"d20dis"},{title:"Ability score roll (4d6 drop lowest 1, dl)",code:"4d6dl1"},{title:"Character creation (roll 6 ability scores)",code:"(4d6dl1)^6"},{title:"Reroll 1s and 2s on damage (rr = infinite rerolls)",code:"2d6rr1 rr2 + 3"},{title:"Reroll 1s once on each die (ro = reroll once)",code:"4d6ro1"},{title:"Spell damage example (Fireball 8d6)",code:"8d6"},{title:"Skill check vs DC 15 (comparison returns 0 or 1)",code:"(d20 + 6) >= 15"},{title:"Spell save: full damage on fail, half on success",code:"(d20 + 2) >= 15 ? 8d6 / 2 : 8d6"},{title:"Basic attack vs AC 15 (2d6+4 on hit)",code:"(d20 attack + 6) >= 15 ? 2d6 + 4 : 0"},{title:"Attack with advantage vs AC 15 (2d6+4 on hit)",code:"(d20adv attack + 6) >= 15 ? 2d6 + 4 : 0"},{title:"Attack with extended crit range (19-20) and advantage",code:"(d20adv attack crit19..20 + 6) >= 15 ? 2d6 + 4 : 0"},{title:"Attack vs AC 15, crit doubles all dice (oncrit double_all)",code:"(d20 attack + 6 oncrit double_all) >= 15 ? 2d6 + 4 : 0"},{title:"Attack vs AC 15, crit maximizes bonus dice (oncrit max_second_dice)",code:"(d20 attack + 6 oncrit max_second_dice) >= 15 ? 2d6 + 4 : 0"},{title:"Elven Accuracy: triple advantage vs AC (keep highest)",code:"(3d20kh1 attack + 7) >= 17 ? 1d8 + 4 : 0"},{title:"Multiattack: repeat the whole attack expression 3 times",code:"((d20 attack + 5) >= 15 ? 1d8 + 4 : 0)^3"},{title:"Analyze a single expression (3d6 distribution)",code:"analyze 3d6"},{title:"Analyze advantage vs normal attack bonus",code:"analyze 2d20kh1 + 5, d20 + 5"},{title:"Analysis of A paladin under effects of bless with 2 attacks, with +8 to hit, against an AC of 15, holding a d10 weapon with +5 damage modifier and doing divine smite on crits",code:"analyze (d20adv attack crit19..20 + 8 as a1 + d4 > 15 ? (1d10 + 5 + (a1.crit ? 2d8))) + (d20adv attack crit19..20 + 8 as a2 + d4 > 15 ? (1d10 + 5 + (a1.crit == 0 ? (a2.crit ? 2d8))))"}],H="raycast-dicelab";var g=require("@raycast/api"),k=require("react");var z=require("@raycast/api"),V="dicelab:aliases",U="dicelab:history",gt=100;async function X(){let t=await z.LocalStorage.getItem(V);if(!t)return{};try{return JSON.parse(t)}catch{return{}}}async function Y(t){await z.LocalStorage.setItem(V,JSON.stringify(t))}async function bt(){let t=await z.LocalStorage.getItem(U);if(!t)return[];try{return JSON.parse(t)}catch{return[]}}async function J(t){let e=await bt(),n=[t,...e].slice(0,gt);await z.LocalStorage.setItem(U,JSON.stringify(n))}var K=require("@raycast/api"),G=pt(require("path")),I=null,O=null;async function Q(){return I||(O||(O=(async()=>{let t=G.default.join(K.environment.assetsPath,"wasm","dicebook.js");try{return require(t)}catch(e){throw console.error("Failed to load WASM module:",e),new Error(`Failed to load Dicelab engine: ${e instanceof Error?e.message:String(e)}`)}})()),I=await O,I)}var R=null,L=null;async function Z(){return R||(L||(L=(async()=>{let t=await Q(),e=new t.WasmEngine(H),n=await X();return Object.keys(n).length>0&&e.setAliases(n),e})()),R=await L,R)}async function tt(){if(!R)return;let t=R.getAliases();await Y(t)}var A=require("@raycast/api");var yt={width:500,height:250,barColor:"#50A0FF",backgroundColor:"transparent",textColor:"#FFFFFF",title:""};function nt(t,e={}){let n={...yt,...e},{width:r,height:i,barColor:s,backgroundColor:y,textColor:a,title:d}=n;if(t.length===0)return xt(r,i,a);let u=Math.max(...t.map(b=>b.probability)),o={top:d?30:10,right:10,bottom:40,left:50},p=r-o.left-o.right,l=i-o.top-o.bottom,c=Math.max(2,Math.floor(p/t.length)-1),M=1,P=t.map((b,v)=>{let S=u>0?b.probability/u*l:0,q=o.left+v*(c+M),T=o.top+l-S;return`<rect x="${q}" y="${T}" width="${c}" height="${S}" fill="${s}" opacity="0.8"/>`}).join(`
+`),F=Math.max(1,Math.ceil(t.length/10)),$=t.filter((b,v)=>v%F===0||v===t.length-1).map(b=>{let v=t.findIndex(T=>T.label===b.label),S=o.left+v*(c+M)+c/2,q=i-10;return`<text x="${S}" y="${q}" text-anchor="middle" fill="${a}" font-size="10">${et(b.label)}</text>`}).join(`
+`),m=5,h=Array.from({length:m+1},(b,v)=>{let S=u/m*v,q=o.top+l-v/m*l,T=`${(S*100).toFixed(0)}%`;return`<text x="${o.left-5}" y="${q+4}" text-anchor="end" fill="${a}" font-size="10">${T}</text>`}).join(`
+`),N=d?`<text x="${r/2}" y="20" text-anchor="middle" fill="${a}" font-size="14" font-weight="bold">${et(d)}</text>`:"";return`<svg xmlns="http://www.w3.org/2000/svg" width="${r}" height="${i}" viewBox="0 0 ${r} ${i}">
+  <rect width="${r}" height="${i}" fill="${y}"/>
+  ${N}
+  ${P}
+  ${$}
+  ${h}
+  <line x1="${o.left}" y1="${o.top+l}" x2="${o.left+p}" y2="${o.top+l}" stroke="${a}" stroke-opacity="0.3"/>
+  <line x1="${o.left}" y1="${o.top}" x2="${o.left}" y2="${o.top+l}" stroke="${a}" stroke-opacity="0.3"/>
+</svg>`}function xt(t,e,n){return`<svg xmlns="http://www.w3.org/2000/svg" width="${t}" height="${e}">
+  <text x="${t/2}" y="${e/2}" text-anchor="middle" fill="${n}" font-size="14">No data</text>
+</svg>`}function ot(t){return`data:image/svg+xml,${encodeURIComponent(t).replace(/'/g,"%27").replace(/"/g,"%22")}`}function et(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;")}function w(t){if(typeof t=="number")return Number.isFinite(t)?t:null;if(t==null)return null;let e=Number.parseFloat(String(t));return Number.isFinite(e)?e:null}function ht(t){let e=w(t);return e===null||Number.isNaN(e)||e<0?0:e}function vt(t){let e=t,n=ht(e?.probability),r=e?.value,i=w(r);return{probability:n,label:String(i!==null?i:r??"?"),rawProbability:e?.probability,rawValue:r}}function _(t){let e=t;return{pmfs:(Array.isArray(e?.pmfs)?e.pmfs:[]).map(i=>{let s=i,a=(Array.isArray(s?.bins)?s.bins:[]).map(m=>vt(m)),d=a.reduce((m,h)=>Math.max(m,h.probability),0),u=w(s?.mean),o=u===null?null:Number(u.toFixed(4)),p=w(s?.variance),l=p===null?null:Number(p.toFixed(4)),c=w(s?.std_dev??s?.stdDev),M=c===null?null:Number(c.toFixed(4)),P=w(s?.interquartile_range??s?.iqr??s?.interquartileRange),F=P===null?null:Number(Math.max(P,0).toFixed(4)),$=Array.isArray(s?.quantiles)?s.quantiles.map(m=>{let h=m,N=w(h?.quantile),b=w(h?.value);return N===null||b===null?null:{quantile:Number(N.toFixed(4)),value:Number(b.toFixed(4))}}).filter(m=>m!==null):[];return{mean:o,variance:l,stdDev:M,iqr:F,quantiles:$,bins:a,maxProbability:Number.isFinite(d)?d:0,raw:i}})}}function it(t){let{pmfs:e}=_(t);if(!e.length)return"PMF available";let n=e[0],r=n.bins.map(c=>w(c.rawValue)).filter(c=>c!==null),i=r.length?Math.min(...r):null,s=r.length?Math.max(...r):null,y=n.mean===null||n.mean===void 0?"?":n.mean.toFixed(2),a=n.stdDev===null||n.stdDev===void 0?"?":n.stdDev.toFixed(2),d=n.variance===null||n.variance===void 0?"?":n.variance.toFixed(2),u=n.iqr===null||n.iqr===void 0?"?":n.iqr.toFixed(2),o=n.quantiles.length?n.quantiles.map(c=>`q${(c.quantile*100).toFixed(0)} ${c.value.toFixed(2)}`).join(", "):null,p=`${i??"?"}..${s??"?"}`,l=[`PMF mean ${y}`,`std ${a}`,`var ${d}`,`IQR ${u}`,`range ${p}`];return o&&l.push(o),l.join("; ")}var E=require("react/jsx-runtime");function rt({expression:t,pmf:e}){let n=_(e),r=it(e);if(!n.pmfs.length)return(0,E.jsx)(A.Detail,{markdown:`# ${t}
+
+No probability data available.`});let i=n.pmfs.map((a,d)=>{let u=a.bins.map(l=>({label:l.label,probability:l.probability})),o=nt(u,{width:500,height:250,title:n.pmfs.length>1?`Distribution #${d+1}`:void 0});return`![PMF Chart](${ot(o)}?raycast-width=500&raycast-height=250)`}).join(`
+
+`),s=n.pmfs.map((a,d)=>{let u=n.pmfs.length>1?`**Distribution #${d+1}**
+`:"",o=a.bins[0]?.label??"?",p=a.bins[a.bins.length-1]?.label??"?";return`${u}| Statistic | Value |
+|-----------|-------|
+| Mean | ${a.mean?.toFixed(2)??"?"} |
+| Std Dev | ${a.stdDev?.toFixed(2)??"?"} |
+| Variance | ${a.variance?.toFixed(2)??"?"} |
+| IQR | ${a.iqr?.toFixed(2)??"?"} |
+| Range | ${o} - ${p} |`}).join(`
+
+`),y=`# Probability Analysis
+
+## Expression
+\`${t}\`
+
+## Distribution
+${i}
+
+## Statistics
+${s}
+
+---
+*${r}*
+`;return(0,E.jsx)(A.Detail,{markdown:y,actions:(0,E.jsxs)(A.ActionPanel,{children:[(0,E.jsx)(A.Action.CopyToClipboard,{title:"Copy Summary",content:r}),(0,E.jsx)(A.Action.CopyToClipboard,{title:"Copy Expression",content:t})]})})}var f=require("react/jsx-runtime");function W(t){let{expression:e}=t.arguments,[n,r]=(0,k.useState)(""),[i,s]=(0,k.useState)(null),[y,a]=(0,k.useState)(null),[d,u]=(0,k.useState)(!0),[o,p]=(0,k.useState)(!1);if((0,k.useEffect)(()=>{async function M(){try{let F=(await Z()).evaluate(e),$,m=null;if(typeof F=="string")$=F;else{let h=F;$=h.result,m=h.pmf}r($),s(m),await J({expression:e,result:$,timestamp:Date.now()}),e.trim().toLowerCase().startsWith("let ")&&await tt()}catch(P){a(P instanceof Error?P.message:"Evaluation failed")}finally{u(!1)}}M()},[e]),d)return(0,f.jsx)(g.Detail,{isLoading:!0,markdown:"Rolling dice..."});if(y)return(0,f.jsx)(g.Detail,{markdown:`# Error
+
+${y}
+
+## Expression
+\`${e}\``,actions:(0,f.jsx)(g.ActionPanel,{children:(0,f.jsx)(g.Action.CopyToClipboard,{title:"Copy Error",content:y})})});if(o&&i)return(0,f.jsx)(rt,{expression:e,pmf:i});let l=i!=null,c=`# Result
+
+\`\`\`
+${n}
+\`\`\`
+
+## Expression
+\`${e}\`
+`;return(0,f.jsx)(g.Detail,{markdown:c,actions:(0,f.jsxs)(g.ActionPanel,{children:[(0,f.jsx)(g.Action.CopyToClipboard,{title:"Copy Result",content:n}),(0,f.jsx)(g.Action.CopyToClipboard,{title:"Copy Expression",content:e}),l&&(0,f.jsx)(g.Action,{title:"View Pmf Chart",onAction:()=>p(!0)})]})})}var C=require("react/jsx-runtime");function at(){return(0,C.jsx)(x.List,{searchBarPlaceholder:"Search examples...",children:j.map((t,e)=>(0,C.jsx)(x.List.Item,{title:t.title,subtitle:t.code,actions:(0,C.jsxs)(x.ActionPanel,{children:[(0,C.jsx)(x.Action.Push,{title:"Try Example",target:(0,C.jsx)(W,{launchType:x.LaunchType.UserInitiated,arguments:{expression:t.code}})}),(0,C.jsx)(x.Action.CopyToClipboard,{title:"Copy Expression",content:t.code})]})},e))})}

@@ -1,20 +1,66 @@
 // Dicelab REPL command
+// Handles both regular rolls and analyze commands
 
 import {
   Form,
   ActionPanel,
   Action,
-  showToast,
-  Toast,
-  Detail,
   useNavigation,
+  LaunchProps,
+  Detail,
 } from "@raycast/api";
-import React, { useState } from "react";
-import { getEngine, syncAliasesToStorage } from "./engine";
-import { addToHistory } from "./engine/storage";
-import type { EvaluateResponse } from "./engine/types";
+import { useState, useEffect } from "react";
+import {
+  evaluateExpression,
+  createDetailView,
+  type EvaluationResult,
+} from "./utils/evaluation";
 
-export default function DicelabCommand() {
+interface Arguments {
+  expression?: string;
+}
+
+export default function DicelabCommand(
+  props: LaunchProps<{ arguments: Arguments }>,
+) {
+  const expressionArg = props.arguments.expression;
+
+  // If expression argument provided, evaluate it directly
+  if (expressionArg) {
+    return <DirectEvaluate expression={expressionArg} />;
+  }
+
+  // Otherwise, show REPL form
+  return <REPLForm />;
+}
+
+// Direct evaluation component (when expression argument is provided)
+function DirectEvaluate({ expression }: { expression: string }) {
+  const [result, setResult] = useState<EvaluationResult | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function evaluate() {
+      const evalResult = await evaluateExpression(expression);
+      setResult(evalResult);
+      setIsLoading(false);
+    }
+    evaluate();
+  }, [expression]);
+
+  if (isLoading) {
+    return <Detail isLoading markdown="Evaluating..." />;
+  }
+
+  if (!result) {
+    return <Detail markdown="# Error\n\nNo result available." />;
+  }
+
+  return createDetailView(result);
+}
+
+// REPL form component (when no expression argument)
+function REPLForm() {
   const [expression, setExpression] = useState("");
   const [results, setResults] = useState<
     Array<{ expression: string; result: string }>
@@ -26,47 +72,23 @@ export default function DicelabCommand() {
       return;
     }
 
-    try {
-      const engine = await getEngine();
-      const evalResult = engine.evaluate(expression);
+    // Store current expression before clearing
+    const currentExpression = expression;
 
-      let resultText: string;
+    // Clear input for next expression
+    setExpression("");
 
-      if (typeof evalResult === "string") {
-        resultText = evalResult;
-      } else {
-        const response = evalResult as EvaluateResponse;
-        resultText = response.result;
-      }
+    // Evaluate using shared utility
+    const evalResult = await evaluateExpression(currentExpression);
 
-      // Add to results
-      setResults([...results, { expression, result: resultText }]);
+    // Add to results history (even if error)
+    setResults([
+      ...results,
+      { expression: currentExpression, result: evalResult.result },
+    ]);
 
-      // Save to history
-      await addToHistory({
-        expression,
-        result: resultText,
-        timestamp: Date.now(),
-      });
-
-      // Sync aliases if this was a let command
-      if (expression.trim().toLowerCase().startsWith("let ")) {
-        await syncAliasesToStorage();
-      }
-
-      // Clear input for next expression
-      setExpression("");
-
-      // Show result in detail view
-      const markdown = `# Result\n\n\`\`\`\n${resultText}\n\`\`\`\n\n## Expression\n\`${expression}\``;
-      push(<Detail markdown={markdown} />);
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Evaluation Failed",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
+    // Push appropriate detail view (PMF or standard)
+    push(createDetailView(evalResult));
   }
 
   return (
