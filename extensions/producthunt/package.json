@@ -187,5 +187,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "evals": "npx ray evals"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

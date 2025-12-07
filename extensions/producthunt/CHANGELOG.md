@@ -1,6 +1,6 @@
 # Product Hunt Changelog
 
-## [2.3] - {PR_MERGE_DATE}
+## [2.3] - 2025-12-07
 
 - Fix scraper to use `latestScore`/`launchDayScore` fields for vote counts (Product Hunt API changed from `votesCount`)
 - Use browser-like headers for all fetch requests to avoid Cloudflare blocking
