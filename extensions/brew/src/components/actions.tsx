@@ -12,10 +12,7 @@ import { preferences } from "../preferences";
 import { showActionToast, showFailureToast } from "../utils";
 import { Cask, Formula, OutdatedFormula, Nameable } from "../brew";
 
-export function FormulaInstallAction(props: {
-  formula: Cask | Formula;
-  onAction: (result: boolean) => void;
-}): JSX.Element {
+export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
   // TD: Support installing other versions?
   return (
     <Action
@@ -29,10 +26,7 @@ export function FormulaInstallAction(props: {
   );
 }
 
-export function FormulaUninstallAction(props: {
-  formula: Cask | Nameable;
-  onAction: (result: boolean) => void;
-}): JSX.Element {
+export function FormulaUninstallAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }) {
   return (
     <Action
       title="Uninstall"
@@ -47,10 +41,7 @@ export function FormulaUninstallAction(props: {
   );
 }
 
-export function FormulaUpgradeAction(props: {
-  formula: Cask | Nameable;
-  onAction: (result: boolean) => void;
-}): JSX.Element {
+export function FormulaUpgradeAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }) {
   return (
     <Action
       title="Upgrade"
@@ -64,7 +55,7 @@ export function FormulaUpgradeAction(props: {
   );
 }
 
-export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => void }): JSX.Element {
+export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => void }) {
   return (
     <Action
       title="Upgrade All"
@@ -77,10 +68,7 @@ export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => 
   );
 }
 
-export function FormulaPinAction(props: {
-  formula: Formula | OutdatedFormula;
-  onAction: (result: boolean) => void;
-}): JSX.Element {
+export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; onAction: (result: boolean) => void }) {
   const isPinned = props.formula.pinned;
   return (
     <Action

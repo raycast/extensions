@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "farrago",
+  "title": "Farrago",
+  "description": "An extension for interacting with the soundboard app Farrago.",
+  "icon": "extension-icon.png",
+  "author": "boradatti",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Sounds",
+      "description": "Search all sounds in Farrago",
+      "mode": "view"
+    },
+    {
+      "name": "fade-all",
+      "title": "Fade All Sounds",
+      "description": "Fade All Sounds Currently Playing in Farrago",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-all",
+      "title": "Stop All Sounds",
+      "description": "Stop All Sounds Currently Playing in Farrago",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "farragoDataDir",
+      "type": "directory",
+      "title": "Farrago Data Directory",
+      "default": "~/Library/Application Support/Farrago 2",
+      "description": "Path to Farrago's data directory",
+      "required": false
+    },
+    {
+      "name": "oscRemoteHost",
+      "type": "textfield",
+      "title": "OSC Remote Host",
+      "default": "localhost",
+      "placeholder": "localhost",
+      "description": "OSC host defined in Farrago under \"OSC Input\"",
+      "required": false
+    },
+    {
+      "name": "oscRemotePort",
+      "type": "textfield",
+      "title": "OSC Remote Port",
+      "default": "8090",
+      "placeholder": "8090",
+      "description": "OSC port defined in Farrago under \"OSC Input\"",
+      "required": false
+    },
+    {
+      "name": "oscLocalHost",
+      "type": "textfield",
+      "title": "OSC Local Host",
+      "default": "localhost",
+      "placeholder": "localhost",
+      "description": "OSC host defined in Farrago under \"OSC Input\"",
+      "required": false
+    },
+    {
+      "name": "oscLocalPort",
+      "type": "textfield",
+      "title": "OSC Local Port",
+      "default": "8091",
+      "placeholder": "8091",
+      "description": "OSC port defined in Farrago under \"OSC Input\"",
+      "required": false
+    },
+    {
+      "name": "shortcutTitleTemplate",
+      "type": "textfield",
+      "title": "Shortcut Title Template",
+      "placeholder": "{{title}} {{icons}}",
+      "description": "Template to be used when you copy a sound's shortcut title w/ ⇧⌘C.\nAvailable variables: {{title}}, {{icons}}, {{firstIcon}}, {{set}}.",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.0",
+    "osc-min": "^2.1.2",
+    "plist": "^3.1.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "22.13.10",
+    "@types/plist": "^3.0.5",
+    "@types/react": "19.0.10",
+    "@types/xml2js": "^0.4.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -3,6 +3,7 @@ import * as React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getProgressIcon, usePromise, useLocalStorage } from "@raycast/utils";
 import { DeleteModel, DeleteServer, GetModels, UpdateModel } from "./function";
+import { Shortcut } from "../shortcut";
 import { FormPullModel } from "./form/PullModel";
 import { FormEditServer } from "./form/EditServer";
 import { GetServerArray } from "../function";
@@ -122,22 +123,26 @@ export function ModelView(): JSX.Element {
             title={showDetail ? "Hide Detail" : "Show Detail"}
             icon={showDetail ? Icon.EyeDisabled : Icon.Eye}
             onAction={() => setShowDetail((prevState) => !prevState)}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
+            shortcut={Shortcut.ToggleQuickLook}
           />
-          <Action.CopyToClipboard title="Copy Model Name" content={prop.model.detail.name as string} />
+          <Action.CopyToClipboard
+            title="Copy Model Name"
+            content={prop.model.detail.name as string}
+            shortcut={Shortcut.Copy}
+          />
           <Action
             title="Update Model"
             icon={Icon.Repeat}
             onAction={() => UpdateModel(prop.model, setDownload, RevalidateModels)}
-            shortcut={{ modifiers: ["cmd"], key: "u" }}
+            shortcut={Shortcut.UpdateModel}
           />
           <Action
             title="Pull Model"
             icon={Icon.Download}
             onAction={() => setShowPullModelForm(true)}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            shortcut={Shortcut.New}
           />
-          <ActionPanel.Submenu title="Delete Model" icon={Icon.Trash}>
+          <ActionPanel.Submenu title="Delete Model" icon={Icon.Trash} shortcut={Shortcut.Remove}>
             <Action
               title={`Yes, Delete "${prop.model.detail.name}" Model`}
               icon={Icon.Trash}
@@ -149,7 +154,7 @@ export function ModelView(): JSX.Element {
             title="Models Library"
             icon={Icon.Globe}
             url="https://ollama.com/library"
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            shortcut={Shortcut.OpenLibrary}
           />
         </ActionPanel.Section>
         <ActionPanel.Section title="Ollama Server">
@@ -233,13 +238,13 @@ export function ModelView(): JSX.Element {
               title="Pull Model"
               icon={Icon.Download}
               onAction={() => setShowPullModelForm(true)}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={Shortcut.New}
             />
             <Action.OpenInBrowser
               title="Models Library"
               icon={Icon.Globe}
               url="https://ollama.com/library"
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              shortcut={Shortcut.OpenLibrary}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Ollama Server">
@@ -289,7 +294,7 @@ export function ModelView(): JSX.Element {
         <List.EmptyView
           icon={Icon.Download}
           title="No Models Installed."
-          description="No model is currently installed on this server. You can download a new model using the ⌘+D shortcut."
+          description="No model is currently installed on this server. You can download a new model using the ⌘+N (macOS) or ctrl+N (Windows) shortcut."
         />
       )}
     </List>

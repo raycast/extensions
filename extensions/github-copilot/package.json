@@ -7,7 +7,8 @@
   "author": "timrogers",
   "contributors": [
     "pernielsentikaer",
-    "thomas"
+    "thomas",
+    "darchen_gautier"
   ],
   "owner": "github",
   "access": "public",
@@ -16,6 +17,15 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "copilotAppsJsonPath",
+      "type": "textfield",
+      "title": "Copilot Apps.json Path",
+      "description": "Path to GitHub Copilot's apps.json file (auto-generated when you sign in to Copilot via an IDE extension). Defaults to ~/.config/github-copilot/apps.json",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "view-tasks",
@@ -29,6 +39,13 @@
       "title": "Create Task",
       "subtitle": "GitHub Copilot",
       "description": "Delegate a task to Copilot coding agent to work on in the background",
+      "mode": "view"
+    },
+    {
+      "name": "copilot-usage",
+      "title": "Copilot Usage",
+      "subtitle": "GitHub Copilot",
+      "description": "View your remaining GitHub Copilot usage",
       "mode": "view"
     },
     {

@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for libreWolf] - 2025-12-07
+
+- Added support for `LibreWolf` browser.
+
 ## [Bug Fixes] - 2025-11-10
 
 - Improved error handling for directory reading.

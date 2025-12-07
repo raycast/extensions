@@ -4,6 +4,7 @@ import { usePromise, useLocalStorage } from "@raycast/utils";
 import React from "react";
 import { FormatOllamaPsModelExpireAtFormat, GetServerArray } from "../function";
 import { GetModels } from "./function";
+import { Shortcut } from "../shortcut";
 
 export function PsView(): React.JSX.Element {
   const abort = React.useRef(new AbortController());
@@ -40,7 +41,7 @@ export function PsView(): React.JSX.Element {
             title={showDetail ? "Hide Detail" : "Show Detail"}
             icon={showDetail ? Icon.EyeDisabled : Icon.Eye}
             onAction={() => setShowDetail((prevState) => !prevState)}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
+            shortcut={Shortcut.ToggleQuickLook}
           />
           <Action.CopyToClipboard title="Copy Model Name" content={prop.model.detail.name as string} />
         </ActionPanel.Section>

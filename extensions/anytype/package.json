@@ -5,6 +5,9 @@
   "description": "Create, browse, search and edit within Anytype - right at your fingertips, anywhere on your Mac.",
   "icon": "anytype-icon.png",
   "author": "jmetrikat",
+  "contributors": [
+    "jouper"
+  ],
   "owner": "any",
   "access": "public",
   "categories": [
@@ -794,5 +797,8 @@
       "eslint --fix",
       "prettier --write"
     ]
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

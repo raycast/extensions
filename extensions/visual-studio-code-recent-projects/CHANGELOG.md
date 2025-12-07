@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Update] - 2025-11-25
+
+- Added support for Antigravity.
+
 ## [Enhancements] - 2025-11-19
 
 - Improved `Search Recent Projects` for remote workspaces by fuzzy matching remote authorities.

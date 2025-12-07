@@ -10,7 +10,8 @@
     "Kimcha",
     "ridemountainpig",
     "nagauta",
-    "dead_hikikomori"
+    "dead_hikikomori",
+    "clins1994"
   ],
   "categories": [
     "Productivity",
@@ -53,6 +54,25 @@
             {
               "title": "Create Time",
               "value": "createTime"
+            }
+          ]
+        },
+        {
+          "type": "dropdown",
+          "name": "downloadsLayout",
+          "label": "Downloads Layout",
+          "title": "Downloads Layout",
+          "description": "The layout for displaying the downloads.",
+          "required": false,
+          "default": "list",
+          "data": [
+            {
+              "title": "List",
+              "value": "list"
+            },
+            {
+              "title": "Grid",
+              "value": "grid"
             }
           ]
         }
@@ -147,17 +167,17 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1",
-    "untildify": "^4.0.0"
+    "@raycast/utils": "^2.2.2",
+    "untildify": "^6.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -165,5 +185,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

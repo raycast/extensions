@@ -3,7 +3,7 @@ import { z } from "zod";
 export const dataModelSchema = z.array(
   z.object({
     id: z.string(),
-    dataSourceId: z.string(),
+    dataSourceId: z.string().optional(),
     nameSingular: z.string(),
     namePlural: z.string(),
     labelSingular: z.string(),

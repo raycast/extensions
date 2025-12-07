@@ -6,8 +6,8 @@ export type Chatbot = {
   ip_limit: number;
   ip_limit_timeframe: number;
   ip_limit_message: string;
-  styles: {
-    button_color: string;
+  styles?: {
+    button_color?: string;
   };
   model: string;
   last_trained_at: string;

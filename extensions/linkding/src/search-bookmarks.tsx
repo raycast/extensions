@@ -5,9 +5,10 @@ import useBookmarks from "./hooks/use-bookmarks";
 
 export default function searchLinkding() {
   const preferences = getPreferenceValues<Preferences>();
-  const { isLoading, bookmarks, setFilter, deleteBookmark } = useBookmarks();
+  const { isLoading, bookmarks, setFilter, deleteBookmark, archiveBookmark } = useBookmarks();
 
   const onDeleteItem = (id: number) => deleteBookmark(id);
+  const onArchiveItem = (id: number) => archiveBookmark(id);
   const onCopyItem = () => showToast({ style: Toast.Style.Success, title: "Success", message: "Copied to clipboard" });
 
   const subtitle = useMemo(() => {
@@ -30,6 +31,7 @@ export default function searchLinkding() {
             preferences={preferences}
             onCopy={onCopyItem}
             onDelete={onDeleteItem}
+            onArchive={onArchiveItem}
           />
         ))}
       </List.Section>

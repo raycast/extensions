@@ -1,0 +1,9 @@
+/node_modules
+dist/
+
+# Raycast specific files
+raycast-env.d.ts
+raycast-debug.log
+
+# misc
+.DS_Store
