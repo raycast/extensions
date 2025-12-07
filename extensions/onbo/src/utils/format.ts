@@ -1,14 +1,48 @@
 /**
- * Converts a day count into a human-readable relative string (Today, Yesterday, N days ago).
+ * Formats a number of elapsed days or a date string into a human‑readable relative time.
  *
- * @param days - Number of days elapsed.
- * @returns Relative time description or empty string on invalid input.
+ * Behavior:
+ * - Number input: Interpreted as elapsed whole days.
+ * - String input: Parsed as a Date; computes days elapsed from now.
+ * - Outputs:
+ *     - "Today" for 0 days
+ *     - "Yesterday" for 1 day
+ *     - "N days ago" for 2–6 days
+ *     - "N weeks ago" for 7–28 days
+ *     - Locale date string for > 28 days
+ * - Invalid input returns "NaN"
+ * - Future dates are treated as "Tomorrow"
+ *
+ * @param value - Elapsed days (number) or a date string to compare with now.
+ * @returns A relative time description or "NaN" on invalid input.
  */
-export function formatDaysAgo(days: number): string {
-  if (!Number.isFinite(days)) return "";
+export function formatDaysAgo(value: number | string): string {
+  let days: number;
+
+  if (typeof value === "string") {
+    if (!value.trim()) return "NaN";
+    const d = new Date(value);
+    const t = d.getTime();
+    if (Number.isNaN(t)) return "NaN";
+    days = Math.floor((Date.now() - t) / 86_400_000);
+  } else {
+    if (!Number.isFinite(value)) return "NaN";
+    days = Math.floor(value);
+  }
+
+  if (days < 0) return "Tomorrow";
   if (days === 0) return "Today";
   if (days === 1) return "Yesterday";
-  return `${days} days ago`;
+  if (days <= 6) return `${days} days ago`;
+
+  if (days <= 28) {
+    const weeks = Math.floor(days / 7);
+    return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
+  }
+
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toLocaleDateString();
 }
 
 /**
@@ -27,43 +61,3 @@ export const formatLocationsString = (locations?: string[]) => {
   if (locations.length === 2) return `${locations[0].split(",")[0]}, ${locations[1].split(",")[0]}`;
   return `${locations[0].split(",")[0]} +${locations.length - 1} more`;
 };
-
-/**
- * Formats a "Last updated ..." accessory string given an ISO timestamp.
- * Uses relative phrasing within 30 days, otherwise a formatted date.
- *
- * @param iso - ISO timestamp string.
- * @returns A human-readable "Last updated ..." string.
- */
-export function formatLastUpdated(iso?: string): string {
-  if (!iso) return "Last updated —";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "Last updated —";
-
-  const diffDays = Math.floor((Date.now() - d.getTime()) / (24 * 60 * 60 * 1000));
-  if (diffDays <= 30) {
-    const rel = formatDaysAgo(diffDays).toLowerCase();
-    return `Last updated ${rel}`;
-  }
-  return `Last updated on ${d.toLocaleDateString()}`;
-}
-
-/**
- * Formats an "Added ..." accessory string from a numeric days-ago value.
- * Uses relative phrasing within 30 days, otherwise a date string.
- *
- * @param days - Days since added.
- * @returns A human-readable "Added ..." string.
- */
-export function formatAddedFromDaysAgo(days: number): string {
-  if (!Number.isFinite(days)) return "";
-  const whole = Math.floor(days);
-
-  if (whole <= 30) {
-    return `Added ${formatDaysAgo(whole).toLowerCase()}`;
-  }
-
-  const d = new Date();
-  d.setDate(d.getDate() - whole);
-  return `Added on ${d.toLocaleDateString()}`;
-}

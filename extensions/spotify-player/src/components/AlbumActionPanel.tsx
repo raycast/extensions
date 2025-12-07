@@ -20,13 +20,19 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
       <Action.Push
         icon={Icon.AppWindowList}
         title="Show Songs"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "a" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+        }}
         target={<TracksList album={album} showGoToAlbum={false} />}
       />
       <Action
         icon={isAlbumSaved ? Icon.Minus : Icon.Plus}
         title={isAlbumSaved ? "Remove from Library" : "Add to Library"}
-        shortcut={{ modifiers: ["cmd", "shift"], key: isAlbumSaved ? "d" : "s" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: isAlbumSaved ? "d" : "s" },
+          Windows: { modifiers: ["ctrl", "shift"], key: isAlbumSaved ? "d" : "s" },
+        }}
         onAction={async () => {
           try {
             if (isAlbumSaved) {

@@ -9,12 +9,14 @@ Explore the world of Pokémon with stunning visuals and detailed information in 
 ## Features
 
 ### Core Functionality
+
 * **Comprehensive Pokémon Database:** Access information on all 1025 Pokémon species, including regional variants, Mega Evolutions, and Gigantamax forms.
 * **Detailed Pokédex Entries:** Explore in-depth details about Pokédex data, stats, types, training, breeding, evolutions, learnsets, and locations.
 * **Enhanced Move Information**: Access detailed information about Pokémon moves, including base power, accuracy, PP, type, category, priority, target, and more.
 * **Quick Links:** Easily access Pokémon on the Official Pokémon Website or Bulbapedia with direct links.
 
 ### Customization Options
+
 * **Language Preferences:** Choose your preferred language for Pokémon details (English, French, German, Italian, Japanese, Korean, Spanish, Simplified & Traditional Chinese).
 * **Type Filtering**: Narrow down your search by selecting specific Pokémon types.
 * **Sorting Flexibility:** Sort the Pokédex by Pokémon name or National Pokédex number to suit your preferences.
@@ -23,8 +25,8 @@ Explore the world of Pokémon with stunning visuals and detailed information in 
   * **Pixel Art:** Experience a nostalgic touch with pixelated Pokémon sprites.
 
 ### Performance Optimization
-* **Efficient Caching:** Benefit from a caching system that stores frequently accessed Pokémon data, improving load times and reducing API usage.
 
+* **Efficient Caching:** Benefit from a caching system that stores frequently accessed Pokémon data, improving load times and reducing API usage.
 
 ## TODO
 

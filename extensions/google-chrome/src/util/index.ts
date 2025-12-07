@@ -32,12 +32,6 @@ const getChromeFilePath = (fileName: ChromeFile, profile?: string) => {
     );
   }
 
-  if (!fs.existsSync(resolvedProfilePath)) {
-    throw new Error(
-      `The profile path ${resolvedProfilePath} does not exist. Please check your Chrome profile location by visiting chrome://version -> Profile Path. Then update it in Extension Settings -> Profile Path.`,
-    );
-  }
-
   return resolvedProfilePath;
 };
 
@@ -83,4 +77,15 @@ export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> =>
 
   const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
   return extractBookmarks(JSON.parse(fileBuffer));
+};
+
+export const getDefaultProfileID = () => {
+  try {
+    const path = getLocalStatePath();
+    const chromeState = fs.readFileSync(path, "utf-8");
+    const profiles = JSON.parse(chromeState).profile.info_cache;
+    return Object.keys(profiles)[0];
+  } catch {
+    return "Default";
+  }
 };

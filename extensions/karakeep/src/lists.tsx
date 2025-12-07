@@ -1,5 +1,6 @@
 import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useMemo } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteList } from "./apis";
 import { BookmarkList } from "./components/BookmarkList";
 import { useConfig } from "./hooks/useConfig";
@@ -36,8 +37,8 @@ function buildHierarchy(lists: ListWithCount[]): ListWithCount[] {
   return rootLists;
 }
 
-function ListBookmarks({ listId, listName }: { listId: string; listName: string }) {
-  const { bookmarks, isLoading, hasMore, revalidate, loadNextPage } = useGetListsBookmarks(listId);
+function ListBookmarksView({ listId, listName }: { listId: string; listName: string }) {
+  const { bookmarks, isLoading, revalidate, pagination } = useGetListsBookmarks(listId);
   const { t } = useTranslation();
 
   const handleRefresh = async () => {
@@ -52,10 +53,9 @@ function ListBookmarks({ listId, listName }: { listId: string; listName: string 
   return (
     <BookmarkList
       bookmarks={bookmarks}
-      hasMore={hasMore}
       isLoading={isLoading}
       onRefresh={handleRefresh}
-      loadMore={loadNextPage}
+      pagination={pagination}
       searchBarPlaceholder={t("list.searchInList").replace("{name}", listName)}
       emptyViewTitle={t("list.noBookmarks.title")}
       emptyViewDescription={t("list.noBookmarks.description")}
@@ -64,7 +64,7 @@ function ListBookmarks({ listId, listName }: { listId: string; listName: string 
 }
 
 function ArchivedBookmarks() {
-  const { bookmarks, isLoading, hasMore, revalidate, loadNextPage } = useGetAllBookmarks({
+  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
     archived: true,
   });
   const { t } = useTranslation();
@@ -74,9 +74,8 @@ function ArchivedBookmarks() {
     <BookmarkList
       bookmarks={archivedBookmarks}
       isLoading={isLoading}
-      hasMore={hasMore}
       onRefresh={revalidate}
-      loadMore={loadNextPage}
+      pagination={pagination}
       searchBarPlaceholder={t("list.searchInArchived")}
       emptyViewTitle={t("list.noArchived.title")}
       emptyViewDescription={t("list.noArchived.description")}
@@ -86,7 +85,7 @@ function ArchivedBookmarks() {
 }
 
 function FavoritedBookmarks() {
-  const { bookmarks, isLoading, hasMore, revalidate, loadNextPage } = useGetAllBookmarks({
+  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
     favourited: true,
   });
   const { t } = useTranslation();
@@ -95,9 +94,8 @@ function FavoritedBookmarks() {
     <BookmarkList
       bookmarks={favoriteBookmarks}
       isLoading={isLoading}
-      hasMore={hasMore}
       onRefresh={revalidate}
-      loadMore={loadNextPage}
+      pagination={pagination}
       searchBarPlaceholder={t("list.searchInFavorites")}
       emptyViewTitle={t("list.noFavorites.title")}
       emptyViewDescription={t("list.noFavorites.description")}
@@ -141,6 +139,7 @@ export default function Lists() {
           toast.message = t("common.deleteSuccess");
           revalidate();
         } catch (error) {
+          logger.error("Failed to delete list", { listId: id, listName, error });
           toast.style = Toast.Style.Failure;
           toast.message = t("common.deleteFailed");
         }
@@ -171,7 +170,7 @@ export default function Lists() {
             <ActionPanel>
               <Action
                 title={t("list.openList")}
-                onAction={() => push(<ListBookmarks listId={list.id} listName={list.name} />)}
+                onAction={() => push(<ListBookmarksView listId={list.id} listName={list.name} />)}
                 icon={Icon.List}
               />
               <Action.OpenInBrowser url={dashboardListsPage(list.id)} title={t("common.viewInBrowser")} />

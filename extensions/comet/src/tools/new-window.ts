@@ -1,6 +1,5 @@
 import { createNewWindow } from "../actions";
-import { runAppleScript } from "run-applescript";
-import { showFailureToast } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 type Input = {
   /** The website we should open a new window to, if one is provided. */

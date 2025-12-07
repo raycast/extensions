@@ -1,0 +1,102 @@
+instructions: |
+  The Bootstrap Icons extension provides access to over 2,000 official Bootstrap icons.
+  Icons can be copied in multiple formats: icon name, embedded SVG, sprite reference, external image tag, or icon font class.
+  
+  When users ask about finding or recommending Bootstrap icons:
+  - Use the find-the-perfect-bootstrap-icon tool to get the complete list of available icons
+  - The tool provides all icon names based on the user's query
+  - Analyze the returned icon names and suggest 3-5 most relevant ones with clear explanations
+  - Think creatively about synonyms and related concepts (e.g., "success" → check-circle, trophy, star)
+  - Format your suggestions clearly with icon names in bold
+  - Always end your response by reminding users: "To view and copy these icons, open the 'Search Bootstrap Icons' command (⌘K to open Raycast, then search for 'Search Bootstrap Icons') and search for any of the recommended icon names."
+
+evals:
+  - input: "@bootstrap-icons find icons to represent time"
+    mocks:
+      find-the-perfect-bootstrap-icon: |
+        User is looking for: "icons to represent time"
+        
+        Available Bootstrap Icons (2078 total):
+        alarm, alarm-fill, clock, clock-fill, clock-history, calendar, calendar-event, stopwatch, hourglass, timer, [... and many more icons ...]
+        
+        Please suggest 3-5 of the most relevant icon names from the list above and explain why each might be a good fit for the user's needs. Consider synonyms and related concepts when making suggestions.
+    expected:
+      - callsTool: "find-the-perfect-bootstrap-icon"
+      - includes: "clock"
+      - includes: "alarm"
+
+  - input: "@bootstrap-icons what icons represent social media?"
+    mocks:
+      find-the-perfect-bootstrap-icon: |
+        User is looking for: "icons represent social media"
+        
+        Available Bootstrap Icons (2078 total):
+        facebook, twitter, instagram, linkedin, youtube, tiktok, share, share-fill, [... and many more icons ...]
+        
+        Please suggest 3-5 of the most relevant icon names from the list above and explain why each might be a good fit for the user's needs. Consider synonyms and related concepts when making suggestions.
+    expected:
+      - callsTool: "find-the-perfect-bootstrap-icon"
+      - includes: "facebook"
+      - includes: "twitter"
+
+  - input: "@bootstrap-icons show me navigation arrows"
+    mocks:
+      find-the-perfect-bootstrap-icon: |
+        User is looking for: "navigation arrows"
+        
+        Available Bootstrap Icons (2078 total):
+        arrow-up, arrow-down, arrow-left, arrow-right, chevron-up, chevron-down, chevron-left, chevron-right, caret-up, caret-down, [... and many more icons ...]
+        
+        Please suggest 3-5 of the most relevant icon names from the list above and explain why each might be a good fit for the user's needs. Consider synonyms and related concepts when making suggestions.
+    expected:
+      - callsTool: "find-the-perfect-bootstrap-icon"
+      - includes: "arrow"
+      - includes: "chevron"
+
+  - input: "@bootstrap-icons I need icons for user profiles"
+    mocks:
+      find-the-perfect-bootstrap-icon: |
+        User is looking for: "icons for user profiles"
+        
+        Available Bootstrap Icons (2078 total):
+        person, person-fill, people, people-fill, person-circle, person-badge, person-vcard, account-circle, [... and many more icons ...]
+        
+        Please suggest 3-5 of the most relevant icon names from the list above and explain why each might be a good fit for the user's needs. Consider synonyms and related concepts when making suggestions.
+    expected:
+      - callsTool: "find-the-perfect-bootstrap-icon"
+      - includes: "person"
+
+  - input: "@bootstrap-icons search for shopping cart icons"
+    mocks:
+      find-the-perfect-bootstrap-icon: |
+        User is looking for: "shopping cart icons"
+        
+        Available Bootstrap Icons (2078 total):
+        cart, cart-fill, cart-plus, cart-check, bag, bag-fill, basket, basket-fill, [... and many more icons ...]
+        
+        Please suggest 3-5 of the most relevant icon names from the list above and explain why each might be a good fit for the user's needs. Consider synonyms and related concepts when making suggestions.
+    expected:
+      - callsTool:
+          name: "find-the-perfect-bootstrap-icon"
+          arguments:
+            query:
+              includes: "shopping"
+      - includes: "cart"
+
+  - input: "@bootstrap-icons help me find the perfect icon for success or completion"
+    mocks:
+      find-the-perfect-bootstrap-icon: |
+        User is looking for: "success or completion"
+        
+        Available Bootstrap Icons (2078 total):
+        0-circle-fill, 0-circle, 0-square-fill, 0-square, check-circle-fill, check-circle, check2-circle, check2, trophy-fill, trophy, star-fill, star, patch-check-fill, patch-check, award-fill, award, [... and many more icons ...]
+        
+        Please suggest 3-5 of the most relevant icon names from the list above and explain why each might be a good fit for the user's needs. Consider synonyms and related concepts when making suggestions.
+    expected:
+      - callsTool:
+          name: "find-the-perfect-bootstrap-icon"
+          arguments:
+            query:
+              includes: "success"
+      - includes: "check"
+      - includes: "icon"

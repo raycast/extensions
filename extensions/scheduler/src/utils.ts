@@ -34,6 +34,7 @@ export function processFormValues(values: Record<string, unknown>): FormValues {
     dayOfMonth: values.dayOfMonth ? String(values.dayOfMonth) : undefined,
     cronExpression: values.cronExpression ? String(values.cronExpression) : undefined,
     runInBackground: Boolean(values.runInBackground),
+    runIfMissed: Boolean(values.runIfMissed),
   };
 }
 
@@ -206,6 +207,7 @@ export function createSavedSchedule(
       schedule,
       enabled: true, // Always enable when saving through the form
       updatedAt: new Date().toISOString(),
+      runIfMissed: values.runIfMissed,
     };
   }
 
@@ -217,5 +219,6 @@ export function createSavedSchedule(
     enabled: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    runIfMissed: values.runIfMissed,
   };
 }

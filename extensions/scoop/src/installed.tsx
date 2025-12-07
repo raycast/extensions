@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
-import { scoopList, scoopUninstall, InstalledScoopPackage } from "./scoop";
 import { withToast } from "./utils";
+import { useScoop } from "./hooks/scoopHooks";
+import { InstalledScoopPackage } from "./types/index.types";
 
 export default function InstalledCommand() {
   const [packages, setPackages] = useState<InstalledScoopPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const scoop = useScoop();
 
   useEffect(() => {
-    scoopList().then((pkgs) => {
+    scoop.listInstalled().then((pkgs) => {
       setPackages(pkgs);
       setIsLoading(false);
     });
@@ -18,8 +20,8 @@ export default function InstalledCommand() {
     await withToast(
       async () => {
         setIsLoading(true);
-        await scoopUninstall(packageName);
-        const updatedPackages = await scoopList();
+        await scoop.uninstall(packageName);
+        const updatedPackages = await scoop.listInstalled();
         setPackages(updatedPackages);
         setIsLoading(false);
       },

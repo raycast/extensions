@@ -1,43 +1,12 @@
-import { type Application, Icon, MenuBarExtra, getApplications, open } from "@raycast/api";
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { resolveAllFiles } from "./api";
-import { useVisitedFiles } from "./hooks/useVisitedFiles";
+import { Icon, MenuBarExtra, open } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
+import { useFigmaData } from "./hooks/useFigmaData";
 import { figma } from "./oauth";
-import { loadStarredFiles } from "./starFiles";
 
 function Command() {
-  const { data, isLoading, error } = useCachedPromise(
-    async () => {
-      const results = await resolveAllFiles();
-      return results;
-    },
-    [],
-    {
-      keepPreviousData: true,
-    },
-  );
+  const { allFiles, starredFiles, visitedFiles, isLoading, error, visitFile, desktopApp } = useFigmaData();
 
-  const { data: starredFiles, isLoading: isLoadingStarredFiles } = useCachedPromise(
-    async () => {
-      const results = await loadStarredFiles();
-      return results;
-    },
-    [],
-    {
-      keepPreviousData: true,
-    },
-  );
-
-  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
-  const [desktopApp, setDesktopApp] = useState<Application>();
   let url = "figma://file/";
-
-  useEffect(() => {
-    getApplications()
-      .then((apps) => apps.find((a) => a.bundleId === "com.figma.Desktop"))
-      .then(setDesktopApp);
-  }, []);
 
   if (!desktopApp) {
     url = "https://figma.com/file/";
@@ -52,7 +21,7 @@ function Command() {
         },
       }}
       tooltip="Figma files"
-      isLoading={isLoadingVisitedFiles || isLoading || isLoadingStarredFiles}
+      isLoading={isLoading}
     >
       {error && <MenuBarExtra.Item title="Error" key="ErrorState" />}
       {starredFiles && (
@@ -83,7 +52,7 @@ function Command() {
           ))}
         </MenuBarExtra.Submenu>
       )}
-      {data?.map((team) => (
+      {allFiles?.map((team) => (
         <MenuBarExtra.Section title={team.name ?? "Untitled"} key={team.name + "-team"}>
           {team.files.map((project) => (
             <MenuBarExtra.Submenu key={team.name + project.name + "-project"} title={project.name ?? "Untitled"}>
@@ -105,8 +74,8 @@ function Command() {
           ))}
         </MenuBarExtra.Section>
       ))}
-      {(isLoading || isLoadingVisitedFiles) && !data && <MenuBarExtra.Item title="Loading..." key="loadingState" />}
-      {!isLoading && !data && <MenuBarExtra.Item title="No projects found" key="noProjectsFoundState" />}
+      {isLoading && !allFiles && <MenuBarExtra.Item title="Loading..." key="loadingState" />}
+      {!isLoading && !allFiles && <MenuBarExtra.Item title="No projects found" key="noProjectsFoundState" />}
     </MenuBarExtra>
   );
 }

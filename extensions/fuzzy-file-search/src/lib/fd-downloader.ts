@@ -1,4 +1,4 @@
-import { environment } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import fs from "fs";
 import afs from "fs/promises";
@@ -6,6 +6,7 @@ import path from "path";
 import { extract as extractTar } from "tar";
 import extractZip from "extract-zip";
 import lockfile from "proper-lockfile";
+import { showFailureToast } from "@raycast/utils";
 
 const cliVersion = "10.3.0";
 const getCliFileInfo = () => {
@@ -56,31 +57,23 @@ export async function ensureFdCLI() {
   });
 
   try {
-    // Create ignore file (including ~/Library/ directory takes too much resources)
-    const homePath = process.env.HOME;
-    if (homePath === undefined) {
-      await release();
-      throw new Error("$HOME environmental variable undefined");
-    }
-    const ignoreFile = path.join(homePath, ".fdignore");
-    // Don't create ignore file if one already exists
-    if (!fs.existsSync(ignoreFile)) {
-      console.log("creating default ~/.fdignore file");
-      await afs.writeFile(ignoreFile, "Library/\n**.photoslibrary\n");
-    }
-
     const cliFileInfo = getCliFileInfo();
     if (fs.existsSync(fdCliFilepath())) {
       return fdCliFilepath();
     }
 
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Downloading",
+      message: "installing fd cli",
+    });
     // Download the cli
     const binaryURL = `https://github.com/sharkdp/fd/releases/download/v${cliVersion}/${cliFileInfo.pkg}`;
-    console.log("downloading archive");
+    console.log("downloading fd archive:", binaryURL);
     const response = await axios.get(binaryURL, { responseType: "stream" });
     const writer = fs.createWriteStream(fdCliArchive());
     response.data.pipe(writer);
-    console.log("waiting for download finish");
+    console.log("waiting for fd download finish");
     await new Promise((resolve, reject) => {
       writer.on("finish", () => resolve("done"));
       writer.on("error", reject);
@@ -95,8 +88,12 @@ export async function ensureFdCLI() {
     await afs.chmod(fdCliFilepath(), "755");
     console.log("set permissions to fd executable to 755");
 
+    toast.style = Toast.Style.Success;
+    toast.message = "fd cli installed successfully";
+
     return fdCliFilepath();
   } catch (error) {
+    showFailureToast(error, { title: "Could not install fd cli" });
     console.error(`error while downloading fd cli: ${error}`);
     if (fs.existsSync(fdCliFilepath())) {
       await afs.rm(fdCliFilepath());

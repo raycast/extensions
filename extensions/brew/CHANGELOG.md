@@ -1,6 +1,11 @@
 # Brew Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Improvements] - 2025-12-01
+
+- Update dependencies and replace node-fetch with native fetch API
+- Upgrade react to 19.0.10
+
+## [Bug Fix] - 2025-11-03
 
 - Fixed an issue where the the terminal command may be mis-typed in the Raycast window
 

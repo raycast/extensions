@@ -1,10 +1,10 @@
-import { useState, ReactNode, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { CometActions, CometListItems } from "./components";
 import { useTabSearch } from "./hooks/useTabSearch";
 import { useCachedState } from "@raycast/utils";
-import { CometProfile, HistoryEntry, Preferences, SearchResult } from "./interfaces";
+import { CometProfile, HistoryEntry, SearchResult } from "./interfaces";
 import CometProfileDropDown from "./components/CometProfileDropdown";
 import { COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID } from "./constants";
 import { checkProfileConfiguration } from "./util";
@@ -94,7 +94,7 @@ export default function Command() {
   };
 
   let actionTitle: string;
-  let actions: ReactNode;
+  let actions: List.Item.Props["actions"];
   let icon: Icon;
 
   if (!searchText || searchText.trim() === "") {

@@ -2,7 +2,7 @@ import { execa } from "execa";
 import fs from "node:fs";
 import path from "path";
 import { Video } from "./types.js";
-import { downloadPath, forceIpv4, getffmpegPath, getytdlPath } from "./utils.js";
+import { downloadPath, forceIpv4, getffmpegPath, getytdlPath, sanitizeVideoTitle } from "./utils.js";
 import SRTParser from "srt-parser-2";
 
 export default async function extractTranscript(url: string, language: string = "en") {
@@ -73,7 +73,7 @@ export default async function extractTranscript(url: string, language: string = 
 
     return {
       transcript,
-      title: video.title,
+      title: sanitizeVideoTitle(video.title),
     };
   } catch (error) {
     // Clean up on error

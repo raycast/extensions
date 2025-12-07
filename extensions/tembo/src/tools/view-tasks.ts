@@ -35,7 +35,7 @@ async function tool(input: Input) {
       const repositoryLower = repository.toLowerCase();
       filteredIssues = issues.filter((issue) => {
         return (
-          issue.solutions.some((solution) =>
+          issue.solutions?.some((solution) =>
             solution.pullRequest.some((pr) => pr.url.toLowerCase().includes(repositoryLower)),
           ) || issue.title.toLowerCase().includes(repositoryLower)
         );
@@ -58,19 +58,20 @@ async function tool(input: Input) {
       kind: issue.kind,
       level: issue.level,
       levelReasoning: issue.levelReasoning,
-      status: issue.solutions.length > 0 ? issue.solutions[0].status : "Pending",
+      status: issue.solutions && issue.solutions.length > 0 ? issue.solutions[0].status : "Pending",
       externalUrl: issue.externalUrl,
       repository: issue.issueSource?.name || "Unknown",
       createdAt: issue.createdAt,
       lastSeenAt: issue.lastSeenAt,
       tags: issue.tags?.map((tag) => tag.name) || [],
-      pullRequests: issue.solutions.flatMap((solution) =>
-        solution.pullRequest.map((pr) => ({
-          url: pr.url,
-          title: pr.title,
-          status: pr.status,
-        })),
-      ),
+      pullRequests:
+        issue.solutions?.flatMap((solution) =>
+          solution.pullRequest.map((pr) => ({
+            url: pr.url,
+            title: pr.title,
+            status: pr.status,
+          })),
+        ) || [],
     }));
 
     return {

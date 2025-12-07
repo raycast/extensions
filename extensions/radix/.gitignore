@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/repository
 
 # Raycast specific files
 raycast-env.d.ts

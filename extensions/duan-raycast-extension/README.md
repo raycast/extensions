@@ -28,6 +28,9 @@ URL shortener service based on Cloudflare Workers and D1 database.
   - Sort by last visited time
   - Sort by visit count
   - Sorting preferences are remembered
+ - Last visited info
+   - View the last visited time from the Actions panel
+   - Shortcut: ⌘ T shows a toast with the formatted local time
 - Quick filtering
   - Filter all links
   - Show only active links
@@ -123,6 +126,7 @@ const results = searchLinks(links, "github");
 - `⌘ Enter` - Copy short link to clipboard
 - `⌘ E` - Edit link details
 - `⌘ ⌫` - Delete link
+- `⌘ T` - Show last visited time (toast)
 
 #### Pin Management
 - `⌘ ⇧ P` - Pin/Unpin link
@@ -162,7 +166,12 @@ The extension provides powerful organization features:
    Original Links → Filter → Sort → Search → Display
    ```
    - Pinned links bypass filtering and sorting
-   - Search applies to all links (including pinned)
+  - Search applies to all links (including pinned)
+
+### Timestamps
+
+- Backend returns UTC timestamps in the fixed format `YYYY-MM-DD HH:MM:SS` (no `T`/`Z`/offset).
+- The extension parses these as UTC by converting to ISO (`YYYY-MM-DDTHH:MM:SSZ`) and renders them in the user's local timezone via `toLocaleString()`.
 
 ### Caching Mechanisms
 

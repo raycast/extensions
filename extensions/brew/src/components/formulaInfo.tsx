@@ -7,7 +7,7 @@ export function FormulaInfo(props: {
   formula: Formula;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { pop } = useNavigation();
   const formula = props.formula;
   return (

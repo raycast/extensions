@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchUpdateBookmark } from "../apis";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
@@ -66,6 +67,7 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
         }
         pop();
       } catch (error) {
+        logger.error("Failed to update bookmark", { bookmarkId: bookmark.id, error });
         toast.style = Toast.Style.Failure;
         toast.title = t("bookmark.updateFailed");
         toast.message = String(error);

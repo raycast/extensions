@@ -10,8 +10,6 @@ type ListInput = {
 
 type ListResult = RecipesListResult;
 
-// API moved to utils/fetchData.getRecipesFromApi
-
 function slugifyRecipeSlug(input: string): string {
   return input.trim().replace(/^\//, "").toLowerCase().replace(/\s+/g, "-");
 }

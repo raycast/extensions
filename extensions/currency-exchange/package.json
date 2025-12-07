@@ -6,7 +6,8 @@
   "icon": "currency.png",
   "author": "xeric",
   "contributors": [
-    "daudln"
+    "daudln",
+    "taken"
   ],
   "license": "MIT",
   "commands": [
@@ -46,5 +47,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }

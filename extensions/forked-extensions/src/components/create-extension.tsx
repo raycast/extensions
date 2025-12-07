@@ -9,6 +9,7 @@ import {
   launchCommand,
   openExtensionPreferences,
 } from "@raycast/api";
+
 import { catchError } from "../errors.js";
 import * as git from "../git.js";
 import { isMac, simplifyPath } from "../utils.js";

@@ -17,7 +17,7 @@ import { getSavedRoles, markAsSaved, removeFromSaved, type AppliedRole, saveWith
 import { enhanceJobTitles } from "../utils/enhanceJobTitles";
 import { ApplicationStatus, RoleType, toApiSegment } from "../utils/roles";
 import { getIconForCategory } from "../utils/icons";
-import { formatAddedFromDaysAgo } from "../utils/format";
+import { formatDaysAgo } from "../utils/format";
 import NotesView from "./NotesView";
 
 /**
@@ -74,12 +74,19 @@ function buildSavedRole(job: RoleListing, roleType: RoleType): AppliedRole {
  * - Auto-save on open/copy based on user preference.
  */
 export default function SearchList({ resource, normalizeCategoryTitle = defaultNormalization }: SearchCommandProps) {
+  const { autoSaveOnOpen, jobLinksBrowser } = getPreferenceValues();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [savedJobs, setSavedJobs] = useState<Set<number>>(new Set());
   const [savedById, setSavedById] = useState<Map<number, AppliedRole>>(new Map());
-  const { autoSaveOnOpen, jobLinksBrowser } = getPreferenceValues();
   const { push } = useNavigation();
+
+  useEffect(() => {
+    const { defaultCategory } = getPreferenceValues();
+    if (defaultCategory) {
+      setSelectedCategory(`${defaultCategory}${resource === "Internship" ? " Internship Roles" : ""}`);
+    }
+  }, []);
 
   const {
     isLoading,
@@ -138,7 +145,12 @@ export default function SearchList({ resource, normalizeCategoryTitle = defaultN
       <List.Dropdown.Item title="All Categories" value="All" />
       {!isLoadingCategories &&
         categoriesData?.categories.map((category) => (
-          <List.Dropdown.Item key={category.name} title={normalizeCategoryTitle(category.name)} value={category.name} />
+          <List.Dropdown.Item
+            key={category.name}
+            icon={getIconForCategory(category.name)}
+            title={normalizeCategoryTitle(category.name)}
+            value={category.name}
+          />
         ))}
     </List.Dropdown>
   );
@@ -254,12 +266,16 @@ export default function SearchList({ resource, normalizeCategoryTitle = defaultN
             key={job.id}
             title={job.displayTitle}
             subtitle={job.company}
-            icon={getIconForCategory(job.category)}
+            icon={{
+              source: getIconForCategory(job.category),
+              tooltip: normalizeCategoryTitle(job.category),
+            }}
             accessories={[
               ...(isSaved
                 ? [{ icon: note ? Icon.Pencil : Icon.Bookmark, tooltip: note && note.length > 0 ? note : "Saved" }]
                 : []),
-              { text: formatAddedFromDaysAgo(job.days_ago) },
+              { icon: Icon.Pin, tooltip: job.locations.join("\n") },
+              { text: formatDaysAgo(job.days_ago) },
             ]}
             actions={
               <ActionPanel>

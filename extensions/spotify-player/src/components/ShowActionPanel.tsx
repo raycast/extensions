@@ -15,7 +15,10 @@ export function ShowActionPanel({ show }: ShowActionPanelProps) {
       <Action.Push
         icon={Icon.AppWindowList}
         title="Show Episodes"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "a" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+        }}
         target={<EpisodesList show={show} />}
       />
       <FooterAction url={show?.external_urls?.spotify} uri={show.uri} title={title} />

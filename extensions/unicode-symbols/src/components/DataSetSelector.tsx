@@ -1,5 +1,4 @@
 import { List } from "@raycast/api";
-
 import { useListContext } from "@/context/ListContext";
 
 const DataSetSelector = () => {

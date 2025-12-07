@@ -1,6 +1,6 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
-import isUrlSuperb from "is-url-superb";
+import validator from "validator";
 import { Format, Video } from "./types.js";
 import { existsSync } from "fs";
 import { execa } from "execa";
@@ -22,17 +22,12 @@ export const {
 } = getPreferenceValues<ExtensionPreferences>();
 
 export async function getWingetPath() {
-  const defaultPath = (await execa("where winget")).stdout.trim().split("\n")[0];
-
-  if (!existsSync(defaultPath)) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Winget path not found",
-      message: "Please set the correct path in preferences.",
-    });
+  try {
+    const { stdout } = await execa("where", ["winget"]);
+    return stdout.trim().split("\n")[0];
+  } catch {
+    throw new Error("Winget not found. Please ensure winget is installed and available in your PATH.");
   }
-
-  return defaultPath;
 }
 
 export const getytdlPath = () => {
@@ -46,8 +41,7 @@ export const getytdlPath = () => {
         : "/usr/bin/yt-dlp";
 
     return defaultPath;
-  } catch (error) {
-    console.error(error);
+  } catch {
     return "";
   }
 };
@@ -63,8 +57,7 @@ export const getffmpegPath = () => {
         : "/usr/bin/ffmpeg";
 
     return defaultPath;
-  } catch (error) {
-    console.error(error);
+  } catch {
     return "";
   }
 };
@@ -79,9 +72,7 @@ export const getffprobePath = () => {
         ? execSync("where ffprobe").toString().trim().split("\n")[0]
         : "/usr/bin/ffprobe";
     return defaultPath;
-  } catch (error) {
-    console.error(error);
-
+  } catch {
     return "";
   }
 };
@@ -131,7 +122,7 @@ export function isValidHHMM(input: string) {
 }
 
 export function isValidUrl(url: string) {
-  return isUrlSuperb(url, { lenient: true });
+  return validator.isURL(url, { require_protocol: false });
 }
 
 export function formatTbr(tbr: number | null) {
@@ -191,3 +182,40 @@ export const getFormatTitle = (format: Format) =>
   [format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize)]
     .filter((x) => Boolean(x))
     .join(" | ");
+
+export function sanitizeVideoTitle(name: string): string {
+  const maxLen = 200;
+  const invalidChars = isWindows ? ["<", ">", ":", '"', "/", "\\", "|", "?", "*"] : [":"];
+
+  // Trim and remove invalid characters
+  let safe = name.trim();
+  for (const char of invalidChars) {
+    safe = safe.replaceAll(char, "");
+  }
+
+  // Remove control characters
+  safe = Array.from(safe)
+    .filter((char) => char.charCodeAt(0) >= 32)
+    .join("");
+
+  // Remove trailing dots and spaces on Windows
+  if (isWindows) safe = safe.replace(/[. ]+$/, "");
+
+  // Replace double or more spaces with single space
+  safe = safe.replace(/\s+/g, " ");
+
+  // Hard truncate to max length
+  safe = safe.slice(0, maxLen);
+
+  // Truncate to max length at a sensible boundary if possible (like a punctuation mark)
+  const cutoffSymbols = /[.!?]/g;
+  const match = [...safe.matchAll(cutoffSymbols)]
+    .map((m) => m.index)
+    .filter((idx) => idx !== undefined && idx <= maxLen);
+
+  if (match.length > 0) {
+    safe = safe.slice(0, match[match.length - 1]);
+  }
+
+  return safe.trim() || "untitled";
+}

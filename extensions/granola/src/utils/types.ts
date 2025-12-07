@@ -79,7 +79,7 @@ export interface Document {
 
 export type Doc = Pick<
   Document,
-  "id" | "title" | "created_at" | "creation_source" | "public" | "notes_markdown" | "sharing_link_visibility"
+  "id" | "title" | "created_at" | "creation_source" | "public" | "notes_markdown" | "sharing_link_visibility" | "people"
 >;
 
 // Notes structure
@@ -326,6 +326,7 @@ export interface RecipesApiResponse {
   userRecipes?: Recipe[];
   defaultRecipes?: DefaultRecipe[];
   sharedRecipes?: Recipe[];
+  publicRecipes?: Recipe[];
 }
 
 export interface RecipesListResult {

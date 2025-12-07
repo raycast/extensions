@@ -31,7 +31,20 @@ export const TextToSpeech = () => {
   }, []);
 
   if (isPlaying) {
-    return <Action icon={Icon.Stop} style={Action.Style.Destructive} title="Stop Saying" onAction={killRunningSay} />;
+    return (
+      <Action
+        icon={Icon.Stop}
+        style={Action.Style.Destructive}
+        title="Stop Saying"
+        onAction={async () => {
+          try {
+            await killRunningSay();
+          } catch {
+            // Handle error gracefully
+          }
+        }}
+      />
+    );
   }
 
   return (

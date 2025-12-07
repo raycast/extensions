@@ -1,16 +1,11 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import fetch, { AbortError } from "node-fetch";
-
-interface Preferences {
-  domain: string;
-  apiToken: string;
-  limit: string;
-}
+import { Action, ActionPanel, getPreferenceValues, Keyboard, List } from "@raycast/api";
+import { useState, useMemo, useCallback } from "react";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function PipedriveSearch() {
-  const { state, search } = useSearch();
+  const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState<string>("");
+  const state = useSearch(searchText);
 
   const filteredResults = useMemo(() => {
     const results = state.results ?? [];
@@ -21,15 +16,7 @@ export default function PipedriveSearch() {
   }, [state.results, filterValue]);
 
   const handleFilterChange = useCallback((value: string) => setFilterValue(value), []);
-  const handleSearchTextChange = useCallback(
-    (newSearchText: string) => {
-      if (newSearchText === "") {
-        return;
-      }
-      search(newSearchText);
-    },
-    [search],
-  );
+  const handleSearchTextChange = useCallback((value: string) => setSearchText(value), []);
 
   const emojiMap: { [key: string]: string } = {
     deal: "💰",
@@ -46,42 +33,32 @@ export default function PipedriveSearch() {
   const addNewOrganizationURL = `https://${preferences.domain}/organizations#dialog/organization/add`;
   const openEmailURL = `https://${preferences.domain}/mail/inbox`;
   const openActivitiesURL = `https://${preferences.domain}/activities/list`;
-  const addNewPersonShortcut = { modifiers: ["cmd"], key: "n" };
-  const addNewDealShortcut = { modifiers: ["cmd"], key: "d" };
-  const addNewOrganizationShortcut = { modifiers: ["cmd"], key: "o" };
-  const openEmailShortcut = { modifiers: ["cmd"], key: "e" };
-  const openActivitiesShortcut = { modifiers: ["cmd"], key: "t" };
 
   const openInBrowserItems = [
     {
       id: "addNewPerson",
       title: emojiMap["person"] + "   Add New Person",
       url: addNewPersonURL,
-      shortcut: addNewPersonShortcut,
     },
     {
       id: "addNewDeal",
       title: emojiMap["deal"] + "   Add New Deal",
       url: addNewDealURL,
-      shortcut: addNewDealShortcut,
     },
     {
       id: "addNewOrganization",
       title: emojiMap["organization"] + "   Add New Organization",
       url: addNewOrganizationURL,
-      shortcut: addNewOrganizationShortcut,
     },
     {
       id: "openEmail",
       title: emojiMap["email"] + "   Open Email",
       url: openEmailURL,
-      shortcut: openEmailShortcut,
     },
     {
       id: "openActivities",
       title: emojiMap["activities"] + "   Open Activities",
       url: openActivitiesURL,
-      shortcut: openActivitiesShortcut,
     },
   ];
 
@@ -99,31 +76,31 @@ export default function PipedriveSearch() {
                   <Action.OpenInBrowser
                     title="Add New Person"
                     url={addNewPersonURL}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     icon={emojiMap["person"]}
                   />
                   <Action.OpenInBrowser
                     title="Add New Deal"
                     url={addNewDealURL}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
                     icon={emojiMap["deal"]}
                   />
                   <Action.OpenInBrowser
                     title="Add New Organization"
                     url={addNewOrganizationURL}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     icon={emojiMap["organization"]}
                   />
                   <Action.OpenInBrowser
                     title="Open Email"
                     url={openEmailURL}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "e" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
                     icon={emojiMap["email"]}
                   />
                   <Action.OpenInBrowser
                     title="Open Activities"
                     url={openActivitiesURL}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                     icon={emojiMap["activities"]}
                   />
                 </ActionPanel.Section>
@@ -210,33 +187,40 @@ function SearchListItem({
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={itemUrl} />
             {name && (
-              <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "n" }} />
+              <Action.CopyToClipboard title="Copy Name" content={name} shortcut={Keyboard.Shortcut.Common.New} />
             )}
             {email && (
-              <Action.CopyToClipboard title="Copy Email" content={email} shortcut={{ modifiers: ["cmd"], key: "e" }} />
+              <Action.CopyToClipboard title="Copy Email" content={email} shortcut={Keyboard.Shortcut.Common.Edit} />
             )}
             {phone && (
-              <Action.CopyToClipboard title="Copy Phone" content={phone} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+              <Action.CopyToClipboard
+                title="Copy Phone"
+                content={phone}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+              />
             )}
             {organization && (
               <Action.CopyToClipboard
                 title="Copy Organization"
                 content={organization}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.Open}
               />
             )}
             {ccEmail && (
               <Action.CopyToClipboard
                 title="Copy Deal Name"
-                content={title}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                content={ccEmail}
+                shortcut={Keyboard.Shortcut.Common.Duplicate}
               />
             )}
             {subtitle === "org" && (
               <Action.CopyToClipboard
                 title="Copy Organization Name"
                 content={title}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "o" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "o" },
+                }}
               />
             )}
           </ActionPanel.Section>
@@ -246,66 +230,25 @@ function SearchListItem({
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: false, searchText: "" });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  async function search(searchText: string) {
-    if (cancelRef.current) {
-      cancelRef.current.abort();
-    }
-
-    if (searchText.length < 2) {
-      setState((prevState) => ({
-        ...prevState,
-        isLoading: false,
-        searchText,
-      }));
-      return;
-    }
-    cancelRef.current = new AbortController();
-    setState((prevState) => ({
-      ...prevState,
-      isLoading: true,
-      searchText,
-    }));
-
-    cancelRef.current = new AbortController();
-    setState((prevState) => ({
-      ...prevState,
-      isLoading: true,
-    }));
-
-    try {
-      const results = await performSearch(searchText, cancelRef.current.signal);
-      setState((prevState) => ({
-        ...prevState,
-        results,
-        isLoading: false,
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-      console.error("Search error:", error);
-      showToast(Toast.Style.Failure, "Could not perform search", String(error));
-    }
-  }
-  return {
-    state,
-    search,
-  };
+function useSearch(searchText: string) {
+  const { isLoading, data } = useCachedPromise(
+    async (searchText: string) => {
+      const results = await performSearch(searchText);
+      return results;
+    },
+    [searchText],
+    {
+      execute: searchText.length > 1,
+      failureToastOptions: {
+        title: "Could not perform search",
+      },
+    },
+  );
+  return { isLoading, results: data };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const { apiToken, domain, limit } = getPreferenceValues();
+async function performSearch(searchText: string, signal?: AbortSignal): Promise<SearchResult[]> {
+  const { apiToken, domain, limit } = getPreferenceValues<Preferences>();
 
   const searchUrl = new URL(`https://${domain}/api/v2/itemSearch`);
   searchUrl.searchParams.set("api_token", apiToken);
@@ -389,12 +332,6 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       }
     },
   );
-}
-
-interface SearchState {
-  results: SearchResult[];
-  isLoading: boolean;
-  searchText: string;
 }
 
 interface SearchResult {

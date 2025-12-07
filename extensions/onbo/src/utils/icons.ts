@@ -9,7 +9,7 @@ const CATEGORY_ICON: Record<string, Icon> = {
   "Software Engineering": Icon.Code,
   "Hardware Engineering": Icon.Hammer,
   "Data Science, AI & Machine Learning": Icon.BarChart,
-  "Product Management": Icon.Box,
+  "Product Management": Icon.Document,
   "Quantitative Finance": Icon.Calculator,
 };
 

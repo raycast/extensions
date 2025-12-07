@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add Grid layout] - 2025-12-01
+
+- Added a Grid layout to the Manage Downloads command. Comes with an Action to toggle between layouts as well as a Preference for setting the default layout
+
 ## [Add delete last downloaded item command] - 2025-06-03
 
 - Added the command `Delete Latest Download`, which deletes the latest download.

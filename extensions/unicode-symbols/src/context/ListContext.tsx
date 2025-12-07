@@ -1,17 +1,18 @@
 import fs from "fs";
 import type { FC, ReactNode } from "react";
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
-
 import { environment } from "@raycast/api";
-
-import { getFilteredDataset } from "@/lib/dataset-manager";
-import { useRecentlyUsedItems } from "@/lib/use-recently-used-items";
 import type { Character, CharacterSection } from "@/types";
-import { buildList } from "@/utils/list";
+import { getFilteredDataset } from "@/lib/dataset-manager";
+import { buildList } from "@/lib/list";
+import { useItemList } from "@/hooks/use-item-list";
 
 const html = JSON.parse(fs.readFileSync(`${environment.assetsPath}/html.json`, "utf-8")) as {
   html_entities: { code: number; value: string }[];
 };
+
+// Create a Map for O(1) lookup instead of O(n) find operations
+const htmlEntitiesMap = new Map(html.html_entities.map((entity) => [entity.code, entity.value]));
 
 interface IListContext {
   list: CharacterSection[];
@@ -25,6 +26,11 @@ interface IListContext {
   availableSets: string[];
   setDatasetFilterAnd: (filter: string | null) => void;
   findHtmlEntity: (code: number) => string | null;
+  // Favorites functionality
+  addToFavorites: (item: Character) => void;
+  removeFromFavorites: (item: Character) => void;
+  clearFavorites: () => void;
+  isFavorite: (item: Character) => boolean;
 }
 
 export const ListContext = createContext<IListContext>(null as unknown as IListContext);
@@ -48,14 +54,28 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
   }
 
   const {
-    recentlyUsedItems,
-    addToRecentlyUsedItems,
-    areRecentlyUsedItemsLoaded,
-    clearRecentlyUsedItems,
-    removeFromRecentlyUsedItems,
-  } = useRecentlyUsedItems<Character>({
+    items: recentlyUsedItems,
+    addItem: addToRecentlyUsedItems,
+    areItemsLoaded: areRecentlyUsedItemsLoaded,
+    clearItems: clearRecentlyUsedItems,
+    removeItem: removeFromRecentlyUsedItems,
+  } = useItemList<Character>({
     key: "recently-used-v2",
     comparator: "c",
+    limit: 10,
+  });
+
+  const {
+    items: favorites,
+    addItem: addToFavorites,
+    removeItem: removeFromFavorites,
+    clearItems: clearFavorites,
+    isInList: isFavorite,
+    areItemsLoaded: areFavoritesLoaded,
+  } = useItemList<Character>({
+    key: "favorites-v1",
+    comparator: "c",
+    limit: 50,
   });
 
   const isRecentlyUsed = useCallback(
@@ -63,18 +83,16 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     [recentlyUsedItems],
   );
 
-  const findHtmlEntity = useCallback(
-    (code: number) => {
-      const entity = html.html_entities.find((e) => e.code === code);
-      return entity ? entity.value : null;
-    },
-    [html],
-  );
+  const findHtmlEntity = useCallback((code: number) => {
+    return htmlEntitiesMap.get(code) || null;
+  }, []);
 
   const list = useMemo(
     () =>
-      !areRecentlyUsedItemsLoaded ? [] : buildList(dataset, recentlyUsedItems, !searchTextRef.current, datasetFilter),
-    [dataset, recentlyUsedItems, areRecentlyUsedItemsLoaded, datasetFilter],
+      !areRecentlyUsedItemsLoaded || !areFavoritesLoaded
+        ? []
+        : buildList(dataset, recentlyUsedItems, !searchTextRef.current, datasetFilter, favorites),
+    [dataset, recentlyUsedItems, areRecentlyUsedItemsLoaded, areFavoritesLoaded, datasetFilter, favorites],
   );
   const loading = !addToRecentlyUsedItems || !list.length;
   const availableSets = useMemo(
@@ -100,6 +118,10 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         availableSets,
         setDatasetFilterAnd,
         findHtmlEntity,
+        addToFavorites,
+        removeFromFavorites,
+        clearFavorites,
+        isFavorite,
       }}
     >
       {children}

@@ -1,6 +1,6 @@
 import { Clipboard, getSelectedText, showToast, Toast, ActionPanel, Action, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { generateQRCode, getQRCodePath } from "./utils";
+import { generateQRCode, getQRCodePath, copyQRCodeToClipboard } from "./utils";
 import fs from "fs";
 
 export default function Common({ from }: { from: "clipboard" | "selection" }) {
@@ -41,6 +41,11 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
     }
   }
 
+  async function handleCopy() {
+    if (!sourceText) return;
+    await copyQRCodeToClipboard({ url: sourceText, format: "png-bg" });
+  }
+
   return (
     <Detail
       isLoading={!qrData}
@@ -48,6 +53,7 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
       actions={
         <ActionPanel>
           <Action title="Save to Downloads" onAction={handleSave} shortcut={{ modifiers: ["cmd"], key: "s" }} />
+          <Action title="Copy to Clipboard" onAction={handleCopy} shortcut={{ modifiers: ["cmd"], key: "c" }} />
         </ActionPanel>
       }
     />

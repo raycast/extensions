@@ -1,5 +1,4 @@
-import { $fetch } from "ofetch";
-import { getNuxtDocsUrl } from "../utils/search";
+import { fetchNuxtDocMarkdown } from "../utils/docs";
 
 type Input = {
   // Path relative to the versioned docs base, e.g. "/getting-started/introduction"
@@ -12,15 +11,5 @@ type Input = {
  * Raw URL will be: https://nuxt.com/raw/docs/4.x/getting-started/introduction.md
  */
 export default async function tool(input: Input) {
-  const base = getNuxtDocsUrl(); // e.g., https://nuxt.com/docs/4.x
-  const normalized = (input.path || "").replace(/\/(index)?$/, "");
-  const path = normalized.endsWith(".md") ? normalized : `${normalized}.md`;
-
-  const rawBase = base.replace("/docs/", "/raw/docs/");
-  const url = `${rawBase}${path}`;
-
-  return await $fetch(url, {
-    method: "GET",
-    headers: { "Content-Type": "text/plain" },
-  });
+  return await fetchNuxtDocMarkdown(input.path);
 }

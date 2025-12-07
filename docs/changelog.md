@@ -18,8 +18,8 @@ Over the past few releases, we've made some additions to the API to better suppo
 
 ```json
 "default": {
-"macOS": "foo",
-"Windows": "bar"
+  "macOS": "foo",
+  "Windows": "bar"
 }
 ```
 

@@ -1,34 +1,43 @@
-import { Icon, MenuBarExtra, open } from "@raycast/api";
+import { Icon, MenuBarExtra, open, Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { temboAPI, TEMBO_UI_BASE, type Issue } from "./api";
 import { getIssueStatus, getIssueIntegrationType, getIssueRepo, getIntegrationIcon } from "./issue-utils";
 
-async function fetchIssues(): Promise<Issue[]> {
-  try {
-    const issues = await temboAPI.getIssues({
-      // Limit for menu bar
-      pageSize: 20,
-    });
-
-    issues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return issues;
-  } catch (error) {
-    console.error("Failed to fetch issues for menubar:", error);
-    return [];
-  }
-}
+const cache = new Cache();
+const ISSUES_CACHE_KEY = "tasks";
 
 export default function MenubarTasks() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [issues, setIssues] = useState<Issue[]>([]);
+  const [issues, setIssues] = useState<Issue[]>(() => {
+    const cachedData = cache.get(ISSUES_CACHE_KEY);
+    return cachedData ? JSON.parse(cachedData) : [];
+  });
+
+  const fetchIssues = async () => {
+    try {
+      const fetchedIssues = await temboAPI.getIssues({
+        pageSize: 20,
+      });
+
+      fetchedIssues.sort((a, b) => {
+        const aQueuedAt = a.lastQueuedAt ? new Date(a.lastQueuedAt).getTime() : 0;
+        const bQueuedAt = b.lastQueuedAt ? new Date(b.lastQueuedAt).getTime() : 0;
+
+        if (aQueuedAt !== bQueuedAt) {
+          return bQueuedAt - aQueuedAt;
+        }
+
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+      setIssues(fetchedIssues);
+      cache.set(ISSUES_CACHE_KEY, JSON.stringify(fetchedIssues));
+    } catch (error) {
+      console.error("Failed to fetch issues for menubar:", error);
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const data = await fetchIssues();
-      setIssues(data);
-      setIsLoading(false);
-    })();
+    fetchIssues();
   }, []);
 
   const activeIssues = issues.filter((issue) => {
@@ -47,14 +56,11 @@ export default function MenubarTasks() {
   });
 
   const getIssueCount = () => {
-    if (isLoading) return "⋯";
     return activeIssues.length.toString();
   };
 
   const getIssueTitle = (issue: Issue) => {
-    const repo = getIssueRepo(issue);
-    const repoName = repo.split("/").pop() || repo;
-    return `${issue.title} (${repoName})`;
+    return `${issue.title}`;
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -74,7 +80,6 @@ export default function MenubarTasks() {
     <MenuBarExtra
       title={getIssueCount()}
       icon={{ source: "tembo-white-mark.png" }}
-      isLoading={isLoading}
       tooltip={`${activeIssues.length} active issues`}
     >
       <MenuBarExtra.Section title="Active Issues">
@@ -140,15 +145,11 @@ export default function MenubarTasks() {
           }}
         />
         <MenuBarExtra.Item
-          title="Refresh Issues"
+          title="Refresh"
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
-            setIsLoading(true);
-            fetchIssues().then((data) => {
-              setIssues(data);
-              setIsLoading(false);
-            });
+            fetchIssues();
           }}
         />
       </MenuBarExtra.Section>

@@ -46,7 +46,7 @@ export default async function copyFileToClipboard(url: string, name?: string, is
   }
 
   await copyToClipboard(file);
-  return path.basename(file);
+  return file;
 }
 
 async function copyToClipboard(file: string) {

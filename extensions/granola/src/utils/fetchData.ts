@@ -204,8 +204,18 @@ export async function getRecipesFromApi(): Promise<RecipesListResult> {
 
     const payload = (await response.json()) as RecipesApiResponse;
     const userRecipes: Recipe[] = Array.isArray(payload.userRecipes) ? payload.userRecipes : [];
-    const defaultRecipes: DefaultRecipe[] = Array.isArray(payload.defaultRecipes) ? payload.defaultRecipes : [];
     const sharedRecipes: Recipe[] = Array.isArray(payload.sharedRecipes) ? payload.sharedRecipes : [];
+
+    let defaultRecipes: DefaultRecipe[] = [];
+
+    if (Array.isArray(payload.publicRecipes) && payload.publicRecipes.length > 0) {
+      defaultRecipes = payload.publicRecipes.map((recipe) => ({
+        slug: recipe.slug,
+        defaultConfig: recipe.config,
+      }));
+    } else if (Array.isArray(payload.defaultRecipes) && payload.defaultRecipes.length > 0) {
+      defaultRecipes = payload.defaultRecipes;
+    }
 
     return { featureEnabled: true, userRecipes, defaultRecipes, sharedRecipes };
   } catch (error) {

@@ -20,6 +20,7 @@ import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBr
 import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
 import useBraveNightlyBookmarks from "./hooks/useBraveNightlyBookmarks";
+import useChatGPTAtlasBookmarks from "./hooks/useChatGPTAtlasBookmarks";
 import useChromeBetaBookmarks from "./hooks/useChromeBetaBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
@@ -110,6 +111,7 @@ export default function Command() {
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
   const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasBraveNightly = browsers.includes(BROWSERS_BUNDLE_ID.braveNightly) ?? false;
+  const hasChatGPTAtlas = browsers.includes(BROWSERS_BUNDLE_ID.chatGPTAtlas) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
   const hasChromeBeta = browsers.includes(BROWSERS_BUNDLE_ID.chromeBeta) ?? false;
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
@@ -133,6 +135,7 @@ export default function Command() {
   const brave = useBraveBookmarks(hasBrave);
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const braveNightly = useBraveNightlyBookmarks(hasBraveNightly);
+  const chatGPTAtlas = useChatGPTAtlasBookmarks(hasChatGPTAtlas);
   const chrome = useChromeBookmarks(hasChrome);
   const chromeBeta = useChromeBetaBookmarks(hasChromeBeta);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
@@ -160,6 +163,7 @@ export default function Command() {
       ...brave.bookmarks,
       ...braveBeta.bookmarks,
       ...braveNightly.bookmarks,
+      ...chatGPTAtlas.bookmarks,
       ...chrome.bookmarks,
       ...chromeBeta.bookmarks,
       ...chromeDev.bookmarks,
@@ -215,6 +219,7 @@ export default function Command() {
     brave.bookmarks,
     braveBeta.bookmarks,
     braveNightly.bookmarks,
+    chatGPTAtlas.bookmarks,
     chrome.bookmarks,
     chromeBeta.bookmarks,
     chromeDev.bookmarks,
@@ -242,6 +247,7 @@ export default function Command() {
       ...brave.folders,
       ...braveBeta.folders,
       ...braveNightly.folders,
+      ...chatGPTAtlas.folders,
       ...chrome.folders,
       ...chromeBeta.folders,
       ...chromeDev.folders,
@@ -267,6 +273,7 @@ export default function Command() {
     brave.folders,
     braveBeta.folders,
     braveNightly.folders,
+    chatGPTAtlas.folders,
     chrome.folders,
     chromeBeta.folders,
     chromeDev.folders,
@@ -371,6 +378,9 @@ export default function Command() {
     if (hasBraveNightly) {
       braveNightly.mutate();
     }
+    if (hasChatGPTAtlas) {
+      chatGPTAtlas.mutate();
+    }
     if (hasChrome) {
       chrome.mutate();
     }
@@ -467,6 +477,7 @@ export default function Command() {
         brave.isLoading ||
         braveBeta.isLoading ||
         braveNightly.isLoading ||
+        chatGPTAtlas.isLoading ||
         chrome.isLoading ||
         chromeBeta.isLoading ||
         chromeDev.isLoading ||
@@ -571,6 +582,15 @@ export default function Command() {
                     profiles={braveNightly.profiles}
                     currentProfile={braveNightly.currentProfile}
                     setCurrentProfile={braveNightly.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.chatGPTAtlas}
+                    name="ChatGPT Atlas"
+                    icon="chatgpt-atlas.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                    profiles={chatGPTAtlas.profiles}
+                    currentProfile={chatGPTAtlas.currentProfile}
+                    setCurrentProfile={chatGPTAtlas.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.chrome}
