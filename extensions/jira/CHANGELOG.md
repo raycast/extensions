@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-12-07
 
 - Add MacOS and Windows to supported platforms
 - Update dependencies and improve error handling
