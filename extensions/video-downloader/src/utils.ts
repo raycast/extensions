@@ -36,7 +36,7 @@ export const getytdlPath = () => {
     const defaultPath = isMac
       ? "/opt/homebrew/bin/yt-dlp"
       : isWindows
-        ? execSync("where yt-dlp").toString().trim().split("\n")[0]
+        ? execSync("where yt-dlp").toString().replace(/\r/g, "").trim().split("\n")[0]
         : "/usr/bin/yt-dlp";
 
     return defaultPath;
@@ -52,7 +52,7 @@ export const getffmpegPath = () => {
     const defaultPath = isMac
       ? "/opt/homebrew/bin/ffmpeg"
       : isWindows
-        ? execSync("where ffmpeg").toString().trim().split("\n")[0]
+        ? execSync("where ffmpeg").toString().replace(/\r/g, "").trim().split("\n")[0]
         : "/usr/bin/ffmpeg";
 
     return defaultPath;
@@ -68,7 +68,7 @@ export const getffprobePath = () => {
     const defaultPath = isMac
       ? "/opt/homebrew/bin/ffprobe"
       : isWindows
-        ? execSync("where ffprobe").toString().trim().split("\n")[0]
+        ? execSync("where ffprobe").toString().replace(/\r/g, "").trim().split("\n")[0]
         : "/usr/bin/ffprobe";
     return defaultPath;
   } catch {
