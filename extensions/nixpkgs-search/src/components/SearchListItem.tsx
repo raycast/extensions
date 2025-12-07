@@ -22,7 +22,7 @@ export function SearchListItem({ searchResult }: SearchListItemProps) {
               )}
             </ActionPanel.Submenu>
 
-            <ActionPanel.Submenu icon={Icon.Clipboard} title="Copy URL…" shortcut={Keyboard.Shortcut.Common.Copy}>
+            <ActionPanel.Submenu icon={Icon.Clipboard} title="Copy…" shortcut={Keyboard.Shortcut.Common.Copy}>
               <Action.CopyToClipboard title="Copy Package Attr Name" content={searchResult.attrName} />
               {searchResult.source && (
                 <Action.CopyToClipboard title="Copy Package Source URL" content={searchResult.source} />
@@ -31,6 +31,12 @@ export function SearchListItem({ searchResult }: SearchListItemProps) {
                 <Action.CopyToClipboard title="Copy Package Homepage URL" content={searchResult.homepage[0]} />
               )}
             </ActionPanel.Submenu>
+
+            <Action.CopyToClipboard
+              title="Copy Package Attr Name"
+              content={searchResult.attrName}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
