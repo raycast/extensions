@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alwaysdata",
   "title": "alwaysdata",
-  "description": "",
+  "description": "The European Cloud",
   "icon": "alwaysdata.png",
   "author": "xmok",
   "platforms": [
@@ -27,7 +27,19 @@
     {
       "name": "domains",
       "title": "domains",
-      "description": "",
+      "description": "Manage Domains",
+      "mode": "view"
+    },
+    {
+      "name": "emails",
+      "title": "emails",
+      "description": "Manage Emails",
+      "mode": "view"
+    },
+    {
+      "name": "sites",
+      "title": "sites",
+      "description": "Manage Sites",
       "mode": "view"
     }
   ],
