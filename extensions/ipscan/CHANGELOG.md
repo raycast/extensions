@@ -1,3 +1,3 @@
-# IPscan Changelog
+# IPScan Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

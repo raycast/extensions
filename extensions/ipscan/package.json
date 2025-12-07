@@ -17,8 +17,7 @@
   "commands": [
     {
       "name": "ipscan",
-      "title": "Ipscan",
-      "subtitle": "Ipscan",
+      "title": "IPScan",
       "description": "Scans IP addresses and ports directly from Raycast. Fast, simple, and scriptable.",
       "mode": "view"
     }

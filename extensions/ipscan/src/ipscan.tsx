@@ -75,7 +75,7 @@ export default function PortScanner() {
 
   if (openPorts) {
     return (
-      <List isLoading={loading} navigationTitle="Porte Aperte">
+      <List isLoading={loading} navigationTitle="Open Ports">
         {openPorts.map((port) => (
           <List.Item key={port} title={`Porta ${port}`} />
         ))}
@@ -85,20 +85,22 @@ export default function PortScanner() {
 
   return (
     <Form
-      navigationTitle="Scanner Porte"
+      navigationTitle="Port Scanner"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Scansiona" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Scan" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="ip"
-        title="Indirizzo IP"
+        title="IP Address"
         placeholder="192.168.1.1"
         value={ip}
         onChange={(value) => {
-          if (!isValidIpInput(value)) return;
+          if (!isValidIpInput(value)) {
+            return;
+          }
           setIp(value);
           if (value.length === 0) setError(undefined);
           else if (!isValidIpFormat(value)) setError("Please enter a valid IP (only numbers and dots)");
