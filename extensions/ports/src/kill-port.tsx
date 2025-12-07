@@ -85,7 +85,7 @@ export default async function KillPort(props: LaunchProps<{ arguments: Arguments
         message: `Could not terminate process in port ${port}. Try running as administrator.`,
       });
     }
-  } catch {
+  } catch (error) {
     loadingToast.hide();
     await showToast({
       style: Toast.Style.Failure,
@@ -129,7 +129,7 @@ async function findProcessUsingPortRobust(port: number): Promise<PortProcess | n
       if (tasklistResult.status === "fulfilled") {
         processOutput = tasklistResult.value.stdout;
       }
-    } catch {
+    } catch (error) {
       console.error("Command execution error:", error);
     }
 
@@ -247,7 +247,7 @@ async function findProcessUsingPortRobust(port: number): Promise<PortProcess | n
     }
 
     return null;
-  } catch {
+  } catch (error) {
     console.error("Port search error:", error);
     throw new Error(
       `Port search failed: ${error instanceof Error ? error.message : "Network command execution failed"}`,
@@ -281,7 +281,7 @@ async function killProcessOptimized(pid: string): Promise<boolean> {
     // Clear cache entry for this PID
     processNameCache.delete(pid);
     return true;
-  } catch {
+  } catch (error) {
     console.error("Kill process failed:", error);
     return false;
   }
