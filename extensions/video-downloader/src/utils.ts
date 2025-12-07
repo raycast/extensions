@@ -26,7 +26,7 @@ export const {
 
 export async function getWingetPath() {
   try {
-    const wingetPath = sanitizeWindowsPath(execSync("where winget").toString());
+    const wingetPath = sanitizeWindowsPath(execSync("where winget").toString().trim());
     return wingetPath.split("\n")[0];
   } catch {
     throw new Error("Winget not found. Please ensure winget is installed and available in your PATH.");
@@ -41,7 +41,7 @@ export const getytdlPath = () => {
     const defaultPath = isMac
       ? "/opt/homebrew/bin/yt-dlp"
       : isWindows
-        ? sanitizeWindowsPath(execSync("where yt-dlp").toString().split("\n")[0])
+        ? sanitizeWindowsPath(execSync("where yt-dlp").toString().trim().split("\n")[0])
         : "/usr/bin/yt-dlp";
 
     return defaultPath;
@@ -58,7 +58,7 @@ export const getffmpegPath = () => {
     const defaultPath = isMac
       ? "/opt/homebrew/bin/ffmpeg"
       : isWindows
-        ? sanitizeWindowsPath(execSync("where ffmpeg").toString().split("\n")[0])
+        ? sanitizeWindowsPath(execSync("where ffmpeg").toString().trim().split("\n")[0])
         : "/usr/bin/ffmpeg";
 
     return defaultPath;
@@ -76,7 +76,7 @@ export const getffprobePath = () => {
     const defaultPath = isMac
       ? "/opt/homebrew/bin/ffprobe"
       : isWindows
-        ? sanitizeWindowsPath(execSync("where ffprobe").toString().split("\n")[0])
+        ? sanitizeWindowsPath(execSync("where ffprobe").toString().trim().split("\n")[0])
         : "/usr/bin/ffprobe";
     return defaultPath;
   } catch {
