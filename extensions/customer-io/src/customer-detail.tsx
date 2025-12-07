@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Detail, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, open } from "@raycast/api";
+import { Detail, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, open, Color } from "@raycast/api";
 import {
   getCustomerAttributes,
   getCustomerSegments,
@@ -106,7 +106,7 @@ export default function CustomerDetail({ id, idType = "id" }: CustomerDetailProp
         <Detail.Metadata.TagList title="Subscription">
           <Detail.Metadata.TagList.Item
             text={customer.unsubscribed ? "Unsubscribed" : "Subscribed"}
-            color={customer.unsubscribed ? "#ff6b6b" : "#00ff00"}
+            color={customer.unsubscribed ? Color.Red : Color.Green}
           />
         </Detail.Metadata.TagList>
       )}
