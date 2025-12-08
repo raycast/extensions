@@ -52,7 +52,7 @@ const API_BASE_URL = "https://api.cognimemo.com";
 class CognimemoAPIError extends Error {
   constructor(
     message: string,
-    public status?: number,
+    public status?: number
   ) {
     super(message);
     this.name = "CognimemoAPIError";
@@ -68,12 +68,12 @@ class AuthenticationError extends Error {
 
 async function getApiKey(): Promise<string> {
   try {
-    const preferences = getPreferenceValues<{ apiKey: string }>();
-    const apiKey = preferences.apiKey?.trim();
+    const preferences = getPreferenceValues<Preferences>();
+    const apiKey = preferences.apiKey.trim();
 
     if (!apiKey) {
       throw new AuthenticationError(
-        "API key is required. Please add your Cognimemo API key in preferences.",
+        "API key is required. Please add your Cognimemo API key in preferences."
       );
     }
 
@@ -85,7 +85,7 @@ async function getApiKey(): Promise<string> {
 
 async function makeAuthenticatedRequest<T>(
   endpoint: string,
-  options: RequestInit = {},
+  options: RequestInit = {}
 ): Promise<T> {
   const apiKey = await getApiKey();
 
@@ -119,7 +119,7 @@ async function makeAuthenticatedRequest<T>(
 
     // Log response status
     console.log(
-      `[API Response] ${method} ${url} - Status: ${response.status} ${response.statusText}`,
+      `[API Response] ${method} ${url} - Status: ${response.status} ${response.statusText}`
     );
 
     if (!response.ok) {
@@ -134,7 +134,7 @@ async function makeAuthenticatedRequest<T>(
 
       if (response.status === 401) {
         throw new AuthenticationError(
-          "Invalid API key. Please check your API key in preferences. Get a new one from https://app.cognimemo.com/integrations",
+          "Invalid API key. Please check your API key in preferences. Get a new one from https://app.cognimemo.com/integrations"
         );
       }
 
@@ -167,7 +167,7 @@ async function makeAuthenticatedRequest<T>(
     // Handle network errors or other fetch errors
     console.error("[API Network Error]", err);
     throw new CognimemoAPIError(
-      `Network error: ${err instanceof Error ? err.message : "Unknown error"}`,
+      `Network error: ${err instanceof Error ? err.message : "Unknown error"}`
     );
   }
 }
@@ -175,7 +175,7 @@ async function makeAuthenticatedRequest<T>(
 export async function fetchProjects(): Promise<Project[]> {
   try {
     const response = await makeAuthenticatedRequest<{ projects: Project[] }>(
-      "/v1/projects",
+      "/v1/projects"
     );
     return response.projects || [];
   } catch (error) {
@@ -215,7 +215,7 @@ export async function addMemory(request: AddMemoryRequest): Promise<Memory> {
 }
 
 export async function searchMemories(
-  request: SearchRequest,
+  request: SearchRequest
 ): Promise<SearchResult[]> {
   try {
     console.log("[searchMemories] Request:", JSON.stringify(request, null, 2));
@@ -224,16 +224,16 @@ export async function searchMemories(
       {
         method: "POST",
         body: JSON.stringify(request),
-      },
+      }
     );
 
     console.log(
       "[searchMemories] Response:",
-      JSON.stringify(response, null, 2),
+      JSON.stringify(response, null, 2)
     );
     console.log(
       "[searchMemories] Results count:",
-      response.results?.length || 0,
+      response.results?.length || 0
     );
 
     // Map results to ensure all required fields are present
@@ -254,7 +254,7 @@ export async function searchMemories(
           title: title as string,
           type: result.type || "text",
         };
-      },
+      }
     );
 
     console.log("[searchMemories] Mapped results count:", mappedResults.length);
@@ -275,8 +275,8 @@ export async function searchMemories(
 export async function checkApiConnection(): Promise<boolean> {
   try {
     // First check if API key exists in preferences
-    const preferences = getPreferenceValues<{ apiKey: string }>();
-    const apiKey = preferences.apiKey?.trim();
+    const preferences = getPreferenceValues<Preferences>();
+    const apiKey = preferences.apiKey.trim();
 
     if (!apiKey) {
       await showToast({
