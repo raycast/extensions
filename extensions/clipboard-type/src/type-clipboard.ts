@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export default async function Command() {

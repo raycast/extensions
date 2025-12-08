@@ -27,6 +27,7 @@
       "name": "delay",
       "type": "dropdown",
       "title": "Typing Speed",
+      "required": false,
       "description": "Choose how quickly characters are typed",
       "default": "0.002",
       "data": [
