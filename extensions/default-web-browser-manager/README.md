@@ -15,5 +15,5 @@ The extension uses a small Swift snippet executed via `swift -` to query macOS L
 
 ---
 
-**Tested only on macOS Sonoma 14.5 (Tahoe 26.1) with Apple Swift version 6.1.2**  
+**Tested only on macOS Tahoe 26.1 with Apple Swift version 6.1.2**  
 I have no idea if it works on earlier or later macOS versions or with other Swift toolchains.
