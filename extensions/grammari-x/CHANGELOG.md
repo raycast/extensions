@@ -1,6 +1,6 @@
 # GrammariX Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-12-08
 
 - Change the order of the copy/paste actions and the shortcut.
 
