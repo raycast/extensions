@@ -1,5 +1,10 @@
 # Downloads Manager Changelog
 
+## [Windows support + Empty Downloads Folder command] - 2025-12-08
+
+- Added Windows platform support
+- Added the command `Empty Downloads Folder` to move all items in the Downloads folder to Trash/Recycle Bin
+
 ## [Add Grid layout] - 2025-12-01
 
 - Added a Grid layout to the Manage Downloads command. Comes with an Action to toggle between layouts as well as a Preference for setting the default layout

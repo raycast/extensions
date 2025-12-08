@@ -79,6 +79,12 @@
       ]
     },
     {
+      "name": "empty-downloads-folder",
+      "title": "Empty Downloads Folder",
+      "description": "Moves all items in your Downloads folder to the Trash/Recycle Bin",
+      "mode": "no-view"
+    },
+    {
       "name": "open-latest-download",
       "title": "Open Latest Download",
       "description": "Opens the last downloaded file or folder",
@@ -187,6 +193,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
