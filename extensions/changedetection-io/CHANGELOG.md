@@ -1,6 +1,6 @@
 # changedetection.io Changelog
 
-## [Error handling] - {PR_MERGE_DATE}
+## [Error handling] - 2025-12-08
 
 - Make the API call only if the instance URL is valid
 - Added an `ErrorGuard` component to handle errors gracefully
