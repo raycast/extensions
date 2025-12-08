@@ -30,13 +30,20 @@ export default function Command() {
           accessories={[{ text: result.albumName }]}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Lyrics" target={<LyricsDetail track={result} />} />
+              <Action.Push
+                title="Show Lyrics"
+                target={<LyricsDetail track={result} />}
+              />
             </ActionPanel>
           }
         />
       ))}
       {!searchText && (
-        <List.EmptyView icon="🔍" title="Search Lyrics" description="Type a song name to search for lyrics." />
+        <List.EmptyView
+          icon="🔍"
+          title="Search Lyrics"
+          description="Type a song name to search for lyrics."
+        />
       )}
     </List>
   );
@@ -45,13 +52,21 @@ export default function Command() {
 import { getArtwork } from "./utils/artwork";
 
 function LyricsDetail({ track }: { track: LrcLibTrack }) {
-  const { data: artwork } = usePromise(async () => getArtwork(`${track.artistName} ${track.albumName}`), [], {
-    execute: true,
-  });
+  const { data: artwork } = usePromise(
+    async () => getArtwork(`${track.artistName} ${track.albumName}`),
+    [],
+    {
+      execute: true,
+    },
+  );
 
-  const albumArtIcon: Image.ImageLike | undefined = artwork ? { source: artwork } : undefined;
+  const albumArtIcon: Image.ImageLike | undefined = artwork
+    ? { source: artwork }
+    : undefined;
 
-  const lyrics = track.syncedLyrics ? formatLyrics(track.syncedLyrics) : track.plainLyrics || "*Instrumental*";
+  const lyrics = track.syncedLyrics
+    ? formatLyrics(track.syncedLyrics)
+    : track.plainLyrics || "*Instrumental*";
 
   let markdown = "";
   markdown += `## ${track.name} - ${track.artistName}\n\n${lyrics}`;
@@ -65,7 +80,10 @@ function LyricsDetail({ track }: { track: LrcLibTrack }) {
           <Detail.Metadata.Label title="Track" text={track.name} />
           <Detail.Metadata.Label title="Artist" text={track.artistName} />
           <Detail.Metadata.Label title="Album" text={track.albumName} />
-          <Detail.Metadata.Label title="Duration" text={formatDuration(track.duration)} />
+          <Detail.Metadata.Label
+            title="Duration"
+            text={formatDuration(track.duration)}
+          />
         </Detail.Metadata>
       }
     />

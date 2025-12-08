@@ -6,7 +6,11 @@ import { getLyrics, LrcLibTrack, parseLrc, LrcLine } from "./utils/lrclib";
 import { getArtwork } from "./utils/artwork";
 
 export default function Command() {
-  const { data: currentTrack, isLoading: isLoadingTrack, revalidate: revalidateTrack } = usePromise(getCurrentTrack);
+  const {
+    data: currentTrack,
+    isLoading: isLoadingTrack,
+    revalidate: revalidateTrack,
+  } = usePromise(getCurrentTrack);
 
   const { data: trackLyrics, isLoading: isLoadingLyrics } = usePromise(
     async (track: TrackInfo | null) => {
@@ -77,7 +81,9 @@ function LyricsView({
       const currentTrackData = await getCurrentTrack();
       if (!currentTrackData) return;
 
-      const positionDiff = Math.abs(currentTrackData.position - prevPositionRef.current);
+      const positionDiff = Math.abs(
+        currentTrackData.position - prevPositionRef.current,
+      );
 
       // Detect seek (position jump > 6 seconds)
       if (positionDiff > 6) {
@@ -132,13 +138,20 @@ function LyricsView({
   // Find current line index
   const currentLineIndex = parsedLyrics.findIndex((line) => {
     const nextLine = parsedLyrics[parsedLyrics.indexOf(line) + 1];
-    return line.time <= currentPosition && (!nextLine || nextLine.time > currentPosition);
+    return (
+      line.time <= currentPosition &&
+      (!nextLine || nextLine.time > currentPosition)
+    );
   });
 
-  const currentLine = currentLineIndex !== -1 ? parsedLyrics[currentLineIndex] : null;
+  const currentLine =
+    currentLineIndex !== -1 ? parsedLyrics[currentLineIndex] : null;
   const nextLine =
-    currentLineIndex !== -1 && currentLineIndex + 1 < parsedLyrics.length ? parsedLyrics[currentLineIndex + 1] : null;
-  const prevLine = currentLineIndex > 0 ? parsedLyrics[currentLineIndex - 1] : null;
+    currentLineIndex !== -1 && currentLineIndex + 1 < parsedLyrics.length
+      ? parsedLyrics[currentLineIndex + 1]
+      : null;
+  const prevLine =
+    currentLineIndex > 0 ? parsedLyrics[currentLineIndex - 1] : null;
 
   let markdown = "";
   const verticalSpacing = "\n\n\n\n\n\n";
@@ -156,7 +169,9 @@ function LyricsView({
     markdown = `## ${track.name} - ${track.artist}\n\n${lyrics.plainLyrics || "*Instrumental*"}`;
   }
 
-  const albumArtIcon: Image.ImageLike | undefined = artwork ? { source: artwork } : undefined;
+  const albumArtIcon: Image.ImageLike | undefined = artwork
+    ? { source: artwork }
+    : undefined;
 
   return (
     <Detail
@@ -168,7 +183,10 @@ function LyricsView({
           <Detail.Metadata.Label title="Artist" text={track.artist} />
           <Detail.Metadata.Label title="Album" text={track.album} />
           <Detail.Metadata.Label title="Source" text={track.app} />
-          <Detail.Metadata.Label title="Time" text={`${formatTime(currentPosition)} / ${formatTime(track.duration)}`} />
+          <Detail.Metadata.Label
+            title="Time"
+            text={`${formatTime(currentPosition)} / ${formatTime(track.duration)}`}
+          />
         </Detail.Metadata>
       }
       actions={

@@ -5,10 +5,14 @@ export async function getDeezerArtwork(term: string): Promise<string | null> {
       limit: "1",
     });
 
-    const response = await fetch(`https://api.deezer.com/search/track?${params.toString()}`);
+    const response = await fetch(
+      `https://api.deezer.com/search/track?${params.toString()}`,
+    );
     if (!response.ok) return null;
 
-    const data = (await response.json()) as { data: { album: { cover_xl: string } }[] };
+    const data = (await response.json()) as {
+      data: { album: { cover_xl: string } }[];
+    };
     if (!data.data || data.data.length === 0) return null;
 
     return data.data[0].album.cover_xl;

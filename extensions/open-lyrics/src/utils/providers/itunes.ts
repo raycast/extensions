@@ -7,10 +7,14 @@ export async function getITunesArtwork(term: string): Promise<string | null> {
       limit: "1",
     });
 
-    const response = await fetch(`https://itunes.apple.com/search?${params.toString()}`);
+    const response = await fetch(
+      `https://itunes.apple.com/search?${params.toString()}`,
+    );
     if (!response.ok) return null;
 
-    const data = (await response.json()) as { results: { artworkUrl100: string }[] };
+    const data = (await response.json()) as {
+      results: { artworkUrl100: string }[];
+    };
     if (data.results.length === 0) return null;
 
     // Get higher resolution image (600x600)
