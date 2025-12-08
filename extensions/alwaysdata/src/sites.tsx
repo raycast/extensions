@@ -1,6 +1,7 @@
-import { List, Icon } from "@raycast/api";
+import { List, Icon, ActionPanel } from "@raycast/api";
 import { useCachedPromise, getFavicon } from "@raycast/utils";
 import { alwaysdata } from "./alwaysdata";
+import OpenInAlwaysdata from "./components/open-in-alwaysdata";
 
 export default function Sites() {
   const { isLoading, data: sites } = useCachedPromise(alwaysdata.sites.list, [], {
@@ -15,6 +16,11 @@ export default function Sites() {
           icon={getFavicon(site.addresses[0], { fallback: Icon.Globe })}
           title={site.addresses[0]}
           accessories={[{ tag: site.type }]}
+          actions={
+            <ActionPanel>
+              <OpenInAlwaysdata path={`site/${site.id}`} />
+            </ActionPanel>
+          }
         />
       ))}
     </List>

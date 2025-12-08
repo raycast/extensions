@@ -26,20 +26,26 @@
   "commands": [
     {
       "name": "domains",
-      "title": "domains",
+      "title": "Manage Domains",
       "description": "Manage Domains",
       "mode": "view"
     },
     {
       "name": "emails",
-      "title": "emails",
+      "title": "Manage Emails",
       "description": "Manage Emails",
       "mode": "view"
     },
     {
       "name": "sites",
-      "title": "sites",
+      "title": "Manage Sites",
       "description": "Manage Sites",
+      "mode": "view"
+    },
+    {
+      "name": "tokens",
+      "title": "Manage Tokens",
+      "description": "Manage Tokens",
       "mode": "view"
     }
   ],

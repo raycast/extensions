@@ -61,6 +61,14 @@ export type Site = {
   addresses: string[];
 };
 
+export type Token = {
+  id: number;
+  app_name: string;
+  key: string;
+  is_disabled: boolean;
+  allowed_ips: string | null;
+};
+
 export type ErrorResult =
   | string
   | {

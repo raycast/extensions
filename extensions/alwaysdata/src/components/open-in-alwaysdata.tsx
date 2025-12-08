@@ -1,6 +1,12 @@
-import { Action } from "@raycast/api";
+import { Action, Keyboard } from "@raycast/api";
 
-export default function OpenInAlwaysdata({path}:{path:string}) {
-    // eslint-disable-next-line @raycast/prefer-title-case
-    return <Action.OpenInBrowser icon="alwaysdata.png" title="Open in alwaysdata" url={`https://admin.alwaysdata.com/${path}/`} />
+export default function OpenInAlwaysdata({ path }: { path: string }) {
+  return (
+    <Action.OpenInBrowser
+      icon="alwaysdata.png"
+      title="Open in Alwaysdata"
+      url={`https://admin.alwaysdata.com/${path}/`}
+      shortcut={Keyboard.Shortcut.Common.Open}
+    />
+  );
 }

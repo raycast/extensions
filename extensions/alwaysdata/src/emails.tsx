@@ -34,9 +34,17 @@ export default function Emails() {
       {domains.map((domain) => (
         <List.Section key={domain.id} title={domain.name}>
           {(emailsByDomainId[domain.id] || []).map((email) => (
-            <List.Item key={email.id} icon={Icon.AtSymbol} title={email.name} subtitle={email.annotation} actions={<ActionPanel>
-              <OpenInAlwaysdata path={`mailbox/${email.id}`} />
-            </ActionPanel>} />
+            <List.Item
+              key={email.id}
+              icon={Icon.AtSymbol}
+              title={email.name}
+              subtitle={email.annotation}
+              actions={
+                <ActionPanel>
+                  <OpenInAlwaysdata path={`mailbox/${email.id}`} />
+                </ActionPanel>
+              }
+            />
           ))}
         </List.Section>
       ))}

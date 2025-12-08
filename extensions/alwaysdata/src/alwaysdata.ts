@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { DNSRecord, DNSRecordForm, Domain, ErrorResult, Mailbox, Site } from "./types";
+import { DNSRecord, DNSRecordForm, Domain, ErrorResult, Mailbox, Site, Token } from "./types";
 
 const { api_token } = getPreferenceValues<Preferences>();
 const API_URL = "https://api.alwaysdata.com/v1";
@@ -49,5 +49,11 @@ export const alwaysdata = {
   },
   sites: {
     list: () => makeRequest<Site[]>("site"),
+  },
+  tokens: {
+    delete: (props: { id: number }) => makeRequest<void>(`token/${props.id}`, { method: "DELETE" }),
+    generate: (props: { app_name: string; allowed_ips: string }) =>
+      makeRequest<void>("token", { method: "POST", body: JSON.stringify(props) }),
+    list: () => makeRequest<Token[]>("token"),
   },
 };
