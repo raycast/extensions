@@ -5,6 +5,9 @@
   "description": "Execute SQL queries on PostgreSQL databases",
   "icon": "icon.png",
   "author": "vmotta8",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools"
   ],
