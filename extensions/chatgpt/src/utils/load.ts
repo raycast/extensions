@@ -122,7 +122,7 @@ const getExplorerSelectedImages = async (): Promise<string[]> => {
       }
     } catch {}
   }
-  $selected -join "`n"
+  $selected -join [Environment]::NewLine
   `;
 
   try {
