@@ -719,7 +719,7 @@ An interface describing an accessory view in a `Grid.Item`.
 | icon | An optional Image.ImageLike that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>null</code> |
 | tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> or <code>null</code> |
 
-### Example
+#### Example
 
 ```typescript
 import { Icon, Grid } from "@raycast/api";
