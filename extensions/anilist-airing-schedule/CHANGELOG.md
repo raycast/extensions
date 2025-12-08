@@ -1,6 +1,6 @@
 # Anilist Airing Schedule Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-12-08
 
 - Added windows support
 
