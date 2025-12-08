@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Model picker, custom agents and more] - {PR_MERGE_DATE}
+## [Model picker, custom agents and more] - 2025-12-08
 
 - Allow selecting a model when creating a task (Copilot Pro and Pro+ users only)
 - Allow selecting a custom agent when creating a task
