@@ -5,6 +5,9 @@
   "description": "Conveniently set your default browser via Raycast commands",
   "icon": "browser-icon.png",
   "author": "clins1994",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "platforms": [
     "macOS"
   ],
