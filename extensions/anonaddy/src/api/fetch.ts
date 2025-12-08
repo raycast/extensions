@@ -1,9 +1,9 @@
-import APIError from "./APIError";
+import AddyError from "./error";
 import preferences from "../preferences";
 
 type Init = { body?: Record<string, unknown> | null | undefined } & Omit<RequestInit, "body">;
 
-const fetch = async (path: string, init: Init = {}): Promise<Response> => {
+async function fetch<R = void>(path: string, init: Init = {}): Promise<R> {
   const url = new URL(path, "https://app.addy.io/api/v1/");
 
   const response = await global.fetch(url.toString(), {
@@ -18,10 +18,14 @@ const fetch = async (path: string, init: Init = {}): Promise<Response> => {
   });
 
   if (!response.ok) {
-    throw new APIError(response);
+    throw new AddyError(response);
   }
 
-  return response;
-};
+  try {
+    return (await response.json()) as R;
+  } catch {
+    return undefined as R;
+  }
+}
 
 export default fetch;
