@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Windows support + Empty Downloads Folder command] - 2025-12-08
+## [Windows support + Empty Downloads Folder command] - {PR_MERGE_DATE}
 
 - Added Windows platform support
 - Added the command `Empty Downloads Folder` to move all items in the Downloads folder to Trash/Recycle Bin

@@ -20,16 +20,32 @@ export default async function main() {
 
   const absoluteEntryPaths = entryNames.map((name) => join(downloadsFolder, name));
 
+  let trashErrored = false;
   try {
     await trash(absoluteEntryPaths);
   } catch {
-    // ignore; we'll fallback on Windows
+    trashErrored = true;
   }
 
+  // On Windows, fallback to Recycle Bin for any remaining items
   if (process.platform === "win32") {
-    const remainingPaths = await filterPathsThatExist(absoluteEntryPaths);
+    let remainingPaths = await filterPathsThatExist(absoluteEntryPaths);
     if (remainingPaths.length > 0) {
       await sendToRecycleBinWindows(remainingPaths);
+      remainingPaths = await filterPathsThatExist(absoluteEntryPaths);
+    }
+    if (remainingPaths.length > 0) {
+      await showHUD("Some files could not be moved to Recycle Bin");
+      await popToRoot();
+      return;
+    }
+  } else {
+    // On non-Windows platforms, only report success if nothing remains or trash didn't error
+    const remainingPaths = await filterPathsThatExist(absoluteEntryPaths);
+    if (trashErrored || remainingPaths.length > 0) {
+      await showHUD("Failed to move some files to Trash");
+      await popToRoot();
+      return;
     }
   }
 
