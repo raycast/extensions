@@ -87,7 +87,7 @@ function LyricsView({
 
       // Detect seek (position jump > 6 seconds)
       if (positionDiff > 6) {
-        console.log("Seek detected:", positionDiff, "seconds");
+        // console.log("Seek detected:", positionDiff, "seconds");
         prevPositionRef.current = currentTrackData.position;
         setCurrentPosition(currentTrackData.position);
       } else {
