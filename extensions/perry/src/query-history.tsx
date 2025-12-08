@@ -82,7 +82,7 @@ export default function QueryHistoryCommand() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Re-run Query"
+                  title="Re-Run Query"
                   icon={Icon.Play}
                   target={<QueryResults historyItem={item} databases={databases} onExecute={revalidate} />}
                 />
