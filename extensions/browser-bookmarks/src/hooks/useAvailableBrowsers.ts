@@ -25,6 +25,7 @@ export const BROWSERS_BUNDLE_ID = {
   prismaAccess: "com.talon-sec.work",
   vivaldi: "com.vivaldi.vivaldi",
   zen: "app.zen-browser.zen",
+  libreWolf: "org.mozilla.librewolf",
   whale: "com.naver.whale",
 };
 

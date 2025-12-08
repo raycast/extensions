@@ -3,6 +3,9 @@
 ## [Windows Compatibility] - {PR_MERGE_DATE}
 
 - Added Windows compatibility for all browsers except macOS-only browsers like Dia, Safari, Atlas.
+## [Support for libreWolf] - 2025-12-07
+
+- Added support for `LibreWolf` browser.
 
 ## [Bug Fixes] - 2025-11-10
 

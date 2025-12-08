@@ -1,5 +1,9 @@
 # Brand Icons Changelog
 
+## [New Feature] - 2025-12-07
+
+- Add support for shuffling icons on start
+
 ## [Enhancement] - 2025-12-04
 
 - Add Windows support

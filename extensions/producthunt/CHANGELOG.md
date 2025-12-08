@@ -1,5 +1,13 @@
 # Product Hunt Changelog
 
+## [2.3] - 2025-12-07
+
+- Fix scraper to use `latestScore`/`launchDayScore` fields for vote counts (Product Hunt API changed from `votesCount`)
+- Use browser-like headers for all fetch requests to avoid Cloudflare blocking
+- Implement custom structured logger with emoji-prefixed output
+- Update dependencies
+- Removed .eslintrc.json in favor of eslint.config.mjs
+
 ## [2.2] - 2025-09-12
 
 ### Added

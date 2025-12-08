@@ -1,5 +1,11 @@
 # NixPkgs Search Changelog
 
+## [Update] - 2025-12-07
+
+- Update shortcuts to use Raycast's common keyboard shortcuts
+- Add submenu for the Open action
+- Add submenu for the Copy URL action
+
 ## [Update] - 2025-12-04
 
 - Consolidate actions for opening package homepage and source code

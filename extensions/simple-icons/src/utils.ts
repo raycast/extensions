@@ -34,6 +34,7 @@ export const {
   enableAiSearch,
   githubToken,
   releaseVersion,
+  shuffleOnStart,
 } = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);

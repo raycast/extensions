@@ -27,10 +27,12 @@ import {
   getAliases,
   getRelativeFileLink,
   loadCachedJson,
+  shuffleOnStart,
   useSearch,
   useVersion,
 } from "./utils.js";
 import { IconData, LaunchContext } from "./types.js";
+import { arrayToShuffled } from "array-shuffle";
 
 const itemDisplayColumns = {
   small: 8,
@@ -67,7 +69,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         slug: getIconSlug(icon),
       }));
 
-      setIcons(icons);
+      setIcons(shuffleOnStart ? arrayToShuffled(icons) : icons);
       setIsLoading(false);
 
       if (icons.length > 0) {
