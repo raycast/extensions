@@ -34,9 +34,6 @@ async function saveLastIssue(issueKey: string, summary?: string) {
 
 export async function startIssue(issueKey: string, summary?: string) {
   const active = await getActiveIssue();
-  if (active && active.isRunning && active.issueKey !== issueKey) {
-    throw new Error(`Issue ${active.issueKey} is already running. Please stop it first.`);
-  }
 
   // If we are logging per segment, we don't need to accumulate elapsedSeconds.
   // Every Start is a new segment.

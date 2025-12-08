@@ -3,6 +3,7 @@ export interface Preferences {
   email?: string;
   apiToken?: string;
   clientId?: string;
+  reminderInterval?: string;
 }
 
 export interface Issue {
@@ -26,6 +27,11 @@ export interface Issue {
     };
     status: {
       name: string;
+    };
+    watches?: {
+      isWatching: boolean;
+      watchCount: number;
+      self: string;
     };
   };
 }

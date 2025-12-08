@@ -9,11 +9,23 @@ import {
   Form,
   useNavigation,
   Icon,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { searchIssues, assignIssue, addComment, getMyself, getTransitions, transitionIssue } from "./utils/jira";
-import { startIssue, getActiveIssue } from "./utils/storage";
+import {
+  searchIssues,
+  assignIssue,
+  addComment,
+  getMyself,
+  getTransitions,
+  transitionIssue,
+  addWorklog,
+  addWatcher,
+  removeWatcher,
+} from "./utils/jira";
+import { startIssue, getActiveIssue, pauseIssue } from "./utils/storage";
 import { Preferences } from "./utils/types";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -101,6 +113,77 @@ export default function Command() {
 
   async function handleStartWork(issueKey: string, summary: string) {
     try {
+      // Check if there's already a running issue
+      if (activeIssue && activeIssue.isRunning && activeIssue.issueKey !== issueKey) {
+        const elapsedSeconds = Math.floor((Date.now() - activeIssue.startTime) / 1000);
+        const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+
+        // Warn if less than 1 minute of work
+        if (elapsedSeconds < 60) {
+          const confirmed = await confirmAlert({
+            title: "Short Work Session",
+            message: `You've only worked ${elapsedSeconds}s on ${activeIssue.issueKey}. This time won't be logged in Jira. Do you want to discard this time and start ${issueKey}?`,
+            primaryAction: {
+              title: "Discard & Start New",
+              style: Alert.ActionStyle.Destructive,
+            },
+            dismissAction: {
+              title: "Continue Current Task",
+              style: Alert.ActionStyle.Cancel,
+            },
+            icon: Icon.Warning,
+          });
+
+          if (!confirmed) {
+            return; // User chose to continue with current task
+          }
+
+          // Discard the current session without logging
+          await pauseIssue(); // This removes it from storage
+          showToast({
+            style: Toast.Style.Success,
+            title: "Time discarded",
+            message: `${elapsedSeconds}s on ${activeIssue.issueKey} not logged`,
+          });
+        } else {
+          // Normal flow: ask to pause and log
+          const confirmed = await confirmAlert({
+            title: "Issue Already Running",
+            message: `${activeIssue.issueKey} is currently active (${elapsedMinutes}m worked). Do you want to pause it and start working on ${issueKey}?`,
+            primaryAction: {
+              title: "Pause & Start New",
+              style: Alert.ActionStyle.Default,
+            },
+            dismissAction: {
+              title: "Cancel",
+              style: Alert.ActionStyle.Cancel,
+            },
+            icon: Icon.Clock,
+          });
+
+          if (!confirmed) {
+            return; // User cancelled
+          }
+
+          // Pause the current issue and log the work
+          showToast({ style: Toast.Style.Animated, title: "Pausing current issue..." });
+          const paused = await pauseIssue();
+          if (paused) {
+            await addWorklog(
+              paused.issueKey,
+              paused.timeSpentSeconds,
+              "Auto-logged when switching tasks",
+              paused.started,
+            );
+            showToast({
+              style: Toast.Style.Success,
+              title: "Previous work logged",
+              message: `${Math.floor(paused.timeSpentSeconds / 60)}m on ${paused.issueKey}`,
+            });
+          }
+        }
+      }
+
       await startIssue(issueKey, summary);
       showToast({ style: Toast.Style.Success, title: "Started working", message: issueKey });
       revalidateActiveIssue();
@@ -148,6 +231,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter your issues...">
+      <List.EmptyView icon={Icon.CheckCircle} title="No issues found" description="You have no assigned issues." />
       {issues?.map((issue) => {
         const isActive = activeIssue?.issueKey === issue.key;
         return (
@@ -189,6 +273,21 @@ export default function Command() {
                   icon={Icon.Bubble}
                   target={<AddComment issueKey={issue.key} />}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
+                />
+                <Action
+                  title={issue.fields.watches?.isWatching ? "Stop Watching" : "Start Watching"}
+                  icon={issue.fields.watches?.isWatching ? Icon.EyeSlash : Icon.Eye}
+                  onAction={async () => {
+                    if (issue.fields.watches?.isWatching) {
+                      await removeWatcher(issue.key, currentUser?.accountId || "");
+                      showToast({ style: Toast.Style.Success, title: "Stopped watching issue" });
+                    } else {
+                      await addWatcher(issue.key);
+                      showToast({ style: Toast.Style.Success, title: "Started watching issue" });
+                    }
+                    revalidate();
+                  }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
                 />
                 <Action.CopyToClipboard content={issue.key} title="Copy Key" />
               </ActionPanel>

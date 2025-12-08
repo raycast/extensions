@@ -7,7 +7,9 @@ export default function Command() {
   const { pop } = useNavigation();
   const [searchText, setSearchText] = useState("");
   const { data: issues, isLoading } = usePromise(searchIssues, [
-    searchText ? `text ~ "${searchText}*"` : "updated >= -30d ORDER BY updated DESC",
+    searchText
+      ? `text ~ "${searchText}*" AND assignee = currentUser()`
+      : "assignee = currentUser() AND updated >= -30d ORDER BY updated DESC",
   ]);
 
   async function handleSubmit(values: { issue: string; timeSpent: string; comment: string; started: Date }) {
@@ -53,7 +55,7 @@ export default function Command() {
         {issues?.map((issue) => (
           <Form.Dropdown.Item
             key={issue.id}
-            value={issue.id}
+            value={issue.key}
             title={`${issue.key} - ${issue.fields.summary}`}
             icon={issue.fields.issuetype.iconUrl}
           />

@@ -8,11 +8,28 @@ import {
   Form,
   useNavigation,
   Icon,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { searchIssues, addComment, assignIssue, getMyself, getTransitions, transitionIssue } from "./utils/jira";
-import { startIssue } from "./utils/storage";
+import {
+  searchIssues,
+  addComment,
+  assignIssue,
+  getMyself,
+  getTransitions,
+  transitionIssue,
+  addWorklog,
+  getProjects,
+  createIssue,
+  getProjectIssueTypes,
+  searchUsers,
+  getFavoriteFilters,
+  addWatcher,
+  removeWatcher,
+} from "./utils/jira";
+import { startIssue, getActiveIssue, pauseIssue } from "./utils/storage";
 import { Preferences } from "./utils/types";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -41,6 +58,127 @@ function AddComment({ issueKey }: { issueKey: string }) {
     >
       <Form.Description title="Issue" text={issueKey} />
       <Form.TextArea id="comment" title="Comment" placeholder="Write your comment here..." />
+    </Form>
+  );
+}
+
+function CreateSubtask({
+  parentKey,
+  projectId,
+  onCreated,
+}: {
+  parentKey: string;
+  projectId: string;
+  onCreated: () => void;
+}) {
+  const { pop } = useNavigation();
+  const { data: issueTypes, isLoading: isLoadingTypes } = usePromise(
+    (id) => (id ? getProjectIssueTypes(id) : Promise.resolve([])),
+    [projectId],
+  );
+  const { data: currentUser } = usePromise(getMyself);
+  const [searchText, setSearchText] = useState("");
+  const { data: users, isLoading: isLoadingUsers } = usePromise(searchUsers, [searchText]);
+
+  async function handleSubmit(values: { summary: string; description: string; issuetype: string; assignee: string }) {
+    try {
+      showToast({ style: Toast.Style.Animated, title: "Creating subtask..." });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const body: any = {
+        fields: {
+          parent: {
+            key: parentKey,
+          },
+          summary: values.summary,
+          description: {
+            type: "doc",
+            version: 1,
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: values.description || "",
+                  },
+                ],
+              },
+            ],
+          },
+          issuetype: {
+            id: values.issuetype,
+          },
+          project: {
+            id: projectId,
+          },
+        },
+      };
+
+      if (values.assignee) {
+        body.fields.assignee = { id: values.assignee };
+      }
+
+      const issue = await createIssue(body);
+
+      showToast({ style: Toast.Style.Success, title: "Subtask created", message: issue.key });
+      onCreated();
+      pop();
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Failed to create subtask", message: String(error) });
+    }
+  }
+
+  const allUsers = users || [];
+  if (currentUser && !allUsers.find((u) => u.accountId === currentUser.accountId)) {
+    allUsers.unshift(currentUser);
+  }
+
+  const subtaskTypes = issueTypes?.filter((t) => t.subtask) || [];
+
+  return (
+    <Form
+      isLoading={isLoadingTypes || isLoadingUsers}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} title="Create Subtask" />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="Parent Issue" text={parentKey} />
+      {subtaskTypes.length > 0 ? (
+        <>
+          <Form.Dropdown id="issuetype" title="Subtask Type">
+            {subtaskTypes.map((type) => (
+              <Form.Dropdown.Item key={type.id} value={type.id} title={type.name} icon={type.iconUrl} />
+            ))}
+          </Form.Dropdown>
+          <Form.Dropdown
+            id="assignee"
+            title="Assignee"
+            placeholder="Select assignee"
+            defaultValue={currentUser?.accountId}
+            onSearchTextChange={setSearchText}
+            throttle
+          >
+            {allUsers.map((user) => (
+              <Form.Dropdown.Item
+                key={user.accountId}
+                value={user.accountId}
+                title={user.displayName}
+                icon={Icon.Person}
+              />
+            ))}
+          </Form.Dropdown>
+          <Form.TextField id="summary" title="Summary" placeholder="Subtask summary" />
+          <Form.TextArea id="description" title="Description" placeholder="Subtask description" />
+        </>
+      ) : (
+        <Form.Description
+          title="Notice"
+          text="No subtask types available for this project. Please check your Jira project configuration."
+        />
+      )}
     </Form>
   );
 }
@@ -80,13 +218,18 @@ function ChangeStatus({ issueKey, onTransition }: { issueKey: string; onTransiti
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [filterType, setFilterType] = useState("all-open");
+  const [filterValue, setFilterValue] = useState("filter:all-open");
 
   const getJql = () => {
+    // Parse the filter value to determine if it's a project or filter type
+    const isProjectFilter = filterValue.startsWith("project:");
+    const selectedProject = isProjectFilter ? filterValue.replace("project:", "") : null;
+    const filterType = isProjectFilter ? "all-open" : filterValue.replace("filter:", "");
+
     let baseJql = "";
     switch (filterType) {
       case "all-open":
-        baseJql = "created >= -30d ORDER BY created DESC";
+        baseJql = "assignee = currentUser() AND created >= -30d ORDER BY created DESC";
         break;
       case "my-issues":
         baseJql = "assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC";
@@ -97,17 +240,38 @@ export default function Command() {
       case "done-recently":
         baseJql = "statusCategory = Done AND updated >= -7d ORDER BY updated DESC";
         break;
+      case "backlog":
+        baseJql = 'statusCategory in ("To Do") ORDER BY created DESC';
+        break;
       default:
-        baseJql = "created >= -30d ORDER BY created DESC";
+        baseJql = "assignee = currentUser() AND created >= -30d ORDER BY created DESC";
+    }
+
+    // Add project filter if a specific project is selected
+    if (selectedProject && selectedProject !== "all") {
+      const cleanBase = baseJql.split("ORDER BY")[0];
+      const orderBy = baseJql.split("ORDER BY")[1] ? "ORDER BY" + baseJql.split("ORDER BY")[1] : "";
+      baseJql = `(${cleanBase}) AND project = "${selectedProject}" ${orderBy}`;
     }
 
     if (searchText) {
-      // If we have search text, we combine it.
-      // Note: If baseJql has ORDER BY, we need to be careful. JQL requires ORDER BY at the end.
-      // Simple string manipulation for this MVP:
+      // When searching, expand the scope to search across all project issues
+      // This allows finding backlog items and unassigned tasks
       const cleanBase = baseJql.split("ORDER BY")[0];
       const orderBy = baseJql.split("ORDER BY")[1] ? "ORDER BY" + baseJql.split("ORDER BY")[1] : "";
-      return `(${cleanBase}) AND text ~ "${searchText}*" ${orderBy}`;
+
+      // Search by issue key, summary (title), or description
+      // Remove user-specific filters when searching to include backlog items
+      const searchCondition = `(key = "${searchText}" OR summary ~ "${searchText}*" OR description ~ "${searchText}*")`;
+
+      // If the filter is already broad (backlog, reported-by-me), keep it
+      // Otherwise, expand to search all issues in the project
+      if (filterType === "backlog" || filterType === "reported-by-me" || filterType === "done-recently") {
+        return `(${cleanBase}) AND ${searchCondition} ${orderBy}`;
+      } else {
+        // For user-specific filters, when searching, include all issues but prioritize user's issues
+        return `${searchCondition} ${orderBy}`;
+      }
     }
 
     return baseJql;
@@ -115,11 +279,86 @@ export default function Command() {
 
   const { data: issues, isLoading, revalidate } = usePromise(searchIssues, [getJql()]);
   const { data: currentUser } = usePromise(getMyself);
+  const { data: projects } = usePromise(getProjects);
+  const { data: favoriteFilters } = usePromise(getFavoriteFilters);
 
   const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
   async function handleStartWork(issueKey: string, summary: string) {
     try {
+      const activeIssue = await getActiveIssue();
+
+      // Check if there's already a running issue
+      if (activeIssue && activeIssue.isRunning && activeIssue.issueKey !== issueKey) {
+        const elapsedSeconds = Math.floor((Date.now() - activeIssue.startTime) / 1000);
+        const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+
+        // Warn if less than 1 minute of work
+        if (elapsedSeconds < 60) {
+          const confirmed = await confirmAlert({
+            title: "Short Work Session",
+            message: `You've only worked ${elapsedSeconds}s on ${activeIssue.issueKey}. This time won't be logged in Jira. Do you want to discard this time and start ${issueKey}?`,
+            primaryAction: {
+              title: "Discard & Start New",
+              style: Alert.ActionStyle.Destructive,
+            },
+            dismissAction: {
+              title: "Continue Current Task",
+              style: Alert.ActionStyle.Cancel,
+            },
+            icon: Icon.Warning,
+          });
+
+          if (!confirmed) {
+            return; // User chose to continue with current task
+          }
+
+          // Discard the current session without logging
+          await pauseIssue(); // This removes it from storage
+          showToast({
+            style: Toast.Style.Success,
+            title: "Time discarded",
+            message: `${elapsedSeconds}s on ${activeIssue.issueKey} not logged`,
+          });
+        } else {
+          // Normal flow: ask to pause and log
+          const confirmed = await confirmAlert({
+            title: "Issue Already Running",
+            message: `${activeIssue.issueKey} is currently active (${elapsedMinutes}m worked). Do you want to pause it and start working on ${issueKey}?`,
+            primaryAction: {
+              title: "Pause & Start New",
+              style: Alert.ActionStyle.Default,
+            },
+            dismissAction: {
+              title: "Cancel",
+              style: Alert.ActionStyle.Cancel,
+            },
+            icon: Icon.Clock,
+          });
+
+          if (!confirmed) {
+            return; // User cancelled
+          }
+
+          // Pause the current issue and log the work
+          showToast({ style: Toast.Style.Animated, title: "Pausing current issue..." });
+          const paused = await pauseIssue();
+          if (paused) {
+            await addWorklog(
+              paused.issueKey,
+              paused.timeSpentSeconds,
+              "Auto-logged when switching tasks",
+              paused.started,
+            );
+            showToast({
+              style: Toast.Style.Success,
+              title: "Previous work logged",
+              message: `${Math.floor(paused.timeSpentSeconds / 60)}m on ${paused.issueKey}`,
+            });
+          }
+        }
+      }
+
       await startIssue(issueKey, summary);
       showToast({ style: Toast.Style.Success, title: "Started working", message: issueKey });
 
@@ -162,16 +401,33 @@ export default function Command() {
       searchBarPlaceholder="Search issues..."
       throttle
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter Issues" onChange={setFilterType}>
-          <List.Dropdown.Section title="Presets">
-            <List.Dropdown.Item title="Recent Issues (All)" value="all-open" />
-            <List.Dropdown.Item title="Assigned to Me" value="my-issues" />
-            <List.Dropdown.Item title="Reported by Me" value="reported-by-me" />
-            <List.Dropdown.Item title="Done Recently" value="done-recently" />
+        <List.Dropdown tooltip="Filter Issues" onChange={setFilterValue} value={filterValue} storeValue>
+          <List.Dropdown.Section title="Favorites">
+            {favoriteFilters?.map((filter: { id: string; name: string; jql: string }) => (
+              <List.Dropdown.Item key={filter.id} title={filter.name} value={`filter:${filter.jql}`} />
+            ))}
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Projects">
+            <List.Dropdown.Item title="All Projects" value="filter:all-open" />
+            {projects?.map((project) => (
+              <List.Dropdown.Item key={project.id} title={project.name} value={`project:${project.key}`} />
+            ))}
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Filter Type">
+            <List.Dropdown.Item title="Recent Issues" value="filter:all-open" />
+            <List.Dropdown.Item title="Assigned to Me" value="filter:my-issues" />
+            <List.Dropdown.Item title="Reported by Me" value="filter:reported-by-me" />
+            <List.Dropdown.Item title="Done Recently" value="filter:done-recently" />
+            <List.Dropdown.Item title="Backlog" value="filter:backlog" />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
+      <List.EmptyView
+        icon={Icon.MagnifyingGlass}
+        title="No issues found"
+        description="Try adjusting your search terms or filters."
+      />
       {issues?.map((issue) => (
         <List.Item
           key={issue.id}
@@ -207,6 +463,29 @@ export default function Command() {
                 icon={Icon.Bubble}
                 target={<AddComment issueKey={issue.key} />}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
+              <Action.Push
+                title="Create Subtask"
+                icon={Icon.Plus}
+                target={
+                  <CreateSubtask parentKey={issue.key} projectId={issue.fields.project.id} onCreated={revalidate} />
+                }
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              />
+              <Action
+                title={issue.fields.watches?.isWatching ? "Stop Watching" : "Start Watching"}
+                icon={issue.fields.watches?.isWatching ? Icon.EyeSlash : Icon.Eye}
+                onAction={async () => {
+                  if (issue.fields.watches?.isWatching) {
+                    await removeWatcher(issue.key, currentUser?.accountId || "");
+                    showToast({ style: Toast.Style.Success, title: "Stopped watching issue" });
+                  } else {
+                    await addWatcher(issue.key);
+                    showToast({ style: Toast.Style.Success, title: "Started watching issue" });
+                  }
+                  revalidate();
+                }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
               />
               <Action.CopyToClipboard content={issue.key} title="Copy Key" />
             </ActionPanel>

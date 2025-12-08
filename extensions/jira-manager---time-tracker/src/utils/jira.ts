@@ -36,7 +36,28 @@ async function jiraFetch(path: string, options: any = {}): Promise<any> {
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`Jira API Error ${response.status}: ${text}`);
+    let errorMessage = `Jira API Error ${response.status}`;
+
+    try {
+      const errorJson = JSON.parse(text);
+      if (errorJson.errorMessages && errorJson.errorMessages.length > 0) {
+        errorMessage = errorJson.errorMessages.join(", ");
+      } else if (errorJson.errors) {
+        const fieldErrors = Object.entries(errorJson.errors)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(", ");
+        if (fieldErrors) {
+          errorMessage = fieldErrors;
+        }
+      } else if (errorJson.message) {
+        errorMessage = errorJson.message;
+      }
+    } catch {
+      // If parsing fails, use the raw text if it's not too long, or just the status
+      if (text.length < 200) errorMessage += `: ${text}`;
+    }
+
+    throw new Error(errorMessage);
   }
 
   // Handle 204 No Content
@@ -59,10 +80,19 @@ export async function searchIssues(jql: string): Promise<Issue[]> {
     method: "POST",
     body: JSON.stringify({
       jql,
-      fields: ["summary", "status", "assignee", "issuetype", "project"],
+      fields: ["summary", "status", "assignee", "issuetype", "project", "watches"],
     }),
   });
   return result.issues;
+}
+
+export async function getIssue(issueIdOrKey: string): Promise<any> {
+  return jiraFetch(`/issue/${issueIdOrKey}?expand=renderedFields,names,schema,transitions`);
+}
+
+export async function getIssueComments(issueIdOrKey: string): Promise<any[]> {
+  const result = await jiraFetch(`/issue/${issueIdOrKey}/comment`);
+  return result.comments || [];
 }
 
 export async function createIssue(body: any): Promise<Issue> {
@@ -187,4 +217,113 @@ export async function getNotifications(): Promise<any[]> {
   const result = await jiraFetch("/notification?read=false");
   return result.results || result.values || [];
   // Note: V3 API typically wrapper response in 'results' or paging.
+}
+
+export async function getBoards(): Promise<any[]> {
+  // Note: Agile API uses /rest/agile/1.0 instead of /rest/api/3
+  const authHeader = await getAuthHeader();
+  const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const url = `https://${domain}/rest/agile/1.0/board`;
+
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: authHeader,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Jira API Error ${response.status}: ${text}`);
+  }
+
+  const result = await response.json();
+  return (result as any).values || [];
+}
+
+export async function getActiveSprints(boardId: number): Promise<any[]> {
+  const authHeader = await getAuthHeader();
+  const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const url = `https://${domain}/rest/agile/1.0/board/${boardId}/sprint?state=active`;
+
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: authHeader,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Jira API Error ${response.status}: ${text}`);
+  }
+
+  const result = await response.json();
+  return (result as any).values || [];
+}
+
+export async function getSprintIssues(sprintId: number): Promise<any[]> {
+  const authHeader = await getAuthHeader();
+  const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const url = `https://${domain}/rest/agile/1.0/sprint/${sprintId}/issue`;
+
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: authHeader,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Jira API Error ${response.status}: ${text}`);
+  }
+
+  const result = await response.json();
+  return (result as any).issues || [];
+}
+
+export async function getFavoriteFilters(): Promise<any[]> {
+  const result = await jiraFetch("/filter/favourite");
+  return result;
+}
+
+export async function getIssueLinkTypes(): Promise<any[]> {
+  const result = await jiraFetch("/issueLinkType");
+  return result.issueLinkTypes;
+}
+
+export async function linkIssues(sourceKey: string, targetKey: string, linkTypeId: string) {
+  // Try using name as per previous attempt, but usually it's better to verify if name or id is required.
+  // v3: POST /rest/api/3/issueLink
+  // body: { type: { name: "Duplicate" }, ... } or { type: { id: "1000" }, ... }
+  // We will assume "name" is passed from the UI for readability, matching the getIssueLinkTypes output.
+  return jiraFetch("/issueLink", {
+    method: "POST",
+    body: JSON.stringify({
+      type: { name: linkTypeId }, // we'll pass the name here
+      inwardIssue: { key: sourceKey },
+      outwardIssue: { key: targetKey },
+    }),
+  });
+}
+
+export async function addWatcher(issueKey: string, accountId?: string) {
+  // If no accountId provided, add current user
+  const user = await getMyself();
+  const targetAccountId = accountId || user.accountId;
+
+  return jiraFetch(`/issue/${issueKey}/watchers`, {
+    method: "POST",
+    body: JSON.stringify(targetAccountId),
+  });
+}
+
+export async function removeWatcher(issueKey: string, accountId: string) {
+  return jiraFetch(`/issue/${issueKey}/watchers?accountId=${accountId}`, {
+    method: "DELETE",
+  });
 }

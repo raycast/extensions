@@ -13,6 +13,12 @@
       "mode": "view"
     },
     {
+      "name": "create-subtask",
+      "title": "Create Subtask",
+      "description": "Create a subtask for an existing issue",
+      "mode": "view"
+    },
+    {
       "name": "search-for-issues",
       "title": "Search for Issues",
       "description": "Search for issues with different filters",
@@ -61,10 +67,53 @@
       "mode": "view"
     },
     {
+      "name": "weekly-report",
+      "title": "Weekly Report",
+      "description": "View detailed time tracking report by week",
+      "mode": "view"
+    },
+    {
+      "name": "view-issue-details",
+      "title": "View Issue Details",
+      "description": "View comprehensive issue information",
+      "mode": "view"
+    },
+    {
+      "name": "active-sprint",
+      "title": "Active Sprint",
+      "description": "View issues in the active sprint",
+      "mode": "view"
+    },
+    {
+      "name": "quick-transition",
+      "title": "Quick Transition",
+      "description": "Fast issue status change by key",
+      "mode": "view"
+    },
+    {
+      "name": "assign-issue",
+      "title": "Assign Issue",
+      "description": "Quickly assign an issue to a user",
+      "mode": "view"
+    },
+    {
+      "name": "link-issues",
+      "title": "Link Issues",
+      "description": "Create relationships between issues",
+      "mode": "view"
+    },
+    {
       "name": "notifications",
       "title": "Notifications",
       "description": "View unread Jira notifications",
       "mode": "view"
+    },
+    {
+      "name": "active-issue-menu-bar",
+      "title": "Active Issue Menu Bar",
+      "description": "View active task in menu bar with reminders",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [
@@ -99,6 +148,15 @@
       "type": "password",
       "required": false,
       "placeholder": "Enter your OAuth Client ID"
+    },
+    {
+      "name": "reminderInterval",
+      "title": "Reminder Interval (Minutes)",
+      "description": "Notify when a task has been running for longer than this duration.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g., 60",
+      "default": "60"
     }
   ],
   "dependencies": {
