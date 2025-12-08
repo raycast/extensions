@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Toast, closeMainWindow, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getBrowsers, setDefaultBrowser } from "./lib/launch-services";
 import { showFailureToast } from "@raycast/utils";
