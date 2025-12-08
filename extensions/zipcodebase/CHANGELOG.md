@@ -1,6 +1,6 @@
 # Zipcodebase Changelog
 
-## [Handle Error of invalid response type] - {PR_MERGE_DATE}
+## [Handle Error of invalid response type] - 2025-12-08
 
 - Handle error when invalid response type (ref: [Issue #23499](https://github.com/raycast/extensions/issues/23499))
 
