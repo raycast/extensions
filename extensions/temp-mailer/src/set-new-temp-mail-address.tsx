@@ -18,17 +18,31 @@ export default function Command() {
   };
 
   const { handleSubmit, itemProps } = useForm<CreateMailFormValues>({
-    onSubmit(values) {
-      showToast({
-        style: Toast.Style.Success,
-        title: "Yay!",
-        message: `${values.mail_username}@${values.mail_domain} your mail address has been set`,
-      });
+    async onSubmit(values) {
+      const trimmedUsername = values.mail_username?.trim() ?? "";
+      if (!trimmedUsername) {
+        await showToast({ style: Toast.Style.Failure, title: "Mail address is required" });
+        return;
+      }
 
-      setMailAddress({
-        mail_username: values.mail_username as string,
-        mail_domain: values.mail_domain as string,
-      });
+      try {
+        await setMailAddress({
+          mail_username: trimmedUsername,
+          mail_domain: values.mail_domain as string,
+        });
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Yay!",
+          message: `${trimmedUsername}@${values.mail_domain} your mail address has been set`,
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to set mail address",
+          message: error instanceof Error ? error.message : undefined,
+        });
+      }
     },
     validation: {
       mail_username: (value) => {
