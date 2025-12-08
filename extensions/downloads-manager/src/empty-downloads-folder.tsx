@@ -74,5 +74,3 @@ async function isDirectoryPath(filePath: string): Promise<boolean> {
     return false;
   }
 }
-
-
