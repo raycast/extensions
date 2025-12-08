@@ -88,7 +88,9 @@ const CreateAlias = () => {
       ) : (
         <>
           <Form.Dropdown {...itemProps.domain} title="Domain">
-            {options.data?.data.map((domain) => <Form.Dropdown.Item key={domain} title={domain} value={domain} />)}
+            {options.data?.data.map((domain) => (
+              <Form.Dropdown.Item key={domain} title={domain} value={domain} />
+            ))}
           </Form.Dropdown>
           <Form.Dropdown {...itemProps.format} title="Format">
             {FORMATS.filter(
