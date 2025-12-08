@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-12-08
 - Added user preference to toggle flag icons display
 - Updated dependencies for improved functionality and security
 - Upgraded ESLint configuration for better code quality
