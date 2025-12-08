@@ -1,6 +1,6 @@
 # setlist.fm Changelog
 
-[🪟 Added Windows Support] - {PR_MERGE_DATE}
+## [🪟 Added Windows Support] - {PR_MERGE_DATE}
 
 Added Windows support
 Updated libraries
