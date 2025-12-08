@@ -1,13 +1,16 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
-import isUrlSuperb from "is-url-superb";
+import validator from "validator";
 import { Format, Video } from "./types.js";
 import { existsSync } from "fs";
-import { execa } from "execa";
 import { execSync } from "child_process";
 
 export const isWindows = process.platform === "win32";
 export const isMac = process.platform === "darwin";
+
+function sanitizeWindowsPath(path: string): string {
+  return path.replace(/\r/g, "").replace(/\n/g, "").trim();
+}
 
 export const {
   downloadPath,
@@ -22,66 +25,61 @@ export const {
 } = getPreferenceValues<ExtensionPreferences>();
 
 export async function getWingetPath() {
-  const defaultPath = (await execa("where winget")).stdout.trim().split("\n")[0];
-
-  if (!existsSync(defaultPath)) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Winget path not found",
-      message: "Please set the correct path in preferences.",
-    });
+  try {
+    const wingetPath = sanitizeWindowsPath(execSync("where winget").toString().trim());
+    return wingetPath.split("\n")[0];
+  } catch {
+    throw new Error("Winget not found. Please ensure winget is installed and available in your PATH.");
   }
-
-  return defaultPath;
 }
 
 export const getytdlPath = () => {
-  if (ytdlPathPreference && existsSync(ytdlPathPreference)) return ytdlPathPreference;
+  const cleanedYtdlPath = isWindows ? sanitizeWindowsPath(ytdlPathPreference || "") : ytdlPathPreference;
+  if (cleanedYtdlPath && existsSync(cleanedYtdlPath)) return cleanedYtdlPath;
 
   try {
     const defaultPath = isMac
       ? "/opt/homebrew/bin/yt-dlp"
       : isWindows
-        ? execSync("where yt-dlp").toString().trim().split("\n")[0]
+        ? sanitizeWindowsPath(execSync("where yt-dlp").toString().trim().split("\n")[0])
         : "/usr/bin/yt-dlp";
 
     return defaultPath;
-  } catch (error) {
-    console.error(error);
+  } catch {
     return "";
   }
 };
 
 export const getffmpegPath = () => {
-  if (ffmpegPathPreference && existsSync(ffmpegPathPreference)) return ffmpegPathPreference;
+  const cleanedFfmpegPath = isWindows ? sanitizeWindowsPath(ffmpegPathPreference || "") : ffmpegPathPreference;
+  if (cleanedFfmpegPath && existsSync(cleanedFfmpegPath)) return cleanedFfmpegPath;
 
   try {
     const defaultPath = isMac
       ? "/opt/homebrew/bin/ffmpeg"
       : isWindows
-        ? execSync("where ffmpeg").toString().trim().split("\n")[0]
+        ? sanitizeWindowsPath(execSync("where ffmpeg").toString().trim().split("\n")[0])
         : "/usr/bin/ffmpeg";
 
     return defaultPath;
-  } catch (error) {
-    console.error(error);
+  } catch {
     return "";
   }
 };
 
 export const getffprobePath = () => {
-  if (ffprobePathPreference && existsSync(ffprobePathPreference)) return ffprobePathPreference;
+  const cleanedFfprobePath = isWindows ? sanitizeWindowsPath(ffprobePathPreference || "") : ffprobePathPreference;
+
+  if (cleanedFfprobePath && existsSync(cleanedFfprobePath)) return cleanedFfprobePath;
 
   try {
     const defaultPath = isMac
       ? "/opt/homebrew/bin/ffprobe"
       : isWindows
-        ? execSync("where ffprobe").toString().trim().split("\n")[0]
+        ? sanitizeWindowsPath(execSync("where ffprobe").toString().trim().split("\n")[0])
         : "/usr/bin/ffprobe";
     return defaultPath;
-  } catch (error) {
-    console.error(error);
-
+  } catch {
     return "";
   }
 };
@@ -131,7 +129,7 @@ export function isValidHHMM(input: string) {
 }
 
 export function isValidUrl(url: string) {
-  return isUrlSuperb(url, { lenient: true });
+  return validator.isURL(url, { require_protocol: false });
 }
 
 export function formatTbr(tbr: number | null) {

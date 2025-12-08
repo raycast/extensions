@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import process from "node:process";
 import { setTimeout } from "node:timers/promises";
 import {
   Action,
@@ -26,10 +27,12 @@ import {
   getAliases,
   getRelativeFileLink,
   loadCachedJson,
+  shuffleOnStart,
   useSearch,
   useVersion,
 } from "./utils.js";
 import { IconData, LaunchContext } from "./types.js";
+import { arrayToShuffled } from "array-shuffle";
 
 const itemDisplayColumns = {
   small: 8,
@@ -66,7 +69,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         slug: getIconSlug(icon),
       }));
 
-      setIcons(icons);
+      setIcons(shuffleOnStart ? arrayToShuffled(icons) : icons);
       setIsLoading(false);
 
       if (icons.length > 0) {
@@ -138,7 +141,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                   message:
                     "This feature requires Raycast Pro subscription. Do you want to open Raycast Pro page? (You can hide this Pro feature in preferences)",
                 });
-                if (confirmed) open("https://raycast.com/pro");
+                if (confirmed) open("https://raycast.com/pro?via=litomore");
               }}
             />
           </ActionPanel>
@@ -171,7 +174,12 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                       title="See Detail"
                       target={
                         <Detail
-                          markdown={`<img src="${fileLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${icon.hex}" />`}
+                          markdown={
+                            process.platform === "darwin"
+                              ? `<img src="${fileLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${icon.hex}" />`
+                              : // [TODO] Windows does not support tinting images via URL parameters
+                                `<img src="${fileLink}?raycast-width=325&raycast-height=325" />`
+                          }
                           navigationTitle={icon.title}
                           metadata={
                             <Detail.Metadata>

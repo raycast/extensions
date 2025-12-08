@@ -21,6 +21,7 @@ import {
   ShowProjectLabels,
   CopyProjectUrlToClipboardAction,
   CreateNewProjectIssuePushAction,
+  ShowProjectReadmeAction,
 } from "./project_actions";
 import { GitLabIcons, getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
@@ -66,6 +67,7 @@ export function ProjectListItem(props: { project: Project; nameOnly?: boolean })
             <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <ShowProjectReadmeAction project={project} />
             <OpenProjectIssuesPushAction project={project} />
             <OpenProjectMergeRequestsPushAction project={project} />
             <OpenProjectBranchesPushAction project={project} />
@@ -193,12 +195,16 @@ function MyProjectsDropdownItem(props: { project: Project }) {
   );
 }
 
-export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined) => void }): React.ReactNode | null {
+export function MyProjectsDropdown(props: {
+  onChange: (pro: Project | undefined) => void;
+  storeValue?: boolean;
+}): React.ReactNode | null {
   const { projects: myprojects } = useMyProjects();
   if (myprojects) {
     return (
       <List.Dropdown
         tooltip="Select Project"
+        storeValue={props.storeValue}
         onChange={(newValue) => {
           const pro = myprojects.find((p) => `${p.id}` === newValue);
           props.onChange(pro);

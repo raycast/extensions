@@ -2,148 +2,212 @@ import { Image } from "@raycast/api";
 import { Process } from "../types";
 
 /**
- * Platform detection utilities
+ * Platform detection
  */
 export const platform = process.platform;
 export const isMac = platform === "darwin";
 export const isWindows = platform === "win32";
 
 /**
- * Get platform-specific process list command
+ * Encode a PowerShell script to Base64 for safe execution via -EncodedCommand
+ * This avoids shell escaping issues with special characters like $
+ */
+function encodePowerShellCommand(script: string): string {
+  return Buffer.from(script, "utf16le").toString("base64");
+}
+
+/**
+ * Windows PowerShell script to quickly list all processes
+ * Returns: pid, name, cpu (placeholder 0), mem (KB), path
+ * Note: CPU is set to 0 here; actual CPU usage comes from getProcessPerformanceCommand()
+ */
+const WINDOWS_PROCESS_LIST_SCRIPT = `
+$result = Get-Process | Where-Object { $_.Id -ne 0 } | ForEach-Object {
+  [PSCustomObject]@{
+    pid = $_.Id
+    name = $_.ProcessName
+    cpu = 0
+    mem = [math]::Round($_.WorkingSet64 / 1KB, 0)
+    path = if ($_.Path) { $_.Path } else { '' }
+  }
+}
+$result | ConvertTo-Json -Compress
+`;
+
+/**
+ * Windows PowerShell script to fetch CPU usage via WMI performance counters
+ * This is slower but provides accurate real-time CPU percentage
+ * Returns: pid, cpu (percentage normalized by core count)
+ */
+const WINDOWS_CPU_PERFORMANCE_SCRIPT = `
+$cpuCores = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+$processes = Get-CimInstance Win32_PerfFormattedData_PerfProc_Process | Where-Object { $_.IDProcess -ne 0 -and $_.Name -ne '_Total' -and $_.Name -ne 'Idle' }
+$result = $processes | ForEach-Object {
+  [PSCustomObject]@{
+    pid = $_.IDProcess
+    cpu = [math]::Round($_.PercentProcessorTime / $cpuCores, 1)
+  }
+}
+$result | ConvertTo-Json -Compress
+`;
+
+/**
+ * Get command to list all processes
+ * - Windows: Uses Get-Process (fast, but CPU is placeholder)
+ * - macOS: Uses ps command
  */
 export function getProcessListCommand(): string {
   if (isWindows) {
-    // Windows: Use PowerShell to get process information
-    return `powershell "Get-Process | Select-Object Id,ProcessName,CPU,WorkingSet,Path | ForEach-Object { \\"$($_.Id) $($_.ProcessName) $($_.CPU) $($_.WorkingSet) $($_.Path)\\" }"`;
-  } else {
-    // macOS: Use ps command
-    return "ps -eo pid,ppid,pcpu,rss,comm";
+    return `powershell -EncodedCommand ${encodePowerShellCommand(WINDOWS_PROCESS_LIST_SCRIPT)}`;
   }
+  return "ps -eo pid,ppid,pcpu,rss,comm";
 }
 
 /**
- * Get platform-specific kill command
+ * Get command to fetch CPU performance data (Windows only)
+ * Uses WMI which is slower but provides accurate real-time CPU usage
  */
-export function getKillCommand(pid: number, force: boolean = false): string {
+export function getProcessPerformanceCommand(): string {
+  if (isWindows) {
+    return `powershell -EncodedCommand ${encodePowerShellCommand(WINDOWS_CPU_PERFORMANCE_SCRIPT)}`;
+  }
+  return "ps -eo pid,ppid,pcpu,rss,comm";
+}
+
+/**
+ * Get command to kill a process
+ */
+export function getKillCommand(pid: number, force = false): string {
   if (isWindows) {
     return force ? `taskkill /F /PID ${pid}` : `taskkill /PID ${pid}`;
-  } else {
-    // macOS
-    return force ? `sudo kill -9 ${pid}` : `kill -9 ${pid}`;
   }
+  return force ? `sudo kill -9 ${pid}` : `kill -9 ${pid}`;
 }
 
 /**
- * Parse process information based on platform
+ * Parse macOS ps command output line
+ * Format: pid ppid cpu mem path
  */
 export function parseProcessLine(line: string): Partial<Process> | null {
-  if (!line.trim()) return null;
+  const trimmed = line.trim();
+  if (!trimmed) return null;
 
-  if (isWindows) {
-    // Windows PowerShell output format: "PID ProcessName CPU WorkingSet Path"
-    const parts = line.trim().split(/\s+/);
-    if (parts.length < 4) return null;
+  const match = trimmed.match(/(\d+)\s+(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/);
+  if (!match) return null;
 
-    const [id, processName, cpu, mem, ...pathParts] = parts;
-    const path = pathParts.join(" ") || "";
+  const [, id, pid, cpu, mem, path] = match;
+  return {
+    id: parseInt(id),
+    pid: parseInt(pid),
+    cpu: parseFloat(cpu),
+    mem: parseInt(mem),
+    path,
+    processName: path.match(/[^/]*$/)?.[0] ?? "",
+  };
+}
 
-    return {
-      id: parseInt(id) || 0,
-      pid: 0, // Parent PID not easily available in basic Windows commands
-      cpu: parseFloat(cpu) || 0,
-      mem: parseInt(mem) || 0,
-      path: path,
-      processName: processName || "",
-    };
-  } else {
-    // macOS: ps output format
-    const defaultValue = ["", "", "", "", "", ""];
-    const regex = /(\d+)\s+(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/;
-    const [, id, pid, cpu, mem, path] = line.match(regex) ?? defaultValue;
+/**
+ * Parse Windows process list JSON output
+ */
+export function parseWindowsProcesses(output: string): Partial<Process>[] {
+  try {
+    const data = JSON.parse(output);
+    const processes = Array.isArray(data) ? data : [data];
 
-    if (!id) return null;
-
-    const processName = path.match(/[^/]*[^/]*$/i)?.[0] ?? "";
-
-    return {
-      id: parseInt(id),
-      pid: parseInt(pid),
-      cpu: parseFloat(cpu),
-      mem: parseInt(mem),
-      path: path,
-      processName: processName,
-    };
+    return processes.map((proc: { pid: number; name: string; cpu: number; mem: number; path: string }) => ({
+      id: proc.pid,
+      pid: 0,
+      cpu: proc.cpu,
+      mem: proc.mem,
+      path: proc.path || "",
+      processName: proc.name || "",
+    }));
+  } catch {
+    console.error("Failed to parse Windows process output");
+    return [];
   }
 }
 
 /**
- * Detect process type based on platform
+ * Parse Windows CPU performance data JSON output
+ * Returns map of process ID to CPU percentage
+ */
+export function parseWindowsPerformanceData(output: string): Map<number, number> {
+  const cpuMap = new Map<number, number>();
+  try {
+    const data = JSON.parse(output);
+    const processes = Array.isArray(data) ? data : [data];
+
+    for (const proc of processes) {
+      if (proc?.pid) {
+        cpuMap.set(proc.pid, proc.cpu ?? 0);
+      }
+    }
+  } catch {
+    console.error("Failed to parse Windows performance output");
+  }
+  return cpuMap;
+}
+
+/**
+ * Detect process type based on path
  */
 export function getProcessType(path: string): Process["type"] {
   if (isMac) {
-    // macOS-specific detection
-    const isPrefPane = path.includes(".prefPane");
-    const isApp = path.includes(".app/");
-    return isPrefPane ? "prefPane" : isApp ? "app" : "binary";
-  } else if (isWindows) {
-    // Windows-specific detection
-    const isApp =
-      path.toLowerCase().endsWith(".exe") &&
-      (path.toLowerCase().includes("program files") || path.toLowerCase().includes("applications"));
-    return isApp ? "app" : "binary";
-  } else {
-    // Fallback for unsupported platforms
+    if (path.includes(".prefPane")) return "prefPane";
+    if (path.includes(".app/")) return "app";
     return "binary";
   }
+
+  if (isWindows) {
+    const lowerPath = path.toLowerCase();
+    const isApp =
+      lowerPath.endsWith(".exe") && (lowerPath.includes("program files") || lowerPath.includes("applications"));
+    return isApp ? "app" : "binary";
+  }
+
+  return "binary";
 }
 
 /**
- * Extract application name based on platform
+ * Extract application name from path
  */
 export function getAppName(path: string, processName: string): string | undefined {
   if (isMac) {
-    // macOS: Extract from .app bundle path
     return path.match(/(?<=\/)[^/]+(?=\.app\/)/)?.[0];
-  } else if (isWindows) {
-    // Windows: Use process name without .exe extension
-    return processName.replace(/\.exe$/i, "");
-  } else {
-    // Fallback for unsupported platforms
-    return processName;
   }
+  if (isWindows) {
+    return processName.replace(/\.exe$/i, "");
+  }
+  return processName;
 }
 
 /**
- * Get platform-specific file icon
+ * Get file icon for a process
  */
 export function getFileIcon(process: Process): Image.ImageLike {
   if (isMac) {
-    // macOS-specific icon handling
     if (process.type === "prefPane") {
-      return {
-        fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "",
-      };
+      return { fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "" };
     }
-
     if (process.type === "app" || process.type === "aggregatedApp") {
       return { fileIcon: process.path?.replace(/(.+\.app)(.+)/, "$1") ?? "" };
     }
-
     return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
-  } else if (isWindows) {
-    // Windows-specific icon handling
+  }
+
+  if (isWindows) {
     if (process.type === "app") {
       return { fileIcon: process.path };
     }
-    return "🖥️"; // Generic computer icon for Windows binaries
-  } else {
-    // Fallback for unsupported platforms
-    return "⚙️"; // Generic gear icon
+    return "🖥️";
   }
+
+  return "⚙️";
 }
 
 /**
- * Get platform-specific error messages and help
+ * Get error help message for failed kill attempts
  */
 export function getPlatformSpecificErrorHelp(isForceKill: boolean): {
   title: string;
@@ -156,15 +220,17 @@ export function getPlatformSpecificErrorHelp(isForceKill: boolean): {
       message: "Please ensure that touch ID/password prompt is enabled for sudo",
       helpUrl: "https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28",
     };
-  } else if (isWindows && isForceKill) {
+  }
+
+  if (isWindows && isForceKill) {
     return {
       title: "Failed to Force Kill Process",
       message: "Administrative privileges may be required. Try running as administrator.",
     };
-  } else {
-    return {
-      title: "Failed to Kill Process",
-      message: "The process could not be terminated. It may have already exited or require elevated privileges.",
-    };
   }
+
+  return {
+    title: "Failed to Kill Process",
+    message: "The process could not be terminated. It may have already exited or require elevated privileges.",
+  };
 }

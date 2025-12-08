@@ -47,6 +47,7 @@ function MyPullRequestsMenu() {
     includeReviewed,
     includeReviewRequests,
     includeRecentlyClosed,
+    includeDrafts,
     useUnreadIndicator,
     repositoryFilterMode,
     repositoryList,
@@ -72,6 +73,7 @@ function MyPullRequestsMenu() {
     includeRecentlyClosed,
     includeReviewRequests,
     includeReviewed,
+    includeDrafts,
     filterMode: repositoryFilterMode,
     repositoryList: repositoryListArray,
   });

@@ -29,10 +29,12 @@
     "lachero",
     "pascal_burkhard",
     "roberto.cinetto",
-    "emiliocantuc"
+    "emiliocantuc",
+    "raxityo"
   ],
   "keywords": [
     "vscode",
+    "antigravity",
     "cursor",
     "codium",
     "kiro",
@@ -90,6 +92,10 @@
       "default": "Code",
       "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
+        {
+          "title": "Antigravity",
+          "value": "Antigravity"
+        },
         {
           "title": "Cursor",
           "value": "Cursor"

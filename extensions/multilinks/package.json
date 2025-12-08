@@ -5,6 +5,9 @@
   "description": "Open multiple links at once",
   "icon": "command-icon.png",
   "author": "abhisheksatre",
+  "contributors": [
+    "lachero"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -20,6 +23,12 @@
       "name": "create-link",
       "title": "Create MultiLink",
       "description": "Create new MultiLink",
+      "mode": "view"
+    },
+    {
+      "name": "open-multilink",
+      "title": "Open MultiLink",
+      "description": "Open multiple links at once without saving",
       "mode": "view"
     }
   ],
@@ -40,7 +49,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

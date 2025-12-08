@@ -1,20 +1,36 @@
-# Football Changelog
+# Changelog
 
-## [Fix] - 2024-12-20
+## [1.0.0] - 2025-11-24
 
-- Fotmob API
-  - Match day has the same problem now as team details had before and solved it with the same solution
+### Added
+- Match Day view to see current match schedule and results
+- Favorite teams, players, and leagues management
+- Search functionality for teams and players
+- Player detail view with comprehensive statistics
+- Team detail view with team information and squad
+- League table view with standings
+- Match detail view with match statistics
+- Favorite upcoming matches view
+- Favorite league tables view
+- Support for Fotmob API integration
 
-## [Updates] - 2024-12-05
+### Features
+- ⚽ View match schedules and results
+- 🏆 Track league tables and standings
+- 👤 Search and view player details
+- 🏟️ Search and view team information
+- ❤️ Manage favorite teams, players, and leagues
+- 📊 Detailed match statistics and information
+- 🔍 Comprehensive search functionality
 
-- Fotmob API
-  - Fixed issue with fetching team details
+### Technical
+- Built with TypeScript and React
+- Raycast API integration
+- ESLint and Prettier configuration
+- Comprehensive error handling
+- Responsive UI components
 
-## [Updates] - 2024-06-11
+## [1.0.1] - 2025-10-13
 
-- Cleanup UI
-  - Removed "ID: " from subtitle, added option to copy ID to clipboard
-- Dependency updates, code cleanup (alias imports, hooks)
-- Added "Open in Browser" option to context menu in favorite view
-
-## [0.1] - 2023-10-04
+- Remove cross-fetch
+- Update packages
