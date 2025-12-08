@@ -49,6 +49,10 @@ export default function Command() {
   );
 }
 
+import { Action, ActionPanel, Detail, List, Image } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
+import { searchLyrics, LrcLibTrack, formatLyrics } from "./utils/lrclib";
 import { getArtwork } from "./utils/artwork";
 
 function LyricsDetail({ track }: { track: LrcLibTrack }) {
