@@ -45,7 +45,7 @@ export const jiraWithApiToken = {
 
     let hostname;
     try {
-      hostname = new URL(siteUrl).host;
+      hostname = new URL(rawSite).host;
     } catch {
       // If the URL isn't valid, assume a hostname was entered directly
       hostname = rawSite.replace(/^https?:\/\//i, "");
