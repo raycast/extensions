@@ -1,9 +1,10 @@
 # Jira Changelog
 
-## [Update] - 2025-12-07
+## [Add Windows support and credential fallback] - 2025-12-07
 
-- Add MacOS and Windows to supported platforms
-- Update dependencies and improve error handling
+- Add macOS and Windows to supported platforms (updated in `package.json`).
+- Update dependencies and improve error handling.
+- Add environment-variable fallback and robust Base64 handling in `src/api/jiraCredentials.ts` for better Windows compatibility.
 
 ## [Fix unbounded JQL error when no project filter] - 2025-09-08
 
