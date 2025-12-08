@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Use distinct status icons for PR states] - {PR_MERGE_DATE}
+## [Use distinct status icons for PR states] - 2025-12-08
 
 - My Pull Requests Menu Bar: Added dedicated icons for merged, closed, draft, and merge queue PR states
 
