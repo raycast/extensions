@@ -1,4 +1,4 @@
-import { Action, Keyboard } from "@raycast/api";
+import { Action } from "@raycast/api";
 
 export default function OpenInAlwaysdata({ path }: { path: string }) {
   return (
@@ -6,7 +6,6 @@ export default function OpenInAlwaysdata({ path }: { path: string }) {
       icon="alwaysdata.png"
       title="Open in Alwaysdata"
       url={`https://admin.alwaysdata.com/${path}/`}
-      shortcut={Keyboard.Shortcut.Common.Open}
     />
   );
 }

@@ -25,6 +25,7 @@ export const makeRequest = async <T>(
     headers,
   });
   if (response.status === 201 || response.status === 204) return undefined as T;
+  if (!response.headers.get("Content-Type")?.includes("application/json")) throw new Error(response.statusText);
   const result = await response.json();
   if (!response.ok) {
     const err = result as ErrorResult;
@@ -52,8 +53,6 @@ export const alwaysdata = {
   },
   tokens: {
     delete: (props: { id: number }) => makeRequest<void>(`token/${props.id}`, { method: "DELETE" }),
-    generate: (props: { app_name: string; allowed_ips: string }) =>
-      makeRequest<void>("token", { method: "POST", body: JSON.stringify(props) }),
     list: () => makeRequest<Token[]>("token"),
   },
 };
