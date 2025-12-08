@@ -5,6 +5,7 @@
   "description": "Monitor and manage open ports on your system with the ability to kill processes using specific ports.",
   "icon": "extension.png",
   "license": "MIT",
+  "type": "module",
   "commands": [
     {
       "name": "index",

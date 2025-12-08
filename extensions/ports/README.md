@@ -1,6 +1,6 @@
 # Port Manager
 
-A powerful Raycast extension for monitoring and managing open ports on your system. Quickly view all active TCP ports, identify which processes are using them, and terminate processes with a single action. Cross-platform support for Windows and macOS.
+A powerful Raycast extension for monitoring and managing open ports on your system. Quickly view all active TCP ports, identify which processes are using them, and terminate processes with a single action. Platform support for Windows.
 
 ![Port Manager Extension](metadata/screenshot1.png)
 
@@ -29,7 +29,7 @@ A powerful Raycast extension for monitoring and managing open ports on your syst
 
 ## Installation
 
-1. Install [Raycast](https://raycast.com/) on your Windows or macOS system
+1. Install [Raycast](https://raycast.com/) on your Windows system
 2. Open Raycast and search for "Port Manager"
 3. Install the extension from the Raycast Store
 4. Grant necessary permissions when prompted
@@ -39,7 +39,6 @@ A powerful Raycast extension for monitoring and managing open ports on your syst
 ### Opening Port Manager
 
 - **Windows**: Open Raycast (`Win + Space` by default)
-- **macOS**: Open Raycast (`⌘ + Space` by default)
 - Type "Manage Open Ports" or "ports"
 - Press Enter to launch the extension
 
@@ -62,13 +61,13 @@ The fastest way to kill a process by port number:
 
 ### Available Actions
 
-| Action            | Windows Shortcut | macOS Shortcut | Description                                    |
-| ----------------- | ---------------- | -------------- | ---------------------------------------------- |
-| Kill Process      | `Ctrl+Shift+K`   | `⌘+Shift+K`    | Terminate the process using the selected port  |
-| Refresh List      | `Ctrl+Shift+R`   | `⌘+Shift+R`    | Update the port list with current system state |
-| Copy Process Name | -                | -              | Copy the process name to clipboard             |
-| Copy Address      | -                | -              | Copy the port address to clipboard             |
-| Copy PID          | -                | -              | Copy the process ID to clipboard               |
+| Action            | Windows Shortcut | Description                                    |
+| ----------------- | ---------------- | ---------------------------------------------- |
+| Kill Process      | `Ctrl+Shift+K`   | Terminate the process using the selected port  |
+| Refresh List      | `Ctrl+Shift+R`   | Update the port list with current system state |
+| Copy Process Name | -                | Copy the process name to clipboard             |
+| Copy Address      | -                | Copy the port address to clipboard             |
+| Copy PID          | -                | Copy the process ID to clipboard               |
 
 ## Commands
 
@@ -175,12 +174,6 @@ ports/
 - May require running Raycast as Administrator for process termination
 - Uses Windows built-in networking commands (netstat, tasklist, taskkill)
 
-### macOS
-
-- Requires macOS 10.15 (Catalina) or later
-- May require granting Terminal/System Events permissions
-- Uses Unix-based commands (lsof, kill) available in macOS
-
 ## Contributing
 
 1. Fork the repository
@@ -197,38 +190,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **dleteliers\_**
 
-## Changelog
-
-### [🎂 Added Cross-Platform Support] - Latest
-
-#### Added
-
-- **macOS Support**: Full compatibility with macOS systems using `lsof` and `kill` commands
-- **OS Detection**: Automatic operating system detection and command selection
-- **Cross-Platform Architecture**: Modular design supporting multiple operating systems
-- **Platform-Specific Shortcuts**: Native keyboard shortcuts for both Windows and macOS
-
 #### Enhanced
 
 - **Port Detection**: Improved port detection logic for both platforms
 - **Process Management**: Platform-appropriate process termination methods
 - **Error Handling**: Better error messages and platform-specific troubleshooting
 - **Documentation**: Updated documentation with platform-specific instructions
-
-### [🎂 Added Port Manager] - Initial Release
-
-- Add port monitoring functionality to view all open TCP ports
-- Add process identification with process names for each port
-- Add ability to kill processes using their PID
-- Add search functionality to filter ports by address, PID, or process name
-- Add copy actions for port address, PID, and process name
-- Add keyboard shortcuts for common actions
-- Add real-time port detection and management
-- Add Windows-specific implementation using netstat and tasklist commands
-- Add loading states and error handling
-- Add toast notifications for successful operations
-- Add responsive UI with Raycast List component
-- Add action panel with contextual actions for each port
 
 ## Support
 
@@ -244,11 +211,6 @@ If you encounter any issues or have questions:
 
 - **Permission Error**: Run Raycast as Administrator
 - **Command Not Found**: Ensure Windows networking tools are available
-
-#### macOS
-
-- **Permission Denied**: Grant necessary permissions in System Preferences > Security & Privacy
-- **Command Not Found**: Ensure you have developer tools installed (`xcode-select --install`)
 
 ---
 
