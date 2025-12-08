@@ -1,6 +1,6 @@
 # Perry Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-12-08
 
 - Quick Query: Execute SQL queries with autocomplete for tables, columns, and keywords
 - Search Tables: Browse and search table data with smart filtering
