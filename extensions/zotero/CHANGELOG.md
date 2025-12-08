@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2025-12-08
 
 - Add search through the notes
 - Update "Open PDF" priority to select the "Primary" PDF (oldest attachment)

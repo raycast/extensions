@@ -197,5 +197,8 @@
     "dev": "ray develop",
     "lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
