@@ -27,24 +27,28 @@
     {
       "name": "domains",
       "title": "Manage Domains",
+      "subtitle": "alwaysdata",
       "description": "Manage Domains",
       "mode": "view"
     },
     {
       "name": "emails",
       "title": "Manage Emails",
+      "subtitle": "alwaysdata",
       "description": "Manage Emails",
       "mode": "view"
     },
     {
       "name": "sites",
       "title": "Manage Sites",
+      "subtitle": "alwaysdata",
       "description": "Manage Sites",
       "mode": "view"
     },
     {
       "name": "tokens",
       "title": "Manage Tokens",
+      "subtitle": "alwaysdata",
       "description": "Manage Tokens",
       "mode": "view"
     }

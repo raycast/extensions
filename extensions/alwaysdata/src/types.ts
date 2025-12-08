@@ -58,7 +58,7 @@ enum SiteType {
 export type Site = {
   id: number;
   type: SiteType;
-  addresses: string[];
+  addresses: [string, ...string[]];
 };
 
 export type Token = {
