@@ -1,6 +1,6 @@
 # Port Manager Changelog
 
-## [🥳 Port Manager v2] - {PR_MERGE_DATE}
+## [🥳 Port Manager v2] - 2025-12-08
 
 ### 🚀 Major Features
 - **New Kill Port Command**: Direct port termination via command argument - simply type the port number and instantly kill the process
