@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List, Toast, closeMainWindow, popToRoot, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getBrowsers, setDefaultBrowser } from "./lib/launch-services";
+import { showFailureToast } from "@raycast/utils";
 
 type BrowserListItem = {
   bundleId: string;
@@ -20,11 +21,7 @@ export default function Command() {
         setDefault(data.defaultBrowser);
         setBrowsers(data.browsers.sort((a, b) => a.name.localeCompare(b.name)));
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load browsers",
-          message: error instanceof Error ? error.message : String(error),
-        });
+        await showFailureToast(error, { title: "Failed to load browsers" });
       } finally {
         setIsLoading(false);
       }
@@ -39,11 +36,7 @@ export default function Command() {
       await closeMainWindow();
       return;
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to set default browser",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Failed to set default browser" });
     }
   };
 

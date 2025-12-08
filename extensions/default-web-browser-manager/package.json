@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "choose-default",
-      "title": "Choose Default",
+      "title": "Choose Default Browser",
       "description": "Choose your default browser",
       "mode": "view"
     }
