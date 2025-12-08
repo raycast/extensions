@@ -51,7 +51,7 @@ An advanced SVG playground right inside Raycast. Preview, edit, and export SVGs 
 
 
 
-一个极其强大的 Raycast SVG 游乐场。直接在 Raycast 中预览、编辑并导出 SVG。
+一个极其强大的 Raycast SVG 工作台。直接在 Raycast 中预览、编辑并导出 SVG。
 
 **SVG Studio** 将 Raycast 变成了一个轻量级的矢量图形 IDE。无论你是想快速查看剪贴板里的图标、微调颜色属性，还是为 PPT 导出一张高清 PNG 图片，SVG Studio 都能为你提供原生般的流畅体验。
 
@@ -91,13 +91,3 @@ An advanced SVG playground right inside Raycast. Preview, edit, and export SVGs 
 - **引擎**: 基于本地 Webview 和 **Ace Editor** (CDN) 构建。
 - **安全**: 所有的渲染过程均在本地完成，不会上传任何 SVG 数据。
 - **性能**: 针对拖拽和缩放进行了专门优化，丝般顺滑。
-
-------
-
-
-
-### Author
-
-
-
-Created by **JaffryGao**.
