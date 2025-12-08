@@ -388,6 +388,7 @@ let hasLoggedInternalApiConfig = false;
 /**
  * Fetch all formulae from the remote API.
  * Uses internal API when `useInternalApi` preference is enabled.
+ * Falls back to public API if internal API fails.
  *
  * Internal API benefits:
  * - ~1 MB download vs ~30 MB (96% smaller)
@@ -400,7 +401,15 @@ export async function brewFetchFormulae(onProgress?: DownloadProgressCallback): 
       logInternalApiConfig();
       hasLoggedInternalApiConfig = true;
     }
-    return await fetchInternalFormulae(onProgress);
+    try {
+      return await fetchInternalFormulae(onProgress);
+    } catch (error) {
+      // Internal API failed, fall back to public API
+      brewLogger.warn("Internal formulae API failed, falling back to public API", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return await fetchRemote(formulaRemote, onProgress);
+    }
   }
   return await fetchRemote(formulaRemote, onProgress);
 }
@@ -408,6 +417,7 @@ export async function brewFetchFormulae(onProgress?: DownloadProgressCallback): 
 /**
  * Fetch all casks from the remote API.
  * Uses internal API when `useInternalApi` preference is enabled.
+ * Falls back to public API if internal API fails.
  *
  * Internal API benefits:
  * - JWS format with full metadata
@@ -419,7 +429,15 @@ export async function brewFetchCasks(onProgress?: DownloadProgressCallback): Pro
       logInternalApiConfig();
       hasLoggedInternalApiConfig = true;
     }
-    return await fetchInternalCasks(onProgress);
+    try {
+      return await fetchInternalCasks(onProgress);
+    } catch (error) {
+      // Internal API failed, fall back to public API
+      brewLogger.warn("Internal casks API failed, falling back to public API", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return await fetchRemote(caskRemote, onProgress);
+    }
   }
   return await fetchRemote(caskRemote, onProgress);
 }

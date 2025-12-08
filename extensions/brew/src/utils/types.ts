@@ -136,6 +136,10 @@ export interface DownloadProgress {
   itemsProcessed?: number;
   /** Total number of items (known after processing completes) */
   totalItems?: number;
+  /** Whether an error occurred during download/processing */
+  error?: boolean;
+  /** Error message if error is true */
+  errorMessage?: string;
 }
 
 export type DownloadProgressCallback = (progress: DownloadProgress) => void;

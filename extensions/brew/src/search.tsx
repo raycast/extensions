@@ -171,10 +171,22 @@ export default function Main() {
     const { phase, casksProgress, formulaeProgress } = loadingState;
 
     // Cold start: show detailed download progress
-    // Detect processing state: download is at 100% but phase hasn't moved on
+    // Detect processing state: download is at 100% (or bytes match) but phase hasn't moved on
     // This happens because processing takes a long time after download completes
-    const isProcessingCasks = phase === "casks" && casksProgress.percent === 100 && !casksProgress.complete;
-    const isProcessingFormulae = phase === "formulae" && formulaeProgress.percent === 100 && !formulaeProgress.complete;
+    // Handle edge case where percent is -1 (unknown total) by checking bytes directly
+    const isCasksDownloadDone =
+      casksProgress.percent >= 100 ||
+      (casksProgress.bytesDownloaded > 0 &&
+        casksProgress.totalBytes > 0 &&
+        casksProgress.bytesDownloaded >= casksProgress.totalBytes);
+    const isFormulaeDownloadDone =
+      formulaeProgress.percent >= 100 ||
+      (formulaeProgress.bytesDownloaded > 0 &&
+        formulaeProgress.totalBytes > 0 &&
+        formulaeProgress.bytesDownloaded >= formulaeProgress.totalBytes);
+
+    const isProcessingCasks = phase === "casks" && isCasksDownloadDone && !casksProgress.complete;
+    const isProcessingFormulae = phase === "formulae" && isFormulaeDownloadDone && !formulaeProgress.complete;
 
     // Formulae haven't started yet if we're still in casks phase
     const formulaeNotStarted = phase === "casks";

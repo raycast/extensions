@@ -10,66 +10,172 @@
  * Use the `useInternalApi` preference to enable it.
  */
 
-import { cpus } from "os";
+import { cpus, release } from "os";
+import { execSync } from "child_process";
 import { Cask, Formula, DownloadProgressCallback } from "../types";
 import { cacheLogger, fetchLogger } from "../logger";
 
 /// System Tag Detection
 
-// Tahoe is macOS 26 (future)
-const MACOS_FUTURE_VERSIONS: Record<string, string> = {
-  tahoe: "26",
+/**
+ * macOS version name mapping from major version number.
+ * Darwin kernel version = macOS version + 4 (e.g., Darwin 24.x = macOS 15 Sequoia)
+ * https://en.wikipedia.org/wiki/Darwin_(operating_system)#Release_history
+ */
+const MACOS_VERSION_NAMES: Record<number, string> = {
+  15: "sequoia", // macOS 15 (Darwin 24.x)
+  14: "sonoma", // macOS 14 (Darwin 23.x)
+  13: "ventura", // macOS 13 (Darwin 22.x)
+  12: "monterey", // macOS 12 (Darwin 21.x)
+  11: "big_sur", // macOS 11 (Darwin 20.x)
+  // Homebrew 5.0 dropped support for macOS 10.14 (Mojave) and earlier
 };
+
+// Future macOS versions (for development/testing)
+const MACOS_FUTURE_VERSIONS: Record<string, number> = {
+  tahoe: 26, // macOS 26 (future)
+};
+
+// Cache detected values to avoid repeated system calls
+let cachedSystemTag: string | null = null;
+let cachedMacOSVersion: number | null = null;
 
 /**
  * Get the current system tag for internal API URLs.
  * Format: {arch}_{os_version} (e.g., "arm64_sequoia", "x86_64_sonoma")
  */
 export function getSystemTag(): string {
+  if (cachedSystemTag) {
+    return cachedSystemTag;
+  }
+
   const arch = getArchitecture();
   const osVersion = getMacOSVersionName();
-  return `${arch}_${osVersion}`;
+  cachedSystemTag = `${arch}_${osVersion}`;
+
+  fetchLogger.log("Detected system tag", {
+    systemTag: cachedSystemTag,
+    architecture: arch,
+    macOSVersion: osVersion,
+  });
+
+  return cachedSystemTag;
 }
 
 /**
  * Get the CPU architecture.
+ * Uses process.arch as primary source, with CPU model as fallback.
  */
 function getArchitecture(): string {
+  // process.arch is the most reliable source
+  if (process.arch === "arm64") {
+    return "arm64";
+  }
+  if (process.arch === "x64") {
+    return "x86_64";
+  }
+
+  // Fallback: check CPU model for Apple Silicon
   const firstCpu = cpus()[0];
-  return firstCpu?.model?.includes("Apple") ? "arm64" : "x86_64";
+  if (firstCpu?.model?.includes("Apple")) {
+    return "arm64";
+  }
+
+  return "x86_64";
+}
+
+/**
+ * Get the macOS major version number.
+ * Uses multiple detection methods for reliability.
+ */
+function getMacOSVersion(): number {
+  if (cachedMacOSVersion !== null) {
+    return cachedMacOSVersion;
+  }
+
+  // Method 1: Check environment variable override (for testing/development)
+  const envVersion = process.env.HOMEBREW_MACOS_VERSION;
+  if (envVersion) {
+    const parsed = parseInt(envVersion, 10);
+    if (!isNaN(parsed) && parsed >= 11 && parsed <= 30) {
+      cachedMacOSVersion = parsed;
+      return cachedMacOSVersion;
+    }
+  }
+
+  // Method 2: Try sw_vers command (most accurate)
+  try {
+    const swVersOutput = execSync("sw_vers -productVersion", {
+      encoding: "utf8",
+      timeout: 5000,
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+    // Format: "15.1" or "14.6.1"
+    const majorVersion = parseInt(swVersOutput.split(".")[0], 10);
+    if (!isNaN(majorVersion) && majorVersion >= 11) {
+      cachedMacOSVersion = majorVersion;
+      return cachedMacOSVersion;
+    }
+  } catch {
+    // sw_vers failed, try next method
+  }
+
+  // Method 3: Derive from Darwin kernel version
+  // Darwin version = macOS version + 4 (approximately)
+  // e.g., Darwin 24.x = macOS 15 (Sequoia)
+  try {
+    const darwinVersion = release(); // e.g., "24.1.0"
+    const darwinMajor = parseInt(darwinVersion.split(".")[0], 10);
+    if (!isNaN(darwinMajor) && darwinMajor >= 20) {
+      // Darwin 20 = macOS 11, Darwin 21 = macOS 12, etc.
+      cachedMacOSVersion = darwinMajor - 9;
+      return cachedMacOSVersion;
+    }
+  } catch {
+    // Darwin version detection failed
+  }
+
+  // Method 4: Default based on architecture (last resort)
+  // Apple Silicon requires macOS 11+, most users are on recent versions
+  const arch = getArchitecture();
+  cachedMacOSVersion = arch === "arm64" ? 15 : 14; // Sequoia for ARM, Sonoma for Intel
+  return cachedMacOSVersion;
 }
 
 /**
  * Get the macOS version name (e.g., "sequoia", "sonoma").
  */
 function getMacOSVersionName(): string {
-  try {
-    // Try to get from process.platform and os.release()
-    // os.release() returns Darwin kernel version, not macOS version
-    // We need to use a different approach
+  const version = getMacOSVersion();
 
-    // Check for known future versions first (for development)
-    for (const [name, version] of Object.entries(MACOS_FUTURE_VERSIONS)) {
-      // This is a placeholder - in practice we'd detect this differently
-      if (process.env.HOMEBREW_MACOS_VERSION === version) {
-        return name;
-      }
-    }
-
-    // Try to detect from sw_vers or default based on architecture
-    // For now, use a reasonable default based on architecture
-    // Most Apple Silicon Macs run recent macOS versions
-    const arch = getArchitecture();
-    if (arch === "arm64") {
-      // Default to sequoia for Apple Silicon (most common)
-      return "sequoia";
-    } else {
-      // Default to sonoma for Intel
-      return "sonoma";
-    }
-  } catch {
-    return "sequoia"; // Safe default
+  // Check known versions
+  const versionName = MACOS_VERSION_NAMES[version];
+  if (versionName) {
+    return versionName;
   }
+
+  // Check future versions
+  for (const [name, futureVersion] of Object.entries(MACOS_FUTURE_VERSIONS)) {
+    if (version === futureVersion) {
+      return name;
+    }
+  }
+
+  // Unknown version - use the most recent known version
+  // This handles cases where a new macOS is released before we update the map
+  if (version > 15) {
+    fetchLogger.warn("Unknown macOS version, using sequoia as fallback", {
+      detectedVersion: version,
+    });
+    return "sequoia";
+  }
+
+  // Very old version (shouldn't happen with Homebrew 5.0)
+  fetchLogger.warn("Unsupported macOS version detected", {
+    detectedVersion: version,
+    minimumSupported: 11,
+  });
+  return "big_sur";
 }
 
 /// Internal API URLs
@@ -102,10 +208,15 @@ type InternalFormulaArray = [string, number, number, string | null, string[]];
 
 /**
  * Internal API response structure (JWS format).
+ * JWS (JSON Web Signature) wraps the payload with cryptographic signatures.
+ *
+ * Note: We do not verify signatures as this is read-only public data.
+ * The signatures are primarily for Homebrew's internal integrity checks.
  */
 interface JWSResponse {
-  payload: string; // JSON string
-  signatures: unknown[];
+  payload: string; // Base64url-encoded or plain JSON string
+  signatures?: unknown[]; // Optional array of signatures
+  protected?: string; // Optional protected header
 }
 
 /**
@@ -126,6 +237,99 @@ interface InternalCaskPayload {
   casks: Record<string, Cask>;
   renames: Record<string, string>;
   tap_migrations: Record<string, string>;
+}
+
+/**
+ * Type guard to validate JWS response structure.
+ */
+function isValidJWSResponse(obj: unknown): obj is JWSResponse {
+  if (typeof obj !== "object" || obj === null) {
+    return false;
+  }
+  const response = obj as Record<string, unknown>;
+  return typeof response.payload === "string" && response.payload.length > 0;
+}
+
+/**
+ * Parse and validate a JWS response, extracting the payload.
+ * Handles both plain JSON payloads and base64url-encoded payloads.
+ *
+ * @throws Error if the response is not a valid JWS structure
+ */
+function parseJWSPayload<T>(text: string, context: string): T {
+  let jwsResponse: unknown;
+
+  // Step 1: Parse outer JSON
+  try {
+    jwsResponse = JSON.parse(text);
+  } catch (error) {
+    fetchLogger.warn(`Failed to parse ${context} JWS response as JSON`, {
+      context,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw new Error(`Failed to parse ${context} JWS response: Invalid JSON`);
+  }
+
+  // Step 2: Validate JWS structure
+  if (!isValidJWSResponse(jwsResponse)) {
+    throw new Error(
+      `Invalid ${context} JWS response: Missing or invalid 'payload' field. ` +
+        `Expected object with 'payload' string, got: ${typeof jwsResponse}`,
+    );
+  }
+
+  // Step 3: Extract and parse payload
+  const payloadString = jwsResponse.payload;
+  let payload: T;
+
+  try {
+    // Try parsing as plain JSON first (Homebrew's format)
+    payload = JSON.parse(payloadString) as T;
+  } catch (plainJsonError) {
+    // If that fails, try base64url decoding (standard JWS format)
+    try {
+      const decoded = Buffer.from(payloadString, "base64url").toString("utf8");
+      payload = JSON.parse(decoded) as T;
+    } catch (decodeError) {
+      fetchLogger.warn(`Failed to parse ${context} JWS payload with both plain JSON and base64url decoding`, {
+        context,
+        plainJsonError: plainJsonError instanceof Error ? plainJsonError.message : String(plainJsonError),
+        decodeError: decodeError instanceof Error ? decodeError.message : String(decodeError),
+      });
+      throw new Error(
+        `Failed to parse ${context} JWS payload: ` + `Neither plain JSON nor base64url decoding succeeded`,
+      );
+    }
+  }
+
+  return payload;
+}
+
+/**
+ * Validate internal formula payload structure.
+ */
+function isValidFormulaPayload(obj: unknown): obj is InternalFormulaPayload {
+  if (typeof obj !== "object" || obj === null) {
+    return false;
+  }
+  const payload = obj as Record<string, unknown>;
+  return (
+    typeof payload.formulae === "object" &&
+    payload.formulae !== null &&
+    typeof payload.aliases === "object" &&
+    typeof payload.renames === "object"
+  );
+}
+
+/**
+ * Validate internal cask payload structure.
+ */
+function isValidCaskPayload(obj: unknown): obj is InternalCaskPayload {
+  if (typeof obj !== "object" || obj === null) {
+    return false;
+  }
+  const payload = obj as Record<string, unknown>;
+  return typeof payload.casks === "object" && payload.casks !== null;
 }
 
 /// Fetch Functions
@@ -175,13 +379,14 @@ export async function fetchInternalFormulae(onProgress?: DownloadProgressCallbac
       complete: false, // Still need to parse
     });
 
-    // Parse JWS response - extract payload string and release JWS object immediately
-    const payloadString = (JSON.parse(text) as JWSResponse).payload;
+    // Parse and validate JWS response
+    const payload = parseJWSPayload<InternalFormulaPayload>(text, "formulae");
     // text is no longer needed, let GC reclaim it
 
-    // Parse the payload
-    const payload = JSON.parse(payloadString) as InternalFormulaPayload;
-    // payloadString is no longer needed
+    // Validate payload structure
+    if (!isValidFormulaPayload(payload)) {
+      throw new Error("Invalid formulae payload structure: missing required fields (formulae, aliases, renames)");
+    }
 
     // Convert to Formula objects
     const formulaeData = payload.formulae;
@@ -270,13 +475,14 @@ export async function fetchInternalCasks(onProgress?: DownloadProgressCallback):
       complete: false, // Still need to parse
     });
 
-    // Parse JWS response - extract payload string and release JWS object immediately
-    const payloadString = (JSON.parse(text) as JWSResponse).payload;
+    // Parse and validate JWS response
+    const payload = parseJWSPayload<InternalCaskPayload>(text, "casks");
     // text is no longer needed, let GC reclaim it
 
-    // Parse the payload
-    const payload = JSON.parse(payloadString) as InternalCaskPayload;
-    // payloadString is no longer needed
+    // Validate payload structure
+    if (!isValidCaskPayload(payload)) {
+      throw new Error("Invalid casks payload structure: missing required 'casks' field");
+    }
 
     // Convert to Cask array
     const casks: Cask[] = Object.values(payload.casks);

@@ -93,21 +93,23 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
   // Track if we've ever received data (for initial load detection)
   const hasEverLoadedRef = useRef(false);
 
+  // Track if component is mounted (for safe state updates)
+  const mountedRef = useRef(true);
+
   // Track if cache exists (checked once at startup)
   // null = not checked yet, true = cache exists (warm start), false = no cache (cold start)
   const [cacheExists, setCacheExists] = useState<boolean | null>(null);
 
-  // Check cache existence once on mount
+  // Check cache existence once on mount, and track unmount for safe state updates
   useEffect(() => {
-    let mounted = true;
     hasSearchCache().then((exists) => {
-      if (mounted) {
+      if (mountedRef.current) {
         setCacheExists(exists);
         searchLogger.log("Cache check complete", { cacheExists: exists });
       }
     });
     return () => {
-      mounted = false;
+      mountedRef.current = false;
     };
   }, []);
 
@@ -131,13 +133,28 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
 
       // Reset progress at start of search
       setDownloadProgress({ phase: "casks" });
+      // Reset throttle timer so first progress update shows immediately
+      lastProgressUpdateRef.current = 0;
 
       // Fetch search results with progress tracking
       // Always track progress - the UI decides whether to show it based on hasCacheFiles
       const result = await brewSearch(query, limit, abortable.current?.signal, (progress) => {
+        // Skip updates if component unmounted
+        if (!mountedRef.current) return;
+
         // Throttle UI updates to avoid excessive re-renders
+        // Always allow through: complete phase, download completion, or throttle interval
         const now = Date.now();
-        if (progress.phase === "complete" || now - lastProgressUpdateRef.current >= PROGRESS_THROTTLE_MS) {
+        const isComplete = progress.phase === "complete";
+        const isCasksComplete = progress.casksProgress?.complete === true;
+        const isFormulaeComplete = progress.formulaeProgress?.complete === true;
+        const shouldUpdate =
+          isComplete ||
+          isCasksComplete ||
+          isFormulaeComplete ||
+          now - lastProgressUpdateRef.current >= PROGRESS_THROTTLE_MS;
+
+        if (shouldUpdate) {
           lastProgressUpdateRef.current = now;
           setDownloadProgress(progress);
         }

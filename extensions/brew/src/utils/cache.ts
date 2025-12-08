@@ -180,42 +180,71 @@ async function _fetchRemote<T>(
         complete: false,
       });
 
-      // If we have a progress callback, use a transform stream to track progress
-      // Otherwise, stream directly to avoid overhead
-      if (onProgress) {
-        // Throttle progress updates to avoid render loops (max once per 100ms)
-        let lastProgressUpdate = 0;
-        const PROGRESS_THROTTLE_MS = 100;
+      // Create write stream with error handling
+      const writeStream = fs.createWriteStream(remote.cachePath);
 
-        const progressStream = new TransformStream({
-          transform(chunk, controller) {
-            bytesDownloaded += chunk.length;
-            const now = Date.now();
+      try {
+        // If we have a progress callback, use a transform stream to track progress
+        // Otherwise, stream directly to avoid overhead
+        if (onProgress) {
+          // Throttle progress updates to avoid render loops (max once per 100ms)
+          let lastProgressUpdate = 0;
+          const PROGRESS_THROTTLE_MS = 100;
 
-            // Only report progress if enough time has passed
-            if (now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
-              const percent = totalBytes > 0 ? Math.round((bytesDownloaded / totalBytes) * 100) : -1;
-              lastProgressUpdate = now;
+          const progressStream = new TransformStream({
+            transform(chunk, controller) {
+              bytesDownloaded += chunk.length;
+              const now = Date.now();
 
-              onProgress({
-                url: remote.url,
-                bytesDownloaded,
-                totalBytes,
-                percent,
-                complete: false,
-              });
-            }
+              // Only report progress if enough time has passed OR this is the final chunk
+              const isComplete = totalBytes > 0 && bytesDownloaded >= totalBytes;
+              if (isComplete || now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
+                const percent = totalBytes > 0 ? Math.round((bytesDownloaded / totalBytes) * 100) : -1;
+                lastProgressUpdate = now;
 
-            controller.enqueue(chunk);
-          },
+                onProgress({
+                  url: remote.url,
+                  bytesDownloaded,
+                  totalBytes,
+                  percent: Math.min(percent, 100), // Cap at 100%
+                  complete: false,
+                });
+              }
+
+              controller.enqueue(chunk);
+            },
+          });
+
+          // Pipe through progress tracker
+          const progressBody = response.body.pipeThrough(progressStream);
+          await streamPipeline(Readable.fromWeb(progressBody as ReadableStream), writeStream);
+        } else {
+          // Direct stream without progress tracking
+          await streamPipeline(Readable.fromWeb(response.body as ReadableStream), writeStream);
+        }
+      } catch (streamError) {
+        // Clean up partial file on stream failure
+        writeStream.destroy();
+        try {
+          fs.unlinkSync(remote.cachePath);
+          fetchLogger.log("Cleaned up partial cache file", { path: remote.cachePath });
+        } catch {
+          // Ignore cleanup errors
+        }
+
+        // Report error state to progress callback
+        const errorMessage = streamError instanceof Error ? streamError.message : String(streamError);
+        onProgress?.({
+          url: remote.url,
+          bytesDownloaded,
+          totalBytes,
+          percent: -1,
+          complete: false,
+          error: true,
+          errorMessage,
         });
 
-        // Pipe through progress tracker
-        const progressBody = response.body.pipeThrough(progressStream);
-        await streamPipeline(Readable.fromWeb(progressBody as ReadableStream), fs.createWriteStream(remote.cachePath));
-      } else {
-        // Direct stream without progress tracking
-        await streamPipeline(Readable.fromWeb(response.body as ReadableStream), fs.createWriteStream(remote.cachePath));
+        throw streamError;
       }
 
       // Report completion
@@ -250,6 +279,18 @@ async function _fetchRemote<T>(
     } catch (error) {
       const downloadDurationMs = Date.now() - downloadStartTime;
       fetchLogger.error("Download failed", { url: remote.url, durationMs: downloadDurationMs, error });
+
+      // Report error state to progress callback
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      onProgress?.({
+        url: remote.url,
+        bytesDownloaded: 0,
+        totalBytes: 0,
+        percent: -1,
+        complete: false,
+        error: true,
+        errorMessage,
+      });
 
       if (isNetworkError(error)) {
         throw error;
@@ -289,6 +330,10 @@ async function _fetchRemote<T>(
     const keysRe = new RegExp(`\\b(${valid_keys.join("|")})\\b`);
 
     return new Promise<T[]>((resolve, reject) => {
+      // Note: We accumulate all parsed objects in memory. For ~7000 formulae/casks,
+      // this is typically 5-15MB of heap usage. The streaming parser avoids loading
+      // the entire 30MB+ JSON file at once, but we still need to hold the parsed
+      // objects for the UI. A SQLite backend could reduce memory but adds complexity.
       const value: T[] = [];
       // Throttle processing progress updates (max once per 100ms)
       let lastProgressUpdate = 0;
