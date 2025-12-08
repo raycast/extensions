@@ -25,19 +25,52 @@
   "preferences": [
     {
       "name": "delay",
-      "type": "textfield",
-      "required": false,
-      "title": "Typing Delay",
-      "description": "Delay between keystrokes in seconds (default: 0.002)",
-      "default": "0.002"
+      "type": "dropdown",
+      "title": "Typing Speed",
+      "description": "Choose how quickly characters are typed",
+      "default": "0.002",
+      "data": [
+        {
+          "title": "Slowest (1 s)",
+          "value": "1"
+        },
+        {
+          "title": "Very Slow (200 ms)",
+          "value": "0.2"
+        },
+        {
+          "title": "Slow (100 ms)",
+          "value": "0.1"
+        },
+        {
+          "title": "Leisurely (50 ms)",
+          "value": "0.05"
+        },
+        {
+          "title": "Moderate (20 ms)",
+          "value": "0.02"
+        },
+        {
+          "title": "Normal (2 ms)",
+          "value": "0.002"
+        },
+        {
+          "title": "Fast (1 ms)",
+          "value": "0.001"
+        },
+        {
+          "title": "Ultra Fast (0.5 ms)",
+          "value": "0.0005"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.5",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
