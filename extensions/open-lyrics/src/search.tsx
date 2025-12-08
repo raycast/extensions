@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, List, Image } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { searchLyrics, LrcLibTrack, formatLyrics } from "./utils/lrclib";
+import { getArtwork } from "./utils/artwork";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -48,12 +49,6 @@ export default function Command() {
     </List>
   );
 }
-
-import { Action, ActionPanel, Detail, List, Image } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useState } from "react";
-import { searchLyrics, LrcLibTrack, formatLyrics } from "./utils/lrclib";
-import { getArtwork } from "./utils/artwork";
 
 function LyricsDetail({ track }: { track: LrcLibTrack }) {
   const { data: artwork } = usePromise(
