@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Atono MCP Server] - {PR_MERGE_DATE}
+## [Add Atono MCP Server] - 2025-12-08
 
 Add official Atono MCP Server to registry to manage projects
 
