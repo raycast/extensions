@@ -65,23 +65,65 @@ export function getSystemTag(): string {
 /**
  * Get the CPU architecture.
  * Uses process.arch as primary source, with CPU model as fallback.
+ *
+ * Handles:
+ * - process.arch: "arm64" → "arm64", "x64" → "x86_64"
+ * - CPU model detection: Fallback for edge cases (Apple Silicon, Intel detection)
+ * - Error handling: Safe defaults if detection fails (returns "x86_64")
  */
 function getArchitecture(): string {
-  // process.arch is the most reliable source
+  // Method 1: Use process.arch (most reliable)
+  // Node.js process.arch values: https://nodejs.org/api/process.html#process_process_arch
   if (process.arch === "arm64") {
     return "arm64";
   }
   if (process.arch === "x64") {
     return "x86_64";
   }
+  // Other architectures (ppc64, s390x, etc.) - not supported by Homebrew on macOS
+  // Treat unknown architectures as x86_64 (safe default)
 
-  // Fallback: check CPU model for Apple Silicon
-  const firstCpu = cpus()[0];
-  if (firstCpu?.model?.includes("Apple")) {
-    return "arm64";
+  // Method 2: Fallback to CPU model detection
+  // This handles edge cases where process.arch might be unreliable
+  try {
+    const cpuList = cpus();
+    if (!cpuList || cpuList.length === 0) {
+      // No CPUs detected, use safe default
+      fetchLogger.warn("No CPUs detected, defaulting to x86_64");
+      return "x86_64";
+    }
+
+    const firstCpu = cpuList[0];
+    if (!firstCpu || typeof firstCpu.model !== "string") {
+      // CPU model is not a string, use safe default
+      fetchLogger.warn("CPU model is not a string, defaulting to x86_64", {
+        cpuModel: typeof firstCpu?.model,
+      });
+      return "x86_64";
+    }
+
+    // Check for Apple Silicon markers
+    if (firstCpu.model.includes("Apple")) {
+      return "arm64";
+    }
+
+    // Check for Intel markers
+    if (firstCpu.model.includes("Intel")) {
+      return "x86_64";
+    }
+
+    // Unknown CPU model, use safe default
+    fetchLogger.warn("Unknown CPU model, defaulting to x86_64", {
+      cpuModel: firstCpu.model,
+    });
+    return "x86_64";
+  } catch (error) {
+    // CPU detection failed entirely, use safe default
+    fetchLogger.warn("CPU detection failed, defaulting to x86_64", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return "x86_64";
   }
-
-  return "x86_64";
 }
 
 /**

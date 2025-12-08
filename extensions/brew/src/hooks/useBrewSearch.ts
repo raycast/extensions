@@ -139,24 +139,31 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
       // Fetch search results with progress tracking
       // Always track progress - the UI decides whether to show it based on hasCacheFiles
       const result = await brewSearch(query, limit, abortable.current?.signal, (progress) => {
-        // Skip updates if component unmounted
-        if (!mountedRef.current) return;
+        try {
+          // Skip updates if component unmounted
+          if (!mountedRef.current) return;
 
-        // Throttle UI updates to avoid excessive re-renders
-        // Always allow through: complete phase, download completion, or throttle interval
-        const now = Date.now();
-        const isComplete = progress.phase === "complete";
-        const isCasksComplete = progress.casksProgress?.complete === true;
-        const isFormulaeComplete = progress.formulaeProgress?.complete === true;
-        const shouldUpdate =
-          isComplete ||
-          isCasksComplete ||
-          isFormulaeComplete ||
-          now - lastProgressUpdateRef.current >= PROGRESS_THROTTLE_MS;
+          // Throttle UI updates to avoid excessive re-renders
+          // Always allow through: complete phase, download completion, or throttle interval
+          const now = Date.now();
+          const isComplete = progress.phase === "complete";
+          const isCasksComplete = progress.casksProgress?.complete === true;
+          const isFormulaeComplete = progress.formulaeProgress?.complete === true;
+          const shouldUpdate =
+            isComplete ||
+            isCasksComplete ||
+            isFormulaeComplete ||
+            now - lastProgressUpdateRef.current >= PROGRESS_THROTTLE_MS;
 
-        if (shouldUpdate) {
-          lastProgressUpdateRef.current = now;
-          setDownloadProgress(progress);
+          if (shouldUpdate) {
+            lastProgressUpdateRef.current = now;
+            setDownloadProgress(progress);
+          }
+        } catch (error) {
+          // Prevent callback errors from breaking the search
+          searchLogger.error("Progress callback error", {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       });
 
