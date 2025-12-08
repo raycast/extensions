@@ -1,6 +1,6 @@
 # FFmpeg Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-08
 
 - Update dependencies to latest versions.
 - Fix linting errors.
