@@ -647,7 +647,7 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action
-                        title="Show This Color in Full Screen"
+                        title="Show Fullscreen Color"
                         icon={Icon.Monitor}
                         onAction={() =>
                           void handleShowColor(color, {
@@ -772,7 +772,7 @@ function ColorActions({
   return (
     <ActionPanel>
       <Action
-        title="Show This Color in Full Screen"
+        title="Show Fullscreen Color"
         icon={Icon.Monitor}
         onAction={() => {
           if (onShow) {
