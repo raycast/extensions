@@ -1,6 +1,6 @@
 # Multi Links Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-12-08
 
 - Added new "Open MultiLink" command to open multiple links at once without saving them
 - Fixed open multilink function that was not working correctly
