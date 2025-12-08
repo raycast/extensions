@@ -1,6 +1,6 @@
 # Caching
 
-Caching abstraction that stores data on disk and supports LRU (least recently used) access. Since extensions can only consume up to a max. heap memory size, the cache only maintains a lightweight index in memory and stores the actual data in separate files on disk in the extension's support directory.
+The Raycast caching system lets extensions store data on disk using a Least Recently Used (LRU) strategy. Because extensions have a limited amount of heap memory available, the cache keeps only a small in-memory index to track entries. The actual cached data is saved in individual files within the extension’s support directory, allowing large datasets to be stored without exceeding memory limits.
 
 ## API Reference
 
