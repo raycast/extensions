@@ -1,5 +1,7 @@
 import { tmt } from "tencentcloud-sdk-nodejs-tmt";
-import { preferences } from "../preferences";
+import { getPreferenceValues } from "@raycast/api";
+
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export const tencentTranslate = async (text: string): Promise<string> => {
   if (!text.trim()) return "";
