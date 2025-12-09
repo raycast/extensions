@@ -88,11 +88,7 @@ export default function Command() {
                         title: "Markdown copied to clipboard",
                       });
                     } catch (e) {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "Failed to copy markdown",
-                        message: String(e),
-                      });
+                      await showFailureToast(e, { title: "Failed to copy markdown" });
                     }
                   }}
                 />
@@ -156,11 +152,7 @@ export default function Command() {
                         title: "Markdown copied to clipboard",
                       });
                     } catch (e) {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "Failed to copy markdown",
-                        message: String(e),
-                      });
+                      await showFailureToast(e, { title: "Failed to copy markdown" });
                     }
                   }}
                 />

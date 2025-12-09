@@ -9,6 +9,7 @@ import {
   LaunchProps,
   getPreferenceValues,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import {
   generateComponent,
@@ -119,11 +120,7 @@ export default function QuickCreateCommand(props: LaunchProps<{ launchContext?: 
 
       await popToRoot();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to create ${values.type}`,
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: `Failed to create ${values.type}` });
     }
   }
 
