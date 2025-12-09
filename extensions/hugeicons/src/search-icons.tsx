@@ -228,6 +228,10 @@ ${coloredSvg.replace("<svg", "<svg {...$$restProps} width={size} height={size}")
 }
 
 async function svgToPng(svg: string, outputPath: string, size: number = 256): Promise<void> {
+  if (process.platform !== "darwin") {
+    throw new Error("PNG export is only available on macOS");
+  }
+
   const resizedSvg = svg
     .replace(/width="24"/, `width="${size}"`)
     .replace(/height="24"/, `height="${size}"`)
