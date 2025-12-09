@@ -1,6 +1,6 @@
-# Test Changelog
+# Addy Changelog
 
-## [Send Email from Alias & Improvements] - 2025-12-08
+## [Send Email from Alias & Improvements] - {PR_MERGE_DATE}
 
 ### Added
 - New "Send an Email from an Alias" command to compose sender addresses for Addy aliases
@@ -21,4 +21,12 @@
 - Enhanced error handling with status code tracking
 - Automatic JSON response parsing in fetch wrapper
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Feature] - 2025-03-20
+- Added support for creating custom aliases through a form.
+- Improved alias management with list and detail views.
+
+## [Enhancements] - 2023-12-12
+- Updated API endpoint to `https://app.addy.io/api/v1`
+- Fixed a bug where `anonaddy.me` was used by default. Now default domain selected in Addy is used.
+
+## [Initial Version] - 2022-09-26
