@@ -1,6 +1,6 @@
 # Disk Usage Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-12-09
 
 - Initial release of Disk Usage extension
 - Scan home directory to identify large files and folders
