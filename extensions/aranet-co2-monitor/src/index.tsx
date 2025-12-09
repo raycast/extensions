@@ -1,9 +1,9 @@
 import { Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
-import { useAranetData, AranetDataPreference } from "./hooks/useAranetData";
+import { useAranetData } from "./hooks/useAranetData";
 import { useRef } from "react";
 
 export default function Command() {
-  const preferences = getPreferenceValues<AranetDataPreference>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const { data, isLoading, error } = useAranetData(preferences);
 
   const cachedData = useRef(data);

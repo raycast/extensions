@@ -2,11 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getAranetData } from "swift:../../swift";
 
-export interface AranetDataPreference {
-  macAddress: string;
-}
-
-export function useAranetData(preferences: AranetDataPreference) {
+export function useAranetData({ macAddress }: ExtensionPreferences) {
   return usePromise(
     async (prefAddress: string) => {
       let targetAddress = prefAddress;
@@ -26,6 +22,6 @@ export function useAranetData(preferences: AranetDataPreference) {
 
       return result;
     },
-    [preferences.macAddress || ""],
+    [macAddress || ""],
   );
 }

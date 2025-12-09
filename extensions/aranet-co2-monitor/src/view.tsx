@@ -1,8 +1,8 @@
 import { Icon, List, getPreferenceValues, ActionPanel, Action, Color, openCommandPreferences } from "@raycast/api";
-import { useAranetData, AranetDataPreference } from "./hooks/useAranetData";
+import { useAranetData } from "./hooks/useAranetData";
 
 export default function Command() {
-  const preferences = getPreferenceValues<AranetDataPreference>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const { data, isLoading, error } = useAranetData(preferences);
 
   const getStatusColor = (status: string | undefined) => {
