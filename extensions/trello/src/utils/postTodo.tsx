@@ -1,15 +1,16 @@
-import fetch from "node-fetch";
-import { getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
-import { postValues, preferences } from "./types";
+import { popToRoot, showToast, Toast } from "@raycast/api";
+import { postValues } from "./types";
+import { trelloClient } from "./trelloClient";
 
 export const postTodo = async (values: postValues) => {
-  const { token, apitoken } = getPreferenceValues<preferences>();
-
   try {
-    await fetch(
-      `https://api.trello.com/1/cards?key=${apitoken}&token=${token}&name=${values.name}&due=${values.due}&desc=${values.desc}&idList=${values.idList}&idMembers=${values.idMember}`,
-      { method: "POST" },
-    );
+    await trelloClient.createCard({
+      name: values.name,
+      desc: values.desc,
+      due: values.due ? new Date(values.due) : null,
+      idList: values.idList,
+      idMembers: values.idMember,
+    });
     showToast({ title: "Success", message: "Your to do was created" });
     popToRoot();
   } catch (error) {

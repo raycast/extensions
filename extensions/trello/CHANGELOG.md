@@ -1,5 +1,12 @@
 # Trello Changelog
 
+## [Update] - 2025-12-08
+
+- Rebuilt extension with Trello REST client
+- Added commands: Fetch Board, Fetch Cards, Move Card, Delete Card
+- Card detail views show descriptions, attachments, checklists, and members
+- Forms use list-scoped search for move/delete to avoid mismatches
+
 ## [Update] - 2025-10-01
 
 Update dependencies and allow for multiple card assignees.

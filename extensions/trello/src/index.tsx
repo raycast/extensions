@@ -1,6 +1,6 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { returnTodos } from "./utils/fetchTodos";
+import { trelloClient } from "./utils/trelloClient";
 import { TrelloFetchResponse } from "./trelloResponse.model";
 import { TodoListItem } from "./TrelloListItem";
 
@@ -12,10 +12,9 @@ export default function PackageList() {
     async function fetchAllTodos() {
       try {
         setLoading(true);
-        await returnTodos("").then((response) => {
-          setTodos(response);
-          setLoading(false);
-        });
+        const response = await trelloClient.getMyCards();
+        setTodos(response);
+        setLoading(false);
       } catch (error) {
         showToast(Toast.Style.Failure, "Failed loading todos");
       }
@@ -28,7 +27,7 @@ export default function PackageList() {
     <List isLoading={loading} searchBarPlaceholder={`Filter todos`} throttle>
       {results?.length
         ? results.map((result) => {
-            return <TodoListItem key={result.id} result={result} />;
+            return <TodoListItem key={result.id} card={result} />;
           })
         : null}
     </List>

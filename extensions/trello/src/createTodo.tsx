@@ -1,40 +1,41 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { TrelloFetchResponse } from "./trelloResponse.model";
-import { returnBoards } from "./utils/fetchBoards";
-// import { Board } from "./Board";
-import { returnLists } from "./utils/fetchLists";
+import { trelloClient } from "./utils/trelloClient";
 import { List } from "./List";
 import { Member } from "./Member";
-// import { TransferListItem } from "worker_threads";
 import { postTodo } from "./utils/postTodo";
-import { getMembers } from "./utils/getMembers";
+import { Board } from "./Board";
 
 // TODO: Consolidate with types?
 type Values = {
   name: string;
   desc: string;
-  due: Date;
+  due?: Date | null;
   idBoard: string;
   idList: string;
+  idMember?: string[];
 };
 
 export default function Command() {
-  const [boardResults, setBoards] = useState<TrelloFetchResponse>([]);
+  const [boardResults, setBoards] = useState<Board[]>([]);
   const [listResults, setLists] = useState<List[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
 
   const [loading, setLoading] = useState<boolean>(true);
-  const currentBoardId = "";
+  const [selectedBoard, setSelectedBoard] = useState<string>("");
+  const [selectedList, setSelectedList] = useState<string>("");
 
   useEffect(() => {
     async function fetchBoards() {
       try {
         setLoading(true);
-        await returnBoards().then((response) => {
-          setBoards(response);
-          setLoading(false);
-        });
+        const response = await trelloClient.getBoards(false);
+        setBoards(response);
+        if (response[0]?.id) {
+          setSelectedBoard(response[0].id);
+          await loadListsAndMembers(response[0].id);
+        }
+        setLoading(false);
       } catch (error) {
         showToast(Toast.Style.Failure, "Failed loading boards");
       }
@@ -42,13 +43,14 @@ export default function Command() {
     fetchBoards();
   }, []);
 
-  async function setSelectedBoard(boardId: string) {
+  async function loadListsAndMembers(boardId: string) {
     try {
       setLoading(true);
-      const listsResponse = await returnLists(boardId);
-      const membersResponse = await getMembers(boardId);
+      const listsResponse = await trelloClient.getLists(boardId);
+      const membersResponse = await trelloClient.getBoardMembers(boardId);
       setLists(listsResponse);
       setMembers(membersResponse);
+      if (listsResponse[0]?.id) setSelectedList(listsResponse[0].id);
       setLoading(false);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed loading boards");
@@ -85,16 +87,22 @@ export default function Command() {
       <Form.Dropdown
         id="idBoard"
         title="Select a board"
-        value={currentBoardId}
+        value={selectedBoard}
         onChange={(val: string) => {
           setSelectedBoard(val);
+          loadListsAndMembers(val);
         }}
       >
         {boardResults?.map((result) => (
           <Form.Dropdown.Item key={result.id} value={result.id.toString()} title={result.name} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="idList" title="Select a list from that board">
+      <Form.Dropdown
+        id="idList"
+        title="Select a list from that board"
+        value={selectedList}
+        onChange={(val: string) => setSelectedList(val)}
+      >
         {listResults?.map((result) => (
           <Form.Dropdown.Item key={result.id} value={result.id.toString()} title={result.name} />
         ))}
