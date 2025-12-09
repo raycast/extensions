@@ -1,7 +1,8 @@
-import { runAppleScript } from "run-applescript";
-import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { exec } from "child_process";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
@@ -42,11 +43,6 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 export async function openNewTab({
   url,
   query,
-  profileCurrent,
-  profileOriginal,
-  openTabInProfile,
-  newWindow,
-  incognito,
 }: {
   url?: string;
   query?: string;
@@ -56,57 +52,22 @@ export async function openNewTab({
   newWindow?: boolean;
   incognito?: boolean;
 }): Promise<boolean | string> {
-  setTimeout(() => {
-    popToRoot({ clearSearchBar: true });
-  }, 3000);
-  const installed = await checkAppInstalled();
-  if (installed) {
-    closeMainWindow({ clearRootSearch: true });
-  }
-
   const { browserOption } = getPreferenceValues<Preferences>();
+  const targetUrl = url ? url : query ? "https://www.google.com/search?q=" + query : "about:blank";
 
-  let script = "";
+  // Close Raycast window first
+  await closeMainWindow({ clearRootSearch: true });
 
-  const getOpenInProfileCommand = (profile: string) =>
-    `
-    set profile to quoted form of "${profile}"
-    set link to quoted form of "${url ? url : "about:blank"}"
-    do shell script "open -na '${browserOption}' --args --profile-directory=" & profile & " " & link
-  `;
-
-  switch (openTabInProfile) {
-    case SettingsProfileOpenBehaviour.Default:
-      script =
-        `
-    tell application "${browserOption}"
-      ${newWindow ? "make new window" : ""}
-      ${incognito ? `make new window with properties {mode: "incognito"}` : ""}
-      activate
-      tell window 1
-          set newTab to make new tab ` +
-        (url
-          ? `with properties {URL:"${url}"}`
-          : query
-          ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
-          : "") +
-        ` 
-        ${newWindow || incognito ? "close tab 1" : ""}
-      end tell
-    end tell
-    return true
-  `;
-      break;
-    case SettingsProfileOpenBehaviour.ProfileCurrent:
-      script = getOpenInProfileCommand(profileCurrent);
-      break;
-    case SettingsProfileOpenBehaviour.ProfileOriginal:
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      script = getOpenInProfileCommand(profileOriginal!);
-      break;
-  }
-
-  return await runAppleScript(script);
+  // Use direct shell command - most reliable approach
+  return new Promise((resolve, reject) => {
+    exec(`open -a "${browserOption}" "${targetUrl}"`, (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(true);
+      }
+    });
+  });
 }
 
 export async function closeTab(tabIndex: number): Promise<void> {

@@ -1,5 +1,11 @@
 # Brave Changelog
 
+## [Fix URL opening & Support for fuzzy searching] - {PR_MERGE_DATE}
+
+- Fixed issue where selecting history/bookmark items would open Brave but not load the URL
+- Replaced AppleScript-based URL opening with more reliable shell command approach
+- Enhanced the search functionality to include fuzzy matching over both titles and URLs
+
 ## [Brave Nightly and Brave Beta support] - 2023-12-07
 
 - Added support for Brave Nightly and Brave Beta for all commands

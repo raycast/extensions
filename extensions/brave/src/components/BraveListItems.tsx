@@ -1,8 +1,21 @@
 import { HistoryEntry, Tab } from "../interfaces";
 import { ReactElement } from "react";
 import { getFavicon } from "@raycast/utils";
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { BraveActions } from ".";
+
+// Safely get favicon, returning a default icon for invalid URLs (e.g., javascript: bookmarklets)
+function getSafeFavicon(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
+      return getFavicon(url);
+    }
+  } catch {
+    // Invalid URL
+  }
+  return Icon.Link;
+}
 
 export class BraveListItems {
   public static TabList = TabListItem;
@@ -15,7 +28,8 @@ function HistoryItem({ profile, entry: { url, title, id } }: { entry: HistoryEnt
       id={`${profile}-${id}`}
       title={title}
       subtitle={url}
-      icon={getFavicon(url)}
+      icon={getSafeFavicon(url)}
+      keywords={[url]}
       actions={<BraveActions.TabHistory title={title} url={url} profile={profile} />}
     />
   );

@@ -4,26 +4,20 @@ import { getHistoryDbPath } from "../util";
 import { useEffect, useState } from "react";
 import { useSQL } from "@raycast/utils";
 
-const whereClauses = (tableTitle: string, terms: string[]) => {
-  return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");
-};
-
-const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
+const getHistoryQuery = (table: string, date_field: string) =>
   `SELECT id,
             url,
              title,
              datetime(${date_field} / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime') as lastVisited
       FROM ${table}
-      WHERE ${whereClauses(table, terms)}
-      ORDER BY ${date_field} DESC LIMIT 100;`;
+      ORDER BY ${date_field} DESC LIMIT 500;`;
 
-export function useHistorySearch(profiles: BraveProfile[], query?: string): SearchResult<HistoryEntry>[] {
+export function useHistorySearch(profiles: BraveProfile[]): SearchResult<HistoryEntry>[] {
   const [profileHistories, setProfileHistories] = useState<{ [id: string]: SearchResult<HistoryEntry> }>({});
   const [currentProfileIndex, setCurrentProfileIndex] = useState<number>(0);
   const [dbPath, setDbPath] = useState<string>(getHistoryDbPath(profiles[0].id));
 
-  const terms = query ? query.trim().split(" ") : [""];
-  const historyQuery = getHistoryQuery("urls", "last_visit_time", terms);
+  const historyQuery = getHistoryQuery("urls", "last_visit_time");
 
   const { data, isLoading, permissionView, revalidate } = useSQL<HistoryEntry>(dbPath, historyQuery);
 

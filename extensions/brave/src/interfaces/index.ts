@@ -1,6 +1,19 @@
 import { ReactNode } from "react";
-import { Image } from "@raycast/api";
+import { Icon, Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
+
+// Safely get favicon, returning a default icon for invalid URLs (e.g., javascript: bookmarklets)
+function getSafeFavicon(url: string): Image.ImageLike {
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
+      return getFavicon(url);
+    }
+  } catch {
+    // Invalid URL
+  }
+  return Icon.Link;
+}
 
 export interface Preferences {
   readonly useOriginalFavicon: boolean;
@@ -45,7 +58,7 @@ export class Tab {
     public readonly url: string,
     public readonly favicon: string,
     public readonly windowsIndex: number,
-    public readonly tabIndex: number
+    public readonly tabIndex: number,
   ) {}
 
   static parse(line: string): Tab {
@@ -63,7 +76,7 @@ export class Tab {
   }
 
   googleFavicon(): Image.ImageLike {
-    return getFavicon(this.url);
+    return getSafeFavicon(this.url);
   }
 }
 
