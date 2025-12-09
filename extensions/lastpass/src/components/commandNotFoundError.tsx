@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Detail, environment } from "@raycast/api";
+import { ActionPanel, Action, Detail } from "@raycast/api";
 
 const isWindows = process.platform === "win32";
 
