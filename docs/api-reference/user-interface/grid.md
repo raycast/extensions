@@ -651,6 +651,33 @@ An interface describing an accessory view in a `Grid.Item`.
 
 ![Grid.Item accessories illustration](../../.gitbook/assets/grid-item-accessories.webp)
 
+#### Properties
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| icon | An optional Image.ImageLike that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>null</code> |
+| tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> or <code>null</code> |
+
+#### Example
+
+```typescript
+import { Icon, Grid } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Grid>
+      <Grid.Item
+        title="Daredevil"
+        accessory={{
+          icon: Icon.FilmStrip,
+          tooltip: "TV Show"
+        }}
+      />
+    </Grid>
+  );
+}
+```
+
 ### Grid.Inset
 
 An enum representing the amount of space there should be between a Grid Item's content and its borders. The absolute value depends on the value of [Grid](#grid)'s or [Grid.Section](#grid.section)'s `columns` prop.
