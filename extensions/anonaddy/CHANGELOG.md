@@ -1,6 +1,6 @@
 # Addy Changelog
 
-## [Send Email from Alias & Improvements] - {PR_MERGE_DATE}
+## [Send Email from Alias & Improvements] - 2025-12-09
 
 ### Added
 - New "Send an Email from an Alias" command to compose sender addresses for Addy aliases
