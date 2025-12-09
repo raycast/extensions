@@ -4,6 +4,12 @@ import path from "node:path";
 import type { FileNode, FileSystemIndex, Volume } from "../types";
 import { formatSize } from "./format";
 
+const execAsync = promisify(exec);
+
+const BLACKLIST_FOLDERS = ["node_modules", ".git", ".next", "dist", "build", "coverage", ".cache"];
+
+const BLACKLIST_REGEX = new RegExp(`\\/(${BLACKLIST_FOLDERS.join("|")})\\/`);
+
 export const parseDuRecord = (line: string) => {
   const parts = line.trim().split(/\t/);
   if (parts.length < 2) return null;
@@ -39,7 +45,7 @@ export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) =
     const PROGRESS_THROTTLE_MS = 100;
 
     const addAccessible = (kb: number, rawPath: string) => {
-      if (kb < minSizeKb) return;
+      if (kb < minSizeKb || BLACKLIST_REGEX.test(rawPath)) return;
 
       const node = buildFileNode(kb, rawPath, normalizedHome);
       if (!node) return;
@@ -50,7 +56,7 @@ export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) =
         lastProgressTime = now;
       }
 
-      const parent = path.normalize(path.dirname(node.path));
+      const parent = path.dirname(node.path);
 
       const list = accessibleByParent.get(parent);
       if (list) list.push(node);
@@ -58,8 +64,10 @@ export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) =
     };
 
     const addRestricted = (rawPath: string) => {
+      if (BLACKLIST_REGEX.test(rawPath)) return;
+
       const normalizedPath = path.normalize(rawPath);
-      const parent = path.normalize(path.dirname(normalizedPath));
+      const parent = path.dirname(normalizedPath);
 
       if (!parent.startsWith(normalizedHome) && parent !== normalizedHome) return;
 
@@ -107,6 +115,9 @@ export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) =
         }
       }
 
+      accessibleByParent.clear();
+      restrictedByParent.clear();
+
       resolve(result);
     };
 
@@ -123,7 +134,7 @@ export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) =
       const lines = chunk.toString("utf8").split("\n");
       for (const line of lines) {
         if (line.includes("Permission denied") || line.includes("Operation not permitted")) {
-          const parts = line.split("du: ");
+          const parts = line.split(/du:\s+/);
           if (parts.length > 1) {
             const pathPart = parts[1].split(":")[0];
             if (pathPart) addRestricted(pathPart.trim());
@@ -143,8 +154,6 @@ export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) =
       finalize();
     });
   });
-
-const execAsync = promisify(exec);
 
 export const fetchVolume = async (): Promise<Volume> => {
   const { stdout } = await execAsync("/usr/sbin/diskutil info /");

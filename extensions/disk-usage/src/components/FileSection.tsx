@@ -1,12 +1,13 @@
 import { FC } from "react";
 import { useFileSystemIndexStore } from "../hooks/use-file-system-index-store";
 import { useSelection } from "../hooks/use-selection";
-import { Action, ActionPanel, Alert, confirmAlert, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { createUsageBar } from "../utils/format";
 import selectionStore from "../stores/selection-store";
 import type { FileNode, FileSystemIndex } from "../types";
 import type { DiskUsageSend } from "../machines/disk-usage-machine";
 import { FolderView } from "./FolderView";
+import { PathLike } from "fs";
 
 const FileRow: FC<{
   node: FileNode;
@@ -20,6 +21,8 @@ const FileRow: FC<{
   const isSelected = selection.has(node.path);
   const isDeletingThis = isDeleting && isSelected;
   const isFolderOrHaveChild = !!fsIndex[node.path];
+
+  const paths: PathLike[] = selectionStore.size > 0 ? selectionStore.getAll() : [node.path];
 
   return (
     <List.Item
@@ -48,26 +51,11 @@ const FileRow: FC<{
             onAction={() => selection.toggle(node.path)}
           />
           <Action.ShowInFinder path={node.path} />
-          <Action
-            title="Move Selected to Trash"
-            style={Action.Style.Destructive}
-            icon={Icon.Trash}
+          <Action.Trash
+            paths={paths}
             shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-            onAction={async () => {
-              if (!isSelected) selection.toggle(node.path);
-              if (
-                await confirmAlert({
-                  title: "Move to Trash?",
-                  message: "Selected items will be moved to Trash.",
-                  primaryAction: {
-                    title: "Trash",
-                    style: Alert.ActionStyle.Destructive,
-                  },
-                })
-              ) {
-                const paths = selectionStore.size > 0 ? selectionStore.getAll() : [node.path];
-                send({ type: "DELETE_ITEMS", paths });
-              }
+            onTrash={() => {
+              send({ type: "DELETE_ITEMS", paths });
             }}
           />
           <Action

@@ -32,12 +32,12 @@ export const HomeDirectoryComponent: FC<{
             icon={Icon.Trash}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Trash
                   title="Move All to Trash"
-                  style={Action.Style.Destructive}
+                  paths={selection.getAll()}
                   icon={Icon.Trash}
                   shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                  onAction={() =>
+                  onTrash={() =>
                     send({
                       type: "DELETE_ITEMS",
                       paths: selection.getAll(),

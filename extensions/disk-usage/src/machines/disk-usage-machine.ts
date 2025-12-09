@@ -1,4 +1,4 @@
-import { showToast, Toast, trash } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { assign, createMachine, fromCallback, fromPromise, type StateFrom, type StateValueMap } from "xstate";
 import { homedir } from "node:os";
 import { isSnapshotAvailable, invalidateSnapshot, hydrateSnapshot, persistSnapshot } from "../utils/cache";
@@ -27,12 +27,10 @@ export const diskUsageMachine = createMachine({
   id: "disk-usage",
   types: {} as { context: DiskUsageContext; events: DiskUsageEvent },
   initial: "checkingCache",
-
   context: {
     fsIndex: {},
     volume: { freeBytes: 0, totalBytes: 0, usageLabel: "0%" },
   } as DiskUsageContext,
-
   states: {
     checkingCache: {
       invoke: {
@@ -133,7 +131,6 @@ export const diskUsageMachine = createMachine({
           entry: assign({ isProcessingDeletion: true }),
           invoke: {
             src: fromPromise(async ({ input }: { input: { paths: string[] } }) => {
-              await trash(input.paths);
               return input.paths;
             }),
             input: ({ event }) => ({

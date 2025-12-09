@@ -1,3 +1,5 @@
+import { PathLike } from "fs";
+
 export interface FileNode {
   path: string;
   bytes: number;
@@ -33,5 +35,5 @@ export type DiskUsageEvent =
   | { type: "SCAN_PROGRESS"; path: string }
   | { type: "SCAN_SUCCESS"; data: FileSystemIndex }
   | { type: "SCAN_FAILURE"; error: unknown }
-  | { type: "DELETE_ITEMS"; paths: string[] }
+  | { type: "DELETE_ITEMS"; paths: PathLike[] }
   | { type: "RETRY" };
