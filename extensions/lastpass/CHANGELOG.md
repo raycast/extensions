@@ -2,6 +2,8 @@
 
 
 ## [Add Windows platform] - {PR_MERGE_DATE}
+- Add Windows platform support via PowerShell command execution
+- Add platform-specific installation instructions for Windows users
 
 ## [Fix] - 2024-08-01
 
