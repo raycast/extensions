@@ -41,7 +41,7 @@
 /extensions/aimlab                                                  @whitespacecode
 /extensions/air-quality                                             @earthpyy
 /extensions/airplane                                                @pradeepb28
-/extensions/airpods-noise-control                                   @chrahe @hllvc @juanra
+/extensions/airpods-noise-control                                   @chrahe @hllvc @juanra @jvlxz
 /extensions/airport                                                 @siddharthsharma94
 /extensions/airsy                                                   @piotrzaborow
 /extensions/airsync                                                 @sameerasw
@@ -60,6 +60,7 @@
 /extensions/alpaca-trading                                          @jfkisafk @srikirank
 /extensions/alpinejs-doc-search                                     @aurawindsurfing @xmok
 /extensions/alt-text-generator                                      @JackCasica
+/extensions/alwaysdata                                              @xmok
 /extensions/amazon-aws                                              @victor-falcon @Hodglim @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna @sidhant92 @DorukAkinci @frese @nagauta @vineus @jfkisafk @srikirank @b0lle @2357gi @davzoku @deleugpn @espenbye @bastor
 /extensions/amazon-search                                           @xilopaint
 /extensions/amphetamine                                             @gstvds
@@ -68,7 +69,7 @@
 /extensions/android-adb-input                                       @STAR-ZERO
 /extensions/android-screen-capture                                  @Leaking
 /extensions/android-versions                                        @bruce3x
-/extensions/anilist-airing-schedule                                 @yeskunall
+/extensions/anilist-airing-schedule                                 @yeskunall @TakenMC
 /extensions/animated-window-manager                                 @MatheusChein
 /extensions/anki                                                    @anton-suprun
 /extensions/anna-s-archive                                          @j3lte
@@ -469,6 +470,7 @@
 /extensions/deepl-api-usage                                         @DophinL @pernielsentikaer
 /extensions/deepseeker                                              @ViGeng @degouville
 /extensions/deepwiki                                                @viveknair @tofrankie
+/extensions/default-web-browser-manager                             @clins1994 @pernielsentikaer
 /extensions/defbro                                                  @jfernandogt @wmorland
 /extensions/defichain-dobby                                         @adrian-schnell
 /extensions/defichain-lottery                                       @adrian-schnell @pernielsentikaer
@@ -650,7 +652,7 @@
 /extensions/feedly                                                  @ShubhamVerma1811 @pernielsentikaer
 /extensions/feishu-document-creator                                 @rokcso
 /extensions/fetch-youtube-transcript                                @apoorv12 @pernielsentikaer @ridemountainpig
-/extensions/ffmpeg                                                  @RenderCoder @blekmus @aagedal @EvanZhouDev
+/extensions/ffmpeg                                                  @RenderCoder @blekmus @aagedal @EvanZhouDev @j3lte
 /extensions/fhir                                                    @loris
 /extensions/fibonacci-sequence                                      @adambutler
 /extensions/figlet                                                  @pernielsentikaer
@@ -1290,7 +1292,7 @@
 /extensions/multi                                                   @fbarbat @fbarbat @pernielsentikaer
 /extensions/multi-force                                             @Decoder22
 /extensions/multi-links                                             @wrick17
-/extensions/multilinks                                              @abhisheksatre
+/extensions/multilinks                                              @abhisheksatre @lacherogwu
 /extensions/multipass                                               @davibe @pernielsentikaer
 /extensions/multiviewer                                             @secustor
 /extensions/music                                                   @Rawnly @peterdev22 @danpalmer @octoxan @Shpigford @urwrstkn8mare @michalzuch @validatedev @hrishabhn @bogdanrbucur
@@ -1529,6 +1531,7 @@
 /extensions/performance-hud                                         @say4n
 /extensions/perplexity                                              @third774 @third774
 /extensions/perplexity-api                                          @maximilianzuern @xilopaint @thomaspaulmann
+/extensions/perry                                                   @vmotta8 @pernielsentikaer
 /extensions/personio                                                @Boosteblume @marcjulianschwarz
 /extensions/pestphp-documentation                                   @danyelkeddah
 /extensions/pexels                                                  @koinzhang
@@ -1931,7 +1934,7 @@
 /extensions/shutdown-timer                                          @WhosMadeer
 /extensions/sidecar                                                 @lsps9150414 @shkm
 /extensions/signal                                                  @leeraymond78
-/extensions/silent-mention                                          @peduarte
+/extensions/silent-mention                                          @peduarte @MuhammadrizoDeveloper
 /extensions/silent-mode                                             @planecore
 /extensions/simctl                                                  @noppefoxwolf @xmok
 /extensions/simon                                                   @andreaselia @pernielsentikaer
@@ -2156,7 +2159,7 @@
 /extensions/time-machine                                            @SuoweiHu @gheorghiuradu
 /extensions/time-teller                                             @ickas @pernielsentikaer
 /extensions/time-tracking                                           @EinLinuus @xmok @swain
-/extensions/time-traveling-world-clock                              @himarky @iwex @ridemountainpig
+/extensions/time-traveling-world-clock                              @himarky @iwex @ridemountainpig @0xdhrv
 /extensions/time-until-i-do                                         @MuhaddiMu
 /extensions/timecamp                                                @iAmKevinCruz
 /extensions/timecrowd-tracker                                       @machamp0714

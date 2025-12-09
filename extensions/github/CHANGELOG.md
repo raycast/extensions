@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Use distinct status icons for PR states] - 2025-12-08
+
+- My Pull Requests Menu Bar: Added dedicated icons for merged, closed, draft, and merge queue PR states
+
 ## [Add option to filter draft pull requests] - 2025-12-07
 
 - My Pull Requests: Added "Drafts" preference to show or hide draft pull requests
