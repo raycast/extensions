@@ -1,7 +1,6 @@
 import { ActionPanel, Form, Action, LocalStorage, showToast, popToRoot, Toast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { TEMP_MAIL_DOMAINS } from "temp-mail-plus-api";
-import { setTimeout } from "timers/promises";
 
 interface CreateMailFormValues {
   mail_username: string;
@@ -12,8 +11,6 @@ export default function Command() {
   const setMailAddress = async ({ mail_username, mail_domain }: { mail_username: string; mail_domain: string }) => {
     const mailAddress = `${mail_username}@${mail_domain}`;
     await LocalStorage.setItem("mail_address", mailAddress);
-
-    await setTimeout(1_000);
     popToRoot();
   };
 
