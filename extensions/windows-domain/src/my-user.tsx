@@ -1,26 +1,26 @@
-import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getLDAPUsers } from "./lib/ldap";
-import { useState } from "react";
-import { LDAPUserListItem } from "./components/user";
+import { getDomainUserAccountInfo } from "./lib/ldap";
+import { LDAPSingleUserList } from "./components/user";
+
+function getCurrentDomainUser() {
+  // process.env.USERNAME; // seems not to work in raycast
+  const home = process.env.HOME;
+  if (!home) {
+    return null;
+  }
+  const parts = home.split("\\");
+  return parts[parts.length - 1];
+}
 
 export default function Command() {
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const { data, isLoading } = usePromise(
-    async (searchQuery: string | undefined) => {
-      if (!searchQuery || searchQuery.length < 3) {
-        return [];
-      }
-      const user = await getLDAPUsers({ searchQuery });
-      return user;
-    },
-    [searchQuery],
-  );
+  const { data, isLoading } = usePromise(async () => {
+    const username = getCurrentDomainUser();
+    if (!username) {
+      throw new Error("Could not determine current user");
+    }
+    const user = await getDomainUserAccountInfo({ username });
+    return user;
+  }, []);
 
-  return (
-    <List searchText={searchQuery} onSearchTextChange={setSearchQuery} isLoading={isLoading} throttle>
-      {searchQuery.length >= 3 && data?.map((user) => <LDAPUserListItem key={user.samaccountname} user={user} />)}
-      {searchQuery.length < 3 && <List.EmptyView title="Enter at least 3 characters to search" />}
-    </List>
-  );
+  return <LDAPSingleUserList user={data} isLoading={isLoading} />;
 }

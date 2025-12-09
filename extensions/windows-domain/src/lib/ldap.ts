@@ -75,3 +75,51 @@ export async function getLDAPUsers({ searchQuery }: { searchQuery: string | unde
     filter: `(&(objectClass=user)(mail=*)(!(userAccountControl:1.2.840.113556.1.4.803:=2))(cn=${wildCard}))`,
   });
 }
+
+export async function getDomainUserAccountInfo({ username }: { username: string }) {
+  const result = await ldapQueryUsers({
+    filter: `(&(objectClass=user)(mail=*)(samaccountname=${username}))`,
+  });
+  if (result.length <= 0) {
+    throw new Error("User not found");
+  }
+  return result[0];
+}
+
+export function ldapDatetimeToDate(ldapDateString: string): Date {
+  const ldapTimestamp = parseInt(ldapDateString, 10);
+  return new Date(ldapTimestamp * 1000);
+}
+
+/**
+ * Convert an LDAP/FILETIME 100-nanosecond timestamp to a Date.
+ * @param timestamp 100-nanosecond intervals since January 1, 1601 (or null/undefined)
+ * @returns Date in UTC or null if input is null/undefined
+ */
+export function convertLDAP100NanoSecondsToDateTime(timestamp: number | null | undefined): Date | null {
+  if (timestamp == null) return null;
+
+  // FILETIME to UNIX epoch offset (number of 100-ns intervals between 1601-01-01 and 1970-01-01)
+  const fileTimeToUnixEpochOffset = 116444736000000000n; // use BigInt for safety
+
+  // Work with BigInt to avoid losing precision for large 64-bit FILETIME values
+  const tsBig = BigInt(timestamp);
+
+  // Convert 100-ns intervals to milliseconds: divide by 10_000 (10000)
+  const msSinceEpoch = (tsBig - fileTimeToUnixEpochOffset) / 10000n;
+
+  // Convert BigInt milliseconds to number for Date. If out of safe range, clamp to Number.MAX_SAFE_INTEGER/ MIN_SAFE_INTEGER
+  const maxSafe = BigInt(Number.MAX_SAFE_INTEGER);
+  const minSafe = BigInt(Number.MIN_SAFE_INTEGER);
+  let msNumber: number;
+  if (msSinceEpoch > maxSafe) {
+    msNumber = Number.MAX_SAFE_INTEGER;
+  } else if (msSinceEpoch < minSafe) {
+    msNumber = Number.MIN_SAFE_INTEGER;
+  } else {
+    msNumber = Number(msSinceEpoch);
+  }
+
+  // Date expects milliseconds since Unix epoch (UTC)
+  return new Date(msNumber);
+}
