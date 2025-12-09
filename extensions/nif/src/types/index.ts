@@ -1,30 +1,19 @@
 export type NifRecord = {
-  taxId: number;
-  companyName: string;
-  registrationStatus: string;
-  activityDescription: string | null;
-  startDate: string | null;
-  contactChannels: {
-    primaryEmail: string | null;
-    primaryPhone: string | null;
-    webUrl: string | null;
-    fax: string | null;
-    link_website_completo: string | null;
-  };
-  headquartersLocation: {
-    addressLine: string;
-    zipCodePart4: string;
-    zipCodePart3: string;
-    city: string;
-    fullMapAddress: string;
-  };
-  apiMetadata: {
-    seoSlug: string;
-    caeList: string;
-    legalRegime: string;
-    shareCapital: string;
-    raciusLink: string;
-  };
+  nif: string;
+  name: string;
+  is_active: boolean;
+  legal_regime: string | null;
+  share_capital: number | null;
+  start_date: string | null;
+  description: string | null;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  address_full: string | null;
+  zip_code: string | null;
+  city: string | null;
+  cae_list: string[] | null;
+  updated_at: string;
 };
 
-export type NifResponse = NifRecord | NifRecord[];
+export type NifResponse = NifRecord;

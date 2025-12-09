@@ -1,4 +1,5 @@
-import { Action, ActionPanel, List, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { useFetchNif } from "../hooks/useFetchNif";
 import CompanyDetail from "../components/CompanyDetail";
@@ -10,11 +11,7 @@ export default function Command() {
 
   useEffect(() => {
     if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch NIF details",
-        message: error.message,
-      });
+      showFailureToast(error, { title: "Failed to fetch NIF details" });
     }
   }, [error]);
 
@@ -29,9 +26,9 @@ export default function Command() {
       ) : (
         records.map((record) => (
           <List.Item
-            key={record.taxId}
-            title={record.companyName || ""}
-            accessories={[{ text: `${record.taxId}` }]}
+            key={record.nif}
+            title={record.name || ""}
+            accessories={[{ text: `${record.nif}` }]}
             actions={
               <ActionPanel>
                 <Action.Push title="Show Details" target={<CompanyDetail record={record} />} />
