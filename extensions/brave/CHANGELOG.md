@@ -1,5 +1,10 @@
 # Brave Changelog
 
+## [Update and maintenance] - {PR_MERGE_DATE}
+
+- Updated dependencies
+- Fixed linting issues
+
 ## [Brave Nightly and Brave Beta support] - 2023-12-07
 
 - Added support for Brave Nightly and Brave Beta for all commands
