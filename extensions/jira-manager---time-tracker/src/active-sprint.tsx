@@ -1,9 +1,12 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues, Color } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { getBoards, getActiveSprints, getSprintIssues, getMyself } from "./utils/jira";
+import { getActiveSprints, getBoards, getSprintIssues } from "./utils/jira-agile";
+import { getMyself } from "./utils/jira";
 // Import Issue type
 import { Issue, Preferences } from "./utils/types";
+import { IssueActions } from "./components/actions/IssueActions";
+import { getActiveIssue } from "./utils/storage";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -16,6 +19,7 @@ export default function Command() {
 
   const { data: boards, isLoading: isLoadingBoards } = usePromise(getBoards);
   const { data: currentUser } = usePromise(getMyself);
+  const { data: activeIssue, revalidate: revalidateActiveIssue } = usePromise(getActiveIssue);
 
   const { data: sprints, isLoading: isLoadingSprints } = usePromise(
     async (boardId: string) => {
@@ -27,7 +31,11 @@ export default function Command() {
 
   const activeSprint = sprints && sprints.length > 0 ? sprints[0] : null;
 
-  const { data: issues, isLoading: isLoadingIssues } = usePromise(
+  const {
+    data: issues,
+    isLoading: isLoadingIssues,
+    revalidate: revalidateIssues,
+  } = usePromise(
     async (sprintId: unknown) => {
       if (!sprintId) return [];
       return getSprintIssues(sprintId as number) as Promise<Issue[]>;
@@ -66,6 +74,11 @@ export default function Command() {
   const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
   const isLoading = isLoadingBoards || isLoadingSprints || isLoadingIssues;
+
+  const revalidateAll = () => {
+    revalidateIssues();
+    revalidateActiveIssue();
+  };
 
   if (!isLoading && (!boards || boards.length === 0)) {
     return (
@@ -139,12 +152,7 @@ export default function Command() {
                 subtitle={issue.fields.summary}
                 icon={issue.fields.issuetype.iconUrl}
                 accessories={[{ text: issue.fields.status.name }, { text: issue.fields.priority?.name || "" }]}
-                actions={
-                  <ActionPanel>
-                    <Action.OpenInBrowser url={`https://${domain}/browse/${issue.key}`} />
-                    <Action.CopyToClipboard content={issue.key} title="Copy Issue Key" />
-                  </ActionPanel>
-                }
+                actions={<IssueActions issue={issue} mutate={revalidateAll} activeIssue={activeIssue} />}
               />
             ))}
           </List.Section>
@@ -167,12 +175,7 @@ export default function Command() {
                         { text: issue.fields.priority?.name || "" },
                         ...(isMyIssue ? [{ icon: { source: Icon.Person, tintColor: Color.Blue } }] : []),
                       ]}
-                      actions={
-                        <ActionPanel>
-                          <Action.OpenInBrowser url={`https://${domain}/browse/${issue.key}`} />
-                          <Action.CopyToClipboard content={issue.key} title="Copy Issue Key" />
-                        </ActionPanel>
-                      }
+                      actions={<IssueActions issue={issue} mutate={revalidateAll} activeIssue={activeIssue} />}
                     />
                   );
                 })}

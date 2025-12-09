@@ -1,35 +1,32 @@
-import {
-  List,
-  Detail,
-  ActionPanel,
-  Action,
-  Icon,
-  useNavigation,
-  getPreferenceValues,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, Detail, ActionPanel, Action, Icon, useNavigation, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import {
-  searchIssues,
-  getIssue,
-  getIssueComments,
-  getIssueWorklogs,
-  addWatcher,
-  removeWatcher,
-  getMyself,
-} from "./utils/jira";
+import { searchIssues, getIssue, getIssueComments, getIssueWorklogs } from "./utils/jira";
 import { Preferences } from "./utils/types";
+import { IssueActions } from "./components/actions/IssueActions";
+import { getActiveIssue } from "./utils/storage";
+import TurndownService from "turndown";
 
 const preferences = getPreferenceValues<Preferences>();
 
 function IssueDetail({ issueKey }: { issueKey: string }) {
-  const { data: issue, isLoading: isLoadingIssue } = usePromise(getIssue, [issueKey]);
-  const { data: comments, isLoading: isLoadingComments } = usePromise(getIssueComments, [issueKey]);
-  const { data: worklogs, isLoading: isLoadingWorklogs } = usePromise(getIssueWorklogs, [issueKey]);
+  const { data: issue, isLoading: isLoadingIssue, revalidate: revalidateIssue } = usePromise(getIssue, [issueKey]);
+  const {
+    data: comments,
+    isLoading: isLoadingComments,
+    revalidate: revalidateComments,
+  } = usePromise(getIssueComments, [issueKey]);
+  const {
+    data: worklogs,
+    isLoading: isLoadingWorklogs,
+    revalidate: revalidateWorklogs,
+  } = usePromise(getIssueWorklogs, [issueKey]);
+  const { data: activeIssue, revalidate: revalidateActiveIssue } = usePromise(getActiveIssue);
 
   const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+  // Initialize Turndown service for HTML to Markdown conversion
+  const turndownService = new TurndownService({ headingStyle: "atx", codeBlockStyle: "fenced" });
 
   if (isLoadingIssue || isLoadingComments || isLoadingWorklogs) {
     return <Detail isLoading={true} />;
@@ -43,7 +40,17 @@ function IssueDetail({ issueKey }: { issueKey: string }) {
   const renderedFields = issue.renderedFields || {};
 
   // Format description
-  const description = renderedFields.description || fields.description || "No description provided";
+  // Use renderedFields (HTML) if available and convert to Markdown, otherwise fallback to plain text description
+  let description = "No description provided";
+  if (renderedFields.description) {
+    try {
+      description = turndownService.turndown(renderedFields.description);
+    } catch {
+      description = fields.description || "No description provided";
+    }
+  } else if (fields.description) {
+    description = fields.description;
+  }
 
   // Format subtasks
 
@@ -82,11 +89,33 @@ function IssueDetail({ issueKey }: { issueKey: string }) {
           .map((comment: any) => {
             const author = comment.author?.displayName || "Unknown";
             const created = new Date(comment.created).toLocaleString();
-            const body = comment.renderedBody || comment.body || "";
+            // Use renderedBody if available for rich text
+            let body = "";
+            if (comment.renderedBody) {
+              try {
+                body = turndownService.turndown(comment.renderedBody);
+              } catch {
+                body = comment.body || "";
+              }
+            } else {
+              body = comment.body || "";
+            }
             return `### ${author} - ${created}\n${body}\n`;
           })
           .join("\n---\n\n")
       : "_No comments_";
+
+  // Helper to extract simple text from ADF (recursive)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const extractTextFromADF = (node: any): string => {
+    if (!node) return "";
+    if (typeof node === "string") return node;
+    if (node.type === "text" && node.text) return node.text;
+    if (node.content && Array.isArray(node.content)) {
+      return node.content.map(extractTextFromADF).join(" ");
+    }
+    return "";
+  };
 
   // Format worklogs
   const worklogsMarkdown =
@@ -98,8 +127,18 @@ function IssueDetail({ issueKey }: { issueKey: string }) {
             const author = worklog.author?.displayName || "Unknown";
             const timeSpent = worklog.timeSpent || "0m";
             const started = new Date(worklog.started).toLocaleDateString();
-            const comment = worklog.comment || "";
-            return `- **${author}** logged **${timeSpent}** on ${started}${comment ? `: ${comment}` : ""}`;
+
+            let commentText = "";
+            if (worklog.comment) {
+              if (typeof worklog.comment === "string") {
+                commentText = worklog.comment;
+              } else {
+                // Start from root node
+                commentText = extractTextFromADF(worklog.comment);
+              }
+            }
+
+            return `- **${author}** logged **${timeSpent}** on ${started}${commentText ? `: ${commentText}` : ""}`;
           })
           .join("\n")
       : "_No work logged_";
@@ -150,6 +189,13 @@ ${commentsMarkdown}
 ${worklogsMarkdown}
 `;
 
+  const revalidateAll = () => {
+    revalidateIssue();
+    revalidateComments();
+    revalidateWorklogs();
+    revalidateActiveIssue();
+  };
+
   return (
     <Detail
       markdown={markdown}
@@ -177,39 +223,20 @@ ${worklogsMarkdown}
           )}
         </Detail.Metadata>
       }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={`https://${domain}/browse/${issue.key}`} />
-          <Action.CopyToClipboard content={issue.key} title="Copy Issue Key" />
-          <Action.CopyToClipboard content={`https://${domain}/browse/${issue.key}`} title="Copy Issue URL" />
-          <Action
-            title={issue.fields.watches?.isWatching ? "Stop Watching" : "Start Watching"}
-            icon={issue.fields.watches?.isWatching ? Icon.EyeSlash : Icon.Eye}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-            onAction={async () => {
-              const currentUser = await getMyself();
-              if (issue.fields.watches?.isWatching) {
-                await removeWatcher(issue.key, currentUser.accountId);
-                showToast({ style: Toast.Style.Success, title: "Stopped watching issue" });
-              } else {
-                await addWatcher(issue.key);
-                showToast({ style: Toast.Style.Success, title: "Started watching issue" });
-              }
-              // We might need to revalidate here but detail view doesn't easily expose revalidate for the single issue.
-              // But since it's a detail view, maybe just a toast is enough or we rely on re-entering.
-              // Ideally we would invalidate the cache for this issue.
-            }}
-          />
-        </ActionPanel>
-      }
+      actions={<IssueActions issue={issue} mutate={revalidateAll} activeIssue={activeIssue} />}
     />
   );
 }
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const { data: activeIssue, revalidate: revalidateActiveIssue } = usePromise(getActiveIssue);
 
-  const { data: issues, isLoading } = usePromise(
+  const {
+    data: issues,
+    isLoading,
+    revalidate: revalidateIssues,
+  } = usePromise(
     (query) => {
       if (!query) return Promise.resolve([]);
       const jql = `(key = "${query}" OR summary ~ "${query}*" OR description ~ "${query}*") ORDER BY updated DESC`;
@@ -241,8 +268,14 @@ export default function Command() {
                 icon={Icon.Eye}
                 onAction={() => push(<IssueDetail issueKey={issue.key} />)}
               />
-              <Action.OpenInBrowser url={`https://${preferences.jiraDomain}/browse/${issue.key}`} />
-              <Action.CopyToClipboard content={issue.key} title="Copy Issue Key" />
+              <IssueActions
+                issue={issue}
+                mutate={() => {
+                  revalidateIssues();
+                  revalidateActiveIssue();
+                }}
+                activeIssue={activeIssue}
+              />
             </ActionPanel>
           }
         />

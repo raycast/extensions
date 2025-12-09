@@ -19,10 +19,14 @@ async function getAuthHeader(): Promise<string> {
   return `Basic ${Buffer.from(`${preferences.email}:${preferences.apiToken}`).toString("base64")}`;
 }
 
-async function jiraFetch(path: string, options: any = {}): Promise<any> {
+export async function jiraFetch(
+  path: string,
+  options: any = {},
+  apiVersion: "api/3" | "agile/1.0" = "api/3",
+): Promise<any> {
   const authHeader = await getAuthHeader();
   const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
-  const url = `https://${domain}/rest/api/3${path}`;
+  const url = `https://${domain}/rest/${apiVersion}${path}`;
 
   const response = await fetch(url, {
     ...options,
@@ -36,6 +40,19 @@ async function jiraFetch(path: string, options: any = {}): Promise<any> {
 
   if (!response.ok) {
     const text = await response.text();
+
+    // Handle specific status codes for better user feedback
+    if (response.status === 401) {
+      throw new Error(
+        "Authentication failed. Please check your Jira credentials (Email and API Token/Password) in Raycast Preferences.",
+      );
+    }
+    if (response.status === 403) {
+      throw new Error(
+        "Access denied. You may not have permission to access this resource or your Jira account is restricted.",
+      );
+    }
+
     let errorMessage = `Jira API Error ${response.status}`;
 
     try {
@@ -91,8 +108,7 @@ export async function getIssue(issueIdOrKey: string): Promise<any> {
 }
 
 export async function getIssueComments(issueIdOrKey: string): Promise<any[]> {
-  const result = await jiraFetch(`/issue/${issueIdOrKey}/comment`);
-  return result.comments || [];
+  return jiraFetch(`/issue/${issueIdOrKey}/comment`).then((res) => res.comments || []);
 }
 
 export async function createIssue(body: any): Promise<Issue> {
@@ -107,7 +123,6 @@ export async function searchUsers(query: string = ""): Promise<User[]> {
 }
 
 export async function getProjects(): Promise<Project[]> {
-  // Pagination might be needed, but for now using /project/search which is the v3 way
   const result = await jiraFetch("/project/search");
   return result.values || result;
 }
@@ -144,12 +159,6 @@ export async function addWorklog(issueIdOrKey: string, timeSpentSeconds: number,
   };
 
   if (started) {
-    // Format: 2021-01-01T12:00:00.000+0000
-    // But Jira API v3 often accepts ISO 8601 string.
-    // Let's use simple toISOString() but we might need to adjust timezone if Jira is strict.
-    // Jira usually expects: "2021-01-17T12:34:00.000+0000"
-    // toISOString gives "2021-01-17T12:34:00.000Z" which is usually fine.
-    // Let's try standard ISO first.
     body.started = started.toISOString().replace("Z", "+0000");
   }
 
@@ -192,8 +201,7 @@ export async function assignIssue(issueIdOrKey: string, accountId: string) {
 }
 
 export async function getTransitions(issueIdOrKey: string): Promise<any[]> {
-  const result = await jiraFetch(`/issue/${issueIdOrKey}/transitions`);
-  return result.transitions;
+  return jiraFetch(`/issue/${issueIdOrKey}/transitions`).then((res) => res.transitions);
 }
 
 export async function transitionIssue(issueIdOrKey: string, transitionId: string) {
@@ -208,82 +216,12 @@ export async function transitionIssue(issueIdOrKey: string, transitionId: string
 }
 
 export async function getIssueWorklogs(issueIdOrKey: string): Promise<any[]> {
-  const result = await jiraFetch(`/issue/${issueIdOrKey}/worklog`);
-  return result.worklogs;
+  return jiraFetch(`/issue/${issueIdOrKey}/worklog`).then((res) => res.worklogs);
 }
 
 export async function getNotifications(): Promise<any[]> {
-  // Queries unread notifications by default
   const result = await jiraFetch("/notification?read=false");
   return result.results || result.values || [];
-  // Note: V3 API typically wrapper response in 'results' or paging.
-}
-
-export async function getBoards(): Promise<any[]> {
-  // Note: Agile API uses /rest/agile/1.0 instead of /rest/api/3
-  const authHeader = await getAuthHeader();
-  const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
-  const url = `https://${domain}/rest/agile/1.0/board`;
-
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: authHeader,
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Jira API Error ${response.status}: ${text}`);
-  }
-
-  const result = await response.json();
-  return (result as any).values || [];
-}
-
-export async function getActiveSprints(boardId: number): Promise<any[]> {
-  const authHeader = await getAuthHeader();
-  const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
-  const url = `https://${domain}/rest/agile/1.0/board/${boardId}/sprint?state=active`;
-
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: authHeader,
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Jira API Error ${response.status}: ${text}`);
-  }
-
-  const result = await response.json();
-  return (result as any).values || [];
-}
-
-export async function getSprintIssues(sprintId: number): Promise<any[]> {
-  const authHeader = await getAuthHeader();
-  const domain = preferences.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
-  const url = `https://${domain}/rest/agile/1.0/sprint/${sprintId}/issue`;
-
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: authHeader,
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Jira API Error ${response.status}: ${text}`);
-  }
-
-  const result = await response.json();
-  return (result as any).issues || [];
 }
 
 export async function getFavoriteFilters(): Promise<any[]> {
