@@ -38,7 +38,7 @@
       "name": "createTodo",
       "title": "Create a Todo",
       "subtitle": "Trello",
-      "description": "Search all your open boards",
+      "description": "Create a card on a selected board/list",
       "mode": "view"
     },
     {
