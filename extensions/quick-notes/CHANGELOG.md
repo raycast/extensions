@@ -6,7 +6,7 @@
 
 ## [New Command] - 2025-06-26
 
--  Open Note Externally
+- Open Note Externally
 
 ## [New Commands] - 2025-04-08
 
