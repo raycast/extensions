@@ -1,6 +1,6 @@
 # UploadThing Changelog
 
-## [2.0.4] - {PR_MERGE_DATE}
+## [2.0.4] - 2025-12-09
 
 - Delete now has a `shortcut` and is **optimistic**
 - Fixed error "Invalid signing secret" when uploading (ref: [Issue #23530](https://github.com/raycast/extensions/issues/23530))
