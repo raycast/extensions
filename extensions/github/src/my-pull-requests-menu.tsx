@@ -24,6 +24,19 @@ function getMaxPullRequestsPreference(): number {
 }
 
 function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): Icon | string {
+  if (pr.merged) {
+    return "pull-request-merged.svg";
+  }
+  if (pr.closed) {
+    return "pull-request-closed.svg";
+  }
+  if (pr.isDraft) {
+    return "pull-request-draft.svg";
+  }
+  if (pr.isInMergeQueue) {
+    return "pull-request-merge-queue.svg";
+  }
+
   const pullRequestStatus = pr.commits.nodes ? pr.commits.nodes[0]?.commit.statusCheckRollup?.state : null;
   switch (pullRequestStatus) {
     case "SUCCESS":

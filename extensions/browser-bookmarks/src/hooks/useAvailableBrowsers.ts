@@ -25,6 +25,7 @@ export const BROWSERS_BUNDLE_ID = {
   zen: "app.zen-browser.zen",
   libreWolf: "org.mozilla.librewolf",
   whale: "com.naver.whale",
+  helium: "net.imput.helium",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);
