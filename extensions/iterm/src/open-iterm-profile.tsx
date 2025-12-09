@@ -85,16 +85,8 @@ export default function Command() {
           title={profile.name}
           actions={
             <ActionPanel>
-              <Action
-                title="Open in New Window"
-                icon={Icon.Window}
-                onAction={() => openProfile(profile, "window")}
-              />
-              <Action
-                title="Open in New Tab"
-                icon={Icon.Plus}
-                onAction={() => openProfile(profile, "tab")}
-              />
+              <Action title="Open in New Window" icon={Icon.Window} onAction={() => openProfile(profile, "window")} />
+              <Action title="Open in New Tab" icon={Icon.Plus} onAction={() => openProfile(profile, "tab")} />
             </ActionPanel>
           }
         />
