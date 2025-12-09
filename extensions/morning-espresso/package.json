@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "morning-espresso",
+  "title": "Morning Espresso",
+  "description": "Create, organize, and instantly open curated groups of websites to streamline your workflow.",
+  "icon": "command-icon.png",
+  "author": "andrew_jablon",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web",
+    "Developer Tools"
+  ],
+
+  "commands": [
+    {
+      "name": "manage-tab-groups",
+      "title": "Manage Tab Groups",
+      "subtitle": "Create, edit, and organize groups",
+      "icon": "command-icon-manage-tab-groups.png",
+      "description": "Build and maintain collections of sites, reorder items, and structure your browsing workflow.",
+      "mode": "view"
+    },
+    {
+      "name": "open-tab-group",
+      "title": "Open Tab Group",
+      "subtitle": "Launch a selected group",
+      "icon": "command-icon-open-tab-group.png",
+      "description": "Instantly open all sites within a selected tab group.",
+      "mode": "view"
+    },
+    {
+      "name": "launch-morning-espresso",
+      "title": "Launch Morning Espresso",
+      "subtitle": "Open your daily starter tabs",
+      "icon": "command-icon-launch-morning-espresso.png",
+      "description": "Opens all sites in your designated “Morning Espresso” group—the perfect way to begin your day.",
+      "mode": "no-view"
+    },
+    {
+      "name": "import-safari-bookmarks",
+      "title": "Import Safari Bookmarks",
+      "subtitle": "Convert bookmarks into tab groups",
+      "icon": "command-icon-import-safari-bookmarks.png",
+      "description": "Select a Safari bookmark folder and automatically import its sites into a new or existing tab group.",
+      "mode": "view"
+    }
+  ],
+
+  "keywords": [
+    "tabs",
+    "browser",
+    "productivity",
+    "workflow",
+    "groups",
+    "safari",
+    "chrome",
+    "bookmarks"
+  ],
+
+  "dependencies": {
+    "@raycast/api": "^1.87.3",
+    "plist": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@raycast/utils": "^2.2.2",
+    "@types/node": "^20.8.10",
+    "@types/plist": "^3.0.5",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
