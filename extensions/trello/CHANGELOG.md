@@ -1,6 +1,6 @@
 # Trello Changelog
 
-## [Update] - 2025-12-08
+## [Update] - {PR_MERGE_DATE}
 
 - Rebuilt extension with Trello REST client
 - Added commands: Fetch Board, Fetch Cards, Move Card, Delete Card

@@ -14,9 +14,10 @@ export default function PackageList() {
         setLoading(true);
         const response = await trelloClient.getMyCards();
         setTodos(response);
-        setLoading(false);
       } catch (error) {
         showToast(Toast.Style.Failure, "Failed loading todos");
+      } finally {
+        setLoading(false);
       }
     }
 

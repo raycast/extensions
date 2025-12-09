@@ -21,6 +21,20 @@
       "mode": "view"
     },
     {
+      "name": "searchTodos",
+      "title": "Search Todos",
+      "subtitle": "Trello",
+      "description": "Search all todos across all your boards",
+      "mode": "view"
+    },
+    {
+      "name": "searchBoards",
+      "title": "Search Boards",
+      "subtitle": "Trello",
+      "description": "Search all your open boards",
+      "mode": "view"
+    },
+    {
       "name": "createTodo",
       "title": "Create a Todo",
       "subtitle": "Trello",
