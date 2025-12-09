@@ -1,14 +1,6 @@
-import { Action, ActionPanel, Color, Icon, List, open } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type { FC } from "react";
 import type { FileNode } from "../types";
-
-export async function openDiskAccessPrefs(): Promise<void> {
-  try {
-    await open("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles");
-  } catch {
-    console.error("Failed to open preferences");
-  }
-}
 
 export const RestrictedSection: FC<{ items: FileNode[] }> = ({ items }) => {
   return (
@@ -22,7 +14,11 @@ export const RestrictedSection: FC<{ items: FileNode[] }> = ({ items }) => {
           accessories={[{ text: "Permission Denied" }]}
           actions={
             <ActionPanel>
-              <Action title="Grant Full Disk Access" icon={Icon.Shield} onAction={openDiskAccessPrefs} />
+              <Action.Open
+                title="Grant Full Disk Access"
+                icon={Icon.Shield}
+                target="x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
+              />
               <Action.ShowInFinder path={node.path} />
             </ActionPanel>
           }

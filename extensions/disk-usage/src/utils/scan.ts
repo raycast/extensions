@@ -6,7 +6,7 @@ import { formatSize } from "./format";
 
 const execAsync = promisify(exec);
 
-const BLACKLIST_FOLDERS = ["node_modules", ".git", ".next", "dist", "build", "coverage", ".cache"];
+const BLACKLIST_FOLDERS = ["node_modules", ".git", ".next", "dist", "build", "coverage"];
 
 const BLACKLIST_REGEX = new RegExp(`\\/(${BLACKLIST_FOLDERS.join("|")})\\/`);
 
@@ -56,7 +56,7 @@ export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) =
         lastProgressTime = now;
       }
 
-      const parent = path.dirname(node.path);
+      const parent = path.normalize(path.dirname(node.path));
 
       const list = accessibleByParent.get(parent);
       if (list) list.push(node);
@@ -67,7 +67,7 @@ export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) =
       if (BLACKLIST_REGEX.test(rawPath)) return;
 
       const normalizedPath = path.normalize(rawPath);
-      const parent = path.dirname(normalizedPath);
+      const parent = path.normalize(path.dirname(normalizedPath));
 
       if (!parent.startsWith(normalizedHome) && parent !== normalizedHome) return;
 
@@ -100,6 +100,8 @@ export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) =
         const accessible = (accessibleByParent.get(parentPath) || []).sort((a, b) => b.bytes - a.bytes);
 
         const deniedPaths = restrictedByParent.get(parentPath);
+
+        console.log({ deniedPaths });
 
         const restricted = deniedPaths
           ? Array.from(deniedPaths).map((p) => ({
