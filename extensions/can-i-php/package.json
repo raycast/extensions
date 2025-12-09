@@ -60,7 +60,7 @@
       "title": "PHP 8.0",
       "description": "Show PHP 8.0 relevant items in Functions and Features command",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false,
       "label": "Show Features and Functions"
     },
@@ -95,6 +95,15 @@
       "name": "php_84",
       "title": "PHP 8.4",
       "description": "Show PHP 8.4 relevant items in Functions and Features command",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Show Features and Functions"
+    },
+    {
+      "name": "php_85",
+      "title": "PHP 8.5",
+      "description": "Show PHP 8.5 relevant items in Functions and Features command",
       "type": "checkbox",
       "default": true,
       "required": false,
