@@ -1,6 +1,5 @@
-import { AI, environment, getPreferenceValues } from "@raycast/api";
-
-const preferences = getPreferenceValues<ExtensionPreferences>();
+import { AI, environment } from "@raycast/api";
+import { preferences } from "../preferences";
 
 export const raycastTranslate = async (text: string): Promise<string> => {
   if (!text.trim()) return "";

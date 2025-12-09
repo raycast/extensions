@@ -11,6 +11,9 @@ interface FormatListProps {
 }
 
 export function FormatList({ text }: FormatListProps) {
+  const isWindows = process.platform === "win32";
+  const modifierSymbol = isWindows ? "Ctrl+" : "⌘";
+
   const formats = [
     { name: "camelCase", format: formatCamelCase, example: "userName", alias: "xt" },
     { name: "PascalCase", format: formatPascalCase, example: "UserName", alias: "dt" },
@@ -34,7 +37,7 @@ export function FormatList({ text }: FormatListProps) {
           key={format.name}
           title={format.format(text)}
           subtitle={`${format.name} (${format.alias})`}
-          accessories={[{ text: `⌘${index + 1}` }]}
+          accessories={[{ text: `${modifierSymbol}${index + 1}` }]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>

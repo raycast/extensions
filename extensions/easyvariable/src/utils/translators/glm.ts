@@ -1,7 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
 import { ZhipuAI } from "zhipuai-sdk-nodejs-v4";
-
-const preferences = getPreferenceValues<ExtensionPreferences>();
+import { preferences } from "../preferences";
 
 export const glmTranslate = async (text: string): Promise<string> => {
   if (!text.trim()) return "";
