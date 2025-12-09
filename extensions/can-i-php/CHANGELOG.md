@@ -1,6 +1,6 @@
 # Can I PHP? Changelog
 
-## [Added support for PHP 8.5] - 2025-12-09
+## [Added support for PHP 8.5] - {PR_MERGE_DATE}
 
 This release includes support for PHP 8.5 features and a new app icon.
 
