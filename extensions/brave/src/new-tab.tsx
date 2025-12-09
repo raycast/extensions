@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { BraveActions, BraveListItems } from "./components";
@@ -7,7 +7,6 @@ import { BraveProfile, HistoryEntry, Preferences, SearchResult } from "./interfa
 import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILE_KEY, BRAVE_PROFILES_KEY, DEFAULT_BRAVE_PROFILE_ID } from "./constants";
 import BraveProfileDropDown from "./components/BraveProfileDropdown";
-import { filterAndSortEntries } from "./util";
 
 function orderByLastVisited(targetId: string, container?: SearchResult<HistoryEntry>[]): SearchResult<HistoryEntry>[] {
   if (!container?.length) {
@@ -28,14 +27,7 @@ export default function Command() {
     { name: "Default", id: DEFAULT_BRAVE_PROFILE_ID },
   ]);
   const [profile] = useCachedState<string>(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
-  const profileHistories = useHistorySearch(profiles);
-
-  const filteredProfileHistories = useMemo(() => {
-    return profileHistories.map((p) => ({
-      ...p,
-      data: filterAndSortEntries(p.data || [], searchText || ""),
-    }));
-  }, [profileHistories, searchText]);
+  const profileHistories = useHistorySearch(profiles, searchText);
   const { data: dataTab, isLoading: isLoadingTab, errorView: errorViewTab } = useTabSearch();
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
 
@@ -67,7 +59,7 @@ export default function Command() {
           <BraveListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
         ))}
       </List.Section>
-      {orderByLastVisited(profile, filteredProfileHistories).map((p) => (
+      {orderByLastVisited(profile, profileHistories).map((p) => (
         <List.Section key={p.profile.id} title={`History - ${p.profile.name}`}>
           {p.data?.map((e) => (
             <BraveListItems.TabHistory key={`${p.profile.id}-${e.id}`} entry={e} profile={p.profile.id} />

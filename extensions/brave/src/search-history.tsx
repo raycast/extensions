@@ -1,12 +1,11 @@
 import { List } from "@raycast/api";
-import { useState, ReactElement, useEffect, useMemo } from "react";
+import { useState, ReactElement, useEffect } from "react";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { BraveProfile, GroupedEntries, HistoryEntry } from "./interfaces";
 import { BraveListItems } from "./components";
 import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILES_KEY, BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "./constants";
 import BraveProfileDropDown from "./components/BraveProfileDropdown";
-import { filterAndSortEntries } from "./util";
 
 const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
   allEntries
@@ -25,12 +24,12 @@ const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
     : new Map<string, HistoryEntry[]>();
 
 export default function Command(): ReactElement {
-  const [searchText, setSearchText] = useState<string>("");
+  const [searchText, setSearchText] = useState<string>();
   const [profiles] = useCachedState<BraveProfile[]>(BRAVE_PROFILES_KEY, [
     { name: "Default", id: DEFAULT_BRAVE_PROFILE_ID },
   ]);
   const [profile] = useCachedState<string>(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
-  const histories = useHistorySearch(profiles);
+  const histories = useHistorySearch(profiles, searchText);
 
   useEffect(() => {
     if (histories[0]) {
@@ -40,13 +39,6 @@ export default function Command(): ReactElement {
 
   const profileHistory = histories.length ? histories.find((e) => e.profile.id == profile) : undefined;
 
-  const filteredData = useMemo(
-    () => filterAndSortEntries(profileHistory?.data || [], searchText),
-    [profileHistory?.data, searchText],
-  );
-  const groupedEntries = groupEntries(filteredData);
-  const groups = Array.from(groupedEntries.keys());
-
   if (!profileHistory) {
     return <List searchBarAccessory={<BraveProfileDropDown />} />;
   }
@@ -54,6 +46,9 @@ export default function Command(): ReactElement {
   if (profileHistory.errorView) {
     return profileHistory.errorView as ReactElement;
   }
+
+  const groupedEntries = groupEntries(profileHistory.data);
+  const groups = Array.from(groupedEntries.keys());
 
   return (
     <List
