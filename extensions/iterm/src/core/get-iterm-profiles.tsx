@@ -14,7 +14,7 @@ export function getItermProfiles(): ItermProfile[] {
     // Get all profile names and GUIDs using PlistBuddy
     const output = execSync(
       `/usr/libexec/PlistBuddy -c "Print :New\\ Bookmarks" "${plistPath}" 2>/dev/null | grep -E "Name =|Guid ="`,
-      { encoding: "utf-8" }
+      { encoding: "utf-8" },
     );
 
     const lines = output.trim().split("\n");
