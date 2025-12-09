@@ -25,7 +25,7 @@ export function IssueActions({ issue, mutate, activeIssue }: IssueActionsProps) 
           <Action
             title="Pause Work"
             icon={{ source: Icon.Pause, tintColor: Color.Yellow }}
-            onAction={() => handlePauseWork(issue.key)}
+            onAction={() => handlePauseWork()}
           />
         ) : (
           <Action
