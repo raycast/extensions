@@ -1,5 +1,10 @@
 # Nuxt Extension Changelog
 
+## [2.1.2] - {PR_MERGE_DATE}
+
+- **Added**: Added new components: editor, editorDragHandle, editorEmojiMenu, editorMentionMenu, editorSuggestionMenu, editorToolbar, empty
+- **Added**: Added new action to copy the markdown link of a component (search-components) and page (search-nuxt-docs)
+
 ## [2.1.1] - 2025-10-15
 
 - **Fixed**: Added Windows support
