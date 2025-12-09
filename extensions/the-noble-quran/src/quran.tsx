@@ -4,6 +4,7 @@ import { getSurah, getAyahs, getEdition } from "./utils/api";
 import { Surah, Ayah } from "./types";
 import { JSX, useEffect, useState } from "react";
 import { addAyahToFavorites, filterSurahs } from "./utils";
+import { BASE_QURAN_URL } from "./utils/constants";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -42,13 +43,13 @@ export default function Command() {
             <ActionPanel>
               <Action.Push target={<ReadSurah surah={surah} />} title="Read" />
               <Action.OpenInBrowser
-                url={`https://quran.com/${surah.number}`}
+                url={`${BASE_QURAN_URL}/${surah.number}`}
                 title="Read in Browser"
                 shortcut={Keyboard.Shortcut.Common.Open}
               />
               <Action.CopyToClipboard
                 title="Copy Link"
-                content={`https://quran.com/${surah.number}`}
+                content={`${BASE_QURAN_URL}/${surah.number}`}
                 shortcut={Keyboard.Shortcut.Common.Copy}
               />
             </ActionPanel>
@@ -76,7 +77,7 @@ const ReadSurah = ({ surah }: { surah: Surah }): JSX.Element => {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
-                  url={`https://quran.com/${surah.number}/${ayah.numberInSurah}`}
+                  url={`${BASE_QURAN_URL}/${surah.number}/${ayah.numberInSurah}`}
                   title="Read in Browser"
                   shortcut={Keyboard.Shortcut.Common.Open}
                 />
