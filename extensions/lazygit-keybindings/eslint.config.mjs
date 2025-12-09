@@ -1,4 +1,6 @@
-import baseConfig from "@raycast/eslint-config";
+import { defineConfig } from "eslint/config";
+import raycastConfig from "@raycast/eslint-config";
 
-// Flatten to avoid nested array entries in the Raycast base config.
-export default baseConfig.flat();
+export default defineConfig([
+  ...raycastConfig,
+]);
