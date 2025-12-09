@@ -137,7 +137,7 @@ export default () => {
                         }
                       }
                     }}
-                    shortcut={Keyboard.Shortcut.Common.Delete}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
