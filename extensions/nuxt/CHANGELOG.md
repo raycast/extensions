@@ -11,7 +11,7 @@
   - Custom templates take priority over defaults with automatic fallback
   - Selecting a custom template auto-fills the file name for faster workflow
   - Expected folder structure: `components/`, `pages/`, `api/`, `layouts/`, `composables/`
-- **Added**: Added new components: editor, editorDragHandle, editorEmojiMenu, editorMentionMenu, editorSuggestionMenu, editorToolbar, empty, scrollArea, scrollArea
+- **Added**: Added new components: editor, editorDragHandle, editorEmojiMenu, editorMentionMenu, editorSuggestionMenu, editorToolbar, empty, scrollArea
 - **Added**: Added new action to copy the markdown link of a component (search-components) and page (search-nuxt-docs)
 
 ## [2.1.1] - 2025-10-15
