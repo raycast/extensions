@@ -1,6 +1,6 @@
 # EasyVariable Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-12-09
 
 - Add Windows platform support
 
