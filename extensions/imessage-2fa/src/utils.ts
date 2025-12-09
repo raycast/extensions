@@ -1,16 +1,6 @@
 import { LookBackUnitType } from "./types";
 
 /**
- * Regex pattern to extract printable text sequences from binary NSArchiver data
- * Matches sequences of 10+ printable characters including:
- * - ASCII printable characters (0x20-0x7E)
- * - Extended Latin (0xA0-0xFF)
- * - Unicode letters, numbers, punctuation, symbols, and emoji
- * Uses Unicode property escapes to match all printable Unicode characters
- */
-const PRINTABLE_TEXT_REGEX = /[\p{L}\p{N}\p{P}\p{S}\p{Zs}]{10,}/gu;
-
-/**
  * try to extract iMessage 2FA Code, empty result if not found any code
  *
  * @param original - original message text from iMessage
@@ -43,7 +33,7 @@ export function extractCode(original: string): string | null {
     // Look for the last occurrence of "code: DIGITS" pattern
     // This helps with cases like "test code: test code: 883848" where we want the last match
     (m =
-      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
+      /(code\s*[:：]|is\s*[:：]|码|use code|passcode\s*[:：]|autoriza(?:ca|çã)o\s*[:：]|c(?:o|ó)digo\s*[:：])\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
         message
       )) !== null
   ) {
@@ -51,12 +41,12 @@ export function extractCode(original: string): string | null {
     code = findLastMatchingCode(
       message,
       m,
-      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i
+      /(code\s*[:：]|is\s*[:：]|码|use code|passcode\s*[:：]|autoriza(?:ca|çã)o\s*[:：]|c(?:o|ó)digo\s*[:：])\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i
     );
   } else if (
     // Modified to match alphanumeric codes
     (m =
-      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
+      /(code\s*[:：]|is\s*[:：]|码|use code|passcode\s*[:：]|autoriza(?:ca|çã)o\s*[:：]|c(?:o|ó)digo\s*[:：])\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
         message
       )) !== null
   ) {
@@ -64,7 +54,7 @@ export function extractCode(original: string): string | null {
     code = findLastMatchingCode(
       message,
       m,
-      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i
+      /(code\s*[:：]|is\s*[:：]|码|use code|passcode\s*[:：]|autoriza(?:ca|çã)o\s*[:：]|c(?:o|ó)digo\s*[:：])\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i
     );
   } else {
     // more generic, brute force patterns
@@ -75,15 +65,15 @@ export function extractCode(original: string): string | null {
 
     message = message.replaceAll(phoneRegex, "");
 
-    if ((m = /(^|\s|\\R|\t|\b|G-|:)(\d{5,8})($|\s|\\R|\t|\b|\.|,)/.exec(message)) !== null) {
+    if ((m = /(^|\s|\\R|\t|\b|G-|[:：])(\d{5,8})($|\s|\\R|\t|\b|\.|,)/.exec(message)) !== null) {
       code = m[2];
     } else if ((m = /\b(?=[A-Z]*[0-9])(?=[0-9]*[A-Z])[0-9A-Z]{3,8}\b/.exec(message)) !== null) {
       code = m[0];
-    } else if ((m = /(^|code:|is:|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    } else if ((m = /(^|code[:：]|is[:：]|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
       const first = m[2];
       const second = m[3];
       code = `${first}${second}`;
-    } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    } else if ((m = /(code|is)[:：]?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
       code = m[2];
     }
   }
@@ -129,27 +119,35 @@ function decodeUrlEntities(url: string): string {
  * Fix quoted-printable encoded URLs
  * Apple Mail often breaks URLs due to quoted-printable encoding
  * This fixes URLs like "https://grand-feline-95.cl=" to proper form
- *
- * Note: We only decode quoted-printable at the end of URLs (trailing =)
- * Regular = signs in URL parameters should NOT be decoded as they're not quoted-printable
  */
 function fixQuotedPrintableUrl(url: string): string {
   if (!url) return url;
 
   // Handle the specific case where a URL is cut off with an equal sign
-  // This is a quoted-printable line continuation marker
   if (url.endsWith("=")) {
     // Remove trailing equals sign that's part of quoted-printable line continuation
     url = url.slice(0, -1);
   }
 
-  // Only decode quoted-printable encoding that appears at the end of URL segments
-  // (after / or ? or &), not regular = signs in parameter values
-  // This pattern matches =XX only when it's followed by a non-hex character or end of string
-  // and preceded by a delimiter, to avoid corrupting regular URL parameters
-  // Actually, we should be more conservative - only decode if it's clearly quoted-printable
-  // For now, don't decode embedded =XX patterns as they're likely regular URL parameters
-  return url;
+  // Fix URLs with embedded quoted-printable encoding
+  // Only process =XX patterns that are clearly quoted-printable line breaks:
+  // - Followed by whitespace or newline (quoted-printable soft line breaks)
+  // - At the very end of the URL (before any trailing =)
+  // We do NOT process =XX when followed by alphanumeric characters,
+  // as those are regular URL query parameters (e.g., token=abc123)
+  return url.replace(/=([0-9A-Fa-f]{2})(?=[\s\r\n]|$)/g, (_, hex) => {
+    try {
+      const charCode = parseInt(hex, 16);
+      // Only decode if it results in a printable ASCII character (32-126)
+      // This ensures we're decoding quoted-printable, not corrupting URL params
+      if (charCode >= 32 && charCode <= 126) {
+        return String.fromCharCode(charCode);
+      }
+      return `=${hex}`; // Keep original if not a valid printable char
+    } catch (e) {
+      return `=${hex}`; // Keep original if parsing fails
+    }
+  });
 }
 
 /**
@@ -225,7 +223,9 @@ export function extractVerificationLink(message: string): { url: string; type: "
     "one-time link",
     "passwordless",
     "access account",
-    "access", // For URLs like /temp-access, /access, etc.
+    "temporary access",
+    "temp-access",
+    "temporary",
     // Spanish
     "iniciar sesión",
     "entrar",
@@ -269,20 +269,8 @@ export function extractVerificationLink(message: string): { url: string; type: "
 
       // B. If text is ambiguous, classify based on URL content
       if (type === "unknown") {
-        // Check sign-in keywords FIRST (they take priority when URL contains both)
-        if (signInKeywords.some((keyword) => lowerUrl.includes(keyword))) {
-          // Refine Google link detection
-          if (
-            lowerUrl.includes("accounts.google.com") &&
-            !(lowerUrl.includes("token=") || lowerUrl.includes("/signin") || lowerUrl.includes("challenge"))
-          ) {
-            // Skip generic google links, keep type as 'unknown'
-          } else {
-            type = "sign-in";
-          }
-        }
-        // Then check for specific patterns like token/auth for verification
-        else if (
+        // Check for specific patterns like token/auth first for verification
+        if (
           verificationKeywords.some(
             (keyword) => lowerUrl.includes(keyword) && (keyword === "token=" || keyword === "auth=")
           )
@@ -304,6 +292,18 @@ export function extractVerificationLink(message: string): { url: string; type: "
             // Skip generic google links, keep type as 'unknown'
           } else {
             type = "verification";
+          }
+        }
+        // Then check sign-in keywords in URL
+        else if (signInKeywords.some((keyword) => lowerUrl.includes(keyword))) {
+          // Refine Google link detection
+          if (
+            lowerUrl.includes("accounts.google.com") &&
+            !(lowerUrl.includes("token=") || lowerUrl.includes("/signin") || lowerUrl.includes("challenge"))
+          ) {
+            // Skip generic google links, keep type as 'unknown'
+          } else {
+            type = "sign-in";
           }
         }
       }
@@ -344,7 +344,7 @@ export function extractVerificationLink(message: string): { url: string; type: "
     // Check for verification/sign-in keywords *within the URL itself*
     let type: "verification" | "sign-in" | "unknown" = "unknown";
 
-    // Check sign-in keywords FIRST (they take priority when URL contains both)
+    // Check sign-in keywords first (they take priority when both are present)
     if (signInKeywords.some((keyword) => lowerUrl.includes(keyword))) {
       // Refine Google link detection
       if (
@@ -423,68 +423,33 @@ export function formatDate(date: Date): string {
  * NSAttributedString serialized in binary format. This function extracts the
  * readable text portion from that binary data.
  *
- * @param data - The raw text field from iMessage database (may be binary or plain text, or null/undefined)
+ * @param data - The raw text field from iMessage database (may be binary or plain text)
  * @returns Clean, readable text string
  */
-export function extractTextFromBinaryData(data: string | null | undefined): string {
-  // Coerce null/undefined to empty string at the start
+export function extractTextFromBinaryData(data: string): string {
   if (!data) return "";
 
-  // Check if this is binary NSArchiver/NSKeyedArchiver data
-  // Primary indicators: Archiver signature strings (most reliable, encoding-independent)
-  // - "streamtyped": NSKeyedArchiver stream type marker
-  // - "NSKeyedArchiver": NSKeyedArchiver class name
-  // - "NSArchiver": NSArchiver class name (legacy format)
-  // Secondary indicators: NSArchiver class names combined with binary structure indicators
-  // Note: Byte sequence checks are unreliable if SQLite encoding changes,
-  // so we rely on string markers that are preserved across encodings
-  // We require multiple indicators to avoid false positives from plain text containing class names
-  const hasArchiverSignature =
-    data.includes("streamtyped") || data.includes("NSKeyedArchiver") || data.includes("NSArchiver");
+  // Check if this is binary NSArchiver data (starts with specific markers)
+  // NSKeyedArchiver typically starts with bytes like \x04\x0B or contains "streamtyped"
+  // Also check for common class name markers that indicate binary data
+  // But be careful not to misidentify plain text that mentions these class names
+  const hasBinaryMarkers =
+    data.includes("streamtyped") ||
+    data.includes("\x04\x0B") ||
+    (data.includes("\x00") && /NS(?:Keyed|Mutable)?Archiver/.test(data)) ||
+    (data.includes("\x00") && /NS(?:Mutable|Attributed)String/.test(data));
 
-  const hasBinaryClassNames =
-    data.includes("NSMutableAttributedString") ||
-    data.includes("NSAttributedString") ||
-    data.includes("NSMutableString") ||
-    data.includes("NSString") ||
-    data.includes("__kIM");
-
-  // Check for null bytes or other non-printable control characters (indicators of binary data)
-  // This helps distinguish actual binary data from plain text that mentions class names
-  // We check for null bytes explicitly and scan for control characters manually to avoid regex issues
-  const hasBinaryStructure = (() => {
-    if (data.includes("\x00")) return true;
-    // Check for control characters (0x01-0x08, 0x0E-0x1F) that indicate binary data
-    for (let i = 0; i < data.length; i++) {
-      const code = data.charCodeAt(i);
-      if ((code >= 0x01 && code <= 0x08) || (code >= 0x0e && code <= 0x1f)) {
-        return true;
-      }
-    }
-    return false;
-  })();
-
-  // Binary data is detected if:
-  // 1. Has archiver signature (streamtyped, NSKeyedArchiver, or NSArchiver), OR
-  // 2. Has binary class names AND binary structure (to avoid false positives from plain text)
-  const isBinaryData = hasArchiverSignature || (hasBinaryClassNames && hasBinaryStructure);
-
-  if (!isBinaryData) {
+  if (!hasBinaryMarkers) {
     // Already plain text, return as-is
     return data;
   }
 
   // Extract printable text from the binary data
   // The actual message text is embedded as readable ASCII/UTF-8 within the binary stream
-  // We use a regex to extract sequences of printable characters
-  // First try longer sequences (10+ chars), then fall back to shorter sequences (4+ chars) for codes
-  let matches = data.match(PRINTABLE_TEXT_REGEX);
-
-  // If no long sequences found, try shorter sequences for OTP codes and short tokens
-  if (!matches || matches.length === 0) {
-    const shortPattern = /[\p{L}\p{N}\p{P}\p{S}\p{Zs}]{4,}/gu;
-    matches = data.match(shortPattern);
-  }
+  // We use a regex to extract sequences of printable characters (including Unicode)
+  // Match printable ASCII, Latin-1, and Unicode characters (excluding control chars)
+  const printableTextRegex = /[\x20-\x7E\xA0-\uFFFF]{10,}/g;
+  const matches = data.match(printableTextRegex);
 
   if (!matches || matches.length === 0) {
     return "";
@@ -492,73 +457,66 @@ export function extractTextFromBinaryData(data: string | null | undefined): stri
 
   // Find the longest match that looks like a real message (not just binary artifacts)
   // Filter out strings that are mostly special characters or look like class names
-  const isArtifact = (match: string): boolean => {
-    // Remove strings that are just class names or binary artifacts
-    return (
-      match.includes("NSMutable") ||
-      match.includes("NSAttributed") ||
-      match.includes("NSDictionary") ||
-      match.includes("NSNumber") ||
-      match.includes("NSValue") ||
-      match.includes("NSObject") ||
-      match.includes("streamtyped") ||
-      match.includes("NSKeyedArchiver") ||
-      match.includes("NSArchiver") ||
-      match.includes("__kIM") ||
-      match.match(/^NS[A-Z][a-z]+$/) !== null || // NS class names like NSDictionary, NSString
-      match.match(/^[A-Z][a-z]+([A-Z][a-z]+)+$/) !== null // CamelCase class names
-    );
-  };
-
-  // First, try to find matches with spaces (likely to be real messages)
-  const messagesWithSpaces = matches
-    .filter((match) => !isArtifact(match) && match.includes(" "))
-    .sort((a, b) => b.length - a.length);
-
-  if (messagesWithSpaces.length > 0) {
-    // Return the longest message with spaces
-    return messagesWithSpaces[0].trim();
-  }
-
-  // Fallback: if no messages with spaces, retain short tokens that contain digits or mixed case
-  // This helps preserve OTP codes and short codes that don't have spaces
-  // We relax the condition to include:
-  // - Pure numeric codes (digit-heavy OTPs)
-  // - Alphanumeric codes with digits
-  // - Mixed case identifiers
-  // - Short text sequences
-  const shortTokens = matches
+  const filtered = matches
     .filter((match) => {
-      if (isArtifact(match)) return false;
-
-      // Keep tokens that:
-      // - Contain digits (likely OTP codes, including pure numeric codes), OR
-      // - Have mixed case (likely codes or identifiers), OR
-      // - Are reasonably short (less than 50 chars) and contain letters
-      // - Are pure numeric sequences (4-8 digits, typical OTP length)
-      const hasDigits = /\d/.test(match);
-      const hasMixedCase = /[a-z]/.test(match) && /[A-Z]/.test(match);
-      const isShortWithLetters = match.length < 50 && /[a-zA-Z]/.test(match);
-      const isPureNumericOTP = /^\d{4,8}$/.test(match); // Typical OTP length
-
-      return hasDigits || hasMixedCase || isShortWithLetters || isPureNumericOTP;
+      // Remove strings that are just class names or binary artifacts
+      if (
+        match.includes("NSMutable") ||
+        match.includes("NSAttributed") ||
+        match.includes("NSKeyedArchiver") ||
+        match.includes("NSArchiver") ||
+        match.includes("NSMutableString") ||
+        match.includes("NSString") ||
+        match.includes("__kIM") ||
+        match.match(/^NS[A-Z][a-zA-Z]*$/) || // NS class names
+        match.match(/^[A-Z][a-z]+([A-Z][a-z]+)+$/) // CamelCase class names
+      ) {
+        return false;
+      }
+      // Keep strings that have spaces (likely to be real sentences)
+      // OR strings that look like codes (alphanumeric with digits)
+      return match.includes(" ") || /\d/.test(match);
     })
-    .sort((a, b) => b.length - a.length);
+    .sort((a, b) => {
+      // Prefer strings with spaces, then by length
+      const aHasSpaces = a.includes(" ");
+      const bHasSpaces = b.includes(" ");
+      if (aHasSpaces && !bHasSpaces) return -1;
+      if (!aHasSpaces && bHasSpaces) return 1;
+      return b.length - a.length;
+    });
 
-  if (shortTokens.length > 0) {
-    // Return the longest valid short token
-    return shortTokens[0].trim();
+  if (filtered.length > 0) {
+    // Return the longest filtered string, trimmed
+    return filtered[0].trim();
   }
 
-  // Final fallback: if no good filtered results, return the longest match that's not an artifact
-  const nonArtifacts = matches.filter((match) => !isArtifact(match));
-  if (nonArtifacts.length > 0) {
-    const longest = nonArtifacts.reduce((a, b) => (a.length > b.length ? a : b));
-    return longest.trim();
+  // Fallback: if no good filtered results, filter out class names from longest match
+  const longest = matches.reduce((a, b) => (a.length > b.length ? a : b));
+  // Check if the longest match contains class names - if so, try to extract just the message part
+  if (
+    longest.includes("NSMutable") ||
+    longest.includes("NSAttributed") ||
+    longest.includes("NSKeyedArchiver") ||
+    longest.includes("NSArchiver") ||
+    longest.includes("__kIM")
+  ) {
+    // Try to find a substring that doesn't contain class names
+    const withoutClassNames = longest
+      .split(/\s*(?:NS(?:Mutable|Attributed|KeyedArchiver|Archiver|MutableString|String)|__kIM)\s*/)
+      .filter((part) => part.length > 0 && (part.includes(" ") || /\d/.test(part)))
+      .sort((a, b) => {
+        const aHasSpaces = a.includes(" ");
+        const bHasSpaces = b.includes(" ");
+        if (aHasSpaces && !bHasSpaces) return -1;
+        if (!aHasSpaces && bHasSpaces) return 1;
+        return b.length - a.length;
+      });
+    if (withoutClassNames.length > 0) {
+      return withoutClassNames[0].trim();
+    }
   }
-
-  // If everything is filtered out, return empty string
-  return "";
+  return longest.trim();
 }
 
 /**
