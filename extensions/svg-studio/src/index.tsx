@@ -1,15 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  Clipboard,
-  showToast,
-  Toast,
-  open,
-  Icon,
-  popToRoot,
-  Detail
-} from "@raycast/api";
+import { Form, ActionPanel, Action, Clipboard, showToast, Toast, open, Icon, popToRoot, Detail } from "@raycast/api";
 import React, { useState, useEffect, useRef } from "react";
 import fs from "fs";
 import os from "os";
@@ -19,7 +8,7 @@ import { Buffer } from "buffer";
 // ... (这里保留之前的 generateHtml 函数代码，内容不用变，为了篇幅我折叠了) ...
 // ⚠️ 请保留你原来的 generateHtml 函数，它没有问题！
 function generateHtml(svgCode: string): string {
-  const base64Code = Buffer.from(svgCode).toString('base64');
+  const base64Code = Buffer.from(svgCode).toString("base64");
   // ... (保留你原来的 HTML 模板代码) ...
   return `
 <!DOCTYPE html>
@@ -157,13 +146,13 @@ function generateHtml(svgCode: string): string {
 
 export default function Command() {
   const [svgInput, setSvgInput] = useState<string>("");
-  const [viewState, setViewState] = useState<'checking' | 'manual'>('checking');
+  const [viewState, setViewState] = useState<"checking" | "manual">("checking");
   // 使用 useRef 来避免重复打开，而不是 LocalStorage
   const hasOpened = useRef(false);
 
   const openPreview = async (code: string) => {
     // 简单的内存锁，防止本次会话重复触发，但不持久化
-    if (hasOpened.current) return; 
+    if (hasOpened.current) return;
     hasOpened.current = true;
 
     try {
@@ -190,10 +179,10 @@ export default function Command() {
           await openPreview(text);
           await popToRoot();
         } else {
-          setViewState('manual');
+          setViewState("manual");
         }
       } catch (e) {
-        setViewState('manual');
+        setViewState("manual");
       }
     }
     init();
@@ -208,18 +197,22 @@ export default function Command() {
     await popToRoot();
   };
 
-  if (viewState === 'checking') return <Detail isLoading={true} />;
+  if (viewState === "checking") return <Detail isLoading={true} />;
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action title="Open SVG Studio" icon={Icon.Globe} onAction={handleManualOpen} />
+          <Action title="Open Svg Studio" icon={Icon.Globe} onAction={handleManualOpen} />
         </ActionPanel>
       }
     >
       <Form.TextArea
-        id="svg" title="SVG Code" placeholder="Paste SVG code here..." value={svgInput} onChange={setSvgInput}
+        id="svg"
+        title="SVG Code"
+        placeholder="Paste SVG code here..."
+        value={svgInput}
+        onChange={setSvgInput}
       />
     </Form>
   );
