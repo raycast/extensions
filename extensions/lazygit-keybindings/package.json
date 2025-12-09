@@ -1,0 +1,74 @@
+{
+  "name": "lazygit-keybindings",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.tsx",
+  "description": "Search Lazygit keybindings by action or shortcut.",
+  "icon": "icon.png",
+  "author": "noamefergan",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "latest"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "schemaVersion": 1,
+  "title": "Lazygit Keybindings",
+  "categories": ["Developer Tools"],
+  "keywords": ["git", "lazygit", "keybindings", "cheatsheet"],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Lazygit Keybindings",
+      "description": "Search Lazygit keybindings",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "locale",
+      "type": "dropdown",
+      "title": "Locale",
+      "description": "Preferred language for keybindings",
+      "required": false,
+      "default": "en",
+      "data": [
+        { "title": "English", "value": "en" },
+        { "title": "Japanese", "value": "ja" },
+        { "title": "Korean", "value": "ko" },
+        { "title": "Dutch", "value": "nl" },
+        { "title": "Polish", "value": "pl" },
+        { "title": "Portuguese", "value": "pt" },
+        { "title": "Russian", "value": "ru" },
+        { "title": "Chinese (Simplified)", "value": "zh-CN" },
+        { "title": "Chinese (Traditional)", "value": "zh-TW" }
+      ]
+    },
+      {
+        "name": "useCache",
+        "type": "checkbox",
+        "title": "Use Cache",
+        "label": "Use Cache",
+        "description": "Use a local cache to avoid refetching",
+        "required": false,
+        "default": true
+      },
+      {
+        "name": "cacheTTLMinutes",
+        "type": "textfield",
+        "title": "Cache TTL (minutes)",
+        "description": "How long to keep cached keybindings before refreshing",
+        "required": false,
+        "default": "1440",
+        "placeholder": "1440"
+      }
+  ]
+}
