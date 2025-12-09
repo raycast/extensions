@@ -1,6 +1,6 @@
 # Instant Domain Search Changelog
 
-## [Price and other fixes] - {PR_MERGE_DATE}
+## [Price and other fixes] - 2025-12-09
 
 - Fixed price display to show the correct price in USD (not in cents)
 - Fixed duplicate domain results
