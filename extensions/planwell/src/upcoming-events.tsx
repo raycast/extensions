@@ -17,6 +17,7 @@ import {
 } from "date-fns";
 import { EventDetail } from "./components/EventDetail";
 import path from "path";
+import { designTokens } from "./utils/design-tokens";
 
 interface Preferences {
   externalEditor?: { name: string; path: string };
@@ -25,6 +26,7 @@ interface Preferences {
 }
 
 export default function Command() {
+  const { accent } = designTokens.colors;
   const preferences = getPreferenceValues<Preferences>();
   const allEvents = getEvents();
   const now = new Date();
@@ -71,7 +73,7 @@ export default function Command() {
           return (
             <List.Item
               key={e.id}
-              icon={{ source: Icon.Star, tintColor: e.color }}
+              icon={{ source: Icon.Star, tintColor: accent.primary }}
               title={e.name}
               subtitle={subtitle}
               accessories={[{ text: `${e.startDate} → ${e.endDate}` }]}
@@ -83,7 +85,7 @@ export default function Command() {
                     target={<EventDetail event={e} />}
                   />
                   <Action
-                    title="Open in PlanWell"
+                    title="Open in Planwell"
                     icon={Icon.AppWindow}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                     onAction={async () => {

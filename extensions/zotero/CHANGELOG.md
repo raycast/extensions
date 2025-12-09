@@ -1,5 +1,10 @@
 # Zotero Changelog
 
+## [Features] - 2025-12-08
+
+- Add search through the notes
+- Update "Open PDF" priority to select the "Primary" PDF (oldest attachment)
+
 ## [Fixes] - 2024-04-03
 
 - If there are no results to a search, display "No Results" rather than "Type something...".

@@ -1,16 +1,19 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "domainr",
-  "title": "Domainr",
+  "title": "Domainr (Fastly Domain Search)",
   "description": "Search domains availability with Domainr",
   "icon": "icon.png",
   "author": "fedevitaledev",
+  "contributors": [
+    "xmok"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "domainr",
       "title": "Search Domain",
-      "subtitle": "Domainr",
+      "subtitle": "Domainr (Fastly Domain Search)",
       "description": "Search domains availability with Domainr.",
       "mode": "view",
       "preferences": [
@@ -18,32 +21,34 @@
           "name": "rapidApiKey",
           "type": "password",
           "required": true,
-          "title": "RapidApi Key",
-          "description": "Your account apiKey",
-          "link": "https://rapidapi.com/domainr/api/domainr"
+          "title": "Fastly API Key",
+          "placeholder": "Fastly API Key",
+          "description": "Your Fastly API Key"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
-    "axios": "~0.21.1",
-    "axios-cache-adapter": "^2.7.3",
-    "fp-ts": "^2.11.5",
-    "io-ts": "^2.2.16",
-    "ts-pattern": "^3.3.3"
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
-  }
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
