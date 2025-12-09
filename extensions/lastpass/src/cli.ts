@@ -36,12 +36,9 @@ const buildMacOSCommand = (command: string): string => {
 };
 
 const buildWindowsCommand = (command: string): string => {
-  // Escape for PowerShell double-quoted -Command string
-  // Order matters: escape backticks FIRST (since backtick is the escape character)
-  const escapedCommand = command
-    .replace(/`/g, "``") // 1. Escape existing backticks first
-    .replace(/\$/g, "`$") // 2. Escape dollar signs (variable interpolation)
-    .replace(/"/g, '`"'); // 3. Escape double quotes last
+  // Escape backticks FIRST (since backtick is the escape character)
+  // Then escape double quotes for PowerShell -Command string
+  const escapedCommand = command.replace(/`/g, "``").replace(/"/g, '`"');
   return `powershell -Command "& { ${escapedCommand} }"`;
 };
 
