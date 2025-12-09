@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, showToast } from "@raycast/api";
 import { useQuran } from "./hooks/useQuran";
 import { getSurah, getAyahs, getEdition } from "./utils/api";
 import { Surah, Ayah } from "./types";
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { addAyahToFavorites, filterSurahs } from "./utils";
 
 export default function Command() {
@@ -41,8 +41,16 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push target={<ReadSurah surah={surah} />} title="Read" />
-              <Action.OpenInBrowser url={`https://quran.com/${surah.number}`} title="Read In Browser" />
-              <Action.CopyToClipboard title="Copy Link" content={`https://quran.com/${surah.number}`} />
+              <Action.OpenInBrowser
+                url={`https://quran.com/${surah.number}`}
+                title="Read in Browser"
+                shortcut={Keyboard.Shortcut.Common.Open}
+              />
+              <Action.CopyToClipboard
+                title="Copy Link"
+                content={`https://quran.com/${surah.number}`}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
             </ActionPanel>
           }
         />
@@ -69,16 +77,17 @@ const ReadSurah = ({ surah }: { surah: Surah }): JSX.Element => {
               <ActionPanel>
                 <Action.OpenInBrowser
                   url={`https://quran.com/${surah.number}/${ayah.numberInSurah}`}
-                  title="Read In Browser"
+                  title="Read in Browser"
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
                 <Action.CopyToClipboard
                   title="Copy Ayah"
                   content={`${ayah.text}\n\n${surah.englishName} ${surah.number}:${ayah.numberInSurah}`}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action
                   title="Add to Favorites"
-                  shortcut={{ modifiers: ["cmd"], key: "f" }}
+                  shortcut={{ macOS: { key: "f", modifiers: ["cmd"] }, Windows: { key: "f", modifiers: ["ctrl"] } }}
                   onAction={() =>
                     addAyahToFavorites({
                       text: ayah.text,

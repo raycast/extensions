@@ -40,10 +40,10 @@ export default function Command() {
               />
               <Action.OpenInBrowser
                 url={`https://quran.com/${favorite.surahNumber}/${favorite.ayahNumber}`}
-                title="Read In Browser"
+                title="Read in Browser"
               />
               <Action
-                title="Remove From Favorites"
+                title="Remove from Favorites"
                 icon={{ source: Icon.XMarkCircle }}
                 onAction={async () => await removeAyah(favorite)}
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
