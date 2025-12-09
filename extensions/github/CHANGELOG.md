@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix filter visited repositories] - {PR_MERGE_DATE}
+## [Fix filter visited repositories] - 2025-12-09
 - Add validation to filter history for only repositories that exist in current data
 - Refactor repository filtering to handle undefined searchText and searchFilter explicitly
 
