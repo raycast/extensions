@@ -17,7 +17,6 @@
     "LunaticMuch",
     "aeorge",
     "daquinoaldo",
-    "ppy",
     "lin",
     "marcotf",
     "qeude",
@@ -45,7 +44,8 @@
     "emergerrrd"
   ],
   "pastContributors": [
-    "Lemon"
+    "Lemon",
+    "ppy"
   ],
   "categories": [
     "Developer Tools",
