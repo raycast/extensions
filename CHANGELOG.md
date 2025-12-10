@@ -1,6 +1,6 @@
 # AirPods Noise Control Changelog
 
-## [Unreleased]
+## [Major Update] - {PR_MERGE_DATE}
 
 ### Fixed
 - **macOS 26 Tahoe Compatibility**: Complete rewrite of Control Center script to fix "Could not run AppleScript" error on macOS 26 Tahoe (Darwin 25+)
