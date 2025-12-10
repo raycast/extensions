@@ -21,8 +21,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.7",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "1.102.7",
+    "@raycast/utils": "1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -34,7 +34,7 @@
   },
   "scripts": {
     "build": "npm run build:swift && ray build",
-    "build:swift": "swiftc swift/show-color-overlay.swift -o assets/show-color-overlay",
+    "build:swift": "swiftc swift/show-color-overlay.swift -o assets/show-color-overlay && chmod +x assets/show-color-overlay",
     "dev": "npm run build:swift && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

@@ -12,9 +12,12 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { execFile } from "node:child_process";
+import { execFile, exec } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { promisify } from "node:util";
 import path from "node:path";
+
+const execAsync = promisify(exec);
 
 interface ColorOption {
   title: string;
@@ -937,6 +940,7 @@ function parseQuickInput(input: string): QuickInput | null {
 }
 
 // 启动全屏颜色覆盖 - 使用 Raycast 编译的 Swift 可执行文件
+// 启动全屏颜色覆盖
 async function launchColorOverlay(hex: string, hex2?: string) {
   const normalized = normalizeHex(hex);
   if (!normalized) {
@@ -952,13 +956,19 @@ async function launchColorOverlay(hex: string, hex2?: string) {
     normalized2 = temp;
   }
 
-  // Raycast 会自动编译 swift/ 目录下的 Swift 文件
-  // 编译后的可执行文件位于 environment.assetsPath
+  // 获取可执行文件路径
   const executablePath = path.join(environment.assetsPath, "show-color-overlay");
   const args = normalized2 ? [normalized, normalized2] : [normalized];
 
-  // 使用 execFile 异步执行，不等待完成（因为窗口会一直显示直到用户关闭）
-  execFile(executablePath, args, { detached: true, stdio: "ignore" }, (error) => {
+  // 确保文件有执行权限（Raycast 复制文件时可能丢失权限）
+  try {
+    await execAsync(`chmod +x "${executablePath}"`);
+  } catch (error) {
+    console.error("Failed to set executable permission:", error);
+  }
+
+  // 执行可执行文件显示全屏颜色
+  execFile(executablePath, args, (error: Error | null) => {
     if (error) {
       console.error("Failed to launch color overlay:", error);
     }
