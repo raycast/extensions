@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-12-10
 
 - Fixes [#23514](https://github.com/raycast/extensions/issues/23514)
 - Updated dependencies
