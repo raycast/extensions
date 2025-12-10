@@ -28,13 +28,6 @@
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
-  "overrides": {
-    "fuel-agent-kit": {
-      "@pythnetwork/pyth-fuel-js": {
-        "glob": "^10.5.0"
-      }
-    }
-  },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
