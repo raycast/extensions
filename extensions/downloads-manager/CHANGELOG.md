@@ -1,5 +1,10 @@
 # Downloads Manager Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fixes https://github.com/raycast/extensions/issues/23514
+- Updated dependencies
+
 ## [Add Grid layout] - 2025-12-01
 
 - Added a Grid layout to the Manage Downloads command. Comes with an Action to toggle between layouts as well as a Preference for setting the default layout
