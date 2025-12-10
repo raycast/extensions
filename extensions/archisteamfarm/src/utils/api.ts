@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch, { RequestInit } from "node-fetch";
 
 // Types derived from Swagger
 export interface GenericResponse<T> {
