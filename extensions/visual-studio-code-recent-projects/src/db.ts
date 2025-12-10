@@ -85,7 +85,7 @@ export function useRecentEntries() {
 
 function getPath() {
   return isMacOS
-    ? `${homedir()}/Library/Application Support/${build}/User/globalStorage/state.vscdb`
+    ? path.join(homedir(), "Library", "Application Support", build, "User", "globalStorage", "state.vscdb")
     : path.join(homedir(), "AppData", "Roaming", build, "User", "globalStorage", "state.vscdb");
 }
 
