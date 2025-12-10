@@ -11,7 +11,7 @@
       "title": "Create QR Code",
       "description": "Create a qr code",
       "mode": "view",
-      "subtitle": "Clipboard"
+      "subtitle": "QR Code Generator"
     }
   ],
   "dependencies": {
