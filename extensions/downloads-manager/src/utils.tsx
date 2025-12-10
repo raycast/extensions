@@ -112,7 +112,7 @@ export async function deleteFileOrFolder(filePath: string) {
   }
 
   try {
-    rm(filePath, { recursive: true, force: true });
+    await rm(filePath, { recursive: true, force: true });
     await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
   } catch (error) {
     if (error instanceof Error) {
