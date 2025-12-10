@@ -23,7 +23,8 @@ import parse from "parse-duration";
 type FormValues = {
   calendar: string;
   title: string;
-  startDate: Date | null;
+  startDateTime: Date | null; // for timed
+  startDate: Date | null; // for all-day
   duration: string;
   attendees: string | undefined;
   conferencingProvider: string | undefined;
@@ -79,24 +80,27 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
 
   const [conferencingProviders] = useConferenceProviders();
   const { data: calendarData, isLoading } = useCalendar(calendarId);
+
   const { focus, handleSubmit, itemProps, reset, values } = useForm<FormValues>({
     initialValues: {
       calendar: props.launchContext?.calendar ?? "primary",
       title: props.launchContext?.title ?? "",
-      startDate: props.launchContext?.startDate ?? roundUpTime(),
+      startDateTime: props.launchContext?.startDate ?? roundUpTime(),
+      startDate: props.launchContext?.startDate ?? new Date(),
       duration: props.launchContext?.duration ?? `${preferences.defaultEventDuration}min`,
       attendees: props.launchContext?.attendees,
       conferencingProvider: props.launchContext?.conferencingProvider,
       description: props.launchContext?.description,
       eventTime: "timed",
     },
+
     validation: {
       title: FormValidation.Required,
       duration: (value: string | undefined, values: FormValues) => {
-        if (values.eventTime === "all_day") {
+        if (values?.eventTime === "all_day") {
           return undefined; // skip validation for all day events
         }
-        if (!value) return undefined; // allow empty, revert to default onSubmit
+        if (!value) return undefined;
         const milliseconds = parseDurationAsMinutesForPlainNumbers(value);
         if (milliseconds === undefined || milliseconds === null) {
           return "Invalid format. Examples: 30, 45m, 1h, 1h30m";
@@ -106,17 +110,23 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         }
       },
     } as Record<string, unknown>,
+
     onSubmit: async (values) => {
       await showToast({ style: Toast.Style.Animated, title: "Creating event" });
 
       const calendarId = values.calendar ?? "primary";
-      const startDate = values.startDate ?? new Date();
       const isAllDay = values.eventTime === "all_day";
+
+      // Correct start date depending on mode
+      const startSource = isAllDay ? values.startDate : values.startDateTime;
+      if (!startSource) return;
+      const startDate = new Date(startSource);
+
       const start: calendar_v3.Schema$EventDateTime = {};
       const end: calendar_v3.Schema$EventDateTime = {};
 
+      // for all day events use date only format
       if (isAllDay) {
-        // for all day events use date only format
         start.date = formatLocalDateYMD(startDate);
         const endDateExclusive = new Date(startDate);
         endDateExclusive.setDate(endDateExclusive.getDate() + 1);
@@ -154,9 +164,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
           values.conferencingProvider === "hangoutsMeet"
             ? {
                 createRequest: {
-                  conferenceSolutionKey: {
-                    type: "hangoutsMeet",
-                  },
+                  conferenceSolutionKey: { type: "hangoutsMeet" },
                   requestId: values.conferencingProvider,
                 },
               }
@@ -195,7 +203,6 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
                 shortcut: { modifiers: ["cmd", "shift"], key: "d" },
                 onAction: async (toast) => {
                   await toast.hide();
-
                   await showToast({ style: Toast.Style.Animated, title: "Deleting event" });
 
                   try {
@@ -233,30 +240,66 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       }
     >
       <Form.Dropdown title="Calendar" value={calendarId} {...calendarItemProps}>
-        {availableCalendars.map((calendar) => (
-          <Form.Dropdown.Item key={calendar.id} value={calendar.id} title={calendar.title} />
+        {availableCalendars.map((c) => (
+          <Form.Dropdown.Item key={c.id} value={c.id} title={c.title} />
         ))}
       </Form.Dropdown>
+
       <Form.TextField title="Title" placeholder="Event title..." {...itemProps.title} />
-      <Form.DatePicker
-        title="Start Date"
-        min={new Date()}
-        type={Form.DatePicker.Type.DateTime}
-        {...itemProps.startDate}
-      />
+
+      {values.eventTime === "timed" ? (
+        <Form.DatePicker
+          title="Start Date"
+          type={Form.DatePicker.Type.DateTime}
+          min={new Date()}
+          {...itemProps.startDateTime}
+          onChange={(v) => {
+            itemProps.startDateTime.onChange?.(v);
+            if (v) {
+              // sync date only field and strip time
+              const d = new Date(v);
+              d.setHours(0, 0, 0, 0);
+              itemProps.startDate.onChange?.(d);
+            }
+          }}
+        />
+      ) : (
+        <Form.DatePicker
+          title="Start Date"
+          type={Form.DatePicker.Type.Date}
+          min={new Date()}
+          {...itemProps.startDate}
+          onChange={(v) => {
+            itemProps.startDate.onChange?.(v);
+
+            if (v) {
+              // sync timed field , reuse old time if exists
+              const previous = values.startDateTime ?? roundUpTime();
+              const merged = new Date(v);
+              merged.setHours(previous.getHours(), previous.getMinutes(), 0, 0);
+
+              itemProps.startDateTime.onChange?.(merged);
+            }
+          }}
+        />
+      )}
+
       <Form.Dropdown title="Event Time" {...itemProps.eventTime}>
         <Form.Dropdown.Item value="timed" title="Default" />
-        <Form.Dropdown.Item value="all_day" title="All day Event" />
+        <Form.Dropdown.Item value="all_day" title="All Day Event" />
       </Form.Dropdown>
+
       {values.eventTime === "timed" && (
         <Form.TextField title="Duration" placeholder="30min, 1h, 1h30m..." {...itemProps.duration} />
       )}
+
       <Form.TextField
         title="Guests"
         placeholder="Event guests..."
-        info="Comma seperated list of email addresses"
+        info="Comma separated list of email addresses"
         {...itemProps.attendees}
       />
+
       <Form.Dropdown
         title="Conferencing"
         storeValue
@@ -274,10 +317,11 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
             />
           ))}
         </Form.Dropdown.Section>
+
         <Form.Dropdown.Section title="Custom">
           {conferencingProviders.map((provider) => (
             <Form.Dropdown.Item
-              key={`${provider.name}-${provider.link}`}
+              key={provider.name}
               icon={getFavicon(provider.link)}
               title={provider.name}
               value={provider.link}
@@ -285,6 +329,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
           ))}
         </Form.Dropdown.Section>
       </Form.Dropdown>
+
       <Form.TextArea title="Description" placeholder="Event description..." {...itemProps.description} />
     </Form>
   );
