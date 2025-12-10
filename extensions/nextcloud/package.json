@@ -24,7 +24,17 @@
       "title": "Search Files",
       "subtitle": "Nextcloud",
       "description": "Search files.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "files_owner",
+          "title": "Files Owner",
+          "placeholder": "username",
+          "description": "This is the username owning files (usually same as username)",
+          "type": "textfield",
+          "required": false
+        }
+      ]
     },
     {
       "name": "favorites",

@@ -103,6 +103,7 @@ export async function webdavRequest({
   const parser = new XMLParser();
   const dom = parser.parse(responseBody);
   if (!("d:multistatus" in dom)) {
+    if (dom["d:error"]?.["s:message"]) throw new Error(dom["d:error"]["s:message"]);
     throw new Error("Invalid response: " + responseBody);
   }
 
