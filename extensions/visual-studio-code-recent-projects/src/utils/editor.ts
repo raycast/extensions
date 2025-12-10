@@ -1,10 +1,11 @@
 import { Application, getApplications } from "@raycast/api";
 import { cacheFunc } from "cache-func";
+import { isMacOS } from "../utils";
 
 const cachedGetApplications = cacheFunc(getApplications);
 
 // Map of build names to bundle IDs
-const bundleIdMap: Record<string, string> = {
+const macOSBundleIdMap: Record<string, string> = {
   Antigravity: "com.google.antigravity",
   Code: "com.microsoft.VSCode",
   "Code - Insiders": "com.microsoft.VSCodeInsiders",
@@ -18,13 +19,26 @@ const bundleIdMap: Record<string, string> = {
   Windsurf: "com.exafunction.windsurf",
 };
 
+const windowsAppNameMap: Record<string, string> = {
+  Code: "Visual Studio Code",
+  "Code - Insiders": "Visual Studio Code - Insiders",
+  Cursor: "Cursor",
+  Kiro: "Kiro",
+  Positron: "Positron",
+  Trae: "Trae",
+  "Trae CN": "Trae CN",
+  VSCodium: "VSCodium",
+  "VSCodium - Insiders": "VSCodium - Insiders",
+  Windsurf: "Windsurf",
+};
+
 /**
  * Get the bundle ID for the specified build name
  * @param buildName The name of the build (e.g., "Code", "VSCodium", etc.)
  * @returns The bundle ID for the specified build
  */
 export function getBundleId(buildName: string): string {
-  return bundleIdMap[buildName] || "";
+  return isMacOS ? macOSBundleIdMap[buildName] || "" : windowsAppNameMap[buildName] || "";
 }
 
 /**
@@ -36,7 +50,7 @@ export async function getEditorApplication(buildName: string): Promise<Applicati
   const apps = await cachedGetApplications();
 
   // Find the app by bundle ID
-  const bundleId = bundleIdMap[buildName];
+  const bundleId = macOSBundleIdMap[buildName];
   if (bundleId) {
     const app = apps.find((app) => app.bundleId === bundleId);
     if (app) return app;
