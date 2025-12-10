@@ -1,5 +1,13 @@
 # Search Domain Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Updated dependencies to the latest versions  
+- Added support for Windows  
+- Switched to the ICANN WHOIS server for more accurate domain availability checks  
+- Improved UI responsiveness during domain searches  
+- Added a history command to view past searches
+
 ## [Initial Release] - 2025-05-09
 
 - Domain name search functionality with automatic TLD completion
