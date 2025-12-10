@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "discord-utilities",
+  "title": "Control Your Discord Client with Ease.",
+  "description": "Control Your Discord Client With Ease.",
+  "icon": "command-icon.png",
+  "author": "nazzy_wazzy_lu",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "assets": [
+    "command-icon.png"
+  ],
+  "keywords": [
+    "discord",
+    "client",
+    "launcher",
+    "windows",
+    "accounts"
+  ],
+  "commands": [
+    {
+      "name": "discord",
+      "title": "Discord Utilities",
+      "description": "Control Your Discord Client With Ease.",
+      "mode": "view",
+      "path": "src/discord.tsx",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "preferredFlavor",
+      "title": "Preferred Flavor",
+      "type": "dropdown",
+      "description": "Which Discord flavor to use when invoking the global Open Discord action.",
+      "default": "stable",
+      "required": true,
+      "data": [
+        { "title": "Stable", "value": "stable" },
+        { "title": "PTB", "value": "ptb" },
+        { "title": "Canary", "value": "canary" }
+      ]
+    },
+    {
+      "name": "stablePath",
+      "title": "Stable Path Override",
+      "type": "textfield",
+      "description": "Optional full path to Update.exe or Discord.exe for Stable.",
+      "placeholder": "%LocalAppData%/Discord/Update.exe or Discord.exe",
+      "required": false
+    },
+    {
+      "name": "ptbPath",
+      "title": "PTB Path Override",
+      "type": "textfield",
+      "description": "Optional full path to Update.exe or DiscordPTB.exe for PTB.",
+      "placeholder": "%LocalAppData%/DiscordPTB/Update.exe or DiscordPTB.exe",
+      "required": false
+    },
+    {
+      "name": "canaryPath",
+      "title": "Canary Path Override",
+      "type": "textfield",
+      "description": "Optional full path to Update.exe or DiscordCanary.exe for Canary.",
+      "placeholder": "%LocalAppData%/DiscordCanary/Update.exe or DiscordCanary.exe",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.66",
+    "@types/react-dom": "18.2.22",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@types/react": "18.2.66",
+    "@types/react-dom": "18.2.22"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "private": true
+}
