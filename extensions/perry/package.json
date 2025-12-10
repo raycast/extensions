@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "perry",
+  "title": "Perry",
+  "description": "Execute SQL queries on PostgreSQL databases",
+  "icon": "icon.png",
+  "author": "vmotta8",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "query-database",
+      "title": "Quick Query",
+      "subtitle": "Perry",
+      "description": "Execute quick SQL queries",
+      "mode": "view"
+    },
+    {
+      "name": "search-tables",
+      "title": "Search Tables",
+      "subtitle": "Perry",
+      "description": "Browse and search table data",
+      "mode": "view"
+    },
+    {
+      "name": "saved-queries",
+      "title": "Saved Queries",
+      "subtitle": "Perry",
+      "description": "Manage and execute saved queries",
+      "mode": "view"
+    },
+    {
+      "name": "query-history",
+      "title": "Query History",
+      "subtitle": "Perry",
+      "description": "View and re-run recent queries",
+      "mode": "view"
+    },
+    {
+      "name": "manage-databases",
+      "title": "Manage Databases",
+      "subtitle": "Perry",
+      "description": "Add, edit, or remove database connections",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2",
+    "dt-sql-parser": "^4.3.1",
+    "pg": "^8.13.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10",
+    "@types/uuid": "^9.0.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

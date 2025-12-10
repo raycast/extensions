@@ -5,13 +5,98 @@
   "description": "Create meetings with Jitsi Meet",
   "icon": "extension-icon.png",
   "author": "tjwds",
+  "contributors": [
+    "5z99tsb75z"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "create-jitsi-meet-link",
       "title": "Create Jitsi Meet Link",
       "description": "Create and join a new video conference and copy its link to your clipboard",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "defaultUsername",
+          "type": "textfield",
+          "required": false,
+          "title": "Default Username",
+          "description": "Your name that will be used when joining meetings",
+          "default": "",
+          "placeholder": "John Doe"
+        },
+        {
+          "name": "jitsiServer",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Jitsi Server",
+          "description": "Custom Jitsi server URL (e.g., meet.example.com)",
+          "default": "meet.jit.si",
+          "placeholder": "meet.jit.si"
+        },
+        {
+          "name": "meetingNameFormat",
+          "type": "dropdown",
+          "required": false,
+          "title": "Meeting Name Format",
+          "description": "How to generate meeting names",
+          "default": "timestamp-random",
+          "data": [
+            {
+              "title": "Timestamp + Random String",
+              "value": "timestamp-random"
+            },
+            {
+              "title": "Random Words",
+              "value": "random-words"
+            },
+            {
+              "title": "Custom Prefix + Random",
+              "value": "custom-prefix"
+            },
+            {
+              "title": "Only Random String",
+              "value": "random-only"
+            }
+          ]
+        },
+        {
+          "name": "customPrefix",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Prefix",
+          "description": "Custom prefix for meeting names (used with 'Custom Prefix + Random' format)",
+          "default": "meeting",
+          "placeholder": "meeting"
+        },
+        {
+          "name": "autoOpenBrowser",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-open in Browser",
+          "description": "Automatically open the meeting in your browser",
+          "default": true,
+          "label": "Open meeting automatically"
+        },
+        {
+          "name": "startWithVideoMuted",
+          "type": "checkbox",
+          "required": false,
+          "title": "Start with Video Muted",
+          "description": "Add parameter to start with video muted",
+          "default": false,
+          "label": "Mute video by default"
+        },
+        {
+          "name": "startWithAudioMuted",
+          "type": "checkbox",
+          "required": false,
+          "title": "Start with Audio Muted",
+          "description": "Add parameter to start with audio muted",
+          "default": false,
+          "label": "Mute audio by default"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -33,5 +118,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

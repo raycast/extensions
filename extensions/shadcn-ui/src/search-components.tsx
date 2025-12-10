@@ -138,7 +138,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             <Action.CopyToClipboard
               icon="yarn-icon.png"
               title="Copy Add Component [Yarn]"
-              content={`npx shadcn@latest add ${searchResult.component}`}
+              content={`yarn shadcn@latest add ${searchResult.component}`}
               shortcut={{ modifiers: ["cmd"], key: "y" }}
             />
             <Action.CopyToClipboard

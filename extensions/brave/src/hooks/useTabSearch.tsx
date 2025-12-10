@@ -18,7 +18,7 @@ export function useTabSearch(query?: string): SearchResult<Tab> {
       tabs = tabs.filter(
         (tab) =>
           tab.title.toLowerCase().includes(query.toLowerCase()) ||
-          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
+          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase()),
       );
     }
     setData(tabs);

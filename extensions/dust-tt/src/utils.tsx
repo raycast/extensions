@@ -1,7 +1,7 @@
-import { Color, Icon, Image, LocalStorage } from "@raycast/api";
-import Asset = Image.Asset;
 import { ConnectorProvider, GetAgentConfigurationsResponseType, MeResponseType } from "@dust-tt/client";
+import { Color, Icon, Image, LocalStorage } from "@raycast/api";
 import { jwtDecode } from "jwt-decode";
+import Asset = Image.Asset;
 
 export interface AgentType {
   sId: string;

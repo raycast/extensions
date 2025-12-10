@@ -3,10 +3,10 @@ import { CreateObjectForm, CreateObjectFormValues, EnsureAuthenticated } from ".
 
 interface LaunchContext {
   defaults: {
-    space: string;
-    type: string;
-    template: string;
-    list: string;
+    spaceId: string;
+    typeId: string;
+    templateId: string;
+    listId: string;
     name: string;
     icon: string;
     description: string;

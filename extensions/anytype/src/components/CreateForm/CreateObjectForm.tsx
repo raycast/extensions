@@ -229,9 +229,10 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
     const url = "raycast://extensions/any/anytype/create-object";
 
     const defaults: Record<string, unknown> = {
-      space: selectedSpaceId,
-      type: selectedTypeId,
-      list: selectedListId,
+      spaceId: selectedSpaceId,
+      typeId: selectedTypeId,
+      templateId: selectedTemplateId,
+      listId: selectedListId,
       name: itemProps.name.value,
       icon: itemProps.icon.value,
       description: itemProps.description.value,

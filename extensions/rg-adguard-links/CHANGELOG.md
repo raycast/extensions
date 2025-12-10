@@ -2,12 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.1.0] - 2025-11-25
+
+- Added Windows as a supported platform in package.json
+- Refactored code to clean up and abstract code
 
 ## [1.0.0] - 2025-11-24
 
 ### Added
+
 - Initial release of RG AdGuard Links extension
 - Convert Microsoft Store URLs to rg-adguard.net download links
 - Proper API integration with POST requests to rg-adguard.net
@@ -28,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File size parsing and formatting (KB, MB, GB)
 
 ### Technical Details
+
 - Built with TypeScript and React
 - Uses Raycast API v1.83.2 and @raycast/utils v1.17.0
 - Implements proper form validation
@@ -41,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Roadmap
 
 ### Planned Features
+
 - Download history tracking
 - Favorite apps bookmarking
 - Batch URL conversion
@@ -50,5 +55,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 For more information about this extension, visit the [README](README.md).
-
-

@@ -45,7 +45,7 @@
       "required": true,
       "type": "appPicker",
       "default": {
-        "Windows": "%LOCALAPPDATA%\\Programs\\PrismLauncher\\prismlauncher.exe",
+        "Windows": "~\\AppData\\Local\\Programs\\PrismLauncher\\prismlauncher.exe",
         "macOS": "/Applications/Prism Launcher.app"
       }
     },
@@ -56,7 +56,7 @@
       "required": true,
       "type": "directory",
       "default": {
-        "Windows": "%USERPROFILE%\\AppData\\Roaming\\PrismLauncher\\instances",
+        "Windows": "~\\AppData\\Roaming\\PrismLauncher\\instances",
         "macOS": "~/Library/Application Support/PrismLauncher/instances"
       }
     }
