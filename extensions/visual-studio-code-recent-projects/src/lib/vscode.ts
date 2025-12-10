@@ -4,7 +4,6 @@ import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import { fileExists, isMacOS, isWindows } from "../utils";
-import { homedir } from "os";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -81,9 +80,9 @@ const cliPathsMac: Record<string, string> = {
 };
 
 const cliPathsWindows: Record<string, string> = {
-  Code: path.join(homedir(), "AppData", "Local", "Programs", "Microsoft VS Code", "bin", "code.cmd"),
+  Code: path.join(os.homedir(), "AppData", "Local", "Programs", "Microsoft VS Code", "bin", "code.cmd"),
   "Code - Insiders": path.join(
-    homedir(),
+    os.homedir(),
     "AppData",
     "Local",
     "Programs",
@@ -91,14 +90,14 @@ const cliPathsWindows: Record<string, string> = {
     "bin",
     "code-insiders.cmd"
   ),
-  Cursor: path.join(homedir(), "AppData", "Local", "Programs", "Cursor", "bin", "cursor.cmd"),
-  Kiro: path.join(homedir(), "AppData", "Local", "Programs", "Kiro", "bin", "kiro.cmd"),
-  Positron: path.join(homedir(), "AppData", "Local", "Programs", "Positron", "bin", "code.cmd"),
-  Trae: path.join(homedir(), "AppData", "Local", "Programs", "Trae", "bin", "marscode.cmd"),
-  "Trae CN": path.join(homedir(), "AppData", "Local", "Programs", "Trae CN", "bin", "marscode.cmd"),
-  VSCodium: path.join(homedir(), "AppData", "Local", "Programs", "VSCodium", "bin", "codium.cmd"),
+  Cursor: path.join(os.homedir(), "AppData", "Local", "Programs", "Cursor", "bin", "cursor.cmd"),
+  Kiro: path.join(os.homedir(), "AppData", "Local", "Programs", "Kiro", "bin", "kiro.cmd"),
+  Positron: path.join(os.homedir(), "AppData", "Local", "Programs", "Positron", "bin", "code.cmd"),
+  Trae: path.join(os.homedir(), "AppData", "Local", "Programs", "Trae", "bin", "marscode.cmd"),
+  "Trae CN": path.join(os.homedir(), "AppData", "Local", "Programs", "Trae CN", "bin", "marscode.cmd"),
+  VSCodium: path.join(os.homedir(), "AppData", "Local", "Programs", "VSCodium", "bin", "codium.cmd"),
   "VSCodium - Insiders": path.join(
-    homedir(),
+    os.homedir(),
     "AppData",
     "Local",
     "Programs",
@@ -106,7 +105,7 @@ const cliPathsWindows: Record<string, string> = {
     "bin",
     "codium-insiders.cmd"
   ),
-  Windsurf: path.join(homedir(), "AppData", "Local", "Programs", "Windsurf", "bin", "windsurf.cmd"),
+  Windsurf: path.join(os.homedir(), "AppData", "Local", "Programs", "Windsurf", "bin", "windsurf.cmd"),
 };
 
 const cliPaths: Record<string, string> = isMacOS ? cliPathsMac : cliPathsWindows;

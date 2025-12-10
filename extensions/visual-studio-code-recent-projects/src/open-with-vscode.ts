@@ -32,7 +32,7 @@ export default async function main() {
     await closeMainWindow();
   } catch (error) {
     await showToast({
-      title: "Failed opening selected Finder or Path Finder item",
+      title: isMacOS ? "Failed opening selected Finder or Path Finder item" : "Failed opening selected Explorer item",
       style: Toast.Style.Failure,
       message: error instanceof Error ? error.message : String(error),
     });

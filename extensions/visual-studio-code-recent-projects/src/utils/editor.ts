@@ -50,7 +50,7 @@ export async function getEditorApplication(buildName: string): Promise<Applicati
   const apps = await cachedGetApplications();
 
   // Find the app by bundle ID
-  const bundleId = macOSBundleIdMap[buildName];
+  const bundleId = getBundleId(buildName);
   if (bundleId) {
     const app = apps.find((app) => app.bundleId === bundleId);
     if (app) return app;

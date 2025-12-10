@@ -40,9 +40,13 @@ foreach ($window in $windows) {
   }
 }
 
-exit 0
+exit 1
 `;
 export const getActiveExplorerPath = async () => {
-  const result = await runPowerShellScript(getActiveExplorerPathScript);
-  return result.trim();
+  try {
+    const result = await runPowerShellScript(getActiveExplorerPathScript);
+    return result.trim();
+  } catch {
+    throw new Error("Could not find Explorer window");
+  }
 };
