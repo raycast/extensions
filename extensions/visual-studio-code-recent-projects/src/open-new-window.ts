@@ -1,6 +1,6 @@
-import { Toast, closeMainWindow, open, showToast } from "@raycast/api";
+import { Toast, closeMainWindow, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { bundleIdentifier, build } from "./preferences";
+import { build } from "./preferences";
 import { VSCodeBuild } from "./types";
 import { isMacOS } from "./utils";
 import { getVSCodeCLI } from "./lib/vscode";

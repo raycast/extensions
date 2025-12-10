@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Update] - 2025-12-15
+## [Enhancements] - 2025-12-9
 
 - Added support for Raycast on Windows.
 
