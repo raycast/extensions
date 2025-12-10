@@ -1,7 +1,9 @@
-import { Toast, closeMainWindow, showToast } from "@raycast/api";
+import { Toast, closeMainWindow, open, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { build } from "./preferences";
+import { bundleIdentifier, build } from "./preferences";
 import { VSCodeBuild } from "./types";
+import { isMacOS } from "./utils";
+import { getVSCodeCLI } from "./lib/vscode";
 
 /**
  * The index of the `New Window` menu item in the `File` menu.
@@ -61,7 +63,10 @@ const makeNewWindow = async () => {
 export default async function command() {
   try {
     await closeMainWindow();
-    await makeNewWindow();
+    if (isMacOS) await makeNewWindow();
+    else {
+      getVSCodeCLI().openWindow();
+    }
   } catch (error) {
     await showToast({
       title: "Failed opening new window",

@@ -140,6 +140,15 @@ export class VSCodeCLI {
       });
     }
   }
+  openWindow() {
+    if (isMacOS) {
+      child_process.execFileSync(this.cliFilename);
+    } else if (isWindows) {
+      child_process.execFileSync('"' + this.cliFilename + '"', {
+        shell: true,
+      });
+    }
+  }
 }
 
 export function getVSCodeCLI(): VSCodeCLI {
