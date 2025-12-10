@@ -14,6 +14,30 @@ import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import fs from "fs";
 import path from "path";
+// Max 10MB to account for base64 encoding overhead (~33% increase = ~13MB final size)
+const MAX_FILE_SIZE_MB = 10;
+
+// Check file size and return base64 data URL, or throw error if too large
+function prepareImage(filePath: string): string {
+  console.log("[DEBUG] prepareImage called with:", filePath);
+  const stats = fs.statSync(filePath);
+  console.log("[DEBUG] File stats:", { size: stats.size, sizeMB: (stats.size / 1024 / 1024).toFixed(2) });
+  const ext = path.extname(filePath).slice(1).toLowerCase();
+
+  // Reject images over 15MB
+  if (stats.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+    const sizeMB = (stats.size / (1024 * 1024)).toFixed(1);
+    console.log("[DEBUG] File too large, throwing error");
+    throw new Error(`Your file is (${sizeMB} MB). Please reduce it to ${MAX_FILE_SIZE_MB} MB or less.`);
+  }
+
+  console.log("[DEBUG] Reading file...");
+  const imageData = fs.readFileSync(filePath);
+  console.log("[DEBUG] File read, converting to base64...");
+  const base64 = imageData.toString("base64");
+  console.log("[DEBUG] Base64 length:", base64.length);
+  return `data:image/${ext};base64,${base64}`;
+}
 
 interface Preferences {
   replicateApiToken: string;
@@ -46,17 +70,20 @@ export default function Command() {
           });
           return;
         }
-        const imageData = fs.readFileSync(file.path);
-        const base64 = imageData.toString("base64");
-        const dataURL = `data:image/${path.extname(file.path).slice(1)};base64,${base64}`;
+        const dataURL = prepareImage(file.path);
         setOriginalImage(dataURL);
         processImage(dataURL);
       } catch (error) {
+        console.log("[DEBUG] Caught error in loadSelectedFile:", error);
         const message = error instanceof Error ? error.message : String(error);
         if (message.toLowerCase().includes("finder") && message.toLowerCase().includes("frontmost")) {
           return; // Silently ignore Finder not frontmost error
         }
-        showToast({ style: Toast.Style.Failure, title: "Error loading file", message });
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot load file",
+          message,
+        });
       }
     }
     loadSelectedFile();
@@ -112,14 +139,17 @@ export default function Command() {
                     return;
                   }
                   try {
-                    const imageData = fs.readFileSync(filePath);
-                    const base64 = imageData.toString("base64");
-                    const dataURL = `data:image/${path.extname(filePath).slice(1)};base64,${base64}`;
+                    const dataURL = prepareImage(filePath);
                     setOriginalImage(dataURL);
                     await processImage(dataURL);
                   } catch (error) {
+                    console.log("[DEBUG] Caught error in Form submit:", error);
                     const message = error instanceof Error ? error.message : String(error);
-                    showToast({ style: Toast.Style.Failure, title: "Error loading file", message });
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Please Resize Your Image",
+                      message,
+                    });
                   }
                 }}
               />
