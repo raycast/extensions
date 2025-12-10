@@ -1,4 +1,4 @@
-# Catenary for Raycast
+# Transit Departures (Catenary for Raycast)
 
 View real-time transit departures for stops near you using Catenary.
 
