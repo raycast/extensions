@@ -1,8 +1,7 @@
-#!/usr/bin/swift
 import AppKit
 import QuartzCore
 
-// Core logic: use AppKit to create a borderless top-level window that covers the screen with color
+// 全屏颜色覆盖窗口
 final class OverlayWindow: NSWindow {
   init(screen: NSScreen, color: NSColor) {
     super.init(
@@ -22,17 +21,55 @@ final class OverlayWindow: NSWindow {
   override var canBecomeKey: Bool { true }
   override var canBecomeMain: Bool { true }
 
+  // 点击鼠标退出
   override func mouseDown(with event: NSEvent) {
     NSApp.terminate(nil)
   }
 
+  // 按 ESC 键退出
   override func keyDown(with event: NSEvent) {
-    if event.keyCode == 53 { // ESC to exit
+    if event.keyCode == 53 {
       NSApp.terminate(nil)
     }
   }
 }
 
+// HEX 字符串转 NSColor
+extension NSColor {
+  convenience init?(hex: String) {
+    var filtered = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+    if filtered.hasPrefix("#") {
+      filtered.removeFirst()
+    }
+
+    // 支持 3 位和 4 位简写格式
+    if filtered.count == 3 || filtered.count == 4 {
+      filtered = filtered.map { String([$0, $0]) }.joined()
+    }
+
+    guard filtered.count == 6 || filtered.count == 8 else { return nil }
+
+    var rgbaValue: UInt64 = 0
+    guard Scanner(string: filtered).scanHexInt64(&rgbaValue) else { return nil }
+
+    let hasAlpha = filtered.count == 8
+    
+    if hasAlpha {
+      let r = CGFloat((rgbaValue & 0xFF000000) >> 24) / 255.0
+      let g = CGFloat((rgbaValue & 0x00FF0000) >> 16) / 255.0
+      let b = CGFloat((rgbaValue & 0x0000FF00) >> 8) / 255.0
+      let a = CGFloat(rgbaValue & 0x000000FF) / 255.0
+      self.init(red: r, green: g, blue: b, alpha: a)
+    } else {
+      let r = CGFloat((rgbaValue & 0xFF0000) >> 16) / 255.0
+      let g = CGFloat((rgbaValue & 0x00FF00) >> 8) / 255.0
+      let b = CGFloat(rgbaValue & 0x0000FF) / 255.0
+      self.init(red: r, green: g, blue: b, alpha: 1.0)
+    }
+  }
+}
+
+// 主函数 - 从命令行参数读取颜色并显示
 guard CommandLine.arguments.count >= 2 else {
   fatalError("Missing HEX color argument")
 }
@@ -45,7 +82,7 @@ guard let color1 = NSColor(hex: hex1) else {
 }
 
 var color2: NSColor?
-if let hex2 = hex2 {
+if let hex2 = hex2, !hex2.isEmpty {
   guard let parsed = NSColor(hex: hex2) else {
     fatalError("Invalid HEX color 2")
   }
@@ -80,37 +117,3 @@ window.makeFirstResponder(contentView)
 
 app.activate(ignoringOtherApps: true)
 app.run()
-
-private extension NSColor {
-  // Convert HEX string to NSColor, supporting RGB and RGBA
-  convenience init?(hex: String) {
-    var filtered = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-    if filtered.hasPrefix("#") {
-      filtered.removeFirst()
-    }
-
-    if filtered.count == 3 || filtered.count == 4 {
-      filtered = filtered.map { String([$0, $0]) }.joined()
-    }
-
-    guard filtered.count == 6 || filtered.count == 8 else { return nil }
-
-    var rgbaValue: UInt64 = 0
-    guard Scanner(string: filtered).scanHexInt64(&rgbaValue) else { return nil }
-
-    let hasAlpha = filtered.count == 8
-    let r = CGFloat((rgbaValue & 0xFF000000) >> 24) / 255.0
-    let g = CGFloat((rgbaValue & 0x00FF0000) >> 16) / 255.0
-    let b = CGFloat((rgbaValue & 0x0000FF00) >> 8) / 255.0
-    let a = hasAlpha ? CGFloat(rgbaValue & 0x000000FF) / 255.0 : 1.0
-
-    if hasAlpha {
-      self.init(red: r, green: g, blue: b, alpha: a)
-    } else {
-      self.init(red: CGFloat((rgbaValue & 0xFF0000) >> 16) / 255.0,
-                green: CGFloat((rgbaValue & 0x00FF00) >> 8) / 255.0,
-                blue: CGFloat(rgbaValue & 0x0000FF) / 255.0,
-                alpha: 1.0)
-    }
-  }
-}

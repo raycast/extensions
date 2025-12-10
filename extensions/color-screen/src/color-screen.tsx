@@ -12,9 +12,8 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { spawn } from "node:child_process";
+import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { existsSync } from "node:fs";
 import path from "node:path";
 
 interface ColorOption {
@@ -647,7 +646,7 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action
-                        title="Show Fullscreen Color"
+                        title="Show This Color in Full Screen"
                         icon={Icon.Monitor}
                         onAction={() =>
                           void handleShowColor(color, {
@@ -772,7 +771,7 @@ function ColorActions({
   return (
     <ActionPanel>
       <Action
-        title="Show Fullscreen Color"
+        title="Show This Color in Full Screen"
         icon={Icon.Monitor}
         onAction={() => {
           if (onShow) {
@@ -937,76 +936,32 @@ function parseQuickInput(input: string): QuickInput | null {
   return { kind: "gradient" as const, primary: first, secondary: second };
 }
 
-function launchColorOverlay(hex: string, hex2?: string) {
-  // Use a Swift script to show a system-level full-screen window with solid color
-  return new Promise<void>((resolve, reject) => {
-    const scriptPath = path.join(environment.assetsPath, "fullscreen_color.swift");
-    if (!existsSync(scriptPath)) {
-      reject(new Error("Full-screen script not found"));
-      return;
+// 启动全屏颜色覆盖 - 使用 Raycast 编译的 Swift 可执行文件
+async function launchColorOverlay(hex: string, hex2?: string) {
+  const normalized = normalizeHex(hex);
+  if (!normalized) {
+    throw new Error("Invalid HEX color");
+  }
+
+  let normalized2: string | undefined = undefined;
+  if (hex2 && hex2.trim().length > 0) {
+    const temp = normalizeHex(hex2);
+    if (!temp) {
+      throw new Error("Invalid secondary HEX color");
     }
+    normalized2 = temp;
+  }
 
-    const swiftExecutable = "/usr/bin/swift";
-    if (!existsSync(swiftExecutable)) {
-      reject(
-        new Error(
-          "Swift runtime not detected. Install Xcode Command Line Tools (xcode-select --install) or Xcode and try again.",
-        ),
-      );
-      return;
+  // Raycast 会自动编译 swift/ 目录下的 Swift 文件
+  // 编译后的可执行文件位于 environment.assetsPath
+  const executablePath = path.join(environment.assetsPath, "show-color-overlay");
+  const args = normalized2 ? [normalized, normalized2] : [normalized];
+
+  // 使用 execFile 异步执行，不等待完成（因为窗口会一直显示直到用户关闭）
+  execFile(executablePath, args, { detached: true, stdio: "ignore" }, (error) => {
+    if (error) {
+      console.error("Failed to launch color overlay:", error);
     }
-
-    const normalized = normalizeHex(hex);
-    if (!normalized) {
-      reject(new Error("Invalid HEX color"));
-      return;
-    }
-
-    let normalized2: string | null = null;
-    if (hex2 && hex2.trim().length > 0) {
-      normalized2 = normalizeHex(hex2);
-      if (!normalized2) {
-        reject(new Error("Invalid secondary HEX color"));
-        return;
-      }
-    }
-
-    const args = [scriptPath, normalized, ...(normalized2 ? [normalized2] : [])];
-
-    const child = spawn(swiftExecutable, args, {
-      detached: true,
-      stdio: "ignore",
-    });
-
-    let settled = false;
-    const timer = setTimeout(() => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      child.unref();
-      resolve();
-    }, 300);
-
-    child.once("error", (error) => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      clearTimeout(timer);
-      reject(error);
-    });
-
-    child.once("close", (code) => {
-      if (settled) {
-        return;
-      }
-      if (typeof code === "number" && code !== 0) {
-        settled = true;
-        clearTimeout(timer);
-        reject(new Error(`Swift script exited with code ${code}`));
-      }
-    });
   });
 }
 

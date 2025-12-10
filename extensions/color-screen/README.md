@@ -10,14 +10,13 @@ Color Screen is a productivity-friendly color picker for macOS users who prefer 
 - **Solid + gradient library** – Curated swatches (black, mint, sunset gradients, etc.) with fuzzy search and keyword support.
 - **Custom palettes** – Save named HEX combinations, favorite them, edit later, and keep everything synced via Raycast LocalStorage.
 - **Recent history** – Jump back to the last colors you showcased without retyping anything.
-- **Swift-powered fullscreen renderer** – Uses a lightweight Swift script to open a true system-level borderless window so there are zero menu bars or distractions.
+- **Swift-powered fullscreen renderer** – Uses Raycast's native Swift compilation to open a true system-level borderless window so there are zero menu bars or distractions.
 
 ## Getting started
 
 1. Install [Raycast](https://www.raycast.com/) on macOS.
 2. Open the Raycast Store, search for **Color Screen**, and add it to your extensions.
 3. Assign a keyboard shortcut if you want instant access.
-4. (Optional) Install Xcode Command Line Tools (`xcode-select --install`) the first time Raycast asks for Swift runtime access.
 
 ## How to use it
 
@@ -30,7 +29,7 @@ Color Screen is a productivity-friendly color picker for macOS users who prefer 
 ## Requirements
 
 - macOS with Raycast installed
-- Swift runtime (Xcode Command Line Tools or Xcode) for the fullscreen renderer (prompted automatically)
+- Raycast will automatically compile the Swift code for the fullscreen renderer
 
 ## Privacy & permissions
 
