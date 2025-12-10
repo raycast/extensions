@@ -5,6 +5,7 @@ import path from "path";
 import { useEffect, useState } from "react";
 import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
 import { fileExists, getErrorMessage, isMacOS, openURIinVSCode, raycastForVSCodeURI, waitForFileExists } from "./utils";
+import { homedir } from "os";
 
 interface CommandMetadata {
   command: string;
@@ -16,7 +17,7 @@ function transitFolder(): string {
   const build = getBuildNamePreference();
   const ts = isMacOS
     ? path.join(os.homedir(), `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`)
-    : path.join(process.env.APPDATA || "", `${build}/User/globalStorage/tonka3000.raycast/transit`);
+    : path.join(homedir(), "AppData", "Roaming", `${build}/User/globalStorage/tonka3000.raycast/transit`);
   return ts;
 }
 
