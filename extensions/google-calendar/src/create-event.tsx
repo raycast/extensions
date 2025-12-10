@@ -51,7 +51,7 @@ function parseDurationAsMinutesForPlainNumbers(value: string | undefined): numbe
   }
 }
 
-function toLocalYMD(date: Date): string {
+function formatLocalDateYMD(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
@@ -92,7 +92,10 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
     },
     validation: {
       title: FormValidation.Required,
-      duration: (value) => {
+      duration: (value: string | undefined, values: FormValues) => {
+        if (values.eventTime === "all_day") {
+          return undefined; // skip validation for all day events
+        }
         if (!value) return undefined; // allow empty, revert to default onSubmit
         const milliseconds = parseDurationAsMinutesForPlainNumbers(value);
         if (milliseconds === undefined || milliseconds === null) {
@@ -102,7 +105,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
           return "Duration must be positive.";
         }
       },
-    },
+    } as Record<string, unknown>,
     onSubmit: async (values) => {
       await showToast({ style: Toast.Style.Animated, title: "Creating event" });
 
@@ -127,10 +130,10 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
 
       if (isAllDay) {
         // for all day events use date only format
-        start.date = toLocalYMD(startDate);
+        start.date = formatLocalDateYMD(startDate);
         const endDateExclusive = new Date(startDate);
         endDateExclusive.setDate(endDateExclusive.getDate() + 1);
-        end.date = toLocalYMD(endDateExclusive);
+        end.date = formatLocalDateYMD(endDateExclusive);
       } else {
         start.dateTime = startDate.toISOString();
         end.dateTime = new Date(startDate.getTime() + parsedMilliseconds).toISOString();
