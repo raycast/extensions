@@ -52,7 +52,7 @@ export async function getEditorApplication(buildName: string): Promise<Applicati
   // Find the app by bundle ID
   const bundleId = getBundleId(buildName);
   if (bundleId) {
-    const app = apps.find((app) => app.bundleId === bundleId);
+    const app = apps.find((app) => app.bundleId === bundleId || app.name === bundleId);
     if (app) return app;
   }
 
