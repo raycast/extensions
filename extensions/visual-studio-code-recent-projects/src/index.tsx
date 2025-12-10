@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Grid, Icon, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { runPowerShellScript, usePromise } from "@raycast/utils";
 import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
 import { runAppleScriptSync } from "run-applescript";
@@ -33,9 +33,11 @@ import {
   filterUnpinnedEntries,
   isFileEntry,
   isFolderEntry,
+  isMacOS,
   isRemoteEntry,
   isRemoteWorkspaceEntry,
   isValidHexColor,
+  isWindows,
   isWorkspaceEntry,
 } from "./utils";
 import { getEditorApplication } from "./utils/editor";
@@ -183,7 +185,7 @@ function LocalItem(
 
   const getAction = (revert = false) => {
     return () => {
-      if (closeOtherWindows !== revert) {
+      if (closeOtherWindows !== revert && isMacOS) {
         runAppleScriptSync(`
         tell application "System Events"
           tell process "${build}"
@@ -193,8 +195,19 @@ function LocalItem(
           end tell
         end tell
         `);
+      } else if (closeOtherWindows !== revert && isWindows) {
+        runPowerShellScript(`
+          $vsCodeProcesses = Get-Process -Name "${build}" -ErrorAction SilentlyContinue
+          foreach ($process in $vsCodeProcesses) {
+            $process.CloseMainWindow() | Out-Null
+          }
+        `);
       }
-      open(props.uri, bundleIdentifier);
+      if (isWindows) {
+        open(decodeURIComponent(props.uri), bundleIdentifier);
+      } else {
+        open(props.uri, bundleIdentifier);
+      }
     };
   };
 
