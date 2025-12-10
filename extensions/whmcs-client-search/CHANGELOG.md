@@ -1,6 +1,6 @@
 # WHMCS Client Search Changelog
 
-## ["Open Support Ticket" Option] - {PR_MERGE_DATE}
+## ["Open Support Ticket" Option] - 2025-12-10
 
 - You can now open a support ticket for your selected client by hitting `CMD + T`.
 
