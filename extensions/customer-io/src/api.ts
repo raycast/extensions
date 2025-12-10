@@ -361,14 +361,8 @@ async function getNewsletters(): Promise<Broadcast[]> {
 }
 
 export async function getBroadcasts(): Promise<Broadcast[]> {
-  const [broadcasts, newsletters] = await Promise.all([
-    apiGet<{ broadcasts?: Broadcast[] }>("broadcasts")
-      .then((data) => data.broadcasts || [])
-      .catch(() => [] as Broadcast[]),
-    getNewsletters().catch(() => [] as Broadcast[]),
-  ]);
-
-  return [...broadcasts, ...newsletters];
+  // Only return newsletters (exclude API-triggered broadcasts)
+  return getNewsletters().catch(() => [] as Broadcast[]);
 }
 
 export async function getBroadcastDetails(id: number): Promise<Broadcast> {

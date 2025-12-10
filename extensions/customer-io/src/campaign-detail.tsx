@@ -10,7 +10,25 @@ import {
   MetricPeriod,
 } from "./api";
 import { getStateColor } from "./utils/colors";
-import { formatNumber, formatPercent, formatState } from "./utils/formatters";
+import { formatNumber, formatPercent, formatState, formatTypeName } from "./utils/formatters";
+
+function getTypeIcon(type?: string): Icon {
+  switch (type) {
+    case "segment":
+      return Icon.Person;
+    case "seg_attr":
+      return Icon.PersonLines;
+    case "behavioral":
+      return Icon.LightBulb;
+    case "date":
+      return Icon.Calendar;
+    case "api":
+    case "event":
+      return Icon.Code;
+    default:
+      return Icon.Envelope;
+  }
+}
 
 interface CampaignDetailProps {
   id: number;
@@ -38,7 +56,7 @@ function buildMarkdown(campaign: Campaign, metrics: CalculatedMetrics | null, pe
   }
 
   md += `---\n\n`;
-  md += `### Performances (${periodLabel})\n\n`;
+  md += `## Performances (${periodLabel})\n\n`;
   md += `_You can switch the period from the action panel_\n\n`;
 
   if (metrics && metrics.sent > 0) {
@@ -116,7 +134,7 @@ export default function CampaignDetail({ id }: CampaignDetailProps) {
       <Detail.Metadata.TagList title="Status">
         <Detail.Metadata.TagList.Item text={formatState(campaign.state)} color={getStateColor(campaign.state)} />
       </Detail.Metadata.TagList>
-      <Detail.Metadata.Label title="Type" text={campaign.type || "N/A"} />
+      <Detail.Metadata.Label title="Type" text={formatTypeName(campaign.type)} icon={getTypeIcon(campaign.type)} />
       {campaign.tags && campaign.tags.length > 0 && (
         <Detail.Metadata.TagList title="Tags">
           {campaign.tags.map((tag, index) => (

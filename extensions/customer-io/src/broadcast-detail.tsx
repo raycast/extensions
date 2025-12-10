@@ -9,9 +9,29 @@ import {
   CalculatedMetrics,
 } from "./api";
 import { getStateColor } from "./utils/colors";
-import { formatNumber, formatPercent, formatState } from "./utils/formatters";
+import { formatNumber, formatPercent, formatState, formatTypeName } from "./utils/formatters";
 import { formatDate } from "./utils/format-date";
 import { getCustomerIoUrl } from "./utils/url-builder";
+
+function getTypeIcon(type?: string): Icon {
+  switch (type) {
+    case "email":
+      return Icon.Envelope;
+    case "webhook":
+      return Icon.Globe;
+    case "push":
+      return Icon.Bell;
+    case "slack":
+      return Icon.Message;
+    case "twilio":
+    case "sms":
+      return Icon.Phone;
+    case "in_app":
+      return Icon.AppWindow;
+    default:
+      return Icon.Megaphone;
+  }
+}
 
 interface BroadcastDetailProps {
   id: number;
@@ -28,7 +48,7 @@ function buildMarkdown(broadcast: Broadcast, metrics: CalculatedMetrics | null):
   }
 
   md += `---\n\n`;
-  md += `### Performances\n\n`;
+  md += `## Performances\n\n`;
 
   if (metrics && metrics.sent > 0) {
     // Delivery section
@@ -95,7 +115,7 @@ export default function BroadcastDetail({ id }: BroadcastDetailProps) {
       <Detail.Metadata.TagList title="Status">
         <Detail.Metadata.TagList.Item text={formatState(broadcast.state)} color={getStateColor(broadcast.state)} />
       </Detail.Metadata.TagList>
-      <Detail.Metadata.Label title="Type" text={broadcast.type || "N/A"} />
+      <Detail.Metadata.Label title="Type" text={formatTypeName(broadcast.type)} icon={getTypeIcon(broadcast.type)} />
       {broadcast.tags && broadcast.tags.length > 0 && (
         <Detail.Metadata.TagList title="Tags">
           {broadcast.tags.map((tag, index) => (
@@ -137,7 +157,10 @@ export default function BroadcastDetail({ id }: BroadcastDetailProps) {
                   });
                   return;
                 }
-                const url = getCustomerIoUrl(preferences.workspace_id, "broadcast", broadcast.id);
+                const url = getCustomerIoUrl(preferences.workspace_id, "broadcast", broadcast.id, {
+                  broadcastType: broadcast.type,
+                  state: broadcast.state,
+                });
                 open(url);
               }}
             />

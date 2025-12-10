@@ -50,3 +50,37 @@ export function isDataDrivenSegment(type?: string): boolean {
   const lowerType = type?.toLowerCase() || "";
   return lowerType === "data_driven" || lowerType === "dynamic" || lowerType === "data-driven";
 }
+
+/**
+ * Format a type name for display (e.g., "in_app" -> "In App", "seg_attr" -> "Segment Attribute").
+ */
+export function formatTypeName(type?: string): string {
+  if (!type) return "Unknown";
+
+  // Map specific API types to human-readable names
+  const typeMap: Record<string, string> = {
+    email: "Email",
+    push: "Push",
+    sms: "SMS",
+    twilio: "SMS",
+    slack: "Slack",
+    webhook: "Webhook",
+    in_app: "In-App",
+    segment: "Segment Triggered",
+    seg_attr: "Segment + Attribute",
+    behavioral: "Behavioral",
+    date: "Date Triggered",
+    api: "API Triggered",
+    event: "Event Triggered",
+  };
+
+  if (typeMap[type.toLowerCase()]) {
+    return typeMap[type.toLowerCase()];
+  }
+
+  // Fallback: capitalize first letter of each word, replace underscores with spaces
+  return type
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}

@@ -4,7 +4,7 @@ import { getCampaigns, pauseCampaign, resumeCampaign, Campaign } from "./api";
 import CampaignDetail from "./campaign-detail";
 import { formatRelativeTime } from "./utils/format-date";
 import { getStateColor } from "./utils/colors";
-import { formatState } from "./utils/formatters";
+import { formatState, formatTypeName } from "./utils/formatters";
 
 function getTypeIcon(type?: string): Icon {
   switch (type) {
@@ -57,7 +57,7 @@ export default function CampaignList() {
         <List.Dropdown tooltip="Filter by type" value={selectedType} onChange={setSelectedType}>
           <List.Dropdown.Item title="All Types" value="all" />
           {uniqueTypes.map((type) => (
-            <List.Dropdown.Item key={type} title={type} value={type} />
+            <List.Dropdown.Item key={type} title={formatTypeName(type)} value={type} />
           ))}
         </List.Dropdown>
       }
@@ -67,7 +67,7 @@ export default function CampaignList() {
           key={campaign.id}
           icon={{ source: getTypeIcon(campaign.type), tintColor: Color.Blue }}
           title={campaign.name}
-          subtitle={campaign.type || "campaign"}
+          subtitle={formatTypeName(campaign.type)}
           accessories={[
             { tag: { value: formatState(campaign.state), color: getStateColor(campaign.state) } },
             ...(campaign.tags && campaign.tags.length > 0 ? [{ text: campaign.tags.slice(0, 2).join(", ") }] : []),
