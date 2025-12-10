@@ -10,7 +10,8 @@ interface QueryHistory {
 }
 export default function HistoryCommand({ onBack }: { onBack?: () => void } = {}) {
   const [queryHistory, setQueryHistory] = useState<QueryHistory[]>([]);
-  const [sortReverse, setSortReverse] = useState(false);
+  // Default to newest-first for a more natural history view
+  const [sortReverse, setSortReverse] = useState(true);
 
   // Load query history from local storage when component mounts
   useEffect(() => {

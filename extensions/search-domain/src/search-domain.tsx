@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, open, List, LocalStorage, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { RDAP_BASE_URL } from "./constants";
+import { RDAP_GENERIC } from "./constants";
 import { Root, Entity } from "./types";
 import HistoryCommand from "./history";
 
@@ -165,7 +165,8 @@ export default function Command() {
     setIsAvailable(false);
     await showToast({ style: Toast.Style.Animated, title: "Checking...", message: domainToCheck });
     try {
-      const response = await fetch(`${RDAP_BASE_URL}/${encodeURIComponent(domainToCheck)}`);
+      // Use the generic RDAP resolver for all TLDs (rdap.org redirects to the authoritative registry)
+      const response = await fetch(`${RDAP_GENERIC}/${encodeURIComponent(domainToCheck)}`);
 
       let markdown = "";
       let buyLink = "";
@@ -302,7 +303,7 @@ export default function Command() {
       <Form.TextField
         id="domain"
         title="Domain Name"
-        placeholder="e.g. dhrv.pw or example.pw"
+        placeholder="e.g. example.com"
         value={domain}
         onChange={setDomain}
         autoFocus
@@ -332,6 +333,7 @@ export default function Command() {
             title="Recent Queries"
             text={`${queryHistory
               .slice(-3)
+              .reverse()
               .map(
                 (q, index) => `${index + 1}. ${q.domain} - ${q.isAvailable ? "Available" : "Registered"} - ${q.date}`,
               )

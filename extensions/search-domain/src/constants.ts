@@ -1,7 +1,8 @@
 /**
  * RDAP API ENDPOINT CONFIGURATION
  *
- * Uses the CentralNIC RDAP service for domain information.
- * Format: https://rdap.centralnic.com/pw/domain/{domain}
+ * This extension uses a generic RDAP resolver by default. The resolver (`rdap.org`)
+ * redirects queries to the authoritative registry for the requested TLD. Using a generic resolver avoids false
+ * "available" results that can happen when querying a registry-specific endpoint that only serves certain TLDs.
  */
-export const RDAP_BASE_URL = "https://rdap.centralnic.com/pw/domain";
+export const RDAP_GENERIC = "https://rdap.org/domain";
