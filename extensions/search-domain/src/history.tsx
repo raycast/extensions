@@ -10,6 +10,7 @@ interface QueryHistory {
 }
 export default function HistoryCommand({ onBack }: { onBack?: () => void } = {}) {
   const [queryHistory, setQueryHistory] = useState<QueryHistory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   // Default to newest-first for a more natural history view
   const [sortReverse, setSortReverse] = useState(true);
 
@@ -25,6 +26,7 @@ export default function HistoryCommand({ onBack }: { onBack?: () => void } = {})
           console.error("Failed to parse history data:", error);
         }
       }
+      setIsLoading(false);
     }
 
     loadHistory();
@@ -78,6 +80,7 @@ export default function HistoryCommand({ onBack }: { onBack?: () => void } = {})
 
   return (
     <List
+      isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Sort Order" storeValue={true} onChange={(value) => setSortReverse(value === "desc")}>
           <List.Dropdown.Item title="Oldest First" value="asc" />

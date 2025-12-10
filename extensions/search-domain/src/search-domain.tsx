@@ -1,4 +1,15 @@
-import { Form, ActionPanel, Action, showToast, Toast, open, List, LocalStorage, Keyboard } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  open,
+  List,
+  LocalStorage,
+  Keyboard,
+  Clipboard,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { RDAP_GENERIC } from "./constants";
@@ -115,7 +126,11 @@ function DomainDetailView({
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
                   />
                 )}
-                <Action title="Copy Value" onAction={() => {}} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+                <Action
+                  title="Copy Value"
+                  onAction={() => Clipboard.copy(item.subtitle || "")}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
               </ActionPanel>
             }
           />
