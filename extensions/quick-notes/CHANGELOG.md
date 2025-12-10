@@ -1,6 +1,6 @@
 # Quick Notes Changelog
 
-## [Windows Compatibility] - {PR_MERGE_DATE}
+## [Windows Compatibility] - 2025-12-10
 
 - Normalize path handling with `path.join` so Quick Notes works on macOS and Windows Raycast.
 
