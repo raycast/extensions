@@ -2,13 +2,6 @@ import { showHUD, getPreferenceValues, environment, LaunchProps } from "@raycast
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
-type Preferences = {
-  whmcsApiUrl: string;
-  whmcsApiIdentifier: string;
-  whmcsApiSecret: string;
-  whmcsAdminPath: string;
-};
-
 type ApiClient = {
   id: string | number;
   firstname?: string;
