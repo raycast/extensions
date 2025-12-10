@@ -1,5 +1,15 @@
 # GraphCalc Changelog
 
+## [SVG Rendering Rewrite and Dependency Cleanup] - {PR_MERGE_DATE}
+
+- Replaced recharts library with custom pure SVG rendering for better compatibility
+- Fixed LaTeX rendering issues (now using proper `$$expression$$` syntax)
+- Removed unused dependencies (recharts, chart.js, react-dom)
+- Improved graph rendering reliability with static SVG generation
+- Better theme support with proper color adaptation for light/dark modes
+- More accurate graph scaling and axis labels
+- Fixes https://github.com/raycast/extensions/issues/23451
+
 ## [🔍Zoom, 🧭panning navigation and 🐛bugfixes] - 2024-11-30
 
 - Along with the ability to zoom and pan, the graph now has a reset button

@@ -69,27 +69,26 @@ const Graph: React.FC<GraphProps> = ({ expression }) => {
           : result !== null
             ? `\\[${expression} = ${result}\\]`
             : svgRendered
-              ? `\\begin{math}${expression}\\end{math}\n\n<img src="data:image/svg+xml;utf8,${encodeURIComponent(
+              ? `$$${expression}$$\n\n<img src="data:image/svg+xml;base64,${Buffer.from(
                   renderGraphToSVG(
                     expression,
                     dataSegments,
                     [xMin, xMax],
                     [yMin, yMax],
                     lineColor,
+                    environment.appearance,
                   ),
-                )}?color=${encodeURIComponent(lineColor)}&t=${
-                  environment.appearance
-                }-${lineColor}" alt="Graph" />`
-              : `\\begin{math}${expression}\\end{math}\n\n`
+                ).toString("base64")}" alt="Graph" />`
+              : `$$${expression}$$\n\n`
       }
       actions={
         !error &&
         result === null && (
           <ActionPanel>
-            <Action title="Zoom In" onAction={zoomIn} />
-            <Action title="Zoom Out" onAction={zoomOut} />
+            <Action title="Zoom in" onAction={zoomIn} />
+            <Action title="Zoom out" onAction={zoomOut} />
             <Action
-              title="Move Up"
+              title="Move up"
               onAction={moveUp}
               shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
             />

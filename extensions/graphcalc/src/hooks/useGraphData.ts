@@ -84,7 +84,7 @@ export function useGraphData(expression: string) {
           title: "Calculation Successful",
           message: `${expression} = ${calculatedResult}`,
         });
-      } catch (error) {
+      } catch {
         setResult(null);
         setError("Invalid expression. Please check the syntax.");
         showToast({
