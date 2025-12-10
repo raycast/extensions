@@ -61,11 +61,11 @@ export const SEARCH_SUGGESTIONS: ReadonlyArray<Suggestion> = [
   },
   {
     title: "Avoid Hyphens",
-    subtitle: "They’re tough to express verbally. They also make the domain more difficult to type",
+    subtitle: "They're tough to express verbally. They also make the domain more difficult to type",
   },
   {
     title: "Avoid Using Doubled Letters",
-    subtitle: "They’re hard to pronounce and spell.",
+    subtitle: "They're hard to pronounce and spell.",
   },
   {
     title: "Keep it short!",
@@ -77,7 +77,7 @@ export const SEARCH_SUGGESTIONS: ReadonlyArray<Suggestion> = [
   },
   {
     title: "Pick a flexible name",
-    subtitle: "You don’t want to be so precise that there’s no room for your website to grow.",
+    subtitle: "You don't want to be so precise that there's no room for your website to grow.",
   },
 ] as const;
 

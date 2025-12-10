@@ -1,5 +1,13 @@
 # Spotify Player Changelog
 
+## [Generate Playlist Improvements] - 2025-12-05
+
+- Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation  
+- Strengthened prompt to enforce a **hard minimum of 20 songs** and a **maximum of 75 songs**  
+- Added strict validation requiring the returned JSON to include a correctly structured `playlist` array  
+- Improved cultural and thematic vibe inference when no artists are explicitly listed  
+- Tightened rules for subgenre consistency, smooth energy progression, and removal of generic or low-intent tracks  
+
 ## [Enhancements] - 2025-11-27
 
 - Fixed detecting if Spotify is installed on Windows

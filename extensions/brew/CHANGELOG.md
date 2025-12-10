@@ -1,8 +1,9 @@
 # Brew Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-12-01
 
 - Update dependencies and replace node-fetch with native fetch API
+- Upgrade react to 19.0.10
 
 ## [Bug Fix] - 2025-11-03
 

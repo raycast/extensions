@@ -37,7 +37,7 @@ export function CaskActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
@@ -148,7 +148,7 @@ export function FormulaActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
@@ -256,7 +256,7 @@ export function FormulaActionPanel(props: {
 export function OutdatedActionPanel(props: {
   outdated: OutdatedCask | OutdatedFormula;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { outdated } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 

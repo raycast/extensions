@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import { getBoundedPreferenceNumber } from "./components/Menu";
@@ -38,15 +38,25 @@ function MyLatestRepositories() {
     { keepPreviousData: true },
   );
 
-  const myLatestRepositories = useMemo(
-    () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
+  useEffect(
+    () => history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))),
     [data],
+  );
+
+  const validHistory = useMemo(
+    () => history.filter((repository) => data?.find((r) => r.id === repository.id)),
+    [data, history],
+  );
+
+  const myLatestRepositories = useMemo(
+    () => data?.filter((repository) => !validHistory.find((r) => r.id === repository.id)),
+    [data, validHistory],
   );
 
   return (
     <List isLoading={isLoading} throttle>
-      <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
-        {history.map((repository) => (
+      <List.Section title="Visited Repositories" subtitle={validHistory ? String(validHistory.length) : undefined}>
+        {validHistory.map((repository) => (
           <RepositoryListItem
             key={repository.id}
             {...{ repository, mutateList, onVisit: visitRepository, sortQuery, setSortQuery, sortTypesData }}

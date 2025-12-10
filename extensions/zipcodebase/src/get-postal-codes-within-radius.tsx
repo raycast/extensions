@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { getPostalCodesWithinRadius } from "./utils/api";
 
 export default function GetPostalCodesWithinRadius(
-  props: LaunchProps<{ arguments: Arguments.GetPostalCodesWithinRadius }>
+  props: LaunchProps<{ arguments: Arguments.GetPostalCodesWithinRadius }>,
 ) {
   const { code, radius, country } = props.arguments;
 

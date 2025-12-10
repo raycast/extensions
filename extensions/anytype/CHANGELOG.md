@@ -1,5 +1,9 @@
 # Anytype Changelog
 
+## [Fixes] - 2025-12-04
+
+- Fix quicklink not loading type, space, list, and template correctly when launching create-object command
+
 ## [Fixes] - 2025-07-09
 
 - Fix error when creating objects without linked type properties
