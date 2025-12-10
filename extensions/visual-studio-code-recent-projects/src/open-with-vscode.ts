@@ -1,38 +1,26 @@
 import { closeMainWindow, getFrontmostApplication, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
 import { bundleIdentifier } from "./preferences";
-import { getCurrentFinderPath } from "./utils/apple-scripts";
-
-// Function to get selected Path Finder items
-const getSelectedPathFinderItems = async () => {
-  const script = `
-    tell application "Path Finder"
-      set thePaths to {}
-      repeat with pfItem in (get selection)
-        set the end of thePaths to POSIX path of pfItem
-      end repeat
-      return thePaths
-    end tell
-  `;
-
-  const paths = await runAppleScript(script);
-  return paths.split(","); // Assuming the paths are comma-separated
-};
+import { getCurrentFinderPath, getSelectedPathFinderItems, getActiveExplorerPath } from "./utils/scripts";
+import { isMacOS, isWindows } from "./utils";
 
 export default async function main() {
   try {
     let selectedItems: { path: string }[] = [];
     const currentApp = await getFrontmostApplication();
 
-    if (currentApp.name === "Finder") {
+    if (isMacOS && currentApp.name === "Finder") {
       selectedItems = await getSelectedFinderItems();
-    } else if (currentApp.name === "Path Finder") {
+    } else if (isMacOS && currentApp.name === "Path Finder") {
       const paths = await getSelectedPathFinderItems();
       selectedItems = paths.map((p) => ({ path: p }));
     }
 
-    if (selectedItems.length === 0) {
+    if (selectedItems.length === 0 && isMacOS) {
       const currentPath = await getCurrentFinderPath();
+      if (currentPath.length === 0) throw new Error("Not a valid directory");
+      await open(currentPath, bundleIdentifier);
+    } else if (selectedItems.length === 0 && isWindows) {
+      const currentPath = await getActiveExplorerPath();
       if (currentPath.length === 0) throw new Error("Not a valid directory");
       await open(currentPath, bundleIdentifier);
     } else {
