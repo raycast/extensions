@@ -111,22 +111,9 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
 
       const calendarId = values.calendar ?? "primary";
       const startDate = values.startDate ?? new Date();
-      const parsedMilliseconds = values.duration
-        ? parseDurationAsMinutesForPlainNumbers(values.duration)
-        : Number(preferences.defaultEventDuration) * 60 * 1000;
-      if (parsedMilliseconds === undefined || parsedMilliseconds === null || parsedMilliseconds <= 0) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid Duration",
-          message: `Could not parse duration: "${values.duration}". Please use formats like "30", "30min", "1h", or "1h30m".`,
-        });
-        return;
-      }
-
+      const isAllDay = values.eventTime === "all_day";
       const start: calendar_v3.Schema$EventDateTime = {};
       const end: calendar_v3.Schema$EventDateTime = {};
-
-      const isAllDay = values.eventTime === "all_day";
 
       if (isAllDay) {
         // for all day events use date only format
@@ -135,6 +122,20 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         endDateExclusive.setDate(endDateExclusive.getDate() + 1);
         end.date = formatLocalDateYMD(endDateExclusive);
       } else {
+        // timed event -> parse and validate
+        const parsedMilliseconds = values.duration
+          ? parseDurationAsMinutesForPlainNumbers(values.duration)
+          : Number(preferences.defaultEventDuration) * 60 * 1000;
+
+        if (parsedMilliseconds === undefined || parsedMilliseconds === null || parsedMilliseconds <= 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid Duration",
+            message: `Could not parse duration: "${values.duration}". Please use formats like "30", "30min", "1h", or "1h30m".`,
+          });
+          return;
+        }
+
         start.dateTime = startDate.toISOString();
         end.dateTime = new Date(startDate.getTime() + parsedMilliseconds).toISOString();
       }
