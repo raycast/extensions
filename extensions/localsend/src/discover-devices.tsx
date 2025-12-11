@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@rayca
 import { useEffect, useState } from "react";
 import { discoverDevicesMulticast, getDeviceInfoHTTP, getLocalIPs } from "./utils/localsend";
 import { getFavoriteDevices, toggleFavoriteDevice, isFavoriteDevice } from "./utils/favorites";
+import { testDeviceConnection } from "./utils/connection-test";
 import { LocalSendDevice } from "./types";
 
 export default function Command() {
@@ -15,7 +16,7 @@ export default function Command() {
 
       const favorites = await getFavoriteDevices();
       const localIPs = getLocalIPs();
-      
+
       const devicesWithFavorites = foundDevices
         .filter((device) => !localIPs.includes(device.ip))
         .map((device) => ({
@@ -79,6 +80,25 @@ export default function Command() {
       style: Toast.Style.Success,
       title: isFav ? "Added to favorites" : "Removed from favorites",
     });
+  };
+
+  const handleTestConnection = async (device: LocalSendDevice) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Testing connection...",
+    });
+
+    const result = await testDeviceConnection(device);
+
+    if (result.reachable) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Device is reachable";
+      toast.message = `${device.alias} is online and ready`;
+    } else {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Device unreachable";
+      toast.message = result.error || "Cannot connect to device";
+    }
   };
 
   const getDeviceIcon = (deviceType?: string): Icon => {
@@ -162,6 +182,7 @@ function DeviceListItem({
   getProtocolTag,
   onRefresh,
   onToggleFavorite,
+  onTestConnection,
   onDiscoverAgain,
 }: {
   device: LocalSendDevice;
@@ -169,6 +190,7 @@ function DeviceListItem({
   getProtocolTag: (protocol: string) => { value: string; color: Color };
   onRefresh: (device: LocalSendDevice) => void;
   onToggleFavorite: (device: LocalSendDevice) => void;
+  onTestConnection: (device: LocalSendDevice) => void;
   onDiscoverAgain: () => void;
 }) {
   return (
@@ -189,6 +211,7 @@ function DeviceListItem({
             icon={device.isFavorite ? Icon.StarDisabled : Icon.Star}
             onAction={() => onToggleFavorite(device)}
           />
+          <Action title="Test Connection" icon={Icon.Network} onAction={() => onTestConnection(device)} />
           <Action.CopyToClipboard title="Copy IP Address" content={device.ip} />
           <Action title="Refresh Device Info" icon={Icon.ArrowClockwise} onAction={() => onRefresh(device)} />
           <Action title="Discover Again" icon={Icon.MagnifyingGlass} onAction={onDiscoverAgain} />

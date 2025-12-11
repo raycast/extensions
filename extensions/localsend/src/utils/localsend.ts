@@ -230,6 +230,9 @@ export const sendFiles = async (
 
   const url = `${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/prepare-upload${pin ? `?pin=${pin}` : ""}`;
 
+  console.log(`Attempting to send to: ${url}`);
+  console.log(`Device info:`, JSON.stringify(device, null, 2));
+
   let prepareResponse;
   try {
     prepareResponse = await fetch(url, {
@@ -238,11 +241,14 @@ export const sendFiles = async (
       body: JSON.stringify(prepareRequest),
       timeout: 10000,
     });
-  } catch {
+  } catch (error) {
+    console.error("Connection error:", error);
     throw new Error(
-      `Cannot connect to ${device.alias} (${device.ip}). Make sure LocalSend is running and the device is reachable.`,
+      `Cannot connect to ${device.alias} (${device.ip}:${device.port}). Make sure LocalSend is running and the device is reachable. Error: ${error instanceof Error ? error.message : "Unknown"}`,
     );
   }
+
+  console.log(`Response status: ${prepareResponse.status}`);
 
   if (!prepareResponse.ok) {
     if (prepareResponse.status === 401) {
