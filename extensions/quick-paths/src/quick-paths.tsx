@@ -48,9 +48,7 @@ function parseCSV(content: string): PathEntry[] {
   const entries: PathEntry[] = [];
   for (const record of records) {
     if (record.length >= 3) {
-      const slug = record[0];
-      const description = record[1];
-      const path = record.slice(2).join(delimiter);
+      const [slug, description, path] = record;
 
       entries.push({
         slug,
@@ -88,12 +86,16 @@ function EditEntryForm({
 }) {
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: {
+  async function handleSubmit({
+    slug,
+    description,
+    path,
+  }: {
     slug: string;
     description: string;
     path: string;
   }) {
-    await onSave(values.slug, values.description, values.path);
+    await onSave(slug, description, path);
     pop();
   }
 
@@ -131,10 +133,11 @@ function EditEntryForm({
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const { csvFilePath, defaultExpandTilde, enterAction } =
+    getPreferenceValues<Preferences>();
   const [entries, setEntries] = useState<PathEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [keepTilde, setKeepTilde] = useState(preferences.defaultExpandTilde);
+  const [keepTilde, setKeepTilde] = useState(defaultExpandTilde);
   const [fileContent, setFileContent] = useState("");
   const { push } = useNavigation();
 
@@ -175,7 +178,7 @@ export default function Command() {
 
   async function loadEntries() {
     try {
-      const csvPath = untildify(preferences.csvFilePath);
+      const csvPath = untildify(csvFilePath);
       let content: string;
 
       try {
@@ -215,7 +218,7 @@ export default function Command() {
 
   useEffect(() => {
     loadEntries();
-  }, [preferences.csvFilePath]);
+  }, [csvFilePath]);
 
   async function handleSaveEntry(
     slug: string,
@@ -223,7 +226,7 @@ export default function Command() {
     path: string,
     originalSlug?: string,
   ) {
-    const csvPath = untildify(preferences.csvFilePath);
+    const csvPath = untildify(csvFilePath);
     let updatedEntries: PathEntry[];
 
     if (originalSlug) {
@@ -258,7 +261,7 @@ export default function Command() {
         },
       })
     ) {
-      const csvPath = untildify(preferences.csvFilePath);
+      const csvPath = untildify(csvFilePath);
       const updatedEntries = entries.filter((e) => e.slug !== slug);
       await saveEntries(csvPath, updatedEntries, fileContent);
       await loadEntries();
@@ -278,7 +281,7 @@ export default function Command() {
         newEntries[targetIndex],
         newEntries[index],
       ];
-      const csvPath = untildify(preferences.csvFilePath);
+      const csvPath = untildify(csvFilePath);
       await saveEntries(csvPath, newEntries, fileContent);
       await loadEntries();
     }
@@ -310,17 +313,18 @@ export default function Command() {
       />
       <List.Section title="Paths">
         {entries.map((entry) => {
-          const pathToUse = keepTilde ? entry.path : entry.expandedPath;
+          const { slug, description, path, expandedPath } = entry;
+          const pathToUse = keepTilde ? path : expandedPath;
           return (
             <List.Item
-              key={entry.slug}
-              title={entry.slug}
-              subtitle={entry.description}
+              key={slug}
+              title={slug}
+              subtitle={description}
               accessories={[{ text: pathToUse }]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    {preferences.enterAction === "search" ? (
+                    {enterAction === "search" ? (
                       <>
                         {createSearchAction(
                           { modifiers: [], key: "return" },
@@ -363,7 +367,7 @@ export default function Command() {
                       title={
                         keepTilde ? "Copy Expanded" : "Copy with Tilde (~)"
                       }
-                      content={keepTilde ? entry.expandedPath : entry.path}
+                      content={keepTilde ? expandedPath : path}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                       onCopy={async () => {
                         await showToast({
@@ -384,12 +388,12 @@ export default function Command() {
                         push(
                           <EditEntryForm
                             entry={entry}
-                            onSave={(slug, description, path) =>
+                            onSave={(newSlug, newDescription, newPath) =>
                               handleSaveEntry(
+                                newSlug,
+                                newDescription,
+                                newPath,
                                 slug,
-                                description,
-                                path,
-                                entry.slug,
                               )
                             }
                           />,
@@ -403,8 +407,8 @@ export default function Command() {
                       onAction={() => {
                         push(
                           <EditEntryForm
-                            onSave={(slug, description, path) =>
-                              handleSaveEntry(slug, description, path)
+                            onSave={(newSlug, newDescription, newPath) =>
+                              handleSaveEntry(newSlug, newDescription, newPath)
                             }
                           />,
                         );
@@ -415,7 +419,7 @@ export default function Command() {
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                      onAction={() => handleDeleteEntry(entry.slug)}
+                      onAction={() => handleDeleteEntry(slug)}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
@@ -423,7 +427,7 @@ export default function Command() {
                       title="Move up"
                       icon={Icon.ArrowUp}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-                      onAction={() => handleMoveEntry(entry.slug, "up")}
+                      onAction={() => handleMoveEntry(slug, "up")}
                     />
                     <Action
                       title="Move Down"
@@ -432,7 +436,7 @@ export default function Command() {
                         modifiers: ["cmd", "shift"],
                         key: "arrowDown",
                       }}
-                      onAction={() => handleMoveEntry(entry.slug, "down")}
+                      onAction={() => handleMoveEntry(slug, "down")}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
