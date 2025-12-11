@@ -105,12 +105,17 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
     setHistory(nextRepositories);
   }
 
-  // Converting query filter string to regexp:
-  const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
+  let data = history;
 
-  const data = history
-    .filter((r) => r.nameWithOwner.toLowerCase().includes(searchText?.toLowerCase() ?? ""))
-    .filter((r) => r.nameWithOwner.match(repositoryFilter));
+  if (searchText) {
+    data = data.filter((r) => r.nameWithOwner.toLowerCase().includes(searchText.toLowerCase()));
+  }
+
+  if (searchFilter) {
+    // Converting query filter string to regexp:
+    const repositoryFilter = `${searchFilter.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
+    data = data.filter((r) => r.nameWithOwner.match(repositoryFilter));
+  }
 
   return { data, visitRepository };
 }

@@ -23,6 +23,7 @@ export interface RefData {
   type?: string;
   citekey?: string;
   tags?: string[];
+  notes?: string[];
   attachment?: Attachment;
   collection?: string[];
   [key: string]: any;
@@ -117,6 +118,7 @@ FROM itemAttachments
         ON itemAttachments.itemID = items.itemID
 WHERE itemAttachments.parentItemID = :id
 AND itemAttachments.contentType = 'application/pdf'
+ORDER BY items.dateAdded ASC
 `;
 
 const CREATORS_SQL = `
@@ -147,13 +149,33 @@ SELECT  collections.collectionName AS name,
 WHERE collectionItems.itemID = :id
 `;
 
+const NOTES_SQL = `
+SELECT itemNotes.note AS note
+  FROM itemNotes
+WHERE itemNotes.parentItemID = :id
+`;
+
 const cachePath = utils.cachePath("zotero.json");
+const CACHE_VERSION = 2;
 
 export function resolveHome(filepath: string): string {
   if (filepath[0] === "~") {
     return path.join(process.env.HOME, filepath.slice(1));
   }
   return filepath;
+}
+
+function stripNoteHtml(note?: string): string {
+  if (!note) {
+    return "";
+  }
+  return note
+    .replace(/<br\s*\/?>(\n)?/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 async function openDb() {
@@ -302,6 +324,22 @@ async function getData(): Promise<RefData[]> {
       row.attachment = at;
     }
 
+    const stNotes = db.prepare(NOTES_SQL);
+    stNotes.bind({ ":id": row.id });
+
+    const notes = [];
+    while (stNotes.step()) {
+      const note = stripNoteHtml(stNotes.getAsObject().note as string);
+      if (note) {
+        notes.push(note);
+      }
+    }
+    stNotes.free();
+
+    if (notes.length > 0) {
+      row.notes = notes;
+    }
+
     const st5 = db.prepare(CREATORS_SQL);
     st5.bind({ ":id": row.id });
 
@@ -367,6 +405,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
   async function updateCache(): Promise<RefData[]> {
     const data = await getData();
     const fData = {
+      version: CACHE_VERSION,
       zotero_path: preferences.zotero_path,
       use_bibtex: preferences.use_bibtex,
       data: data,
@@ -393,7 +432,11 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
       if (latest < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
         const fData = JSON.parse(cacheBuffer.toString());
-        if (fData.zotero_path === preferences.zotero_path && fData.use_bibtex === preferences.use_bibtex) {
+        if (
+          fData.version === CACHE_VERSION &&
+          fData.zotero_path === preferences.zotero_path &&
+          fData.use_bibtex === preferences.use_bibtex
+        ) {
           return fData.data;
         } else {
           throw "Invalid cache";
@@ -457,6 +500,10 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
       {
         name: "abstractNote",
         weight: 5,
+      },
+      {
+        name: "notes",
+        weight: 6,
       },
       {
         name: "tags",

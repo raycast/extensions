@@ -1,7 +1,6 @@
 import {
   List,
   Icon,
-  Color,
   ActionPanel,
   Action,
   confirmAlert,
@@ -23,6 +22,7 @@ import { getDay, set, isAfter, isBefore, formatDistanceToNow } from "date-fns";
 import { ClassDetail } from "./components/ClassDetail";
 import { QuickAddClass } from "./components/QuickAddClass";
 import path from "path";
+import { designTokens } from "./utils/design-tokens";
 
 interface Preferences {
   vaultPath: string;
@@ -42,6 +42,7 @@ interface ClassWithTime extends Class {
 }
 
 export default function Command() {
+  const { base, accent } = designTokens.colors;
   const preferences = getPreferenceValues<Preferences>();
   const showAllPeriods = preferences.defaultView === "all";
   const [, setRefreshKey] = useState(0);
@@ -140,7 +141,6 @@ export default function Command() {
       return {
         id: `free-${period.id}`,
         name: "Free Period",
-        color: "#808080",
         occurrences: [],
         content: "",
         startTime: period.startTime,
@@ -180,18 +180,18 @@ export default function Command() {
       ) : (
         itemsToShow.map((c) => {
           let statusIcon = Icon.Circle;
-          let statusColor = Color.SecondaryText;
+          let statusColor: string = accent.primary;
 
           if (c.startTimeDate && c.endTimeDate) {
             if (isAfter(now, c.endTimeDate)) {
               statusIcon = Icon.CheckCircle;
-              statusColor = Color.Green;
+              statusColor = base.text.secondary;
             } else if (isBefore(now, c.startTimeDate)) {
               statusIcon = Icon.Clock;
-              statusColor = Color.SecondaryText;
+              statusColor = accent.primary;
             } else {
               statusIcon = Icon.Stopwatch;
-              statusColor = Color.Orange;
+              statusColor = accent.primary;
             }
           }
 
@@ -217,7 +217,7 @@ export default function Command() {
               key={c.id}
               icon={{
                 source: c.isFreePeriod ? Icon.Circle : Icon.CircleFilled,
-                tintColor: c.color,
+                tintColor: statusColor,
               }}
               title={title}
               accessories={[
@@ -283,7 +283,7 @@ export default function Command() {
                         }}
                       />
                       <Action
-                        title="Open in PlanWell"
+                        title="Open in Planwell"
                         icon={Icon.AppWindow}
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                         onAction={async () => {

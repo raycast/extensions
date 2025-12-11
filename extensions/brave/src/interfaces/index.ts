@@ -45,7 +45,7 @@ export class Tab {
     public readonly url: string,
     public readonly favicon: string,
     public readonly windowsIndex: number,
-    public readonly tabIndex: number
+    public readonly tabIndex: number,
   ) {}
 
   static parse(line: string): Tab {
