@@ -5,6 +5,9 @@
   "description": "Access a Bento profile.",
   "icon": "bento.png",
   "author": "pabroux",
+  "contributors": [
+    "0xdhrv"
+  ],
   "categories": [
     "Communication"
   ],
@@ -41,17 +44,17 @@
     "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
     "cheerio": "^1.1.2",
-    "tldts": "^6.1.86"
+    "tldts": "^7.0.19"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^22.18.10",
-    "@types/react": "^19.2.2",
-    "eslint": "^9.37.0",
-    "prettier": "^3.6.2",
+    "@types/node": "^25.0.0",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
     "typescript": "^5.9.3"
   },
   "scripts": {
