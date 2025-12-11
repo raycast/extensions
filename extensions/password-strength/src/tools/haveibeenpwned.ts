@@ -14,12 +14,16 @@ export default async function tool({ password }: Input): Promise<string> {
   const sha = getPasswordSha(password);
   const url = `https://api.pwnedpasswords.com/range/${sha.slice(0, 5)}`;
 
-  const response = await fetch(url);
-  const data = await parsePwnedPasswordsResponse(response);
+  try {
+    const response = await fetch(url);
+    const data = await parsePwnedPasswordsResponse(response);
 
-  const find = data.find((item) => item.hash.toUpperCase().localeCompare(sha.slice(5)) === 0);
-  if (!find) {
-    return `Congratulations! It appears your password hasn't been found in online databases.`;
+    const find = data.find((item) => item.hash.toUpperCase().localeCompare(sha.slice(5)) === 0);
+    if (!find) {
+      return `Congratulations! It appears your password hasn't been found in online databases.`;
+    }
+    return `Warning! Your password has been found \`${find.count}\` times in online databases. Please consider using a different password.`;
+  } catch (error) {
+    return `Error while checking password: ${error}`;
   }
-  return `Warning! Your password has been found \`${find.count}\` times in online databases. Please consider using a different password.`;
 }
