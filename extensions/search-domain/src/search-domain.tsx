@@ -173,7 +173,7 @@ export default function Command() {
   }, []);
 
   async function handleSubmit(values: { domain: string }) {
-    const domainToCheck = values.domain.includes(".") ? values.domain : `${values.domain}.pw`;
+    const domainToCheck = values.domain.includes(".") ? values.domain : `${values.domain}.com`;
     setLoading(true);
     setResult(null);
     setDomainData(null);
@@ -195,7 +195,14 @@ export default function Command() {
         await showToast({ style: Toast.Style.Success, title: "Available", message: domainToCheck });
       } else if (response.ok) {
         // Domain is registered, parse RDAP response
-        const responseData = await response.json();
+        let responseData;
+        try {
+          responseData = await response.json();
+        } catch (parseError) {
+          throw new Error(
+            `Failed to parse response: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
+          );
+        }
         const data: Root = responseData as Root;
         setDomainData(data);
         markdown = `Domain ${domainToCheck} is registered`;
