@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## Bookmarks improvement and fix - {PR_MERGE_DATE}
+## Bookmarks improvement and fix - 2025-12-11
 
 - Added Bookmarks in the global Search command (in addition to tabs, browser history and google suggestions)
 - Use Action.Open to open bookmarks instead of AppleScript (fix #23370 #23352 #23340 #23329)
