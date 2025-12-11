@@ -1,4 +1,4 @@
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { getDomainUserAccountInfo, getDomainUserPasswordExpireTimeInSeconds } from "./lib/ldap";
 import { LDAPSingleUserList } from "./components/user";
 
@@ -13,7 +13,7 @@ function getCurrentDomainUser() {
 }
 
 export default function Command() {
-  const { data, isLoading } = usePromise(async () => {
+  const { data, isLoading } = useCachedPromise(async () => {
     const username = getCurrentDomainUser();
     if (!username) {
       throw new Error("Could not determine current user");

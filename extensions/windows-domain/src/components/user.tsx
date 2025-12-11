@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { convertLDAP100NanoSecondsToDateTime, ldapDatetimeToDate, LDAPUser } from "../lib/ldap";
 import { LDAPUserCopyEmployeeNumberAction, LDAPUserEmailAction } from "./actions";
 
@@ -71,6 +71,23 @@ function PasswordExpireListItem({
   );
 }
 
+function AttributeListItem({ content, title }: { content: string | undefined; title: string }) {
+  if (!content) {
+    return null;
+  }
+  return (
+    <List.Item
+      title={title}
+      accessories={[{ text: content }]}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title={`Copy ${title}`} content={content} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 export function LDAPSingleUserList({
   user,
   isLoading,
@@ -83,15 +100,15 @@ export function LDAPSingleUserList({
   return (
     <List isLoading={isLoading}>
       <List.Section title="User Information">
-        {user?.samaccountname && <List.Item title="Username" accessories={[{ text: user.samaccountname }]} />}
-        {user?.displayname && <List.Item title="Name" accessories={[{ text: user.displayname }]} />}
-        {user?.mail && <List.Item title="EMail" accessories={[{ text: user.mail?.toLowerCase() }]} />}
-        {user?.title && <List.Item title="Title" accessories={[{ text: user.title }]} />}
-        {user?.company && <List.Item title="Company" accessories={[{ text: user.company }]} />}
-        {user?.department && <List.Item title="Department" accessories={[{ text: user.department }]} />}
-        {user?.telephonenumber && <List.Item title="Phone" accessories={[{ text: user.telephonenumber }]} />}
-        {user?.mobile && <List.Item title="Mobile" accessories={[{ text: user.mobile }]} />}
-        {user?.employeenumber && <List.Item title="Employee Number" accessories={[{ text: user.employeenumber }]} />}
+        <AttributeListItem title="Username" content={user?.samaccountname} />
+        <AttributeListItem title="Name" content={user?.displayname} />
+        <AttributeListItem title="EMail" content={user?.mail?.toLowerCase()} />
+        <AttributeListItem title="Title" content={user?.title} />
+        <AttributeListItem title="Company" content={user?.company} />
+        <AttributeListItem title="Department" content={user?.department} />
+        <AttributeListItem title="Phone" content={user?.telephonenumber} />
+        <AttributeListItem title="Mobile" content={user?.mobile} />
+        <AttributeListItem title="Employee Number" content={user?.employeenumber} />
         {user?.whencreated && (
           <List.Item title="Account Created" accessories={[{ date: ldapDatetimeToDate(user.whencreated) }]} />
         )}
