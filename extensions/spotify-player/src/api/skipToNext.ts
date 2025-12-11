@@ -1,3 +1,4 @@
+import { delay } from "../helpers/delay";
 import { getErrorMessage } from "../helpers/getError";
 import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
@@ -7,6 +8,8 @@ export async function skipToNext() {
 
   try {
     await spotifyClient.postMePlayerNext();
+    // Wait for the track to actually skip
+    await delay(100);
   } catch (err) {
     const error = getErrorMessage(err);
 

@@ -6,7 +6,8 @@
   "icon": "nix-snowflake.png",
   "author": "aiotter",
   "contributors": [
-    "xmok"
+    "xmok",
+    "0xdhrv"
   ],
   "categories": [
     "Developer Tools"
@@ -28,33 +29,43 @@
   "preferences": [
     {
       "name": "searchSize",
-      "description": "Number of result which will be shown at once",
-      "type": "textfield",
+      "description": "Number of results which will be shown at once",
+      "type": "dropdown",
       "required": false,
       "title": "Search result count",
-      "default": "20"
-    },
-    {
-      "name": "branchName",
-      "description": "Branch name of NixOS/nixpkgs to query against",
-      "type": "textfield",
-      "required": false,
-      "title": "NixPkgs verison",
-      "default": "unstable"
+      "default": "20",
+      "data": [
+        {
+          "title": "10 results",
+          "value": "10"
+        },
+        {
+          "title": "20 results",
+          "value": "20"
+        },
+        {
+          "title": "50 results",
+          "value": "50"
+        },
+        {
+          "title": "100 results",
+          "value": "100"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.18.0"
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^5.6.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -65,6 +76,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

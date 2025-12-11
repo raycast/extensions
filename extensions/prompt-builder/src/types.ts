@@ -28,9 +28,42 @@ export interface FormValues {
   reasoning?: boolean;
   sources?: boolean;
   summary?: boolean;
-  followup?: boolean;
+  noEmDash?: boolean;
 }
 
 export interface PreviewPromptProps {
   prompt: string;
+}
+
+export interface Template extends FormValues {
+  id: string;
+  title: string;
+}
+
+export interface SaveTemplateFormProps {
+  addTemplate: (title: string, values: FormValues) => Promise<string>;
+  updateTemplate?: (id: string, title: string, values: FormValues) => Promise<void>;
+  selectedTemplateId?: string;
+  setSelectedTemplateId: React.Dispatch<React.SetStateAction<string>>;
+  templates: Template[];
+  formValues: FormValues;
+  isUpdate: boolean;
+  initialTitle?: string;
+}
+
+export interface PromptFormActionsProp {
+  formState: {
+    formValues: FormValues;
+    resetFormValues: () => void;
+    setTaskError: React.Dispatch<React.SetStateAction<string | undefined>>;
+  };
+  templateState: {
+    selectedTemplateId: string;
+    setSelectedTemplateId: React.Dispatch<React.SetStateAction<string>>;
+    templates: Template[];
+    addTemplate: (title: string, values: FormValues) => Promise<string>;
+    updateTemplate: (id: string, title: string, values: FormValues) => Promise<void>;
+    deleteTemplate: () => Promise<void>;
+    deleteAllTemplates: () => Promise<void>;
+  };
 }

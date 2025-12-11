@@ -1,5 +1,14 @@
 # Downloads Manager Changelog
 
+## [Fixes] - 2025-12-10
+
+- Fixes [#23514](https://github.com/raycast/extensions/issues/23514)
+- Updated dependencies
+
+## [Add Grid layout] - 2025-12-01
+
+- Added a Grid layout to the Manage Downloads command. Comes with an Action to toggle between layouts as well as a Preference for setting the default layout
+
 ## [Add delete last downloaded item command] - 2025-06-03
 
 - Added the command `Delete Latest Download`, which deletes the latest download.

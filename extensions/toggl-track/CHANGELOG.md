@@ -1,5 +1,11 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2025-11-24
+
+- Add Windows support
+- Fixed stopping running time entry shortcut issue
+- Add ability to cache API responses to support users on free tier that have lower rate limits
+
 ## [Enhancements] - 2025-04-23
 
 - Add preferences to select the history lookback window

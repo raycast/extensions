@@ -30,10 +30,12 @@ const CreateAlias = () => {
   const options = useOptions();
   const recipients = useRecipients();
 
+  const { data: defaults } = options;
+
   const { handleSubmit, itemProps, setValidationError, setValue, values } = useForm<Form>({
     initialValues: {
-      domain: options.data?.defaultAliasDomain,
-      format: options.data?.defaultAliasFormat,
+      domain: defaults?.defaultAliasDomain,
+      format: defaults?.defaultAliasFormat,
     },
     async onSubmit(input) {
       if (input.format === "custom" && (input.local_part?.length ?? 0) < 1) {
@@ -59,7 +61,7 @@ const CreateAlias = () => {
     },
   });
 
-  const isLoading = context.isLoading || !options.data || !recipients.data;
+  const isLoading = !context.data || !options.data || !recipients.data;
 
   useEffect(() => {
     if (options.data?.defaultAliasDomain) {
@@ -88,7 +90,9 @@ const CreateAlias = () => {
       ) : (
         <>
           <Form.Dropdown {...itemProps.domain} title="Domain">
-            {options.data?.data.map((domain) => <Form.Dropdown.Item key={domain} title={domain} value={domain} />)}
+            {options.data?.data.map((domain) => (
+              <Form.Dropdown.Item key={domain} title={domain} value={domain} />
+            ))}
           </Form.Dropdown>
           <Form.Dropdown {...itemProps.format} title="Format">
             {FORMATS.filter(

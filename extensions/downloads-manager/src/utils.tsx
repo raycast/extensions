@@ -11,6 +11,15 @@ export const downloadsFolder = untildify(preferences.downloadsFolder ?? "~/Downl
 const showHiddenFiles = preferences.showHiddenFiles;
 const fileOrder = preferences.fileOrder;
 const lastestDownloadOrder = preferences.lastestDownloadOrder;
+export const defaultDownloadsLayout = preferences.downloadsLayout ?? "list";
+const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff", ".heic", ".svg"];
+
+export function isImageFile(filename: string): boolean {
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex === -1) return false;
+  const ext = filename.toLowerCase().slice(dotIndex);
+  return imageExtensions.includes(ext);
+}
 
 export function getDownloads() {
   const files = readdirSync(downloadsFolder);
@@ -18,16 +27,24 @@ export function getDownloads() {
     .filter((file) => showHiddenFiles || !file.startsWith("."))
     .map((file) => {
       const path = join(downloadsFolder, file);
-      const stats = statSync(path);
-      return {
-        file,
-        path,
-        lastModifiedAt: stats.mtime,
-        createdAt: stats.ctime,
-        addedAt: stats.atime,
-        birthAt: stats.birthtime,
-      };
+      try {
+        const stats = statSync(path);
+        return {
+          file,
+          path,
+          lastModifiedAt: stats.mtime,
+          createdAt: stats.ctime,
+          addedAt: stats.atime,
+          birthAt: stats.birthtime,
+        };
+      } catch (error) {
+        // Skip entries we can't stat (broken symlinks, removed targets, permission issues)
+        console.warn(`Skipping '${path}' because it could not be stat'd:`, error);
+        return undefined;
+      }
     })
+    .filter((entry) => Boolean(entry))
+    .map((entry) => entry as Exclude<typeof entry, undefined>)
     .sort((a, b) => {
       switch (fileOrder) {
         case "addTime":
@@ -62,7 +79,7 @@ export function getLatestDownload() {
 
 export function hasAccessToDownloadsFolder() {
   try {
-    accessSync(preferences.downloadsFolder, constants.R_OK);
+    accessSync(downloadsFolder, constants.R_OK);
     return true;
   } catch (error) {
     console.error(error);
@@ -95,7 +112,7 @@ export async function deleteFileOrFolder(filePath: string) {
   }
 
   try {
-    rm(filePath, { recursive: true, force: true });
+    await rm(filePath, { recursive: true, force: true });
     await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
   } catch (error) {
     if (error instanceof Error) {
@@ -107,7 +124,6 @@ export async function deleteFileOrFolder(filePath: string) {
 export const withAccessToDownloadsFolder = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
     if (hasAccessToDownloadsFolder()) {
-      accessSync(preferences.downloadsFolder, constants.R_OK);
       return <Component {...props} />;
     } else {
       const markdown = `## Permission Required\n\nThe Downloads Manager extension requires access to your Downloads folder. Please grant permission to use it.\n\n![Grant Permission](permission.png)`;

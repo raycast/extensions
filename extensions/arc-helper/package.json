@@ -1,0 +1,81 @@
+{
+  "name": "arc-helper",
+  "title": "Arc Helper",
+  "description": "Search items, quests, events, and traders for Arc Raiders",
+  "icon": "icon.png",
+  "author": "pcho",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-items",
+      "title": "Search Items",
+      "subtitle": "Arc Helper",
+      "description": "Search Arc Raiders items",
+      "mode": "view"
+    },
+    {
+      "name": "search-arcs",
+      "title": "Search ARCs",
+      "subtitle": "Arc Helper",
+      "description": "Browse ARC enemies and their descriptions",
+      "mode": "view"
+    },
+    {
+      "name": "search-quests",
+      "title": "Search Quests",
+      "subtitle": "Arc Helper",
+      "description": "Browse Arc Raiders quests with requirements and rewards",
+      "mode": "view"
+    },
+    {
+      "name": "event-timers",
+      "title": "Event Timers",
+      "subtitle": "Arc Helper",
+      "description": "View current and upcoming Arc Raiders events",
+      "mode": "view"
+    },
+    {
+      "name": "traders",
+      "title": "Browse Traders",
+      "subtitle": "Arc Helper",
+      "description": "Browse trader inventories",
+      "mode": "view"
+    },
+    {
+      "name": "open-map",
+      "title": "Open Map",
+      "subtitle": "Arc Helper",
+      "description": "Open Arc Raiders interactive maps in browser",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.9",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

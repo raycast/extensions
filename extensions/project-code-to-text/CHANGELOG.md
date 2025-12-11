@@ -1,5 +1,19 @@
 # Changelog
 
+## [Update] - 2025-12-02
+
+### Added
+- Multiple file and directory selection support in the file picker
+- Copy to clipboard option for generated content
+- Token estimation display in file metadata and notifications
+- Preview statistics showing estimated file size and token count before generation
+- Results screen after successful generation with file information and quick actions
+
+### Improved
+- File picker now supports selecting both files and directories simultaneously
+- Multiple Finder selection handling for better UI feedback
+- Output file location logic for multiple selected items
+
 ## [Update] - 2025-06-25
 
 ### Added

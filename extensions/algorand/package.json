@@ -1,0 +1,152 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "algorand",
+  "title": "Algorand",
+  "description": "Perform all of Algorand operations from your toolbar",
+  "icon": "icon.png",
+  "author": "raihan_khan",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "wallet-info",
+      "title": "Wallet Info",
+      "subtitle": "Algorand",
+      "description": "View your Algorand wallet info or create one if none exists",
+      "mode": "view"
+    },
+    {
+      "name": "send-algo",
+      "title": "Send Algo",
+      "subtitle": "Algorand",
+      "description": "Send ALGO to another address",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "toAddress",
+          "type": "text",
+          "title": "Recipient Address",
+          "placeholder": "Enter Algorand address",
+          "required": true
+        },
+        {
+          "name": "amount",
+          "type": "text",
+          "title": "Amount (ALGO)",
+          "placeholder": "Enter amount in ALGO",
+          "required": true
+        },
+        {
+          "name": "note",
+          "type": "text",
+          "title": "Note (Optional)",
+          "placeholder": "Transaction note",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-asset",
+      "title": "Create Asset",
+      "subtitle": "Algorand",
+      "description": "Create a new Algorand Standard Asset (ASA)",
+      "mode": "view"
+    },
+    {
+      "name": "transfer-asset",
+      "title": "Transfer Asset",
+      "subtitle": "Algorand",
+      "description": "Transfer an Algorand Standard Asset",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "toAddress",
+          "type": "text",
+          "title": "Recipient Address",
+          "placeholder": "Enter Algorand address",
+          "required": true
+        },
+        {
+          "name": "assetId",
+          "type": "text",
+          "title": "Asset ID",
+          "placeholder": "Enter Asset ID",
+          "required": true
+        },
+        {
+          "name": "amount",
+          "type": "text",
+          "title": "Amount",
+          "placeholder": "Enter amount to transfer",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "transaction-history",
+      "title": "Transaction History",
+      "subtitle": "Algorand",
+      "description": "View your wallet's transaction history",
+      "mode": "view"
+    },
+    {
+      "name": "export-wallet",
+      "title": "Export Wallet",
+      "subtitle": "Algorand",
+      "description": "Export wallet details including address, mnemonic, and private key",
+      "mode": "view"
+    },
+    {
+      "name": "asset-info",
+      "title": "Asset Info",
+      "subtitle": "Algorand",
+      "description": "Get detailed information about an Algorand Standard Asset",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "assetId",
+          "type": "text",
+          "title": "Asset ID",
+          "placeholder": "Enter Asset ID (e.g., 123456)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "swap-assets",
+      "title": "Swap Assets",
+      "subtitle": "Algorand",
+      "description": "Swap Algorand assets using Tinyman DEX",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@tinymanorg/tinyman-js-sdk": "^3.0.0",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^1.17.0",
+    "algosdk": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

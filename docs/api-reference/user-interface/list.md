@@ -584,12 +584,9 @@ export default function Command() {
 
 ### List.EmptyView
 
-A view to display when there aren't any items available. Use to greet users with a friendly message if the
-extension requires user input before it can show any list items e.g. when searching for a package, an article etc.
+A view to display when there aren't any items available. Use to greet users with a friendly message if the extension requires user input before it can show any list items e.g. when searching for a package, an article etc.
 
-Raycast provides a default `EmptyView` that will be displayed if the List component either has no children,
-or if it has children, but none of them match the query in the search bar. This too can be overridden by passing an
-empty view alongside the other `List.Item`s.
+Raycast provides a default `EmptyView` that will be displayed if the List component either has no children, or if it has children, but none of them match the query in the search bar. This too can be overridden by passing an empty view alongside the other `List.Item`s.
 
 Note that the `EmptyView` is _never_ displayed if the `List`'s `isLoading` property is true and the search bar is empty.
 
@@ -628,9 +625,7 @@ export default function CommandWithCustomEmptyView() {
 
 A item in the [List](#list).
 
-This is one of the foundational UI components of Raycast. A list item represents a single entity. It can be a
-GitHub pull request, a file, or anything else. You most likely want to perform actions on this item, so make it clear
-to the user what this list item is about.
+This is one of the foundational UI components of Raycast. A list item represents a single entity. It can be a GitHub pull request, a file, or anything else. You most likely want to perform actions on this item, so make it clear to the user what this list item is about.
 
 #### Example
 
@@ -945,8 +940,7 @@ export default function Metadata() {
 
 A group of related [List.Item](#list.item).
 
-Sections are a great way to structure your list. For example, group GitHub issues with the same status and order them by priority.
-This way, the user can quickly access what is most relevant.
+Sections are a great way to structure your list. For example, group GitHub issues with the same status and order them by priority. This way, the user can quickly access what is most relevant.
 
 #### Example
 

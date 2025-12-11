@@ -12,7 +12,7 @@ import {
   PopToRootType,
   Keyboard,
 } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, usePromise } from "@raycast/utils";
 import { useState } from "react";
 
 import {
@@ -49,17 +49,13 @@ type CreatePageFormProps = {
   defaults?: Partial<CreatePageFormValues>;
 };
 
-type CreatePageFormPreferences = {
-  closeAfterCreate: boolean;
-};
-
 const createPropertyId = (property: DatabaseProperty) => "property::" + property.type + "::" + property.id;
 
 const NON_EDITABLE_PROPETY_TYPES = ["formula"];
 const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
 
 export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
-  const preferences = getPreferenceValues<CreatePageFormPreferences>();
+  const preferences = getPreferenceValues<Preferences.CreateDatabasePage>();
   const defaultValues = launchContext?.defaults ?? defaults;
   const initialDatabaseId = defaultValues?.database;
 
@@ -87,7 +83,29 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     initialValues[key] = value;
   }
 
-  const { itemProps, values, handleSubmit, reset, focus } = useForm<CreatePageFormValues>({
+  usePromise(
+    async () => {
+      if (!preferences.useClipboard) return;
+      const text = await Clipboard.readText();
+      if (!text) return;
+      switch (preferences.useClipboard) {
+        case "title":
+          setValue("property::title::title", text);
+          break;
+        case "content":
+          setValue("content", text);
+          break;
+      }
+    },
+    [],
+    {
+      failureToastOptions: {
+        title: "Failed to read clipboard",
+      },
+    },
+  );
+
+  const { itemProps, values, handleSubmit, reset, focus, setValue } = useForm<CreatePageFormValues>({
     initialValues,
     validation,
     async onSubmit(values) {
@@ -129,7 +147,9 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
         } else {
           reset(initialValues);
           const titleProperty = databaseProperties?.find((dp) => dp.type == "title");
-          titleProperty && focus(createPropertyId(titleProperty));
+          if (titleProperty) {
+            focus(createPropertyId(titleProperty));
+          }
         }
       } catch (error) {
         console.error(error);

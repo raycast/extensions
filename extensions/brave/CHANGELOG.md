@@ -1,5 +1,16 @@
 # Brave Changelog
 
+## [Improvements & Dependency Updates] - 2025-12-09
+
+- Enhanced URL keyword extraction for better search filtering of tabs and history
+- Refactored tab opening logic to use shell commands for improved reliability
+- Added URL validation for favicons, falling back to globe icon for non-HTTP protocols
+- Improved history search to match against both title and URL
+- Enabled client-side filtering on tab search list
+- Upgraded `@raycast/api` and `@raycast/utils` to latest versions
+- Updated TypeScript, ESLint, and Prettier to latest versions
+- Migrated to `@raycast/eslint-config` with flat config
+
 ## [Brave Nightly and Brave Beta support] - 2023-12-07
 
 - Added support for Brave Nightly and Brave Beta for all commands
