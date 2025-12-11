@@ -123,3 +123,35 @@ export function convertLDAP100NanoSecondsToDateTime(timestamp: number | null | u
   // Date expects milliseconds since Unix epoch (UTC)
   return new Date(msNumber);
 }
+
+interface DomainPasswordPolicy {
+  maxPwdAgeSeconds: number;
+}
+
+export async function getDomainUserPasswordExpireTimeInSeconds(): Promise<number> {
+  const data = await runPowerShellScript(`
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+    # Retrieve domain policy for password settings
+    $DomainController = ([System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()).PdcRoleOwner.Name
+    $directoryEntry = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$DomainController")
+
+    # Retrieve the domain password policy
+    $domainPolicy = New-Object System.DirectoryServices.DirectorySearcher
+    $domainPolicy.SearchRoot = $directoryEntry
+    $domainPolicy.Filter = "(objectClass=domainDNS)"
+    $domainPolicy.PropertiesToLoad.Add("maxPwdAge") | Out-Null
+    $domainResults = $domainPolicy.FindOne()
+
+    # Get the maxPwdAge property (returned as a large integer -100 nanoseconds intervals)
+    $maxPwdAge = $domainResults.Properties["maxpwdage"][0]
+
+    # Convert maxPwdAge to days
+    $maxPwdAgeSeconds = ([Math]::Abs($maxPwdAge) / 10000 / 1000)
+
+    ConvertTo-Json @{
+      maxPwdAgeSeconds = $maxPwdAgeSeconds
+    }
+    `);
+  const raw = JSON.parse(data) as DomainPasswordPolicy;
+  return raw.maxPwdAgeSeconds;
+}

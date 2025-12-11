@@ -1,5 +1,5 @@
 import { usePromise } from "@raycast/utils";
-import { getDomainUserAccountInfo } from "./lib/ldap";
+import { getDomainUserAccountInfo, getDomainUserPasswordExpireTimeInSeconds } from "./lib/ldap";
 import { LDAPSingleUserList } from "./components/user";
 
 function getCurrentDomainUser() {
@@ -19,8 +19,18 @@ export default function Command() {
       throw new Error("Could not determine current user");
     }
     const user = await getDomainUserAccountInfo({ username });
-    return user;
+    const domainExpirePasswordPolicy = await getDomainUserPasswordExpireTimeInSeconds();
+    return {
+      user,
+      domainExpirePasswordPolicy,
+    };
   }, []);
 
-  return <LDAPSingleUserList user={data} isLoading={isLoading} />;
+  return (
+    <LDAPSingleUserList
+      user={data?.user}
+      isLoading={isLoading}
+      domainExpirePasswordPolicy={data?.domainExpirePasswordPolicy}
+    />
+  );
 }

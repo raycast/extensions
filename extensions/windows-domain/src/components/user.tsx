@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { convertLDAP100NanoSecondsToDateTime, ldapDatetimeToDate, LDAPUser } from "../lib/ldap";
 import { LDAPUserCopyEmployeeNumberAction, LDAPUserEmailAction } from "./actions";
 
@@ -19,6 +19,11 @@ export function LDAPUserListItem({ user }: { user: LDAPUser }) {
       title={user.displayname || "No Display Name"}
       subtitle={subtitle(user)}
       icon={user.thumbnailphoto}
+      accessories={[
+        { icon: user.mobile ? Icon.Mobile : undefined },
+        { icon: user.telephonenumber ? Icon.Phone : undefined },
+        { date: user.whencreated ? ldapDatetimeToDate(user.whencreated) : undefined },
+      ]}
       actions={
         <ActionPanel>
           <LDAPUserEmailAction user={user} />
@@ -29,7 +34,52 @@ export function LDAPUserListItem({ user }: { user: LDAPUser }) {
   );
 }
 
-export function LDAPSingleUserList({ user, isLoading }: { user: LDAPUser | undefined; isLoading?: boolean }) {
+function PasswordExpireListItem({
+  user,
+  domainExpirePasswordPolicy,
+}: {
+  user: LDAPUser | undefined;
+  domainExpirePasswordPolicy?: number;
+}) {
+  if (!user?.pwdlastset || !domainExpirePasswordPolicy) {
+    return null;
+  }
+  const lastPasswordSetDate = convertLDAP100NanoSecondsToDateTime(Number.parseInt(user.pwdlastset));
+  if (!lastPasswordSetDate) {
+    return null;
+  }
+  const secondsToAdd = domainExpirePasswordPolicy;
+
+  const expireDate = new Date();
+  expireDate.setSeconds(lastPasswordSetDate.getSeconds() + secondsToAdd);
+
+  const daysBetween = (a: Date, b: Date): number => {
+    return Math.abs(a.getTime() - b.getTime()) / (1000 * 60 * 60 * 24);
+  };
+
+  const days = daysBetween(expireDate, new Date());
+
+  return (
+    <List.Item
+      title="Password Expire"
+      accessories={[
+        {
+          text: `${expireDate.toDateString()} (${Math.round(days)} days)`,
+        },
+      ]}
+    />
+  );
+}
+
+export function LDAPSingleUserList({
+  user,
+  isLoading,
+  domainExpirePasswordPolicy,
+}: {
+  user: LDAPUser | undefined;
+  isLoading?: boolean;
+  domainExpirePasswordPolicy?: number;
+}) {
   return (
     <List isLoading={isLoading}>
       <List.Section title="User Information">
@@ -48,16 +98,19 @@ export function LDAPSingleUserList({ user, isLoading }: { user: LDAPUser | undef
       </List.Section>
       <List.Section title="Password">
         {user?.pwdlastset && (
-          <List.Item
-            title="Password Expire"
-            accessories={[
-              {
-                date: convertLDAP100NanoSecondsToDateTime(
-                  user.pwdlastset ? Number.parseInt(user.pwdlastset) : undefined,
-                ),
-              },
-            ]}
-          />
+          <>
+            <PasswordExpireListItem user={user} domainExpirePasswordPolicy={domainExpirePasswordPolicy} />
+            <List.Item
+              title="Last Password Set"
+              accessories={[
+                {
+                  date: convertLDAP100NanoSecondsToDateTime(
+                    user.pwdlastset ? Number.parseInt(user.pwdlastset) : undefined,
+                  ),
+                },
+              ]}
+            />
+          </>
         )}
       </List.Section>
     </List>
