@@ -5,7 +5,6 @@ const MULTICAST_ADDRESS = "224.0.0.167";
 const MULTICAST_PORT = 53317;
 const ANNOUNCE_INTERVAL = 3000; // Announce every 3 seconds (more frequent)
 const RESTART_DELAY = 5000; // Restart faster on errors
-const SOCKET_TIMEOUT = 60000; // Keep socket alive for 60 seconds
 
 let discoverySocket: dgram.Socket | null = null;
 let announceTimer: NodeJS.Timeout | null = null;

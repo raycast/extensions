@@ -73,11 +73,32 @@
       "mode": "view"
     },
     {
+      "name": "send-media",
+      "title": "Send Media",
+      "subtitle": "LocalSend",
+      "description": "Send images and videos to a LocalSend device",
+      "mode": "view"
+    },
+    {
+      "name": "send-text",
+      "title": "Send Text",
+      "subtitle": "LocalSend",
+      "description": "Send text content to a LocalSend device",
+      "mode": "view"
+    },
+    {
       "name": "send-clipboard",
       "title": "Send Clipboard",
       "subtitle": "LocalSend",
       "description": "Send clipboard content to a LocalSend device",
       "mode": "no-view"
+    },
+    {
+      "name": "send-folder",
+      "title": "Send Folder",
+      "subtitle": "LocalSend",
+      "description": "Send entire folder to a LocalSend device",
+      "mode": "view"
     },
     {
       "name": "localsend-status",
@@ -90,6 +111,8 @@
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^2.2.2",
+    "@types/archiver": "7.0.0",
+    "archiver": "7.0.1",
     "node-fetch": "2.7.0"
   },
   "devDependencies": {
