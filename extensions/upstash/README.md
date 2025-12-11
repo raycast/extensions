@@ -19,6 +19,8 @@ This is a Raycast extension for [Upstash](https://upstash.com/) - _Serverless Da
 
 - List Redis Databases
     - View Details & Usage
+    - Data Browser
+        - Create Key
     - Create Database
 
 ### <img src="./assets/vector.svg" width="15" height="15" /> Vector

@@ -1,5 +1,5 @@
-import { List, Icon, ActionPanel } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { List, Icon, ActionPanel, Action, Form, showToast, Toast, useNavigation, Image, Color } from "@raycast/api";
+import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { Redis } from "@upstash/redis";
 import { useState } from "react";
 import { RedisDatabase } from "../redis";
@@ -11,19 +11,24 @@ function formatValue(value: RedisValueType) {
   const str = typeof value === "string" ? value : JSON.stringify(value);
   return str.length > 40 ? str.substring(0, 40) + "…" : str;
 }
+
+const TYPE_ICON: Record<string, Image.ImageLike> = {
+  string: { source: Icon.QuotationMarks, tintColor: Color.Blue },
+};
 export default function DataBrowser({ database }: { database: RedisDatabase }) {
   const [prefix, setPrefix] = useState("");
-  const redis = new Redis({
-    url: `https://${database.endpoint}`,
-    token: database.password,
-  });
 
   const {
     isLoading,
     data: items,
     pagination,
+    mutate,
   } = useCachedPromise(
-    (match: string) => async (options) => {
+    (match: string, db: RedisDatabase) => async (options) => {
+      const redis = new Redis({
+        url: `https://${db.endpoint}`,
+        token: db.password,
+      });
       const cursor = options.cursor || 0;
 
       const [next, keys] = await redis.scan(cursor, {
@@ -65,9 +70,9 @@ export default function DataBrowser({ database }: { database: RedisDatabase }) {
       });
 
       const values: RedisValueType[] = await valuePipe.exec();
-
       const result = keys.map((key, i) => ({
-        key,
+        // we wrap in string in string literal to account for empty key
+        key: `${key}`,
         type: types[i],
         value: values[i],
       }));
@@ -78,26 +83,98 @@ export default function DataBrowser({ database }: { database: RedisDatabase }) {
         cursor: Number(next),
       };
     },
-    [prefix],
+    [prefix, database],
     { initialData: [] },
   );
-
   return (
-    <List isLoading={isLoading} pagination={pagination} onSearchTextChange={setPrefix}>
-      {items.map((item) => (
-        <List.Item
-          key={item.key}
-          icon={Icon.Key}
-          title={item.key}
-          subtitle={item.type}
-          accessories={[{ text: formatValue(item.value) }]}
+    <List isLoading={isLoading} pagination={pagination} onSearchTextChange={setPrefix} isShowingDetail>
+      {!isLoading && !items.length ? (
+        <List.EmptyView
+          title="Data on a break"
+          description="Quick, lure it back with some CLI magic!"
           actions={
             <ActionPanel>
-              <OpenInUpstash route={`redis/${database.database_id}/data-browser`} />
+              <Action.Push
+                icon={Icon.Plus}
+                title="Create New Key"
+                target={<CreateKey database={database} />}
+                onPop={mutate}
+              />
             </ActionPanel>
           }
         />
-      ))}
+      ) : (
+        items.map((item, index) => (
+          <List.Item
+            key={item.key + index}
+            icon={TYPE_ICON[item.type] || Icon.Key}
+            title={item.key}
+            subtitle={item.type}
+            detail={<List.Item.Detail markdown={formatValue(item.value)} />}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Create New Key"
+                  target={<CreateKey database={database} />}
+                  onPop={mutate}
+                />
+                <OpenInUpstash route={`redis/${database.database_id}/data-browser`} />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
+  );
+}
+
+function CreateKey({ database }: { database: RedisDatabase }) {
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<{ type: string; key: string }>({
+    async onSubmit(values) {
+      const { type, key } = values;
+      const toast = await showToast(Toast.Style.Animated, "Creating", key);
+      try {
+        const redis = new Redis({
+          url: `https://${database.endpoint}`,
+          token: database.password,
+        });
+        switch (type) {
+          case "string":
+            await redis.set(key, "");
+            break;
+          case "list":
+            await redis.lpush(key);
+            break;
+        }
+        toast.style = Toast.Style.Success;
+        toast.message = "Created";
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = `${error}`;
+      }
+    },
+    validation: {
+      key: FormValidation.Required,
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Plus} title="Create New Key" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown title="Type" {...itemProps.type}>
+        <Form.Dropdown.Item title="STRING" value="string" />
+        <Form.Dropdown.Item title="LIST" value="list" />
+      </Form.Dropdown>
+      <Form.TextField title="Key Name" placeholder="mykey" {...itemProps.key} />
+      <Form.Description text="After creating the key, you can edit the value" />
+    </Form>
   );
 }
