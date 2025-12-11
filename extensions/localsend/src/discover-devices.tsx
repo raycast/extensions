@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { discoverDevicesMulticast, getDeviceInfoHTTP } from "./utils/localsend";
+import { discoverDevicesMulticast, getDeviceInfoHTTP, getLocalIPs } from "./utils/localsend";
 import { getFavoriteDevices, toggleFavoriteDevice, isFavoriteDevice } from "./utils/favorites";
 import { LocalSendDevice } from "./types";
 
@@ -14,14 +14,18 @@ export default function Command() {
       const foundDevices = await discoverDevicesMulticast(5000);
 
       const favorites = await getFavoriteDevices();
-      const devicesWithFavorites = foundDevices.map((device) => ({
-        ...device,
-        isFavorite: favorites.some((f) => f.fingerprint === device.fingerprint),
-      }));
+      const localIPs = getLocalIPs();
+      
+      const devicesWithFavorites = foundDevices
+        .filter((device) => !localIPs.includes(device.ip))
+        .map((device) => ({
+          ...device,
+          isFavorite: favorites.some((f) => f.fingerprint === device.fingerprint),
+        }));
 
       setDevices(devicesWithFavorites);
 
-      if (foundDevices.length === 0) {
+      if (devicesWithFavorites.length === 0) {
         await showToast({
           style: Toast.Style.Failure,
           title: "No devices found",
@@ -30,7 +34,7 @@ export default function Command() {
       } else {
         await showToast({
           style: Toast.Style.Success,
-          title: `Found ${foundDevices.length} device${foundDevices.length !== 1 ? "s" : ""}`,
+          title: `Found ${devicesWithFavorites.length} device${devicesWithFavorites.length !== 1 ? "s" : ""}`,
         });
       }
     } catch (error) {
