@@ -1,6 +1,7 @@
 import dgram from "node:dgram";
 import os from "node:os";
 import crypto from "node:crypto";
+import fetch from "node-fetch";
 import { DeviceInfo, LocalSendDevice, PrepareUploadRequest, PrepareUploadResponse } from "../types";
 
 const MULTICAST_ADDRESS = "224.0.0.167";
@@ -117,7 +118,7 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(deviceInfo),
-          signal: AbortSignal.timeout(1000),
+          timeout: 1000,
         });
 
         if (response.ok) {
@@ -143,7 +144,7 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
 export const getDeviceInfoHTTP = async (ip: string, port: number): Promise<DeviceInfo | null> => {
   try {
     const response = await fetch(`http://${ip}:${port}/api/localsend/v2/info`, {
-      signal: AbortSignal.timeout(3000),
+      timeout: 3000,
     });
 
     if (response.ok) {
@@ -181,12 +182,19 @@ export const sendFiles = async (
 
   const url = `${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/prepare-upload${pin ? `?pin=${pin}` : ""}`;
 
-  const prepareResponse = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(prepareRequest),
-    signal: AbortSignal.timeout(10000),
-  });
+  let prepareResponse;
+  try {
+    prepareResponse = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(prepareRequest),
+      timeout: 10000,
+    });
+  } catch {
+    throw new Error(
+      `Cannot connect to ${device.alias} (${device.ip}). Make sure LocalSend is running and the device is reachable.`,
+    );
+  }
 
   if (!prepareResponse.ok) {
     if (prepareResponse.status === 401) {
@@ -211,7 +219,7 @@ export const sendFiles = async (
     const uploadResponse = await fetch(uploadUrl, {
       method: "POST",
       body: fileData,
-      signal: AbortSignal.timeout(60000),
+      timeout: 60000,
     });
 
     if (!uploadResponse.ok) {
