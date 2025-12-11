@@ -17,18 +17,21 @@
     {
       "name": "gallery",
       "title": "Browse ImgBed",
+      "subtitle": "CloudFlareImgbed",
       "description": "View, filter, and manage CloudFlare ImgBed inside Raycast",
       "mode": "view"
     },
     {
       "name": "upload",
       "title": "Upload Images",
+      "subtitle": "CloudFlareImgbed",
       "description": "Choose local images, upload them to CloudFlare ImgBed, then copy the generated links",
       "mode": "view"
     },
     {
       "name": "upload-from-clipboard",
       "title": "Upload from Clipboard",
+      "subtitle": "CloudFlareImgbed",
       "description": "Detect clipboard images or links and upload them",
       "mode": "view"
     }

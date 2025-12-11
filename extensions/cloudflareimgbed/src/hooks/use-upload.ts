@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useMemo } from "react";
 import { ImgBedClient } from "../api/client";
 import { getPreferenceValues } from "@raycast/api";
@@ -19,9 +20,7 @@ export function useUpload() {
         toast.message = url;
         return url;
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Upload failed";
-        toast.message = (error as Error).message;
+        await showFailureToast(error, { title: "Upload failed" });
         throw error;
       }
     },
