@@ -1,5 +1,14 @@
 # ClickUp Changelog
 
+## [New Commands & Modernization] - {PR_MERGE_DATE}
+
+- Add "My Tasks" command to view tasks assigned to you with parent task context
+- Add "List Tasks" command to browse all tasks in your default list
+- Add optimistic UI updates for status changes
+- Replace axios with native fetch (fixes security vulnerability)
+- Fix deprecated `PushAction` usage
+- Add extension icon
+
 ## [Persist Priority on Capture] - 2025-06-19
 
 - After creating a task, Raycast remembers the previously selected "Priority" (ref: [Issue #19884](https://github.com/raycast/extensions/issues/19884))
