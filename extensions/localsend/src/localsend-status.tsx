@@ -126,9 +126,10 @@ export default function Command() {
       <MenuBarExtra.Separator />
 
       <MenuBarExtra.Item
-        title="Preferences"
+        title="Open Extension Preferences"
         icon={Icon.Gear}
-        onAction={async () => await open("raycast://extensions/kud/localsend")}
+        shortcut={{ modifiers: ["cmd"], key: "," }}
+        onAction={async () => await open("raycast://extensions/raycast/raycast/manage-extensions?context=" + encodeURIComponent(JSON.stringify({ action: "preferences", extensionName: "LocalSend" })))}
       />
     </MenuBarExtra>
   );

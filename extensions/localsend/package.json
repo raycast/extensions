@@ -65,6 +65,39 @@
       "default": "53318"
     },
     {
+      "name": "multicastAddress",
+      "title": "Multicast Address",
+      "description": "Multicast address for device discovery (default: 224.0.0.167)",
+      "type": "textfield",
+      "required": false,
+      "default": "224.0.0.167"
+    },
+    {
+      "name": "discoveryTimeout",
+      "title": "Discovery Timeout (seconds)",
+      "description": "How long to wait for device discovery responses",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    },
+    {
+      "name": "networkInterface",
+      "title": "Network Interface",
+      "description": "Specific network interface to use (leave empty for all interfaces)",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "enableEncryption",
+      "title": "Enable Encryption",
+      "description": "Use HTTPS for secure file transfer (experimental)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable HTTPS encryption"
+    },
+    {
       "name": "downloadPath",
       "title": "Download Folder",
       "description": "Where to save received files",
