@@ -69,13 +69,6 @@
       "subtitle": "LocalSend",
       "description": "Send clipboard content to a LocalSend device",
       "mode": "no-view"
-    },
-    {
-      "name": "manage-receive",
-      "title": "Manage Receive Server",
-      "subtitle": "LocalSend",
-      "description": "Start/stop the server to receive files from other devices",
-      "mode": "view"
     }
   ],
   "dependencies": {

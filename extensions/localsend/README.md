@@ -7,7 +7,7 @@ Share files to nearby devices using the LocalSend protocol.
 - **Discover Devices**: Find LocalSend devices on your local network
 - **Send Files**: Select and send files to discovered devices
 - **Send Clipboard**: Quickly send clipboard content to nearby devices
-- **Receive Files**: Start a server to receive files from other LocalSend devices
+- **Receive Files**: Automatically receive files from other LocalSend devices
 - **Customizable Settings**: Configure device name, port, and download location
 
 ## How to Use
@@ -20,17 +20,19 @@ Share files to nearby devices using the LocalSend protocol.
 
 ### Receiving Files
 
-1. Open "Manage Receive Server" to control the receive functionality
-2. Start the server to allow other devices to send files to you
-3. Files will be saved to your configured download folder (default: ~/Downloads)
+Files can be received automatically if enabled in preferences:
+
+1. Open extension preferences (`Cmd + ,` while in the extension)
+2. Check "Enable receiving files" to start the receive server
+3. Received files will be saved to your configured download folder (default: ~/Downloads)
 
 ### Settings
 
-Access extension preferences to configure:
+Access extension preferences (`Cmd + ,`) to configure:
 
-- **Device Name**: How your device appears to others
+- **Device Name**: How your device appears to others (defaults to your computer name)
 - **HTTP Port**: Port for receiving files (default: 53318, to avoid conflicts with LocalSend app on port 53317)
-- **Download Folder**: Where received files are saved
+- **Download Folder**: Where received files are saved (default: ~/Downloads)
 - **Enable Receive**: Automatically start the receive server
 
 ## Port Configuration
