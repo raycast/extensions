@@ -96,7 +96,7 @@ async function asfFetch<T>(endpoint: string, options?: RequestInit): Promise<Gen
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(
-        `Available to connect to ASF at ${getASFUrl()}. Ensure ASF is running and IPC is enabled. Error: ${error.message}`,
+        `Unable to connect to ASF at ${getASFUrl()}. Ensure ASF is running and IPC is enabled. Error: ${error.message}`,
       );
     }
     throw error;

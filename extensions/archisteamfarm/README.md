@@ -23,6 +23,4 @@ This extension requires the following configuration:
 
 ## Installation
 
-1.  Clone this repository.
-2.  Run `npm install` to install dependencies.
-3.  Run `npm run dev` to start the extension in development mode.
+Install from the Raycast Store.
