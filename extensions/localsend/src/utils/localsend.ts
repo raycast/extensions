@@ -64,12 +64,13 @@ export const getLocalIPs = (): string[] => {
 export const getDeviceInfo = (): DeviceInfo => {
   const prefs = getPreferences();
   const deviceName = prefs.deviceName || os.hostname() || "Raycast";
+  const deviceType = (prefs.deviceType || "desktop") as "mobile" | "desktop" | "web" | "headless";
 
   return {
     alias: deviceName,
     version: PROTOCOL_VERSION,
     deviceModel: os.platform(),
-    deviceType: "desktop",
+    deviceType: deviceType,
     fingerprint: crypto.randomBytes(16).toString("hex"),
     port: getHttpPort(),
     protocol: "http",

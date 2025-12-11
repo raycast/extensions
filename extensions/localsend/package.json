@@ -23,6 +23,32 @@
       "default": ""
     },
     {
+      "name": "deviceType",
+      "title": "Device Type",
+      "description": "Type of this device",
+      "type": "dropdown",
+      "required": false,
+      "default": "desktop",
+      "data": [
+        {
+          "title": "Desktop",
+          "value": "desktop"
+        },
+        {
+          "title": "Mobile",
+          "value": "mobile"
+        },
+        {
+          "title": "Web",
+          "value": "web"
+        },
+        {
+          "title": "Headless",
+          "value": "headless"
+        }
+      ]
+    },
+    {
       "name": "httpPort",
       "title": "HTTP Port",
       "description": "Port for receiving files (default: 53318, LocalSend uses 53317)",
