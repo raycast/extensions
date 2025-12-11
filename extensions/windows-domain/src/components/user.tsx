@@ -1,6 +1,11 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { convertLDAP100NanoSecondsToDateTime, ldapDatetimeToDate, LDAPUser } from "../lib/ldap";
-import { LDAPUserCopyEmployeeNumberAction, LDAPUserEmailAction } from "./actions";
+import {
+  LDAPUserCopyAttributeAction,
+  LDAPUserCopyEmployeeNumberAction,
+  LDAPUserEmailAction,
+  LDAPUserPhoneCallAction,
+} from "./actions";
 
 export function LDAPUserListItem({ user }: { user: LDAPUser }) {
   const subtitle = (user: LDAPUser) => {
@@ -26,8 +31,24 @@ export function LDAPUserListItem({ user }: { user: LDAPUser }) {
       ]}
       actions={
         <ActionPanel>
-          <LDAPUserEmailAction user={user} />
-          <LDAPUserCopyEmployeeNumberAction user={user} />
+          <ActionPanel.Section>
+            <LDAPUserEmailAction user={user} />
+            <LDAPUserPhoneCallAction user={user} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Copy">
+            <LDAPUserCopyAttributeAction content={user.displayname} title="Name" />
+            <LDAPUserCopyAttributeAction content={user.samaccountname} title="Username" />
+            <LDAPUserCopyAttributeAction content={user.mail} title="EMail" />
+            <LDAPUserCopyAttributeAction content={user.telephonenumber} title="Phone" />
+            <LDAPUserCopyAttributeAction content={user.mobile} title="Mobile" />
+            <LDAPUserCopyAttributeAction content={user.title} title="Title" />
+            <LDAPUserCopyAttributeAction content={user.department} title="Department" />
+            <LDAPUserCopyAttributeAction content={user.company} title="Company" />
+            <LDAPUserCopyEmployeeNumberAction user={user} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard title="Copy LDAP Path" content={user._path} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

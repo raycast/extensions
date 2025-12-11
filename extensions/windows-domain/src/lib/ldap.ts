@@ -1,7 +1,7 @@
 import { runPowerShellScript } from "@raycast/utils";
 
 export interface LDAPUser {
-  path: string;
+  _path: string;
   displayname?: string;
   mail?: string;
   telephonenumber?: string;
