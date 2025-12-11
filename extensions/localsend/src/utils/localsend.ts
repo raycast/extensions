@@ -240,6 +240,7 @@ export const sendFiles = async (
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(prepareRequest),
       timeout: 10000,
+      agent: device.protocol === "https" ? httpsAgent : undefined,
     });
   } catch (error) {
     console.error("Connection error:", error);
@@ -276,6 +277,7 @@ export const sendFiles = async (
         method: "POST",
         body: fileData,
         timeout: 60000,
+        agent: device.protocol === "https" ? httpsAgent : undefined,
       });
 
       if (!uploadResponse.ok) {

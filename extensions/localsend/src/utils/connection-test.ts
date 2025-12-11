@@ -1,11 +1,13 @@
 import fetch from "node-fetch";
 import { LocalSendDevice } from "../types";
 
-export const testDeviceConnection = async (device: LocalSendDevice): Promise<{ reachable: boolean; error?: string }> => {
+export const testDeviceConnection = async (
+  device: LocalSendDevice,
+): Promise<{ reachable: boolean; error?: string }> => {
   try {
     const url = `${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/info`;
     console.log(`Testing connection to: ${url}`);
-    
+
     const response = await fetch(url, {
       method: "GET",
       timeout: 3000,
