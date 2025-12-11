@@ -2,8 +2,9 @@ import dgram from "node:dgram";
 import os from "node:os";
 import crypto from "node:crypto";
 import fetch from "node-fetch";
+import https from "node:https";
 import { getPreferenceValues } from "@raycast/api";
-import { DeviceInfo, LocalSendDevice, PrepareUploadRequest, PrepareUploadResponse } from "../types";
+import { DeviceInfo, LocalSendDevice, PrepareUploadRequest, PrepareUploadResponse, FileMetadata } from "../types";
 
 interface Preferences {
   deviceName: string;
@@ -16,6 +17,11 @@ const MULTICAST_ADDRESS = "224.0.0.167";
 const MULTICAST_PORT = 53317;
 const DEFAULT_HTTP_PORT = 53318;
 const PROTOCOL_VERSION = "2.1";
+
+// HTTPS agent that accepts self-signed certificates (safe for local network)
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+});
 
 const getPreferences = (): Preferences => {
   try {
@@ -297,6 +303,7 @@ export const cancelSession = async (device: LocalSendDevice, sessionId: string):
     await fetch(`${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/cancel?sessionId=${sessionId}`, {
       method: "POST",
       timeout: 3000,
+      agent: device.protocol === "https" ? httpsAgent : undefined,
     });
   } catch (error) {
     console.error("Failed to cancel session:", error);
