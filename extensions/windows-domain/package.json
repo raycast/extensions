@@ -2,21 +2,23 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windows-domain",
   "title": "Windows Domain",
-  "description": "Get Informations from your Windows Domain",
-  "icon": "extension-icon.png",
+  "description": "Get Information from your current Windows Domain",
+  "icon": "domain.png",
   "license": "MIT",
   "commands": [
     {
       "name": "my-user",
       "title": "My User",
-      "description": "Get Information about the current User",
-      "mode": "view"
+      "description": "Get Information about the current Windows Domain User including password expire date",
+      "mode": "view",
+      "icon": "user.png"
     },
     {
       "name": "search-user",
       "title": "Search User",
-      "description": "Search for a User in the Windows Domain",
-      "mode": "view"
+      "description": "Search for a User in the logged in Windows Domain",
+      "mode": "view",
+      "icon": "users.png"
     }
   ],
   "dependencies": {
