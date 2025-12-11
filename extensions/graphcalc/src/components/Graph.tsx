@@ -85,10 +85,10 @@ const Graph: React.FC<GraphProps> = ({ expression }) => {
         !error &&
         result === null && (
           <ActionPanel>
-            <Action title="Zoom in" onAction={zoomIn} />
-            <Action title="Zoom out" onAction={zoomOut} />
+            <Action title="Zoom In" onAction={zoomIn} />
+            <Action title="Zoom Out" onAction={zoomOut} />
             <Action
-              title="Move up"
+              title="Move Up"
               onAction={moveUp}
               shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
             />
