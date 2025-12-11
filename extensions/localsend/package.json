@@ -35,13 +35,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^2.2.2",
-    "node-fetch": "^3.3.2"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "25.0.0",
-    "@types/node-fetch": "^2.6.13",
     "@types/react": "19.2.7",
     "eslint": "^9.39.1",
     "prettier": "^3.7.4",

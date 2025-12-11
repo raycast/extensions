@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { discoverDevicesMulticast, sendFiles } from "./utils/localsend";
 import { LocalSendDevice } from "./types";
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 const STORAGE_KEY = "recent-devices";
 
@@ -12,12 +12,7 @@ export default function Command() {
   const [devices, setDevices] = useState<LocalSendDevice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadRecentDevices();
-    discoverDevices();
-  }, []);
-
-  async function loadRecentDevices() {
+  const loadRecentDevices = async () => {
     const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
     if (stored) {
       try {
@@ -27,16 +22,16 @@ export default function Command() {
         console.error("Failed to parse recent devices:", error);
       }
     }
-  }
+  };
 
-  async function saveRecentDevice(device: LocalSendDevice) {
+  const saveRecentDevice = async (device: LocalSendDevice) => {
     const existing = devices.filter((d) => d.ip !== device.ip);
     const updated = [device, ...existing].slice(0, 10);
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     setDevices(updated);
-  }
+  };
 
-  async function discoverDevices() {
+  const discoverDevices = async () => {
     setIsLoading(true);
     try {
       const foundDevices = await discoverDevicesMulticast(5000);
@@ -51,7 +46,12 @@ export default function Command() {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    loadRecentDevices();
+    discoverDevices();
+  }, []);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search devices...">
@@ -93,7 +93,7 @@ function SendFilesForm({ device, onSuccess }: { device: LocalSendDevice; onSucce
   const [pin, setPin] = useState("");
   const { pop } = useNavigation();
 
-  async function handleSubmit() {
+  const handleSubmit = async () => {
     if (files.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
@@ -134,7 +134,7 @@ function SendFilesForm({ device, onSuccess }: { device: LocalSendDevice; onSucce
       toast.title = "Failed to send files";
       toast.message = error instanceof Error ? error.message : "Unknown error";
     }
-  }
+  };
 
   return (
     <Form

@@ -7,11 +7,7 @@ export default function Command() {
   const [devices, setDevices] = useState<LocalSendDevice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    discoverDevices();
-  }, []);
-
-  async function discoverDevices() {
+  const discoverDevices = async () => {
     setIsLoading(true);
     try {
       const foundDevices = await discoverDevicesMulticast(5000);
@@ -38,9 +34,9 @@ export default function Command() {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
-  async function refreshDevice(device: LocalSendDevice) {
+  const refreshDevice = async (device: LocalSendDevice) => {
     try {
       const info = await getDeviceInfoHTTP(device.ip, device.port);
       if (info) {
@@ -59,9 +55,9 @@ export default function Command() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }
+  };
 
-  function getDeviceIcon(deviceType?: string): Icon {
+  const getDeviceIcon = (deviceType?: string): Icon => {
     switch (deviceType) {
       case "mobile":
         return Icon.Mobile;
@@ -74,14 +70,16 @@ export default function Command() {
       default:
         return Icon.Laptop;
     }
-  }
+  };
 
-  function getProtocolTag(protocol: string) {
-    return {
-      value: protocol.toUpperCase(),
-      color: protocol === "https" ? Color.Green : Color.Orange,
-    };
-  }
+  const getProtocolTag = (protocol: string) => ({
+    value: protocol.toUpperCase(),
+    color: protocol === "https" ? Color.Green : Color.Orange,
+  });
+
+  useEffect(() => {
+    discoverDevices();
+  }, []);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search devices...">

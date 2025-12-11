@@ -1,7 +1,6 @@
-import * as dgram from "node:dgram";
-import * as os from "node:os";
-import * as crypto from "node:crypto";
-import fetch from "node-fetch";
+import dgram from "node:dgram";
+import os from "node:os";
+import crypto from "node:crypto";
 import { DeviceInfo, LocalSendDevice, PrepareUploadRequest, PrepareUploadResponse } from "../types";
 
 const MULTICAST_ADDRESS = "224.0.0.167";
@@ -9,12 +8,11 @@ const MULTICAST_PORT = 53317;
 const HTTP_PORT = 53317;
 const PROTOCOL_VERSION = "2.1";
 
-export function getLocalIPs(): string[] {
+export const getLocalIPs = (): string[] => {
   const interfaces = os.networkInterfaces();
   const ips: string[] = [];
 
-  for (const name of Object.keys(interfaces)) {
-    const iface = interfaces[name];
+  for (const iface of Object.values(interfaces)) {
     if (!iface) continue;
 
     for (const addr of iface) {
@@ -25,23 +23,21 @@ export function getLocalIPs(): string[] {
   }
 
   return ips;
-}
+};
 
-export function getDeviceInfo(): DeviceInfo {
-  return {
-    alias: os.hostname() || "Raycast",
-    version: PROTOCOL_VERSION,
-    deviceModel: os.platform(),
-    deviceType: "desktop",
-    fingerprint: crypto.randomBytes(16).toString("hex"),
-    port: HTTP_PORT,
-    protocol: "http",
-    download: false,
-  };
-}
+export const getDeviceInfo = (): DeviceInfo => ({
+  alias: os.hostname() || "Raycast",
+  version: PROTOCOL_VERSION,
+  deviceModel: os.platform(),
+  deviceType: "desktop",
+  fingerprint: crypto.randomBytes(16).toString("hex"),
+  port: HTTP_PORT,
+  protocol: "http",
+  download: false,
+});
 
-export async function discoverDevicesMulticast(timeout = 5000): Promise<LocalSendDevice[]> {
-  return new Promise((resolve) => {
+export const discoverDevicesMulticast = async (timeout = 5000): Promise<LocalSendDevice[]> =>
+  new Promise((resolve) => {
     const devices = new Map<string, LocalSendDevice>();
     const socket = dgram.createSocket({ type: "udp4", reuseAddr: true });
     const deviceInfo = getDeviceInfo();
@@ -95,9 +91,8 @@ export async function discoverDevicesMulticast(timeout = 5000): Promise<LocalSen
       resolve(Array.from(devices.values()));
     }, timeout);
   });
-}
 
-export async function discoverDevicesHTTP(): Promise<LocalSendDevice[]> {
+export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
   const devices: LocalSendDevice[] = [];
   const localIPs = getLocalIPs();
   const deviceInfo = getDeviceInfo();
@@ -143,9 +138,9 @@ export async function discoverDevicesHTTP(): Promise<LocalSendDevice[]> {
 
   await Promise.all(promises);
   return devices;
-}
+};
 
-export async function getDeviceInfoHTTP(ip: string, port: number): Promise<DeviceInfo | null> {
+export const getDeviceInfoHTTP = async (ip: string, port: number): Promise<DeviceInfo | null> => {
   try {
     const response = await fetch(`http://${ip}:${port}/api/localsend/v2/info`, {
       signal: AbortSignal.timeout(3000),
@@ -159,13 +154,13 @@ export async function getDeviceInfoHTTP(ip: string, port: number): Promise<Devic
   }
 
   return null;
-}
+};
 
-export async function sendFiles(
+export const sendFiles = async (
   device: LocalSendDevice,
   files: Array<{ path: string; name: string; size: number; type: string }>,
   pin?: string,
-): Promise<void> {
+): Promise<void> => {
   const deviceInfo = getDeviceInfo();
   const fileMetadata: Record<string, FileMetadata> = {};
 
@@ -225,4 +220,4 @@ export async function sendFiles(
   });
 
   await Promise.all(uploadPromises);
-}
+};

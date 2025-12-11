@@ -2,9 +2,9 @@ import { showHUD, Clipboard, showToast, Toast, LocalStorage } from "@raycast/api
 import { showFailureToast } from "@raycast/utils";
 import { discoverDevicesMulticast, sendFiles } from "./utils/localsend";
 import { LocalSendDevice } from "./types";
-import * as os from "node:os";
-import * as path from "node:path";
-import * as fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import fs from "node:fs/promises";
 
 const STORAGE_KEY = "last-device";
 
