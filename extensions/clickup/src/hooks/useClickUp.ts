@@ -1,22 +1,27 @@
+import { getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { ClickUpClient } from "../utils/clickUpClient";
-import { AxiosError } from "axios";
 
 export default function useClickUp<T>(endpoint: string, { apiVersion }: { apiVersion: 2 | 3 } = { apiVersion: 2 }) {
-  type ErrorResult = {
-    err: string;
-    ECODE: string;
-  };
   const { isLoading, data } = usePromise(
     async () => {
-      try {
-        const response = await ClickUpClient<T>(endpoint, "GET", undefined, undefined, apiVersion);
-        return response.data;
-      } catch (error) {
-        const result = error as AxiosError<ErrorResult>;
-        if (result.response?.data) throw new Error(`${result.response.data.err} (${result.response.data.ECODE})`);
-        throw new Error();
+      const prefs = getPreferenceValues<Preferences>();
+      const url = `https://api.clickup.com/api/v${apiVersion}${endpoint}`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: prefs.token,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = (await response.json().catch(() => ({}))) as { err?: string; ECODE?: string };
+        if (errorData.err) {
+          throw new Error(`${errorData.err} (${errorData.ECODE})`);
+        }
+        throw new Error(`Request failed with status ${response.status}`);
       }
+
+      return (await response.json()) as T;
     },
     [],
     {

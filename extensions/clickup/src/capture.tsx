@@ -1,9 +1,9 @@
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon, Color } from "@raycast/api";
-import { ClickUpClient } from "./utils/clickUpClient";
-import { TaskItem } from "./types/tasks.dt";
-import preferences from "./utils/preferences";
+import { Action, ActionPanel, Color, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
+
+import { getClickUpClient } from "./api/clickup";
 import { useList } from "./hooks/useList";
+import preferences from "./utils/preferences";
 
 interface FormValues {
   name: string;
@@ -22,18 +22,14 @@ export default function QuickCapture() {
         title: "Creating task...",
       });
       try {
-        const res = await ClickUpClient<TaskItem>(`/list/${preferences.listId}/task`, "POST", {
+        const client = getClickUpClient();
+        await client.createTask(preferences.listId, {
           name: formValues.name,
           ...(formValues?.description && { description: formValues.description }),
           ...(formValues?.dueDate && { due_date: new Date(formValues.dueDate).getTime() }),
-          ...(formValues?.priority && { priority: formValues.priority }),
+          ...(formValues?.priority && { priority: parseInt(formValues.priority, 10) }),
           ...(formValues?.status && { status: formValues.status }),
         });
-
-        // Ensure the user sees root search when they re-open Raycast.
-        if (res.status != 200) {
-          throw new Error(`Failed to fetch with status code: ${res.status}`);
-        }
 
         toast.style = Toast.Style.Success;
         toast.title = "Task created successfully";

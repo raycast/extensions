@@ -1,7 +1,6 @@
-import { SpacesResponse } from "../types/spaces.dt";
-import { ClickUpClient } from "../utils/clickUpClient";
+import { getClickUpClient } from "../api/clickup";
 
 export default async function ({ teamId }: { teamId: string }) {
-  const res = await ClickUpClient<SpacesResponse>(`/team/${teamId}/space?archived=false`);
-  return res.data.spaces;
+  const client = getClickUpClient();
+  return client.getSpaces(teamId);
 }
