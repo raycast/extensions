@@ -1,5 +1,11 @@
 # CSS Tricks Changelog
 
+## [Updates] - {PR_MERGE_DATE}
+
+- Enable Windows support
+- Update (dev) dependencies
+- Refactor code in separate files
+
 ## [UX Improvements] - 2024-09-23
 
 - Moved Details to List item details
