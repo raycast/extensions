@@ -5,7 +5,7 @@ import { homedir } from "os";
 import { resolve } from "path";
 import { Device, LocalTab, RemoteTab } from "../types";
 import { safariAppIdentifier } from "../utils";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { JSX, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getLocalTabs } from "swift:../../swift/SafariTabs";
 
 const DATABASE_PATH = `${resolve(homedir(), `Library/Containers/com.apple.Safari/Data/Library/Safari`)}/CloudTabs.db`;
