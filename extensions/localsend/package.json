@@ -39,6 +39,15 @@
       "default": "~/Downloads"
     },
     {
+      "name": "enableDiscovery",
+      "title": "Enable Discovery",
+      "description": "Announce this device on the network so others can find it",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Make this device discoverable"
+    },
+    {
       "name": "enableReceive",
       "title": "Enable Receive",
       "description": "Allow this device to receive files from others",
@@ -69,6 +78,13 @@
       "subtitle": "LocalSend",
       "description": "Send clipboard content to a LocalSend device",
       "mode": "no-view"
+    },
+    {
+      "name": "localsend-status",
+      "title": "LocalSend Status",
+      "subtitle": "LocalSend",
+      "description": "Toggle discovery and receive server from menu bar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
