@@ -34,7 +34,11 @@ export default function MenuBarDeployments() {
   const team = teams?.find((t: Team) => t.id === selectedTeam);
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={{ source: "icon.png" }} tooltip="Recent Deployments">
+    <MenuBarExtra
+      isLoading={isLoading}
+      icon={{ source: { light: "vercel-light.svg", dark: "vercel-dark.svg" } }}
+      tooltip="Recent Deployments"
+    >
       <MenuBarExtra.Section title="Recent Deployments">
         {deployments.length === 0 && !isLoading ? (
           <MenuBarExtra.Item title="No deployments found" />
