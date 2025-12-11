@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { discoverDevicesMulticast, getDeviceInfoHTTP } from "./utils/localsend";
+import { getFavoriteDevices, toggleFavoriteDevice, isFavoriteDevice } from "./utils/favorites";
 import { LocalSendDevice } from "./types";
 
 export default function Command() {
@@ -11,7 +12,14 @@ export default function Command() {
     setIsLoading(true);
     try {
       const foundDevices = await discoverDevicesMulticast(5000);
-      setDevices(foundDevices);
+
+      const favorites = await getFavoriteDevices();
+      const devicesWithFavorites = foundDevices.map((device) => ({
+        ...device,
+        isFavorite: favorites.some((f) => f.fingerprint === device.fingerprint),
+      }));
+
+      setDevices(devicesWithFavorites);
 
       if (foundDevices.length === 0) {
         await showToast({
@@ -40,8 +48,11 @@ export default function Command() {
     try {
       const info = await getDeviceInfoHTTP(device.ip, device.port);
       if (info) {
+        const isFav = await isFavoriteDevice(device.fingerprint);
         setDevices((prev) =>
-          prev.map((d) => (d.ip === device.ip ? { ...info, ip: device.ip, lastSeen: Date.now() } : d)),
+          prev.map((d) =>
+            d.ip === device.ip ? { ...info, ip: device.ip, lastSeen: Date.now(), isFavorite: isFav } : d,
+          ),
         );
         await showToast({
           style: Toast.Style.Success,
@@ -55,6 +66,15 @@ export default function Command() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     }
+  };
+
+  const handleToggleFavorite = async (device: LocalSendDevice) => {
+    const isFav = await toggleFavoriteDevice(device);
+    setDevices((prev) => prev.map((d) => (d.fingerprint === device.fingerprint ? { ...d, isFavorite: isFav } : d)));
+    await showToast({
+      style: Toast.Style.Success,
+      title: isFav ? "Added to favorites" : "Removed from favorites",
+    });
   };
 
   const getDeviceIcon = (deviceType?: string): Icon => {
@@ -81,6 +101,9 @@ export default function Command() {
     discoverDevices();
   }, []);
 
+  const favoriteDevices = devices.filter((d) => d.isFavorite);
+  const otherDevices = devices.filter((d) => !d.isFavorite);
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search devices...">
       <List.EmptyView
@@ -93,22 +116,80 @@ export default function Command() {
           </ActionPanel>
         }
       />
-      {devices.map((device) => (
-        <List.Item
-          key={device.ip}
-          icon={getDeviceIcon(device.deviceType)}
-          title={device.alias}
-          subtitle={device.deviceModel}
-          accessories={[{ text: device.ip }, { tag: getProtocolTag(device.protocol) }, { text: `v${device.version}` }]}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard title="Copy IP Address" content={device.ip} />
-              <Action title="Refresh Device Info" icon={Icon.ArrowClockwise} onAction={() => refreshDevice(device)} />
-              <Action title="Discover Again" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
-            </ActionPanel>
-          }
-        />
-      ))}
+
+      {favoriteDevices.length > 0 && (
+        <List.Section title="Favorites">
+          {favoriteDevices.map((device) => (
+            <DeviceListItem
+              key={device.ip}
+              device={device}
+              getDeviceIcon={getDeviceIcon}
+              getProtocolTag={getProtocolTag}
+              onRefresh={refreshDevice}
+              onToggleFavorite={handleToggleFavorite}
+              onDiscoverAgain={discoverDevices}
+            />
+          ))}
+        </List.Section>
+      )}
+
+      {otherDevices.length > 0 && (
+        <List.Section title={favoriteDevices.length > 0 ? "Other Devices" : "Devices"}>
+          {otherDevices.map((device) => (
+            <DeviceListItem
+              key={device.ip}
+              device={device}
+              getDeviceIcon={getDeviceIcon}
+              getProtocolTag={getProtocolTag}
+              onRefresh={refreshDevice}
+              onToggleFavorite={handleToggleFavorite}
+              onDiscoverAgain={discoverDevices}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
+  );
+}
+
+function DeviceListItem({
+  device,
+  getDeviceIcon,
+  getProtocolTag,
+  onRefresh,
+  onToggleFavorite,
+  onDiscoverAgain,
+}: {
+  device: LocalSendDevice;
+  getDeviceIcon: (deviceType?: string) => Icon;
+  getProtocolTag: (protocol: string) => { value: string; color: Color };
+  onRefresh: (device: LocalSendDevice) => void;
+  onToggleFavorite: (device: LocalSendDevice) => void;
+  onDiscoverAgain: () => void;
+}) {
+  return (
+    <List.Item
+      icon={getDeviceIcon(device.deviceType)}
+      title={device.alias}
+      subtitle={device.deviceModel}
+      accessories={[
+        ...(device.isFavorite ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []),
+        { text: device.ip },
+        { tag: getProtocolTag(device.protocol) },
+        { text: `v${device.version}` },
+      ]}
+      actions={
+        <ActionPanel>
+          <Action
+            title={device.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+            icon={device.isFavorite ? Icon.StarDisabled : Icon.Star}
+            onAction={() => onToggleFavorite(device)}
+          />
+          <Action.CopyToClipboard title="Copy IP Address" content={device.ip} />
+          <Action title="Refresh Device Info" icon={Icon.ArrowClockwise} onAction={() => onRefresh(device)} />
+          <Action title="Discover Again" icon={Icon.MagnifyingGlass} onAction={onDiscoverAgain} />
+        </ActionPanel>
+      }
+    />
   );
 }

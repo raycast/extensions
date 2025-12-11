@@ -203,14 +203,23 @@ export const sendFiles = async (
 ): Promise<void> => {
   const deviceInfo = getDeviceInfo();
   const fileMetadata: Record<string, FileMetadata> = {};
+  const fs = await import("node:fs/promises");
+  const crypto = await import("node:crypto");
 
   for (const file of files) {
     const fileId = crypto.randomBytes(8).toString("hex");
+
+    const stats = await fs.stat(file.path);
+
     fileMetadata[fileId] = {
       id: fileId,
       fileName: file.name,
       size: file.size,
       fileType: file.type,
+      metadata: {
+        modified: stats.mtime.toISOString(),
+        accessed: stats.atime.toISOString(),
+      },
     };
   }
 
@@ -242,29 +251,46 @@ export const sendFiles = async (
       throw new Error("Transfer rejected by receiver");
     } else if (prepareResponse.status === 409) {
       throw new Error("Blocked by another session");
+    } else if (prepareResponse.status === 204) {
+      return;
     }
     throw new Error(`Failed to prepare upload: ${prepareResponse.status}`);
   }
 
   const { sessionId, files: fileTokens } = (await prepareResponse.json()) as PrepareUploadResponse;
 
-  const fs = await import("node:fs/promises");
-  const uploadPromises = Object.entries(fileTokens).map(async ([fileId, token]) => {
-    const file = files[Object.keys(fileMetadata).indexOf(fileId)];
-    const fileData = await fs.readFile(file.path);
+  try {
+    const uploadPromises = Object.entries(fileTokens).map(async ([fileId, token]) => {
+      const file = files[Object.keys(fileMetadata).indexOf(fileId)];
+      const fileData = await fs.readFile(file.path);
 
-    const uploadUrl = `${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/upload?sessionId=${sessionId}&fileId=${fileId}&token=${token}`;
+      const uploadUrl = `${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/upload?sessionId=${sessionId}&fileId=${fileId}&token=${token}`;
 
-    const uploadResponse = await fetch(uploadUrl, {
-      method: "POST",
-      body: fileData,
-      timeout: 60000,
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "POST",
+        body: fileData,
+        timeout: 60000,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Failed to upload file ${file.name}: ${uploadResponse.status}`);
+      }
     });
 
-    if (!uploadResponse.ok) {
-      throw new Error(`Failed to upload file ${file.name}: ${uploadResponse.status}`);
-    }
-  });
+    await Promise.all(uploadPromises);
+  } catch (error) {
+    await cancelSession(device, sessionId);
+    throw error;
+  }
+};
 
-  await Promise.all(uploadPromises);
+export const cancelSession = async (device: LocalSendDevice, sessionId: string): Promise<void> => {
+  try {
+    await fetch(`${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/cancel?sessionId=${sessionId}`, {
+      method: "POST",
+      timeout: 3000,
+    });
+  } catch (error) {
+    console.error("Failed to cancel session:", error);
+  }
 };

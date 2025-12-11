@@ -13,6 +13,7 @@ export interface DeviceInfo {
 export interface LocalSendDevice extends DeviceInfo {
   ip: string;
   lastSeen: number;
+  isFavorite?: boolean;
 }
 
 export interface FileMetadata {
@@ -42,4 +43,11 @@ export interface PrepareDownloadResponse {
   info: DeviceInfo;
   sessionId: string;
   files: Record<string, FileMetadata>;
+}
+
+export interface FavoriteDevice {
+  fingerprint: string;
+  alias: string;
+  ip?: string;
+  addedAt: number;
 }
