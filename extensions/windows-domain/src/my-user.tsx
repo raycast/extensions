@@ -1,15 +1,11 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getDomainUserAccountInfo, getDomainUserPasswordExpireTimeInSeconds } from "./lib/ldap";
 import { LDAPSingleUserList } from "./components/user";
+import os from "os";
 
 function getCurrentDomainUser() {
-  // process.env.USERNAME; // seems not to work in raycast
-  const home = process.env.HOME;
-  if (!home) {
-    return null;
-  }
-  const parts = home.split("\\");
-  return parts[parts.length - 1];
+  const username = os.userInfo().username;
+  return username;
 }
 
 export default function Command() {
