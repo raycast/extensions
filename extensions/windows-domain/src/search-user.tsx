@@ -20,7 +20,9 @@ export default function Command() {
   return (
     <List searchText={searchQuery} onSearchTextChange={setSearchQuery} isLoading={isLoading} throttle>
       {searchQuery.length >= 3 && data?.map((user) => <LDAPUserListItem key={user.samaccountname} user={user} />)}
-      {searchQuery.length < 3 && <List.EmptyView title="Enter at least 3 characters to search" />}
+      {searchQuery.length < 3 && (
+        <List.EmptyView title="Enter at least 3 characters to Search for a Windows Domain User" icon={"domain.png"} />
+      )}
     </List>
   );
 }
