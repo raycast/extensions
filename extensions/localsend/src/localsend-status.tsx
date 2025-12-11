@@ -1,5 +1,6 @@
 import { MenuBarExtra, Icon, Color, open, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { getDeviceInfo } from "./utils/localsend";
 import { startDiscoveryService, stopDiscoveryService, getDiscoveryStatus } from "./utils/discovery-service";
 import { startReceiveServer, stopReceiveServer, isServerRunning } from "./utils/receive-server";
 
@@ -12,6 +13,7 @@ export default function Command() {
   const [discoveryRunning, setDiscoveryRunning] = useState(false);
   const [serverRunning, setServerRunning] = useState(false);
   const [localIPs, setLocalIPs] = useState<string[]>([]);
+  const [deviceInfo, setDeviceInfo] = useState(getDeviceInfo());
   const prefs = getPreferenceValues<Preferences>();
   const port = parseInt(prefs.httpPort || "53318", 10);
 
@@ -26,6 +28,7 @@ export default function Command() {
     setDiscoveryRunning(status.running);
     setServerRunning(isServerRunning());
     setLocalIPs(status.localIPs);
+    setDeviceInfo(getDeviceInfo());
   };
 
   const toggleDiscovery = async () => {
@@ -70,6 +73,17 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={getStatusIcon()} tooltip={`LocalSend: ${getStatusText()}`}>
+      <MenuBarExtra.Section title="Device Information">
+        <MenuBarExtra.Item title={`Name: ${deviceInfo.alias}`} icon={Icon.Person} />
+        <MenuBarExtra.Item
+          title={`Type: ${deviceInfo.deviceType.charAt(0).toUpperCase() + deviceInfo.deviceType.slice(1)}`}
+          icon={Icon.ComputerChip}
+        />
+        <MenuBarExtra.Item title={`Model: ${deviceInfo.deviceModel}`} icon={Icon.Monitor} />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Separator />
+
       <MenuBarExtra.Section title="Status">
         <MenuBarExtra.Item
           title={discoveryRunning ? "Discovery Active" : "Discovery Inactive"}
@@ -119,3 +133,4 @@ export default function Command() {
     </MenuBarExtra>
   );
 }
+
