@@ -17,7 +17,7 @@
     {
       "name": "deviceName",
       "title": "Device Name",
-      "description": "Name shown to other LocalSend devices",
+      "description": "Name shown to other LocalSend devices (e.g., 'John's Mac')",
       "type": "textfield",
       "required": false,
       "default": ""
@@ -47,6 +47,14 @@
           "value": "headless"
         }
       ]
+    },
+    {
+      "name": "deviceModel",
+      "title": "Device Model",
+      "description": "Model of this device (e.g., 'MacBook Pro M3', 'iMac 2023')",
+      "type": "textfield",
+      "required": false,
+      "default": ""
     },
     {
       "name": "httpPort",

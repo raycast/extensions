@@ -9,6 +9,7 @@ import { DeviceInfo, LocalSendDevice, PrepareUploadRequest, PrepareUploadRespons
 interface Preferences {
   deviceName: string;
   deviceType: string;
+  deviceModel: string;
   httpPort: string;
   downloadPath: string;
   enableReceive: boolean;
@@ -31,6 +32,7 @@ const getPreferences = (): Preferences => {
     return {
       deviceName: "",
       deviceType: "desktop",
+      deviceModel: "",
       httpPort: "53318",
       downloadPath: "~/Downloads",
       enableReceive: false,
@@ -63,13 +65,16 @@ export const getLocalIPs = (): string[] => {
 
 export const getDeviceInfo = (): DeviceInfo => {
   const prefs = getPreferences();
-  const deviceName = prefs.deviceName || os.hostname() || "Raycast";
+  const hostname = os.hostname();
+  
+  const deviceName = prefs.deviceName || hostname || "Raycast";
   const deviceType = (prefs.deviceType || "desktop") as "mobile" | "desktop" | "web" | "headless";
+  const deviceModel = prefs.deviceModel || `${os.type()} ${os.release()}`;
 
   return {
     alias: deviceName,
     version: PROTOCOL_VERSION,
-    deviceModel: os.platform(),
+    deviceModel: deviceModel,
     deviceType: deviceType,
     fingerprint: crypto.randomBytes(16).toString("hex"),
     port: getHttpPort(),
