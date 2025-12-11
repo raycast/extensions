@@ -113,8 +113,28 @@ export default function Command() {
       <MenuBarExtra.Section title="Actions">
         <MenuBarExtra.Item
           title="Send Files"
-          icon={Icon.Upload}
+          icon={Icon.Document}
           onAction={async () => await open("raycast://extensions/kud/localsend/send-files")}
+        />
+        <MenuBarExtra.Item
+          title="Send Media"
+          icon={Icon.Image}
+          onAction={async () => await open("raycast://extensions/kud/localsend/send-media")}
+        />
+        <MenuBarExtra.Item
+          title="Send Text"
+          icon={Icon.Text}
+          onAction={async () => await open("raycast://extensions/kud/localsend/send-text")}
+        />
+        <MenuBarExtra.Item
+          title="Send Clipboard"
+          icon={Icon.Clipboard}
+          onAction={async () => await open("raycast://extensions/kud/localsend/send-clipboard")}
+        />
+        <MenuBarExtra.Item
+          title="Send Folder"
+          icon={Icon.Folder}
+          onAction={async () => await open("raycast://extensions/kud/localsend/send-folder")}
         />
         <MenuBarExtra.Item
           title="Discover Devices"
