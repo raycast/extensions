@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { convertLDAP100NanoSecondsToDateTime, ldapDatetimeToDate, LDAPUser } from "../lib/ldap";
 import {
   LDAPUserCopyAttributeAction,
@@ -80,10 +80,15 @@ function PasswordExpireListItem({
 
   const days = daysBetween(expireDate, new Date());
 
+  const inExpireRange = days < 30;
+
   return (
     <List.Item
       title="Password Expire"
       accessories={[
+        {
+          tag: { value: inExpireRange ? "Expire Soon" : undefined, color: inExpireRange ? Color.Orange : undefined },
+        },
         {
           text: `${expireDate.toDateString()} (${Math.round(days)} days)`,
         },
