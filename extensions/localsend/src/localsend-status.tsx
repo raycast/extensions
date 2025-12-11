@@ -70,16 +70,18 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={getStatusIcon()} tooltip={`LocalSend: ${getStatusText()}`}>
-      <MenuBarExtra.Item
-        title={discoveryRunning ? "Discovery: Active" : "Discovery: Inactive"}
-        icon={discoveryRunning ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.XMarkCircle}
-        onAction={toggleDiscovery}
-      />
-      <MenuBarExtra.Item
-        title={serverRunning ? `Receive Server: Port ${port}` : "Receive Server: Inactive"}
-        icon={serverRunning ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.XMarkCircle}
-        onAction={toggleReceiveServer}
-      />
+      <MenuBarExtra.Section title="Status">
+        <MenuBarExtra.Item
+          title={discoveryRunning ? "Discovery Active" : "Discovery Inactive"}
+          icon={discoveryRunning ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.XMarkCircle}
+          onAction={toggleDiscovery}
+        />
+        <MenuBarExtra.Item
+          title={serverRunning ? `Server Active (Port ${port})` : "Server Inactive"}
+          icon={serverRunning ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.XMarkCircle}
+          onAction={toggleReceiveServer}
+        />
+      </MenuBarExtra.Section>
 
       <MenuBarExtra.Separator />
 
@@ -94,16 +96,18 @@ export default function Command() {
         </>
       )}
 
-      <MenuBarExtra.Item
-        title="Send Files"
-        icon={Icon.Upload}
-        onAction={async () => await open("raycast://extensions/kud/localsend/send-files")}
-      />
-      <MenuBarExtra.Item
-        title="Discover Devices"
-        icon={Icon.MagnifyingGlass}
-        onAction={async () => await open("raycast://extensions/kud/localsend/discover-devices")}
-      />
+      <MenuBarExtra.Section title="Actions">
+        <MenuBarExtra.Item
+          title="Send Files"
+          icon={Icon.Upload}
+          onAction={async () => await open("raycast://extensions/kud/localsend/send-files")}
+        />
+        <MenuBarExtra.Item
+          title="Discover Devices"
+          icon={Icon.MagnifyingGlass}
+          onAction={async () => await open("raycast://extensions/kud/localsend/discover-devices")}
+        />
+      </MenuBarExtra.Section>
 
       <MenuBarExtra.Separator />
 

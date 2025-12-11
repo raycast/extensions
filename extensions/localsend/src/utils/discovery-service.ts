@@ -13,7 +13,7 @@ let shouldBeRunning = false;
 
 export const startDiscoveryService = (): void => {
   shouldBeRunning = true;
-  
+
   if (discoverySocket) {
     console.log("Discovery service already running");
     return;
@@ -26,7 +26,7 @@ export const startDiscoveryService = (): void => {
     discoverySocket.on("error", (err) => {
       console.error("Discovery service error:", err);
       cleanup();
-      
+
       if (shouldBeRunning) {
         console.log("Attempting to restart discovery service...");
         restartTimer = setTimeout(() => {
@@ -65,7 +65,7 @@ export const startDiscoveryService = (): void => {
     discoverySocket.bind({ port: MULTICAST_PORT, exclusive: false }, () => {
       try {
         if (!discoverySocket) return;
-        
+
         discoverySocket.addMembership(MULTICAST_ADDRESS);
         discoverySocket.setBroadcast(true);
         console.log("Discovery service started and listening");
@@ -79,7 +79,7 @@ export const startDiscoveryService = (): void => {
             const currentDeviceInfo = getDeviceInfo();
             const announcement = { ...currentDeviceInfo, announce: true };
             const message = Buffer.from(JSON.stringify(announcement));
-            
+
             discoverySocket.send(message, MULTICAST_PORT, MULTICAST_ADDRESS, (err) => {
               if (err) {
                 console.error("Error sending announcement:", err);
@@ -98,7 +98,7 @@ export const startDiscoveryService = (): void => {
           clearInterval(announceTimer);
         }
         announceTimer = setInterval(sendAnnouncement, ANNOUNCE_INTERVAL);
-        
+
         announceTimer.unref();
       } catch (error) {
         console.error("Error setting up discovery service:", error);
@@ -129,7 +129,7 @@ const cleanup = () => {
 
 export const stopDiscoveryService = (): void => {
   shouldBeRunning = false;
-  
+
   if (restartTimer) {
     clearTimeout(restartTimer);
     restartTimer = null;
