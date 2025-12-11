@@ -2,12 +2,39 @@ import dgram from "node:dgram";
 import os from "node:os";
 import crypto from "node:crypto";
 import fetch from "node-fetch";
+import { getPreferenceValues } from "@raycast/api";
 import { DeviceInfo, LocalSendDevice, PrepareUploadRequest, PrepareUploadResponse } from "../types";
+
+interface Preferences {
+  deviceName: string;
+  httpPort: string;
+  downloadPath: string;
+  enableReceive: boolean;
+}
 
 const MULTICAST_ADDRESS = "224.0.0.167";
 const MULTICAST_PORT = 53317;
-const HTTP_PORT = 53317;
+const DEFAULT_HTTP_PORT = 53318;
 const PROTOCOL_VERSION = "2.1";
+
+const getPreferences = (): Preferences => {
+  try {
+    return getPreferenceValues<Preferences>();
+  } catch {
+    return {
+      deviceName: "",
+      httpPort: "53318",
+      downloadPath: "~/Downloads",
+      enableReceive: false,
+    };
+  }
+};
+
+const getHttpPort = (): number => {
+  const prefs = getPreferences();
+  const port = parseInt(prefs.httpPort || "53318", 10);
+  return isNaN(port) || port < 1024 || port > 65535 ? DEFAULT_HTTP_PORT : port;
+};
 
 export const getLocalIPs = (): string[] => {
   const interfaces = os.networkInterfaces();
@@ -26,16 +53,21 @@ export const getLocalIPs = (): string[] => {
   return ips;
 };
 
-export const getDeviceInfo = (): DeviceInfo => ({
-  alias: os.hostname() || "Raycast",
-  version: PROTOCOL_VERSION,
-  deviceModel: os.platform(),
-  deviceType: "desktop",
-  fingerprint: crypto.randomBytes(16).toString("hex"),
-  port: HTTP_PORT,
-  protocol: "http",
-  download: false,
-});
+export const getDeviceInfo = (): DeviceInfo => {
+  const prefs = getPreferences();
+  const deviceName = prefs.deviceName || os.hostname() || "Raycast";
+
+  return {
+    alias: deviceName,
+    version: PROTOCOL_VERSION,
+    deviceModel: os.platform(),
+    deviceType: "desktop",
+    fingerprint: crypto.randomBytes(16).toString("hex"),
+    port: getHttpPort(),
+    protocol: "http",
+    download: prefs.enableReceive,
+  };
+};
 
 export const discoverDevicesMulticast = async (timeout = 5000): Promise<LocalSendDevice[]> =>
   new Promise((resolve) => {
@@ -74,7 +106,7 @@ export const discoverDevicesMulticast = async (timeout = 5000): Promise<LocalSen
       }
     });
 
-    socket.bind(MULTICAST_PORT, () => {
+    socket.bind({ port: MULTICAST_PORT, exclusive: false }, () => {
       try {
         socket.addMembership(MULTICAST_ADDRESS);
         socket.setBroadcast(true);
@@ -105,6 +137,8 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
   const subnet = localIPs[0].split(".").slice(0, 3).join(".");
   const promises: Promise<void>[] = [];
 
+  const portsToCheck = [53317, 53318, 53319];
+
   for (let i = 1; i <= 254; i++) {
     const ip = `${subnet}.${i}`;
 
@@ -112,29 +146,34 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
       continue;
     }
 
-    const promise = (async () => {
-      try {
-        const response = await fetch(`http://${ip}:${HTTP_PORT}/api/localsend/v2/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(deviceInfo),
-          timeout: 1000,
-        });
-
-        if (response.ok) {
-          const data = (await response.json()) as DeviceInfo;
-          devices.push({
-            ...data,
-            ip,
-            lastSeen: Date.now(),
+    for (const port of portsToCheck) {
+      const promise = (async () => {
+        try {
+          const response = await fetch(`http://${ip}:${port}/api/localsend/v2/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(deviceInfo),
+            timeout: 1000,
           });
-        }
-      } catch {
-        // Ignore timeout errors
-      }
-    })();
 
-    promises.push(promise);
+          if (response.ok) {
+            const data = (await response.json()) as DeviceInfo;
+            const existingDevice = devices.find((d) => d.ip === ip);
+            if (!existingDevice) {
+              devices.push({
+                ...data,
+                ip,
+                lastSeen: Date.now(),
+              });
+            }
+          }
+        } catch {
+          // Ignore timeout errors
+        }
+      })();
+
+      promises.push(promise);
+    }
   }
 
   await Promise.all(promises);
