@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="./assets/upstash-icon-dark-bg.png" width="100" height="100" />
+</p>
+
 # Upstash
 
 This is a Raycast extension for [Upstash](https://upstash.com/) - _Serverless Data Platform_.
@@ -21,6 +25,7 @@ This is a Raycast extension for [Upstash](https://upstash.com/) - _Serverless Da
     - View Details & Usage
     - Data Browser
         - Create Key
+        - Delete Key
     - Create Database
 
 ### <img src="./assets/vector.svg" width="15" height="15" /> Vector

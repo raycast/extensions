@@ -4,6 +4,7 @@
 
 - Add a basic Data Browser in Redis
 - Add keys in Redis
+- Del keys in Redis
 
 ## [Initial Version - Redis + Vector] - 2025-07-07
 

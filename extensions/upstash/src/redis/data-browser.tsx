@@ -1,4 +1,17 @@
-import { List, Icon, ActionPanel, Action, Form, showToast, Toast, useNavigation, Image, Color } from "@raycast/api";
+import {
+  List,
+  Icon,
+  ActionPanel,
+  Action,
+  Form,
+  showToast,
+  Toast,
+  useNavigation,
+  Image,
+  Color,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { Redis } from "@upstash/redis";
 import { useState } from "react";
@@ -8,16 +21,20 @@ import { OpenInUpstash } from "../upstash";
 type RedisValueType = string | number | boolean | null | undefined | object | Array<RedisValueType>;
 function formatValue(value: RedisValueType) {
   if (value === null || value === undefined) return "";
-  const str = typeof value === "string" ? value : JSON.stringify(value);
-  return str.length > 40 ? str.substring(0, 40) + "…" : str;
+  if (typeof value === "string") return value;
+  if (value instanceof Array)
+    return `|-|-|
+|-|-|
+${value.map((v, idx) => `| ${idx} | ${v instanceof Array ? JSON.stringify(v) : v} |`).join("\n")}`;
+  return JSON.stringify(value);
 }
 
 const TYPE_ICON: Record<string, Image.ImageLike> = {
+  list: { source: Icon.List, tintColor: Color.Orange },
   string: { source: Icon.QuotationMarks, tintColor: Color.Blue },
 };
 export default function DataBrowser({ database }: { database: RedisDatabase }) {
   const [prefix, setPrefix] = useState("");
-
   const {
     isLoading,
     data: items,
@@ -25,12 +42,12 @@ export default function DataBrowser({ database }: { database: RedisDatabase }) {
     mutate,
   } = useCachedPromise(
     (match: string, db: RedisDatabase) => async (options) => {
+      const cursor = options.cursor || 0;
+
       const redis = new Redis({
         url: `https://${db.endpoint}`,
         token: db.password,
       });
-      const cursor = options.cursor || 0;
-
       const [next, keys] = await redis.scan(cursor, {
         match: match || "*",
         count: 100,
@@ -86,6 +103,40 @@ export default function DataBrowser({ database }: { database: RedisDatabase }) {
     [prefix, database],
     { initialData: [] },
   );
+
+  async function confirmAndDelete(key: string) {
+    await confirmAlert({
+      title: "Delete Key",
+      message: `Are you sure you want to delete this key?
+This action cannot be undone.`,
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Yes, Delete",
+        async onAction() {
+          const toast = await showToast(Toast.Style.Animated, "Deleting", key);
+          try {
+            const redis = new Redis({
+              url: `https://${database.endpoint}`,
+              token: database.password,
+            });
+            await mutate(redis.del(key), {
+              optimisticUpdate(data) {
+                return data.filter((i) => i.key !== key);
+              },
+              shouldRevalidateAfter: false,
+            });
+            toast.style = Toast.Style.Success;
+            toast.title = "Deleted";
+          } catch (error) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed";
+            toast.message = `${error}`;
+          }
+        },
+      },
+    });
+  }
+
   return (
     <List isLoading={isLoading} pagination={pagination} onSearchTextChange={setPrefix} isShowingDetail>
       {!isLoading && !items.length ? (
@@ -119,6 +170,12 @@ export default function DataBrowser({ database }: { database: RedisDatabase }) {
                   target={<CreateKey database={database} />}
                   onPop={mutate}
                 />
+                <Action
+                  icon={Icon.Trash}
+                  title="Delete Key"
+                  onAction={() => confirmAndDelete(item.key)}
+                  style={Action.Style.Destructive}
+                />
                 <OpenInUpstash route={`redis/${database.database_id}/data-browser`} />
               </ActionPanel>
             }
@@ -135,17 +192,17 @@ function CreateKey({ database }: { database: RedisDatabase }) {
     async onSubmit(values) {
       const { type, key } = values;
       const toast = await showToast(Toast.Style.Animated, "Creating", key);
+      const redis = new Redis({
+        url: `https://${database.endpoint}`,
+        token: database.password,
+      });
       try {
-        const redis = new Redis({
-          url: `https://${database.endpoint}`,
-          token: database.password,
-        });
         switch (type) {
           case "string":
-            await redis.set(key, "");
+            await redis.set(key, "value");
             break;
           case "list":
-            await redis.lpush(key);
+            await redis.lpush(key, null);
             break;
         }
         toast.style = Toast.Style.Success;
