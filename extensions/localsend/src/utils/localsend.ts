@@ -8,6 +8,7 @@ import { DeviceInfo, LocalSendDevice, PrepareUploadRequest, PrepareUploadRespons
 
 interface Preferences {
   deviceName: string;
+  deviceType: string;
   httpPort: string;
   downloadPath: string;
   enableReceive: boolean;
@@ -29,6 +30,7 @@ const getPreferences = (): Preferences => {
   } catch {
     return {
       deviceName: "",
+      deviceType: "desktop",
       httpPort: "53318",
       downloadPath: "~/Downloads",
       enableReceive: false,
