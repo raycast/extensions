@@ -1,0 +1,142 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudflareimgbed",
+  "title": "CloudFlareImgbed",
+  "description": "Raycast extension for managing CloudFlare ImgBed uploads, listing, and clipboard sharing.",
+  "icon": "extension-icon.png",
+  "author": "shiyu46416",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "gallery",
+      "title": "Browse ImgBed",
+      "description": "View, filter, and manage CloudFlare ImgBed inside Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "upload",
+      "title": "Upload Images",
+      "description": "Choose local images, upload them to CloudFlare ImgBed, then copy the generated links",
+      "mode": "view"
+    },
+    {
+      "name": "upload-from-clipboard",
+      "title": "Upload from Clipboard",
+      "description": "Detect clipboard images or links and upload them",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "CloudFlare ImgBed deployment URL, such as https://imgbed.example.com",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://imgbed.example.com"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Token with list/upload/delete permissions",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultDir",
+      "title": "Default Directory",
+      "description": "Directory used by default when listing images",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultChannel",
+      "title": "Default Channel (telegram/cfr2/s3)",
+      "description": "Channel used for filtering and uploading when no override is provided",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "pageSize",
+      "title": "Items Per Fetch",
+      "description": "count parameter for the list command; recommended range 10-100",
+      "type": "textfield",
+      "placeholder": "50",
+      "required": false
+    },
+    {
+      "name": "uploadChannel",
+      "title": "Upload Channel",
+      "description": "Default channel for the upload endpoint (telegram/cfr2/s3)",
+      "type": "textfield",
+      "placeholder": "telegram",
+      "required": false
+    },
+    {
+      "name": "uploadFolder",
+      "title": "Default Upload Folder",
+      "description": "Relative folder appended during upload, e.g. img/test",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "uploadNameType",
+      "title": "Naming Strategy (default/index/origin/short)",
+      "description": "uploadNameType parameter passed to the upload endpoint",
+      "type": "textfield",
+      "placeholder": "default",
+      "required": false
+    },
+    {
+      "name": "returnFormat",
+      "title": "Link Format (default/full)",
+      "description": "default returns /file/xxx, full returns the complete URL",
+      "type": "textfield",
+      "placeholder": "default",
+      "required": false
+    },
+    {
+      "name": "serverCompress",
+      "type": "checkbox",
+      "label": "Enable compression for Telegram channel",
+      "description": "Only applied when the channel is Telegram",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "autoRetry",
+      "type": "checkbox",
+      "label": "Retry with different channel on failure",
+      "description": "Attempt other channels when the upload fails",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
