@@ -159,7 +159,6 @@ export default function Command() {
                 onAction={() => setSelectedFileIndex((i) => (i - 1 + results.length) % results.length)}
                 shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
               />
-              {/* <Action. /> */}
             </>
           )}
           <Action.OpenInBrowser title="View Gltf-Transform Documentation" url="https://gltf-transform.dev/cli.html" />

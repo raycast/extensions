@@ -3,6 +3,9 @@
 # dependencies
 /node_modules
 
+# Python virtual environment
+.venv
+
 # Raycast specific files
 raycast-env.d.ts
 .raycast-swift-build
