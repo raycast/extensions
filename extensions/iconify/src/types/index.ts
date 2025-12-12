@@ -1,4 +1,4 @@
-enum primaryActionEnum {
+export enum primaryActionEnum {
   paste = "paste",
   copy = "copy",
   pasteName = "pasteName",
@@ -9,9 +9,8 @@ enum primaryActionEnum {
   copyDataURI = "copyDataURI",
 }
 
-enum iconColorEnum {
+export enum iconColorEnum {
   default = "currentColor",
   customColor = "customColor",
 }
 
-export { primaryActionEnum, iconColorEnum };

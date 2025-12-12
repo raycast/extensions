@@ -11,9 +11,9 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 
-import Service, { Icon } from "./service";
+import Service, { Icon } from "./api/service";
 import { toDataURI, toSvg, toURL, copyToClipboard } from "./utils";
-import { primaryActionEnum, iconColorEnum } from "./types/perferenceValues";
+import { primaryActionEnum, iconColorEnum } from "./types";
 
 const { primaryAction, iconColor, customColor } = getPreferenceValues<Preferences>();
 

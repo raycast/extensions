@@ -12,9 +12,9 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { createGlobalState } from "react-hooks-global-state";
-import Service, { Icon, Set } from "./service";
+import Service, { Icon, Set } from "./api/service";
 import { copyToClipboard, toDataURI, toSvg, toURL } from "./utils";
-import { iconColorEnum, primaryActionEnum } from "./types/perferenceValues";
+import { iconColorEnum, primaryActionEnum } from "./types";
 import { usePromise } from "@raycast/utils";
 
 const { primaryAction, iconColor, customColor } = getPreferenceValues<Preferences>();
