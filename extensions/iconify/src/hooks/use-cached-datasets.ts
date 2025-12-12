@@ -1,5 +1,5 @@
 import { usePromise } from "@raycast/utils";
-import { cache, isExpired } from "../utils";
+import { getCacheValue } from "../utils/cache";
 import { DataSet } from "../types";
 import { useRef } from "react";
 import { listSets } from "../api/service";
@@ -10,17 +10,14 @@ export const useCachedDataSets = () => {
   const { isLoading, data } = usePromise(
     async () => {
       const cacheId = "sets";
-      const cached = cache.get(cacheId);
-      if (cached) {
-        try {
-          const { time, data }: { time: number; data: DataSet[] } = JSON.parse(cached);
-          if (!isExpired(time)) return data;
-        } catch (e) {
-          console.log("Couldn't parse cache: ", e);
-        }
+      const cached = getCacheValue<DataSet>(cacheId);
+
+      if (cached.useCache) {
+        return cached.data;
       }
+
       const data = await listSets(abortable.current.signal);
-      cache.set(cacheId, JSON.stringify({ time: Date.now(), data }));
+      cached.setCache(data);
       return data;
     },
     [],

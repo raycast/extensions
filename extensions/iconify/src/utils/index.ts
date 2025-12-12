@@ -1,4 +1,4 @@
-import { Cache, Clipboard } from "@raycast/api";
+import { Clipboard } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { tmpdir, platform } from "node:os";
@@ -75,10 +75,3 @@ export async function copyToClipboard(svgString: string, id: string) {
     file: actualPath,
   });
 }
-
-export const cache = new Cache({
-  capacity: 50 * 1e6,
-});
-
-const day = 24 * 60 * 60 * 1e3;
-export const isExpired = (time: number) => Date.now() - time > day;
