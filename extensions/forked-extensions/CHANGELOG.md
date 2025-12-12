@@ -1,5 +1,9 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add support for opening an extension folder with a default application
+
 ## [Bugfix] - 2025-11-17
 
 - Fix init repository when user path has spaces
