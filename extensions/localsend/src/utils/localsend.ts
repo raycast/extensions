@@ -209,7 +209,6 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
           }
         } catch {
           clearTimeout(timeoutId);
-          // Ignore timeout errors
         }
       })();
 
@@ -283,7 +282,7 @@ export const sendFiles = async (
   let prepareResponse;
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s to wait for user to accept
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
       prepareResponse = await fetch(url, {
