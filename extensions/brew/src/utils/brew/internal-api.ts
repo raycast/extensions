@@ -14,6 +14,7 @@ import { cpus, release } from "os";
 import { execSync } from "child_process";
 import { Cask, Formula, DownloadProgressCallback } from "../types";
 import { cacheLogger, fetchLogger } from "../logger";
+import { logMemory } from "../memory";
 
 /// System Tag Detection
 
@@ -389,6 +390,7 @@ export async function fetchInternalFormulae(onProgress?: DownloadProgressCallbac
   const startTime = Date.now();
 
   fetchLogger.log("Fetching internal formulae API", { url });
+  logMemory("Before fetchInternalFormulae");
 
   try {
     // Report initial progress
@@ -411,6 +413,7 @@ export async function fetchInternalFormulae(onProgress?: DownloadProgressCallbac
     // Read the response
     const text = await response.text();
     const bytesDownloaded = text.length;
+    logMemory("After formulae download");
 
     // Report download complete
     onProgress?.({
@@ -424,6 +427,7 @@ export async function fetchInternalFormulae(onProgress?: DownloadProgressCallbac
     // Parse and validate JWS response
     const payload = parseJWSPayload<InternalFormulaPayload>(text, "formulae");
     // text is no longer needed, let GC reclaim it
+    logMemory("After formulae JWS parse");
 
     // Validate payload structure
     if (!isValidFormulaPayload(payload)) {
@@ -439,6 +443,8 @@ export async function fetchInternalFormulae(onProgress?: DownloadProgressCallbac
       const name = names[i];
       formulae[i] = createFormulaFromInternal(name, formulaeData[name]);
     }
+
+    logMemory("After formulae conversion");
 
     const duration = Date.now() - startTime;
     fetchLogger.log("Internal formulae API fetched", {
@@ -462,6 +468,7 @@ export async function fetchInternalFormulae(onProgress?: DownloadProgressCallbac
 
     return formulae;
   } catch (error) {
+    logMemory("Error in fetchInternalFormulae", true);
     const duration = Date.now() - startTime;
     fetchLogger.error("Internal formulae API fetch failed", {
       url,
@@ -485,6 +492,7 @@ export async function fetchInternalCasks(onProgress?: DownloadProgressCallback):
   const startTime = Date.now();
 
   fetchLogger.log("Fetching internal casks API", { url });
+  logMemory("Before fetchInternalCasks");
 
   try {
     // Report initial progress
@@ -507,6 +515,7 @@ export async function fetchInternalCasks(onProgress?: DownloadProgressCallback):
     // Read the response
     const text = await response.text();
     const bytesDownloaded = text.length;
+    logMemory("After casks download");
 
     // Report download complete
     onProgress?.({
@@ -520,6 +529,7 @@ export async function fetchInternalCasks(onProgress?: DownloadProgressCallback):
     // Parse and validate JWS response
     const payload = parseJWSPayload<InternalCaskPayload>(text, "casks");
     // text is no longer needed, let GC reclaim it
+    logMemory("After casks JWS parse");
 
     // Validate payload structure
     if (!isValidCaskPayload(payload)) {
@@ -528,6 +538,7 @@ export async function fetchInternalCasks(onProgress?: DownloadProgressCallback):
 
     // Convert to Cask array
     const casks: Cask[] = Object.values(payload.casks);
+    logMemory("After casks conversion");
 
     const duration = Date.now() - startTime;
     fetchLogger.log("Internal casks API fetched", {
@@ -551,6 +562,7 @@ export async function fetchInternalCasks(onProgress?: DownloadProgressCallback):
 
     return casks;
   } catch (error) {
+    logMemory("Error in fetchInternalCasks", true);
     const duration = Date.now() - startTime;
     fetchLogger.error("Internal casks API fetch failed", {
       url,

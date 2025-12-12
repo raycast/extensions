@@ -25,6 +25,7 @@ export default function Main() {
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
+      dataFetched={installed !== undefined}
       isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => revalidate()}
     />

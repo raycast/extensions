@@ -80,7 +80,7 @@ function OutdatedList(props: OutdatedListProps) {
       searchBarAccessory={props.searchBarAccessory}
       isLoading={showLoading}
     >
-      {!showLoading && !hasResults && (
+      {!showLoading && !hasResults && props.outdated !== undefined && (
         <List.EmptyView
           icon={Icon.CheckCircle}
           title="All Packages Up to Date"

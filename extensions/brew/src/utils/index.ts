@@ -78,6 +78,17 @@ export { wait } from "./async";
 // Text utilities
 export { pluralize, formatCount } from "./text";
 
+// Memory diagnostics
+export {
+  memoryLogger,
+  logMemory,
+  takeMemorySnapshot,
+  withMemoryTracking,
+  withMemoryTrackingSync,
+  getMemorySummary,
+} from "./memory";
+export type { MemorySnapshot, MemoryDelta, MemoryTrackingResult, CallerInfo } from "./memory";
+
 // Brew utilities
 export * from "./brew";
 

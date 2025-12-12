@@ -41,6 +41,7 @@ function InstalledViewContent() {
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
+      dataFetched={installed !== undefined}
       isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => {
         uiLogger.log("Revalidating installed packages");

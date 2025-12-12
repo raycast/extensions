@@ -110,7 +110,7 @@ function OutdatedList(props: OutdatedListProps) {
       )}
 
       {/* Empty state when no outdated packages */}
-      {!props.isLoading && !hasResults && (
+      {!props.isLoading && !hasResults && props.outdated !== undefined && (
         <List.EmptyView
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title={getEmptyMessage()}

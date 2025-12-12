@@ -106,7 +106,7 @@ function getDownloadIcon(progress: FileDownloadProgress, isProcessing = false) {
   return getProgressIcon(fraction, Color.PrimaryText);
 }
 
-export default function Main() {
+export default function SearchView() {
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState(InstallableFilterType.all);
 

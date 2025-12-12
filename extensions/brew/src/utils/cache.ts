@@ -4,9 +4,10 @@
  * Provides functions for managing cached data and remote fetching.
  */
 
-import { environment } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import path from "path";
 import fs from "fs";
+import { rm } from "fs/promises";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
 import { ReadableStream } from "stream/web";
@@ -45,6 +46,61 @@ export const bundleIdentifier: string = (() => {
 
 export function cachePath(name: string): string {
   return path.join(supportPath, name);
+}
+
+const CACHE_FILES = ["formula.json", "cask.json", "installedv2.json"];
+
+/**
+ * Clear all cached data files (formulae, casks, installed packages).
+ */
+export async function clearCache(): Promise<void> {
+  try {
+    cacheLogger.log("Starting cache clear operation");
+    await showToast(Toast.Style.Animated, "Clearing downloaded casks and formulae...");
+
+    // Check which files exist before clearing
+    const existingFiles: string[] = [];
+    const fileSizes: Record<string, number> = {};
+
+    for (const file of CACHE_FILES) {
+      const filePath = path.join(environment.supportPath, file);
+      try {
+        const stats = await stat(filePath);
+        existingFiles.push(file);
+        fileSizes[file] = stats.size;
+      } catch {
+        // File doesn't exist
+      }
+    }
+
+    if (existingFiles.length > 0) {
+      cacheLogger.log("Clearing cache files", {
+        files: existingFiles,
+        sizes: fileSizes,
+        totalBytes: Object.values(fileSizes).reduce((a, b) => a + b, 0),
+      });
+    } else {
+      cacheLogger.log("No cache files to clear");
+    }
+
+    await Promise.all(
+      CACHE_FILES.map((file) =>
+        rm(path.join(environment.supportPath, file), { force: true }).catch(() => {
+          // Ignore errors for files that don't exist
+        }),
+      ),
+    );
+
+    cacheLogger.log("Cache clear completed", {
+      filesCleared: existingFiles,
+      fileCount: existingFiles.length,
+    });
+
+    await showToast(Toast.Style.Success, "Cache files cleared");
+  } catch (err) {
+    cacheLogger.error("Failed to clear cache", { error: (err as Error).message });
+    await showToast(Toast.Style.Failure, "Failed to clear cache", (err as Error).message);
+  }
 }
 
 /// Remote Fetching

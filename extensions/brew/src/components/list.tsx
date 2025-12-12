@@ -19,6 +19,7 @@ export interface FormulaListProps {
   isInstalled: (name: string) => boolean;
   onAction: () => void;
   filtering?: boolean;
+  dataFetched?: boolean;
 }
 
 export function FormulaList(props: FormulaListProps) {
@@ -42,20 +43,9 @@ export function FormulaList(props: FormulaListProps) {
           description="Fetching casks and formulae from Homebrew..."
         />
       )}
-      {!hasResults && !props.isLoading && (
+      {!hasResults && !props.isLoading && props.dataFetched && (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No Results" description="No packages found" />
       )}
-      <List.Section title="Casks">
-        {casks.map((cask) => (
-          <CaskListItem
-            key={`cask-${cask.token}`}
-            cask={cask}
-            isInstalled={props.isInstalled}
-            onAction={props.onAction}
-          />
-        ))}
-        {casks.isTruncated() && <MoreListItem />}
-      </List.Section>
       <List.Section title="Formulae">
         {formulae.map((formula) => (
           <FormulaListItem
@@ -66,6 +56,17 @@ export function FormulaList(props: FormulaListProps) {
           />
         ))}
         {formulae.isTruncated() && <MoreListItem />}
+      </List.Section>
+      <List.Section title="Casks">
+        {casks.map((cask) => (
+          <CaskListItem
+            key={`cask-${cask.token}`}
+            cask={cask}
+            isInstalled={props.isInstalled}
+            onAction={props.onAction}
+          />
+        ))}
+        {casks.isTruncated() && <MoreListItem />}
       </List.Section>
     </List>
   );
