@@ -100,13 +100,15 @@ export const startDiscoveryService = (): void => {
         };
 
         sendAnnouncement();
+        setRunningStatus(true);
 
         if (announceTimer) {
           clearInterval(announceTimer);
         }
         announceTimer = setInterval(sendAnnouncement, ANNOUNCE_INTERVAL);
 
-        announceTimer.unref();
+        // Keep the timer referenced so it continues to run
+        // announceTimer.unref(); // REMOVED - this was preventing the loop from running!
       } catch (error) {
         console.error("Error setting up discovery service:", error);
         cleanup();
