@@ -73,14 +73,10 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={getStatusIcon()} tooltip={`LocalSend: ${getStatusText()}`}>
-      <MenuBarExtra.Section title="Device Information">
-        <MenuBarExtra.Item title={`Name: ${deviceInfo.alias}`} icon={Icon.Person} />
-        <MenuBarExtra.Item
-          title={`Type: ${deviceInfo.deviceType.charAt(0).toUpperCase() + deviceInfo.deviceType.slice(1)}`}
-          icon={Icon.ComputerChip}
-        />
-        <MenuBarExtra.Item title={`Model: ${deviceInfo.deviceModel}`} icon={Icon.Monitor} />
-      </MenuBarExtra.Section>
+      <MenuBarExtra.Item title="Device Information" />
+      <MenuBarExtra.Item title={`👤  ${deviceInfo.alias}`} />
+      <MenuBarExtra.Item title={`💻  ${deviceInfo.deviceType.charAt(0).toUpperCase() + deviceInfo.deviceType.slice(1)}`} />
+      <MenuBarExtra.Item title={`🖥️  ${deviceInfo.deviceModel}`} />
 
       <MenuBarExtra.Separator />
 
