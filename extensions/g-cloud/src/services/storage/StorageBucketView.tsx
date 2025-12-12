@@ -8,7 +8,6 @@ import {
   Icon,
   confirmAlert,
   Form,
-  Detail,
   Color,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
@@ -41,7 +40,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   const [isLoading, setIsLoading] = useState(true);
   const [buckets, setBuckets] = useState<Bucket[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>("");
   const { push, pop } = useNavigation();
 
   useEffect(() => {
@@ -64,28 +62,19 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       message: `Project: ${projectId}`,
     });
 
-    let debugText = `Project: ${projectId}\n`;
-
     try {
-      // Use REST API instead of gcloud CLI
-      debugText += `Using REST API to list buckets\n`;
-
       const bucketList = await listStorageBuckets(gcloudPath, projectId);
 
       if (bucketList.length === 0) {
         setBuckets([]);
-        debugText += "No buckets found or empty result\n";
         showToast({
           style: Toast.Style.Success,
           title: "No buckets found",
           message: "Create a bucket to get started",
         });
-        setDebugInfo(debugText);
         setIsLoading(false);
         return;
       }
-
-      debugText += `Found ${bucketList.length} buckets\n`;
 
       const mappedBuckets = bucketList.map((bucket) => ({
         id: bucket.id || bucket.name,
@@ -96,16 +85,12 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       }));
 
       setBuckets(mappedBuckets);
-      setDebugInfo(debugText);
       showToast({
         style: Toast.Style.Success,
         title: "Buckets loaded",
         message: `Found ${mappedBuckets.length} buckets`,
       });
     } catch (error: unknown) {
-      console.error("Error listing buckets:", error);
-      debugText += `Error: ${error instanceof Error ? error.message : String(error)}\n`;
-      setDebugInfo(debugText);
       setError(`Failed to list buckets: ${error instanceof Error ? error.message : String(error)}`);
       showFailureToast("Failed to list buckets", {
         title: "Failed to list buckets",
@@ -181,11 +166,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
 
   function viewBucketObjects(bucketName: string) {
     push(<StorageObjectsView projectId={projectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function _showDebugInfo() {
-    push(<Detail markdown={debugInfo} navigationTitle="Debug Info" />);
   }
 
   function getStorageClassIcon(storageClass: string) {

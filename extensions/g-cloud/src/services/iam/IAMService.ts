@@ -425,11 +425,9 @@ export class IAMService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async createGroup(groupId: string, displayName?: string, description?: string): Promise<Record<string, unknown>> {
-    // Note: Group creation requires Cloud Identity API which has different auth
-    // Keeping this as a stub for now - would need separate implementation
-    console.log("createGroup called with:", groupId, displayName, description);
-    throw new Error("Group creation requires Cloud Identity API - not implemented in REST API migration");
+    throw new Error("Group creation requires Cloud Identity API - not implemented");
   }
 
   async getRoleSuggestions(query: string): Promise<IAMRole[]> {

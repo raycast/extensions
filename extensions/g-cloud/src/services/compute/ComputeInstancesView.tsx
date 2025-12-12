@@ -131,7 +131,6 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     if (!hasTransitionalInstances) return;
 
     const refreshTimer = setInterval(() => {
-      //console.log("Auto-refreshing instances in transitional state...");
       fetchInstances(service);
     }, 30000);
     return () => clearInterval(refreshTimer);

@@ -9,15 +9,6 @@ interface GCloudProject extends Omit<Project, "createTime"> {
 
 const execPromise = promisify(exec);
 
-// Performance logging - set to true to compare REST vs CLI performance
-const PERF_LOG_ENABLED = true;
-
-function perfLog(type: "REST" | "CLI", operation: string, durationMs: number, details?: string) {
-  if (!PERF_LOG_ENABLED) return;
-  const icon = type === "REST" ? "🚀" : "🐢";
-  console.log(`${icon} [${type}] ${operation}: ${durationMs}ms${details ? ` (${details})` : ""}`);
-}
-
 interface CommandCacheEntry<T> {
   result: T;
   timestamp: number;
@@ -142,21 +133,12 @@ async function executeCommand(
   maxRetries: number,
   currentRetry: number = 0,
 ): Promise<unknown> {
-  const start = Date.now();
-  // Extract the gcloud subcommand for logging (e.g., "compute instances list")
-  const commandMatch = fullCommand.match(/gcloud\s+(.+?)\s+--/);
-  const operation = commandMatch ? commandMatch[1] : fullCommand.substring(0, 50);
-
   try {
     const { stdout, stderr } = await execPromise(fullCommand, {
       maxBuffer: 10 * 1024 * 1024,
     });
 
-    perfLog("CLI", operation, Date.now() - start);
-
     if (stderr && stderr.trim() !== "") {
-      console.warn(`Command produced stderr: ${stderr}`);
-
       if (
         stderr.includes("not authorized") ||
         stderr.includes("not authenticated") ||
@@ -187,7 +169,6 @@ async function executeCommand(
         fullCommand.includes("list") || (fullCommand.endsWith("--format=json") && fullCommand.includes("list"));
 
       if (expectsArray && !Array.isArray(result)) {
-        //console.log("Command expected to return array but got object, wrapping in array:", fullCommand);
         const parsedResult = [result];
         commandCache.set(cacheKey, { result: parsedResult, timestamp: Date.now() });
         return parsedResult;

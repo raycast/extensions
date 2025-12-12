@@ -20,7 +20,6 @@ import { promisify } from "util";
 import { homedir } from "os";
 import { join } from "path";
 import { CloudStorageUploader } from "../../utils/FilePicker";
-import { CloudStorageDownloader } from "../../utils/FileDownloader";
 import { formatFileSize, validateFile, getFileInfo } from "../../utils/FileUtils";
 import ObjectVersionsView from "./ObjectVersionsView";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
@@ -141,8 +140,6 @@ export default function StorageObjectsView({
 
     try {
       const command = `${gcloudPath} storage ls gs://${bucketName}${prefix ? "/" + prefix : ""}`;
-
-      //console.log(`Executing list command: ${command}`);
       const { stdout, stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -161,7 +158,6 @@ export default function StorageObjectsView({
       }
 
       const lines = stdout.trim().split("\n");
-      //console.log(`Found ${lines.length} items in response`);
 
       let batchFolders: Folder[] = [];
       let batchObjects: StorageObject[] = [];
@@ -345,8 +341,6 @@ export default function StorageObjectsView({
 
       try {
         const command = `${gcloudPath} storage rm gs://${bucketName}/${fullObjectPath} --project=${projectId}`;
-
-        //console.log(`Executing delete command: ${command}`);
         const { stderr } = await execPromise(command);
 
         if (stderr && stderr.includes("ERROR")) {
@@ -384,73 +378,6 @@ export default function StorageObjectsView({
     }
   }
 
-  // This function is used indirectly through CloudStorageDownloader
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-  async function performDownload(objectName: string, downloadPath?: string) {
-    if (downloadPath) {
-      const downloadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Downloading object...",
-        message: `To: ${downloadPath}`,
-      });
-
-      try {
-        const fullObjectPath = prefix ? `${prefix}/${objectName}` : objectName;
-        const command = `${gcloudPath} storage cp gs://${bucketName}/${fullObjectPath} ${downloadPath} --project=${projectId}`;
-
-        //console.log(`Executing download command: ${command}`);
-        const { stderr } = await execPromise(command);
-
-        if (stderr && stderr.includes("ERROR")) {
-          throw new Error(stderr);
-        }
-
-        downloadingToast.hide();
-        showToast({
-          style: Toast.Style.Success,
-          title: "Download complete",
-          message: `Saved to ${downloadPath}`,
-        });
-      } catch (error: unknown) {
-        downloadingToast.hide();
-        console.error("Error downloading object:", error);
-
-        let errorMessage = error instanceof Error ? error.message : String(error);
-        let errorTitle = "Failed to download object";
-
-        if (typeof errorMessage === "string") {
-          if (errorMessage.includes("Permission denied") || errorMessage.includes("403")) {
-            errorTitle = "Permission denied";
-            errorMessage = "You don't have permission to download this object.";
-          } else if (errorMessage.includes("not found") || errorMessage.includes("404")) {
-            errorTitle = "Object not found";
-            errorMessage = `The object "${objectName}" was not found.`;
-          } else if (errorMessage.includes("EACCES") || errorMessage.includes("access denied")) {
-            errorTitle = "Access denied";
-            errorMessage = `Cannot write to ${downloadPath}. Please check your file permissions.`;
-          }
-        }
-
-        showFailureToast({
-          title: errorTitle,
-          message: errorMessage,
-        });
-      }
-    } else {
-      const safeFileName = objectName.split("/").pop() || "download";
-
-      push(
-        <CloudStorageDownloader
-          onDownload={(path) => performDownload(objectName, path)}
-          fileName={safeFileName}
-          bucketName={bucketName}
-          objectName={objectName}
-          title="Download Object"
-        />,
-      );
-    }
-  }
-
   async function uploadObject(filePath: string) {
     const isValid = await validateFile(filePath);
     if (!isValid) return;
@@ -470,8 +397,6 @@ export default function StorageObjectsView({
         : `gs://${bucketName}/${fileInfo.name}`;
 
       const command = `${gcloudPath} storage cp ${filePath} ${destinationPath} --project=${projectId}`;
-
-      //console.log(`Executing upload command: ${command}`);
       const { stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -534,8 +459,6 @@ export default function StorageObjectsView({
     try {
       const tempDownloadPath = join(homedir(), "Downloads", safeFileName);
       const command = `${gcloudPath} storage cp gs://${bucketName}/${fullObjectPath} ${tempDownloadPath} --project=${projectId}`;
-
-      //console.log(`Executing download command: ${command}`);
       const { stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -614,8 +537,6 @@ export default function StorageObjectsView({
 
     try {
       const command = `${gcloudPath} storage objects describe gs://${bucketName}/${fullObjectPath} --format=json --project=${projectId}`;
-
-      //console.log(`Executing describe command: ${command}`);
       const { stdout, stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -796,8 +717,6 @@ export default function StorageObjectsView({
       await execPromise(`touch ${tempFile}`);
 
       const command = `${gcloudPath} storage cp ${tempFile} ${gcsPath} --project=${projectId}`;
-      //console.log(`Creating folder with command: ${command}`);
-
       const { stderr } = await execPromise(command);
 
       await execPromise(`rm ${tempFile}`);

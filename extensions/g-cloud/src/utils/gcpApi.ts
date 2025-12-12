@@ -15,15 +15,6 @@ import { promisify } from "util";
 
 const execPromise = promisify(exec);
 
-// Performance logging - set to true to compare REST vs CLI performance
-const PERF_LOG_ENABLED = true;
-
-function perfLog(type: "REST" | "CLI", operation: string, durationMs: number, details?: string) {
-  if (!PERF_LOG_ENABLED) return;
-  const icon = type === "REST" ? "🚀" : "🐢";
-  console.log(`${icon} [${type}] ${operation}: ${durationMs}ms${details ? ` (${details})` : ""}`);
-}
-
 // Base API URLs
 export const COMPUTE_API = "https://compute.googleapis.com/compute/v1";
 export const STORAGE_API = "https://storage.googleapis.com/storage/v1";
@@ -67,14 +58,11 @@ function quotePath(path: string): string {
  * Get access token from gcloud CLI (cached for 55 minutes using persistent storage)
  */
 export async function getAccessToken(gcloudPath: string): Promise<string> {
-  // Check persistent cache first (survives extension reloads)
   const cached = getCachedToken();
   if (cached && Date.now() < cached.expiresAt - 300000) {
-    perfLog("REST", "getAccessToken", 0, "cached");
     return cached.token;
   }
 
-  const start = Date.now();
   const quotedPath = quotePath(gcloudPath);
   try {
     const { stdout } = await execPromise(`${quotedPath} auth print-access-token`, {
@@ -86,10 +74,8 @@ export async function getAccessToken(gcloudPath: string): Promise<string> {
       throw new Error("No access token returned");
     }
 
-    // Cache for 55 minutes using persistent storage
     const expiresAt = Date.now() + 55 * 60 * 1000;
     setCachedToken(token, expiresAt);
-    perfLog("CLI", "auth print-access-token", Date.now() - start, "token refreshed");
     return token;
   } catch (error) {
     // Clear cache on error
@@ -121,12 +107,7 @@ interface GcpErrorResponse {
  * Make an authenticated request to Google Cloud REST API
  */
 export async function gcpFetch<T>(gcloudPath: string, url: string, options: RequestInit = {}): Promise<T> {
-  const start = Date.now();
   const token = await getAccessToken(gcloudPath);
-
-  // Extract operation name from URL for logging
-  const urlPath = new URL(url).pathname;
-  const operation = urlPath.split("/").slice(-2).join("/");
 
   const response = await fetch(url, {
     ...options,
@@ -136,8 +117,6 @@ export async function gcpFetch<T>(gcloudPath: string, url: string, options: Requ
       ...options.headers,
     },
   });
-
-  perfLog("REST", operation, Date.now() - start, options.method || "GET");
 
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => ({}))) as GcpErrorResponse;
