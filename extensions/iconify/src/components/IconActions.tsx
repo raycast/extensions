@@ -20,7 +20,10 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, children }: IconA
       title="Paste SVG File"
       icon={Icon.Clipboard}
       onAction={async () => {
-        await copyToClipboard(svgIcon, id);
+        const res = await copyToClipboard(svgIcon, id);
+        if (!res) {
+          return;
+        }
         const { file } = await Clipboard.read();
         if (file) {
           Clipboard.paste({ file: file.replace("file://", "") });
@@ -33,7 +36,10 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, children }: IconA
       title="Copy SVG File"
       icon={Icon.Clipboard}
       onAction={async () => {
-        await copyToClipboard(svgIcon, id);
+        const res = await copyToClipboard(svgIcon, id);
+        if (!res) {
+          return;
+        }
         await showToast({
           title: "Copied to clipboard",
           message: "The SVG file has been copied to the clipboard.",
