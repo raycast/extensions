@@ -1,3 +1,8 @@
+import fs from "node:fs";
+import path from "node:path";
+
+import { useEffect, useState } from "react";
+
 import {
   Form,
   ActionPanel,
@@ -9,14 +14,13 @@ import {
   LocalStorage,
   open,
   getSelectedFinderItems,
+  getPreferenceValues,
 } from "@raycast/api";
-import fs from "fs";
-import { useEffect, useState } from "react";
-import { getPreferenceValues } from "@raycast/api";
 import { ImgurClient } from "imgur";
-import path from "path";
 import mime from "mime-types";
-import { ALOWED_IMGUR_CONTENT_TYPES } from "./common/constants";
+
+import { ALOWED_IMGUR_CONTENT_TYPES } from "@/common/constants";
+import { StoreData, UploadResponse } from "@/types";
 
 const { clientID } = getPreferenceValues();
 const imgurClient = new ImgurClient({ clientId: clientID });
@@ -31,34 +35,6 @@ const saveHistory = async (type: "image" | "album", data: StoreData) => {
     JSON.stringify(history),
   );
 };
-
-export interface UploadResponse {
-  success: boolean;
-  id: string;
-  title?: string | null;
-  type: string;
-  datetime: number;
-  width: number;
-  height: number;
-  size: number;
-  deletehash?: string | null;
-  link: string;
-}
-
-interface Album {
-  id: string;
-  link: string;
-  title: string;
-  description: string;
-  deletehash: string;
-}
-
-export interface AlbumGroup {
-  album: Album;
-  images: UploadResponse[];
-}
-
-export type StoreData = UploadResponse | AlbumGroup;
 
 export default function CommandView() {
   const [albumTitle, setAlbumTitle] = useState<string>("");

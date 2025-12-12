@@ -1,9 +1,12 @@
-import { Detail, Grid, LocalStorage, ActionPanel, Action, Icon, Toast, showToast } from "@raycast/api";
+import { writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { join } from "node:path";
+
 import { useMemo, useState } from "react";
-import { StoreData, UploadResponse } from "./index";
-import { writeFile } from "fs/promises";
-import { homedir } from "os";
-import { join } from "path";
+
+import { Detail, Grid, LocalStorage, ActionPanel, Action, Icon, Toast, showToast } from "@raycast/api";
+
+import { StoreData, UploadResponse } from "@/types";
 
 export default function Command() {
   const [term, setTerm] = useState<string>("");
