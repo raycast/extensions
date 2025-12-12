@@ -1,168 +1,103 @@
-import axios from "axios";
+import { IconResponse, DataIcon, SetResponse, DataSet, SetCategory } from "../types";
 
-const jsdelivrClient = axios.create({
-  baseURL: "https://cdn.jsdelivr.net/gh/iconify/icon-sets",
-});
+export const JSDELIVR_BASE_URL = "https://cdn.jsdelivr.net";
+export const ICONIFY_BASE_URL = "https://api.iconify.design";
 
-const iconifyClient = axios.create({
-  baseURL: "https://api.iconify.design",
-});
+export function createURL(baseURL: string, path: string, params?: Record<string, string>): string {
+  const url = new URL(path, baseURL).toString();
 
-type SetCategory =
-  | "General"
-  | "Emoji"
-  | "Brands / Social"
-  | "Maps / Flags"
-  | "Thematic"
-  | "Archive / Unmaintained"
-  | "";
-
-interface SetResponse {
-  name: string;
-  total: number;
-  author: {
-    name: string;
-    url: string;
-  };
-  license: {
-    title: string;
-    spdx: string;
-    url: string;
-  };
-  samples: string[];
-  category: SetCategory | undefined;
-  palette: boolean;
-  hidden: boolean | undefined;
-}
-
-interface Set {
-  id: string;
-  name: string;
-  category: SetCategory;
-}
-
-interface IconResponse {
-  prefix: string;
-  icons: Record<
-    string,
-    {
-      body: string;
-    }
-  >;
-  width: number;
-  height: number;
-}
-
-interface Icon {
-  set: {
-    id: string;
-    title: string;
-  };
-  id: string;
-  width: number;
-  height: number;
-  body: string;
-}
-
-interface QueryResponse {
-  icons: string[];
-  collections: Record<string, SetResponse>;
-}
-
-class Service {
-  async listSets(): Promise<Set[]> {
-    const response = await jsdelivrClient.get<Record<string, SetResponse>>("/collections.json");
-    const ids = Object.keys(response.data);
-    return ids
-      .map((id) => {
-        const { name, category } = response.data[id];
-        return {
-          id,
-          name,
-          category: category as SetCategory,
-        };
-      })
-      .filter((icon) => {
-        const { hidden } = response.data[icon.id];
-        return !hidden;
-      });
+  if (params) {
+    const queryString = new URLSearchParams(params).toString();
+    return url + `?${queryString}`;
   }
 
-  async listIcons(setId: string, setTitle: string): Promise<Icon[]> {
-    const response = await jsdelivrClient.get<IconResponse>(`/json/${setId}.json`);
-    const ids = Object.keys(response.data.icons);
-    return ids.map((id) => {
-      const icon = response.data.icons[id];
+  return url;
+}
+
+type FetchJSONOpts = {
+  params?: Record<string, string>;
+  signal?: AbortSignal;
+};
+
+async function fetchJSON<T>(baseURL: string, path: string, { params, signal }: FetchJSONOpts = {}): Promise<T> {
+  const url = createURL(baseURL, path, params);
+
+  const response = await fetch(url, {
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json() as T;
+}
+
+export const listIcons = async (setId: string, setTitle: string, signal?: AbortSignal): Promise<DataIcon[]> => {
+  const data = await fetchJSON<IconResponse>(JSDELIVR_BASE_URL, `/gh/iconify/icon-sets/json/${setId}.json`, { signal });
+  const ids = Object.keys(data.icons);
+  return ids.map((id) => {
+    const icon = data.icons[id];
+    return {
+      set: {
+        id: setId,
+        title: setTitle,
+      },
+      id,
+      width: data.width,
+      height: data.height,
+      body: icon.body,
+    };
+  });
+};
+
+export const listSets = async (signal?: AbortSignal): Promise<DataSet[]> => {
+  const data = await fetchJSON<Record<string, SetResponse>>(
+    JSDELIVR_BASE_URL,
+    "/gh/iconify/icon-sets/collections.json",
+    { signal },
+  );
+  const ids = Object.keys(data);
+  return ids
+    .map((id) => {
+      const { name, category } = data[id];
+      return {
+        id,
+        name,
+        category: category as SetCategory,
+      };
+    })
+    .filter((icon) => {
+      const { hidden } = data[icon.id];
+      return !hidden;
+    });
+};
+
+export const getIcons = async (
+  setId: string,
+  setTitle: string,
+  ids: string[],
+  signal?: AbortSignal,
+): Promise<DataIcon[]> => {
+  const data = await fetchJSON<IconResponse>(ICONIFY_BASE_URL, `/${setId}.json`, {
+    params: {
+      icons: ids.join(","),
+    },
+    signal,
+  });
+  return ids
+    .filter((id) => data.icons[id] !== undefined)
+    .map((id) => {
+      const icon = data.icons[id];
       return {
         set: {
           id: setId,
           title: setTitle,
         },
         id,
-        width: response.data.width,
-        height: response.data.height,
+        width: data.width,
+        height: data.height,
         body: icon.body,
       };
     });
-  }
-
-  async getIcons(setId: string, setTitle: string, ids: string[]): Promise<Icon[]> {
-    const response = await iconifyClient.get<IconResponse>(`${setId}.json`, {
-      params: {
-        icons: ids.join(","),
-      },
-    });
-    return ids
-      .filter((id) => response.data.icons[id] !== undefined)
-      .map((id) => {
-        const icon = response.data.icons[id];
-        return {
-          set: {
-            id: setId,
-            title: setTitle,
-          },
-          id,
-          width: response.data.width,
-          height: response.data.height,
-          body: icon.body,
-        };
-      });
-  }
-
-  async queryIcons(query: string): Promise<Icon[]> {
-    if (!query) {
-      return [];
-    }
-    // make a search query
-    const response = await iconifyClient.get<QueryResponse>(`/search`, {
-      params: {
-        query,
-        limit: 100,
-      },
-    });
-    // group by set
-    const setMap: Record<string, string[]> = {};
-    for (const icon of response.data.icons) {
-      const [setId, id] = icon.split(":");
-      if (!setMap[setId]) {
-        setMap[setId] = [];
-      }
-      setMap[setId].push(id);
-    }
-    // fetch icons of each set
-    const icons: Icon[] = [];
-    for (const setId in setMap) {
-      const ids = setMap[setId];
-      const set = response.data.collections[setId];
-      const setIcons = await this.getIcons(setId, set.name, ids);
-      for (const setIcon of setIcons) {
-        icons.push(setIcon);
-      }
-    }
-    return icons;
-  }
-}
-
-export default Service;
-
-export type { Set, Icon };
+};

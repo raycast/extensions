@@ -1,4 +1,4 @@
-import { Clipboard } from "@raycast/api";
+import { Cache, Clipboard } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { existsSync } from "fs";
 import { tmpdir, platform } from "node:os";
@@ -11,22 +11,22 @@ if (!isWindows && !isMac) {
   throw new Error("Unsupported operating system");
 }
 
-function toSvg(path: string, width: number, height: number, color: string): string {
+export function toSvg(path: string, width: number, height: number, color: string): string {
   //  replace all currentColor pattern with the provided color
   path = path.replace(/currentColor/g, color);
 
   return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">${path}</svg>`;
 }
 
-function toDataURI(svg: string): string {
+export function toDataURI(svg: string): string {
   return `data:image/svg+xml,${svg}`;
 }
 
-function toURL(setId: string, id: string): string {
+export function toURL(setId: string, id: string): string {
   return `https://api.iconify.design/${setId}/${id}.svg`;
 }
 
-async function copyToClipboard(svgString: string, id: string) {
+export async function copyToClipboard(svgString: string, id: string) {
   const osTempDirectory = tmpdir();
   const fileTempDirectory = path.join(osTempDirectory, "/raycast-iconify");
 
@@ -68,4 +68,9 @@ async function copyToClipboard(svgString: string, id: string) {
   });
 }
 
-export { toSvg, toDataURI, toURL, copyToClipboard };
+export const cache = new Cache({
+  capacity: 50 * 1e6,
+});
+
+const day = 24 * 60 * 60 * 1e3;
+export const isExpired = (time: number) => Date.now() - time > day;

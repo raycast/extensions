@@ -117,7 +117,6 @@
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^2.2.2",
-    "axios": "^1.8.4",
     "react-hooks-global-state": "^2.1.0"
   },
   "devDependencies": {

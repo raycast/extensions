@@ -3,7 +3,6 @@ import {
   ActionPanel,
   Color,
   Grid,
-  Cache,
   getPreferenceValues,
   Icon as RaycastIcon,
   showToast,
@@ -12,90 +11,21 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { createGlobalState } from "react-hooks-global-state";
-import Service, { Icon, Set } from "./api/service";
 import { copyToClipboard, toDataURI, toSvg, toURL } from "./utils";
-import { iconColorEnum, primaryActionEnum } from "./types";
-import { usePromise } from "@raycast/utils";
+import { iconColorEnum, primaryActionEnum, DataIcon } from "./types";
+import { useCachedDataSets } from "./hooks/use-cached-datasets";
+import { useCachedListIcons } from "./hooks/use-cached-list-icons";
 
 const { primaryAction, iconColor, customColor } = getPreferenceValues<Preferences>();
-
-const service = new Service();
-const cache = new Cache({
-  capacity: 50 * 1e6,
-});
-
-const day = 24 * 60 * 60 * 1e3;
-const isExpired = (time: number) => Date.now() - time > day;
-
 const { useGlobalState } = createGlobalState({ page: 0, itemsPerPage: 800 });
-
-const useSets = () => {
-  const { isLoading, data } = usePromise(
-    async () => {
-      const cacheId = "sets";
-      const cached = cache.get(cacheId);
-      if (cached) {
-        try {
-          const { time, data }: { time: number; data: Set[] } = await JSON.parse(cached);
-          if (!isExpired(time) && "total" in data) return data;
-        } catch (e) {
-          console.log("Couldn't parse cache: ", e);
-        }
-      }
-      const sets = await service.listSets();
-      cache.set(cacheId, JSON.stringify({ time: Date.now(), data: sets }));
-      return sets;
-    },
-    [],
-    {
-      failureToastOptions: {
-        title: "Couldn't fetch icon sets",
-      },
-    },
-  );
-  return {
-    isLoading,
-    sets: data ?? [],
-  };
-};
-
-const useIcons = (set?: Set) => {
-  const { isLoading, data } = usePromise(
-    async (set?: Set) => {
-      if (!set) return [];
-      const cacheId = `set-${set.id}`;
-      const cached = cache.get(cacheId);
-      if (cached) {
-        try {
-          const { time, data }: { time: number; data: Icon[] } = await JSON.parse(cached);
-          if (!isExpired(time)) return data;
-        } catch (e) {
-          console.log("Couldn't parse cache: ", e);
-        }
-      }
-      const icons = await service.listIcons(set.id, set.name);
-      cache.set(cacheId, JSON.stringify({ time: Date.now(), data: icons }));
-      return icons;
-    },
-    [set],
-    {
-      failureToastOptions: {
-        title: "Couldn't fetch icons",
-      },
-    },
-  );
-  return {
-    isLoading,
-    icons: data ?? [],
-  };
-};
 
 function Command() {
   const [page, setPage] = useGlobalState("page");
   const [itemsPerPage] = useGlobalState("itemsPerPage");
   const [activeSetId, setActiveSetId] = useState<string>();
-  const { sets, isLoading: isSetsLoading } = useSets();
-  const { icons, isLoading: isIconsLoading } = useIcons(sets.find((set) => set.id == activeSetId));
+
+  const { data: sets, isLoading: isSetsLoading } = useCachedDataSets();
+  const { data: icons, isLoading: isIconsLoading } = useCachedListIcons(sets.find((set) => set.id == activeSetId));
 
   const isLoading = isSetsLoading || isIconsLoading;
 
@@ -307,7 +237,7 @@ function NavigationActionSection({
   icons,
   firstAction,
 }: {
-  icons: Icon[];
+  icons: DataIcon[];
   firstAction?: "next-page" | "previous-page";
 }) {
   const [page] = useGlobalState("page");

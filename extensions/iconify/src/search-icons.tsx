@@ -11,26 +11,15 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 
-import Service, { Icon } from "./api/service";
 import { toDataURI, toSvg, toURL, copyToClipboard } from "./utils";
 import { primaryActionEnum, iconColorEnum } from "./types";
+import { useQueryIcons } from "./hooks/use-query-icons";
 
 const { primaryAction, iconColor, customColor } = getPreferenceValues<Preferences>();
 
-const service = new Service();
-
 function Command() {
-  const [icons, setIcons] = useState<Icon[]>([]);
-  const [isLoading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
-
-  async function queryIcons(text: string) {
-    setQuery(text);
-    setLoading(true);
-    const icons = await service.queryIcons(text);
-    setIcons(icons);
-    setLoading(false);
-  }
+  const { data, isLoading } = useQueryIcons(query);
 
   function getEmptyViewDescription(query: string, isLoading: boolean) {
     if (query.length === 0 || isLoading) {
@@ -40,9 +29,9 @@ function Command() {
   }
 
   return (
-    <Grid throttle columns={8} inset={Grid.Inset.Medium} isLoading={isLoading} onSearchTextChange={queryIcons}>
+    <Grid throttle columns={8} inset={Grid.Inset.Medium} isLoading={isLoading} onSearchTextChange={setQuery}>
       <Grid.EmptyView title="No results" description={getEmptyViewDescription(query, isLoading)} />
-      {icons.map((icon) => {
+      {data.map((icon) => {
         const { set, id, body, width, height } = icon;
         const { id: setId, title: setName } = set;
         const svgIcon = toSvg(
