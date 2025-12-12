@@ -1,6 +1,6 @@
-# G-Cloud Changelog
+# Google Cloud Cli Changelog
 
-## [1.0.0] - {MERGE_DATE}
+## [1.0.0] - {PR_MERGE_DATE}
 - Added Streamer Mode - hide sensitive data (emails, IPs, secrets) with Cmd+Shift+H
 - Added Windows compatibility
 - Added Cloud Run service support

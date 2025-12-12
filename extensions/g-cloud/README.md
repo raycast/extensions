@@ -1,4 +1,4 @@
-# G-Cloud
+# Google Cloud Cli
 
 A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.
 
