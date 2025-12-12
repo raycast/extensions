@@ -266,11 +266,18 @@ export const sendFiles = async (
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(prepareRequest),
-      timeout: 10000,
+      timeout: 30000, // Increased to 30s to wait for user to accept
       agent: device.protocol === "https" ? httpsAgent : undefined,
     });
   } catch (error) {
     console.error("Connection error:", error);
+    
+    if (error instanceof Error && error.message.includes('timeout')) {
+      throw new Error(
+        `${device.alias} didn't respond within 30 seconds. The device may be waiting for the user to accept a previous transfer, or LocalSend may not be running.`
+      );
+    }
+    
     throw new Error(
       `Cannot connect to ${device.alias} (${device.ip}:${device.port}). Make sure LocalSend is running and the device is reachable. Error: ${error instanceof Error ? error.message : "Unknown"}`,
     );
@@ -284,7 +291,7 @@ export const sendFiles = async (
     } else if (prepareResponse.status === 403) {
       throw new Error("Transfer rejected by receiver");
     } else if (prepareResponse.status === 409) {
-      throw new Error("Blocked by another session");
+      throw new Error("Device is busy with another transfer. Please wait for the receiver to accept/decline the pending transfer, or try again in a few moments.");
     } else if (prepareResponse.status === 204) {
       return;
     }
