@@ -1,5 +1,16 @@
 # Anytype Changelog
 
+## [Terminology Updates & Enhancements] - {PR_MERGE_DATE}
+
+- Update to API version 2025-11-08
+- Allow updating markdown body of objects
+- Add ability to remove objects from collections
+- Add word and character count display for objects
+- Add tag creation functionality in TagSubmenu component and allow deletion of tags
+- Improve search with client-side and API-side filtering for better offline support
+- Rename "spaces" to "channels" throughout the extension to align with adjusted terminology
+- Improve handling of deleted types with fallback representations
+
 ## [Fixes] - 2025-12-04
 
 - Fix quicklink not loading type, space, list, and template correctly when launching create-object command
