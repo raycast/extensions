@@ -166,15 +166,18 @@ export default function Command() {
         await loadReceivedFiles();
         await loadPendingTransfers();
         
-        // Auto-start server if enabled in preferences
-        if (preferences.enableReceive && !serverActive) {
+        // Auto-start server when opening Receive view
+        if (!serverActive) {
           const port = parseInt(preferences.httpPort || "53318");
           await startReceiveServer(port);
           setServerActive(true);
           
-          // Also start discovery to announce ourselves
-          const { startDiscoveryService } = await import("./utils/discovery-service");
-          startDiscoveryService();
+          // Start discovery to announce ourselves (only if not already running)
+          const { startDiscoveryService, getDiscoveryStatus } = await import("./utils/discovery-service");
+          const discoveryStatus = await getDiscoveryStatus();
+          if (!discoveryStatus.running) {
+            startDiscoveryService();
+          }
         }
       } catch (error) {
         console.error("Initialization error:", error);
@@ -185,6 +188,24 @@ export default function Command() {
 
     initialize();
 
+    // Cleanup: stop server when leaving the view
+    return () => {
+      const cleanup = async () => {
+        if (serverActive) {
+          // Stop discovery first
+          const { stopDiscoveryService } = await import("./utils/discovery-service");
+          stopDiscoveryService();
+          
+          // Stop server
+          await stopReceiveServer();
+        }
+      };
+      cleanup();
+    };
+  }, []);
+
+  // Separate effect for polling
+  useEffect(() => {
     // Refresh received files and pending transfers every 3 seconds
     const interval = setInterval(async () => {
       await loadReceivedFiles();
