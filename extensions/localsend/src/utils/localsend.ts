@@ -183,13 +183,18 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
 
     for (const port of portsToCheck) {
       const promise = (async () => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1000);
+
         try {
           const response = await fetch(`http://${ip}:${port}/api/localsend/v2/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(deviceInfo),
-            timeout: 1000,
+            signal: controller.signal,
           });
+
+          clearTimeout(timeoutId);
 
           if (response.ok) {
             const data = (await response.json()) as DeviceInfo;
@@ -203,6 +208,7 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
             }
           }
         } catch {
+          clearTimeout(timeoutId);
           // Ignore timeout errors
         }
       })();
@@ -216,15 +222,21 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
 };
 
 export const getDeviceInfoHTTP = async (ip: string, port: number): Promise<DeviceInfo | null> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3000);
+
   try {
     const response = await fetch(`http://${ip}:${port}/api/localsend/v2/info`, {
-      timeout: 3000,
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (response.ok) {
       return (await response.json()) as DeviceInfo;
     }
   } catch (error) {
+    clearTimeout(timeoutId);
     console.error("Error fetching device info:", error);
   }
 
@@ -270,13 +282,22 @@ export const sendFiles = async (
 
   let prepareResponse;
   try {
-    prepareResponse = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(prepareRequest),
-      timeout: 30000, // Increased to 30s to wait for user to accept
-      agent: device.protocol === "https" ? httpsAgent : undefined,
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s to wait for user to accept
+
+    try {
+      prepareResponse = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(prepareRequest),
+        signal: controller.signal,
+        agent: device.protocol === "https" ? httpsAgent : undefined,
+      });
+      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
+    }
   } catch (error) {
     console.error("Connection error:", error);
 
@@ -323,15 +344,25 @@ export const sendFiles = async (
 
       const uploadUrl = `${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/upload?sessionId=${sessionId}&fileId=${fileId}&token=${token}`;
 
-      const uploadResponse = await fetch(uploadUrl, {
-        method: "POST",
-        body: fileData,
-        timeout: 60000,
-        agent: device.protocol === "https" ? httpsAgent : undefined,
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-      if (!uploadResponse.ok) {
-        throw new Error(`Failed to upload file ${file.name}: ${uploadResponse.status}`);
+      try {
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "POST",
+          body: fileData,
+          signal: controller.signal,
+          agent: device.protocol === "https" ? httpsAgent : undefined,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Failed to upload file ${file.name}: ${uploadResponse.status}`);
+        }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
       }
     });
 
@@ -344,11 +375,20 @@ export const sendFiles = async (
 
 export const cancelSession = async (device: LocalSendDevice, sessionId: string): Promise<void> => {
   try {
-    await fetch(`${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/cancel?sessionId=${sessionId}`, {
-      method: "POST",
-      timeout: 3000,
-      agent: device.protocol === "https" ? httpsAgent : undefined,
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+    try {
+      await fetch(`${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/cancel?sessionId=${sessionId}`, {
+        method: "POST",
+        signal: controller.signal,
+        agent: device.protocol === "https" ? httpsAgent : undefined,
+      });
+      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
+    }
   } catch (error) {
     console.error("Failed to cancel session:", error);
   }
