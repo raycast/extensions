@@ -1,6 +1,5 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { showFailureToast } from "@raycast/utils";
 import { Project } from "./utils/CacheManager";
 
 // Extend the Project type to make createTime optional
@@ -9,6 +8,15 @@ interface GCloudProject extends Omit<Project, "createTime"> {
 }
 
 const execPromise = promisify(exec);
+
+// Performance logging - set to true to compare REST vs CLI performance
+const PERF_LOG_ENABLED = true;
+
+function perfLog(type: "REST" | "CLI", operation: string, durationMs: number, details?: string) {
+  if (!PERF_LOG_ENABLED) return;
+  const icon = type === "REST" ? "🚀" : "🐢";
+  console.log(`${icon} [${type}] ${operation}: ${durationMs}ms${details ? ` (${details})` : ""}`);
+}
 
 interface CommandCacheEntry<T> {
   result: T;
@@ -34,6 +42,13 @@ const pendingRequests = new Map<string, Promise<unknown>>();
  * @param options Additional options for the command
  * @returns The parsed JSON result
  */
+/**
+ * Quote a path if it contains spaces (for Windows compatibility)
+ */
+function quotePath(path: string): string {
+  return path.includes(" ") ? `"${path}"` : path;
+}
+
 export async function executeGcloudCommand(
   gcloudPath: string,
   command: string,
@@ -47,18 +62,10 @@ export async function executeGcloudCommand(
 ) {
   // Validate inputs
   if (!gcloudPath || typeof gcloudPath !== "string") {
-    showFailureToast({
-      title: "Invalid Configuration",
-      message: "Invalid gcloud path: must be a non-empty string",
-    });
     throw new Error("Invalid gcloud path: must be a non-empty string");
   }
 
   if (!command || typeof command !== "string") {
-    showFailureToast({
-      title: "Invalid Command",
-      message: "Command must be a non-empty string",
-    });
     throw new Error("Invalid command: must be a non-empty string");
   }
 
@@ -74,7 +81,9 @@ export async function executeGcloudCommand(
       effectiveTimeout = 45000; // 45 seconds for VM operations
     }
 
-    const fullCommand = `${gcloudPath} ${command}${projectFlag} --format=json`;
+    // Quote path for Windows compatibility (paths with spaces)
+    const quotedPath = quotePath(gcloudPath);
+    const fullCommand = `${quotedPath} ${command}${projectFlag} --format=json`;
     const cacheKey = fullCommand;
 
     const pendingRequest = pendingRequests.get(cacheKey);
@@ -119,10 +128,7 @@ export async function executeGcloudCommand(
     if (error instanceof Error && "stderr" in error) {
       console.error(`Command stderr: ${(error as { stderr: string }).stderr}`);
     }
-    showFailureToast({
-      title: "Command Execution Failed",
-      message: error instanceof Error ? error.message : "An unknown error occurred",
-    });
+    // Let callers handle toast display for better UX control
     throw error;
   }
 }
@@ -136,10 +142,17 @@ async function executeCommand(
   maxRetries: number,
   currentRetry: number = 0,
 ): Promise<unknown> {
+  const start = Date.now();
+  // Extract the gcloud subcommand for logging (e.g., "compute instances list")
+  const commandMatch = fullCommand.match(/gcloud\s+(.+?)\s+--/);
+  const operation = commandMatch ? commandMatch[1] : fullCommand.substring(0, 50);
+
   try {
     const { stdout, stderr } = await execPromise(fullCommand, {
       maxBuffer: 10 * 1024 * 1024,
     });
+
+    perfLog("CLI", operation, Date.now() - start);
 
     if (stderr && stderr.trim() !== "") {
       console.warn(`Command produced stderr: ${stderr}`);
@@ -150,10 +163,6 @@ async function executeCommand(
         stderr.includes("requires authentication") ||
         stderr.includes("login required")
       ) {
-        showFailureToast({
-          title: "Authentication Error",
-          message: "Please re-authenticate with Google Cloud",
-        });
         throw new Error("Authentication error: Please re-authenticate with Google Cloud");
       }
 
@@ -162,10 +171,6 @@ async function executeCommand(
         stderr.includes("project ID not specified") ||
         stderr.includes("project does not exist")
       ) {
-        showFailureToast({
-          title: "Project Error",
-          message: "The specified project was not found or is invalid",
-        });
         throw new Error("Project error: The specified project was not found or is invalid");
       }
     }
@@ -194,10 +199,6 @@ async function executeCommand(
     } catch (error) {
       console.error(`Error parsing JSON: ${error}`);
       console.error(`Raw output: ${stdout.substring(0, 200)}...`);
-      showFailureToast({
-        title: "Parse Error",
-        message: `Failed to parse command output as JSON: ${error instanceof Error ? error.message : String(error)}`,
-      });
       throw new Error(`Failed to parse command output as JSON: ${error}`);
     }
   } catch (error: unknown) {
@@ -206,11 +207,6 @@ async function executeCommand(
       await new Promise((resolve) => setTimeout(resolve, backoffMs));
       return executeCommand(fullCommand, cacheKey, maxRetries, currentRetry + 1);
     }
-
-    showFailureToast({
-      title: "Command Failed",
-      message: error instanceof Error ? error.message : "An unknown error occurred",
-    });
     throw error;
   }
 }
@@ -238,7 +234,8 @@ export function clearCommandCache(pattern?: RegExp) {
  */
 export async function isAuthenticated(gcloudPath: string): Promise<boolean> {
   try {
-    const { stdout } = await execPromise(`${gcloudPath} auth list --format="value(account)" --filter="status=ACTIVE"`);
+    const quotedPath = quotePath(gcloudPath);
+    const { stdout } = await execPromise(`${quotedPath} auth list --format="value(account)" --filter="status=ACTIVE"`);
     return stdout.trim() !== "";
   } catch (error) {
     console.error("Error checking authentication status:", error);
@@ -253,7 +250,8 @@ export async function isAuthenticated(gcloudPath: string): Promise<boolean> {
  */
 export async function authenticateWithBrowser(gcloudPath: string): Promise<void> {
   try {
-    await execPromise(`${gcloudPath} auth login --launch-browser`);
+    const quotedPath = quotePath(gcloudPath);
+    await execPromise(`${quotedPath} auth login --launch-browser`);
   } catch (error) {
     console.error("Error during browser authentication:", error);
     throw error;
@@ -269,15 +267,12 @@ interface RawGCloudProject {
 
 export async function getProjects(gcloudPath: string): Promise<Project[]> {
   if (!gcloudPath || typeof gcloudPath !== "string") {
-    showFailureToast({
-      title: "Invalid Configuration",
-      message: "Invalid gcloud path: must be a non-empty string",
-    });
     throw new Error("Invalid gcloud path: must be a non-empty string");
   }
 
   try {
-    const cacheKey = `${gcloudPath} projects list --format=json`;
+    const quotedPath = quotePath(gcloudPath);
+    const cacheKey = `${quotedPath} projects list --format=json`;
     const cachedResult = commandCache.get(cacheKey);
     const now = Date.now();
 
@@ -285,7 +280,7 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
       return cachedResult.result as Project[];
     }
 
-    const { stdout } = await execPromise(`${gcloudPath} projects list --format=json`);
+    const { stdout } = await execPromise(`${quotedPath} projects list --format=json`);
 
     if (!stdout || stdout.trim() === "") {
       return [];
@@ -325,10 +320,61 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
     return mappedProjects;
   } catch (error: unknown) {
     console.error("Error fetching projects:", error);
-    showFailureToast({
-      title: "Failed to Fetch Projects",
-      message: error instanceof Error ? error.message : "An unknown error occurred",
-    });
     throw error;
   }
+}
+
+/**
+ * Fetches resource counts for all services in a project using REST APIs
+ * @param gcloudPath Path to the gcloud executable (needed for auth token)
+ * @param projectId The project ID
+ * @returns ServiceCounts object with counts for each service
+ */
+export async function fetchResourceCounts(
+  gcloudPath: string,
+  projectId: string,
+): Promise<{ compute: number; storage: number; iam: number; network: number; secrets: number; cloudrun: number }> {
+  // Import REST API functions dynamically to avoid circular dependencies
+  const {
+    listComputeInstances,
+    listStorageBuckets,
+    getProjectIamPolicy,
+    listVpcNetworks,
+    listSecrets,
+    listCloudRunServices,
+  } = await import("./utils/gcpApi");
+
+  // Run all count queries in parallel using REST APIs for better performance
+  const [computeResult, storageResult, iamResult, networkResult, secretsResult, cloudrunResult] =
+    await Promise.allSettled([
+      listComputeInstances(gcloudPath, projectId),
+      listStorageBuckets(gcloudPath, projectId),
+      getProjectIamPolicy(gcloudPath, projectId),
+      listVpcNetworks(gcloudPath, projectId),
+      listSecrets(gcloudPath, projectId),
+      listCloudRunServices(gcloudPath, projectId),
+    ]);
+
+  const getArrayCount = (result: PromiseSettledResult<unknown[]>): number => {
+    if (result.status === "fulfilled" && Array.isArray(result.value)) {
+      return result.value.length;
+    }
+    return 0;
+  };
+
+  // For IAM, count bindings in the policy
+  let iamCount = 0;
+  if (iamResult.status === "fulfilled") {
+    const policy = iamResult.value as { bindings?: unknown[] };
+    iamCount = policy.bindings?.length || 0;
+  }
+
+  return {
+    compute: getArrayCount(computeResult as PromiseSettledResult<unknown[]>),
+    storage: getArrayCount(storageResult as PromiseSettledResult<unknown[]>),
+    iam: iamCount,
+    network: getArrayCount(networkResult as PromiseSettledResult<unknown[]>),
+    secrets: getArrayCount(secretsResult as PromiseSettledResult<unknown[]>),
+    cloudrun: getArrayCount(cloudrunResult as PromiseSettledResult<unknown[]>),
+  };
 }

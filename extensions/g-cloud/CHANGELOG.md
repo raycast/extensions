@@ -1,5 +1,16 @@
 # G-Cloud Changelog
 
+## [1.0.0] - {MERGE_DATE}
+- Added Windows compatibility
+- Added Cloud Run service support
+- Added Cloud Logging service support
+- Added Doctor view for diagnostics and troubleshooting gcloud setup
+- Added REST API layer for faster performance
+- Added gcloud CLI auto-detection - no more manual path configuration required
+- Removed redundant per-service commands, improving ergonomics
+- Improved error handling
+- Improved UI and date formatting
+
 ## [0.1.32] - 2025-07-08
 - Add Secret Manager command for managing Google Cloud secrets
 - Add secure secret value viewing with confirmation dialogs

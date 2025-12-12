@@ -575,6 +575,18 @@ export default function StorageObjectsView({
     }
   }
 
+  function formatDateUS(dateString: string): string {
+    const date = new Date(dateString);
+    const month = (date.getMonth() + 1).toString();
+    const day = date.getDate().toString();
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hour12 = hours % 12 || 12;
+    return `${month}/${day}/${year}, ${hour12}:${minutes}:${date.getSeconds().toString().padStart(2, "0")} ${ampm}`;
+  }
+
   function getContentTypeIcon(contentType: string): Image.Source {
     if (contentType.startsWith("image/")) {
       return Icon.Image;
@@ -620,8 +632,8 @@ export default function StorageObjectsView({
         `**Bucket:** ${bucketName}${prefix ? `/${prefix}` : ""}\n\n` +
         `**Size:** ${formatFileSize(objectData.size ? parseInt(objectData.size) : 0)}\n\n` +
         `**Content Type:** ${objectData.contentType || guessContentTypeFromName(objectName)}\n\n` +
-        `**Created:** ${objectData.timeCreated ? new Date(objectData.timeCreated).toLocaleString() : "Unknown"}\n\n` +
-        `**Updated:** ${objectData.updated ? new Date(objectData.updated).toLocaleString() : "Unknown"}\n\n` +
+        `**Created:** ${objectData.timeCreated ? formatDateUS(objectData.timeCreated) : "Unknown"}\n\n` +
+        `**Updated:** ${objectData.updated ? formatDateUS(objectData.updated) : "Unknown"}\n\n` +
         `**Storage Class:** ${objectData.storageClass || "Standard"}\n\n` +
         `**MD5 Hash:** ${objectData.md5Hash || "N/A"}\n\n`;
 
@@ -647,11 +659,11 @@ export default function StorageObjectsView({
               <Detail.Metadata.Separator />
               <Detail.Metadata.Label
                 title="Created"
-                text={objectData.timeCreated ? new Date(objectData.timeCreated).toLocaleString() : "Unknown"}
+                text={objectData.timeCreated ? formatDateUS(objectData.timeCreated) : "Unknown"}
               />
               <Detail.Metadata.Label
                 title="Updated"
-                text={objectData.updated ? new Date(objectData.updated).toLocaleString() : "Unknown"}
+                text={objectData.updated ? formatDateUS(objectData.updated) : "Unknown"}
               />
               <Detail.Metadata.Separator />
               <Detail.Metadata.Label title="MD5 Hash" text={objectData.md5Hash || "N/A"} />
@@ -961,7 +973,6 @@ export default function StorageObjectsView({
             <List.Item
               key={folder.path}
               title={folder.name}
-              subtitle="Folder"
               icon={Icon.Folder}
               accessories={[{ icon: Icon.ChevronRight }]}
               actions={
@@ -989,7 +1000,6 @@ export default function StorageObjectsView({
             <List.Item
               key={obj.id}
               title={obj.name}
-              subtitle={obj.contentType}
               icon={{ source: getContentTypeIcon(obj.contentType) }}
               accessories={[{ text: obj.size }]}
               detail={
@@ -998,10 +1008,9 @@ export default function StorageObjectsView({
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="Name" text={obj.name} />
                       <List.Item.Detail.Metadata.Label title="Size" text={obj.size} />
-                      <List.Item.Detail.Metadata.Label title="Type" text={obj.contentType} />
                       <List.Item.Detail.Metadata.Label
                         title="Last Modified"
-                        text={new Date(obj.updated).toLocaleString()}
+                        text={formatDateUS(obj.updated)}
                       />
                     </List.Item.Detail.Metadata>
                   }
