@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
-import { Formula, brewIsInstalled, brewPrefix, brewFetchFormulaInfo, uiLogger } from "../utils";
+import { Formula, brewIsInstalled, brewPrefix, brewFetchFormulaInfo, uiLogger, ensureError } from "../utils";
 import { Dependencies } from "./dependencies";
 
 /**
@@ -69,7 +69,7 @@ export function FormulaInfo(props: {
         }
       } catch (err) {
         clearTimeout(timeoutId);
-        const isTimeout = (err as Error).name === "AbortError";
+        const isTimeout = ensureError(err).name === "AbortError";
         uiLogger.error("Failed to load formula info", {
           name: props.formula.name,
           error: err,

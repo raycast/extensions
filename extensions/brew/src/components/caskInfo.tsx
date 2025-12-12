@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
-import { Cask, brewName, brewFetchCaskInfo, uiLogger } from "../utils";
+import { Cask, brewName, brewFetchCaskInfo, uiLogger, ensureError } from "../utils";
 import { Dependencies } from "./dependencies";
 
 /**
@@ -74,7 +74,7 @@ export function CaskInfo({
         }
       } catch (err) {
         clearTimeout(timeoutId);
-        const isTimeout = (err as Error).name === "AbortError";
+        const isTimeout = ensureError(err).name === "AbortError";
         uiLogger.error("Failed to load cask info", {
           token: initialCask.token,
           error: err,

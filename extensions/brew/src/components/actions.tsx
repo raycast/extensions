@@ -11,6 +11,7 @@ import {
   preferences,
   showActionToast,
   showFailureToast,
+  ensureError,
   Cask,
   Formula,
   OutdatedFormula,
@@ -110,7 +111,7 @@ async function install(formula: Cask | Formula): Promise<boolean> {
     await handle.showSuccessHUD(`Installed ${name}`);
     return true;
   } catch (err) {
-    const error = err as Error;
+    const error = ensureError(err);
     // Show HUD for failure if user might have closed Raycast
     await handle.showFailureHUD(`Failed to install ${name}`);
     // Also show detailed toast if Raycast is still open
@@ -127,7 +128,7 @@ async function uninstall(formula: Cask | Nameable): Promise<boolean> {
     await handle.showSuccessHUD(`Uninstalled ${name}`);
     return true;
   } catch (err) {
-    const error = err as Error;
+    const error = ensureError(err);
     await handle.showFailureHUD(`Failed to uninstall ${name}`);
     showFailureToast("Uninstall failed", error);
     return false;
@@ -149,7 +150,7 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean> {
     await handle.showSuccessHUD(`Upgraded ${name}`);
     return true;
   } catch (err) {
-    const error = err as Error;
+    const error = ensureError(err);
     await handle.showFailureHUD(`Failed to upgrade ${name}`);
     showFailureToast("Upgrade failed", error);
     return false;
@@ -167,7 +168,7 @@ async function upgradeAll(): Promise<boolean> {
     await handle.showSuccessHUD("All packages upgraded");
     return true;
   } catch (err) {
-    const error = err as Error;
+    const error = ensureError(err);
     await handle.showFailureHUD("Failed to upgrade packages");
     showFailureToast("Upgrade failed", error);
     return false;
@@ -182,7 +183,7 @@ async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
     showToast(Toast.Style.Success, `Pinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Pin formula failed", err as Error);
+    showFailureToast("Pin formula failed", ensureError(err));
     return false;
   }
 }
@@ -195,7 +196,7 @@ async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
     showToast(Toast.Style.Success, `Unpinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Unpin formula failed", err as Error);
+    showFailureToast("Unpin formula failed", ensureError(err));
     return false;
   }
 }

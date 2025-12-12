@@ -5,7 +5,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast, popToRoot } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { brewUpgradeWithProgress, preferences, showFailureToast, actionsLogger } from "../utils";
+import { brewUpgradeWithProgress, preferences, showFailureToast, actionsLogger, ensureError } from "../utils";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import type { UpgradeStep } from "../utils/brew/upgrade";
 
@@ -129,7 +129,7 @@ function UpgradeViewContent() {
         setError(result.error);
       }
     } catch (err) {
-      const error = err as Error;
+      const error = ensureError(err);
       actionsLogger.error("Upgrade caught exception", {
         name: error.name,
         message: error.message,

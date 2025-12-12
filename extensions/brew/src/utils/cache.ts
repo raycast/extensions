@@ -18,7 +18,7 @@ import { streamArray } from "stream-json/streamers/StreamArray";
 import { pipeline as streamPipeline } from "stream/promises";
 import { Remote, DownloadProgressCallback } from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
-import { NetworkError, ParseError, isNetworkError, isRecoverableError } from "./errors";
+import { NetworkError, ParseError, isNetworkError, isRecoverableError, ensureError } from "./errors";
 import { wait } from "./async";
 import { preferences } from "./preferences";
 
@@ -98,8 +98,9 @@ export async function clearCache(): Promise<void> {
 
     await showToast(Toast.Style.Success, "Cache files cleared");
   } catch (err) {
-    cacheLogger.error("Failed to clear cache", { error: (err as Error).message });
-    await showToast(Toast.Style.Failure, "Failed to clear cache", (err as Error).message);
+    const error = ensureError(err);
+    cacheLogger.error("Failed to clear cache", { error: error.message });
+    await showToast(Toast.Style.Failure, "Failed to clear cache", error.message);
   }
 }
 

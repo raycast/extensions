@@ -394,6 +394,15 @@ export function isMacOSVersionMessage(message: string): boolean {
 }
 
 /**
+ * Safely cast an unknown error to an Error instance.
+ * If the value is already an Error, returns it as-is.
+ * Otherwise, wraps it in a new Error with the string representation.
+ */
+export function ensureError(err: unknown): Error {
+  return err instanceof Error ? err : new Error(String(err));
+}
+
+/**
  * Get a user-friendly error message from an error.
  */
 export function getErrorMessage(error: unknown): string {

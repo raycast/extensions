@@ -60,6 +60,7 @@ export {
   parseDisabledPackageMessage,
   isConflictMessage,
   isMacOSVersionMessage,
+  ensureError,
 } from "./errors";
 
 // Cache

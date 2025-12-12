@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { brewCleanup } from "./utils/brew";
-import { showActionToast, showFailureToast, wait } from "./utils";
+import { showActionToast, showFailureToast, wait, ensureError } from "./utils";
 import { preferences } from "./utils";
 
 export default async (): Promise<void> => {
@@ -12,7 +12,7 @@ export default async (): Promise<void> => {
     await brewCleanup(preferences.withoutThreshold, handle.abort?.signal);
     showToast(Toast.Style.Success, "Cleaning completed");
   } catch (err) {
-    await showFailureToast("Cleaning failed", err as Error);
+    await showFailureToast("Cleaning failed", ensureError(err));
     await wait(3000);
   }
 };
