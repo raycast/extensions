@@ -4,7 +4,7 @@ import { getDeviceInfo, getLocalIPs } from "./localsend";
 
 const MULTICAST_ADDRESS = "224.0.0.167";
 const MULTICAST_PORT = 53317;
-const ANNOUNCE_INTERVAL = 3000; // Announce every 3 seconds (more frequent)
+const ANNOUNCE_INTERVAL = 5000; // Announce every 5 seconds (reduced frequency to avoid UI interruption)
 const RESTART_DELAY = 5000; // Restart faster on errors
 const STATUS_KEY = "discovery-service-status";
 
