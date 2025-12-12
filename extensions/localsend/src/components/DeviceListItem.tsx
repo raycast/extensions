@@ -1,5 +1,4 @@
 import { List, Icon, Color } from "@raycast/api";
-import type { ReactElement } from "react";
 import { LocalSendDevice } from "../types";
 
 export function getDeviceIcon(deviceType?: string): Icon {
@@ -24,7 +23,8 @@ export function getProtocolTag(protocol: string) {
   };
 }
 
-export function DeviceListItem({ device, actions }: { device: LocalSendDevice; actions: ReactElement }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function DeviceListItem({ device, actions }: { device: LocalSendDevice; actions: any }) {
   return (
     <List.Item
       icon={getDeviceIcon(device.deviceType)}
