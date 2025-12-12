@@ -1,6 +1,6 @@
 # Upstash Changelog
 
-## [Redis Data Browser] - {PR_MERGE_DATE}
+## [Redis Data Browser] - 2025-12-12
 
 - Add a basic Data Browser in Redis
 - Add keys in Redis
