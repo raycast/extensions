@@ -33,7 +33,7 @@ export async function copyToClipboard(svgString: string, id: string): Promise<bo
   if (!existsSync(fileTempDirectory)) {
     if (isWindows) {
       try {
-        await mkdirSync(fileTempDirectory, { recursive: true });
+        mkdirSync(fileTempDirectory, { recursive: true });
       } catch (e) {
         showFailureToast(e, { title: "Unable to create temporary directory" });
         return false;
