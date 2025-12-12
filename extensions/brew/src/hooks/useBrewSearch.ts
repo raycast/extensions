@@ -93,23 +93,33 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
   // Track if we've ever received data (for initial load detection)
   const hasEverLoadedRef = useRef(false);
 
-  // Track if component is mounted (for safe state updates)
-  const mountedRef = useRef(true);
-
   // Track if cache exists (checked once at startup)
   // null = not checked yet, true = cache exists (warm start), false = no cache (cold start)
   const [cacheExists, setCacheExists] = useState<boolean | null>(null);
 
-  // Check cache existence once on mount, and track unmount for safe state updates
+  // Check cache existence once on mount using AbortController for safe cleanup
   useEffect(() => {
-    hasSearchCache().then((exists) => {
-      if (mountedRef.current) {
-        setCacheExists(exists);
-        searchLogger.log("Cache check complete", { cacheExists: exists });
-      }
-    });
+    const abortController = new AbortController();
+
+    hasSearchCache()
+      .then((exists) => {
+        // Only update state if the request wasn't aborted
+        if (!abortController.signal.aborted) {
+          setCacheExists(exists);
+          searchLogger.log("Cache check complete", { cacheExists: exists });
+        }
+      })
+      .catch((error) => {
+        // Silently ignore abort errors
+        if (error.name !== "AbortError") {
+          searchLogger.error("Cache check failed", {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      });
+
     return () => {
-      mountedRef.current = false;
+      abortController.abort();
     };
   }, []);
 
@@ -140,8 +150,8 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
       // Always track progress - the UI decides whether to show it based on hasCacheFiles
       const result = await brewSearch(query, limit, abortable.current?.signal, (progress) => {
         try {
-          // Skip updates if component unmounted
-          if (!mountedRef.current) return;
+          // AbortController signal will prevent further updates after abort
+          if (abortable.current?.signal.aborted) return;
 
           // Throttle UI updates to avoid excessive re-renders
           // Always allow through: complete phase, download completion, or throttle interval
