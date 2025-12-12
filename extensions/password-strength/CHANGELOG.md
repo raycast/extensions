@@ -1,6 +1,6 @@
 # Password Strength Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-12
 
 - Added Windows support
 - Updated (dev) dependencies
