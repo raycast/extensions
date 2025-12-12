@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.12] - {PR_MERGE_DATE}
+## [2.12] - 2025-12-12
 
 - Added Recent Deployments Menu Bar
 
