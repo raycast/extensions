@@ -45,6 +45,7 @@ export function RDPConnectionListItem({ connection }: { connection: RdpConnectio
       actions={
         <ActionPanel>
           <RDPConnectAction connection={connection} />
+          <Action.CopyToClipboard title="Copy Hostname" content={connection.Hostname} />
         </ActionPanel>
       }
     />
