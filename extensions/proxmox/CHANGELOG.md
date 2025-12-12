@@ -1,6 +1,6 @@
 # Proxmox Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-12
 
 - Cleanup codebase, refactored almost all code to separate files
 - Added action to open a Qemu/LXC dashboard in the browser
