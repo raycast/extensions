@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { getCachedDevices } from "./utils/device-cache";
 import { sendFiles, getDeviceInfo } from "./utils/localsend";
 import { LocalSendDevice } from "./types";
+import { DeviceListItem } from "./components/DeviceListItem";
 import fs from "node:fs/promises";
 import path from "node:path";
 import archiver from "archiver";
@@ -190,12 +191,9 @@ function DeviceList({ folder, pin }: { folder: string; pin: string }) {
         }
       />
       {devices.map((device) => (
-        <List.Item
+        <DeviceListItem
           key={device.ip}
-          icon={Icon.Mobile}
-          title={device.alias}
-          subtitle={device.ip}
-          accessories={[{ text: device.deviceModel }]}
+          device={device}
           actions={
             <ActionPanel>
               <Action title="Send Folder" icon={Icon.Upload} onAction={() => sendToDevice(device)} />

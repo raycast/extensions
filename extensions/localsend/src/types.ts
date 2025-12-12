@@ -51,3 +51,12 @@ export interface FavoriteDevice {
   ip?: string;
   addedAt: number;
 }
+
+export interface PendingTransfer {
+  id: string;
+  senderAlias: string;
+  senderFingerprint?: string;
+  files: Record<string, FileMetadata>;
+  timestamp: number;
+  status: "pending" | "accepted" | "rejected";
+}

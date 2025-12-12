@@ -122,12 +122,41 @@
       "required": false,
       "default": false,
       "label": "Enable receiving files"
+    },
+    {
+      "name": "quickSave",
+      "title": "Quick Save",
+      "description": "How to handle incoming file transfers",
+      "type": "dropdown",
+      "required": false,
+      "default": "off",
+      "data": [
+        {
+          "title": "Off - Ask for confirmation",
+          "value": "off"
+        },
+        {
+          "title": "Favorites - Auto-accept from favorites only",
+          "value": "favorites"
+        },
+        {
+          "title": "On - Auto-accept from everyone",
+          "value": "on"
+        }
+      ]
     }
   ],
   "background": {
     "command": "background"
   },
   "commands": [
+    {
+      "name": "send",
+      "title": "Send",
+      "subtitle": "LocalSend",
+      "description": "Choose what to send to a LocalSend device",
+      "mode": "view"
+    },
     {
       "name": "discover-devices",
       "title": "Discover Devices",
@@ -161,7 +190,7 @@
       "title": "Send Clipboard",
       "subtitle": "LocalSend",
       "description": "Send clipboard content to a LocalSend device",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "send-folder",
@@ -179,7 +208,7 @@
     },
     {
       "name": "localsend-status",
-      "title": "LocalSend Status",
+      "title": "LocalSend Menu Bar",
       "subtitle": "LocalSend",
       "description": "Toggle discovery and receive server from menu bar",
       "mode": "menu-bar"

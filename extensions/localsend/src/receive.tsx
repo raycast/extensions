@@ -1,8 +1,9 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, getPreferenceValues, Detail, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, getPreferenceValues, Color, confirmAlert, Alert } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { startReceiveServer, stopReceiveServer, isServerRunning } from "./utils/receive-server";
+import { startReceiveServer, stopReceiveServer, isServerRunning, getPendingTransfers, acceptPendingTransfer, rejectPendingTransfer, clearCompletedTransfers } from "./utils/receive-server";
 import { getDeviceInfo } from "./utils/localsend";
+import { PendingTransfer } from "./types";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
@@ -18,13 +19,13 @@ interface ReceivedFile {
   path: string;
   size: number;
   timestamp: number;
-  category: string;
 }
 
 export default function Command() {
   const [serverActive, setServerActive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [receivedFiles, setReceivedFiles] = useState<ReceivedFile[]>([]);
+  const [pendingTransfers, setPendingTransfers] = useState<PendingTransfer[]>([]);
   const preferences = getPreferenceValues<Preferences>();
 
   const expandPath = (filePath: string): string => {
@@ -32,61 +33,6 @@ export default function Command() {
       return path.join(os.homedir(), filePath.slice(1));
     }
     return filePath;
-  };
-
-  const getCategoryIcon = (category: string): Icon => {
-    switch (category) {
-      case 'Images':
-        return Icon.Image;
-      case 'Videos':
-        return Icon.Video;
-      case 'Documents':
-        return Icon.Document;
-      case 'Code':
-        return Icon.Code;
-      case 'Audio':
-        return Icon.Music;
-      case 'Archives':
-        return Icon.Box;
-      default:
-        return Icon.Document;
-    }
-  };
-
-  const getFileCategory = (fileName: string): string => {
-    const ext = path.extname(fileName).toLowerCase();
-    
-    // Images
-    if (['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.heic', '.heif', '.bmp', '.ico'].includes(ext)) {
-      return 'Images';
-    }
-    
-    // Videos
-    if (['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.flv', '.wmv'].includes(ext)) {
-      return 'Videos';
-    }
-    
-    // Documents
-    if (['.pdf', '.doc', '.docx', '.txt', '.rtf', '.pages', '.odt', '.xls', '.xlsx', '.numbers', '.ppt', '.pptx', '.keynote'].includes(ext)) {
-      return 'Documents';
-    }
-    
-    // Archives
-    if (['.zip', '.tar', '.gz', '.7z', '.rar', '.bz2', '.xz'].includes(ext)) {
-      return 'Archives';
-    }
-    
-    // Code
-    if (['.js', '.ts', '.jsx', '.tsx', '.py', '.java', '.cpp', '.c', '.h', '.go', '.rs', '.swift', '.kt', '.rb', '.php', '.css', '.scss', '.html', '.json', '.xml', '.yaml', '.yml'].includes(ext)) {
-      return 'Code';
-    }
-    
-    // Audio
-    if (['.mp3', '.wav', '.m4a', '.flac', '.aac', '.ogg', '.wma'].includes(ext)) {
-      return 'Audio';
-    }
-    
-    return 'Other';
   };
 
   const loadReceivedFiles = async () => {
@@ -104,7 +50,6 @@ export default function Command() {
               path: filePath,
               size: stats.size,
               timestamp: stats.mtimeMs,
-              category: getFileCategory(file),
             };
           } catch {
             return null;
@@ -118,6 +63,58 @@ export default function Command() {
       setReceivedFiles(validFiles.slice(0, 50)); // Show last 50 files
     } catch (error) {
       console.error("Failed to load received files:", error);
+    }
+  };
+
+  const loadPendingTransfers = async () => {
+    try {
+      const transfers = await getPendingTransfers();
+      // Only show pending ones
+      setPendingTransfers(transfers.filter((t) => t.status === "pending"));
+    } catch (error) {
+      console.error("Failed to load pending transfers:", error);
+    }
+  };
+
+  const handleAcceptTransfer = async (transferId: string) => {
+    try {
+      const success = await acceptPendingTransfer(transferId);
+      if (success) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Transfer Accepted",
+          message: "Files will be downloaded shortly",
+        });
+        await loadPendingTransfers();
+      }
+    } catch (error) {
+      await showFailureToast(error);
+    }
+  };
+
+  const handleRejectTransfer = async (transferId: string) => {
+    try {
+      const confirmed = await confirmAlert({
+        title: "Reject Transfer?",
+        message: "Are you sure you want to reject this file transfer?",
+        primaryAction: {
+          title: "Reject",
+          style: Alert.ActionStyle.Destructive,
+        },
+      });
+
+      if (confirmed) {
+        const success = await rejectPendingTransfer(transferId);
+        if (success) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Transfer Rejected",
+          });
+          await loadPendingTransfers();
+        }
+      }
+    } catch (error) {
+      await showFailureToast(error);
     }
   };
 
@@ -167,6 +164,7 @@ export default function Command() {
       try {
         await checkServerStatus();
         await loadReceivedFiles();
+        await loadPendingTransfers();
         
         // Auto-start server if enabled in preferences
         if (preferences.enableReceive && !serverActive) {
@@ -187,8 +185,11 @@ export default function Command() {
 
     initialize();
 
-    // Refresh received files every 5 seconds
-    const interval = setInterval(loadReceivedFiles, 5000);
+    // Refresh received files and pending transfers every 3 seconds
+    const interval = setInterval(async () => {
+      await loadReceivedFiles();
+      await loadPendingTransfers();
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -217,29 +218,24 @@ export default function Command() {
 
   const deviceInfo = getDeviceInfo();
   const downloadPath = expandPath(preferences.downloadPath || "~/Downloads");
-
-  // Group files by category
-  const filesByCategory = receivedFiles.reduce((acc, file) => {
-    if (!acc[file.category]) {
-      acc[file.category] = [];
+  
+  const formatFileList = (files: Record<string, { fileName: string; size: number }>) => {
+    const fileNames = Object.values(files).map((f) => f.fileName);
+    if (fileNames.length <= 2) {
+      return fileNames.join(", ");
     }
-    acc[file.category].push(file);
-    return acc;
-  }, {} as Record<string, ReceivedFile[]>);
-
-  // Sort categories: Images, Videos, Documents, Code, Audio, Archives, Other
-  const categoryOrder = ['Images', 'Videos', 'Documents', 'Code', 'Audio', 'Archives', 'Other'];
-  const sortedCategories = categoryOrder.filter(cat => filesByCategory[cat] && filesByCategory[cat].length > 0);
+    return `${fileNames.slice(0, 2).join(", ")} +${fileNames.length - 2} more`;
+  };
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search received files...">
       <List.Section title="Server Status">
         <List.Item
           icon={serverActive ? Icon.CheckCircle : Icon.XMarkCircle}
-          title={serverActive ? "Receive Server Active" : "Receive Server Inactive"}
-          subtitle={serverActive ? `Port ${preferences.httpPort || "53318"}` : "Not listening"}
+          title="Receive Server"
+          subtitle={`Port ${preferences.httpPort || "53318"}`}
           accessories={[
-            { tag: { value: deviceInfo.alias } },
+            { tag: { value: serverActive ? "Active" : "Inactive", color: serverActive ? Color.Green : Color.Red } },
             { tag: { value: downloadPath, color: Color.Blue }, icon: Icon.Folder },
           ]}
           actions={
@@ -250,18 +246,65 @@ export default function Command() {
                 onAction={toggleServer}
               />
               <Action.OpenWith path={downloadPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-              <Action title="Refresh Files" icon={Icon.ArrowClockwise} onAction={loadReceivedFiles} />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={async () => {
+                await loadReceivedFiles();
+                await loadPendingTransfers();
+              }} />
             </ActionPanel>
           }
         />
       </List.Section>
 
-      {sortedCategories.map((category) => (
-        <List.Section key={category} title={`${category} (${filesByCategory[category].length})`}>
-          {filesByCategory[category].map((file) => (
+      {pendingTransfers.length > 0 && (
+        <List.Section title={`Pending Transfers (${pendingTransfers.length})`}>
+          {pendingTransfers.map((transfer) => {
+            const fileCount = Object.keys(transfer.files).length;
+            return (
+              <List.Item
+                key={transfer.id}
+                icon={{ source: Icon.Envelope, tintColor: Color.Orange }}
+                title={transfer.senderAlias}
+                subtitle={formatFileList(transfer.files)}
+                accessories={[
+                  { tag: { value: `${fileCount} file${fileCount !== 1 ? "s" : ""}`, color: Color.Orange } },
+                  { text: formatDate(transfer.timestamp) },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Accept Transfer"
+                      icon={Icon.Checkmark}
+                      onAction={() => handleAcceptTransfer(transfer.id)}
+                      style={Action.Style.Regular}
+                    />
+                    <Action
+                      title="Reject Transfer"
+                      icon={Icon.XMarkCircle}
+                      onAction={() => handleRejectTransfer(transfer.id)}
+                      style={Action.Style.Destructive}
+                    />
+                    <Action 
+                      title="Refresh" 
+                      icon={Icon.ArrowClockwise} 
+                      onAction={async () => {
+                        await loadPendingTransfers();
+                      }}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
+
+      {receivedFiles.length > 0 && (
+        <List.Section title={`Recent Files (${receivedFiles.length})`}>
+          {receivedFiles.map((file) => (
             <List.Item
               key={file.path}
-              icon={getCategoryIcon(file.category)}
+              icon={Icon.Document}
               title={file.name}
               subtitle={formatFileSize(file.size)}
               accessories={[{ text: formatDate(file.timestamp) }]}
@@ -280,15 +323,18 @@ export default function Command() {
                     onAction={toggleServer}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                   />
-                  <Action title="Refresh Files" icon={Icon.ArrowClockwise} onAction={loadReceivedFiles} />
+                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={async () => {
+                    await loadReceivedFiles();
+                    await loadPendingTransfers();
+                  }} />
                 </ActionPanel>
               }
             />
           ))}
         </List.Section>
-      ))}
+      )}
 
-      {receivedFiles.length === 0 && !isLoading && (
+      {receivedFiles.length === 0 && pendingTransfers.length === 0 && !isLoading && (
         <List.EmptyView
           icon={Icon.Download}
           title="No Files Received Yet"

@@ -1,12 +1,15 @@
-import { MenuBarExtra, Icon, Color, open, getPreferenceValues } from "@raycast/api";
+import { MenuBarExtra, Icon, Color, open, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getDeviceInfo } from "./utils/localsend";
 import { startDiscoveryService, stopDiscoveryService, getDiscoveryStatus } from "./utils/discovery-service";
 import { startReceiveServer, stopReceiveServer, isServerRunning } from "./utils/receive-server";
 
+const QUICK_SAVE_KEY = "quick-save-mode";
+
 interface Preferences {
   httpPort: string;
   enableReceive: boolean;
+  quickSave: "off" | "favorites" | "on";
 }
 
 export default function Command() {
@@ -14,8 +17,26 @@ export default function Command() {
   const [serverRunning, setServerRunning] = useState(false);
   const [localIPs, setLocalIPs] = useState<string[]>([]);
   const [deviceInfo, setDeviceInfo] = useState(getDeviceInfo());
+  const [quickSaveMode, setQuickSaveMode] = useState<"off" | "favorites" | "on">("off");
   const prefs = getPreferenceValues<Preferences>();
   const port = parseInt(prefs.httpPort || "53318", 10);
+
+  useEffect(() => {
+    loadQuickSaveMode();
+    updateStatus();
+    const interval = setInterval(updateStatus, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadQuickSaveMode = async () => {
+    const stored = await LocalStorage.getItem<string>(QUICK_SAVE_KEY);
+    setQuickSaveMode((stored as "off" | "favorites" | "on") || prefs.quickSave || "off");
+  };
+
+  const setQuickSave = async (mode: "off" | "favorites" | "on") => {
+    await LocalStorage.setItem(QUICK_SAVE_KEY, mode);
+    setQuickSaveMode(mode);
+  };
 
   useEffect(() => {
     updateStatus();
@@ -58,15 +79,8 @@ export default function Command() {
   };
 
   const getStatusIcon = () => {
-    // if (discoveryRunning && serverRunning) {
-    //   return { source: Icon.Checkmark, tintColor: Color.Green };
-    // } else if (discoveryRunning || serverRunning) {
-    //   return { source: Icon.Circle, tintColor: Color.Yellow };
-    // } else {
-    //   return { source: Icon.Circle, tintColor: Color.Red };
-    // }
-
-    return { source: Icon.Circle, tintColor: Color.Green };
+    // Use custom LocalSend icon for menu bar with tint color for proper display
+    return { source: { light: "menubar-icon.svg", dark: "menubar-icon.svg" }, tintColor: Color.PrimaryText };
   };
 
   const getStatusText = () => {
@@ -138,6 +152,26 @@ export default function Command() {
           onAction={async () => await open("raycast://extensions/kud/localsend/discover-devices")}
         />
       </MenuBarExtra.Section>
+
+      <MenuBarExtra.Separator />
+
+      <MenuBarExtra.Submenu title="Quick Save" icon={Icon.Download}>
+        <MenuBarExtra.Item
+          title="Off - Ask for confirmation"
+          icon={quickSaveMode === "off" ? Icon.Checkmark : Icon.Minus}
+          onAction={() => setQuickSave("off")}
+        />
+        <MenuBarExtra.Item
+          title="Favorites - Auto-accept favorites only"
+          icon={quickSaveMode === "favorites" ? Icon.Checkmark : Icon.Minus}
+          onAction={() => setQuickSave("favorites")}
+        />
+        <MenuBarExtra.Item
+          title="On - Auto-accept from everyone"
+          icon={quickSaveMode === "on" ? Icon.Checkmark : Icon.Minus}
+          onAction={() => setQuickSave("on")}
+        />
+      </MenuBarExtra.Submenu>
 
       <MenuBarExtra.Separator />
 
