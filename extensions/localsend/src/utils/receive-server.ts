@@ -2,9 +2,11 @@ import http from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { getDeviceInfo } from "./localsend";
 import { PrepareUploadRequest, PrepareUploadResponse, FileMetadata } from "../types";
+
+const SERVER_STATUS_KEY = "receive-server-status";
 
 interface Preferences {
   downloadPath: string;
@@ -19,6 +21,10 @@ interface Session {
 
 let server: http.Server | null = null;
 const sessions = new Map<string, Session>();
+
+const setServerRunning = async (running: boolean) => {
+  await LocalStorage.setItem(SERVER_STATUS_KEY, running);
+};
 
 const expandPath = (filePath: string): string => {
   if (filePath.startsWith("~")) {
@@ -179,18 +185,21 @@ export const startReceiveServer = async (port: number): Promise<http.Server> => 
   return new Promise((resolve, reject) => {
     server!.listen(port, () => {
       console.log(`LocalSend receive server listening on port ${port}`);
+      setServerRunning(true);
       resolve(server!);
     });
 
     server!.on("error", (error) => {
       console.error("Server error:", error);
+      setServerRunning(false);
       reject(error);
     });
   });
 };
 
-export const stopReceiveServer = (): Promise<void> => {
+export const stopReceiveServer = async (): Promise<void> => {
   if (!server) {
+    await setServerRunning(false);
     return Promise.resolve();
   }
 
@@ -198,9 +207,13 @@ export const stopReceiveServer = (): Promise<void> => {
     server!.close(() => {
       server = null;
       sessions.clear();
+      setServerRunning(false);
       resolve();
     });
   });
 };
 
-export const isServerRunning = (): boolean => server !== null;
+export const isServerRunning = async (): Promise<boolean> => {
+  const status = await LocalStorage.getItem<boolean>(SERVER_STATUS_KEY);
+  return status === true;
+};

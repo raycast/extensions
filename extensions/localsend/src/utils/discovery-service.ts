@@ -1,21 +1,28 @@
 import dgram from "node:dgram";
+import { LocalStorage } from "@raycast/api";
 import { getDeviceInfo, getLocalIPs } from "./localsend";
 
 const MULTICAST_ADDRESS = "224.0.0.167";
 const MULTICAST_PORT = 53317;
 const ANNOUNCE_INTERVAL = 3000; // Announce every 3 seconds (more frequent)
 const RESTART_DELAY = 5000; // Restart faster on errors
+const STATUS_KEY = "discovery-service-status";
 
 let discoverySocket: dgram.Socket | null = null;
 let announceTimer: NodeJS.Timeout | null = null;
 let restartTimer: NodeJS.Timeout | null = null;
 let shouldBeRunning = false;
 
+const setRunningStatus = async (running: boolean) => {
+  await LocalStorage.setItem(STATUS_KEY, running);
+};
+
 export const startDiscoveryService = (): void => {
   shouldBeRunning = true;
 
   if (discoverySocket) {
     console.log("Discovery service already running");
+    setRunningStatus(true);
     return;
   }
 
@@ -125,6 +132,8 @@ const cleanup = () => {
     }
     discoverySocket = null;
   }
+  
+  setRunningStatus(false);
 };
 
 export const stopDiscoveryService = (): void => {
@@ -139,14 +148,17 @@ export const stopDiscoveryService = (): void => {
   console.log("Discovery service stopped");
 };
 
-export const isDiscoveryRunning = (): boolean => discoverySocket !== null;
+export const isDiscoveryRunning = async (): Promise<boolean> => {
+  const status = await LocalStorage.getItem<boolean>(STATUS_KEY);
+  return status === true;
+};
 
-export const getDiscoveryStatus = (): {
+export const getDiscoveryStatus = async (): Promise<{
   running: boolean;
   localIPs: string[];
   deviceInfo: ReturnType<typeof getDeviceInfo>;
-} => ({
-  running: isDiscoveryRunning(),
+}> => ({
+  running: await isDiscoveryRunning(),
   localIPs: getLocalIPs(),
   deviceInfo: getDeviceInfo(),
 });

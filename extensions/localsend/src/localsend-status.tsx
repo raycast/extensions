@@ -23,10 +23,10 @@ export default function Command() {
     return () => clearInterval(interval);
   }, []);
 
-  const updateStatus = () => {
-    const status = getDiscoveryStatus();
+  const updateStatus = async () => {
+    const status = await getDiscoveryStatus();
     setDiscoveryRunning(status.running);
-    setServerRunning(isServerRunning());
+    setServerRunning(await isServerRunning());
     setLocalIPs(status.localIPs);
     setDeviceInfo(getDeviceInfo());
   };
