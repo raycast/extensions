@@ -21,10 +21,17 @@ A powerful Raycast extension for quickly checking domain availability.
 - **Cmd + Enter**: Search for domain
 - **Cmd + B**: Purchase domain (when available)
 - **Cmd + H**: Show query history
-- **Cmd + R**: Toggle sort order in history view
 - **Cmd + N**: Return to search from history view
 - **Cmd + Shift + F**: Send feedback
 - **Cmd + Shift + C**: Support developer
+
+### History View
+
+In the history view, you can:
+
+- Use the dropdown menu in the search bar to toggle between "Oldest First" and "Newest First" sort order
+- Delete individual history items with the Delete key
+- Clear all history using the "Clear All History" action
 
 ## Technical Details
 
