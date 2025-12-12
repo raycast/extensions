@@ -1,6 +1,6 @@
 # Tududi Changelog
 
-## [1.8.0] - 2025-12-11
+## [1.8.0] - {PR_MERGE_DATE}
 
 ### Technical Improvements
 
