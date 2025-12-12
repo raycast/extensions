@@ -124,6 +124,9 @@
       "label": "Enable receiving files"
     }
   ],
+  "background": {
+    "command": "background"
+  },
   "commands": [
     {
       "name": "discover-devices",
@@ -165,6 +168,13 @@
       "title": "Send Folder",
       "subtitle": "LocalSend",
       "description": "Send entire folder to a LocalSend device",
+      "mode": "view"
+    },
+    {
+      "name": "receive",
+      "title": "Receive",
+      "subtitle": "LocalSend",
+      "description": "Start receive server and view received files",
       "mode": "view"
     },
     {

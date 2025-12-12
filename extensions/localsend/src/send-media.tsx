@@ -10,8 +10,50 @@ import path from "node:path";
 const STORAGE_KEY = "recent-devices";
 
 export default function Command() {
+  const [files, setFiles] = useState<string[]>([]);
+  const [pin, setPin] = useState("");
+
+  const handleSubmit = async (values: { files: string[]; pin: string }) => {
+    if (values.files.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No files selected",
+      });
+      return;
+    }
+
+    setFiles(values.files);
+    setPin(values.pin);
+  };
+
+  if (files.length > 0) {
+    return <DeviceList files={files} pin={pin} />;
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Choose Device" icon={Icon.ArrowRight} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker
+        id="files"
+        title="Media Files"
+        allowMultipleSelection={true}
+        canChooseDirectories={false}
+        autoFocus
+      />
+      <Form.TextField id="pin" title="PIN (optional)" placeholder="Enter PIN if required by receiver" />
+    </Form>
+  );
+}
+
+function DeviceList({ files, pin }: { files: string[]; pin: string }) {
   const [devices, setDevices] = useState<LocalSendDevice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { pop } = useNavigation();
 
   const loadRecentDevices = async () => {
     const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
@@ -53,58 +95,32 @@ export default function Command() {
 
   useEffect(() => {
     loadRecentDevices();
-    discoverDevices();
+    const loadDevices = async () => {
+      setIsLoading(true);
+      try {
+        const foundDevices = await getCachedDevices();
+        const myFingerprint = getDeviceInfo().fingerprint;
+        const filtered = foundDevices.filter((d) => d.fingerprint !== myFingerprint);
+        if (filtered.length > 0) {
+          const uniqueDevices = new Map<string, LocalSendDevice>();
+          devices.forEach((d) => uniqueDevices.set(d.ip, d));
+          filtered.forEach((d) => uniqueDevices.set(d.ip, d));
+          setDevices(Array.from(uniqueDevices.values()));
+        }
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to discover devices",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadDevices();
   }, []);
 
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search devices...">
-      <List.EmptyView
-        icon={Icon.Network}
-        title="No LocalSend Devices Found"
-        description="Make sure LocalSend is running on nearby devices"
-        actions={
-          <ActionPanel>
-            <Action title="Discover Devices" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
-          </ActionPanel>
-        }
-      />
-      {devices.map((device) => (
-        <List.Item
-          key={device.ip}
-          icon={Icon.Mobile}
-          title={device.alias}
-          subtitle={device.ip}
-          accessories={[{ text: device.deviceModel }]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Send Files"
-                icon={Icon.Upload}
-                target={<SendFilesForm device={device} onSuccess={() => saveRecentDevice(device)} />}
-              />
-              <Action title="Discover Devices" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
-  );
-}
-
-function SendFilesForm({ device, onSuccess }: { device: LocalSendDevice; onSuccess: () => void }) {
-  const [files, setFiles] = useState<string[]>([]);
-  const [pin, setPin] = useState("");
-  const { pop } = useNavigation();
-
-  const handleSubmit = async () => {
-    if (files.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No files selected",
-      });
-      return;
-    }
-
+  const sendToDevice = async (device: LocalSendDevice) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Preparing to send files...",
@@ -130,7 +146,7 @@ function SendFilesForm({ device, onSuccess }: { device: LocalSendDevice; onSucce
       toast.title = "Files sent successfully";
       toast.message = `Sent ${files.length} file${files.length !== 1 ? "s" : ""} to ${device.alias}`;
 
-      onSuccess();
+      await saveRecentDevice(device);
       pop();
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -140,29 +156,32 @@ function SendFilesForm({ device, onSuccess }: { device: LocalSendDevice; onSucce
   };
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Send Files" icon={Icon.Upload} onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text={`Sending to: ${device.alias} (${device.ip})`} />
-      <Form.FilePicker
-        id="files"
-        title="Files"
-        allowMultipleSelection={true}
-        value={files}
-        onChange={setFiles}
-        canChooseDirectories={false}
+    <List isLoading={isLoading} searchBarPlaceholder="Search devices...">
+      <List.EmptyView
+        icon={Icon.Network}
+        title="No LocalSend Devices Found"
+        description="Make sure LocalSend is running on nearby devices"
+        actions={
+          <ActionPanel>
+            <Action title="Discover Devices" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
+          </ActionPanel>
+        }
       />
-      <Form.TextField
-        id="pin"
-        title="PIN (optional)"
-        placeholder="Enter PIN if required by receiver"
-        value={pin}
-        onChange={setPin}
-      />
-    </Form>
+      {devices.map((device) => (
+        <List.Item
+          key={device.ip}
+          icon={Icon.Mobile}
+          title={device.alias}
+          subtitle={device.ip}
+          accessories={[{ text: device.deviceModel }]}
+          actions={
+            <ActionPanel>
+              <Action title="Send Files" icon={Icon.Upload} onAction={() => sendToDevice(device)} />
+              <Action title="Discover Devices" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }

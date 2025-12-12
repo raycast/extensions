@@ -10,81 +10,11 @@ import os from "node:os";
 const STORAGE_KEY = "recent-devices";
 
 export default function Command() {
-  const [devices, setDevices] = useState<LocalSendDevice[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const discoverDevices = async () => {
-    setIsLoading(true);
-    try {
-      const foundDevices = await getCachedDevices();
-      const myFingerprint = getDeviceInfo().fingerprint;
-      const filtered = foundDevices.filter((d) => d.fingerprint !== myFingerprint);
-      setDevices(filtered);
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load devices",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const saveRecentDevice = async (device: LocalSendDevice) => {
-    const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
-    const recent = stored ? JSON.parse(stored) : [];
-    const filtered = recent.filter((d: LocalSendDevice) => d.fingerprint !== device.fingerprint);
-    filtered.unshift(device);
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(filtered.slice(0, 5)));
-  };
-
-  useEffect(() => {
-    discoverDevices();
-  }, []);
-
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search devices...">
-      <List.EmptyView
-        icon={Icon.Network}
-        title="No LocalSend Devices Found"
-        description="Make sure LocalSend is running on nearby devices"
-        actions={
-          <ActionPanel>
-            <Action title="Discover Devices" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
-          </ActionPanel>
-        }
-      />
-      {devices.map((device) => (
-        <List.Item
-          key={device.ip}
-          icon={Icon.Mobile}
-          title={device.alias}
-          subtitle={device.ip}
-          accessories={[{ text: device.deviceModel }]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Send Text"
-                icon={Icon.Upload}
-                target={<SendTextForm device={device} onSuccess={() => saveRecentDevice(device)} />}
-              />
-              <Action title="Discover Devices" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
-  );
-}
-
-function SendTextForm({ device, onSuccess }: { device: LocalSendDevice; onSuccess: () => void }) {
   const [text, setText] = useState("");
   const [pin, setPin] = useState("");
-  const { pop } = useNavigation();
 
-  const handleSubmit = async () => {
-    if (!text || text.trim().length === 0) {
+  const handleSubmit = async (values: { text: string; pin: string }) => {
+    if (!values.text || values.text.trim().length === 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No text entered",
@@ -92,6 +22,103 @@ function SendTextForm({ device, onSuccess }: { device: LocalSendDevice; onSucces
       return;
     }
 
+    setText(values.text);
+    setPin(values.pin);
+  };
+
+  if (text.length > 0) {
+    return <DeviceList text={text} pin={pin} />;
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Choose Device" icon={Icon.ArrowRight} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextArea id="text" title="Text" placeholder="Enter text to send..." autoFocus />
+      <Form.TextField id="pin" title="PIN (optional)" placeholder="Enter PIN if required" />
+    </Form>
+  );
+}
+
+function DeviceList({ text, pin }: { text: string; pin: string }) {
+  const [devices, setDevices] = useState<LocalSendDevice[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { pop } = useNavigation();
+
+  const loadRecentDevices = async () => {
+    const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
+    if (stored) {
+      try {
+        const recent = JSON.parse(stored) as LocalSendDevice[];
+        setDevices(recent);
+      } catch (error) {
+        console.error("Failed to parse recent devices:", error);
+      }
+    }
+  };
+
+  const saveRecentDevice = async (device: LocalSendDevice) => {
+    const existing = devices.filter((d) => d.ip !== device.ip);
+    const updated = [device, ...existing].slice(0, 10);
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setDevices(updated);
+  };
+
+  const discoverDevices = async () => {
+    setIsLoading(true);
+    try {
+      const foundDevices = await getCachedDevices();
+      const myFingerprint = getDeviceInfo().fingerprint;
+      const filtered = foundDevices.filter((d) => d.fingerprint !== myFingerprint);
+      if (filtered.length > 0) {
+        const uniqueDevices = new Map<string, LocalSendDevice>();
+        devices.forEach((d) => uniqueDevices.set(d.ip, d));
+        filtered.forEach((d) => uniqueDevices.set(d.ip, d));
+        setDevices(Array.from(uniqueDevices.values()));
+      }
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to discover devices",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRecentDevices();
+    const loadDevices = async () => {
+      setIsLoading(true);
+      try {
+        const foundDevices = await getCachedDevices();
+        const myFingerprint = getDeviceInfo().fingerprint;
+        const filtered = foundDevices.filter((d) => d.fingerprint !== myFingerprint);
+        if (filtered.length > 0) {
+          const uniqueDevices = new Map<string, LocalSendDevice>();
+          devices.forEach((d) => uniqueDevices.set(d.ip, d));
+          filtered.forEach((d) => uniqueDevices.set(d.ip, d));
+          setDevices(Array.from(uniqueDevices.values()));
+        }
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to discover devices",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadDevices();
+  }, []);
+
+  const sendToDevice = async (device: LocalSendDevice) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Preparing to send text...",
@@ -120,7 +147,7 @@ function SendTextForm({ device, onSuccess }: { device: LocalSendDevice; onSucces
       toast.title = "Text sent successfully";
       toast.message = `Sent to ${device.alias}`;
 
-      onSuccess();
+      await saveRecentDevice(device);
       pop();
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -130,17 +157,33 @@ function SendTextForm({ device, onSuccess }: { device: LocalSendDevice; onSucces
   };
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Send Text" icon={Icon.Upload} onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text={`Sending to: ${device.alias} (${device.ip})`} />
-      <Form.TextArea id="text" title="Text" placeholder="Enter text to send..." value={text} onChange={setText} />
-      <Form.TextField id="pin" title="PIN (optional)" placeholder="Enter PIN if required" value={pin} onChange={setPin} />
-    </Form>
+    <List isLoading={isLoading} searchBarPlaceholder="Search devices...">
+      <List.EmptyView
+        icon={Icon.Network}
+        title="No LocalSend Devices Found"
+        description="Make sure LocalSend is running on nearby devices"
+        actions={
+          <ActionPanel>
+            <Action title="Discover Devices" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
+          </ActionPanel>
+        }
+      />
+      {devices.map((device) => (
+        <List.Item
+          key={device.ip}
+          icon={Icon.Mobile}
+          title={device.alias}
+          subtitle={device.ip}
+          accessories={[{ text: device.deviceModel }]}
+          actions={
+            <ActionPanel>
+              <Action title="Send Text" icon={Icon.Upload} onAction={() => sendToDevice(device)} />
+              <Action title="Discover Devices" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }
 

@@ -58,13 +58,15 @@ export default function Command() {
   };
 
   const getStatusIcon = () => {
-    if (discoveryRunning && serverRunning) {
-      return { source: Icon.Checkmark, tintColor: Color.Green };
-    } else if (discoveryRunning || serverRunning) {
-      return { source: Icon.Circle, tintColor: Color.Yellow };
-    } else {
-      return { source: Icon.Circle, tintColor: Color.Red };
-    }
+    // if (discoveryRunning && serverRunning) {
+    //   return { source: Icon.Checkmark, tintColor: Color.Green };
+    // } else if (discoveryRunning || serverRunning) {
+    //   return { source: Icon.Circle, tintColor: Color.Yellow };
+    // } else {
+    //   return { source: Icon.Circle, tintColor: Color.Red };
+    // }
+
+    return { source: Icon.Circle, tintColor: Color.Green };
   };
 
   const getStatusText = () => {
@@ -80,29 +82,15 @@ export default function Command() {
   };
 
   return (
-    <MenuBarExtra icon={getStatusIcon()} tooltip={`LocalSend: ${getStatusText()}`}>
+    <MenuBarExtra icon={getStatusIcon()}>
       <MenuBarExtra.Section title="Device Information">
-        <MenuBarExtra.Item title={deviceInfo.alias} icon={Icon.Person} />
+        <MenuBarExtra.Item title={deviceInfo.alias} icon={Icon.Person} onAction={async () => {}} />
         <MenuBarExtra.Item
           title={deviceInfo.deviceType.charAt(0).toUpperCase() + deviceInfo.deviceType.slice(1)}
           icon={Icon.ComputerChip}
+          onAction={async () => {}}
         />
-        <MenuBarExtra.Item title={deviceInfo.deviceModel} icon={Icon.Monitor} />
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Separator />
-
-      <MenuBarExtra.Section title="Status">
-        <MenuBarExtra.Item
-          title={discoveryRunning ? "Discovery Active" : "Discovery Inactive"}
-          icon={discoveryRunning ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.XMarkCircle}
-          onAction={toggleDiscovery}
-        />
-        <MenuBarExtra.Item
-          title={serverRunning ? `Server Active (Port ${port})` : "Server Inactive"}
-          icon={serverRunning ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.XMarkCircle}
-          onAction={toggleReceiveServer}
-        />
+        <MenuBarExtra.Item title={deviceInfo.deviceModel} icon={Icon.Monitor} onAction={async () => {}} />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Separator />
@@ -111,7 +99,7 @@ export default function Command() {
         <>
           <MenuBarExtra.Section title="Local IP Addresses">
             {localIPs.map((ip) => (
-              <MenuBarExtra.Item key={ip} title={ip} icon={Icon.Network} />
+              <MenuBarExtra.Item key={ip} title={ip} icon={Icon.Network} onAction={async () => {}} />
             ))}
           </MenuBarExtra.Section>
           <MenuBarExtra.Separator />
@@ -162,4 +150,3 @@ export default function Command() {
     </MenuBarExtra>
   );
 }
-

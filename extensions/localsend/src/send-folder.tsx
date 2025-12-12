@@ -11,8 +11,70 @@ import os from "node:os";
 const STORAGE_KEY = "recent-devices";
 
 export default function Command() {
+  const [folder, setFolder] = useState<string[]>([]);
+  const [pin, setPin] = useState("");
+
+  const handleSubmit = async (values: { folder: string[]; pin: string }) => {
+    if (values.folder.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No folder selected",
+      });
+      return;
+    }
+
+    setFolder(values.folder);
+    setPin(values.pin);
+  };
+
+  if (folder.length > 0) {
+    return <DeviceList folder={folder[0]} pin={pin} />;
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Choose Device" icon={Icon.ArrowRight} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker
+        id="folder"
+        title="Folder"
+        allowMultipleSelection={false}
+        canChooseDirectories={true}
+        canChooseFiles={false}
+        autoFocus
+      />
+      <Form.TextField id="pin" title="PIN (optional)" placeholder="Enter PIN if required by receiver" />
+    </Form>
+  );
+}
+
+function DeviceList({ folder, pin }: { folder: string; pin: string }) {
   const [devices, setDevices] = useState<LocalSendDevice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { pop } = useNavigation();
+
+  const loadRecentDevices = async () => {
+    const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
+    if (stored) {
+      try {
+        const recent = JSON.parse(stored) as LocalSendDevice[];
+        setDevices(recent);
+      } catch (error) {
+        console.error("Failed to parse recent devices:", error);
+      }
+    }
+  };
+
+  const saveRecentDevice = async (device: LocalSendDevice) => {
+    const existing = devices.filter((d) => d.ip !== device.ip);
+    const updated = [device, ...existing].slice(0, 10);
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setDevices(updated);
+  };
 
   const discoverDevices = async () => {
     setIsLoading(true);
@@ -20,11 +82,16 @@ export default function Command() {
       const foundDevices = await getCachedDevices();
       const myFingerprint = getDeviceInfo().fingerprint;
       const filtered = foundDevices.filter((d) => d.fingerprint !== myFingerprint);
-      setDevices(filtered);
+      if (filtered.length > 0) {
+        const uniqueDevices = new Map<string, LocalSendDevice>();
+        devices.forEach((d) => uniqueDevices.set(d.ip, d));
+        filtered.forEach((d) => uniqueDevices.set(d.ip, d));
+        setDevices(Array.from(uniqueDevices.values()));
+      }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load devices",
+        title: "Failed to discover devices",
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
@@ -32,17 +99,83 @@ export default function Command() {
     }
   };
 
-  const saveRecentDevice = async (device: LocalSendDevice) => {
-    const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
-    const recent = stored ? JSON.parse(stored) : [];
-    const filtered = recent.filter((d: LocalSendDevice) => d.fingerprint !== device.fingerprint);
-    filtered.unshift(device);
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(filtered.slice(0, 5)));
-  };
-
   useEffect(() => {
-    discoverDevices();
+    loadRecentDevices();
+    const loadDevices = async () => {
+      setIsLoading(true);
+      try {
+        const foundDevices = await getCachedDevices();
+        const myFingerprint = getDeviceInfo().fingerprint;
+        const filtered = foundDevices.filter((d) => d.fingerprint !== myFingerprint);
+        if (filtered.length > 0) {
+          const uniqueDevices = new Map<string, LocalSendDevice>();
+          devices.forEach((d) => uniqueDevices.set(d.ip, d));
+          filtered.forEach((d) => uniqueDevices.set(d.ip, d));
+          setDevices(Array.from(uniqueDevices.values()));
+        }
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to discover devices",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadDevices();
   }, []);
+
+  const sendToDevice = async (device: LocalSendDevice) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Compressing folder...",
+    });
+
+    try {
+      const tmpDir = os.tmpdir();
+      const folderName = path.basename(folder);
+      const zipFileName = `${folderName}.zip`;
+      const zipFilePath = path.join(tmpDir, zipFileName);
+
+      const output = await fs.open(zipFilePath, 'w');
+      const archive = archiver("zip", { zlib: { level: 9 } });
+
+      await new Promise<void>((resolve, reject) => {
+        archive.on("error", reject);
+        archive.on("end", resolve);
+        archive.pipe(output.createWriteStream());
+        archive.directory(folder, false);
+        archive.finalize();
+      });
+
+      await output.close();
+      const stats = await fs.stat(zipFilePath);
+
+      const zipFile = {
+        path: zipFilePath,
+        name: zipFileName,
+        size: stats.size,
+        type: "application/zip",
+      };
+
+      toast.message = "Sending folder...";
+      await sendFiles(device, [zipFile], pin || undefined);
+
+      await fs.unlink(zipFilePath);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Folder sent successfully";
+      toast.message = `Sent ${folderName} to ${device.alias}`;
+
+      await saveRecentDevice(device);
+      pop();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to send folder";
+      toast.message = error instanceof Error ? error.message : "Unknown error";
+    }
+  };
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search devices...">
@@ -65,11 +198,7 @@ export default function Command() {
           accessories={[{ text: device.deviceModel }]}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Send Folder"
-                icon={Icon.Upload}
-                target={<SendFolderForm device={device} onSuccess={() => saveRecentDevice(device)} />}
-              />
+              <Action title="Send Folder" icon={Icon.Upload} onAction={() => sendToDevice(device)} />
               <Action title="Discover Devices" icon={Icon.MagnifyingGlass} onAction={discoverDevices} />
             </ActionPanel>
           }
@@ -78,97 +207,3 @@ export default function Command() {
     </List>
   );
 }
-
-function SendFolderForm({ device, onSuccess }: { device: LocalSendDevice; onSuccess: () => void }) {
-  const [folder, setFolder] = useState<string[]>([]);
-  const [pin, setPin] = useState("");
-  const { pop } = useNavigation();
-
-  const handleSubmit = async () => {
-    if (folder.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No folder selected",
-      });
-      return;
-    }
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating archive...",
-      message: "Compressing folder contents",
-    });
-
-    try {
-      const folderPath = folder[0];
-      const folderName = path.basename(folderPath);
-      const tmpDir = os.tmpdir();
-      const timestamp = Date.now();
-      const zipFileName = `${folderName}-${timestamp}.zip`;
-      const zipPath = path.join(tmpDir, zipFileName);
-
-      // Create zip archive
-      const output = (await import("node:fs")).createWriteStream(zipPath);
-      const archive = archiver("zip", {
-        zlib: { level: 9 },
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        output.on("close", () => resolve());
-        archive.on("error", (err: Error) => reject(err));
-
-        archive.pipe(output);
-        archive.directory(folderPath, false);
-        archive.finalize();
-      });
-
-      const stats = await fs.stat(zipPath);
-
-      const zipFile = {
-        path: zipPath,
-        name: zipFileName,
-        size: stats.size,
-        type: "application/zip",
-      };
-
-      toast.title = "Sending folder...";
-      toast.message = `Sending ${folderName} to ${device.alias}`;
-      
-      await sendFiles(device, [zipFile], pin || undefined);
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Folder sent successfully";
-      toast.message = `Sent ${folderName} to ${device.alias}`;
-
-      onSuccess();
-      pop();
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to send folder";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
-    }
-  };
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Send Folder" icon={Icon.Upload} onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text={`Sending to: ${device.alias} (${device.ip})`} />
-      <Form.FilePicker
-        id="folder"
-        title="Folder"
-        value={folder}
-        onChange={setFolder}
-        allowMultipleSelection={false}
-        canChooseDirectories={true}
-        canChooseFiles={false}
-      />
-      <Form.TextField id="pin" title="PIN (optional)" placeholder="Enter PIN if required" value={pin} onChange={setPin} />
-    </Form>
-  );
-}
-

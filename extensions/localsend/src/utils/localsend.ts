@@ -272,7 +272,7 @@ export const sendFiles = async (
   } catch (error) {
     console.error("Connection error:", error);
     
-    if (error instanceof Error && error.message.includes('timeout')) {
+    if (error instanceof Error && (error.message.includes('timeout') || (error as any).type === 'request-timeout')) {
       throw new Error(
         `${device.alias} didn't respond within 30 seconds. The device may be waiting for the user to accept a previous transfer, or LocalSend may not be running.`
       );
