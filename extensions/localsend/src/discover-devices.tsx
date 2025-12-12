@@ -189,7 +189,6 @@ const DeviceListItem = ({
             icon={device.isFavorite ? Icon.StarDisabled : Icon.Star}
             onAction={() => onToggleFavorite(device)}
           />
-          <Action title="Test Connection" icon={Icon.Network} onAction={() => onTestConnection(device)} />
           <Action.CopyToClipboard title="Copy IP Address" content={device.ip} />
           <Action title="Refresh Device Info" icon={Icon.ArrowClockwise} onAction={() => onRefresh(device)} />
           <Action title="Discover Again" icon={Icon.MagnifyingGlass} onAction={onDiscoverAgain} />
