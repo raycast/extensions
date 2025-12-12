@@ -1,6 +1,6 @@
 # GraphCalc Changelog
 
-## [SVG Rendering Rewrite and Dependency Cleanup] - {PR_MERGE_DATE}
+## [SVG Rendering Rewrite and Dependency Cleanup] - 2025-12-12
 
 - Replaced recharts library with custom pure SVG rendering for better compatibility
 - Fixed LaTeX rendering issues (now using proper `$$expression$$` syntax)
