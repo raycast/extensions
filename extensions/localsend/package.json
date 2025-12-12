@@ -219,14 +219,14 @@
     "@raycast/utils": "^2.2.2",
     "@types/archiver": "7.0.0",
     "archiver": "7.0.1",
-    "node-fetch": "2.7.0"
+    "node-fetch": "3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.0.0",
+    "@types/node": "25.0.1",
     "@types/node-fetch": "2.6.13",
     "@types/react": "19.2.7",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3"
   },
