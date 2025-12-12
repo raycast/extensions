@@ -53,7 +53,7 @@ export default function Command() {
   );
 }
 
-function DeviceList({ folder, pin }: { folder: string; pin: string }) {
+const DeviceList = ({ folder, pin }: { folder: string; pin: string }) => {
   const [devices, setDevices] = useState<LocalSendDevice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { pop } = useNavigation();
@@ -204,4 +204,4 @@ function DeviceList({ folder, pin }: { folder: string; pin: string }) {
       ))}
     </List>
   );
-}
+};

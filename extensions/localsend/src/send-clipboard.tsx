@@ -54,7 +54,7 @@ export default function Command() {
   return <DeviceList clipboardText={clipboardText} />;
 }
 
-function DeviceList({ clipboardText }: { clipboardText: string }) {
+const DeviceList = ({ clipboardText }: { clipboardText: string }) => {
   const [devices, setDevices] = useState<LocalSendDevice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { pop } = useNavigation();
@@ -188,4 +188,4 @@ function DeviceList({ clipboardText }: { clipboardText: string }) {
       ))}
     </List>
   );
-}
+};

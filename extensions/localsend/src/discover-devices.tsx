@@ -156,7 +156,7 @@ export default function Command() {
   );
 }
 
-function DeviceListItem({
+const DeviceListItem = ({
   device,
   getDeviceIcon,
   getProtocolTag,
@@ -172,7 +172,7 @@ function DeviceListItem({
   onToggleFavorite: (device: LocalSendDevice) => void;
   onTestConnection: (device: LocalSendDevice) => void;
   onDiscoverAgain: () => void;
-}) {
+}) => {
   return (
     <List.Item
       icon={getDeviceIcon(device.deviceType)}
@@ -199,4 +199,4 @@ function DeviceListItem({
       }
     />
   );
-}
+};
