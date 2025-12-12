@@ -15,15 +15,7 @@ const initializeServices = async () => {
 
   const prefs = getPreferenceValues<Preferences>();
 
-  if (prefs.enableDiscovery !== false) {
-    try {
-      startDiscoveryService();
-      console.log("LocalSend discovery service started");
-    } catch (error) {
-      console.error("Failed to start discovery service:", error);
-    }
-  }
-
+  // START RECEIVE SERVER FIRST - devices need to connect to verify
   if (prefs.enableReceive) {
     const port = parseInt(prefs.httpPort || "53318", 10);
     try {
@@ -31,6 +23,16 @@ const initializeServices = async () => {
       console.log(`LocalSend receive server started on port ${port}`);
     } catch (error) {
       console.error("Failed to start receive server:", error);
+    }
+  }
+
+  // THEN START DISCOVERY - announce after server is listening
+  if (prefs.enableDiscovery !== false) {
+    try {
+      startDiscoveryService();
+      console.log("LocalSend discovery service started");
+    } catch (error) {
+      console.error("Failed to start discovery service:", error);
     }
   }
 };

@@ -35,18 +35,26 @@ export default function Command() {
     if (discoveryRunning) {
       stopDiscoveryService();
     } else {
+      // Ensure server is running before starting discovery
+      if (!serverRunning) {
+        await startReceiveServer(port);
+      }
       startDiscoveryService();
     }
-    updateStatus();
+    setTimeout(() => updateStatus(), 500);
   };
 
   const toggleReceiveServer = async () => {
     if (serverRunning) {
+      // Stop discovery first if running
+      if (discoveryRunning) {
+        stopDiscoveryService();
+      }
       await stopReceiveServer();
     } else {
       await startReceiveServer(port);
     }
-    updateStatus();
+    setTimeout(() => updateStatus(), 500);
   };
 
   const getStatusIcon = () => {
