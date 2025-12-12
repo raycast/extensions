@@ -1,6 +1,6 @@
 import { Cache, Clipboard } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
-import { existsSync } from "fs";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { tmpdir, platform } from "node:os";
 import path from "node:path";
 
@@ -30,26 +30,33 @@ export async function copyToClipboard(svgString: string, id: string) {
   const osTempDirectory = tmpdir();
   const fileTempDirectory = path.join(osTempDirectory, "/raycast-iconify");
 
-  if (isWindows) {
-    return;
-  }
-
   if (!existsSync(fileTempDirectory)) {
-    await runAppleScript(`
+    if (isWindows) {
+      try {
+        await mkdirSync(fileTempDirectory, { recursive: true });
+      } catch (e) {
+        showFailureToast(e, { title: "Unable to create temporary directory" });
+      }
+    } else {
+      await runAppleScript(`
         set file_path to "${fileTempDirectory}"
         set file_path to do shell script "echo " & quoted form of file_path & " | iconv -f utf-8 -t utf-8"
         set file_path to file_path as text
 
         do shell script "mkdir -p " & quoted form of file_path
       `);
+    }
   }
   const selectedPath = fileTempDirectory;
   const fixedPathName = selectedPath.endsWith("/") ? `${selectedPath}${id}.svg` : `${selectedPath}/${id}.svg`;
 
   const actualPath = fixedPathName;
 
-  const fixedSvgString = svgString.replace(/"/g, '\\"');
-  await runAppleScript(`
+  if (isWindows) {
+    writeFileSync(actualPath, svgString, { encoding: "utf-8" });
+  } else {
+    const fixedSvgString = svgString.replace(/"/g, '\\"');
+    await runAppleScript(`
         set svg to "${fixedSvgString}"
         set svg to do shell script "echo " & quoted form of svg & " | iconv -f utf-8 -t utf-8"
         set svg to svg as text
@@ -62,6 +69,7 @@ export async function copyToClipboard(svgString: string, id: string) {
         write svg to fileRef
         close access fileRef
       `);
+  }
 
   await Clipboard.copy({
     file: actualPath,
