@@ -1,6 +1,6 @@
 # shell Changelog
 
-## [Add Windows support] - {PR_MERGE_DATE}
+## [Add Windows support] - 2025-12-12
 
 Adds the options to run commands in `PowerShell`, `PowerShell 7` or `Command Prompt` on Windows.
 
