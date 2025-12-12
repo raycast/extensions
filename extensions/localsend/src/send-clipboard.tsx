@@ -23,6 +23,7 @@ const STORAGE_KEY = "recent-devices";
 
 export default function Command() {
   const [clipboardText, setClipboardText] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadClipboard = async () => {
@@ -46,6 +47,10 @@ export default function Command() {
     };
     loadClipboard();
   }, []);
+
+  if (isLoading) {
+    return <List isLoading={true} />;
+  }
 
   if (!clipboardText) {
     return null;

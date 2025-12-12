@@ -73,10 +73,10 @@ export const getDeviceInfo = (): DeviceInfo => {
 
   // Generate deterministic fingerprint from MAC address + hostname
   // This ensures the same fingerprint across all commands in a session
-  interface GlobalWithFingerprint extends NodeJS.Global {
+  interface GlobalWithFingerprint {
     __localsend_fingerprint?: string;
   }
-  let sessionFingerprint = (global as GlobalWithFingerprint).__localsend_fingerprint;
+  let sessionFingerprint = (global as unknown as GlobalWithFingerprint).__localsend_fingerprint;
   if (!sessionFingerprint) {
     const networkInterfaces = os.networkInterfaces();
     const macAddress =
@@ -89,7 +89,7 @@ export const getDeviceInfo = (): DeviceInfo => {
       .update(macAddress + hostname)
       .digest("hex")
       .substring(0, 32);
-    (global as GlobalWithFingerprint).__localsend_fingerprint = sessionFingerprint;
+    (global as unknown as GlobalWithFingerprint).__localsend_fingerprint = sessionFingerprint;
   }
 
   return {

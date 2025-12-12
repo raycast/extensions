@@ -12,7 +12,7 @@ export function getDeviceIcon(deviceType?: string): Icon {
     case "web":
       return Icon.Globe;
     default:
-      return Icon.Laptop;
+      return Icon.ComputerChip;
   }
 }
 

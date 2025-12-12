@@ -99,11 +99,13 @@ export default function Command() {
       <MenuBarExtra.Section title="Device Information">
         <MenuBarExtra.Item title={deviceInfo.alias} icon={Icon.Person} onAction={async () => {}} />
         <MenuBarExtra.Item
-          title={deviceInfo.deviceType.charAt(0).toUpperCase() + deviceInfo.deviceType.slice(1)}
+          title={
+            (deviceInfo.deviceType || "desktop").charAt(0).toUpperCase() + (deviceInfo.deviceType || "desktop").slice(1)
+          }
           icon={Icon.ComputerChip}
           onAction={async () => {}}
         />
-        <MenuBarExtra.Item title={deviceInfo.deviceModel} icon={Icon.Monitor} onAction={async () => {}} />
+        <MenuBarExtra.Item title={deviceInfo.deviceModel || "Unknown"} icon={Icon.Monitor} onAction={async () => {}} />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Separator />

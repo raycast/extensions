@@ -92,7 +92,7 @@ export default function Command() {
       case "web":
         return Icon.Globe;
       default:
-        return Icon.Laptop;
+        return Icon.ComputerChip;
     }
   };
 
@@ -162,7 +162,6 @@ const DeviceListItem = ({
   getProtocolTag,
   onRefresh,
   onToggleFavorite,
-  onTestConnection,
   onDiscoverAgain,
 }: {
   device: LocalSendDevice;
@@ -170,7 +169,6 @@ const DeviceListItem = ({
   getProtocolTag: (protocol: string) => { value: string; color: Color };
   onRefresh: (device: LocalSendDevice) => void;
   onToggleFavorite: (device: LocalSendDevice) => void;
-  onTestConnection: (device: LocalSendDevice) => void;
   onDiscoverAgain: () => void;
 }) => {
   return (
