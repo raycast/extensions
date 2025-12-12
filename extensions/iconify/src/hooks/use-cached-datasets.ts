@@ -14,7 +14,7 @@ export const useCachedDataSets = () => {
       if (cached) {
         try {
           const { time, data }: { time: number; data: DataSet[] } = JSON.parse(cached);
-          if (!isExpired(time) && "total" in data) return data;
+          if (!isExpired(time)) return data;
         } catch (e) {
           console.log("Couldn't parse cache: ", e);
         }
