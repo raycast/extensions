@@ -67,10 +67,10 @@ export async function getVaultsFromPreferencesOrObsidianJson(): Promise<Obsidian
 export enum ObsidianTargetType {
   OpenVault = "obsidian://open?vault=",
   OpenPath = "obsidian://open?path=",
-  DailyNote = "obsidian://advanced-uri?daily=true&vault=",
-  DailyNoteAppend = "obsidian://advanced-uri?daily=true",
+  DailyNote = "obsidian://adv-uri?daily=true&vault=",
+  DailyNoteAppend = "obsidian://adv-uri?daily=true&",
   NewNote = "obsidian://new?vault=",
-  AppendTask = "obsidian://advanced-uri?mode=append&filepath=",
+  AppendTask = "obsidian://adv-uri?mode=append&filepath=",
 }
 
 export type ObsidianTarget =
