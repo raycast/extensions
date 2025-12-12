@@ -71,12 +71,25 @@ export const getDeviceInfo = (): DeviceInfo => {
   const deviceType = (prefs.deviceType || "desktop") as "mobile" | "desktop" | "web" | "headless";
   const deviceModel = prefs.deviceModel || `${os.type()} ${os.release()}`;
 
+  // Generate deterministic fingerprint from MAC address + hostname
+  // This ensures the same fingerprint across all commands in a session
+  let sessionFingerprint = (global as any).__localsend_fingerprint;
+  if (!sessionFingerprint) {
+    const networkInterfaces = os.networkInterfaces();
+    const macAddress = Object.values(networkInterfaces)
+      .flat()
+      .find((iface) => iface && !iface.internal && iface.mac !== "00:00:00:00:00:00")?.mac || hostname;
+    
+    sessionFingerprint = crypto.createHash("sha256").update(macAddress + hostname).digest("hex").substring(0, 32);
+    (global as any).__localsend_fingerprint = sessionFingerprint;
+  }
+
   return {
     alias: deviceName,
     version: PROTOCOL_VERSION,
     deviceModel: deviceModel,
     deviceType: deviceType,
-    fingerprint: crypto.randomBytes(16).toString("hex"),
+    fingerprint: sessionFingerprint,
     port: getHttpPort(),
     protocol: "http",
     download: prefs.enableReceive,
