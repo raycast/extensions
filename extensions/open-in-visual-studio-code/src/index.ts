@@ -7,11 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { getActiveExplorerWindow, getSelectedFinderWindow, isMac } from "./utils";
-
-const getActiveFileManagerWindow = (): Promise<string> => {
-  return isMac ? getSelectedFinderWindow() : getActiveExplorerWindow();
-};
+import { getCurrentExplorerPath, getSelectedFileExplorerItems, getSelectedFinderWindow, isMac } from "./utils";
 
 export default async () => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
@@ -52,18 +48,20 @@ export default async () => {
   }
 
   try {
-    const selectedFinderItems = await getSelectedFinderItems();
+    const selectedFileManagerItems = await (isMac ? getSelectedFinderItems() : getSelectedFileExplorerItems());
 
-    if (selectedFinderItems.length) {
-      for (const finderItem of selectedFinderItems) {
-        await open(finderItem.path, vscodeApplication);
+    if (selectedFileManagerItems.length) {
+      for (const fileManagerItem of selectedFileManagerItems) {
+        await open(fileManagerItem.path, vscodeApplication);
       }
       return;
     }
 
-    const activeFileManagerPath = await getActiveFileManagerWindow();
+    const activeFileManagerPath = await (isMac ? getSelectedFinderWindow() : getCurrentExplorerPath());
+
+    if (!activeFileManagerPath) throw new Error();
+
     await open(activeFileManagerPath, vscodeApplication);
-    return;
   } catch {
     const fileManagerName = isMac ? "Finder" : "File Explorer";
     await showToast({
