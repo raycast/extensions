@@ -28,7 +28,7 @@ const saveHistory = async (type: "image" | "album", data: StoreData) => {
 
   return await LocalStorage.setItem(
     type === "image" || type === "album" ? "history" : "linkHistory",
-    JSON.stringify(history)
+    JSON.stringify(history),
   );
 };
 
@@ -72,8 +72,8 @@ export default function CommandView() {
       values.filter(
         (mediaPath) =>
           path.basename(mediaPath).includes(".") &&
-          ALOWED_IMGUR_CONTENT_TYPES.find((item) => item === mime.lookup(path.basename(mediaPath)))
-      )
+          ALOWED_IMGUR_CONTENT_TYPES.find((item) => item === mime.lookup(path.basename(mediaPath))),
+      ),
     );
   };
 
@@ -86,7 +86,7 @@ export default function CommandView() {
         const selectedFinderItem = await getSelectedFinderItems();
 
         setMediaPaths((paths) => [...paths, ...selectedFinderItem.map((item) => item.path)]);
-      } catch (error) {
+      } catch {
         // Do nothing
       }
     }
@@ -116,7 +116,7 @@ export default function CommandView() {
           throw Error("Failed to create album");
         }
         album = { ...albumResponse.data, link: `https://imgur.com/a/${albumResponse.data.id}` };
-      } catch (error) {
+      } catch {
         albumToast.style = Toast.Style.Failure;
         albumToast.title = "Album create failed";
         albumToast.message = "Please try again";
@@ -125,16 +125,16 @@ export default function CommandView() {
     }
 
     const uploadToast = await showToast(Toast.Style.Animated, "Uploading", "Please wait...");
-    const uploadedFiles: any[] = [];
+    const uploadedFiles: UploadResponse[] = [];
 
     for (const mediaPath of mediaPaths) {
       uploadToast.message = `${path.basename(mediaPath)}`;
 
       const stream = fs.createReadStream(mediaPath);
       const upload = await imgurClient.upload({
-        ...(album && { album: (album as any).deletehash }),
+        ...(album && { album: album.deletehash }),
         type: "stream",
-        image: stream,
+        image: stream as unknown as string | Buffer | ReadableStream,
       });
 
       if (!upload.success) {
@@ -145,7 +145,18 @@ export default function CommandView() {
         return;
       }
 
-      uploadedFiles.push(upload.data);
+      uploadedFiles.push({
+        success: upload.success,
+        id: upload.data.id,
+        title: upload.data.title,
+        type: upload.data.type,
+        datetime: upload.data.datetime,
+        width: upload.data.width,
+        height: upload.data.height,
+        size: upload.data.size,
+        deletehash: upload.data.deletehash,
+        link: upload.data.link,
+      });
     }
 
     const link = album ? album.link : uploadedFiles[0].link;
@@ -153,12 +164,18 @@ export default function CommandView() {
     await Clipboard.copy(link);
     await saveHistory(
       createAlbum ? "album" : "image",
-      createAlbum
+      createAlbum && album
         ? {
-            album: album,
+            album: {
+              id: album.id,
+              link: album.link,
+              title: album.title ?? "",
+              description: album.description ?? "",
+              deletehash: album.deletehash,
+            },
             images: uploadedFiles,
           }
-        : { success: true, ...uploadedFiles[0] }
+        : uploadedFiles[0],
     );
 
     setUploading(false);
@@ -178,21 +195,6 @@ export default function CommandView() {
     setAlbumTitle("");
     setMediaPaths([]);
   };
-
-  /**
-   * Track current upload progress
-   * Not working right now, but can be good to have
-   */
-  // useEffect(() => {
-  //   const listener = ({ percent }: { percent: number }) => {
-  //     if (!uploadToast) return;
-  //     uploadToast.message = `Uploading ${(percent * 100).toFixed(0)}%`;
-  //   };
-  //   imgurClient.on("uploadProgress", listener);
-  //   return () => {
-  //     imgurClient.off("uploadProgress", listener);
-  //   };
-  // }, [uploadToast]);
 
   return (
     <Form

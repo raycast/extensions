@@ -2,7 +2,6 @@ import { Detail, Grid, LocalStorage, ActionPanel, Action, Icon, Toast, showToast
 import { useMemo, useState } from "react";
 import { StoreData, UploadResponse } from "./index";
 import { writeFile } from "fs/promises";
-import axios from "axios";
 import { homedir } from "os";
 import { join } from "path";
 
@@ -54,7 +53,7 @@ const useHistory = (term: string) => {
 
       if (term) {
         const filtered = history.filter((item: UploadResponse) =>
-          item.title?.toLowerCase().includes(term.toLowerCase())
+          item.title?.toLowerCase().includes(term.toLowerCase()),
         );
         setHistory(filtered);
         setLoading(false);
@@ -101,12 +100,13 @@ export const downloadMedia = async (url: string, filename: string) => {
 
   try {
     const toast = await showToast(Toast.Style.Animated, "Downloading image", "Please wait...");
-    const response = await (await axios.get(url, { responseType: "arraybuffer" })).data;
-    await writeFile(path, Buffer.from(response));
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    await writeFile(path, Buffer.from(arrayBuffer));
     toast.title = "Downloaded";
     toast.message = `${path}`;
     toast.style = Toast.Style.Success;
-  } catch (error) {
+  } catch {
     await showToast(Toast.Style.Failure, "Download failed", "Please try again");
   }
 };
@@ -127,5 +127,5 @@ const bytesToString = (bytes: number) =>
   bytes >= 1048576
     ? (bytes / 1048576).toFixed(1) + "MB"
     : bytes >= 1024
-    ? (bytes / 1024).toFixed(1) + "KB"
-    : bytes + "B";
+      ? (bytes / 1024).toFixed(1) + "KB"
+      : bytes + "B";
