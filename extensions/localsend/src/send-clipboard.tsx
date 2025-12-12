@@ -1,6 +1,7 @@
 import { showHUD, Clipboard, showToast, Toast, LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { discoverDevicesMulticast, sendFiles } from "./utils/localsend";
+import { getCachedDevices } from "./utils/device-cache";
+import { sendFiles, getDeviceInfo } from "./utils/localsend";
 import { LocalSendDevice } from "./types";
 import os from "node:os";
 import path from "node:path";
@@ -39,16 +40,18 @@ export default async function Command() {
     }
 
     if (!device) {
-      const devices = await discoverDevicesMulticast(3000);
+      const devices = await getCachedDevices();
+      const myFingerprint = getDeviceInfo().fingerprint;
+      const filtered = devices.filter((d) => d.fingerprint !== myFingerprint);
 
-      if (devices.length === 0) {
+      if (filtered.length === 0) {
         toast.style = Toast.Style.Failure;
         toast.title = "No devices found";
         toast.message = "Make sure LocalSend is running on nearby devices";
         return;
       }
 
-      device = devices[0];
+      device = filtered[0];
       await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(device));
     }
 

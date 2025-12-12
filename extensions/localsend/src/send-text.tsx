@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, List, useNavigation, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { sendFiles, discoverDevicesMulticast } from "./utils/localsend";
+import { sendFiles, getDeviceInfo } from "./utils/localsend";
+import { getCachedDevices } from "./utils/device-cache";
 import { LocalSendDevice } from "./types";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -15,12 +16,14 @@ export default function Command() {
   const discoverDevices = async () => {
     setIsLoading(true);
     try {
-      const foundDevices = await discoverDevicesMulticast(5000);
-      setDevices(foundDevices);
+      const foundDevices = await getCachedDevices();
+      const myFingerprint = getDeviceInfo().fingerprint;
+      const filtered = foundDevices.filter((d) => d.fingerprint !== myFingerprint);
+      setDevices(filtered);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Discovery failed",
+        title: "Failed to load devices",
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {

@@ -15,8 +15,8 @@ interface Preferences {
   enableReceive: boolean;
 }
 
-const MULTICAST_ADDRESS = "224.0.0.167";
-const MULTICAST_PORT = 53317;
+export const MULTICAST_ADDRESS = "224.0.0.167";
+export const MULTICAST_PORT = 53317;
 const DEFAULT_HTTP_PORT = 53318;
 const PROTOCOL_VERSION = "2.1";
 

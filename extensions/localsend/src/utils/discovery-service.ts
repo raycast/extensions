@@ -1,12 +1,14 @@
 import dgram from "node:dgram";
 import { LocalStorage } from "@raycast/api";
-import { getDeviceInfo, getLocalIPs } from "./localsend";
+import { getDeviceInfo, getLocalIPs, MULTICAST_ADDRESS, MULTICAST_PORT } from "./localsend";
+import { setCachedDevices } from "./device-cache";
+import { LocalSendDevice } from "../types";
 
-const MULTICAST_ADDRESS = "224.0.0.167";
-const MULTICAST_PORT = 53317;
 const ANNOUNCE_INTERVAL = 5000; // Announce every 5 seconds (reduced frequency to avoid UI interruption)
 const RESTART_DELAY = 5000; // Restart faster on errors
 const STATUS_KEY = "discovery-service-status";
+
+const discoveredDevices = new Map<string, LocalSendDevice>();
 
 let discoverySocket: dgram.Socket | null = null;
 let announceTimer: NodeJS.Timeout | null = null;
@@ -47,13 +49,24 @@ export const startDiscoveryService = (): void => {
       cleanup();
     });
 
-    discoverySocket.on("message", (msg, rinfo) => {
+    discoverySocket.on("message", async (msg, rinfo) => {
       try {
         const data = JSON.parse(msg.toString());
 
         if (data.fingerprint === deviceInfo.fingerprint) {
           return;
         }
+
+        // Cache discovered device
+        const device: LocalSendDevice = {
+          ...data,
+          ip: rinfo.address,
+          lastSeen: Date.now(),
+        };
+        discoveredDevices.set(data.fingerprint, device);
+        
+        // Update cache in storage
+        await setCachedDevices(Array.from(discoveredDevices.values()));
 
         if (data.announce) {
           const response = { ...deviceInfo, announce: false };
