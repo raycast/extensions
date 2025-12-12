@@ -64,7 +64,7 @@ export const startDiscoveryService = (): void => {
           lastSeen: Date.now(),
         };
         discoveredDevices.set(data.fingerprint, device);
-        
+
         // Update cache in storage
         await setCachedDevices(Array.from(discoveredDevices.values()));
 
@@ -147,7 +147,7 @@ const cleanup = () => {
     }
     discoverySocket = null;
   }
-  
+
   setRunningStatus(false);
 };
 

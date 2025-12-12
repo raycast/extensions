@@ -1,62 +1,239 @@
-# LocalSend
+# LocalSend for Raycast
 
-Share files to nearby devices using the LocalSend protocol.
+<p align="center">
+  <img src="assets/extension-icon.png" width="128" height="128" alt="LocalSend Logo">
+</p>
 
-## Features
+<p align="center">
+  <strong>Share files to nearby devices using LocalSend protocol</strong>
+</p>
 
-- **Discover Devices**: Find LocalSend devices on your local network
-- **Send Files**: Select and send files to discovered devices
-- **Send Clipboard**: Quickly send clipboard content to nearby devices
-- **Receive Files**: Automatically receive files from other LocalSend devices
-- **Menu Bar Status**: Toggle discovery and receive server from your menu bar
-- **Favorite Devices**: Star devices for quick access
-- **Customizable Settings**: Configure device name, port, and download location
+<p align="center">
+  A Raycast extension that brings LocalSend's seamless file sharing to your command bar.
+</p>
 
-## How to Use
+---
 
-### Making Your Computer Discoverable
+## ✨ Features
 
-**Option 1: Menu Bar (Recommended)**
-- Enable the "LocalSend Status" menu bar command
-- Click the menu bar icon to toggle discovery on/off
-- Green icon = fully online, Yellow = partial, Red = offline
+### 📤 **Send Files & Content**
+- **Send Files** - Select and send any files to discovered devices
+- **Send Media** - Quick access to send images and videos
+- **Send Text** - Share text content instantly
+- **Send Clipboard** - One-click clipboard sharing
+- **Send Folder** - Share entire folders with a single command
 
-**Option 2: Preferences**
-- Open extension preferences (`Cmd + ,`)
-- Check "Make this device discoverable"
-- Discovery will start automatically in the background
+### 📥 **Receive Files**
+- **Auto-receive** - Server starts automatically when you open the Receive view
+- **Pending Transfers** - Review and accept/reject incoming transfers when Quick Save is off
+- **Smart Notifications** - See pending transfers in real-time
+- **Organized Storage** - All files saved to your configured download folder
 
-### Sending Files
+### 🔍 **Device Discovery**
+- **Multicast Discovery** - Automatically find LocalSend devices on your network
+- **Favorite Devices** - Star frequently used devices for quick access
+- **Device Details** - See device type, model, IP, and connection status
 
-1. Use "Discover Devices" to find available devices on your network
-2. Use "Send Files" to select files and send them to a device
-3. Use "Send Clipboard" to quickly share clipboard content
-4. Star frequently used devices for quick access
+### 📊 **Menu Bar Control**
+- **Quick Save Settings** - Toggle between Off, Favorites, or Auto-accept modes
+- **Device Information** - View your device details and local IPs
+- **Quick Actions** - Fast access to all send commands
+- **Status Indicator** - Custom LocalSend icon in your menu bar
+
+---
+
+## 🚀 Quick Start
+
+### First Time Setup
+
+1. **Install the extension** from Raycast Store
+2. **Configure your device name** (optional, defaults to your computer name)
+3. **Set download folder** (optional, defaults to ~/Downloads)
+
+That's it! You're ready to share files.
+
+### Sending Your First File
+
+1. Open Raycast and type **"Send Files"**
+2. Select files to send (supports multiple selection)
+3. Choose the destination device from the list
+4. Confirm and send!
 
 ### Receiving Files
 
-Files can be received automatically if enabled in preferences:
+**Automatic Mode** (Recommended):
+- Simply open the **"Receive"** command
+- The server starts automatically and stops when you close the view
+- Files appear in the list as they're received
 
-1. Open extension preferences (`Cmd + ,` while in the extension)
-2. Check "Enable receiving files" to start the receive server
-3. Received files will be saved to your configured download folder (default: ~/Downloads)
+**Manual Approval Mode**:
+- Set Quick Save to **"Off"** in the menu bar
+- Incoming transfers appear in the "Pending Transfers" section
+- Click ✓ to accept or ✗ to reject each transfer
 
-### Settings
+---
 
-Access extension preferences (`Cmd + ,`) to configure:
+## 📋 Commands
 
-- **Device Name**: How your device appears to others (defaults to your computer name)
-- **HTTP Port**: Port for receiving files (default: 53318, to avoid conflicts with LocalSend app on port 53317)
-- **Download Folder**: Where received files are saved (default: ~/Downloads)
-- **Enable Discovery**: Announce this device on the network (default: enabled)
-- **Enable Receive**: Automatically start the receive server (default: disabled)
+### Main Commands
 
-## Port Configuration
+| Command | Description | Shortcut Tip |
+|---------|-------------|--------------|
+| **Send** | Choose what to send (files, text, clipboard, etc.) | Quick launcher for all send options |
+| **Discover Devices** | Find LocalSend devices on your network | See all available devices |
+| **Receive** | View received files and pending transfers | Auto-starts receive server |
+| **LocalSend Menu Bar** | Quick access to settings and actions | Always visible in menu bar |
 
-By default, this extension uses port **53318** for receiving files, while the LocalSend app uses port **53317**. This allows both to run simultaneously without conflicts. You can change the port in preferences if needed.
+### Send Commands
 
-## About LocalSend
+| Command | Use Case |
+|---------|----------|
+| **Send Files** | General file sharing |
+| **Send Media** | Photos and videos |
+| **Send Text** | Text snippets and notes |
+| **Send Clipboard** | Current clipboard content |
+| **Send Folder** | Entire directories |
 
-LocalSend is a free, open-source app that allows you to securely share files and messages with nearby devices over your local network without needing an internet connection.
+---
 
-Learn more at [localsend.org](https://localsend.org)
+## ⚙️ Settings
+
+Access settings via `Cmd + ,` while in the extension.
+
+### Essential Settings
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| **Download Folder** | `~/Downloads` | Where received files are saved |
+| **Quick Save** | `Off` | How to handle incoming transfers:<br>• **Off** - Ask for confirmation<br>• **Favorites** - Auto-accept from favorites<br>• **On** - Auto-accept from everyone |
+| **Device Name** | Computer name | How your device appears to others |
+
+### Advanced Settings
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| **Device Type** | `Desktop` | Device category (Desktop, Mobile, Web, Headless) |
+| **Device Model** | System info | Model shown to other devices |
+| **HTTP Port** | `53318` | Port for receiving files (53317 used by LocalSend app) |
+| **Multicast Address** | `224.0.0.167` | Discovery multicast group |
+| **Discovery Timeout** | `5 seconds` | How long to wait for device responses |
+| **Network Interface** | All interfaces | Specific interface to use (leave empty for all) |
+| **Enable Encryption** | `Disabled` | HTTPS for transfers (experimental) |
+
+---
+
+## 💡 Tips & Tricks
+
+### Quick Save Modes
+
+**Off (Default)**
+- Best for security-conscious users
+- You manually approve each transfer
+- Pending transfers appear in the Receive view
+
+**Favorites Only**
+- Auto-accept from starred devices
+- Reject all others automatically
+- Perfect balance of security and convenience
+
+**On (Auto-accept)**
+- Fastest workflow
+- All transfers accepted immediately
+- Use only on trusted networks
+
+### Menu Bar Quick Actions
+
+Right-click the menu bar icon for:
+- Quick Send Files/Media/Text/Clipboard/Folder
+- Discover Devices
+- Change Quick Save mode
+- View device information and local IPs
+
+### Favorite Devices
+
+In the Discover Devices view:
+- Press `Cmd + F` to star/unstar a device
+- Favorited devices appear at the top of all lists
+- Combine with "Favorites" Quick Save mode for trusted devices
+
+### Keyboard Shortcuts
+
+| Action | Shortcut |
+|--------|----------|
+| Toggle Favorite | `Cmd + F` |
+| Refresh Devices | `Cmd + R` |
+| Copy Device IP | `Cmd + .` |
+
+---
+
+## 🔧 Troubleshooting
+
+### Devices Not Showing Up
+
+1. **Check network** - Ensure both devices are on the same local network
+2. **Check firewall** - Allow incoming connections on port 53318
+3. **Restart discovery** - Close and reopen Discover Devices command
+4. **Check preferences** - Verify "Enable Discovery" is checked
+
+### Cannot Receive Files
+
+1. **Open Receive view** - Server starts automatically when you open it
+2. **Check Quick Save** - Set to "On" for testing, then adjust as needed
+3. **Verify port** - Ensure port 53318 isn't blocked by firewall
+4. **Check download folder** - Ensure the path exists and is writable
+
+### Port Conflicts
+
+If you're running the official LocalSend app:
+- LocalSend app uses port **53317**
+- This extension uses port **53318** by default
+- Both can run simultaneously without conflicts
+
+Change the port in preferences if you encounter other conflicts.
+
+---
+
+## 🔐 Security & Privacy
+
+- **Local Network Only** - All transfers happen over your local network
+- **No Internet Required** - Files never leave your network
+- **No Cloud Storage** - Direct device-to-device transfer
+- **Manual Approval** - Review transfers before accepting (when Quick Save is Off)
+- **Favorites System** - Trust specific devices for auto-acceptance
+
+---
+
+## 🤝 Compatibility
+
+### Works With
+- ✅ Official LocalSend apps (Android, iOS, macOS, Windows, Linux)
+- ✅ Multiple LocalSend Raycast extensions simultaneously
+- ✅ Any device supporting LocalSend Protocol v2
+
+### Network Requirements
+- Same local network (WiFi or Ethernet)
+- Multicast support (enabled on most home/office networks)
+- No VPN interference
+
+---
+
+## 📚 Learn More
+
+- **LocalSend Official Site**: [localsend.org](https://localsend.org)
+- **LocalSend Protocol**: [github.com/localsend/protocol](https://github.com/localsend/protocol)
+- **Report Issues**: [github.com/raycast/extensions](https://github.com/raycast/extensions)
+
+---
+
+## 🙏 Credits
+
+Built with ❤️ for the Raycast community.
+
+- **LocalSend Protocol** by the LocalSend team
+- **Extension** by [kud](https://github.com/kud)
+
+---
+
+<p align="center">
+  <sub>Made for Raycast • Share files at the speed of thought</sub>
+</p>

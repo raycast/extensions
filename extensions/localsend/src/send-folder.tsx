@@ -139,7 +139,7 @@ function DeviceList({ folder, pin }: { folder: string; pin: string }) {
       const zipFileName = `${folderName}.zip`;
       const zipFilePath = path.join(tmpDir, zipFileName);
 
-      const output = await fs.open(zipFilePath, 'w');
+      const output = await fs.open(zipFilePath, "w");
       const archive = archiver("zip", { zlib: { level: 9 } });
 
       await new Promise<void>((resolve, reject) => {

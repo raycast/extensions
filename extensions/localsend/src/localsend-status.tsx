@@ -1,8 +1,15 @@
-import { MenuBarExtra, Icon, Color, open, getPreferenceValues, LocalStorage } from "@raycast/api";
+import {
+  MenuBarExtra,
+  Icon,
+  Color,
+  open,
+  getPreferenceValues,
+  LocalStorage,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getDeviceInfo } from "./utils/localsend";
-import { startDiscoveryService, stopDiscoveryService, getDiscoveryStatus } from "./utils/discovery-service";
-import { startReceiveServer, stopReceiveServer, isServerRunning } from "./utils/receive-server";
+import { getDiscoveryStatus } from "./utils/discovery-service";
 
 const QUICK_SAVE_KEY = "quick-save-mode";
 
@@ -13,13 +20,10 @@ interface Preferences {
 }
 
 export default function Command() {
-  const [discoveryRunning, setDiscoveryRunning] = useState(false);
-  const [serverRunning, setServerRunning] = useState(false);
   const [localIPs, setLocalIPs] = useState<string[]>([]);
   const [deviceInfo, setDeviceInfo] = useState(getDeviceInfo());
   const [quickSaveMode, setQuickSaveMode] = useState<"off" | "favorites" | "on">("off");
   const prefs = getPreferenceValues<Preferences>();
-  const port = parseInt(prefs.httpPort || "53318", 10);
 
   useEffect(() => {
     loadQuickSaveMode();
@@ -46,36 +50,8 @@ export default function Command() {
 
   const updateStatus = async () => {
     const status = await getDiscoveryStatus();
-    setDiscoveryRunning(status.running);
-    setServerRunning(await isServerRunning());
     setLocalIPs(status.localIPs);
     setDeviceInfo(getDeviceInfo());
-  };
-
-  const toggleDiscovery = async () => {
-    if (discoveryRunning) {
-      stopDiscoveryService();
-    } else {
-      // Ensure server is running before starting discovery
-      if (!serverRunning) {
-        await startReceiveServer(port);
-      }
-      startDiscoveryService();
-    }
-    setTimeout(() => updateStatus(), 500);
-  };
-
-  const toggleReceiveServer = async () => {
-    if (serverRunning) {
-      // Stop discovery first if running
-      if (discoveryRunning) {
-        stopDiscoveryService();
-      }
-      await stopReceiveServer();
-    } else {
-      await startReceiveServer(port);
-    }
-    setTimeout(() => updateStatus(), 500);
   };
 
   const getStatusIcon = () => {
@@ -83,43 +59,8 @@ export default function Command() {
     return { source: { light: "menubar-icon.svg", dark: "menubar-icon.svg" }, tintColor: Color.PrimaryText };
   };
 
-  const getStatusText = () => {
-    if (discoveryRunning && serverRunning) {
-      return "Online";
-    } else if (discoveryRunning) {
-      return "Discoverable";
-    } else if (serverRunning) {
-      return "Receiving";
-    } else {
-      return "Offline";
-    }
-  };
-
   return (
     <MenuBarExtra icon={getStatusIcon()}>
-      <MenuBarExtra.Section title="Device Information">
-        <MenuBarExtra.Item title={deviceInfo.alias} icon={Icon.Person} onAction={async () => {}} />
-        <MenuBarExtra.Item
-          title={deviceInfo.deviceType.charAt(0).toUpperCase() + deviceInfo.deviceType.slice(1)}
-          icon={Icon.ComputerChip}
-          onAction={async () => {}}
-        />
-        <MenuBarExtra.Item title={deviceInfo.deviceModel} icon={Icon.Monitor} onAction={async () => {}} />
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Separator />
-
-      {localIPs.length > 0 && (
-        <>
-          <MenuBarExtra.Section title="Local IP Addresses">
-            {localIPs.map((ip) => (
-              <MenuBarExtra.Item key={ip} title={ip} icon={Icon.Network} onAction={async () => {}} />
-            ))}
-          </MenuBarExtra.Section>
-          <MenuBarExtra.Separator />
-        </>
-      )}
-
       <MenuBarExtra.Section title="Actions">
         <MenuBarExtra.Item
           title="Send Files"
@@ -155,6 +96,29 @@ export default function Command() {
 
       <MenuBarExtra.Separator />
 
+      <MenuBarExtra.Section title="Device Information">
+        <MenuBarExtra.Item title={deviceInfo.alias} icon={Icon.Person} onAction={async () => {}} />
+        <MenuBarExtra.Item
+          title={deviceInfo.deviceType.charAt(0).toUpperCase() + deviceInfo.deviceType.slice(1)}
+          icon={Icon.ComputerChip}
+          onAction={async () => {}}
+        />
+        <MenuBarExtra.Item title={deviceInfo.deviceModel} icon={Icon.Monitor} onAction={async () => {}} />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Separator />
+
+      {localIPs.length > 0 && (
+        <>
+          <MenuBarExtra.Section title="Local IP Addresses">
+            {localIPs.map((ip) => (
+              <MenuBarExtra.Item key={ip} title={ip} icon={Icon.Network} onAction={async () => {}} />
+            ))}
+          </MenuBarExtra.Section>
+          <MenuBarExtra.Separator />
+        </>
+      )}
+
       <MenuBarExtra.Submenu title="Quick Save" icon={Icon.Download}>
         <MenuBarExtra.Item
           title="Off - Ask for confirmation"
@@ -176,10 +140,10 @@ export default function Command() {
       <MenuBarExtra.Separator />
 
       <MenuBarExtra.Item
-        title="Extension Preferences"
+        title="Preferences"
         icon={Icon.Gear}
         shortcut={{ modifiers: ["cmd"], key: "," }}
-        onAction={async () => await open("raycast://confetti")}
+        onAction={openExtensionPreferences}
       />
     </MenuBarExtra>
   );

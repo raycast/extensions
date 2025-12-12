@@ -1,4 +1,14 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Clipboard, useNavigation, LocalStorage } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  Clipboard,
+  useNavigation,
+  LocalStorage,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { getCachedDevices } from "./utils/device-cache";
@@ -13,7 +23,6 @@ const STORAGE_KEY = "recent-devices";
 
 export default function Command() {
   const [clipboardText, setClipboardText] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadClipboard = async () => {

@@ -1,8 +1,25 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, getPreferenceValues, Color, confirmAlert, Alert } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Color,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { startReceiveServer, stopReceiveServer, isServerRunning, getPendingTransfers, acceptPendingTransfer, rejectPendingTransfer, clearCompletedTransfers } from "./utils/receive-server";
-import { getDeviceInfo } from "./utils/localsend";
+import {
+  startReceiveServer,
+  stopReceiveServer,
+  isServerRunning,
+  getPendingTransfers,
+  acceptPendingTransfer,
+  rejectPendingTransfer,
+} from "./utils/receive-server";
 import { PendingTransfer } from "./types";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -39,7 +56,7 @@ export default function Command() {
     try {
       const downloadPath = expandPath(preferences.downloadPath || "~/Downloads");
       const files = await fs.readdir(downloadPath);
-      
+
       const fileStats = await Promise.all(
         files.map(async (file) => {
           const filePath = path.join(downloadPath, file);
@@ -54,7 +71,7 @@ export default function Command() {
           } catch {
             return null;
           }
-        })
+        }),
       );
 
       // Filter out null entries and sort by most recent first
@@ -124,7 +141,7 @@ export default function Command() {
         // Stop discovery service first
         const { stopDiscoveryService } = await import("./utils/discovery-service");
         stopDiscoveryService();
-        
+
         // Then stop receive server
         await stopReceiveServer();
         setServerActive(false);
@@ -137,11 +154,11 @@ export default function Command() {
         const port = parseInt(preferences.httpPort || "53318");
         await startReceiveServer(port);
         setServerActive(true);
-        
+
         // Auto-start discovery when server starts
         const { startDiscoveryService } = await import("./utils/discovery-service");
         startDiscoveryService();
-        
+
         await showToast({
           style: Toast.Style.Success,
           title: "Receive server started",
@@ -165,13 +182,13 @@ export default function Command() {
         await checkServerStatus();
         await loadReceivedFiles();
         await loadPendingTransfers();
-        
+
         // Auto-start server when opening Receive view
         if (!serverActive) {
           const port = parseInt(preferences.httpPort || "53318");
           await startReceiveServer(port);
           setServerActive(true);
-          
+
           // Start discovery to announce ourselves (only if not already running)
           const { startDiscoveryService, getDiscoveryStatus } = await import("./utils/discovery-service");
           const discoveryStatus = await getDiscoveryStatus();
@@ -195,7 +212,7 @@ export default function Command() {
           // Stop discovery first
           const { stopDiscoveryService } = await import("./utils/discovery-service");
           stopDiscoveryService();
-          
+
           // Stop server
           await stopReceiveServer();
         }
@@ -237,9 +254,8 @@ export default function Command() {
     return date.toLocaleDateString();
   };
 
-  const deviceInfo = getDeviceInfo();
   const downloadPath = expandPath(preferences.downloadPath || "~/Downloads");
-  
+
   const formatFileList = (files: Record<string, { fileName: string; size: number }>) => {
     const fileNames = Object.values(files).map((f) => f.fileName);
     if (fileNames.length <= 2) {
@@ -267,10 +283,14 @@ export default function Command() {
                 onAction={toggleServer}
               />
               <Action.OpenWith path={downloadPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={async () => {
-                await loadReceivedFiles();
-                await loadPendingTransfers();
-              }} />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={async () => {
+                  await loadReceivedFiles();
+                  await loadPendingTransfers();
+                }}
+              />
             </ActionPanel>
           }
         />
@@ -304,9 +324,9 @@ export default function Command() {
                       onAction={() => handleRejectTransfer(transfer.id)}
                       style={Action.Style.Destructive}
                     />
-                    <Action 
-                      title="Refresh" 
-                      icon={Icon.ArrowClockwise} 
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
                       onAction={async () => {
                         await loadPendingTransfers();
                       }}
@@ -344,10 +364,14 @@ export default function Command() {
                     onAction={toggleServer}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                   />
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={async () => {
-                    await loadReceivedFiles();
-                    await loadPendingTransfers();
-                  }} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    onAction={async () => {
+                      await loadReceivedFiles();
+                      await loadPendingTransfers();
+                    }}
+                  />
                 </ActionPanel>
               }
             />

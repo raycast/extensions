@@ -9,67 +9,47 @@ export default function Command() {
           title="Files"
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Send Files"
-                icon={Icon.Document}
-                target={<SendFilesCommand />}
-              />
+              <Action.Push title="Send Files" icon={Icon.Document} target={<SendFilesCommand />} />
             </ActionPanel>
           }
         />
-        
+
         <Grid.Item
           content={{ source: Icon.Image, tintColor: "#FFFFFF" }}
           title="Media"
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Send Media"
-                icon={Icon.Image}
-                target={<SendMediaCommand />}
-              />
+              <Action.Push title="Send Media" icon={Icon.Image} target={<SendMediaCommand />} />
             </ActionPanel>
           }
         />
-        
+
         <Grid.Item
           content={{ source: Icon.Text, tintColor: "#FFFFFF" }}
           title="Text"
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Send Text"
-                icon={Icon.Text}
-                target={<SendTextCommand />}
-              />
+              <Action.Push title="Send Text" icon={Icon.Text} target={<SendTextCommand />} />
             </ActionPanel>
           }
         />
-        
+
         <Grid.Item
           content={{ source: Icon.Clipboard, tintColor: "#FFFFFF" }}
           title="Clipboard"
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Send Clipboard"
-                icon={Icon.Clipboard}
-                target={<SendClipboardCommand />}
-              />
+              <Action.Push title="Send Clipboard" icon={Icon.Clipboard} target={<SendClipboardCommand />} />
             </ActionPanel>
           }
         />
-        
+
         <Grid.Item
           content={{ source: Icon.Folder, tintColor: "#FFFFFF" }}
           title="Folder"
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Send Folder"
-                icon={Icon.Folder}
-                target={<SendFolderCommand />}
-              />
+              <Action.Push title="Send Folder" icon={Icon.Folder} target={<SendFolderCommand />} />
             </ActionPanel>
           }
         />

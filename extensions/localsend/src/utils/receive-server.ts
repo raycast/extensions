@@ -55,14 +55,14 @@ const savePendingTransfers = async (transfers: PendingTransfer[]) => {
 export const acceptPendingTransfer = async (transferId: string): Promise<boolean> => {
   const transfers = await getPendingTransfers();
   const transfer = transfers.find((t) => t.id === transferId);
-  
+
   if (!transfer || transfer.status !== "pending") {
     return false;
   }
-  
+
   transfer.status = "accepted";
   await savePendingTransfers(transfers);
-  
+
   // If we have a pending HTTP request, respond now
   const pendingReq = pendingRequests.get(transferId);
   if (pendingReq) {
@@ -91,28 +91,28 @@ export const acceptPendingTransfer = async (transferId: string): Promise<boolean
     pendingReq.response.end(JSON.stringify(response));
     pendingRequests.delete(transferId);
   }
-  
+
   return true;
 };
 
 export const rejectPendingTransfer = async (transferId: string): Promise<boolean> => {
   const transfers = await getPendingTransfers();
   const transfer = transfers.find((t) => t.id === transferId);
-  
+
   if (!transfer || transfer.status !== "pending") {
     return false;
   }
-  
+
   transfer.status = "rejected";
   await savePendingTransfers(transfers);
-  
+
   // Clean up any associated session
   sessions.forEach((session, sessionId) => {
     if (session.pendingTransferId === transferId) {
       sessions.delete(sessionId);
     }
   });
-  
+
   // If we have a pending HTTP request, respond with 403
   const pendingReq = pendingRequests.get(transferId);
   if (pendingReq) {
@@ -120,9 +120,9 @@ export const rejectPendingTransfer = async (transferId: string): Promise<boolean
     pendingReq.response.end(JSON.stringify({ error: "Transfer rejected by user" }));
     pendingRequests.delete(transferId);
   }
-  
+
   pendingTransfers.delete(transferId);
-  
+
   return true;
 };
 
@@ -161,25 +161,25 @@ const handlePrepareUpload = async (req: http.IncomingMessage, res: http.ServerRe
 
   try {
     const request = JSON.parse(body) as PrepareUploadRequest;
-    
+
     // Get Quick Save setting - check LocalStorage first, then preferences
     const storedMode = await LocalStorage.getItem<string>("quick-save-mode");
     const prefs = getPreferenceValues<Preferences>();
     const quickSave = (storedMode as "off" | "favorites" | "on") || prefs.quickSave || "off";
-    
+
     // Get sender info from request
     const senderAlias = request.info?.alias || "Unknown Device";
     const senderFingerprint = request.info?.fingerprint;
-    
+
     let shouldAccept = false;
-    
+
     if (quickSave === "on") {
       // Auto-accept from everyone
       shouldAccept = true;
     } else if (quickSave === "favorites" && senderFingerprint) {
       // Check if sender is a favorite
       shouldAccept = await isFavoriteDevice(senderFingerprint);
-      
+
       if (!shouldAccept) {
         // Reject - not a favorite
         res.writeHead(403, { "Content-Type": "application/json" });
@@ -190,7 +190,7 @@ const handlePrepareUpload = async (req: http.IncomingMessage, res: http.ServerRe
       // Quick Save is "off" - store request and DON'T respond yet
       // Keep HTTP connection open until user accepts/rejects
       const transferId = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      
+
       const pendingTransfer: PendingTransfer = {
         id: transferId,
         senderAlias,
@@ -199,28 +199,28 @@ const handlePrepareUpload = async (req: http.IncomingMessage, res: http.ServerRe
         timestamp: Date.now(),
         status: "pending",
       };
-      
+
       // Store in memory for immediate access
       pendingTransfers.set(transferId, pendingTransfer);
-      
+
       // Save to LocalStorage for UI
       const allTransfers = await getPendingTransfers();
       allTransfers.unshift(pendingTransfer);
       await savePendingTransfers(allTransfers);
-      
+
       // Store the HTTP response object - we'll respond later when user accepts/rejects
       pendingRequests.set(transferId, {
         response: res,
         request,
         transferId,
       });
-      
+
       // Don't close the connection - it stays open until user decision
       // The sender will see "waiting for response" status
-      
+
       return;
     }
-    
+
     // Accept the transfer (auto-accept mode)
     const sessionId = Math.random().toString(36).substring(7);
     const fileTokens: Record<string, string> = {};
@@ -245,7 +245,7 @@ const handlePrepareUpload = async (req: http.IncomingMessage, res: http.ServerRe
 
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify(response));
-    
+
     // Show notification that we're receiving
     const fileCount = Object.keys(request.files).length;
     // Don't use showHUD - it closes the window

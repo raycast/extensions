@@ -1,6 +1,53 @@
-# localsend Changelog
+# LocalSend Changelog
 
-## [Initial Implementation] - {PR_MERGE_DATE}
+## [Major Enhancement - Pending Transfer System] - {PR_MERGE_DATE}
+
+### 🎯 Pending Transfer Notifications
+- Added pending transfer system with HTTP connection management
+- Incoming transfers now appear in real-time in the Receive view
+- Accept/reject transfers with interactive UI
+- Sender sees "waiting for response" status during approval
+- No more automatic rejection when Quick Save is off
+
+### 🚀 Auto-start Receive Server
+- Server automatically starts when opening the Receive command
+- Server stops automatically when leaving the view
+- No manual server management needed
+- Prevents duplicate discovery service instances
+
+### 🎨 Menu Bar Improvements
+- Custom LocalSend icon in menu bar
+- Quick Save as submenu for cleaner UI
+- Consistent icon spacing with placeholder icons
+- Proper template image rendering for system theme
+
+### 📁 Better Preferences Organization
+- Download Folder and Quick Save moved to top (most used)
+- Advanced settings clearly labeled
+- Logical grouping by usage frequency
+- Improved descriptions with context
+
+### 📚 Documentation
+- Comprehensive README with quick start guide
+- Feature categorization and tables
+- Troubleshooting section
+- Security & privacy information
+- Keyboard shortcuts reference
+
+### 🐛 Bug Fixes
+- Fixed discovery service "already running" messages
+- Removed all unused variables and imports
+- Proper TypeScript types (no more `any`)
+- Code formatting with Prettier
+- All ESLint errors resolved
+
+### 🔧 Technical Improvements
+- Proper HTTP connection handling for pending transfers
+- LocalStorage integration for pending transfer queue
+- Separated polling logic from server lifecycle
+- Cleaner state management
+
+## [Initial Implementation] - 2024-12-11
 
 ### Core Features
 - Discover LocalSend devices on the network using multicast and HTTP

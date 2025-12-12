@@ -184,4 +184,3 @@ function DeviceList({ text, pin }: { text: string; pin: string }) {
     </List>
   );
 }
-

@@ -66,22 +66,30 @@ export const getLocalIPs = (): string[] => {
 export const getDeviceInfo = (): DeviceInfo => {
   const prefs = getPreferences();
   const hostname = os.hostname();
-  
+
   const deviceName = prefs.deviceName || hostname || "Raycast";
   const deviceType = (prefs.deviceType || "desktop") as "mobile" | "desktop" | "web" | "headless";
   const deviceModel = prefs.deviceModel || `${os.type()} ${os.release()}`;
 
   // Generate deterministic fingerprint from MAC address + hostname
   // This ensures the same fingerprint across all commands in a session
-  let sessionFingerprint = (global as any).__localsend_fingerprint;
+  interface GlobalWithFingerprint extends NodeJS.Global {
+    __localsend_fingerprint?: string;
+  }
+  let sessionFingerprint = (global as GlobalWithFingerprint).__localsend_fingerprint;
   if (!sessionFingerprint) {
     const networkInterfaces = os.networkInterfaces();
-    const macAddress = Object.values(networkInterfaces)
-      .flat()
-      .find((iface) => iface && !iface.internal && iface.mac !== "00:00:00:00:00:00")?.mac || hostname;
-    
-    sessionFingerprint = crypto.createHash("sha256").update(macAddress + hostname).digest("hex").substring(0, 32);
-    (global as any).__localsend_fingerprint = sessionFingerprint;
+    const macAddress =
+      Object.values(networkInterfaces)
+        .flat()
+        .find((iface) => iface && !iface.internal && iface.mac !== "00:00:00:00:00:00")?.mac || hostname;
+
+    sessionFingerprint = crypto
+      .createHash("sha256")
+      .update(macAddress + hostname)
+      .digest("hex")
+      .substring(0, 32);
+    (global as GlobalWithFingerprint).__localsend_fingerprint = sessionFingerprint;
   }
 
   return {
@@ -271,13 +279,19 @@ export const sendFiles = async (
     });
   } catch (error) {
     console.error("Connection error:", error);
-    
-    if (error instanceof Error && (error.message.includes('timeout') || (error as any).type === 'request-timeout')) {
+
+    interface FetchError extends Error {
+      type?: string;
+    }
+    if (
+      error instanceof Error &&
+      (error.message.includes("timeout") || (error as FetchError).type === "request-timeout")
+    ) {
       throw new Error(
-        `${device.alias} didn't respond within 30 seconds. The device may be waiting for the user to accept a previous transfer, or LocalSend may not be running.`
+        `${device.alias} didn't respond within 30 seconds. The device may be waiting for the user to accept a previous transfer, or LocalSend may not be running.`,
       );
     }
-    
+
     throw new Error(
       `Cannot connect to ${device.alias} (${device.ip}:${device.port}). Make sure LocalSend is running and the device is reachable. Error: ${error instanceof Error ? error.message : "Unknown"}`,
     );
@@ -291,7 +305,9 @@ export const sendFiles = async (
     } else if (prepareResponse.status === 403) {
       throw new Error("Transfer rejected by receiver");
     } else if (prepareResponse.status === 409) {
-      throw new Error("Device is busy with another transfer. Please wait for the receiver to accept/decline the pending transfer, or try again in a few moments.");
+      throw new Error(
+        "Device is busy with another transfer. Please wait for the receiver to accept/decline the pending transfer, or try again in a few moments.",
+      );
     } else if (prepareResponse.status === 204) {
       return;
     }

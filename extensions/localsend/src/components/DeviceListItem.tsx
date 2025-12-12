@@ -23,13 +23,7 @@ export function getProtocolTag(protocol: string) {
   };
 }
 
-export function DeviceListItem({
-  device,
-  actions,
-}: {
-  device: LocalSendDevice;
-  actions: React.ReactNode;
-}) {
+export function DeviceListItem({ device, actions }: { device: LocalSendDevice; actions: React.ReactNode }) {
   return (
     <List.Item
       icon={getDeviceIcon(device.deviceType)}

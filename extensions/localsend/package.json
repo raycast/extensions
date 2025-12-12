@@ -15,6 +15,54 @@
   },
   "preferences": [
     {
+      "name": "downloadPath",
+      "title": "Download Folder",
+      "description": "Where to save received files",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Downloads"
+    },
+    {
+      "name": "quickSave",
+      "title": "Quick Save",
+      "description": "How to handle incoming file transfers",
+      "type": "dropdown",
+      "required": false,
+      "default": "off",
+      "data": [
+        {
+          "title": "Off - Ask for confirmation",
+          "value": "off"
+        },
+        {
+          "title": "Favorites - Auto-accept from favorites only",
+          "value": "favorites"
+        },
+        {
+          "title": "On - Auto-accept from everyone",
+          "value": "on"
+        }
+      ]
+    },
+    {
+      "name": "enableDiscovery",
+      "title": "Enable Discovery",
+      "description": "Announce this device on the network so others can find it",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Make this device discoverable"
+    },
+    {
+      "name": "enableReceive",
+      "title": "Enable Receive",
+      "description": "Start receive server automatically in background (not recommended - use Receive command instead)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable background receive server"
+    },
+    {
       "name": "deviceName",
       "title": "Device Name",
       "description": "Name shown to other LocalSend devices (e.g., 'John's Mac')",
@@ -51,7 +99,7 @@
     {
       "name": "deviceModel",
       "title": "Device Model",
-      "description": "Model of this device (e.g., 'MacBook Pro M3', 'iMac 2023')",
+      "description": "Model of this device (e.g., 'MacBook Pro M3')",
       "type": "textfield",
       "required": false,
       "default": ""
@@ -59,18 +107,10 @@
     {
       "name": "httpPort",
       "title": "HTTP Port",
-      "description": "Port for receiving files (default: 53318, LocalSend uses 53317)",
+      "description": "Port for receiving files (default: 53318, LocalSend app uses 53317)",
       "type": "textfield",
       "required": false,
       "default": "53318"
-    },
-    {
-      "name": "multicastAddress",
-      "title": "Multicast Address",
-      "description": "Multicast address for device discovery (default: 224.0.0.167)",
-      "type": "textfield",
-      "required": false,
-      "default": "224.0.0.167"
     },
     {
       "name": "discoveryTimeout",
@@ -79,6 +119,14 @@
       "type": "textfield",
       "required": false,
       "default": "5"
+    },
+    {
+      "name": "multicastAddress",
+      "title": "Multicast Address",
+      "description": "Multicast address for device discovery (default: 224.0.0.167)",
+      "type": "textfield",
+      "required": false,
+      "default": "224.0.0.167"
     },
     {
       "name": "networkInterface",
@@ -96,54 +144,6 @@
       "required": false,
       "default": false,
       "label": "Enable HTTPS encryption"
-    },
-    {
-      "name": "downloadPath",
-      "title": "Download Folder",
-      "description": "Where to save received files",
-      "type": "textfield",
-      "required": false,
-      "default": "~/Downloads"
-    },
-    {
-      "name": "enableDiscovery",
-      "title": "Enable Discovery",
-      "description": "Announce this device on the network so others can find it",
-      "type": "checkbox",
-      "required": false,
-      "default": true,
-      "label": "Make this device discoverable"
-    },
-    {
-      "name": "enableReceive",
-      "title": "Enable Receive",
-      "description": "Allow this device to receive files from others",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "label": "Enable receiving files"
-    },
-    {
-      "name": "quickSave",
-      "title": "Quick Save",
-      "description": "How to handle incoming file transfers",
-      "type": "dropdown",
-      "required": false,
-      "default": "off",
-      "data": [
-        {
-          "title": "Off - Ask for confirmation",
-          "value": "off"
-        },
-        {
-          "title": "Favorites - Auto-accept from favorites only",
-          "value": "favorites"
-        },
-        {
-          "title": "On - Auto-accept from everyone",
-          "value": "on"
-        }
-      ]
     }
   ],
   "background": {

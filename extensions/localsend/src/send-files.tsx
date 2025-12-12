@@ -39,13 +39,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker
-        id="files"
-        title="Files"
-        allowMultipleSelection={true}
-        canChooseDirectories={false}
-        autoFocus
-      />
+      <Form.FilePicker id="files" title="Files" allowMultipleSelection={true} canChooseDirectories={false} autoFocus />
       <Form.TextField id="pin" title="PIN (optional)" placeholder="Enter PIN if required by receiver" />
     </Form>
   );

@@ -2,7 +2,6 @@ import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@rayca
 import { useEffect, useState } from "react";
 import { discoverDevicesMulticast, getDeviceInfoHTTP, getLocalIPs } from "./utils/localsend";
 import { getFavoriteDevices, toggleFavoriteDevice, isFavoriteDevice } from "./utils/favorites";
-import { testDeviceConnection } from "./utils/connection-test";
 import { LocalSendDevice } from "./types";
 
 export default function Command() {
@@ -80,25 +79,6 @@ export default function Command() {
       style: Toast.Style.Success,
       title: isFav ? "Added to favorites" : "Removed from favorites",
     });
-  };
-
-  const handleTestConnection = async (device: LocalSendDevice) => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Testing connection...",
-    });
-
-    const result = await testDeviceConnection(device);
-
-    if (result.reachable) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Device is reachable";
-      toast.message = `${device.alias} is online and ready`;
-    } else {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Device unreachable";
-      toast.message = result.error || "Cannot connect to device";
-    }
   };
 
   const getDeviceIcon = (deviceType?: string): Icon => {
