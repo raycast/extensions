@@ -82,7 +82,7 @@
     {
       "name": "openWith",
       "title": "Open Extension Folder With",
-      "description": "Choose an application (typically and editor) to open the forked extension folder with.",
+      "description": "Choose an application (typically an editor) to open the forked extension folder with.",
       "type": "appPicker",
       "required": false
     }
