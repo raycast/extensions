@@ -16,6 +16,9 @@ import {
 import { SecretManagerService, Secret, SecretVersion } from "./SecretManagerService";
 import AddVersionForm from "./components/AddVersionForm";
 import { showFailureToast } from "@raycast/utils";
+import { useStreamerMode } from "../../utils/useStreamerMode";
+import { maskSecretIfEnabled } from "../../utils/maskSensitiveData";
+import { StreamerModeAction } from "../../components/StreamerModeAction";
 
 interface SecretDetailViewProps {
   secretId: string;
@@ -30,6 +33,7 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
   const [service, setService] = useState<SecretManagerService | null>(null);
   const [viewMode, setViewMode] = useState<"overview" | "versions">("overview");
   const { push, pop } = useNavigation();
+  const { isEnabled: isStreamerMode } = useStreamerMode();
 
   useEffect(() => {
     const secretService = new SecretManagerService(gcloudPath, projectId);
@@ -122,8 +126,11 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
         (await loadingToast).hide();
 
         if (value) {
-          // Show value in a detail view with auto-hide
-          const markdown = `# Secret Value\n\n\`\`\`\n${value}\n\`\`\`\n\n> ⚠️ **Security Notice**: This value will be automatically cleared from your clipboard in 30 seconds.`;
+          // Show value in a detail view with auto-hide (masked if streamer mode)
+          const displayValue = maskSecretIfEnabled(value, isStreamerMode);
+          const markdown = isStreamerMode
+            ? `# Secret Value\n\n\`\`\`\n${displayValue}\n\`\`\`\n\n> 🔒 **Streamer Mode**: Secret value is hidden. Disable Streamer Mode to view.`
+            : `# Secret Value\n\n\`\`\`\n${displayValue}\n\`\`\`\n\n> ⚠️ **Security Notice**: This value will be automatically cleared from your clipboard in 30 seconds.`;
 
           push(
             <Detail
@@ -131,35 +138,38 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
               navigationTitle={`Secret Value - ${secretId}`}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Copy to Clipboard"
-                    icon={Icon.Clipboard}
-                    onAction={async () => {
-                      await Clipboard.copy(value);
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Value copied",
-                        message: "Secret value has been copied to clipboard",
-                      });
+                  {!isStreamerMode && (
+                    <Action
+                      title="Copy to Clipboard"
+                      icon={Icon.Clipboard}
+                      onAction={async () => {
+                        await Clipboard.copy(value);
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: "Value copied",
+                          message: "Secret value has been copied to clipboard",
+                        });
 
-                      // Auto-clear clipboard after 30 seconds
-                      setTimeout(async () => {
-                        try {
-                          const currentClipboard = await Clipboard.readText();
-                          if (currentClipboard === value) {
-                            await Clipboard.copy("");
-                            showToast({
-                              style: Toast.Style.Success,
-                              title: "Clipboard cleared",
-                              message: "Secret value has been automatically cleared for security",
-                            });
+                        // Auto-clear clipboard after 30 seconds
+                        setTimeout(async () => {
+                          try {
+                            const currentClipboard = await Clipboard.readText();
+                            if (currentClipboard === value) {
+                              await Clipboard.copy("");
+                              showToast({
+                                style: Toast.Style.Success,
+                                title: "Clipboard cleared",
+                                message: "Secret value has been automatically cleared for security",
+                              });
+                            }
+                          } catch (error) {
+                            // Silently fail if clipboard access is denied
                           }
-                        } catch (error) {
-                          // Silently fail if clipboard access is denied
-                        }
-                      }, 30000);
-                    }}
-                  />
+                        }, 30000);
+                      }}
+                    />
+                  )}
+                  <StreamerModeAction />
                   <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
                 </ActionPanel>
               }
@@ -332,6 +342,9 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
             </ActionPanel.Section>
+            <ActionPanel.Section title="Privacy">
+              <StreamerModeAction />
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />
@@ -417,6 +430,9 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
                         shortcut={{ modifiers: ["cmd"], key: "n" }}
                       />
                       <Action title="Back to Overview" icon={Icon.ArrowLeft} onAction={() => setViewMode("overview")} />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Privacy">
+                      <StreamerModeAction />
                     </ActionPanel.Section>
                   </ActionPanel>
                 }

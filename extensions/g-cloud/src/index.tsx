@@ -27,6 +27,7 @@ import NetworkView from "./services/network/NetworkView";
 import SecretListView from "./services/secrets/SecretListView";
 import { CloudRunView } from "./services/cloudrun";
 import { LogsView } from "./services/logs";
+import { StreamerModeAction } from "./components/StreamerModeAction";
 
 const execPromise = promisify(exec);
 
@@ -356,6 +357,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
             onAction={refreshAll}
           />
           <Action title="Switch Account" icon={Icon.Person} onAction={loginWithDifferentAccount} />
+          <StreamerModeAction />
         </ActionPanel>
       }
     >
@@ -384,6 +386,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
                     content={resource.name}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
+                  <StreamerModeAction />
                 </ActionPanel>
               }
             />
@@ -423,6 +426,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={refreshAll}
                   />
+                  <StreamerModeAction />
                 </ActionPanel>
               }
             />
