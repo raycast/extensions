@@ -6,7 +6,8 @@ import { QueryResponse, SetResponse } from "../types";
 type QuerySet = { setId: string; name: string; ids: string[] };
 
 export const useQueryIcons = (query: string) => {
-  const abortable = useRef(new AbortController());
+  //@ts-expect-error React issue, this works fine
+  const abortable = useRef<AbortController>();
   const url = useMemo(() => {
     return createURL(ICONIFY_BASE_URL, `/search`, {
       query,
@@ -19,7 +20,6 @@ export const useQueryIcons = (query: string) => {
     error: queryError,
     isLoading: queryLoading,
   } = useFetch<QueryResponse>(url, {
-    signal: abortable.current.signal,
     execute: !!query,
     onError: (error) => {
       showFailureToast(error, { title: "Error while searching for icons" });
@@ -52,7 +52,7 @@ export const useQueryIcons = (query: string) => {
   } = usePromise(
     async (sets: Array<QuerySet>) => {
       return Promise.all(
-        sets.map((dataset) => getIcons(dataset.setId, dataset.name, dataset.ids, abortable.current.signal)),
+        sets.map((dataset) => getIcons(dataset.setId, dataset.name, dataset.ids, abortable?.current?.signal)),
       ).then((value) => value.flat());
     },
     [iconSets],

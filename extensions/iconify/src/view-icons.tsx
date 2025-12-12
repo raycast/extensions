@@ -1,22 +1,13 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Grid,
-  getPreferenceValues,
-  Icon as RaycastIcon,
-  showToast,
-  Toast,
-  Clipboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Grid, getPreferenceValues, Icon as RaycastIcon } from "@raycast/api";
 import { useState } from "react";
 import { createGlobalState } from "react-hooks-global-state";
-import { copyToClipboard, toDataURI, toSvg, toURL } from "./utils";
-import { iconColorEnum, primaryActionEnum, DataIcon } from "./types";
+import { toDataURI, toSvg } from "./utils";
+import { iconColorEnum, DataIcon } from "./types";
 import { useCachedDataSets } from "./hooks/use-cached-datasets";
 import { useCachedListIcons } from "./hooks/use-cached-list-icons";
+import { IconActions } from "./components/IconActions";
 
-const { primaryAction, iconColor, customColor } = getPreferenceValues<Preferences>();
+const { iconColor, customColor } = getPreferenceValues<Preferences>();
 const { useGlobalState } = createGlobalState({ page: 0, itemsPerPage: 800 });
 
 function Command() {
@@ -77,41 +68,6 @@ function Command() {
             );
             const dataURIIcon = toDataURI(svgIcon);
 
-            const paste = <Action.Paste title="Paste SVG String" content={svgIcon} />;
-            const copy = <Action.CopyToClipboard title="Copy SVG String" content={svgIcon} />;
-            const pasteFile = (
-              <Action
-                title="Paste SVG File"
-                icon={RaycastIcon.Clipboard}
-                onAction={async () => {
-                  await copyToClipboard(svgIcon, id);
-                  const { file } = await Clipboard.read();
-                  if (file) {
-                    Clipboard.paste({ file: file.replace("file://", "") });
-                  }
-                }}
-              />
-            );
-            const copyFile = (
-              <Action
-                title="Copy SVG File"
-                icon={RaycastIcon.Clipboard}
-                onAction={async () => {
-                  await copyToClipboard(svgIcon, id);
-                  await showToast({
-                    title: "Copied to clipboard",
-                    message: "The SVG file has been copied to the clipboard.",
-                    style: Toast.Style.Success,
-                  });
-                }}
-              />
-            );
-            const pasteName = activeSetId && <Action.Paste title="Paste Name" content={`${activeSetId}:${id}`} />;
-            const copyName = activeSetId && (
-              <Action.CopyToClipboard title="Copy Name" content={`${activeSetId}:${id}`} />
-            );
-            const copyURL = activeSetId && <Action.CopyToClipboard title="Copy URL" content={toURL(activeSetId, id)} />;
-            const copyDataURI = <Action.CopyToClipboard title="Copy Data Uri" content={dataURIIcon} />;
             return (
               <Grid.Item
                 content={{
@@ -123,105 +79,9 @@ function Command() {
                 key={id}
                 title={id}
                 actions={
-                  <ActionPanel>
-                    {primaryAction === primaryActionEnum.paste && (
-                      <>
-                        {paste}
-                        {copy}
-                        {pasteFile}
-                        {copyFile}
-                        {pasteName}
-                        {copyName}
-                        {copyURL}
-                        {copyDataURI}
-                      </>
-                    )}
-                    {primaryAction === primaryActionEnum.copy && (
-                      <>
-                        {copy}
-                        {paste}
-                        {pasteFile}
-                        {copyFile}
-                        {pasteName}
-                        {copyName}
-                        {copyURL}
-                        {copyDataURI}
-                      </>
-                    )}
-                    {primaryAction === primaryActionEnum.pasteName && (
-                      <>
-                        {pasteName}
-                        {paste}
-                        {copy}
-                        {pasteFile}
-                        {copyFile}
-                        {copyName}
-                        {copyURL}
-                        {copyDataURI}
-                      </>
-                    )}
-                    {primaryAction === primaryActionEnum.pasteFile && (
-                      <>
-                        {pasteFile}
-                        {paste}
-                        {copy}
-                        {copyFile}
-                        {pasteName}
-                        {copyName}
-                        {copyURL}
-                        {copyDataURI}
-                      </>
-                    )}
-                    {primaryAction === primaryActionEnum.copyFile && (
-                      <>
-                        {copyFile}
-                        {paste}
-                        {copy}
-                        {pasteFile}
-                        {pasteName}
-                        {copyName}
-                        {copyURL}
-                        {copyDataURI}
-                      </>
-                    )}
-                    {primaryAction === primaryActionEnum.copyName && (
-                      <>
-                        {copyName}
-                        {paste}
-                        {copy}
-                        {pasteFile}
-                        {copyFile}
-                        {pasteName}
-                        {copyURL}
-                        {copyDataURI}
-                      </>
-                    )}
-                    {primaryAction === primaryActionEnum.copyURL && (
-                      <>
-                        {copyURL}
-                        {paste}
-                        {copy}
-                        {pasteFile}
-                        {copyFile}
-                        {pasteName}
-                        {copyName}
-                        {copyDataURI}
-                      </>
-                    )}
-                    {primaryAction === primaryActionEnum.copyDataURI && (
-                      <>
-                        {copyDataURI}
-                        {paste}
-                        {copy}
-                        {pasteFile}
-                        {copyFile}
-                        {pasteName}
-                        {copyName}
-                        {copyURL}
-                      </>
-                    )}
+                  <IconActions id={id} setId={activeSetId} svgIcon={svgIcon} dataURIIcon={dataURIIcon}>
                     <NavigationActionSection icons={icons} firstAction="next-page" />
-                  </ActionPanel>
+                  </IconActions>
                 }
               />
             );

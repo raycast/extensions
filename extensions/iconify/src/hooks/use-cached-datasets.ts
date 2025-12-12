@@ -5,7 +5,8 @@ import { useRef } from "react";
 import { listSets } from "../api/service";
 
 export const useCachedDataSets = () => {
-  const abortable = useRef<AbortController>(new AbortController());
+  //@ts-expect-error React issue, this works fine
+  const abortable = useRef<AbortController>();
 
   const { isLoading, data } = usePromise(
     async () => {
@@ -16,7 +17,7 @@ export const useCachedDataSets = () => {
         return cached.data;
       }
 
-      const data = await listSets(abortable.current.signal);
+      const data = await listSets(abortable?.current?.signal);
       cached.setCache(data);
       return data;
     },

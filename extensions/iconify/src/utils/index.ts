@@ -26,7 +26,7 @@ export function toURL(setId: string, id: string): string {
   return `https://api.iconify.design/${setId}/${id}.svg`;
 }
 
-export async function copyToClipboard(svgString: string, id: string) {
+export async function copyToClipboard(svgString: string, id: string): Promise<boolean> {
   const osTempDirectory = tmpdir();
   const fileTempDirectory = path.join(osTempDirectory, "/raycast-iconify");
 
@@ -36,6 +36,7 @@ export async function copyToClipboard(svgString: string, id: string) {
         await mkdirSync(fileTempDirectory, { recursive: true });
       } catch (e) {
         showFailureToast(e, { title: "Unable to create temporary directory" });
+        return false;
       }
     } else {
       await runAppleScript(`
@@ -53,7 +54,12 @@ export async function copyToClipboard(svgString: string, id: string) {
   const actualPath = fixedPathName;
 
   if (isWindows) {
-    writeFileSync(actualPath, svgString, { encoding: "utf-8" });
+    try {
+      writeFileSync(actualPath, svgString, { encoding: "utf-8" });
+    } catch (e) {
+      showFailureToast(e, { title: "Unable to write file to disk" });
+      return false;
+    }
   } else {
     const fixedSvgString = svgString.replace(/"/g, '\\"');
     await runAppleScript(`
@@ -74,4 +80,6 @@ export async function copyToClipboard(svgString: string, id: string) {
   await Clipboard.copy({
     file: actualPath,
   });
+
+  return true;
 }
