@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Action, ActionPanel, Icon, getFrontmostApplication } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, getFrontmostApplication } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import type { Character } from "@/types";
 import { primaryAction } from "@/lib/preferences";
@@ -31,7 +31,7 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
         title="Copy Character to Clipboard"
         content={item.v}
         onCopy={() => addToRecentlyUsedItems(item)}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
       />
     );
   }, [item, addToRecentlyUsedItems]);
@@ -43,7 +43,10 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
         content={item.v}
         icon={frontmostApp ? { fileIcon: frontmostApp.path } : Icon.Clipboard}
         onPaste={() => addToRecentlyUsedItems(item)}
-        shortcut={{ modifiers: ["cmd"], key: "v" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "v" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+        }}
       />
     );
   }, [frontmostApp, item, addToRecentlyUsedItems]);
@@ -73,25 +76,31 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
           title={`Copy "${formatting.hex}" (HEX) to Clipboard`}
           content={formatting.hex}
           onCopy={() => addToRecentlyUsedItems(item)}
-          shortcut={{ modifiers: ["cmd"], key: "h" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "h" }, Windows: { modifiers: ["ctrl"], key: "h" } }}
         />
         <Action.CopyToClipboard
           title={`Copy "${formatting.unicodeEscape}" (Unicode Escape) to Clipboard`}
           content={formatting.unicodeEscape}
-          shortcut={{ modifiers: ["cmd"], key: "u" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "u" }, Windows: { modifiers: ["ctrl"], key: "u" } }}
         />
         {html ? (
           <Action.CopyToClipboard
             title={`Copy "${html}" (HTML Entity) to Clipboard`}
             content={html}
             onCopy={() => addToRecentlyUsedItems(item)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "h" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+            }}
           />
         ) : null}
         <Action.CopyToClipboard
           title={`Copy "${formatting.htmlDecimal}" (HTML Decimal) to Clipboard`}
           content={formatting.htmlDecimal}
-          shortcut={{ modifiers: ["cmd", "shift"], key: html !== null ? "t" : "h" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: html !== null ? "t" : "h" },
+            Windows: { modifiers: ["ctrl", "shift"], key: html !== null ? "t" : "h" },
+          }}
         />
       </ActionPanel.Section>
       {section && (
@@ -101,7 +110,7 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
               title={`Set Filter to "${section}"`}
               icon={Icon.Filter}
               onAction={() => setDatasetFilterAnd(section)}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
             />
           )}
           {filter !== null && (
@@ -109,7 +118,10 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
               title={`Clear Filter (Show All Characters)`}
               icon={Icon.XMarkCircle}
               onAction={() => setDatasetFilterAnd(null)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "f" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+              }}
             />
           )}
         </ActionPanel.Section>
@@ -120,21 +132,24 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
             title="Remove from Favorites"
             icon={Icon.HeartDisabled}
             onAction={() => removeFromFavorites(item)}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
           />
         ) : (
           <Action
             title="Add to Favorites"
             icon={Icon.Heart}
             onAction={() => addToFavorites(item)}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
           />
         )}
         <Action
           title="Clear All Favorites"
           icon={Icon.Trash}
           onAction={() => clearFavorites()}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "l" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+          }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Recently Used">
@@ -144,13 +159,16 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
               title="Remove from Recently Used"
               icon={Icon.Trash}
               onAction={() => removeFromRecentlyUsedItems(item)}
-              shortcut={{ modifiers: ["cmd"], key: "j" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "j" }, Windows: { modifiers: ["ctrl"], key: "j" } }}
             />
             <Action
               title="Clear All Recently Used"
               icon={Icon.Trash}
               onAction={() => clearRecentlyUsedItems()}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "j" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "j" },
+              }}
             />
           </>
         ) : null}
@@ -159,12 +177,15 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
         <Action.OpenInBrowser
           title="Open Character on Compart"
           url={`https://www.compart.com/en/unicode/U+${formatting.hex}`}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
         <Action.OpenInBrowser
           title="Open Character on Unicode Explorer"
           url={`https://unicode-explorer.com/c/${formatting.hex}`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "o" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "o" },
+          }}
         />
       </ActionPanel.Section>
     </ActionPanel>
