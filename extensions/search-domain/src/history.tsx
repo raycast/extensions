@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, open, LocalStorage, showToast, Toast, Keyboard } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  open,
+  LocalStorage,
+  showToast,
+  Toast,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 
 interface QueryHistory {
@@ -53,9 +64,6 @@ export default function HistoryCommand({ onBack }: { onBack?: () => void } = {})
   }
 
   // Toggle sort order
-  function toggleSortOrder() {
-    setSortReverse(!sortReverse);
-  }
 
   // Clear all history with confirmation
   async function clearHistory() {
@@ -90,13 +98,34 @@ export default function HistoryCommand({ onBack }: { onBack?: () => void } = {})
       actions={
         <ActionPanel>
           {onBack && <Action title="Back to Search" onAction={onBack} />}
-          <Action title="Toggle Sort Order" onAction={toggleSortOrder} shortcut={Keyboard.Shortcut.Common.Refresh} />
-          <Action
-            title="Clear All History"
-            onAction={clearHistory}
-            style={Action.Style.Destructive}
-            shortcut={Keyboard.Shortcut.Common.RemoveAll}
-          />
+          <ActionPanel.Section title="History">
+            {queryHistory.length > 0 && (
+              <Action
+                title="Clear All History"
+                onAction={clearHistory}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.RemoveAll}
+              />
+            )}
+
+            {queryHistory.length === 0 && (
+              <Action
+                title="Search Domain"
+                onAction={async () => {
+                  try {
+                    await launchCommand({ name: "search-domain", type: LaunchType.UserInitiated });
+                  } catch (error) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to launch search",
+                      message: error instanceof Error ? error.message : "Unknown error",
+                    });
+                  }
+                }}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
+            )}
+          </ActionPanel.Section>
           <Action
             title="Send Feedback"
             onAction={() =>
@@ -136,6 +165,14 @@ export default function HistoryCommand({ onBack }: { onBack?: () => void } = {})
                   style={Action.Style.Destructive}
                   shortcut={Keyboard.Shortcut.Common.Remove}
                 />
+                {queryHistory.length > 0 && (
+                  <Action
+                    title="Clear All History"
+                    onAction={clearHistory}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                  />
+                )}
               </ActionPanel>
             }
           />
