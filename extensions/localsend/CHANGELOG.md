@@ -47,7 +47,7 @@
 - Separated polling logic from server lifecycle
 - Cleaner state management
 
-## [Initial Implementation] - 2024-12-11
+## [Initial Implementation] - {PR_MERGE_DATE}
 
 ### Core Features
 - Discover LocalSend devices on the network using multicast and HTTP
