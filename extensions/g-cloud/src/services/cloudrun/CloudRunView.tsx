@@ -25,7 +25,7 @@ import {
 } from "../../utils/gcpApi";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { initializeQuickLink } from "../../utils/QuickLinks";
-import { LogsView } from "../logs";
+import { LogsView } from "../logs-service";
 
 const CLOUD_RUN_REGIONS = [
   { value: "us-central1", title: "Iowa (us-central1)" },

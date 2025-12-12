@@ -723,7 +723,10 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
                         metadata={
                           <List.Item.Detail.Metadata>
                             <List.Item.Detail.Metadata.Label title="Type" text={principal.displayName} />
-                            <List.Item.Detail.Metadata.Label title="ID" text={maskEmailIfEnabled(principal.id, isStreamerMode)} />
+                            <List.Item.Detail.Metadata.Label
+                              title="ID"
+                              text={maskEmailIfEnabled(principal.id, isStreamerMode)}
+                            />
                             <List.Item.Detail.Metadata.Separator />
                             <List.Item.Detail.Metadata.Label title="Roles" text={`${principal.roles.length}`} />
                             {principal.roles.map((role, index) => (

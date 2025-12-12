@@ -1008,10 +1008,7 @@ export default function StorageObjectsView({
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="Name" text={obj.name} />
                       <List.Item.Detail.Metadata.Label title="Size" text={obj.size} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Last Modified"
-                        text={formatDateUS(obj.updated)}
-                      />
+                      <List.Item.Detail.Metadata.Label title="Last Modified" text={formatDateUS(obj.updated)} />
                     </List.Item.Detail.Metadata>
                   }
                 />

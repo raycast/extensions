@@ -18,7 +18,7 @@ import CreateVMForm from "./components/CreateVMForm";
 import InstanceListItem from "./components/InstanceListItem";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { showFailureToast } from "@raycast/utils";
-import { LogsView } from "../logs";
+import { LogsView } from "../logs-service";
 
 interface ComputeInstancesViewProps {
   projectId: string;

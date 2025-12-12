@@ -289,7 +289,10 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="IP Address Details" />
                     <List.Item.Detail.Metadata.Label title="Name" text={ip.name} />
-                    <List.Item.Detail.Metadata.Label title="IP Address" text={maskIPIfEnabled(ip.address, isStreamerMode)} />
+                    <List.Item.Detail.Metadata.Label
+                      title="IP Address"
+                      text={maskIPIfEnabled(ip.address, isStreamerMode)}
+                    />
                     <List.Item.Detail.Metadata.Label title="Description" text={ip.description || "No description"} />
                     <List.Item.Detail.Metadata.Label title="ID" text={ip.id} />
                     <List.Item.Detail.Metadata.Separator />

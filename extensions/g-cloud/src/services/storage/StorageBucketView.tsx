@@ -22,7 +22,7 @@ import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { showFailureToast } from "@raycast/utils";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { listStorageBuckets, createStorageBucket, deleteStorageBucket } from "../../utils/gcpApi";
-import { LogsView } from "../logs";
+import { LogsView } from "../logs-service";
 
 interface StorageBucketViewProps {
   projectId: string;

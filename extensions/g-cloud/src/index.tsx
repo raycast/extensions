@@ -26,7 +26,7 @@ import IAMView from "./services/iam/IAMView";
 import NetworkView from "./services/network/NetworkView";
 import SecretListView from "./services/secrets/SecretListView";
 import { CloudRunView } from "./services/cloudrun";
-import { LogsView } from "./services/logs";
+import { LogsView } from "./services/logs-service";
 import { StreamerModeAction } from "./components/StreamerModeAction";
 
 const execPromise = promisify(exec);
