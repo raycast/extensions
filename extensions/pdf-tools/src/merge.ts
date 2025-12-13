@@ -1,12 +1,13 @@
-import { closeMainWindow, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import path from "path";
+import { getSelectedItems } from "universal-selection";
 import { isPDFDocumentLocked, merge } from "swift:../swift";
 
 export default async function Command(props: { arguments: { outputFilename: string } }) {
   try {
     const { outputFilename } = props.arguments;
 
-    const selectedItems = await getSelectedFinderItems();
+    const selectedItems = await getSelectedItems();
 
     if (selectedItems.length < 2) {
       throw new Error("You must select at least two PDF files in Finder");

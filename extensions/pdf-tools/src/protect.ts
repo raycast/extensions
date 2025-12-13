@@ -1,12 +1,13 @@
-import { closeMainWindow, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import path from "path";
+import { getSelectedItems } from "universal-selection";
 import { isPDFDocumentLocked, protect } from "swift:../swift";
 
 export default async function Command(props: { arguments: { password: string } }) {
   try {
     const { password } = props.arguments;
 
-    const selectedItems = await getSelectedFinderItems();
+    const selectedItems = await getSelectedItems();
 
     if (selectedItems.length === 0) {
       throw new Error("No files have been selected in Finder");

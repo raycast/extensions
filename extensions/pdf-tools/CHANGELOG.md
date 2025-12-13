@@ -1,5 +1,9 @@
 # PDF Tools Changelog
 
+## [Improvements] - 2025-12-13
+
+- Add support for third-party file managers.
+
 ## [Improvements] - 2025-02-26
 
 - Improved UX by reducing noise in toast notifications.
