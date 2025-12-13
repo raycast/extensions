@@ -26,6 +26,11 @@ export const lowerFirst: CaseFunction = (input) => {
   return input.slice(0, idx) + input[idx].toLowerCase() + input.slice(idx + 1);
 };
 
+// Note: We intentionally do NOT pre-lowercase the input here.
+// The change-case library author explicitly chose not to pre-lowercase because:
+// 1. Words like "iPhone" and "NASA" would become "iphone" and "nasa"
+// 2. Context-aware conversions (e.g., "hereAreSomeWords" → "Here Are Some Words") would break
+// See: https://github.com/blakeembrey/change-case/issues/308
 export const capitalCase: CaseFunction = (input, options) => {
   const preferences = getPreferenceValues<Preferences>();
   if (preferences.preservePunctuation) {

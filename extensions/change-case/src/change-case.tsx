@@ -302,18 +302,20 @@ export default function Command(props: LaunchProps) {
   return (
     <List isShowingDetail={true} isLoading={!pinned || !recent} selectedItemId={recent[0]}>
       <List.Section title="Pinned">
-        {pinned?.map((key) => {
-          const modified = conversions[key];
-          return (
-            <CaseItem
-              key={key}
-              case={key as CaseType}
-              modified={modified.rawText}
-              detail={modified.markdown}
-              pinned={true}
-            />
-          );
-        })}
+        {pinned
+          ?.filter((key) => conversions[key])
+          .map((key) => {
+            const modified = conversions[key];
+            return (
+              <CaseItem
+                key={key}
+                case={key as CaseType}
+                modified={modified.rawText}
+                detail={modified.markdown}
+                pinned={true}
+              />
+            );
+          })}
       </List.Section>
       <List.Section title="Recent">
         {recent
