@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Action,
   ActionPanel,
@@ -19,8 +20,10 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CaseType, aliases, convert, functions, modifyCasesWrapper } from "./cases.js";
+
+const MAX_RECENT_CASES = 4;
 
 class NoTextError extends Error {
   constructor() {
@@ -32,7 +35,7 @@ class NoTextError extends Error {
 async function getSelection() {
   try {
     return await getSelectedText();
-  } catch (error) {
+  } catch {
     return "";
   }
 }
@@ -79,36 +82,38 @@ export default function Command(props: LaunchProps) {
   const hideHUD = preferences.hideHUD;
 
   const immediatelyConvertToCase = props.launchContext?.case;
-  if (immediatelyConvertToCase) {
-    (async () => {
-      const content = await readContent(preferredSource);
-      const modified = convert(content, immediatelyConvertToCase);
-
-      if (preferredAction === "paste") {
-        Clipboard.paste(modified);
-      } else {
-        Clipboard.copy(modified);
-      }
-
-      if (!hideHUD) {
-        showHUD(`Converted to ${immediatelyConvertToCase}`);
-      }
-      popToRoot();
-    })();
-    return;
-  }
 
   const [content, setContent] = useState<string>("");
   const [frontmostApp, setFrontmostApp] = useState<Application>();
-
   const [pinned, setPinned] = useState<CaseType[]>([]);
   const [recent, setRecent] = useState<CaseType[]>([]);
+  const [isQuickConvert, setIsQuickConvert] = useState(!!immediatelyConvertToCase);
 
   useEffect(() => {
+    if (immediatelyConvertToCase) {
+      (async () => {
+        const content = await readContent(preferredSource);
+        const modified = convert(content, immediatelyConvertToCase);
+
+        if (preferredAction === "paste") {
+          Clipboard.paste(modified);
+        } else {
+          Clipboard.copy(modified);
+        }
+
+        if (!hideHUD) {
+          showHUD(`Converted to ${immediatelyConvertToCase}`);
+        }
+        popToRoot();
+      })();
+      return;
+    }
+
+    setIsQuickConvert(false);
     setPinned(getPinnedCases());
     setRecent(getRecentCases());
     getFrontmostApplication().then(setFrontmostApp);
-  }, []);
+  }, [immediatelyConvertToCase, preferredSource, preferredAction, hideHUD]);
 
   useEffect(() => {
     setPinnedCases(pinned);
@@ -133,60 +138,55 @@ export default function Command(props: LaunchProps) {
   };
 
   useEffect(() => {
-    refreshContent();
-  }, []);
+    if (!isQuickConvert) {
+      refreshContent();
+    }
+  }, [isQuickConvert]);
 
-  const CopyToClipboard = (props: {
-    case: CaseType;
-    modified: string;
-    pinned?: boolean;
-    recent?: boolean;
-  }): JSX.Element => {
-    return (
-      <Action
-        title="Copy to Clipboard"
-        icon={Icon.Clipboard}
-        onAction={() => {
-          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
-          if (!hideHUD) {
-            showHUD("Copied to Clipboard");
-          }
-          Clipboard.copy(props.modified);
-          if (preferences.popToRoot) {
-            popToRoot();
-          } else {
-            closeMainWindow();
-          }
-        }}
-      />
-    );
-  };
+  const handleAction = useCallback(
+    (caseType: CaseType, modified: string, hudMessage: string, action: "copy" | "paste") => {
+      setRecent([caseType, ...recent.filter((c) => c !== caseType)].slice(0, MAX_RECENT_CASES + pinned.length));
+      if (!hideHUD) showHUD(hudMessage);
+      if (action === "paste") {
+        Clipboard.paste(modified);
+      } else {
+        Clipboard.copy(modified);
+      }
+      if (preferences.popToRoot) {
+        popToRoot();
+      } else {
+        closeMainWindow();
+      }
+    },
+    [recent, pinned.length, hideHUD, preferences.popToRoot],
+  );
 
-  const PasteToActiveApp = (props: {
-    case: CaseType;
-    modified: string;
-    pinned?: boolean;
-    recent?: boolean;
-  }): JSX.Element | null => {
-    return frontmostApp ? (
+  const conversions = useMemo(() => {
+    const allCases = [...new Set([...pinned, ...recent, ...Object.keys(functions)])];
+    return Object.fromEntries(allCases.map((key) => [key, modifyCasesWrapper(content, key)]));
+  }, [content, pinned, recent]);
+
+  if (isQuickConvert) {
+    return null;
+  }
+
+  const CopyToClipboard = (props: { case: CaseType; modified: string }): React.JSX.Element => (
+    <Action
+      title="Copy to Clipboard"
+      icon={Icon.Clipboard}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+      onAction={() => handleAction(props.case, props.modified, "Copied to Clipboard", "copy")}
+    />
+  );
+
+  const PasteToActiveApp = (props: { case: CaseType; modified: string }): React.JSX.Element | null =>
+    frontmostApp ? (
       <Action
         title={`Paste in ${frontmostApp.name}`}
         icon={{ fileIcon: frontmostApp.path }}
-        onAction={() => {
-          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
-          if (!hideHUD) {
-            showHUD(`Pasted in ${frontmostApp.name}`);
-          }
-          Clipboard.paste(props.modified);
-          if (preferences.popToRoot) {
-            popToRoot();
-          } else {
-            closeMainWindow();
-          }
-        }}
+        onAction={() => handleAction(props.case, props.modified, `Pasted in ${frontmostApp.name}`, "paste")}
       />
     ) : null;
-  };
 
   const CaseItem = (props: {
     case: CaseType;
@@ -194,7 +194,7 @@ export default function Command(props: LaunchProps) {
     detail: string;
     pinned?: boolean;
     recent?: boolean;
-  }): JSX.Element => {
+  }): React.JSX.Element => {
     const context = encodeURIComponent(`{"case":"${props.case}"}`);
     const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
@@ -289,7 +289,7 @@ export default function Command(props: LaunchProps) {
     <List isShowingDetail={true} isLoading={!pinned || !recent} selectedItemId={recent[0]}>
       <List.Section title="Pinned">
         {pinned?.map((key) => {
-          const modified = modifyCasesWrapper(content, key);
+          const modified = conversions[key];
           return (
             <CaseItem
               key={key}
@@ -305,7 +305,7 @@ export default function Command(props: LaunchProps) {
         {recent
           .filter((key) => !pinned.includes(key))
           .map((key) => {
-            const modified = modifyCasesWrapper(content, key);
+            const modified = conversions[key];
             return (
               <CaseItem
                 key={key}
@@ -326,7 +326,7 @@ export default function Command(props: LaunchProps) {
               !pinned.includes(key as CaseType),
           )
           .map((key) => {
-            const modified = modifyCasesWrapper(content, key);
+            const modified = conversions[key];
             return <CaseItem key={key} case={key as CaseType} modified={modified.rawText} detail={modified.markdown} />;
           })}
       </List.Section>
