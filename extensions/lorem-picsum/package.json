@@ -24,6 +24,7 @@
     {
       "name": "index",
       "title": "Lorem Picsum Image",
+      "subtitle": "Lorem Picsum",
       "description": "Get a random image given the dimensions.",
       "keywords": [
         "lorem",
@@ -60,8 +61,9 @@
     },
     {
       "name": "list",
-      "title": "Lorem Picsum Image List",
+      "title": "Image List",
       "description": "Show a list of images",
+      "subtitle": "Lorem Picsum",
       "mode": "view",
       "keywords": [
         "lorem",
