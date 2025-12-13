@@ -1,5 +1,9 @@
 # Lucide Icons Changelog
 
+## [Update] - {PR_MERGE_DATE
+
+- Added Windows support
+
 ## [Update] - 2025-06-12
 
 - Added the preference to select the primary action to use.
