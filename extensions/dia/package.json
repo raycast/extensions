@@ -10,7 +10,8 @@
   "contributors": [
     "Daat",
     "thomas",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "loris"
   ],
   "platforms": [
     "macOS"
@@ -24,14 +25,14 @@
       "name": "search",
       "title": "Search Dia",
       "subtitle": "Dia",
-      "description": "Search open tabs and browsing history in Dia",
+      "description": "Search tabs, bookmarks and browsing history in Dia",
       "mode": "view"
     },
     {
       "name": "search-tabs",
       "title": "Search Tabs",
       "subtitle": "Dia",
-      "description": "Search open tabs in Dia",
+      "description": "Search tabs in Dia",
       "mode": "view"
     },
     {

@@ -1,5 +1,9 @@
 # Domainr Changelog
 
+## [Windows Support] - 2025-12-09
+
+- Extension now works on Windows
+
 ## [Move to Fastly API + Modernize] - 2025-12-07
 
 - Move to Fastly Domain API (ref: [Issue #23453](https://github.com/raycast/extensions/issues/23453))

@@ -1,5 +1,12 @@
 # GitHub Changelog
 
+## [Moved Contributor] - 2025-12-10
+
+## [Fix filter visited repositories] - 2025-12-09
+
+- Add validation to filter history for only repositories that exist in current data
+- Refactor repository filtering to handle undefined searchText and searchFilter explicitly
+
 ## [Use distinct status icons for PR states] - 2025-12-08
 
 - My Pull Requests Menu Bar: Added dedicated icons for merged, closed, draft, and merge queue PR states

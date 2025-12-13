@@ -12,7 +12,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} filtering={true}>
       {data?.map((tab) => (
         <BraveListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
       ))}

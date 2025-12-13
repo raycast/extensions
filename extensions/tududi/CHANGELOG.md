@@ -1,5 +1,11 @@
 # Tududi Changelog
 
+## [1.8.0] - 2025-12-12
+
+### Technical Improvements
+
+- Updated task update API to use `uid` instead of `id` for consistency.
+
 ## [1.7.0] - 2025-11-18
 
 ### Features
