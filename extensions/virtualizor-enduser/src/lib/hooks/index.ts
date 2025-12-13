@@ -68,7 +68,7 @@ export function useVirtualizorPaginated<T>(
   return { isLoading, data, revalidate, pagination };
 }
 
-async function handleParseResponse(response: Response) {
+export async function handleParseResponse(response: Response) {
   if (!response.ok) {
     if (!response.headers.get("Content-Type")?.includes("application/json")) throw new Error(response.statusText);
     const result = (await response.json()) as { message: string };

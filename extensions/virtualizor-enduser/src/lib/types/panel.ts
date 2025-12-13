@@ -1,1 +1,1 @@
-export type Panel = { title: string } & Preferences;
+export type Panel = { id: string; title: string } & Preferences;

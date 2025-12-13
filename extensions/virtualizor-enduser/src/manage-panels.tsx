@@ -17,6 +17,8 @@ import { Panel } from "./lib/types/panel";
 import Logs from "./logs";
 import VirtualServers from "./virtual-servers";
 import Tasks from "./tasks";
+import crypto from "crypto";
+import { handleParseResponse } from "./lib/hooks";
 
 export default function ManagePanels() {
   const { isLoading, value: panels = [], setValue: setPanels } = useLocalStorage<Panel[]>("virtualizor-panels");
@@ -33,9 +35,9 @@ export default function ManagePanels() {
           }
         />
       ) : (
-        panels.map((panel, index) => (
+        panels.map((panel) => (
           <List.Item
-            key={index}
+            key={panel.id}
             icon="virtualizor.png"
             title={panel.title}
             subtitle={panel.virtualizor_url}
@@ -62,7 +64,7 @@ export default function ManagePanels() {
                         style: Alert.ActionStyle.Destructive,
                         title: "Remove",
                         async onAction() {
-                          await setPanels(panels.filter((p) => p.title !== panel.title));
+                          await setPanels(panels.filter((p) => p.id !== panel.id));
                         },
                       },
                     })
@@ -93,8 +95,8 @@ function AddPanel() {
         });
         const url = new URL(`index.php?${params}`, values.virtualizor_url);
         const response = await fetch(url);
-        if (!response.ok) throw new Error(response.statusText);
-        await setValue([...value, values]);
+        await handleParseResponse(response);
+        await setValue([...value, { ...values, id: crypto.randomUUID() }]);
         toast.style = Toast.Style.Success;
         toast.title = "Added";
         await popToRoot();
