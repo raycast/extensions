@@ -29,7 +29,7 @@ export const lowerFirst: CaseFunction = (input) => {
 export const capitalCase: CaseFunction = (input, options) => {
   const preferences = getPreferenceValues<Preferences>();
   if (preferences.preservePunctuation) {
-    return input.replace(/\b\w/g, (char) => char.toUpperCase());
+    return input.replace(/(^|[\s\-_])(\w)/g, (_, sep, char) => sep + char.toUpperCase());
   }
   return changeCase.capitalCase(input, options);
 };

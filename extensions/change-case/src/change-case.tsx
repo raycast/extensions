@@ -1,4 +1,4 @@
-import React from "react";
+import type { JSX } from "react";
 import {
   Action,
   ActionPanel,
@@ -87,33 +87,45 @@ export default function Command(props: LaunchProps) {
   const [frontmostApp, setFrontmostApp] = useState<Application>();
   const [pinned, setPinned] = useState<CaseType[]>([]);
   const [recent, setRecent] = useState<CaseType[]>([]);
-  const [isQuickConvert, setIsQuickConvert] = useState(!!immediatelyConvertToCase);
-
   useEffect(() => {
     if (immediatelyConvertToCase) {
       (async () => {
-        const content = await readContent(preferredSource);
-        const modified = convert(content, immediatelyConvertToCase);
+        try {
+          const content = await readContent(preferredSource);
+          const modified = convert(content, immediatelyConvertToCase);
 
-        if (preferredAction === "paste") {
-          Clipboard.paste(modified);
-        } else {
-          Clipboard.copy(modified);
-        }
+          if (preferredAction === "paste") {
+            Clipboard.paste(modified);
+          } else {
+            Clipboard.copy(modified);
+          }
 
-        if (!hideHUD) {
-          showHUD(`Converted to ${immediatelyConvertToCase}`);
+          if (!hideHUD) {
+            showHUD(`Converted to ${immediatelyConvertToCase}`);
+          }
+        } catch (error) {
+          if (error instanceof NoTextError) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "No text available",
+              message: "Please ensure that text is either selected or copied",
+            });
+          } else {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to convert text",
+            });
+          }
         }
         popToRoot();
       })();
       return;
     }
 
-    setIsQuickConvert(false);
     setPinned(getPinnedCases());
     setRecent(getRecentCases());
     getFrontmostApplication().then(setFrontmostApp);
-  }, [immediatelyConvertToCase, preferredSource, preferredAction, hideHUD]);
+  }, []);
 
   useEffect(() => {
     setPinnedCases(pinned);
@@ -138,10 +150,10 @@ export default function Command(props: LaunchProps) {
   };
 
   useEffect(() => {
-    if (!isQuickConvert) {
+    if (!immediatelyConvertToCase) {
       refreshContent();
     }
-  }, [isQuickConvert]);
+  }, []);
 
   const handleAction = useCallback(
     (caseType: CaseType, modified: string, hudMessage: string, action: "copy" | "paste") => {
@@ -163,14 +175,16 @@ export default function Command(props: LaunchProps) {
 
   const conversions = useMemo(() => {
     const allCases = [...new Set([...pinned, ...recent, ...Object.keys(functions)])];
-    return Object.fromEntries(allCases.map((key) => [key, modifyCasesWrapper(content, key)]));
+    return Object.fromEntries(
+      allCases.filter((key) => functions[key]).map((key) => [key, modifyCasesWrapper(content, key)]),
+    );
   }, [content, pinned, recent]);
 
-  if (isQuickConvert) {
+  if (immediatelyConvertToCase) {
     return null;
   }
 
-  const CopyToClipboard = (props: { case: CaseType; modified: string }): React.JSX.Element => (
+  const CopyToClipboard = (props: { case: CaseType; modified: string }): JSX.Element => (
     <Action
       title="Copy to Clipboard"
       icon={Icon.Clipboard}
@@ -179,7 +193,7 @@ export default function Command(props: LaunchProps) {
     />
   );
 
-  const PasteToActiveApp = (props: { case: CaseType; modified: string }): React.JSX.Element | null =>
+  const PasteToActiveApp = (props: { case: CaseType; modified: string }): JSX.Element | null =>
     frontmostApp ? (
       <Action
         title={`Paste in ${frontmostApp.name}`}
@@ -194,7 +208,7 @@ export default function Command(props: LaunchProps) {
     detail: string;
     pinned?: boolean;
     recent?: boolean;
-  }): React.JSX.Element => {
+  }): JSX.Element => {
     const context = encodeURIComponent(`{"case":"${props.case}"}`);
     const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
