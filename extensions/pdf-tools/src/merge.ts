@@ -10,12 +10,12 @@ export default async function Command(props: { arguments: { outputFilename: stri
     const selectedItems = await getSelectedItems();
 
     if (selectedItems.length < 2) {
-      throw new Error("You must select at least two PDF files in Finder");
+      throw new Error("You must select at least two PDF files");
     }
 
     for (const item of selectedItems) {
       if (path.extname(item.path).toLowerCase() !== ".pdf") {
-        throw new Error("Only PDF files should be selected in Finder");
+        throw new Error("Only PDF files should be selected");
       }
 
       if (await isPDFDocumentLocked(item.path)) {

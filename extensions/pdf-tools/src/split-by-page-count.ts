@@ -18,12 +18,12 @@ export default async function Command(props: { arguments: { pageCount: string } 
     const selectedItems = await getSelectedItems();
 
     if (selectedItems.length === 0) {
-      throw new Error("You must select at least one PDF file in Finder");
+      throw new Error("You must select at least one PDF file");
     }
 
     for (const item of selectedItems) {
       if (path.extname(item.path).toLowerCase() !== ".pdf") {
-        throw new Error("Only PDF files should be selected in Finder");
+        throw new Error("Only PDF files should be selected");
       }
 
       if (await isPDFDocumentLocked(item.path)) {

@@ -10,12 +10,12 @@ export default async function Command(props: { arguments: { password: string } }
     const selectedItems = await getSelectedItems();
 
     if (selectedItems.length === 0) {
-      throw new Error("No files have been selected in Finder");
+      throw new Error("No files have been selected");
     }
 
     for (const item of selectedItems) {
       if (path.extname(item.path).toLowerCase() !== ".pdf") {
-        throw new Error("Only PDF files should be selected in Finder");
+        throw new Error("Only PDF files should be selected");
       }
 
       if (await isPDFDocumentLocked(item.path)) {
