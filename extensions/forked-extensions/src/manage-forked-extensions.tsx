@@ -108,7 +108,7 @@ function ManageForkedExtensions() {
                 <Action icon={Icon.Eye} title="Show Details" onAction={() => setIsShowingDetail(!isShowingDetail)} />
                 {openWith ? (
                   <Action.Open
-                    application={openWith.bundleId}
+                    application={openWith}
                     target={x.folderPath}
                     title={`Open with ${openWith.name}`}
                     icon={{ fileIcon: openWith.path }}
