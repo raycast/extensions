@@ -1,69 +1,47 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { GandiDomain, DomainAvailability, DNSRecord, WebsiteMetadata, GandiError, GandiMessage } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 const createRequest = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const preferences = getPreferenceValues<Preferences>();
 
   try {
-    const url = new URL(endpoint, preferences.sandboxApiToken ? "https://api.sandbox.gandi.net/" : "https://api.gandi.net/");
+    const url = new URL(
+      endpoint,
+      preferences.sandboxApiToken ? "https://api.sandbox.gandi.net/" : "https://api.gandi.net/",
+    );
     const token = preferences.sandboxApiToken || preferences.apiToken;
     const response = await fetch(url, {
       method: "GET",
       ...options,
       headers: {
         Authorization: `Bearer ${token}`,
-        ...(options.body ? { "Content-Type": "application/json" } : {})
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
       },
     });
 
+    if (response.status === 204) return undefined as T;
     const result = await response.json();
     if (!response.ok) {
       const err = result as GandiError;
-      throw new Error("message" in err ? err.message : (err.errors?.[0]?.description || response.statusText));
+      throw new Error("message" in err ? err.message : err.errors?.[0]?.description || response.statusText);
     }
 
     return result as T;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "API Error",
-      message,
-    });
+    await showFailureToast(error || "Unknown error", { title: "API Error" });
     throw error;
   }
 };
 
-export const getDomains = (): Promise<GandiDomain[]> =>
-  createRequest<GandiDomain[]>("v5/domain/domains");
+export const getDomains = (): Promise<GandiDomain[]> => createRequest<GandiDomain[]>("v5/domain/domains");
 
 export const checkAvailability = async (domain: string): Promise<DomainAvailability> => {
   const params = new URLSearchParams({ name: domain });
   const entry = await createRequest<Omit<DomainAvailability, "available">>("v5/domain/check?" + params.toString());
-  
-  let available = false;
-    if (entry.products?.length) {
-    // Check if "create" action is available
-    const hasCreateAvailable = entry.products.some(
-      (p) => p.process === "create" && p.status.startsWith("available")
-    );
-
-    // Check if only "renew" is available (domain is taken but renewable)
-    const hasRenewAvailable = entry.products.some(
-      (p) => p.process === "renew" && p.status.startsWith("available")
-    );
-
-    if (hasCreateAvailable) {
-      available = true;
-    } else if (hasRenewAvailable) {
-      // Can renew but not create = domain is taken
-      available = false;
-    } else {
-      // Fallback: check if "create" process exists at all
-      available = entry.products.some((p) => p.process === "create");
-    }
-  }
-
+  // If process==="create", the domain is in an available state. The state then informs us if it's actually available. (ref: https://api.gandi.net/docs/domains/#get-v5-domain-check)
+  const available =
+    entry.products?.some((product) => product.process === "create" && product.status.startsWith("available")) ?? false;
   return { ...entry, available };
 };
 
