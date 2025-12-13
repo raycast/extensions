@@ -18,8 +18,9 @@ import {
   showToast,
   Toast,
   Keyboard,
+  clearSearchBar,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { CaseType, aliases, convert, functions, modifyCasesWrapper } from "./cases.js";
 
 class NoTextError extends Error {
@@ -32,7 +33,7 @@ class NoTextError extends Error {
 async function getSelection() {
   try {
     return await getSelectedText();
-  } catch (error) {
+  } catch {
     return "";
   }
 }
@@ -118,9 +119,13 @@ export default function Command(props: LaunchProps) {
     setRecentCases(recent);
   }, [recent]);
 
+  useEffect(() => {
+    if (props.fallbackText) clearSearchBar();
+  }, []);
+
   const refreshContent = async () => {
     try {
-      setContent(await readContent(preferredSource));
+      setContent(props.fallbackText || (await readContent(preferredSource)));
     } catch (error) {
       if (error instanceof NoTextError) {
         showToast({

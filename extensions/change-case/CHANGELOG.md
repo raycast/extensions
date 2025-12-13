@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Enable `fallback text`. support] - {PR_MERGE_DATE}
+- You can use the extension in fallback mode (ref: [Issue #23577](https://github.com/raycast/extensions/issues/23577))
+
 ## [Add `hide HUD` preference] - 2025-08-18
 - Added a preference to hide the HUD after the action
 
