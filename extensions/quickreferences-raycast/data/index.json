@@ -1,0 +1,4835 @@
+[
+  {
+    "id": "1password",
+    "title": "1Password",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "tools"
+    ],
+    "summary": "A cheat sheet for 1password's keyboard shortcuts in Mac, Windows, iOS, Linux.",
+    "headings": [
+      "1Password Keyboard Shortcuts for Mac",
+      "Global keyboard shortcuts",
+      "1Password app",
+      "1Password in the browser",
+      "Quick Access",
+      "1Password Keyboard Shortcuts for iOS",
+      "1Password app (I)",
+      "1Password app (II)",
+      "1Password app (III)",
+      "1Password Keyboard Shortcuts for Windows",
+      "Global keyboard shortcuts",
+      "1Password app"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for 1Password](https://support.1password.com/keyboard-shortcuts/) _(support.1password.com)_",
+    "path": "1password.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/1password.md"
+  },
+  {
+    "id": "adobe-lightroom",
+    "title": "Adobe Lightroom CC",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 251 keyboard shortcuts found in Adobe Lightroom CC",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Working with panels",
+      "Navigating modules",
+      "Using a secondary window",
+      "Working in the Develop module",
+      "Changing view and screen modes",
+      "Managing photos and catalogs",
+      "Comparing photos in the Library module",
+      "Rating and filtering photos",
+      "Working with collections",
+      "Working with metadata and keywords in the Library module",
+      "Working in the Slideshow module"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Adobe Lightroom CC](https://helpx.adobe.com/lightroom/help/keyboard-shortcuts.html)",
+    "path": "adobe-lightroom.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/adobe-lightroom.md"
+  },
+  {
+    "id": "adobe-photoshop",
+    "title": "Adobe Photoshop",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 283 keyboard shortcuts found in Adobe Photoshop",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Popular shortcuts",
+      "Use function keys",
+      "Select tools",
+      "View images",
+      "Use Puppet Warp",
+      "Use Refine Edge",
+      "Use the Filter Gallery",
+      "Use the Liquify filter",
+      "Use Vanishing Point",
+      "Use the Camera Raw dialog box",
+      "Use the Black-and-White dialog box"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Adobe Photoshop](https://helpx.adobe.com/photoshop/using/default-keyboard-shortcuts.html)",
+    "path": "adobe-photoshop.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/adobe-photoshop.md"
+  },
+  {
+    "id": "adobe-xd",
+    "title": "Adobe XD",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 97 keyboard shortcuts found in Adobe XD",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Keys for Edit menu",
+      "Keys for File menu",
+      "Keys for Pen/Path",
+      "Keys for Layers (Objects), Groups, and Artboards",
+      "Keys for Align",
+      "Keys for Arrange",
+      "Keys for Distribute",
+      "Keys for Text",
+      "Keys for Operations menu",
+      "Keys for Tools menu",
+      "Keys for Interface and Viewing Options"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Adobe XD](https://helpx.adobe.com/xd/help/keyboard-shortcuts.html) _(helpx.adobe.com)_",
+    "path": "adobe-xd.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/adobe-xd.md"
+  },
+  {
+    "id": "affinity-designer",
+    "title": "Affinity Designer",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 108 keyboard shortcuts found in Affinity Designer",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Designer Persona",
+      "Pixel Persona",
+      "Modifiers and Layer Control",
+      "Advanced Text",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Affinity Designer](https://affinityspotlight.com/article/downloadable-affinity-keyboard-shortcut-cheat-sheets/)",
+    "path": "affinity-designer.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/affinity-designer.md"
+  },
+  {
+    "id": "affinity-photo",
+    "title": "Affinity Photo",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 177 keyboard shortcuts found in Affinity Photo",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Editing",
+      "Tools (Tone Mapping Persona)",
+      "Files",
+      "Vector Graphics",
+      "Tools (Export Persona)",
+      "Tools (Develop Persona)",
+      "Tools",
+      "Tools (Liquify Persona)",
+      "Text",
+      "Tools (Panorama Persona)",
+      "Edit"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Affinity Photo](https://affinityspotlight.com/article/downloadable-affinity-keyboard-shortcut-cheat-sheets/)",
+    "path": "affinity-photo.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/affinity-photo.md"
+  },
+  {
+    "id": "ai",
+    "title": "AI Directory",
+    "category": "Other",
+    "tags": [
+      "AI",
+      "List",
+      "Tools",
+      "Resources"
+    ],
+    "summary": "This is a quick reference list of cheat sheets for the AI Navigation Directory, designed to help you discover exciting AI tools.",
+    "headings": [
+      "Getting Started",
+      "Health & fitness",
+      "Text",
+      "Writing",
+      "Image editing",
+      "Productivity",
+      "Music",
+      "Design assistant",
+      "Image",
+      "Business",
+      "Virtual reality",
+      "Developer tools"
+    ],
+    "topSnippet": "- [![Favicon](https://icon.horse/icon/buoyhealth.com) Buoy health](https://buoyhealth.com)",
+    "path": "ai.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/ai.md"
+  },
+  {
+    "id": "airtable",
+    "title": "Airtable",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 36 keyboard shortcuts found in Airtable",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General",
+      "Grid View",
+      "Gallery View",
+      "Kanban View",
+      "Expanded Record",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Airtable](https://support.airtable.com/hc/en-us/articles/204143385-Airtable-keyboard-shortcuts)",
+    "path": "airtable.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/airtable.md"
+  },
+  {
+    "id": "alan-ai",
+    "title": "Alan AI",
+    "category": "Toolkit",
+    "tags": [
+      "AI",
+      "AlanAI",
+      "Prompts",
+      "Tips"
+    ],
+    "summary": "This cheat sheet covers all major script concepts, client API methods, handlers and other tools to create a multimodal conversational experience with Alan AI",
+    "headings": [
+      "Legend",
+      "Dialog script",
+      "Intents & patterns",
+      "Response functions",
+      "User-defined slots",
+      "Predefined slots",
+      "Dynamic slots",
+      "RegEx slots",
+      "Contexts",
+      "Predefined objects",
+      "Predefined callbacks",
+      "Q&A service"
+    ],
+    "topSnippet": "intent('pattern'[, 'patternN'], reply('pattern'))",
+    "path": "alan-ai.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/alan-ai.md"
+  },
+  {
+    "id": "alpine-linux",
+    "title": "Alpine Linux",
+    "category": "Operating System",
+    "tags": [
+      "linux",
+      "server",
+      "container"
+    ],
+    "summary": "A comprehensive cheatsheet for Alpine Linux, covering package management, system administration, networking, and more. Alpine Linux is a security-oriented, lightweight Linux distribution based on musl libc and busybox.",
+    "headings": [
+      "Alpine Linux Cheatsheet",
+      "Package Management (apk)",
+      "Basic Package Operations",
+      "Update package index",
+      "Upgrade all installed packages",
+      "Install a package",
+      "Remove a package",
+      "Search for a package",
+      "Show package info",
+      "List all installed packages",
+      "Advanced Package Operations",
+      "Add package from testing repository"
+    ],
+    "topSnippet": "# Update package index\napk update\n\n# Upgrade all installed packages\napk upgrade\n\n# Install a package\napk add <package-name>\n\n# Remove a package\napk del <package-name>",
+    "path": "alpine-linux.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/alpine-linux.md"
+  },
+  {
+    "id": "android-studio",
+    "title": "Android Studio",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 130 keyboard shortcuts found in the Andriod Studio software",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General",
+      "Navigating and Searching",
+      "Writing Code",
+      "Viewing Layouts",
+      "Layout Editor",
+      "Navigation Editor",
+      "Build and Run",
+      "Debugging",
+      "Refactoring",
+      "Version Control",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Android Studio](https://developer.android.com/studio/intro/keyboard-shortcuts)",
+    "path": "android-studio.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/android-studio.md"
+  },
+  {
+    "id": "apex-legends",
+    "title": "Apex Legends",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 27 default keyboard shortcuts found in Apex Legends",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Movement",
+      "Weapons and Abilities",
+      "Communication",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Apex Legends](https://www.metabomb.net/off-meta/gameplay-guides/apex-legends-controls-pc-playstation-4xbox-one)",
+    "path": "apex-legends.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/apex-legends.md"
+  },
+  {
+    "id": "apple-music",
+    "title": "Apple Music",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 62 keyboard shortcuts found in the Apple Music app. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Playing Music",
+      "Playlists",
+      "Window Options",
+      "Library",
+      "iTunes Store",
+      "Other",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Music on Mac](https://support.apple.com/guide/music/keyboard-shortcuts-mus1019/mac)",
+    "path": "apple-music.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/apple-music.md"
+  },
+  {
+    "id": "arduino-programming",
+    "title": "Arduino Programming",
+    "category": "Programming",
+    "tags": [
+      "-cpp -I/O"
+    ],
+    "summary": "Ardunio programming cheat-sheet for I/O programming and ardunio board programming.",
+    "headings": [
+      "Getting Started",
+      "Gather Necessary Materials",
+      "Install the Arduino IDE",
+      "Connect Your Arduino Board",
+      "Configure the Arduino IDE",
+      "Basic Structure",
+      "Setup and Loop",
+      "Comment",
+      "Variable",
+      "Pin Modes",
+      "Digital I/O",
+      "Analog I/O"
+    ],
+    "topSnippet": "void setup() {\n  // Code here runs once\n}\n\nvoid loop() {\n  // Code here runs repeatedly\n}",
+    "path": "arduino-programming.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/arduino-programming.md"
+  },
+  {
+    "id": "arduino",
+    "title": "Arduino IDE",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 12 keyboard shortcuts found in the Arduino IDE",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for the Arduino IDE](https://progtpoint.blogspot.com/2017/02/arduino-keyboard-shortcuts.html)",
+    "path": "arduino.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/arduino.md"
+  },
+  {
+    "id": "asana",
+    "title": "Asana",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 40 keyboard shortcuts found in Asana",
+    "headings": [
+      "Keyboard Shortcuts",
+      "My Tasks",
+      "Inbox",
+      "Task Actions",
+      "Navigation",
+      "Selection",
+      "Application",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Asana](https://asana.com/guide/help/faq/shortcuts) _(asana.com)_",
+    "path": "asana.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/asana.md"
+  },
+  {
+    "id": "ascii-code",
+    "title": "ASCII Code",
+    "category": "Other",
+    "tags": [
+      "ASCII",
+      "code",
+      "Table"
+    ],
+    "summary": "This cheatsheet is a complete list of ASCII Code Table with their numbers and names.",
+    "headings": [
+      "ASCII Code Table",
+      "ASCII Code Table"
+    ],
+    "path": "ascii-code.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/ascii-code.md"
+  },
+  {
+    "id": "aspect-ratio",
+    "title": "Aspect Ratio",
+    "category": "Other",
+    "tags": [
+      "photo",
+      "image",
+      "aspect",
+      "ratio",
+      "resolutions"
+    ],
+    "summary": "This cheat sheet lists some common aspect ratios and their pixel resolutions. Always confirm your final delivery ratio when shooting.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Multi-format of Aspect Ratio",
+      "Lists of Aspect Ratios",
+      "1080p",
+      "720p",
+      "Cinema DCP 4K",
+      "Cinema DCP 2K",
+      "8K",
+      "6K",
+      "4K",
+      "3K"
+    ],
+    "topSnippet": "- The aspect ratio is the ratio between the width and height of the screen or image",
+    "path": "aspect-ratio.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/aspect-ratio.md"
+  },
+  {
+    "id": "audacity",
+    "title": "Audacity",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 135 default keyboard shortcuts found in Audacity",
+    "headings": [
+      "Keyboard Shortcuts",
+      "File Menu",
+      "Edit Menu",
+      "Extra Menu",
+      "Select Menu",
+      "View Menu",
+      "Transport Menu",
+      "Tracks Menu",
+      "Effect Menu",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Audacity](https://manual.audacityteam.org/man/keyboard_shortcut_reference.html)",
+    "path": "audacity.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/audacity.md"
+  },
+  {
+    "id": "awk",
+    "title": "Awk",
+    "category": "Linux Command",
+    "tags": [
+      "bash",
+      "text",
+      "script"
+    ],
+    "summary": "This is a one page quick reference cheat sheet to the [GNU awk](https://www.gnu.org/software/gawk/manual/gawk.html), which covers commonly used awk expressions and commands.",
+    "headings": [
+      "Getting Started",
+      "Have a try",
+      "Awk program",
+      "Example",
+      "Variables",
+      "First and last field",
+      "With line number",
+      "Second last field",
+      "Custom string",
+      "Awk program examples",
+      "/pattern/ Execute actions only for matched pattern",
+      "BEGIN block is executed once at the start"
+    ],
+    "topSnippet": "$ awk -F: '{print $1, $NF}' /etc/passwd",
+    "path": "awk.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/awk.md"
+  },
+  {
+    "id": "bash",
+    "title": "Bash",
+    "category": "Programming",
+    "tags": [
+      "shell",
+      "sh",
+      "echo",
+      "script",
+      "linux"
+    ],
+    "summary": "This is a quick reference cheat sheet to getting started with linux bash shell scripting.",
+    "headings": [
+      "Getting Started",
+      "hello.sh",
+      "Variables",
+      "Comments",
+      "This is an inline Bash comment.",
+      "Arguments",
+      "Functions",
+      "Conditionals",
+      "Brace expansion",
+      "Shell execution",
+      "=> I'm in /path/of/current",
+      "Same as:"
+    ],
+    "topSnippet": "#!/bin/bash\n\nVAR=\"world\"\necho \"Hello $VAR!\" # => Hello world!",
+    "path": "bash.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/bash.md"
+  },
+  {
+    "id": "bear-notes",
+    "title": "Bear",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 66 keyboard shortcuts found in Bear. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Text Styles",
+      "Todos",
+      "Structure",
+      "Lists",
+      "Dates",
+      "Control",
+      "Zoom",
+      "Navigation",
+      "Panels and search",
+      "Saving and importing",
+      "Window"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Bear notes app](https://bear.app/faq/Shortcuts%20and%20more/Mac%20shortcuts/) _(bear.app)_",
+    "path": "bear-notes.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/bear-notes.md"
+  },
+  {
+    "id": "bitbucket",
+    "title": "Bitbucket",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 35 keyboard shortcuts found on Bitbucket",
+    "headings": [
+      "Keyboard Shortcuts",
+      "All pages",
+      "Most pages (except Your Work and Source)",
+      "Repository pages (except for Source)",
+      "Repository pages (except for Source and Settings)",
+      "Pull requests",
+      "Repository pages with sidebar",
+      "Repository source",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Bitbucket](https://confluence.atlassian.com/bitbucket/keyboard-shortcuts-269980511.html)",
+    "path": "bitbucket.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/bitbucket.md"
+  },
+  {
+    "id": "blender",
+    "title": "Blender",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 187 keyboard shortcuts found in Blender",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Universal",
+      "Object Mode",
+      "Edit Mode - General",
+      "Edit Mode - Mesh",
+      "Edit Mode - Curve",
+      "Edit Mode - Surface",
+      "Edit Mode - Font",
+      "VertexPaint",
+      "UV Editor",
+      "FaceSelect",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Blender](https://download.blender.org/documentation/BlenderHotkeyReference.pdf)",
+    "path": "blender.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/blender.md"
+  },
+  {
+    "id": "brave",
+    "title": "Brave Browser",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 64 keyboard shortcuts found in the Brave browser",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Tabs and Windows",
+      "Browser",
+      "Address Bar",
+      "Webpage",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Brave](https://support.brave.com/hc/en-us/articles/360032272171-What-keyboard-shortcuts-can-I-use-in-Brave-)",
+    "path": "brave.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/brave.md"
+  },
+  {
+    "id": "c",
+    "title": "C",
+    "category": "Programming",
+    "tags": [],
+    "summary": "C quick reference cheat sheet that provides basic syntax and methods.",
+    "headings": [
+      "Getting Started",
+      "hello.c",
+      "Variables",
+      "Constants",
+      "Comment",
+      "Print text",
+      "Control the number of spaces",
+      "Strings",
+      "Condition",
+      "Ternary operator",
+      "Switch",
+      "While Loop"
+    ],
+    "topSnippet": "#include <stdio.h>\n\nint main(void) {\n  printf(\"Hello World!\\n\");\n\n  return 0;\n}",
+    "path": "c.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/c.md"
+  },
+  {
+    "id": "canvas",
+    "title": "HTML Canvas",
+    "category": "Programming",
+    "tags": [
+      "web"
+    ],
+    "summary": "This HTML Canvas quick reference cheat sheet lists the common HTML5 Canvas design tags in readable layout.",
+    "headings": [
+      "Getting Started",
+      "Basic Setup",
+      "Getting the Context",
+      "Drawing Shapes",
+      "Rectangles",
+      "Paths",
+      "Lines",
+      "Circles",
+      "Arcs",
+      "Bezier and Quadratic Curves",
+      "Quadratic Curve",
+      "Bezier Curve"
+    ],
+    "topSnippet": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>Canvas Example</title>\n  </head>\n  <body>\n    <canvas\n      id=\"myCanvas\"\n      width=\"500\"\n      height=\"400\"\n      style=\"border:1px solid #000000;\"\n    ></canvas>",
+    "path": "canvas.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/canvas.md"
+  },
+  {
+    "id": "chatgpt",
+    "title": "ChatGPT",
+    "category": "Toolkit",
+    "tags": [
+      "AI",
+      "OpenAI",
+      "Prompts",
+      "Tips"
+    ],
+    "summary": "This cheat sheet lists out prompts and tips from all over the world on how to use ChatGPT effectively",
+    "headings": [
+      "Glossary",
+      "AI",
+      "Prompt Engineering Techniques",
+      "Modes",
+      "Prompt Tips",
+      "Efficiency",
+      "Clarity",
+      "Security",
+      "Prompt Structure",
+      "Prompt Frameworks",
+      "Role",
+      "Tasks (Language And Text)"
+    ],
+    "topSnippet": "[role] [task] [style] [output format] [constraint]",
+    "path": "chatgpt.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/chatgpt.md"
+  },
+  {
+    "id": "chmod",
+    "title": "Chmod",
+    "category": "Linux Command",
+    "tags": [
+      "permission"
+    ],
+    "summary": "This quick reference cheat sheet provides a brief overview of file permissions, and the operation of the chmod command",
+    "headings": [
+      "Getting Started",
+      "Syntax",
+      "Example",
+      "Change files and directories recursively",
+      "Chmod Generator",
+      "Common Permissions",
+      "Explains",
+      "Permission analysis of \"dir\"",
+      "Permission Modes",
+      "Objects",
+      "Permissions",
+      "File Types"
+    ],
+    "topSnippet": "$ chmod [options] <permissions> <file>",
+    "path": "chmod.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/chmod.md"
+  },
+  {
+    "id": "chrome-devtools",
+    "title": "Chrome Developer Tools",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 56 keyboard shortcuts found in Chrome's Developer Tools",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Opening DevTools",
+      "Global Shortcuts",
+      "Elements Panel",
+      "Sources Panel",
+      "Code Editor",
+      "Performance Panel",
+      "Memory Panel",
+      "Console Panel",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools/shortcuts)",
+    "path": "chrome-devtools.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/chrome-devtools.md"
+  },
+  {
+    "id": "code-editor-ios",
+    "title": "Code Editor for iOS",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 43 keyboard shortcuts found in the Code Editor for iOS app. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General Shortcuts I",
+      "General Shortcuts II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for the Code Editor iOS app](https://library.panic.com/code-editor/shortcut-keys/)",
+    "path": "code-editor-ios.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/code-editor-ios.md"
+  },
+  {
+    "id": "color-picker",
+    "title": "Color Picker",
+    "category": "Toolkit",
+    "tags": [
+      "html",
+      "color"
+    ],
+    "summary": "The Color Picker cheat sheet provides you basic color info and choices",
+    "headings": [
+      "Getting Started",
+      "Color Basics",
+      "Main Frameworks",
+      "Color Palette",
+      "Tailwind Palette",
+      "Gradient CSS",
+      "Gradient Maker"
+    ],
+    "path": "color-picker.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/color-picker.md"
+  },
+  {
+    "id": "conventional-commits",
+    "title": "Conventional Commits",
+    "category": "Other",
+    "tags": [
+      "permission"
+    ],
+    "summary": "A cheat sheet of the Conventional Commits and Conventional Comments standards",
+    "headings": [
+      "Getting Started",
+      "Quick Guide",
+      "Why Conventional Commits",
+      "Structure",
+      "Examples",
+      "Types",
+      "Specification",
+      "Specification",
+      "Also see"
+    ],
+    "topSnippet": "<type>[optional scope]: <description>\n\n[optional body]\n\n[optional footer(s)]",
+    "path": "conventional-commits.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/conventional-commits.md"
+  },
+  {
+    "id": "cpp",
+    "title": "C++",
+    "category": "Programming",
+    "tags": [],
+    "summary": "C++ quick reference cheat sheet that provides basic syntax and methods.",
+    "headings": [
+      "Getting Started",
+      "hello.cpp",
+      "Variables",
+      "Primitive Data Types",
+      "User Input",
+      "Swap",
+      "Comments",
+      "If statement",
+      "Loops",
+      "Functions",
+      "References",
+      "Namespaces"
+    ],
+    "topSnippet": "#include <iostream>\n\nint main() {\n    std::cout << \"Hello CheatSheets\\n\";\n    return 0;\n}",
+    "path": "cpp.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/cpp.md"
+  },
+  {
+    "id": "cron",
+    "title": "Cron",
+    "category": "Linux Command",
+    "tags": [
+      "schedule",
+      "crontab",
+      "time"
+    ],
+    "summary": "[Cron](https://en.wikipedia.org/wiki/Cron) is most suitable for scheduling repetitive tasks. Scheduling one-time tasks can be accomplished using the associated at utility.",
+    "headings": [
+      "Crontab Format",
+      "Format",
+      "Examples",
+      "Cron Generator",
+      "Special strings",
+      "Crontab command",
+      "Special characters",
+      "Also see"
+    ],
+    "topSnippet": "Min  Hour Day  Mon  Weekday",
+    "path": "cron.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/cron.md"
+  },
+  {
+    "id": "cs",
+    "title": "C#",
+    "category": "Programming",
+    "tags": [
+      "object-oriented",
+      "class"
+    ],
+    "summary": "C# quick reference cheat sheet that provides basic syntax and methods.",
+    "headings": [
+      "Getting Started",
+      "Hello.cs",
+      "Variables",
+      "Primitive Data Types",
+      "Comments",
+      "Strings",
+      "User Input",
+      "Conditionals",
+      "Arrays",
+      "Loops",
+      "C# Strings",
+      "String concatenation"
+    ],
+    "topSnippet": "class Hello {\n  // main method\n  static void Main(string[] args)\n  {\n    // Output: Hello, world!\n    Console.WriteLine(\"Hello, world!\");\n  }\n}",
+    "path": "cs.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/cs.md"
+  },
+  {
+    "id": "css3",
+    "title": "CSS 3",
+    "category": "Programming",
+    "tags": [
+      "web",
+      "css",
+      "style"
+    ],
+    "summary": "This is a quick reference cheat sheet for CSS goodness, listing selector syntax, properties, units and other useful bits of information.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "External stylesheet",
+      "Internal stylesheet",
+      "Inline styles",
+      "Add class",
+      "!important",
+      "Selector",
+      "Text color",
+      "Background",
+      "Font",
+      "Position"
+    ],
+    "topSnippet": "<link href=\"./path/to/stylesheet/style.css\" rel=\"stylesheet\" type=\"text/css\" />",
+    "path": "css3.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/css3.md"
+  },
+  {
+    "id": "curl",
+    "title": "Curl",
+    "category": "Linux Command",
+    "tags": [
+      "url",
+      "request"
+    ],
+    "summary": "This [Curl](https://github.com/curl/curl) cheat sheet contains commands and examples of some common Curl tricks.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Options",
+      "Request",
+      "data",
+      "--data: HTTP post data",
+      "URL encoding (eg, status=\"Hello\")",
+      "--data pass file",
+      "--get: send -d data via get",
+      "Header information Headers",
+      "SSL",
+      "Install"
+    ],
+    "topSnippet": "-o <file>    # --output: write to file\n-u user:pass # --user: authentication",
+    "path": "curl.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/curl.md"
+  },
+  {
+    "id": "dart",
+    "title": "Dart",
+    "category": "Programming",
+    "tags": [
+      "dart",
+      "flutter"
+    ],
+    "summary": "A Dart cheat sheet with the most important concepts, functions, methods, and more. A complete quick reference for beginners.",
+    "headings": [
+      "Getting Started",
+      "hello.dart",
+      "Variables",
+      "Datatypes",
+      "String interpolation",
+      "Comments",
+      "multiline String",
+      "Imports",
+      "Operators",
+      "Arithmatic Operators",
+      "Equality and relational operators",
+      "Logical operators"
+    ],
+    "topSnippet": "// top-level function where app execution starts\nvoid main(){\n    print(\"Hello World!\"); // Print to console\n}",
+    "path": "dart.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/dart.md"
+  },
+  {
+    "id": "django",
+    "title": "Django",
+    "category": "Programming",
+    "tags": [
+      "python",
+      "web"
+    ],
+    "summary": "A Django cheat sheet.",
+    "headings": [
+      "Getting Started",
+      "Start a new Django Project",
+      "Create et access project folder",
+      "Create Python virtual env",
+      "Activate virtual env",
+      "If you want to deactivate virtual env",
+      "Install django (~= same as 4.2.*)",
+      "New django project (from project_name folder)",
+      "Create app (from project_name folder)",
+      "Migration:",
+      "Create superuser for authenficiation/admin panel",
+      "Start server"
+    ],
+    "topSnippet": "# Create et access project folder\n~$  mkdir project_name\n~$  cd project_name\n\n# Create Python virtual env\n~$  python3 -m venv venv\n\n# Activate virtual env\n~$  source venv/bin/activate\n\n# If you want to deactivate virtual env\n~$  deactivate",
+    "path": "django.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/django.md"
+  },
+  {
+    "id": "docker",
+    "title": "Docker",
+    "category": "Programming",
+    "tags": [
+      "container",
+      "virtual"
+    ],
+    "summary": "This is a quick reference cheat sheet for [Docker](https://docs.docker.com/get-started/). And you can find the most common Docker commands here.",
+    "headings": [
+      "Getting Started",
+      "Getting started",
+      "General commands",
+      "Docker Containers",
+      "Starting & Stopping",
+      "Information",
+      "Creating",
+      "Example",
+      "Manipulating",
+      "Docker Images",
+      "Manipulating",
+      "Building Images"
+    ],
+    "topSnippet": "$ docker run -d -p 80:80 docker/getting-started",
+    "path": "docker.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/docker.md"
+  },
+  {
+    "id": "ejs",
+    "title": "EJS",
+    "category": "Programming",
+    "tags": [
+      "EJS",
+      "Frontend",
+      "Framework"
+    ],
+    "summary": "EJS(Embedded JavaScript) is a simple templating language that lets you generate HTML markup with plain JavaScript.",
+    "headings": [
+      "Get Started",
+      "Hello world",
+      "install",
+      "hello.ejs",
+      "CLI",
+      "Render with Data",
+      "Browser Support",
+      "Variables",
+      "CLI",
+      "Comments",
+      "Method",
+      "Including Files"
+    ],
+    "topSnippet": "$ npm install ejs",
+    "path": "ejs.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/ejs.md"
+  },
+  {
+    "id": "emacs",
+    "title": "Emacs",
+    "category": "Toolkit",
+    "tags": [
+      "editor",
+      "text",
+      "shortcut"
+    ],
+    "summary": "[Emacs](https://www.gnu.org/software/emacs) is the extensible, customizable, self-documenting real time display text editor. This reference was made for Emacs 27.",
+    "headings": [
+      "Getting started",
+      "Starting Emacs",
+      "Global Description",
+      "Motion",
+      "Case Change",
+      "Files",
+      "Error Recovery",
+      "Transposing",
+      "Scroll",
+      "Goto",
+      "Marking",
+      "Killing and Deleting"
+    ],
+    "topSnippet": "$ emacs",
+    "path": "emacs.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/emacs.md"
+  },
+  {
+    "id": "emmet",
+    "title": "Emmet",
+    "category": "Toolkit",
+    "tags": [
+      "snippets",
+      "coding",
+      "html",
+      "css",
+      "abbr"
+    ],
+    "summary": "[Emmet](https://emmet.io/) is a web-developer’s toolkit for boosting HTML & CSS code writing, which allows you to write large HTML code blocks at speed of light using well-known CSS selectors.",
+    "headings": [
+      "Emmet Syntax",
+      "Getting started",
+      "Multiplication: \\*",
+      "Child: >",
+      "Custom attributes",
+      "Text:",
+      "ID and CLASS attributes",
+      "Implicit tag names",
+      "Sibling: +",
+      "Climb-up: ^",
+      "Grouping: ()",
+      "Indexing: $"
+    ],
+    "topSnippet": "<ul>\n  <li></li>\n  <li></li>\n  <li></li>\n  <li></li>\n  <li></li>\n</ul>",
+    "path": "emmet.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/emmet.md"
+  },
+  {
+    "id": "emoji",
+    "title": "Emoji",
+    "category": "Other",
+    "tags": [],
+    "summary": "Some of the emoji codes are not super easy to remember, so here is a little cheat sheet.",
+    "headings": [
+      "Getting Started",
+      "People",
+      "Symbols",
+      "Objects",
+      "Places",
+      "Nature"
+    ],
+    "path": "emoji.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/emoji.md"
+  },
+  {
+    "id": "es6",
+    "title": "ES6",
+    "category": "Programming",
+    "tags": [
+      "config",
+      "format"
+    ],
+    "summary": "A quick reference cheatsheet of what's new in JavaScript for ES2015, ES2016, ES2017, ES2018 and beyond",
+    "headings": [
+      "Getting Started",
+      "Block-scoped",
+      "Let",
+      "Const",
+      "Template Strings",
+      "Interpolation",
+      "Multi-line string",
+      "Binary and octal literals",
+      "Exponential Operator",
+      "New library additions",
+      "New string methods",
+      "New Number Methods"
+    ],
+    "topSnippet": "function fn () {\n  let x = 0\n  if (true) {\n    let x = 1 // only inside this `if`\n  }\n}",
+    "path": "es6.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/es6.md"
+  },
+  {
+    "id": "express",
+    "title": "Express",
+    "category": "Programming",
+    "tags": [
+      "config",
+      "format"
+    ],
+    "summary": "A quick reference cheatsheet for Express, a flexible and streamlined web framework for Node.js",
+    "headings": [
+      "Getting Started",
+      "Hello World",
+      "express -h",
+      "run the application",
+      "express()",
+      "Router",
+      "Application",
+      "Attribute",
+      "Events",
+      "Method",
+      "Request",
+      "Attribute"
+    ],
+    "topSnippet": "$ mkdir myapp # create directory\n  $ cd myapp    # enter the directory\n  $ npm init -y # Initialize a configuration",
+    "path": "express.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/express.md"
+  },
+  {
+    "id": "fastapi",
+    "title": "FastAPI",
+    "category": "Programming",
+    "tags": [
+      "web",
+      "python",
+      "backend"
+    ],
+    "summary": "A concise cheatsheet for FastAPI, a fast and modern web framework for building APIs with Python 3.7+.",
+    "headings": [
+      "Getting Started",
+      "Install & Run",
+      "Hello World",
+      "CLI Run Hint",
+      "Routing & Parameters",
+      "Path Parameter",
+      "Query Parameter",
+      "Optional Query",
+      "Request Body & Validation",
+      "Using Pydantic",
+      "JSON Body",
+      "Response Model"
+    ],
+    "topSnippet": "pip install fastapi uvicorn\nuvicorn main:app --reload",
+    "path": "fastapi.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/fastapi.md"
+  },
+  {
+    "id": "feedly",
+    "title": "Feedly",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 25 keyboard shortcuts found on the Feedly app",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Navigation",
+      "Lists",
+      "Selected Article",
+      "Help",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Feedly](https://blog.feedly.com/keyboard-shortcuts/) _(blog.feedly.com)_",
+    "path": "feedly.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/feedly.md"
+  },
+  {
+    "id": "figma",
+    "title": "Figma",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 119 keyboard shortcuts found in Figma",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Essential",
+      "Tools",
+      "View",
+      "Zoom",
+      "Text",
+      "Shape",
+      "Selection",
+      "Cursor",
+      "Edit",
+      "Transform",
+      "Arrange"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Figma](https://help.figma.com/article/77-keyboard-shortcuts) _(help.figma.com)_",
+    "path": "figma.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/figma.md"
+  },
+  {
+    "id": "filezilla",
+    "title": "FileZilla",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 30 keyboard shortcuts found on the FileZilla program",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General Shortcuts I",
+      "General Shortcuts II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for FileZilla](https://wiki.filezilla-project.org/Keyboard_shortcuts)",
+    "path": "filezilla.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/filezilla.md"
+  },
+  {
+    "id": "find",
+    "title": "Find",
+    "category": "Linux Command",
+    "tags": [
+      "search",
+      "file",
+      "directory"
+    ],
+    "summary": "This is a quick reference list of cheatsheet for linux find command, contains common options and examples.",
+    "headings": [
+      "Getting Started",
+      "Usage",
+      "Option Examples",
+      "Type",
+      "Size",
+      "Size +/-",
+      "Names",
+      "Permissions",
+      "Owners and Groups",
+      "Multiple filenames",
+      "Multiple dirs",
+      "Empty"
+    ],
+    "topSnippet": "$ find [path...] [options] [expression]",
+    "path": "find.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/find.md"
+  },
+  {
+    "id": "finder",
+    "title": "Finder",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 55 keyboard shortcuts found in Finder. This application is part of MacOS.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Finder Shortcuts",
+      "Finder Shortcuts",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for MacOS Finder](https://support.apple.com/en-us/HT201236) _(support.apple.com)_",
+    "path": "finder.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/finder.md"
+  },
+  {
+    "id": "firefox",
+    "title": "Firefox",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 116 keyboard shortcuts found in Firefox",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Navigation",
+      "Current Page",
+      "Editing",
+      "Search",
+      "Windows and Tabs",
+      "History",
+      "Bookmarks",
+      "Tools",
+      "PDF Viewer",
+      "Miscellaneous",
+      "Media Shortcuts"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Firefox](https://support.mozilla.org/en-US/kb/keyboard-shortcuts-perform-firefox-tasks-quickly)",
+    "path": "firefox.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/firefox.md"
+  },
+  {
+    "id": "flask",
+    "title": "Flask",
+    "category": "Programming",
+    "tags": [
+      "web",
+      "python",
+      "backend"
+    ],
+    "summary": "A concise cheatsheet for Flask, a lightweight WSGI web application framework for Python.",
+    "headings": [
+      "Getting Started",
+      "Install Flask",
+      "Hello World",
+      "Flask CLI",
+      "App Config & Environment",
+      "App Object",
+      "Configuration",
+      "Common Config Keys",
+      "Routing & Methods",
+      "Basic Route",
+      "Methods",
+      "Dynamic Routes"
+    ],
+    "topSnippet": "pip install flask",
+    "path": "flask.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/flask.md"
+  },
+  {
+    "id": "fortnite",
+    "title": "Fortnite",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 26 default keyboard shortcuts found in Fortnite",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Main Controls",
+      "Building",
+      "Communication",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Fortnite](https://fortnite.gamepedia.com/Controls) _(fortnite.gamepedia.com)_",
+    "path": "fortnite.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/fortnite.md"
+  },
+  {
+    "id": "framer-x",
+    "title": "Framer X",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 45 keyboard shortcuts found in Framer X. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Tools",
+      "Graphics",
+      "Layout",
+      "Components",
+      "Text",
+      "Editing",
+      "View",
+      "Window",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Framer X](https://www.framer.com/support/using-framer-x/shortcuts/) _(www.framer.com)_",
+    "path": "framer-x.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/framer-x.md"
+  },
+  {
+    "id": "gimp",
+    "title": "GIMP",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 97 keyboard shortcuts found in GIMP",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Toolbox",
+      "File",
+      "Dialogs",
+      "View",
+      "Layers",
+      "Edit",
+      "Selections",
+      "Plug-Ins",
+      "Help",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for GIMP](https://www.gimpusers.com/gimp/hotkeys) _(www.gimpusers.com)_",
+    "path": "gimp.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/gimp.md"
+  },
+  {
+    "id": "git",
+    "title": "Git",
+    "category": "Linux Command",
+    "tags": [
+      "github",
+      "gitlab",
+      "version",
+      "VCS"
+    ],
+    "summary": "This cheat sheet summarizes commonly used Git command line instructions for quick reference.",
+    "headings": [
+      "Getting Started",
+      "Create a Repository",
+      "Make a change",
+      "Configuration",
+      "Working with Branches",
+      "Observe your Repository",
+      "Synchronize",
+      "No fast-forward",
+      "Only fast-forward",
+      "Remote",
+      "Temporary Commits",
+      "Tracking path Changes"
+    ],
+    "topSnippet": "$ git init [project name]",
+    "path": "git.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/git.md"
+  },
+  {
+    "id": "github-actions",
+    "title": "Github Actions",
+    "category": "Toolkit",
+    "tags": [
+      "Github",
+      "CICD"
+    ],
+    "summary": "A quick reference to Github Actions for the automation of software workflows, allowing developers to build, test, and deploy code right from their GitHub repositories.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Workflow Files",
+      "Workflow Syntax",
+      "Workflow Syntax Descriptions",
+      "Events",
+      "Jobs",
+      "Steps",
+      "step 1",
+      "step 2",
+      "step 3",
+      "step 4"
+    ],
+    "topSnippet": "name: hello-world\non: push\njobs:\n  hello-world-job:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello World\n        run: echo \"Hello World!\"",
+    "path": "github-actions.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/github-actions.md"
+  },
+  {
+    "id": "github-cli",
+    "title": "Github CLI",
+    "category": "Toolkit",
+    "tags": [
+      "Github",
+      "CICD",
+      "CLI"
+    ],
+    "summary": "A quick reference to Github CLI, an open-source command line tool that enables GitHub on your terminal.",
+    "headings": [
+      "Getting Started",
+      "Installation",
+      "Basic Usage",
+      "Repository Management",
+      "Issues",
+      "search issues matching set of keywords \"readme\" and \"typo\"",
+      "search issues matching phrase \"broken feature\"",
+      "search issues and pull requests in cli organization",
+      "search open issues assigned to yourself",
+      "search issues with numerous comments",
+      "search issues without label \"bug\"",
+      "Pull Requests"
+    ],
+    "topSnippet": "type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)\ncurl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \\\n&& sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \\\n&& echo \"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main\" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \\\n&& sudo apt update \\\n&& sudo apt install gh -y",
+    "path": "github-cli.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/github-cli.md"
+  },
+  {
+    "id": "github",
+    "title": "Github",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 80 keyboard shortcuts found on Github.com",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Site wide shortcuts",
+      "Repositories",
+      "Source code editing",
+      "Source code browsing",
+      "Comments",
+      "Issue and pull request lists",
+      "Issues and pull requests",
+      "Changes in pull requests",
+      "Project boards",
+      "Notifications",
+      "Network graph"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Github](https://help.github.com/articles/using-keyboard-shortcuts/) _(help.github.com)_",
+    "path": "github.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/github.md"
+  },
+  {
+    "id": "gitlab",
+    "title": "GitLab",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 58 keyboard shortcuts found in GitLab",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Global",
+      "Project",
+      "Issues and Merge Requests",
+      "Project Files",
+      "Web IDE",
+      "Repository Graph",
+      "Wiki Pages",
+      "Filtered Search",
+      "Epics",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for GitLab](https://docs.gitlab.com/ee/user/shortcuts.html) _(docs.gitlab.com)_",
+    "path": "gitlab.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/gitlab.md"
+  },
+  {
+    "id": "gmail",
+    "title": "Gmail",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 90 keyboard shortcuts found on Gmail",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Compose and Chat",
+      "Formatting Text",
+      "Actions",
+      "Hangouts",
+      "Jumping",
+      "Threadlist Selection",
+      "Navigation",
+      "Application",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Gmail](https://support.google.com/mail/answer/6594?hl=en) _(support.google.com)_",
+    "path": "gmail.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/gmail.md"
+  },
+  {
+    "id": "gnome-desktop",
+    "title": "Gnome Desktop",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for Gnome Desktop",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Actions",
+      "Launchers",
+      "Screenshots",
+      "System",
+      "Typing",
+      "Windows",
+      "Navigation",
+      "Also see"
+    ],
+    "topSnippet": "- [Gnome Shell Cheatsheet](https://wiki.gnome.org/Projects/GnomeShell/CheatSheet) _(www.gnome.org)_",
+    "path": "gnome-desktop.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/gnome-desktop.md"
+  },
+  {
+    "id": "gnupg",
+    "title": "GnuPG",
+    "category": "Linux Command",
+    "tags": [],
+    "summary": "A cheatsheet for GnuPG, the encryption and signing software.",
+    "headings": [
+      "Getting Started",
+      "Software",
+      "Create a key-pair",
+      "Key management",
+      "Encryption",
+      "Symmetric",
+      "Asymmetric",
+      "Importing a public key",
+      "Commit Signing",
+      "Local Git Setup",
+      "GPG Program List",
+      "Exporting your public key"
+    ],
+    "topSnippet": "$ gpg --generate-key",
+    "path": "gnupg.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/gnupg.md"
+  },
+  {
+    "id": "go",
+    "title": "Go",
+    "category": "Programming",
+    "tags": [
+      "Go"
+    ],
+    "summary": "This cheat sheet provided basic syntax and methods to help you using [Go](https://go.dev/).",
+    "headings": [
+      "Getting Started",
+      "hello.go",
+      "Variables",
+      "Functions",
+      "Comments",
+      "If statement",
+      "Go Basic types",
+      "Strings",
+      "Numbers",
+      "Operators",
+      "Booleans",
+      "Operators"
+    ],
+    "topSnippet": "package main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Hello, world!\")\n}",
+    "path": "go.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/go.md"
+  },
+  {
+    "id": "google-chrome",
+    "title": "Google Chrome",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 65 keyboard shortcuts found in Google Chrome",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Tab and window",
+      "Google Chrome features",
+      "Address bar",
+      "Webpage shortcuts",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Google Chrome](https://support.google.com/chrome/answer/157179?hl=en) _(support.google.com)_",
+    "path": "google-chrome.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/google-chrome.md"
+  },
+  {
+    "id": "google-drive",
+    "title": "Google Drive",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 54 keyboard shortcuts found in Google Drive on the web",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Navigation and views",
+      "Select items",
+      "Move between items",
+      "Take action on selected items",
+      "Create new items",
+      "Open menus",
+      "Application actions",
+      "Preview mode actions",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Google Drive](https://support.google.com/drive/answer/2563044?hl=en) _(support.google.com)_",
+    "path": "google-drive.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/google-drive.md"
+  },
+  {
+    "id": "google-search",
+    "title": "Google Search",
+    "category": "Other",
+    "tags": [],
+    "summary": "This quick reference cheat sheet lists of Google advanced search operators.",
+    "headings": [
+      "Getting Started",
+      "Google Advanced Search Operators",
+      "Search with url",
+      "Search with dates",
+      "Search files",
+      "Search with page content",
+      "Keywords",
+      "Search on emails",
+      "Some other useful search operators",
+      "Also see"
+    ],
+    "topSnippet": "- [Google Search Operators Cheat Sheet](https://static.semrush.com/blog/uploads/files/39/12/39121580a18160d3587274faed6323e2.pdf)",
+    "path": "google-search.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/google-search.md"
+  },
+  {
+    "id": "graphql",
+    "title": "GraphQL",
+    "category": "Programming",
+    "tags": [
+      "query",
+      "API"
+    ],
+    "summary": "This quick reference cheat sheet provides a brief overview of GraphQL.",
+    "headings": [
+      "Getting Started",
+      "Overview",
+      "Schema",
+      "Built-in Scalar Types",
+      "Type Definitions",
+      "Type Modifiers",
+      "Input Arguments",
+      "Basic Input",
+      "Input with default value",
+      "Input with multiple arguments",
+      "Input with multiple arguments and default values",
+      "Input Types"
+    ],
+    "topSnippet": "type Query {\n    users(limit: Int): [User]\n}",
+    "path": "graphql.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/graphql.md"
+  },
+  {
+    "id": "grep",
+    "title": "Grep",
+    "category": "Linux Command",
+    "tags": [
+      "egrep",
+      "search",
+      "pattern",
+      "text"
+    ],
+    "summary": "This cheat sheet is intended to be a quick reminder for the main concepts involved in using the command line program grep and assumes you already understand its usage.",
+    "headings": [
+      "Getting Started",
+      "Usage",
+      "Option examples",
+      "Grep regular expressions",
+      "Refer",
+      "Wildcards",
+      "Quantifiers",
+      "POSIX",
+      "Character",
+      "Position"
+    ],
+    "topSnippet": "$ grep [options] search_string",
+    "path": "grep.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/grep.md"
+  },
+  {
+    "id": "guitar-pro",
+    "title": "Guitar Pro",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 129 keyboard shortcuts found in Guitar Pro",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Track",
+      "Bar - General",
+      "Bar - Section",
+      "Bar - Simile Mark",
+      "Note - Duration",
+      "Note - General",
+      "Effects - General",
+      "Note - Accidentals",
+      "Effects - Grace Note",
+      "Effects - Vibrato",
+      "Effects - Vibrato with Trem. Bar"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Guitar Pro](https://shredaddict.com/guitar-pro-shortcuts/) _(shredaddict.com)_",
+    "path": "guitar-pro.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/guitar-pro.md"
+  },
+  {
+    "id": "homebrew",
+    "title": "Homebrew",
+    "category": "Toolkit",
+    "tags": [
+      "packages manager",
+      "macos"
+    ],
+    "summary": "This is a quick reference cheat sheet to getting started with homebrew.",
+    "headings": [
+      "Getting Started",
+      "Install",
+      "Commands",
+      "Help",
+      "Updates",
+      "Repositories",
+      "Cask",
+      "Search, Install, Remove",
+      "Cleanup"
+    ],
+    "topSnippet": "xcode-select --install",
+    "path": "homebrew.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/homebrew.md"
+  },
+  {
+    "id": "hook",
+    "title": "Hook",
+    "category": "Programming",
+    "tags": [
+      "script",
+      "interpret"
+    ],
+    "summary": "The [Hook](https://github.com/hook-lang/hook/) cheat sheet is a one-page reference sheet for the Hook programming language.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "What does Hook look like?",
+      "Hello, world!",
+      "Installing with Homebrew",
+      "Installing on Windows",
+      "Types and Values",
+      "Basic Types",
+      "Bool",
+      "Numbers",
+      "Strings",
+      "Ranges"
+    ],
+    "topSnippet": "fn factorial(n) {\n  if (n == 0)\n    return 1;\n  return n * factorial(n - 1);\n}",
+    "path": "hook.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/hook.md"
+  },
+  {
+    "id": "html-char",
+    "title": "HTML Characters Entities",
+    "category": "Other",
+    "tags": [
+      "html",
+      "code",
+      "characters"
+    ],
+    "summary": "This cheatsheet is a complete list of HTML entities with their numbers and names. Also included is a full list of ASCII characters that can be represented in HTML.",
+    "headings": [
+      "HTML Character Entity References",
+      "HTML Special Characters",
+      "HTML Latin",
+      "HTML Latin Extended",
+      "HTML Spacing Modifier Letters",
+      "HTML Greek",
+      "HTML Punctuation",
+      "HTML Letter-like Symbols",
+      "HTML Arrows",
+      "HTML Mathematical Operators",
+      "HTML Technical",
+      "HTML Miscellaneous"
+    ],
+    "path": "html-char.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/html-char.md"
+  },
+  {
+    "id": "html",
+    "title": "HTML",
+    "category": "Programming",
+    "tags": [
+      "web"
+    ],
+    "summary": "This HTML quick reference cheat sheet lists the common HTML and HTML5 tags in readable layout.",
+    "headings": [
+      "Getting Started",
+      "hello.html",
+      "Comment",
+      "Paragraph",
+      "HTML link",
+      "Image Tag",
+      "Text Formatting Tags",
+      "Headings",
+      "Section Divisions",
+      "Inline Frame",
+      "↓ Preview",
+      "JavaScript in HTML"
+    ],
+    "topSnippet": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>HTML5 Boilerplate</title>\n  </head>\n  <body>\n    <h1>Hello world, hello CheatSheets.zip!</h1>\n  </body>\n</html>",
+    "path": "html.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/html.md"
+  },
+  {
+    "id": "htmx",
+    "title": "HTMX",
+    "category": "Programming",
+    "tags": [
+      "frontend",
+      "javascript",
+      "htmx"
+    ],
+    "summary": "A modern, minimal JavaScript library that allows you to create dynamic web interfaces using HTML attributes.",
+    "headings": [
+      "Getting Started",
+      "CDN Import",
+      "Basic Usage",
+      "Server Response",
+      "Core Attributes",
+      "`hx-get`, `hx-post`, etc.",
+      "`hx-target`",
+      "`hx-trigger`",
+      "Swap & Out of Band",
+      "`hx-swap`",
+      "`hx-swap-oob`",
+      "Swap Modifiers"
+    ],
+    "topSnippet": "<script src=\"https://unpkg.com/htmx.org@1.9.2\"></script>",
+    "path": "htmx.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/htmx.md"
+  },
+  {
+    "id": "http-status-code",
+    "title": "HTTP Status Code",
+    "category": "Other",
+    "tags": [
+      "response",
+      "server"
+    ],
+    "summary": "The HTTP status codes cheat sheet. A quick reference to every HTTP status code.",
+    "headings": [
+      "HTTP Status code",
+      "Means",
+      "2xx. Successful",
+      "4xx. Client Error",
+      "1xx. Information",
+      "3xx. Redirection",
+      "5xx. Server Error"
+    ],
+    "topSnippet": "- [1xx: Informational](#1xx-information){data-tooltip=\"It means the request has been received and the process is continuing.\"}",
+    "path": "http-status-code.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/http-status-code.md"
+  },
+  {
+    "id": "idea",
+    "title": "IntelliJ IDEA",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "jetbrains",
+      "java",
+      "shortcut"
+    ],
+    "summary": "IntelliJ IDEA is a very good Java IDE, most of its commands have shortcuts to keep your hands from leaving the keyboard",
+    "headings": [
+      "IDEA Windows & Linux Keymap",
+      "Editing",
+      "Usage Search",
+      "Navigation",
+      "Search/Replace",
+      "Live Templates",
+      "Refactoring",
+      "Debugging",
+      "Compile and Run",
+      "VCS/Local History",
+      "General"
+    ],
+    "path": "idea.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/idea.md"
+  },
+  {
+    "id": "ini",
+    "title": "INI",
+    "category": "Programming",
+    "tags": [],
+    "summary": "This is a quick reference cheat sheet for understanding and writing INI-format configuration files.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Example",
+      "Comments",
+      "Here is the comment text, ⚠️ Some compilers support it",
+      "Sections",
+      "Nesting (supported by some parsers)",
+      "Escape character",
+      "Array",
+      "Interpreter",
+      "See also"
+    ],
+    "topSnippet": "; Here are the comments\n[owner]\nname=John Doe\norganization=Acme Products\n\n[database]\n; Here are the comments\nserver=192.0.2.42\nport=143\nfile=\"acme payroll.dat\"\n\n[section.subsection]",
+    "path": "ini.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/ini.md"
+  },
+  {
+    "id": "iso-639-1",
+    "title": "ISO 639-1 Language Code",
+    "category": "Other",
+    "tags": [
+      "code",
+      "i18n",
+      "language"
+    ],
+    "summary": "This is a list of the ISO language codes that conform to the ISO 639-1 standard, it provide reference for multi-language website.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Multi-format of 639-1 codes",
+      "List of ISO 639-1 codes",
+      "Full codes"
+    ],
+    "topSnippet": "- The [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) is a standardized nomenclature used to classify languages",
+    "path": "iso-639-1.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/iso-639-1.md"
+  },
+  {
+    "id": "java",
+    "title": "Java",
+    "category": "Programming",
+    "tags": [
+      "object-oriented",
+      "class"
+    ],
+    "summary": "This cheat sheet is a crash course for Java beginners and help review the basic syntax of the Java language.",
+    "headings": [
+      "Getting Started",
+      "Hello.java",
+      "Variables",
+      "Primitive Data Types",
+      "Strings",
+      "Loops",
+      "Arrays",
+      "Swap",
+      "Type Casting",
+      "Conditionals",
+      "User Input",
+      "Java Strings"
+    ],
+    "topSnippet": "public class Hello {\n  // main method\n  public static void main(String[] args)\n  {\n    // Output: Hello, world!\n    System.out.println(\"Hello, world!\");\n  }\n}",
+    "path": "java.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/java.md"
+  },
+  {
+    "id": "javascript",
+    "title": "JavaScript",
+    "category": "Programming",
+    "tags": [
+      "js",
+      "web"
+    ],
+    "summary": "A JavaScript cheat sheet with the most important concepts, functions, methods, and more. A complete quick reference for beginners.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Console",
+      "Numbers",
+      "Variables",
+      "Strings",
+      "Arithmetic Operators",
+      "Comments",
+      "Assignment Operators",
+      "String Interpolation",
+      "let Keyword",
+      "const Keyword"
+    ],
+    "topSnippet": "// => Hello world!\nconsole.log('Hello world!');\n\n// => Hello CheatSheets.zip\nconsole.warn('hello %s', 'CheatSheets.zip');\n\n// Prints error message to stderr\nconsole.error(new Error('Oops!'));",
+    "path": "javascript.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/javascript.md"
+  },
+  {
+    "id": "jest",
+    "title": "Jest Cheat Sheet",
+    "category": "Testing",
+    "tags": [
+      "React Testing Jest"
+    ],
+    "summary": "Jest is a JavaScript testing framework designed by Facebook. It works out of the box with modern JavaScript apps especially those built with React or Node.js. Its main goal is to simplify testing by providing all required features in one package test runner, assertion library, mocking, spies, coverage reports, and snapshot testing.",
+    "headings": [
+      "A Quick Overview to Jest",
+      "Key Concepts Explained",
+      "🚀 Quick Start",
+      "✍️ Writing Tests",
+      "🔧 Setup Hooks",
+      "🎯 Focusing or Skipping Tests",
+      "🏁 Optional CLI Flags",
+      "✅ Expectations (Matchers)",
+      "Basic",
+      "Snapshots",
+      "Errors",
+      "Booleans"
+    ],
+    "topSnippet": "npm install --save-dev jest babel-jest",
+    "path": "jest.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/jest.md"
+  },
+  {
+    "id": "jira",
+    "title": "Jira",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 44 keyboard shortcuts found in Jira",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Global Shortcuts",
+      "Agile Shortcuts",
+      "Issue Actions and Navigator Shortcuts",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Atlassian's Jira](https://confluence.atlassian.com/agile066/jira-agile-user-s-guide/using-keyboard-shortcuts)",
+    "path": "jira.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/jira.md"
+  },
+  {
+    "id": "jquery",
+    "title": "jQuery",
+    "category": "Programming",
+    "tags": [
+      "web",
+      "js",
+      "javascript",
+      "library"
+    ],
+    "summary": "This [jQuery](https://jquery.com/) cheat sheet is a great reference for both beginners and experienced developers.",
+    "headings": [
+      "Getting Started",
+      "Including jQuery",
+      "Official CDN",
+      "jQuery syntax",
+      "Example:",
+      "jQuery document ready",
+      "jQuery Selectors",
+      "Examples",
+      "Combining selectors",
+      "Basics",
+      "Basic Filters",
+      "Attribute"
+    ],
+    "topSnippet": "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>",
+    "path": "jquery.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/jquery.md"
+  },
+  {
+    "id": "json",
+    "title": "JSON",
+    "category": "Programming",
+    "tags": [
+      "config",
+      "format"
+    ],
+    "summary": "This is a quick reference cheat sheet for understanding and writing JSON format configuration files.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Examples",
+      "Types",
+      "String",
+      "Examples",
+      "Invalid String",
+      "Number",
+      "Examples",
+      "Invalid Number",
+      "Objects",
+      "Arrays"
+    ],
+    "topSnippet": "{\n  \"name\": \"Jason\",\n  \"age\": 39,\n  \"height\": 1.92,\n  \"gender\": \"M\",\n  \"salary\": 70000,\n  \"married\": true,\n  \"children\": [\n    { \"name\": \"Tom\", \"age\": 9, \"gender\": \"M\" },\n    { \"name\": \"Ava\", \"age\": 7, \"gender\": \"F\" }\n  ]\n}",
+    "path": "json.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/json.md"
+  },
+  {
+    "id": "kanbanmail",
+    "title": "KanbanMail",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 29 keyboard shortcuts found in KanbanMail",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Global",
+      "Board",
+      "Email",
+      "Composer",
+      "Editor",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for KanbanMail](https://guides.kanbanmail.app/keyboard-shortcuts) _(guides.kanbanmail.app)_",
+    "path": "kanbanmail.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/kanbanmail.md"
+  },
+  {
+    "id": "kotlin",
+    "title": "Kotlin",
+    "category": "Programming",
+    "tags": [
+      "Cross-platform",
+      "Android"
+    ],
+    "summary": "A quick reference cheatsheet for Kotlin that includes usage, examples, and more.",
+    "headings": [
+      "Introduction to Kotlin",
+      "main()",
+      "Print statement",
+      "Notes",
+      "Execution order",
+      "Data Types and Variables",
+      "Mutable variables",
+      "Immutable variables",
+      "Type inference",
+      "String concatenation",
+      "String Templates",
+      "Built-in Properties and Functions"
+    ],
+    "topSnippet": "fun main() {\n  println(\"Greetings, CheatSheets.zip!\")\n  // Code goes here\n}",
+    "path": "kotlin.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/kotlin.md"
+  },
+  {
+    "id": "kubernetes",
+    "title": "Kubernetes",
+    "category": "Programming",
+    "tags": [
+      "config",
+      "format"
+    ],
+    "summary": "This page contains a list of commonly used kubectl commands and flags.",
+    "headings": [
+      "Viewing and finding resources",
+      "Nodes",
+      "Output the field information defined by the jsonpath expression",
+      "Pods",
+      "Export container group information to yaml file in yaml format",
+      "Use the field selector to filter out container group information",
+      "Namespaces",
+      "Deployments",
+      "Services",
+      "Daemon Sets",
+      "Events",
+      "Logs"
+    ],
+    "topSnippet": "kubectl get no # Display all node information\nkubectl get no -o wide # Show more information about all nodes\nkubectl describe no # Display node details\nkubectl get no -o yaml # Display node details in yaml format\nkubectl get node --selector=[label_name] # Filter the node with the specified label\nkubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=\"ExternalIP\")].address}'\n# Output the field information defined by the jsonpath expression\nkubectl top node [node_name] # Display node (CPU/memory/storage) usage",
+    "path": "kubernetes.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/kubernetes.md"
+  },
+  {
+    "id": "laravel",
+    "title": "Laravel",
+    "category": "Programming",
+    "tags": [
+      "web",
+      "framework",
+      "php"
+    ],
+    "summary": "[Laravel](https://laravel.com/docs/8.x/) is an expressive and progressive web application framework for PHP. This cheat sheet provides a reference for common commands and features for Laravel 8.",
+    "headings": [
+      "Getting Started",
+      "Requirements",
+      "Windows",
+      "Mac",
+      "Linux",
+      "Configuration",
+      ".env",
+      "Debug Mode",
+      "Maintenance Mode",
+      "Disable maintenance mode",
+      "Bypass Maintenance Mode",
+      "Routing"
+    ],
+    "topSnippet": "$ curl -s https://laravel.build/example-app | bash\n      $ cd example-app\n      $ ./vendor/bin/sail up",
+    "path": "laravel.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/laravel.md"
+  },
+  {
+    "id": "latex",
+    "title": "LaTeX",
+    "category": "Programming",
+    "tags": [],
+    "summary": "This cheat sheet summarizes a reference list of [LaTeX](https://www.latex-project.org/) commonly used display math notation and some application examples of [KaTeX](https://katex.org/).",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Example",
+      "Inline",
+      "Supported Functions",
+      "Accents",
+      "Emphasis in \\text&lcub;...&rcub;",
+      "Delimiter Sizing",
+      "Greek and Hebrew letters",
+      "Other letters",
+      "Alphabets and Unicode",
+      "Annotation"
+    ],
+    "topSnippet": "% \\f is defined as #1f(#2) using the macro\nf\\relax(x) = \\int_{-\\infty}^\\infty\n    f\\hat\\xi\\,e^{2 \\pi i \\xi x}\n    \\,d\\xi",
+    "path": "latex.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/latex.md"
+  },
+  {
+    "id": "lsof",
+    "title": "Lsof",
+    "category": "Linux Command",
+    "tags": [
+      "port",
+      "processes",
+      "utility"
+    ],
+    "summary": "This quick reference cheat sheet provides various for using lsof command.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Port-specific",
+      "Process-specific",
+      "User-specific",
+      "Network-specific",
+      "PID-specific",
+      "Filename-specific",
+      "Directory-specific",
+      "Kill"
+    ],
+    "topSnippet": "$ lsof\n$ sudo lsof -u root",
+    "path": "lsof.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/lsof.md"
+  },
+  {
+    "id": "lua",
+    "title": "Lua",
+    "category": "Programming",
+    "tags": [
+      "script",
+      "interpret"
+    ],
+    "summary": "The [Lua](https://www.lua.org/) cheat sheet is a one-page reference sheet for the Lua 5.4 programming language.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Hello World",
+      "Variables",
+      "Data Types",
+      "IO",
+      "Comments",
+      "Operators",
+      "Arithmetic",
+      "Relational",
+      "Logical",
+      "Conditionals"
+    ],
+    "topSnippet": "print(\"Hello, World!\") -- Hello, World!\n\n-- You can omit parentheses if the argument is one string or table literal\nprint \"Hello, World!\"  -- Hello, World!\n\nprint [[multi-line\n Hello\n World]]",
+    "path": "lua.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/lua.md"
+  },
+  {
+    "id": "markdown",
+    "title": "Markdown",
+    "category": "Programming",
+    "tags": [
+      "md",
+      "Markup",
+      "text",
+      "format"
+    ],
+    "summary": "This is a quick reference cheat sheet to the Markdown syntax.",
+    "headings": [
+      "Markdown Quick Reference",
+      "Headers (atx style)",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "Headers (setext style)",
+      "Blockquotes",
+      "Unordered List",
+      "Ordered List"
+    ],
+    "topSnippet": "# h1\n## h2\n### h3\n#### h4\n##### h5\n###### h6",
+    "path": "markdown.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/markdown.md"
+  },
+  {
+    "id": "matlab",
+    "title": "MATLAB",
+    "category": "Programming",
+    "tags": [],
+    "summary": "This quick reference cheat sheet provides an example introduction to using the [MATLAB](https://mathworks.cn/) scientific computing language to get started quickly",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Matrix and array operations",
+      "concatenation",
+      "Matrices and arrays",
+      "Create a matrix with multiple rows",
+      "5×1 column vector of zeros",
+      "Complex number",
+      "Basic knowledge",
+      "Input the command",
+      "Objects",
+      "Matrices and Arrays"
+    ],
+    "topSnippet": "a + 10",
+    "path": "matlab.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/matlab.md"
+  },
+  {
+    "id": "matplotlib",
+    "title": "Matplotlib",
+    "category": "Python",
+    "tags": [
+      "data visualization",
+      "matplotlib",
+      "plotting"
+    ],
+    "summary": "[Matplotlib](https://matplotlib.org/) is a comprehensive library for creating static, animated, and interactive plots in Python. This cheat sheet provides a quick reference from basic to advanced usage, covering essential features for data science, machine learning, and scientific computing.",
+    "headings": [
+      "Getting Started",
+      "Importing",
+      "Basic Plot",
+      "Plot Types",
+      "Line Plot",
+      "Scatter Plot",
+      "Bar Plot",
+      "Horizontal Bar Plot",
+      "Histogram",
+      "Pie Chart",
+      "Customization",
+      "Subplots & Layouts"
+    ],
+    "topSnippet": "import matplotlib.pyplot as plt  # Core plotting library\nimport numpy as np               # For numerical operations",
+    "path": "matplotlib.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/matplotlib.md"
+  },
+  {
+    "id": "microsoft-teams",
+    "title": "Microsoft Teams",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 38 keyboard shortcuts found in Microsoft Teams",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General",
+      "Navigation",
+      "Messaging",
+      "Meetings and Calls",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Microsoft Teams](https://support.microsoft.com/en-us/office/keyboard-shortcuts-for-microsoft-teams-2e8e2a70-e8d8-4a19-949b-4c36dd5292d2)",
+    "path": "microsoft-teams.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/microsoft-teams.md"
+  },
+  {
+    "id": "mime",
+    "title": "MIME types",
+    "category": "Other",
+    "tags": [
+      "media type"
+    ],
+    "summary": "This cheat sheet lists some common MIME types for the Web. You can look in the [IANA/MIME Media Types registry](http://www.iana.org/assignments/media-types/index.html) which contains all registered MIME types.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Multi-format of MIME types",
+      "Lists of MIME types",
+      "Common MIME (Media) types"
+    ],
+    "topSnippet": "- The MIME type registry associates particular filename extensions and filename pattern",
+    "path": "mime.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/mime.md"
+  },
+  {
+    "id": "missive",
+    "title": "Missive",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 83 keyboard shortcuts found in Missive",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Navigation",
+      "Selection",
+      "Application",
+      "Actions",
+      "Composer",
+      "Formatting",
+      "Calendar",
+      "Jumping",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Missive Team Inbox](https://missiveapp.com/help/keyboard-shortcuts) _(missiveapp.com)_",
+    "path": "missive.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/missive.md"
+  },
+  {
+    "id": "mitmproxy",
+    "title": "Mitmproxy",
+    "category": "Toolkit",
+    "tags": [
+      "capture",
+      "traffic",
+      "network",
+      "utility"
+    ],
+    "summary": "[mitmproxy](https://mitmproxy.org/) is a free and open source interactive HTTPS proxy. This is a quick reference cheat sheet to the mitmproxy.",
+    "headings": [
+      "Getting Started",
+      "Usage",
+      "Movement",
+      "Copy to Clipboard",
+      "Save to File",
+      "Common Keybindings",
+      "Global Keybindings",
+      "Flow (View)",
+      "Mitmproxy Filter",
+      "Filter",
+      "Operators",
+      "Expressions"
+    ],
+    "topSnippet": "k                 Ctrl b\n        ▲                   ▲▲\n        │                   ││\nh ◀ ─── + ─── ▶ l           ││ page\n        │                   ││\n        ▼                   ▼▼\n        j             Ctrl f / Space",
+    "path": "mitmproxy.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/mitmproxy.md"
+  },
+  {
+    "id": "monday",
+    "title": "Monday.com",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 24 keyboard shortcuts found on Monday.com",
+    "headings": [
+      "Keyboard Shortcuts",
+      "System",
+      "Board I",
+      "Board II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Monday.com](https://support.monday.com/hc/en-us/articles/115005339905-The-Spreadsheet-capabilities-shortcuts-)",
+    "path": "monday.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/monday.md"
+  },
+  {
+    "id": "mongodb",
+    "title": "MongoDB",
+    "category": "Database",
+    "tags": [
+      "NoSQL",
+      "DB"
+    ],
+    "summary": "The MongoDB cheat sheet provides you with the most commonly used MongoDB commands and queries for your reference. the cheatsheet is from mongodb developers website",
+    "headings": [
+      "Getting Started",
+      "Connect MongoDB Shell",
+      "Helpers",
+      "Crud",
+      "Create",
+      "Delete",
+      "Update",
+      "Array",
+      "Update many",
+      "FindOneAndUpdate",
+      "Upsert",
+      "Replace"
+    ],
+    "topSnippet": "mongo # connects to mongodb://127.0.0.1:27017 by default",
+    "path": "mongodb.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/mongodb.md"
+  },
+  {
+    "id": "mysql",
+    "title": "MySQL",
+    "category": "Database",
+    "tags": [
+      "RDBMS",
+      "DB"
+    ],
+    "summary": "The SQL cheat sheet provides you with the most commonly used SQL statements for your reference.",
+    "headings": [
+      "Getting Started",
+      "Connect MySQL",
+      "Commons",
+      "Database",
+      "Table",
+      "Process",
+      "Other",
+      "Backups",
+      "MySQL Examples",
+      "Managing tables",
+      "Querying data from a table",
+      "Querying from multiple tables"
+    ],
+    "topSnippet": "mysql -u <user> -p\n\nmysql [db_name]\n\nmysql -h <host> -P <port> -u <user> -p [db_name]\n\nmysql -h <host> -u <user> -p [db_name]",
+    "path": "mysql.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/mysql.md"
+  },
+  {
+    "id": "nc",
+    "title": "Netcat",
+    "category": "Linux Command",
+    "tags": [
+      "ncat",
+      "nc",
+      "utility",
+      "network",
+      "traffic"
+    ],
+    "summary": "This cheat sheet provides various for using Netcat on both Linux and Unix.",
+    "headings": [
+      "Getting Started",
+      "Usage",
+      "Option examples",
+      "Chat client-server",
+      "Netcat Examples",
+      "Banner grabbing",
+      "Port scanning",
+      "Proxy and port forwarding",
+      "Download file",
+      "Upload file",
+      "Directory transfer",
+      "Encrypt transfer"
+    ],
+    "topSnippet": "$ nc [options] [host] [port]",
+    "path": "nc.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/nc.md"
+  },
+  {
+    "id": "neo4j",
+    "title": "Neo4j",
+    "category": "Database",
+    "tags": [
+      "DB",
+      "GraphDB"
+    ],
+    "summary": "A Neo4j cheat sheet with getting started resources and information on how to query the database with Cypher.",
+    "headings": [
+      "Getting Started",
+      "Getting Started with Neo4j",
+      "Graph Database Concepts",
+      "Neo4j Syntax",
+      "Read query structure",
+      "Write-only query structure",
+      "Read-write query structure",
+      "Neo4j Reading Data",
+      "MATCH",
+      "WHERE",
+      "RETURN",
+      "WITH"
+    ],
+    "topSnippet": "[USE]\n[MATCH WHERE]\n[OPTIONAL MATCH WHERE]\n[WITH [ORDER BY] [SKIP] [LIMIT]]\nRETURN [ORDER BY] [SKIP] [LIMIT]",
+    "path": "neo4j.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/neo4j.md"
+  },
+  {
+    "id": "netstat",
+    "title": "Netstat",
+    "category": "Linux Command",
+    "tags": [
+      "network",
+      "utility",
+      "port"
+    ],
+    "summary": "This quick reference cheat sheet provides various for using netstat command.",
+    "headings": [
+      "Getting Started",
+      "Statistics",
+      "Listening",
+      "Connections",
+      "Statistics",
+      "Networks",
+      "Routing"
+    ],
+    "topSnippet": "$ netstat -anp | grep :80",
+    "path": "netstat.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/netstat.md"
+  },
+  {
+    "id": "networkports",
+    "title": "NetworkPorts",
+    "category": "Other",
+    "tags": [
+      "Network"
+    ],
+    "summary": "A network ports cheat sheet with non-exhaustive list of ports used according to their field of application.",
+    "headings": [
+      "Networking and Infrastructure",
+      "Web Ports",
+      "Network and Infrastructure Service Ports",
+      "Virtualization and Containerization Service Ports",
+      "Monitoring and Management Service Ports",
+      "Data Management",
+      "Data Base Ports",
+      "Communication Services",
+      "Remote Ports",
+      "Messagerie Service Ports",
+      "Instant Messaging and VoIP Service Ports",
+      "Voice and Video Service Ports"
+    ],
+    "path": "networkports.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/networkports.md"
+  },
+  {
+    "id": "nginx",
+    "title": "Nginx",
+    "category": "Linux Command",
+    "tags": [],
+    "summary": "nginx quick reference cheat sheet",
+    "headings": [
+      "Getting Started",
+      "Install & Service",
+      "Key Paths",
+      "Minimal HTTP Server",
+      "/etc/nginx/conf.d/example.conf",
+      "Config Structure",
+      "Core Blocks",
+      "servers / includes go here...",
+      "Context & Order",
+      "Common Includes",
+      "Virtual Hosts & Redirects",
+      "Basic Server Block"
+    ],
+    "topSnippet": "$ sudo apt update && sudo apt install -y nginx",
+    "path": "nginx.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/nginx.md"
+  },
+  {
+    "id": "nim",
+    "title": "Nim",
+    "category": "Programming",
+    "tags": [],
+    "summary": "The Nim quick reference cheat sheet that aims at providing help on writing basic syntax and methods.",
+    "headings": [
+      "Getting Started",
+      "helloworld.nim",
+      "This is a comment",
+      "readLine(stdin) asks you to type in a string.",
+      "Common compile commands (terminal)",
+      "Useful Resources",
+      "Variables",
+      "'var' declares mutable variables.",
+      "A 'var' block can declare multiple variables at once.",
+      "Immutable Variables (let)",
+      "'let' declares immutable variables.",
+      "Comments"
+    ],
+    "topSnippet": "echo \"Hello World!\"\n\n# This is a comment\necho \"What's your name? \"\nvar name: string = readLine(stdin)\n# readLine(stdin) asks you to type in a string.\n\necho \"Hi, \", name, \"!\"",
+    "path": "nim.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/nim.md"
+  },
+  {
+    "id": "nix",
+    "title": "Nix",
+    "category": "Programming",
+    "tags": [],
+    "summary": "The Nix quick reference cheat sheet that aims at providing help on writing basic nix code.",
+    "headings": [
+      "Types & Syntax",
+      "String",
+      "Integer",
+      "Float",
+      "Boolean",
+      "Null",
+      "Path",
+      "Attribute Set",
+      "List",
+      "Comment",
+      "↓ single-line comment",
+      "your comment"
+    ],
+    "topSnippet": "let\n  x = \"single-line string\";\n  y = ''\n    multi-line string\n  '';\nin",
+    "path": "nix.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/nix.md"
+  },
+  {
+    "id": "nmap",
+    "title": "Nmap",
+    "category": "Linux Command",
+    "tags": [
+      "network",
+      "scan",
+      "port"
+    ],
+    "summary": "The [Nmap](https://nmap.org/) cheat sheet is a one-page reference sheet for the famous Network Mapper tool.",
+    "headings": [
+      "Getting Started",
+      "Basic Usage :",
+      "set your target in etc/hosts",
+      "fast scan of all port of your target",
+      "fast scan on port 80 with os detection",
+      "Basic Options :",
+      "Nmap Intermediate Options",
+      "Service Detections :",
+      "Timing",
+      "Formating answers",
+      "Details & Report",
+      "Advanced Technic"
+    ],
+    "topSnippet": "# set your target in etc/hosts\n\n# fast scan of all port of your target\nnmap -p- -T5 target \n\n# fast scan on port 80 with os detection  \nnamp -p, 80 -T5 -O target",
+    "path": "nmap.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/nmap.md"
+  },
+  {
+    "id": "notion",
+    "title": "Notion Shortcuts",
+    "category": "Productivity",
+    "tags": [
+      "notion",
+      "keyboard",
+      "shortcuts",
+      "productivity",
+      "reference"
+    ],
+    "summary": "A comprehensive quick reference guide for Notion keyboard shortcuts on Desktop and Web, designed to boost your productivity.",
+    "headings": [
+      "Notion Keyboard Shortcuts",
+      "Most Popular / Essential",
+      "Create & Navigate",
+      "View & Mode",
+      "Markdown Style Formatting",
+      "On New Lines",
+      "Inline",
+      "Text Formatting & Editing",
+      "Basic Formatting",
+      "Block Type Conversion",
+      "Editing",
+      "Creating & Modifying Blocks"
+    ],
+    "topSnippet": "- `*`, `-`, or `+` : Bulleted list",
+    "path": "notion.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/notion.md"
+  },
+  {
+    "id": "npm",
+    "title": "npm",
+    "category": "Programming",
+    "tags": [
+      "js",
+      "web",
+      "node",
+      "npm"
+    ],
+    "summary": "A NPM (node package manager) cheat sheet with the most important concepts, and commands to install, update, and manage your node packages.",
+    "headings": [
+      "Getting Started with npm",
+      "Introduction",
+      "Installing and checking npm version",
+      "or",
+      "Initializing a new project",
+      "or",
+      "Installing packages",
+      "Install dependencies from package.json",
+      "or",
+      "Install a specific package",
+      "Uninstall a package",
+      "Viewing, searching and exploring packages"
+    ],
+    "topSnippet": "npm --version\n# or\nnpm -v",
+    "path": "npm.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/npm.md"
+  },
+  {
+    "id": "numpy",
+    "title": "Numpy",
+    "category": "Python",
+    "tags": [
+      "scientific",
+      "computing"
+    ],
+    "summary": "[NumPy](https://numpy.org/) is the fundamental package for scientific computing with Python. This cheat sheet is a quick reference for NumPy beginners.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Importing/exporting",
+      "Creating Arrays",
+      "Inspecting Properties",
+      "Copying/sorting/reshaping",
+      "Adding/removing Elements",
+      "Combining/splitting",
+      "Indexing/slicing/subsetting",
+      "Vector Math",
+      "Scalar Math",
+      "Statistics"
+    ],
+    "topSnippet": "import numpy as np",
+    "path": "numpy.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/numpy.md"
+  },
+  {
+    "id": "obsidian",
+    "title": "Obsidian",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 17 keyboard shortcuts found in the Obsidian knowledge base app.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Default Shortcuts",
+      "Editing",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Obsidian](https://help.obsidian.md/How+to/Keyboard+shortcuts) _(help.obsidian.md)_",
+    "path": "obsidian.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/obsidian.md"
+  },
+  {
+    "id": "ocaml",
+    "title": "OCaml",
+    "category": "Programming",
+    "tags": [
+      "scientific",
+      "functional"
+    ],
+    "summary": "The [OCaml](https://www.ocaml.org/) cheat sheet is a one-page reference sheet for the OCaml programming language.",
+    "headings": [
+      "Getting Started",
+      "hello.ml",
+      "Compile and Run",
+      "Build and Run with Dune",
+      "you can also just run",
+      "Imports",
+      "Global Open",
+      "Local Open",
+      "Comments",
+      "Line & Block Comments",
+      "Documentation Comments",
+      "Data Types"
+    ],
+    "topSnippet": "let () =\n  let message = \"Hello, World!\" in\n  Printf.printf \"%s\\n\" message",
+    "path": "ocaml.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/ocaml.md"
+  },
+  {
+    "id": "openssl",
+    "title": "OpenSSL",
+    "category": "Linux Command",
+    "tags": [],
+    "summary": "This is a reference of commands to use to interact with electronic certificates",
+    "headings": [
+      "Private Key",
+      "Print out the private key details",
+      "Print out the hashes of the private key",
+      "Change password",
+      "List available elliptic curves",
+      "Create elliptic curve private key with a specific curve",
+      "Certificate",
+      "Print out the hashes of the certificate",
+      "Print out the content of the certificates",
+      "Print out specific fields of the certificates",
+      "Inspect server certificates",
+      "Verify certificates"
+    ],
+    "topSnippet": "openssl rsa -check -text -in privateKey.key",
+    "path": "openssl.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/openssl.md"
+  },
+  {
+    "id": "origami",
+    "title": "Origami Studio",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 71 keyboard shortcuts found in Origami Studio. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General",
+      "Patches",
+      "Organizing Patches",
+      "Layers",
+      "Viewer",
+      "Number Inputs",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Origami Studio](https://origami.design/documentation/workflow/KeyboardShortcuts.html)",
+    "path": "origami.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/origami.md"
+  },
+  {
+    "id": "outlook",
+    "title": "Microsoft Outlook",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 210 keyboard shortcuts found in Microsoft Outlook",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Frequently used",
+      "Basic navigation",
+      "Search",
+      "Create an item or file",
+      "Commands in most views",
+      "Mail",
+      "Calendar",
+      "People",
+      "Tasks",
+      "Format text",
+      "Add web information to items"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Microsoft Outlook](https://support.office.com/en-us/article/keyboard-shortcuts-for-outlook-3cdeb221-7ae5-4c1d-8c1d-9e63216c1efd)",
+    "path": "outlook.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/outlook.md"
+  },
+  {
+    "id": "pandas",
+    "title": "Pandas",
+    "category": "Python",
+    "tags": [
+      "data analysis",
+      "data manipulation"
+    ],
+    "summary": "[Pandas](https://pandas.pydata.org/) is a powerful data analysis and manipulation library for Python. This cheat sheet is a quick reference for Pandas beginners.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Creating DataFrames",
+      "Inspecting Data",
+      "Selecting Data",
+      "Data Cleaning",
+      "Adding/Removing Data",
+      "Combining Data",
+      "Aggregating Data",
+      "Applying Functions",
+      "Handling Dates",
+      "Input/Output"
+    ],
+    "topSnippet": "import pandas as pd",
+    "path": "pandas.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/pandas.md"
+  },
+  {
+    "id": "pandoc",
+    "title": "Pandoc",
+    "category": "Linux Command",
+    "tags": [
+      "convert",
+      "document",
+      "utility"
+    ],
+    "summary": "[Pandoc](https://pandoc.org) is a document converter, this pandoc cheat sheet contains pandoc commands and some common pandoc tricks.",
+    "headings": [
+      "Getting Started",
+      "Pandoc Usage",
+      "Pandoc examples",
+      "LaTeX to MS Word",
+      "Also see"
+    ],
+    "topSnippet": "$ pandoc -s [source file] -o [output file]",
+    "path": "pandoc.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/pandoc.md"
+  },
+  {
+    "id": "perl",
+    "title": "Perl",
+    "category": "Programming",
+    "tags": [],
+    "summary": "The perl quick reference cheat sheet that aims at providing help on writing basic syntax and methods.",
+    "headings": [
+      "Getting Started",
+      "Unix and Linux Installation",
+      "Windows Installation",
+      "Macintosh Installation",
+      "Running Perl",
+      "Unix/Linux",
+      "Windows/DOS",
+      "Available command line options",
+      "Script from the Command-line",
+      "Unix/Linux",
+      "Windows/DOS",
+      "First Perl Program"
+    ],
+    "topSnippet": "$tar -xzf perl-5.x.y.tar.gz\n$cd perl-5.x.y\n$./Configure -de\n$make\n$make test\n$make install",
+    "path": "perl.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/perl.md"
+  },
+  {
+    "id": "php",
+    "title": "PHP",
+    "category": "Programming",
+    "tags": [
+      "web"
+    ],
+    "summary": "This [PHP](https://www.php.net/manual/en/) cheat sheet provides a reference for quickly looking up the correct syntax for the code you use most frequently.",
+    "headings": [
+      "Getting Started",
+      "hello.php",
+      "Variables",
+      "Strings",
+      "Arrays",
+      "Operators",
+      "Include",
+      "vars.php",
+      "test.php",
+      "Functions",
+      "Comments",
+      "This is a one line shell-style comment"
+    ],
+    "topSnippet": "<?php // begin with a PHP open tag.\n\necho \"Hello World\\n\";\nprint(\"Hello cheatsheets.zip\");\n\n?>",
+    "path": "php.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/php.md"
+  },
+  {
+    "id": "phpstorm",
+    "title": "PhpStorm",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "jetbrains"
+    ],
+    "summary": "A visual cheat-sheet for the 96 keyboard shortcuts found in JetBrains PhpStorm",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Editing",
+      "Debugging",
+      "Running",
+      "Search/Replace",
+      "Usage Search",
+      "Navigation",
+      "Refactoring",
+      "VCS/Local History",
+      "General",
+      "Live Templates/Snippets",
+      "Misc"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for PhpStorm](https://resources.jetbrains.com/storage/products/phpstorm/docs/PhpStorm_ReferenceCard.pdf)",
+    "path": "phpstorm.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/phpstorm.md"
+  },
+  {
+    "id": "pm2",
+    "title": "PM2",
+    "category": "Linux Command",
+    "tags": [
+      "process"
+    ],
+    "summary": "[PM2] is a daemon process manager that will help you manage and keep your application online. Getting started with PM2 is straightforward, it is offered as a simple and intuitive CLI.",
+    "headings": [
+      "Getting Started",
+      "Install",
+      "Start an app",
+      "Some options you can pass to the CLI",
+      "Managing processes",
+      "Instead of app_name you can pass",
+      "Check status, logs, metrics",
+      "Cluster mode",
+      "Ecosystem File",
+      "Setup startup script",
+      "Restart application on changes",
+      "CheatSheet"
+    ],
+    "topSnippet": "$ npm install pm2@latest -g",
+    "path": "pm2.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/pm2.md"
+  },
+  {
+    "id": "pocket",
+    "title": "Pocket",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 36 keyboard shortcuts found on Pocket for Web",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Viewing Your List",
+      "Item Actions",
+      "Article View",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Pocket](https://help.getpocket.com/article/994-keyboard-shortcuts-in-pocket-for-web)",
+    "path": "pocket.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/pocket.md"
+  },
+  {
+    "id": "postgres",
+    "title": "PostgreSQL",
+    "category": "Database",
+    "tags": [
+      "DB",
+      "RDBMS"
+    ],
+    "summary": "The [PostgreSQL](https://www.postgresql.org/docs/current/) cheat sheet provides you with the common PostgreSQL commands and statements.",
+    "headings": [
+      "Getting Started",
+      "Getting started",
+      "psql commands",
+      "Getting help",
+      "PostgreSQL Working",
+      "Recon",
+      "Databases",
+      "Tables",
+      "Permissions",
+      "Columns",
+      "Data",
+      "Users"
+    ],
+    "topSnippet": "$ sudo -u postgres psql",
+    "path": "postgres.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/postgres.md"
+  },
+  {
+    "id": "postman",
+    "title": "Postman",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 23 keyboard shortcuts found in Postman",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Navigational Shortcuts",
+      "Manipulation Shortcuts",
+      "Global Shortcuts",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Postman](https://learning.getpostman.com/docs/postman/launching_postman/keyboard_shortcuts/)",
+    "path": "postman.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/postman.md"
+  },
+  {
+    "id": "powershell",
+    "title": "PowerShell",
+    "category": "Programming",
+    "tags": [
+      "script",
+      "windows"
+    ],
+    "summary": "This is a quick reference cheat sheet to getting started with PowerShell scripting.",
+    "headings": [
+      "Basic Commands",
+      "Helper Commands",
+      "Object Manipulation",
+      "FileSystem",
+      "using .NET Base Class Library",
+      "System Management",
+      "Windows Management Instrumentation",
+      "Retrieve BIOS information",
+      "Retrieve information about locally connected physical disk devices",
+      "Retrieve information about install physical memory (RAM)",
+      "Retrieve information about installed network adapters (physical + virtual)",
+      "Retrieve information about installed graphics / video card (GPU)"
+    ],
+    "topSnippet": "Get-Module --ListAvailable",
+    "path": "powershell.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/powershell.md"
+  },
+  {
+    "id": "principle",
+    "title": "Principle",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 30 keyboard shortcuts found in Principle. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Layers",
+      "Editing",
+      "Canvas Navigation",
+      "Selection",
+      "Preview",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Principle](https://principleformac.com/docs.html#shortcuts) _(principleformac.com)_",
+    "path": "principle.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/principle.md"
+  },
+  {
+    "id": "proto-io",
+    "title": "Proto.io",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 48 keyboard shortcuts found in Proto.io",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Main",
+      "History",
+      "Edit",
+      "Grid",
+      "View",
+      "Item",
+      "Group",
+      "States Preview",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Proto.io](https://support.proto.io/hc/en-us/articles/115001423511-Keyboard-shortcuts)",
+    "path": "proto-io.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/proto-io.md"
+  },
+  {
+    "id": "putty",
+    "title": "PuTTy",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 32 keyboard shortcuts found on the PuTTy app",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General Shortcuts",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for PuTTy](http://rizwanansari.net/putty-shell-keyboard-shortcuts/) _(rizwanansari.net)_",
+    "path": "putty.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/putty.md"
+  },
+  {
+    "id": "python",
+    "title": "Python",
+    "category": "Programming",
+    "tags": [
+      "script",
+      "interpret"
+    ],
+    "summary": "The [Python](https://www.python.org/) cheat sheet is a one-page reference sheet for the Python 3 programming language.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Hello World",
+      "Variables",
+      "Data Types",
+      "Slicing String",
+      "Lists",
+      "If Else",
+      "Loops",
+      "Functions",
+      "File Handling",
+      "Arithmetic"
+    ],
+    "topSnippet": ">>> print(\"Hello, World!\")\nHello, World!",
+    "path": "python.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/python.md"
+  },
+  {
+    "id": "pytorch",
+    "title": "PyTorch",
+    "category": "Other",
+    "tags": [
+      "AI",
+      "Python"
+    ],
+    "summary": "This is a quick reference list of cheat sheets for PyTorch. See also [PyTorch website](https://pytorch.org/)",
+    "headings": [
+      "Imports",
+      "General",
+      "Neural Network API",
+      "Torchscript and JIT",
+      "data input, and traces the computational steps",
+      "that the data encounters as it progresses through the model",
+      "control flow within the code being traced",
+      "ONNX",
+      "model using a trained model, dummy",
+      "data and the desired file name",
+      "IR is well formed",
+      "representation of the graph"
+    ],
+    "topSnippet": "import torch                                        # root package\nfrom torch.utils.data import Dataset, DataLoader    # dataset representation and loading",
+    "path": "pytorch.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/pytorch.md"
+  },
+  {
+    "id": "quickref",
+    "title": "CheatSheets",
+    "category": "Other",
+    "tags": [
+      "guide",
+      "reference"
+    ],
+    "summary": "This is the magic syntax variant manual that you can use on CheatSheets.zip, It's a good practice for contributors.",
+    "headings": [
+      "Getting Started",
+      "Develop Setup",
+      "Directory Structure",
+      "Cheatsheet Structure",
+      "Syntax Variants",
+      "Create source/\\_posts/demo.md",
+      "Getting Started",
+      "List Card",
+      "Table Card",
+      "Section Variants",
+      "Section Overview",
+      ".cols-1"
+    ],
+    "topSnippet": "$ git clone https://github.com/Fechin/reference.git",
+    "path": "quickref.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/quickref.md"
+  },
+  {
+    "id": "quip",
+    "title": "Quip.com",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 52 keyboard shortcuts found in Quip",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Anywhere",
+      "Style Shortcuts",
+      "Editing Shortcuts",
+      "Spreadsheets",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Quip](https://www.quipsupport.com/hc/en-us/articles/210436306-What-are-Quip-s-keyboard-shortcuts-)",
+    "path": "quip.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/quip.md"
+  },
+  {
+    "id": "react-test-library",
+    "title": "React Testing Library Cheat Sheet",
+    "category": "Testing",
+    "tags": [
+      "react",
+      "testing",
+      "javascript",
+      "cheatsheet"
+    ],
+    "summary": "When it comes to testing React apps manually, we can either choose to render individual component trees in a simplified test environment or run the complete app in a realistic browser environment (end-to-end testing). But for automated tests, React Testing Library (RTL) is recommended for its user-centric approach and maintainability.",
+    "headings": [
+      "Introduction",
+      "Basic level",
+      "1. Purpose & Solution",
+      "2. A basic component render test",
+      "3. Why use RTL vs Enzyme?",
+      "4. Queries in RTL",
+      "5. Component tree testing level",
+      "Intermediate level",
+      "1. Jest vs RTL",
+      "2. Mocking with MSW",
+      "3. `render` options",
+      "4. `renderHook` usage"
+    ],
+    "topSnippet": "const title = 'Hello, World!';\n\nfunction App() {\n  return <div>{title}</div>;\n}\n\nexport default App;",
+    "path": "react-test-library.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/react-test-library.md"
+  },
+  {
+    "id": "react",
+    "title": "React",
+    "category": "Programming",
+    "tags": [
+      "react",
+      "web"
+    ],
+    "summary": "A React cheat sheet with the most important concepts, functions, methods, and more. A complete quick reference for beginners.",
+    "headings": [
+      "Getting Started",
+      "JSX",
+      "JSX Expressions",
+      "JSX Attributes",
+      "JSX Functions",
+      "JSX Conditional Rendering",
+      "Components",
+      "Functional Component",
+      "Embed an internal Component",
+      "Embed an external Component",
+      "Advanced Functional Components",
+      "Properties"
+    ],
+    "topSnippet": "let element = <h1>Hello, world!</h1>;\n\nlet emptyHeading = <h1 />;",
+    "path": "react.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/react.md"
+  },
+  {
+    "id": "reddit",
+    "title": "Reddit",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 17 keyboard shortcuts found on Reddit.com",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Navigation",
+      "Action",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Reddit](https://i.imgur.com/7644kEy.png) _(i.imgur.com)_",
+    "path": "reddit.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/reddit.md"
+  },
+  {
+    "id": "redis",
+    "title": "Redis",
+    "category": "Database",
+    "tags": [
+      "cache"
+    ],
+    "summary": "This is a [redis](https://redis.io/) quick reference cheat sheet that lists examples of redis commands",
+    "headings": [
+      "Getting Started",
+      "Getting started",
+      "Hello World",
+      "Ping",
+      "Hello World",
+      "Basic Data types",
+      "Redis String command",
+      "APPEND",
+      "Example",
+      "BITCOUNT",
+      "Example",
+      "BITFIELD"
+    ],
+    "topSnippet": "$ redis-server",
+    "path": "redis.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/redis.md"
+  },
+  {
+    "id": "regex",
+    "title": "RegEX",
+    "category": "Toolkit",
+    "tags": [
+      "regular expression",
+      "regexp",
+      "pattern"
+    ],
+    "summary": "A quick reference for regular expressions (regex), including symbols, ranges, grouping, assertions and some sample patterns to get you started.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Character Classes",
+      "Quantifiers",
+      "Common Metacharacters",
+      "Meta Sequences",
+      "Anchors",
+      "Substitution",
+      "Group Constructs",
+      "Assertions",
+      "Lookarounds",
+      "Flags/Modifiers"
+    ],
+    "topSnippet": "M(?(?=.*?\\bher\\b)s|r)\\.",
+    "path": "regex.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/regex.md"
+  },
+  {
+    "id": "resolutions",
+    "title": "Resolutions",
+    "category": "Other",
+    "tags": [
+      "design",
+      "screen",
+      "size"
+    ],
+    "summary": "This cheat sheet lists screen sizes, viewport size and CSS media queries for popular Phones, Tablets, Laptops and Watches",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Multi-format of Resolutions",
+      "Lists of Resolutions",
+      "Mobile Phones",
+      "Tablets",
+      "Laptops",
+      "Smart Watch"
+    ],
+    "topSnippet": "- Resolution is the number of pixels (individual points of color)",
+    "path": "resolutions.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/resolutions.md"
+  },
+  {
+    "id": "roam",
+    "title": "Roam Research",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 45 keyboard shortcuts found on Roam Research",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General",
+      "Lists and Blocks",
+      "Version Control",
+      "Formatting",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Roam Research](https://www.roamtips.com/home/the-complete-list-of-roam-research-keyboard-shortcuts)",
+    "path": "roam.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/roam.md"
+  },
+  {
+    "id": "ruby",
+    "title": "Ruby",
+    "category": "Programming",
+    "tags": [
+      "script",
+      "interpret"
+    ],
+    "summary": "The [Ruby](https://www.ruby-lang.org/) cheat sheet is a one-page reference sheet for the Ruby programming language.",
+    "headings": [
+      "Getting Started",
+      "Install",
+      "Debian, Ubuntu",
+      "Windows",
+      "What is Gemfile and Gemfile.lock",
+      "Specify gem in the Gemfile in the project root directory",
+      "Install a specific version of a specific ruby gem",
+      "Update gems using Bundler",
+      "Updating a single gem using Bundler",
+      "Use Bundler to update each gem in the Gemfile",
+      "Comment",
+      "This is a single line comments."
+    ],
+    "topSnippet": "# Debian, Ubuntu\n$ sudo apt-get install ruby-full\n# Windows\n$ winget install RubyInstallerTeam.Ruby\n$ brew install ruby # macOS\n$ docker run -it --rm ruby:latest # Docker",
+    "path": "ruby.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/ruby.md"
+  },
+  {
+    "id": "rust",
+    "title": "Rust",
+    "category": "Programming",
+    "tags": [],
+    "summary": "The Rust quick reference cheat sheet that aims at providing help on writing basic syntax and methods.",
+    "headings": [
+      "Getting Started",
+      "Hello_World.rs",
+      "Compiling and Running",
+      "Primitive types",
+      "Formatting",
+      "Printing Styles",
+      "Variables",
+      "Comments",
+      "Functions",
+      "Rust Types",
+      "Integer",
+      "Floating-Point"
+    ],
+    "topSnippet": "fn main() {\n    println!(\"Hello, World!\");\n}",
+    "path": "rust.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/rust.md"
+  },
+  {
+    "id": "sass",
+    "title": "Sass",
+    "category": "Programming",
+    "tags": [
+      "css"
+    ],
+    "summary": "This is a quick reference cheat sheet that lists the most useful features of [SASS](https://sass-lang.com).",
+    "headings": [
+      "Sass Basics",
+      "Introduction",
+      "Variables",
+      "String interpolation",
+      "Comments",
+      "Mixins",
+      "Nesting",
+      "to properties",
+      "Extend",
+      "@import",
+      "Sass Mixins",
+      "Parameters"
+    ],
+    "topSnippet": "$defaultLinkColor: #46eac2;\n\na {\n  color: $defaultLinkColor;\n}",
+    "path": "sass.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/sass.md"
+  },
+  {
+    "id": "screen",
+    "title": "Screen",
+    "category": "Linux Command",
+    "tags": [
+      "terminal",
+      "session",
+      "utility"
+    ],
+    "summary": "This is a quick reference guide cheat sheet for the screen command.",
+    "headings": [
+      "Getting Started",
+      "Getting started",
+      "Options",
+      "Help",
+      "Window Management",
+      "Getting Out",
+      "Split screen",
+      "Misc",
+      "Screen tricks"
+    ],
+    "topSnippet": "$ screen",
+    "path": "screen.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/screen.md"
+  },
+  {
+    "id": "sdkman",
+    "title": "SDKMAN!",
+    "category": "Linux Command",
+    "tags": [
+      "command",
+      "software development kits",
+      "sdk"
+    ],
+    "summary": "This cheatsheet provides the most commonly used SDKMAN! command line instructions",
+    "headings": [
+      "Getting Started",
+      "Installing SDKMAN!",
+      "Installing and managing candidates"
+    ],
+    "topSnippet": "$ curl -s \"https://get.sdkman.io\" | bash",
+    "path": "sdkman.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/sdkman.md"
+  },
+  {
+    "id": "sed",
+    "title": "Sed",
+    "category": "Linux Command",
+    "tags": [
+      "editor",
+      "replace",
+      "text",
+      "utility"
+    ],
+    "summary": "[Sed](https://www.gnu.org/software/sed/manual/sed.html) is a stream editor, this sed cheat sheet contains sed commands and some common sed tricks.",
+    "headings": [
+      "Getting Started",
+      "Sed Usage",
+      "Option Examples",
+      "Multiple commands",
+      "Sed script",
+      "Examples",
+      "Sed commands",
+      "Commands",
+      "Space commands",
+      "Flags",
+      "Loops commands",
+      "Misc Flags"
+    ],
+    "topSnippet": "$ sed [options] command [input-file]",
+    "path": "sed.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/sed.md"
+  },
+  {
+    "id": "selenium",
+    "title": "Selenium",
+    "category": "Programming",
+    "tags": [
+      "automation",
+      "testing"
+    ],
+    "summary": "This cheat sheet is a crash course for Selenium beginners and help to get the idea about the basic concepts of Selenium.",
+    "headings": [
+      "Getting Started",
+      "Initialize Browser Drivers",
+      "Selenium Locators",
+      "Navigate to URL",
+      "Close all browser windows",
+      "Close the current browser window",
+      "Navigation",
+      "Frame Handling",
+      "Alerts/Pop-Ups",
+      "Mouse and Keyboard Actions",
+      "Page Information",
+      "Waits"
+    ],
+    "topSnippet": "driver.get(\"https://www.example.com\");",
+    "path": "selenium.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/selenium.md"
+  },
+  {
+    "id": "sequel-pro",
+    "title": "Sequel Pro",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 71 keyboard shortcuts found in Sequel Pro. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Main Tabs",
+      "General Shortcuts",
+      "Select",
+      "Table Structure Tab",
+      "Table Content Tab",
+      "Custom Query Tab",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Sequel Pro](https://sequelpro.com/docs/get-started/keyboard-shortcuts) _(sequelpro.com)_",
+    "path": "sequel-pro.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/sequel-pro.md"
+  },
+  {
+    "id": "shopify",
+    "title": "Shopify",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 50 keyboard shortcuts found on the Shopify website",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General Shortcuts",
+      "Adding Items",
+      "Admin Panel I",
+      "Admin Panel II",
+      "Admin Panel III",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Shopify](https://help.shopify.com/en/manual/productivity-tools/keyboard-shortcuts)",
+    "path": "shopify.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/shopify.md"
+  },
+  {
+    "id": "sketch",
+    "title": "Sketch",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 149 keyboard shortcuts found in Sketch. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General",
+      "Inserting Layers",
+      "Selecting Layers",
+      "Moving and Resizing Layers",
+      "Editing Layers",
+      "Vector Editing",
+      "Text Editing",
+      "Arranging Layers",
+      "Exporting Layers",
+      "Zoom and Focus",
+      "Text Fields"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Sketch](https://www.sketch.com/docs/shortcuts/) _(www.sketch.com)_",
+    "path": "sketch.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/sketch.md"
+  },
+  {
+    "id": "sketchup",
+    "title": "SketchUp Pro",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 135 default keyboard shortcuts found in SketchUp Pro",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General I",
+      "General II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for SketchUp](https://help.sketchup.com/en/sketchup/getting-started-sketchup#qrc)",
+    "path": "sketchup.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/sketchup.md"
+  },
+  {
+    "id": "skype",
+    "title": "Skype",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 31 keyboard shortcuts found in Skype",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General I",
+      "General II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Skype](https://support.skype.com/en/faq/FA12025/what-are-keyboard-shortcuts-and-how-do-i-use-them-in-skype)",
+    "path": "skype.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/skype.md"
+  },
+  {
+    "id": "slack",
+    "title": "Slack",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 62 keyboard shortcuts found in Slack",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Navigation",
+      "All Unreads navigation",
+      "Switch workspaces",
+      "Mark messages read or unread",
+      "Message shortcuts",
+      "Message autocomplete",
+      "File and snippets",
+      "Call actions",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Slack](https://get.slack.help/hc/en-us/articles/201374536-Slack-keyboard-shortcuts)",
+    "path": "slack.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/slack.md"
+  },
+  {
+    "id": "socket-io",
+    "title": "Socket io",
+    "category": "Programming",
+    "tags": [
+      "socket io",
+      "web"
+    ],
+    "summary": "Socket.IO is a JavaScript library for real-time web applications. It enables bi-directional, event-based communication between clients (typically browsers or native apps) and servers.",
+    "headings": [
+      "Socket.IO Multi-Language Cheat Sheet (v4)",
+      "Introduction",
+      "Introduction",
+      "Installation / Setup",
+      "Installation / Setup",
+      "or",
+      "Installation / Setup",
+      "Installation / Setup",
+      "Connecting / Setup",
+      "JavaScript (Browser Client then Node.js Server)",
+      "Python (Client then Server)",
+      "Java (Client then Server)"
+    ],
+    "topSnippet": "npm install socket.io socket.io-client",
+    "path": "socket-io.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/socket-io.md"
+  },
+  {
+    "id": "soundcloud",
+    "title": "SoundCloud",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 22 keyboard shortcuts found on SoundCloud",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General I",
+      "General II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for SoundCloud](https://i.imgur.com/ZQf24je.png) _(i.imgur.com)_",
+    "path": "soundcloud.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/soundcloud.md"
+  },
+  {
+    "id": "spotify",
+    "title": "Spotify",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 23 keyboard shortcuts found in Spotify",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General I",
+      "General II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Spotify](https://support.spotify.com/is/using_spotify/system_settings/keyboard-shortcuts/)",
+    "path": "spotify.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/spotify.md"
+  },
+  {
+    "id": "ssh",
+    "title": "SSH",
+    "category": "Linux Command",
+    "tags": [
+      "protocol",
+      "remote",
+      "network",
+      "22"
+    ],
+    "summary": "This quick reference cheat sheet provides various for using SSH.",
+    "headings": [
+      "Getting Started",
+      "Connecting",
+      "Executing",
+      "SCP",
+      "Config location",
+      "SCP Options",
+      "Config sample",
+      "ProxyJump",
+      "ssh-copy-id",
+      "SSH keygen",
+      "ssh-keygen",
+      "Generate"
+    ],
+    "topSnippet": "$ ssh root@192.168.1.5",
+    "path": "ssh.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/ssh.md"
+  },
+  {
+    "id": "sublime-text",
+    "title": "Sublime Text",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 49 keyboard shortcuts found in Sublime Text",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Editing",
+      "Navigation",
+      "General",
+      "Find/Replace",
+      "Split window",
+      "Bookmarks",
+      "Text manipulation",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Sublime Text](http://docs.sublimetext.info/en/latest/reference/keyboard_shortcuts_win.html)",
+    "path": "sublime-text.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/sublime-text.md"
+  },
+  {
+    "id": "superhuman",
+    "title": "Superhuman",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 105 keyboard shortcuts found in Superhuman. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Actions",
+      "Filters",
+      "Messages",
+      "Conversations",
+      "Folders (Press keys separately)",
+      "Format",
+      "Labels",
+      "Calendar",
+      "Navigation",
+      "Pop Out Compose",
+      "Compose"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Superhuman](https://download.superhuman.com/Superhuman%20Keyboard%20Shortcuts.pdf)",
+    "path": "superhuman.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/superhuman.md"
+  },
+  {
+    "id": "svelte",
+    "title": "Svelte",
+    "category": "Programming",
+    "tags": [
+      "svelte",
+      "web"
+    ],
+    "summary": "A Svelte cheat sheet with the most important concepts, functions, reactivity, and more. A complete quick reference for beginners, updated for Svelte 5.",
+    "headings": [
+      "Getting Started",
+      "Basic Syntax",
+      "Expressions",
+      "Attributes",
+      "Functions in Markup",
+      "Conditional Rendering",
+      "Components",
+      "Functional Component",
+      "Embed an internal Component",
+      "Embed an external Component",
+      "Advanced Functional Components",
+      "Properties"
+    ],
+    "topSnippet": "<script>\n  let name = 'world';\n</script>\n\n<h1>Hello {name}!</h1>",
+    "path": "svelte.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/svelte.md"
+  },
+  {
+    "id": "swift",
+    "title": "Swift",
+    "category": "Programming",
+    "tags": [
+      "Apple",
+      "iOS",
+      "iPadOS"
+    ],
+    "summary": "This cheat sheet provides examples of using Swift that cover basic Swift knowledge, control flow etc.",
+    "headings": [
+      "Getting Started",
+      "Variable",
+      "Type annotations",
+      "Arithmetic operators",
+      "Compound Assignment Operators",
+      "String interpolation",
+      "Multi-line string",
+      "Code Comments",
+      "Form a tuple",
+      "Decompose tuple",
+      "Special comment syntax (MARK)",
+      "Special comment syntax (TODO)"
+    ],
+    "topSnippet": "var score = 0  // Variable\nlet pi = 3.14  // Constant\n\nvar greeting = \"Hello\"\nvar numberOfToys = 8\nvar isMorning = true\n\nvar numberOfToys: Int = 8\nnumberOfToys += 1\n\nprint(numberOfToys)\n// prints \"9\"",
+    "path": "swift.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/swift.md"
+  },
+  {
+    "id": "symfony",
+    "title": "Symfony",
+    "category": "Programming",
+    "tags": [
+      "php",
+      "web"
+    ],
+    "summary": "This Symfony Cheat Sheet is a non exhaustive list of main symfony basics that you can use or need.",
+    "headings": [
+      "Getting Started",
+      "Installation",
+      "Symfony CLI: Basic Commands",
+      "Creating a New Symfony Project",
+      "Symfony Console Basic Usage",
+      "Linting Commands",
+      "Debugging Commands",
+      "AssetMap Commands",
+      "ORM & Migration",
+      "Database Connection",
+      "MySQL",
+      "MariaDB"
+    ],
+    "topSnippet": "curl -sS https://get.symfony.com/cli/installer | bash",
+    "path": "symfony.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/symfony.md"
+  },
+  {
+    "id": "systemd",
+    "title": "Systemd",
+    "category": "Linux Command",
+    "tags": [
+      "systemd",
+      "linux"
+    ],
+    "summary": "systemd is the init system and service manager used by most modern Linux distributions.",
+    "headings": [
+      "systemd Core Utilities",
+      "systemd utility List",
+      "Utility Commands",
+      "systemctl",
+      "systemctl - System Commands",
+      "systemctl - Service Commands",
+      "journalctl",
+      "busctl",
+      "loginctl",
+      "systemd-analyze",
+      "systemd-cgtop",
+      "timedatectl"
+    ],
+    "topSnippet": "- Static - The permanent hostname stored in `/etc/hostname`. Used at boot time.\n- Transient - Temporary hostname set at runtime (often by DHCP or manually). Lost on reboot.\n- Pretty - A user-friendly, display name (can include spaces and special characters).",
+    "path": "systemd.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/systemd.md"
+  },
+  {
+    "id": "table-plus",
+    "title": "TablePlus",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 34 keyboard shortcuts found in TablePlus",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Global",
+      "Workspace",
+      "Table Data",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for TablePlus app](https://tableplus.com/blog/2018/02/shortcut-keys.html) _(tableplus.com)_",
+    "path": "table-plus.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/table-plus.md"
+  },
+  {
+    "id": "taskset",
+    "title": "Taskset",
+    "category": "Linux Command",
+    "tags": [
+      "process",
+      "process manager"
+    ],
+    "summary": "The taskset command is used to set or retrieve the CPU affinity of a running process given its pid, or to launch a new command with a given CPU affinity.",
+    "headings": [
+      "Getting Started",
+      "Usage",
+      "Usage #2",
+      "Common Options",
+      "Example",
+      "View CPU Affinity",
+      "Set CPU Affinity",
+      "Change CPU affinity to 1:",
+      "Set CPU Affinity with multiple value",
+      "Other",
+      "Also see"
+    ],
+    "topSnippet": "$ taskset [mask] [command] [arguments]",
+    "path": "taskset.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/taskset.md"
+  },
+  {
+    "id": "telegram",
+    "title": "Telegram Desktop",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 37 keyboard shortcuts found on the Telegram Desktop app",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Chats",
+      "Messages",
+      "Search",
+      "QuickShare Panel",
+      "Jump to",
+      "Window Related",
+      "Selected Text",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Telegram Desktop](https://github.com/telegramdesktop/tdesktop/wiki/Keyboard-Shortcuts)",
+    "path": "telegram.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/telegram.md"
+  },
+  {
+    "id": "telnet",
+    "title": "Telnet",
+    "category": "Linux Command",
+    "tags": [
+      "network",
+      "scan",
+      "port"
+    ],
+    "summary": "This cheat sheet is intended to be a quick reminder for the main concepts involved in using the command line program telnet and assumes you already understand its usage.",
+    "headings": [
+      "Getting Started",
+      "Usage",
+      "Option examples",
+      "Also see"
+    ],
+    "topSnippet": "$ telnet [options] target [port]",
+    "path": "telnet.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/telnet.md"
+  },
+  {
+    "id": "tensorflow",
+    "title": "Tensorflow",
+    "category": "Other",
+    "tags": [
+      "AI",
+      "Python"
+    ],
+    "summary": "This is a quick reference list of cheat sheets for Tensorflow. See also [Tensorflow website](https://tensorflow.org/).",
+    "headings": [
+      "Imports",
+      "General",
+      "Tensors",
+      "Basic Operations",
+      "Creation",
+      "history for future derivative calculations",
+      "Dimensionality",
+      "Algebra",
+      "GPU Usage",
+      "either \"/CPU:0\", \"/GPU:0\", or other qualified name",
+      "of the second GPU of your machine",
+      "Deep Learning Models"
+    ],
+    "topSnippet": "import tensorflow as tf                             # root package\nimport tensorflow_datasets as tfds                  # dataset representation and loading\nmodel.compile(optimizer, loss, metrics)             # compile necessary components for training and evaluation\nmodel.fit(x_train, y_train, epoch, batch_size)      # model training\nmodel.evaluate(x_test, y_test)                      # model evaluation",
+    "path": "tensorflow.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/tensorflow.md"
+  },
+  {
+    "id": "terraform",
+    "title": "Terraform",
+    "category": "Programming",
+    "tags": [
+      "container",
+      "virtual"
+    ],
+    "summary": "This is a quick reference cheat sheet for [Terraform](https://docs.docker.com/get-started/).",
+    "headings": [
+      "HCL Syntax:",
+      "Variable Types",
+      "type string",
+      "type list(string)",
+      "type map",
+      "type object",
+      "Meta-Arguments",
+      "Loops",
+      "creating multiple EC2 instances using count",
+      "declaring a variable",
+      "creating IAM users using for_each",
+      "A for expression creates a complex type value by transforming another complex type value."
+    ],
+    "topSnippet": "(Block Name)  (Resource Type)  (Resource Name)\n      |           |                 |\n      ▽           ▽                 ▽\n  resource \"aws_instance\" \"my_aws_server\" {\n                                            --\n      ami           = \"ami-1251351351513\"    |<--(Arguments)\n      instance_type = \"t2.micro\"             |\n                                            --\n\n}",
+    "path": "terraform.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/terraform.md"
+  },
+  {
+    "id": "ticktick",
+    "title": "TickTick",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 25 keyboard shortcuts found in the TickTick desktop app",
+    "headings": [
+      "Keyboard Shortcuts (Mac)",
+      "General",
+      "Global Action",
+      "Navigation",
+      "Task",
+      "Quick Add",
+      "Edit Tasks",
+      "Switch Views",
+      "Sticky Note",
+      "Keyboard Shortcuts (Windows)",
+      "General I",
+      "General II"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for TickTick](https://support.ticktick.com/hc/en-us/articles/360016272252-Shortcuts)",
+    "path": "ticktick.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/ticktick.md"
+  },
+  {
+    "id": "tmux",
+    "title": "Tmux",
+    "category": "Linux Command",
+    "tags": [
+      "utility",
+      "terminal",
+      "session"
+    ],
+    "summary": "The tmux cheat sheet quick reference of most commonly used shortcuts and commands",
+    "headings": [
+      "Tmux CLI",
+      "New session",
+      "Attach session",
+      "Kill session",
+      "Tmux help",
+      "Config",
+      "Copy Mode",
+      "Tmux shortcuts",
+      "Getting started",
+      "Panes (Splits)",
+      "Window (Tabs)",
+      "Session (Set of Windows)"
+    ],
+    "topSnippet": "$ tmux",
+    "path": "tmux.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/tmux.md"
+  },
+  {
+    "id": "todoist",
+    "title": "Todoist",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 37 keyboard shortcuts found in Todoist",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Task Quick Add",
+      "General",
+      "Adding or editing tasks",
+      "Creating and completing sub-tasks",
+      "Sorting tasks inside a project",
+      "Navigation",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Todoist](https://get.todoist.help/hc/en-us/articles/205063212-Keyboard-Shortcuts)",
+    "path": "todoist.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/todoist.md"
+  },
+  {
+    "id": "toml",
+    "title": "TOML",
+    "category": "Programming",
+    "tags": [
+      "config",
+      "format"
+    ],
+    "summary": "This is a quick reference cheat sheet to the TOML format configuration file syntax.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Examples",
+      "Comments",
+      "A single line comment example",
+      "block level comment example",
+      "comment line 1",
+      "comment line 2",
+      "comment line 3",
+      "Integer",
+      "Float",
+      "Boolean"
+    ],
+    "topSnippet": "bool = true\ndate = 2006-05-27T07:32:00Z\nstring = \"hello\"\nnumber = 42\nfloat = 3.14\nscientificNotation = 1e+12",
+    "path": "toml.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/toml.md"
+  },
+  {
+    "id": "transmit",
+    "title": "Transmit",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 62 keyboard shortcuts found in Transmit. This application is MacOS-only.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Transmit Menu",
+      "File Menu",
+      "Edit Menu",
+      "View Menu",
+      "Go Menu",
+      "Transfer Menu",
+      "Servers Menu",
+      "Window Menu",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for the Transmit app](https://library.panic.com/transmit/transmit5/shortcuts/)",
+    "path": "transmit.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/transmit.md"
+  },
+  {
+    "id": "trello",
+    "title": "Trello",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 29 keyboard shortcuts found on Trello",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General I",
+      "General II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Trello](https://trello.com/shortcuts) _(trello.com)_",
+    "path": "trello.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/trello.md"
+  },
+  {
+    "id": "twitter",
+    "title": "Twitter",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 26 keyboard shortcuts found on Twitter",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Actions",
+      "Navigation",
+      "Timelines",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Twitter](https://help.twitter.com/en/using-twitter/how-to-tweet) _(help.twitter.com)_",
+    "path": "twitter.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/twitter.md"
+  },
+  {
+    "id": "typescript",
+    "title": "TypeScript",
+    "category": "Programming",
+    "tags": [
+      "ts",
+      "web"
+    ],
+    "summary": "A TypeScript cheat sheet with the most important concepts, functions, methods, and more. A complete quick reference for beginners.",
+    "headings": [
+      "Getting Started",
+      "Installing the Compiler",
+      "Introduction",
+      "Basic Types",
+      "Arrays",
+      "Tuples",
+      "Enums",
+      "Type Aliases",
+      "Interfaces",
+      "Extending Interfaces",
+      "Functions",
+      "Optional & Default Parameters"
+    ],
+    "topSnippet": "npm install typescript --save-dev\nnpm tsc",
+    "path": "typescript.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/typescript.md"
+  },
+  {
+    "id": "unity-3d",
+    "title": "Unity 3D",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 50 keyboard shortcuts found in Unity 3D",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Tools",
+      "GameObject",
+      "Window",
+      "Edit",
+      "Selection",
+      "Assets",
+      "Animation",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Unity 3D](https://docs.unity3d.com/2018.1/Documentation/Manual/UnityHotkeys.html)",
+    "path": "unity-3d.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/unity-3d.md"
+  },
+  {
+    "id": "unity-shader-graph",
+    "title": "Unity Shader Graph",
+    "category": "Programming",
+    "tags": [
+      "unity",
+      "shader",
+      "computer graphics",
+      "visual effects"
+    ],
+    "summary": "This is a visual cheat-sheet for the Unity Shader Graph. This tool is used to create custom shaders material in Unity, a popular game engine.",
+    "headings": [
+      "Shader Graph Nodes",
+      "1. Attributes",
+      "Positioning",
+      "Timing",
+      "2. Math Operations",
+      "Basic Math",
+      "Advanced Math",
+      "Trigonometry",
+      "Interpolation",
+      "3. Color Processing",
+      "Basic Color Manipulation",
+      "Color Adjustment"
+    ],
+    "topSnippet": "float3 CustomPosition(in float time, in float3 position, out float3 newPosition) {\n        newPosition = position + float3(sin(time), cos(time), 0.0);\n        return newPosition;\n      }",
+    "path": "unity-shader-graph.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/unity-shader-graph.md"
+  },
+  {
+    "id": "unreal-engine",
+    "title": "Unreal Engine",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "unreal",
+      "engine"
+    ],
+    "summary": "A visual cheat-sheet for many keyboard shortcuts found in Unreal Engine 5",
+    "headings": [
+      "Level Editor",
+      "Viewport Transformation",
+      "View Modes",
+      "Level Editor General",
+      "Camera Navigation",
+      "Editing Modes",
+      "Snapping",
+      "Play in Editor (PIE)",
+      "Content Browser",
+      "Asset Editors",
+      "Blueprints",
+      "Asset Editor Viewports"
+    ],
+    "topSnippet": "- Click on the `Edit` Menu",
+    "path": "unreal-engine.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/unreal-engine.md"
+  },
+  {
+    "id": "vhdl",
+    "title": "VHDL",
+    "category": "Programming",
+    "tags": [
+      "hardware",
+      "hdl",
+      "synthesis"
+    ],
+    "summary": "VHDL (VHSIC Hardware Description Language) cheat sheet - A comprehensive reference for digital hardware design and simulation.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Basic Entity",
+      "Simple AND Gate",
+      "Libraries and Packages",
+      "Comments",
+      "Data Types",
+      "Standard Logic Types",
+      "Vector Types",
+      "Array Types",
+      "Record Types",
+      "Entity and Architecture"
+    ],
+    "topSnippet": "entity hello_world is\nend hello_world;\n\narchitecture behavioral of hello_world is\nbegin\n  -- Simple testbench process\n  process\n  begin\n    report \"Hello, VHDL World!\";\n    wait;\n  end process;\nend behavioral;",
+    "path": "vhdl.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/vhdl.md"
+  },
+  {
+    "id": "vim",
+    "title": "Vim",
+    "category": "Toolkit",
+    "tags": [
+      "vi",
+      "text",
+      "editor",
+      "terminal",
+      "shortcut"
+    ],
+    "summary": "A useful collection of [Vim](http://www.vim.org/) 8.2 quick reference cheat sheets to help you learn vim editor faster.",
+    "headings": [
+      "Getting Started",
+      "Motion Diagrams",
+      "Left-right motions",
+      "Up-down motions",
+      "Motions",
+      "Words",
+      "Line",
+      "Character",
+      "Document",
+      "Window",
+      "Insert Mode",
+      "Saving and Exiting"
+    ],
+    "topSnippet": "▼/▶ Cursor   ▽/▷ Target",
+    "path": "vim.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/vim.md"
+  },
+  {
+    "id": "vivaldi",
+    "title": "Vivaldi Browser",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 69 default keyboard shortcuts found in the Vivaldi browser",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Window",
+      "View",
+      "Tab",
+      "Page",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Vivaldi](https://help.vivaldi.com/article/keyboard-shortcuts/) _(help.vivaldi.com)_",
+    "path": "vivaldi.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/vivaldi.md"
+  },
+  {
+    "id": "vlc",
+    "title": "VLC Player",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 82 keyboard shortcuts found in VLC Player",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General I",
+      "General II",
+      "General III",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for VLC](https://wiki.videolan.org/hotkeys_table/) _(wiki.videolan.org)_",
+    "path": "vlc.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/vlc.md"
+  },
+  {
+    "id": "vscode",
+    "title": "VSCode",
+    "category": "Toolkit",
+    "tags": [
+      "text",
+      "editor",
+      "shortcut"
+    ],
+    "summary": "This VSCode (Visual Studio Code) quick reference cheat sheet shows its keyboard shortcuts and commands.",
+    "headings": [
+      "Keyboard shortcuts for Windows",
+      "General",
+      "Basic Editing",
+      "Navigation",
+      "Search and replace",
+      "Multi-cursor and selection",
+      "Rich languages editing",
+      "Editor management",
+      "File management",
+      "Display",
+      "Debug",
+      "Integrated terminal"
+    ],
+    "topSnippet": "- [VS Code Keyboard shortcuts for Windows](https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf)",
+    "path": "vscode.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/vscode.md"
+  },
+  {
+    "id": "vue",
+    "title": "Vue",
+    "category": "Programming",
+    "tags": [
+      "vue",
+      "web"
+    ],
+    "summary": "A Vue 3 cheat sheet with the most important concepts, reactivity, component system, routing, and more. Updated for the latest version and perfect for both beginners and advanced users.",
+    "headings": [
+      "📘 Vue.js 3 Cheatsheet – Beginner to Advanced",
+      "⚙️ 1. Setup",
+      "CDN (Quick Start)",
+      "Vite + Vue",
+      "🧠 2. App Structure",
+      "📦 3. Data, Methods, Template",
+      "🧰 4. Directives",
+      "Example",
+      "🪝 5. Lifecycle Hooks",
+      "🎯 6. Events",
+      "🔁 7. Computed & Watch",
+      "🧱 8. Components"
+    ],
+    "topSnippet": "<script src=\"https://unpkg.com/vue@3\"></script>\n<div id=\"app\">{{ message }}</div>\n<script>\n  Vue.createApp({\n    data() {\n      return { message: \"Hello Vue!\" };\n    }\n  }).mount(\"#app\");\n</script>",
+    "path": "vue.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/vue.md"
+  },
+  {
+    "id": "webflow",
+    "title": "Webflow",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 41 keyboard shortcuts found in Webflow",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General",
+      "View",
+      "Left-hand Toolbar",
+      "Right-hand Tabs",
+      "Copy/Paste",
+      "Undo/Redo",
+      "Device View",
+      "Style Panel",
+      "Find",
+      "Other",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Webflow](https://university.webflow.com/article/keyboard-shortcuts-in-the-webflow-designer)",
+    "path": "webflow.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/webflow.md"
+  },
+  {
+    "id": "webstorm",
+    "title": "WebStorm",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "jetbrains",
+      "web",
+      "shortcut"
+    ],
+    "summary": "This quick reference cheat sheet lists the default keyboard shortcuts for WebStorm running on Windows/Linux or Mac",
+    "headings": [
+      "Webstorm Windows & Linux Keymap",
+      "Editing",
+      "General",
+      "Navigation",
+      "Multiple carets and selections",
+      "Debugging",
+      "Running",
+      "Usage Search",
+      "VCS/Local History",
+      "Search/Replace",
+      "Refactoring"
+    ],
+    "path": "webstorm.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/webstorm.md"
+  },
+  {
+    "id": "windows-cmd",
+    "title": "Windows Cmd",
+    "category": "Programming",
+    "tags": [
+      "command"
+    ],
+    "summary": "This windows command Cheat Sheet is a non exhaustive list of main windows command that you can use.",
+    "headings": [
+      "Getting Started",
+      "Basic",
+      "Manage file :",
+      "File",
+      "System & Network",
+      "System",
+      "Network",
+      "Miscellaneouss",
+      "Process Management",
+      "Disk Management",
+      "System Configuration",
+      "Tips & Tricks"
+    ],
+    "topSnippet": "- Also see : [Windows Official Documentation](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/windows-commands)",
+    "path": "windows-cmd.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/windows-cmd.md"
+  },
+  {
+    "id": "windows-shortcuts",
+    "title": "windows-shortcuts",
+    "category": "General",
+    "tags": [],
+    "summary": "Copy selected content (Ctrl + C can also abort commands):",
+    "headings": [
+      "Best Windows Shortcuts on Your Keyboard",
+      "Keyboard Shortcuts for Navigating Windows",
+      "Keyboard Shortcuts for Screenshots",
+      "Keyboard Shortcuts for Text Manipulation",
+      "Keyboard Shortcuts for Web Browsers",
+      "Windows Shortcuts in Run Command",
+      "Create God Mode Folder"
+    ],
+    "topSnippet": "Ctrl + C",
+    "path": "windows-shortcuts.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/windows-shortcuts.md"
+  },
+  {
+    "id": "wordpress",
+    "title": "WordPress",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 34 keyboard shortcuts found in the WordPress visual editor",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Editor I",
+      "Editor II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for WordPress](https://wordpress.org/support/article/keyboard-shortcuts/) _(wordpress.org)_",
+    "path": "wordpress.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/wordpress.md"
+  },
+  {
+    "id": "xpath",
+    "title": "XPath",
+    "category": "Toolkit",
+    "tags": [
+      "document",
+      "expression",
+      "select"
+    ],
+    "summary": "This is an [XPath](https://en.wikipedia.org/wiki/XPath) selectors cheat sheet, which lists commonly used XPath positioning methods and CSS selectors",
+    "headings": [
+      "XPath Selectors",
+      "Getting started",
+      "Descendant selectors",
+      "Order selectors",
+      "Attribute selectors",
+      "Siblings",
+      "jQuery",
+      "Misc selectors",
+      "XPath Expressions",
+      "Steps and axes",
+      "Prefixes",
+      "Axes"
+    ],
+    "topSnippet": "$x('/html/body')\n$x('//h1')\n$x('//h1')[0].innerText\n$x('//a[text()=\"XPath\"]')[0].click()",
+    "path": "xpath.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/xpath.md"
+  },
+  {
+    "id": "yaml",
+    "title": "YAML",
+    "category": "Programming",
+    "tags": [
+      "config",
+      "format"
+    ],
+    "summary": "This is a quick reference cheat sheet for understanding and writing YAML format configuration files.",
+    "headings": [
+      "Getting Started",
+      "Introduction",
+      "Scalar types",
+      "↓ Equivalent JSON",
+      "Variables",
+      "↓ Equivalent JSON",
+      "Comments",
+      "A single line comment example",
+      "block level comment example",
+      "comment line 1",
+      "comment line 2",
+      "comment line 3"
+    ],
+    "topSnippet": "n1: 1            # integer\nn2: 1.234        # float\n\ns1: 'abc'        # string\ns2: \"abc\"        # string\ns3: abc          # string\n\nb: false         # boolean type\n\nd: 2015-04-05    # date type",
+    "path": "yaml.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/yaml.md"
+  },
+  {
+    "id": "youtube",
+    "title": "YouTube",
+    "category": "Keyboard Shortcuts",
+    "tags": [],
+    "summary": "A visual cheat-sheet for the 18 keyboard shortcuts found on YouTube.com",
+    "headings": [
+      "Keyboard Shortcuts",
+      "General I",
+      "General II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for YouTube](https://support.google.com/youtube/answer/7631406?hl=en) _(support.google.com)_",
+    "path": "youtube.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/youtube.md"
+  },
+  {
+    "id": "zed",
+    "title": "Zed",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "text",
+      "editor",
+      "shortcut"
+    ],
+    "summary": "A visual cheat-sheet for the 50 keyboard shortcuts found in the Zed text editor.",
+    "headings": [
+      "Keyboard Shortcuts",
+      "Zed",
+      "File",
+      "Edit",
+      "Selection",
+      "View",
+      "Go",
+      "Also see"
+    ],
+    "topSnippet": "- [Zed](https://zed.dev/)",
+    "path": "zed.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/zed.md"
+  },
+  {
+    "id": "zoom",
+    "title": "Zoom",
+    "category": "Keyboard Shortcuts",
+    "tags": [
+      "mac"
+    ],
+    "summary": "A visual cheat-sheet for the 32 keyboard shortcuts found in Zoom. These shortcuts are for MacOS, for Windows visit /zoom-windows.",
+    "headings": [
+      "Mac Keyboard Shortcuts",
+      "Meetings I",
+      "Meetings II",
+      "Chat Shortcuts",
+      "General Shortcuts",
+      "Windows Keyboard Shortcuts",
+      "All Shortcuts II",
+      "All Shortcuts II",
+      "Also see"
+    ],
+    "topSnippet": "- [Keyboard shortcuts for Zoom on MacOS](https://support.zoom.us/hc/en-us/articles/205683899-Hot-Keys-and-Keyboard-Shortcuts-for-Zoom)",
+    "path": "zoom.md",
+    "link": "https://github.com/Fechin/reference/blob/main/source/_posts/zoom.md"
+  }
+]

@@ -1,0 +1,71 @@
+{
+  "name": "quickreferences-raycast",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Raycast extension for Fechin/reference cheat sheets with offline search, detail view, and favorites.",
+  "license": "MIT",
+  "prettier": {},
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e production",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "generate:data": "ts-node scripts/build-data.ts"
+  },
+  "schemaVersion": 1,
+  "title": "QuickReferences",
+  "icon": "icon.png",
+  "author": "daniel_schoeman",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "reference",
+    "cheatsheet",
+    "developer",
+    "docs",
+    "offline"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "QuickReferences",
+      "subtitle": "Search Cheatsheets",
+      "description": "Search and open Fechin/reference cheat sheets",
+      "mode": "view"
+    },
+    {
+      "name": "update",
+      "title": "Update References",
+      "subtitle": "Refresh dataset",
+      "description": "Download the latest Fechin/reference data",
+      "mode": "view"
+    }
+  ],
+  "permissions": [
+    "network",
+    "filesystem"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.7",
+    "@raycast/utils": "^1.14.2",
+    "adm-zip": "^0.5.16",
+    "fuse.js": "^6.6.2",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/adm-zip": "^0.5.6",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.17.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
