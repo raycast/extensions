@@ -116,5 +116,8 @@
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ]
 }
