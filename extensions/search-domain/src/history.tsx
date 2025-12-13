@@ -10,6 +10,7 @@ import {
   launchCommand,
   LaunchType,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
 interface QueryHistory {
@@ -115,8 +116,7 @@ export default function HistoryCommand({ onBack }: { onBack?: () => void } = {})
                   try {
                     await launchCommand({ name: "search-domain", type: LaunchType.UserInitiated });
                   } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
+                    await showFailureToast({
                       title: "Failed to launch search",
                       message: error instanceof Error ? error.message : "Unknown error",
                     });
