@@ -23,6 +23,7 @@ interface QueryHistory {
 export default function HistoryCommand({ onBack }: { onBack?: () => void } = {}) {
   const [queryHistory, setQueryHistory] = useState<QueryHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState("");
   // Default to newest-first for a more natural history view
   const [sortReverse, setSortReverse] = useState(true);
 
@@ -90,6 +91,7 @@ export default function HistoryCommand({ onBack }: { onBack?: () => void } = {})
   return (
     <List
       isLoading={isLoading}
+      onSearchTextChange={(newValue) => setSearchText(newValue)}
       searchBarAccessory={
         <List.Dropdown tooltip="Sort Order" storeValue={true} onChange={(value) => setSortReverse(value === "desc")}>
           <List.Dropdown.Item title="Oldest First" value="asc" />
@@ -141,43 +143,47 @@ export default function HistoryCommand({ onBack }: { onBack?: () => void } = {})
         </ActionPanel>
       }
     >
-      <List.Section title="Query History">
-        {sortedHistory.map((query) => (
-          <List.Item
-            key={query.id}
-            title={query.domain}
-            subtitle={query.isAvailable ? "Available for purchase" : "Registered"}
-            accessories={[
-              { date: new Date(query.date) },
-              { tag: { value: `#${query.id}`, color: query.isAvailable ? "#00FF00" : "#FF0000" } },
-            ]}
-            actions={
-              <ActionPanel>
-                {query.isAvailable && <Action title="Purchase" onAction={() => handleHistoryBuy(query.buyLink)} />}
-                <Action
-                  title="Open in Browser"
-                  onAction={() => open(`https://${query.domain}`)}
-                  shortcut={Keyboard.Shortcut.Common.Open}
-                />
-                <Action
-                  title="Delete"
-                  onAction={() => deleteHistoryItem(query.id)}
-                  style={Action.Style.Destructive}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                />
-                {queryHistory.length > 0 && (
+      {!isLoading && searchText === "" && sortedHistory.length === 0 ? (
+        <List.EmptyView title="No History Yet" description="Search for domains to see your history here" />
+      ) : (
+        <List.Section title="Query History">
+          {sortedHistory.map((query) => (
+            <List.Item
+              key={query.id}
+              title={query.domain}
+              subtitle={query.isAvailable ? "Available for purchase" : "Registered"}
+              accessories={[
+                { date: new Date(query.date) },
+                { tag: { value: `#${query.id}`, color: query.isAvailable ? "#00FF00" : "#FF0000" } },
+              ]}
+              actions={
+                <ActionPanel>
+                  {query.isAvailable && <Action title="Purchase" onAction={() => handleHistoryBuy(query.buyLink)} />}
                   <Action
-                    title="Clear All History"
-                    onAction={clearHistory}
-                    style={Action.Style.Destructive}
-                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                    title="Open in Browser"
+                    onAction={() => open(`https://${query.domain}`)}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                   />
-                )}
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+                  <Action
+                    title="Delete"
+                    onAction={() => deleteHistoryItem(query.id)}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                  />
+                  {queryHistory.length > 0 && (
+                    <Action
+                      title="Clear All History"
+                      onAction={clearHistory}
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                    />
+                  )}
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
