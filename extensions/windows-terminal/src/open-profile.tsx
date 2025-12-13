@@ -16,14 +16,14 @@ interface WindowsTerminalSettings {
   };
 }
 
-export default function Command() {
-  const PROFILES = JSON.parse(
-    fs.readFileSync(
-      `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`,
-      "utf8",
-    ),
-  ) as WindowsTerminalSettings;
+const PROFILES = JSON.parse(
+  fs.readFileSync(
+    `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`,
+    "utf8",
+  ),
+) as WindowsTerminalSettings;
 
+export default function Command() {
   return (
     <List searchBarPlaceholder="Search all profiles...">
       {PROFILES.profiles.list
