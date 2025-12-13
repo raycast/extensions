@@ -1,5 +1,10 @@
 # Material Icons Changelog
 
+## [Updates] - {PR_MERGE_DATE}
+
+- Add Windows support
+- Update (dev) dependencies, remove node-fetch
+
 ## [Update] - 2023-11-15
 
 - Added Grid view
