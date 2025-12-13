@@ -83,11 +83,4 @@ export {
 } from "./helpers";
 
 // Internal API (experimental)
-export {
-  getSystemTag,
-  getInternalFormulaUrl,
-  getInternalCaskUrl,
-  fetchInternalFormulae,
-  fetchInternalCasks,
-  logInternalApiConfig,
-} from "./internal-api";
+export { getSystemTag, getInternalFormulaUrl, getInternalCaskUrl, logInternalApiConfig } from "./internal-api";

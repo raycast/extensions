@@ -13,6 +13,7 @@
  */
 
 import * as fs from "fs/promises";
+import { execSync } from "child_process";
 import {
   Cask,
   Formula,
@@ -27,7 +28,7 @@ import { brewPath } from "./paths";
 import { execBrew } from "./commands";
 import { brewLogger, cacheLogger } from "../logger";
 import { preferences } from "../preferences";
-import { fetchInternalFormulae, fetchInternalCasks, logInternalApiConfig } from "./internal-api";
+import { downloadAndCacheInternalFormulae, logInternalApiConfig } from "./internal-api";
 
 /// Cache Paths
 
@@ -385,10 +386,51 @@ export async function brewUpdate(cancel?: AbortSignal): Promise<void> {
 // Track if we've logged internal API config (only log once per session)
 let hasLoggedInternalApiConfig = false;
 
+// Mutex to prevent concurrent internal API cache updates
+// This prevents memory exhaustion when multiple search calls happen simultaneously
+let formulaeCacheUpdateInProgress: Promise<void> | null = null;
+
+/**
+ * Check if the internal API cache needs updating.
+ * Uses HEAD request to check Last-Modified header.
+ */
+async function needsInternalApiCacheUpdate(internalApiUrl: string, localCachePath: string): Promise<boolean> {
+  try {
+    const stats = await fs.stat(localCachePath);
+    if (stats.size === 0) return true;
+
+    const response = await fetch(internalApiUrl, { method: "HEAD" });
+    const lastModified = Date.parse(response.headers.get("last-modified") ?? "");
+
+    if (lastModified > stats.mtimeMs) {
+      cacheLogger.log("Internal API cache outdated", {
+        cachePath: localCachePath,
+        cacheTime: stats.mtimeMs,
+        remoteTime: lastModified,
+      });
+      return true;
+    }
+
+    cacheLogger.log("Internal API cache up to date", {
+      cachePath: localCachePath,
+      cacheAgeMs: Date.now() - stats.mtimeMs,
+    });
+    return false;
+  } catch {
+    // Cache doesn't exist or error checking
+    return true;
+  }
+}
+
 /**
  * Fetch all formulae from the remote API.
  * Uses internal API when `useInternalApi` preference is enabled.
  * Falls back to public API if internal API fails.
+ *
+ * Hybrid approach (when useInternalApi is enabled):
+ * 1. Downloads smaller internal API (~1 MB vs ~30 MB)
+ * 2. Converts to standard array format and writes to cache
+ * 3. Uses existing stream-json parsing for memory-efficient reading
  *
  * Internal API benefits:
  * - ~1 MB download vs ~30 MB (96% smaller)
@@ -402,7 +444,30 @@ export async function brewFetchFormulae(onProgress?: DownloadProgressCallback): 
       hasLoggedInternalApiConfig = true;
     }
     try {
-      return await fetchInternalFormulae(onProgress);
+      // Check if we need to update the cache from internal API
+      const internalApiUrl = "https://formulae.brew.sh/api/internal/formula." + getSystemTagForCache() + ".jws.json";
+      const needsUpdate = await needsInternalApiCacheUpdate(internalApiUrl, formulaCachePath);
+
+      if (needsUpdate) {
+        // Use mutex to prevent concurrent cache updates (memory exhaustion)
+        if (formulaeCacheUpdateInProgress) {
+          brewLogger.log("Waiting for existing formulae cache update to complete");
+          await formulaeCacheUpdateInProgress;
+        } else {
+          // Download internal API and write to standard cache format
+          brewLogger.log("Updating formulae cache from internal API");
+          formulaeCacheUpdateInProgress = downloadAndCacheInternalFormulae(formulaCachePath, onProgress);
+          try {
+            await formulaeCacheUpdateInProgress;
+          } finally {
+            formulaeCacheUpdateInProgress = null;
+          }
+        }
+      }
+
+      // Now use the standard fetchRemote path which uses stream-json
+      // The cache file is already populated, so this will just read it
+      return await fetchRemote(formulaRemote, onProgress);
     } catch (error) {
       // Internal API failed, fall back to public API
       brewLogger.warn("Internal formulae API failed, falling back to public API", {
@@ -416,30 +481,52 @@ export async function brewFetchFormulae(onProgress?: DownloadProgressCallback): 
 
 /**
  * Fetch all casks from the remote API.
- * Uses internal API when `useInternalApi` preference is enabled.
- * Falls back to public API if internal API fails.
+ * Always uses the public API with stream-json parsing for memory efficiency.
  *
- * Internal API benefits:
- * - JWS format with full metadata
- * - Same data as public API but wrapped differently
+ * Note: The internal API for casks is ~13 MB (vs ~30 MB public) but requires
+ * complex JWS parsing that adds memory pressure. The public API's stream-json
+ * parsing is more memory-efficient overall, so we use it exclusively for casks.
+ *
+ * The internal API is only used for formulae where the size difference is
+ * significant (~1 MB vs ~30 MB, 96% smaller).
  */
 export async function brewFetchCasks(onProgress?: DownloadProgressCallback): Promise<Cask[]> {
-  if (preferences.useInternalApi) {
-    if (!hasLoggedInternalApiConfig) {
-      logInternalApiConfig();
-      hasLoggedInternalApiConfig = true;
-    }
-    try {
-      return await fetchInternalCasks(onProgress);
-    } catch (error) {
-      // Internal API failed, fall back to public API
-      brewLogger.warn("Internal casks API failed, falling back to public API", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return await fetchRemote(caskRemote, onProgress);
-    }
-  }
+  // Always use public API for casks - stream-json parsing is more memory-efficient
+  // than the JWS parsing overhead of the internal API
   return await fetchRemote(caskRemote, onProgress);
+}
+
+/**
+ * Get the system tag for internal API URLs.
+ * This is a local helper to avoid circular imports.
+ */
+function getSystemTagForCache(): string {
+  // Use the same logic as internal-api.ts
+  const arch = process.arch === "arm64" ? "arm64" : "x86_64";
+
+  // Get macOS version name
+  let osVersion = "sequoia"; // default
+  try {
+    const swVersOutput = execSync("sw_vers -productVersion", {
+      encoding: "utf8",
+      timeout: 5000,
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+    const majorVersion = parseInt(swVersOutput.split(".")[0], 10);
+
+    const versionNames: Record<number, string> = {
+      15: "sequoia",
+      14: "sonoma",
+      13: "ventura",
+      12: "monterey",
+      11: "big_sur",
+    };
+    osVersion = versionNames[majorVersion] || "sequoia";
+  } catch {
+    // Use default
+  }
+
+  return `${arch}_${osVersion}`;
 }
 
 /**

@@ -119,6 +119,7 @@ export default function SearchView() {
     hasCacheFiles,
     loadingState,
     data: results,
+    indexTotals,
   } = useBrewSearch({
     searchText,
     installed,
@@ -138,9 +139,9 @@ export default function SearchView() {
   useEffect(() => {
     if (phase === "complete" && !hasShownCompletionToast.current && results) {
       hasShownCompletionToast.current = true;
-      // Use totalLength from results (set before slicing) for accurate counts
-      const totalFormulae = results.formulae?.totalLength || results.formulae?.length || 0;
-      const totalCasks = results.casks?.totalLength || results.casks?.length || 0;
+      // Use indexTotals for accurate counts (total packages in index, not filtered results)
+      const totalFormulae = indexTotals?.formulae || 0;
+      const totalCasks = indexTotals?.casks || 0;
       showToast({
         style: Toast.Style.Success,
         title: "Package Index Ready",
@@ -267,6 +268,7 @@ export default function SearchView() {
       filtering={false}
       isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => revalidateInstalled()}
+      dataFetched={loadingState.phase === "complete"}
     />
   );
 }

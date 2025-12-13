@@ -12,9 +12,14 @@
 
 import { cpus, release } from "os";
 import { execSync } from "child_process";
-import { Cask, Formula, DownloadProgressCallback } from "../types";
+import * as fs from "fs";
+import { chain } from "stream-chain";
+import { parser } from "stream-json";
+import { pick } from "stream-json/filters/Pick";
+import { streamObject } from "stream-json/streamers/StreamObject";
+import { Formula, DownloadProgressCallback } from "../types";
 import { cacheLogger, fetchLogger } from "../logger";
-import { logMemory } from "../memory";
+import { logMemory, withMemoryTracking } from "../memory";
 
 /// System Tag Detection
 
@@ -235,6 +240,11 @@ export function getInternalFormulaUrl(): string {
 
 /**
  * Get the internal API URL for casks.
+ *
+ * Note: Currently not used - casks use the public API for better memory efficiency.
+ * The internal cask API (~13 MB) requires JWS parsing overhead that negates the
+ * download size benefit compared to stream-json parsing the public API (~30 MB).
+ * Kept for potential future use if a more efficient JWS parser is implemented.
  */
 export function getInternalCaskUrl(): string {
   const tag = getSystemTag();
@@ -249,328 +259,355 @@ export function getInternalCaskUrl(): string {
  */
 type InternalFormulaArray = [string, number, number, string | null, string[]];
 
+/// Streaming Cache Functions
+
 /**
- * Internal API response structure (JWS format).
- * JWS (JSON Web Signature) wraps the payload with cryptographic signatures.
+ * Download internal API and write to standard cache format.
  *
- * Note: We do not verify signatures as this is read-only public data.
- * The signatures are primarily for Homebrew's internal integrity checks.
- */
-interface JWSResponse {
-  payload: string; // Base64url-encoded or plain JSON string
-  signatures?: unknown[]; // Optional array of signatures
-  protected?: string; // Optional protected header
-}
-
-/**
- * Parsed internal formula API payload.
- */
-interface InternalFormulaPayload {
-  formulae: Record<string, InternalFormulaArray>;
-  casks?: Record<string, unknown>;
-  aliases: Record<string, string>;
-  renames: Record<string, string>;
-  tap_migrations: Record<string, string>;
-}
-
-/**
- * Parsed internal cask API payload.
- */
-interface InternalCaskPayload {
-  casks: Record<string, Cask>;
-  renames: Record<string, string>;
-  tap_migrations: Record<string, string>;
-}
-
-/**
- * Type guard to validate JWS response structure.
- */
-function isValidJWSResponse(obj: unknown): obj is JWSResponse {
-  if (typeof obj !== "object" || obj === null) {
-    return false;
-  }
-  const response = obj as Record<string, unknown>;
-  return typeof response.payload === "string" && response.payload.length > 0;
-}
-
-/**
- * Parse and validate a JWS response, extracting the payload.
- * Handles both plain JSON payloads and base64url-encoded payloads.
+ * This hybrid approach:
+ * 1. Downloads the smaller internal API (~1 MB formulae vs ~30 MB)
+ * 2. Extracts the JWS payload
+ * 3. Converts to array format and writes to standard cache files
+ * 4. Allows existing stream-json parsing to be used for reading
  *
- * @throws Error if the response is not a valid JWS structure
+ * Memory optimization: We stream the download to disk, then process
+ * the JWS payload incrementally to avoid holding large data in memory.
  */
-function parseJWSPayload<T>(text: string, context: string): T {
-  let jwsResponse: unknown;
 
-  // Step 1: Parse outer JSON
-  try {
-    jwsResponse = JSON.parse(text);
-  } catch (error) {
-    fetchLogger.warn(`Failed to parse ${context} JWS response as JSON`, {
-      context,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    throw new Error(`Failed to parse ${context} JWS response: Invalid JSON`);
-  }
+/**
+ * Download internal formulae API and write to cache in standard array format.
+ * Uses streaming to avoid loading the entire payload into memory.
+ *
+ * @param cachePath - Path to write the converted cache file
+ * @param onProgress - Optional callback for progress updates
+ */
+export async function downloadAndCacheInternalFormulae(
+  cachePath: string,
+  onProgress?: DownloadProgressCallback,
+): Promise<void> {
+  const url = getInternalFormulaUrl();
+  const startTime = Date.now();
+  const tempJwsPath = cachePath + ".jws.tmp";
 
-  // Step 2: Validate JWS structure
-  if (!isValidJWSResponse(jwsResponse)) {
-    throw new Error(
-      `Invalid ${context} JWS response: Missing or invalid 'payload' field. ` +
-        `Expected object with 'payload' string, got: ${typeof jwsResponse}`,
-    );
-  }
+  fetchLogger.log("Downloading internal formulae API for cache", { url, cachePath });
 
-  // Step 3: Extract and parse payload
-  const payloadString = jwsResponse.payload;
-  let payload: T;
-
-  try {
-    // Try parsing as plain JSON first (Homebrew's format)
-    payload = JSON.parse(payloadString) as T;
-  } catch (plainJsonError) {
-    // If that fails, try base64url decoding (standard JWS format)
-    try {
-      const decoded = Buffer.from(payloadString, "base64url").toString("utf8");
-      payload = JSON.parse(decoded) as T;
-    } catch (decodeError) {
-      fetchLogger.warn(`Failed to parse ${context} JWS payload with both plain JSON and base64url decoding`, {
-        context,
-        plainJsonError: plainJsonError instanceof Error ? plainJsonError.message : String(plainJsonError),
-        decodeError: decodeError instanceof Error ? decodeError.message : String(decodeError),
+  await withMemoryTracking(
+    "downloadAndCacheInternalFormulae",
+    async () => {
+      // Report initial progress
+      onProgress?.({
+        url,
+        bytesDownloaded: 0,
+        totalBytes: 0,
+        percent: 0,
+        complete: false,
+        phase: "downloading",
       });
-      throw new Error(
-        `Failed to parse ${context} JWS payload: ` + `Neither plain JSON nor base64url decoding succeeded`,
-      );
-    }
-  }
 
-  return payload;
-}
+      const response = await fetch(url);
+      if (!response.ok || !response.body) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
-/**
- * Validate internal formula payload structure.
- */
-function isValidFormulaPayload(obj: unknown): obj is InternalFormulaPayload {
-  if (typeof obj !== "object" || obj === null) {
-    return false;
-  }
-  const payload = obj as Record<string, unknown>;
-  return (
-    typeof payload.formulae === "object" &&
-    payload.formulae !== null &&
-    typeof payload.aliases === "object" &&
-    typeof payload.renames === "object"
+      const contentLength = response.headers.get("content-length");
+      const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
+
+      // Step 1: Stream download directly to temp file (no memory accumulation)
+      let bytesDownloaded = 0;
+      let lastProgressUpdate = 0;
+      const PROGRESS_THROTTLE_MS = 100;
+
+      const downloadStream = fs.createWriteStream(tempJwsPath);
+      const reader = response.body.getReader();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        downloadStream.write(Buffer.from(value));
+        bytesDownloaded += value.length;
+
+        const now = Date.now();
+        if (now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
+          lastProgressUpdate = now;
+          const percent = totalBytes > 0 ? Math.round((bytesDownloaded / totalBytes) * 100) : -1;
+          onProgress?.({
+            url,
+            bytesDownloaded,
+            totalBytes,
+            percent,
+            complete: false,
+            phase: "downloading",
+          });
+        }
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        downloadStream.end((err: Error | null) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      logMemory("After formulae download to disk");
+
+      onProgress?.({
+        url,
+        bytesDownloaded,
+        totalBytes,
+        percent: 100,
+        complete: false,
+        phase: "processing",
+      });
+
+      // Step 2: Extract the payload from JWS directly to a temp file (no memory accumulation)
+      const tempPayloadPath = cachePath + ".payload.tmp";
+      await extractJwsPayloadToFile(tempJwsPath, tempPayloadPath);
+      logMemory("After JWS payload extraction to disk");
+
+      // Step 4: Stream-parse the formulae and write to cache
+      // Formulae are in format: {"formulae": {"name": [version, scheme, rebuild, sha256, deps], ...}}
+      let itemsProcessed = 0;
+      const writeStream = fs.createWriteStream(cachePath);
+      writeStream.write("[");
+
+      await new Promise<void>((resolve, reject) => {
+        const pipeline = chain([
+          fs.createReadStream(tempPayloadPath),
+          parser(),
+          pick({ filter: "formulae" }),
+          streamObject(),
+        ]);
+
+        let isFirst = true;
+
+        pipeline.on("data", (data: { key: string; value: InternalFormulaArray }) => {
+          if (data && data.key && data.value) {
+            const formula = createFormulaFromInternal(data.key, data.value);
+
+            if (!isFirst) {
+              writeStream.write(",\n");
+            } else {
+              writeStream.write("\n");
+              isFirst = false;
+            }
+            writeStream.write(JSON.stringify(formula));
+            itemsProcessed++;
+
+            // Report progress (throttled)
+            const now = Date.now();
+            if (now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
+              lastProgressUpdate = now;
+              onProgress?.({
+                url,
+                bytesDownloaded,
+                totalBytes,
+                percent: 100,
+                complete: false,
+                phase: "processing",
+                itemsProcessed,
+              });
+            }
+          }
+        });
+
+        pipeline.on("end", () => {
+          writeStream.write("\n]");
+          writeStream.end((err: Error | null) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+
+        pipeline.on("error", reject);
+      });
+
+      // Clean up temp files
+      try {
+        fs.unlinkSync(tempJwsPath);
+        fs.unlinkSync(tempPayloadPath);
+      } catch {
+        // Ignore cleanup errors
+      }
+
+      logMemory("After formulae cache write (streaming)");
+
+      const duration = Date.now() - startTime;
+      fetchLogger.log("Internal formulae cached", {
+        url,
+        cachePath,
+        count: itemsProcessed,
+        durationMs: duration,
+        downloadBytes: bytesDownloaded,
+      });
+
+      onProgress?.({
+        url,
+        bytesDownloaded,
+        totalBytes,
+        percent: 100,
+        complete: true,
+        phase: "processing",
+        itemsProcessed,
+        totalItems: itemsProcessed,
+      });
+    },
+    { logAlways: true },
   );
 }
 
 /**
- * Validate internal cask payload structure.
- */
-function isValidCaskPayload(obj: unknown): obj is InternalCaskPayload {
-  if (typeof obj !== "object" || obj === null) {
-    return false;
-  }
-  const payload = obj as Record<string, unknown>;
-  return typeof payload.casks === "object" && payload.casks !== null;
-}
-
-/// Fetch Functions
-
-/**
- * Fetch formulae from the internal API.
- * Returns minimal Formula objects suitable for search/display.
+ * Extract the payload from a JWS file and write it directly to another file.
+ * This avoids loading the entire payload string into memory.
  *
- * Memory optimization: We parse incrementally and release references
- * as soon as possible to reduce peak memory usage in Raycast's
- * constrained worker environment.
- */
-export async function fetchInternalFormulae(onProgress?: DownloadProgressCallback): Promise<Formula[]> {
-  const url = getInternalFormulaUrl();
-  const startTime = Date.now();
-
-  fetchLogger.log("Fetching internal formulae API", { url });
-  logMemory("Before fetchInternalFormulae");
-
-  try {
-    // Report initial progress
-    onProgress?.({
-      url,
-      bytesDownloaded: 0,
-      totalBytes: 0,
-      percent: 0,
-      complete: false,
-    });
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const contentLength = response.headers.get("content-length");
-    const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
-
-    // Read the response
-    const text = await response.text();
-    const bytesDownloaded = text.length;
-    logMemory("After formulae download");
-
-    // Report download complete
-    onProgress?.({
-      url,
-      bytesDownloaded,
-      totalBytes,
-      percent: 100,
-      complete: false, // Still need to parse
-    });
-
-    // Parse and validate JWS response
-    const payload = parseJWSPayload<InternalFormulaPayload>(text, "formulae");
-    // text is no longer needed, let GC reclaim it
-    logMemory("After formulae JWS parse");
-
-    // Validate payload structure
-    if (!isValidFormulaPayload(payload)) {
-      throw new Error("Invalid formulae payload structure: missing required fields (formulae, aliases, renames)");
-    }
-
-    // Convert to Formula objects
-    const formulaeData = payload.formulae;
-    const names = Object.keys(formulaeData);
-    const formulae: Formula[] = new Array(names.length);
-
-    for (let i = 0; i < names.length; i++) {
-      const name = names[i];
-      formulae[i] = createFormulaFromInternal(name, formulaeData[name]);
-    }
-
-    logMemory("After formulae conversion");
-
-    const duration = Date.now() - startTime;
-    fetchLogger.log("Internal formulae API fetched", {
-      url,
-      count: formulae.length,
-      durationMs: duration,
-      sizeBytes: bytesDownloaded,
-      sizeKb: `${(bytesDownloaded / 1024).toFixed(2)} KB`,
-    });
-
-    // Report complete
-    onProgress?.({
-      url,
-      bytesDownloaded,
-      totalBytes,
-      percent: 100,
-      complete: true,
-      itemsProcessed: formulae.length,
-      totalItems: formulae.length,
-    });
-
-    return formulae;
-  } catch (error) {
-    logMemory("Error in fetchInternalFormulae", true);
-    const duration = Date.now() - startTime;
-    fetchLogger.error("Internal formulae API fetch failed", {
-      url,
-      durationMs: duration,
-      error,
-    });
-    throw error;
-  }
-}
-
-/**
- * Fetch casks from the internal API.
- * Returns full Cask objects (internal cask API has full metadata).
+ * The JWS format is: {"payload": "...escaped JSON string...", ...}
+ * We stream through the file, find the payload value, unescape it, and write to output.
  *
- * Memory optimization: We parse incrementally and release references
- * as soon as possible to reduce peak memory usage in Raycast's
- * constrained worker environment.
+ * Memory optimization: Use array-based buffering to avoid string concatenation overhead.
  */
-export async function fetchInternalCasks(onProgress?: DownloadProgressCallback): Promise<Cask[]> {
-  const url = getInternalCaskUrl();
-  const startTime = Date.now();
+async function extractJwsPayloadToFile(jwsFilePath: string, outputPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const readStream = fs.createReadStream(jwsFilePath, { encoding: "utf8", highWaterMark: 16 * 1024 });
+    const writeStream = fs.createWriteStream(outputPath, { highWaterMark: 16 * 1024 });
 
-  fetchLogger.log("Fetching internal casks API", { url });
-  logMemory("Before fetchInternalCasks");
+    let state: "searching" | "in_payload" | "done" = "searching";
+    let searchBuffer = "";
+    let unicodeBuffer = "";
+    let escapeNext = false;
 
-  try {
-    // Report initial progress
-    onProgress?.({
-      url,
-      bytesDownloaded: 0,
-      totalBytes: 0,
-      percent: 0,
-      complete: false,
+    // Use array-based buffering to avoid string concatenation memory overhead
+    const outputChunks: string[] = [];
+    let outputSize = 0;
+    const FLUSH_THRESHOLD = 8 * 1024; // Flush every 8KB
+
+    const flushOutput = () => {
+      if (outputChunks.length > 0) {
+        writeStream.write(outputChunks.join(""));
+        outputChunks.length = 0;
+        outputSize = 0;
+      }
+    };
+
+    const appendOutput = (str: string) => {
+      outputChunks.push(str);
+      outputSize += str.length;
+      if (outputSize >= FLUSH_THRESHOLD) {
+        flushOutput();
+      }
+    };
+
+    // We're looking for: "payload":" then capturing until the closing unescaped "
+    const payloadMarker = '"payload":"';
+
+    readStream.on("data", (chunkData: string | Buffer) => {
+      const chunk = typeof chunkData === "string" ? chunkData : chunkData.toString("utf8");
+      if (state === "done") return;
+
+      // Process chunk - collect runs of regular characters to batch
+      let runStart = -1;
+
+      for (let i = 0; i < chunk.length; i++) {
+        const char = chunk[i];
+
+        if (state === "searching") {
+          searchBuffer += char;
+          // Keep buffer small - only need enough to match the marker
+          if (searchBuffer.length > payloadMarker.length) {
+            searchBuffer = searchBuffer.slice(-payloadMarker.length);
+          }
+          if (searchBuffer === payloadMarker) {
+            state = "in_payload";
+            searchBuffer = "";
+          }
+        } else if (state === "in_payload") {
+          if (escapeNext) {
+            // Handle escape sequences
+            escapeNext = false;
+            if (char === "n") {
+              appendOutput("\n");
+            } else if (char === "r") {
+              appendOutput("\r");
+            } else if (char === "t") {
+              appendOutput("\t");
+            } else if (char === '"') {
+              appendOutput('"');
+            } else if (char === "\\") {
+              appendOutput("\\");
+            } else if (char === "/") {
+              appendOutput("/");
+            } else if (char === "u") {
+              // Unicode escape - collect next 4 chars
+              unicodeBuffer = "\\u";
+            } else {
+              // Unknown escape, write as-is
+              appendOutput(char);
+            }
+          } else if (unicodeBuffer.length > 0) {
+            unicodeBuffer += char;
+            if (unicodeBuffer.length === 6) {
+              // Complete unicode escape: \uXXXX
+              try {
+                const codePoint = parseInt(unicodeBuffer.slice(2), 16);
+                appendOutput(String.fromCharCode(codePoint));
+              } catch {
+                appendOutput(unicodeBuffer);
+              }
+              unicodeBuffer = "";
+            }
+          } else if (char === "\\") {
+            // Flush any pending run before escape
+            if (runStart >= 0) {
+              appendOutput(chunk.slice(runStart, i));
+              runStart = -1;
+            }
+            escapeNext = true;
+          } else if (char === '"') {
+            // Flush any pending run
+            if (runStart >= 0) {
+              appendOutput(chunk.slice(runStart, i));
+              runStart = -1;
+            }
+            // End of payload string
+            state = "done";
+            flushOutput();
+            writeStream.end();
+            resolve();
+            return;
+          } else {
+            // Regular character - start or continue a run
+            if (runStart < 0) {
+              runStart = i;
+            }
+          }
+        }
+      }
+
+      // Flush any remaining run from this chunk
+      if (state === "in_payload" && runStart >= 0) {
+        appendOutput(chunk.slice(runStart));
+      }
     });
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const contentLength = response.headers.get("content-length");
-    const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
-
-    // Read the response
-    const text = await response.text();
-    const bytesDownloaded = text.length;
-    logMemory("After casks download");
-
-    // Report download complete
-    onProgress?.({
-      url,
-      bytesDownloaded,
-      totalBytes,
-      percent: 100,
-      complete: false, // Still need to parse
+    readStream.on("end", () => {
+      if (state !== "done") {
+        flushOutput();
+        writeStream.end();
+        if (state === "searching") {
+          reject(new Error("No payload found in JWS file"));
+        } else {
+          // Payload wasn't properly terminated, but we got data
+          resolve();
+        }
+      }
     });
 
-    // Parse and validate JWS response
-    const payload = parseJWSPayload<InternalCaskPayload>(text, "casks");
-    // text is no longer needed, let GC reclaim it
-    logMemory("After casks JWS parse");
-
-    // Validate payload structure
-    if (!isValidCaskPayload(payload)) {
-      throw new Error("Invalid casks payload structure: missing required 'casks' field");
-    }
-
-    // Convert to Cask array
-    const casks: Cask[] = Object.values(payload.casks);
-    logMemory("After casks conversion");
-
-    const duration = Date.now() - startTime;
-    fetchLogger.log("Internal casks API fetched", {
-      url,
-      count: casks.length,
-      durationMs: duration,
-      sizeBytes: bytesDownloaded,
-      sizeKb: `${(bytesDownloaded / 1024).toFixed(2)} KB`,
+    readStream.on("error", (err) => {
+      writeStream.end();
+      reject(err);
     });
 
-    // Report complete
-    onProgress?.({
-      url,
-      bytesDownloaded,
-      totalBytes,
-      percent: 100,
-      complete: true,
-      itemsProcessed: casks.length,
-      totalItems: casks.length,
-    });
-
-    return casks;
-  } catch (error) {
-    logMemory("Error in fetchInternalCasks", true);
-    const duration = Date.now() - startTime;
-    fetchLogger.error("Internal casks API fetch failed", {
-      url,
-      durationMs: duration,
-      error,
-    });
-    throw error;
-  }
+    writeStream.on("error", reject);
+  });
 }
 
 /**

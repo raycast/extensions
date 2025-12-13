@@ -1,64 +1,28 @@
 /**
  * Hook for fetching installed brew packages.
  *
- * Uses a two-phase loading strategy for better perceived performance:
- * 1. Fast initial load from cache or `brew list --json` (quick)
- * 2. Background refresh with full metadata via `brew info --json=v2 --installed`
+ * Uses Raycast's useCachedPromise for caching with keepPreviousData
+ * to show stale data while revalidating.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import {
-  brewFetchInstalled,
-  brewFetchInstalledFast,
-  InstalledMap,
-  isBrewLockError,
-  getErrorMessage,
-  brewLogger,
-} from "../utils";
+import { brewFetchInstalled, InstalledMap, isBrewLockError, getErrorMessage, brewLogger } from "../utils";
 
 /**
- * Hook to fetch and cache installed brew packages with optimized loading.
+ * Hook to fetch and cache installed brew packages.
  *
- * Implements stale-while-revalidate pattern:
- * - Returns cached/fast data immediately
- * - Fetches full metadata in background
- * - Updates UI when full data is ready
+ * Uses useCachedPromise with keepPreviousData to implement stale-while-revalidate:
+ * - Shows cached data immediately if available
+ * - Fetches fresh data in background
+ * - Loading state is true until data is available
  *
  * @returns Object containing loading state, data, and revalidate function
  */
 export function useBrewInstalled() {
-  const [fastData, setFastData] = useState<InstalledMap | undefined>(undefined);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const fastLoadAttempted = useRef(false);
+  const loadingToastRef = useRef<Toast | undefined>(undefined);
 
-  // Phase 1: Fast initial load (cache or brew list)
-  useEffect(() => {
-    if (fastLoadAttempted.current) return;
-    fastLoadAttempted.current = true;
-
-    const loadFast = async () => {
-      try {
-        const data = await brewFetchInstalledFast();
-        if (data) {
-          setFastData(data);
-          brewLogger.log("Fast data loaded", {
-            formulaeCount: data.formulae.size,
-            casksCount: data.casks.size,
-          });
-        }
-      } catch (err) {
-        brewLogger.error("Fast load failed", { error: err });
-      } finally {
-        setIsInitialLoading(false);
-      }
-    };
-
-    loadFast();
-  }, []);
-
-  // Phase 2: Full metadata fetch (runs in background)
   const result = useCachedPromise(
     async (): Promise<InstalledMap | undefined> => {
       return await brewFetchInstalled(true);
@@ -66,7 +30,17 @@ export function useBrewInstalled() {
     [],
     {
       keepPreviousData: true,
+      onWillExecute: async () => {
+        loadingToastRef.current = await showToast({
+          style: Toast.Style.Animated,
+          title: "Loading Installed Packages…",
+        });
+      },
+      onData: () => {
+        loadingToastRef.current?.hide();
+      },
       onError: async (error) => {
+        loadingToastRef.current?.hide();
         brewLogger.error("Failed to fetch installed packages", {
           errorType: error.name,
           message: error.message,
@@ -92,13 +66,5 @@ export function useBrewInstalled() {
     },
   );
 
-  // Use fast data while full data is loading, then switch to full data
-  const data = result.data ?? fastData;
-  const isLoading = isInitialLoading || (result.isLoading && !data);
-
-  return {
-    ...result,
-    data,
-    isLoading,
-  };
+  return result;
 }

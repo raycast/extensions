@@ -66,9 +66,12 @@ export function parseBrewOutput(line: string): BrewProgress | null {
   const trimmedLine = line.trim();
   if (!trimmedLine) return null;
 
+  // Strip the "==>" prefix from Homebrew output for cleaner UI messages
+  const cleanMessage = trimmedLine.replace(/^=+>\s*/, "");
+
   // Downloading phase
   if (trimmedLine.includes("Downloading")) {
-    return { phase: "downloading", message: trimmedLine };
+    return { phase: "downloading", message: cleanMessage };
   }
 
   // Download progress (e.g., "######## 50.0%")
@@ -83,37 +86,37 @@ export function parseBrewOutput(line: string): BrewProgress | null {
 
   // Verifying checksum
   if (trimmedLine.includes("Verifying") || trimmedLine.includes("checksum")) {
-    return { phase: "verifying", message: trimmedLine };
+    return { phase: "verifying", message: cleanMessage };
   }
 
   // Extracting/Pouring
   if (trimmedLine.includes("Pouring") || trimmedLine.includes("Extracting")) {
-    return { phase: "extracting", message: trimmedLine };
+    return { phase: "extracting", message: cleanMessage };
   }
 
   // Installing
   if (trimmedLine.includes("Installing") || trimmedLine.includes("==> Installing")) {
-    return { phase: "installing", message: trimmedLine };
+    return { phase: "installing", message: cleanMessage };
   }
 
   // Linking
   if (trimmedLine.includes("Linking") || trimmedLine.includes("==> Linking")) {
-    return { phase: "linking", message: trimmedLine };
+    return { phase: "linking", message: cleanMessage };
   }
 
   // Cleaning
   if (trimmedLine.includes("Cleaning") || trimmedLine.includes("Removing")) {
-    return { phase: "cleaning", message: trimmedLine };
+    return { phase: "cleaning", message: cleanMessage };
   }
 
   // Caveats or summary
   if (trimmedLine.includes("==> Caveats") || trimmedLine.includes("==> Summary")) {
-    return { phase: "complete", message: trimmedLine };
+    return { phase: "complete", message: cleanMessage };
   }
 
   // Generic progress message
   if (trimmedLine.startsWith("==>")) {
-    return { phase: "installing", message: trimmedLine };
+    return { phase: "installing", message: cleanMessage };
   }
 
   return null;

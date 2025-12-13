@@ -57,6 +57,12 @@ export interface SearchLoadingState {
   formulaeProgress: FileDownloadProgress;
 }
 
+/** Total counts of packages in the index (not filtered by search) */
+export interface IndexTotals {
+  formulae: number;
+  casks: number;
+}
+
 interface UseBrewSearchResult {
   isLoading: boolean;
   isInitialLoad: boolean;
@@ -65,6 +71,8 @@ interface UseBrewSearchResult {
   loadingState: SearchLoadingState;
   data: InstallableResults | undefined;
   mutate: MutatePromise<InstallableResults | undefined>;
+  /** Total counts of packages in the index (for status display) */
+  indexTotals: IndexTotals | undefined;
 }
 
 /** Default progress state for a file */
@@ -315,6 +323,24 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
   // null means we haven't checked yet - UI should wait before deciding which view to show
   const hasCacheFiles = cacheExists;
 
+  // Extract index totals from download progress (set when processing completes)
+  const indexTotals: IndexTotals | undefined = useMemo(() => {
+    const casksTotal = downloadProgress.casksProgress?.totalItems;
+    const formulaeTotal = downloadProgress.formulaeProgress?.totalItems;
+    if (casksTotal !== undefined && formulaeTotal !== undefined && casksTotal > 0 && formulaeTotal > 0) {
+      return { formulae: formulaeTotal, casks: casksTotal };
+    }
+    // Fallback to rawData totalLength if available (for warm cache starts)
+    if (rawData) {
+      const formulaeLen = rawData.formulae.totalLength ?? rawData.formulae.length;
+      const casksLen = rawData.casks.totalLength ?? rawData.casks.length;
+      if (formulaeLen > 0 || casksLen > 0) {
+        return { formulae: formulaeLen, casks: casksLen };
+      }
+    }
+    return undefined;
+  }, [downloadProgress.casksProgress?.totalItems, downloadProgress.formulaeProgress?.totalItems, rawData]);
+
   return {
     isLoading,
     isInitialLoad,
@@ -322,6 +348,7 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     loadingState,
     data,
     mutate,
+    indexTotals,
   };
 }
 

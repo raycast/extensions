@@ -36,7 +36,7 @@ export function FormulaList(props: FormulaListProps) {
       filtering={props.filtering ?? true}
       throttle
     >
-      {!hasResults && props.isLoading && (
+      {!hasResults && (props.isLoading || !props.dataFetched) && (
         <List.EmptyView
           icon={getProgressIcon(0.5)}
           title="Loading Packages"
@@ -46,28 +46,32 @@ export function FormulaList(props: FormulaListProps) {
       {!hasResults && !props.isLoading && props.dataFetched && (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No Results" description="No packages found" />
       )}
-      <List.Section title="Formulae">
-        {formulae.map((formula) => (
-          <FormulaListItem
-            key={`formula-${formula.name}`}
-            formula={formula}
-            isInstalled={props.isInstalled}
-            onAction={props.onAction}
-          />
-        ))}
-        {formulae.isTruncated() && <MoreListItem />}
-      </List.Section>
-      <List.Section title="Casks">
-        {casks.map((cask) => (
-          <CaskListItem
-            key={`cask-${cask.token}`}
-            cask={cask}
-            isInstalled={props.isInstalled}
-            onAction={props.onAction}
-          />
-        ))}
-        {casks.isTruncated() && <MoreListItem />}
-      </List.Section>
+      {formulae.length > 0 && (
+        <List.Section title="Formulae">
+          {formulae.map((formula) => (
+            <FormulaListItem
+              key={`formula-${formula.name}`}
+              formula={formula}
+              isInstalled={props.isInstalled}
+              onAction={props.onAction}
+            />
+          ))}
+          {formulae.isTruncated() && <MoreListItem />}
+        </List.Section>
+      )}
+      {casks.length > 0 && (
+        <List.Section title="Casks">
+          {casks.map((cask) => (
+            <CaskListItem
+              key={`cask-${cask.token}`}
+              cask={cask}
+              isInstalled={props.isInstalled}
+              onAction={props.onAction}
+            />
+          ))}
+          {casks.isTruncated() && <MoreListItem />}
+        </List.Section>
+      )}
     </List>
   );
 }
