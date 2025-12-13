@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
-import { useState, useCallback, useMemo } from "react";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState, useMemo } from "react";
 import * as gandiAPI from "./api";
 import { GandiDomain } from "./types";
 import DomainDetail from "./components/DomainDetail";
@@ -13,16 +13,11 @@ export default function ListDomains() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [sort, setSort] = useState<SortKey>("days_asc");
 
-  const fetchDomains = useCallback(async () => {
-    try {
-      return await gandiAPI.getDomains();
-    } catch (error) {
-      await showFailureToast(error, { title: "Failed to fetch domains" });
-      return [];
+  const { data: domains, isLoading, revalidate } = useCachedPromise(gandiAPI.getDomains, [], {
+    failureToastOptions: {
+      title: "Failed to fetch domains"
     }
-  }, []);
-
-  const { data: domains, isLoading, revalidate } = usePromise(fetchDomains, []);
+  });
 
   const daysUntil = (d: GandiDomain) =>
     Math.ceil((new Date(d.dates.registry_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24));

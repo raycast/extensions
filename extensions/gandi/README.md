@@ -60,6 +60,7 @@ Manage your Gandi domains, DNS records, and check domain availability directly f
 ## Preferences
 
 - **API Token**: Your Gandi Personal Access Token (required)
+- **Sandbox API Token**: Your Gandi Sandbox Personal Access Token (optional) [if present, the extension will use the sandbox API]
 
 ## API Permissions
 

@@ -29,8 +29,8 @@ export interface DomainAvailability {
   // Currency code as returned by the API (may be undefined for some registries)
   currency?: string;
   available: boolean;
-  min_period?: number;
-  max_period?: number;
+  // min_period?: number;
+  // max_period?: number;
   taxes?: Array<{
     type: string;
     rate: number;
@@ -53,6 +53,19 @@ export interface DomainAvailability {
       starts_at?: string;
       ends_at?: string;
     }>;
+    status: "available"
+|"available_reserved"
+|"available_preorder"
+|"unavailable"
+|"unavailable_premium"
+|"unavailable_restricted"
+|"error_invalid"
+|"error_refused"
+|"error_timeout"
+|"error_unknown"
+|"reserved_corporate"
+|"pending"
+|"error_eoi"
   }>;
 }
 
@@ -72,14 +85,20 @@ export interface WebsiteMetadata {
   favicon?: string;
 }
 
-export interface GandiError {
-  code: string;
+export type GandiError = {
+  code: number;
   message: string;
   object?: string;
   cause?: string;
-  errors?: Array<{
+} | {
+status: "error";
+  errors: Array<{
     location: string;
     name: string;
     description: string;
   }>;
+}
+
+export interface GandiMessage {
+message: string
 }
