@@ -20,7 +20,7 @@ interface Preferences {
 }
 
 export default function Command() {
-  const [localIPs, setLocalIPs] = useState<string[]>([]);
+  const [localIPs, setLocalIPs] = useState<string[]>(["Loading..."]);
   const [deviceInfo, setDeviceInfo] = useState(getDeviceInfo());
   const [quickSaveMode, setQuickSaveMode] = useState<"off" | "favorites" | "on">("off");
   const prefs = getPreferenceValues<Preferences>();
@@ -28,7 +28,8 @@ export default function Command() {
   useEffect(() => {
     loadQuickSaveMode();
     updateStatus();
-    const interval = setInterval(updateStatus, 2000);
+    // Refresh every 30 seconds instead of 2 - IPs don't change that frequently
+    const interval = setInterval(updateStatus, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -42,15 +43,12 @@ export default function Command() {
     setQuickSaveMode(mode);
   };
 
-  useEffect(() => {
-    updateStatus();
-    const interval = setInterval(updateStatus, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
   const updateStatus = async () => {
     const status = await getDiscoveryStatus();
-    setLocalIPs(status.localIPs);
+    // Only update if we have real IPs (not placeholder), otherwise keep current
+    if (status.localIPs.length > 0 && status.localIPs[0] !== "0.0.0.0") {
+      setLocalIPs(status.localIPs);
+    }
     setDeviceInfo(getDeviceInfo());
   };
 
@@ -110,16 +108,13 @@ export default function Command() {
 
       <MenuBarExtra.Separator />
 
-      {localIPs.length > 0 && (
-        <>
-          <MenuBarExtra.Section title="Local IP Addresses">
-            {localIPs.map((ip) => (
-              <MenuBarExtra.Item key={ip} title={ip} icon={Icon.Network} onAction={async () => {}} />
-            ))}
-          </MenuBarExtra.Section>
-          <MenuBarExtra.Separator />
-        </>
-      )}
+      <MenuBarExtra.Section title="Local IP Addresses">
+        {localIPs.map((ip) => (
+          <MenuBarExtra.Item key={ip} title={ip} icon={Icon.Network} onAction={async () => {}} />
+        ))}
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Separator />
 
       <MenuBarExtra.Submenu title="Quick Save" icon={Icon.Download}>
         <MenuBarExtra.Item

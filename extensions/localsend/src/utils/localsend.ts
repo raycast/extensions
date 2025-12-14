@@ -46,6 +46,9 @@ const getHttpPort = (): number => {
   return isNaN(port) || port < 1024 || port > 65535 ? DEFAULT_HTTP_PORT : port;
 };
 
+// Cache for local IPs to prevent UI blinking during refresh
+let cachedIPs: string[] = ["0.0.0.0"]; // Start with placeholder
+
 export const getLocalIPs = (): string[] => {
   const interfaces = os.networkInterfaces();
   const ips: string[] = [];
@@ -60,7 +63,13 @@ export const getLocalIPs = (): string[] => {
     }
   }
 
-  return ips;
+  // Only update cache if we found IPs, otherwise keep showing old ones
+  if (ips.length > 0) {
+    cachedIPs = ips;
+  }
+
+  // Always return cached IPs (which defaults to 0.0.0.0 if nothing found yet)
+  return cachedIPs;
 };
 
 export const getDeviceInfo = (): DeviceInfo => {
