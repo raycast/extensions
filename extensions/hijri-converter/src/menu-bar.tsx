@@ -70,19 +70,37 @@ export default function Command() {
           title="Hijri Calendar"
           icon={Icon.List}
           shortcut={{ modifiers: ["cmd"], key: "l" }}
-          onAction={() => launchCommand({ name: "hijri-calendar", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "hijri-calendar", type: LaunchType.UserInitiated });
+            } catch {
+              await showHUD("Failed to open Hijri Calendar");
+            }
+          }}
         />
         <MenuBarExtra.Item
           title="Convert Hijri to Gregorian"
           icon={Icon.ArrowRight}
           shortcut={{ modifiers: ["cmd"], key: "1" }}
-          onAction={() => launchCommand({ name: "convert-date", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "convert-date", type: LaunchType.UserInitiated });
+            } catch {
+              await showHUD("Failed to open converter");
+            }
+          }}
         />
         <MenuBarExtra.Item
           title="Convert Gregorian to Hijri"
           icon={Icon.ArrowLeft}
           shortcut={{ modifiers: ["cmd"], key: "2" }}
-          onAction={() => launchCommand({ name: "gregorian-to-hijri", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "gregorian-to-hijri", type: LaunchType.UserInitiated });
+            } catch {
+              await showHUD("Failed to open converter");
+            }
+          }}
         />
       </MenuBarExtra.Section>
 
