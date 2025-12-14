@@ -22,7 +22,7 @@ export function useRecentEntries() {
       isLoading: false,
       error: true,
 
-      removeEntry: (entry: EntryLike) => Promise.resolve(),
+      removeEntry: () => Promise.resolve(),
       removeAllEntries: () => Promise.resolve(),
     };
   }
@@ -45,7 +45,7 @@ export function useRecentEntries() {
       await saveEntries(parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)));
       await revalidate();
       showToast(Toast.Style.Success, "Entry removed", `Restart ${build} to sync the list in ${build} (optional)`);
-    } catch (error) {
+    } catch {
       showToast(Toast.Style.Failure, "Failed to remove entry");
     }
   }
@@ -75,7 +75,7 @@ export function useRecentEntries() {
           `Restart ${build} to sync the list in ${build} (optional)`,
         );
       }
-    } catch (error) {
+    } catch {
       showToast(Toast.Style.Failure, "Failed to remove entries");
     }
   }

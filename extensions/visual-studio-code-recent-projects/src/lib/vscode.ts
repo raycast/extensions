@@ -4,6 +4,7 @@ import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import { fileExists, isWin } from "../utils";
+import { runPowerShellScript } from "@raycast/utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -120,6 +121,14 @@ export class VSCodeCLI {
   uninstallExtensionByIDSync(id: string) {
     child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
   }
+
+  async newWindow() {
+    if (isWin) {
+      await runPowerShellScript(`
+        Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--new-window" -WindowStyle Hidden
+      `);
+    }
+  }
 }
 
 export function getVSCodeCLI(): VSCodeCLI {
@@ -146,7 +155,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
               displayName = displayNameNLS;
             }
           }
-        } catch (error) {
+        } catch {
           // ignore
         }
       }
@@ -158,7 +167,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
         preview,
       };
     }
-  } catch (error) {
+  } catch {
     //
   }
 }

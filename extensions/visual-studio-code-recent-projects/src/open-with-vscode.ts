@@ -2,6 +2,9 @@ import { closeMainWindow, getFrontmostApplication, getSelectedFinderItems, open,
 import { runAppleScript } from "@raycast/utils";
 import { bundleIdentifier } from "./preferences";
 import { getCurrentFinderPath } from "./utils/apple-scripts";
+import { isMac, isWin, runExec } from "./utils";
+import { getCurrentExplorerPath, getSelectedFileExplorerItems } from "./utils/win-scripts";
+import { getVSCodeCLIFilename } from "./lib/vscode";
 
 // Function to get selected Path Finder items
 const getSelectedPathFinderItems = async () => {
@@ -22,22 +25,50 @@ const getSelectedPathFinderItems = async () => {
 export default async function main() {
   try {
     let selectedItems: { path: string }[] = [];
-    const currentApp = await getFrontmostApplication();
 
-    if (currentApp.name === "Finder") {
-      selectedItems = await getSelectedFinderItems();
-    } else if (currentApp.name === "Path Finder") {
-      const paths = await getSelectedPathFinderItems();
-      selectedItems = paths.map((p) => ({ path: p }));
-    }
+    if (isMac) {
+      const currentApp = await getFrontmostApplication();
+      if (currentApp.name === "Finder") {
+        selectedItems = await getSelectedFinderItems();
+      } else if (currentApp.name === "Path Finder") {
+        const paths = await getSelectedPathFinderItems();
+        selectedItems = paths.map((p) => ({ path: p }));
+      }
 
-    if (selectedItems.length === 0) {
-      const currentPath = await getCurrentFinderPath();
-      if (currentPath.length === 0) throw new Error("Not a valid directory");
-      await open(currentPath, bundleIdentifier);
-    } else {
+      if (selectedItems.length === 0) {
+        const currentPath = await getCurrentFinderPath();
+        if (currentPath.length === 0) throw new Error("Not a valid directory");
+        selectedItems = [{ path: currentPath }];
+      }
+
       for (const item of selectedItems) {
         await open(item.path, bundleIdentifier);
+      }
+    }
+
+    if (isWin) {
+      const cliFilename = getVSCodeCLIFilename();
+      const paths = await getSelectedFileExplorerItems();
+      selectedItems = paths.map((p) => ({ path: p }));
+
+      if (selectedItems.length === 0) {
+        const currentPath = await getCurrentExplorerPath();
+
+        if (currentPath.length === 0) {
+          throw new Error("Not a valid directory or no selection in active application.");
+        }
+
+        selectedItems = [{ path: currentPath }];
+      }
+
+      for (const item of selectedItems) {
+        runExec([cliFilename, item.path], (error) => {
+          if (error) {
+            console.error(`Error opening file: ${error}`);
+            showToast(Toast.Style.Failure, `Failed to open file: ${error}`);
+            return;
+          }
+        });
       }
     }
 

@@ -169,7 +169,7 @@ function LocalItem(
         if (mounted) {
           setGitBranch(branch);
         }
-      } catch (error) {
+      } catch {
         // Silently handle errors - they're already handled in getGitBranch
       }
     }

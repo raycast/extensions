@@ -27,7 +27,7 @@ export function isFileEntry(entry: EntryLike): entry is FileEntry {
   try {
     const fileUrl = new URL(fileUri);
     return existsSync(fileUrl) && fileUri.indexOf(".code-workspace") === -1;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -42,7 +42,7 @@ export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
   try {
     const folderUrl = new URL(folderUri);
     return existsSync(folderUrl);
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -57,7 +57,7 @@ export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
   try {
     const configUrl = new URL(workspace.configPath);
     return existsSync(configUrl) && workspace.configPath.indexOf(".code-workspace") !== -1;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -93,7 +93,7 @@ export function isSameEntry(a: EntryLike, b: EntryLike) {
 export function filterEntriesByType(filter: EntryType | null) {
   switch (filter) {
     case "All Types":
-      return (entry: EntryLike) => true;
+      return () => true;
     case "Workspaces":
       return isWorkspaceEntry;
     case "Folders":
@@ -105,7 +105,7 @@ export function filterEntriesByType(filter: EntryType | null) {
     case "Files":
       return isFileEntry;
     default:
-      return (entry: EntryLike) => false;
+      return () => false;
   }
 }
 
@@ -163,10 +163,11 @@ export function isValidHexColor(color: string): boolean {
 }
 
 export const isWin = process.platform === "win32";
+export const isMac = process.platform === "darwin";
 
 export function runExec(commands: string[], onFinish: (error: string | null) => void) {
   const cmd = commands.map((c) => `"${c}"`).join(" ");
-  exec(cmd, (error, stdout, stderr) => {
+  exec(cmd, { env: {} }, (error, stdout, stderr) => {
     if (stdout || stderr) {
       console.log("fix me");
     }

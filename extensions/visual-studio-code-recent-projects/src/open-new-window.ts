@@ -2,6 +2,8 @@ import { Toast, closeMainWindow, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { build } from "./preferences";
 import { VSCodeBuild } from "./types";
+import { getVSCodeCLI } from "./lib/vscode";
+import { isMac, isWin } from "./utils";
 
 /**
  * The index of the `New Window` menu item in the `File` menu.
@@ -34,7 +36,7 @@ const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
  * However, for Cursor, which does not have a `New File` menu item, `New Window` is in the second position.
  * We need to handle this case specially.
  */
-const makeNewWindow = async () => {
+const makeNewWindowMacOs = async () => {
   await runAppleScript(`
     tell application "${build}"
 	    activate
@@ -58,10 +60,20 @@ const makeNewWindow = async () => {
   `);
 };
 
+const makeNewWindowWindows = async () => {
+  const cli = getVSCodeCLI();
+  return cli.newWindow();
+};
+
 export default async function command() {
   try {
     await closeMainWindow();
-    await makeNewWindow();
+    if (isMac) {
+      await makeNewWindowMacOs();
+    }
+    if (isWin) {
+      await makeNewWindowWindows();
+    }
   } catch (error) {
     await showToast({
       title: "Failed opening new window",
