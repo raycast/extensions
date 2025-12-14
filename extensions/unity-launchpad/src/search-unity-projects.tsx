@@ -10,6 +10,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -130,7 +131,7 @@ export default function Command() {
         setProjects(foundProjects);
         setIsLoading(false);
       } catch (error) {
-        showToast({ style: Toast.Style.Failure, title: "Error", message: String(error) });
+        showFailureToast(error, { title: "Error" });
         setIsLoading(false);
       }
     }
