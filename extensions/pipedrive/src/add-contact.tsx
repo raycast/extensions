@@ -446,6 +446,8 @@ export default function AddContact({
 
       onSaved?.();
 
+      onSaved?.();
+
       pop();
     } catch (error) {
       if (isAbortError(error)) {
