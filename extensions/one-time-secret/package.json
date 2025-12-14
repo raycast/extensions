@@ -35,23 +35,23 @@
   "ai": {
     "evals": [
       {
-  "input" : "@one-time-secret store \"santa is real\" for 1 week. passcode: \"christmas\"",
-  "mocks" : {
-    "send-one-time-secret" : "https://onetimesecret.com/secret/2uim0qy8e88vxm3saw4hceg3v0boaa6"
-  },
-  "expected" : [
-    {
-      "callsTool" : {
-        "arguments" : {
-          "lifetime" : "604800",
-          "passphrase" : "christmas",
-          "secret" : "santa is real"
+        "input" : "@one-time-secret store \"santa is real\" for 1 week. passcode: \"christmas\"",
+        "mocks" : {
+          "send-one-time-secret" : "https://onetimesecret.com/secret/2uim0qy8e88vxm3saw4hceg3v0boaa6"
         },
-        "name" : "send-one-time-secret"
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "lifetime" : "604800",
+                "passphrase" : "christmas",
+                "secret" : "santa is real"
+              },
+              "name" : "send-one-time-secret"
+            }
+          }
+        ]
       }
-    }
-  ]
-}
     ]
   },
   "dependencies": {
