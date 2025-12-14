@@ -104,9 +104,19 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
 }
 
 /**
- * Show a failure toast with error details and optional retry action.
+ * Show a Brew-specific failure toast with error details and optional retry action.
+ *
+ * Unlike the standard `showFailureToast` from `@raycast/utils`, this function:
+ * - Detects Homebrew lock errors and shows "Brew is Busy" with helpful context
+ * - Logs structured error details (stderr, exit code, error type) via uiLogger
+ * - Provides a "Copy Logs" action with brew-specific troubleshooting tips
+ * - Supports conditional retry for recoverable brew errors
+ * - Silently ignores AbortError (user-initiated cancellations)
+ *
+ * Use this for all Homebrew operations. Use `showFailureToast` from `@raycast/utils`
+ * for general extension errors unrelated to brew commands.
  */
-export async function showFailureToast(
+export async function showBrewFailureToast(
   title: string,
   error: Error,
   options?: { retryAction?: () => Promise<void> },

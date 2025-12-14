@@ -5,7 +5,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast, popToRoot } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { brewUpgradeWithProgress, preferences, showFailureToast, actionsLogger, ensureError } from "./utils";
+import { brewUpgradeWithProgress, preferences, showBrewFailureToast, actionsLogger, ensureError } from "./utils";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import type { UpgradeStep } from "./utils/brew/upgrade";
 
@@ -152,7 +152,7 @@ function UpgradeContent() {
         toast.title = "Upgrade failed";
         toast.message = error.message;
         setError(error);
-        await showFailureToast("Upgrade failed", error);
+        await showBrewFailureToast("Upgrade failed", error);
       }
     } finally {
       setIsRunning(false);

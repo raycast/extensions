@@ -4,6 +4,8 @@
  * Provides helper functions for async operations.
  */
 
+import { setTimeout } from "node:timers";
+
 /**
  * Wait for a specified number of milliseconds.
  *

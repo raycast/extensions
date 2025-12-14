@@ -10,7 +10,7 @@ import {
   brewUpgradeAll,
   preferences,
   showActionToast,
-  showFailureToast,
+  showBrewFailureToast,
   ensureError,
   Cask,
   Formula,
@@ -115,7 +115,7 @@ async function install(formula: Cask | Formula): Promise<boolean> {
     // Show HUD for failure if user might have closed Raycast
     await handle.showFailureHUD(`Failed to install ${name}`);
     // Also show detailed toast if Raycast is still open
-    showFailureToast("Install failed", error);
+    showBrewFailureToast("Install failed", error);
     return false;
   }
 }
@@ -130,7 +130,7 @@ async function uninstall(formula: Cask | Nameable): Promise<boolean> {
   } catch (err) {
     const error = ensureError(err);
     await handle.showFailureHUD(`Failed to uninstall ${name}`);
-    showFailureToast("Uninstall failed", error);
+    showBrewFailureToast("Uninstall failed", error);
     return false;
   }
 }
@@ -152,7 +152,7 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean> {
   } catch (err) {
     const error = ensureError(err);
     await handle.showFailureHUD(`Failed to upgrade ${name}`);
-    showFailureToast("Upgrade failed", error);
+    showBrewFailureToast("Upgrade failed", error);
     return false;
   }
 }
@@ -170,7 +170,7 @@ async function upgradeAll(): Promise<boolean> {
   } catch (err) {
     const error = ensureError(err);
     await handle.showFailureHUD("Failed to upgrade packages");
-    showFailureToast("Upgrade failed", error);
+    showBrewFailureToast("Upgrade failed", error);
     return false;
   }
 }
@@ -183,7 +183,7 @@ async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
     showToast(Toast.Style.Success, `Pinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Pin formula failed", ensureError(err));
+    showBrewFailureToast("Pin formula failed", ensureError(err));
     return false;
   }
 }
@@ -196,7 +196,7 @@ async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
     showToast(Toast.Style.Success, `Unpinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Unpin formula failed", ensureError(err));
+    showBrewFailureToast("Unpin formula failed", ensureError(err));
     return false;
   }
 }

@@ -67,7 +67,7 @@ export {
 export { supportPath, bundleIdentifier, cachePath, fetchRemote } from "./cache";
 
 // Toast
-export { showActionToast, showFailureToast } from "./toast";
+export { showActionToast, showBrewFailureToast } from "./toast";
 export type { ActionToastHandle } from "./toast";
 
 // Array extensions (side-effect import to add prototype methods)

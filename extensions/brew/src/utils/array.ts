@@ -22,13 +22,13 @@ declare global {
 
 if (!Array.prototype.first) {
   Array.prototype.first = function <T>(this: T[]): T | undefined {
-    return this.length > 0 ? this[0] : undefined;
+    return this.at(0);
   };
 }
 
 if (!Array.prototype.last) {
   Array.prototype.last = function <T>(this: T[]): T | undefined {
-    return this.length > 0 ? this[this.length - 1] : undefined;
+    return this.at(-1);
   };
 }
 
