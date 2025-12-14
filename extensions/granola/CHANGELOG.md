@@ -1,5 +1,9 @@
 # Granola Changelog
 
+## [1.6.2] - 2025-12-14
+
+- Updated extension icon
+
 ## [1.6.1] - 2025-10-08
 
 ### ✨ Enhancements
