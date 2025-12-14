@@ -86,6 +86,11 @@ export default function Command() {
           onAction={async () => await open("raycast://extensions/kud/localsend/send-folder")}
         />
         <MenuBarExtra.Item
+          title="Receive"
+          icon={Icon.Download}
+          onAction={async () => await open("raycast://extensions/kud/localsend/receive")}
+        />
+        <MenuBarExtra.Item
           title="Discover Devices"
           icon={Icon.MagnifyingGlass}
           onAction={async () => await open("raycast://extensions/kud/localsend/discover-devices")}
@@ -96,6 +101,7 @@ export default function Command() {
 
       <MenuBarExtra.Section title="Device Information">
         <MenuBarExtra.Item title={deviceInfo.alias} icon={Icon.Person} onAction={async () => {}} />
+        <MenuBarExtra.Item title={deviceInfo.deviceModel || "Unknown"} icon={Icon.Monitor} onAction={async () => {}} />
         <MenuBarExtra.Item
           title={
             (deviceInfo.deviceType || "desktop").charAt(0).toUpperCase() + (deviceInfo.deviceType || "desktop").slice(1)
@@ -103,7 +109,6 @@ export default function Command() {
           icon={Icon.ComputerChip}
           onAction={async () => {}}
         />
-        <MenuBarExtra.Item title={deviceInfo.deviceModel || "Unknown"} icon={Icon.Monitor} onAction={async () => {}} />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Separator />
