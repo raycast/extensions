@@ -17,24 +17,6 @@ import { CheckTextResult } from "./components";
 import { API_ENDPOINTS } from "./config/api";
 import { checkTextWithAPI } from "./services/languagetool-api";
 
-type Preferences = {
-  showAdvancedOptions?: boolean;
-  motherTongue?: string;
-  preferredVariants?: string;
-  level?: "" | "default" | "picky";
-  enabledRules?: string;
-  disabledRules?: string;
-  enabledCategories?: string;
-  disabledCategories?: string;
-  enabledOnly?: boolean;
-  enableHiddenRules?: boolean;
-  noopLanguages?: string;
-  abtest?: string;
-  mode?: "" | "allButTextLevelOnly" | "textLevelOnly";
-  allowIncompleteResults?: boolean;
-  useragent?: "" | "standalone";
-};
-
 type FormValues = {
   language: string;
   text: string;

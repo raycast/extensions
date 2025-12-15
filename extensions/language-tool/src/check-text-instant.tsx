@@ -7,17 +7,7 @@ import {
 } from "@raycast/api";
 import { applyAllCorrections } from "./utils/text-correction";
 import { checkTextWithAPI } from "./services/languagetool-api";
-
-type Preferences = {
-  level?: "" | "default" | "picky";
-  disabledRules?: string;
-  enableHiddenRules?: boolean;
-  noopLanguages?: string;
-  abtest?: string;
-  mode?: "" | "allButTextLevelOnly" | "textLevelOnly";
-  allowIncompleteResults?: boolean;
-  useragent?: "" | "standalone";
-};
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Command that reads text from clipboard, checks it, and pastes the corrected result
@@ -78,10 +68,6 @@ export default async function Command() {
     // Close Raycast window
     await closeMainWindow();
   } catch (error) {
-    await showToast({
-      title: "Error checking text",
-      message: error instanceof Error ? error.message : "Unknown error",
-      style: Toast.Style.Failure,
-    });
+    await showFailureToast(error, { title: "Error checking text" });
   }
 }

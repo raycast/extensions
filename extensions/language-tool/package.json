@@ -5,7 +5,6 @@
   "description": "Raycast extension that provides instant spelling and grammar correction using LanguageTool. Type any text, get real-time suggestions, and copy the improved version. Ideal for developers, writers, and anyone who wants fast, high-quality text corrections in multiple languages.",
   "icon": "extension-icon.png",
   "author": "lucastaonline",
-  "version": "1.0.0",
   "platforms": [
     "macOS",
     "Windows"
@@ -214,13 +213,14 @@
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.88.0",
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
+  "version": "1.0.0",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",

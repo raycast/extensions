@@ -3,26 +3,6 @@ import { API_ENDPOINTS } from "../config/api";
 import type { CheckTextResponse } from "../types";
 import { isEmpty } from "../utils/string-utils";
 
-type Preferences = {
-  username?: string;
-  apiKey?: string;
-  showAdvancedOptions?: boolean;
-  motherTongue?: string;
-  preferredVariants?: string;
-  level?: "" | "default" | "picky";
-  enabledRules?: string;
-  disabledRules?: string;
-  enabledCategories?: string;
-  disabledCategories?: string;
-  enabledOnly?: boolean;
-  enableHiddenRules?: boolean;
-  noopLanguages?: string;
-  abtest?: string;
-  mode?: "" | "allButTextLevelOnly" | "textLevelOnly";
-  allowIncompleteResults?: boolean;
-  useragent?: string;
-};
-
 export type CheckTextOptions = {
   /** The text to be checked (required if 'data' is not provided) */
   text?: string;
