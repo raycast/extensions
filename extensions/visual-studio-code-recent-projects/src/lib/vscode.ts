@@ -3,7 +3,7 @@ import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import { fileExists, isWin, runExec } from "../utils";
+import { fileExists, isWin } from "../utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -112,22 +112,17 @@ export function getVSCodeCLIFilename(): string {
 export class VSCodeCLI {
   private cliFilename: string;
   constructor(cliFilename: string) {
-    this.cliFilename = cliFilename;
+    this.cliFilename = `"${cliFilename}"`;
   }
   installExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
+    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"], { shell: isWin });
   }
   uninstallExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
+    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], { shell: isWin });
   }
 
   async newWindow() {
-    runExec([this.cliFilename, "--new-window"], (error) => {
-      if (error) {
-        console.error(`Error opening new window: ${error}`);
-        return;
-      }
-    });
+    child_process.execFileSync(this.cliFilename, ["--new-window"], { shell: isWin });
   }
 }
 
