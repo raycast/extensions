@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-12-15
 
 - Interactive form with text checking and detailed results
 - Instant clipboard check and paste (background mode)
