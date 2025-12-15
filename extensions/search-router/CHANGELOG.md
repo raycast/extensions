@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-12-15
 
 - Added support for multiple search URLs for custom search engines
 
