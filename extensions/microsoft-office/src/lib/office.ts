@@ -50,7 +50,7 @@ export interface ExcelFiles {
 }
 
 export async function recentPowerpointFilesRaw() {
-  const data = fs.readFileSync(environment.assetsPath + "/pp.ps1", "utf8");
+  const data = fs.readFileSync(environment.assetsPath + "/office.ps1", "utf8");
   const result = await runPowerShellScript(data);
   const j = JSON.parse(result) as PowerShellResult;
   const adalKey = Object.keys(j).filter((key) => key.startsWith("ADAL"));
