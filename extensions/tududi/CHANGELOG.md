@@ -1,6 +1,6 @@
 # Tududi Changelog
 
-## [1.8.1] - {PR_MERGE_DATE}
+## [1.8.1] - 2025-12-15
 
 ### Bug fixes
 
