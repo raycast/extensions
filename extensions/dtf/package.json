@@ -26,30 +26,35 @@
     {
       "name": "latest-posts",
       "title": "Latest Posts",
+      "subtitle": "DTF",
       "description": "Browse latest posts from DTF feed",
       "mode": "view"
     },
     {
       "name": "popular-posts",
       "title": "Popular",
+      "subtitle": "DTF",
       "description": "Popular posts on DTF",
       "mode": "view"
     },
     {
       "name": "fresh-posts",
       "title": "Fresh",
+      "subtitle": "DTF",
       "description": "Fresh posts on DTF with rating filters",
       "mode": "view"
     },
     {
       "name": "news",
       "title": "News",
+      "subtitle": "DTF",
       "description": "News from DTF editorial team",
       "mode": "view"
     },
     {
       "name": "search-posts",
       "title": "Search",
+      "subtitle": "DTF",
       "description": "Search posts on DTF",
       "mode": "view",
       "arguments": [
@@ -64,18 +69,21 @@
     {
       "name": "browse-subsites",
       "title": "Topics",
+      "subtitle": "DTF",
       "description": "Browse posts by DTF topics (categories)",
       "mode": "view"
     },
     {
       "name": "top-blogs",
       "title": "Top Blogs",
+      "subtitle": "DTF",
       "description": "Rating of popular blogs on DTF",
       "mode": "view"
     },
     {
       "name": "menu-bar",
       "title": "Menu Bar",
+      "subtitle": "DTF",
       "description": "DTF posts in your menu bar (macOS only)",
       "mode": "menu-bar",
       "interval": "5m",
