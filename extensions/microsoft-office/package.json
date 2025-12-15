@@ -19,6 +19,13 @@
       "description": "Search Recent Word Documents",
       "mode": "view",
       "icon": "word.png"
+    },
+    {
+      "name": "recent-excel",
+      "title": "Recent Excel Documents",
+      "description": "Search Recent Excel Documents",
+      "mode": "view",
+      "icon": "excel.png"
     }
   ],
   "dependencies": {

@@ -8,6 +8,7 @@ interface PowerShellResult {
 interface Result {
   PPTPath?: string;
   WORDPath?: string;
+  EXCELPath?: string;
   OfficeVersion: string;
   Files: RecentPowerpointFile[];
 }
@@ -36,6 +37,16 @@ export interface WordFile {
 export interface WordFiles {
   files: WordFile[];
   wordExecutable?: string;
+}
+
+export interface ExcelFile {
+  filename: string;
+  timestampUTC: Date;
+}
+
+export interface ExcelFiles {
+  files: ExcelFile[];
+  excelExecutable?: string;
 }
 
 export async function recentPowerpointFilesRaw() {
@@ -86,5 +97,22 @@ export async function recentWordFiles(): Promise<WordFiles> {
   return {
     files,
     wordExecutable: data.WORDPath,
+  };
+}
+
+export async function recentExcelFiles(): Promise<ExcelFiles> {
+  const data = await recentPowerpointFilesRaw();
+  const result = data.Files.map<PowerPointFile>((file) => {
+    return {
+      filename: file.FilePath,
+      timestampUTC: powershellDateStringToDate(file.TimestampUTC),
+    };
+  });
+  const files = result
+    .filter((f) => f.filename.toLowerCase().endsWith(".xls") || f.filename.toLowerCase().endsWith(".xlsx"))
+    .sort((a, b) => b.timestampUTC.getTime() - a.timestampUTC.getTime());
+  return {
+    files,
+    excelExecutable: data.EXCELPath,
   };
 }

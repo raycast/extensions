@@ -24,7 +24,16 @@ foreach ($k in $appPaths) {
     }
 }
 
-#$groups["pptPath"] = $pptPath
+$appPaths = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\excel.exe",
+            "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\excel.exe"
+
+$excelPath = $null
+foreach ($k in $appPaths) {
+    if (Test-Path $k) {
+        $excelPath = (Get-ItemProperty -Path $k -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+        break
+    }
+}
 
 Get-ChildItem $basePath -Recurse -ErrorAction SilentlyContinue |
 Where-Object { $_.PSChildName -eq "File MRU" -and $_.PSPath -match "ADAL" } |
@@ -49,6 +58,7 @@ ForEach-Object {
             Files         = @()
             PPTPath       = $pptPath
             WORDPath      = $wordPath
+            EXCELPath     = $excelPath
         }
     }
 

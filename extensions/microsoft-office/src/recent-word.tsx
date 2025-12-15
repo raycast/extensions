@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { recentWordFiles } from "./lib/office";
 import { WordListItem } from "./components/word/list";
 
-export default function recentPowerpointSlides() {
+export default function RecentWordDocuments() {
   const { data, isLoading } = useCachedPromise(async () => recentWordFiles(), []);
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Recent Word Documents...">
