@@ -195,11 +195,11 @@ export function useVaultPluginCheck(params: {
   corePlugins?: string[];
 }) {
   return useMemo(() => {
-    const cacheKey = [
-      params.vaults.map((v) => v.path).join(","),
-      params.communityPlugins?.join(",") || "",
-      params.corePlugins?.join(",") || "",
-    ].join("|");
+    const cacheKey = JSON.stringify({
+      vaultPaths: params.vaults.map((v) => v.path),
+      communityPlugins: params.communityPlugins || [],
+      corePlugins: params.corePlugins || [],
+    });
 
     // Check cache first
     const cached = vaultPluginCheckCache.get(cacheKey);

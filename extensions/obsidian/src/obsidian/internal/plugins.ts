@@ -16,8 +16,13 @@ export function readCommunityPlugins(vaultPath: string): string[] | undefined {
   const path = `${vaultPath}/${configFileName || ".obsidian"}/community-plugins.json`;
   if (!fs.existsSync(path)) return;
   const content = fs.readFileSync(path, "utf-8");
-  const plugins: string[] = JSON.parse(content);
-  return plugins;
+  try {
+    const plugins: string[] = JSON.parse(content);
+    return plugins;
+  } catch (error) {
+    logger.error(`Failed to parse community-plugins.json for vault ${vaultPath}: ${error}`);
+    return undefined;
+  }
 }
 
 /** Reads the core-plugins.json file and returns a record with plugin name keys. The values
@@ -28,8 +33,13 @@ export function readCorePlugins(vaultPath: string): Record<string, boolean> | un
   const path = `${vaultPath}/${configFileName || ".obsidian"}/core-plugins.json`;
   if (!fs.existsSync(path)) return;
   const content = fs.readFileSync(path, "utf-8");
-  const plugins: Record<string, boolean> = JSON.parse(content);
-  return plugins;
+  try {
+    const plugins: Record<string, boolean> = JSON.parse(content);
+    return plugins;
+  } catch (error) {
+    logger.error(`Failed to parse core-plugins.json for vault ${vaultPath}: ${error}`);
+    return undefined;
+  }
 }
 
 export function vaultPluginCheck(params: VaultPluginCheckParams) {

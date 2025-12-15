@@ -121,17 +121,17 @@ export default async function tool(input: Input) {
     return "Either fullNotePath or useDailyNote must be provided.";
   }
 
-  // Validate that the path contains a valid vault name
+  // Validate that the path is within a configured vault
   const allVaults = await Obsidian.getVaultsFromPreferencesOrObsidianJson();
-  const pathContainsVault = allVaults.some((vault) => input.fullNotePath!.includes(vault.name));
+  const isValidPath = Obsidian.validateNotePath(input.fullNotePath, allVaults);
 
-  if (!pathContainsVault) {
-    const vaultNames = allVaults.map((v) => v.name).join(", ");
+  if (!isValidPath) {
+    const vaultInfo = allVaults.map((v) => `${v.name} (${v.path})`).join(", ");
     return `Invalid path: The fullNotePath "${
       input.fullNotePath
-    }" does not appear to contain a valid vault name. Please use the FULL ABSOLUTE path to the note file (e.g., /path/to/vault/${
-      allVaults[0]?.name || "VaultName"
-    }/folder/note.md). Available vaults: ${vaultNames}`;
+    }" is not within any configured vault. Please use the FULL ABSOLUTE path to the note file (e.g., ${
+      allVaults[0]?.path || "/path/to/vault"
+    }/folder/note.md). Available vaults: ${vaultInfo}`;
   }
 
   // Append or prepend the content

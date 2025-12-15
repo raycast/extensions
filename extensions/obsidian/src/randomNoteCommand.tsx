@@ -21,7 +21,7 @@ export default function Command() {
         target={(vault: ObsidianVault) => <RandomNote vault={vault} showTitle={true} />}
       />
     );
-  } else if (vaults.length == 1) {
+  } else if (vaults.length === 1) {
     return <RandomNote vault={vaults[0]} showTitle={false} />;
   } else {
     noVaultPathsToast();

@@ -6,6 +6,7 @@ import {
   getVaultsFromPreferencesOrObsidianJson,
   ObsidianTarget,
   getObsidianTarget,
+  validateNotePath,
 } from "./internal/obsidian";
 import { readCommunityPlugins, readCorePlugins, VaultPluginCheckParams, vaultPluginCheck } from "./internal/plugins";
 import {
@@ -15,6 +16,7 @@ import {
   getExcludedFolders,
   getMarkdownFilePaths,
   getCanvasFilePaths,
+  ObsidianVault,
 } from "./internal/vault";
 import { inlineTagsForString, tagsForString, yamlPropertyForString, yamlTagsForString } from "./internal/yaml";
 
@@ -109,6 +111,10 @@ export const Obsidian = {
   getTarget(target: ObsidianTarget) {
     return getObsidianTarget(target);
   },
+
+  validateNotePath(notePath: string, vaults: ObsidianVault[]) {
+    return validateNotePath(notePath, vaults);
+  },
 };
 
 export const ObsidianUtils = {
@@ -120,7 +126,7 @@ export const ObsidianUtils = {
     return inlineTagsForString(str);
   },
 
-  getPropery(str: string, property: string) {
+  getProperty(str: string, property: string) {
     return yamlPropertyForString(str, property);
   },
 

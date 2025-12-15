@@ -64,6 +64,14 @@ export async function getVaultsFromPreferencesOrObsidianJson(): Promise<Obsidian
   return vaults;
 }
 
+/**
+ * Validates that a note path is within a configured vault.
+ * Returns true if the path starts with any vault path, false otherwise.
+ */
+export function validateNotePath(notePath: string, vaults: ObsidianVault[]): boolean {
+  return vaults.some((vault) => notePath.startsWith(vault.path));
+}
+
 export enum ObsidianTargetType {
   OpenVault = "obsidian://open?vault=",
   OpenPath = "obsidian://open?path=",

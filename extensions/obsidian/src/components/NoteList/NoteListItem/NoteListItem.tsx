@@ -55,7 +55,7 @@ export function NoteListItem(props: {
 
   function Link() {
     if (!noteContent) return null;
-    const url = ObsidianUtils.getPropery(noteContent, "url");
+    const url = ObsidianUtils.getProperty(noteContent, "url");
     if (url) {
       return <List.Item.Detail.Metadata.Link target={url} text="View" title="URL" />;
     } else {

@@ -619,6 +619,12 @@
   ],
   "tools": [
     {
+      "name": "getVaults",
+      "title": "Get Vaults",
+      "description": "Get a list of all available Obsidian vaults with their names and paths",
+      "instructions": "Use this tool when you need to know what Obsidian vaults are available. This is useful before using other tools that require a vault name. Call this proactively if the user's request involves vaults but doesn't specify which one."
+    },
+    {
       "name": "searchNote",
       "title": "Search Note",
       "description": "Search for notes in Obsidian vaults by name or content and return a list of matching notes with their locations",
@@ -628,7 +634,7 @@
       "name": "createNote",
       "title": "Create Note",
       "description": "Create a new note in an Obsidian vault or create/open today's daily note",
-      "instructions": "Use this tool to create new notes or work with daily notes. For regular notes: supports tags, custom paths within vaults, and templates. For daily notes: set useDailyNote to true (requires Advanced URI plugin in Obsidian). Does not open Obsidian for regular notes unless specified."
+      "instructions": "Use this tool to create new notes or work with daily notes. For regular notes: supports tags, custom paths within vaults, and templates. For daily notes: set useDailyNote to true (requires Advanced URI plugin in Obsidian). Does not open Obsidian for regular notes unless specified. If you need to know available vaults, use getVaults first."
     },
     {
       "name": "openNote",
@@ -640,7 +646,7 @@
       "name": "appendNote",
       "title": "Append to Note",
       "description": "Append or prepend content to an existing note or today's daily note",
-      "instructions": "Use this tool to add content to existing notes or daily notes. For regular notes: provide notePath. For daily notes: set useDailyNote to true (requires Advanced URI plugin). Supports prepending, headings, and template expansion. Silent mode available for daily notes."
+      "instructions": "Use this tool to add content to existing notes or daily notes. For regular notes: provide notePath. For daily notes: set useDailyNote to true (requires Advanced URI plugin). Supports prepending, headings, and template expansion. Silent mode available for daily notes. If you need to know available vaults, use getVaults first."
     },
     {
       "name": "readNote",

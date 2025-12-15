@@ -30,8 +30,6 @@ export async function createNote(vault: ObsidianVault, params: CreateNoteParams)
   let name = params.name == "" ? pref.prefNoteName : params.name;
   let content = fillDefaults ? pref.prefNoteContent : params.content;
 
-  console.log(params.content);
-
   content = ObsidianUtils.createProperties(params.tags) + content;
   content = await applyTemplates(content);
   name = await applyTemplates(name);
