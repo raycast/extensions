@@ -10,7 +10,8 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "strict": true,
-    "target": "ES2022"
+    "target": "ES2022",
+    "skipLibCheck": true
   },
   "include": ["src/**/*", "env.d.ts", "raycast-env.d.ts"]
 }
