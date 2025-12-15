@@ -3,8 +3,7 @@ import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import { fileExists, isWin } from "../utils";
-import { runPowerShellScript } from "@raycast/utils";
+import { fileExists, isWin, runExec } from "../utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -123,11 +122,12 @@ export class VSCodeCLI {
   }
 
   async newWindow() {
-    if (isWin) {
-      await runPowerShellScript(`
-        Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--new-window" -WindowStyle Hidden
-      `);
-    }
+    runExec([this.cliFilename, "--new-window"], (error) => {
+      if (error) {
+        console.error(`Error opening new window: ${error}`);
+        return;
+      }
+    });
   }
 }
 
