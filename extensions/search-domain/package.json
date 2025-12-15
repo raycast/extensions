@@ -31,13 +31,13 @@
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^2.2.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^24.10.2",
-    "@types/react": "^18.2.0",
+    "@types/react": "^19.2.7",
     "eslint": "^9.39.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
@@ -53,10 +53,10 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "resolutions": {
-    "react": "^18.2.0",
-    "**/react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "**/react-dom": "^18.2.0"
+    "react": "^19.2.1",
+    "**/react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "**/react-dom": "^19.2.1"
   },
   "platforms": [
     "macOS",
