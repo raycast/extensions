@@ -60,40 +60,75 @@ export const indexHomeDirectory = async (
 ): Promise<void> => {
   await initStorage();
 
-  return new Promise((resolve, reject) => {
-    const du = spawn("du", ["-k", "-P", "-x", homeDir], {
-      stdio: ["ignore", "pipe", "pipe"],
+  const du = spawn("du", ["-k", "-P", "-x", homeDir], {
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  const buffer = new Map<string, FileNode[]>();
+  const restricted = new Map<string, FileNode[]>();
+  const globalTopFiles: FileNode[] = [];
+
+  const exitPromise = new Promise<void>((resolve, reject) => {
+    du.on("close", (code) => {
+      if (code !== 0 && code !== 1) {
+        reject(new Error(`Scan failed with code ${code}`));
+      } else {
+        resolve();
+      }
     });
+    du.on("error", reject);
+  });
 
-    const buffer = new Map<string, FileNode[]>();
-    const restricted = new Map<string, FileNode[]>();
-    const globalTopFiles: FileNode[] = [];
+  const flushBuffer = async () => {
+    if (buffer.size === 0 && restricted.size === 0) return;
 
+    const pathsToProcess = Array.from(buffer.keys());
+    const bufferSnapshot = new Map(buffer);
+    const restrictedSnapshot = new Map(restricted);
+
+    buffer.clear();
+    restricted.clear();
+
+    for (const dirPath of pathsToProcess) {
+      const files = bufferSnapshot.get(dirPath) || [];
+      const restrictedFiles = restrictedSnapshot.get(dirPath) || [];
+
+      files.sort((a, b) => b.bytes - a.bytes);
+      const topFiles = files.slice(0, TOP_FILES_PER_FOLDER);
+
+      if (topFiles.length > 0 || restrictedFiles.length > 0) {
+        await upsertDirectorySnapshot(dirPath, {
+          accessible: topFiles,
+          restricted: restrictedFiles,
+        });
+      }
+    }
+  };
+
+  du.stderr.on("data", (chunk: Buffer) => {
+    const text = chunk.toString();
+    const lines = text.split("\n");
+    for (const line of lines) {
+      const match = line.match(/du:\s+(.+?):\s+(Permission denied|Operation not permitted)/);
+      if (match?.[1]) {
+        const deniedPath = match[1];
+        const parent = path.dirname(deniedPath);
+        if (!restricted.has(parent)) restricted.set(parent, []);
+        restricted.get(parent)?.push({
+          path: deniedPath,
+          bytes: 0,
+          formattedSize: "Access Denied",
+          name: path.basename(deniedPath),
+        });
+      }
+    }
+  });
+
+  try {
     let lineBuffer = "";
     let lastProgress = Date.now();
 
-    const flushBuffer = async () => {
-      const paths = Array.from(buffer.keys());
-
-      for (const dirPath of paths) {
-        const files = buffer.get(dirPath) || [];
-        const restrictedFiles = restricted.get(dirPath) || [];
-
-        files.sort((a, b) => b.bytes - a.bytes);
-        const topFiles = files.slice(0, TOP_FILES_PER_FOLDER);
-
-        if (topFiles.length > 0 || restrictedFiles.length > 0) {
-          await upsertDirectorySnapshot(dirPath, {
-            accessible: topFiles,
-            restricted: restrictedFiles,
-          });
-        }
-      }
-      buffer.clear();
-      restricted.clear();
-    };
-
-    du.stdout.on("data", async (chunk: Buffer) => {
+    for await (const chunk of du.stdout) {
       lineBuffer += chunk.toString("utf8");
       const lines = lineBuffer.split("\n");
       lineBuffer = lines.pop() || "";
@@ -113,12 +148,12 @@ export const indexHomeDirectory = async (
         };
 
         if (!buffer.has(parent)) buffer.set(parent, []);
-        buffer.get(parent)!.push(node);
+        buffer.get(parent)?.push(node);
 
         globalTopFiles.push(node);
 
         const now = Date.now();
-        if (now - lastProgress > 200) {
+        if (now - lastProgress > 100) {
           const memUsage = process.memoryUsage().heapUsed / 1024 / 1024;
           onProgress(p.path, `${memUsage.toFixed(1)} MB`);
           lastProgress = now;
@@ -129,45 +164,19 @@ export const indexHomeDirectory = async (
         globalTopFiles.sort((a, b) => b.bytes - a.bytes);
         globalTopFiles.splice(MAX_GLOBAL_SEARCH_ITEMS * 2);
       }
-
       if (buffer.size > 200) {
         await flushBuffer();
       }
-    });
+    }
+  } catch (err) {
+    du.kill();
+    throw err;
+  }
 
-    du.stderr.on("data", (chunk: Buffer) => {
-      const text = chunk.toString();
-      const lines = text.split("\n");
-      for (const line of lines) {
-        const match = line.match(/du:\s+(.+?):\s+(Permission denied|Operation not permitted)/);
-        if (match && match[1]) {
-          const deniedPath = match[1];
-          const parent = path.dirname(deniedPath);
-          if (!restricted.has(parent)) restricted.set(parent, []);
-          restricted.get(parent)!.push({
-            path: deniedPath,
-            bytes: 0,
-            formattedSize: "Access Denied",
-            name: path.basename(deniedPath),
-          });
-        }
-      }
-    });
+  await exitPromise;
 
-    du.on("close", async (code) => {
-      if (code !== 0 && code !== 1) {
-        reject(new Error(`Scan failed with code ${code}`));
-        return;
-      }
+  await flushBuffer();
 
-      await flushBuffer();
-
-      globalTopFiles.sort((a, b) => b.bytes - a.bytes);
-      await saveGlobalSearchIndex(globalTopFiles.slice(0, MAX_GLOBAL_SEARCH_ITEMS));
-
-      resolve();
-    });
-
-    du.on("error", (err) => reject(err));
-  });
+  globalTopFiles.sort((a, b) => b.bytes - a.bytes);
+  await saveGlobalSearchIndex(globalTopFiles.slice(0, MAX_GLOBAL_SEARCH_ITEMS));
 };
