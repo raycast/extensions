@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "g-cloud",
-  "title": "Google Cloud Cli",
+  "title": "Google Cloud CLI",
   "subtitle": "Manage your Google Cloud resources without opening a browser",
   "description": "A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.",
   "icon": "icon.png",
