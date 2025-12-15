@@ -8,21 +8,21 @@
   "commands": [
     {
       "name": "recent-powerpoint-slides",
-      "title": "Recent PowerPoint Slides",
+      "title": "Search Recent PowerPoint Slides",
       "description": "Search Recent PowerPoint slides",
       "mode": "view",
       "icon": "powerpoint.png"
     },
     {
       "name": "recent-word",
-      "title": "Recent Word Documents",
+      "title": "Search Recent Word Documents",
       "description": "Search Recent Word Documents",
       "mode": "view",
       "icon": "word.png"
     },
     {
       "name": "recent-excel",
-      "title": "Recent Excel Documents",
+      "title": "Search Recent Excel Documents",
       "description": "Search Recent Excel Documents",
       "mode": "view",
       "icon": "excel.png"
