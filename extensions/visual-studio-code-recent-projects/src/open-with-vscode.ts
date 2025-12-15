@@ -3,7 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 import { bundleIdentifier } from "./preferences";
 import { getCurrentFinderPath } from "./utils/apple-scripts";
 import { isMac, isWin, runExec } from "./utils";
-import { getCurrentExplorerPath, getSelectedFileExplorerItems } from "./utils/win-scripts";
+import { getCurrentExplorerPath } from "./utils/win-scripts";
 import { getVSCodeCLIFilename } from "./lib/vscode";
 
 // Function to get selected Path Finder items
@@ -48,8 +48,7 @@ export default async function main() {
 
     if (isWin) {
       const cliFilename = getVSCodeCLIFilename();
-      const paths = await getSelectedFileExplorerItems();
-      selectedItems = paths.map((p) => ({ path: p }));
+      selectedItems = await getSelectedFinderItems();
 
       if (selectedItems.length === 0) {
         const currentPath = await getCurrentExplorerPath();
