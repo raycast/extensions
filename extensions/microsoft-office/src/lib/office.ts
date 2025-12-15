@@ -1,0 +1,62 @@
+import fs from "fs";
+import { runPowerShellScript } from "@raycast/utils";
+import { environment } from "@raycast/api";
+
+interface PowerShellResult {
+  [key: string]: Result;
+}
+interface Result {
+  PPTPath?: string;
+  OfficeVersion: string;
+  Files: RecentPowerpointFile[];
+}
+
+interface RecentPowerpointFile {
+  ItemName: string;
+  FilePath: string;
+  TimestampUTC: string;
+}
+
+export interface PowerPointFile {
+  filename: string;
+  timestampUTC: Date;
+}
+
+export interface PowerPointFiles {
+  files: PowerPointFile[];
+  pptExecutable?: string;
+}
+
+export async function recentPowerpointFilesRaw() {
+  const data = fs.readFileSync(environment.assetsPath + "/pp.ps1", "utf8");
+  const result = await runPowerShellScript(data);
+  const j = JSON.parse(result) as PowerShellResult;
+  const adalKey = Object.keys(j).filter((key) => key.startsWith("ADAL"));
+  if (!adalKey || adalKey.length <= 0) {
+    throw new Error("No ADAL key found in the result");
+  }
+  return j[adalKey[0]];
+}
+
+function powershellDateStringToDate(dateString: string): Date {
+  const ms = parseInt(dateString.replace(/\D/g, ""), 10);
+  const date = new Date(ms);
+  return date;
+}
+
+export async function recentPowerPointFiles(): Promise<PowerPointFiles> {
+  const data = await recentPowerpointFilesRaw();
+  const result = data.Files.map<PowerPointFile>((file) => {
+    return {
+      filename: file.FilePath,
+      timestampUTC: powershellDateStringToDate(file.TimestampUTC),
+    };
+  });
+  const files = result
+    .filter((f) => f.filename.toLowerCase().endsWith(".pptx") || f.filename.toLowerCase().endsWith(".potx"))
+    .sort((a, b) => b.timestampUTC.getTime() - a.timestampUTC.getTime());
+  return {
+    files,
+    pptExecutable: data.PPTPath,
+  };
+}
