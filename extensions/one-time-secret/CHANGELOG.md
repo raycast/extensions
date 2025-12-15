@@ -1,6 +1,6 @@
 # One-Time Secret Changelog
 
-## [AI Ready + Windows Support] - {PR_MERGE_DATE}
+## [AI Ready + Windows Support] - 2025-12-15
 - Adds **Windows** support
 - Adds support to use as an **AI** extension
 
