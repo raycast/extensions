@@ -17,50 +17,58 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "hash",
-      "title": "Hash",
-      "description": "Computer hash of a string",
+      "name": "base",
+      "title": "Base",
+      "subtitle": "Hackit",
+      "description": "Convert numbers between binary, octal, decimal, hexadecimal, and ASCII",
       "mode": "view"
     },
     {
-      "name": "base",
-      "title": "Base",
-      "description": "Convert numbers between binary, octal, decimal, hexadecimal, and ASCII",
+      "name": "hash",
+      "title": "Hash",
+      "subtitle": "Hackit",
+      "description": "Computer hash of a string",
       "mode": "view"
     },
     {
       "name": "decrypt-vigenere",
       "title": "Decrypt Vigenère Cipher",
+      "subtitle": "Hackit",
       "description": "Decrypt Vigenère cipher",
       "mode": "view"
     },
     {
       "name": "caesar",
       "title": "Caesar Cipher",
+      "subtitle": "Hackit",
       "description": "Encrypt/Decrypt with Caesar Cipher",
       "mode": "view"
     },
     {
       "name": "rot",
       "title": "ROT Cipher",
+      "subtitle": "Hackit",
       "description": "Show all 26 rotations of a string",
       "mode": "view"
     },
     {
       "name": "xor",
       "title": "XOR Calculator",
+      "subtitle": "Hackit",
       "description": "Calculate bitwise XOR of two inputs",
       "mode": "view"
     },
     {
       "name": "aes",
       "title": "AES Encryption",
+      "subtitle": "Hackit",
       "description": "Encrypt text using AES-256-CBC",
       "mode": "view"
     },
     {
       "name": "pbkdf2",
       "title": "PBKDF2 Key Derivation",
+      "subtitle": "Hackit",
       "description": "Derive key using PBKDF2-SHA256",
       "mode": "view"
     }

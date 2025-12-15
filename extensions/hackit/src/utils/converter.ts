@@ -42,7 +42,7 @@ export function detectAndConvert(input: string, iterations = 1): ConversionResul
       try {
         let str = "";
         for (let i = 0; i < hexStr.length; i += 2) {
-          const byte = parseInt(hexStr.substr(i, 2), 16);
+          const byte = parseInt(hexStr.slice(i, i + 2), 16);
           if (byte >= 32 && byte <= 126) {
             str += String.fromCharCode(byte);
           } else {
