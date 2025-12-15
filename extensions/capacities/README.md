@@ -2,25 +2,25 @@
 
 <br />
 
-The Capacities extension for [Raycast](https://www.raycast.com/) offers quick access to your Capacities data, improving productivity and reducing context switching. It is available on Mac and Windows. 
+The Capacities extension for [Raycast](https://www.raycast.com/) offers quick access to your Capacities data, improving productivity and reducing context switching. It is available on Mac and Windows.
 
 ## Setup
 
-1. In Capacities, go to Settings > Raycast and copy the communication token. 
+1. In Capacities, go to Settings > Raycast and copy the communication token.
 
-2 .Click on 'Install Raycast Extension'. This will open the the [Raycast extension store](https://www.raycast.com/steffenble/capacities). 
+2 .Click on 'Install Raycast Extension'. This will open the the [Raycast extension store](https://www.raycast.com/steffenble/capacities).
 
 3. Click 'Install Extension' in the Raycast Store
 
 4. Open Raycast and choose a Capacities command
 
-5. Paste the communication token when prompted. 
+5. Paste the communication token when prompted.
 
 The integration is now ready to use.
 
 ## Commands
 
-Capacities will need to be open in the background to use these commands. 
+Capacities will need to be open in the background to use these commands.
 
 ### Search Content
 
@@ -32,7 +32,7 @@ This will search full content of all objects in all spaces by default.
 
 Your results will be labeled with their type, and the space they are found in.
 
-Navigate to the result you wish to load, press `enter`, and it'll be opened in Capacities' desktop app. 
+Navigate to the result you wish to load, press `enter`, and it'll be opened in Capacities' desktop app.
 
 ![Search Results](./media/capacities-1.png)
 
@@ -62,7 +62,7 @@ _For full functionality, you will need to have the correct Raycast permissions l
 
 You will see it in the 'Created today' section in your calendar and with your other weblinks.
 
-![Save weblink](/reference/integrations/media/capacities-3.png)
+![Save weblink](./media/capacities-3.png)
 
 ### Save to Daily Note
 
@@ -74,7 +74,7 @@ Similar to Weblinks, you can save any text to your daily note.
 
 It will arrive in your daily note with an icon to show it's from Raycast.
 
-![Save to daily note](/reference/integrations/media/capacities-5.png)
+![Save to daily note](./media/capacities-5.png)
 
 ::: tip Good to know!
 You can use markdown, add tags, create content and more, all from Raycast. See more [here](https://docs.capacities.io/reference/integrations/email#how-it-works).
@@ -82,24 +82,22 @@ You can use markdown, add tags, create content and more, all from Raycast. See m
 
 ### Create Task
 
-Send [tasks](/reference/task-management) with this command. 
+Send [tasks](/reference/task-management) with this command.
 
 - Run `Create Task`
 - Enter any relevant information
 - Cmd + Enter to save to Capacities
 
-![Add task](/reference/integrations/media/capacities-6.png)
+![Add task](./media/capacities-6.png)
 
 ## FAQs
 
-**My weblinks are not being prefilled from my browser** 
+**My weblinks are not being prefilled from my browser**
 
-  Go to Mac System Settings > Privacy and Security > Automation > Raycast > make sure **system events** is toggled on.
+Go to Mac System Settings > Privacy and Security > Automation > Raycast > make sure **system events** is toggled on.
 
-  If you don't toggle this on, you will need to paste the link manually.
+If you don't toggle this on, you will need to paste the link manually.
 
 **Why didn't one of the actions work?**
-  
-  Capacities must be open in the background in order for the commands to work. 
 
-
+Capacities must be open in the background in order for the commands to work.
