@@ -33,7 +33,7 @@ function StarredFiles() {
                 <MenuBarExtra.Item
                   title="Open Starred Files in Raycast"
                   icon={Icon.RaycastLogoPos}
-                  onAction={() => launchCommand({ name: "starred-google-drive-files", type: LaunchType.UserInitiated })}
+                  onAction={() => launchCommand({ name: "search-google-drive-files", type: LaunchType.UserInitiated })}
                 />
               }
             />
