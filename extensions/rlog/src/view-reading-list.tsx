@@ -1,11 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  List,
-  getPreferenceValues,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import { useState, useEffect } from "react";
 import { ReadLaterEntry, loadJson } from "./utils";
@@ -30,11 +24,7 @@ export default function Command() {
         const data = loadJson<ReadLaterEntry>(dataPath);
         setReadingList(data);
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load reading list",
-          message: String(error),
-        });
+        await showFailureToast(error, { title: "Failed to load reading list" });
       } finally {
         setIsLoading(false);
       }

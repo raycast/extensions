@@ -1,7 +1,7 @@
 {
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "rlog",
-    "title": "Rlog",
+    "title": "rlog",
     "description": "A frictionless, public reading log manager for static blogs.",
     "icon": "command-icon.png",
     "author": "ossa-ma",
