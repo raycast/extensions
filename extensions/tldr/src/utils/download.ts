@@ -1,14 +1,11 @@
 import https from "https";
 import fs from "fs";
-import { promisify } from "util";
-import { exec } from "child_process";
+import AdmZip from "adm-zip";
 import { rm } from "fs/promises";
 import { resolve } from "path";
 import { showToast, Toast, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { CACHE_DIR, ZIP_URL } from "./constants";
-
-const execAsync = promisify(exec);
 
 export async function downloadFile(url: string, dest: string): Promise<void> {
   return new Promise((resolvePromise, reject) => {
@@ -69,9 +66,12 @@ export async function refreshPages() {
 
     await fs.promises.mkdir(tempExtractPath, { recursive: true });
     try {
-      await execAsync(`unzip -q "${tempZipPath}" -d "${tempExtractPath}"`);
-    } catch {
-      throw new Error("Failed to extract archive: unzip command failed. Please ensure unzip is installed.");
+      // Use a JS-based unzip to be cross-platform (works on Windows/macOS/Linux)
+      const zip = new AdmZip(tempZipPath);
+      zip.extractAllTo(tempExtractPath, true);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to extract archive: ${message}`);
     }
 
     const pagesPath = resolve(tempExtractPath, "tldr-main", "pages");

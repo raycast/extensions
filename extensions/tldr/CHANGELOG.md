@@ -1,6 +1,6 @@
 # TLDR
 
-## [Refacor and Add Windows Support] - {PR_MERGE_DATE}
+## [Refactor and Add Windows Support] - {PR_MERGE_DATE}
 
 - Refactored the entire codebase to improve maintainability and readability.
 - Added support for Windows platform, expanding the user base.
