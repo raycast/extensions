@@ -1,5 +1,10 @@
 # TLDR
 
+## [Refacor and Add Windows Support] - {PR_MERGE_DATE}
+
+- Refactored the entire codebase to improve maintainability and readability.
+- Added support for Windows platform, expanding the user base.
+
 ## [Update] - 2025-12-15
 
 - Update the degit to use the GitHub API to fetch and download the TLDR pages.
