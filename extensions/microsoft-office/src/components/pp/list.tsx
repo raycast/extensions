@@ -1,5 +1,5 @@
 import path from "path";
-import { ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { OpenInPowerPointAction } from "./actions";
 import { PowerPointFile } from "../../lib/office";
 
@@ -14,6 +14,7 @@ export function PowerPointListItem({ file, executable }: { file: PowerPointFile;
       actions={
         <ActionPanel>
           <OpenInPowerPointAction filename={file.filename} executable={executable} />
+          <Action.ShowInFinder path={file.filename} />
         </ActionPanel>
       }
     />

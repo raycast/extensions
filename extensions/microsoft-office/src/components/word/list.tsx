@@ -1,5 +1,5 @@
 import path from "path";
-import { ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { OpenInWordAction } from "./actions";
 import { WordFile } from "../../lib/office";
 
@@ -14,6 +14,7 @@ export function WordListItem({ file, executable }: { file: WordFile; executable:
       actions={
         <ActionPanel>
           <OpenInWordAction filename={file.filename} executable={executable} />
+          <Action.ShowInFinder path={file.filename} />
         </ActionPanel>
       }
     />
