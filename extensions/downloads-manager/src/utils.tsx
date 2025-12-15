@@ -70,7 +70,6 @@ export function getCustomDownloadsFolder(): string {
         `powershell -Command "(New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path"`,
         { encoding: "utf-8" },
       );
-      console.log("result", result);
       return result.trim();
     } catch (error) {
       // Fallback to default location if registry query fails
