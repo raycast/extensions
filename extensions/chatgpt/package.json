@@ -374,6 +374,6 @@
     "pull": "ray pull-contributions"
   },
   "platforms": [
-    "macOS"
+    "macOS", "windows"
   ]
 }
