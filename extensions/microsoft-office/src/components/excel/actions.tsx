@@ -1,6 +1,6 @@
 import { Action, popToRoot } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { spawn } from "child_process";
+import { runExecutable } from "../../lib/utils";
 
 export function OpenInExcelAction({ filename, executable }: { filename: string; executable: string | undefined }) {
   if (!executable) {
@@ -8,13 +8,7 @@ export function OpenInExcelAction({ filename, executable }: { filename: string; 
   }
   const onOpen = () => {
     try {
-      const args = [filename];
-      const child = spawn(executable, args, {
-        detached: true,
-        stdio: "ignore",
-        windowsHide: false,
-      });
-      child.unref();
+      runExecutable(executable, [filename]);
       popToRoot();
     } catch (error) {
       showFailureToast(error);
