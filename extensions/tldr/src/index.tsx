@@ -13,11 +13,15 @@ export default function TLDRList(): JSX.Element {
   const selectedPlatforms = platforms ? [platforms[selectedPlatformName], platforms["common"]] : undefined;
 
   async function loadPages(options?: { forceRefresh?: boolean }) {
-    if (!existsSync(CACHE_DIR) || readdirSync(CACHE_DIR).length === 0 || options?.forceRefresh) {
-      await refreshPages();
+    try {
+      if (!existsSync(CACHE_DIR) || readdirSync(CACHE_DIR).length === 0 || options?.forceRefresh) {
+        await refreshPages();
+      }
+      const platforms = await readPages();
+      setPlatforms(Object.fromEntries(platforms.map((platform) => [platform.name, platform])));
+    } catch (error) {
+      console.error("Failed to load pages:", error);
     }
-    const platforms = await readPages();
-    setPlatforms(Object.fromEntries(platforms.map((platform) => [platform.name, platform])));
   }
 
   useEffect(() => {
