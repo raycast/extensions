@@ -23,7 +23,7 @@ function makeConnection({
   const child = spawn(exePath, args, {
     detached: true,
     stdio: "ignore",
-    windowsHide: true,
+    windowsHide: false,
   });
   child.unref();
 }
