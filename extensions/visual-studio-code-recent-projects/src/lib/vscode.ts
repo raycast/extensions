@@ -115,14 +115,14 @@ export class VSCodeCLI {
     this.cliFilename = `"${cliFilename}"`;
   }
   installExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"], { shell: isWin });
+    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"], { shell: isWin, env: {} });
   }
   uninstallExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], { shell: isWin });
+    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], { shell: isWin, env: {} });
   }
 
-  async newWindow() {
-    child_process.execFileSync(this.cliFilename, ["--new-window"], { shell: isWin });
+  newWindow() {
+    child_process.execFileSync(this.cliFilename, ["--new-window"], { shell: isWin, env: {} });
   }
 }
 
