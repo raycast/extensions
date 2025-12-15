@@ -1,6 +1,7 @@
 # Days Until Christmas Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-12-15
+
 - Added Windows support
 - Updated dependencies and extension icon
 
