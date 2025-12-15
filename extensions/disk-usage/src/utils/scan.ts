@@ -1,177 +1,173 @@
-import { spawn, exec } from "node:child_process";
-import { promisify } from "node:util";
+import { exec, spawn } from "node:child_process";
 import path from "node:path";
-import type { FileNode, FileSystemIndex, Volume } from "../types";
+import { promisify } from "node:util";
+import type { FileNode, Volume } from "../types";
 import { formatSize } from "./format";
+import { initStorage, saveGlobalSearchIndex, upsertDirectorySnapshot } from "./storage";
 
 const execAsync = promisify(exec);
 
-const BLACKLIST_FOLDERS = ["node_modules", ".git", ".next", "dist", "build", "coverage"];
+const BLACKLIST_FOLDERS = [
+  "node_modules",
+  "\\.git",
+  "\\.next",
+  "dist",
+  "coverage",
+  "com\\.raycast\\.macos",
+  "\\.vscode",
+  "\\.DS_Store",
+];
 
-const BLACKLIST_REGEX = new RegExp(`\\/(${BLACKLIST_FOLDERS.join("|")})\\/`);
+const BLACKLIST_REGEX = new RegExp(`\\/(${BLACKLIST_FOLDERS.join("|")})(\\/|$)`, "i");
 
-export const parseDuRecord = (line: string) => {
-  const parts = line.trim().split(/\t/);
-  if (parts.length < 2) return null;
+const TOP_FILES_PER_FOLDER = 100;
+const MAX_GLOBAL_SEARCH_ITEMS = 1000;
+const MIN_SIZE_KB = 1024;
 
-  const kb = parseInt(parts[0], 10);
-  const filePath = parts.slice(1).join("\t");
-
-  return Number.isNaN(kb) ? null : { kb, path: filePath };
+export const fetchVolume = async (): Promise<Volume> => {
+  try {
+    const { stdout } = await execAsync("/usr/sbin/diskutil info /");
+    const extractBytes = (pattern: string): number => {
+      const match = stdout.match(new RegExp(`${pattern}.*?\\((\\d+)\\s+Bytes\\)`));
+      return match?.[1] ? Number(match[1]) : 0;
+    };
+    const total = extractBytes("Container Total Space:") || extractBytes("Total Space:");
+    const free = extractBytes("Container Free Space:") || extractBytes("Free Space:");
+    const used = total - free;
+    const percent = total > 0 ? Math.round((used / total) * 100) : 0;
+    return { totalBytes: total, freeBytes: free, usageLabel: `${percent}%` };
+  } catch {
+    return { totalBytes: 0, freeBytes: 0, usageLabel: "?" };
+  }
 };
 
-export const buildFileNode = (kb: number, rawPath: string, rootPath: string): FileNode | null => {
-  if (!rawPath.startsWith(rootPath)) return null;
+interface DuRecord {
+  kb: number;
+  path: string;
+}
 
-  const bytes = kb * 1024;
-
-  return {
-    path: rawPath,
-    bytes: bytes,
-    formattedSize: formatSize(bytes),
-    name: path.basename(rawPath),
-  };
+const parseDuRecord = (line: string): DuRecord | null => {
+  const tabIndex = line.indexOf("\t");
+  if (tabIndex === -1) return null;
+  const kb = parseInt(line.slice(0, tabIndex), 10);
+  if (Number.isNaN(kb)) return null;
+  return { kb, path: line.slice(tabIndex + 1) };
 };
 
-export const indexHomeDirectory = (homeDir: string, onProgress: (path: string) => void): Promise<FileSystemIndex> =>
-  new Promise((resolve, reject) => {
-    const normalizedHome = path.normalize(homeDir);
+export const indexHomeDirectory = async (
+  homeDir: string,
+  onProgress: (path: string, heap: string) => void,
+): Promise<void> => {
+  await initStorage();
 
-    const accessibleByParent = new Map<string, FileNode[]>();
-    const restrictedByParent = new Map<string, Set<string>>();
-
-    const minSizeKb = 1024;
-    let lastProgressTime = 0;
-    const PROGRESS_THROTTLE_MS = 100;
-
-    const addAccessible = (kb: number, rawPath: string) => {
-      if (kb < minSizeKb || BLACKLIST_REGEX.test(rawPath)) return;
-
-      const node = buildFileNode(kb, rawPath, normalizedHome);
-      if (!node) return;
-
-      const now = Date.now();
-      if (now - lastProgressTime > PROGRESS_THROTTLE_MS) {
-        onProgress(node.path);
-        lastProgressTime = now;
-      }
-
-      const parent = path.normalize(path.dirname(node.path));
-
-      const list = accessibleByParent.get(parent);
-      if (list) list.push(node);
-      else accessibleByParent.set(parent, [node]);
-    };
-
-    const addRestricted = (rawPath: string) => {
-      if (BLACKLIST_REGEX.test(rawPath)) return;
-
-      const normalizedPath = path.normalize(rawPath);
-      const parent = path.normalize(path.dirname(normalizedPath));
-
-      if (!parent.startsWith(normalizedHome) && parent !== normalizedHome) return;
-
-      const list = restrictedByParent.get(parent);
-      if (list) list.add(normalizedPath);
-      else restrictedByParent.set(parent, new Set([normalizedPath]));
-    };
-
-    const du = spawn("du", ["-k", homeDir], {
+  return new Promise((resolve, reject) => {
+    const du = spawn("du", ["-k", "-P", "-x", homeDir], {
       stdio: ["ignore", "pipe", "pipe"],
     });
 
-    let leftover = "";
-    let hasResolved = false;
+    const buffer = new Map<string, FileNode[]>();
+    const restricted = new Map<string, FileNode[]>();
+    const globalTopFiles: FileNode[] = [];
 
-    const finalize = () => {
-      if (hasResolved) return;
-      hasResolved = true;
+    let lineBuffer = "";
+    let lastProgress = Date.now();
 
-      if (leftover.trim()) {
-        const p = parseDuRecord(leftover);
-        if (p) addAccessible(p.kb, p.path);
-      }
+    const flushBuffer = async () => {
+      const paths = Array.from(buffer.keys());
 
-      const result: FileSystemIndex = {};
+      for (const dirPath of paths) {
+        const files = buffer.get(dirPath) || [];
+        const restrictedFiles = restricted.get(dirPath) || [];
 
-      const allParents = new Set([...accessibleByParent.keys(), ...restrictedByParent.keys()]);
+        files.sort((a, b) => b.bytes - a.bytes);
+        const topFiles = files.slice(0, TOP_FILES_PER_FOLDER);
 
-      for (const parentPath of allParents) {
-        const accessible = (accessibleByParent.get(parentPath) || []).sort((a, b) => b.bytes - a.bytes);
-
-        const deniedPaths = restrictedByParent.get(parentPath);
-
-        console.log({ deniedPaths });
-
-        const restricted = deniedPaths
-          ? Array.from(deniedPaths).map((p) => ({
-              path: p,
-              bytes: 0,
-              formattedSize: "Access Denied",
-              name: path.basename(p),
-            }))
-          : [];
-
-        if (accessible.length > 0 || restricted.length > 0) {
-          result[parentPath] = { accessible, restricted };
+        if (topFiles.length > 0 || restrictedFiles.length > 0) {
+          await upsertDirectorySnapshot(dirPath, {
+            accessible: topFiles,
+            restricted: restrictedFiles,
+          });
         }
       }
-
-      accessibleByParent.clear();
-      restrictedByParent.clear();
-
-      resolve(result);
+      buffer.clear();
+      restricted.clear();
     };
 
-    du.stdout.on("data", (chunk) => {
-      const lines = (leftover + chunk.toString("utf8")).split("\n");
-      leftover = lines.pop() || "";
+    du.stdout.on("data", async (chunk: Buffer) => {
+      lineBuffer += chunk.toString("utf8");
+      const lines = lineBuffer.split("\n");
+      lineBuffer = lines.pop() || "";
+
       for (const line of lines) {
         const p = parseDuRecord(line);
-        if (p) addAccessible(p.kb, p.path);
+        if (!p || p.kb < MIN_SIZE_KB || BLACKLIST_REGEX.test(p.path)) continue;
+
+        const parent = path.dirname(p.path);
+        const bytes = p.kb * 1024;
+
+        const node: FileNode = {
+          path: p.path,
+          bytes,
+          formattedSize: formatSize(bytes),
+          name: path.basename(p.path),
+        };
+
+        if (!buffer.has(parent)) buffer.set(parent, []);
+        buffer.get(parent)!.push(node);
+
+        globalTopFiles.push(node);
+
+        const now = Date.now();
+        if (now - lastProgress > 200) {
+          const memUsage = process.memoryUsage().heapUsed / 1024 / 1024;
+          onProgress(p.path, `${memUsage.toFixed(1)} MB`);
+          lastProgress = now;
+        }
+      }
+
+      if (globalTopFiles.length > MAX_GLOBAL_SEARCH_ITEMS * 3) {
+        globalTopFiles.sort((a, b) => b.bytes - a.bytes);
+        globalTopFiles.splice(MAX_GLOBAL_SEARCH_ITEMS * 2);
+      }
+
+      if (buffer.size > 200) {
+        await flushBuffer();
       }
     });
 
-    du.stderr.on("data", (chunk) => {
-      const lines = chunk.toString("utf8").split("\n");
+    du.stderr.on("data", (chunk: Buffer) => {
+      const text = chunk.toString();
+      const lines = text.split("\n");
       for (const line of lines) {
-        if (line.includes("Permission denied") || line.includes("Operation not permitted")) {
-          const parts = line.split(/du:\s+/);
-          if (parts.length > 1) {
-            const pathPart = parts[1].split(":")[0];
-            if (pathPart) addRestricted(pathPart.trim());
-          }
+        const match = line.match(/du:\s+(.+?):\s+(Permission denied|Operation not permitted)/);
+        if (match && match[1]) {
+          const deniedPath = match[1];
+          const parent = path.dirname(deniedPath);
+          if (!restricted.has(parent)) restricted.set(parent, []);
+          restricted.get(parent)!.push({
+            path: deniedPath,
+            bytes: 0,
+            formattedSize: "Access Denied",
+            name: path.basename(deniedPath),
+          });
         }
       }
     });
 
-    du.on("error", (err) => !hasResolved && reject(err));
-
-    du.on("close", (code) => {
-      if (code && code > 1 && !hasResolved && accessibleByParent.size === 0) {
-        hasResolved = true;
-        reject(new Error(`Process exited with code ${code}`));
+    du.on("close", async (code) => {
+      if (code !== 0 && code !== 1) {
+        reject(new Error(`Scan failed with code ${code}`));
         return;
       }
-      finalize();
+
+      await flushBuffer();
+
+      globalTopFiles.sort((a, b) => b.bytes - a.bytes);
+      await saveGlobalSearchIndex(globalTopFiles.slice(0, MAX_GLOBAL_SEARCH_ITEMS));
+
+      resolve();
     });
+
+    du.on("error", (err) => reject(err));
   });
-
-export const fetchVolume = async (): Promise<Volume> => {
-  const { stdout } = await execAsync("/usr/sbin/diskutil info /");
-
-  const extractBytes = (pattern: string) =>
-    Number(stdout.match(new RegExp(`${pattern}.*?\\((\\d+)\\s+Bytes\\)`))?.[1] ?? 0);
-
-  const total = extractBytes("Container Total Space:");
-  const free = extractBytes("Container Free Space:");
-  const used = total - free;
-
-  const percent = total > 0 ? Math.round((used / total) * 100) : 0;
-
-  return {
-    totalBytes: total,
-    freeBytes: free,
-    usageLabel: `${percent}%`,
-  };
 };

@@ -10,3 +10,21 @@
 - Bulk selection and deletion support
 - Automatic size recalculation when files are deleted
 - Support for denied access items display
+
+## [Initial Version] - {PR_MERGE_DATE}
+
+**New**
+
+- Added real-time memory (RAM) usage indicator during scanning.
+- Added "Copy Path" action (`Cmd` + `Shift` + `C`) for files and restricted items.
+
+**Improvements**
+
+- Completely rewrote the scanning architecture to use file-based caching. This significantly reduces memory usage and prevents crashes on large disks.
+- Optimized scanning speed by ignoring system junk folders and very small files.
+- Improved UI stability: the file list no longer flickers during rescans.
+
+**Fixes**
+
+- Fixed [Error: Worker terminated due to reaching memory limit: JS heap out of memory](https://www.raycast.com/extension-issues/easymikey/disk-usage/7110092740) caused by large file trees.
+- Fixed [Error: ENOENT: no such file or directory](https://www.raycast.com/extension-issues/easymikey/disk-usage/7104073808) occurring when files changed during a scan.

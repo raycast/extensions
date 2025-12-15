@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import type { FC } from "react";
+import { type DiskUsageSend, type DiskUsageState, matchStatus } from "../machines/disk-usage-machine";
 import type { Volume } from "../types";
 import { formatSize } from "../utils/format";
-import { type DiskUsageSend, type DiskUsageState, matchStatus } from "../machines/disk-usage-machine";
 
 const VolumeSummary: FC<{
   volume: Volume;
@@ -37,8 +37,6 @@ export const StatusView: FC<{
         state.value,
         { ...state.context, send },
         {
-          checkingCache: () => <List.Item title="Checking cache..." icon={Icon.CircleProgress} />,
-          restoringCache: () => <List.Item title="Restoring index..." icon={Icon.CircleProgress} />,
           loadingUsage: () => <List.Item title="Fetching volume stats..." icon={Icon.CircleProgress} />,
           scanning: ({ volume, activePath }) => (
             <>

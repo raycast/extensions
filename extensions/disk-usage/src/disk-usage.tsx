@@ -1,12 +1,11 @@
+import { homedir } from "node:os";
 import { List } from "@raycast/api";
 import { useMachine } from "@xstate/react";
-import { homedir } from "node:os";
-
+import { useState } from "react";
+import { HomeDirectoryView } from "./components/HomeDirectoryView";
 import { StatusView } from "./components/StatusView";
 import { useSelection } from "./hooks/use-selection";
 import { diskUsageMachine } from "./machines/disk-usage-machine";
-import { HomeDirectoryView } from "./components/HomeDirectoryView";
-import { useState } from "react";
 
 const homeDir = homedir();
 
@@ -15,9 +14,9 @@ export default function Command() {
   const [state, send] = useMachine(diskUsageMachine);
 
   const selection = useSelection();
-  const navTitle = selection.size > 0 ? `${homeDir} — ${selection.size} selected` : undefined;
+  const navTitle = selection.size > 0 ? `${homeDir} — ${selection.size} selected` : "Disk Space Explorer";
 
-  const isLoading = !state.matches("ready") && !state.matches("failure");
+  const isLoading = state.matches("scanning") || state.matches("loadingUsage");
 
   return (
     <List
