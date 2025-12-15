@@ -22,6 +22,16 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
       );
     }
 
+    const contentType = response.headers.get("content-type");
+    if (contentType && !contentType.includes("text/html")) {
+      console.log(`Skipping non-HTML content: ${contentType}`);
+      return {
+        title: url.split("/").pop() || "Untitled",
+        author: null,
+        publishedDate: null,
+      };
+    }
+
     const html = await response.text();
     const $ = cheerio.load(html);
 
