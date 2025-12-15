@@ -13,6 +13,17 @@ foreach ($k in $appPaths) {
     }
 }
 
+$appPaths = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Winword.exe",
+            "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\Winword.exe"
+
+$wordPath = $null
+foreach ($k in $appPaths) {
+    if (Test-Path $k) {
+        $wordPath = (Get-ItemProperty -Path $k -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+        break
+    }
+}
+
 #$groups["pptPath"] = $pptPath
 
 Get-ChildItem $basePath -Recurse -ErrorAction SilentlyContinue |
@@ -37,6 +48,7 @@ ForEach-Object {
             Folders       = @()
             Files         = @()
             PPTPath       = $pptPath
+            WORDPath      = $wordPath
         }
     }
 

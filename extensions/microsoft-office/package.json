@@ -12,6 +12,13 @@
       "description": "Search Recent PowerPoint slides",
       "mode": "view",
       "icon": "powerpoint.png"
+    },
+    {
+      "name": "recent-word",
+      "title": "Recent Word Documents",
+      "description": "Search Recent Word Documents",
+      "mode": "view",
+      "icon": "word.png"
     }
   ],
   "dependencies": {
