@@ -1,4 +1,4 @@
-# Google Cloud Cli Changelog
+# Google Cloud CLI Changelog
 
 ## [1.0.0] - {PR_MERGE_DATE}
 - Added Streamer Mode - hide sensitive data (emails, IPs, secrets) with Cmd+Shift+H
