@@ -1,5 +1,11 @@
 # Changelog
 
+## [Updates] - {PR_MERGE_DATE}
+
+- Add Windows support
+- Update (dev) dependencies
+- Fix issue [#23660](https://github.com/raycast/extensions/issues/23660) where Match day command is not working
+
 ## [1.0.0] - 2025-11-24
 
 ### Added
