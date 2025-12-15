@@ -1,7 +1,9 @@
 import { List } from "@raycast/api";
-import { Astronaut } from "../types/astronauts";
-import { calculateTimeInSpace, formatTimeAgo } from "../utils/timeCalculator";
+
 import { flag } from "country-emoji";
+
+import { Astronaut } from "@/types";
+import { calculateTimeInSpace, formatTimeAgo } from "@/utils";
 
 export default function AstronautDetail({ astronaut }: { astronaut: Astronaut }) {
   const markdown = `

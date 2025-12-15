@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
-import { Launch } from "../types/launches";
+
+import { Launch } from "@/types";
 
 export default function LaunchDetail({ launch }: { launch: Launch }) {
   const markdown = `

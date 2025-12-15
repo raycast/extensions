@@ -1,5 +1,6 @@
-import { ActionPanel, Action, Detail } from "@raycast/api";
-import { ApodResponse } from "../types/apod";
+import { Action, ActionPanel, Detail } from "@raycast/api";
+
+import { ApodResponse } from "@/types";
 
 export default function Apod({ apod, isLoading }: { apod: ApodResponse; isLoading: boolean }) {
   while (isLoading) {

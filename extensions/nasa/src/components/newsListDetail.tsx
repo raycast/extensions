@@ -1,7 +1,9 @@
-import { List, Action, ActionPanel } from "@raycast/api";
-import { NewsItem } from "../types/news";
-import { formatTimeAgo } from "../utils/timeCalculator";
+import { Action, ActionPanel, List } from "@raycast/api";
+
 import { NodeHtmlMarkdown } from "node-html-markdown";
+
+import { NewsItem } from "@/types";
+import { formatTimeAgo } from "@/utils";
 
 export default function NewsListDetail({ item }: { item: NewsItem }) {
   let markdown = `# ${item.title}\n\n`;

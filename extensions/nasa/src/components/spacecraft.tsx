@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
-import { SpaceCraft } from "../types/spacecrafts";
-import { calculateTimeInSpace } from "../utils/timeCalculator";
+
+import { SpaceCraft } from "@/types";
+import { calculateTimeInSpace } from "@/utils";
 
 export default function SpacecraftDetail({ spacecraft }: { spacecraft: SpaceCraft }) {
   const markdown = `

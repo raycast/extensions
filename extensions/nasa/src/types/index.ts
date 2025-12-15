@@ -1,3 +1,50 @@
+export type ApodResponse = {
+  copyright: string;
+  date: string;
+  explanation: string;
+  hdurl: string;
+  media_type: string;
+  service_version: string;
+  title: string;
+};
+
+export type AstronautsResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: Astronaut[];
+};
+
+export type Astronaut = {
+  id: number;
+  name: string;
+  date_of_birth: string;
+  time_in_space: string;
+  profile_image_thumbnail: string;
+  age: number;
+  nationality: string;
+  bio: string;
+  flights_count: number;
+  landings_count: number;
+  spacewalks_count: number;
+  first_flight: string;
+  last_flight: string;
+  agency: AstronautAgency;
+};
+
+type AstronautAgency = {
+  id: number;
+  name: string;
+  abbrev: string;
+  description: string;
+  administrator: string;
+  founding_year: string;
+  launchers: string;
+  spacecraft: string;
+  country_code: string;
+  social_media_url: string;
+};
+
 export type Status = {
   id: number;
   name: string;
@@ -170,4 +217,61 @@ export type LaunchesResponse = {
   next: string | null;
   previous: string | null;
   results: Launch[];
+};
+
+export interface NewsItem {
+  title: string;
+  link: string;
+  description: string;
+  pubDate: string;
+}
+
+export type SpaceCraftsResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: SpaceCraft[];
+};
+
+export type SpacecraftStatus = {
+  id: number;
+  name: string;
+};
+
+export type SpacecraftType = {
+  id: number;
+  name: string;
+};
+
+export type SpacecraftAgency = {
+  id: number;
+  url: string;
+  name: string;
+  type: string;
+};
+
+export type SpacecraftConfig = {
+  id: number;
+  url: string;
+  name: string;
+  type: SpacecraftType;
+  agency: SpacecraftAgency;
+  in_use: boolean;
+  image_url: string;
+};
+
+export type SpaceCraft = {
+  id: number;
+  url: string;
+  name: string;
+  serial_number: string | null;
+  is_placeholder: boolean;
+  in_space: boolean;
+  time_in_space: string;
+  time_docked: string;
+  flights_count: number;
+  mission_ends_count: number;
+  status: SpacecraftStatus;
+  description: string;
+  spacecraft_config: SpacecraftConfig;
 };
