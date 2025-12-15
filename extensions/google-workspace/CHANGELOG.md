@@ -1,6 +1,6 @@
 # Google Workspace Changelog
 
-## [Enhanced File Details and Improved Search] - {PR_MERGE_DATE}
+## [Enhanced File Details and Improved Search] - 2025-12-15
 
 ### Added
 
