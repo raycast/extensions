@@ -2,8 +2,8 @@ import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/ap
 import { useCachedPromise } from "@raycast/utils";
 import { getStarredFiles } from "./api/getFiles";
 import { withGoogleAuth } from "./components/withGoogleAuth";
-import { getFileIconLink } from "./helpers/files";
 import { createDocFromUrl } from "./helpers/docs";
+import { getFileIconLink } from "./helpers/files";
 
 function StarredFiles() {
   const { data, isLoading } = useCachedPromise(async () => {

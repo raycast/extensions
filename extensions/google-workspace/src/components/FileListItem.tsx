@@ -155,6 +155,7 @@ export default function FileListItem({ file, email }: FileListItemProps) {
             />
           )}
           <Action.OpenWith
+            // eslint-disable-next-line @raycast/prefer-title-case
             title="Open With"
             path={`${file.webViewLink}${
               email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""
