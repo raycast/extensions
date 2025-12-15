@@ -45,9 +45,9 @@ function SearchGoogleDriveFiles() {
             setScopeType(scopeType as ScopeTypes);
           }}
         >
-          <List.Dropdown.Item title="File name in My Drive" value={`${QueryTypes.fileName}-${ScopeTypes.user}`} />
+          <List.Dropdown.Item title="File Name in My Drive" value={`${QueryTypes.fileName}-${ScopeTypes.user}`} />
           <List.Dropdown.Item
-            title="File name in All Drives"
+            title="File Name in All Drives"
             value={`${QueryTypes.fileName}-${ScopeTypes.allDrives}`}
           />
           <List.Dropdown.Item title="Content in My Drive" value={`${QueryTypes.fullText}-${ScopeTypes.user}`} />
