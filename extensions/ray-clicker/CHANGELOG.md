@@ -1,13 +1,18 @@
 # Ray Clicker Changelog
 
-## [Stability: Render Loop Fix & Persistence Hardening] - {PR_MERGE_DATE}
+## [Windows ready & package update] - {PR_MERGE_DATE}
+
+- Verified Windows support
+- Updated package.json dependencies
+
+## [Stability: Render Loop Fix & Persistence Hardening] - 2025-08-26
 
 - fix: Prevent redundant renders by skipping idle tick state updates when estimated gain < 0.01; only advance `lastUpdateRef` (`src/useGameState.ts`).
 - fix: Align `lastUpdateRef` to `now` immediately after initial load to avoid an inflated first-tick delta (`src/useGameState.ts`).
 - persistence: Gate debounced/periodic autosaves and save-on-unmount on `isLoading` to prevent overwriting progress at startup (`src/useGameState.ts`).
 - cleanup: Remove Menu Bar background command and related UI; rely on 50% offline catch-up on open. Clear legacy `idle-menu-bar-active` flag (`package.json`, `src/GameView.tsx`, `src/useGameState.ts`).
 
-## [Fix: Idle Accrual Sync & Prestige fix & UX improvements] - {PR_MERGE_DATE}
+## [Fix: Idle Accrual Sync & Prestige fix & UX improvements] - 2025-08-22
 
 - Sync main UI state from storage when the menu bar heartbeat is active to reflect idle gains without double-counting (`src/useGameState.ts`).
 - Convert menu bar command to a continuous 1s accrual loop; maintain heartbeat, persist each tick, and clean up on unmount (`src/menu-bar.tsx`).
@@ -91,7 +96,3 @@
 - Format changelog entries to ISO dates and correct typos throughout.
 - Add category switcher to upgrade action menu
 
-## [Windows ready & package update] - {PR_MERGE_DATE}
-
-- verified Windows support
-- updated package.json
