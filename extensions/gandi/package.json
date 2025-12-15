@@ -73,5 +73,8 @@
       "description": "Your Gandi Sandbox Personal Access Token",
       "placeholder": "Enter your Gandi Sandbox PAT"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
