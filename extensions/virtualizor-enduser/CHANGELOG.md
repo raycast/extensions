@@ -1,6 +1,6 @@
 # Virtualizor Enduser Changelog
 
-## [Manage Panels (Experimental) + Modernize] - {PR_MERGE_DATE}
+## [Manage Panels (Experimental) + Modernize] - 2025-12-15
 
 - Add a new (experimental, **disabled by default**) command to manage multiple Virtualizor panels
 - Modernize to use latest Raycast configuration
