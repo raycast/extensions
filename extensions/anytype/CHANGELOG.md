@@ -1,6 +1,6 @@
 # Anytype Changelog
 
-## [Terminology Updates & Enhancements] - {PR_MERGE_DATE}
+## [Terminology Updates & Enhancements] - 2025-12-15
 
 - Update to API version 2025-11-08
 - Allow updating markdown body of objects
