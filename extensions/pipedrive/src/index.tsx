@@ -19,25 +19,6 @@ import OrganizationDetail from "./organization-detail";
 import { buildPipedriveApiUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
 import { validatePipedriveDomain } from "./pipedrive-security";
 
-type PipedriveErrorResponse = {
-  error?: string;
-  error_info?: string;
-};
-
-async function parsePipedriveErrorMessage(response: Response): Promise<string> {
-  const statusPrefix = `HTTP ${response.status}: ${response.statusText}`;
-
-  const contentType = response.headers.get("content-type") || "";
-  if (!contentType.includes("application/json")) {
-    const text = await response.text().catch(() => "");
-    return text ? `${statusPrefix} — ${text}` : statusPrefix;
-  }
-
-  const json = (await response.json().catch(() => ({}))) as PipedriveErrorResponse;
-  const message = [json.error, json.error_info].filter(Boolean).join(" — ");
-  return message ? `${statusPrefix} — ${message}` : statusPrefix;
-}
-
 export default function PipedriveSearch() {
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState<string>("");
