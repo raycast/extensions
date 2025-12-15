@@ -1,6 +1,6 @@
 # Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-15
 
 - Add Windows support
 - Update (dev) dependencies
