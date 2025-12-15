@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { execSync } from "child_process";
 import { getTabbyProfiles, getProfileGroups, TabbyProfile } from "./utils/get-tabby-profiles";
@@ -36,11 +37,7 @@ export default function Command() {
       // Use Tabby CLI to open profile by name
       execSync(`"${TABBY_CLI}" profile "${profile.name}"`, { encoding: "utf-8" });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Cannot open profile "${profile.name}"`,
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: `Cannot open profile "${profile.name}"` });
     }
   };
 
