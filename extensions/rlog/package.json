@@ -1,0 +1,123 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "rlog",
+    "title": "Rlog",
+    "description": "A frictionless, public reading log manager for static blogs.",
+    "icon": "command-icon.png",
+    "author": "ossa-ma",
+    "categories": [
+        "Productivity",
+        "Developer Tools"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "log-read",
+            "title": "Log Read",
+            "subtitle": "rlog",
+            "description": "Add a new article/post/blog/page to your read list",
+            "mode": "view"
+        },
+        {
+            "name": "setup-rlog",
+            "title": "Setup rlog",
+            "subtitle": "rlog",
+            "description": "Inject read and reading list code into your blog",
+            "mode": "view"
+        },
+        {
+            "name": "read-later",
+            "title": "Read Later",
+            "subtitle": "rlog",
+            "description": "Save current tab to reading list",
+            "mode": "no-view"
+        },
+        {
+            "name": "log-window",
+            "title": "Log Window",
+            "subtitle": "rlog",
+            "description": "Log all open tabs in the active window",
+            "mode": "no-view"
+        },
+        {
+            "name": "read-window-later",
+            "title": "Read Window Later",
+            "subtitle": "rlog",
+            "description": "Save all open tabs in the active window to read later",
+            "mode": "no-view"
+        },
+        {
+            "name": "view-read-log",
+            "title": "View Read Log",
+            "subtitle": "rlog",
+            "description": "View your reading log",
+            "mode": "view"
+        },
+        {
+            "name": "view-reading-list",
+            "title": "View Reading List",
+            "subtitle": "rlog",
+            "description": "View your read later list",
+            "mode": "view"
+        },
+        {
+            "name": "open-random-article",
+            "title": "Open Random Article",
+            "subtitle": "rlog",
+            "description": "Open a random article from your reading list",
+            "mode": "no-view"
+        }
+    ],
+    "platforms": [
+        "macOS"
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.103.10",
+        "@raycast/utils": "^1.16.0",
+        "cheerio": "^1.0.0-rc.12",
+        "date-fns": "^3.6.0",
+        "ini": "^6.0.0",
+        "lz4js": "^0.2.0",
+        "node-fetch": "^3.3.2",
+        "simple-git": "^3.24.0"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.8",
+        "@types/ini": "^4.1.1",
+        "@types/jest": "^30.0.0",
+        "@types/lz4js": "^0.2.2",
+        "@types/node": "^20.8.10",
+        "@types/react": "^19.0.10",
+        "eslint": "^8.57.0",
+        "jest": "^29.7.0",
+        "prettier": "^3.2.5",
+        "ts-jest": "^29.4.6",
+        "typescript": "^5.4.5"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish",
+        "test": "jest --config tests/jest.config.js"
+    },
+    "preferences": [
+        {
+            "name": "blogPath",
+            "type": "directory",
+            "required": true,
+            "title": "Blog Repository Path",
+            "description": "Absolute path to your static blog repository."
+        },
+        {
+            "name": "dataPath",
+            "type": "textfield",
+            "required": false,
+            "title": "Data File Path",
+            "description": "Relative path to your reading.json file (default: data/reading.json).",
+            "default": "data/reading.json",
+            "placeholder": "data/reading.json"
+        }
+    ]
+}
