@@ -27,6 +27,13 @@ type LocationChoice = {
   stopData?: SearchResultStop;
 };
 
+type CfGeoResponse = {
+  latitude?: string | number;
+  longitude?: string | number;
+  city?: string;
+  region?: string;
+};
+
 type TripEntry = {
   dep: NearbyDepartureV2;
   dir: NearbyDirectionV2;
@@ -92,9 +99,9 @@ function LocationPicker() {
     (async () => {
       try {
         const res = await fetch(CF_GEO_URL);
-        const cf = await res.json();
-        const lat = parseFloat(cf.latitude);
-        const lon = parseFloat(cf.longitude);
+        const cf = (await res.json()) as CfGeoResponse;
+        const lat = parseFloat(String(cf.latitude));
+        const lon = parseFloat(String(cf.longitude));
         if (!cancelled && !Number.isNaN(lat) && !Number.isNaN(lon) && cf.city && cf.region) {
           setDetected({
             type: "detected",

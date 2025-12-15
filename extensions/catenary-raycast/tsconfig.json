@@ -1,24 +1,17 @@
 {
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "include": ["src/**/*", "raycast-env.d.ts"],
     "compilerOptions": {
-        "module": "esnext",
-        "target": "esnext",
-        "lib": [
-            "DOM",
-            "DOM.Iterable",
-            "ESNext"
-        ],
-        "skipLibCheck": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "noEmit": true,
-        "jsx": "react-jsx"
-    },
-    "include": [
-        "src/**/*"
-    ]
-}
+      "lib": ["ES2023"],
+      "module": "commonjs",
+      "target": "ES2023",
+      "strict": true,
+      "isolatedModules": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "jsx": "react-jsx",
+      "resolveJsonModule": true
+    }
+  }
+  
