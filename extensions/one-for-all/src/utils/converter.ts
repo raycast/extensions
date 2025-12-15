@@ -28,9 +28,9 @@ export function detectAndConvert(input: string, iterations = 1): ConversionResul
   }
 
   // 2. Try Hexadecimal
-  let hexStr = trimmed;
-  if (trimmed.toLowerCase().startsWith("0x")) {
-    hexStr = trimmed.slice(2);
+  let hexStr = trimmed.replace(/\s+/g, "");
+  if (hexStr.toLowerCase().startsWith("0x")) {
+    hexStr = hexStr.slice(2);
   }
   if (iterations === 1 && /^[0-9a-fA-F]+$/.test(hexStr)) {
     const num = parseInt(hexStr, 16);

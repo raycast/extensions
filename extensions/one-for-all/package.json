@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "one-for-all",
-  "title": "One for All",
+  "title": "Hackit",
   "description": "All what a hacker needs.",
   "icon": "extension-icon.png",
   "version": "0.1.0",
@@ -11,7 +11,8 @@
     "Windows"
   ],
   "categories": [
-    "Developer Tools"
+    "Developer Tools",
+    "Data"
   ],
   "license": "MIT",
   "commands": [
@@ -23,8 +24,44 @@
     },
     {
       "name": "base",
-      "title": "Base Converter",
+      "title": "Base",
       "description": "Convert numbers between binary, octal, decimal, hexadecimal, and ASCII",
+      "mode": "view"
+    },
+    {
+      "name": "decrypt-vigenere",
+      "title": "Decrypt Vigenère Cipher",
+      "description": "Decrypt Vigenère cipher",
+      "mode": "view"
+    },
+    {
+      "name": "caesar",
+      "title": "Caesar Cipher",
+      "description": "Encrypt/Decrypt with Caesar Cipher",
+      "mode": "view"
+    },
+    {
+      "name": "rot",
+      "title": "ROT Cipher",
+      "description": "Show all 26 rotations of a string",
+      "mode": "view"
+    },
+    {
+      "name": "xor",
+      "title": "XOR Calculator",
+      "description": "Calculate bitwise XOR of two inputs",
+      "mode": "view"
+    },
+    {
+      "name": "aes",
+      "title": "AES Encryption",
+      "description": "Encrypt text using AES-256-CBC",
+      "mode": "view"
+    },
+    {
+      "name": "pbkdf2",
+      "title": "PBKDF2 Key Derivation",
+      "description": "Derive key using PBKDF2-SHA256",
       "mode": "view"
     }
   ],

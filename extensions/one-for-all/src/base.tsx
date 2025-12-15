@@ -1,9 +1,17 @@
-import { ActionPanel, Action, List } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Action, List, Clipboard } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { detectAndConvert, ConversionResult } from "./utils/converter";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+
+  useEffect(() => {
+    Clipboard.readText().then((text) => {
+      if (text) {
+        setSearchText(text);
+      }
+    });
+  }, []);
 
   let input = searchText;
   let iterations = 1;
@@ -21,6 +29,7 @@ export default function Command() {
 
   return (
     <List
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Enter a number (decimal, hex, binary) or text..."
       throttle
