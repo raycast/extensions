@@ -39,7 +39,7 @@
     },
     {
       "name": "create-weblink",
-      "title": "Create Weblink",
+      "title": "Save Weblink",
       "description": "Create a weblink in Capacities",
       "mode": "view",
       "keywords": ["create", "weblink", "url", "capacities"]
