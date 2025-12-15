@@ -3,7 +3,7 @@
   "name": "microsoft-office",
   "title": "Microsoft Office",
   "description": "Command for Office Products",
-  "icon": "extension-icon.png",
+  "icon": "msoffice.png",
   "license": "MIT",
   "commands": [
     {
