@@ -11,21 +11,24 @@
       "title": "Search Recent PowerPoint Slides",
       "description": "Search Recent PowerPoint slides",
       "mode": "view",
-      "icon": "powerpoint.png"
+      "icon": "powerpoint.png",
+      "subtitle": "Microsoft Office"
     },
     {
       "name": "recent-word",
       "title": "Search Recent Word Documents",
       "description": "Search Recent Word Documents",
       "mode": "view",
-      "icon": "word.png"
+      "icon": "word.png",
+      "subtitle": "Microsoft Office"
     },
     {
       "name": "recent-excel",
       "title": "Search Recent Excel Documents",
       "description": "Search Recent Excel Documents",
       "mode": "view",
-      "icon": "excel.png"
+      "icon": "excel.png",
+      "subtitle": "Microsoft Office"
     }
   ],
   "dependencies": {

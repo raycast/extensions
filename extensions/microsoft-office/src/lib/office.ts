@@ -2,7 +2,7 @@ import fs from "fs";
 import { runPowerShellScript } from "@raycast/utils";
 import { environment } from "@raycast/api";
 
-interface PowerShellResult {
+interface OfficeResult {
   [key: string]: Result;
 }
 interface Result {
@@ -49,15 +49,19 @@ export interface ExcelFiles {
   excelExecutable?: string;
 }
 
-export async function recentPowerpointFilesRaw() {
-  const data = fs.readFileSync(environment.assetsPath + "/office.ps1", "utf8");
-  const result = await runPowerShellScript(data);
-  const j = JSON.parse(result) as PowerShellResult;
-  const adalKey = Object.keys(j).filter((key) => key.startsWith("ADAL"));
-  if (!adalKey || adalKey.length <= 0) {
-    throw new Error("No ADAL key found in the result");
+export async function recentMSOfficeFiles() {
+  try {
+    const data = fs.readFileSync(environment.assetsPath + "/office.ps1", "utf8");
+    const result = await runPowerShellScript(data);
+    const j = JSON.parse(result) as OfficeResult;
+    const adalKey = Object.keys(j).filter((key) => key.startsWith("ADAL"));
+    if (!adalKey || adalKey.length <= 0) {
+      throw new Error("No ADAL key found in the result");
+    }
+    return j[adalKey[0]];
+  } catch {
+    throw new Error("Could not read Office files");
   }
-  return j[adalKey[0]];
 }
 
 function powershellDateStringToDate(dateString: string): Date {
@@ -67,7 +71,7 @@ function powershellDateStringToDate(dateString: string): Date {
 }
 
 export async function recentPowerPointFiles(): Promise<PowerPointFiles> {
-  const data = await recentPowerpointFilesRaw();
+  const data = await recentMSOfficeFiles();
   const result = data.Files.map<PowerPointFile>((file) => {
     return {
       filename: file.FilePath,
@@ -84,7 +88,7 @@ export async function recentPowerPointFiles(): Promise<PowerPointFiles> {
 }
 
 export async function recentWordFiles(): Promise<WordFiles> {
-  const data = await recentPowerpointFilesRaw();
+  const data = await recentMSOfficeFiles();
   const result = data.Files.map<PowerPointFile>((file) => {
     return {
       filename: file.FilePath,
@@ -101,7 +105,7 @@ export async function recentWordFiles(): Promise<WordFiles> {
 }
 
 export async function recentExcelFiles(): Promise<ExcelFiles> {
-  const data = await recentPowerpointFilesRaw();
+  const data = await recentMSOfficeFiles();
   const result = data.Files.map<PowerPointFile>((file) => {
     return {
       filename: file.FilePath,
