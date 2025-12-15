@@ -177,23 +177,27 @@ export default function FileListItem({ file, email }: FileListItemProps) {
 
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              icon={Icon.Clipboard}
               content={file.name}
               title="Copy File Name"
               shortcut={Keyboard.Shortcut.Common.CopyName}
             />
 
             <Action.CopyToClipboard
-              icon={Icon.Clipboard}
               content={file.webViewLink}
               title="Copy File URL"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={{
+                macOS: { modifiers: ["shift", "cmd"], key: "," },
+                Windows: { modifiers: ["shift", "ctrl"], key: "," },
+              }}
             />
 
             <Action.CopyToClipboard
               content={`[${file.name}](${file.webViewLink})`}
               title="Copy Markdown Link"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              shortcut={{
+                macOS: { modifiers: ["shift", "cmd"], key: "." },
+                Windows: { modifiers: ["shift", "ctrl"], key: "." },
+              }}
             />
 
             <Action.CopyToClipboard
@@ -202,7 +206,10 @@ export default function FileListItem({ file, email }: FileListItemProps) {
                 text: file.name,
               }}
               title="Copy HTML Link"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={{
+                macOS: { modifiers: ["shift", "cmd"], key: "c" },
+                Windows: { modifiers: ["shift", "ctrl"], key: "c" },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>
