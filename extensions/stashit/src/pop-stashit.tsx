@@ -1,12 +1,27 @@
-import { Detail, ActionPanel, Action, Icon, Clipboard } from "@raycast/api";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  Icon,
+  Clipboard,
+  LaunchProps,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
   popHighestFromAnyQueue,
+  popItem,
   QueueItem,
   getSortedQueue,
 } from "./utils/queue";
 
-export default function Command() {
+interface Arguments {
+  queue?: string;
+}
+
+export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+  const { queue: queueArg } = props.arguments;
+  const queueName = queueArg?.trim() || undefined;
+
   const [item, setItem] = useState<QueueItem | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,7 +29,10 @@ export default function Command() {
 
   useEffect(() => {
     async function pop() {
-      const popped = await popHighestFromAnyQueue();
+      // If queue name specified, pop from that queue; otherwise pop highest from any queue
+      const popped = queueName
+        ? await popItem(queueName)
+        : await popHighestFromAnyQueue();
       if (popped) {
         setItem(popped);
         await Clipboard.copy(popped.text);
@@ -26,18 +44,19 @@ export default function Command() {
       setIsLoading(false);
     }
     pop();
-  }, []);
+  }, [queueName]);
 
   if (isLoading) {
     return <Detail isLoading={true} />;
   }
 
   if (isEmpty) {
+    const emptyMessage = queueName
+      ? `# 📭 Queue "${queueName}" is Empty\nNo items in this queue. Add items using the **Add to Queue** command with \`#${queueName}\`.`
+      : `# 📭 Queue is Empty\nNo items to pop. Add items using the **Add to Queue** command.`;
     return (
       <Detail
-        markdown={`# 📭 Queue is Empty
-No items to pop. Add items using the **Add to Queue** command.
-`}
+        markdown={emptyMessage}
         actions={
           <ActionPanel>
             <Action.Push

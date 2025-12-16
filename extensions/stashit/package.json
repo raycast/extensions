@@ -12,18 +12,29 @@
     {
       "name": "stashit",
       "title": "Add to Queue",
+      "subtitle": "Capture tasks with priority",
       "description": "Add an item to the queue (syntax: task #queue priority)",
       "mode": "view"
     },
     {
       "name": "pop-stashit",
       "title": "Queue Pop",
+      "subtitle": "Get highest priority task",
       "description": "Pop the highest priority item from the queue",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queue",
+          "placeholder": "Queue name (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "view-stashit",
       "title": "View Queue",
+      "subtitle": "Browse all tasks",
       "description": "View all items in the priority queue",
       "mode": "view"
     }
