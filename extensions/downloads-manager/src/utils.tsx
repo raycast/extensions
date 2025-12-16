@@ -44,7 +44,7 @@ function getCachedOrDetectDownloadsFolder(): string {
 export const downloadsFolder = getCachedOrDetectDownloadsFolder();
 const showHiddenFiles = preferences.showHiddenFiles;
 const fileOrder = preferences.fileOrder;
-const lastestDownloadOrder = preferences.lastestDownloadOrder;
+const latestDownloadOrder = preferences.lastestDownloadOrder;
 export const defaultDownloadsLayout = preferences.downloadsLayout ?? "list";
 const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff", ".heic", ".svg"];
 
@@ -131,13 +131,13 @@ export function getLatestDownload() {
     return undefined;
   }
 
-  if (lastestDownloadOrder === "addTime") {
+  if (latestDownloadOrder === "addTime") {
     downloads.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime());
-  } else if (lastestDownloadOrder === "createTime") {
+  } else if (latestDownloadOrder === "createTime") {
     downloads.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  } else if (lastestDownloadOrder === "modifiedTime") {
+  } else if (latestDownloadOrder === "modifiedTime") {
     downloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
-  } else if (lastestDownloadOrder === "birthTime") {
+  } else if (latestDownloadOrder === "birthTime") {
     downloads.sort((a, b) => b.birthAt.getTime() - a.birthAt.getTime());
   }
 

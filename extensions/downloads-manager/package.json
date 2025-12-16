@@ -122,9 +122,9 @@
     {
       "type": "dropdown",
       "name": "lastestDownloadOrder",
-      "label": "Lastest Download Order",
-      "title": "Lastest Download Order",
-      "description": "The order of the lastest download",
+      "label": "Latest Download Order",
+      "title": "Latest Download Order",
+      "description": "The order of the latest download",
       "required": false,
       "default": "modifiedTime",
       "data": [
