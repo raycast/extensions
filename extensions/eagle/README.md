@@ -24,9 +24,11 @@ Eagle Extension for Raycast - Manage your Eagle assets directly from Raycast.
 ### API Coverage
 
 #### Application APIs
+
 - ✅ `/api/application/info` - Get Eagle application information
 
 #### Folder APIs
+
 - ✅ `/api/folder/list` - List all folders in library
 - ✅ `/api/folder/create` - Create new folder
 - ✅ `/api/folder/rename` - Rename existing folder
@@ -34,6 +36,7 @@ Eagle Extension for Raycast - Manage your Eagle assets directly from Raycast.
 - ❌ `/api/folder/listRecent` - List recently accessed folders
 
 #### Item APIs
+
 - ✅ `/api/item/info` - Get item information (via thumbnail)
 - ✅ `/api/item/thumbnail` - Get item thumbnail
 - ✅ `/api/item/list` - List items with filtering
@@ -48,6 +51,7 @@ Eagle Extension for Raycast - Manage your Eagle assets directly from Raycast.
 - ❌ `/api/item/refreshThumbnail` - Regenerate item thumbnail
 
 #### Library APIs
+
 - ✅ `/api/library/info` - Get current library information
 - ✅ `/api/library/history` - Get recently opened libraries
 - ✅ `/api/library/switch` - Switch to different library
@@ -100,6 +104,6 @@ npm run dev
 
 ## Requirements
 
-- macOS
+- macOS or Windows
 - Eagle app installed and running
-- Eagle API server enabled (default: http://localhost:41595)
+- Eagle API server enabled (Settings → Advanced → Enable HTTP API, default: http://localhost:41595)
