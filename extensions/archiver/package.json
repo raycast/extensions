@@ -130,7 +130,24 @@
       ],
       "preferences": [
         {
-          "name": "quickCompressFormat",
+          "name": "deleteAfterCompression",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
+          "description": "Delete file(s) after compression",
+          "label": "Delete File(s) after Compression",
+          "default": false
+        },
+        {
+          "name": "locationSaveCompressed",
+          "type": "directory",
+          "required": false,
+          "title": "Location to Save Compressed",
+          "description": "Please select location, default is next to original",
+          "placeholder": "Select Location to Save Compressed"
+        },
+        {
+          "name": "defaultCompressionFormat",
           "type": "dropdown",
           "required": false,
           "title": "Compression Format",

@@ -9,12 +9,6 @@ interface ICompressPreferences {
   useParentFolderNameWhenMultiple: boolean;
 }
 
-interface IQuickCompressPreferences {
-  quickCompressFormat: CompressFormat;
-  useOriginalNameWhenSingle: boolean;
-  useParentFolderNameWhenMultiple: boolean;
-}
-
 interface IExtractPreferences {
   defaultExtractSelected: boolean;
   deleteAfterExtraction: boolean;

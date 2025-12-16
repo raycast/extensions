@@ -1,10 +1,10 @@
 import { getPreferenceValues, getSelectedFinderItems, showToast, Toast, showHUD, showInFinder } from "@raycast/api";
 import { compress, ensureBinary } from "./common/utils";
-import { IQuickCompressPreferences } from "./common/types";
+import { ICompressPreferences } from "./common/types";
 import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
-  const preferences: IQuickCompressPreferences = getPreferenceValues<IQuickCompressPreferences>();
+  const preferences: ICompressPreferences = getPreferenceValues<ICompressPreferences>();
 
   try {
     await ensureBinary();
@@ -17,9 +17,9 @@ export default async function Command() {
 
     const filePaths = selectedFinderItems.map((item) => item.path);
     showToast({ title: "Compressing...", style: Toast.Style.Animated });
-    const path = await compress(filePaths, preferences.quickCompressFormat);
+    const path = await compress(filePaths, preferences.defaultCompressionFormat);
     await showInFinder(path);
-    await showHUD(`🎉 Compressed to ${preferences.quickCompressFormat} successfully`);
+    await showHUD(`🎉 Compressed to ${preferences.defaultCompressionFormat} successfully`);
   } catch (error) {
     showFailureToast(error, { title: "Failed to compress" });
   }
