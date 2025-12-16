@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Homebrew 5.0 Support] - {PR_MERGE_DATE}
+## [Homebrew 5.0 Support] - 2025-12-16
 
 - Added compatibility with Homebrew 5.0
   - Added preference to disable concurrent downloads (enabled by default in Homebrew 5.0)
