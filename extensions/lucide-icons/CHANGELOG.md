@@ -1,6 +1,6 @@
 # Lucide Icons Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-16
 
 - Add support for Windows
 - Update (dev) dependencies
