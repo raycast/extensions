@@ -22,6 +22,11 @@ import {
   deleteQueueByName,
   updateItem,
   QueueItem,
+  backupToFile,
+  restoreFromFile,
+  getSettings,
+  saveSettings,
+  moveItem,
 } from "./utils/queue";
 
 type ViewFilter = "active" | "history" | "all";
@@ -73,6 +78,63 @@ function EditItemForm({
         title="Queue"
         value={queue}
         onChange={setQueue}
+      />
+    </Form>
+  );
+}
+
+function SettingsForm({ onSave }: { onSave: () => void }) {
+  const { pop } = useNavigation();
+  const [retentionDays, setRetentionDays] = useState("15");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadSettings() {
+      const settings = await getSettings();
+      setRetentionDays(settings.retentionDays.toString());
+      setIsLoading(false);
+    }
+    loadSettings();
+  }, []);
+
+  async function handleSubmit() {
+    const days = parseInt(retentionDays, 10);
+    if (isNaN(days) || days < 1) {
+      await showHUD("❌ Retention days must be at least 1");
+      return;
+    }
+    await saveSettings({ retentionDays: days });
+    await showHUD(`✅ History retention set to ${days} days`);
+    onSave();
+    pop();
+  }
+
+  if (isLoading) {
+    return <Form isLoading={true} />;
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Save Settings"
+            icon={Icon.Check}
+            onSubmit={handleSubmit}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="retentionDays"
+        title="History Retention (days)"
+        value={retentionDays}
+        onChange={setRetentionDays}
+        info="Popped items older than this will be automatically deleted"
+      />
+      <Form.Description
+        title="Note"
+        text="Set to 0 to keep history forever. Default is 15 days."
       />
     </Form>
   );
@@ -160,6 +222,101 @@ export default function Command() {
     const currentIndex = filters.indexOf(viewFilter);
     const nextIndex = (currentIndex + 1) % filters.length;
     setViewFilter(filters[nextIndex]);
+  }
+
+  function generateExportData() {
+    return {
+      exportedAt: new Date().toISOString(),
+      active: items,
+      history: archive,
+    };
+  }
+
+  function generateMarkdownExport(): string {
+    const lines: string[] = [];
+    lines.push("# Stashit Export");
+    lines.push(`\n*Exported: ${new Date().toLocaleString()}*\n`);
+
+    if (items.length > 0) {
+      lines.push("## Active Queue\n");
+      const grouped: Record<string, QueueItem[]> = {};
+      items.forEach((item) => {
+        if (!grouped[item.queue]) grouped[item.queue] = [];
+        grouped[item.queue].push(item);
+      });
+
+      Object.entries(grouped).forEach(([queueName, queueItems]) => {
+        lines.push(`### ${queueName}\n`);
+        lines.push("| Priority | Task | Added |");
+        lines.push("|----------|------|-------|");
+        queueItems.forEach((item) => {
+          const date = new Date(item.createdAt).toLocaleDateString();
+          lines.push(`| ${item.priority} | ${item.text} | ${date} |`);
+        });
+        lines.push("");
+      });
+    }
+
+    if (archive.length > 0) {
+      lines.push("## History\n");
+      lines.push("| Priority | Task | Queue | Added |");
+      lines.push("|----------|------|-------|-------|");
+      archive.forEach((item) => {
+        const date = new Date(item.createdAt).toLocaleDateString();
+        lines.push(
+          `| ${item.priority} | ${item.text} | ${item.queue} | ${date} |`,
+        );
+      });
+    }
+
+    return lines.join("\n");
+  }
+
+  async function handleExportJSON() {
+    const data = generateExportData();
+    const json = JSON.stringify(data, null, 2);
+    await Clipboard.copy(json);
+    await showHUD(`📋 Exported ${items.length + archive.length} items as JSON`);
+  }
+
+  async function handleExportMarkdown() {
+    const markdown = generateMarkdownExport();
+    await Clipboard.copy(markdown);
+    await showHUD(
+      `📋 Exported ${items.length + archive.length} items as Markdown`,
+    );
+  }
+
+  async function handleBackupToFile() {
+    const path = await backupToFile();
+    await Clipboard.copy(path);
+    await showHUD(`💾 Backed up to ${path} (path copied)`);
+  }
+
+  async function handleRestoreFromFile() {
+    const result = await restoreFromFile();
+    if (result) {
+      await showHUD(
+        `♻️ Restored ${result.activeCount} active + ${result.archiveCount} archived items`,
+      );
+      await loadQueue();
+    } else {
+      await showHUD("❌ No backup file found");
+    }
+  }
+
+  async function handleMoveUp(id: string) {
+    const moved = await moveItem(id, "up");
+    if (moved) {
+      await loadQueue();
+    }
+  }
+
+  async function handleMoveDown(id: string) {
+    const moved = await moveItem(id, "down");
+    if (moved) {
+      await loadQueue();
+    }
   }
 
   function getPriorityColor(priority: number): Color {
@@ -317,6 +474,26 @@ ${isArchived ? "*This item has been completed*" : "*Press Enter to pop this item
                               }
                             />
                           </ActionPanel.Section>
+                          <ActionPanel.Section title="Reorder">
+                            <Action
+                              title="Move Up"
+                              icon={Icon.ChevronUp}
+                              shortcut={{
+                                modifiers: ["shift"],
+                                key: "arrowUp",
+                              }}
+                              onAction={() => handleMoveUp(item.id)}
+                            />
+                            <Action
+                              title="Move Down"
+                              icon={Icon.ChevronDown}
+                              shortcut={{
+                                modifiers: ["shift"],
+                                key: "arrowDown",
+                              }}
+                              onAction={() => handleMoveDown(item.id)}
+                            />
+                          </ActionPanel.Section>
                           <ActionPanel.Section>
                             <Action
                               title={`Pop from ${queueName}`}
@@ -346,6 +523,50 @@ ${isArchived ? "*This item has been completed*" : "*Press Enter to pop this item
                               icon={Icon.Filter}
                               shortcut={{ modifiers: ["cmd"], key: "f" }}
                               onAction={cycleFilter}
+                            />
+                          </ActionPanel.Section>
+                          <ActionPanel.Section title="Export & Backup">
+                            <Action
+                              title="Export All as JSON"
+                              icon={Icon.Download}
+                              shortcut={{
+                                modifiers: ["cmd", "shift"],
+                                key: "j",
+                              }}
+                              onAction={handleExportJSON}
+                            />
+                            <Action
+                              title="Export All as Markdown"
+                              icon={Icon.Document}
+                              shortcut={{
+                                modifiers: ["cmd", "shift"],
+                                key: "m",
+                              }}
+                              onAction={handleExportMarkdown}
+                            />
+                            <Action
+                              title="Backup to File"
+                              icon={Icon.HardDrive}
+                              shortcut={{
+                                modifiers: ["cmd", "shift"],
+                                key: "b",
+                              }}
+                              onAction={handleBackupToFile}
+                            />
+                            <Action
+                              title="Restore from Backup"
+                              icon={Icon.RotateAntiClockwise}
+                              shortcut={{
+                                modifiers: ["cmd", "shift"],
+                                key: "r",
+                              }}
+                              onAction={handleRestoreFromFile}
+                            />
+                            <Action.Push
+                              title="Settings"
+                              icon={Icon.Gear}
+                              shortcut={{ modifiers: ["cmd"], key: "," }}
+                              target={<SettingsForm onSave={loadQueue} />}
                             />
                           </ActionPanel.Section>
                           <ActionPanel.Section>
@@ -431,6 +652,38 @@ ${isArchived ? "*This item has been completed*" : "*Press Enter to pop this item
                           icon={Icon.Filter}
                           shortcut={{ modifiers: ["cmd"], key: "f" }}
                           onAction={cycleFilter}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section title="Export & Backup">
+                        <Action
+                          title="Export All as JSON"
+                          icon={Icon.Download}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+                          onAction={handleExportJSON}
+                        />
+                        <Action
+                          title="Export All as Markdown"
+                          icon={Icon.Document}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+                          onAction={handleExportMarkdown}
+                        />
+                        <Action
+                          title="Backup to File"
+                          icon={Icon.HardDrive}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                          onAction={handleBackupToFile}
+                        />
+                        <Action
+                          title="Restore from Backup"
+                          icon={Icon.RotateAntiClockwise}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                          onAction={handleRestoreFromFile}
+                        />
+                        <Action.Push
+                          title="Settings"
+                          icon={Icon.Gear}
+                          shortcut={{ modifiers: ["cmd"], key: "," }}
+                          target={<SettingsForm onSave={loadQueue} />}
                         />
                       </ActionPanel.Section>
                       <ActionPanel.Section>

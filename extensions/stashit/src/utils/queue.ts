@@ -1,4 +1,7 @@
 import { LocalStorage } from "@raycast/api";
+import { homedir } from "os";
+import { existsSync, mkdirSync, writeFile, readFileSync } from "fs";
+import { join } from "path";
 
 export interface QueueItem {
   id: string;
@@ -11,7 +14,27 @@ export interface QueueItem {
 
 const STORAGE_KEY = "stashit-items";
 const ARCHIVE_KEY = "stashit-archive";
+const SETTINGS_KEY = "stashit-settings";
 const DEFAULT_QUEUE = "default";
+const DEFAULT_RETENTION_DAYS = 15;
+
+// Debounce sync - wait 2 seconds after last change before writing to file
+let syncTimeout: NodeJS.Timeout | null = null;
+let syncPending = false;
+
+export interface Settings {
+  retentionDays: number;
+}
+
+export async function getSettings(): Promise<Settings> {
+  const data = await LocalStorage.getItem<string>(SETTINGS_KEY);
+  if (!data) return { retentionDays: DEFAULT_RETENTION_DAYS };
+  return JSON.parse(data) as Settings;
+}
+
+export async function saveSettings(settings: Settings): Promise<void> {
+  await LocalStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
 
 export async function getQueue(): Promise<QueueItem[]> {
   const data = await LocalStorage.getItem<string>(STORAGE_KEY);
@@ -21,16 +44,83 @@ export async function getQueue(): Promise<QueueItem[]> {
 
 export async function saveQueue(queue: QueueItem[]): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
+  scheduleSyncToFile();
 }
 
 export async function getArchive(): Promise<QueueItem[]> {
   const data = await LocalStorage.getItem<string>(ARCHIVE_KEY);
   if (!data) return [];
-  return JSON.parse(data) as QueueItem[];
+
+  const archive = JSON.parse(data) as QueueItem[];
+  const settings = await getSettings();
+
+  // If retention is 0 or negative, keep forever
+  if (settings.retentionDays <= 0) {
+    return archive;
+  }
+
+  // Auto-cleanup old items
+  const cutoffTime = Date.now() - settings.retentionDays * 24 * 60 * 60 * 1000;
+
+  const filtered = archive.filter(
+    (item) => (item.poppedAt || item.createdAt) > cutoffTime
+  );
+
+  // If items were removed, save the cleaned archive
+  if (filtered.length < archive.length) {
+    await LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify(filtered));
+    scheduleSyncToFile();
+  }
+
+  return filtered;
 }
 
 export async function saveArchive(archive: QueueItem[]): Promise<void> {
   await LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify(archive));
+  scheduleSyncToFile();
+}
+
+// Debounced cleanup - wait 3 seconds after last pop before cleaning
+let cleanupTimeout: NodeJS.Timeout | null = null;
+
+function scheduleCleanup(): void {
+  if (cleanupTimeout) {
+    clearTimeout(cleanupTimeout);
+  }
+
+  cleanupTimeout = setTimeout(() => {
+    performCleanup();
+  }, 3000);
+}
+
+// Cleanup old archive items based on retention settings (async, non-blocking)
+async function performCleanup(): Promise<void> {
+  try {
+    const settings = await getSettings();
+
+    // If retention is 0 or negative, keep forever
+    if (settings.retentionDays <= 0) {
+      return;
+    }
+
+    const data = await LocalStorage.getItem<string>(ARCHIVE_KEY);
+    if (!data) return;
+
+    const archive = JSON.parse(data) as QueueItem[];
+    const cutoffTime =
+      Date.now() - settings.retentionDays * 24 * 60 * 60 * 1000;
+
+    const filtered = archive.filter(
+      (item) => (item.poppedAt || item.createdAt) > cutoffTime
+    );
+
+    if (filtered.length < archive.length) {
+      await LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify(filtered));
+      scheduleSyncToFile();
+    }
+  } catch (error) {
+    console.error("Failed to cleanup archive:", error);
+  }
 }
 
 export function parseItemWithPriority(input: string): {
@@ -117,6 +207,9 @@ export async function popItem(queueName?: string): Promise<QueueItem | null> {
 
   await saveQueue(queue);
 
+  // Schedule async cleanup (non-blocking)
+  scheduleCleanup();
+
   return popped;
 }
 
@@ -147,6 +240,9 @@ export async function popHighestFromAnyQueue(): Promise<QueueItem | null> {
   await saveArchive(archive);
 
   await saveQueue(queue);
+
+  // Schedule async cleanup (non-blocking)
+  scheduleCleanup();
 
   return popped;
 }
@@ -213,6 +309,9 @@ export async function popItemById(id: string): Promise<QueueItem | null> {
 
   await saveQueue(queue);
 
+  // Schedule async cleanup (non-blocking)
+  scheduleCleanup();
+
   return popped;
 }
 
@@ -250,7 +349,7 @@ export async function deleteQueueByName(queueName: string): Promise<number> {
 
 export async function updateItem(
   id: string,
-  updates: { text?: string; priority?: number; queue?: string },
+  updates: { text?: string; priority?: number; queue?: string }
 ): Promise<QueueItem | null> {
   const queue = await getQueue();
   const index = queue.findIndex((item) => item.id === id);
@@ -271,4 +370,177 @@ export async function updateItem(
 export async function getItemById(id: string): Promise<QueueItem | null> {
   const queue = await getQueue();
   return queue.find((item) => item.id === id) || null;
+}
+
+// Move item up (increase priority) or down (decrease priority) within its queue
+export async function moveItem(
+  id: string,
+  direction: "up" | "down"
+): Promise<boolean> {
+  const queue = await getQueue();
+  const item = queue.find((i) => i.id === id);
+
+  if (!item) return false;
+
+  // Get items in the same queue, sorted by priority (highest first), then by createdAt
+  const sameQueueItems = queue
+    .filter((i) => i.queue === item.queue)
+    .sort((a, b) => {
+      if (b.priority !== a.priority) return b.priority - a.priority;
+      return a.createdAt - b.createdAt;
+    });
+
+  const currentIndex = sameQueueItems.findIndex((i) => i.id === id);
+
+  if (direction === "up" && currentIndex === 0) return false; // Already at top
+  if (direction === "down" && currentIndex === sameQueueItems.length - 1)
+    return false; // Already at bottom
+
+  const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+  const targetItem = sameQueueItems[targetIndex];
+
+  // Set priority relative to target item (target's priority +/- 1)
+  if (direction === "up") {
+    // Moving up = higher priority than the item above
+    item.priority = targetItem.priority + 1;
+  } else {
+    // Moving down = lower priority than the item below (min 0)
+    item.priority = Math.max(0, targetItem.priority - 1);
+  }
+
+  await saveQueue(queue);
+  return true;
+}
+
+// File backup functions
+const BACKUP_DIR = join(homedir(), ".stashit");
+const BACKUP_FILE = join(BACKUP_DIR, "backup.json");
+
+export interface BackupData {
+  version: number;
+  exportedAt: string;
+  active: QueueItem[];
+  archive: QueueItem[];
+  settings?: Settings;
+}
+
+function ensureBackupDir(): void {
+  if (!existsSync(BACKUP_DIR)) {
+    mkdirSync(BACKUP_DIR, { recursive: true });
+  }
+}
+
+// Schedule a debounced sync - waits 2 seconds after last change
+function scheduleSyncToFile(): void {
+  syncPending = true;
+
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+  }
+
+  syncTimeout = setTimeout(() => {
+    performSyncToFile();
+  }, 2000);
+}
+
+// Internal sync function - writes current LocalStorage state to file (async, non-blocking)
+async function performSyncToFile(): Promise<void> {
+  if (!syncPending) return;
+  syncPending = false;
+
+  try {
+    ensureBackupDir();
+
+    // Read directly from LocalStorage to avoid circular calls
+    const queueData = await LocalStorage.getItem<string>(STORAGE_KEY);
+    const archiveData = await LocalStorage.getItem<string>(ARCHIVE_KEY);
+    const settingsData = await LocalStorage.getItem<string>(SETTINGS_KEY);
+
+    const backup: BackupData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      active: queueData ? JSON.parse(queueData) : [],
+      archive: archiveData ? JSON.parse(archiveData) : [],
+      settings: settingsData
+        ? JSON.parse(settingsData)
+        : { retentionDays: DEFAULT_RETENTION_DAYS },
+    };
+
+    // Async write - non-blocking
+    writeFile(BACKUP_FILE, JSON.stringify(backup, null, 2), (err) => {
+      if (err) console.error("Failed to sync to file:", err);
+    });
+  } catch (error) {
+    console.error("Failed to sync to file:", error);
+  }
+}
+
+// Force immediate sync (for manual backup)
+async function syncToFile(): Promise<void> {
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+    syncTimeout = null;
+  }
+  syncPending = true;
+  await performSyncToFile();
+}
+
+export async function backupToFile(): Promise<string> {
+  await syncToFile();
+  return BACKUP_FILE;
+}
+
+export async function restoreFromFile(): Promise<{
+  activeCount: number;
+  archiveCount: number;
+} | null> {
+  if (!existsSync(BACKUP_FILE)) {
+    return null;
+  }
+
+  const data = readFileSync(BACKUP_FILE, "utf-8");
+  const backup = JSON.parse(data) as BackupData;
+
+  // Save directly to LocalStorage without triggering sync (avoid writing same data back)
+  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(backup.active));
+  await LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify(backup.archive));
+  if (backup.settings) {
+    await LocalStorage.setItem(SETTINGS_KEY, JSON.stringify(backup.settings));
+  }
+
+  return {
+    activeCount: backup.active.length,
+    archiveCount: backup.archive.length,
+  };
+}
+
+export function getBackupPath(): string {
+  return BACKUP_FILE;
+}
+
+export function backupExists(): boolean {
+  return existsSync(BACKUP_FILE);
+}
+
+export function getBackupInfo(): {
+  exists: boolean;
+  path: string;
+  modifiedAt?: Date;
+} {
+  const exists = existsSync(BACKUP_FILE);
+  if (!exists) {
+    return { exists: false, path: BACKUP_FILE };
+  }
+
+  try {
+    const data = readFileSync(BACKUP_FILE, "utf-8");
+    const backup = JSON.parse(data) as BackupData;
+    return {
+      exists: true,
+      path: BACKUP_FILE,
+      modifiedAt: new Date(backup.exportedAt),
+    };
+  } catch {
+    return { exists: true, path: BACKUP_FILE };
+  }
 }

@@ -18,3 +18,11 @@
 - History of popped items
 - Restore items from history
 - Copy item text to clipboard on pop
+- Export all data as JSON (⌘⇧J)
+- Export all data as Markdown (⌘⇧M)
+- Auto-sync data to ~/.stashit/backup.json (debounced for efficiency)
+- Manual backup copies file path to clipboard (⌘⇧B)
+- Restore data from backup file (⌘⇧R)
+- Settings (⌘,) to configure history retention (default: 15 days, 0 = forever)
+- Auto-cleanup of history items older than retention period
+- Reorder items with Move Up (⇧↑) and Move Down (⇧↓) - adjusts priorities
