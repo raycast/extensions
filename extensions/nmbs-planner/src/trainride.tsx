@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Trainrides, Vias, Via } from "./types";
 import { getTrainRides } from "./api";
 import { LaunchProps, List } from "@raycast/api";
@@ -21,7 +21,7 @@ function formatDuration(duration: string | number) {
   return new Date(Number(duration) * 1000).toISOString().slice(11, 16);
 }
 
-function renderViaLabels(vias?: Vias): JSX.Element | null {
+function renderViaLabels(vias?: Vias) {
   if (!vias?.via || !Array.isArray(vias.via)) return null;
 
   const fmt = (ts?: string | number, delay?: string | number) => {
