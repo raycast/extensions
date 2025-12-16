@@ -6,7 +6,7 @@ import {
   Clipboard,
   LaunchProps,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   popHighestFromAnyQueue,
   popItem,
@@ -27,7 +27,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
   const [isLoading, setIsLoading] = useState(true);
   const [remainingCount, setRemainingCount] = useState(0);
 
+  // Use a ref to ensure pop only happens once, even with React Strict Mode
+  const hasPopped = useRef(false);
+
   useEffect(() => {
+    // Prevent duplicate pops from Strict Mode or rapid re-renders
+    if (hasPopped.current) {
+      return;
+    }
+    hasPopped.current = true;
+
     async function pop() {
       // If queue name specified, pop from that queue; otherwise pop highest from any queue
       const popped = queueName
