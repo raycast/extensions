@@ -2,6 +2,9 @@
 
 ## [Update] - 2025-12-02
 
+### Fixed
+- Fixed memory issues (JS heap out of memory) by optimizing string concatenation and reducing safety limits
+
 ### Added
 - Multiple file and directory selection support in the file picker
 - Copy to clipboard option for generated content
