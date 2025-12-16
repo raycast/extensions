@@ -14,7 +14,7 @@ const pad2 = (n: number) => n.toString().padStart(2, "0");
 function formatTime(ts: string | number, delay?: string | number) {
   const date = new Date(Number(ts) * 1000);
   const delayNum = Number(delay ?? 0);
-  const delayText = delayNum > 0 ? `(+${delayNum / 60})` : "";
+  const delayText = delayNum > 0 ? `(+${Math.floor(delayNum / 60)})` : "";
   return `${pad2(date.getHours())}:${pad2(date.getMinutes())} ${delayText}`.trim();
 }
 
@@ -36,7 +36,7 @@ function renderViaLabels(vias?: Vias) {
       {vias.via.map((via: Via) => (
         <List.Item.Detail.Metadata.Label
           key={via.id}
-          title={`${via.station} (${fmt(via.arrival?.time)} - ${fmt(via.departure?.time)})`}
+          title={`${via.station} (${fmt(via.arrival?.time, via.arrival?.delay)} - ${fmt(via.departure?.time, via.departure?.delay)})`}
           text={`${via.arrival?.platform ?? "—"} -> ${via.departure?.platform ?? "—"}`}
         />
       ))}
