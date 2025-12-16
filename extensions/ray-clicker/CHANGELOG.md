@@ -1,6 +1,6 @@
 # Ray Clicker Changelog
 
-## [Windows ready & package update] - {PR_MERGE_DATE}
+## [Windows ready & package update] - 2025-12-16
 
 - Verified Windows support
 - Updated package.json dependencies
