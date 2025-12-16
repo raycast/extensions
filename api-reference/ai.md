@@ -155,7 +155,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 
 #### Enumeration members
 
-| Model enum name                                | Description                                                                 |
+| Model                                          | Description                                                                 |
 | ---------------------------------------------- | --------------------------------------------------------------------------- |
 | OpenAI_GPT-5                                   | OpenAI’s latest flagship model for coding and agentic tasks across domains. |
 | OpenAI_GPT-5.1                                 | Improved GPT-5 variant with better reasoning and reliability.               |
