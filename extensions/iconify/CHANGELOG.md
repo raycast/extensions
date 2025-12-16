@@ -1,6 +1,6 @@
 # Iconify Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-12-16
 
 - Refactor code to make it better maintainable
 - Remove axios as we can use fetch from Node
