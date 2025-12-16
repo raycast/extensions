@@ -32,7 +32,7 @@ export default async function AICommand(props?: LaunchProps<{ arguments: Argumen
   await showToast(Toast.Style.Animated, notification);
 
   const response = await AI.ask(prompt, {
-    model: "gpt-3.5-turbo",
+    model: AI.Model["OpenAI_GPT-5_mini"],
     creativity: "none",
   });
   const output = response.trim();
