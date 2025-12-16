@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Make Windows Compatible] - {PR_MERGE_DATE}
+## [Make Windows Compatible] - 2025-12-16
 
 - Update action shortcuts for Windows compatibility
 
