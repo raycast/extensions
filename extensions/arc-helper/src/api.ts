@@ -50,19 +50,12 @@ export interface Arc {
   image: string;
 }
 
-export interface EventTime {
-  start: string;
-  end: string;
-}
-
 export interface EventTimer {
-  game: string;
   name: string;
   map: string;
   icon: string;
-  description: string;
-  days: string[];
-  times: EventTime[];
+  startTime: number;
+  endTime: number;
 }
 
 export interface TraderItem {
