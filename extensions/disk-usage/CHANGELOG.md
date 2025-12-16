@@ -1,6 +1,6 @@
 # Disk Usage Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-12-16
 
 - Completely rewrote the scanning architecture to use file-based caching.
 - Optimized scanning speed by ignoring system junk folders and very small files.
