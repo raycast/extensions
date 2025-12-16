@@ -11,6 +11,8 @@ interface ICompressPreferences {
 
 interface IQuickCompressPreferences {
   quickCompressFormat: CompressFormat;
+  useOriginalNameWhenSingle: boolean;
+  useParentFolderNameWhenMultiple: boolean;
 }
 
 interface IExtractPreferences {
