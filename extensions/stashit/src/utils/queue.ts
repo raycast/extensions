@@ -63,7 +63,7 @@ export async function getArchive(): Promise<QueueItem[]> {
   const cutoffTime = Date.now() - settings.retentionDays * 24 * 60 * 60 * 1000;
 
   const filtered = archive.filter(
-    (item) => (item.poppedAt || item.createdAt) > cutoffTime
+    (item) => (item.poppedAt || item.createdAt) > cutoffTime,
   );
 
   // If items were removed, save the cleaned archive
@@ -111,7 +111,7 @@ async function performCleanup(): Promise<void> {
       Date.now() - settings.retentionDays * 24 * 60 * 60 * 1000;
 
     const filtered = archive.filter(
-      (item) => (item.poppedAt || item.createdAt) > cutoffTime
+      (item) => (item.poppedAt || item.createdAt) > cutoffTime,
     );
 
     if (filtered.length < archive.length) {
@@ -349,7 +349,7 @@ export async function deleteQueueByName(queueName: string): Promise<number> {
 
 export async function updateItem(
   id: string,
-  updates: { text?: string; priority?: number; queue?: string }
+  updates: { text?: string; priority?: number; queue?: string },
 ): Promise<QueueItem | null> {
   const queue = await getQueue();
   const index = queue.findIndex((item) => item.id === id);
@@ -375,7 +375,7 @@ export async function getItemById(id: string): Promise<QueueItem | null> {
 // Move item up (increase priority) or down (decrease priority) within its queue
 export async function moveItem(
   id: string,
-  direction: "up" | "down"
+  direction: "up" | "down",
 ): Promise<boolean> {
   const queue = await getQueue();
   const item = queue.find((i) => i.id === id);
