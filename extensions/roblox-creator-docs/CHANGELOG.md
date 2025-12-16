@@ -1,6 +1,6 @@
 # Roblox Creator Docs Changelog
 
-## [1.0.2] - {PR_MERGE_DATE}
+## [1.0.2] - 2025-12-16
 
 ### Fixed
 - Fixed critical memory issues causing "JS heap out of memory" crashes during cache refresh
