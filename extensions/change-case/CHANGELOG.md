@@ -1,6 +1,6 @@
 # Change Case Changelog
 
-## [Refactor and Dependency Updates] - {PR_MERGE_DATE}
+## [Refactor and Dependency Updates] - 2025-12-16
 
 - Updated dependencies and Raycast API
 - Migrated to ESLint 9
