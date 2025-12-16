@@ -8,7 +8,7 @@ export const useCachedDataSets = () => {
   //@ts-expect-error React issue, this works fine
   const abortable = useRef<AbortController>();
 
-  const { isLoading, data } = usePromise(
+  const { data, ...rest } = usePromise(
     async () => {
       const cacheId = "sets";
       const cached = getCacheValue<DataSet>(cacheId);
@@ -30,7 +30,7 @@ export const useCachedDataSets = () => {
     },
   );
   return {
-    isLoading,
+    ...rest,
     data: data ?? [],
   };
 };
