@@ -1,5 +1,12 @@
 # Iconify Changelog
 
+## [Improvements] - 2025-12-16
+
+- Refactor code to make it better maintainable
+- Remove axios as we can use fetch from Node
+- Add `abortable` options to `usePromise` to make sure any requests are aborted on changes
+- Add Windows support
+
 ## [Improvements] - 2025-12-02
 
 - Add error handling in "Search Icons"

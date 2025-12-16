@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 import { getOAuthToken } from "./googleAuth";
 
 export enum QueryTypes {
@@ -13,6 +12,29 @@ export enum ScopeTypes {
   allDrives = "allDrives",
 }
 
+export type User = {
+  displayName: string;
+  emailAddress: string;
+};
+
+export type ImageMediaMetadata = {
+  width: number;
+  height: number;
+  cameraMake?: string;
+  cameraModel?: string;
+  time?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+};
+
+export type VideoMediaMetadata = {
+  width: number;
+  height: number;
+  durationMillis: number;
+};
+
 export type File = {
   id: string;
   name: string;
@@ -21,6 +43,16 @@ export type File = {
   webContentLink?: string;
   size?: string;
   modifiedTime: string;
+  createdTime?: string;
+  modifiedByMeTime?: string;
+  viewedByMeTime?: string;
+  sharedWithMeTime?: string;
+  lastModifyingUser?: User;
+  owners?: User[];
+  shared?: boolean;
+  viewersCanCopyContent?: boolean;
+  imageMediaMetadata?: ImageMediaMetadata;
+  videoMediaMetadata?: VideoMediaMetadata;
   starred: boolean;
   parents?: string[];
   filePath?: string;
@@ -38,7 +70,7 @@ type FileData = {
 // For the whole list of properties, look at: https://developers.google.com/drive/api/reference/rest/v3/files
 
 const EXTENSION_SEARCH_PARAMS =
-  "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents)";
+  "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, createdTime, modifiedByMeTime, viewedByMeTime, sharedWithMeTime, lastModifyingUser(displayName,emailAddress), owners(displayName,emailAddress), shared, viewersCanCopyContent, imageMediaMetadata(width,height,cameraMake,cameraModel,time,location), videoMediaMetadata(width,height,durationMillis), thumbnailLink, starred, capabilities(canTrash), parents)";
 
 const AI_EXTENSION_SEARCH_PARAMS =
   "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents, " +

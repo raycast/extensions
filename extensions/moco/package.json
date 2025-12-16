@@ -5,6 +5,9 @@
   "description": "Provide Integration to MOCO timetracking.",
   "icon": "MocoLogo.png",
   "author": "eviscares",
+  "contributors": [
+    "el-schneider"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -69,5 +72,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

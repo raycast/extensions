@@ -55,9 +55,31 @@ Boost your productivity with instant file generation:
   - API Routes
   - Composables
   - Layouts
+- **Custom Templates Registry**: Create and use your own templates
+  - Configure a templates directory in preferences
+  - Add multiple templates per file type (e.g., `ColorMode.vue`, `Button.vue`)
+  - Selecting a custom template auto-fills the file name
+  - Override default templates with your own `default.vue`/`default.ts`
 - **Naming Conventions**: Automatic PascalCase/kebab-case conversion
 - **File Picker**: Easy project directory selection
 - **Context-Aware**: Pre-fills path when launched from menu bar
+
+#### Custom Templates Structure
+```
+~/my-nuxt-templates/
+├── components/
+│   ├── default.vue      # Replaces the default component template
+│   ├── ColorMode.vue    # Custom "ColorMode" template
+│   └── Button.vue       # Custom "Button" template
+├── pages/
+│   └── default.vue
+├── api/
+│   └── default.ts
+├── layouts/
+│   └── default.vue
+└── composables/
+    └── default.ts
+```
 
 ### 📚 Nuxt Documentation Browser
 - Command: "Nuxt Documentation" (view)
@@ -84,6 +106,7 @@ Access Nuxt UI documentation and tools instantly:
 ### ⚙️ Smart Configuration
 Customize to match your workflow (Preferences in Raycast):
 - `Prefix` for component names (default: `U`)
+- `Custom Templates Directory` for Quick Create custom templates
 
 The extension is pre-configured to work with Nuxt UI v4 and Nuxt 4.x documentation.
 

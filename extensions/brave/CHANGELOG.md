@@ -1,6 +1,6 @@
 # Brave Changelog
 
-## [Bookmarklets Support] - 2025-12-10
+## [Bookmarklets Support] - {PR_MERGE_DATE}
 
 - Added support for executing bookmarklets
 

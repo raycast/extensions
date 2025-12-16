@@ -21,7 +21,7 @@ import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 interface SecretListViewProps {
   projectId: string;
   gcloudPath: string;
-  onProjectChange: (projectId: string) => void;
+  onProjectChange?: (projectId: string) => void;
 }
 
 export default function SecretListView({ projectId, gcloudPath, onProjectChange }: SecretListViewProps) {

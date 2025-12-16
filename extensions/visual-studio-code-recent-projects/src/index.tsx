@@ -15,7 +15,7 @@ import {
   ListOrGridItem,
   ListOrGridSection,
 } from "./grid-or-list";
-import { getBuildScheme } from "./lib/vscode";
+import { getBuildScheme, getVSCodeCLIFilename } from "./lib/vscode";
 import { usePinnedEntries } from "./pinned";
 import {
   build,
@@ -36,10 +36,13 @@ import {
   isRemoteEntry,
   isRemoteWorkspaceEntry,
   isValidHexColor,
+  isWin,
   isWorkspaceEntry,
+  runExec,
 } from "./utils";
 import { getEditorApplication } from "./utils/editor";
 import { getGitBranch } from "./utils/git";
+import { OpenInShell } from "./actions";
 
 export default function Command() {
   const { data, isLoading, error, ...removeMethods } = useRecentEntries();
@@ -144,7 +147,7 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & 
 }
 
 function LocalItem(
-  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean } & PinMethods & RemoveMethods
+  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean } & PinMethods & RemoveMethods,
 ) {
   const name = decodeURIComponent(basename(props.uri));
   const path = fileURLToPath(props.uri);
@@ -171,7 +174,9 @@ function LocalItem(
       }
     }
 
-    fetchGitBranch();
+    if (showGitBranch) {
+      fetchGitBranch();
+    }
     return () => {
       mounted = false;
     };
@@ -182,6 +187,19 @@ function LocalItem(
   };
 
   const getAction = (revert = false) => {
+    if (isWin) {
+      return () => {
+        const cliFilename = getVSCodeCLIFilename();
+        const fp = fileURLToPath(props.uri);
+        runExec([cliFilename, fp], (error) => {
+          if (error) {
+            console.error(`Error opening file: ${error}`);
+            showToast(Toast.Style.Failure, `Failed to open file: ${error}`);
+            return;
+          }
+        });
+      };
+    }
     return () => {
       if (closeOtherWindows !== revert) {
         runAppleScriptSync(`
@@ -232,7 +250,7 @@ function LocalItem(
               icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
               onAction={getAction()}
             />
-            <Action.ShowInFinder path={path} />
+            <OpenInShell path={path} />
             <Action
               title={getTitle(true)}
               icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
@@ -247,7 +265,7 @@ function LocalItem(
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 onAction={() =>
                   open(path, terminalApp).catch(() =>
-                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`)
+                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`),
                   )
                 }
               />
@@ -270,7 +288,7 @@ function LocalItem(
 }
 
 function RemoteItem(
-  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods
+  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods,
 ) {
   const remotePath = decodeURI(basename(props.uri));
   const scheme = getBuildScheme();

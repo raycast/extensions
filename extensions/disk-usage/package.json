@@ -25,7 +25,6 @@
 	"dependencies": {
 		"@raycast/api": "^1.103.10",
 		"@xstate/react": "^6.0.0",
-		"fflate": "^0.8.2",
 		"xstate": "^5.24.0"
 	},
 	"devDependencies": {

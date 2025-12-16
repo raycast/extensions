@@ -1,5 +1,9 @@
 # Search Router Changelog
 
+## [Feature] - 2025-12-15
+
+- Added support for multiple search URLs for custom search engines
+
 ## [Make Windows Compatible] - 2025-11-11
 
 - Update package.json to include Windows platform compatibility

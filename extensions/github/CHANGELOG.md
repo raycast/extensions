@@ -1,5 +1,7 @@
 # GitHub Changelog
 
+## [Moved Contributor] - 2025-12-10
+
 ## [Fix filter visited repositories] - 2025-12-09
 
 - Add validation to filter history for only repositories that exist in current data

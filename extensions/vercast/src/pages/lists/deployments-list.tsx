@@ -108,7 +108,7 @@ const getCommitDeploymentBranch = (deployment: Deployment) => {
   return deployment.meta.githubCommitRef ?? null;
 };
 
-const StateIcon = (state?: DeploymentState) => {
+export const StateIcon = (state?: DeploymentState) => {
   switch (state) {
     case "READY":
       return { source: Icon.Dot, tintColor: Color.Green };

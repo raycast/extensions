@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "biknandy",
   "contributors": [
-    "dead_hikikomori"
+    "dead_hikikomori",
+    "adityavardhansharma"
   ],
   "categories": [
     "Productivity",
@@ -125,5 +126,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }
