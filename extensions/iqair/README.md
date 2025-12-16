@@ -25,7 +25,7 @@ iqair [city name]
 ```
 
 ### Top Polluted Cities
-View the top 25 most polluted cities ranked by current AQI. Click on any city to see detailed information.
+View the top 10 most polluted cities ranked by current AQI. Click on any city to see detailed information.
 
 ## Installation
 
