@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Trainrides, Vias, Via } from "./types";
 import { getTrainRides } from "./api";
 import { LaunchProps, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface TrainrideArguments {
   from: string;
@@ -46,13 +47,28 @@ function renderViaLabels(vias?: Vias) {
 export default function TrainRide(props: LaunchProps<{ arguments: TrainrideArguments }>) {
   const { from, to } = props.arguments;
   const [trainrides, setTrainrides] = useState<Trainrides>();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getTrainRides(from, to).then((tr) => setTrainrides(tr));
+    const fetchTrainRides = async () => {
+      try {
+        setIsLoading(true);
+        const tr = await getTrainRides(from, to);
+        setTrainrides(tr);
+      } catch (error) {
+        await showFailureToast(error, {
+          title: "Failed to fetch train rides",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTrainRides();
   }, [from, to]);
 
   return (
-    <List isLoading={!trainrides} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail>
       <List.Section title={`${from} -> ${to}`}>
         {trainrides?.connection?.map((trainride) => {
           const dep = trainride.departure;

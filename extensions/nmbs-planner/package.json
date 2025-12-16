@@ -39,7 +39,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10"
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -55,6 +56,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "type-check": " ./node_modules/.bin/tsc -p tsconfig.json --noEmit"
+    "type-check": "./node_modules/.bin/tsc -p tsconfig.json --noEmit"
   }
 }
