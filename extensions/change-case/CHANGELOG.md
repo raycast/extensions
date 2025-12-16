@@ -1,6 +1,6 @@
 # Change Case Changelog
 
-## [Enable `fallback text`. support] - {PR_MERGE_DATE}
+## [Enable `fallback text`. support] - 2025-12-16
 
 - You can use the extension in fallback mode (ref: [Issue #23577](https://github.com/raycast/extensions/issues/23577))
 
