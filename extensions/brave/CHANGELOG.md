@@ -1,6 +1,10 @@
 # Brave Changelog
 
-## [Improvements & Dependency Updates] - {PR_MERGE_DATE}
+## [Bookmarklets Support] - 2025-12-10
+
+- Added support for executing bookmarklets
+
+## [Improvements & Dependency Updates] - 2025-12-09
 
 - Enhanced URL keyword extraction for better search filtering of tabs and history
 - Refactored tab opening logic to use shell commands for improved reliability

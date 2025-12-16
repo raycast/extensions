@@ -140,6 +140,27 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   `);
 }
 
+export async function executeJavaScriptOnActiveTab(script: string): Promise<void> {
+  const { browserOption } = getPreferenceValues<Preferences>();
+  const escapedScript = script
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/[\n\r]+/g, " ");
+  try {
+    await runAppleScript(`
+      tell application "${browserOption}"
+        execute active tab of window 1 javascript "${escapedScript}"
+      end tell
+    `);
+  } catch (e) {
+    const error = e as Error;
+    if (error.message.includes("Allow JavaScript from Apple Events")) {
+      throw new Error("Enable 'View > Developer > Allow JavaScript from Apple Events' in Brave.");
+    }
+    throw error;
+  }
+}
+
 const checkAppInstalled = async (): Promise<boolean> => {
   const { browserOption } = getPreferenceValues<Preferences>();
 
