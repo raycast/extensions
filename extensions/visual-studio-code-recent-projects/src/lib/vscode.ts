@@ -111,18 +111,30 @@ export function getVSCodeCLIFilename(): string {
 
 export class VSCodeCLI {
   private cliFilename: string;
+  private cleanEnv: NodeJS.ProcessEnv;
   constructor(cliFilename: string) {
     this.cliFilename = `"${cliFilename}"`;
+    this.cleanEnv = { ...process.env };
+    delete this.cleanEnv.LC_ALL;
+    delete this.cleanEnv.LANG;
+    delete this.cleanEnv.LANGUAGE;
   }
+
   installExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"], { shell: isWin, env: {} });
+    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"], {
+      shell: isWin,
+      env: this.cleanEnv,
+    });
   }
   uninstallExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], { shell: isWin, env: {} });
+    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], {
+      shell: isWin,
+      env: this.cleanEnv,
+    });
   }
 
   newWindow() {
-    child_process.execFileSync(this.cliFilename, ["--new-window"], { shell: isWin, env: {} });
+    child_process.execFileSync(this.cliFilename, ["--new-window"], { shell: isWin, env: this.cleanEnv });
   }
 }
 

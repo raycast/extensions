@@ -167,7 +167,11 @@ export const isMac = process.platform === "darwin";
 
 export function runExec(commands: string[], onFinish: (error: string | null) => void) {
   const cmd = commands.map((c) => `"${c}"`).join(" ");
-  exec(cmd, { env: {} }, (error, stdout, stderr) => {
+  const cleanEnv = { ...process.env };
+  delete cleanEnv.LC_ALL;
+  delete cleanEnv.LANG;
+  delete cleanEnv.LANGUAGE;
+  exec(cmd, { env: cleanEnv }, (error, stdout, stderr) => {
     if (stdout || stderr) {
       console.log("fix me");
     }
