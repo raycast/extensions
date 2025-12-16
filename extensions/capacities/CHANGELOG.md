@@ -1,6 +1,6 @@
 # Capacities Changelog
 
-## [Version 2.0.0] - {PR_MERGE_DATE}
+## [Version 2.0.0] - 2025-12-16
 
 - Offline support: The Raycast extension now communicates with the Capacities desktop app via a communication token. This means you can use the extension even if you're offline.
 - Create Task: You can now create tasks in Capacities from Raycast.
