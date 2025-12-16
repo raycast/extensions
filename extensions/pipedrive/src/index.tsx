@@ -309,6 +309,9 @@ function SearchListItem({
               }}
             />
             {searchResult.type === "person" && (
+              <Action.Push title="Show Details" target={<ContactDetail id={searchResult.id} />} />
+            )}
+            {searchResult.type === "person" && (
               <Action.Push
                 title="Edit Contact"
                 target={<AddContact personIdToEdit={searchResult.id} onSaved={revalidate} />}
