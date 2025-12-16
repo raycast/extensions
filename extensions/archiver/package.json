@@ -6,7 +6,8 @@
   "icon": "archiver-icon.png",
   "author": "JinShi",
   "contributors": [
-    "3llomi"
+    "3llomi",
+    "ridemountainpig"
   ],
   "categories": [
     "Data",
@@ -78,6 +79,65 @@
               "title": "Previous",
               "value": "PREVIOUS"
             },
+            {
+              "title": "7Z",
+              "value": "7Z"
+            },
+            {
+              "title": "ZIP",
+              "value": "ZIP"
+            },
+            {
+              "title": "TAR",
+              "value": "TAR"
+            },
+            {
+              "title": "GZIP",
+              "value": "GZIP"
+            }
+          ]
+        },
+        {
+          "name": "useOriginalNameWhenSingle",
+          "type": "checkbox",
+          "required": false,
+          "title": "Name of New File",
+          "description": "Use original file name when compressing single file",
+          "label": "Use Original File Name When A Single",
+          "default": true
+        },
+        {
+          "name": "useParentFolderNameWhenMultiple",
+          "type": "checkbox",
+          "required": false,
+          "description": "Use parent folder name when compressing multiple files",
+          "label": "Use Parent Folder Name When Multiple",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "quick-compress",
+      "title": "Quick Compress Files",
+      "subtitle": "Archiver",
+      "description": "Quickly compress files without options",
+      "mode": "no-view",
+      "keywords": [
+        "archiver",
+        "archive",
+        "compress",
+        "zip"
+      ],
+      "preferences": [
+        {
+          "name": "quickCompressFormat",
+          "type": "dropdown",
+          "required": false,
+          "title": "Compression Format",
+          "description": "Default compression format for quick compress",
+          "placeholder": "Select Compression Format",
+          "default": "ZIP",
+          "data": [
             {
               "title": "7Z",
               "value": "7Z"
