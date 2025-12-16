@@ -27,6 +27,16 @@
     "pomdtr",
     "Lemon"
   ],
+  "keywords": [
+    "chat",
+    "gpt",
+    "openai",
+    "vision"
+  ],
+  "platforms": [
+    "macOS",
+    "windows"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools",
@@ -139,12 +149,6 @@
       "mode": "view",
       "icon": "icon.png"
     }
-  ],
-  "keywords": [
-    "chat",
-    "gpt",
-    "openai",
-    "vision"
   ],
   "preferences": [
     {
@@ -372,8 +376,5 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "pull": "ray pull-contributions"
-  },
-  "platforms": [
-    "macOS", "windows"
-  ]
+  }
 }
