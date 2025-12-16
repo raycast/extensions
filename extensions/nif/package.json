@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nif",
-  "title": "NIF",
-  "description": "Look up key VAT identification number (NIF) details for Portuguese companies.",
+  "title": "NIF - Portugal Tax Number Lookup",
+  "description": "Search and verify Tax Identification Number (NIF) for Portuguese companies.",
   "icon": "extension-icon.png",
   "author": "rgllm",
   "platforms": [
@@ -17,7 +17,7 @@
     {
       "name": "nif",
       "title": "Search NIF",
-      "description": "Look up key VAT identification number (NIF) details for Portuguese companies.",
+      "description": "Search and verify Tax Identification Number (NIF) for Portuguese companies.",
       "mode": "view"
     }
   ],
