@@ -50,6 +50,20 @@ export interface Arc {
   image: string;
 }
 
+export interface EventTimeSlot {
+  start: string; // "HH:mm" format
+  end: string; // "HH:mm" format
+}
+
+export interface EventTimerRaw {
+  name: string;
+  map: string;
+  icon: string;
+  description: string;
+  days: string[];
+  times: EventTimeSlot[];
+}
+
 export interface EventTimer {
   name: string;
   map: string;

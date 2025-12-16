@@ -4,13 +4,13 @@
 
 ### Changed
 
-- Updated Event Timers to use new timestamp-based API format
-- Events now show specific start/end times instead of recurring schedules
-- Updated dependencies to latest versions
+- Event Timers now auto-refresh every 60 seconds to update event statuses
+- Events properly transition from "upcoming" to "active" without manual refresh
 
 ### Fixed
 
-- Fixed Event Timers not loading due to API changes
+- Fixed Event Timers showing no results due to API response format mismatch
+- Added proper parsing of recurring daily time slots into actual timestamped events
 
 ## [1.0.0] - 2025-12-04
 

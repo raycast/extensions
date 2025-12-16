@@ -1,10 +1,64 @@
 import { ActionPanel, Action, List, Detail, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useMemo } from "react";
-import { API, EventTimer } from "./api";
+import { useState, useMemo, useEffect } from "react";
+import { API, EventTimer, EventTimerRaw } from "./api";
 
 interface EventTimersResponse {
-  data: EventTimer[];
+  data: EventTimerRaw[];
+}
+
+function parseTimeToMs(timeStr: string, baseDate: Date): number {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  const date = new Date(baseDate);
+  date.setHours(hours, minutes, 0, 0);
+  return date.getTime();
+}
+
+function transformRawEvents(rawEvents: EventTimerRaw[]): EventTimer[] {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const events: EventTimer[] = [];
+
+  for (const raw of rawEvents) {
+    for (const timeSlot of raw.times) {
+      // Create event for today
+      let startTime = parseTimeToMs(timeSlot.start, today);
+      let endTime = parseTimeToMs(timeSlot.end, today);
+
+      // Handle overnight events (e.g., 22:00 - 00:00)
+      if (endTime <= startTime) {
+        endTime += 24 * 60 * 60 * 1000; // Add 24 hours
+      }
+
+      events.push({
+        name: raw.name,
+        map: raw.map,
+        icon: raw.icon,
+        startTime,
+        endTime,
+      });
+
+      // Create event for tomorrow
+      startTime = parseTimeToMs(timeSlot.start, tomorrow);
+      endTime = parseTimeToMs(timeSlot.end, tomorrow);
+      if (endTime <= startTime) {
+        endTime += 24 * 60 * 60 * 1000;
+      }
+
+      events.push({
+        name: raw.name,
+        map: raw.map,
+        icon: raw.icon,
+        startTime,
+        endTime,
+      });
+    }
+  }
+
+  return events;
 }
 
 interface EventWithStatus extends EventTimer {
@@ -122,13 +176,21 @@ ${event.minutesUntil > 0 ? `**Starts in:** ${formatTimeUntil(event.minutesUntil)
 
 export default function EventTimers() {
   const [mapFilter, setMapFilter] = useState<string>("all");
+  const [tick, setTick] = useState(0);
 
   const { isLoading, data, revalidate } = useFetch<EventTimersResponse>(API.eventTimers, {
     keepPreviousData: true,
   });
 
-  const events = data?.data || [];
-  const maps = [...new Set(events.map((e) => e.map))].sort();
+  // Auto-refresh every 60 seconds to update event statuses
+  useEffect(() => {
+    const interval = setInterval(() => setTick((n) => n + 1), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const rawEvents = data?.data || [];
+  const events = useMemo(() => transformRawEvents(rawEvents), [rawEvents]);
+  const maps = [...new Set(rawEvents.map((e) => e.map))].sort();
 
   const eventsWithStatus = useMemo(() => {
     const now = Date.now();
@@ -145,7 +207,7 @@ export default function EventTimers() {
         // Then by start time
         return a.startTime - b.startTime;
       });
-  }, [events, mapFilter]);
+  }, [events, mapFilter, tick]);
 
   const activeEvents = eventsWithStatus.filter((e) => e.status === "active");
   const upcomingEvents = eventsWithStatus.filter((e) => e.status === "upcoming");
