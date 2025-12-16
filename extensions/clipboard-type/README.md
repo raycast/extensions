@@ -1,4 +1,4 @@
-# clipboard-type
+# Clipboard Type
 
 **Clipboard Type** allows you to "paste" the contents of your clipboard by simulating keystrokes. This is particularly useful in situations where standard pasting is blocked, disabled, or unavailable, such as:
 
