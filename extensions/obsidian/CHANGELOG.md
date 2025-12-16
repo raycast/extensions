@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Welcoming AI, Sort Notes, Better Tag Search, Code Improvements] - {PR_MERGE_DATE}
+## [Welcoming AI, Sort Notes, Better Tag Search, Code Improvements] - 2025-12-16
 
 - Adds new syntax to search for tagged notes: "tag:someTag". This can be used in combination with a normal search. For example "tag:someTag some text", this searches for notes with the tag "someTag" and then filters those notes with "some text"
 - Adds new sorting orders: Relevance, File name (A to Z), File name (Z to A), Modified time (new to old), Modified time (old to new), Created time (new to old), Created time (old to new)
