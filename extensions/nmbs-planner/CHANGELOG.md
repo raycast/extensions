@@ -2,10 +2,6 @@
 
 ## [Updates] - {PR_MERGE_DATE}
 
-- xxx
-
-## [Updates] - {PR_MERGE_DATE}
-
 - Update dependencies to latest
 - Add Windows support
 - Update .gitignore
