@@ -1,6 +1,6 @@
 # DICOM Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-16
 
 - Update to use the `useStreamJSON` hook from `@raycast/utils`, using the `dictionary.json` file from the `assets` folder
 - Add Windows support
