@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0] - 2025-12-16
+
+### Changed
+
+- Updated Event Timers to use new timestamp-based API format
+- Events now show specific start/end times instead of recurring schedules
+- Updated dependencies to latest versions
+
+### Fixed
+
+- Fixed Event Timers not loading due to API changes
+
 ## [1.0.0] - 2025-12-04
 
 ### Added
