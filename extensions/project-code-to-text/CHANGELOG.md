@@ -1,9 +1,11 @@
 # Changelog
 
-## [Update] - 2025-12-02
+## [Update] - {PR_MERGE_DATE}
 
 ### Fixed
 - Fixed memory issues (JS heap out of memory) by optimizing string concatenation and reducing safety limits
+
+## [Update] - 2025-12-02
 
 ### Added
 - Multiple file and directory selection support in the file picker
