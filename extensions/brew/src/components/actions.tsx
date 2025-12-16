@@ -1,4 +1,3 @@
-import React from "react";
 import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import {
   brewName,

@@ -4,7 +4,6 @@
  * Shows a list of dependencies with installation status indicators.
  */
 
-import React from "react";
 import { Detail, Color } from "@raycast/api";
 
 interface DependenciesProps {

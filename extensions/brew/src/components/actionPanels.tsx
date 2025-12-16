@@ -1,4 +1,3 @@
-import React from "react";
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import {
   brewIsInstalled,
