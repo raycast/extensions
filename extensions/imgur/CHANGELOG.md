@@ -1,6 +1,6 @@
 # Imgur Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-16
 
 - Add Windows support
 - Update dependencies
