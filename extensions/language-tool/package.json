@@ -1,0 +1,232 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-language-tool",
+  "title": "Language Tool - Spell & Grammar Checker",
+  "description": "Raycast extension that provides instant spelling and grammar correction using LanguageTool. Type any text, get real-time suggestions, and copy the improved version. Ideal for developers, writers, and anyone who wants fast, high-quality text corrections in multiple languages.",
+  "icon": "extension-icon.png",
+  "author": "lucastaonline",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-text",
+      "title": "Check Text",
+      "description": "Check a text with LanguageTool for possible style and grammar issues.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "check-text-instant",
+      "title": "Check Text Instant",
+      "description": "Check a text with LanguageTool using the clipboard content and paste the result instantly. The language is detected automatically.",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "title": "Username/Email",
+      "description": "Your username or email used to log in at languagetool.org (for Premium access).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "your-email@example.com"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your API key from https://languagetool.org/editor/settings/access-tokens (for Premium access).",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "showAdvancedOptions",
+      "label": "Show Advanced Options in Form",
+      "description": "Display advanced option fields in the form. Values below are always used when filled, regardless of this setting.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "motherTongue",
+      "title": "Mother Tongue",
+      "description": "Your native language code (e.g., pt-BR, es) for false friends detection.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g., pt-BR"
+    },
+    {
+      "name": "preferredVariants",
+      "title": "Preferred Variants",
+      "description": "Comma-separated list of preferred language variants when using auto-detection (e.g., en-GB,de-AT).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g., en-GB,de-AT"
+    },
+    {
+      "name": "level",
+      "title": "Check Level",
+      "description": "Verification level: empty (default API behavior), 'default' (force standard mode), or 'picky' (stricter checking with additional rules for formal text).",
+      "type": "dropdown",
+      "required": false,
+      "default": "picky",
+      "data": [
+        {
+          "title": "--",
+          "value": ""
+        },
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "Picky (More Strict)",
+          "value": "picky"
+        }
+      ]
+    },
+    {
+      "name": "enabledRules",
+      "title": "Enabled Rules",
+      "description": "Comma-separated list of rule IDs to enable (e.g., RULE_ID_1,RULE_ID_2).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g., COMMA_RULE,UPPERCASE_SENTENCE_START"
+    },
+    {
+      "name": "disabledRules",
+      "title": "Disabled Rules",
+      "description": "Comma-separated list of rule IDs to disable (e.g., WHITESPACE_RULE).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g., WHITESPACE_RULE,PASSIVE_VOICE"
+    },
+    {
+      "name": "enabledCategories",
+      "title": "Enabled Categories",
+      "description": "Comma-separated list of category IDs to enable (e.g., GRAMMAR,TYPOS).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g., GRAMMAR,TYPOS,PUNCTUATION"
+    },
+    {
+      "name": "disabledCategories",
+      "title": "Disabled Categories",
+      "description": "Comma-separated list of category IDs to disable (e.g., STYLE).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g., STYLE,REDUNDANCY"
+    },
+    {
+      "name": "enabledOnly",
+      "label": "Enable Only Specified Rules",
+      "description": "If checked, only rules/categories specified in 'Enabled Rules' or 'Enabled Categories' will be active.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "enableHiddenRules",
+      "label": "Enable Hidden Rules",
+      "description": "If checked, enables hidden rules in the API.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "noopLanguages",
+      "title": "Noop Languages",
+      "description": "Comma-separated list of language codes that should not be processed (e.g., pt,en).",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "e.g., pt,en"
+    },
+    {
+      "name": "abtest",
+      "title": "A/B Test",
+      "description": "A/B test configuration string for experimental features. To get the best A/B test combination, use the official website https://languagetool.org/ and check the POST request to /check in devtools.",
+      "type": "textfield",
+      "required": false,
+      "default": "deggec,esggec,ptggec,qb,gc_1_aggressive,de_gc_1_aggressive,fr_gc_1_aggressive,pt_gc_1_aggressive,nl_gc_1_aggressive,es_gc_1_aggressive",
+      "placeholder": "e.g., deggec,esggec,ptggec"
+    },
+    {
+      "name": "mode",
+      "title": "Mode",
+      "description": "API mode: empty (default), 'allButTextLevelOnly', or 'textLevelOnly'.",
+      "type": "dropdown",
+      "required": false,
+      "default": "allButTextLevelOnly",
+      "data": [
+        {
+          "title": "--",
+          "value": ""
+        },
+        {
+          "title": "All But Text Level Only",
+          "value": "allButTextLevelOnly"
+        },
+        {
+          "title": "Text Level Only",
+          "value": "textLevelOnly"
+        }
+      ]
+    },
+    {
+      "name": "allowIncompleteResults",
+      "label": "Allow Incomplete Results",
+      "description": "If checked, allows the API to return incomplete results.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "useragent",
+      "title": "User Agent",
+      "description": "User agent configuration for API requests.",
+      "type": "dropdown",
+      "required": false,
+      "default": "standalone",
+      "data": [
+        {
+          "title": "Standalone",
+          "value": "standalone"
+        },
+        {
+          "title": "--",
+          "value": ""
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.88.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

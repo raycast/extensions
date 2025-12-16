@@ -9,23 +9,93 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import degit from "degit";
+import { showFailureToast } from "@raycast/utils";
+import { exec } from "child_process";
 import fs, { existsSync, readdirSync } from "fs";
 import { rm } from "fs/promises";
 import { globby } from "globby";
+import https from "https";
 import { parse, resolve } from "path";
-import { useEffect, useState } from "react";
+import { promisify } from "util";
+import { JSX, useEffect, useState } from "react";
+
+const execAsync = promisify(exec);
 
 const CACHE_DIR = resolve(environment.supportPath, "pages");
+
+async function downloadFile(url: string, dest: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    https
+      .get(url, (response) => {
+        if (response.statusCode === 301 || response.statusCode === 302) {
+          const redirectUrl = response.headers.location;
+          if (redirectUrl) {
+            downloadFile(redirectUrl, dest).then(resolve).catch(reject);
+            return;
+          }
+        }
+
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to download: ${response.statusCode}`));
+          return;
+        }
+
+        const file = fs.createWriteStream(dest);
+        response.pipe(file);
+
+        file.on("finish", () => {
+          file.close((err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+
+        file.on("error", (err) => {
+          file.close();
+          fs.unlink(dest, () => reject(err));
+        });
+      })
+      .on("error", (err) => {
+        reject(err);
+      });
+  });
+}
 
 async function refreshPages() {
   await rm(resolve(CACHE_DIR), { recursive: true, force: true });
   await showToast(Toast.Style.Animated, "Fetching TLDR Pages...");
+
+  const ZIP_URL = "https://github.com/tldr-pages/tldr/archive/refs/heads/main.zip";
+  const tempZipPath = resolve(environment.supportPath, "tldr-main.zip");
+  const tempExtractPath = resolve(environment.supportPath, "tldr-temp");
+
   try {
-    await degit("tldr-pages/tldr/pages").clone(CACHE_DIR);
+    await downloadFile(ZIP_URL, tempZipPath);
+
+    if (!existsSync(tempZipPath)) {
+      throw new Error("Downloaded file does not exist");
+    }
+
+    const stats = await fs.promises.stat(tempZipPath);
+    if (stats.size === 0) {
+      throw new Error("Downloaded file is empty");
+    }
+
+    await fs.promises.mkdir(tempExtractPath, { recursive: true });
+    try {
+      await execAsync(`unzip -q "${tempZipPath}" -d "${tempExtractPath}"`);
+    } catch {
+      throw new Error("Failed to extract archive: unzip command failed. Please ensure unzip is installed.");
+    }
+
+    const pagesPath = resolve(tempExtractPath, "tldr-main", "pages");
+    await fs.promises.rename(pagesPath, CACHE_DIR);
     await showToast(Toast.Style.Success, "TLDR pages fetched!");
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Download Failed!", "Please check your internet connexion.");
+    await showFailureToast(error, { title: "Download Failed" });
+  } finally {
+    await rm(tempZipPath, { force: true });
+    await rm(tempExtractPath, { recursive: true, force: true });
   }
 }
 
@@ -39,7 +109,7 @@ async function readPages() {
         name: platformName,
         pages: pages,
       };
-    })
+    }),
   );
 }
 
@@ -168,7 +238,7 @@ async function parsePage(path: string): Promise<Page> {
   }
 
   const match = markdown.match(
-    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/
+    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/,
   );
   const url = match ? match[0] : undefined;
 

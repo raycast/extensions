@@ -1,5 +1,10 @@
 # Changelog
 
+## [Update] - 2025-12-16
+
+### Fixed
+- Fixed memory issues (JS heap out of memory) by optimizing string concatenation and reducing safety limits
+
 ## [Update] - 2025-12-02
 
 ### Added

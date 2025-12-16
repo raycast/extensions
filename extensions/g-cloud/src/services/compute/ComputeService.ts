@@ -1,10 +1,19 @@
 /**
  * Compute Service - Provides efficient access to Google Cloud Compute Engine functionality
- * Optimized for performance and user experience
+ * Uses REST APIs for improved performance (no CLI subprocess overhead)
  */
 
-import { executeGcloudCommand } from "../../gcloud";
 import { showFailureToast } from "@raycast/utils";
+import {
+  listComputeInstances,
+  getComputeInstance,
+  startComputeInstance,
+  stopComputeInstance,
+  listComputeZones,
+  listComputeDisks,
+  type ComputeInstance as ApiComputeInstance,
+  type ComputeDisk as ApiComputeDisk,
+} from "../../utils/gcpApi";
 
 // Interfaces
 export interface ComputeInstance {
@@ -83,13 +92,14 @@ export interface ServiceAccount {
 
 /**
  * Compute Service class - provides optimized access to Compute Engine functionality
+ * Now uses REST APIs instead of gcloud CLI for better performance
  */
 export class ComputeService {
   private gcloudPath: string;
   private projectId: string;
   private vmCache: Map<string, { data: ComputeInstance[]; timestamp: number }> = new Map();
   private diskCache: Map<string, { data: Disk[]; timestamp: number }> = new Map();
-  private readonly CACHE_TTL = 300000; // 5 minutes cache TTL (increased from 1 minute)
+  private readonly CACHE_TTL = 300000; // 5 minutes cache TTL
 
   // Static cache shared between instances for improved performance
   private static zonesCache: { zones: string[]; timestamp: number } | null = null;
@@ -98,6 +108,61 @@ export class ComputeService {
   constructor(gcloudPath: string, projectId: string) {
     this.gcloudPath = gcloudPath;
     this.projectId = projectId;
+  }
+
+  /**
+   * Convert API response to internal format
+   */
+  private convertInstance(apiInstance: ApiComputeInstance): ComputeInstance {
+    return {
+      id: apiInstance.id,
+      name: apiInstance.name,
+      zone: apiInstance.zone,
+      machineType: apiInstance.machineType,
+      status: apiInstance.status,
+      cpuPlatform: apiInstance.cpuPlatform || "",
+      networkInterfaces: (apiInstance.networkInterfaces || []).map((ni) => ({
+        networkIP: ni.networkIP,
+        network: ni.network,
+        accessConfigs: ni.accessConfigs?.map((ac) => ({
+          natIP: ac.natIP,
+          type: ac.type,
+        })),
+      })),
+      disks: (apiInstance.disks || []).map((d, index) => ({
+        deviceName: d.deviceName,
+        index,
+        boot: d.boot,
+        kind: "compute#attachedDisk",
+        mode: "READ_WRITE",
+        source: d.source,
+        type: "PERSISTENT",
+      })),
+      creationTimestamp: apiInstance.creationTimestamp,
+      tags: apiInstance.tags,
+      labels: apiInstance.labels,
+      metadata: apiInstance.metadata,
+      scheduling: apiInstance.scheduling,
+      serviceAccounts: apiInstance.serviceAccounts,
+    };
+  }
+
+  /**
+   * Convert API disk response to internal format
+   */
+  private convertDisk(apiDisk: ApiComputeDisk): Disk {
+    return {
+      id: apiDisk.id,
+      name: apiDisk.name,
+      sizeGb: apiDisk.sizeGb,
+      zone: apiDisk.zone,
+      status: apiDisk.status,
+      sourceImage: apiDisk.sourceImage,
+      type: apiDisk.type,
+      creationTimestamp: apiDisk.creationTimestamp,
+      users: apiDisk.users,
+      labels: apiDisk.labels,
+    };
   }
 
   /**
@@ -115,6 +180,7 @@ export class ComputeService {
     }
 
     try {
+      // Return stale cache while refreshing in background
       if (!zone && this.hasCachedZoneInstances()) {
         const combinedInstances = this.getCombinedCachedInstances();
         if (combinedInstances.length > 0) {
@@ -123,17 +189,10 @@ export class ComputeService {
         }
       }
 
-      const command = zone ? `compute instances list --zone=${zone}` : `compute instances list`;
+      // Use REST API instead of gcloud CLI
+      const apiInstances = await listComputeInstances(this.gcloudPath, this.projectId, zone);
+      const instances = apiInstances.map((i) => this.convertInstance(i));
 
-      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-
-      if (!result) {
-        const emptyInstances: ComputeInstance[] = [];
-        this.vmCache.set(cacheKey, { data: emptyInstances, timestamp: now });
-        return emptyInstances;
-      }
-
-      const instances = Array.isArray(result) ? result : [result];
       this.vmCache.set(cacheKey, { data: instances, timestamp: now });
       return instances;
     } catch (error: unknown) {
@@ -165,7 +224,6 @@ export class ComputeService {
 
     for (const [key, value] of this.vmCache.entries()) {
       if (key.startsWith("instances:") && key !== "instances:all") {
-        // Add instances that aren't already in the list
         for (const instance of value.data) {
           if (!seenIds.has(instance.id)) {
             instances.push(instance);
@@ -179,19 +237,12 @@ export class ComputeService {
   }
 
   /**
-   * Refresh instances in background
+   * Refresh instances in background using REST API
    */
   private async refreshInstancesInBackground(): Promise<void> {
     try {
-      const command = `compute instances list`;
-      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-
-      if (!result) {
-        this.vmCache.set("instances:all", { data: [], timestamp: Date.now() });
-        return;
-      }
-
-      const instances = Array.isArray(result) ? result : [result];
+      const apiInstances = await listComputeInstances(this.gcloudPath, this.projectId);
+      const instances = apiInstances.map((i) => this.convertInstance(i));
       this.vmCache.set("instances:all", { data: instances, timestamp: Date.now() });
     } catch (error) {
       // Silently fail for background refresh
@@ -227,11 +278,10 @@ export class ComputeService {
       }
     }
 
-    // If not found in cache, fetch directly
+    // If not found in cache, fetch directly using REST API
     try {
-      const command = `compute instances describe ${name} --zone=${zone}`;
-      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-      return result ? (result as ComputeInstance) : null;
+      const apiInstance = await getComputeInstance(this.gcloudPath, this.projectId, zone, name);
+      return this.convertInstance(apiInstance);
     } catch (error: unknown) {
       showFailureToast({
         title: "Failed to Fetch Instance",
@@ -248,10 +298,20 @@ export class ComputeService {
    * @returns Promise with disk details or null if not found
    */
   async getDisk(name: string, zone: string): Promise<Disk | null> {
+    // Check cache first
+    const cacheKey = `disks:${zone}`;
+    const cachedData = this.diskCache.get(cacheKey);
+    if (cachedData) {
+      const disk = cachedData.data.find((d) => d.name === name);
+      if (disk) {
+        return disk;
+      }
+    }
+
+    // Fetch all disks in zone and find the one we need
     try {
-      const command = `compute disks describe ${name} --zone=${zone} --format=json`;
-      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-      return result ? (result as Disk) : null;
+      const disks = await this.getDisks(zone);
+      return disks.find((d) => d.name === name) || null;
     } catch (error: unknown) {
       showFailureToast({
         title: "Failed to Fetch Disk",
@@ -272,14 +332,9 @@ export class ComputeService {
     }
 
     try {
-      const command = `compute zones list`;
-      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-
-      if (!result) {
-        return [];
-      }
-
-      const zones = Array.isArray(result) ? result.map((zone) => zone.name) : [];
+      // Use REST API instead of gcloud CLI
+      const apiZones = await listComputeZones(this.gcloudPath, this.projectId);
+      const zones = apiZones.map((z) => z.name);
       ComputeService.zonesCache = { zones, timestamp: now };
       return zones;
     } catch (error: unknown) {
@@ -313,17 +368,10 @@ export class ComputeService {
         }
       }
 
-      const command = zone ? `compute disks list --zone=${zone}` : `compute disks list`;
+      // Use REST API instead of gcloud CLI
+      const apiDisks = await listComputeDisks(this.gcloudPath, this.projectId, zone);
+      const disks = apiDisks.map((d) => this.convertDisk(d));
 
-      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-
-      if (!result) {
-        const emptyDisks: Disk[] = [];
-        this.diskCache.set(cacheKey, { data: emptyDisks, timestamp: now });
-        return emptyDisks;
-      }
-
-      const disks = Array.isArray(result) ? result : [result];
       this.diskCache.set(cacheKey, { data: disks, timestamp: now });
       return disks;
     } catch (error: unknown) {
@@ -355,7 +403,6 @@ export class ComputeService {
 
     for (const [key, value] of this.diskCache.entries()) {
       if (key.startsWith("disks:") && key !== "disks:all") {
-        // Add disks that aren't already in the list
         for (const disk of value.data) {
           if (!seenIds.has(disk.id)) {
             disks.push(disk);
@@ -369,19 +416,12 @@ export class ComputeService {
   }
 
   /**
-   * Refresh disks in background
+   * Refresh disks in background using REST API
    */
   private async refreshDisksInBackground(): Promise<void> {
     try {
-      const command = `compute disks list`;
-      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-
-      if (!result) {
-        this.diskCache.set("disks:all", { data: [], timestamp: Date.now() });
-        return;
-      }
-
-      const disks = Array.isArray(result) ? result : [result];
+      const apiDisks = await listComputeDisks(this.gcloudPath, this.projectId);
+      const disks = apiDisks.map((d) => this.convertDisk(d));
       this.diskCache.set("disks:all", { data: disks, timestamp: Date.now() });
     } catch (error) {
       // Silently fail for background refresh
@@ -389,15 +429,14 @@ export class ComputeService {
   }
 
   /**
-   * Start a compute instance
+   * Start a compute instance using REST API
    * @param name Instance name
    * @param zone Zone of the instance
    * @returns Promise indicating success
    */
   async startInstance(name: string, zone: string): Promise<boolean> {
     try {
-      const command = `compute instances start ${name} --zone=${zone}`;
-      await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      await startComputeInstance(this.gcloudPath, this.projectId, zone, name);
       this.clearCache("instances");
       return true;
     } catch (error: unknown) {
@@ -410,23 +449,20 @@ export class ComputeService {
   }
 
   /**
-   * Stop a compute instance
+   * Stop a compute instance using REST API
    * @param name Instance name
    * @param zone Zone of the instance
    * @returns Promise indicating success and VM status information
    */
   async stopInstance(name: string, zone: string): Promise<{ success: boolean; isTimedOut?: boolean }> {
     try {
-      const command = `compute instances stop ${name} --zone=${zone}`;
-      await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      await stopComputeInstance(this.gcloudPath, this.projectId, zone, name);
       this.clearCache("instances");
       return { success: true };
     } catch (error: unknown) {
-      // Check if this is a timeout error during VM stopping
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes("timed out") && errorMessage.includes("stop")) {
-        // VMs can take a while to stop, and we might timeout but the operation continues
-        // This is expected behavior for some instances, so mark as "stopping"
+      // REST API might return before operation completes
+      if (errorMessage.includes("timed out") || errorMessage.includes("RUNNING")) {
         this.clearCache("instances");
         return { success: true, isTimedOut: true };
       }

@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Icon, Toast, showToast } from "@raycast/api";
 import { MutatePromise, showFailureToast } from "@raycast/utils";
-import { partition } from "lodash";
 import { useState } from "react";
-import { updateObject } from "../../api";
+import { createTag, updateObject } from "../../api";
 import { useProperties, useTags } from "../../hooks";
 import {
+  Color,
   Member,
   Property,
   PropertyLinkWithValue,
@@ -25,17 +25,19 @@ interface TagSubmenuProps {
 
 export function TagSubmenu({ spaceId, object, mutate, mutateObject }: TagSubmenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   // TODO: remove workaround once property retrieval by key is supported -> do:
   // const { property, isLoadingProperty } = useProperty(spaceId, propKeys.tag);
-  const { properties, isLoadingProperties } = useProperties(spaceId);
+  const { properties, isLoadingProperties } = useProperties(spaceId, undefined, { execute: isOpen });
   const property = properties?.find((p) => p.key === propKeys.tag);
 
-  const { tags, isLoadingTags } = useTags(spaceId, property?.id ?? "", { execute: isOpen });
+  const { tags, isLoadingTags } = useTags(spaceId, property?.id ?? "", searchText, { execute: isOpen });
   const currentTags =
     (object?.properties as PropertyWithValue[])?.find((p) => p.key === propKeys.tag)?.multi_select || [];
 
-  const [selectedTags, availableTags] = partition(tags || [], (tag) => currentTags.some((t: Tag) => t.id === tag.id));
+  // Filter out already selected tags from available tags
+  const availableTags = (tags || []).filter((tag) => !currentTags.some((t: Tag) => t.id === tag.id));
 
   async function addTag(tag: Tag) {
     await showToast({ style: Toast.Style.Animated, title: "Adding tag…" });
@@ -89,6 +91,43 @@ export function TagSubmenu({ spaceId, object, mutate, mutateObject }: TagSubmenu
     }
   }
 
+  async function createAndAddTag(name: string) {
+    if (!property?.id) return;
+
+    await showToast({ style: Toast.Style.Animated, title: "Creating tag…" });
+    try {
+      // Create the new tag with a default color
+      const { tag } = await createTag(spaceId, property.id, {
+        name,
+        color: [Color.Grey, Color.Yellow, Color.Orange, Color.Red, Color.Pink, Color.Purple, Color.Blue][
+          Math.floor(Math.random() * 7)
+        ],
+      });
+
+      // Add the newly created tag to the object
+      const newTagIds = [...currentTags.map((t: Tag) => t.id), tag.id];
+
+      const propertyUpdate: PropertyLinkWithValue = {
+        key: propKeys.tag,
+        multi_select: newTagIds,
+      };
+
+      await updateObject(spaceId, object.id, {
+        properties: [propertyUpdate],
+      });
+
+      await showToast({ style: Toast.Style.Success, title: "Tag created and added" });
+      if (mutate) {
+        await Promise.all(mutate.map((m) => m()));
+      }
+      if (mutateObject) {
+        await mutateObject();
+      }
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to create tag" });
+    }
+  }
+
   return (
     <>
       <ActionPanel.Submenu
@@ -96,7 +135,12 @@ export function TagSubmenu({ spaceId, object, mutate, mutateObject }: TagSubmenu
         icon={Icon.Tag}
         shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
         isLoading={isLoadingProperties || isLoadingTags}
-        onOpen={() => setIsOpen(true)}
+        onOpen={() => {
+          setIsOpen(true);
+          setSearchText("");
+        }}
+        onSearchTextChange={setSearchText}
+        throttle={true}
       >
         {availableTags.map((tag) => (
           <Action
@@ -106,16 +150,29 @@ export function TagSubmenu({ spaceId, object, mutate, mutateObject }: TagSubmenu
             onAction={() => addTag(tag)}
           />
         ))}
+        {searchText.trim() && !isLoadingTags ? (
+          <Action
+            title={`Create tag "${searchText.trim()}"`}
+            icon={Icon.Plus}
+            onAction={() => createAndAddTag(searchText.trim())}
+          />
+        ) : (
+          <Action
+            title="Type to create new tag"
+            icon={Icon.Plus}
+            onAction={() => showToast({ style: Toast.Style.Failure, title: "Cannot create tag without a name" })}
+          />
+        )}
       </ActionPanel.Submenu>
 
-      {selectedTags.length > 0 && (
+      {currentTags.length > 0 && (
         <ActionPanel.Submenu
           title="Remove Tag"
           icon={Icon.Tag}
           shortcut={{ modifiers: ["ctrl", "shift"], key: "t" }}
           isLoading={isLoadingProperties || isLoadingTags}
         >
-          {selectedTags.map((tag) => (
+          {currentTags.map((tag: Tag) => (
             <Action
               key={tag.id}
               title={tag.name}

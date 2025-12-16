@@ -15,7 +15,8 @@
     "PWrzesinski",
     "yug2005",
     "ridemountainpig",
-    "xmok"
+    "xmok",
+    "chrismessina"
   ],
   "keywords": [
     "text",
@@ -97,7 +98,7 @@
       "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
       "data": [
         {
-          "title": "Selected",
+          "title": "Selected Text",
           "value": "selected"
         },
         {
@@ -305,19 +306,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
+    "@raycast/api": "^1.103.0",
     "change-case": "^5.4.4",
     "sponge-case": "^2.0.3",
     "swap-case": "^3.0.3",
     "title-case": "^4.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "prettier": "^3.7.4"
   },
   "scripts": {
     "build": "ray build",

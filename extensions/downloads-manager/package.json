@@ -11,7 +11,8 @@
     "ridemountainpig",
     "nagauta",
     "dead_hikikomori",
-    "clins1994"
+    "clins1994",
+    "0xdhrv"
   ],
   "categories": [
     "Productivity",
@@ -166,17 +167,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^1.103.10",
     "@raycast/utils": "^2.2.2",
     "untildify": "^6.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^22.13.10",
+    "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "eslint": "^9.39.1",
-    "prettier": "^3.7.3",
-    "react": "^19.2.0",
+    "prettier": "^3.7.4",
+    "react": "^19.2.1",
     "typescript": "^5.9.3"
   },
   "scripts": {

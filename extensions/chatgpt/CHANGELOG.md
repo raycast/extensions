@@ -1,5 +1,9 @@
 # Changelog
 
+## [Feature] - 2025-12-08
+
+- Windows 11 support: vision commands can read selected images from File Explorer; app icon resolution falls back to executable paths on Windows.
+
 ## [Fix] - 2025-04-14
 
 - Fix: Actions such as copy, save, and speak were unavailable in chat messages of previous conversations.

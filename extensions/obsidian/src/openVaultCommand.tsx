@@ -1,7 +1,7 @@
 import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, Icon } from "@raycast/api";
 
-import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
+import { Obsidian, ObsidianTargetType } from "@/obsidian";
 import { ShowVaultInFinderAction } from "./utils/actions";
 import { useObsidianVaults } from "./utils/hooks";
 
@@ -9,7 +9,7 @@ export default function Command() {
   const { ready, vaults } = useObsidianVaults();
 
   if (vaults.length === 1) {
-    open(getObsidianTarget({ type: ObsidianTargetType.OpenVault, vault: vaults[0] }));
+    open(Obsidian.getTarget({ type: ObsidianTargetType.OpenVault, vault: vaults[0] }));
     popToRoot();
     closeMainWindow();
   }
@@ -19,7 +19,7 @@ export default function Command() {
   } else if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   } else if (vaults.length == 1) {
-    open(getObsidianTarget({ type: ObsidianTargetType.OpenVault, vault: vaults[0] }));
+    open(Obsidian.getTarget({ type: ObsidianTargetType.OpenVault, vault: vaults[0] }));
     popToRoot();
     closeMainWindow();
     return <List />;
@@ -35,7 +35,7 @@ export default function Command() {
                 <Action.Open
                   title="Open Vault"
                   icon={Icon.ArrowRight}
-                  target={getObsidianTarget({ type: ObsidianTargetType.OpenVault, vault: vault })}
+                  target={Obsidian.getTarget({ type: ObsidianTargetType.OpenVault, vault: vault })}
                 />
                 <ShowVaultInFinderAction vault={vault} />
               </ActionPanel>

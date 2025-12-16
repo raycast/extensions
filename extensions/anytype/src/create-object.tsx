@@ -15,8 +15,7 @@ interface LaunchContext {
   };
 }
 
-interface CreateObjectProps
-  extends LaunchProps<{ draftValues?: CreateObjectFormValues; launchContext?: LaunchContext }> {}
+type CreateObjectProps = LaunchProps<{ draftValues?: CreateObjectFormValues; launchContext?: LaunchContext }>;
 
 export default function Command(props: CreateObjectProps) {
   return (

@@ -152,6 +152,7 @@ export default function BrowseSearchEngines() {
           subtitle={`!${searchEngine.t}`}
           accessories={[
             { tag: searchEngine.ad || searchEngine.d },
+            { text: searchEngine.urls && searchEngine.urls.length > 1 ? `${searchEngine.urls.length} URLs` : "" },
             { text: searchEngine.isCustom ? "Custom" : "" },
             { text: searchEngine.t === defaultSearchEngine?.t ? "Default" : "" },
             { icon: searchEngine.t === defaultSearchEngine?.t ? Icon.CheckCircle : undefined },
@@ -160,7 +161,19 @@ export default function BrowseSearchEngines() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
-                <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
+                {searchEngine.urls && searchEngine.urls.length > 1 ? (
+                  <>
+                    {searchEngine.urls.map((url, index) => (
+                      <Action.OpenInBrowser
+                        key={index}
+                        title={`Test Search - URL ${index + 1}`}
+                        url={url.replace("{{{s}}}", "test")}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
+                )}
               </ActionPanel.Section>
 
               <ActionPanel.Section>

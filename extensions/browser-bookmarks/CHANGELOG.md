@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Helium Browser] - 2025-12-08
+
+- Added support for `Helium` browser.
+
 ## [Support for libreWolf] - 2025-12-07
 
 - Added support for `LibreWolf` browser.

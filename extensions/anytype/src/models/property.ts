@@ -64,6 +64,7 @@ export interface PropertyWithValue extends Omit<RawPropertyWithValue, "select" |
   multi_select?: Tag[];
   files?: SpaceObject[];
   objects?: SpaceObject[];
+  moreCount?: number;
 }
 
 export interface PropertyLink {
