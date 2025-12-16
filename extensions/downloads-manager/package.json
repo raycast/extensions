@@ -117,8 +117,7 @@
       "name": "downloadsFolder",
       "title": "Downloads Folder",
       "description": "The folder where your downloads are stored",
-      "default": "~/Downloads",
-      "required": true
+      "required": false
     },
     {
       "type": "dropdown",

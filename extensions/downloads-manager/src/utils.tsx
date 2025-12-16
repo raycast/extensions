@@ -191,7 +191,6 @@ export async function deleteFileOrFolder(filePath: string) {
 export const withAccessToDownloadsFolder = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
     if (hasAccessToDownloadsFolder()) {
-      accessSync(downloadsFolder, constants.R_OK);
       return <Component {...props} />;
     } else {
       if (process.platform === "darwin") {
