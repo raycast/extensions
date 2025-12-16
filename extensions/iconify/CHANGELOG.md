@@ -1,6 +1,6 @@
 # Iconify Changelog
 
-## [Error Guard] - {PR_MERGE_DATE}
+## [Error Guard] - 2025-12-16
 
 - Add `ErrorGuard` component that makes it a bit more friendly when there is an error, instructing the user to reinstall/clear cache/check internet connection
 
