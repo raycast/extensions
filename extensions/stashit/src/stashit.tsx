@@ -63,7 +63,7 @@ export default function Command() {
       <Form.TextField
         id="item"
         title="Task"
-        placeholder="Buy groceries #shopping 5"
+        placeholder="Buy groceries -5 #shopping"
         value={text}
         onChange={setText}
         autoFocus
@@ -87,9 +87,9 @@ export default function Command() {
 
       <Form.Description
         title="Syntax"
-        text="task description #queue-name priority"
+        text="task description -priority #queue-name"
       />
-      <Form.Description title="Example" text="Call mom #personal 8" />
+      <Form.Description title="Example" text="Call mom -8 #personal" />
     </Form>
   );
 }

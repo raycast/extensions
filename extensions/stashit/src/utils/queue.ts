@@ -42,20 +42,22 @@ export function parseItemWithPriority(input: string): {
   let priority = 0;
   let queue = DEFAULT_QUEUE;
 
+  // Match priority ANYWHERE: -10 (dash followed by number)
+  const priorityMatch = text.match(/-(\d+)/);
+  if (priorityMatch) {
+    priority = parseInt(priorityMatch[1], 10);
+    text = text.replace(/-\d+/, "").trim();
+  }
+
   // Match #queue-name pattern (must contain at least one letter, can have numbers, hyphens, underscores)
-  // This distinguishes queue names like #work1, #1st-task from pure numbers like #10
   const queueMatch = text.match(/#([a-zA-Z0-9_-]*[a-zA-Z][a-zA-Z0-9_-]*)/);
   if (queueMatch) {
     queue = queueMatch[1].toLowerCase();
     text = text.replace(/#[a-zA-Z0-9_-]*[a-zA-Z][a-zA-Z0-9_-]*/, "").trim();
   }
 
-  // Match priority: -10, 10, or standalone number at the end
-  const priorityMatch = text.match(/\s+(-?\d+)\s*$/);
-  if (priorityMatch) {
-    priority = Math.abs(parseInt(priorityMatch[1], 10));
-    text = text.replace(/\s+(-?\d+)\s*$/, "").trim();
-  }
+  // Clean up extra spaces
+  text = text.replace(/\s+/g, " ").trim();
 
   return { text, priority, queue };
 }
