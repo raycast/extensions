@@ -3,6 +3,8 @@ import { useCachedPromise } from "@raycast/utils";
 import { getClickUpClient } from "../api/clickup";
 import { SpaceFolders } from "./SpaceFolders";
 import { OpenInClickUpAction } from "../components/OpenInClickUpAction";
+import { CopyId } from "../components/actions/CopyActions";
+import { buildSpaceRoute } from "../utils/link-helpers";
 
 interface Props {
   teamId: string;
@@ -17,22 +19,28 @@ export function TeamSpaces({ teamId, teamName }: Props) {
   );
 
   return (
-    <List throttle={true} isLoading={isLoading} navigationTitle={`${teamName} Spaces`}>
-      <List.Section title={`Teams / ${teamId}`} subtitle={`${spaces.length} spaces`}>
+    <List
+      throttle={true}
+      isLoading={isLoading}
+      navigationTitle={`${teamName} / Spaces`}
+      searchBarPlaceholder="Search spaces"
+    >
+      <List.Section title="Spaces" subtitle={`${spaces.length} spaces`}>
         {spaces.map((space) => (
           <List.Item
             key={space.id}
             title={space.name}
-            subtitle={`ID: ${space.id}`}
-            icon={Icon.Pin}
+            icon={space.private ? Icon.Lock : Icon.Globe}
+            accessories={[{ tag: space.private ? "Private" : "Public" }]}
             actions={
               <ActionPanel title="Space Actions">
                 <Action.Push
-                  icon={Icon.Folder}
-                  title="Folders Page"
-                  target={<SpaceFolders spaceId={space.id} spaceName={space.name} />}
+                  icon={Icon.ChevronRight}
+                  title="Browse Folders"
+                  target={<SpaceFolders spaceId={space.id} spaceName={space.name} teamId={teamId} />}
                 />
-                <OpenInClickUpAction route={`${teamId}/v/o/s/${space.id}`} />
+                <OpenInClickUpAction route={buildSpaceRoute(teamId, space.id)} />
+                <CopyId id={space.id} />
               </ActionPanel>
             }
           />

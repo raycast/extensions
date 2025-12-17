@@ -211,6 +211,66 @@ export interface CreateTaskParams {
   time_estimate?: number;
 }
 
+export interface GetTasksParams {
+  archived?: boolean;
+  assignees?: number[];
+  custom_fields?: Array<{
+    field_id: string;
+    operator: string;
+    value: string | number;
+  }>;
+  date_created_gt?: number;
+  date_created_lt?: number;
+  date_updated_gt?: number;
+  date_updated_lt?: number;
+  due_date_gt?: number;
+  due_date_lt?: number;
+  include_closed?: boolean;
+  order_by?: string;
+  page?: number;
+  reverse?: boolean;
+  statuses?: string[];
+  subtasks?: boolean;
+  tags?: string[];
+}
+
+export interface UpdateTaskParams {
+  archived?: boolean;
+  assignees?: {
+    add?: number[];
+    rem?: number[];
+  };
+  description?: string;
+  due_date?: number | null;
+  due_date_time?: boolean;
+  name?: string;
+  priority?: number | null;
+  start_date?: number | null;
+  start_date_time?: boolean;
+  status?: string;
+}
+
+export interface GetTasksResponse {
+  last_page?: boolean;
+  tasks: ClickUpTask[];
+}
+
+export interface ClickUpAuthenticatedUser {
+  color: string;
+  email: string;
+  global_font_support: boolean;
+  id: number;
+  initials: string;
+  profilePicture: string | null;
+  timezone: string;
+  username: string;
+  week_start_day: number | null;
+}
+
+export interface GetAuthenticatedUserResponse {
+  user: ClickUpAuthenticatedUser;
+}
+
 /**
  * ClickUp Docs Types (v3 API)
  */

@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { getClickUpClient } from "./api/clickup";
 import { TeamSpaces } from "./views/TeamSpaces";
 import { OpenInClickUpAction } from "./components/OpenInClickUpAction";
+import { CopyId } from "./components/actions/CopyActions";
 
 export default function Teams() {
   const { isLoading, data: teams } = useCachedPromise(async () => getClickUpClient().getTeams(), [], {
@@ -10,21 +11,23 @@ export default function Teams() {
   });
 
   return (
-    <List searchBarPlaceholder="Search teams" isLoading={isLoading}>
-      <List.Section title="/" subtitle={`${teams.length} teams`}>
+    <List searchBarPlaceholder="Search teams" isLoading={isLoading} navigationTitle="Tasks Explorer">
+      <List.Section title="Teams" subtitle={`${teams.length} teams`}>
         {teams.map((team) => (
           <List.Item
             key={team.id}
             icon={Icon.TwoPeople}
             title={team.name}
+            accessories={[{ text: `${team.members.length} members`, icon: Icon.Person }]}
             actions={
               <ActionPanel title="Team Actions">
                 <Action.Push
-                  icon={Icon.Pin}
-                  title="Projects Page"
+                  icon={Icon.ChevronRight}
+                  title="Browse Spaces"
                   target={<TeamSpaces teamId={team.id} teamName={team.name} />}
                 />
                 <OpenInClickUpAction route={team.id} />
+                <CopyId id={team.id} />
               </ActionPanel>
             }
           />

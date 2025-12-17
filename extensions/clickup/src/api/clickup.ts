@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import {
+  ClickUpAuthenticatedUser,
   ClickUpDoc,
   ClickUpDocPage,
   ClickUpErrorResponse,
@@ -9,6 +10,10 @@ import {
   ClickUpTask,
   ClickUpTeam,
   CreateTaskParams,
+  GetAuthenticatedUserResponse,
+  GetTasksParams,
+  GetTasksResponse,
+  UpdateTaskParams,
 } from "../types/clickup";
 
 interface GetDocsResponse {
@@ -29,10 +34,6 @@ interface GetListsResponse {
 
 interface GetSpacesResponse {
   spaces: ClickUpSpace[];
-}
-
-interface GetTasksResponse {
-  tasks: ClickUpTask[];
 }
 
 interface GetTeamsResponse {
@@ -175,6 +176,89 @@ class ClickUpClient {
       3,
     );
     return response.pages;
+  }
+
+  /**
+   * Build query parameters for getTasks
+   */
+  private buildTaskQueryParams(params?: GetTasksParams): URLSearchParams {
+    const queryParams = new URLSearchParams();
+
+    queryParams.set("archived", String(params?.archived ?? false));
+
+    if (!params) return queryParams;
+
+    const arrayParams = new Set(["statuses", "assignees", "tags"]);
+
+    for (const [key, value] of Object.entries(params)) {
+      if (value === undefined || value === null || key === "archived") continue;
+
+      if (Array.isArray(value)) {
+        if (value.length === 0) continue;
+
+        if (key === "custom_fields") {
+          for (const [index, cf] of value.entries()) {
+            queryParams.append(`custom_fields[${index}][field_id]`, cf.field_id);
+            queryParams.append(`custom_fields[${index}][operator]`, cf.operator);
+            queryParams.append(`custom_fields[${index}][value]`, String(cf.value));
+          }
+        } else if (arrayParams.has(key)) {
+          for (const item of value) {
+            queryParams.append(`${key}[]`, String(item));
+          }
+        }
+      } else {
+        queryParams.set(key, String(value));
+      }
+    }
+
+    return queryParams;
+  }
+
+  /**
+   * Get all tasks from a list with pagination support
+   */
+  async getAllTasksFromList(listId: string, params?: Omit<GetTasksParams, "page">): Promise<ClickUpTask[]> {
+    const allTasks: ClickUpTask[] = [];
+    let page = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const queryParams = this.buildTaskQueryParams({ ...params, page });
+      const response = await this.request<GetTasksResponse>(`/list/${listId}/task?${queryParams.toString()}`);
+
+      allTasks.push(...response.tasks);
+
+      hasMore = response.tasks.length === 100;
+      page++;
+    }
+
+    return allTasks;
+  }
+
+  /**
+   * Get all tasks from a list with nested subtasks
+   */
+  async getAllTasksFromListRecursively(listId: string, params?: Omit<GetTasksParams, "page">): Promise<ClickUpTask[]> {
+    return this.getAllTasksFromList(listId, { ...params, subtasks: true });
+  }
+
+  /**
+   * Get the authenticated user's information
+   */
+  async getAuthenticatedUser(): Promise<ClickUpAuthenticatedUser> {
+    const response = await this.request<GetAuthenticatedUserResponse>("/user");
+    return response.user;
+  }
+
+  /**
+   * Update a task
+   */
+  async updateTask(taskId: string, updates: UpdateTaskParams): Promise<ClickUpTask> {
+    return this.request<ClickUpTask>(`/task/${taskId}`, {
+      body: JSON.stringify(updates),
+      method: "PUT",
+    });
   }
 }
 

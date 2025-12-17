@@ -32,6 +32,20 @@
       "subtitle": "ClickUp",
       "description": "Browse ClickUp docs from Raycast",
       "mode": "view"
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "subtitle": "ClickUp",
+      "description": "View tasks assigned to you",
+      "mode": "view"
+    },
+    {
+      "name": "lists",
+      "title": "Browse Lists",
+      "subtitle": "ClickUp",
+      "description": "Browse all ClickUp lists",
+      "mode": "view"
     }
   ],
   "preferences": [
