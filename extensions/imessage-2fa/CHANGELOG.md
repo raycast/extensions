@@ -1,6 +1,6 @@
 # Messages 2FA Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-12-17
 
 - Add support for extracting text from binary data in iMessage messages
 
