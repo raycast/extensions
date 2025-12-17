@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Form, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import { umami } from "./lib/umami";
 import { AddWebsiteFormValues } from "./lib/types";
 import { FormValidation, getFavicon, useCachedPromise, useForm } from "@raycast/utils";
@@ -45,7 +45,7 @@ function Websites() {
           icon="placeholder.png"
           actions={
             <ActionPanel>
-              <Action.Push title="Add Website" icon={Icon.Plus} target={<AddWebsite />} onPop={mutate} />
+              <Action.Push icon={Icon.Plus} title="Add Website" target={<AddWebsite />} onPop={mutate} />
             </ActionPanel>
           }
         />
@@ -60,6 +60,33 @@ function Websites() {
           actions={
             <ActionPanel>
               <Action.Push title="Add Website" icon={Icon.Plus} target={<AddWebsite />} onPop={mutate} />
+              <Action icon={Icon.Trash} title="Delete Website" onAction={() => confirmAlert({
+                icon: Icon.Trash,
+                title: "Delete Website",
+                primaryAction: {
+                  style: Alert.ActionStyle.Destructive,
+                  title: "Delete",
+                  async onAction() {
+                    const toast = await showToast(Toast.Style.Animated, "Deleting", website.name);
+                    try {
+                      await mutate(
+                        umami.deleteWebsite(website.id).then(({error}) => handleUmamiError(error)), {
+                          optimisticUpdate(data) {
+                            return data?.filter(w => w.id !== website.id)
+                          },
+                          shouldRevalidateAfter: false
+                        }
+                      )
+                      toast.style = Toast.Style.Success;
+                      toast.title = "Deleted";
+                    } catch (error) {
+                      toast.style = Toast.Style.Failure;
+                      toast.title = "Failed";
+                      toast.message = `${error}`;
+                    }
+                  },
+                }
+              })} />
             </ActionPanel>
           }
         />
@@ -96,7 +123,7 @@ function AddWebsite() {
       navigationTitle="Add Website"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" icon={Icon.Check} onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Add Website" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

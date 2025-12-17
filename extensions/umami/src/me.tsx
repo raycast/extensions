@@ -1,44 +1,43 @@
-import { Action, ActionPanel, Detail, Form, Icon, popToRoot, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { IS_CLOUD, umami } from "./lib/umami";
 import ErrorComponent from "./components/ErrorComponent";
-import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { UmamiMe, UmamiUpdateMyPassword } from "./lib/types";
 import { handleUmamiError } from "./lib/utils";
+import WithUmami from "./components/WithUmami";
 
-export default function Me() {
-  const { push } = useNavigation();
+export default function Main() {
+  return <WithUmami>
+    <Me />
+  </WithUmami>
+}
+
+function Me() {
   const { isLoading, data, error } = useCachedPromise(async () => {
     const { data, error } = await umami.getMe();
     handleUmamiError(error);
-    return data as UmamiMe;
+    const user = IS_CLOUD ? (data as {user: UmamiMe}).user : data as UmamiMe;
+    return user;
   });
-
-  const markdown = data
-    ? Object.entries(data)
-        .map(([key, value]) => `${key} = ${value}`)
-        .join("\n\n")
-    : "";
-
-  async function pushUpdateMyPassword() {
-    if (IS_CLOUD) {
-      await showFailureToast("Not available in Umami Cloud", {
-        title: "ERROR",
-      });
-    } else {
-      push(<UpdateMyPassword />);
-    }
-  }
 
   return error ? (
     <ErrorComponent error={error} />
   ) : (
     <Detail
       isLoading={isLoading}
-      markdown={markdown}
+      metadata={data && <Detail.Metadata>
+        <Detail.Metadata.Label title="ID" text={data.id} />
+        <Detail.Metadata.Label title="Username" text={data.username} />
+        <Detail.Metadata.TagList title="Role">
+          <Detail.Metadata.TagList.Item text={data.role} />
+        </Detail.Metadata.TagList>
+        <Detail.Metadata.Label title="Created At" text={data.createdAt} />
+        <Detail.Metadata.Label title="Is Admin" icon={data.isAdmin ? Icon.Check : Icon.Xmark} />
+      </Detail.Metadata>}
       actions={
         !data ? undefined : (
           <ActionPanel>
-            <Action icon={Icon.Pencil} title="Update My Password" onAction={pushUpdateMyPassword} />
+            {!IS_CLOUD && <Action.Push icon={Icon.Pencil} title="Update My Password" target={<UpdateMyPassword />} />}
           </ActionPanel>
         )
       }
@@ -73,7 +72,7 @@ function UpdateMyPassword() {
       navigationTitle="Update My Password"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" icon={Icon.Check} onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Pencil} title="Update My Password" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
