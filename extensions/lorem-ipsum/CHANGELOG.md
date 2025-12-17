@@ -1,6 +1,6 @@
 # Lorem Ipsum Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-17
 
 - Update (dev) dependencies
 - Fix issue [#23670](https://github.com/raycast/extensions/issues/23670) where the AI model did not exist.
