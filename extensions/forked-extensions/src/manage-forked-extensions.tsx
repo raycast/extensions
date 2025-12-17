@@ -114,7 +114,10 @@ function ManageForkedExtensions() {
                     icon={{ fileIcon: openWith.path }}
                   />
                 ) : null}
-                <Action.OpenWith path={x.folderPath} shortcut={openWith ? { key: "enter", modifiers: ["shift"]} : undefined} />
+                <Action.OpenWith
+                  path={x.folderPath}
+                  shortcut={openWith ? { key: "enter", modifiers: ["shift"] } : undefined}
+                />
                 <Action.CopyToClipboard
                   title="Copy Extension Path to Clipboard"
                   content={x.folderPath}
