@@ -59,12 +59,12 @@ export default function Command() {
               key={server._id}
               title={server.name}
               icon={{
-                source: server.providerInfo.icon == "" ? "extension-icon.png" : server.providerInfo.icon,
+                source: server.providerInfo.icon === "" ? "extension-icon.png" : server.providerInfo.icon,
                 fallback: "extension-icon.png",
                 mask: Image.Mask.RoundedRectangle,
               }}
               accessories={[
-                ...(serverStatus?.status.isOnline
+                ...(serverStatus?.status
                   ? [
                       {
                         tag: {
@@ -118,7 +118,7 @@ export default function Command() {
                           key={project._id}
                           title={project.name}
                           icon={{
-                            source: project.iconURL == "" ? "extension-icon.png" : project.iconURL,
+                            source: project.iconURL === "" ? "extension-icon.png" : project.iconURL,
                             fallback: "extension-icon.png",
                             mask: Image.Mask.RoundedRectangle,
                           }}

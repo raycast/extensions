@@ -50,7 +50,7 @@ export default function Command() {
               key={project._id}
               title={project.name}
               icon={{
-                source: project.iconURL == "" ? "extension-icon.png" : project.iconURL,
+                source: project.iconURL === "" ? "extension-icon.png" : project.iconURL,
                 fallback: "extension-icon.png",
                 mask: Image.Mask.RoundedRectangle,
               }}
