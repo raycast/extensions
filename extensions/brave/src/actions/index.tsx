@@ -1,6 +1,6 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { exec } from "child_process";
 
@@ -53,7 +53,7 @@ export async function openNewTab({
   query?: string;
   profileCurrent: string;
   profileOriginal?: string;
-  openTabInProfile: SettingsProfileOpenBehaviour;
+  openTabInProfile: Preferences["openTabInProfile"];
   newWindow?: boolean;
   incognito?: boolean;
 }): Promise<boolean | string> {

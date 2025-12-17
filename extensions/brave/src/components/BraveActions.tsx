@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
 import { closeTab, executeJavascript, openNewTab, setActiveTab } from "../actions";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "../constants";
 
