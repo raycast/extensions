@@ -131,7 +131,7 @@ export const getTasks =
     }
 
     return fetch(
-      new URL(`${baseURI}/${route}?${pagination}${filterBy ? `&filterby= ${filterBy}` : ""}`),
+      new URL(`${baseURI}/${route}?${pagination}${filterBy ? `&filterby=${filterBy}` : ""}`),
       getRequestOptions(token),
     )
       .then((response) => ({

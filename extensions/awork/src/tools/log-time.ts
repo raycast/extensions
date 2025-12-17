@@ -32,6 +32,7 @@ export default async (input: Input) => {
     return undefined;
   }
   const tasks = await getTasks(tokens.accessToken, input.taskId, 50)({ page: 0 });
+  const task = tasks.data.find((t) => t.id === input.taskId);
   return logTime(
     tokens.accessToken,
     {
@@ -42,7 +43,7 @@ export default async (input: Input) => {
       date: input.date ? new Date(input.date) : new Date(),
       startTime: input.startTime,
       duration: input.duration,
-      isBillable: tasks.data[0]?.project?.isBillableByDefault,
+      isBillable: task?.project?.isBillableByDefault ?? false,
     },
     tasks.data,
   );
