@@ -5,18 +5,11 @@
   "description": "Generate placeholder content",
   "icon": "paragraph-icon.png",
   "author": "AntonNiklasson",
-  "license": "MIT",
   "contributors": [
     "GastroGeek",
     "stelo",
     "enkia",
     "j3lte"
-  ],
-  "categories": [
-    "Data",
-    "Design Tools",
-    "Developer Tools",
-    "Web"
   ],
   "keywords": [
     "generator",
@@ -31,6 +24,13 @@
     "macOS",
     "Windows"
   ],
+  "categories": [
+    "Data",
+    "Design Tools",
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "paragraphs",
