@@ -149,7 +149,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
           },
         });
       }
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not download GIF",
@@ -162,7 +162,6 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     <Action
       icon={Icon.Clipboard}
       key="copyFile"
-      // eslint-disable-next-line @raycast/prefer-title-case
       title="Copy GIF"
       onAction={copyGif}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
@@ -172,7 +171,6 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     <Action
       icon={Icon.Clipboard}
       key="pasteFile"
-      // eslint-disable-next-line @raycast/prefer-title-case
       title="Paste GIF"
       onAction={pasteGif}
       shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
@@ -181,7 +179,6 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   const copyGifUrl = (
     <Action.CopyToClipboard
       key="copyGifUrl"
-      // eslint-disable-next-line @raycast/prefer-title-case
       title="Copy GIF Link"
       content={stripQParams(gif_url)}
       onCopy={trackUsage}
@@ -190,7 +187,6 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   const copyGifMarkdown = (
     <Action.CopyToClipboard
       key="copyGifMarkdown"
-      // eslint-disable-next-line @raycast/prefer-title-case
       title="Copy GIF Markdown"
       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       content={`![${item.title}](${stripQParams(gif_url)})`}
@@ -200,7 +196,6 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   const pasteGifMarkdown = (
     <Action.Paste
       key="pasteGifMarkdown"
-      // eslint-disable-next-line @raycast/prefer-title-case
       title="Paste GIF Markdown"
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       content={`![${item.title}](${stripQParams(gif_url)})`}
@@ -243,7 +238,6 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     <Action.Push
       icon={Icon.Eye}
       key="viewDetails"
-      // eslint-disable-next-line @raycast/prefer-title-case
       title="View GIF Details"
       target={<GifDetails item={item} mutate={mutate} />}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
@@ -273,7 +267,6 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       key="downloadFile"
       shortcut={{ modifiers: ["cmd", "opt"], key: "d" }}
       icon={Icon.Download}
-      // eslint-disable-next-line @raycast/prefer-title-case
       title="Download GIF"
       onAction={downloadGIFAction}
     />
