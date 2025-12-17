@@ -1,5 +1,5 @@
-# taby-raycast
+# Taby Changelog
 
-[Raycast](https://www.raycast.com/) extensio for [Taby](https://github.com/gp0119/Taby).
+[Raycast](https://www.raycast.com/) extension for [Taby](https://github.com/gp0119/Taby).
 
 ![Example](https://i.imgur.com/isweARC.png)

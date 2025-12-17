@@ -42,7 +42,7 @@
       "name": "accessToken",
       "title": "Access Token",
       "description": "Enter the Access Token",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "default": ""
     }
