@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Trainrides, Vias, Via } from "./types";
-import { getTrainRides } from "./api";
+import { Trainrides, Vias, Via } from "@/types";
+import { getTrainRides } from "@/utils";
 import { LaunchProps, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
@@ -36,7 +36,10 @@ function renderViaLabels(vias?: Vias) {
       {vias.via.map((via: Via) => (
         <List.Item.Detail.Metadata.Label
           key={via.id}
-          title={`${via.station} (${fmt(via.arrival?.time, via.arrival?.delay)} - ${fmt(via.departure?.time, via.departure?.delay)})`}
+          title={`${via.station} (${fmt(via.arrival?.time, via.arrival?.delay)} - ${fmt(
+            via.departure?.time,
+            via.departure?.delay,
+          )})`}
           text={`${via.arrival?.platform ?? "—"} -> ${via.departure?.platform ?? "—"}`}
         />
       ))}
