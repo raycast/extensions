@@ -2,11 +2,18 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
-import { QueryTypes, getFiles, ScopeTypes } from "./api/getFiles";
+import { getFiles, QueryTypes, ScopeTypes } from "./api/getFiles";
 import FileListItem from "./components/FileListItem";
 
-import { withGoogleAuth } from "./components/withGoogleAuth";
 import { getUserEmail } from "./api/googleAuth";
+import { withGoogleAuth } from "./components/withGoogleAuth";
+
+function getSectionTitle(queryType: QueryTypes): string {
+  if (queryType === QueryTypes.fullText) {
+    return "Results";
+  }
+  return "Recently Used";
+}
 
 function SearchGoogleDriveFiles() {
   const [query, setQuery] = useState("");
@@ -25,10 +32,12 @@ function SearchGoogleDriveFiles() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search files"
+      isShowingDetail={true}
+      searchBarPlaceholder="Search in Drive"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Search mode"
+          placeholder="Filter by"
           value={`${queryType}-${scopeType}`}
           onChange={(value) => {
             const [queryType, scopeType] = value.split("-");
@@ -36,40 +45,37 @@ function SearchGoogleDriveFiles() {
             setScopeType(scopeType as ScopeTypes);
           }}
         >
-          <List.Dropdown.Item title="By file name in My Drive" value={`${QueryTypes.fileName}-${ScopeTypes.user}`} />
+          <List.Dropdown.Item title="File Name in My Drive" value={`${QueryTypes.fileName}-${ScopeTypes.user}`} />
           <List.Dropdown.Item
-            title="By file name in All Drives"
+            title="File Name in All Drives"
             value={`${QueryTypes.fileName}-${ScopeTypes.allDrives}`}
           />
-          <List.Dropdown.Item title="In full text in My Drive" value={`${QueryTypes.fullText}-${ScopeTypes.user}`} />
-          <List.Dropdown.Item
-            title="In full text in All Drives"
-            value={`${QueryTypes.fullText}-${ScopeTypes.allDrives}`}
-          />
+          <List.Dropdown.Item title="Content in My Drive" value={`${QueryTypes.fullText}-${ScopeTypes.user}`} />
+          <List.Dropdown.Item title="Content in All Drives" value={`${QueryTypes.fullText}-${ScopeTypes.allDrives}`} />
+          <List.Dropdown.Item title="Starred in My Drive" value={`${QueryTypes.starred}-${ScopeTypes.user}`} />
+          <List.Dropdown.Item title="Starred in All Drives" value={`${QueryTypes.starred}-${ScopeTypes.allDrives}`} />
         </List.Dropdown>
       }
       onSearchTextChange={setQuery}
       throttle
     >
       <List.EmptyView
-        title="No files"
-        description="You haven't any files yet"
+        title="No files found"
+        description="Try adjusting your search or filter"
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser
-              title="Open Google Drive"
-              icon="google-drive.png"
-              url="https://docs.google.com/document/create"
-            />
+            <Action.OpenInBrowser title="Open Google Drive" icon="google-drive.png" url="https://drive.google.com" />
           </ActionPanel>
         }
       />
 
-      {data?.files && data.files.length > 0 ? (
-        <List.Section title="Recent Files" subtitle={`${data.files.length}`}>
-          {data.files?.map((file) => <FileListItem file={file} key={file.id} email={email} />)}
+      {data?.files && data.files.length > 0 && (
+        <List.Section title={getSectionTitle(queryType)} subtitle={`${data.files.length}`}>
+          {data.files.map((file) => (
+            <FileListItem file={file} key={file.id} email={email} />
+          ))}
         </List.Section>
-      ) : null}
+      )}
     </List>
   );
 }

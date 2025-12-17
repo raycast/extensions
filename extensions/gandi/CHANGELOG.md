@@ -1,5 +1,19 @@
 # Gandi Changelog
 
+## [1.0.1] - 2025-12-15
+
+### Added
+- Sandbox support
+
+### Enhancements
+
+- **Manage DNS Records** - cached results + optimistic deletion
+- **List Domains** - cached results
+- Simplify domain availability check
+- Cross-platform `Keyboard` `shortcut`
+- Remove uses of `any`
+- Modernize to use latest Raycast configuration
+
 ## [1.0.0] - 2025-09-03
 
 ### Added

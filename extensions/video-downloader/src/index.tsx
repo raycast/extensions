@@ -275,11 +275,9 @@ export default function DownloadVideo() {
               }}
             />
           </ActionPanel.Section>
-          {isMac && (
-            <ActionPanel.Section>
-              <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
-            </ActionPanel.Section>
-          )}
+          <ActionPanel.Section>
+            <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       searchBarAccessory={

@@ -1,4 +1,20 @@
-# Changelog
+# Iconify Changelog
+
+## [Error Guard] - 2025-12-16
+
+- Add `ErrorGuard` component that makes it a bit more friendly when there is an error, instructing the user to reinstall/clear cache/check internet connection
+
+## [Improvements] - 2025-12-16
+
+- Refactor code to make it better maintainable
+- Remove axios as we can use fetch from Node
+- Add `abortable` options to `usePromise` to make sure any requests are aborted on changes
+- Add Windows support
+
+## [Improvements] - 2025-12-02
+
+- Add error handling in "Search Icons"
+- Add README.md
 
 ## [Improvements] - 2025-03-20
 

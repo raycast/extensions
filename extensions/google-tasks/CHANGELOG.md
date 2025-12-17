@@ -1,5 +1,9 @@
 # Google Tasks Changelog
 
+## [Update] - 2025-12-07
+
+- Add "Create Task" command for quick task creation
+
 ## [Maintenance] - 2025-10-27
 
 - Add support for Windows platform.

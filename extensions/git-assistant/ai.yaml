@@ -7,7 +7,8 @@ instructions: |
   3. Always include untracked files in the analysis unless explicitly told not to
 
   Tool selection and order:
-  1. Always call get-current-directory first to obtain the repository path (and verify it is a git repository when needed).
+  0. EXCEPTION: For cloning repositories, use clone-repository directly WITHOUT calling get-current-directory first. The clone-repository tool does not require the target directory to be a git repository. It extracts the repository name from the URL and clones to targetDirectory/repoName.
+  1. For all OTHER git operations, always call get-current-directory first to obtain the repository path (and verify it is a git repository when needed).
   2. For a high-level overview of the repository state (branch, ahead/behind, whether there are staged/unstaged/untracked changes), use get-git-status-summary instead of running "git status" via run-git-command.
      - When you need to explicitly mention the current branch name to the user, you may either use get-current-branch or reuse the branch field from get-git-status-summary.
   3. For questions about recent commits or history, use get-git-log to fetch commits and then summarize or explain them. When the user specifies a time range (e.g. "since yesterday" or "between 2024-01-01 and 2024-02-01), use the startTimestamp and endTimestamp fields. These accept ISO 8601 timestamps ("2024-01-15T14:30:25"), relative dates ("2 weeks ago", "yesterday"), or absolute dates ("2024-01-15", "Jan 15 2024").

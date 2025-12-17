@@ -4,6 +4,7 @@ import { homedir } from "os";
 import { readFileSync } from "fs";
 import dedent from "dedent";
 import { escapeAppleScriptString, escapeSQLLikePattern } from "./utils";
+import { getBookmarksTree, type BookmarkDirectory } from "./bookmarks";
 
 type LocalState = {
   profile: {
@@ -26,6 +27,13 @@ export type Tab = {
   url?: string;
   isPinned: boolean;
   isFocused: boolean;
+};
+
+export type Bookmark = {
+  id: string;
+  name: string;
+  url: string;
+  path: string; // Breadcrumb as single string (e.g., "Bookmarks Bar › Work")
 };
 
 function getActiveProfilePath() {
@@ -52,6 +60,49 @@ function getHistoryPath() {
 
 export function getBookmarksPath() {
   return resolve(getActiveProfilePath(), "Bookmarks");
+}
+
+async function searchBookmarks(searchText: string): Promise<Bookmark[]> {
+  if (!searchText || searchText.trim().length === 0) {
+    return [];
+  }
+
+  try {
+    const tree = await getBookmarksTree();
+    const results: Bookmark[] = [];
+    const query = searchText.toLowerCase();
+
+    // Recursively search bookmarks with simple case-insensitive matching
+    function searchInDirectory(dir: BookmarkDirectory, currentPath: string[] = []) {
+      if (!dir.children) return;
+
+      for (const child of dir.children) {
+        if (child.type === "url" && child.url) {
+          const searchableText = `${child.name.toLowerCase()} ${child.url.toLowerCase()}`;
+
+          // Simple case-insensitive search (matching filterTabs pattern)
+          if (searchableText.includes(query)) {
+            results.push({
+              id: child.id,
+              name: child.name,
+              url: child.url,
+              path: currentPath.length > 0 ? currentPath.join(" › ") : "Bookmarks",
+            });
+          }
+        } else if (child.type === "folder") {
+          searchInDirectory(child, [...currentPath, child.name]);
+        }
+      }
+    }
+
+    // Start search from the root (which already has friendly names from getBookmarksTree)
+    searchInDirectory(tree);
+
+    return results;
+  } catch (error) {
+    console.error("Error searching bookmarks:", error);
+    return [];
+  }
 }
 
 function parseAppleScriptBoolean(value: string): boolean {
@@ -158,6 +209,12 @@ export function useTabs() {
   return usePromise(getTabs);
 }
 
+export function useBookmarks(searchText?: string) {
+  return usePromise(async (query: string) => searchBookmarks(query), [searchText || ""], {
+    execute: !!searchText && searchText.trim().length > 0,
+  });
+}
+
 export async function focusTab(tab: Tab) {
   // Escape user input to prevent AppleScript injection
   const escapedWindowId = escapeAppleScriptString(tab.windowId);
@@ -179,20 +236,6 @@ export async function focusTab(tab: Tab) {
             exit repeat
           end if
         end repeat
-      end tell
-    `,
-  );
-}
-
-export async function openNewTab(url: string) {
-  await runAppleScript(
-    dedent`
-      tell application "Dia"
-        activate
-
-        tell window 1
-          make new tab with properties {URL:"${url}"}
-        end tell
       end tell
     `,
   );

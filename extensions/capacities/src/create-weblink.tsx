@@ -1,19 +1,8 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  Icon,
-  closeMainWindow,
-  Clipboard,
-  showToast,
-  Toast,
-  PopToRootType,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, closeMainWindow, Clipboard, showToast, Toast, showHUD } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
 import { useEffect, useRef } from "react";
 import { useActiveTab } from "./helpers/useActiveTab";
-import { API_HEADERS, API_URL, fetchErrorHandler, useCapacitiesStore } from "./helpers/storage";
+import { API_HEADERS, API_URL, handleAPIError, handleUnexpectedError, useCapacitiesStore } from "./helpers/storage";
 
 interface SaveWeblinkBody {
   spaceId: string;
@@ -32,10 +21,6 @@ function isValidURL(url: string) {
 }
 
 export default function Command() {
-  useEffect(() => {
-    checkCapacitiesApp();
-  }, []);
-
   const { store, triggerLoading, isLoading: storeIsLoading } = useCapacitiesStore();
 
   useEffect(() => {
@@ -46,7 +31,10 @@ export default function Command() {
 
   const { handleSubmit, itemProps, setValue } = useForm<SaveWeblinkBody>({
     async onSubmit(values) {
-      const toast = await showToast(Toast.Style.Animated, "Saving");
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Saving",
+      });
       const body = {
         spaceId: store?.spaces.length === 1 ? store.spaces[0].id : values.spaceId,
         url: values.value,
@@ -60,17 +48,23 @@ export default function Command() {
           headers: API_HEADERS,
           body: JSON.stringify(body),
         });
-        if (!response.ok) throw new Error(fetchErrorHandler(response.status));
+        if (!response.ok) {
+          handleAPIError(response);
+          return;
+        }
 
-        toast.style = Toast.Style.Success;
-        toast.title = "Saved";
-        await closeMainWindow({
-          popToRootType: PopToRootType.Immediate,
+        showToast({
+          style: Toast.Style.Success,
+          title: "Saved",
         });
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed";
-        toast.message = `${error}`;
+        showHUD("Weblink created");
+        closeMainWindow();
+      } catch (e) {
+        if (e instanceof Error) {
+          handleUnexpectedError(e);
+        } else {
+          console.log(e);
+        }
       }
     },
     validation: {
@@ -122,15 +116,6 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Link" placeholder="Link here" {...itemProps.value} />
-      <Form.TextField
-        title="Tags"
-        placeholder="Use a comma separated list of tags."
-        {...itemProps.tags}
-        info="Optional. Tags added to your web link object. Tags need to exactly match your tag names in Capacities, otherwise they will be created. You can add a maximum of 10 tags."
-        storeValue
-      />
-      <Form.TextArea title="Notes" {...itemProps.mdText} info="Optional" />
       {store && store.spaces.length > 1 && (
         <>
           <Form.Dropdown
@@ -141,10 +126,21 @@ export default function Command() {
             ref={spacesDropdown}
           >
             {store.spaces &&
-              store.spaces.map((space) => <Form.Dropdown.Item key={space.id} value={space.id} title={space.title} />)}
+              store.spaces.map((space) => (
+                <Form.Dropdown.Item key={space.id} value={space.id} title={space.title} icon={Icon.Desktop} />
+              ))}
           </Form.Dropdown>
         </>
       )}
+      <Form.TextField title="Link" {...itemProps.value} autoFocus />
+      <Form.TextField
+        title="Tags"
+        placeholder="Use a comma separated list of tags."
+        {...itemProps.tags}
+        info="Optional. Tags added to your web link object. Tags need to exactly match your tag names in Capacities, otherwise they will be created. You can add a maximum of 10 tags."
+        storeValue
+      />
+      <Form.TextArea title="Notes" {...itemProps.mdText} info="Optional. Notes can be formatted in markdown." />
     </Form>
   );
 }

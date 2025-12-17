@@ -5,8 +5,16 @@
   "description": "Allows secrets to be transmitted using the One-Time Secret website.",
   "icon": "extension_icon.png",
   "author": "larsasolidor",
+  "contributors": [
+    "xmok"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
-    "Communication"
+    "Communication",
+    "Security"
   ],
   "license": "MIT",
   "commands": [
@@ -17,25 +25,52 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "send-one-time-secret",
+      "title": "Send One-Time Secret",
+      "description": "Stores a secret on One-Time Secret and gives back the shareable URL."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input" : "@one-time-secret store \"santa is real\" for 1 week. passcode: \"christmas\"",
+        "mocks" : {
+          "send-one-time-secret" : "https://onetimesecret.com/secret/2uim0qy8e88vxm3saw4hceg3v0boaa6"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "lifetime" : "604800",
+                "passphrase" : "christmas",
+                "secret" : "santa is real"
+              },
+              "name" : "send-one-time-secret"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.53.4",
-    "@types/got": "^9.6.12",
-    "node-fetch": "^3.3.1"
+    "@raycast/api": "^1.103.10"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/node-fetch": "^2.6.4",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -8,15 +8,15 @@ import {
 import { Extension, getLocalExtensions } from "./lib/vscode";
 import { getErrorMessage } from "./utils";
 
-function OpenExtensionInVSCodeAction(props: { extension: Extension }): JSX.Element {
+function OpenExtensionInVSCodeAction(props: { extension: Extension }) {
   return <OpenExtensionByIDInVSCodeAction extensionID={props.extension.id} />;
 }
 
-function OpenExtensionInBrowserAction(props: { extension: Extension }): JSX.Element {
+function OpenExtensionInBrowserAction(props: { extension: Extension }) {
   return <OpenExtensionByIDInBrowserAction extensionID={props.extension.id} />;
 }
 
-function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }): JSX.Element {
+function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }) {
   const e = props.extension;
   return (
     <List.Item
@@ -39,7 +39,6 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
           <ActionPanel.Section>
             <Action.CopyToClipboard
               content={e.id}
-              // eslint-disable-next-line @raycast/prefer-title-case
               title="Copy Extension ID"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
@@ -69,7 +68,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
   );
 }
 
-export default function ExtensionsRootCommand(): JSX.Element {
+export default function ExtensionsRootCommand() {
   const { extensions, isLoading, error, refresh } = useLocalExtensions();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

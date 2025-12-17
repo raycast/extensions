@@ -30,6 +30,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [Atono](https://docs.atono.io/docs/mcp-server-for-atono/) | AI-powered project management for product teams. Connect your AI assistant to Atono's workflow platform to create and update stories, track bugs, manage team assignments, and document fixes—all through natural language commands. |
 | [Brave Search](https://github.com/modelcontextprotocol/servers/tree/HEAD/src/brave-search) | A Model Context Protocol server for Brave Search. This server provides tools to read, search, and manipulate Brave Search repositories via Large Language Models. |
 | [Chroma](https://github.com/chroma-core/chroma-mcp) | This server provides data retrieval capabilities powered by Chroma, enabling AI models to create collections over generated data and user inputs, and retrieve that data using vector search, full text search, metadata filtering, and more. |
 | [Context 7](https://github.com/upstash/context7) | Context7 MCP pulls up-to-date, version-specific documentation and code examples straight from the source — and places them directly into your prompt. |
