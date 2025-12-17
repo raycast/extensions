@@ -1,6 +1,6 @@
 # Google Workspace Changelog
 
-## [Thumbnail Previews] - {PR_MERGE_DATE}
+## [Thumbnail Previews] - 2025-12-17
 
 ### Changed
 
