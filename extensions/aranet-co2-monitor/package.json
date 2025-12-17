@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index", 
+      "name": "index",
       "title": "Menu Bar Toggle",
       "description": "Refresh CO2 readings in the Menu Bar",
       "mode": "menu-bar",
@@ -57,5 +57,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
