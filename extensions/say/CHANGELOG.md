@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-12-17
 
 - Add AI Say Tool to say things out loud from AI Chat
 
