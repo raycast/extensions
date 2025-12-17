@@ -162,12 +162,18 @@ export async function executeJavascript(code: string): Promise<void> {
 
   try {
     const decodedCode = decodeURIComponent(code);
+
+    // We manually escape the characters that break AppleScript strings.
+    // This is safer than JSON.stringify because we control the exact output format.
     const escapedCode = decodedCode
-      .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"')
-      .replace(/\r/g, "\\r")
-      .replace(/\n/g, "\\n")
-      .replace(/\t/g, "\\t");
+      .replace(/\\/g, "\\\\") // Escape backslashes first!
+      .replace(/"/g, '\\"') // Escape double quotes
+      .replace(/\r/g, "\\r") // Escape Carriage Return
+      .replace(/\n/g, "\\n") // Escape New Line
+      .replace(/\t/g, "\\t") // Escape Tab
+      .replace(/[\b]/g, "\\b") // Escape Backspace
+      .replace(/\f/g, "\\f"); // Escape Form Feed
+
     const script = `
       tell application "${browserOption}"
         activate
