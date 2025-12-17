@@ -8,6 +8,9 @@ type Input = {
   content: string;
 };
 
+/**
+ * Use AI to say things out loud
+ */
 export default async function ({ content }: Input) {
   const { keepSilentOnError, ...saySettings } = parseSaySettings(getSaySettings());
   try {
