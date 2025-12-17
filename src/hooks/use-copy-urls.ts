@@ -59,7 +59,10 @@ export function useCopyUrls(folder: Folder | undefined, allFolders: Folder[]): U
     await Clipboard.copy(list)
 
     const urlCount = countUrls(collectedUrls)
-    await toastSuccess("Copied as List", `${urlCount} ${pluralize(urlCount, "URL")} (sorted by length)`)
+    await toastSuccess(
+      "Copied as List",
+      `${urlCount} ${pluralize(urlCount, "URL")} (sorted by length)`
+    )
   }, [collectedUrls, hasUrls])
 
   return {
@@ -69,4 +72,3 @@ export function useCopyUrls(folder: Folder | undefined, allFolders: Folder[]): U
     copyAsList,
   }
 }
-

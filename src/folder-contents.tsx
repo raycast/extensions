@@ -285,7 +285,10 @@ export default function FolderContentsView({
 
     await updateFolder(folderId, { items: uniqueItems })
 
-    await toastSuccess("Duplicates removed", `Removed ${duplicateCount} ${pluralize(duplicateCount, "item")}`)
+    await toastSuccess(
+      "Duplicates removed",
+      `Removed ${duplicateCount} ${pluralize(duplicateCount, "item")}`
+    )
 
     await handleSave()
   }, [folder, folderId, folderName, duplicateInfo, handleSave])
@@ -350,7 +353,10 @@ export default function FolderContentsView({
           await toastSuccess("Opened", getItemDisplayName(item, applications, allFolders))
         }
       } catch (error) {
-        await toastFailure("Failed to open", error instanceof Error ? error.message : "Unknown error")
+        await toastFailure(
+          "Failed to open",
+          error instanceof Error ? error.message : "Unknown error"
+        )
       }
     },
     [folderId, applications, revalidate]
@@ -515,7 +521,7 @@ export default function FolderContentsView({
           />
           {folder && allFolders.length > 1 && (
             <Action.Push
-              title="Move to Folder..."
+              title="Move to Folder…"
               icon={Icon.ArrowRightCircle}
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               target={<MoveToFolderForm item={item} currentFolder={folder} onMove={handleSave} />}

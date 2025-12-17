@@ -433,9 +433,13 @@ async function openItemsInBulk<T>(
   }
 
   if (failed === 0) {
-    await toastSuccess(options.successTitle, `Opened ${success} ${pluralize(success, options.itemLabel)}`)
+    await toastSuccess(
+      options.successTitle,
+      `Opened ${success} ${pluralize(success, options.itemLabel)}`
+    )
   } else {
-    const title = failed === items.length ? options.failureTitle : `Some ${options.itemLabel}s failed`
+    const title =
+      failed === items.length ? options.failureTitle : `Some ${options.itemLabel}s failed`
     await toastFailure(title, `Opened ${success}, failed ${failed}`)
   }
 }

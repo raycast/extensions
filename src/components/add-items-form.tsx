@@ -159,7 +159,7 @@ function AddItemsForm({ folder, onSave }: AddItemsFormProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-          <Action.SubmitForm icon={Icon.Plus} title="Add Items" onSubmit={handleSubmit} />
+            <Action.SubmitForm icon={Icon.Plus} title="Add Items" onSubmit={handleSubmit} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Nested Folders">
             <Action.Push
@@ -174,20 +174,20 @@ function AddItemsForm({ folder, onSave }: AddItemsFormProps) {
         </ActionPanel>
       }
     >
-            <Form.TagPicker
-              title="Applications"
-              placeholder="Select applications to add..."
-              {...itemProps.applications}
-            >
+      <Form.TagPicker
+        title="Applications"
+        placeholder="Select applications to add..."
+        {...itemProps.applications}
+      >
         {applications.map((app) => (
-                <Form.TagPicker.Item
-                  key={app.path}
-                  value={app.path}
-                  title={app.name}
-                  icon={app.path ? { fileIcon: app.path } : Icon.AppWindow}
-                />
-              ))}
-            </Form.TagPicker>
+          <Form.TagPicker.Item
+            key={app.path}
+            value={app.path}
+            title={app.name}
+            icon={app.path ? { fileIcon: app.path } : Icon.AppWindow}
+          />
+        ))}
+      </Form.TagPicker>
 
       <Form.TextArea
         title="Website URLs"
@@ -196,26 +196,26 @@ function AddItemsForm({ folder, onSave }: AddItemsFormProps) {
         {...itemProps.websiteUrls}
       />
 
-            <Form.TagPicker
-              title="Nested Folders"
+      <Form.TagPicker
+        title="Nested Folders"
         placeholder="Select folders to nest..."
-              {...itemProps.folders}
-            >
+        {...itemProps.folders}
+      >
         <Form.TagPicker.Item
           key={CREATE_NEW_FOLDER_VALUE}
           value={CREATE_NEW_FOLDER_VALUE}
           title="​Create New Folder..."
           icon={Icon.PlusCircle}
         />
-              {availableFolders.map((f) => (
+        {availableFolders.map((f) => (
           <Form.TagPicker.Item
             key={f.id}
             value={f.id}
             title={f.name}
             icon={getFolderIcon(f.icon, f.color)}
           />
-              ))}
-            </Form.TagPicker>
+        ))}
+      </Form.TagPicker>
     </Form>
   )
 }
