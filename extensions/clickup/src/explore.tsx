@@ -18,7 +18,7 @@ export default function Teams() {
             key={team.id}
             icon={Icon.TwoPeople}
             title={team.name}
-            accessories={[{ text: `${team.members.length} members`, icon: Icon.Person }]}
+            accessories={[{ text: `${team.members?.length ?? 0} members`, icon: Icon.Person }]}
             actions={
               <ActionPanel title="Team Actions">
                 <Action.Push

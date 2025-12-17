@@ -23,7 +23,7 @@ export function formatDate(date: string | number | null | undefined): string {
 }
 
 /** Format a ClickUp user for display with avatar or initials */
-export function formatUser(user: ClickUpUser | undefined): Pick<ItemAccessory, "icon" | "tooltip"> & { text: string } {
+export function formatUser(user: ClickUpUser | undefined): Pick<ItemAccessory, "icon"> & { text: string } {
   if (!user) {
     return { icon: Icon.Person, text: "Unknown" };
   }

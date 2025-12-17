@@ -1,9 +1,10 @@
 import { useCachedPromise } from "@raycast/utils";
 import { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
 import { getClickUpClient } from "../api/clickup";
-import { ClickUpList, ClickUpSpace } from "../types/clickup";
+import { ClickUpFolder, ClickUpList, ClickUpSpace } from "../types/clickup";
 
 interface ListWithSpace extends ClickUpList {
+  folder?: ClickUpFolder;
   spaceName: string;
 }
 
@@ -26,34 +27,35 @@ export function useLists(): UseListsResult {
     const client = getClickUpClient();
     const teams = await client.getTeams();
 
-    const result: ListsBySpace[] = [];
+    const teamSpaces = await Promise.all(teams.map((team) => client.getSpaces(team.id)));
+    const allSpaces = teamSpaces.flat();
 
-    for (const team of teams) {
-      const spaces = await client.getSpaces(team.id);
+    const spaceResults = await Promise.all(
+      allSpaces.map(async (space) => {
+        const [folderlessLists, folders] = await Promise.all([
+          client.getFolderlessLists(space.id),
+          client.getFolders(space.id),
+        ]);
 
-      for (const space of spaces) {
+        const folderListsResults = await Promise.all(folders.map((folder) => client.getLists(folder.id)));
+
         const lists: ListWithSpace[] = [];
 
-        const folderlessLists = await client.getFolderlessLists(space.id);
         for (const list of folderlessLists) {
           lists.push({ ...list, spaceName: space.name });
         }
 
-        const folders = await client.getFolders(space.id);
-        for (const folder of folders) {
-          const folderLists = await client.getLists(folder.id);
-          for (const list of folderLists) {
-            lists.push({ ...list, spaceName: space.name, folder });
+        for (const [index, folder] of folders.entries()) {
+          for (const list of folderListsResults[index]) {
+            lists.push({ ...list, folder, spaceName: space.name });
           }
         }
 
-        if (lists.length > 0) {
-          result.push({ lists, space });
-        }
-      }
-    }
+        return lists.length > 0 ? { lists, space } : null;
+      }),
+    );
 
-    return result;
+    return spaceResults.filter((result): result is ListsBySpace => result !== null);
   };
 
   const { data, error, isLoading } = useCachedPromise(fetchLists, [], {

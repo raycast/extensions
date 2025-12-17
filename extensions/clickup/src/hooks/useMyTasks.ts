@@ -38,6 +38,7 @@ export function useMyTasks(): UseMyTasksResult {
 
     const parentTasks: ClickUpTask[] = [];
     const fetchedParentIds = new Set<string>();
+    const MAX_PARENT_DEPTH = 10;
 
     for (const parentId of missingParentIds) {
       if (fetchedParentIds.has(parentId)) continue;
@@ -49,7 +50,6 @@ export function useMyTasks(): UseMyTasksResult {
 
         let currentParent = parentTask;
         let depth = 0;
-        const MAX_PARENT_DEPTH = 10;
         while (
           currentParent.parent &&
           !assignedTaskIds.has(currentParent.parent) &&

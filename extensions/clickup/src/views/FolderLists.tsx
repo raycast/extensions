@@ -10,7 +10,6 @@ import { buildListRoute } from "../utils/link-helpers";
 interface Props {
   folderId: string;
   folderName: string;
-  spaceId: string;
   teamId: string;
 }
 

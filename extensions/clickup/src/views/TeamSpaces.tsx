@@ -12,11 +12,23 @@ interface Props {
 }
 
 export function TeamSpaces({ teamId, teamName }: Props) {
-  const { isLoading, data: spaces } = useCachedPromise(
-    async (id: string) => getClickUpClient().getSpaces(id),
-    [teamId],
-    { initialData: [] },
-  );
+  const {
+    isLoading,
+    data: spaces,
+    error,
+  } = useCachedPromise(async (id: string) => getClickUpClient().getSpaces(id), [teamId], { initialData: [] });
+
+  if (error && !isLoading) {
+    return (
+      <List>
+        <List.EmptyView
+          description={(error as Error).message || "Unknown error"}
+          icon={Icon.ExclamationMark}
+          title="Failed to load spaces"
+        />
+      </List>
+    );
+  }
 
   return (
     <List

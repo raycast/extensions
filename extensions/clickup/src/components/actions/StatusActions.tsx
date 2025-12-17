@@ -19,7 +19,7 @@ function getNextStatusFromList(currentStatus: string, statuses: ClickUpList["sta
 
 export function NextStatus({ task }: Props) {
   const { revertTaskStatus, updateTaskStatus } = useTasksContext();
-  const { data: listData, isLoading } = useCachedPromise(
+  const { data: listData } = useCachedPromise(
     async (listId: string) => {
       const client = getClickUpClient();
       return await client.getList(listId);
@@ -27,7 +27,7 @@ export function NextStatus({ task }: Props) {
     [task.list.id],
   );
 
-  if (isLoading || !listData) return null;
+  if (!listData) return null;
 
   const nextStatus = getNextStatusFromList(task.status.status, listData.statuses);
   if (!nextStatus) return null;
@@ -87,11 +87,11 @@ function ChangeStatusForm({ task }: ChangeStatusFormProps) {
     }
 
     updateTaskStatus(task.id, newStatus);
-    pop();
 
     try {
       const client = getClickUpClient();
       await client.updateTask(task.id, { status: newStatus });
+      pop();
       await showToast({
         message: `Changed to ${newStatus}`,
         style: Toast.Style.Success,

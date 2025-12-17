@@ -49,9 +49,7 @@ export function SpaceFolders({ spaceId, spaceName, teamId }: Props) {
                     <Action.Push
                       icon={Icon.ChevronRight}
                       title="Browse Lists"
-                      target={
-                        <FolderLists folderId={folder.id} folderName={folder.name} spaceId={spaceId} teamId={teamId} />
-                      }
+                      target={<FolderLists folderId={folder.id} folderName={folder.name} teamId={teamId} />}
                     />
                     <OpenInClickUpAction route={buildFolderRoute(teamId, folder.id)} />
                     <CopyId id={folder.id} />

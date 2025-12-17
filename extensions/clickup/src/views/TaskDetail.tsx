@@ -14,11 +14,6 @@ interface Props {
 
 export function TaskDetail({ task }: Props) {
   const { tasks: allTasks } = useTasksContext();
-
-  if (!task) {
-    return <Detail navigationTitle="Error Loading task" markdown="Something went wrong loading the task" />;
-  }
-
   const isSubTask = isSubtask(task);
   const parentTask = isSubTask ? getParentTask(task, allTasks) : undefined;
   const subtaskCount = hasSubtasks(task, allTasks) ? countSubtasks(task, allTasks) : 0;

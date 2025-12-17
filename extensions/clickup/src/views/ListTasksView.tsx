@@ -17,6 +17,7 @@ interface Props {
 
 export function ListTasksView({ list }: Props) {
   const { error, isLoading, tasks } = useTasks({ listId: list.id });
+  const tasksWithDepth = useMemo(() => flattenTasksWithDepth(tasks), [tasks]);
 
   if (error && !isLoading && tasks.length === 0) {
     return (
@@ -25,8 +26,6 @@ export function ListTasksView({ list }: Props) {
       </List>
     );
   }
-
-  const tasksWithDepth = useMemo(() => flattenTasksWithDepth(tasks), [tasks]);
 
   return (
     <TasksProvider tasks={tasks}>

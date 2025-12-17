@@ -32,7 +32,7 @@ export interface ClickUpStatus {
 export interface ClickUpPriority {
   color: string;
   id: string;
-  orderindex?: string;
+  orderindex?: number;
   priority: string;
 }
 
