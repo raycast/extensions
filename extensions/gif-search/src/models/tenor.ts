@@ -1,5 +1,4 @@
 import { formatRelative, fromUnixTime } from "date-fns";
-import fetch from "node-fetch";
 
 import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
 import { getTenorLocale } from "../preferences";

@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 import { APIOpt, IGif, IGifAPI, slugify } from "./gif";
 
 export interface FinerGifsClubResults {

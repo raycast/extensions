@@ -24,7 +24,7 @@ export default async function giphy(type?: "gifs" | "videos") {
       if (!response.ok) {
         throw new Error("Could not search gifs from Giphy");
       }
-      const results = await response.json();
+      const results = (await response.json()) as { data: GiphyGif[] };
       return { results: results.data.map(mapGiphyResponse) };
     },
 
@@ -43,7 +43,7 @@ export default async function giphy(type?: "gifs" | "videos") {
         throw new Error("Could not get trending gifs from Giphy");
       }
 
-      const results = await response.json();
+      const results = (await response.json()) as { data: GiphyGif[] };
       return { results: results.data.map(mapGiphyResponse) };
     },
 
@@ -56,7 +56,7 @@ export default async function giphy(type?: "gifs" | "videos") {
       reqUrl.searchParams.set("ids", ids.join(","));
 
       const response = await fetch(reqUrl.toString());
-      const results = await response.json();
+      const results = (await response.json()) as { data: GiphyGif[] };
       return results.data.map(mapGiphyResponse);
     },
   };
