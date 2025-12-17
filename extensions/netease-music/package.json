@@ -8,7 +8,6 @@
   "contributors": [
     "IceGiraffe"
   ],
-  "license": "MIT",
   "keywords": [
     "music",
     "NeteaseMusic",
@@ -16,6 +15,7 @@
     "player",
     "media"
   ],
+  "license": "MIT",
   "commands": [
     {
       "name": "play",
@@ -71,7 +71,7 @@
       "title": "Toggle Lyrics",
       "subtitle": "NeteaseMusic",
       "description": "Show or hide lyrics window in NeteaseMusic.",
-      "mode": "no-view" 
+      "mode": "no-view"
     },
     {
       "name": "turn-up-volume",
