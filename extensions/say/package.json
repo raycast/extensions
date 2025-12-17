@@ -68,6 +68,11 @@
       "name": "say",
       "title": "Say",
       "description": "Say it from AI"
+    },
+    {
+      "name": "get-voices",
+      "title": "Get Voices",
+      "description": "Get Available Voices"
     }
   ],
   "ai": {
@@ -87,6 +92,72 @@
             }
           }
         ]
+      },
+      {
+        "input": "@say how many voices do you have in english?",
+        "mocks": {
+          "get-voices": [
+            {
+              "example": "Hello! My name is Albert.",
+              "languageCode": "en_US",
+              "name": "Albert"
+            },
+            {
+              "example": "Hello! My name is Bad News.",
+              "languageCode": "en_US",
+              "name": "Bad News"
+            },
+            {
+              "example": "Hello! My name is Bahh.",
+              "languageCode": "en_US",
+              "name": "Bahh"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-voices"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@say find a female Dutch voice and tell me in Dutch what day of the week it is",
+        "mocks": {
+          "get-voices": [
+            {
+              "example": "Hello! My name is Albert.",
+              "languageCode": "en_US",
+              "name": "Albert"
+            },
+            {
+              "example": "Hello! My name is Bad News.",
+              "languageCode": "en_US",
+              "name": "Bad News"
+            }
+          ],
+          "say": "Successfully called \"say\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-voices"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "content": "Het is woensdag.",
+                "voice": "Ellen"
+              },
+              "name": "say"
+            }
+          }
+        ],
+        "usedAsExample": false
       }
     ]
   },

@@ -5,6 +5,7 @@
 - Update dependencies, cleanup eslint
 - Refactored code to separate screens from the rest
 - Add AI tool to say the text you provide in AI chat
+- Add AI tool to get available voices
 
 ## [Bugfix] - 2025-10-06
 
