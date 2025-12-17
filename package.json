@@ -1,0 +1,205 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "folders",
+    "title": "Folders",
+    "description": "Organize applications, websites, and folders in custom folders accessible from Raycast",
+    "icon": "icon.png",
+    "author": "Jace",
+    "categories": [
+        "Productivity",
+        "System"
+    ],
+    "license": "MIT",
+    "preferences": [
+        {
+            "name": "folderContentsSortPrimary",
+            "type": "dropdown",
+            "required": true,
+            "title": "🥇 Primary Sort",
+            "description": "Primary sort method for items inside folders",
+            "default": "alphabetical-asc",
+            "data": [
+                {
+                    "title": "A → Z",
+                    "value": "alphabetical-asc"
+                },
+                {
+                    "title": "Z → A",
+                    "value": "alphabetical-desc"
+                },
+                {
+                    "title": "Short → Long",
+                    "value": "length-asc"
+                },
+                {
+                    "title": "Long → Short",
+                    "value": "length-desc"
+                },
+                {
+                    "title": "Old → New",
+                    "value": "recent-asc"
+                },
+                {
+                    "title": "New → Old",
+                    "value": "recent-desc"
+                },
+                {
+                    "title": "None",
+                    "value": "none"
+                }
+            ]
+        },
+        {
+            "name": "folderContentsSortSecondary",
+            "type": "dropdown",
+            "required": true,
+            "title": "🥈 Secondary Sort",
+            "description": "Used when items are equal by the first sort",
+            "default": "none",
+            "data": [
+                {
+                    "title": "A → Z",
+                    "value": "alphabetical-asc"
+                },
+                {
+                    "title": "Z → A",
+                    "value": "alphabetical-desc"
+                },
+                {
+                    "title": "Short → Long",
+                    "value": "length-asc"
+                },
+                {
+                    "title": "Long → Short",
+                    "value": "length-desc"
+                },
+                {
+                    "title": "Old → New",
+                    "value": "recent-asc"
+                },
+                {
+                    "title": "New → Old",
+                    "value": "recent-desc"
+                },
+                {
+                    "title": "None",
+                    "value": "none"
+                }
+            ]
+        },
+        {
+            "name": "folderContentsSortTertiary",
+            "type": "dropdown",
+            "required": true,
+            "title": "🥉 Tertiary Sort",
+            "description": "Used when items are equal by the first two sorts",
+            "default": "none",
+            "data": [
+                {
+                    "title": "A → Z",
+                    "value": "alphabetical-asc"
+                },
+                {
+                    "title": "Z → A",
+                    "value": "alphabetical-desc"
+                },
+                {
+                    "title": "Short → Long",
+                    "value": "length-asc"
+                },
+                {
+                    "title": "Long → Short",
+                    "value": "length-desc"
+                },
+                {
+                    "title": "Old → New",
+                    "value": "recent-asc"
+                },
+                {
+                    "title": "New → Old",
+                    "value": "recent-desc"
+                },
+                {
+                    "title": "None",
+                    "value": "none"
+                }
+            ]
+        },
+        {
+            "name": "folderContentsViewType",
+            "type": "dropdown",
+            "required": true,
+            "title": "📋 View Type",
+            "description": "How to display items when viewing folder contents",
+            "default": "list",
+            "data": [
+                {
+                    "title": "List View",
+                    "value": "list"
+                },
+                {
+                    "title": "Grid View",
+                    "value": "grid"
+                }
+            ]
+        },
+        {
+            "name": "showPreviewPane",
+            "type": "checkbox",
+            "required": true,
+            "title": "Preview Pane",
+            "description": "Show folder contents in a preview pane beside the folder list",
+            "label": "Show Preview Pane",
+            "default": false
+        },
+        {
+            "name": "gridSeparateSections",
+            "type": "checkbox",
+            "required": true,
+            "title": "Folder Contents",
+            "description": "Group apps, websites, and folders into separate sections",
+            "label": "Separate Apps, Websites & Folders",
+            "default": true
+        },
+        {
+            "name": "defaultFolderColor",
+            "type": "textfield",
+            "required": false,
+            "title": "Default Folder Color",
+            "description": "CSS color name or hex code for new folders",
+            "placeholder": "coral"
+        }
+    ],
+    "commands": [
+        {
+            "name": "index",
+            "title": "Folders",
+            "description": "Search and open your custom folders",
+            "mode": "view",
+            "keywords": [
+                "folder",
+                "folders",
+                "organize"
+            ]
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.69.0",
+        "@raycast/utils": "^1.10.0"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.11",
+        "@types/node": "^20.8.0",
+        "@types/react": "^18.2.0",
+        "eslint": "^8.51.0",
+        "prettier": "^3.0.0",
+        "typescript": "^5.2.2"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
