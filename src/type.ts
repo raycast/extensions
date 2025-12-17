@@ -1,5 +1,5 @@
 export interface Prefs {
-  airpodsIndex: number;
+  airpodsIndex: string; // textfield returns string, will be parsed to number
   airpodsType: "pro" | "max";
   soundLoc: string;
   optionOne: string;

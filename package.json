@@ -31,69 +31,6 @@
         "isolation",
         "anc",
         "adaptive"
-      ],
-      "preferences": [
-        {
-          "name": "optionOne",
-          "title": "Option One 🔵",
-          "description": "First option to switch between.",
-          "type": "dropdown",
-          "default": "Noise Cancellation",
-          "data": [
-            {
-              "title": "Off",
-              "value": "Off"
-            },
-            {
-              "title": "Transparency",
-              "value": "Transparency"
-            },
-            {
-              "title": "Adaptive (only if you have)",
-              "value": "Adaptive"
-            },
-            {
-              "title": "Noise Cancellation",
-              "value": "Noise Cancellation"
-            }
-          ],
-          "required": true
-        },
-        {
-          "name": "optionTwo",
-          "title": "Option Two 🟢",
-          "description": "Second option to switch between.",
-          "type": "dropdown",
-          "default": "Transparency",
-          "data": [
-            {
-              "title": "Off",
-              "value": "Off"
-            },
-            {
-              "title": "Transparency",
-              "value": "Transparency"
-            },
-            {
-              "title": "Adaptive (only if you have)",
-              "value": "Adaptive"
-            },
-            {
-              "title": "Noise Cancellation",
-              "value": "Noise Cancellation"
-            }
-          ],
-          "required": true
-        },
-        {
-          "title": "Preview",
-          "name": "showHudNC",
-          "label": "Show HUD For Noise Control",
-          "description": "Show HUD feedback on noise control change.",
-          "type": "checkbox",
-          "default": false,
-          "required": true
-        }
       ]
     },
     {
@@ -106,17 +43,6 @@
         "airpods",
         "conversation",
         "awareness"
-      ],
-      "preferences": [
-        {
-          "title": "Preview",
-          "name": "showHudCA",
-          "label": "Show HUD For Conversation Awareness",
-          "description": "Show HUD feedback on conversation awareness change.",
-          "type": "checkbox",
-          "default": true,
-          "required": true
-        }
       ]
     }
   ],
@@ -155,6 +81,76 @@
       "required": false,
       "default": "Sound",
       "placeholder": "Sound, Ton, ..."
+    },
+    {
+      "name": "optionOne",
+      "title": "Option One 🔵",
+      "description": "First noise control mode to switch between",
+      "type": "dropdown",
+      "default": "Noise Cancellation",
+      "required": true,
+      "data": [
+        {
+          "title": "Off",
+          "value": "Off"
+        },
+        {
+          "title": "Transparency",
+          "value": "Transparency"
+        },
+        {
+          "title": "Adaptive",
+          "value": "Adaptive"
+        },
+        {
+          "title": "Noise Cancellation",
+          "value": "Noise Cancellation"
+        }
+      ]
+    },
+    {
+      "name": "optionTwo",
+      "title": "Option Two 🟢",
+      "description": "Second noise control mode to switch between",
+      "type": "dropdown",
+      "default": "Transparency",
+      "required": true,
+      "data": [
+        {
+          "title": "Off",
+          "value": "Off"
+        },
+        {
+          "title": "Transparency",
+          "value": "Transparency"
+        },
+        {
+          "title": "Adaptive",
+          "value": "Adaptive"
+        },
+        {
+          "title": "Noise Cancellation",
+          "value": "Noise Cancellation"
+        }
+      ]
+    },
+    {
+      "name": "showHudNC",
+      "title": "Show HUD For Noise Control",
+      "description": "Show heads-up display when switching noise control modes",
+      "type": "checkbox",
+      "label": "Show HUD",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showHudCA",
+      "title": "Show HUD For Conversation Awareness",
+      "description": "Show heads-up display when toggling conversation awareness",
+      "type": "checkbox",
+      "label": "Show HUD",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
