@@ -63,6 +63,33 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "say",
+      "title": "Say",
+      "description": "Say it from AI"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@say Say out loud the days of the week",
+        "mocks": {
+          "say": "Successfully called \"say\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "content": "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday"
+              },
+              "name": "say"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.104.0",
     "@raycast/utils": "^2.2.2",
