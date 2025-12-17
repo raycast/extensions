@@ -48,12 +48,14 @@
     {
       "name": "show-profile",
       "title": "Show Profile",
+      "subtitle": "Umami",
       "description": "View your user and update password",
       "mode": "view"
     },
     {
       "name": "view-websites",
       "title": "View Websites",
+      "subtitle": "Umami",
       "description": "View your websites and their stats",
       "mode": "view"
     }
