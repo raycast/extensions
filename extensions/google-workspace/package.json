@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-workspace",
   "title": "Google Workspace",
-  "description": "Access Google Drive files.",
+  "description": "Access Google Drive files",
   "icon": "google-logo.png",
   "owner": "raycast",
   "access": "public",
@@ -38,7 +38,7 @@
     {
       "name": "create-google-document",
       "title": "Create Google Document",
-      "description": "Create a new Google document.",
+      "description": "Create a new Google document",
       "icon": "google-docs.png",
       "mode": "no-view",
       "arguments": [
@@ -53,14 +53,14 @@
     {
       "name": "create-google-spreadsheet",
       "title": "Create Google Spreadsheet",
-      "description": "Create a new Google spreadsheet.",
+      "description": "Create a new Google spreadsheet",
       "icon": "google-sheets.png",
       "mode": "no-view"
     },
     {
       "name": "create-google-presentation",
       "title": "Create Google Presentation",
-      "description": "Create a new Google presentation.",
+      "description": "Create a new Google presentation",
       "icon": "google-slides.png",
       "mode": "no-view",
       "arguments": [
@@ -75,7 +75,7 @@
     {
       "name": "create-google-form",
       "title": "Create Google Form",
-      "description": "Create a new Google form.",
+      "description": "Create a new Google form",
       "icon": "google-forms.png",
       "mode": "no-view",
       "arguments": [
@@ -90,21 +90,21 @@
     {
       "name": "open-google-drive-home",
       "title": "Open Google Drive Home",
-      "description": "Open Google Drive in your default browser.",
+      "description": "Open Google Drive in your default browser",
       "icon": "google-drive.png",
       "mode": "no-view"
     },
     {
       "name": "search-google-drive-files",
       "title": "Search Google Drive Files",
-      "description": "Search files in your Google Drive.",
+      "description": "Search files in your Google Drive",
       "icon": "google-drive.png",
       "mode": "view"
     },
     {
       "name": "starred-google-drive-files-menubar",
       "title": "Starred Google Drive Files",
-      "description": "List of your starred Google Drive files in the Menu Bar.",
+      "description": "List your starred Google Drive files in the Menu Bar",
       "icon": "google-drive.png",
       "mode": "menu-bar",
       "interval": "15m"

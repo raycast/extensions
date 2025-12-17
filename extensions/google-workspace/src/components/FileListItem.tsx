@@ -28,8 +28,9 @@ export default function FileListItem({ file, email }: FileListItemProps) {
       })()
     : null;
 
-  const iconUrl = getFileIconLink(file.mimeType, 256);
-  const markdown = `<img src="${iconUrl}" alt="${file.name}" width="185" />`;
+  // Use thumbnail if available, otherwise use icon
+  const imageUrl = file.thumbnailLink || getFileIconLink(file.mimeType, 256);
+  const markdown = `<img src="${imageUrl}" alt="${file.name}" width="185" />`;
 
   const detail = (
     <List.Item.Detail

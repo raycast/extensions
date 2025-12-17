@@ -53,6 +53,7 @@ export type File = {
   viewersCanCopyContent?: boolean;
   imageMediaMetadata?: ImageMediaMetadata;
   videoMediaMetadata?: VideoMediaMetadata;
+  thumbnailLink?: string;
   starred: boolean;
   parents?: string[];
   filePath?: string;
