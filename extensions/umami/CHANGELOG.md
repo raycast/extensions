@@ -1,3 +1,3 @@
 # Umami Changelog
 
-## [Initial Version] - 2024-05-12
+## [Initial Version] - {PR_MERGE_DATE}
