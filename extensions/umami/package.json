@@ -9,6 +9,22 @@
     "Applications"
   ],
   "license": "MIT",
+  "commands": [
+    {
+      "name": "show-profile",
+      "title": "Show Profile",
+      "subtitle": "Umami",
+      "description": "View your user and update password",
+      "mode": "view"
+    },
+    {
+      "name": "view-websites",
+      "title": "View Websites",
+      "subtitle": "Umami",
+      "description": "View your websites and their stats",
+      "mode": "view"
+    }
+  ],
   "preferences": [
     {
       "name": "UMAMI_API_CLIENT_ENDPOINT",
@@ -42,22 +58,6 @@
       "description": "A unique string provided by Umami Cloud.",
       "type": "password",
       "required": false
-    }
-  ],
-  "commands": [
-    {
-      "name": "show-profile",
-      "title": "Show Profile",
-      "subtitle": "Umami",
-      "description": "View your user and update password",
-      "mode": "view"
-    },
-    {
-      "name": "view-websites",
-      "title": "View Websites",
-      "subtitle": "Umami",
-      "description": "View your websites and their stats",
-      "mode": "view"
     }
   ],
   "dependencies": {
