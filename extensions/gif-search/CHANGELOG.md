@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Faster Thumbnails] - {PR_MERGE_DATE}
+## [Faster Thumbnails] - 2025-12-17
 
 - Speed up loading of thumbnails in large grid items
 
