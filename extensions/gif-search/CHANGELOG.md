@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Faster Thumbnails] - {PR_MERGE_DATE}
+
+- Speed up loading of thumbnails in large grid items
+
 ## [Enhancement] - 2025-09-29
 
 - Add a new action to paste a GIF into the front-most application
