@@ -90,7 +90,7 @@ export default function Command() {
                         style: Toast.Style.Failure,
                         title: "Failed to refresh",
                         message: String(error),
-                      })
+                      }),
                     )
                     .finally(() => setIsLoading(false));
                 }}
@@ -121,7 +121,7 @@ function filterBindings(all: Keybinding[], search: string): Keybinding[] {
     ].map((v) => v.toLowerCase());
 
     return tokens.every((token) =>
-      haystacks.some((text) => text.includes(token))
+      haystacks.some((text) => text.includes(token)),
     );
   });
 }
