@@ -18,7 +18,7 @@ import { catchError, handleError } from "./errors.js";
 import * as git from "./git.js";
 import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
-import { extensionLink, getActualIconPath, userLink, openWith } from "./utils.js";
+import { extensionLink, getActualIconPath, openWith, userLink } from "./utils.js";
 
 function ManageForkedExtensions() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
