@@ -5,6 +5,8 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
+  Icon,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchKeybindings, cacheTTLMinutesOrDefault } from "./keybindings";
@@ -73,6 +75,8 @@ export default function Command() {
               />
               <Action
                 title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={() => {
                   setIsLoading(true);
                   fetchKeybindings(locale, {
@@ -86,7 +90,7 @@ export default function Command() {
                         style: Toast.Style.Failure,
                         title: "Failed to refresh",
                         message: String(error),
-                      }),
+                      })
                     )
                     .finally(() => setIsLoading(false));
                 }}
@@ -117,7 +121,7 @@ function filterBindings(all: Keybinding[], search: string): Keybinding[] {
     ].map((v) => v.toLowerCase());
 
     return tokens.every((token) =>
-      haystacks.some((text) => text.includes(token)),
+      haystacks.some((text) => text.includes(token))
     );
   });
 }
