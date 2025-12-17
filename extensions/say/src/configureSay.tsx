@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast } from "@raycast/api";
 import { groupBy } from "lodash";
-import { Device, Voice, say, getAudioDevices } from "mac-say";
-import { systemDefault } from "./constants.js";
+import { Device, Voice, getAudioDevices, say } from "mac-say";
+import { SpeechPlist } from "@/types";
 import {
   getAdvancedMessage,
   getRates,
@@ -11,8 +11,8 @@ import {
   languageCodeToEmojiFlag,
   useSaySettings,
   voiceNameToEmojiFlag,
-} from "./utils.js";
-import { SpeechPlist } from "./types.js";
+  SYSTEM_DEFAULT,
+} from "@/utils";
 
 export default function ConfigureSay() {
   const [isLoading, setIsLoading] = useState(true);
@@ -54,11 +54,11 @@ export default function ConfigureSay() {
             icon={Icon.SpeechBubbleActive}
             title="Say Example"
             onSubmit={async () => {
-              const foundVoice = voices.find((v) => v.name === (voice === systemDefault ? speechPlist?.voice : voice));
+              const foundVoice = voices.find((v) => v.name === (voice === SYSTEM_DEFAULT ? speechPlist?.voice : voice));
               await say(foundVoice ? foundVoice.example : "This voice is from system settings.", {
-                voice: foundVoice ? (voice === systemDefault ? undefined : voice) : undefined,
-                rate: rate === systemDefault ? undefined : parseInt(rate, 10),
-                audioDevice: device === systemDefault ? undefined : device,
+                voice: foundVoice ? (voice === SYSTEM_DEFAULT ? undefined : voice) : undefined,
+                rate: rate === SYSTEM_DEFAULT ? undefined : parseInt(rate, 10),
+                audioDevice: device === SYSTEM_DEFAULT ? undefined : device,
               });
             }}
           />
@@ -78,8 +78,8 @@ export default function ConfigureSay() {
       >
         <Form.Dropdown.Item
           icon={voiceNameToEmojiFlag(voices, speechPlist?.voice)}
-          value={systemDefault}
-          title={`${speechPlist?.voice ?? "Default"} (${systemDefault})`}
+          value={SYSTEM_DEFAULT}
+          title={`${speechPlist?.voice ?? "Default"} (${SYSTEM_DEFAULT})`}
         />
         {Object.entries(
           groupBy(voices, (v) => new Intl.DisplayNames(["en"], { type: "language" }).of(v.languageCode.slice(0, 2))),
@@ -107,7 +107,7 @@ export default function ConfigureSay() {
           }
         }}
       >
-        <Form.Dropdown.Item value={systemDefault} title={`${speechPlist?.rate ?? "Default"} (${systemDefault})`} />
+        <Form.Dropdown.Item value={SYSTEM_DEFAULT} title={`${speechPlist?.rate ?? "Default"} (${SYSTEM_DEFAULT})`} />
         <Form.Dropdown.Section>
           {getRates().map((rate) => (
             <Form.Dropdown.Item key={rate} value={rate.toString()} title={rate.toString()} />
@@ -125,7 +125,7 @@ export default function ConfigureSay() {
           }
         }}
       >
-        <Form.Dropdown.Item value={systemDefault} title={`Default (${systemDefault})`} />
+        <Form.Dropdown.Item value={SYSTEM_DEFAULT} title={`Default (${SYSTEM_DEFAULT})`} />
         <Form.Dropdown.Section>
           {audioDevices.map((d) => (
             <Form.Dropdown.Item key={d.id} value={d.id} title={d.name} />

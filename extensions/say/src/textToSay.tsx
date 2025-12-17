@@ -1,5 +1,5 @@
 import { ActionPanel, Form } from "@raycast/api";
-import { ConfigureSpokenContent, TextToSpeech } from "./components/actions.js";
+import { ConfigureSpokenContent, TextToSpeech } from "@/components/actions";
 
 export default function TextToSay() {
   return (

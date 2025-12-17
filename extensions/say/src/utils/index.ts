@@ -5,22 +5,25 @@ import { Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import bplist from "bplist-parser";
 import { Voice, getVoices } from "mac-say";
-import { minRate, maxRate } from "./constants.js";
-import { systemDefault } from "./constants.js";
-import { ParsedSaySettings, SpeechPlist, StoredSaySettings } from "./types.js";
+import { ParsedSaySettings, SpeechPlist, StoredSaySettings } from "@/types";
+
+export const SYSTEM_DEFAULT = "System Settings";
+export const DEFAULT_RATE = 175;
+export const MIN_RATE = 50;
+export const MAX_RATE = 300;
 
 const cache = new Cache();
 
 function getCache(key: string): string;
 function getCache(key: "keepSilentOnError"): boolean;
 function getCache(key: string | "keepSilentOnError"): string | boolean {
-  return JSON.parse(cache.get(key) ?? `"${systemDefault}"`);
+  return JSON.parse(cache.get(key) ?? `"${SYSTEM_DEFAULT}"`);
 }
 
 export const useSaySettings = () => {
-  const [voice, setVoice] = useCachedState<string>("voice", systemDefault);
-  const [rate, setRate] = useCachedState<string>("rate", systemDefault);
-  const [device, setAudioDevice] = useCachedState<string>("audioDevice", systemDefault);
+  const [voice, setVoice] = useCachedState<string>("voice", SYSTEM_DEFAULT);
+  const [rate, setRate] = useCachedState<string>("rate", SYSTEM_DEFAULT);
+  const [device, setAudioDevice] = useCachedState<string>("audioDevice", SYSTEM_DEFAULT);
   const [keepSilentOnError, setKeepSilentOnError] = useCachedState<boolean>("keepSilentOnError", false);
   return { voice, rate, device, keepSilentOnError, setVoice, setRate, setAudioDevice, setKeepSilentOnError };
 };
@@ -36,9 +39,9 @@ export const getSaySettings = () => {
 export const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
   const { voice, rate, audioDevice, keepSilentOnError } = settings;
   return {
-    voice: voice === systemDefault ? undefined : voice,
-    rate: rate === systemDefault ? undefined : parseInt(rate, 10),
-    audioDevice: audioDevice === systemDefault ? undefined : audioDevice,
+    voice: voice === SYSTEM_DEFAULT ? undefined : voice,
+    rate: rate === SYSTEM_DEFAULT ? undefined : parseInt(rate, 10),
+    audioDevice: audioDevice === SYSTEM_DEFAULT ? undefined : audioDevice,
     keepSilentOnError,
   };
 };
@@ -76,7 +79,7 @@ export const voiceNameToEmojiFlag = (voices: Voice[], voiceName?: string) => {
 export const getRates = () => {
   const step = 25;
   const rates = [];
-  for (let i = minRate; i <= maxRate; i += step) {
+  for (let i = MIN_RATE; i <= MAX_RATE; i += step) {
     rates.push(i);
   }
   return rates;

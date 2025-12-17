@@ -1,9 +1,8 @@
 import { setTimeout } from "node:timers/promises";
 import { useEffect, useState } from "react";
 import { Action, Icon, open } from "@raycast/api";
-import { checkIfSayIsRunning, say, killRunningSay } from "mac-say";
-import { systemDefault } from "../constants.js";
-import { useSaySettings } from "../utils.js";
+import { checkIfSayIsRunning, killRunningSay, say } from "mac-say";
+import { useSaySettings, SYSTEM_DEFAULT } from "@/utils";
 
 export const ConfigureSpokenContent = () => (
   <Action
@@ -53,9 +52,9 @@ export const TextToSpeech = () => {
       title="Say"
       onSubmit={async (values) => {
         await say(values.content, {
-          voice: voice === systemDefault ? undefined : voice,
-          rate: rate === systemDefault ? undefined : parseInt(rate, 10),
-          audioDevice: device === systemDefault ? undefined : device,
+          voice: voice === SYSTEM_DEFAULT ? undefined : voice,
+          rate: rate === SYSTEM_DEFAULT ? undefined : parseInt(rate, 10),
+          audioDevice: device === SYSTEM_DEFAULT ? undefined : device,
         });
       }}
     />

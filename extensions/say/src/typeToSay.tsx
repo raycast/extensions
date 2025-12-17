@@ -1,7 +1,7 @@
 import { LaunchProps } from "@raycast/api";
-import { say, SayOptions } from "mac-say";
 import { omitBy } from "lodash";
-import { getSaySettings, parseSaySettings } from "./utils.js";
+import { SayOptions, say } from "mac-say";
+import { getSaySettings, parseSaySettings } from "@/utils";
 
 type LaunchContext = {
   sayOptions: SayOptions;

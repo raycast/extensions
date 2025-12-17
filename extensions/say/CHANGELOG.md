@@ -1,5 +1,10 @@
 # Say - Text to Speech Changelog
 
+## [Updates] - {PR_MERGE_DATE}
+
+- Update dependencies, cleanup eslint
+- Refactored code to separate screens from the rest
+
 ## [Bugfix] - 2025-10-06
 
 - Fix missing await for say function to keep the command process alive

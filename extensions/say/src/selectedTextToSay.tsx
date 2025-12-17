@@ -1,6 +1,6 @@
 import { closeMainWindow, getSelectedText } from "@raycast/api";
 import { say } from "mac-say";
-import { getSaySettings, parseSaySettings } from "./utils.js";
+import { getSaySettings, parseSaySettings } from "@/utils";
 
 export default async function SelectionToSay() {
   await closeMainWindow();
