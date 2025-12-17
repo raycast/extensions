@@ -1,6 +1,6 @@
 # Netherlands Railways Train Search Changelog
 
-## [0.0.3] - {PR_MERGE_DATE}
+## [0.0.3] - 2025-12-17
 
 - Added optional caching for last selected "From" and "To" stations
 - Added "Remember Last Used Stations" preference setting to control caching behavior
