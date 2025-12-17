@@ -32,7 +32,6 @@ interface GifActionsProps {
 }
 
 export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifActionsProps) {
-  return null;
   const { id, url, gif_url } = item;
 
   const service = getServiceFromUrl(item);
