@@ -1,10 +1,10 @@
 import { closeMainWindow, getSelectedText } from "@raycast/api";
 import { say } from "mac-say";
-import { getSaySettings, parseSaySettings } from "@/utils";
+import { getParsedSaySettings } from "@/utils";
 
 export default async function SelectionToSay() {
   await closeMainWindow();
-  const { keepSilentOnError, ...saySettings } = parseSaySettings(getSaySettings());
+  const { keepSilentOnError, ...saySettings } = getParsedSaySettings();
   try {
     const selectedText = await getSelectedText();
     await say(selectedText, saySettings);

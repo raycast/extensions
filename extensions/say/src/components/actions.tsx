@@ -2,7 +2,8 @@ import { setTimeout } from "node:timers/promises";
 import { useEffect, useState } from "react";
 import { Action, Icon, open } from "@raycast/api";
 import { checkIfSayIsRunning, killRunningSay, say } from "mac-say";
-import { useSaySettings, SYSTEM_DEFAULT } from "@/utils";
+import { useSaySettings } from "@/hooks/use-say-settings";
+import { SYSTEM_DEFAULT } from "@/utils";
 
 export const ConfigureSpokenContent = () => (
   <Action

@@ -1,7 +1,7 @@
 import { LaunchProps } from "@raycast/api";
 import { omitBy } from "lodash";
 import { SayOptions, say } from "mac-say";
-import { getSaySettings, parseSaySettings } from "@/utils";
+import { getParsedSaySettings } from "@/utils";
 
 type LaunchContext = {
   sayOptions: SayOptions;
@@ -12,6 +12,6 @@ export default async function TypeToSay({
   launchContext,
 }: LaunchProps<{ arguments: Arguments.TypeToSay; launchContext?: LaunchContext }>) {
   if (!args.content) return;
-  const saySettings = parseSaySettings(getSaySettings());
+  const saySettings = getParsedSaySettings();
   await say(args.content, { ...saySettings, ...omitBy(launchContext?.sayOptions, (v) => !v) });
 }

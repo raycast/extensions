@@ -2,7 +2,6 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { Cache } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import bplist from "bplist-parser";
 import { Voice, getVoices } from "mac-say";
 import { ParsedSaySettings, SpeechPlist, StoredSaySettings } from "@/types";
@@ -20,15 +19,7 @@ function getCache(key: string | "keepSilentOnError"): string | boolean {
   return JSON.parse(cache.get(key) ?? `"${SYSTEM_DEFAULT}"`);
 }
 
-export const useSaySettings = () => {
-  const [voice, setVoice] = useCachedState<string>("voice", SYSTEM_DEFAULT);
-  const [rate, setRate] = useCachedState<string>("rate", SYSTEM_DEFAULT);
-  const [device, setAudioDevice] = useCachedState<string>("audioDevice", SYSTEM_DEFAULT);
-  const [keepSilentOnError, setKeepSilentOnError] = useCachedState<boolean>("keepSilentOnError", false);
-  return { voice, rate, device, keepSilentOnError, setVoice, setRate, setAudioDevice, setKeepSilentOnError };
-};
-
-export const getSaySettings = () => {
+const getSaySettings = () => {
   const voice = getCache("voice");
   const rate = getCache("rate");
   const audioDevice = getCache("audioDevice");
@@ -36,7 +27,7 @@ export const getSaySettings = () => {
   return { voice, rate, audioDevice, keepSilentOnError };
 };
 
-export const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
+const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
   const { voice, rate, audioDevice, keepSilentOnError } = settings;
   return {
     voice: voice === SYSTEM_DEFAULT ? undefined : voice,
@@ -44,6 +35,10 @@ export const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings
     audioDevice: audioDevice === SYSTEM_DEFAULT ? undefined : audioDevice,
     keepSilentOnError,
   };
+};
+
+export const getParsedSaySettings = (): ParsedSaySettings => {
+  return parseSaySettings(getSaySettings());
 };
 
 export const getSortedVoices = async () => {

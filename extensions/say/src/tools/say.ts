@@ -1,5 +1,5 @@
 import { say } from "mac-say";
-import { getSaySettings, parseSaySettings } from "@/utils";
+import { getParsedSaySettings } from "@/utils";
 
 type Input = {
   /**
@@ -12,7 +12,7 @@ type Input = {
  * Use AI to say things out loud
  */
 export default async function ({ content }: Input) {
-  const { keepSilentOnError, ...saySettings } = parseSaySettings(getSaySettings());
+  const { keepSilentOnError, ...saySettings } = getParsedSaySettings();
   try {
     await say(content, saySettings);
   } catch (error) {

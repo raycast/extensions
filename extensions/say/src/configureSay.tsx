@@ -3,13 +3,13 @@ import { Action, ActionPanel, Form, Icon, showToast } from "@raycast/api";
 import { groupBy } from "lodash";
 import { Device, Voice, getAudioDevices, say } from "mac-say";
 import { SpeechPlist } from "@/types";
+import { useSaySettings } from "@/hooks/use-say-settings";
 import {
   getAdvancedMessage,
   getRates,
   getSortedVoices,
   getSpeechPlist,
   languageCodeToEmojiFlag,
-  useSaySettings,
   voiceNameToEmojiFlag,
   SYSTEM_DEFAULT,
 } from "@/utils";
