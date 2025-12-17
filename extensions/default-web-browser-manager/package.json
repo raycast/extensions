@@ -17,7 +17,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "set-default-browser",
+      "name": "choose-browser",
       "title": "Set Default Browser",
       "description": "Set your default browser",
       "mode": "view"
