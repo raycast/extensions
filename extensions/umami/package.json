@@ -46,14 +46,14 @@
   ],
   "commands": [
     {
-      "name": "me",
-      "title": "Me",
+      "name": "show-profile",
+      "title": "Show Profile",
       "description": "View your user and update password",
       "mode": "view"
     },
     {
-      "name": "websites",
-      "title": "Websites",
+      "name": "view-websites",
+      "title": "View Websites",
       "description": "View your websites and their stats",
       "mode": "view"
     }
