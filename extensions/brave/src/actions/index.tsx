@@ -166,7 +166,8 @@ export async function executeJavascript(code: string): Promise<void> {
       .replace(/\\/g, "\\\\")
       .replace(/"/g, '\\"')
       .replace(/\r/g, "\\r")
-      .replace(/\n/g, "\\n");
+      .replace(/\n/g, "\\n")
+      .replace(/\t/g, "\\t");
     const script = `
       tell application "${browserOption}"
         activate
