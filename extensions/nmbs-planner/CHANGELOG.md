@@ -1,6 +1,6 @@
 # NMBS Planner Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-17
 
 - Update dependencies to latest
 - Add Windows support
