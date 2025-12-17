@@ -493,7 +493,7 @@
   ],
   "dependencies": {
     "@giphy/js-fetch-api": "^5.4.0",
-    "@raycast/api": "^1.93.2",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.2",
     "date-fns": "^3.6.0",
     "tempy": "^2.0.0"
@@ -504,7 +504,8 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "@giphy/js-types": "^5.1.0"
   },
   "scripts": {
     "build": "ray build -e dist",

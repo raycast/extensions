@@ -40,7 +40,7 @@ export default async function tenor() {
       const reqUrl = new URL(API_BASE_URL);
       reqUrl.searchParams.set("locale", getTenorLocale());
       reqUrl.searchParams.set("q", term);
-      reqUrl.searchParams.set("media_filter", "gif,nanogif");
+      reqUrl.searchParams.set("media_filter", "gif,nanogif,tinygif");
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
 
       if (opt?.next) {
@@ -59,7 +59,7 @@ export default async function tenor() {
     async trending(opt?: APIOpt) {
       const reqUrl = new URL(API_BASE_URL);
       reqUrl.searchParams.set("locale", getTenorLocale());
-      reqUrl.searchParams.set("media_filter", "gif,nanogif");
+      reqUrl.searchParams.set("media_filter", "gif,nanogif,tinygif");
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
 
       if (opt?.next) {
@@ -82,7 +82,7 @@ export default async function tenor() {
 
       const reqUrl = new URL(API_BASE_URL);
       reqUrl.searchParams.set("ids", ids.join(","));
-      reqUrl.searchParams.set("media_filter", "gif,nanogif");
+      reqUrl.searchParams.set("media_filter", "gif,nanogif,tinygif");
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
 
       const response = await fetch(reqUrl.toString());
