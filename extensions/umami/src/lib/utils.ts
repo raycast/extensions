@@ -1,7 +1,7 @@
 import { UmamiErrorResponse } from "./types";
 
 export const handleUmamiError = (error: unknown) => {
-  if (error===undefined) return;
+  if (error === undefined) return;
   if (error instanceof Error) throw new Error(error.message);
   if (typeof error === "string") {
     let message = "";

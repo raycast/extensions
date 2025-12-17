@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Alert, Form, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Form,
+  Icon,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { umami } from "./lib/umami";
 import { AddWebsiteFormValues } from "./lib/types";
 import { FormValidation, getFavicon, useCachedPromise, useForm } from "@raycast/utils";
@@ -38,7 +50,7 @@ function Websites() {
   });
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} isShowingDetail>
       {websites && !websites.length && (
         <List.EmptyView
           title="Add your website to get started."
@@ -55,38 +67,68 @@ function Websites() {
           key={website.id}
           icon={getFavicon(`https://${website.domain}`)}
           title={website.name}
-          subtitle={website.domain}
-          accessories={[{ icon: Icon.Number24, text: `${website.stats?.pageviews.value || 0}`, tooltip: "24h" }]}
+          detail={
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  {website.stats && (
+                    <>
+                      <List.Item.Detail.Metadata.Label title="Stats" />
+                      <List.Item.Detail.Metadata.Label title="Bounces" text={`${website.stats.bounces.value || 0}`} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Page Views"
+                        text={`${website.stats.pageviews.value || 0}`}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="Total Time"
+                        text={`${website.stats.totaltime.value || 0}`}
+                      />
+                      <List.Item.Detail.Metadata.Label title="Visitors" text={`${website.stats.visitors.value || 0}`} />
+                      <List.Item.Detail.Metadata.Label title="Visits" text={`${website.stats.visits.value || 0}`} />
+                    </>
+                  )}
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel>
               <Action.Push title="Add Website" icon={Icon.Plus} target={<AddWebsite />} onPop={mutate} />
-              <Action icon={Icon.Trash} title="Delete Website" onAction={() => confirmAlert({
-                icon: Icon.Trash,
-                title: "Delete Website",
-                primaryAction: {
-                  style: Alert.ActionStyle.Destructive,
-                  title: "Delete",
-                  async onAction() {
-                    const toast = await showToast(Toast.Style.Animated, "Deleting", website.name);
-                    try {
-                      await mutate(
-                        umami.deleteWebsite(website.id).then(({error}) => handleUmamiError(error)), {
-                          optimisticUpdate(data) {
-                            return data?.filter(w => w.id !== website.id)
-                          },
-                          shouldRevalidateAfter: false
+              <Action
+                icon={Icon.Trash}
+                title="Delete Website"
+                onAction={() =>
+                  confirmAlert({
+                    icon: { source: Icon.Trash, tintColor: Color.Red },
+                    title: "Delete Website",
+                    primaryAction: {
+                      style: Alert.ActionStyle.Destructive,
+                      title: "Delete",
+                      async onAction() {
+                        const toast = await showToast(Toast.Style.Animated, "Deleting", website.name);
+                        try {
+                          await mutate(
+                            umami.deleteWebsite(website.id).then(({ error }) => handleUmamiError(error)),
+                            {
+                              optimisticUpdate(data) {
+                                return data?.filter((w) => w.id !== website.id);
+                              },
+                              shouldRevalidateAfter: false,
+                            },
+                          );
+                          toast.style = Toast.Style.Success;
+                          toast.title = "Deleted";
+                        } catch (error) {
+                          toast.style = Toast.Style.Failure;
+                          toast.title = "Failed";
+                          toast.message = `${error}`;
                         }
-                      )
-                      toast.style = Toast.Style.Success;
-                      toast.title = "Deleted";
-                    } catch (error) {
-                      toast.style = Toast.Style.Failure;
-                      toast.title = "Failed";
-                      toast.message = `${error}`;
-                    }
-                  },
+                      },
+                    },
+                  })
                 }
-              })} />
+                style={Action.Style.Destructive}
+              />
             </ActionPanel>
           }
         />

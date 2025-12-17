@@ -7,16 +7,18 @@ import { handleUmamiError } from "./lib/utils";
 import WithUmami from "./components/WithUmami";
 
 export default function Main() {
-  return <WithUmami>
-    <Me />
-  </WithUmami>
+  return (
+    <WithUmami>
+      <Me />
+    </WithUmami>
+  );
 }
 
 function Me() {
   const { isLoading, data, error } = useCachedPromise(async () => {
     const { data, error } = await umami.getMe();
     handleUmamiError(error);
-    const user = IS_CLOUD ? (data as {user: UmamiMe}).user : data as UmamiMe;
+    const user = IS_CLOUD ? (data as { user: UmamiMe }).user : (data as UmamiMe);
     return user;
   });
 
@@ -25,15 +27,19 @@ function Me() {
   ) : (
     <Detail
       isLoading={isLoading}
-      metadata={data && <Detail.Metadata>
-        <Detail.Metadata.Label title="ID" text={data.id} />
-        <Detail.Metadata.Label title="Username" text={data.username} />
-        <Detail.Metadata.TagList title="Role">
-          <Detail.Metadata.TagList.Item text={data.role} />
-        </Detail.Metadata.TagList>
-        <Detail.Metadata.Label title="Created At" text={data.createdAt} />
-        <Detail.Metadata.Label title="Is Admin" icon={data.isAdmin ? Icon.Check : Icon.Xmark} />
-      </Detail.Metadata>}
+      metadata={
+        data && (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="ID" text={data.id} />
+            <Detail.Metadata.Label title="Username" text={data.username} />
+            <Detail.Metadata.TagList title="Role">
+              <Detail.Metadata.TagList.Item text={data.role} />
+            </Detail.Metadata.TagList>
+            <Detail.Metadata.Label title="Created At" text={data.createdAt} />
+            <Detail.Metadata.Label title="Is Admin" icon={data.isAdmin ? Icon.Check : Icon.Xmark} />
+          </Detail.Metadata>
+        )
+      }
       actions={
         !data ? undefined : (
           <ActionPanel>
