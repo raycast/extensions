@@ -1,4 +1,4 @@
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
 import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
@@ -140,27 +140,6 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   `);
 }
 
-export async function executeJavaScriptOnActiveTab(script: string): Promise<void> {
-  const { browserOption } = getPreferenceValues<Preferences>();
-  const escapedScript = script
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/[\n\r]+/g, " ");
-  try {
-    await runAppleScript(`
-      tell application "${browserOption}"
-        execute active tab of window 1 javascript "${escapedScript}"
-      end tell
-    `);
-  } catch (e) {
-    const error = e as Error;
-    if (error.message.includes("Allow JavaScript from Apple Events")) {
-      throw new Error("Enable 'View > Developer > Allow JavaScript from Apple Events' in Brave.");
-    }
-    throw error;
-  }
-}
-
 const checkAppInstalled = async (): Promise<boolean> => {
   const { browserOption } = getPreferenceValues<Preferences>();
 
@@ -177,3 +156,35 @@ return isInstalled`);
   }
   return true;
 };
+
+export async function executeJavascript(code: string): Promise<void> {
+  const { browserOption } = getPreferenceValues<Preferences>();
+
+  try {
+    const decodedCode = decodeURIComponent(code);
+    const escapedCode = decodedCode
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\r/g, "\\r")
+      .replace(/\n/g, "\\n");
+    const script = `
+      tell application "${browserOption}"
+        activate
+        tell active tab of front window
+          execute javascript "${escapedCode}"
+        end tell
+      end tell
+    `;
+    await runAppleScript(script);
+    await closeMainWindow();
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Error && e.message.includes("Allow JavaScript from Apple Events")) {
+      await showFailureToast("Enable 'View > Developer > Allow JavaScript from Apple Events' in Brave.");
+    } else {
+      await showFailureToast("Could not run bookmarklet", {
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+}

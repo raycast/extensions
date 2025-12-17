@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import { closeTab, openNewTab, setActiveTab, executeJavaScriptOnActiveTab } from "../actions";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
+import { closeTab, executeJavascript, openNewTab, setActiveTab } from "../actions";
 import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "../constants";
@@ -66,33 +66,12 @@ function HistoryItemActions({
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
 
-  if (url.trim().toLowerCase().startsWith("javascript:")) {
+  if (url.startsWith("javascript:")) {
+    const code = url.substring("javascript:".length);
     return (
       <ActionPanel title={title}>
-        <Action
-          title="Run Bookmarklet"
-          icon={Icon.Code}
-          onAction={async () => {
-            await closeMainWindow();
-            const rawScript = url.trim().replace(/^javascript:/i, "");
-            let script = rawScript;
-            try {
-              script = decodeURIComponent(rawScript);
-            } catch {
-              // ignore
-            }
-            try {
-              await executeJavaScriptOnActiveTab(script);
-            } catch (e) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Error running bookmarklet",
-                message: (e as Error).message,
-              });
-            }
-          }}
-        />
-        <Action.CopyToClipboard title="Copy Script" content={url} />
+        <Action onAction={() => executeJavascript(code)} icon={Icon.Play} title="Run Bookmarklet" />
+        <Action.CopyToClipboard title="Copy Code" content={code} shortcut={{ modifiers: ["cmd"], key: "c" }} />
       </ActionPanel>
     );
   }
