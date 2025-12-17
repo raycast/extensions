@@ -1,6 +1,6 @@
 # NASA Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-17
 
 - Added Windows support
 - Update (dev) dependencies
