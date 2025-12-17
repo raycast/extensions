@@ -1,6 +1,6 @@
 # Zeabur Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-12-17
 
 - Added the manage servers command to manage the servers on Zeabur.
 - Added deploy template action, service count, and deployment count information to the template list.
