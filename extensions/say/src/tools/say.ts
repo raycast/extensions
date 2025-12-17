@@ -8,7 +8,7 @@ type Input = {
   voice?: string;
   /**
    * The rate to use. If not provided, the default rate will be used.
-   * The rate is a number between 50 and 300. The default rate is 175.
+   * The rate can be a number between 50 and 300.
    */
   rate?: number;
   /**
