@@ -1,6 +1,6 @@
 # Archiver Changelog
 
-## [Added Quick Compress Command] - {PR_MERGE_DATE}
+## [Added Quick Compress Command] - 2025-12-17
 
 - Added a new "Quick Compress Files" command that instantly compresses selected files without displaying an options dialog. User can also combine a shortcut for quick compression.
 

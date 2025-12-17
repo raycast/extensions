@@ -200,7 +200,7 @@
           "placeholder": "Select Location to Save Extracted"
         }
       ]
-    }, 
+    },
     {
       "name": "preview",
       "title": "Preview Zip File",
@@ -235,5 +235,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
