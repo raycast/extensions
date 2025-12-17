@@ -10,12 +10,12 @@ import {
   Toast,
   Alert,
   getPreferenceValues,
-  openExtensionPreferences,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ProjectInfo } from "./type";
 import { getProjects, getProjectUsage, deleteProject } from "./utils/zeabur-graphql";
 import ProjectServices from "./components/project-services";
+import ZeaburTokenUndefined from "./components/zeabur-token-undefined";
 
 export default function Command() {
   const preferences = getPreferenceValues();
@@ -77,17 +77,7 @@ export default function Command() {
   }, [sortBy, projects]);
 
   if (zeaburToken === undefined || zeaburToken === "") {
-    return (
-      <List
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      >
-        <List.EmptyView icon={Icon.Key} title="Please set Zeabur Token in the extension preferences" />
-      </List>
-    );
+    return <ZeaburTokenUndefined />;
   }
 
   return (
