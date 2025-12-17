@@ -1,6 +1,6 @@
 # Default Web Browser Manager Changelog
 
-## [Rename Command] - {PR_MERGE_DATE}
+## [Rename Command] - 2025-12-17
 
 - Rename "Choose" to "Set" so it better aligns with the default "System" setting commands
 
