@@ -3,7 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { Notification } from "./types";
 
-const rtf = new Intl.RelativeTimeFormat("fr", { numeric: "always" });
+const rtf = new Intl.RelativeTimeFormat("en", { numeric: "always" });
 
 const units = {
   year: 24 * 60 * 60 * 1000 * 365,
