@@ -223,7 +223,6 @@ async function generateWithAI(prompt: string, prefs: Preferences): Promise<strin
     const geminiData = data as {
       candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
     };
-    const parts = geminiData.candidates?.[0]?.content?.parts || [];
-    return parts[parts.length - 1]?.text || parts[0]?.text || "";
+    return geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
   }
 }
