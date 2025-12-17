@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "umami",
   "title": "Umami",
-  "description": "",
-  "icon": "command-icon.png",
+  "description": "The modern analytics platform for effortless insights",
+  "icon": "umami.png",
   "author": "xmok",
   "categories": [
     "Applications"
@@ -11,24 +11,8 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "UMAMI_API_CLIENT_USER_ID",
-      "title": "UMAMI_API_CLIENT_USER_ID",
-      "placeholder": "UMAMI_API_CLIENT_USER_ID",
-      "description": "The USER_ID of the User performing the API calls. Permission restrictions will apply based on application settings.",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "UMAMI_API_CLIENT_SECRET",
-      "title": "UMAMI_API_CLIENT_SECRET",
-      "placeholder": "UMAMI_API_CLIENT_SECRET",
-      "description": "A random string used to generate unique values. This needs to match the APP_SECRET used in the Umami application.",
-      "type": "password",
-      "required": false
-    },
-    {
       "name": "UMAMI_API_CLIENT_ENDPOINT",
-      "title": "UMAMI ENDPOINT",
+      "title": "Umami Endpoint",
       "placeholder": "UMAMI_API_CLIENT_ENDPOINT",
       "description": "The endpoint of your Umami API. Example: https://{yourserver}/api/",
       "default": "https://api.umami.is/v1",
@@ -36,8 +20,24 @@
       "required": true
     },
     {
+      "name": "UMAMI_API_CLIENT_USER_ID",
+      "title": "Umami User ID (Self-Hosted)",
+      "placeholder": "UMAMI_API_CLIENT_USER_ID",
+      "description": "The USER_ID of the User performing the API calls. Permission restrictions will apply based on application settings.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "UMAMI_API_CLIENT_SECRET",
+      "title": "Umami Client Secret (Self-Hosted)",
+      "placeholder": "UMAMI_API_CLIENT_SECRET",
+      "description": "A random string used to generate unique values. This needs to match the APP_SECRET used in the Umami application.",
+      "type": "password",
+      "required": false
+    },
+    {
       "name": "UMAMI_API_KEY",
-      "title": "UMAMI_API_KEY",
+      "title": "Umami API Key (Cloud)",
       "placeholder": "UMAMI_API_KEY",
       "description": "A unique string provided by Umami Cloud.",
       "type": "password",
@@ -48,21 +48,20 @@
     {
       "name": "me",
       "title": "Me",
-      "description": "",
+      "description": "View your user and update password",
       "mode": "view"
     },
     {
       "name": "websites",
       "title": "Websites",
-      "description": "",
+      "description": "View your websites and their stats",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.2",
-    "@raycast/utils": "^2.0.0",
-    "@types/umami": "^2.10.0",
-    "@umami/api-client": "^0.79.0"
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.2",
+    "@umami/api-client": "^0.80.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
