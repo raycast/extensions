@@ -1,10 +1,21 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useSpaces } from "../hooks/useSpaces";
+import { useCachedPromise } from "@raycast/utils";
+import { getClickUpClient } from "../api/clickup";
 import { SpaceFolders } from "./SpaceFolders";
 import { OpenInClickUpAction } from "../components/OpenInClickUpAction";
 
-function TeamSpaces({ teamId, teamName }: { teamId: string; teamName: string }) {
-  const { isLoading, spaces } = useSpaces(teamId);
+interface Props {
+  teamId: string;
+  teamName: string;
+}
+
+export function TeamSpaces({ teamId, teamName }: Props) {
+  const { isLoading, data: spaces } = useCachedPromise(
+    async (id: string) => getClickUpClient().getSpaces(id),
+    [teamId],
+    { initialData: [] },
+  );
+
   return (
     <List throttle={true} isLoading={isLoading} navigationTitle={`${teamName} Spaces`}>
       <List.Section title={`Teams / ${teamId}`} subtitle={`${spaces.length} spaces`}>
@@ -30,5 +41,3 @@ function TeamSpaces({ teamId, teamName }: { teamId: string; teamName: string }) 
     </List>
   );
 }
-
-export { TeamSpaces };

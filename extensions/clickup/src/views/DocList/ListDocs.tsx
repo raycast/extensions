@@ -1,10 +1,20 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import useDocs from "../../hooks/useDocs";
+import { useCachedPromise } from "@raycast/utils";
+import { getClickUpClient } from "../../api/clickup";
 import { ListDocPages } from "./ListDocPages";
 import { OpenInClickUpAction } from "../../components/OpenInClickUpAction";
 
-export function ListDocs({ workspaceId, workspaceName }: { workspaceId: string; workspaceName: string }) {
-  const { isLoading, docs } = useDocs(workspaceId);
+interface Props {
+  workspaceId: string;
+  workspaceName: string;
+}
+
+export function ListDocs({ workspaceId, workspaceName }: Props) {
+  const { isLoading, data: docs } = useCachedPromise(
+    async (id: string) => getClickUpClient().getDocs(id),
+    [workspaceId],
+    { initialData: [] },
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search docs" navigationTitle={`${workspaceName} Docs`}>

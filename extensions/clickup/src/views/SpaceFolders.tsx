@@ -1,12 +1,27 @@
-import { useFolders } from "../hooks/useFolders";
-import { Action, ActionPanel, Icon, List, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { getClickUpClient } from "../api/clickup";
 import { FolderLists } from "./FolderLists";
-import { useFolderlessTaskList } from "../hooks/useFolderlessTaskList";
 import { ListTasks } from "./TaskList/ListTasks";
 
-export function SpaceFolders({ spaceId, spaceName }: { spaceId: string; spaceName: string }) {
-  const { isLoading: isLoadingFolders, folders } = useFolders(spaceId);
-  const { isLoading: isLoadingLists, lists: folderlesstasks } = useFolderlessTaskList(spaceId);
+interface Props {
+  spaceId: string;
+  spaceName: string;
+}
+
+export function SpaceFolders({ spaceId, spaceName }: Props) {
+  const { isLoading: isLoadingFolders, data: folders } = useCachedPromise(
+    async (id: string) => getClickUpClient().getFolders(id),
+    [spaceId],
+    { initialData: [] },
+  );
+
+  const { isLoading: isLoadingLists, data: folderlessLists } = useCachedPromise(
+    async (id: string) => getClickUpClient().getFolderlessLists(id),
+    [spaceId],
+    { initialData: [] },
+  );
+
   return (
     <List
       throttle={true}
@@ -26,28 +41,28 @@ export function SpaceFolders({ spaceId, spaceName }: { spaceId: string; spaceNam
                 <Action.Push
                   icon={Icon.Eye}
                   title="Lists Page"
-                  target={<FolderLists folderId={folder?.id} folderName={folder?.name} />}
+                  target={<FolderLists folderId={folder.id} folderName={folder.name} />}
                 />
               </ActionPanel>
             }
           />
         ))}
       </List.Section>
-      {folderlesstasks.length ? (
+      {folderlessLists.length > 0 && (
         <List.Item
-          title={"Folderless Tasks"}
-          subtitle={`Total Tasks: ${folderlesstasks[0].task_count}`}
+          title="Folderless Tasks"
+          subtitle={`Total Tasks: ${folderlessLists[0].task_count}`}
           icon={Icon.Hashtag}
           actions={
             <ActionPanel title="Folderless Actions">
-              <PushAction
+              <Action.Push
                 title="Lists Page"
-                target={<ListTasks listId={folderlesstasks[0].id} listName="Folderless Tasks" />}
+                target={<ListTasks listId={folderlessLists[0].id} listName="Folderless Tasks" />}
               />
             </ActionPanel>
           }
         />
-      ) : undefined}
+      )}
     </List>
   );
 }
