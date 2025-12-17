@@ -1,14 +1,12 @@
-import { Form, ActionPanel, Action, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import QRCode from "qrcode";
-import { QrDetail, buildUrl, parseUrl } from "./utils";
-import { ParseResult } from "./types";
-import { showFailureToast } from "@raycast/utils";
+import { buildUrl, parseUrl } from "../utils";
+import { QrDetail } from "../qrcode";
+import { ParseResult } from "../types";
+import { EDIT_FORM_SHORTCUTS } from "../brief";
 
 export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed: ParseResult) => void }) {
   const [fields, setFields] = useState<ParseResult | null>(null);
-  const [qr, setQr] = useState<string | null>(null);
-  const { push } = useNavigation();
   const [showAddQuery, setShowAddQuery] = useState(false);
   const [newQueryKey, setNewQueryKey] = useState("");
   const [newQueryValue, setNewQueryValue] = useState("");
@@ -64,17 +62,6 @@ export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed
 
   const fullUrl = fields ? buildUrl(fields) : "";
 
-  async function handleGenerateQrAndShow() {
-    try {
-      const dataUrl = await QRCode.toDataURL(fullUrl);
-      setQr(dataUrl);
-      push(<QrDetail qr={dataUrl} url={fields} />);
-    } catch (error) {
-      console.error(error);
-      showFailureToast(error, { title: "Failed to generate QR code" });
-    }
-  }
-
   function handleSubmit() {
     if (fields) {
       onSave(fields);
@@ -93,12 +80,8 @@ export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed
   const descriptions = (
     <>
       <Form.Description
-        title="Usage>>>"
-        text={
-          showAddQuery
-            ? "💡Press Cmd + Shift + A Again to save the query!"
-            : "💡Press Cmd + Shift + A to add query parameter" + "\n" + "💡Press Cmd + Shift + P to save/pin to history"
-        }
+        title="Quick Actions"
+        text={showAddQuery ? EDIT_FORM_SHORTCUTS.addingQuery : EDIT_FORM_SHORTCUTS.default}
       />
       <Form.Separator />
       <Form.Description title="Full URL" text={fullUrl} />
@@ -111,12 +94,7 @@ export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed
       actions={
         <ActionPanel>
           <Action.CopyToClipboard content={fullUrl} title="Copy to Clipboard" />
-          <Action.Push
-            title="Show Qr Code"
-            icon={Icon.Code}
-            target={<QrDetail qr={qr || ""} url={fields} />}
-            onPush={handleGenerateQrAndShow}
-          />
+          <Action.Push title="Show Qr Code" icon={Icon.Code} target={<QrDetail url={fields} />} />
           {showAddQuery ? (
             <Action
               title="Add Query Parameter"
