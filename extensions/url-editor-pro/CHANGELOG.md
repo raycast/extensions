@@ -1,6 +1,6 @@
 # URL Editor Pro Changelog
 
-## [1.1.0] - 2024-12-18
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### New Features
 
