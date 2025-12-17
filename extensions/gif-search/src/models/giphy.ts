@@ -83,7 +83,8 @@ export function mapGiphyResponse(giphyResp: GiphyGif) {
     slug: slugify(title),
     download_url,
     download_name: `${slug}.${isGiphyClip && isMP4 ? "mp4" : "gif"}`,
-    preview_gif_url: isGiphyClip ? gif_url : giphyResp.images.preview_gif.url,
+    small_preview_gif_url: isGiphyClip ? gif_url : giphyResp.images.preview_gif.url,
+    large_preview_gif_url: isGiphyClip ? gif_url : giphyResp.images.fixed_height_small.url,
     gif_url,
     metadata: {
       width: giphyResp.images.original.width,

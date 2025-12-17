@@ -32,6 +32,7 @@ interface GifActionsProps {
 }
 
 export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifActionsProps) {
+  return null;
   const { id, url, gif_url } = item;
 
   const service = getServiceFromUrl(item);
@@ -161,7 +162,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     <Action
       icon={Icon.Clipboard}
       key="copyFile"
-      title="Copy GIF"
+      title="Copy Gif"
       onAction={copyGif}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
@@ -170,7 +171,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     <Action
       icon={Icon.Clipboard}
       key="pasteFile"
-      title="Paste GIF"
+      title="Paste Gif"
       onAction={pasteGif}
       shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
     />
@@ -178,7 +179,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   const copyGifUrl = (
     <Action.CopyToClipboard
       key="copyGifUrl"
-      title="Copy GIF Link"
+      title="Copy Gif Link"
       content={stripQParams(gif_url)}
       onCopy={trackUsage}
     />
@@ -186,7 +187,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   const copyGifMarkdown = (
     <Action.CopyToClipboard
       key="copyGifMarkdown"
-      title="Copy GIF Markdown"
+      title="Copy Gif Markdown"
       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       content={`![${item.title}](${stripQParams(gif_url)})`}
       onCopy={trackUsage}
@@ -195,7 +196,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   const pasteGifMarkdown = (
     <Action.Paste
       key="pasteGifMarkdown"
-      title="Paste GIF Markdown"
+      title="Paste Gif Markdown"
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       content={`![${item.title}](${stripQParams(gif_url)})`}
       onPaste={trackUsage}
@@ -237,7 +238,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     <Action.Push
       icon={Icon.Eye}
       key="viewDetails"
-      title="View GIF Details"
+      title="View Gif Details"
       target={<GifDetails item={item} mutate={mutate} />}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       onPush={trackUsage}
@@ -266,7 +267,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       key="downloadFile"
       shortcut={{ modifiers: ["cmd", "opt"], key: "d" }}
       icon={Icon.Download}
-      title="Download GIF"
+      title="Download Gif"
       onAction={downloadGIFAction}
     />
   );

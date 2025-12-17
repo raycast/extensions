@@ -105,7 +105,8 @@ export function mapTenorResponse(response: TenorGif) {
     slug,
     download_url: medias.gif.url,
     download_name: `${slug}.gif`,
-    preview_gif_url: medias.nanogif.url,
+    small_preview_gif_url: medias.nanogif.url,
+    large_preview_gif_url: medias.tinygif?.url,
     gif_url: medias.gif.url,
     metadata: {
       width: medias.gif.dims[0],
