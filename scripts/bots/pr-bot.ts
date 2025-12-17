@@ -227,6 +227,8 @@ This is especially helpful since there were no maintainers for this extension :p
       });
     }
 
+    const checkoutInstructions = getCheckoutInstructions(extensionFolder, { context });
+
     await comment({
       github,
       context,
@@ -236,7 +238,11 @@ This is especially helpful since there were no maintainers for this extension :p
         .map((x) => `@${x}`)
         .join(
           " "
-        )} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.\n\n${expectations}`,
+        )} you might want to have a look.
+
+You can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.
+${checkoutInstructions}
+${expectations}`,
     });
 
     return;
@@ -472,6 +478,44 @@ async function comment({ github, context, comment: commentText }: Pick<API, "git
       body: commentText,
     });
   }
+}
+
+function getCheckoutInstructions(
+  extensionFolder: string,
+  { context }: Pick<API, "context">
+): string {
+  const pullRequest = context.payload.pull_request;
+  
+  // head.repo can be null if the fork was deleted
+  const forkUrl = pullRequest.head.repo?.clone_url;
+  const branch = pullRequest.head.ref;
+  const repoName = pullRequest.head.repo?.name;
+
+  if (!forkUrl || !branch || !extensionFolder || !repoName) {
+    console.log("Missing data for checkout instructions:", { forkUrl, branch, extensionFolder, repoName });
+    return '';
+  }
+
+  return `
+<details>
+<summary>📋 Quick checkout commands</summary>
+
+\`\`\`bash
+BRANCH="${branch}"
+FORK_URL="${forkUrl}"
+EXTENSION_NAME="${extensionFolder}"
+REPO_NAME="${repoName}"
+
+git clone -n --depth=1 --filter=tree:0 -b $BRANCH $FORK_URL
+cd $REPO_NAME
+git sparse-checkout set --no-cone "extensions/$EXTENSION_NAME"
+git checkout
+cd "extensions/$EXTENSION_NAME"
+npm install && npm run dev
+\`\`\`
+
+</details>
+`;
 }
 
 async function extensionLabel(extensionFolder: string, api: Pick<API, "github" | "context">) {
