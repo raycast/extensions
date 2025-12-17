@@ -1,6 +1,6 @@
 # Search Domain Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-12-17
 
 - Updated dependencies to the latest versions
 - Added support for Windows
