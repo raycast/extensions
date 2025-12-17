@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Trainrides, Vias, Via } from "@/types";
-import { getTrainRides } from "@/utils";
+import { getTrainRides } from "@/utils/index";
 import { LaunchProps, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 

@@ -67,9 +67,9 @@ Example (in Raycast): run the `Trainride` command and enter `from=Brussels` and 
 ## Relevant files
 
 - `package.json` — Raycast extension metadata and scripts
-- `src/api.tsx` — small wrapper that calls the iRail connections endpoint
+- `src/utils/index.ts` — small wrapper that calls the iRail connections endpoint
 - `src/trainride.tsx` — Raycast UI component that renders results
-- `src/types.tsx` — TypeScript interfaces for the API response
+- `src/types/index.ts` — TypeScript interfaces for the API response
 
 ## Contributing
 
