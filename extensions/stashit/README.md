@@ -1,56 +1,101 @@
 # Stashit
 
-A simple priority queue extension for Raycast that helps you manage tasks with priorities.
+A smart priority queue extension for Raycast that helps you capture and manage tasks with priorities and multiple queues.
 
 ## Features
 
-- **Add to Queue**: Add items with priority tags (e.g., `Message my manager #10`)
-- **Queue Pop**: Pop the highest priority item from the queue
-- **View Queue**: See all items sorted by priority
+- **Add to Queue**: Quickly capture tasks with inline priority and queue syntax
+- **Queue Pop**: Pop the highest priority item (copies to clipboard automatically)
+- **View Queue**: Browse all items organized by queue, with filtering and management
+- **Multiple Queues**: Organize tasks into separate queues (e.g., `#work`, `#personal`)
+- **History Tracking**: Popped items are saved to history with auto-cleanup
+- **Edit & Reorder**: Modify items or manually reorder them within a queue
+- **Export & Backup**: Export to JSON/Markdown, backup to file, and restore
 
-## Usage
-
-### Adding Items
-
-Use the "Add to Queue" command and type your task with a priority:
+## Syntax
 
 ```
-Message my manager about the project #10
-Buy groceries #3
-Call dentist #5
+task description -priority #queue-name
 ```
 
-The `#<number>` pattern sets the priority. Higher numbers = higher priority.
-If no priority is specified, it defaults to 0.
+| Component | Format | Description |
+|-----------|--------|-------------|
+| Task | Plain text | The task description |
+| Priority | `-<number>` | Higher = more urgent (optional, defaults to 0) |
+| Queue | `#<name>` | Queue name (optional, defaults to "default") |
 
-### Popping Items
+### Examples
 
-Use the "Queue Pop" command to get the highest priority item. The item is:
+```
+Call mom -8 #personal
+Review PR -5 #work
+Buy groceries #shopping
+Quick note
+```
 
-1. Removed from the queue
+## Priority Levels
+
+| Priority | Level | Color |
+|----------|-------|-------|
+| 8+ | 🔴 Critical | Red |
+| 5-7 | 🟠 High | Orange |
+| 3-4 | 🟡 Medium | Yellow |
+| 1-2 | 🟢 Low | Green |
+| 0 | ➖ None | Gray |
+
+## Commands
+
+### Add to Queue
+
+Add tasks with real-time preview showing parsed task, queue, and priority level.
+
+### Queue Pop
+
+Pop the highest priority item from the queue. Optionally specify a queue name to pop from a specific queue only.
+
+When an item is popped:
+1. It's removed from the active queue
 2. Copied to your clipboard
-3. Shown in a HUD notification
+3. Saved to history
 
-### Viewing the Queue
+### View Queue
 
-Use the "View Queue" command to see all items sorted by priority. From here you can:
+A comprehensive view of all your tasks with:
 
-- Pop individual items
-- Copy items to clipboard
-- Remove items from the queue
+- **Filtering**: Switch between Active, History, or All views
+- **Actions**:
+  - Pop items (individually or highest from queue)
+  - Edit item text, priority, or queue
+  - Move items up/down within a queue
+  - Copy to clipboard
+  - Restore items from history
+  - Export as JSON or Markdown
+  - Backup/restore to file
+  - Settings for history retention
 
-## Installation
+## Keyboard Shortcuts (View Queue)
 
-1. Clone this repository
-2. Navigate to the directory
-3. Run `npm install`
-4. Run `npm run dev` to start development mode (this will open Raycast with the extension loaded)
+| Shortcut | Action |
+|----------|--------|
+| `Enter` | Pop selected item |
+| `⌘C` | Copy to clipboard |
+| `⌘E` | Edit item |
+| `⇧↑` / `⇧↓` | Move item up/down |
+| `⌘P` | Pop from current queue |
+| `⌘⇧P` | Pop highest from any queue |
+| `⌘D` | Toggle detail panel |
+| `⌘F` | Cycle view filter |
+| `⌘⇧J` | Export as JSON |
+| `⌘⇧M` | Export as Markdown |
+| `⌘⇧B` | Backup to file |
+| `⌘⇧R` | Restore from backup |
+| `⌘,` | Settings |
+| `⌃X` | Remove from queue |
 
-## Development
+## Settings
 
-```bash
-npm install    # Install dependencies
-npm run dev    # Start development mode
-npm run build  # Build the extension
-npm run lint   # Run linter
-```
+- **History Retention**: Configure how many days to keep popped items (default: 15 days, set to 0 to keep forever)
+
+## Backup
+
+Stashit automatically syncs your data to `~/.stashit/backup.json`. You can also manually backup and restore using the actions in View Queue.
