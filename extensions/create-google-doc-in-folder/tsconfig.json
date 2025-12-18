@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Raycast Extension",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
+    "lib": [
+      "ES2023"
+    ],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "strict": true,
+    "target": "ES2022",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true
+  },
+  "include": [
+    "src/**/*"
+  ]
+}
