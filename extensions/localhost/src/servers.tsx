@@ -141,14 +141,26 @@ export default function Command() {
   useEffect(() => {
     if (!servers) return;
 
-    servers.forEach(async (server) => {
-      if (titles[server.port]) return;
+    let isMounted = true;
 
-      const title = await getPageTitle(server.url);
-      if (title) {
-        setTitles((prev) => ({ ...prev, [server.port]: title }));
-      }
-    });
+    const fetchTitles = async () => {
+      await Promise.all(
+        servers.map(async (server) => {
+          if (titles[server.port]) return;
+
+          const title = await getPageTitle(server.url);
+          if (isMounted && title) {
+            setTitles((prev) => ({ ...prev, [server.port]: title }));
+          }
+        }),
+      );
+    };
+
+    fetchTitles();
+
+    return () => {
+      isMounted = false;
+    };
   }, [servers]);
 
   return (

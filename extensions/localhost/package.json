@@ -5,6 +5,8 @@
   "description": "view locally running servers and open them.",
   "icon": "extension-icon.png",
   "license": "MIT",
+  "screenshots": ["metadata/featurephoto.png", "metadata/featurephoto2.png"],
+  "version": "1.0.0",
   "commands": [
     {
       "name": "servers",
