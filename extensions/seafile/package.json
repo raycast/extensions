@@ -23,6 +23,15 @@
   ],
   "preferences": [
     {
+      "name": "seafile_url",
+      "title": "Seafile URL",
+      "placeholder": "https://plus.seafile.com/",
+      "description": "Seafile URL",
+      "required": true,
+      "type": "textfield",
+      "default": "https://plus.seafile.com/"
+    },
+    {
       "name": "username",
       "title": "Username",
       "placeholder": "username",
