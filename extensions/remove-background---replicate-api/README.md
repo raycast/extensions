@@ -1,6 +1,6 @@
 # Remove Background
 
-Remove image backgrounds instantly using AI.
+Remove image backgrounds instantly using AI. Powered by [Bria AI Background Remover](https://replicate.com/bria/remove-background) on Replicate.
 
 ## Setup
 
@@ -17,9 +17,11 @@ Remove image backgrounds instantly using AI.
 
 ## How to Use
 
-1. Select a PNG or JPG image in Finder (macOS) or use the file picker.
+1. Select a PNG or JPG image in Finder (macOS) or use the file picker
 2. The extension processes it automatically.
 3. View results side-by-side and copy/paste as needed.
+
+**Image Size Limit:** To ensure stability, images are limited to **10MB**. Larger images should be resized before processing.
 
 ## Actions
 
@@ -32,6 +34,7 @@ Remove image backgrounds instantly using AI.
 
 - Internet connection.
 - Replicate API token.
+- Max file size: **10MB** (PNG or JPG).
 
 ## Troubleshooting
 
