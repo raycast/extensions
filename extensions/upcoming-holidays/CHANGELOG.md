@@ -1,4 +1,4 @@
-# upcoming-holidays Changelog
+# Upcoming Holidays Changelog
 
 ## [Updates] - {PR_MERGE_DATE}
 
