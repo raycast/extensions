@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [Update Keyboard Shortcuts] - {PR_MERGE_DATE}
+## [Update Keyboard Shortcuts] - 2025-12-18
 
 - Update keyboard shortcuts for Windows compatibility
 - Change the "copy" and "paste" shortcuts to not clash with native shortcuts (ref: [Issue #23441](https://github.com/raycast/extensions/issues/23441))
