@@ -1,7 +1,18 @@
-// API Response types from Free Dictionary API
+/**
+ * Type definitions for the Speak out extension.
+ * @module types
+ */
 
+// ============================================================================
+// Free Dictionary API Response Types
+// @see https://dictionaryapi.dev/
+// ============================================================================
+
+/** Phonetic pronunciation data from the dictionary API */
 export interface Phonetic {
+  /** IPA text representation (e.g., "/rɪˈzuːm/") */
   text?: string;
+  /** URL to MP3 audio file */
   audio?: string;
   sourceUrl?: string;
   license?: {
@@ -10,6 +21,7 @@ export interface Phonetic {
   };
 }
 
+/** Word definition with examples and related words */
 export interface Definition {
   definition: string;
   example?: string;
@@ -17,6 +29,7 @@ export interface Definition {
   antonyms: string[];
 }
 
+/** Word meaning grouped by part of speech */
 export interface Meaning {
   partOfSpeech: string;
   definitions: Definition[];
@@ -24,9 +37,12 @@ export interface Meaning {
   antonyms: string[];
 }
 
+/** Complete dictionary entry for a word */
 export interface DictionaryEntry {
   word: string;
+  /** Primary IPA pronunciation */
   phonetic?: string;
+  /** All available phonetic pronunciations */
   phonetics: Phonetic[];
   origin?: string;
   meanings: Meaning[];
@@ -37,17 +53,26 @@ export interface DictionaryEntry {
   sourceUrls?: string[];
 }
 
-// App-specific types
+// ============================================================================
+// Application Types
+// ============================================================================
 
+/** Search history item stored in LocalStorage */
 export interface HistoryItem {
   word: string;
+  /** Unix timestamp in milliseconds */
   timestamp: number;
 }
 
+/** Processed pronunciation result displayed in the UI */
 export interface PronunciationResult {
   word: string;
+  /** IPA transcription */
   ipa: string;
+  /** URL to pronunciation audio (MP3) */
   audioUrl?: string;
+  /** Part of speech (noun, verb, etc.) */
   partOfSpeech?: string;
+  /** Brief definition */
   definition?: string;
 }

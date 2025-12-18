@@ -1,9 +1,29 @@
+/**
+ * Audio playback utilities for pronunciation and text-to-speech.
+ * Uses macOS native commands: `afplay` for audio files, `say` for TTS.
+ * @module utils/audio
+ */
+
 import { exec } from "child_process";
 import { writeFile, unlink } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { showToast, Toast } from "@raycast/api";
+import { VOICES } from "../constants";
 
+// Re-export for convenience.
+export { VOICES };
+
+/**
+ * Downloads and plays an audio file from a URL.
+ *
+ * Process:
+ * 1. Download audio to temp file
+ * 2. Play using macOS `afplay` command
+ * 3. Clean up temp file after playback
+ *
+ * @param audioUrl - URL to the audio file (MP3)
+ */
 export async function playAudio(audioUrl: string): Promise<void> {
   if (!audioUrl) {
     await showToast({
@@ -20,7 +40,6 @@ export async function playAudio(audioUrl: string): Promise<void> {
       title: "Loading audio...",
     });
 
-    // Download the audio file
     const response = await fetch(audioUrl);
     if (!response.ok) {
       throw new Error(`Failed to download audio: ${response.status}`);
@@ -29,20 +48,12 @@ export async function playAudio(audioUrl: string): Promise<void> {
     const buffer = await response.arrayBuffer();
     const tempPath = join(tmpdir(), `pronunciation-${Date.now()}.mp3`);
 
-    // Write to temp file
     await writeFile(tempPath, Buffer.from(buffer));
 
-    // Play with afplay (macOS)
     await new Promise<void>((resolve, reject) => {
       exec(`afplay "${tempPath}"`, (error) => {
-        // Clean up temp file
         unlink(tempPath).catch(() => {});
-
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
+        error ? reject(error) : resolve();
       });
     });
 
@@ -59,7 +70,13 @@ export async function playAudio(audioUrl: string): Promise<void> {
   }
 }
 
-// Get accent label from audio URL (Free Dictionary API uses regional subdomains)
+/**
+ * Detects accent/region from audio URL patterns.
+ * Free Dictionary API uses regional markers in URLs (e.g., "-us.mp3", "/uk/").
+ *
+ * @param audioUrl - URL to analyze
+ * @returns Emoji + region code (e.g., "🇺🇸 US")
+ */
 export function getAccentFromUrl(audioUrl?: string): string {
   if (!audioUrl) return "Unknown";
 
@@ -76,7 +93,13 @@ export function getAccentFromUrl(audioUrl?: string): string {
   return "🔊 Audio";
 }
 
-// Text-to-Speech using macOS 'say' command for words not in dictionary
+/**
+ * Speaks a word using macOS Text-to-Speech.
+ * Useful for technical terms not in the dictionary (e.g., "Kubernetes").
+ *
+ * @param word - Word to speak
+ * @param voice - macOS voice name (defaults to "Samantha" for US English)
+ */
 export async function speakWord(word: string, voice?: string): Promise<void> {
   if (!word) return;
 
@@ -86,19 +109,13 @@ export async function speakWord(word: string, voice?: string): Promise<void> {
       title: "Speaking...",
     });
 
-    const selectedVoice = voice || "Samantha"; // Default US English voice
+    const selectedVoice = voice || VOICES.us;
+    const sanitizedWord = sanitizeForShell(word);
 
     await new Promise<void>((resolve, reject) => {
-      exec(
-        `say -v "${selectedVoice}" "${word.replace(/"/g, '\\"')}"`,
-        (error) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve();
-          }
-        },
-      );
+      exec(`say -v "${selectedVoice}" "${sanitizedWord}"`, (error) => {
+        error ? reject(error) : resolve();
+      });
     });
 
     await showToast({
@@ -114,14 +131,10 @@ export async function speakWord(word: string, voice?: string): Promise<void> {
   }
 }
 
-// Available macOS voices for different accents
-export const VOICES = {
-  us: "Samantha", // US English
-  uk: "Daniel", // UK English
-  au: "Karen", // Australian English
-  ie: "Moira", // Irish English
-  za: "Tessa", // South African English
-  in: "Veena", // Indian English
-} as const;
-
-export type VoiceAccent = keyof typeof VOICES;
+/**
+ * Sanitizes input for safe shell command execution.
+ * Removes characters that could be used for command injection.
+ */
+function sanitizeForShell(input: string): string {
+  return input.replace(/[`$\\;"'|&<>(){}[\]!#*?~]/g, "");
+}

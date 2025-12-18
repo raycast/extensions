@@ -1,15 +1,32 @@
+/**
+ * Search history management hook using Raycast LocalStorage.
+ * @module hooks/useHistory
+ */
+
 import { LocalStorage } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { HistoryItem } from "../types";
+import { HISTORY_KEY, MAX_HISTORY_ITEMS } from "../constants";
 
-const HISTORY_KEY = "pronunciation-history";
-const MAX_HISTORY_ITEMS = 20;
-
+/**
+ * Hook for managing search history with persistence.
+ *
+ * Features:
+ * - Persists history to Raycast LocalStorage
+ * - Limits history to most recent 20 items
+ * - Prevents duplicate entries (moves existing to top)
+ * - Normalizes words to lowercase
+ *
+ * @returns History state and management functions
+ *
+ * @example
+ * const { history, addToHistory, clearHistory } = useHistory();
+ * await addToHistory("example");
+ */
 export function useHistory() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load history on mount
   useEffect(() => {
     loadHistory();
   }, []);
@@ -18,8 +35,7 @@ export function useHistory() {
     try {
       const stored = await LocalStorage.getItem<string>(HISTORY_KEY);
       if (stored) {
-        const items: HistoryItem[] = JSON.parse(stored);
-        setHistory(items);
+        setHistory(JSON.parse(stored));
       }
     } catch (error) {
       console.error("Failed to load history:", error);
@@ -28,23 +44,23 @@ export function useHistory() {
     }
   };
 
+  /**
+   * Adds a word to history. If word exists, moves it to the top.
+   * Automatically persists to LocalStorage.
+   */
   const addToHistory = useCallback(async (word: string) => {
     const normalizedWord = word.trim().toLowerCase();
     if (!normalizedWord) return;
 
     setHistory((prevHistory) => {
-      // Remove existing entry for this word
       const filtered = prevHistory.filter(
         (item) => item.word !== normalizedWord,
       );
-
-      // Add new entry at the beginning
       const newHistory = [
         { word: normalizedWord, timestamp: Date.now() },
         ...filtered,
       ].slice(0, MAX_HISTORY_ITEMS);
 
-      // Persist to storage
       LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory)).catch(
         console.error,
       );
@@ -53,6 +69,9 @@ export function useHistory() {
     });
   }, []);
 
+  /**
+   * Removes a specific word from history.
+   */
   const removeFromHistory = useCallback(async (word: string) => {
     setHistory((prevHistory) => {
       const newHistory = prevHistory.filter((item) => item.word !== word);
@@ -63,6 +82,9 @@ export function useHistory() {
     });
   }, []);
 
+  /**
+   * Clears all history items.
+   */
   const clearHistory = useCallback(async () => {
     setHistory([]);
     await LocalStorage.removeItem(HISTORY_KEY);

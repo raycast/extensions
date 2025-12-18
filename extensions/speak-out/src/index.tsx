@@ -1,3 +1,8 @@
+/**
+ * Speak out - Raycast extension for English word pronunciation lookup.
+ * @module index
+ */
+
 import {
   Action,
   ActionPanel,
@@ -8,9 +13,10 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { lookupWord } from "./api/dictionary";
-import { playAudio, getAccentFromUrl, speakWord, VOICES } from "./utils/audio";
+import { playAudio, getAccentFromUrl, speakWord } from "./utils/audio";
 import { useHistory } from "./hooks/useHistory";
 import { PronunciationResult } from "./types";
+import { SEARCH_DEBOUNCE_MS, TTS_OPTIONS } from "./constants";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -26,7 +32,7 @@ export default function Command() {
     clearHistory,
   } = useHistory();
 
-  // Search when user stops typing
+  // Debounced search effect
   useEffect(() => {
     if (!searchText.trim()) {
       setResults([]);
@@ -42,7 +48,6 @@ export default function Command() {
         const data = await lookupWord(searchText);
         setResults(data);
 
-        // Add to history on successful search
         if (data.length > 0) {
           await addToHistory(searchText);
         }
@@ -52,7 +57,7 @@ export default function Command() {
       } finally {
         setIsSearching(false);
       }
-    }, 300); // Debounce 300ms
+    }, SEARCH_DEBOUNCE_MS);
 
     return () => clearTimeout(timeoutId);
   }, [searchText, addToHistory]);
@@ -68,10 +73,13 @@ export default function Command() {
     await playAudio(audioUrl);
   };
 
+  // Computed display states
   const isLoading = isSearching || isHistoryLoading;
   const showHistory = !searchText.trim() && history.length > 0;
   const showResults = searchText.trim() && results.length > 0;
-  const showError = error && !isSearching;
+  const showTTSFallback = error && !isSearching;
+  const showEmptyView =
+    !showHistory && !showResults && !showTTSFallback && !isLoading;
 
   return (
     <List
@@ -81,89 +89,36 @@ export default function Command() {
       searchBarPlaceholder="Enter a word to look up pronunciation..."
       throttle
     >
-      {showError && (
+      {/* TTS Fallback - shown when word not found in dictionary */}
+      {showTTSFallback && (
         <List.Section
           title={`"${searchText}" not found in dictionary - Use Text-to-Speech`}
         >
-          <List.Item
-            key="tts-us"
-            icon={Icon.SpeakerHigh}
-            title={searchText}
-            subtitle="🇺🇸 US English (Samantha)"
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Speak with Us Accent"
-                  icon={Icon.Play}
-                  onAction={() => speakWord(searchText, VOICES.us)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Word"
-                  content={searchText}
-                />
-              </ActionPanel>
-            }
-          />
-          <List.Item
-            key="tts-uk"
-            icon={Icon.SpeakerHigh}
-            title={searchText}
-            subtitle="🇬🇧 UK English (Daniel)"
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Speak with Uk Accent"
-                  icon={Icon.Play}
-                  onAction={() => speakWord(searchText, VOICES.uk)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Word"
-                  content={searchText}
-                />
-              </ActionPanel>
-            }
-          />
-          <List.Item
-            key="tts-au"
-            icon={Icon.SpeakerHigh}
-            title={searchText}
-            subtitle="🇦🇺 Australian English (Karen)"
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Speak with Australian Accent"
-                  icon={Icon.Play}
-                  onAction={() => speakWord(searchText, VOICES.au)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Word"
-                  content={searchText}
-                />
-              </ActionPanel>
-            }
-          />
-          <List.Item
-            key="tts-in"
-            icon={Icon.SpeakerHigh}
-            title={searchText}
-            subtitle="🇮🇳 Indian English (Veena)"
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Speak with Indian Accent"
-                  icon={Icon.Play}
-                  onAction={() => speakWord(searchText, VOICES.in)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Word"
-                  content={searchText}
-                />
-              </ActionPanel>
-            }
-          />
+          {TTS_OPTIONS.map((option) => (
+            <List.Item
+              key={option.key}
+              icon={Icon.SpeakerHigh}
+              title={searchText}
+              subtitle={option.label}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title={`Speak with ${option.accent} Accent`}
+                    icon={Icon.Play}
+                    onAction={() => speakWord(searchText, option.voice)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Word"
+                    content={searchText}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
         </List.Section>
       )}
 
+      {/* Search Results */}
       {showResults && (
         <List.Section title={`Pronunciations for "${searchText}"`}>
           {results.map((result, index) => (
@@ -171,7 +126,7 @@ export default function Command() {
               key={`${result.word}-${index}`}
               icon={result.audioUrl ? Icon.SpeakerHigh : Icon.SpeakerOff}
               title={result.word}
-              subtitle={result.ipa ? `${result.ipa}` : undefined}
+              subtitle={result.ipa || undefined}
               accessories={[
                 { text: result.partOfSpeech },
                 { tag: getAccentFromUrl(result.audioUrl) },
@@ -209,6 +164,7 @@ export default function Command() {
         </List.Section>
       )}
 
+      {/* Search History */}
       {showHistory && (
         <List.Section title="Recent Searches">
           {history.map((item) => (
@@ -247,10 +203,11 @@ export default function Command() {
         </List.Section>
       )}
 
-      {!showHistory && !showResults && !showError && !isLoading && (
+      {/* Empty State */}
+      {showEmptyView && (
         <List.EmptyView
           icon={Icon.Book}
-          title="Pronunciation Lookup"
+          title="Speak out"
           description="Type a word to find its pronunciation and IPA"
         />
       )}
