@@ -50,16 +50,19 @@ export const MAX_MAX_FILE_SIZE_MB = 50; // 50MB, to prevent accidental excessive
 
 /**
  * Safety limits to prevent extension crashes with large directories.
+ * Reduced limits to prevent memory issues.
  */
 export const SAFETY_LIMITS = {
   /** Maximum number of files to process before stopping */
-  MAX_FILES: 5000,
+  MAX_FILES: 3000, // Reduced from 5000 to prevent memory issues
   /** Maximum directory scan time in milliseconds */
   MAX_SCAN_TIME_MS: 30000, // 30 seconds
   /** Maximum total size of all included files in bytes */
-  MAX_TOTAL_SIZE_BYTES: 100 * 1024 * 1024, // 100MB
+  MAX_TOTAL_SIZE_BYTES: 50 * 1024 * 1024, // 50MB, reduced from 100MB to prevent memory issues
   /** Show warning after this many files */
-  FILES_WARNING_THRESHOLD: 1000,
+  FILES_WARNING_THRESHOLD: 500, // Reduced from 1000
+  /** Batch size for processing files to reduce memory usage */
+  BATCH_SIZE: 100, // Process files in batches of 100
 } as const;
 
 // Re-export ignore patterns from config file
@@ -389,23 +392,24 @@ export function formatProjectStructure(entries: readonly ProjectEntry[], level =
 
 /**
  * Formats the content of all files into a string, wrapped in <file> tags.
+ * Uses array-based string building for better memory efficiency.
  * @param entries An array of ProjectEntry objects.
  * @returns A string containing all file contents.
  */
 export function formatFileContents(entries: readonly ProjectEntry[]): string {
-  let contents = "";
+  const parts: string[] = [];
   for (const entry of entries) {
     if (entry.type === "file") {
-      contents += `\n<file path="${entry.path}" size="${formatFileSizeKB(entry.size)}"`;
+      parts.push(`\n<file path="${entry.path}" size="${formatFileSizeKB(entry.size)}"`);
       if (entry.language) {
-        contents += ` language="${entry.language}"`;
+        parts.push(` language="${entry.language}"`);
       }
-      contents += ">\n";
-      contents += entry.content || "[Content not available or file was skipped]";
-      contents += "\n</file>\n";
+      parts.push(">\n");
+      parts.push(entry.content || "[Content not available or file was skipped]");
+      parts.push("\n</file>\n");
     } else if (entry.type === "directory" && entry.children) {
-      contents += formatFileContents(entry.children);
+      parts.push(formatFileContents(entry.children));
     }
   }
-  return contents;
+  return parts.join("");
 }

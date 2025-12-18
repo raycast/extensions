@@ -34,7 +34,7 @@ function TabListItemActions({ tab }: { tab: Tab }) {
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
       <Action
-        title="Move To New Window"
+        title="Move to New Window"
         icon={Icon.Window}
         onAction={async () => {
           await closeTab(tab.tabIndex);
@@ -42,7 +42,7 @@ function TabListItemActions({ tab }: { tab: Tab }) {
         }}
       />
       <Action
-        title="Move To Incognito Window"
+        title="Move to Incognito Window"
         icon={Icon.EyeDisabled}
         onAction={async () => {
           await closeTab(tab.tabIndex);
@@ -74,14 +74,14 @@ function HistoryItemActions({
         title="Open"
       />
       <Action
-        title="Open In New Window"
+        title="Open in New Window"
         icon={Icon.Window}
         onAction={async () =>
           await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile, newWindow: true })
         }
       />
       <Action
-        title="Open In Incognito Window"
+        title="Open in Incognito Window"
         icon={Icon.EyeDisabled}
         onAction={async () =>
           await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile, incognito: true })
@@ -97,7 +97,7 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileCurrent,
             })
           }
-          title={"Open in current profile"}
+          title={"Open in Current Profile"}
         />
         <Action
           onAction={() =>
@@ -108,7 +108,7 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileOriginal,
             })
           }
-          title={"Open in original profile"}
+          title={"Open in Original Profile"}
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />

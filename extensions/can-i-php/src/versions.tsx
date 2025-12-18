@@ -42,22 +42,24 @@ function getReleaseAnnouncementLink(phpVersion: PhpVersion): string {
 }
 
 export default function Command() {
-  const { isLoading, data } = useFetch("https://endoflife.date/api/php.json");
-
-  const phpVersions = Array.isArray(data)
-    ? (data as PhpVersion[]).map((phpVersion: PhpVersion) => {
-        phpVersion.status = getPhpVersionStatus(phpVersion);
-        phpVersion.releaseDateHuman = getHumanDifference(phpVersion.releaseDate);
-        phpVersion.eolHuman = getHumanDifference(phpVersion.eol);
-        phpVersion.supportHuman = getHumanDifference(phpVersion.support);
-        phpVersion.latestReleaseDateHuman = getHumanDifference(phpVersion.latestReleaseDate);
-        return phpVersion;
-      })
-    : [];
+  const { isLoading, data: phpVersions } = useFetch<PhpVersion[]>("https://endoflife.date/api/php.json", {
+    keepPreviousData: true,
+    parseResponse: async (response) => response.json() as Promise<PhpVersion[]>,
+    mapResult: (versions) => ({
+      data: versions.map((phpVersion: PhpVersion) => ({
+        ...phpVersion,
+        status: getPhpVersionStatus(phpVersion),
+        releaseDateHuman: getHumanDifference(phpVersion.releaseDate),
+        eolHuman: getHumanDifference(phpVersion.eol),
+        supportHuman: getHumanDifference(phpVersion.support),
+        latestReleaseDateHuman: getHumanDifference(phpVersion.latestReleaseDate),
+      })),
+    }),
+  });
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      {phpVersions.map((phpVersion) => (
+      {(phpVersions ?? []).map((phpVersion: PhpVersion) => (
         <List.Item
           key={phpVersion.cycle}
           title={"PHP  " + phpVersion.cycle}

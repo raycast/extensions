@@ -148,9 +148,7 @@ If a number is passed, it needs to be in the range 0-2. For larger values, 2 wil
 
 ### AI.Model
 
-The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.5-turbo"]`.
-
-#### Enumeration members
+The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-4o_mini"]`.
 
 | Model                                          | Description                                                                                                        |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -164,9 +162,9 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | OpenAI_GPT-4o                                  | Advanced OpenAI model optimized for speed and complex problem solving.                                             |
 | OpenAI_GPT-4o_mini                             | Fast and intelligent model for everyday tasks.                                                                     |
 | OpenAI_GPT-5                                   | OpenAI's latest model, great for coding and agentic tasks across domains.                                          |
-| undefined                                      | OpenAI's model optimized for agentic coding tasks in Codex and similar environments.                               |
+| OpenAI_GPT-5_Codex                             | OpenAI's model optimized for agentic coding tasks in Codex and similar environments.                               |
 | OpenAI_GPT-5.1                                 | OpenAI's latest model with adaptive reasoning, great for coding and agentic tasks across domains.                  |
-| undefined                                      | A version of GPT-5.1 optimized for agentic coding tasks in Codex or similar environments.                          |
+| OpenAI_GPT-5.1_Codex                           | A version of GPT-5.1 optimized for agentic coding tasks in Codex or similar environments.                          |
 | OpenAI_GPT-5.1_Instant                         | OpenAI's fastest GPT-5.1 model with adaptive reasoning, optimized for speed and efficiency.                        |
 | OpenAI_o3                                      | Advanced model excelling in math, science, coding, and visual tasks.                                               |
 | OpenAI_o4-mini                                 | Fast, efficient model optimized for coding and visual tasks.                                                       |
@@ -180,6 +178,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | Anthropic_Claude_4.5_Sonnet                    | Anthropic's most intelligent model with the highest intelligence across most tasks.                                |
 | Anthropic_Claude_4_Opus                        | Anthropic's model for complex tasks with exceptional fluency.                                                      |
 | Anthropic_Claude_4.1_Opus                      | Anthropic's model for complex tasks with exceptional fluency.                                                      |
+| Anthropic_Claude_4.5_Opus                      | Anthropic's model for complex tasks with exceptional fluency.                                                      |
 | Perplexity_Sonar                               | Fast Perplexity model with integrated search capabilities.                                                         |
 | Perplexity_Sonar_Pro                           | Advanced Perplexity model for complex queries with search integration.                                             |
 | Groq_Llama_4_Scout                             | Advanced 17B parameter multimodal model with 16 experts.                                                           |
@@ -193,7 +192,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | Mistral_Codestral                              | Specialized model for code-related tasks and testing.                                                              |
 | Groq_Kimi_K2_Instruct                          | Kimi K2 is a powerful and versatile AI model designed for a wide range of tasks.                                   |
 | Groq_Qwen3-32B                                 | The latest generation of large language models in the Qwen series.                                                 |
-| undefined                                      | Advanced thinking model for complex problem solving.                                                               |
+| Google_Gemini_3_Pro                            | Advanced thinking model for complex problem solving.                                                               |
 | Google_Gemini_2.5_Pro                          | Advanced thinking model for complex problem solving.                                                               |
 | Google_Gemini_2.5_Flash                        | Fast, well-rounded thinking model.                                                                                 |
 | Google_Gemini_2.5_Flash_Lite                   | Fast model optimized for large-scale text output.                                                                  |
@@ -201,7 +200,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | Together_AI_Qwen3-235B-A22B-Instruct-2507-tput | A varied model with enhanced reasoning.                                                                            |
 | Together_AI_DeepSeek-R1                        | Open-source model matching OpenAI-o1 performance.                                                                  |
 | Together_AI_DeepSeek-V3                        | Advanced Mixture-of-Experts model.                                                                                 |
-| undefined                                      | xAI's best agentic tool calling model that shines in real-world use cases like customer support and deep research. |
+| xAI_Grok-4.1_Fast                              | xAI's best agentic tool calling model that shines in real-world use cases like customer support and deep research. |
 | xAI_Grok-4                                     | Advanced language model with enhanced reasoning and tool capabilities.                                             |
 | xAI_Grok-4_Fast                                | xAI's latest advancement in cost-efficient reasoning models.                                                       |
 | xAI_Grok_Code_Fast_1                           | Grok Code Fast 1 is xAI's Coding Agent focused model                                                               |

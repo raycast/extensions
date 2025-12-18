@@ -12,7 +12,8 @@
     "kevinxo328",
     "ridemountainpig",
     "pernielsentikaer",
-    "xmok"
+    "xmok",
+    "j3lte"
   ],
   "categories": [
     "Design Tools",
@@ -114,20 +115,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.18.0",
-    "axios": "^1.8.4",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
     "react-hooks-global-state": "^2.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

@@ -112,6 +112,17 @@ export default function Command() {
                       }
                     }}
                   />
+                  <Action.CopyToClipboard
+                    title="Copy Markdown Link"
+                    icon={Icon.Link}
+                    shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    content={(() => {
+                      const base = getNuxtDocsUrl();
+                      const rawBase = base.replace("/docs/", "/raw/docs/");
+                      const mdPath = item.path.endsWith(".md") ? item.path : `${item.path}.md`;
+                      return `${rawBase}${mdPath}`;
+                    })()}
+                  />
                 </ActionPanel>
               }
             />

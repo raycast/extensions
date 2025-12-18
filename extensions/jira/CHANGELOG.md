@@ -1,5 +1,10 @@
 # Jira Changelog
 
+## [Update] - 2025-12-07
+
+- Add MacOS and Windows to supported platforms
+- Update dependencies and improve error handling
+
 ## [Fix unbounded JQL error when no project filter] - 2025-09-08
 
 - Added a fallback `created >= -30d` clause in the *Search Issues* command when no project is selected to prevent Jira’s “Unbounded JQL queries are not allowed” error.

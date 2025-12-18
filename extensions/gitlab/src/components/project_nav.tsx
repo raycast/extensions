@@ -98,7 +98,7 @@ export function ProjectNavMenusList(props: { project: Project }) {
       <ProjectNavMenuItem
         title="Milestones"
         icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
-        target={<MilestoneList project={project} navigationTitle={project.name_with_namespace} />}
+        target={<MilestoneList project={project} navigationTitle={`Milestones ${project.name_with_namespace}`} />}
       />
       <ProjectNavMenuBrowserItem
         title="Wiki"

@@ -1,0 +1,73 @@
+import {
+  Clipboard,
+  showToast,
+  Toast,
+  closeMainWindow,
+  getPreferenceValues,
+} from "@raycast/api";
+import { applyAllCorrections } from "./utils/text-correction";
+import { checkTextWithAPI } from "./services/languagetool-api";
+import { showFailureToast } from "@raycast/utils";
+
+/**
+ * Command that reads text from clipboard, checks it, and pastes the corrected result
+ * Runs instantly without UI
+ */
+export default async function Command() {
+  try {
+    // Read text from clipboard
+    const text = await Clipboard.readText();
+
+    if (!text || text.trim().length === 0) {
+      await showToast({
+        title: "No text found",
+        message: "Please copy some text to check",
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
+
+    // Show loading
+    await showToast({
+      title: "Checking text...",
+      style: Toast.Style.Animated,
+    });
+
+    // Get global preferences
+    const preferences = getPreferenceValues<Preferences>();
+
+    // Use centralized service (includes Premium credentials automatically)
+    const result = await checkTextWithAPI({
+      text: text,
+      language: "auto",
+      level: preferences.level,
+      disabledRules: preferences.disabledRules,
+      enableHiddenRules: preferences.enableHiddenRules,
+      noopLanguages: preferences.noopLanguages,
+      abtest: preferences.abtest,
+      mode: preferences.mode,
+      allowIncompleteResults: preferences.allowIncompleteResults,
+      useragent: preferences.useragent,
+    });
+
+    // Apply all corrections using pure utility function
+    const correctedText = applyAllCorrections(text, result);
+
+    // Paste the corrected text
+    await Clipboard.paste(correctedText);
+
+    // Feedback
+    const matchesCount = result.matches?.length || 0;
+    await showToast({
+      title:
+        matchesCount > 0 ? `Fixed ${matchesCount} issues` : "No issues found",
+      message: "Corrected text pasted",
+      style: Toast.Style.Success,
+    });
+
+    // Close Raycast window
+    await closeMainWindow();
+  } catch (error) {
+    await showFailureToast(error, { title: "Error checking text" });
+  }
+}

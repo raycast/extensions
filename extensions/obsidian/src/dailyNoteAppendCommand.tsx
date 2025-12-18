@@ -2,13 +2,11 @@ import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, 
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
-import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
 import { DailyNoteAppendPreferences } from "./utils/preferences";
-import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
-import { useObsidianVaults } from "./utils/hooks";
-import { vaultPluginCheck } from "./api/vault/plugins/plugins.service";
+import { useObsidianVaults, useVaultPluginCheck } from "./utils/hooks";
 import { clearCache } from "./api/cache/cache.service";
 import { applyTemplates } from "./api/templating/templating.service";
+import { Obsidian, ObsidianTargetType } from "@/obsidian";
 
 interface DailyNoteAppendArgs {
   text: string;
@@ -18,7 +16,11 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
   const { vaults, ready } = useObsidianVaults();
   const { text } = props.arguments;
   const { appendTemplate, heading, vaultName, prepend, silent } = getPreferenceValues<DailyNoteAppendPreferences>();
-  const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
+  const { vaultsWithPlugin } = useVaultPluginCheck({
+    vaults: vaults,
+    communityPlugins: ["obsidian-advanced-uri"],
+    corePlugins: ["daily-notes"],
+  });
   const [content, setContent] = useState("");
   const [isAppending, setIsAppending] = useState(false);
 
@@ -42,7 +44,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
       const vaultToUse = selectedVault || vaultsWithPlugin[0];
       setIsAppending(true);
 
-      const target = getObsidianTarget({
+      const target = Obsidian.getTarget({
         type: ObsidianTargetType.DailyNoteAppend,
         vault: vaultToUse,
         text: content,
@@ -64,9 +66,6 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
     return <NoVaultFoundMessage />;
   }
 
-  if (vaultsWithoutPlugin.length > 0) {
-    vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin);
-  }
   if (vaultsWithPlugin.length === 0) {
     return <AdvancedURIPluginNotInstalled />;
   }
@@ -86,7 +85,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
               <ActionPanel>
                 <Action.Open
                   title="Append to Daily Note"
-                  target={getObsidianTarget({
+                  target={Obsidian.getTarget({
                     type: ObsidianTargetType.DailyNoteAppend,
                     vault: vault,
                     text: content,

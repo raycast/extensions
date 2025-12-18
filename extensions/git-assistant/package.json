@@ -118,6 +118,11 @@
       "name": "pull-current-branch",
       "title": "Pull Current Branch",
       "description": "Pulls the latest changes for the current branch from its remote using fast-forward only by default."
+    },
+    {
+      "name": "clone-repository",
+      "title": "Clone Repository",
+      "description": "Clones a git repository to a specified target directory. Extracts the repository name from the URL and clones to targetDirectory/repoName. Does not require the target directory to be a git repository."
     }
   ],
   "preferences": [
@@ -997,6 +1002,29 @@
             "path": "/projects/git-assistant"
           }
         }
+      },
+      {
+        "input": "@git-assistant Clone git@github.com:example/my-project.git to ~/Developer/projects",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "clone-repository",
+              "arguments": {
+                "repoUrl": "git@github.com:example/my-project.git",
+                "targetDirectory": "~/Developer/projects"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "clone-repository": {
+            "success": true,
+            "repoName": "my-project",
+            "clonedPath": "/Users/user/Developer/projects/my-project",
+            "message": "Successfully cloned my-project to /Users/user/Developer/projects/my-project"
+          }
+        },
+        "meetsCriteria": "Uses clone-repository directly without calling get-current-directory first"
       }
     ]
   },
