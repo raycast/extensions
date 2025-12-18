@@ -5,6 +5,13 @@
   "description": "AI-powered search that understands your queries and delivers precise, context-aware results quickly",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "0xdhrv"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "owner": "exa_ai",
   "access": "public",
   "categories": [
@@ -12,6 +19,27 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "search",
+      "title": "Search Exa",
+      "subtitle": "Find relevant results",
+      "description": "Search the web using Exa's neural search.",
+      "mode": "view"
+    },
+    {
+      "name": "answer",
+      "title": "Ask Exa",
+      "subtitle": "Get answers to questions",
+      "description": "Ask a question and get an answer based on search results.",
+      "mode": "view"
+    },
+    {
+      "name": "find-similar",
+      "title": "Find Similar",
+      "subtitle": "Find related webpages",
+      "description": "Find webpages similar to a given URL.",
+      "mode": "view"
+    },
     {
       "name": "open-in-browser",
       "title": "Open in Browser",
@@ -59,17 +87,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.17.0",
-    "exa-js": "^1.4.8"
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "exa-js": "^2.0.11"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -77,6 +105,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "./node_modules/.bin/tsc -p tsconfig.json --noEmit"
   }
 }
