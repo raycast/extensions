@@ -1,6 +1,6 @@
 # Iconify Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2025-12-18
 
 - Add `iconNameFormat` preference to control how icon names are formatted
 - Introducing Jest to make sure icon names are generated correctly
