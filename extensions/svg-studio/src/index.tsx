@@ -5,11 +5,9 @@ import os from "os";
 import path from "path";
 import { Buffer } from "buffer";
 
-// ... (这里保留之前的 generateHtml 函数代码，内容不用变，为了篇幅我折叠了) ...
-// ⚠️ 请保留你原来的 generateHtml 函数，它没有问题！
 function generateHtml(svgCode: string): string {
   const base64Code = Buffer.from(svgCode).toString("base64");
-  // ... (保留你原来的 HTML 模板代码) ...
+
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -87,12 +85,22 @@ function generateHtml(svgCode: string): string {
     <canvas id="canvas"></canvas>
     <script>
         var editor; var scale = 1, posX = 0, posY = 0; var isDragging = false, startX = 0, startY = 0, initX = 0, initY = 0, spacePressed = false; var isDark = false; var initialSvg = "";
+        
         function initEditor(code) {
+            // Check if Ace is loaded (CDN check)
+            if (typeof ace === 'undefined') {
+                const errorBar = document.getElementById('errorBar');
+                errorBar.style.display = 'block';
+                errorBar.textContent = "⚠️ Network Error: Unable to load Ace Editor resources. Please check your internet connection.";
+                return;
+            }
+
             ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/');
             editor = ace.edit("editor"); editor.setTheme("ace/theme/chrome"); editor.session.setMode("ace/mode/xml"); editor.setValue(code, -1);
             editor.setOptions({ fontSize: "13px", fontFamily: "SF Mono, Menlo, Monaco, Consolas, monospace", showPrintMargin: false, wrap: true, useWorker: false, tabSize: 2 });
             editor.session.on('change', function() { updateSvg(editor.getValue()); });
         }
+
         function updateSvg(code) {
             const layer = document.getElementById('transform-layer'); const errorBar = document.getElementById('errorBar');
             layer.innerHTML = code;
@@ -117,9 +125,13 @@ function generateHtml(svgCode: string): string {
             }
             setTransition(true); layer.style.position = 'absolute'; layer.style.top = '50%'; layer.style.left = '50%'; updateTransform();
         }
-        function toggleSidebar() { const sidebar = document.getElementById('sidebar'); sidebar.classList.toggle('collapsed'); setTimeout(() => { editor.resize(); }, 310); }
+        function toggleSidebar() { const sidebar = document.getElementById('sidebar'); sidebar.classList.toggle('collapsed'); setTimeout(() => { if(editor) editor.resize(); }, 310); }
         try { const base64 = document.getElementById('raw-data').textContent; const binaryString = atob(base64); const bytes = new Uint8Array(binaryString.length); for (let i = 0; i < binaryString.length; i++) { bytes[i] = binaryString.charCodeAt(i); } initialSvg = new TextDecoder().decode(bytes); } catch(e) { console.error(e); initialSvg = "<svg><text>Error decoding SVG</text></svg>"; }
-        initEditor(initialSvg); updateSvg(initialSvg); setTimeout(autoFit, 100);
+        
+        initEditor(initialSvg); 
+        updateSvg(initialSvg); 
+        setTimeout(autoFit, 100);
+        
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) toggleTheme();
         window.addEventListener('keydown', e => { const active = document.activeElement; const isEditorFocused = active && (active.classList.contains('ace_text-input')); if(e.code==='Space' && !isEditorFocused) { spacePressed=true; document.getElementById('viewport').style.cursor='grab'; } });
         window.addEventListener('keyup', e => { if(e.code==='Space') { spacePressed=false; document.getElementById('viewport').style.cursor='grab'; }});
@@ -129,7 +141,13 @@ function generateHtml(svgCode: string): string {
         window.addEventListener('mouseup', () => { isDragging=false; viewport.style.cursor=spacePressed?'grab':'auto'; });
         function renderToCanvas(callback) {
             const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d'); const scaleFactor = parseInt(document.getElementById('exportScale').value) || 2;
-            const tempDiv = document.createElement('div'); tempDiv.innerHTML = editor.getValue(); const svgEl = tempDiv.querySelector('svg');
+            const tempDiv = document.createElement('div'); 
+            if (editor) {
+                tempDiv.innerHTML = editor.getValue(); 
+            } else {
+                tempDiv.innerHTML = initialSvg;
+            }
+            const svgEl = tempDiv.querySelector('svg');
             if(!svgEl) { alert("Invalid SVG Code"); return; } if(!svgEl.getAttribute('width')) svgEl.setAttribute('width', '500'); if(!svgEl.getAttribute('height')) svgEl.setAttribute('height', '500');
             const computedStyle = window.getComputedStyle(svgEl); svgEl.style.fontFamily = computedStyle.fontFamily;
             const s = new XMLSerializer().serializeToString(svgEl); const src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(s)));
@@ -147,11 +165,11 @@ function generateHtml(svgCode: string): string {
 export default function Command() {
   const [svgInput, setSvgInput] = useState<string>("");
   const [viewState, setViewState] = useState<"checking" | "manual">("checking");
-  // 使用 useRef 来避免重复打开，而不是 LocalStorage
+  // Use useRef to prevent duplicate opening instead of LocalStorage
   const hasOpened = useRef(false);
 
   const openPreview = async (code: string) => {
-    // 简单的内存锁，防止本次会话重复触发，但不持久化
+    // Simple memory lock to prevent duplicate triggering in this session, not persistent
     if (hasOpened.current) return;
     hasOpened.current = true;
 
@@ -164,7 +182,7 @@ export default function Command() {
       return true;
     } catch (error) {
       showToast(Toast.Style.Failure, "Open failed", String(error));
-      hasOpened.current = false; // 失败允许重试
+      hasOpened.current = false; // Allow retry on failure
       return false;
     }
   };
