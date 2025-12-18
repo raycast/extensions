@@ -1,0 +1,134 @@
+[
+  {
+    "name": "Home",
+    "componentName": "HomeIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z\"/></svg>",
+    "keywords": ["home", "house", "main"]
+  },
+  {
+    "name": "Search",
+    "componentName": "SearchIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5L20.49 19l-5-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z\"/></svg>",
+    "keywords": ["find", "magnify", "lookup"]
+  },
+  {
+    "name": "Favorite",
+    "componentName": "FavoriteIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z\"/></svg>",
+    "keywords": ["like", "heart", "love"]
+  },
+  {
+    "name": "AccountCircle",
+    "componentName": "AccountCircleIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\"/></svg>",
+    "keywords": ["person", "avatar", "profile"]
+  },
+  {
+    "name": "Settings",
+    "componentName": "SettingsIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.59l-1.92-3.32a.503.503 0 0 0-.56-.22l-2.39.96c-.5-.38-1.04-.7-1.62-.94L14.96 2.5c-.03-.22-.22-.38-.44-.38h-3.03c-.22 0-.41.16-.44.38L10.5 5.37c-.58.24-1.12.56-1.62.94l-2.39-.96a.503.503 0 0 0-.56.22l-1.92 3.32c-.11.2-.06.45.12.59l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.59l1.92 3.32c.11.2.35.28.56.22l2.39-.96c.5.38 1.04.7 1.62.94l.56 2.87c.03.22.22.38.44.38h3.03c.22 0 .41-.16.44-.38l.56-2.87c.58-.24 1.12-.56 1.62-.94l2.39.96c.21.08.45-.02.56-.22l1.92-3.32a.5.5 0 0 0-.12-.59l-2.03-1.58zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5S10.07 8.5 12 8.5s3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z\"/></svg>",
+    "keywords": ["cog", "preferences", "gear"]
+  },
+  {
+    "name": "Add",
+    "componentName": "AddIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z\"/></svg>",
+    "keywords": ["plus", "create", "new"]
+  },
+  {
+    "name": "Remove",
+    "componentName": "RemoveIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M19 13H5V11H19V13Z\"/></svg>",
+    "keywords": ["minus", "subtract", "delete"]
+  },
+  {
+    "name": "Close",
+    "componentName": "CloseIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z\"/></svg>",
+    "keywords": ["times", "x", "dismiss"]
+  },
+  {
+    "name": "Menu",
+    "componentName": "MenuIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M3 18H21V16H3V18ZM3 13H21V11H3V13ZM3 6V8H21V6H3Z\"/></svg>",
+    "keywords": ["hamburger", "list", "navigation"]
+  },
+  {
+    "name": "ArrowBack",
+    "componentName": "ArrowBackIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M20 11H7.83L13.42 5.41 12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z\"/></svg>",
+    "keywords": ["left", "previous", "back"]
+  },
+  {
+    "name": "ArrowForward",
+    "componentName": "ArrowForwardIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z\"/></svg>",
+    "keywords": ["right", "next", "forward"]
+  },
+  {
+    "name": "CheckCircle",
+    "componentName": "CheckCircleIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\"/></svg>",
+    "keywords": ["success", "done", "ok"]
+  },
+  {
+    "name": "Info",
+    "componentName": "InfoIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M11 17h2v-6h-2v6zm0-8h2V7h-2v2zm1-7C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z\"/></svg>",
+    "keywords": ["information", "about", "details"]
+  },
+  {
+    "name": "Warning",
+    "componentName": "WarningIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M1 21h22L12 2 1 21zm12-3h-2v2h2v-2zm0-8h-2v6h2v-6z\"/></svg>",
+    "keywords": ["alert", "error", "caution"]
+  },
+  {
+    "name": "Star",
+    "componentName": "StarIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 17.27L18.18 21 16.54 13.97 22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24 7.46 13.97 5.82 21z\"/></svg>",
+    "keywords": ["favorite", "rating", "bookmark"]
+  },
+  {
+    "name": "Visibility",
+    "componentName": "VisibilityIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z\"/></svg>",
+    "keywords": ["eye", "show", "reveal"]
+  },
+  {
+    "name": "Download",
+    "componentName": "DownloadIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M5 20h14v-2H5v2zm7-16v8.17l3.59-3.58L17 10l-5 5-5-5 1.41-1.41L11 12.17V4h1z\"/></svg>",
+    "keywords": ["save", "arrow", "download"]
+  },
+  {
+    "name": "Upload",
+    "componentName": "UploadIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M5 18h14v-2H5v2zm7-12-5 5h3v4h4v-4h3l-5-5z\"/></svg>",
+    "keywords": ["arrow", "send", "cloud"]
+  },
+  {
+    "name": "Cloud",
+    "componentName": "CloudIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z\"/></svg>",
+    "keywords": ["weather", "storage", "sky"]
+  },
+  {
+    "name": "Email",
+    "componentName": "EmailIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z\"/></svg>",
+    "keywords": ["mail", "message", "letter"]
+  },
+  {
+    "name": "Phone",
+    "componentName": "PhoneIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.36 11.36 0 0 0 3.58.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.07 21 3 13.93 3 5a1 1 0 0 1 1-1h2.5a1 1 0 0 1 1 1 11.36 11.36 0 0 0 .57 3.58 1 1 0 0 1-.24 1.01l-2.21 2.2z\"/></svg>",
+    "keywords": ["call", "contact", "device"]
+  },
+  {
+    "name": "LocationOn",
+    "componentName": "LocationOnIcon",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z\"/></svg>",
+    "keywords": ["map", "pin", "place"]
+  }
+]
