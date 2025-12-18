@@ -129,8 +129,8 @@
           "value": "IconName"
         },
         {
-          "title": "iconName",
-          "value": "iconName"
+          "title": "icon-name",
+          "value": "icon-name"
         },
         {
           "title": "set-name:icon-name",
