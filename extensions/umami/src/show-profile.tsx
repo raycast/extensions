@@ -9,17 +9,17 @@ import { handleUmamiError } from "./lib/utils";
 export default function Main() {
   return (
     <WithUmami>
-      <Me />
+      <Account />
     </WithUmami>
   );
 }
 
-function Me() {
+function Account() {
   const { isLoading, data, error } = useCachedPromise(async () => {
     const { ok, data, error } = await umami.getMe();
     if (!ok) handleUmamiError(error);
-    const user = IS_CLOUD ? (data as { user: UmamiMe }).user : (data as UmamiMe);
-    return user;
+    const userData = data as { user: UmamiMe } | UmamiMe;
+    return "user" in userData ? userData.user : userData;
   });
 
   return error ? (
