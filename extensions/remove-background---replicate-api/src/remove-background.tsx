@@ -7,6 +7,7 @@ import {
   getPreferenceValues,
   getSelectedFinderItems,
   Grid,
+  Keyboard,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -41,6 +42,18 @@ function prepareImage(filePath: string): string {
 
 interface Preferences {
   replicateApiToken: string;
+}
+
+// Helper function to copy processed image to clipboard
+async function copyProcessedImage(imageUrl: string): Promise<void> {
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+  const arrayBuffer = await blob.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const base64 = buffer.toString("base64");
+  const mimeType = response.headers.get("content-type") || "image/png";
+  const dataURL = `data:${mimeType};base64,${base64}`;
+  await Clipboard.copy(dataURL);
 }
 
 interface ReplicatePrediction {
@@ -91,6 +104,11 @@ export default function Command() {
 
   async function processImage(imageDataURL: string) {
     try {
+      // Validate API token
+      if (!preferences.replicateApiToken || !preferences.replicateApiToken.trim()) {
+        throw new Error("Replicate API token is not configured. Please add it in extension preferences.");
+      }
+
       const response = await fetch(`https://api.replicate.com/v1/models/bria/remove-background/predictions`, {
         method: "POST",
         headers: {
@@ -106,11 +124,20 @@ export default function Command() {
           },
         }),
       });
+
+      // Check for HTTP errors
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Invalid API token. Please check your Replicate API token in extension preferences.");
+        }
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
       const prediction = (await response.json()) as ReplicatePrediction;
       if (prediction.output) {
         setProcessedImage(prediction.output);
       } else {
-        throw new Error("Processing failed");
+        throw new Error("Processing failed - no output received");
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -163,9 +190,15 @@ export default function Command() {
   }
 
   return (
-    <Grid columns={2} aspectRatio="4/3" isLoading={!processedImage}>
-      <Grid.Item title="Original" content={originalImage} />
+    <Grid
+      columns={2}
+      aspectRatio="4/3"
+      isLoading={!processedImage}
+      selectedItemId={processedImage ? "processed" : undefined}
+    >
+      <Grid.Item id="original" title="Original" content={originalImage} />
       <Grid.Item
+        id="processed"
         title={processedImage ? "Processed" : "Processing..."}
         subtitle={processedImage ? undefined : "Please wait while the image is being processed."}
         content={processedImage || ""}
@@ -176,23 +209,28 @@ export default function Command() {
                 title="Copy Processed Image"
                 onAction={async () => {
                   try {
-                    const response = await fetch(processedImage);
-                    const blob = await response.blob();
-                    const arrayBuffer = await blob.arrayBuffer();
-                    const buffer = Buffer.from(arrayBuffer);
-                    const base64 = buffer.toString("base64");
-                    const mimeType = response.headers.get("content-type") || "image/png";
-                    const dataURL = `data:${mimeType};base64,${base64}`;
-                    await Clipboard.copy(dataURL);
+                    await copyProcessedImage(processedImage);
                   } catch {
                     showFailureToast("Failed to copy image");
                   }
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
-              <Action.CopyToClipboard title="Copy Processed Image URL" content={processedImage} />
-              <Action.Paste title="Paste Processed Image URL" content={processedImage} />
-              <Action.OpenInBrowser title="Open Processed Image in Browser" url={processedImage} />
+              <Action.CopyToClipboard
+                title="Copy Processed Image URL"
+                content={processedImage}
+                shortcut={Keyboard.Shortcut.Common.CopyPath}
+              />
+              <Action.Paste
+                title="Paste Processed Image URL"
+                content={processedImage}
+                shortcut={{ modifiers: ["cmd"], key: "v" }}
+              />
+              <Action.OpenInBrowser
+                title="Open Processed Image in Browser"
+                url={processedImage}
+                shortcut={Keyboard.Shortcut.Common.Open}
+              />
             </ActionPanel>
           ) : undefined
         }
