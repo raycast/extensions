@@ -1,5 +1,10 @@
 # Eagle Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Major Update] - 2025-11-03
 
 ### Added
