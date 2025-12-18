@@ -1,32 +1,40 @@
-import { popToRoot, showHUD, Clipboard, closeMainWindow } from "@raycast/api";
+import { popToRoot, showHUD, Clipboard, closeMainWindow, LaunchProps } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { getLatestDownload, hasAccessToDownloadsFolder } from "./utils";
+import { getLatestDownloads, hasAccessToDownloadsFolder } from "./utils";
 
-export default async function main() {
+export default async function main(props: LaunchProps<{ arguments: Arguments.PasteLatestDownload }>) {
   if (!hasAccessToDownloadsFolder()) {
     await showHUD("No permission to access the downloads folder");
     return;
   }
 
-  let download;
+  let downloads;
   try {
-    download = getLatestDownload();
+    const quantity = props.arguments.quantity ? parseInt(props.arguments.quantity, 10) || 1 : 1;
+    downloads = getLatestDownloads(quantity);
   } catch (error) {
-    await showFailureToast(error, { title: "Could not get latest download" });
+    await showFailureToast(error, { title: "Could not get latest downloads" });
     return;
   }
 
-  if (!download) {
+  if (downloads.length === 0) {
     await showHUD("No downloads found");
     return;
   }
 
   try {
-    await Clipboard.paste({ file: download.path });
+    for (let i = 0; i < downloads.length; i++) {
+      await Clipboard.paste({ file: downloads[i].path });
+      // Add a small delay between pastes to ensure each one completes
+      if (i < downloads.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    }
     await closeMainWindow();
-    await showHUD("Pasted latest download");
+    const message = downloads.length === 1 ? "Pasted latest download" : `Pasted ${downloads.length} downloads`;
+    await showHUD(message);
     await popToRoot();
   } catch (error) {
-    await showFailureToast(error, { title: "Could not paste download" });
+    await showFailureToast(error, { title: "Could not paste downloads" });
   }
 }

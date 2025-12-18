@@ -1,5 +1,10 @@
 # Downloads Manager Changelog
 
+## [Add optional quantity argument to Paste and Delete commands] - {PR_MERGE_DATE}
+
+- Added optional dropdown argument 'quantity' with values 1~10 for Paste Latest Download command
+- Added optional dropdown argument 'quantity' with values 1~10 for Delete Latest Download command
+
 ## [Fixes] - 2025-12-10
 
 - Fixes [#23514](https://github.com/raycast/extensions/issues/23514)

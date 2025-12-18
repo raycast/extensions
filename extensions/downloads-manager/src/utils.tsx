@@ -77,6 +77,25 @@ export function getLatestDownload() {
   return downloads[0];
 }
 
+export function getLatestDownloads(quantity: number) {
+  const downloads = getDownloads();
+  if (downloads.length < 1) {
+    return [];
+  }
+
+  if (lastestDownloadOrder === "addTime") {
+    downloads.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime());
+  } else if (lastestDownloadOrder === "createTime") {
+    downloads.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  } else if (lastestDownloadOrder === "modifiedTime") {
+    downloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
+  } else if (lastestDownloadOrder === "birthTime") {
+    downloads.sort((a, b) => b.birthAt.getTime() - a.birthAt.getTime());
+  }
+
+  return downloads.slice(0, quantity);
+}
+
 export function hasAccessToDownloadsFolder() {
   try {
     accessSync(downloadsFolder, constants.R_OK);
