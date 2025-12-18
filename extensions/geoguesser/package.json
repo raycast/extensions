@@ -16,21 +16,21 @@
     {
       "name": "get-profile",
       "title": "Get Your Profile",
-      "subtitle": "Check your personal geoguesser stats",
+      "subtitle": "Geoguesser",
       "description": "Show you your current profile including stats",
       "mode": "view"
     },
     {
       "name": "daily-challenge",
       "title": "Daily Challenge",
-      "subtitle": "View today's daily challenge",
+      "subtitle": "Geoguesser",
       "description": "Show today's GeoGuessr daily challenge",
       "mode": "view"
     },
     {
       "name": "last-games",
       "title": "Show Your Recent Games",
-      "subtitle": "View your recent games",
+      "subtitle": "Geoguesser",
       "description": "Show your recent GeoGuessr game history",
       "mode": "view"
     }
