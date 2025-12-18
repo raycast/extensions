@@ -50,7 +50,7 @@ export type File = {
   lastModifyingUser?: User;
   owners?: User[];
   shared?: boolean;
-  viewersCanCopyContent?: boolean;
+  copyRequiresWriterPermission?: boolean;
   imageMediaMetadata?: ImageMediaMetadata;
   videoMediaMetadata?: VideoMediaMetadata;
   thumbnailLink?: string;
@@ -71,7 +71,7 @@ type FileData = {
 // For the whole list of properties, look at: https://developers.google.com/drive/api/reference/rest/v3/files
 
 const EXTENSION_SEARCH_PARAMS =
-  "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, createdTime, modifiedByMeTime, viewedByMeTime, sharedWithMeTime, lastModifyingUser(displayName,emailAddress), owners(displayName,emailAddress), shared, viewersCanCopyContent, imageMediaMetadata(width,height,cameraMake,cameraModel,time,location), videoMediaMetadata(width,height,durationMillis), thumbnailLink, starred, capabilities(canTrash), parents)";
+  "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, createdTime, modifiedByMeTime, viewedByMeTime, sharedWithMeTime, lastModifyingUser(displayName,emailAddress), owners(displayName,emailAddress), shared, copyRequiresWriterPermission, imageMediaMetadata(width,height,cameraMake,cameraModel,time,location), videoMediaMetadata(width,height,durationMillis), thumbnailLink, starred, capabilities(canTrash), parents)";
 
 const AI_EXTENSION_SEARCH_PARAMS =
   "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents, " +
@@ -80,7 +80,7 @@ const AI_EXTENSION_SEARCH_PARAMS =
   "createdTime, modifiedTime, modifiedByMeTime, viewedByMeTime, sharedWithMeTime, " +
   "lastModifyingUser(displayName,emailAddress), " +
   "owners(displayName,emailAddress), " +
-  "shared, viewersCanCopyContent, " +
+  "shared, copyRequiresWriterPermission, " +
   "spaces, folderColorRgb, " +
   "trashed, explicitlyTrashed, trashedTime, " +
   "properties, appProperties, " +
@@ -194,7 +194,16 @@ async function getFilePath(fileId: string): Promise<string> {
     return `${parentPath}/${fileData.name}`;
   };
 
-  return await getParentPath(fileId);
+  // Get the file's parent folder ID first
+  const fileData = (await getFileParents(fileId)) as FileData;
+
+  // If file has no parent, return "My Drive"
+  if (!fileData.parents || fileData.parents.length === 0) {
+    return "My Drive";
+  }
+
+  // Build path for parent folder only (excluding the file itself)
+  return await getParentPath(fileData.parents[0]);
 }
 
 export function getStarredFiles() {

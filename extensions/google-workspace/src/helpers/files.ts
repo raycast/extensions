@@ -1,43 +1,29 @@
 import { showToast, Toast } from "@raycast/api";
+import { resolveMime } from "friendly-mimes";
 import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 import { File } from "../api/getFiles";
 import { getOAuthToken } from "../api/googleAuth";
 
-export const MIME_TYPE_LABELS: Record<string, string> = {
-  "application/vnd.google-apps.document": "Google Docs",
-  "application/vnd.google-apps.spreadsheet": "Google Sheets",
-  "application/vnd.google-apps.presentation": "Google Slides",
-  "application/vnd.google-apps.vid": "Google Vids",
-  "application/vnd.google-apps.form": "Google Forms",
-  "application/vnd.google-apps.drawing": "Google Drawings",
-  "application/vnd.google-apps.map": "Google My Maps",
-  "application/vnd.google-apps.site": "Google Sites",
-  "application/vnd.google-apps.script": "Google Apps Script",
-  "application/vnd.google-apps.folder": "Folder",
-  "application/vnd.google-apps.shortcut": "Shortcut",
-  "application/pdf": "PDF Document",
-  "application/zip": "ZIP Archive",
-  "application/x-zip-compressed": "ZIP Archive",
-  "image/jpeg": "JPEG Image",
-  "image/png": "PNG Image",
-  "image/gif": "GIF Image",
-  "text/plain": "Plain Text",
-  "text/html": "HTML Document",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word Document",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel Workbook",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "PowerPoint Presentation",
-};
-
 export function getMimeTypeLabel(mimeType: string): string {
-  return MIME_TYPE_LABELS[mimeType] || mimeType.split("/").pop() || "Unknown";
+  try {
+    const result = resolveMime(mimeType);
+    if (result?.name) {
+      return result.name;
+    }
+  } catch {
+    // If friendly-mimes doesn't recognize the MIME type, continue to fallback
+  }
+
+  // Fallback to extracting from MIME type
+  return mimeType.split("/").pop() || "Unknown";
 }
 
 export function humanFileSize(size: number) {
   const unit = Math.floor(Math.log(size) / Math.log(1000));
 
-  return `${Math.round(size / Math.pow(1000, unit))} ${["B", "kB", "MB", "GB", "TB"][unit]}`;
+  return `${Math.round(size / Math.pow(1000, unit))} ${["B", "KB", "MB", "GB", "TB"][unit]}`;
 }
 
 export function getFileIconLink(mimeType: string, size = 32) {
