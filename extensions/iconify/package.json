@@ -122,7 +122,7 @@
       "required": false,
       "title": "Icon Name Format",
       "description": "Choose how icon names should be formatted when copying or pasting",
-      "default": "<set-name:icon-name>",
+      "default": "set-name:icon-name",
       "data": [
         {
           "title": "IconName",

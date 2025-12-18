@@ -1,6 +1,6 @@
 import { iconFormatsMap } from "./format-name";
 
-describe("iconFormatsMap", () => {
+describe("format icon name", () => {
   const cases = [
     { setId: "simple-icons", iconId: "raycast" },
     { setId: "lucide-lab", iconId: "apple-core" },
