@@ -1,6 +1,6 @@
 # Finnish Dictionary Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-12-18
 
 * Add support for Windows platform
 * Update dependencies to latest versions
