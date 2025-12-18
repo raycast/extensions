@@ -1,6 +1,6 @@
 # Google Workspace Changelog
 
-## [Improvements and Fixes] - {PR_MERGE_DATE}
+## [Improvements and Fixes] - 2025-12-18
 
 ### Changed
 
