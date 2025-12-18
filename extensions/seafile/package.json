@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "seafile",
   "title": "Seafile",
-  "description": "",
+  "description": "Open Source File Sync and Share Software",
   "icon": "seafile.png",
   "author": "xmok",
   "platforms": [
@@ -17,7 +17,7 @@
     {
       "name": "search-files",
       "title": "Search Files",
-      "description": "",
+      "description": "Search files in your libraries",
       "mode": "view"
     }
   ],
