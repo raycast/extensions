@@ -72,7 +72,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.8",
+    "@raycast/api": "^1.104.0",
     "@raycast/utils": "^1.17.0",
     "jwt-decode": "^4.0.0",
     "run-applescript": "^7.1.0"
