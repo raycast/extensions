@@ -9,12 +9,12 @@ import { handleUmamiError } from "./lib/utils";
 export default function Main() {
   return (
     <WithUmami>
-      <Account />
+      <Me />
     </WithUmami>
   );
 }
 
-function Account() {
+function Me() {
   const { isLoading, data, error } = useCachedPromise(async () => {
     const { ok, data, error } = await umami.getMe();
     if (!ok) handleUmamiError(error);
