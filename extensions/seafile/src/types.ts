@@ -17,7 +17,6 @@ export type FileDetails = {
   is_draft: boolean;
   has_draft: boolean;
   draft_file_path: string;
-  //   "draft_id": null,
   mtime: number;
   last_modified: string;
   last_modifier_email: string;

@@ -49,7 +49,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "filesize": "^11.0.13"
   },

@@ -21,8 +21,11 @@ const parseResponse = async <T>(response: Response) => {
 };
 
 const getToken = async () => {
-  if (!SEAFILE_URL) SEAFILE_URL = new URL(seafile_url).toString();
-  if (!API_URL) API_URL = new URL("api2/", seafile_url).toString();
+  if (!SEAFILE_URL) {
+    const url = new URL(seafile_url).toString();
+    SEAFILE_URL = url.endsWith("/") ? url : `${url}/`;
+  }
+  if (!API_URL) API_URL = SEAFILE_URL + "api2/";
   const token = await LocalStorage.getItem<string>("SEAFILE-ACCOUNT-TOKEN");
   if (token) return token;
   const response = await fetch(API_URL + "auth-token/", {
