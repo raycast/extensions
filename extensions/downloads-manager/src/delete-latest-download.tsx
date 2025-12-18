@@ -1,5 +1,5 @@
 import { getLatestDownloads, hasAccessToDownloadsFolder, deleteFileOrFolder } from "./utils";
-import { popToRoot, showHUD, LaunchProps } from "@raycast/api";
+import { popToRoot, showHUD, LaunchProps, confirmAlert, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 export default async function main(props: LaunchProps<{ arguments: Arguments.DeleteLatestDownload }>) {
@@ -16,12 +16,56 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Del
     return;
   }
 
+  const preferences = getPreferenceValues();
+  const deletionBehavior = preferences.deletionBehavior as string;
+  const isPermanentDelete = deletionBehavior === "permaDel";
+  const isMultipleFiles = downloads.length > 1;
+
+  // Show single confirmation dialog for multiple permanent deletions
+  if (isPermanentDelete && isMultipleFiles) {
+    const fileList = downloads.map((d) => d.file).join("\n");
+    const shouldDelete = await confirmAlert({
+      title: `Delete ${downloads.length} Files?`,
+      message: `Are you sure you want to permanently delete these ${downloads.length} files?\n\n${fileList}`,
+      primaryAction: {
+        title: "Delete",
+      },
+    });
+
+    if (!shouldDelete) {
+      await showHUD("Deletion cancelled");
+      await popToRoot();
+      return;
+    }
+  }
+
+  let deletedCount = 0;
+  const errors: Error[] = [];
+
   try {
     for (const download of downloads) {
-      await deleteFileOrFolder(download.path);
+      try {
+        await deleteFileOrFolder(download.path, {
+          skipToasts: isMultipleFiles,
+          skipConfirmation: isPermanentDelete && isMultipleFiles,
+        });
+        deletedCount++;
+      } catch (error) {
+        if (error instanceof Error && error.message === "Deletion cancelled by user") {
+          // User cancelled during individual file deletion (shouldn't happen with upfront confirmation, but handle it)
+          break;
+        }
+        errors.push(error instanceof Error ? error : new Error(String(error)));
+      }
     }
-    const message = downloads.length === 1 ? "download" : `${downloads.length} downloads`;
-    await showHUD(`Deleted latest ${message}`);
+
+    // Only show success message if files were actually deleted
+    if (deletedCount > 0) {
+      const message = deletedCount === 1 ? "download" : `${deletedCount} downloads`;
+      await showHUD(`Deleted latest ${message}`);
+    } else if (errors.length > 0) {
+      await showFailureToast(new Error("Failed to delete files"), { title: "Deletion Failed" });
+    }
   } catch (error) {
     await showFailureToast(error, { title: "Deletion Failed" });
   }

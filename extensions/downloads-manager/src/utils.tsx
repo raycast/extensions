@@ -106,37 +106,60 @@ export function hasAccessToDownloadsFolder() {
   }
 }
 
-export async function deleteFileOrFolder(filePath: string) {
+export async function deleteFileOrFolder(
+  filePath: string,
+  options?: { skipToasts?: boolean; skipConfirmation?: boolean },
+) {
+  const skipToasts = options?.skipToasts ?? false;
+  const skipConfirmation = options?.skipConfirmation ?? false;
+
   if (preferences.deletionBehavior === "trash") {
     try {
       await trash(filePath);
-      await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+      if (!skipToasts) {
+        await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+      }
     } catch (error) {
-      await showFailureToast(error, { title: "Move to Trash Failed" });
+      if (!skipToasts) {
+        await showFailureToast(error, { title: "Move to Trash Failed" });
+      }
+      throw error;
     }
     return;
   }
 
-  const shouldDelete = await confirmAlert({
-    title: "Delete Item?",
-    message: `Are you sure you want to permanently delete:\n${filePath}?`,
-    primaryAction: {
-      title: "Delete",
-    },
-  });
+  if (!skipConfirmation) {
+    const shouldDelete = await confirmAlert({
+      title: "Delete Item?",
+      message: `Are you sure you want to permanently delete:\n${filePath}?`,
+      primaryAction: {
+        title: "Delete",
+      },
+    });
 
-  if (!shouldDelete) {
-    await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
-    return;
+    if (!shouldDelete) {
+      if (!skipToasts) {
+        await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
+      }
+      throw new Error("Deletion cancelled by user");
+    }
   }
 
   try {
     await rm(filePath, { recursive: true, force: true });
-    await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
-  } catch (error) {
-    if (error instanceof Error) {
-      await showFailureToast(error, { title: "Deletion Failed" });
+    if (!skipToasts) {
+      await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
     }
+  } catch (error) {
+    if (error instanceof Error && error.message === "Deletion cancelled by user") {
+      throw error;
+    }
+    if (!skipToasts) {
+      if (error instanceof Error) {
+        await showFailureToast(error, { title: "Deletion Failed" });
+      }
+    }
+    throw error;
   }
 }
 
