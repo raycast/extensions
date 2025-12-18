@@ -74,3 +74,25 @@ export interface QueryResponse {
   icons: string[];
   collections: Record<string, SetResponse>;
 }
+
+export type IconNameFormat =
+  | "icon-name"
+  | "IconName"
+  | "set-name:icon-name"
+  | "set-name-icon-name"
+  | "set-name/icon-name"
+  | "set-name--icon-name"
+  | "setNameIconName"
+  | "SetNameIconName"
+  | "<SetNameIconName />"
+  | "<set-name-icon-name />"
+  | "i-set-name:icon-name"
+  | "i-set-name-icon-name"
+  | "icon-[set-name--icon-name]";
+
+export interface Preferences {
+  primaryAction: primaryActionEnum;
+  iconColor: iconColorEnum;
+  customColor: string;
+  iconNameFormat: IconNameFormat;
+}

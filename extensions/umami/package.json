@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "umami",
+  "title": "Umami",
+  "description": "The modern analytics platform for effortless insights",
+  "icon": "umami.png",
+  "author": "xmok",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-profile",
+      "title": "Show Profile",
+      "subtitle": "Umami",
+      "description": "View your user and update password",
+      "mode": "view"
+    },
+    {
+      "name": "view-websites",
+      "title": "View Websites",
+      "subtitle": "Umami",
+      "description": "View your websites and their stats",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "UMAMI_API_CLIENT_ENDPOINT",
+      "title": "Umami Endpoint",
+      "placeholder": "UMAMI_API_CLIENT_ENDPOINT",
+      "description": "The endpoint of your Umami API. Example: https://{yourserver}/api/",
+      "default": "https://api.umami.is/v1",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "UMAMI_API_CLIENT_USER_ID",
+      "title": "Umami User ID (Self-Hosted)",
+      "placeholder": "UMAMI_API_CLIENT_USER_ID",
+      "description": "The USER_ID of the User performing the API calls. Permission restrictions will apply based on application settings.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "UMAMI_API_CLIENT_SECRET",
+      "title": "Umami Client Secret (Self-Hosted)",
+      "placeholder": "UMAMI_API_CLIENT_SECRET",
+      "description": "A random string used to generate unique values. This needs to match the APP_SECRET used in the Umami application.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "UMAMI_API_KEY",
+      "title": "Umami API Key (Cloud)",
+      "placeholder": "UMAMI_API_KEY",
+      "description": "A unique string provided by Umami Cloud.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.2",
+    "@umami/api-client": "^0.80.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.3.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

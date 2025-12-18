@@ -1,5 +1,10 @@
 # Iconify Changelog
 
+## [Features] - 2025-12-18
+
+- Add `iconNameFormat` preference to control how icon names are formatted
+- Introducing Jest to make sure icon names are generated correctly
+
 ## [Error Guard] - 2025-12-16
 
 - Add `ErrorGuard` component that makes it a bit more friendly when there is an error, instructing the user to reinstall/clear cache/check internet connection
