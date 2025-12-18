@@ -40,10 +40,6 @@ function prepareImage(filePath: string): string {
   return `data:image/${ext};base64,${base64}`;
 }
 
-interface Preferences {
-  replicateApiToken: string;
-}
-
 // Helper function to copy processed image to clipboard
 async function copyProcessedImage(imageUrl: string): Promise<void> {
   const response = await fetch(imageUrl);
