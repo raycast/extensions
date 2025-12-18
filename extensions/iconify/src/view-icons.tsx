@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Grid, getPreferenceValues, Icon as RaycastI
 import { useState } from "react";
 import { createGlobalState } from "react-hooks-global-state";
 import { toDataURI, toSvg } from "./utils";
-import { iconColorEnum, DataIcon } from "./types";
+import { iconColorEnum, DataIcon, Preferences } from "./types";
 import { useCachedDataSets } from "./hooks/use-cached-datasets";
 import { useCachedListIcons } from "./hooks/use-cached-list-icons";
 import { IconActions } from "./components/IconActions";

@@ -2,7 +2,7 @@ import { Color, Grid, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 
 import { toDataURI, toSvg } from "./utils";
-import { iconColorEnum } from "./types";
+import { iconColorEnum, Preferences } from "./types";
 import { useQueryIcons } from "./hooks/use-query-icons";
 import { IconActions } from "./components/IconActions";
 import { ErrorGuard } from "./components/ErrorGuard";
