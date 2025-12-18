@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Detail, getPreferenceValues, showToast, Toast, trash } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, showToast, Toast, trash } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { accessSync, constants, readdirSync, statSync } from "fs";
 import { rm } from "fs/promises";
@@ -106,12 +106,8 @@ export function hasAccessToDownloadsFolder() {
   }
 }
 
-export async function deleteFileOrFolder(
-  filePath: string,
-  options?: { skipToasts?: boolean; skipConfirmation?: boolean },
-) {
+export async function deleteFileOrFolder(filePath: string, options?: { skipToasts?: boolean }) {
   const skipToasts = options?.skipToasts ?? false;
-  const skipConfirmation = options?.skipConfirmation ?? false;
 
   if (preferences.deletionBehavior === "trash") {
     try {
@@ -128,32 +124,13 @@ export async function deleteFileOrFolder(
     return;
   }
 
-  if (!skipConfirmation) {
-    const shouldDelete = await confirmAlert({
-      title: "Delete Item?",
-      message: `Are you sure you want to permanently delete:\n${filePath}?`,
-      primaryAction: {
-        title: "Delete",
-      },
-    });
-
-    if (!shouldDelete) {
-      if (!skipToasts) {
-        await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
-      }
-      throw new Error("Deletion cancelled by user");
-    }
-  }
-
+  // Permanent delete - confirmation is handled by the caller
   try {
     await rm(filePath, { recursive: true, force: true });
     if (!skipToasts) {
       await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
     }
   } catch (error) {
-    if (error instanceof Error && error.message === "Deletion cancelled by user") {
-      throw error;
-    }
     if (!skipToasts) {
       if (error instanceof Error) {
         await showFailureToast(error, { title: "Deletion Failed" });

@@ -21,12 +21,17 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Del
   const isPermanentDelete = deletionBehavior === "permaDel";
   const isMultipleFiles = downloads.length > 1;
 
-  // Show single confirmation dialog for multiple permanent deletions
-  if (isPermanentDelete && isMultipleFiles) {
-    const fileList = downloads.map((d) => d.file).join("\n");
+  // Show confirmation dialog for permanent deletions (single or multiple)
+  if (isPermanentDelete) {
+    const fileList = isMultipleFiles ? downloads.map((d) => d.file).join("\n") : downloads[0].file;
+    const title = isMultipleFiles ? `Delete ${downloads.length} Files?` : "Delete File?";
+    const message = isMultipleFiles
+      ? `Are you sure you want to permanently delete these ${downloads.length} files?\n\n${fileList}`
+      : `Are you sure you want to permanently delete:\n${downloads[0].path}?`;
+
     const shouldDelete = await confirmAlert({
-      title: `Delete ${downloads.length} Files?`,
-      message: `Are you sure you want to permanently delete these ${downloads.length} files?\n\n${fileList}`,
+      title,
+      message,
       primaryAction: {
         title: "Delete",
       },
@@ -47,14 +52,9 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Del
       try {
         await deleteFileOrFolder(download.path, {
           skipToasts: isMultipleFiles,
-          skipConfirmation: isPermanentDelete && isMultipleFiles,
         });
         deletedCount++;
       } catch (error) {
-        if (error instanceof Error && error.message === "Deletion cancelled by user") {
-          // User cancelled during individual file deletion (shouldn't happen with upfront confirmation, but handle it)
-          break;
-        }
         errors.push(error instanceof Error ? error : new Error(String(error)));
       }
     }
