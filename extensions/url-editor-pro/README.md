@@ -56,7 +56,7 @@ No API keys or external configuration required. Just install and use!
 7. **Search** your history by URL or alias.
 8. You can clear all history, or delete a single item.
 9. **Generate a QR code** for any URL and save it to your computer.
-10. **Clipboard detection:** If a URL is detected in your clipboard, you'll be prompted to parse and edit it. **Press Cmd</kbd> + <kbd>Enter</kbd>** to fill and parse.
+10. **Clipboard detection:** If a URL is detected in your clipboard, you'll be prompted to parse and edit it. **Press <kbd>Cmd</kbd> + <kbd>Enter</kbd>** to fill and parse.
 
 ## Extension Guidelines
 
