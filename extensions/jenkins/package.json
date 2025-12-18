@@ -22,24 +22,82 @@
   "commands": [
     {
       "name": "jenkins",
-      "title": "Manage Jenkins",
-      "description": "Manage jenkins and jobs",
+      "title": "View Instances",
+      "description": "View Jenkins instances and jobs",
       "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "View Favorites",
+      "description": "View all your favorite Jenkins jobs in one place",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Job Status",
+      "description": "Track status of your important Jenkins jobs in the menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "trackedJobs",
+          "type": "textfield",
+          "required": false,
+          "title": "Tracked Jobs",
+          "description": "Comma-separated list of job names to track (e.g., my-app-build,backend-deploy)",
+          "placeholder": "my-app-build,backend-deploy,frontend-test"
+        },
+        {
+          "name": "refreshInterval",
+          "type": "textfield",
+          "required": false,
+          "title": "Refresh Interval (seconds)",
+          "description": "How often to refresh job status",
+          "default": "30",
+          "placeholder": "30"
+        },
+        {
+          "name": "enableNotifications",
+          "type": "checkbox",
+          "required": false,
+          "title": "Enable Notifications",
+          "description": "Show desktop notifications when build status changes",
+          "default": false,
+          "label": "Show notifications for build status changes"
+        },
+        {
+          "name": "notifyOnSuccess",
+          "type": "checkbox",
+          "required": false,
+          "title": "Notify on Success",
+          "description": "Show notification when builds succeed",
+          "default": true,
+          "label": "Notify when builds succeed"
+        },
+        {
+          "name": "notifyOnFailure",
+          "type": "checkbox",
+          "required": false,
+          "title": "Notify on Failure",
+          "description": "Show notification when builds fail",
+          "default": true,
+          "label": "Notify when builds fail"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.2",
-    "node-fetch": "^3.0.0",
-    "uuid": "^9.0.0"
+    "@raycast/api": "^1.104.1",
+    "node-fetch": "^3.3.2",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@types/uuid": "^8.3.4",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/uuid": "^11.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

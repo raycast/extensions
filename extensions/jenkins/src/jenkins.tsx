@@ -9,33 +9,77 @@ import {
   Icon,
   useNavigation,
   Form,
+  Color,
 } from "@raycast/api";
 import { Search } from "./search";
 import { Jenkins, JenkinsAPI } from "./lib/api";
-import { addJenkins, deleteJenkins, listJenkins } from "./lib/storage";
+import {
+  addJenkins,
+  deleteJenkins,
+  listJenkins,
+  addFavoriteInstance,
+  removeFavoriteInstance,
+  isFavoriteInstance,
+} from "./lib/storage";
 import { useState, useCallback, useEffect } from "react";
+
+interface JenkinsWithStats extends Jenkins {
+  isOnline?: boolean;
+  totalJobs?: number;
+  buildingJobs?: number;
+  failedJobs?: number;
+  lastChecked?: Date;
+}
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [jenkinsList, setJenkinsList] = useState<Jenkins[]>([]);
+  const [jenkinsList, setJenkinsList] = useState<JenkinsWithStats[]>([]);
   const [hasJenkins, setHasJenkins] = useState<boolean>(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  const fetchStats = async (jenkins: Jenkins): Promise<JenkinsWithStats> => {
+    const jenkinsWithStats: JenkinsWithStats = { ...jenkins, lastChecked: new Date() };
+
+    try {
+      const jenkinsAPI = new JenkinsAPI(jenkins);
+      const resp = await jenkinsAPI.inspect();
+
+      jenkinsWithStats.isOnline = true;
+      jenkinsWithStats.totalJobs = resp.jobs?.length || 0;
+      jenkinsWithStats.buildingJobs = resp.jobs?.filter((job) => job.color?.includes("anime")).length || 0;
+      jenkinsWithStats.failedJobs = resp.jobs?.filter((job) => job.color?.startsWith("red")).length || 0;
+    } catch (err) {
+      jenkinsWithStats.isOnline = false;
+    }
+
+    return jenkinsWithStats;
+  };
 
   const search = useCallback(
     async function search(searchText: string) {
       setIsLoading(true);
       try {
         const jenkinsList = await listJenkins();
-        setJenkinsList(jenkinsList);
         setHasJenkins(jenkinsList.length > 0);
         const results = jenkinsList.filter((j) => j.name.toLowerCase().includes(searchText.toLowerCase()));
-        setJenkinsList(results);
+
+        const jenkinsWithStats = await Promise.all(results.map(fetchStats));
+        setJenkinsList(jenkinsWithStats);
+
+        const favs = new Set<string>();
+        for (const jenkins of jenkinsWithStats) {
+          if (await isFavoriteInstance(jenkins.id)) {
+            favs.add(jenkins.id);
+          }
+        }
+        setFavorites(favs);
       } catch (err) {
         showToast({ style: Toast.Style.Failure, title: "Search Failed", message: String(err) });
       } finally {
         setIsLoading(false);
       }
     },
-    [setIsLoading, setJenkinsList]
+    [setIsLoading, setJenkinsList],
   );
 
   useEffect(() => {
@@ -43,73 +87,187 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Jenkins..." throttle>
+    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Instances..." throttle>
       <List.EmptyView
-        title={hasJenkins ? "No Results" : "No Jenkins Added"}
-        description={hasJenkins ? "Try a different search." : "Add a Jenkins to get started."}
+        title={hasJenkins ? "No Results" : "No Instances Added"}
+        description={hasJenkins ? "Try a different search." : "Add an instance to get started."}
         icon="iconnv.png"
         actions={
           <ActionPanel>
             <Action.Push
               icon={Icon.Plus}
-              title="Add Jenkins"
+              title="Add Instance"
               target={<AddJenkins setJenkinsList={setJenkinsList} />}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
           </ActionPanel>
         }
       />
-      <List.Section title="Results" subtitle={jenkinsList.length + ""}>
-        {jenkinsList.map((jenkins) => (
-          <JenkinsItem key={jenkins.name} jenkins={jenkins} setJenkinsList={setJenkinsList} />
-        ))}
-      </List.Section>
+      {(() => {
+        const favoriteInstances = jenkinsList.filter((j) => favorites.has(j.id));
+        const otherInstances = jenkinsList.filter((j) => !favorites.has(j.id));
+
+        return (
+          <>
+            {favoriteInstances.length > 0 && (
+              <List.Section title="Favorites" subtitle={favoriteInstances.length + ""}>
+                {favoriteInstances.map((jenkins) => (
+                  <JenkinsItem
+                    key={jenkins.id}
+                    jenkins={jenkins}
+                    setJenkinsList={setJenkinsList}
+                    onRefresh={() => search("")}
+                    isFavorite={true}
+                    onToggleFavorite={async () => {
+                      await removeFavoriteInstance(jenkins.id);
+                      setFavorites((prev) => {
+                        const next = new Set(prev);
+                        next.delete(jenkins.id);
+                        return next;
+                      });
+                    }}
+                  />
+                ))}
+              </List.Section>
+            )}
+            {otherInstances.length > 0 && (
+              <List.Section title="Results" subtitle={otherInstances.length + ""}>
+                {otherInstances.map((jenkins) => (
+                  <JenkinsItem
+                    key={jenkins.id}
+                    jenkins={jenkins}
+                    setJenkinsList={setJenkinsList}
+                    onRefresh={() => search("")}
+                    isFavorite={false}
+                    onToggleFavorite={async () => {
+                      await addFavoriteInstance(jenkins.id);
+                      setFavorites((prev) => {
+                        const next = new Set(prev);
+                        next.add(jenkins.id);
+                        return next;
+                      });
+                    }}
+                  />
+                ))}
+              </List.Section>
+            )}
+          </>
+        );
+      })()}
     </List>
   );
 }
 
-function JenkinsItem(props: { jenkins: Jenkins; setJenkinsList: (f: (v: Jenkins[]) => Jenkins[]) => void }) {
+function JenkinsItem(props: {
+  jenkins: JenkinsWithStats;
+  setJenkinsList: (f: (v: Jenkins[]) => Jenkins[]) => void;
+  onRefresh: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => Promise<void>;
+}) {
+  const getDisplayUrl = (url: string): string => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname;
+    } catch {
+      return url.replace(/^https?:\/\//, "").split("/")[0];
+    }
+  };
+
+  const getStatusIcon = () => {
+    if (props.jenkins.isOnline === undefined) {
+      return { source: Icon.Circle, tintColor: Color.SecondaryText };
+    }
+    return props.jenkins.isOnline
+      ? { source: Icon.CheckCircle, tintColor: Color.Green }
+      : { source: Icon.XMarkCircle, tintColor: Color.Red };
+  };
+
+  const accessories: List.Item.Accessory[] = [];
+
+  if (props.jenkins.isOnline !== undefined) {
+    const statusTag = props.jenkins.isOnline
+      ? { tag: { value: "Online", color: Color.Green } }
+      : { tag: { value: "Offline", color: Color.Red } };
+    accessories.push(statusTag);
+  }
+
+  if (props.jenkins.buildingJobs && props.jenkins.buildingJobs > 0) {
+    accessories.push({
+      tag: { value: `${props.jenkins.buildingJobs} Building`, color: Color.Blue },
+      icon: Icon.CircleProgress,
+    });
+  }
+
+  if (props.jenkins.failedJobs && props.jenkins.failedJobs > 0) {
+    accessories.push({
+      tag: { value: `${props.jenkins.failedJobs} Failed`, color: Color.Red },
+      icon: Icon.XMarkCircle,
+    });
+  }
+
+  if (props.jenkins.totalJobs !== undefined) {
+    accessories.push({ text: `${props.jenkins.totalJobs} jobs` });
+  }
+
+  if (props.isFavorite) {
+    accessories.push({ icon: Icon.Star, tooltip: "Favorite" });
+  }
+
   return (
     <List.Item
       title={props.jenkins.name}
-      subtitle={props.jenkins.version}
-      accessories={[{ text: props.jenkins.url }]}
+      subtitle={getDisplayUrl(props.jenkins.url)}
+      icon={getStatusIcon()}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={props.jenkins.url} />
             <Action.Push
               icon={Icon.BarCode}
-              title="Manage Jobs"
-              target={<Search jenkins={props.jenkins} navigationTitle="Manage Jobs" />}
+              title="View Jobs"
+              target={<Search jenkins={props.jenkins} navigationTitle="Jobs" />}
             />
+            <Action.OpenInBrowser title="Open in Browser" url={props.jenkins.url} />
             <Action.Push
               icon={Icon.Filter}
               title="Global Search"
               target={<Search jenkins={props.jenkins} navigationTitle="Global Search" isGlobalSearch={true} />}
               shortcut={{ modifiers: ["cmd"], key: "g" }}
             />
+            <Action
+              icon={Icon.ArrowClockwise}
+              title="Refresh Status"
+              onAction={props.onRefresh}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+            <Action
+              icon={props.isFavorite ? Icon.StarDisabled : Icon.Star}
+              title={props.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+              onAction={props.onToggleFavorite}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+            />
             <Action.Push
               icon={Icon.Plus}
-              title="Add Jenkins"
+              title="Add Instance"
               target={<AddJenkins setJenkinsList={props.setJenkinsList} />}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
             <Action.Push
               icon={Icon.Patch}
-              title="Update Jenkins"
+              title="Update Instance"
               target={<AddJenkins jenkins={props.jenkins} setJenkinsList={props.setJenkinsList} />}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <Action.SubmitForm
               icon={Icon.Warning}
-              title="Delete Jenkins"
+              title="Delete Instance"
               onSubmit={async () => {
                 const options: Alert.Options = {
-                  title: "Delete the Jenkins?",
+                  title: "Delete this Instance?",
                   message: "You will not be able to recover it",
                   primaryAction: {
-                    title: "Delete Jenkins",
+                    title: "Delete Instance",
                     style: Alert.ActionStyle.Destructive,
                     onAction: async () => {
                       try {
@@ -123,7 +281,7 @@ function JenkinsItem(props: { jenkins: Jenkins; setJenkinsList: (f: (v: Jenkins[
                 };
                 await confirmAlert(options);
               }}
-              shortcut={{ modifiers: ["cmd"], key: "delete" }}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
             />
             <Action.CopyToClipboard
               title="Copy URL"
@@ -157,7 +315,7 @@ function AddJenkins(props: { jenkins?: Jenkins; setJenkinsList: (f: (v: Jenkins[
 
   return (
     <Form
-      navigationTitle={action + " Jenkins"}
+      navigationTitle={action + " Instance"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -189,7 +347,7 @@ function AddJenkins(props: { jenkins?: Jenkins; setJenkinsList: (f: (v: Jenkins[
                 });
                 pop();
               } catch (err) {
-                showToast(Toast.Style.Failure, `${action} Jenkins Failed`, String(err));
+                showToast(Toast.Style.Failure, `${action} Instance Failed`, String(err));
               }
             }}
           />

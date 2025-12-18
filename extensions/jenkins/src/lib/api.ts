@@ -29,6 +29,27 @@ export interface Build {
   number: number;
   url: string;
   _class: string;
+  building?: boolean;
+  duration?: number;
+  estimatedDuration?: number;
+  result?: string;
+  timestamp?: number;
+  _branchName?: string;
+}
+
+export interface PipelineStage {
+  id: string;
+  name: string;
+  status: string;
+  startTimeMillis: number;
+  durationMillis: number;
+}
+
+export interface BuildDetails {
+  building: boolean;
+  duration: number;
+  estimatedDuration: number;
+  result?: string;
 }
 
 export interface View {
@@ -110,6 +131,34 @@ export class JenkinsAPI {
     }
   }
 
+  public async stopBuild(buildUrl: string) {
+    const api = `${buildUrl}stop`;
+    const resp = await this.request(api, {
+      method: "POST",
+    });
+    if (!resp.ok) {
+      return Promise.reject(new Error(`${resp.status} ${await resp.text()}`));
+    }
+  }
+
+  public async getPipelineStages(buildUrl: string): Promise<PipelineStage[]> {
+    try {
+      const api = `${buildUrl}wfapi/describe`;
+      const resp = await this.request(api);
+      const result = (await resp.json()) as { stages?: PipelineStage[] };
+      return result.stages || [];
+    } catch (err) {
+      // Pipeline API might not be available for non-pipeline jobs
+      return [];
+    }
+  }
+
+  public async getConsoleLog(buildUrl: string): Promise<string> {
+    const api = `${buildUrl}consoleText`;
+    const resp = await this.request(api);
+    return await resp.text();
+  }
+
   async request(url: RequestInfo, init?: RequestInit) {
     let urlAgent;
     if (url.toString().startsWith("http://")) {
@@ -125,7 +174,7 @@ export class JenkinsAPI {
       headers = new Headers();
       headers.append(
         "Authorization",
-        "Basic " + Buffer.from(`${this.jenkins.username}:${this.jenkins.token}`).toString("base64")
+        "Basic " + Buffer.from(`${this.jenkins.username}:${this.jenkins.token}`).toString("base64"),
       );
     }
     const resp = await fetch(url, {
@@ -147,6 +196,8 @@ export class JenkinsAPI {
 export const hasSubJobs = (job: Job): boolean => {
   return (
     job._class === "org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject" ||
-    job._class === "com.cloudbees.hudson.plugins.folder.Folder"
+    job._class === "com.cloudbees.hudson.plugins.folder.Folder" ||
+    (job._class?.includes("MultiBranch") ?? false) ||
+    (job._class?.includes("Folder") ?? false)
   );
 };
