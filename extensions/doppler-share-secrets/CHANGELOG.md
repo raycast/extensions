@@ -1,5 +1,10 @@
 # Doppler Changelog
 
+## [Update and Add support for Windows] - {PR_MERGE_DATE}
+
+- Updated dependencies to latest versions
+- Added support for Windows Platform
+
 ## [View Config Logs + "Open in Doppler" component] - 2025-07-01
 
 - View Logs of a Config
