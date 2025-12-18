@@ -87,11 +87,11 @@ export const FolderItemActions = memo(function FolderItemActions({
     await updateFolder(folder.id, { items: [] })
     await handleSave()
 
-    await showToast({
-      style: Toast.Style.Success,
+      await showToast({
+        style: Toast.Style.Success,
       title: "Folder emptied",
       message: `Removed ${folder.items.length} ${pluralize(folder.items.length, "item")}`,
-    })
+      })
   }, [folder.id, folder.name, folder.items.length, handleSave])
 
   return (
@@ -108,11 +108,11 @@ export const FolderItemActions = memo(function FolderItemActions({
       {/* Open All */}
       {(hasApps || hasWebsites) && (
         <ActionPanel.Section title="Open All">
-          {hasApps && (
-            <Action
-              title="Open All Applications"
-              icon={Icon.AppWindow}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+        {hasApps && (
+          <Action
+            title="Open All Applications"
+            icon={Icon.AppWindow}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
               onAction={handleOpenAllApps}
             />
           )}
@@ -122,9 +122,9 @@ export const FolderItemActions = memo(function FolderItemActions({
               icon={Icon.Globe}
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               onAction={handleOpenAllWebsites}
-            />
-          )}
-        </ActionPanel.Section>
+          />
+        )}
+      </ActionPanel.Section>
       )}
 
       {/* Copy URLs */}
