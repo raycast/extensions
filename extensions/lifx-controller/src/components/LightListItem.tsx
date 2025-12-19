@@ -120,6 +120,15 @@ function LoadProfileList({
 
   async function applyProfile(profile: LightProfile) {
     try {
+      // Validate profile has at least one light
+      if (!profile.lights || profile.lights.length === 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid profile",
+          message: "Profile has no saved light states",
+        });
+        return;
+      }
       const lightState = profile.lights[0];
       await client.controlLight(light.id, {
         power: lightState.power,
@@ -335,7 +344,7 @@ export function LightListItem({ light, client, onUpdate, onExecuteNlp }: Props) 
       if (light.hue >= 30 && light.hue < 90) return Color.Yellow;
       if (light.hue >= 90 && light.hue < 150) return Color.Green;
       if (light.hue >= 150 && light.hue < 210) return Color.Blue;
-      if (light.hue >= 210 && light.hue < 270) return Color.Blue;
+      if (light.hue >= 210 && light.hue < 270) return Color.Purple;
       if (light.hue >= 270 && light.hue < 330) return Color.Magenta;
       return Color.Red;
     }

@@ -80,7 +80,7 @@ All actions have keyboard shortcuts for maximum efficiency:
 1. Clone the Raycast extensions repository:
 ```bash
 git clone https://github.com/raycast/extensions.git
-cd extensions/extensions/lifx-controller
+cd extensions/lifx-controller
 ```
 
 2. Install dependencies:
@@ -105,7 +105,7 @@ If LAN discovery fails or you want remote control, you can add an HTTP API token
 2. Sign in with your LIFX account
 3. Click "Generate New Token"
 4. Copy the token
-5. Open Raycast → LIFX extension → Preferences
+5. Open Raycast → LIFX Controller → Preferences
 6. Paste your token in "LIFX HTTP API Token"
 
 ### Preferences
