@@ -66,11 +66,11 @@ export default function MigrateCommand() {
   return (
     <List isLoading={isWorking}>
       <List.Item
-        title="Migrate Local → iCloud Keychain"
+        title="Migrate to iCloud Keychain"
         subtitle={
           backend === "icloud-keychain"
             ? "Keychain backend is currently selected"
-            : "Tip: Switch Storage Backend preference to iCloud Keychain after migrating"
+            : "Keeps the local LocalStorage copy as a fallback"
         }
         actions={
           <ActionPanel>
@@ -78,6 +78,19 @@ export default function MigrateCommand() {
               title="Migrate (Keep Local Copy)"
               onAction={migrateKeepLocal}
             />
+          </ActionPanel>
+        }
+      />
+
+      <List.Item
+        title="Migrate to iCloud Keychain (Delete Local Copy)"
+        subtitle={
+          backend === "icloud-keychain"
+            ? "Keychain backend is currently selected"
+            : "Deletes the local LocalStorage copy on this Mac after migrating"
+        }
+        actions={
+          <ActionPanel>
             <Action
               title="Migrate + Delete Local Copy"
               style={Action.Style.Destructive}
