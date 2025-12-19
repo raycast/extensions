@@ -13,7 +13,10 @@ type ResultMetadataProps = {
  */
 function formatTextForDisplay(text: string): string {
   // Remove newlines completely (replace with empty string)
-  const normalized = text.replace(/\r\n/g, "").replace(/\n/g, "").replace(/\r/g, "");
+  const normalized = text
+    .replace(/\r\n/g, "")
+    .replace(/\n/g, "")
+    .replace(/\r/g, "");
 
   // If after normalizing it's only whitespace or empty, return empty string
   if (normalized.trim().length === 0) {

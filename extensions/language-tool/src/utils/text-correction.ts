@@ -29,7 +29,10 @@ function extractTrailingNewline(text: string): string {
  * @param originalText - The original text being replaced
  * @returns Adjusted replacement with newline preserved if applicable
  */
-function adjustReplacementForNewline(replacement: string, originalText: string): string {
+function adjustReplacementForNewline(
+  replacement: string,
+  originalText: string,
+): string {
   // Only adjust if replacement ends with space and original has trailing newline
   if (!replacement.endsWith(" ") || originalText.length === 0) {
     return replacement;
@@ -53,7 +56,11 @@ function adjustReplacementForNewline(replacement: string, originalText: string):
  */
 function applySingleCorrection(
   text: string,
-  match: { offset: number; length: number; replacements: Array<{ value?: string }> },
+  match: {
+    offset: number;
+    length: number;
+    replacements: Array<{ value?: string }>;
+  },
   offset: number,
 ): { updatedText: string; newOffset: number } {
   let replacement = match.replacements[0]?.value || "";
@@ -102,7 +109,11 @@ export function calculateCorrectedText(
   let offset = 0;
 
   for (const match of sortedMatches) {
-    const { updatedText, newOffset } = applySingleCorrection(text, match, offset);
+    const { updatedText, newOffset } = applySingleCorrection(
+      text,
+      match,
+      offset,
+    );
     text = updatedText;
     offset = newOffset;
   }

@@ -18,7 +18,9 @@ function isValidMatch(match: Match): boolean {
  * @param result - The API response with matches
  * @returns Filtered result with only valid matches
  */
-export function filterValidMatches(result: CheckTextResponse): CheckTextResponse {
+export function filterValidMatches(
+  result: CheckTextResponse,
+): CheckTextResponse {
   if (!result.matches || result.matches.length === 0) {
     return result;
   }
@@ -30,4 +32,3 @@ export function filterValidMatches(result: CheckTextResponse): CheckTextResponse
     matches: validMatches,
   };
 }
-

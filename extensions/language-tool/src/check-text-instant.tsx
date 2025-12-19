@@ -56,12 +56,8 @@ export default async function Command() {
     // Filter out matches with invalid replacements (empty or only whitespace/newlines)
     const filteredResult = filterValidMatches(result);
 
-    console.log("text", text);
-
     // Apply all corrections using pure utility function
     const correctedText = applyAllCorrections(text, filteredResult);
-
-    console.log("correctedText", correctedText);
 
     // Paste the corrected text
     await Clipboard.paste(correctedText);
