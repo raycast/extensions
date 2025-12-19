@@ -19,6 +19,20 @@
       "subtitle": "Pipedrive",
       "description": "Search Pipedrive deals, people and organizations",
       "mode": "view"
+    },
+    {
+      "name": "add-contact",
+      "title": "Add Contact",
+      "subtitle": "Pipedrive",
+      "description": "Add a new contact",
+      "mode": "view"
+    },
+    {
+      "name": "add-deal",
+      "title": "Create Deal",
+      "subtitle": "Pipedrive",
+      "description": "Create a new deal",
+      "mode": "view"
     }
   ],
   "preferences": [

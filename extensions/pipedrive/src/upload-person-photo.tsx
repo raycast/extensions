@@ -1,0 +1,79 @@
+import { Action, ActionPanel, Form, Toast, getPreferenceValues, showToast, useNavigation } from "@raycast/api";
+import { basename } from "path";
+import { stat } from "fs/promises";
+
+import { buildPipedriveApiUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
+import { readFileAsBuffer } from "./pipedrive-avatar-cache";
+
+type Preferences = {
+  domain: string;
+  apiToken: string;
+  limit: string;
+};
+
+export default function UploadPersonPhoto({ personId, onUploaded }: { personId: string; onUploaded?: () => void }) {
+  const preferences = getPreferenceValues<Preferences>();
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: { file?: string[] }) {
+    const filePath = values.file?.[0];
+    if (!filePath) {
+      await showToast({ style: Toast.Style.Failure, title: "Choose an image" });
+      return;
+    }
+
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Uploading photo…" });
+
+    const abortable = new AbortController();
+    try {
+      await stat(filePath);
+
+      const url = buildPipedriveApiUrl(preferences, `/api/v1/persons/${personId}/picture`);
+
+      const bytes = await readFileAsBuffer(filePath);
+      const form = new FormData();
+      form.append("file", new Blob([bytes]), basename(filePath));
+
+      await fetchPipedriveJson<Record<string, unknown>>(preferences, url, {
+        method: "POST",
+        body: form,
+        signal: abortable.signal,
+      });
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Photo uploaded";
+
+      onUploaded?.();
+      pop();
+    } catch (error) {
+      if (isAbortError(error)) {
+        await toast.hide();
+        return;
+      }
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to upload photo";
+      toast.message = error instanceof Error ? error.message : String(error);
+    }
+  }
+
+  return (
+    <Form
+      navigationTitle="Upload Photo"
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.SubmitForm title="Upload" onSubmit={handleSubmit} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker
+        id="file"
+        title="Image"
+        canChooseFiles
+        canChooseDirectories={false}
+        allowMultipleSelection={false}
+      />
+    </Form>
+  );
+}
