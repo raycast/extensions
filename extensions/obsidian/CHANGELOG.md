@@ -1,5 +1,18 @@
 # Obsidian Changelog
 
+## [Welcoming AI, Sort Notes, Better Tag Search, Code Improvements] - 2025-12-16
+
+- Adds new syntax to search for tagged notes: "tag:someTag". This can be used in combination with a normal search. For example "tag:someTag some text", this searches for notes with the tag "someTag" and then filters those notes with "some text"
+- Adds new sorting orders: Relevance, File name (A to Z), File name (Z to A), Modified time (new to old), Modified time (old to new), Created time (new to old), Created time (old to new)
+- Adds AI commands/tools for appending to notes, creating notes, opening notes, reading notes, searching notes, updating notes and finding vaults
+- Adds Obsidian Canvas files
+- Adds the option to auto-focus the content field in the Create Note command
+- Improves memory usage during search by doing two-fold search, first on note metadata then on note content in a more memory efficient way
+- Introduces a proper interface for the Obsidian app, many more tests and DOCUMENTATION.md, CONTRIBUTING.md, REFERENCE.md to help contributors
+- Fixes a bug where templates would load selected text even when the template was not used
+- Fixes several internal bugs
+- REFERENCE.md was used to manually check the current state of the extension
+
 ## [Bug fixes] - 2025-06-10
 
 - Fixes a bug, which create a tagged note a wrong way. Changes an order of properties block and note text

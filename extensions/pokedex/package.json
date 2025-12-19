@@ -14,6 +14,10 @@
     "Other",
     "Fun"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "pokemon",
@@ -145,10 +149,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4",
-    "json2md": "^2.0.1",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "axios": "^1.13.2",
+    "json2md": "^2.0.3",
     "lodash.debounce": "^4.0.8",
     "lodash.groupby": "^4.6.0",
     "lodash.orderby": "^4.6.0",
@@ -156,25 +160,24 @@
     "lodash.uniqby": "^4.7.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.11.0",
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/json2md": "^1.5.4",
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.groupby": "^4.6.9",
     "@types/lodash.orderby": "^4.6.9",
     "@types/lodash.shuffle": "^4.2.9",
     "@types/lodash.uniqby": "^4.7.9",
-    "@types/node": "~22.5.5",
-    "@types/react": "^18.3.8",
-    "eslint": "^9.11.0",
-    "eslint-plugin-react": "^7.36.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2",
-    "typescript-eslint": "^8.6.0"
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -11,13 +11,13 @@ import { useLocalExtensions } from "./extensions";
 import { Extension } from "./lib/vscode";
 import { compactNumberFormat } from "./utils";
 
-function InstallExtensionAction(props: { extension: GalleryExtension; afterInstall?: () => void }): JSX.Element {
+function InstallExtensionAction(props: { extension: GalleryExtension; afterInstall?: () => void }) {
   return (
     <InstallExtensionByIDAction extensionID={getFullExtensionID(props.extension)} afterInstall={props.afterInstall} />
   );
 }
 
-function UninstallExtensionAction(props: { extension: GalleryExtension; afterUninstall?: () => void }): JSX.Element {
+function UninstallExtensionAction(props: { extension: GalleryExtension; afterUninstall?: () => void }) {
   return (
     <UninstallExtensionByIDAction
       extensionID={getFullExtensionID(props.extension)}
@@ -104,7 +104,7 @@ function GalleryExtensionListItem(props: {
   extension: GalleryExtension;
   installedExtensions: Extension[] | undefined;
   reloadLocalExtensions: () => void;
-}): JSX.Element {
+}) {
   const e = props.extension;
   const ie = props.installedExtensions;
   const iconURI = (): string | undefined => {
@@ -158,7 +158,7 @@ function GalleryExtensionListItem(props: {
             <OpenExtensionByIDInBrowserAction extensionID={getFullExtensionID(e)} />
             <Action.CopyToClipboard
               content={getFullExtensionID(e)}
-              title="Copy Extension Id"
+              title="Copy Extension ID"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>
@@ -182,7 +182,7 @@ function getTotalResultCount(data: GalleryQueryResult | undefined): number | und
   }
 }
 
-export default function InstallExtensionRootCommand(): JSX.Element {
+export default function InstallExtensionRootCommand() {
   const [searchText, setSearchText] = useState("");
   const { extensions: installExtensions, refresh } = useLocalExtensions();
   const { isLoading, error, data } = useGalleryQuery(searchText);

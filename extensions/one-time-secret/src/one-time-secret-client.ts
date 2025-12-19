@@ -1,5 +1,3 @@
-import fetch, { Headers, RequestInit, Response } from "node-fetch";
-
 export class OneTimeSecretClient {
   baseUrl: string;
 
@@ -14,7 +12,7 @@ export class OneTimeSecretClient {
   public async storeAnonymousSecret(
     secret: string,
     ttl: string,
-    passphrase: string | null = null
+    passphrase: string | null = null,
   ): Promise<OneTimeSecretResponse> {
     const body = new URLSearchParams();
     body.append("secret", secret);

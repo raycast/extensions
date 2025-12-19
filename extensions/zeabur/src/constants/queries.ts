@@ -125,3 +125,19 @@ export const redeployServiceQuery = {
   query:
     "mutation RedeployService($serviceID: ObjectID!, $environmentID: ObjectID!) {\n  redeployService(serviceID: $serviceID, environmentID: $environmentID)\n}",
 };
+
+export const getServersQuery = {
+  operationName: "Servers",
+  variables: {},
+  query:
+    "query Servers {\n  servers {\n    _id\n    name\n    providerInfo {\n      icon\n      __typename\n    }\n    ...ServerCard\n    __typename\n  }\n}\n\nfragment ServerCard on Server {\n  _id\n  ip\n  sshPort\n  sshUsername\n  name\n  providerInfo {\n    code\n    console\n    homepage\n    icon\n    name\n    __typename\n  }\n  continent\n  country\n  city\n  createdAt\n  isAutoRenewDisabled\n  events {\n    message\n    time\n    severity\n    __typename\n  }\n  ...ServerPriceContext\n  __typename\n}\n\nfragment ServerPriceContext on Server {\n  _id\n  isManaged\n  __typename\n}",
+};
+
+export const getServerWithStatusQuery = {
+  operationName: "ServerWithStatus",
+  variables: {
+    serverID: "",
+  },
+  query:
+    "query ServerWithStatus($serverID: ObjectID!) {\n  server(_id: $serverID) {\n    _id\n    status {\n      isOnline\n      totalCPU\n      totalMemory\n      usedCPU\n      usedMemory\n      warnings\n      vmStatus\n      __typename\n    }\n    __typename\n  }\n}",
+};

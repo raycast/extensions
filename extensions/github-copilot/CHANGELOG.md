@@ -1,5 +1,15 @@
 # GitHub Copilot Changelog
 
+## [Model picker, custom agents and more] - 2025-12-08
+
+- Allow selecting a model when creating a task (Copilot Pro and Pro+ users only)
+- Allow selecting a custom agent when creating a task
+- When opening a task, launch mission control by default, not the pull request
+
+## [Copilot usage] - 2025-12-01
+
+- Add a command to view GitHub Copilot usage details
+
 ## [Refactor data loading] - 2025-09-12
 
 - Load pull request data using the pull request ID returned from the GitHub API

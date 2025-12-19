@@ -6,7 +6,7 @@
   "icon": "extension_icon.png",
   "author": "ben_rowlands",
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "categories": [
     "Developer Tools",
     "Documentation"
@@ -34,17 +34,17 @@
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^1.17.0",
-    "react": "^18.2.0",
+    "js-yaml": "^4.1.0",
     "node-fetch": "^2.6.7",
-    "jszip": "^3.10.1",
-    "js-yaml": "^4.1.0"
+    "react": "^18.2.0",
+    "unzip-stream": "^0.3.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
+    "@types/js-yaml": "^4.0.5",
     "@types/node": "22.13.10",
     "@types/node-fetch": "^2.6.2",
     "@types/react": "19.0.10",
-    "@types/js-yaml": "^4.0.5",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
@@ -57,6 +57,13 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
+  "screenshots": [
+    {
+      "title": "Roblox Creator Docs",
+      "description": "Search and open Roblox Creator Docs in default browser",
+      "image": "metadata/screenshot.png"
+    }
+  ],
   "platforms": [
     "macOS"
   ]

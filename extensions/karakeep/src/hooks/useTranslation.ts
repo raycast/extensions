@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { Language, translations } from "../i18n";
 import { Preferences } from "../types";
 import { useConfig } from "./useConfig";
@@ -73,7 +74,7 @@ export function useTranslation() {
           setLanguage(prefLanguage);
         }
       } catch (error) {
-        console.error("Error loading language:", error);
+        logger.error("Error loading language preferences", error);
       }
     };
 

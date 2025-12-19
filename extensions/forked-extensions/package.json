@@ -9,7 +9,8 @@
   "contributors": [
     "pernielsentikaer",
     "yusifaliyevpro",
-    "ivens_joris"
+    "ivens_joris",
+    "j3lte"
   ],
   "platforms": [
     "macOS",
@@ -76,6 +77,13 @@
       "title": "Git Executable File Path",
       "description": "Path to the Git executable file. If not set, it will use `git` as default. You may need to set this if `git` is not in your PATH environment variable. On Windows, if the path contains spaces, it will be wrapped with double quotes, e.g., `\"C:\\Program Files\\Git\\cmd\\git.exe\"`.",
       "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "openWith",
+      "title": "Open Extension Folder With",
+      "description": "Choose an application (typically an editor) to open the forked extension folder with.",
+      "type": "appPicker",
       "required": false
     }
   ],

@@ -13,7 +13,14 @@ import {
   useTypes,
 } from "../hooks";
 import { Member, MemberStatus, Property, Space, SpaceObject, Type } from "../models";
-import { defaultTintColor, formatMemberRole, localStorageKeys, pluralize, processObject } from "../utils";
+import {
+  defaultTintColor,
+  formatMemberRole,
+  itemMatchesSearch,
+  localStorageKeys,
+  pluralize,
+  processObject,
+} from "../utils";
 
 type ObjectListProps = {
   space: Space;
@@ -44,11 +51,15 @@ export function ObjectList({ space }: ObjectListProps) {
     searchText,
     [],
   );
-  const { types, typesError, isLoadingTypes, mutateTypes, typesPagination } = useTypes(space.id);
+  const { types, typesError, isLoadingTypes, mutateTypes, typesPagination } = useTypes(space.id, searchText);
   const { properties, propertiesError, isLoadingProperties, mutateProperties, propertiesPagination } = useProperties(
     space.id,
+    searchText,
   );
-  const { members, membersError, isLoadingMembers, mutateMembers, membersPagination } = useMembers(space.id);
+  const { members, membersError, isLoadingMembers, mutateMembers, membersPagination } = useMembers(
+    space.id,
+    searchText,
+  );
   const { pinnedObjects, pinnedObjectsError, isLoadingPinnedObjects, mutatePinnedObjects } = usePinnedObjects(
     localStorageKeys.suffixForViewsPerSpace(space.id, ViewType.objects),
   );
@@ -88,8 +99,8 @@ export function ObjectList({ space }: ObjectListProps) {
     }
   }, [pinnedObjectsError, pinnedTypesError, pinnedPropertiesError, pinnedMembersError]);
 
-  const filterItems = <T extends { name: string }>(items: T[], searchText: string): T[] => {
-    return items?.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()));
+  const filterItems = <T extends { name: string; snippet?: string }>(items: T[], searchText: string): T[] => {
+    return items.filter((item) => itemMatchesSearch(item, searchText));
   };
 
   const processType = (type: Type, isPinned: boolean) => {
@@ -164,6 +175,7 @@ export function ObjectList({ space }: ObjectListProps) {
             (object) =>
               !pinnedObjects?.some((pinned) => pinned.id === object.id && pinned.space_id === object.space_id),
           )
+          .filter((object) => filterItems([object], searchText).length > 0)
           .map((object) => processObject(object, false, mutateObjects, mutatePinnedObjects));
 
         return { processedPinned, processedRegular };
@@ -190,6 +202,7 @@ export function ObjectList({ space }: ObjectListProps) {
               .filter((property) => filterItems([property], searchText).length > 0)
               .map((property) => processProperty(property, true))
           : [];
+
         const processedRegular = properties
           .filter((property) => !pinnedProperties?.some((pinned) => pinned.id === property.id))
           .filter((property) => filterItems([property], searchText).length > 0)

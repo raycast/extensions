@@ -1,12 +1,7 @@
 // utils/auth.ts - Refactored
 
 import Parse from "parse/node.js";
-import {
-  LocalStorage,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { LocalStorage, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { clearUserData } from "./userHelpers";
 import { buildApiUrl, API_ENDPOINTS } from "./env";
@@ -42,25 +37,17 @@ export const isLoggedIn = async (): Promise<boolean> => {
 };
 
 export const generateKey = async (sessionToken: string) => {
-  const generateKeyResponse = await fetch(
-    buildApiUrl(API_ENDPOINTS.GENERATE_KEY),
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionToken}`,
-      },
+  const generateKeyResponse = await fetch(buildApiUrl(API_ENDPOINTS.GENERATE_KEY), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionToken}`,
     },
-  );
+  });
 
   if (!generateKeyResponse.ok) {
-    const errorData = await generateKeyResponse
-      .json()
-      .catch(() => ({ message: "Key generation failed" }));
-    throw new Error(
-      errorData.message ||
-        `HTTP ${generateKeyResponse.status}: ${generateKeyResponse.statusText}`,
-    );
+    const errorData = await generateKeyResponse.json().catch(() => ({ message: "Key generation failed" }));
+    throw new Error(errorData.message || `HTTP ${generateKeyResponse.status}: ${generateKeyResponse.statusText}`);
   }
 
   const keyData = await generateKeyResponse.json();
@@ -79,10 +66,7 @@ export const generateKey = async (sessionToken: string) => {
  * @param password User's password
  * @returns Promise resolving to the Parse.User
  */
-export const login = async (
-  username: string,
-  password: string,
-): Promise<Parse.User> => {
+export const login = async (username: string, password: string): Promise<Parse.User> => {
   try {
     // Call backend API for login
 
@@ -98,12 +82,8 @@ export const login = async (
     });
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: "Login failed" }));
-      throw new Error(
-        errorData.message || `HTTP ${response.status}: ${response.statusText}`,
-      );
+      const errorData = await response.json().catch(() => ({ message: "Login failed" }));
+      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
     }
 
     const loginData = await response.json();
@@ -118,8 +98,7 @@ export const login = async (
     user.set("username", loginData.user.username);
     user.set("email", loginData.user.email);
     // Set session token using Parse's internal method
-    (user as Parse.User & { _sessionToken: string })._sessionToken =
-      loginData.sessionToken;
+    (user as Parse.User & { _sessionToken: string })._sessionToken = loginData.sessionToken;
 
     try {
       const isFirstLogin = await LocalStorage.getItem<string>("is_first_login");
@@ -269,16 +248,12 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
           user.id = backendUserData.user.id;
           user.set("username", backendUserData.user.username);
           user.set("email", backendUserData.user.email);
-          (user as Parse.User & { _sessionToken: string })._sessionToken =
-            sessionToken;
+          (user as Parse.User & { _sessionToken: string })._sessionToken = sessionToken;
           return user;
         }
       }
     } catch (error) {
-      console.error(
-        "Error fetching user from backend, falling back to stored data:",
-        error,
-      );
+      console.error("Error fetching user from backend, falling back to stored data:", error);
     }
 
     // If backend fetch fails, create a user from stored data
@@ -289,11 +264,7 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
     const userKeys = Object.keys(userData);
     for (const key of userKeys) {
       // Skip special Parse keys that should not be set directly
-      if (
-        ["objectId", "createdAt", "updatedAt", "ACL", "_sessionToken"].includes(
-          key,
-        )
-      ) {
+      if (["objectId", "createdAt", "updatedAt", "ACL", "_sessionToken"].includes(key)) {
         continue;
       }
 
@@ -305,8 +276,7 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
     }
 
     // Set session token
-    (user as Parse.User & { _sessionToken: string })._sessionToken =
-      sessionToken;
+    (user as Parse.User & { _sessionToken: string })._sessionToken = sessionToken;
 
     return user;
   } catch (error) {

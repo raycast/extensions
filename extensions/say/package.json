@@ -6,6 +6,9 @@
   "description": "Use the macOS built-in TTS (Live Speech) to say the text you provide.",
   "icon": "say-icon.png",
   "author": "litomore",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Communication",
     "Productivity",
@@ -60,9 +63,126 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "say",
+      "title": "Say",
+      "description": "Say it from AI"
+    },
+    {
+      "name": "get-voices",
+      "title": "Get Voices",
+      "description": "Get Available Voices"
+    },
+    {
+      "name": "stop",
+      "title": "Stop",
+      "description": "Stop the current running Say"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@say Say out loud the days of the week",
+        "mocks": {
+          "say": "Successfully called \"say\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "content": "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday"
+              },
+              "name": "say"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@say how many voices do you have in english?",
+        "mocks": {
+          "get-voices": [
+            {
+              "example": "Hello! My name is Albert.",
+              "languageCode": "en_US",
+              "name": "Albert"
+            },
+            {
+              "example": "Hello! My name is Bad News.",
+              "languageCode": "en_US",
+              "name": "Bad News"
+            },
+            {
+              "example": "Hello! My name is Bahh.",
+              "languageCode": "en_US",
+              "name": "Bahh"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-voices"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@say find a female Dutch voice and tell me in Dutch what day of the week it is",
+        "mocks": {
+          "get-voices": [
+            {
+              "example": "Hello! My name is Albert.",
+              "languageCode": "en_US",
+              "name": "Albert"
+            },
+            {
+              "example": "Hello! My name is Bad News.",
+              "languageCode": "en_US",
+              "name": "Bad News"
+            }
+          ],
+          "say": "Successfully called \"say\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-voices"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "content": "Het is woensdag.",
+                "voice": "Ellen"
+              },
+              "name": "say"
+            }
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "input": "@say stop saying things out loud",
+        "mocks": {
+          "stop": "Successfully called \"stop\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "stop"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.2",
     "bplist-parser": "^0.3.2",
     "lodash": "^4.17.21",
     "mac-say": "^0.3.3"
@@ -72,8 +192,8 @@
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.6.2",
     "@types/react": "^19.2.0",
-    "eslint": "^9.37.0",
-    "prettier": "^3.6.2",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
     "typescript": "^5.9.3"
   },
   "platforms": [
