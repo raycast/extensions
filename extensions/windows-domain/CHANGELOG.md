@@ -1,5 +1,5 @@
 # Windows Domain Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-12-19
 
 - Add initial version
