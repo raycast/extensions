@@ -37,8 +37,8 @@ export default function PipedriveSearch() {
 
   const emojiMap: { [key: string]: string } = {
     deal: "💰",
-    person: "🅿️",
-    organization: "🅾️",
+    person: "👔",
+    organization: "🏛️",
     email: "📧",
     activities: "📝",
     search: "🔎",
@@ -118,7 +118,7 @@ export default function PipedriveSearch() {
                 <ActionPanel.Section>
                   <Action.OpenInBrowser title="Open in Browser" url={item.url} />
                   <Action.Push title="Add New Contact" target={<AddContact />} icon="👤" />
-                  <Action.Push title="Create Deal" target={<AddDeal />} icon={emojiMap["deal"]} />
+                  <Action.Push title="Add New Deal" target={<AddDeal />} icon={emojiMap["deal"]} />
                   <Action.OpenInBrowser
                     title="Add New Person"
                     url={addNewPersonURL}
@@ -183,31 +183,35 @@ export default function PipedriveSearch() {
                 <>
                   <List.Item
                     id="create-contact"
-                    title={`🙎   Create contact: ${titleCased}`}
+                    title={`${emojiMap["person"]}   Create contact: ${titleCased}`}
                     subtitle="Create a new contact in Pipedrive"
                     actions={
                       <ActionPanel>
-                        <Action.Push title="Add Contact" target={<AddContact prefillName={titleCased} />} icon="👤" />
+                        <Action.Push
+                          title="Add Contact"
+                          target={<AddContact prefillName={titleCased} />}
+                          icon={emojiMap["person"]}
+                        />
                       </ActionPanel>
                     }
                   />
                   <List.Item
                     id="create-organization"
-                    title={`🏢   Create organization: ${titleCased}`}
+                    title={`${emojiMap["organization"]}   Create organization: ${titleCased}`}
                     subtitle="Create a new organization in Pipedrive"
                     actions={
                       <ActionPanel>
                         <Action.Push
                           title="Add Organization"
                           target={<AddOrganization prefillName={titleCased} />}
-                          icon="🏢"
+                          icon={emojiMap["organization"]}
                         />
                       </ActionPanel>
                     }
                   />
                   <List.Item
                     id="create-deal"
-                    title={`💰   Create deal: ${titleCased}`}
+                    title={`${emojiMap["deal"]}   Create deal: ${titleCased}`}
                     subtitle="Create a new deal in Pipedrive"
                     actions={
                       <ActionPanel>

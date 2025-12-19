@@ -599,7 +599,7 @@ export default function AddContact({
         </Fragment>
       ))}
 
-      <Form.Description title="Add Email" text={`Add Another Email action (Cmd+E / Ctrl+E).`} />
+      <Form.Description title="Add Email" text={`Add Another Email (Cmd+Shift+E / Ctrl+Shift+E).`} />
 
       <Form.Separator />
 
@@ -625,7 +625,7 @@ export default function AddContact({
         </Fragment>
       ))}
 
-      <Form.Description title="Add Phones" text={`Add Another Phone action (Cmd+Shift+P / Ctrl+Shift+P).`} />
+      <Form.Description title="Add Phones" text={`Add Another Phone (Cmd+Shift+P / Ctrl+Shift+P).`} />
 
       <Form.Separator />
     </Form>
