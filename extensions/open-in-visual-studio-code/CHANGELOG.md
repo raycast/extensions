@@ -1,6 +1,6 @@
 # Open in Visual Studio Code Changelog
 
-## [Fix: Localized File Explorer Support] - {PR_MERGE_DATE}
+## [Fix: Localized File Explorer Support] - 2025-12-19
 
 - Fixed compatibility with localized File Explorer names by using frontmost application detection
 
