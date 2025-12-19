@@ -5,6 +5,8 @@
       width="128"
    />
 
+⚠️ **This extension is not created by Kaneo developers.**
+
 A Raycast extension for managing your [Kaneo](https://kaneo.app/) projects and tasks directly from Raycast.
 </div>
 
