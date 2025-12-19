@@ -5,6 +5,9 @@
   "description": "Generate Turkish Identification Number and copy to clipboard",
   "icon": "cmd-icon.png",
   "author": "denizyoldas",
+  "contributors": [
+    "0xdhrv"
+  ],
   "categories": [
     "Data"
   ],
@@ -12,31 +15,32 @@
   "commands": [
     {
       "name": "tc-no-generate",
-      "title": "Generate Id",
+      "title": "Generate ID",
       "subtitle": "Turkish Identification Number",
-      "description": "Generate Turkish Identification Number and copy to clipboard",
-      "mode": "no-view"
+      "description": "Generate Turkish Identification Number and preview before copying",
+      "mode": "view"
     },
     {
-      "name": "last-tc",
-      "title": "Copy Last Id",
-      "subtitle": "Turkish Identification Number",
-      "description": "Copy last generate Turkish Identification Number to clipboard",
-      "mode": "no-view"
+      "name": "tc-history",
+      "title": "History",
+      "subtitle": "Generated Turkish Identification Numbers",
+      "description": "View history of generated Turkish IDs, copy or delete entries",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.3"
+    "@raycast/api": "^1.104.1"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.3",
+    "@types/react": "19.2.7",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -44,5 +48,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
