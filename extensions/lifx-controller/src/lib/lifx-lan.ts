@@ -29,8 +29,11 @@ interface LifxLanLight {
   getState: (callback: (error: Error | null, state: LifxLanLightState | null) => void) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LifxLanClientType = any;
+
 export class LIFXLanClient {
-  private client: Client;
+  private client: LifxLanClientType;
   private lights: Map<string, LifxLanLight>;
   private lastControlTime: Map<string, number> = new Map();
   private cachedStates: Map<string, LIFXLight> = new Map();
