@@ -9,6 +9,7 @@ import {
 import { applyAllCorrections } from "./utils/text-correction";
 import { checkTextWithAPI } from "./services/languagetool-api";
 import { showFailureToast } from "@raycast/utils";
+import { filterValidMatches } from "./utils/match-filter";
 
 /**
  * Command that reads text from clipboard, checks it, and pastes the corrected result
@@ -52,10 +53,13 @@ export default async function Command() {
       useragent: preferences.useragent,
     });
 
+    // Filter out matches with invalid replacements (empty or only whitespace/newlines)
+    const filteredResult = filterValidMatches(result);
+
     console.log("text", text);
 
     // Apply all corrections using pure utility function
-    const correctedText = applyAllCorrections(text, result);
+    const correctedText = applyAllCorrections(text, filteredResult);
 
     console.log("correctedText", correctedText);
 
@@ -63,7 +67,7 @@ export default async function Command() {
     await Clipboard.paste(correctedText);
 
     // Feedback
-    const matchesCount = result.matches?.length || 0;
+    const matchesCount = filteredResult.matches?.length || 0;
     await showToast({
       title:
         matchesCount > 0 ? `Fixed ${matchesCount} issues` : "No issues found",
