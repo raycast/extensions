@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import crypto from "node:crypto";
 import {
   CreateVaultRecordInput,
@@ -9,9 +9,32 @@ import {
   VaultRecordMetadata,
   validateKeyName,
 } from "./model";
+import {
+  keychainCreateRecord,
+  keychainDeleteRecordById,
+  keychainGetRecordByKeyName,
+  keychainGetSecret,
+  keychainKeyNameExists,
+  keychainListRecords,
+  keychainUpdateRecordById,
+} from "./keychainBackend";
 
 const RECORDS_KEY = "apiKeyVault:records:v1";
 const SECRET_KEY_PREFIX = "apiKeyVault:secret:v1:";
+
+type StorageBackendKind = "local" | "icloud-keychain";
+type StoragePreferences = {
+  storageBackend?: StorageBackendKind;
+};
+
+function getBackendKind(): StorageBackendKind {
+  try {
+    const prefs = getPreferenceValues<StoragePreferences>();
+    return (prefs.storageBackend ?? "local") as StorageBackendKind;
+  } catch {
+    return "local";
+  }
+}
 
 export class DuplicateKeyNameError extends Error {
   readonly keyName: string;
@@ -51,6 +74,9 @@ async function saveRecords(records: VaultRecordMetadata[]): Promise<void> {
 }
 
 export async function listRecords(): Promise<VaultRecordMetadata[]> {
+  if (getBackendKind() === "icloud-keychain") {
+    return await keychainListRecords();
+  }
   const records = await loadRecords();
   return records.slice().sort((a, b) => a.keyName.localeCompare(b.keyName));
 }
@@ -58,6 +84,9 @@ export async function listRecords(): Promise<VaultRecordMetadata[]> {
 export async function getRecordByKeyName(
   keyNameRaw: string,
 ): Promise<VaultRecordMetadata | undefined> {
+  if (getBackendKind() === "icloud-keychain") {
+    return await keychainGetRecordByKeyName(keyNameRaw);
+  }
   const keyName = normalizeKeyName(keyNameRaw);
   const records = await loadRecords();
   return records.find((r) => r.keyName === keyName);
@@ -67,6 +96,9 @@ export async function keyNameExists(
   keyNameRaw: string,
   opts?: { excludeId?: VaultRecordId },
 ): Promise<boolean> {
+  if (getBackendKind() === "icloud-keychain") {
+    return await keychainKeyNameExists(keyNameRaw, opts);
+  }
   const keyName = normalizeKeyName(keyNameRaw);
   const records = await loadRecords();
   return records.some((r) => r.keyName === keyName && r.id !== opts?.excludeId);
@@ -75,6 +107,10 @@ export async function keyNameExists(
 export async function createRecord(
   input: CreateVaultRecordInput,
 ): Promise<VaultRecordMetadata> {
+  if (getBackendKind() === "icloud-keychain") {
+    // Keychain backend stores both the index and the secret in macOS Keychain.
+    return await keychainCreateRecord(input);
+  }
   const now = new Date().toISOString();
   const keyName = normalizeKeyName(input.keyName);
   const keyNameError = validateKeyName(keyName);
@@ -113,6 +149,9 @@ export async function updateRecordById(
   id: VaultRecordId,
   input: UpdateVaultRecordInput,
 ): Promise<VaultRecordMetadata> {
+  if (getBackendKind() === "icloud-keychain") {
+    return await keychainUpdateRecordById(id, input);
+  }
   const records = await loadRecords();
   const index = records.findIndex((r) => r.id === id);
   if (index === -1) throw new Error("Record not found");
@@ -160,6 +199,10 @@ export async function deleteRecordByKeyName(keyNameRaw: string): Promise<void> {
 }
 
 export async function deleteRecordById(id: VaultRecordId): Promise<void> {
+  if (getBackendKind() === "icloud-keychain") {
+    await keychainDeleteRecordById(id);
+    return;
+  }
   const records = await loadRecords();
   const nextRecords = records.filter((r) => r.id !== id);
   await saveRecords(nextRecords);
@@ -169,6 +212,9 @@ export async function deleteRecordById(id: VaultRecordId): Promise<void> {
 export async function getSecret(
   id: VaultRecordId,
 ): Promise<string | undefined> {
+  if (getBackendKind() === "icloud-keychain") {
+    return await keychainGetSecret(id);
+  }
   return await LocalStorage.getItem<string>(secretKey(id));
 }
 
@@ -176,9 +222,59 @@ export async function setSecret(
   id: VaultRecordId,
   value: string,
 ): Promise<void> {
+  if (getBackendKind() === "icloud-keychain") {
+    // In keychain mode, secrets are updated via updateRecordById/createRecord.
+    // This is kept for compatibility but should not be called.
+    await keychainUpdateRecordById(id, { apiKey: value });
+    return;
+  }
   await LocalStorage.setItem(secretKey(id), value);
 }
 
 export async function deleteSecret(id: VaultRecordId): Promise<void> {
+  if (getBackendKind() === "icloud-keychain") {
+    await keychainDeleteRecordById(id);
+    return;
+  }
   await LocalStorage.removeItem(secretKey(id));
+}
+
+export async function migrateLocalToICloudKeychain(opts?: {
+  deleteLocalAfter?: boolean;
+}): Promise<{ migrated: number; skipped: number }> {
+  const records = await loadRecords();
+  let migrated = 0;
+  let skipped = 0;
+
+  for (const r of records) {
+    const exists = await keychainKeyNameExists(r.keyName);
+    if (exists) {
+      skipped += 1;
+      continue;
+    }
+
+    const secret = await LocalStorage.getItem<string>(secretKey(r.id));
+    if (!secret) {
+      skipped += 1;
+      continue;
+    }
+
+    await keychainCreateRecord({
+      keyName: r.keyName,
+      application: r.application,
+      service: r.service,
+      tags: r.tags,
+      apiKey: secret,
+    });
+    migrated += 1;
+  }
+
+  if (opts?.deleteLocalAfter) {
+    await LocalStorage.removeItem(RECORDS_KEY);
+    for (const r of records) {
+      await LocalStorage.removeItem(secretKey(r.id));
+    }
+  }
+
+  return { migrated, skipped };
 }

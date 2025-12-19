@@ -36,6 +36,32 @@
       "title": "Delete API Key",
       "description": "Delete an existing API key entry.",
       "mode": "view"
+    },
+    {
+      "name": "migrate",
+      "title": "Migrate Storage",
+      "description": "Migrate local vault data to iCloud Keychain-backed storage.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "storageBackend",
+      "title": "Storage Backend",
+      "description": "Choose where API keys and metadata are stored. iCloud Keychain syncs via Apple iCloud Keychain.",
+      "type": "dropdown",
+      "required": true,
+      "default": "local",
+      "data": [
+        {
+          "title": "Local (Raycast LocalStorage)",
+          "value": "local"
+        },
+        {
+          "title": "iCloud Keychain (macOS Keychain)",
+          "value": "icloud-keychain"
+        }
+      ]
     }
   ],
   "scripts": {

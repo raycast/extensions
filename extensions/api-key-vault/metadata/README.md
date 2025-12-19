@@ -24,7 +24,10 @@ Store and retrieve API keys locally from Raycast.
 
 ## Sync
 
-If you have **Raycast Sync** enabled, the data stored by this extension (via Raycast LocalStorage) should sync across your Raycast installs on the same account. Sync timing may not be instant.
+This extension can store data in **Raycast LocalStorage** (local-only) or in **macOS Keychain**.
+
+- If you select **iCloud Keychain (macOS Keychain)** as the storage backend in the extension preferences, your vault should sync across Macs signed into the same Apple ID with **iCloud Keychain** enabled.
+- Raycast Cloud Sync settings do not necessarily include extension LocalStorage secrets.
 
 ## Privacy
 
