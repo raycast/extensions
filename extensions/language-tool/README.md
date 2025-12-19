@@ -2,8 +2,6 @@
 
 > Instant spelling and grammar correction using LanguageTool API. Get real-time suggestions and improve your text quality in multiple languages.
 
-![Raycast LanguageTool Extension](./assets/extension-icon.png)
-
 ## 🚀 Features
 
 - ✅ **Check Text** - Interactive form with detailed results and corrections

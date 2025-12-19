@@ -4,6 +4,7 @@ import {
   Toast,
   closeMainWindow,
   getPreferenceValues,
+  getSelectedText,
 } from "@raycast/api";
 import { applyAllCorrections } from "./utils/text-correction";
 import { checkTextWithAPI } from "./services/languagetool-api";
@@ -15,8 +16,9 @@ import { showFailureToast } from "@raycast/utils";
  */
 export default async function Command() {
   try {
-    // Read text from clipboard
-    const text = await Clipboard.readText();
+    // Read text from selected text or clipboard
+    const text =
+      (await getSelectedText()).trim() || (await Clipboard.readText());
 
     if (!text || text.trim().length === 0) {
       await showToast({
@@ -50,8 +52,12 @@ export default async function Command() {
       useragent: preferences.useragent,
     });
 
+    console.log("text", text);
+
     // Apply all corrections using pure utility function
     const correctedText = applyAllCorrections(text, result);
+
+    console.log("correctedText", correctedText);
 
     // Paste the corrected text
     await Clipboard.paste(correctedText);
