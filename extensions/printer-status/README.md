@@ -2,11 +2,6 @@
 
 This Raycast extension allows you to quickly check key information about your **Xerox WorkCentre 6515** printer directly from Raycast.
 
-## Screenshots
-
-![Screenshot 1](assets/SCR-20251219-gxpf.png)
-![Screenshot 2](assets/SCR-20251219-gxui.png)
-![Screenshot 3](assets/SCR-20251219-gxvy.png)
 
 ## How it works
 
