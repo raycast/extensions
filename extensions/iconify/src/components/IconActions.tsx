@@ -25,7 +25,7 @@ type IconActionProps = PropsWithChildren<{
   from?: string;
 }>;
 
-export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, children }: IconActionProps) => {
+export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from, children }: IconActionProps) => {
   const formattedIconName = setId ? iconFormatsMap[iconNameFormat]({ setId, iconId: id }) : id;
   const paste = <Action.Paste title="Paste SVG String" content={svgIcon} />;
   const copy = <Action.CopyToClipboard title="Copy SVG String" content={svgIcon} />;
@@ -66,33 +66,39 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
   const copyName = setId ? <Action.CopyToClipboard title="Copy Name" content={formattedIconName} /> : null;
   const copyURL = setId ? <Action.CopyToClipboard title="Copy URL" content={toURL(setId, id)} /> : null;
   const copyDataURI = <Action.CopyToClipboard title="Copy Data URI" content={dataURIIcon} />;
-  const pickColor = (
-    <Action
-      title="Pick Color"
-      icon={Icon.EyeDropper}
-      onAction={async () => {
-        try {
-          await crossLaunchCommand({
-            name: "pick-color",
-            type: LaunchType.UserInitiated,
-            extensionName: "color-picker",
-            ownerOrAuthorName: "thomas",
-            context: {
-              copyToClipboard: false,
-              callbackLaunchOptions: from
-                ? {
-                    name: from,
-                    type: LaunchType.Background,
-                  }
-                : undefined,
-            },
-          });
-        } catch {
-          open("raycast://extensions/thomas/color-picker");
-        }
-      }}
-    />
-  );
+
+  function ToolsActionSection() {
+    const pickColor = (
+      <Action
+        title="Pick Color"
+        icon={Icon.EyeDropper}
+        onAction={async () => {
+          try {
+            await crossLaunchCommand({
+              name: "pick-color",
+              type: LaunchType.UserInitiated,
+              extensionName: "color-picker",
+              ownerOrAuthorName: "thomas",
+              context: {
+                copyToClipboard: false,
+                callbackLaunchOptions: from
+                  ? {
+                      name: from,
+                      type: LaunchType.Background,
+                    }
+                  : undefined,
+              },
+            });
+          } catch {
+            open("raycast://extensions/thomas/color-picker");
+          }
+        }}
+      />
+    );
+
+    return <ActionPanel.Section title="Tools">{pickColor}</ActionPanel.Section>;
+  }
+
   return (
     <ActionPanel>
       {primaryAction === primaryActionEnum.paste && (
@@ -101,7 +107,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
           {copy}
           {pasteFile}
           {copyFile}
-          {pickColor}
           {pasteName}
           {copyName}
           {copyURL}
@@ -114,7 +119,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
           {paste}
           {pasteFile}
           {copyFile}
-          {pickColor}
           {pasteName}
           {copyName}
           {copyURL}
@@ -128,7 +132,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
           {copy}
           {pasteFile}
           {copyFile}
-          {pickColor}
           {copyName}
           {copyURL}
           {copyDataURI}
@@ -140,7 +143,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
           {paste}
           {copy}
           {copyFile}
-          {pickColor}
           {pasteName}
           {copyName}
           {copyURL}
@@ -153,7 +155,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
           {paste}
           {copy}
           {pasteFile}
-          {pickColor}
           {pasteName}
           {copyName}
           {copyURL}
@@ -167,7 +168,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
           {copy}
           {pasteFile}
           {copyFile}
-          {pickColor}
           {pasteName}
           {copyURL}
           {copyDataURI}
@@ -180,7 +180,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
           {copy}
           {pasteFile}
           {copyFile}
-          {pickColor}
           {pasteName}
           {copyName}
           {copyDataURI}
@@ -193,7 +192,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
           {copy}
           {pasteFile}
           {copyFile}
-          {pickColor}
           {pasteName}
           {copyName}
           {copyURL}
@@ -201,7 +199,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
       )}
       {primaryAction === primaryActionEnum.pickColor && (
         <>
-          {pickColor}
           {paste}
           {copy}
           {pasteFile}
@@ -212,6 +209,7 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from: from, child
           {copyDataURI}
         </>
       )}
+      <ToolsActionSection />
       {children}
     </ActionPanel>
   );
