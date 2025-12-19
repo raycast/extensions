@@ -51,18 +51,7 @@ const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif
 export function getCustomDownloadsFolder(): string {
   // macOS
   if (process.platform === "darwin") {
-    // Query Finder for the actual Downloads folder location
-    try {
-      const result = execSync(
-        `osascript -e 'tell application "Finder" to return POSIX path of (path to downloads folder)'`,
-        { encoding: "utf-8" },
-      );
-      return result.trim();
-    } catch (error) {
-      // Fallback to default location if query fails
-      console.error("Failed to get Downloads folder from Finder:", error);
-      return untildify("~/Downloads");
-    }
+    return untildify("~/Downloads");
   } else if (process.platform === "win32") {
     // Query Windows registry for the actual Downloads folder location
     try {
