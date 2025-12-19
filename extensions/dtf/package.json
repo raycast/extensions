@@ -5,14 +5,6 @@
   "description": "Browse posts, news, topics, and top blogs from DTF.ru with AI-powered features",
   "icon": "extension_icon.png",
   "author": "shadeov",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/shadeov/dtf-raycast.git"
-  },
-  "homepage": "https://github.com/shadeov/dtf-raycast",
-  "bugs": {
-    "url": "https://github.com/shadeov/dtf-raycast/issues"
-  },
   "platforms": [
     "macOS",
     "Windows"
@@ -25,35 +17,35 @@
   "commands": [
     {
       "name": "latest-posts",
-      "title": "Latest Posts",
+      "title": "Show Latest Posts",
       "subtitle": "DTF",
       "description": "Browse latest posts from DTF feed",
       "mode": "view"
     },
     {
       "name": "popular-posts",
-      "title": "Popular",
+      "title": "Show Popular Posts",
       "subtitle": "DTF",
       "description": "Popular posts on DTF",
       "mode": "view"
     },
     {
       "name": "fresh-posts",
-      "title": "Fresh",
+      "title": "Show Fresh Posts",
       "subtitle": "DTF",
       "description": "Fresh posts on DTF with rating filters",
       "mode": "view"
     },
     {
       "name": "news",
-      "title": "News",
+      "title": "Show News",
       "subtitle": "DTF",
       "description": "News from DTF editorial team",
       "mode": "view"
     },
     {
       "name": "search-posts",
-      "title": "Search",
+      "title": "Search Posts",
       "subtitle": "DTF",
       "description": "Search posts on DTF",
       "mode": "view",
@@ -68,14 +60,14 @@
     },
     {
       "name": "browse-subsites",
-      "title": "Topics",
+      "title": "Browse Topics",
       "subtitle": "DTF",
       "description": "Browse posts by DTF topics (categories)",
       "mode": "view"
     },
     {
       "name": "top-blogs",
-      "title": "Top Blogs",
+      "title": "Browse Top Blogs",
       "subtitle": "DTF",
       "description": "Rating of popular blogs on DTF",
       "mode": "view"
@@ -597,6 +589,7 @@
     "prettier": "^3.7.3",
     "typescript": "^5.9.3"
   },
+  "version": "0.1.1",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
@@ -605,5 +598,12 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
-  "version": "0.1.1"
+  "bugs": {
+    "url": "https://github.com/shadeov/dtf-raycast/issues"
+  },
+  "homepage": "https://github.com/shadeov/dtf-raycast",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shadeov/dtf-raycast.git"
+  }
 }

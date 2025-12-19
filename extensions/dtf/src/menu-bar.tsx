@@ -11,6 +11,7 @@ import {
   LaunchType,
   Image,
   Keyboard,
+  showFailureToast,
 } from "@raycast/api";
 import {
   getPopularPosts,
@@ -673,7 +674,7 @@ export default function MenuBar() {
                   type: LaunchType.UserInitiated,
                 });
               } catch (error) {
-                console.error("Failed to launch command:", error);
+                await showFailureToast(error, { title: "Failed to refresh menu bar" });
               }
             }}
           />
@@ -693,7 +694,7 @@ export default function MenuBar() {
                   type: LaunchType.UserInitiated,
                 });
               } catch (error) {
-                console.error("Failed to launch command:", error);
+                await showFailureToast(error, { title: "Failed to open Popular Posts" });
               }
             }}
           />
@@ -707,7 +708,7 @@ export default function MenuBar() {
                   type: LaunchType.UserInitiated,
                 });
               } catch (error) {
-                console.error("Failed to launch command:", error);
+                await showFailureToast(error, { title: "Failed to open Fresh Posts" });
               }
             }}
           />
@@ -721,7 +722,7 @@ export default function MenuBar() {
                   type: LaunchType.UserInitiated,
                 });
               } catch (error) {
-                console.error("Failed to launch command:", error);
+                await showFailureToast(error, { title: "Failed to open News" });
               }
             }}
           />
@@ -735,7 +736,7 @@ export default function MenuBar() {
                   type: LaunchType.UserInitiated,
                 });
               } catch (error) {
-                console.error("Failed to launch command:", error);
+                await showFailureToast(error, { title: "Failed to open Topics" });
               }
             }}
           />
@@ -749,7 +750,7 @@ export default function MenuBar() {
                   type: LaunchType.UserInitiated,
                 });
               } catch (error) {
-                console.error("Failed to launch command:", error);
+                await showFailureToast(error, { title: "Failed to open Top Blogs" });
               }
             }}
           />
@@ -774,7 +775,7 @@ export default function MenuBar() {
                     type: LaunchType.UserInitiated,
                   });
                 } catch (error) {
-                  console.error("Failed to launch command:", error);
+                  await showFailureToast(error, { title: "Failed to open Search Posts" });
                 }
               }}
             />
@@ -800,7 +801,7 @@ export default function MenuBar() {
                     type: LaunchType.UserInitiated,
                   });
                 } catch (error) {
-                  console.error("Failed to launch command:", error);
+                  await showFailureToast(error, { title: "Failed to refresh menu bar" });
                 }
               }}
             />
