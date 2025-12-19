@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2025-12-19
 
 ### Improved
 - Check Text Instant now prioritizes selected text over clipboard content for better workflow integration
