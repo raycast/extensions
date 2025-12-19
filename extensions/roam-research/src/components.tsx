@@ -308,7 +308,7 @@ export const TodoCaptureDetail = ({ graphConfig }: { graphConfig: GraphConfig })
                 style: Toast.Style.Animated,
               });
 
-              // Create template with due date if provided
+              // Process template with due date variable if provided
               let finalTemplate = values.template;
               if (dueDate) {
                 // Format date as "December 19th, 2025" style
@@ -326,9 +326,11 @@ export const TodoCaptureDetail = ({ graphConfig }: { graphConfig: GraphConfig })
                     return `${day}${suffix},`;
                   });
 
-                // Add due date as indented child block to template using custom keyword
-                const dueDateKeyword = preferences.todoDueDateKeyword || "due";
-                finalTemplate = `${values.template}\n - ${dueDateKeyword}:: [[${formattedDate}]]`;
+                // Replace {{due_date}} template variable with formatted date
+                finalTemplate = values.template.replaceAll(/\{due_date\}/gi, `[[${formattedDate}]]`);
+              } else {
+                // Remove {{due_date}} template variable if no date selected
+                finalTemplate = values.template.replaceAll(/\{due_date\}/gi, "");
               }
 
               // values.graphPageDropdown="" means that we want to send to Daily Notes Page
@@ -425,11 +427,13 @@ export const TodoCaptureDetail = ({ graphConfig }: { graphConfig: GraphConfig })
       />
       <Form.Description
         title=""
-        text={`Some useful variables: {date} for timestamp HH:mm 
-                                      {content} for the content you pass
-For template with multiple blocks, use a single space for indentation
-(To change the default TODO template and due date keyword, go to Extension Settings)
-Note: This command uses a dedicated TODO capture template
+        text={`Template variables available:
+{date} - timestamp (supports custom formats like {date: HH:mm:ss})
+{content} - the content you enter above
+{due_date} - the selected due date (formatted as [[December 19th, 2025]])
+
+For multi-line templates, use single space indentation
+(To change the default template, go to Extension Settings)
       `}
       />
     </Form>

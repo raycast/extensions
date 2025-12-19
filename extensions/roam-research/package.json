@@ -109,17 +109,8 @@
       "title": "Default template for TODO Capture",
       "label": "Default template for TODO Capture",
       "required": false,
-      "default": "- {{[[TODO]]}} {content} from [[Raycast]] at {date}",
-      "description": "{date} supports {date: HH:mm:ss} (by default), \n                           {date: YYYY-MM-DD HH:mm:ss}, \n                           all formats in dayjs\nYou can have multiple lines for multiple blocks. For those, use a single space for indentation"
-    },
-    {
-      "name": "todoDueDateKeyword",
-      "type": "textfield",
-      "title": "Due Date Keyword",
-      "label": "Keyword for due dates in TODO capture",
-      "required": false,
-      "default": "due",
-      "description": "The keyword used for due dates (e.g., 'due', 'deadline', 'by'). Will be formatted as 'keyword:: [[date]]'"
+      "default": "- {{[[TODO]]}} {content} from [[Raycast]] at {date}\n - due:: {due_date}",
+      "description": "{date} supports {date: HH:mm:ss} (by default), \n                           {date: YYYY-MM-DD HH:mm:ss}, \n                           all formats in dayjs\n{content} for the content you pass\n{due_date} for the selected due date (formatted as [[December 19th, 2025]])\nFor multiple lines, use a single space for indentation"
     }
   ],
   "dependencies": {
