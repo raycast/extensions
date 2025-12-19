@@ -2,12 +2,8 @@
 
 ## [Features] - {PR_MERGE_DATE}
 
-- Support picking icon color
-
-
-## [Fix] - {PR_MERGE_DATE}
-
 - Fix icon custom color rendering issue
+- Support picking icon color
 
 ## [Features] - 2025-12-18
 
