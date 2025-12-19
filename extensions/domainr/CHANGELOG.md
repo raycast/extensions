@@ -11,7 +11,6 @@
 - Renamed costants.ts to constants.ts
 - Added basic logging
 
-
 ## [Windows Support] - 2025-12-09
 
 - Extension now works on Windows
