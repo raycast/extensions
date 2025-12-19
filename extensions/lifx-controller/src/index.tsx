@@ -250,35 +250,35 @@ export default function Command() {
                         title="Turn All on"
                         icon={Icon.Power}
                         onAction={() => controlAllLights("on")}
-                        shortcut={{ modifiers: ["ctrl", "shift"], key: "o" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                       />
                       <Action
                         title="Turn All off"
                         icon={Icon.XMarkCircle}
                         onAction={() => controlAllLights("off")}
-                        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Set All Brightness">
                       <Action
                         title="All to 100%"
                         onAction={() => controlAllLights("brightness", 100)}
-                        shortcut={{ modifiers: ["ctrl", "shift"], key: "1" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "1" }}
                       />
                       <Action
                         title="All to 75%"
                         onAction={() => controlAllLights("brightness", 75)}
-                        shortcut={{ modifiers: ["ctrl", "shift"], key: "2" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "2" }}
                       />
                       <Action
                         title="All to 50%"
                         onAction={() => controlAllLights("brightness", 50)}
-                        shortcut={{ modifiers: ["ctrl", "shift"], key: "3" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
                       />
                       <Action
                         title="All to 25%"
                         onAction={() => controlAllLights("brightness", 25)}
-                        shortcut={{ modifiers: ["ctrl", "shift"], key: "4" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "4" }}
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
@@ -286,7 +286,7 @@ export default function Command() {
                         title="Refresh Lights"
                         icon={Icon.ArrowClockwise}
                         onAction={refreshLights}
-                        shortcut={{ modifiers: ["ctrl"], key: "r" }}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>

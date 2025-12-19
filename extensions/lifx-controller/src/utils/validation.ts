@@ -1,5 +1,5 @@
 export function validateBrightness(value: string): { valid: boolean; error?: string; value?: number } {
-  const num = parseInt(value);
+  const num = parseInt(value, 10);
 
   if (isNaN(num)) {
     return { valid: false, error: "Brightness must be a number" };
@@ -13,7 +13,7 @@ export function validateBrightness(value: string): { valid: boolean; error?: str
 }
 
 export function validateHue(value: string): { valid: boolean; error?: string; value?: number } {
-  const num = parseInt(value);
+  const num = parseInt(value, 10);
 
   if (isNaN(num)) {
     return { valid: false, error: "Hue must be a number" };
@@ -27,7 +27,7 @@ export function validateHue(value: string): { valid: boolean; error?: string; va
 }
 
 export function validateSaturation(value: string): { valid: boolean; error?: string; value?: number } {
-  const num = parseInt(value);
+  const num = parseInt(value, 10);
 
   if (isNaN(num)) {
     return { valid: false, error: "Saturation must be a number" };
@@ -41,7 +41,7 @@ export function validateSaturation(value: string): { valid: boolean; error?: str
 }
 
 export function validateKelvin(value: string): { valid: boolean; error?: string; value?: number } {
-  const num = parseInt(value);
+  const num = parseInt(value, 10);
 
   if (isNaN(num)) {
     return { valid: false, error: "Temperature must be a number" };

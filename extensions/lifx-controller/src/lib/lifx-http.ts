@@ -64,6 +64,9 @@ export class LIFXHttpClient {
       control.kelvin !== undefined
     ) {
       // Get current light state to preserve unchanged values
+      // Note: The lifxjs library doesn't support fetching individual lights by ID,
+      // so we fetch all lights and filter. For users with many lights, this may be
+      // less efficient, but it's the only approach available with this library.
       const lights = await this.client.get.all();
       const currentLight = lights.find((l: LifxHttpLight) => l.id === lightId);
 
