@@ -3,6 +3,8 @@ interface Preferences {
   hideCodeBlocksInSearch: boolean;
   quickCaptureTemplate: string;
   quickCaptureTagTodayDnp: boolean;
+  todoCaptureTemplate: string;
+  todoDueDateKeyword: string;
 }
 
 type BlockParentPull = {
