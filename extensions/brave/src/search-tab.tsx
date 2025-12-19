@@ -1,7 +1,6 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { BraveListItems } from "./components";
 import { useTabSearch } from "./hooks/useTabSearch";
-import { Preferences } from "./interfaces";
 
 export default function Command() {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();

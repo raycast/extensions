@@ -6,6 +6,14 @@
 
 This is a Raycast extension for [Umami](https://umami.is/) - _The modern analytics platform for effortless insights_.
 
+## 🧪 Versions
+
+This extension is tested on the following:
+| Version | Type |
+|---------|------|
+| v2.11.3 | Self-Hosted |
+| v3.0.3 | Cloud |
+
 ## ⚙️ Configuration
 
 This extension supports both "Umami Cloud" and "Umami Self-Hosted".
@@ -23,6 +31,6 @@ This extension supports both "Umami Cloud" and "Umami Self-Hosted".
 |------------|---------|
 | Umami Endpoint | The URL of your Umami instance including "api" e.g. `https://umami.example.com/api/` |
 | Umami User ID (Self-Hosted) | The ID of the User performing the API calls |
-| Umami Client Secret (Self-Hosted) | A random string used to generate unique values. This needs to match the APP_SECRET used in the Umami application. |
+| Umami Client Secret (Self-Hosted) | A random string used to generate unique values. This needs to match the `APP_SECRET` used in the Umami deployment |
 
 > For now, the extension shows you your sites with the last 24 hours of stats

@@ -20,7 +20,7 @@ interface ConnectorProviderConfig {
   color: Color;
   name: string;
 }
-export const ConnectorProviders: Record<ConnectorProvider, ConnectorProviderConfig> = {
+export const ConnectorProviders: Partial<Record<ConnectorProvider, ConnectorProviderConfig>> = {
   github: {
     icon: "icons/github.svg",
     color: Color.PrimaryText,

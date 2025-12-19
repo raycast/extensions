@@ -1,5 +1,12 @@
 # Google Workspace Changelog
 
+## [Improvements and Fixes] - 2025-12-18
+
+### Changed
+
+- 📂 **File location now shows folder path** - the "Where" metadata field now displays only the parent folder path, making it easier to understand file organization
+- 📑 **Expanded file type recognition** - improved support for more file types
+
 ## [Thumbnail Previews] - 2025-12-17
 
 ### Changed

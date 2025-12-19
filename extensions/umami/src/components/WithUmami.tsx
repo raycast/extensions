@@ -14,8 +14,8 @@ const WithUmami: FC<PropsWithChildren<object>> = ({ children }) => {
       } else {
         if (!UMAMI_API_CLIENT_USER_ID || !UMAMI_API_CLIENT_SECRET) throw new Error("Missing Preferences");
       }
-      const { error } = await umami.getMe();
-      handleUmamiError(error);
+      const { ok, error } = await umami.getMe();
+      if (!ok) handleUmamiError(error);
     },
     [],
     {

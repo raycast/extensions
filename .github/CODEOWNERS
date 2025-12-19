@@ -676,7 +676,7 @@
 /extensions/finderutils                                             @edrf12
 /extensions/findnearby                                              @lichin-lin @0xdhrv
 /extensions/fingertip                                               @mblode
-/extensions/finnish-dictionary                                      @albertoxamin
+/extensions/finnish-dictionary                                      @albertoxamin @0xdhrv
 /extensions/fip                                                     @louison
 /extensions/firebase-import-export                                  @mguyard
 /extensions/firecrawl                                               @KELiON @thomaspaulmann @pernielsentikaer @xilopaint @ftonato
@@ -737,6 +737,7 @@
 /extensions/geist-ui-components                                     @Rahuls-Coding @xmok
 /extensions/genius-lyrics                                           @TKDKid1000 @johnstclair @Rayn322
 /extensions/geoconverter                                            @kylinwowo
+/extensions/geoguesser                                              @Boosteblume
 /extensions/geohash-encode-decode                                   @alrico88
 /extensions/geoping                                                 @Chiroyce1
 /extensions/gerrit-code-review                                      @vkhitrin
@@ -1788,6 +1789,7 @@
 /extensions/remember-the-date                                       @pernielsentikaer @samuelkraft @ridemountainpig @aryan-thatte @0xdhrv
 /extensions/remember-this                                           @Ek2100 @ridemountainpig
 /extensions/remove-background                                       @maantje @FezVrasta
+/extensions/remove-background---replicate-api                       @NathanTCode
 /extensions/remove-background-powered-by-mac                        @remorses @ridemountainpig @andreaselia
 /extensions/remove-paywall                                          @tegola @whitespacecode @DannySeidel @artivilla @maxoliinyk @0xdhrv
 /extensions/remove-window-from-set                                  @Silv-1
@@ -1868,6 +1870,7 @@
 /extensions/script-commands                                         @unnamedd
 /extensions/script-kit                                              @pomdtr
 /extensions/scss-compile                                            @SuoweiHu
+/extensions/seafile                                                 @xmok
 /extensions/search-astro-docs                                       @ElianCodes @pernielsentikaer
 /extensions/search-blockchain                                       @gutenye
 /extensions/search-chatwork                                         @nagauta @xmok
@@ -2275,7 +2278,7 @@
 /extensions/unpackr                                                 @kvaishak @pernielsentikaer
 /extensions/unsplash                                                @eggsy @kkange @yug2005 @xmok
 /extensions/untis                                                   @builtbybengt
-/extensions/upcoming-holidays                                       @rodrigouroz
+/extensions/upcoming-holidays                                       @rodrigouroz @0xdhrv
 /extensions/update-clash-subscription                               @JakeLaoyu
 /extensions/uplabs                                                  @gebeto
 /extensions/uploadthing                                             @juliusmarminge @xmok @TakenMC

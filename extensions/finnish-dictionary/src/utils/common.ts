@@ -1,3 +1,5 @@
+import { RedFoxAPIResponse } from "@/types";
+
 const regexWord = /\[\[([A-Za-zäöëå ]+)#(Finnish|English)\|\1\]\]/gim;
 const regexWords = /\[\[w:(.*?)\|.*?\]\]/gm;
 const regexCategory = /\(\[\[.*#([a-zäöëå]+)\|\1.*?\]\]\)/gm;
@@ -10,7 +12,7 @@ const regexNotImportantCategories = /\[\[Category:.*?\]\]/gm;
 const regexStrike = /<strike>(.*?)<\/strike>/gm;
 const regexBrackets = /(\[\[)(.*?)(\]\])/gm;
 
-export function resToDetail(word: string, srcLang: string, destLang: string, res: any) {
+export function resToDetail(word: string, srcLang: string, destLang: string, res: RedFoxAPIResponse) {
   const cleanMarkup = (markup: string) => {
     return markup
       .replace(regexWord, "$1")
@@ -28,26 +30,26 @@ export function resToDetail(word: string, srcLang: string, destLang: string, res
   try {
     if (!res.translations.empty) {
       for (const x of res.translations.entryGroups) {
-        detail += `##### ${x.gategory}\n---\n`;
+        detail += `##### ${x.category || "Translations"}\n---\n`;
         for (const y of x.entries) {
-          detail += `1. ${cleanMarkup(y.text)} ${y.context ? "_" + y.context + "_" : ""}\n\n`;
+          detail += `1. ${cleanMarkup(y.text || "")} ${y.context ? "_" + y.context + "_" : ""}\n\n`;
         }
       }
     }
     if (!res.definitions.empty) {
       for (const x of res.definitions.entryGroups) {
-        detail += `##### ${x.gategory}\n---\n`;
+        detail += `##### ${x.category || "Definitions"}\n---\n`;
         for (const y of x.entries) {
-          detail += `${cleanMarkup(y.text)}\n\n`;
+          detail += `${cleanMarkup(y.text || "")}\n\n`;
         }
       }
     }
     if (res.definitionsInDestLanguage && !res.definitionsInDestLanguage.empty) {
       detail += `##### DEFINITIONS IN DEST LANGUAGE\n---\n`;
       for (const x of res.definitionsInDestLanguage.entryGroups) {
-        detail += `* ${x.gategory}\n`;
+        detail += `* ${x.category || "Definitions"}\n`;
         for (const y of x.entries) {
-          detail += `\t1. ${cleanMarkup(y.text)}\n`;
+          detail += `\t1. ${cleanMarkup(y.text || "")}\n`;
         }
         detail += `\n`;
       }
@@ -55,7 +57,7 @@ export function resToDetail(word: string, srcLang: string, destLang: string, res
     if (res.subtitleResult && res.subtitleResult.resultList) {
       detail += `##### EXAMPLES\n---\n`;
       for (const x of res.subtitleResult.resultList) {
-        detail += `* _${x.subtitle1}_\n${x.subtitle2}\n\n`;
+        detail += `* _${x.subtitle1 || "Example"}_\n${x.subtitle2 || ""}\n\n`;
       }
     }
   } catch (e) {
@@ -65,5 +67,6 @@ export function resToDetail(word: string, srcLang: string, destLang: string, res
   if (detail === "") {
     detail = "No definition found.";
   }
+
   return detail;
 }

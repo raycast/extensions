@@ -22,7 +22,7 @@ interface FormData {
   token?: string;
 }
 
-export function FormEditServer(props: props): JSX.Element {
+export function FormEditServer(props: props) {
   const { handleSubmit, itemProps } = useForm<FormData>({
     onSubmit(values) {
       Submit(values);
