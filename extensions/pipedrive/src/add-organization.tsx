@@ -15,12 +15,6 @@ import { useEffect, useRef, useState } from "react";
 import { buildPipedriveApiUrl, buildPipedriveWebUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
 import { redactPipedriveSecrets } from "./pipedrive-security";
 
-interface Preferences {
-  domain: string;
-  apiToken: string;
-  limit: string;
-}
-
 interface AddOrganizationProps {
   prefillName?: string;
   onCreated?: (organization: { id: string; name: string }) => void;

@@ -8,12 +8,6 @@ import { buildPipedriveApiUrl, buildPipedriveWebUrl, fetchPipedriveJson, isAbort
 import { ensurePersonAvatarCached } from "./pipedrive-avatar-cache";
 import UploadPersonPhoto from "./upload-person-photo";
 
-type Preferences = {
-  domain: string;
-  apiToken: string;
-  limit: string;
-};
-
 type PersonResponse = {
   data?: {
     id: number;
