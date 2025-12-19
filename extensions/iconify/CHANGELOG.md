@@ -1,6 +1,6 @@
 # Iconify Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2025-12-19
 
 - Fix icon custom color rendering issue
 - Support picking icon color
