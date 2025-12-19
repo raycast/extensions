@@ -1,0 +1,60 @@
+{
+  "name": "tui-type",
+  "title": "TUI Type",
+  "description": "Practice and improve your typing speed with this Monkeytype-inspired typing test. Features multiple game modes (time, words, quotes), many languages and a customizable appearance.",
+  "icon": "icon.png",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you want to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "keywords": [
+    "typing",
+    "typing test",
+    "monkeytype",
+    "typing speed",
+    "wpm",
+    "practice",
+    "keyboard",
+    "productivity",
+    "speed test",
+    "typing game"
+  ],
+  "author": "doek",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "TUI Type",
+      "subtitle": "Monkeytype for Raycast",
+      "description": "Start a typing test with customizable modes, languages, and appearance settings",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/react-dom": "18.2.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@types/react": "18.2.27",
+    "@types/react-dom": "18.2.12"
+  },
+  "version": "1.0.0",
+  "main": "index.js"
+}

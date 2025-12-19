@@ -1,0 +1,8 @@
+- More/better settings:
+  - [ ] Custom time
+  - [ ] Custom word amount
+- [ ] improved results
+  - [ ] better stats
+- [ ] stats-over-time
+- in index view show more information about the current test
+  - make option to tweak this
