@@ -1,13 +1,12 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "printer-status",
-  "title": "Printer Status",
+  "title": "Xerox",
   "description": "Raycast extension to check Xerox printer status via SNMP",
-  "icon": "extension-icon.png",
+  "icon": "printer-icon.png",
   "author": "davidyannick",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Productivity"
@@ -17,8 +16,16 @@
     {
       "name": "xerox",
       "title": "Xerox Printer Status",
+      "icon": "printer-icon.png",
       "description": "Show the current page count of the Xerox printer",
       "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ask-xerox",
+      "title": "Ask Xerox",
+      "description": "Retrieve current status, ink levels, page counts, and device information from the Xerox printer"
     }
   ],
   "preferences": [
