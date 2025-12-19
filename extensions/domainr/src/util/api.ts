@@ -1,18 +1,39 @@
 import { getPreferenceValues } from "@raycast/api";
 import { ISearchResponse, IStatusResult } from "./types";
+import { DOMAIN_RESEARCH_API_URL } from "./constants";
 
-const { rapidApiKey } = getPreferenceValues<Preferences.Domainr>();
-const API_URL = "https://api.fastly.com/domain-management/v1/tools/";
-const API_HEADERS = {
-  "Fastly-Key": rapidApiKey,
-};
+interface Preferences {
+  rapidApiKey: string;
+}
+
 const makeRequest = async <T>(endpoint: string) => {
-  const response = await fetch(API_URL + endpoint, {
-    headers: API_HEADERS,
+  const { rapidApiKey } = getPreferenceValues<Preferences>();
+  const fastlyApiKey = rapidApiKey;
+  if (!fastlyApiKey) {
+    throw new Error("Fastly API Key is not configured. Please set it in the extension preferences.", {
+      cause: 401,
+    });
+  }
+  const url = DOMAIN_RESEARCH_API_URL + endpoint;
+  console.log("Requesting:", url);
+  const response = await fetch(url, {
+    headers: {
+      "Fastly-Key": fastlyApiKey,
+    },
   });
   const result = await response.json();
   if (!response.ok) {
-    throw new Error((result as { msg: string }).msg, {
+    let errorMessage =
+      (result as { msg?: string; error?: string; message?: string }).msg ||
+      (result as { error?: string }).error ||
+      (result as { message?: string }).message ||
+      JSON.stringify(result);
+
+    if (response.status === 404) {
+      errorMessage = "Domain Research API not enabled. Please enable it in Fastly Dashboard.";
+    }
+
+    throw new Error(errorMessage, {
       cause: response.status,
     });
   }

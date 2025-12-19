@@ -1,5 +1,17 @@
 # Domainr Changelog
 
+## [Updated README and tweaked UI] - {PR_MERGE_DATE}
+
+- Update README to require enabling Fastly Domain Research API
+- Added debouncing to search input to reduce API requests
+- Added filter for different availability statuses
+- Updated domain availability descriptions
+- Fixed grammar in search suggestions
+- Improved error handling and user feedback
+- Renamed costants.ts to constants.ts
+- Added basic logging
+
+
 ## [Windows Support] - 2025-12-09
 
 - Extension now works on Windows
