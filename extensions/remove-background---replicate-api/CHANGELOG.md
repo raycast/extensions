@@ -1,6 +1,6 @@
 # Remove Background Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-12-19
 
 - Added AI-powered background removal using Replicate API
 - Automatic Finder integration for image selection
