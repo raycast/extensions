@@ -45,6 +45,12 @@
       "mode": "view"
     },
     {
+      "name": "todo-capture",
+      "title": "TODO Capture",
+      "description": "Quickly capture TODOs with {{[[TODO]]}} prefix to your Roam graph",
+      "mode": "view"
+    },
+    {
       "name": "create-graph-quicklink",
       "title": "Create Graph Quicklink",
       "description": "Create a Raycast Quicklink for a Roam graph or a specific page in that graph",
@@ -96,6 +102,24 @@
       "required": false,
       "default": true,
       "description": "Check if you want to append your quick captures with something like #[[August 1, 2023]]"
+    },
+    {
+      "name": "todoCaptureTemplate",
+      "type": "textfield",
+      "title": "Default template for TODO Capture",
+      "label": "Default template for TODO Capture",
+      "required": false,
+      "default": "- {{[[TODO]]}} {content} from [[Raycast]] at {date}",
+      "description": "{date} supports {date: HH:mm:ss} (by default), \n                           {date: YYYY-MM-DD HH:mm:ss}, \n                           all formats in dayjs\nYou can have multiple lines for multiple blocks. For those, use a single space for indentation"
+    },
+    {
+      "name": "todoDueDateKeyword",
+      "type": "textfield",
+      "title": "Due Date Keyword",
+      "label": "Keyword for due dates in TODO capture",
+      "required": false,
+      "default": "due",
+      "description": "The keyword used for due dates (e.g., 'due', 'deadline', 'by'). Will be formatted as 'keyword:: [[date]]'"
     }
   ],
   "dependencies": {

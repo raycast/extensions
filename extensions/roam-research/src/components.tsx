@@ -272,6 +272,166 @@ export const SelectedBlocksSearchView = ({
   );
 };
 
+export const TodoCaptureDetail = ({ graphConfig }: { graphConfig: GraphConfig }) => {
+  const { pop } = useNavigation();
+  const preferences = getPreferenceValues<Preferences>();
+
+  // Use the dedicated TODO capture template
+  const [template, setTemplate] = useState<string>(preferences.todoCaptureTemplate);
+  const [tagTodayDnp, setTagTodayDnp] = useState<boolean>(preferences.quickCaptureTagTodayDnp);
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+
+  const { isLoading: isGraphPagesLoading, data: graphPagesData } = usePromise(
+    (graphConfig: GraphConfig) => getAllPagesCached(graphConfig),
+    [graphConfig]
+  );
+
+  const [graphPageDropdownValue, setGraphPageDropdownValue] = useState<string>("");
+
+  return (
+    <Form
+      navigationTitle={`TODO Capture to ${graphConfig.nameField}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="ok"
+            onSubmit={async (values) => {
+              if (!values.content) {
+                showToast({
+                  title: `Content cann't be empty`,
+                  style: Toast.Style.Failure,
+                });
+                return;
+              }
+              showToast({
+                title: "uploading...",
+                style: Toast.Style.Animated,
+              });
+              
+              // Create template with due date if provided
+              let finalTemplate = values.template;
+              if (dueDate) {
+                // Format date as "December 19th, 2025" style
+                const formattedDate = dueDate.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                }).replace(/(\d+),/, (match, day) => {
+                  const num = parseInt(day);
+                  const suffix = ['th', 'st', 'nd', 'rd'][num % 100 > 10 && num % 100 < 20 ? 0 : num % 10 > 3 ? 0 : num % 10];
+                  return `${day}${suffix},`;
+                });
+                
+                // Add due date as indented child block to template using custom keyword
+                const dueDateKeyword = preferences.todoDueDateKeyword || "due";
+                finalTemplate = `${values.template}\n - ${dueDateKeyword}:: [[${formattedDate}]]`;
+              }
+              
+              // values.graphPageDropdown="" means that we want to send to Daily Notes Page
+              const isAppendToDailyNotesPage = !values.graphPageDropdown;
+              const addTagToTodaysDnpOnTopBlock = !isAppendToDailyNotesPage && tagTodayDnp;
+              const todayDnpPageTitle = roamApiSdk.dateToPageTitle(new Date());
+
+              // TODO: maybe add options/multiselect/tag select to tag other pages too?
+              // currently being used only for tagging today's daily note page on the basis of a checkbox (only when NOT sending the block to the DNP)
+              const pageTitlesToTagTopBlockWith =
+                addTagToTodaysDnpOnTopBlock && todayDnpPageTitle ? [todayDnpPageTitle] : [];
+              appendToPageOrDailyNote(
+                initRoamBackendClient(graphConfig.nameField, graphConfig.tokenField),
+                values.content,
+                finalTemplate,
+                values.date,
+                pageTitlesToTagTopBlockWith,
+                isAppendToDailyNotesPage ? undefined : values.graphPageDropdown
+              ).then(
+                () => {
+                  showToast({
+                    title: isAppendToDailyNotesPage
+                      ? "Successfully added TODO to daily note!"
+                      : "Successfully appended TODO to page!",
+                    style: Toast.Style.Success,
+                  });
+                  setTimeout(() => {
+                    pop();
+                  }, 500);
+                },
+                (e) => {
+                  // TODO: handle 500 server errors with message to contact me/support
+                  showToast({
+                    title: "Failed to add TODO to " + (isAppendToDailyNotesPage ? "daily note!" : "page!"),
+                    style: Toast.Style.Failure,
+                    message: e.message,
+                  });
+                }
+              );
+            }}
+          />
+          {
+            // passing in no `page` opens daily notes page by default which is what we want here
+            preferences.openIn === "web" ? (
+              <Action.OpenInBrowser
+                title="Open in browser"
+                url={`https://roamresearch.com/#/app/${graphConfig.nameField}`}
+              />
+            ) : (
+              <Action.Open title="Open in app" target={`roam://#/app/${graphConfig.nameField}`} />
+            )
+          }
+          <Action.OpenInBrowser title="View date format" url="https://day.js.org/docs/en/parse/string-format" />
+        </ActionPanel>
+      }
+    >
+      <Form.TextArea id="content" title="Content" />
+      <Form.DatePicker 
+        id="dueDate" 
+        title="Due Date (Optional)" 
+        value={dueDate} 
+        onChange={setDueDate}
+        type={Form.DatePicker.Type.Date}
+      />
+      <Form.Dropdown
+        id="graphPageDropdown"
+        title="Append to page"
+        value={graphPageDropdownValue}
+        onChange={setGraphPageDropdownValue}
+      >
+        <Form.Dropdown.Item key="dailyNotesPage" value="" title="Daily Notes Page (default)" />
+        {!isGraphPagesLoading &&
+          graphPagesData &&
+          Object.entries(graphPagesData).map(([blockUid, nodeTitle]) => (
+            <Form.Dropdown.Item key={blockUid} value={blockUid} title={nodeTitle} />
+          ))}
+      </Form.Dropdown>
+      {graphPageDropdownValue && (
+        <Form.Checkbox
+          label="Tag today's Daily Note Page?"
+          id="tagTodayDnpCheckbox"
+          value={tagTodayDnp}
+          onChange={setTagTodayDnp}
+        />
+      )}
+      {/* <Form.DatePicker id="date" defaultValue={new Date()} type={Form.DatePicker.Type.DateTime} /> */}
+      <Form.TextArea
+        onChange={(template) => {
+          setTemplate(template);
+        }}
+        id="template"
+        title="Any changes to default template for this capture?"
+        value={template}
+      />
+      <Form.Description
+        title=""
+        text={`Some useful variables: {date} for timestamp HH:mm 
+                                      {content} for the content you pass
+For template with multiple blocks, use a single space for indentation
+(To change the default TODO template and due date keyword, go to Extension Settings)
+Note: This command uses a dedicated TODO capture template
+      `}
+      />
+    </Form>
+  );
+};
+
 export const QuickCaptureDetail = ({ graphConfig }: { graphConfig: GraphConfig }) => {
   const { pop } = useNavigation();
   const preferences = getPreferenceValues<Preferences>();
