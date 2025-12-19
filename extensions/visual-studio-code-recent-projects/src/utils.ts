@@ -167,11 +167,8 @@ export const isMac = process.platform === "darwin";
 
 export function runExec(commands: string[], onFinish: (error: string | null) => void) {
   const cmd = commands.map((c) => `"${c}"`).join(" ");
-  const cleanEnv = { ...process.env };
-  delete cleanEnv.LC_ALL;
-  delete cleanEnv.LANG;
-  delete cleanEnv.LANGUAGE;
-  exec(cmd, { env: cleanEnv }, (error, stdout, stderr) => {
+  const cleanedEnv = cleanEnv(process.env);
+  exec(cmd, { env: cleanedEnv }, (error, stdout, stderr) => {
     if (stdout || stderr) {
       console.log("fix me");
     }
@@ -181,4 +178,25 @@ export function runExec(commands: string[], onFinish: (error: string | null) => 
       onFinish(null);
     }
   });
+}
+
+export function cleanEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const cleanEnv = { ...env };
+  delete cleanEnv.LC_ALL;
+  delete cleanEnv.LANG;
+  delete cleanEnv.LANGUAGE;
+  delete cleanEnv.ORIGINAL_PATH;
+  delete cleanEnv.NODE_ENV;
+  delete cleanEnv.SUPPORT_PATH;
+  delete cleanEnv.RAYCAST_SESSION;
+  delete cleanEnv.RAYCAST_VERSION;
+  delete cleanEnv.ASSETS_PATH;
+  delete cleanEnv.COMMAND_NAME;
+  delete cleanEnv.EXTENSION_NAME;
+  delete cleanEnv.FAVICON_PROVIDER;
+  delete cleanEnv.PROMPT;
+  delete cleanEnv.NODE_PATH;
+  delete cleanEnv.TZ;
+  cleanEnv.PATH = "";
+  return cleanEnv;
 }

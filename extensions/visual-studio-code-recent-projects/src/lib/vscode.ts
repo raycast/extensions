@@ -3,7 +3,7 @@ import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import { fileExists, isWin } from "../utils";
+import { cleanEnv, fileExists, isWin } from "../utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -111,30 +111,23 @@ export function getVSCodeCLIFilename(): string {
 
 export class VSCodeCLI {
   private cliFilename: string;
-  private cleanEnv: NodeJS.ProcessEnv;
+  private cleanedEnv: NodeJS.ProcessEnv;
+  private execOptions: child_process.ExecFileOptions | undefined;
   constructor(cliFilename: string) {
     this.cliFilename = `"${cliFilename}"`;
-    this.cleanEnv = { ...process.env };
-    delete this.cleanEnv.LC_ALL;
-    delete this.cleanEnv.LANG;
-    delete this.cleanEnv.LANGUAGE;
+    this.cleanedEnv = cleanEnv(process.env);
+    this.execOptions = isWin ? { shell: true, env: this.cleanedEnv } : undefined;
   }
 
   installExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"], {
-      shell: isWin,
-      env: this.cleanEnv,
-    });
+    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"], this.execOptions);
   }
   uninstallExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], {
-      shell: isWin,
-      env: this.cleanEnv,
-    });
+    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], this.execOptions);
   }
 
   newWindow() {
-    child_process.execFileSync(this.cliFilename, ["--new-window"], { shell: isWin, env: this.cleanEnv });
+    child_process.execFileSync(this.cliFilename, ["--new-window"], this.execOptions);
   }
 }
 
