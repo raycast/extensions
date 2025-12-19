@@ -1,4 +1,4 @@
-import { Grid, ActionPanel, Action, showToast, Toast, Color, popToRoot } from "@raycast/api";
+import { Grid, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
 import { LIFXLight } from "../lib/types";
 import { LIFXClientManager } from "../lib/lifx-client";
 
@@ -68,10 +68,7 @@ export function ColorPicker({ light, client, onComplete }: Props) {
             key={`${color.hue}-${color.saturation}`}
             content={{ value: color.icon, tooltip: color.label }}
             title={color.label}
-            subtitle={`${color.hue}° • ${color.saturation}%`}
-            accessory={
-              isCurrent(color.hue, color.saturation) ? { tag: { value: "Current", color: Color.Green } } : undefined
-            }
+            subtitle={`${color.hue}° • ${color.saturation}%${isCurrent(color.hue, color.saturation) ? " (Current)" : ""}`}
             actions={
               <ActionPanel>
                 <Action
@@ -89,10 +86,7 @@ export function ColorPicker({ light, client, onComplete }: Props) {
             key={`${color.hue}-${color.saturation}`}
             content={{ value: color.icon, tooltip: color.label }}
             title={color.label}
-            subtitle={`${color.hue}° • ${color.saturation}%`}
-            accessory={
-              isCurrent(color.hue, color.saturation) ? { tag: { value: "Current", color: Color.Green } } : undefined
-            }
+            subtitle={`${color.hue}° • ${color.saturation}%${isCurrent(color.hue, color.saturation) ? " (Current)" : ""}`}
             actions={
               <ActionPanel>
                 <Action
