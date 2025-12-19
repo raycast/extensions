@@ -42,9 +42,10 @@ function Command() {
             <Grid.Item
               content={{
                 source: dataURIIcon,
-                tintColor: body.includes("currentColor")
-                  ? Color.PrimaryText // Monochrome icon
-                  : null,
+                tintColor:
+                  body.includes("currentColor") && iconColor !== iconColorEnum.customColor
+                    ? Color.PrimaryText // Monochrome icon
+                    : null,
               }}
               key={`${setId}:${id}`}
               title={id}

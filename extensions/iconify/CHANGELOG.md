@@ -1,5 +1,9 @@
 # Iconify Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix icon custom color rendering issue
+
 ## [Features] - 2025-12-18
 
 - Add `iconNameFormat` preference to control how icon names are formatted
