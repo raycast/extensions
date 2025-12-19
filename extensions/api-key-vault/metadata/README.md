@@ -9,6 +9,14 @@ Store and retrieve API keys locally from Raycast.
 - **Update API Key**: Select an entry (supports partial matching), then edit fields. The API key value stays unchanged unless you enter a new one.
 - **Delete API Key**: Select an entry (supports partial matching), then confirm deletion.
 
+## Screenshots
+
+![API Key Vault Commands](./API_Key_Vault_Commands.png)
+
+![Create API Key](./Create_API_Key.png)
+
+![Find API Key](./Find_API_Key.png)
+
 ## Notes
 
 - **Key names** are normalized to kebab-case and must be globally unique.
