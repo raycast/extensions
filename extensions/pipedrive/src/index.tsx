@@ -110,6 +110,7 @@ export default function PipedriveSearch() {
       <List.Section title="Open In Browser">
         {openInBrowserItems.map((item) => (
           <List.Item
+            id={item.id}
             key={item.id}
             title={item.title}
             actions={
@@ -162,6 +163,7 @@ export default function PipedriveSearch() {
       <List
         isLoading={state.isLoading}
         onSearchTextChange={handleSearchTextChange}
+        selectedItemId={searchText.length >= 2 && !state.isLoading ? "create-contact" : undefined}
         searchBarPlaceholder="Search by name of deal, person or organization..."
         searchBarAccessory={
           <List.Dropdown tooltip="Filter results by type" onChange={handleFilterChange} filtering={true}>
@@ -180,6 +182,7 @@ export default function PipedriveSearch() {
               return (
                 <>
                   <List.Item
+                    id="create-contact"
                     title={`🙎   Create contact: ${titleCased}`}
                     subtitle="Create a new contact in Pipedrive"
                     actions={
@@ -189,6 +192,7 @@ export default function PipedriveSearch() {
                     }
                   />
                   <List.Item
+                    id="create-organization"
                     title={`🏢   Create organization: ${titleCased}`}
                     subtitle="Create a new organization in Pipedrive"
                     actions={
@@ -202,6 +206,7 @@ export default function PipedriveSearch() {
                     }
                   />
                   <List.Item
+                    id="create-deal"
                     title={`💰   Create deal: ${titleCased}`}
                     subtitle="Create a new deal in Pipedrive"
                     actions={
@@ -295,8 +300,8 @@ function SearchListItem({
               title="Open in Browser"
               url={itemUrl}
               shortcut={{
-                macOS: { modifiers: ["cmd"], key: "enter" },
-                Windows: { modifiers: ["ctrl"], key: "enter" },
+                macOS: { modifiers: ["cmd"], key: "b" },
+                Windows: { modifiers: ["ctrl"], key: "b" },
               }}
             />
             {searchResult.type === "person" && (

@@ -98,7 +98,6 @@ export default function AddDeal({
 
   const [titleValue, setTitleValue] = useState(prefillTitle || "");
   const [valueValue, setValueValue] = useState("");
-  const [currencyValue, setCurrencyValue] = useState("");
 
   const [selectedPersonId, setSelectedPersonId] = useState(prefillPersonId || "");
   const [selectedOrganizationId, setSelectedOrganizationId] = useState(prefillOrganizationId || "");
@@ -128,7 +127,6 @@ export default function AddDeal({
           id: number;
           title?: string;
           value?: number | string | null;
-          currency?: string | null;
           person_id?: { value?: number | null; name?: string } | number | null;
           org_id?: { value?: number | null; name?: string } | number | null;
           person_name?: string;
@@ -151,7 +149,6 @@ export default function AddDeal({
         id: String(data.id),
         title: (data.title || "").trim(),
         value: data.value == null ? "" : String(data.value),
-        currency: (data.currency || "").trim(),
         personId: personId ? String(personId) : "",
         personName: (personName || "").trim(),
         organizationId: orgId ? String(orgId) : "",
@@ -183,7 +180,6 @@ export default function AddDeal({
 
     setTitleValue(existingDeal.title);
     setValueValue(existingDeal.value);
-    setCurrencyValue(existingDeal.currency);
 
     setSelectedPersonId(existingDeal.personId);
     setSelectedOrganizationId(existingDeal.organizationId);
@@ -257,13 +253,7 @@ export default function AddDeal({
     return { id: prefillOrganizationId, title: prefillOrganizationName };
   }, [prefillOrganizationId, prefillOrganizationName]);
 
-  async function handleSubmit(values: {
-    title: string;
-    value?: string;
-    currency?: string;
-    personId?: string;
-    organizationId?: string;
-  }) {
+  async function handleSubmit(values: { title: string; value?: string; personId?: string; organizationId?: string }) {
     const title = (values.title || "").trim();
     if (!title) {
       await showToast({ style: Toast.Style.Failure, title: "Deal title is required" });
@@ -317,11 +307,6 @@ export default function AddDeal({
         if (!Number.isNaN(parsed)) {
           body.value = parsed;
         }
-      }
-
-      const currency = (values.currency || "").trim();
-      if (currency) {
-        body.currency = currency;
       }
 
       const personId = (values.personId || "").trim();
@@ -446,13 +431,12 @@ export default function AddDeal({
         onChange={setTitleValue}
       />
 
-      <Form.TextField id="value" title="Value" placeholder="Optional" value={valueValue} onChange={setValueValue} />
       <Form.TextField
-        id="currency"
-        title="Currency"
-        placeholder="Optional (e.g. USD)"
-        value={currencyValue}
-        onChange={setCurrencyValue}
+        id="value"
+        title="Value ($)"
+        placeholder="Optional (e.g. 100,000)"
+        value={valueValue}
+        onChange={setValueValue}
       />
 
       <Form.Separator />
