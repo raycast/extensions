@@ -183,8 +183,10 @@ export default function RenameFiles() {
       // Only check if it's not the file itself (case change or same file)
       // Note: We use synchronous existsSync for UI responsiveness in the effect loop
       if (!isSameFile && existsSync(newPath)) {
-        // Double check not in our internal set (though internal set tracks *targets*, this tracks *existing on disk*)
-        externalCollisionCount++;
+        // If it exists, check if it's just a case change of the SAME file
+        if (file.path.toLowerCase() !== newPath.toLowerCase()) {
+          externalCollisionCount++;
+        }
       }
 
       return {
@@ -375,10 +377,13 @@ export default function RenameFiles() {
         // Check if target file already exists
         try {
           await fs.access(newPath);
-          errorCount++;
-          continue; // Skip if file already exists
+          // File exists. Check if it's the same file (case-insensitive)
+          if (file.path.toLowerCase() !== newPath.toLowerCase()) {
+            errorCount++;
+            continue; // Skip if file genuinely already exists and is different
+          }
         } catch {
-          // File doesn't exist, proceed with rename
+          // File doesn't exist (or is same file on some systems), proceed with rename
         }
 
         await fs.rename(file.path, newPath);
