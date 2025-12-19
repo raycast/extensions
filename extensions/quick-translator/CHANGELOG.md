@@ -1,6 +1,6 @@
 # Quick Translator Changelog
 
-## [Initial Version] - 2024-12-19
+## [Initial Version] - 2025-12-19
 
 - Initial release
 - Translate selected text using Raycast AI
