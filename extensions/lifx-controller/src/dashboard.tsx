@@ -528,7 +528,7 @@ export default function Command() {
                         title="Apply Profile"
                         icon={Icon.Checkmark}
                         onAction={() => applyProfile(profile)}
-                        shortcut={{ modifiers: ["ctrl"], key: "return" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
                       />
                       <Action
                         title="Delete Profile"

@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { LIFXLanClient } from "./lifx-lan";
 import { LIFXHttpClient } from "./lifx-http";
-import { LIFXLight, LightControl, Preferences, ConnectionState } from "./types";
+import { LIFXLight, LightControl, ConnectionState } from "./types";
 
 export class LIFXClientManager {
   private lanClient: LIFXLanClient | null = null;
@@ -19,10 +19,10 @@ export class LIFXClientManager {
     // Try LAN discovery first (if enabled in preferences)
     if (preferences.enableLanDiscovery) {
       try {
-        const timeout = parseInt(preferences.lanTimeout) || 5000;
-        const stateTimeout = parseInt(preferences.lanStateTimeout) || 5000;
-        const retryAttempts = parseInt(preferences.lanRetryAttempts) || 3;
-        const cooldownPeriod = parseInt(preferences.lanCooldownPeriod) || 2000;
+        const timeout = parseInt(preferences.lanTimeout, 10) || 5000;
+        const stateTimeout = parseInt(preferences.lanStateTimeout, 10) || 5000;
+        const retryAttempts = parseInt(preferences.lanRetryAttempts, 10) || 3;
+        const cooldownPeriod = parseInt(preferences.lanCooldownPeriod, 10) || 2000;
 
         this.lanClient = new LIFXLanClient({
           stateTimeout,

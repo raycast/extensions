@@ -467,7 +467,7 @@ export class NaturalLanguageParser {
     for (const pattern of percentPatterns) {
       const match = input.match(pattern);
       if (match) {
-        const value = parseInt(match[1]);
+        const value = parseInt(match[1], 10);
         if (value >= 0 && value <= 100) {
           return {
             type: "brightness",
@@ -642,7 +642,7 @@ export class NaturalLanguageParser {
     for (const pattern of kelvinPatterns) {
       const match = input.match(pattern);
       if (match) {
-        const kelvin = parseInt(match[1]);
+        const kelvin = parseInt(match[1], 10);
         if (kelvin >= 2500 && kelvin <= 9000) {
           return {
             type: "temperature",

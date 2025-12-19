@@ -102,6 +102,8 @@ ${light.saturation > 0 ? `**Color:** ${getColorFromHSB(light.hue, light.saturati
         style: Toast.Style.Success,
         title: `Turned ${!light.power ? "on" : "off"} ${light.label}`,
       });
+      // Wait for LIFX bulb to internally update and broadcast its new state via LAN
+      // before refreshing. Required because LIFX bulbs take time to propagate state changes.
       await new Promise((resolve) => setTimeout(resolve, 1500));
       await onUpdate();
     } catch (error) {
@@ -231,7 +233,7 @@ export function LightGridItem({ light, client, onUpdate, onExecuteNlp }: Props) 
       if (light.hue >= 30 && light.hue < 90) return Color.Yellow;
       if (light.hue >= 90 && light.hue < 150) return Color.Green;
       if (light.hue >= 150 && light.hue < 210) return Color.Blue;
-      if (light.hue >= 210 && light.hue < 270) return Color.Blue;
+      if (light.hue >= 210 && light.hue < 270) return Color.Purple;
       if (light.hue >= 270 && light.hue < 330) return Color.Magenta;
       return Color.Red;
     }
