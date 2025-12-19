@@ -15,7 +15,6 @@ const makeRequest = async <T>(endpoint: string) => {
     });
   }
   const url = DOMAIN_RESEARCH_API_URL + endpoint;
-  console.log("Requesting:", url);
   const response = await fetch(url, {
     headers: {
       "Fastly-Key": fastlyApiKey,

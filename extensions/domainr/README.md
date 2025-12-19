@@ -27,6 +27,6 @@ This extension requires access to Fastly's [**Domain Research API**](https://doc
 
 ## History
 
-This extension was previously used the [Domainr](https://domainr.com/) API via [RapidAPI](https://rapidapi.com/).
+This extension previously used the [Domainr](https://domainr.com/) API via [RapidAPI](https://rapidapi.com/).
 
 It now uses the Fastly Domain Research API directly, as Domainr was [acquired by Fastly in 2023](https://www.fastly.com/press/press-releases/fastly-expands-domains-api-and-tls-capabilities-with-domainr-acquisition-and)

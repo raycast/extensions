@@ -11,8 +11,8 @@ type SearchResponse = {
 };
 export type ISearchResponse = SearchResponse;
 
-// Status
-export type Status =
+// Status - individual status values returned by the API
+export type StatusValue =
   | "unknown"
   | "undelegated"
   | "inactive"
@@ -33,6 +33,10 @@ export type Status =
   | "tld"
   | "zone"
   | "deleting";
+
+// API returns space-delimited status string (e.g., "marketed undelegated")
+export type Status = string;
+
 type StatusResult = {
   domain: string;
   zone: string;

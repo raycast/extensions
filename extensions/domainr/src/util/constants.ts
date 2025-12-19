@@ -1,4 +1,4 @@
-import { DomainStatus, Status } from "./types";
+import { DomainStatus, StatusValue } from "./types";
 
 export const DOMAIN_RESEARCH_URL = "https://manage.fastly.com/products/domain-research";
 export const DOMAIN_RESEARCH_API_URL = "https://api.fastly.com/domain-management/v1/tools/";
@@ -6,7 +6,7 @@ export const DOMAINR_URL = "https://domainr.com";
 export const QUERY_MIN_LENGTH: number = 1 as const;
 export const SEARCH_DEBOUNCE_MS: number = 300 as const;
 
-export const STATUS_MAPPING: Record<Status, DomainStatus> = {
+export const STATUS_MAPPING: Record<StatusValue, DomainStatus> = {
   unknown: DomainStatus.Unknown,
   undelegated: DomainStatus.Available,
   inactive: DomainStatus.Available,
@@ -29,7 +29,7 @@ export const STATUS_MAPPING: Record<Status, DomainStatus> = {
   zone: DomainStatus.Disallowed,
 } as const;
 
-export const STATUS_DESCRIPTIONS: Record<Status, string> = {
+export const STATUS_DESCRIPTIONS: Record<StatusValue, string> = {
   unknown: "Unknown",
   undelegated: "Available",
   inactive: "Inactive",

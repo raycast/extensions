@@ -10,7 +10,7 @@ import {
   DOMAINR_URL,
   DOMAIN_RESEARCH_URL,
 } from "./util/constants";
-import { DomainStatus, getStatusIcon, Status, IStatusResult } from "./util/types";
+import { DomainStatus, getStatusIcon, StatusValue, IStatusResult } from "./util/types";
 import { getDomainStatus, search } from "./util/api";
 
 function DomainrSearch() {
@@ -52,9 +52,9 @@ function DomainrSearch() {
     },
   );
 
-  const getPrimaryStatus = (status: string): Status => {
+  const getPrimaryStatus = (status: string): StatusValue => {
     const statuses = status.split(" ");
-    return statuses[statuses.length - 1] as Status;
+    return statuses[statuses.length - 1] as StatusValue;
   };
 
   const getFilterPredicate = (filterValue: string) => (result: IStatusResult) => {
