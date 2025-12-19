@@ -180,7 +180,7 @@ ${light.saturation > 0 ? `**Color:** ${getColorFromHSB(light.hue, light.saturati
           <ActionPanel.Section title="Power">
             <Action
               title={light.power ? "Turn off" : "Turn on"}
-              icon={light.power ? Icon.PowerOff : Icon.Power}
+              icon={light.power ? Icon.XMarkCircle : Icon.Power}
               onAction={togglePower}
             />
           </ActionPanel.Section>
@@ -315,18 +315,16 @@ export function LightGridItem({ light, client, onUpdate, onExecuteNlp }: Props) 
         source: Icon.LightBulb,
         tintColor: getTintColor(),
       }}
-      accessories={[
-        {
-          icon: { source: Icon.CircleFilled, tintColor: light.power ? Color.Green : Color.Red },
-          tooltip: light.power ? "On" : "Off",
-        },
-      ]}
+      accessory={{
+        icon: { source: Icon.CircleFilled, tintColor: light.power ? Color.Green : Color.Red },
+        tooltip: light.power ? "On" : "Off",
+      }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Quick Actions">
             <Action
               title={light.power ? "Turn off" : "Turn on"}
-              icon={light.power ? Icon.PowerOff : Icon.Power}
+              icon={light.power ? Icon.XMarkCircle : Icon.Power}
               onAction={togglePower}
             />
             {onExecuteNlp && (

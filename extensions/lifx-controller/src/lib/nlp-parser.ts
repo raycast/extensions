@@ -40,7 +40,6 @@ const COLOR_MAP: Record<string, { hue: number; saturation: number }> = {
   mint: { hue: 150, saturation: 50 },
   emerald: { hue: 140, saturation: 80 },
   jade: { hue: 160, saturation: 60 },
-  lime: { hue: 90, saturation: 100 },
   chartreuse: { hue: 90, saturation: 100 },
   olive: { hue: 60, saturation: 50 },
   gold: { hue: 50, saturation: 80 },

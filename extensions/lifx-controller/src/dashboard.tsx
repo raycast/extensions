@@ -412,7 +412,7 @@ export default function Command() {
     <ActionPanel.Section>
       <Action
         title={`Switch to ${viewMode === "list" ? "Grid" : "List"} View`}
-        icon={viewMode === "list" ? Icon.Grid : Icon.List}
+        icon={viewMode === "list" ? Icon.AppWindowGrid4x4 : Icon.List}
         onAction={toggleViewMode}
         shortcut={{ modifiers: ["cmd"], key: "v" }}
       />
@@ -439,7 +439,7 @@ export default function Command() {
         />
         <Action
           title="Turn All off"
-          icon={Icon.PowerOff}
+          icon={Icon.XMarkCircle}
           onAction={() => controlAllLights("off")}
           shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
         />
@@ -665,7 +665,7 @@ export default function Command() {
                       />
                       <Action
                         title="Turn All off"
-                        icon={Icon.PowerOff}
+                        icon={Icon.XMarkCircle}
                         onAction={() => controlAllLights("off")}
                         shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                       />
