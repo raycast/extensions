@@ -45,8 +45,8 @@ export default function MigrateCommand() {
     const ok = await confirmAlert({
       title: "Migrate to iCloud Keychain?",
       message:
-        "This will copy your current local records into macOS Keychain (syncs via iCloud Keychain).\n\nAfter migration, local records on this Mac will be deleted.",
-      primaryAction: { title: "Migrate & Delete Local" },
+        "This will copy your current local records into macOS Keychain (syncs via iCloud Keychain).\n\nAfter migration, the local LocalStorage copy on this Mac will be deleted.",
+      primaryAction: { title: "Migrate + Delete Local Copy" },
     });
     if (!ok) return;
     await migrate(true);
@@ -56,8 +56,8 @@ export default function MigrateCommand() {
     const ok = await confirmAlert({
       title: "Migrate to iCloud Keychain?",
       message:
-        "This will copy your current local records into macOS Keychain (syncs via iCloud Keychain).\n\nLocal records on this Mac will be kept.",
-      primaryAction: { title: "Migrate (Keep Local)" },
+        "This will copy your current local records into macOS Keychain (syncs via iCloud Keychain).\n\nThe local LocalStorage copy on this Mac will be kept as a fallback.",
+      primaryAction: { title: "Migrate (Keep Local Copy)" },
     });
     if (!ok) return;
     await migrate(false);
@@ -70,13 +70,16 @@ export default function MigrateCommand() {
         subtitle={
           backend === "icloud-keychain"
             ? "Keychain backend is currently selected"
-            : "Tip: Set Storage Backend preference to iCloud Keychain after migrating"
+            : "Tip: Switch Storage Backend preference to iCloud Keychain after migrating"
         }
         actions={
           <ActionPanel>
-            <Action title="Migrate (Keep Local)" onAction={migrateKeepLocal} />
             <Action
-              title="Migrate & Delete Local"
+              title="Migrate (Keep Local Copy)"
+              onAction={migrateKeepLocal}
+            />
+            <Action
+              title="Migrate + Delete Local Copy"
               style={Action.Style.Destructive}
               onAction={migrateAndDeleteLocal}
             />
