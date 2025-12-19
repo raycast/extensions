@@ -21,17 +21,19 @@ const makeRequest = async <T>(endpoint: string) => {
       "Fastly-Key": fastlyApiKey,
     },
   });
-  const result = await response.json();
+  const result = (await response.json()) as Record<string, unknown>;
   if (!response.ok) {
-    let errorMessage =
-      (result as { msg?: string; error?: string; message?: string }).msg ||
-      (result as { error?: string }).error ||
-      (result as { message?: string }).message ||
-      JSON.stringify(result);
-
     if (response.status === 404) {
-      errorMessage = "Domain Research API not enabled. Please enable it in Fastly Dashboard.";
+      throw new Error("Domain Research API not enabled. Please enable it in Fastly Dashboard.", {
+        cause: response.status,
+      });
     }
+
+    const errorMessage =
+      (result?.msg as string | undefined) ||
+      (result?.error as string | undefined) ||
+      (result?.message as string | undefined) ||
+      "Unknown error occurred";
 
     throw new Error(errorMessage, {
       cause: response.status,

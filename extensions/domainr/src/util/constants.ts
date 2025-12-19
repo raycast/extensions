@@ -3,6 +3,8 @@ import { DomainStatus, Status } from "./types";
 export const DOMAIN_RESEARCH_URL = "https://manage.fastly.com/products/domain-research";
 export const DOMAIN_RESEARCH_API_URL = "https://api.fastly.com/domain-management/v1/tools/";
 export const DOMAINR_URL = "https://domainr.com";
+export const QUERY_MIN_LENGTH: number = 1 as const;
+export const SEARCH_DEBOUNCE_MS: number = 300 as const;
 
 export const STATUS_MAPPING: Record<Status, DomainStatus> = {
   unknown: DomainStatus.Unknown,
@@ -82,5 +84,3 @@ export const SEARCH_SUGGESTIONS: ReadonlyArray<Suggestion> = [
     subtitle: "Don't be so precise that there's no room for your website to grow.",
   },
 ] as const;
-
-export const QUERY_MIN_LENGTH: number = 1 as const;

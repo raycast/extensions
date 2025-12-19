@@ -3,6 +3,7 @@ import { Action, ActionPanel, Icon, List, openCommandPreferences } from "@raycas
 import { getFavicon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   QUERY_MIN_LENGTH,
+  SEARCH_DEBOUNCE_MS,
   SEARCH_SUGGESTIONS,
   STATUS_DESCRIPTIONS,
   STATUS_MAPPING,
@@ -22,7 +23,7 @@ function DomainrSearch() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchText);
-    }, 500);
+    }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [searchText]);
 
