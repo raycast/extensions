@@ -2,7 +2,7 @@
 
 All notable changes to this extension will be documented in this file.
 
-## [0.0.1] - 2025-12-18
+## [0.0.1] - {PR_MERGE_DATE}
 
 ### Added
 - Create / Update / Find / Delete commands for managing API keys locally in Raycast.
