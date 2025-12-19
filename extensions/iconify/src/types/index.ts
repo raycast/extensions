@@ -96,3 +96,7 @@ export interface Preferences {
   customColor: string;
   iconNameFormat: IconNameFormat;
 }
+
+export interface LaunchContext {
+  hex?: string;
+}

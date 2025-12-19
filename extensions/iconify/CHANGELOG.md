@@ -1,5 +1,10 @@
 # Iconify Changelog
 
+## [Features] - 2025-12-19
+
+- Fix icon custom color rendering issue
+- Support picking icon color
+
 ## [Features] - 2025-12-18
 
 - Add `iconNameFormat` preference to control how icon names are formatted

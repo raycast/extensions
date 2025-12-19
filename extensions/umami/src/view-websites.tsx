@@ -31,8 +31,8 @@ function Websites() {
     data: websites = [],
     mutate,
   } = useCachedPromise(async () => {
-    const { error, data } = await umami.getWebsites();
-    handleUmamiError(error);
+    const { ok, error, data } = await umami.getWebsites();
+    if (!ok) handleUmamiError(error);
     const websites = data?.data ?? [];
     const endAt = Date.now();
     const pastDate = new Date();
@@ -108,7 +108,9 @@ function Websites() {
                         const toast = await showToast(Toast.Style.Animated, "Deleting", website.name);
                         try {
                           await mutate(
-                            umami.deleteWebsite(website.id).then(({ error }) => handleUmamiError(error)),
+                            umami.deleteWebsite(website.id).then(({ ok, error }) => {
+                              if (!ok) handleUmamiError(error);
+                            }),
                             {
                               optimisticUpdate(data) {
                                 return data?.filter((w) => w.id !== website.id);
@@ -143,8 +145,8 @@ function AddWebsite() {
     async onSubmit() {
       const toast = await showToast(Toast.Style.Animated, "Adding", values.name);
       try {
-        const { error } = await umami.createWebsite(values);
-        handleUmamiError(error);
+        const { ok, error } = await umami.createWebsite(values);
+        if (!ok) handleUmamiError(error);
         toast.style = Toast.Style.Success;
         toast.title = "Added";
         pop();

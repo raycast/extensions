@@ -1,17 +1,17 @@
-import { Action, ActionPanel, Color, Grid, getPreferenceValues, Icon as RaycastIcon } from "@raycast/api";
+import { Action, ActionPanel, Color, Grid, getPreferenceValues, LaunchProps, Icon as RaycastIcon } from "@raycast/api";
 import { useState } from "react";
 import { createGlobalState } from "react-hooks-global-state";
 import { toDataURI, toSvg } from "./utils";
-import { iconColorEnum, DataIcon, Preferences } from "./types";
+import { iconColorEnum, DataIcon, Preferences, type LaunchContext } from "./types";
 import { useCachedDataSets } from "./hooks/use-cached-datasets";
 import { useCachedListIcons } from "./hooks/use-cached-list-icons";
 import { IconActions } from "./components/IconActions";
 import { ErrorGuard } from "./components/ErrorGuard";
 
-const { iconColor, customColor } = getPreferenceValues<Preferences>();
 const { useGlobalState } = createGlobalState({ page: 0, itemsPerPage: 800 });
 
-function Command() {
+function Command({ launchContext = {} }: LaunchProps<{ launchContext?: LaunchContext }>) {
+  const { iconColor, customColor } = getPreferenceValues<Preferences>();
   const [page, setPage] = useGlobalState("page");
   const [itemsPerPage] = useGlobalState("itemsPerPage");
   const [activeSetId, setActiveSetId] = useState<string>();
@@ -62,30 +62,35 @@ function Command() {
             .slice(itemsPerPage * page, itemsPerPage * (page + 1))
             .map((icon) => {
               const { id, body, width, height } = icon;
-              const svgIcon = toSvg(
-                body,
-                width,
-                height,
-                iconColor === iconColorEnum.customColor &&
-                  customColor &&
-                  /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(customColor)
+              const currentColor =
+                launchContext?.hex ||
+                (iconColor === iconColorEnum.customColor &&
+                customColor &&
+                /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(customColor)
                   ? customColor
-                  : iconColor,
-              );
+                  : iconColor);
+              const svgIcon = toSvg(body, width, height, currentColor);
               const dataURIIcon = toDataURI(svgIcon);
 
               return (
                 <Grid.Item
                   content={{
                     source: dataURIIcon,
-                    tintColor: body.includes("currentColor")
-                      ? Color.PrimaryText // Monochrome icon
-                      : null,
+                    tintColor:
+                      body.includes("currentColor") && !launchContext?.hex && iconColor !== iconColorEnum.customColor
+                        ? Color.PrimaryText // Monochrome icon
+                        : null,
                   }}
                   key={id}
                   title={id}
                   actions={
-                    <IconActions id={id} setId={activeSetId} svgIcon={svgIcon} dataURIIcon={dataURIIcon}>
+                    <IconActions
+                      id={id}
+                      setId={activeSetId}
+                      svgIcon={svgIcon}
+                      dataURIIcon={dataURIIcon}
+                      from="view-icons"
+                    >
                       <NavigationActionSection icons={icons} firstAction="next-page" />
                     </IconActions>
                   }

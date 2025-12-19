@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
-import { closeTab, openNewTab, setActiveTab } from "../actions";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { closeTab, executeJavascript, openNewTab, setActiveTab } from "../actions";
+import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "../constants";
 
@@ -65,6 +65,16 @@ function HistoryItemActions({
 }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
+
+  if (url.startsWith("javascript:")) {
+    const code = url.substring("javascript:".length);
+    return (
+      <ActionPanel title={title}>
+        <Action onAction={() => executeJavascript(code)} icon={Icon.Play} title="Run Bookmarklet" />
+        <Action.CopyToClipboard title="Copy Code" content={code} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+      </ActionPanel>
+    );
+  }
 
   return (
     <ActionPanel title={title}>

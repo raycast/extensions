@@ -3,8 +3,8 @@ import { IS_CLOUD, umami } from "./lib/umami";
 import ErrorComponent from "./components/ErrorComponent";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { UmamiMe, UmamiUpdateMyPassword } from "./lib/types";
-import { handleUmamiError } from "./lib/utils";
 import WithUmami from "./components/WithUmami";
+import { handleUmamiError } from "./lib/utils";
 
 export default function Main() {
   return (
@@ -16,10 +16,10 @@ export default function Main() {
 
 function Me() {
   const { isLoading, data, error } = useCachedPromise(async () => {
-    const { data, error } = await umami.getMe();
-    handleUmamiError(error);
-    const user = IS_CLOUD ? (data as { user: UmamiMe }).user : (data as UmamiMe);
-    return user;
+    const { ok, data, error } = await umami.getMe();
+    if (!ok) handleUmamiError(error);
+    const userData = data as { user: UmamiMe } | UmamiMe;
+    return "user" in userData ? userData.user : userData;
   });
 
   return error ? (
@@ -56,8 +56,8 @@ function UpdateMyPassword() {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating");
       try {
-        const { error } = await umami.updateMyPassword(values);
-        handleUmamiError(error);
+        const { ok, error } = await umami.updateMyPassword(values);
+        if (!ok) handleUmamiError(error);
         toast.style = Toast.Style.Success;
         toast.title = "Updated";
         await popToRoot();

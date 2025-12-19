@@ -1,17 +1,20 @@
-import { Color, Grid, getPreferenceValues } from "@raycast/api";
+import { Color, Grid, getPreferenceValues, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 
 import { toDataURI, toSvg } from "./utils";
-import { iconColorEnum, Preferences } from "./types";
+import { iconColorEnum, Preferences, type LaunchContext } from "./types";
 import { useQueryIcons } from "./hooks/use-query-icons";
 import { IconActions } from "./components/IconActions";
 import { ErrorGuard } from "./components/ErrorGuard";
 
-const { iconColor, customColor } = getPreferenceValues<Preferences>();
-
-function Command() {
+function Command({
+  launchContext = {},
+}: LaunchProps<{
+  launchContext?: LaunchContext;
+}>) {
   const [query, setQuery] = useState("");
   const { data, isLoading, error } = useQueryIcons(query);
+  const { iconColor, customColor } = getPreferenceValues<Preferences>();
 
   function getEmptyViewDescription(query: string, isLoading: boolean) {
     if (query.length === 0 || isLoading) {
@@ -27,29 +30,30 @@ function Command() {
         {data.map((icon) => {
           const { set, id, body, width, height } = icon;
           const { id: setId, title: setName } = set;
-          const svgIcon = toSvg(
-            body,
-            width,
-            height,
-            iconColor === iconColorEnum.customColor &&
-              customColor &&
-              /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(customColor)
+          const currentColor =
+            launchContext?.hex ||
+            (iconColor === iconColorEnum.customColor &&
+            customColor &&
+            /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(customColor)
               ? customColor
-              : iconColor,
-          );
+              : iconColor);
+          const svgIcon = toSvg(body, width, height, currentColor);
           const dataURIIcon = toDataURI(svgIcon);
           return (
             <Grid.Item
               content={{
                 source: dataURIIcon,
-                tintColor: body.includes("currentColor")
-                  ? Color.PrimaryText // Monochrome icon
-                  : null,
+                tintColor:
+                  body.includes("currentColor") && !launchContext?.hex && iconColor !== iconColorEnum.customColor
+                    ? Color.PrimaryText // Monochrome icon
+                    : null,
               }}
               key={`${setId}:${id}`}
               title={id}
               subtitle={setName}
-              actions={<IconActions id={id} setId={setId} svgIcon={svgIcon} dataURIIcon={dataURIIcon} />}
+              actions={
+                <IconActions id={id} setId={setId} svgIcon={svgIcon} dataURIIcon={dataURIIcon} from="search-icons" />
+              }
             />
           );
         })}
