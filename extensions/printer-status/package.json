@@ -52,6 +52,14 @@
         {
           "title": "Français",
           "value": "fr"
+        },
+        {
+          "title": "Deutsch",
+          "value": "de"
+        },
+        {
+          "title": "Español",
+          "value": "es"
         }
       ]
     }

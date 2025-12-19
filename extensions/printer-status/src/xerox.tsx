@@ -3,11 +3,6 @@ import { useState, useEffect } from "react";
 import { fetchPrinterStats, PrinterStats } from "./snmp-client";
 import { INK_COLORS, LABELS } from "./constants";
 
-interface Preferences {
-  printerIp: string;
-  language: "en" | "fr";
-}
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const host = preferences.printerIp;
