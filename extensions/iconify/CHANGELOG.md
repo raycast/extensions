@@ -1,5 +1,10 @@
 # Iconify Changelog
 
+## [Features] - {PR_MERGE_DATE}
+
+- Support picking icon color
+
+
 ## [Fix] - {PR_MERGE_DATE}
 
 - Fix icon custom color rendering issue

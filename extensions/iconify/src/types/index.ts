@@ -7,6 +7,7 @@ export enum primaryActionEnum {
   copyFile = "copyFile",
   copyURL = "copyURL",
   copyDataURI = "copyDataURI",
+  pickColor = "pickColor",
 }
 
 export enum iconColorEnum {
@@ -95,4 +96,8 @@ export interface Preferences {
   iconColor: iconColorEnum;
   customColor: string;
   iconNameFormat: IconNameFormat;
+}
+
+export interface LaunchContext {
+  hex?: string;
 }
