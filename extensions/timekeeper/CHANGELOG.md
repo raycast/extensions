@@ -1,6 +1,13 @@
 # Timekeeper Changelog
 
-## First version! - 12/18/25
+
+## Version 2 - {PR_MERGE_DATE}
+
+- Removed unsupported Discord Timestamps
+- Removed an unused package from code
+
+
+## First version! - {PR_MERGE_DATE}
 
 Includes 2 commands!
 

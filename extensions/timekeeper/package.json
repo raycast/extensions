@@ -23,7 +23,6 @@
   "dependencies": {
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.1",
-    "chrono": "^1.0.5",
     "chrono-node": "^2.9.0"
   },
   "devDependencies": {

@@ -154,25 +154,6 @@ export default function DiscordTimestamp() {
           return diffDays >= 0 ? `in ${diffDays} days` : `${Math.abs(diffDays)} days ago`;
         }
       }
-      case "s":
-        return date.toLocaleString("en-US", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        });
-      case "S":
-        return date.toLocaleString("en-US", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "numeric",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
-        });
       default:
         return "";
     }
@@ -220,18 +201,6 @@ export default function DiscordTimestamp() {
       label: "Relative Time",
       preview: getPreview("R"),
       description: "in 2 hours or 2 hours ago",
-    },
-    {
-      format: "s",
-      label: "Short Date/Time (no seconds)",
-      preview: getPreview("s"),
-      description: "12/17/2025, 9:30 PM",
-    },
-    {
-      format: "S",
-      label: "Short Date/Time (with seconds)",
-      preview: getPreview("S"),
-      description: "12/17/2025, 9:30:38 PM",
     },
   ];
 
