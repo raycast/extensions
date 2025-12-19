@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Add Windows support] - {PR_MERGE_DATE}
+## [Add Windows support] - 2025-12-19
 
 - Added support for Windows
 
