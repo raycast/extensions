@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "lifx-controller",
-  "title": "LIFX Controller",
+  "name": "lifx-advanced-controller",
+  "title": "LIFX Advanced Controller",
   "description": "Control your LIFX smart lights with natural language commands and profiles",
   "icon": "extension-icon.png",
   "license": "MIT",
