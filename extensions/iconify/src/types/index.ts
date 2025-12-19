@@ -7,7 +7,6 @@ export enum primaryActionEnum {
   copyFile = "copyFile",
   copyURL = "copyURL",
   copyDataURI = "copyDataURI",
-  pickColor = "pickColor",
 }
 
 export enum iconColorEnum {

@@ -197,18 +197,6 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from, children }:
           {copyURL}
         </>
       )}
-      {primaryAction === primaryActionEnum.pickColor && (
-        <>
-          {paste}
-          {copy}
-          {pasteFile}
-          {copyFile}
-          {pasteName}
-          {copyName}
-          {copyURL}
-          {copyDataURI}
-        </>
-      )}
       <ToolsActionSection />
       {children}
     </ActionPanel>
