@@ -294,7 +294,13 @@ export default function AddContact({
   ];
 
   function addEmail() {
-    setEmails((prevEmails: EmailEntry[]) => [...prevEmails, { value: "", label: "work" }]);
+    setEmails((prevEmails: EmailEntry[]) => {
+      const last = prevEmails[prevEmails.length - 1];
+      if (last && !last.value.trim()) {
+        return prevEmails;
+      }
+      return [...prevEmails, { value: "", label: "work" }];
+    });
   }
 
   function updateEmail(index: number, field: keyof EmailEntry, value: string) {
@@ -306,7 +312,13 @@ export default function AddContact({
   }
 
   function addPhone() {
-    setPhones((prev: PhoneEntry[]) => [...prev, { value: "", label: "work" }]);
+    setPhones((prev: PhoneEntry[]) => {
+      const last = prev[prev.length - 1];
+      if (last && !last.value.trim()) {
+        return prev;
+      }
+      return [...prev, { value: "", label: "work" }];
+    });
   }
 
   function updatePhone(index: number, field: keyof PhoneEntry, value: string) {
@@ -462,11 +474,27 @@ export default function AddContact({
             title={isEditing ? "Update Contact" : "Add Contact"}
             onSubmit={handleSubmit}
             icon="👤"
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
           <ActionPanel.Section>
-            <Action title="Add Email" icon="📧" onAction={addEmail} shortcut={{ modifiers: ["cmd"], key: "e" }} />
-            <Action title="Add Phone" icon="📞" onAction={addPhone} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+            <Action
+              title="Add Another Email"
+              icon="➕"
+              onAction={addEmail}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                Windows: { modifiers: ["ctrl"], key: "e" },
+              }}
+            />
+            <Action
+              title="Add Another Phone"
+              icon="➕"
+              onAction={addPhone}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "p" },
+                Windows: { modifiers: ["ctrl"], key: "p" },
+              }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -571,6 +599,8 @@ export default function AddContact({
         </Fragment>
       ))}
 
+      <Form.Description title="Add Email" text={`Add Another Email action (Cmd+E / Ctrl+E).`} />
+
       <Form.Separator />
 
       {phones.map((phone: PhoneEntry, index: number) => (
@@ -594,6 +624,8 @@ export default function AddContact({
           </Form.Dropdown>
         </Fragment>
       ))}
+
+      <Form.Description title="Add Phones" text={`Add Another Phone action (Cmd+Shift+P / Ctrl+Shift+P).`} />
 
       <Form.Separator />
     </Form>
