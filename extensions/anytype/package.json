@@ -25,16 +25,16 @@
     },
     {
       "name": "browse-spaces",
-      "title": "Browse Spaces",
+      "title": "Browse Channels",
       "subtitle": "Anytype",
-      "description": "Browse your spaces one by one.",
+      "description": "Browse your channels one by one.",
       "mode": "view"
     },
     {
       "name": "search-anytype",
       "title": "Search Anytype",
       "subtitle": "Anytype",
-      "description": "Search objects globally in all spaces.",
+      "description": "Search objects globally in all channels.",
       "mode": "view"
     },
     {
@@ -727,19 +727,19 @@
       "type": "dropdown",
       "data": [
         {
+          "title": "25",
+          "value": "25"
+        },
+        {
           "title": "50",
           "value": "50"
         },
         {
           "title": "100",
           "value": "100"
-        },
-        {
-          "title": "200",
-          "value": "200"
         }
       ],
-      "default": "100",
+      "default": "50",
       "required": false
     },
     {
@@ -759,34 +759,55 @@
       ],
       "default": "text",
       "required": false
+    },
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "The base URL of the Anytype API (default: http://127.0.0.1:31009).",
+      "type": "textfield",
+      "default": "http://127.0.0.1:31009",
+      "required": false
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Optional API key for the Anytype API. Leave empty to use the built-in authentication flow with your Anytype desktop app, or enter an API key (e.g., from a headless Anytype instance) to use manual authentication.",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.17.0",
-    "date-fns": "^4.1.0",
-    "emoji-regex": "^10.4.0",
-    "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "1.103.9",
+    "@raycast/utils": "2.2.2",
+    "date-fns": "4.1.0",
+    "emoji-regex": "10.6.0",
+    "node-fetch": "3.3.2",
+    "remove-markdown": "0.6.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.16",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^15.4.3",
-    "prettier": "^3.3.3",
-    "prettier-plugin-organize-imports": "^4.1.0",
-    "typescript": "^5.4.5"
+    "@eslint/eslintrc": "3.3.3",
+    "@eslint/js": "9.39.1",
+    "@raycast/eslint-config": "2.1.1",
+    "@types/lodash": "4.17.21",
+    "@types/node": "22.16.5",
+    "@types/react": "19.2.7",
+    "eslint": "9.39.1",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.7",
+    "prettier": "3.7.3",
+    "prettier-plugin-organize-imports": "4.3.0",
+    "typescript": "5.9.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "type-check": "tsc --noEmit",
+    "lint:fix": "ray lint --fix",
+    "format": "prettier --write",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "prepare": "husky",

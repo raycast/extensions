@@ -1,12 +1,12 @@
+import { homedir } from "node:os";
+import path from "node:path";
 import { showToast, Toast } from "@raycast/api";
 import { assign, createMachine, fromCallback, fromPromise, type StateFrom, type StateValueMap } from "xstate";
-import { homedir } from "node:os";
-import { isSnapshotAvailable, invalidateSnapshot, hydrateSnapshot, persistSnapshot } from "../utils/cache";
-import fileSystemIndexStore from "../stores/file-system-index-store";
-import { fetchVolume, indexHomeDirectory } from "../utils/scan";
+import { refreshStore } from "../stores/refresh-store";
 import selectionStore from "../stores/selection-store";
 import type { DiskUsageContext, DiskUsageEvent } from "../types";
-import { pruneFileSystemIndex, adjustVolume } from "../utils/calc";
+import { fetchVolume, indexHomeDirectory } from "../utils/scan";
+import { clearCache, decreaseEntrySize, hasIndex, removeItemFromCache } from "../utils/storage";
 
 export type DiskUsageState = StateFrom<typeof diskUsageMachine>;
 export type DiskUsageSend = (event: DiskUsageEvent) => void;
@@ -14,9 +14,7 @@ export type DiskUsageSend = (event: DiskUsageEvent) => void;
 export const matchStatus = <C, R>(
   stateValue: string | StateValueMap,
   context: C,
-  patterns: Record<string, (ctx: C) => R> & {
-    _?: (ctx: C) => R;
-  },
+  patterns: Record<string, (ctx: C) => R> & { _?: (ctx: C) => R },
 ): R | null => {
   const statusKey = typeof stateValue === "string" ? stateValue : Object.keys(stateValue)[0];
   const handler = patterns[statusKey] ?? patterns._;
@@ -28,82 +26,69 @@ export const diskUsageMachine = createMachine({
   types: {} as { context: DiskUsageContext; events: DiskUsageEvent },
   initial: "checkingCache",
   context: {
-    fsIndex: {},
     volume: { freeBytes: 0, totalBytes: 0, usageLabel: "0%" },
+    activePath: "",
+    heapUsed: "0 MB",
+    needsScan: false,
   } as DiskUsageContext,
   states: {
     checkingCache: {
       invoke: {
-        src: fromPromise(isSnapshotAvailable),
+        src: fromPromise(async () => await hasIndex()),
         onDone: [
           {
-            target: "restoringCache",
+            target: "loadingUsage",
             guard: ({ event }) => event.output === true,
           },
-          { target: "loadingUsage" },
+          { target: "loadingUsage", actions: assign({ needsScan: true }) },
         ],
-        onError: { target: "loadingUsage" },
+        onError: {
+          target: "loadingUsage",
+          actions: assign({ needsScan: true }),
+        },
       },
     },
-
-    restoringCache: {
-      invoke: {
-        src: fromPromise(hydrateSnapshot),
-        onDone: [
-          {
-            guard: ({ event }) => !!event.output,
-            target: "ready",
-            actions: [
-              assign({
-                fsIndex: ({ event }) => event.output!.fsIndex,
-                volume: ({ event }) => event.output!.volume,
-              }),
-              ({ event }) => fileSystemIndexStore.set(event.output!.fsIndex),
-            ],
-          },
-          { target: "loadingUsage" },
-        ],
-        onError: { target: "loadingUsage" },
-      },
-    },
-
     loadingUsage: {
       invoke: {
         src: fromPromise(fetchVolume),
-        onDone: {
-          target: "scanning",
-          actions: assign({ volume: ({ event }) => event.output }),
-        },
-        onError: {
-          target: "error",
-          actions: assign({ error: "Failed to load disk usage" }),
-        },
+        onDone: [
+          {
+            target: "scanning",
+            guard: ({ context }) => context.needsScan,
+            actions: assign({ volume: ({ event }) => event.output }),
+          },
+          {
+            target: "ready",
+            actions: assign({ volume: ({ event }) => event.output }),
+          },
+        ],
+        onError: { target: "ready" },
       },
     },
-
     scanning: {
       invoke: {
-        src: fromCallback(({ sendBack }: { sendBack: DiskUsageSend; input: { homeDir: string } }) => {
-          indexHomeDirectory(homedir(), (path) => sendBack({ type: "SCAN_PROGRESS", path }))
-            .then((data) => sendBack({ type: "SCAN_SUCCESS", data }))
-            .catch((error) => sendBack({ type: "SCAN_FAILURE", error }));
+        src: fromCallback(({ sendBack }) => {
+          indexHomeDirectory(homedir(), (path, heap) => sendBack({ type: "SCAN_PROGRESS", path, heap }))
+            .then(() => sendBack({ type: "SCAN_SUCCESS" }))
+            .catch((error) =>
+              sendBack({
+                type: "SCAN_FAILURE",
+                error: error instanceof Error ? error.message : String(error),
+              }),
+            );
           return () => {};
         }),
       },
       on: {
         SCAN_PROGRESS: {
-          actions: assign({ activePath: ({ event }) => event.path }),
+          actions: assign({
+            activePath: ({ event }) => event.path,
+            heapUsed: ({ event }) => event.heap,
+          }),
         },
         SCAN_SUCCESS: {
           target: "ready",
-          actions: [
-            assign({
-              activePath: "",
-              fsIndex: ({ event }) => event.data,
-            }),
-            ({ event }) => fileSystemIndexStore.set(event.data),
-            ({ event, context }) => persistSnapshot(event.data, context.volume),
-          ],
+          actions: [assign({ activePath: "", needsScan: false }), () => refreshStore.triggerRefresh()],
         },
         SCAN_FAILURE: {
           target: "error",
@@ -111,27 +96,35 @@ export const diskUsageMachine = createMachine({
         },
       },
     },
-
     ready: {
       initial: "idle",
       on: {
         REFRESH: {
-          target: "loadingUsage",
-          actions: [() => invalidateSnapshot(), () => fileSystemIndexStore.set(null)],
+          target: "scanning",
+          actions: async () => await clearCache(),
         },
         RETRY: "loadingUsage",
       },
       states: {
         idle: {
-          on: {
-            DELETE_ITEMS: "deleting",
-          },
+          on: { DELETE_ITEMS: "deleting" },
         },
         deleting: {
           entry: assign({ isProcessingDeletion: true }),
           invoke: {
-            src: fromPromise(async ({ input }: { input: { paths: string[] } }) => {
-              return input.paths;
+            src: fromPromise<void, { paths: string[] }>(async ({ input }) => {
+              const home = homedir();
+              for (const filePath of input.paths) {
+                const removedBytes = await removeItemFromCache(filePath);
+                if (removedBytes > 0) {
+                  let currentPath = filePath;
+                  while (currentPath.startsWith(home) && currentPath !== home) {
+                    const parent = path.dirname(currentPath);
+                    await decreaseEntrySize(parent, currentPath, removedBytes);
+                    currentPath = parent;
+                  }
+                }
+              }
             }),
             input: ({ event }) => ({
               paths: event.type === "DELETE_ITEMS" ? event.paths : [],
@@ -139,23 +132,10 @@ export const diskUsageMachine = createMachine({
             onDone: {
               target: "idle",
               actions: [
-                assign({
-                  isProcessingDeletion: false,
-                  volume: ({ context, event }) => {
-                    const currentFsIndex = fileSystemIndexStore.get();
-                    if (!currentFsIndex) return context.volume;
-
-                    const { index, freedBytes } = pruneFileSystemIndex(context.fsIndex, event.output, homedir());
-                    const volume = adjustVolume(context.volume, freedBytes);
-
-                    fileSystemIndexStore.set(index);
-                    persistSnapshot(index, volume);
-
-                    return volume;
-                  },
-                }),
+                assign({ isProcessingDeletion: false }),
                 () => {
                   selectionStore.clear();
+                  refreshStore.triggerRefresh();
                   showToast({
                     title: "Moved to Trash",
                     message: "Space reclaimed",
@@ -170,7 +150,7 @@ export const diskUsageMachine = createMachine({
                 () =>
                   showToast({
                     title: "Error",
-                    message: "Failed to delete items",
+                    message: "Failed to update cache",
                     style: Toast.Style.Failure,
                   }),
               ],

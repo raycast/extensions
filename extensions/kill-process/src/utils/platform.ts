@@ -81,7 +81,7 @@ export function getKillCommand(pid: number, force = false): string {
   if (isWindows) {
     return force ? `taskkill /F /PID ${pid}` : `taskkill /PID ${pid}`;
   }
-  return force ? `sudo kill -9 ${pid}` : `kill -9 ${pid}`;
+  return force ? `zsh -c 'sudo kill -9 ${pid}'` : `kill -9 ${pid}`;
 }
 
 /**

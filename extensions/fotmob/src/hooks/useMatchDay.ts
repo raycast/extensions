@@ -6,7 +6,7 @@ export function useMatchDay(date: Date) {
   const { data, error, isLoading } = useCachedPromise(
     async (date): Promise<MatchDayResponse> => {
       const dateStr = date.toISOString().split("T")[0].replace(/-/g, "");
-      const url = `https://www.fotmob.com/api/matches?date=${dateStr}`;
+      const url = `https://www.fotmob.com/api/data/matches?date=${dateStr}`;
       const headers = await getHeaderToken();
       const searchResponse = await fetch(url, { headers });
 

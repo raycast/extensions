@@ -3,7 +3,6 @@
   "name": "change-case",
   "title": "Change Case",
   "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
-  "type": "module",
   "icon": "command-icon.png",
   "author": "erics118",
   "categories": [
@@ -15,7 +14,9 @@
     "nagauta",
     "PWrzesinski",
     "yug2005",
-    "ridemountainpig"
+    "ridemountainpig",
+    "xmok",
+    "chrismessina"
   ],
   "keywords": [
     "text",
@@ -97,7 +98,7 @@
       "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
       "data": [
         {
-          "title": "Selected",
+          "title": "Selected Text",
           "value": "selected"
         },
         {
@@ -305,25 +306,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.2",
+    "@raycast/api": "^1.103.0",
     "change-case": "^5.4.4",
     "sponge-case": "^2.0.3",
     "swap-case": "^3.0.3",
     "title-case": "^4.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.13.0",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.0",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "prettier": "^3.7.4"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [

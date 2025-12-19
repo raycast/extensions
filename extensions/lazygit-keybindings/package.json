@@ -1,0 +1,114 @@
+{
+  "name": "lazygit-keybindings",
+  "title": "Lazygit Keybindings",
+  "description": "Search Lazygit keybindings by action or shortcut.",
+  "icon": "icon.png",
+  "author": "noamefergan",
+  "keywords": [
+    "git",
+    "lazygit",
+    "keybindings",
+    "cheatsheet"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Lazygit Keybindings",
+      "description": "Search Lazygit keybindings",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "locale",
+      "type": "dropdown",
+      "title": "Locale",
+      "description": "Preferred language for keybindings",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-TW"
+        }
+      ]
+    },
+    {
+      "name": "useCache",
+      "type": "checkbox",
+      "title": "Use Cache",
+      "label": "Use Cache",
+      "description": "Use a local cache to avoid refetching",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "cacheTTLMinutes",
+      "type": "textfield",
+      "title": "Cache TTL (minutes)",
+      "description": "How long to keep cached keybindings before refreshing",
+      "required": false,
+      "default": "1440",
+      "placeholder": "1440"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "version": "0.0.1",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

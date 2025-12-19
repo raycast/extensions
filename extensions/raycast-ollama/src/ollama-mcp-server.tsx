@@ -1,5 +1,5 @@
 import { McpServerView } from "./lib/ui/McpServerView/main";
 
-export default function Command(): JSX.Element {
+export default function Command() {
   return <McpServerView />;
 }

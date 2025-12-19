@@ -12,6 +12,7 @@
     "nagauta",
     "dead_hikikomori",
     "clins1994",
+    "YourMCGeek",
     "0xdhrv"
   ],
   "categories": [
@@ -116,15 +117,14 @@
       "name": "downloadsFolder",
       "title": "Downloads Folder",
       "description": "The folder where your downloads are stored",
-      "default": "~/Downloads",
-      "required": true
+      "required": false
     },
     {
       "type": "dropdown",
       "name": "lastestDownloadOrder",
-      "label": "Lastest Download Order",
-      "title": "Lastest Download Order",
-      "description": "The order of the lastest download",
+      "label": "Latest Download Order",
+      "title": "Latest Download Order",
+      "description": "The order of the latest download",
       "required": false,
       "default": "modifiedTime",
       "data": [
@@ -188,6 +188,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

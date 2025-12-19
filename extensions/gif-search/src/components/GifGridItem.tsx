@@ -14,14 +14,14 @@ interface GifGridItemProps {
 }
 
 export function GifGridItem(props: GifGridItemProps) {
-  const { preview_gif_url, title, gif_url } = props.item;
+  const { small_preview_gif_url, large_preview_gif_url, title, gif_url } = props.item;
 
   const isLargeGridSize = getGridItemSize() === "large";
 
   return (
     <Grid.Item
       title={title}
-      content={{ source: isLargeGridSize ? gif_url : preview_gif_url }}
+      content={{ source: isLargeGridSize ? (large_preview_gif_url ?? gif_url) : small_preview_gif_url }}
       actions={
         <GifActions item={props.item} showViewDetails={true} visitGifItem={props.visitGifItem} mutate={props.mutate} />
       }

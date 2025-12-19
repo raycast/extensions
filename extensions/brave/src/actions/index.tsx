@@ -1,6 +1,6 @@
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { exec } from "child_process";
 
@@ -53,7 +53,7 @@ export async function openNewTab({
   query?: string;
   profileCurrent: string;
   profileOriginal?: string;
-  openTabInProfile: SettingsProfileOpenBehaviour;
+  openTabInProfile: Preferences["openTabInProfile"];
   newWindow?: boolean;
   incognito?: boolean;
 }): Promise<boolean | string> {
@@ -156,3 +156,42 @@ return isInstalled`);
   }
   return true;
 };
+
+export async function executeJavascript(code: string): Promise<void> {
+  const { browserOption } = getPreferenceValues<Preferences>();
+
+  try {
+    const decodedCode = decodeURIComponent(code);
+
+    // We manually escape the characters that break AppleScript strings.
+    // This is safer than JSON.stringify because we control the exact output format.
+    const escapedCode = decodedCode
+      .replace(/\\/g, "\\\\") // Escape backslashes first!
+      .replace(/"/g, '\\"') // Escape double quotes
+      .replace(/\r/g, "\\r") // Escape Carriage Return
+      .replace(/\n/g, "\\n") // Escape New Line
+      .replace(/\t/g, "\\t") // Escape Tab
+      .replace(/[\b]/g, "\\b") // Escape Backspace
+      .replace(/\f/g, "\\f"); // Escape Form Feed
+
+    const script = `
+      tell application "${browserOption}"
+        activate
+        tell active tab of front window
+          execute javascript "${escapedCode}"
+        end tell
+      end tell
+    `;
+    await runAppleScript(script);
+    await closeMainWindow();
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Error && e.message.includes("Allow JavaScript from Apple Events")) {
+      await showFailureToast("Enable 'View > Developer > Allow JavaScript from Apple Events' in Brave.");
+    } else {
+      await showFailureToast("Could not run bookmarklet", {
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+}

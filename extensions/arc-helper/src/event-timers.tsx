@@ -1,75 +1,94 @@
 import { ActionPanel, Action, List, Detail, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useMemo } from "react";
-import { API, EventTimer } from "./api";
+import { useState, useMemo, useEffect } from "react";
+import { API, EventTimer, EventTimerRaw } from "./api";
 
 interface EventTimersResponse {
-  data: EventTimer[];
+  data: EventTimerRaw[];
+}
+
+function parseTimeToMs(timeStr: string, baseDate: Date): number {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  const date = new Date(baseDate);
+  date.setHours(hours, minutes, 0, 0);
+  return date.getTime();
+}
+
+function transformRawEvents(rawEvents: EventTimerRaw[]): EventTimer[] {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const events: EventTimer[] = [];
+
+  for (const raw of rawEvents) {
+    for (const timeSlot of raw.times) {
+      // Create event for today
+      let startTime = parseTimeToMs(timeSlot.start, today);
+      let endTime = parseTimeToMs(timeSlot.end, today);
+
+      // Handle overnight events (e.g., 22:00 - 00:00)
+      if (endTime <= startTime) {
+        endTime += 24 * 60 * 60 * 1000; // Add 24 hours
+      }
+
+      events.push({
+        name: raw.name,
+        map: raw.map,
+        icon: raw.icon,
+        startTime,
+        endTime,
+      });
+
+      // Create event for tomorrow
+      startTime = parseTimeToMs(timeSlot.start, tomorrow);
+      endTime = parseTimeToMs(timeSlot.end, tomorrow);
+      if (endTime <= startTime) {
+        endTime += 24 * 60 * 60 * 1000;
+      }
+
+      events.push({
+        name: raw.name,
+        map: raw.map,
+        icon: raw.icon,
+        startTime,
+        endTime,
+      });
+    }
+  }
+
+  return events;
 }
 
 interface EventWithStatus extends EventTimer {
   status: "active" | "upcoming" | "later";
-  nextStart: Date | null;
-  nextEnd: Date | null;
-  minutesUntil: number | null;
+  startDate: Date;
+  endDate: Date;
+  minutesUntil: number;
 }
 
 function getEventStatus(event: EventTimer): EventWithStatus {
-  const now = new Date();
-  const currentHour = now.getUTCHours();
-  const currentMinute = now.getUTCMinutes();
-  const currentTimeMinutes = currentHour * 60 + currentMinute;
+  const now = Date.now();
+  const startDate = new Date(event.startTime);
+  const endDate = new Date(event.endTime);
 
-  let status: "active" | "upcoming" | "later" = "later";
-  let nextStart: Date | null = null;
-  let nextEnd: Date | null = null;
-  let minutesUntil: number | null = null;
+  let status: "active" | "upcoming" | "later";
+  let minutesUntil: number;
 
-  for (const time of event.times) {
-    const [startHour, startMinute] = time.start.split(":").map(Number);
-    const [endHour, endMinute] = time.end.split(":").map(Number);
-    const startMinutes = startHour * 60 + startMinute;
-    const endMinutes = endHour * 60 + endMinute;
-
-    if (currentTimeMinutes >= startMinutes && currentTimeMinutes < endMinutes) {
-      status = "active";
-      nextStart = new Date(now);
-      nextStart.setUTCHours(startHour, startMinute, 0, 0);
-      nextEnd = new Date(now);
-      nextEnd.setUTCHours(endHour, endMinute, 0, 0);
-      minutesUntil = 0;
-      break;
-    }
-
-    if (currentTimeMinutes < startMinutes) {
-      const diff = startMinutes - currentTimeMinutes;
-      if (minutesUntil === null || diff < minutesUntil) {
-        minutesUntil = diff;
-        status = diff <= 60 ? "upcoming" : "later";
-        nextStart = new Date(now);
-        nextStart.setUTCHours(startHour, startMinute, 0, 0);
-        nextEnd = new Date(now);
-        nextEnd.setUTCHours(endHour, endMinute, 0, 0);
-      }
-    }
+  if (now >= event.startTime && now < event.endTime) {
+    status = "active";
+    minutesUntil = 0;
+  } else if (now < event.startTime) {
+    const diff = Math.floor((event.startTime - now) / 60000);
+    minutesUntil = diff;
+    status = diff <= 60 ? "upcoming" : "later";
+  } else {
+    status = "later";
+    minutesUntil = 9999;
   }
 
-  // Check for events that wrap to next day
-  if (minutesUntil === null && event.times.length > 0) {
-    const firstTime = event.times[0];
-    const [startHour, startMinute] = firstTime.start.split(":").map(Number);
-    const [endHour, endMinute] = firstTime.end.split(":").map(Number);
-    const startMinutes = startHour * 60 + startMinute;
-    minutesUntil = 24 * 60 - currentTimeMinutes + startMinutes;
-    nextStart = new Date(now);
-    nextStart.setDate(nextStart.getDate() + 1);
-    nextStart.setUTCHours(startHour, startMinute, 0, 0);
-    nextEnd = new Date(now);
-    nextEnd.setDate(nextEnd.getDate() + 1);
-    nextEnd.setUTCHours(endHour, endMinute, 0, 0);
-  }
-
-  return { ...event, status, nextStart, nextEnd, minutesUntil };
+  return { ...event, status, startDate, endDate, minutesUntil };
 }
 
 function formatTimeUntil(minutes: number | null): string {
@@ -81,9 +100,25 @@ function formatTimeUntil(minutes: number | null): string {
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 }
 
-function EventDetail({ event }: { event: EventWithStatus }) {
-  const timesList = event.times.map((t) => `| ${t.start} UTC | ${t.end} UTC |`).join("\n");
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
 
+function formatDateTime(date: Date): string {
+  return date.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function EventDetail({ event }: { event: EventWithStatus }) {
   const markdown = `
 # ${event.name}
 
@@ -91,21 +126,19 @@ function EventDetail({ event }: { event: EventWithStatus }) {
 
 **Map:** ${event.map}
 
-${event.description || ""}
-
 ---
 
-## Schedule (UTC)
+## Event Time
 
 | Start | End |
 |-------|-----|
-${timesList}
+| ${formatDateTime(event.startDate)} | ${formatDateTime(event.endDate)} |
 
 ---
 
-**Status:** ${event.status === "active" ? "ACTIVE NOW" : event.status === "upcoming" ? "Starting soon" : "Later today"}
+**Status:** ${event.status === "active" ? "ACTIVE NOW" : event.status === "upcoming" ? "Starting soon" : "Later"}
 
-${event.minutesUntil !== null && event.minutesUntil > 0 ? `**Next in:** ${formatTimeUntil(event.minutesUntil)}` : ""}
+${event.minutesUntil > 0 ? `**Starts in:** ${formatTimeUntil(event.minutesUntil)}` : ""}
 `;
 
   return (
@@ -126,9 +159,10 @@ ${event.minutesUntil !== null && event.minutesUntil > 0 ? `**Next in:** ${format
               }
             />
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Next In" text={formatTimeUntil(event.minutesUntil)} />
+          <Detail.Metadata.Label title="Starts In" text={formatTimeUntil(event.minutesUntil)} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Times Today" text={`${event.times.length} occurrence(s)`} />
+          <Detail.Metadata.Label title="Start" text={formatDateTime(event.startDate)} />
+          <Detail.Metadata.Label title="End" text={formatDateTime(event.endDate)} />
         </Detail.Metadata>
       }
       actions={
@@ -142,16 +176,26 @@ ${event.minutesUntil !== null && event.minutesUntil > 0 ? `**Next in:** ${format
 
 export default function EventTimers() {
   const [mapFilter, setMapFilter] = useState<string>("all");
+  const [tick, setTick] = useState(0);
 
   const { isLoading, data, revalidate } = useFetch<EventTimersResponse>(API.eventTimers, {
     keepPreviousData: true,
   });
 
-  const events = data?.data || [];
-  const maps = [...new Set(events.map((e) => e.map))].sort();
+  // Auto-refresh every 60 seconds to update event statuses
+  useEffect(() => {
+    const interval = setInterval(() => setTick((n) => n + 1), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const rawEvents = data?.data || [];
+  const events = useMemo(() => transformRawEvents(rawEvents), [rawEvents]);
+  const maps = [...new Set(rawEvents.map((e) => e.map))].sort();
 
   const eventsWithStatus = useMemo(() => {
+    const now = Date.now();
     return events
+      .filter((e) => e.endTime > now) // Filter out past events
       .map(getEventStatus)
       .filter((e) => mapFilter === "all" || e.map === mapFilter)
       .sort((a, b) => {
@@ -160,10 +204,10 @@ export default function EventTimers() {
         if (statusOrder[a.status] !== statusOrder[b.status]) {
           return statusOrder[a.status] - statusOrder[b.status];
         }
-        // Then by minutes until
-        return (a.minutesUntil || 9999) - (b.minutesUntil || 9999);
+        // Then by start time
+        return a.startTime - b.startTime;
       });
-  }, [events, mapFilter]);
+  }, [events, mapFilter, tick]);
 
   const activeEvents = eventsWithStatus.filter((e) => e.status === "active");
   const upcomingEvents = eventsWithStatus.filter((e) => e.status === "upcoming");
@@ -196,9 +240,9 @@ export default function EventTimers() {
     >
       {activeEvents.length > 0 && (
         <List.Section title="Active Now">
-          {activeEvents.map((event, idx) => (
+          {activeEvents.map((event) => (
             <List.Item
-              key={`${event.name}-${event.map}-${idx}`}
+              key={`${event.name}-${event.map}-${event.startTime}`}
               icon={{ source: event.icon, fallback: Icon.Clock }}
               title={event.name}
               subtitle={event.map}
@@ -221,13 +265,14 @@ export default function EventTimers() {
 
       {upcomingEvents.length > 0 && (
         <List.Section title="Starting Soon">
-          {upcomingEvents.map((event, idx) => (
+          {upcomingEvents.map((event) => (
             <List.Item
-              key={`${event.name}-${event.map}-${idx}`}
+              key={`${event.name}-${event.map}-${event.startTime}`}
               icon={{ source: event.icon, fallback: Icon.Clock }}
               title={event.name}
               subtitle={event.map}
               accessories={[
+                { text: formatTime(event.startDate) },
                 {
                   tag: {
                     value: formatTimeUntil(event.minutesUntil),
@@ -253,13 +298,13 @@ export default function EventTimers() {
 
       {laterEvents.length > 0 && (
         <List.Section title="Later">
-          {laterEvents.map((event, idx) => (
+          {laterEvents.map((event) => (
             <List.Item
-              key={`${event.name}-${event.map}-${idx}`}
+              key={`${event.name}-${event.map}-${event.startTime}`}
               icon={{ source: event.icon, fallback: Icon.Clock }}
               title={event.name}
               subtitle={event.map}
-              accessories={[{ text: formatTimeUntil(event.minutesUntil) }]}
+              accessories={[{ text: formatTime(event.startDate) }, { text: formatTimeUntil(event.minutesUntil) }]}
               actions={
                 <ActionPanel>
                   <Action.Push title="View Details" icon={Icon.Eye} target={<EventDetail event={event} />} />

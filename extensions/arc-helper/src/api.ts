@@ -50,19 +50,26 @@ export interface Arc {
   image: string;
 }
 
-export interface EventTime {
-  start: string;
-  end: string;
+export interface EventTimeSlot {
+  start: string; // "HH:mm" format
+  end: string; // "HH:mm" format
 }
 
-export interface EventTimer {
-  game: string;
+export interface EventTimerRaw {
   name: string;
   map: string;
   icon: string;
   description: string;
   days: string[];
-  times: EventTime[];
+  times: EventTimeSlot[];
+}
+
+export interface EventTimer {
+  name: string;
+  map: string;
+  icon: string;
+  startTime: number;
+  endTime: number;
 }
 
 export interface TraderItem {

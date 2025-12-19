@@ -1,8 +1,8 @@
-import { List, ActionPanel, Action } from "@raycast/api";
-import { Vault } from "../api/vault/vault.types";
+import { ObsidianVault } from "@/obsidian";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { ShowVaultInFinderAction } from "../utils/actions";
 
-export function VaultSelection(props: { vaults: Vault[]; target: (vault: Vault) => React.ReactNode }) {
+export function VaultSelection(props: { vaults: ObsidianVault[]; target: (vault: ObsidianVault) => React.ReactNode }) {
   const { vaults, target } = props;
   return (
     <List>

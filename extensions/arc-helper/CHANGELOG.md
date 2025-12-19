@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0] - 2025-12-16
+
+### Changed
+
+- Event Timers now auto-refresh every 60 seconds to update event statuses
+- Events properly transition from "upcoming" to "active" without manual refresh
+
+### Fixed
+
+- Fixed Event Timers showing no results due to API response format mismatch
+- Added proper parsing of recurring daily time slots into actual timestamped events
+
 ## [1.0.0] - 2025-12-04
 
 ### Added

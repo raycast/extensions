@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "JonathanRReed",
   "license": "MIT",
-  "categories": ["Fun"],
+  "categories": [
+    "Fun"
+  ],
   "commands": [
     {
       "name": "index",
@@ -17,7 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.3",
+    "@raycast/api": "^1.103.10",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
@@ -34,5 +36,8 @@
     "fix-lint": "npx @raycast/api@latest lint --fix",
     "lint": "npx @raycast/api@latest lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
