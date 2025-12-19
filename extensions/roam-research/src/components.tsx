@@ -307,26 +307,30 @@ export const TodoCaptureDetail = ({ graphConfig }: { graphConfig: GraphConfig })
                 title: "uploading...",
                 style: Toast.Style.Animated,
               });
-              
+
               // Create template with due date if provided
               let finalTemplate = values.template;
               if (dueDate) {
                 // Format date as "December 19th, 2025" style
-                const formattedDate = dueDate.toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                }).replace(/(\d+),/, (match, day) => {
-                  const num = parseInt(day);
-                  const suffix = ['th', 'st', 'nd', 'rd'][num % 100 > 10 && num % 100 < 20 ? 0 : num % 10 > 3 ? 0 : num % 10];
-                  return `${day}${suffix},`;
-                });
-                
+                const formattedDate = dueDate
+                  .toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                  .replace(/(\d+),/, (match, day) => {
+                    const num = parseInt(day);
+                    const suffix = ["th", "st", "nd", "rd"][
+                      num % 100 > 10 && num % 100 < 20 ? 0 : num % 10 > 3 ? 0 : num % 10
+                    ];
+                    return `${day}${suffix},`;
+                  });
+
                 // Add due date as indented child block to template using custom keyword
                 const dueDateKeyword = preferences.todoDueDateKeyword || "due";
                 finalTemplate = `${values.template}\n - ${dueDateKeyword}:: [[${formattedDate}]]`;
               }
-              
+
               // values.graphPageDropdown="" means that we want to send to Daily Notes Page
               const isAppendToDailyNotesPage = !values.graphPageDropdown;
               const addTagToTodaysDnpOnTopBlock = !isAppendToDailyNotesPage && tagTodayDnp;
@@ -382,10 +386,10 @@ export const TodoCaptureDetail = ({ graphConfig }: { graphConfig: GraphConfig })
       }
     >
       <Form.TextArea id="content" title="Content" />
-      <Form.DatePicker 
-        id="dueDate" 
-        title="Due Date (Optional)" 
-        value={dueDate} 
+      <Form.DatePicker
+        id="dueDate"
+        title="Due Date (Optional)"
+        value={dueDate}
         onChange={setDueDate}
         type={Form.DatePicker.Type.Date}
       />
