@@ -1,6 +1,6 @@
 # Fastly Changelog
 
-## [Windows Support + Validate Forms] - {PR_MERGE_DATE}
+## [Windows Support + Validate Forms] - 2025-12-19
 
 - Added Windows support
 - Updated `Keyboard` shortcuts to be cross-platform
