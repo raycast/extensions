@@ -1,0 +1,11 @@
+# dependencies
+node_modules/
+
+# Raycast build output (for local import)
+.raycast-build/
+
+# misc
+.DS_Store
+
+# optional local env
+.env
