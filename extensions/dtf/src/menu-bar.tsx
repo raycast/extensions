@@ -11,7 +11,6 @@ import {
   LaunchType,
   Image,
   Keyboard,
-  showFailureToast,
 } from "@raycast/api";
 import {
   getPopularPosts,
@@ -25,6 +24,7 @@ import {
 } from "./api/client";
 import { DisplayPost, TopicSubsite, BlogData } from "./api/types";
 import { formatRelativeDateShort, formatNumber, truncateText } from "./utils/formatters";
+import { showFailureToast } from "@raycast/utils";
 
 // Cache for storing posts between refreshes
 const cache = new Cache();
