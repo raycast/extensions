@@ -2,18 +2,9 @@ import { getPreferenceValues } from "@raycast/api";
 import { ISearchResponse, IStatusResult } from "./types";
 import { DOMAIN_RESEARCH_API_URL } from "./constants";
 
-interface Preferences {
-  rapidApiKey: string;
-}
-
 const makeRequest = async <T>(endpoint: string) => {
-  const { rapidApiKey } = getPreferenceValues<Preferences>();
+  const { rapidApiKey } = getPreferenceValues<Preferences.Domainr>();
   const fastlyApiKey = rapidApiKey;
-  if (!fastlyApiKey) {
-    throw new Error("Fastly API Key is not configured. Please set it in the extension preferences.", {
-      cause: 401,
-    });
-  }
   const url = DOMAIN_RESEARCH_API_URL + endpoint;
   const response = await fetch(url, {
     headers: {

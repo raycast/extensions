@@ -1,6 +1,6 @@
 # Domainr Changelog
 
-## [Updated README and tweaked UI] - {PR_MERGE_DATE}
+## [Updated README and Tweaked UI] - {PR_MERGE_DATE}
 
 - Update README to require enabling Fastly Domain Research API
 - Added debouncing to search input to reduce API requests

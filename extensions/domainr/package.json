@@ -14,7 +14,7 @@
     {
       "name": "domainr",
       "title": "Search Domain",
-      "subtitle": "Fastly Domain Search",
+      "subtitle": "Domainr (Fastly Domain Search)",
       "description": "Search domains availability with Domainr.",
       "mode": "view",
       "preferences": [
