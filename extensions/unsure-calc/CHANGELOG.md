@@ -1,3 +1,3 @@
-# unSure calc Changelog
+# Unsure calc Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

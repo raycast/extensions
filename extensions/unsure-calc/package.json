@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unsure-calc",
-  "title": "UnSureCalc",
+  "title": "Unsure Calc",
   "description": "Lightweight probabilistic calculator that lets you type ranges (with `~`) and arithmetic to see exact bounds plus simulated outcomes and a text histogram.",
   "icon": "extension-icon.png",
   "author": "wojtek_nowak",
@@ -17,7 +17,41 @@
       "title": "Calc",
       "subtitle": "ranges (with `~`) and arithmetic calculation",
       "description": "Lightweight probabilistic calculator",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "samples",
+          "type": "textfield",
+          "required": false,
+          "title": "Number of Samples",
+          "description": "Number of Monte Carlo samples for simulation",
+          "default": "10000"
+        },
+        {
+          "name": "histogramBins",
+          "type": "textfield",
+          "required": false,
+          "title": "Histogram Bins",
+          "description": "Number of bins in the histogram",
+          "default": "20"
+        },
+        {
+          "name": "histogramWidth",
+          "type": "textfield",
+          "required": false,
+          "title": "Histogram Width",
+          "description": "Maximum width of histogram bars",
+          "default": "40"
+        },
+        {
+          "name": "barChar",
+          "type": "textfield",
+          "required": false,
+          "title": "Bar Character",
+          "description": "Character used for histogram bars",
+          "default": "█"
+        }
+      ]
     }
   ],
   "dependencies": {

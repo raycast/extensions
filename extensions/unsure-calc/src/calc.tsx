@@ -55,13 +55,6 @@ interface CommandProps {
   };
 }
 
-interface Preferences {
-  samples: number;
-  histogramBins: number;
-  histogramWidth: number;
-  barChar: string;
-}
-
 const introMarkdown = `# UnSure Calculator
 
 Use '~' to enter ranges. Examples:
