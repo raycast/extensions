@@ -29,6 +29,14 @@ A Raycast extension for managing your [Kaneo](https://kaneo.app/) projects and t
 2. Search for "Kaneo"
 3. Click Install
 
+### From Source
+
+1. Clone the repository `git clone https://github.com/MonsPropre/kaneo-for-raycast.git`
+2. Go to the project directory `cd kaneo-for-raycast`
+3. Install dependencies `npm install`
+4. Start the extension `npm run dev`
+5. Play with the extension 😊
+
 ## Configuration
 
 Before using the extension, you need to configure the following preferences:
