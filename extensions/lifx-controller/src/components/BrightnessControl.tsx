@@ -54,7 +54,7 @@ export function BrightnessControl({ light, client, onComplete }: Props) {
             source: getIcon(value),
             tintColor: value === light.brightness ? Color.Green : Color.SecondaryText,
           }}
-          accessories={[value === light.brightness ? { tag: { value: "Current", color: Color.Green } } : {}]}
+          accessories={value === light.brightness ? [{ tag: { value: "Current", color: Color.Green } }] : []}
           actions={
             <ActionPanel>
               <Action title={`Set to ${value}%`} icon={Icon.Checkmark} onAction={() => setBrightness(value)} />

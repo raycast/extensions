@@ -66,17 +66,21 @@ All actions have keyboard shortcuts for maximum efficiency:
 
 ## Installation
 
+### From Raycast Store (Recommended)
+1. Open Raycast
+2. Search for "LIFX" in the Extension Store
+3. Click "Install"
+
 ### Requirements
 - [Raycast](https://www.raycast.com/) installed
 - LIFX smart lights on your network
-- Node.js 18+ (for development)
 
-### From Source
+### From Source (Development)
 
-1. Clone this repository:
+1. Clone the Raycast extensions repository:
 ```bash
-git clone https://github.com/luinbytes/lifx.git
-cd lifx
+git clone https://github.com/raycast/extensions.git
+cd extensions/extensions/lifx-controller
 ```
 
 2. Install dependencies:
@@ -84,12 +88,7 @@ cd lifx
 npm install
 ```
 
-3. Build the extension:
-```bash
-npm run build
-```
-
-4. Import into Raycast:
+3. Build and import into Raycast:
 ```bash
 npm run dev
 ```

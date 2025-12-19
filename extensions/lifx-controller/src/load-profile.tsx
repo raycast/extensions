@@ -92,17 +92,8 @@ export default function Command() {
       {profiles.length === 0 ? (
         <List.EmptyView
           title="No Profiles Saved"
-          description="Save your current light setup as a profile to load it later"
+          description="Use the 'Save Profile' command from the LIFX Dashboard to save your current light setup"
           icon={Icon.SaveDocument}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Create New Profile"
-                icon={Icon.Plus}
-                target={<List.EmptyView title="Use 'Save Profile' command" icon={Icon.SaveDocument} />}
-              />
-            </ActionPanel>
-          }
         />
       ) : (
         profiles.map((profile: LightProfile) => {
