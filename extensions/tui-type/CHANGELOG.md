@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial release] - 2025-12-19
+## [Initial release] - {PR_MERGE_DATE}
 
 - Time mode with multiple durations (15s, 30s, 60s, 120s)
 - Words mode with configurable word counts (10, 25, 50, 100)

@@ -56,7 +56,12 @@ export const generateCanvasSvg = (
       } else if (isActiveWord) {
         const inputLen = currentInput.length;
         const targetLen = targetWord.length;
-        const maxLen = targetLen; // Only render up to the target word length
+        // INTENTIONAL DESIGN: Only render characters up to target word length.
+        // This prevents displaying extra characters typed beyond the word boundary,
+        // matching Monkeytype's behavior where typos are counted but not shown.
+        // Users can still type extra characters (tracked for accuracy calculation),
+        // but the visual feedback stops at the word boundary to maintain clean UX.
+        const maxLen = targetLen;
         let localX = xPos;
         for (let c = 0; c < maxLen; c++) {
           const targetChar = targetWord[c];
