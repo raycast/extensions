@@ -186,19 +186,6 @@ export default function PipedriveSearch() {
               return (
                 <>
                   <List.Item
-                    title={`💰   Create deal: ${titleCased}`}
-                    subtitle="Create a new deal in Pipedrive"
-                    actions={
-                      <ActionPanel>
-                        <Action.Push
-                          title="Create Deal"
-                          target={<AddDeal prefillTitle={titleCased} />}
-                          icon={emojiMap["deal"]}
-                        />
-                      </ActionPanel>
-                    }
-                  />
-                  <List.Item
                     title={`🙎   Create contact: ${titleCased}`}
                     subtitle="Create a new contact in Pipedrive"
                     actions={
@@ -216,6 +203,19 @@ export default function PipedriveSearch() {
                           title="Add Organization"
                           target={<AddOrganization prefillName={titleCased} />}
                           icon="🏢"
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                  <List.Item
+                    title={`💰   Create deal: ${titleCased}`}
+                    subtitle="Create a new deal in Pipedrive"
+                    actions={
+                      <ActionPanel>
+                        <Action.Push
+                          title="Create Deal"
+                          target={<AddDeal prefillTitle={titleCased} />}
+                          icon={emojiMap["deal"]}
                         />
                       </ActionPanel>
                     }
