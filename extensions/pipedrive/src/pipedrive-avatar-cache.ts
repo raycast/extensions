@@ -5,10 +5,7 @@ import crypto from "crypto";
 
 import { redactPipedriveSecrets, validatePipedriveDomain } from "./pipedrive-security";
 
-type Preferences = {
-  domain: string;
-  apiToken: string;
-};
+type AvatarPreferences = Pick<Preferences, "domain" | "apiToken">;
 
 type CachedAvatarEntry = {
   pictureKey: string;
@@ -51,7 +48,7 @@ function contentTypeToExt(contentType: string): string {
 }
 
 export async function ensurePersonAvatarCached(
-  preferences: Preferences,
+  preferences: AvatarPreferences,
   personId: string,
   input: { pictureKey?: string | null; pictureUrl?: string | null; signal?: AbortSignal },
 ): Promise<string | null> {

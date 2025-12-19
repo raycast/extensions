@@ -17,12 +17,6 @@ import AddOrganization from "./add-organization";
 import { buildPipedriveApiUrl, buildPipedriveWebUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
 import { redactPipedriveSecrets } from "./pipedrive-security";
 
-interface Preferences {
-  domain: string;
-  apiToken: string;
-  limit: string;
-}
-
 interface ItemSearchResponse {
   data?: {
     items?: Array<{

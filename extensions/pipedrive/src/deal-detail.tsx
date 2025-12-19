@@ -5,12 +5,6 @@ import { useMemo, useRef } from "react";
 import AddDeal from "./add-deal";
 import { buildPipedriveApiUrl, buildPipedriveWebUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
 
-type Preferences = {
-  domain: string;
-  apiToken: string;
-  limit: string;
-};
-
 type DealResponse = {
   data?: {
     id: number;

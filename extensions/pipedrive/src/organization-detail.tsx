@@ -5,12 +5,6 @@ import { useMemo, useRef } from "react";
 import AddOrganization from "./add-organization";
 import { buildPipedriveApiUrl, buildPipedriveWebUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
 
-type Preferences = {
-  domain: string;
-  apiToken: string;
-  limit: string;
-};
-
 type OrganizationResponse = {
   data?: {
     id: number;

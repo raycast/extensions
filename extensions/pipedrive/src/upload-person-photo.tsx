@@ -5,12 +5,6 @@ import { stat } from "fs/promises";
 import { buildPipedriveApiUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
 import { readFileAsBuffer } from "./pipedrive-avatar-cache";
 
-type Preferences = {
-  domain: string;
-  apiToken: string;
-  limit: string;
-};
-
 export default function UploadPersonPhoto({ personId, onUploaded }: { personId: string; onUploaded?: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();

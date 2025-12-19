@@ -19,12 +19,6 @@ import OrganizationDetail from "./organization-detail";
 import { buildPipedriveApiUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
 import { validatePipedriveDomain } from "./pipedrive-security";
 
-interface Preferences {
-  domain: string;
-  apiToken: string;
-  limit: string;
-}
-
 export default function PipedriveSearch() {
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState<string>("");

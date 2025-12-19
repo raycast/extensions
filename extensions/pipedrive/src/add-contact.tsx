@@ -16,12 +16,6 @@ import AddOrganization from "./add-organization";
 import { buildPipedriveApiUrl, buildPipedriveWebUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
 import { redactPipedriveSecrets } from "./pipedrive-security";
 
-interface Preferences {
-  domain: string;
-  apiToken: string;
-  limit: string;
-}
-
 interface Organization {
   id: number;
   name: string;
@@ -398,7 +392,13 @@ export default function AddContact({
 
       const orgId = (values.organizationId || "").trim();
       if (orgId) {
-        body.org_id = Number.parseInt(orgId, 10);
+        const parsedOrgId = Number.parseInt(orgId, 10);
+        if (Number.isNaN(parsedOrgId)) {
+          await toast.hide();
+          await showToast({ style: Toast.Style.Failure, title: "Selected organization is invalid" });
+          return;
+        }
+        body.org_id = parsedOrgId;
       }
 
       const result = await fetchPipedriveJson<{ data?: { id: number; name: string } }>(preferences, url, {
