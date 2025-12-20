@@ -218,7 +218,10 @@ function SetBrightnessAction(props: { group: Group; groupedLight: GroupedLight; 
       title="Set Brightness"
       // This should be 0-100, but the API returns 0-254
       icon={getProgressIcon((props.groupedLight.dimming?.brightness ?? 0) / 254, Color.PrimaryText)}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "b" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "b" },
+      }}
     >
       {BRIGHTNESSES.map((brightness) => (
         <Action key={brightness} title={`${brightness}% Brightness`} onAction={() => props.onSet(brightness)} />
@@ -238,7 +241,10 @@ function IncreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
   return (
     <Action
       title="Increase Brightness"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowUp" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
+      }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
@@ -256,7 +262,10 @@ function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
   return (
     <Action
       title="Decrease Brightness"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowDown" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
+      }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />

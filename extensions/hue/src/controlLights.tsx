@@ -177,7 +177,10 @@ function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) 
         (props.light.dimming?.brightness ?? 0) / 100,
         environment.appearance === "light" ? "#000" : "#fff",
       )}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "b" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "b" },
+      }}
     >
       {BRIGHTNESSES.map((brightness) => (
         <Action key={brightness} title={`${brightness}% Brightness`} onAction={() => props.onSet(brightness)} />
@@ -194,7 +197,10 @@ function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void 
   return (
     <Action
       title="Increase Brightness"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowUp" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
+      }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
@@ -209,7 +215,10 @@ function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void 
   return (
     <Action
       title="Decrease Brightness"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowDown" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
+      }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
@@ -218,7 +227,14 @@ function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void 
 
 function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void }) {
   return (
-    <ActionPanel.Submenu title="Set Color" icon={Icon.Swatch} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}>
+    <ActionPanel.Submenu
+      title="Set Color"
+      icon={Icon.Swatch}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "c" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+      }}
+    >
       {COLORS.map((color) => (
         <Action key={color.name} title={color.name} icon={getIconForColor(color)} onAction={() => props.onSet(color)} />
       ))}
@@ -234,7 +250,10 @@ function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () =
   return (
     <Action
       title="Increase Color Temperature"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowRight" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowRight" },
+      }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
@@ -249,7 +268,10 @@ function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () =
   return (
     <Action
       title="Decrease Color Temperature"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowLeft" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowLeft" },
+      }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />

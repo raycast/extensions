@@ -3,6 +3,7 @@
   "name": "hue",
   "title": "Hue",
   "description": "Quickly and easily control Philips Hue lights",
+  "platforms": ["macOS", "Windows"],
   "icon": "command-icon.png",
   "author": "pindab0ter",
   "contributors": [
