@@ -143,7 +143,7 @@ function DomainrSearch() {
               icon={Icon.Clipboard}
               content={`https://${result.domain}`}
               title="Copy URL to Clipboard"
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
             <Action.Paste
               icon={Icon.Clipboard}
