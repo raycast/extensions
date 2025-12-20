@@ -74,8 +74,7 @@ export default function MyInboxes() {
 function AddMailbox() {
   const { isLoading, value: inboxes = [], setValue: setInboxes } = useInboxes();
   const { handleSubmit, itemProps, values } = useForm<{ name: string }>({
-    async onSubmit(values) {
-      const newInbox = `${teamId}.${values.name}@zyntramail.com`;
+    async onSubmit() {
       const toast = await showToast(Toast.Style.Animated, "Adding", newInbox);
       await setInboxes([...inboxes, newInbox]);
       toast.style = Toast.Style.Success;
@@ -85,10 +84,12 @@ function AddMailbox() {
     validation: {
       name(value) {
         if (!value?.trim()) return "The item is required";
-        if (inboxes.includes(value)) return "Mailbox already exists";
+        if (inboxes.includes(newInbox)) return "Mailbox already exists";
       },
     },
   });
+  const newInbox = `${teamId}.${values.name}@zyntramail.com`;
+
   return (
     <Form
       navigationTitle={`My Inboxes > Add`}
@@ -100,7 +101,7 @@ function AddMailbox() {
       }
     >
       <Form.TextField title="Name" placeholder="Mailbox name" {...itemProps.name} />
-      <Form.Description text={`${teamId}.${values.name || "<mailbox-name>"}@zyntramail.com`} />
+      <Form.Description text={newInbox} />
     </Form>
   );
 }
