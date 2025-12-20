@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { api } from "node-app-store-connect-api";
-import { App, AppStoreVersion, ProcessedApp, Preferences, ApiResponse } from "../types";
+import { App, AppStoreVersion, ProcessedApp, ApiResponse } from "../types";
 
 type ApiClient = Awaited<ReturnType<typeof api>>;
 
@@ -40,7 +40,7 @@ async function getApiClient(): Promise<ApiClient> {
     return cachedApi;
   }
 
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const privateKey = cleanPrivateKey(preferences.privateKey);
 
   try {

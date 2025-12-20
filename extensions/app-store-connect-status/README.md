@@ -2,7 +2,7 @@
 
 View the status of your apps in App Store Connect directly from Raycast.
 
-![Extension Screenshot](metadata/screenshot.png)
+![Extension Screenshot](metadata/image1.png)
 
 ## Features
 

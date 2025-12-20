@@ -94,9 +94,3 @@ export interface ApiResponse {
   };
 }
 
-// Preferences
-export interface Preferences {
-  issuerId: string;
-  apiKey: string;
-  privateKey: string;
-}
