@@ -45,33 +45,33 @@ type StatusResult = {
 };
 export type IStatusResult = StatusResult;
 
+/**
+ * Simplified domain availability status, inspired by the Domainr Mac app.
+ * - Available: Can be registered directly
+ * - Maybe: Registered but potentially obtainable (aftermarket, expiring, etc.)
+ * - Unavailable: Cannot be obtained
+ */
 export enum DomainStatus {
-  Unknown = "Unknown",
   Available = "Available",
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  Pending = "Available",
-  Disallowed = "Disallowed",
-  Invalid = "Invalid",
-  Reserved = "Reserved",
-  Taken = "Taken",
-  Aftermarket = "Aftermarket",
+  Maybe = "Maybe",
+  Unavailable = "Unavailable",
 }
 
 export const getStatusIcon = (status: DomainStatus): Image.ImageLike => {
   switch (status) {
     case DomainStatus.Available:
       return {
-        source: Icon.Checkmark,
+        source: Icon.CheckCircle,
         tintColor: Color.Green,
       };
-    case DomainStatus.Aftermarket:
+    case DomainStatus.Maybe:
       return {
-        source: Icon.QuestionMark,
+        source: Icon.QuestionMarkCircle,
         tintColor: Color.Yellow,
       };
-    default:
+    case DomainStatus.Unavailable:
       return {
-        source: Icon.XMarkCircle,
+        source: Icon.Xmark,
         tintColor: Color.Red,
       };
   }

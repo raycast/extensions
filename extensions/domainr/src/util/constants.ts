@@ -6,47 +6,100 @@ export const DOMAINR_URL = "https://domainr.com";
 export const QUERY_MIN_LENGTH: number = 1 as const;
 export const SEARCH_DEBOUNCE_MS: number = 300 as const;
 
+/**
+ * Maps API status values to simplified availability categories.
+ * Inspired by the Domainr Mac app's three-state model:
+ * - Available: Can register directly
+ * - Maybe: Registered but potentially obtainable (aftermarket, expiring)
+ * - Unavailable: Cannot be obtained
+ */
 export const STATUS_MAPPING: Record<StatusValue, DomainStatus> = {
-  unknown: DomainStatus.Unknown,
+  // Available - can register directly
   undelegated: DomainStatus.Available,
   inactive: DomainStatus.Available,
-  pending: DomainStatus.Pending,
-  claimed: DomainStatus.Taken,
-  reserved: DomainStatus.Reserved,
-  disallowed: DomainStatus.Disallowed,
-  dpml: DomainStatus.Reserved,
-  invalid: DomainStatus.Invalid,
-  active: DomainStatus.Aftermarket,
-  parked: DomainStatus.Aftermarket,
-  marketed: DomainStatus.Aftermarket,
-  expiring: DomainStatus.Taken,
+  pending: DomainStatus.Available,
   priced: DomainStatus.Available,
-  transferable: DomainStatus.Aftermarket,
   premium: DomainStatus.Available,
-  suffix: DomainStatus.Disallowed,
-  tld: DomainStatus.Disallowed,
-  deleting: DomainStatus.Disallowed,
-  zone: DomainStatus.Disallowed,
+
+  // Maybe - registered but potentially obtainable
+  parked: DomainStatus.Maybe,
+  marketed: DomainStatus.Maybe,
+  transferable: DomainStatus.Maybe,
+  expiring: DomainStatus.Maybe,
+  deleting: DomainStatus.Maybe,
+
+  // Unavailable - cannot be obtained
+  active: DomainStatus.Unavailable,
+  unknown: DomainStatus.Unavailable,
+  claimed: DomainStatus.Unavailable,
+  reserved: DomainStatus.Unavailable,
+  disallowed: DomainStatus.Unavailable,
+  dpml: DomainStatus.Unavailable,
+  invalid: DomainStatus.Unavailable,
+  suffix: DomainStatus.Unavailable,
+  tld: DomainStatus.Unavailable,
+  zone: DomainStatus.Unavailable,
 } as const;
 
+/**
+ * User-friendly descriptions for each API status value.
+ * Used as subtitles in the "All" view for a clean UX.
+ */
 export const STATUS_DESCRIPTIONS: Record<StatusValue, string> = {
-  unknown: "Unknown",
+  // Available
   undelegated: "Available",
-  inactive: "Inactive",
+  inactive: "Available",
   pending: "Coming soon",
-  disallowed: "Not allowed",
-  claimed: "Taken",
-  reserved: "Reserved",
-  dpml: "Trademark protected",
-  invalid: "Invalid",
-  active: "Registered",
-  parked: "Parked",
-  marketed: "For sale",
-  expiring: "Expiring",
-  deleting: "Being deleted",
   priced: "For sale",
-  transferable: "For sale",
   premium: "Premium",
+
+  // Maybe
+  parked: "Maybe",
+  marketed: "For sale",
+  transferable: "For sale",
+  expiring: "Expiring",
+  deleting: "Expiring",
+
+  // Unavailable
+  active: "Unavailable",
+  unknown: "Unavailable",
+  claimed: "Unavailable",
+  reserved: "Reserved",
+  disallowed: "Unavailable",
+  dpml: "Reserved",
+  invalid: "Unavailable",
+  suffix: "Unavailable",
+  tld: "Unavailable",
+  zone: "Unavailable",
+} as const;
+
+/**
+ * Detailed descriptions for each API status value.
+ * Used as subtitles in filtered views to provide more context.
+ */
+export const STATUS_DETAILS: Record<StatusValue, string> = {
+  // Available
+  undelegated: "Not in DNS",
+  inactive: "Available for registration",
+  pending: "TLD coming soon",
+  priced: "Premium pricing",
+  premium: "Premium domain",
+
+  // Maybe
+  parked: "Parked domain",
+  marketed: "Listed for sale",
+  transferable: "Fast transfer available",
+  expiring: "Expiring soon",
+  deleting: "Pending deletion",
+
+  // Unavailable
+  active: "Taken",
+  unknown: "Status unknown",
+  claimed: "Taken",
+  reserved: "Reserved by registry",
+  disallowed: "Not allowed",
+  dpml: "Trademark protected",
+  invalid: "Invalid domain",
   suffix: "Public suffix",
   tld: "Top-level domain",
   zone: "Domain extension",
