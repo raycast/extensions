@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, open } from "@raycast/api";
 import { File } from "../api/getFiles";
 import { downloadFile, getFileIconLink, getMimeTypeLabel, humanFileSize } from "../helpers/files";
 import { formatDateTime, formatDuration } from "../helpers/formatters";
@@ -6,9 +6,10 @@ import { formatDateTime, formatDuration } from "../helpers/formatters";
 type FileListItemProps = {
   file: File;
   email?: string;
+  preferredBrowser?: string;
 };
 
-export default function FileListItem({ file, email }: FileListItemProps) {
+export default function FileListItem({ file, email, preferredBrowser }: FileListItemProps) {
   const createdTime = file.createdTime ? new Date(file.createdTime) : null;
   const modifiedByMeTime = file.modifiedByMeTime ? new Date(file.modifiedByMeTime) : null;
   const viewedByMeTime = file.viewedByMeTime ? new Date(file.viewedByMeTime) : null;
@@ -141,10 +142,15 @@ export default function FileListItem({ file, email }: FileListItemProps) {
       detail={detail}
       actions={
         <ActionPanel title={file.name}>
-          <Action.OpenInBrowser
-            url={`${file.webViewLink}${
-              email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""
-            }`}
+          <Action
+            title="Open in Browser"
+            icon={Icon.Globe}
+            onAction={() =>
+              open(
+                `${file.webViewLink}${email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""}`,
+                preferredBrowser || undefined,
+              )
+            }
           />
           {file.parents && file.parents.length > 0 && (
             <Action.OpenInBrowser

@@ -1,6 +1,6 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List, open, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { getFiles, QueryTypes, ScopeTypes } from "./api/getFiles";
 import FileListItem from "./components/FileListItem";
@@ -15,12 +15,21 @@ function getSectionTitle(queryType: QueryTypes): string {
   return "Recently Used";
 }
 
+interface Preferences {
+  preferredBrowser: string;
+}
+
 function SearchGoogleDriveFiles() {
   const [query, setQuery] = useState("");
   const [queryType, setQueryType] = useCachedState<QueryTypes>("query type", QueryTypes.fileName);
   const [scopeType, setScopeType] = useCachedState<ScopeTypes>("scope type", ScopeTypes.allDrives);
 
-  const email = getUserEmail();
+  const { preferredBrowser } = getPreferenceValues<Preferences>();
+
+  const [email, setEmail] = useState<string>();
+  useEffect(() => {
+    setEmail(getUserEmail());
+  }, []);
 
   const { data, isLoading } = useCachedPromise(
     async (queryType: QueryTypes, scopeType: ScopeTypes, query: string) =>
@@ -31,7 +40,7 @@ function SearchGoogleDriveFiles() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || !email}
       isShowingDetail={true}
       searchBarPlaceholder="Search in Drive"
       searchBarAccessory={
@@ -64,15 +73,19 @@ function SearchGoogleDriveFiles() {
         description="Try adjusting your search or filter"
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open Google Drive" icon="google-drive.png" url="https://drive.google.com" />
+            <Action
+              title="Open Google Drive"
+              icon="google-drive.png"
+              onAction={() => open("https://drive.google.com", preferredBrowser || undefined)}
+            />
           </ActionPanel>
         }
       />
 
-      {data?.files && data.files.length > 0 && (
+      {data?.files && data.files.length > 0 && email && (
         <List.Section title={getSectionTitle(queryType)} subtitle={`${data.files.length}`}>
           {data.files.map((file) => (
-            <FileListItem file={file} key={file.id} email={email} />
+            <FileListItem file={file} key={file.id} email={email} preferredBrowser={preferredBrowser} />
           ))}
         </List.Section>
       )}

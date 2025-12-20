@@ -18,7 +18,8 @@
     "jbjanot",
     "ridemountainpig",
     "ViGeng",
-    "xilopaint"
+    "xilopaint",
+    "faridrashidi"
   ],
   "categories": [
     "Productivity"
@@ -32,6 +33,44 @@
       "default": false,
       "description": "This may slow down your search results.",
       "label": "Display file path in search results"
+    },
+    {
+      "name": "preferredBrowser",
+      "type": "dropdown",
+      "required": false,
+      "title": "Preferred Browser",
+      "description": "Select the browser to open Google Drive files in. Note: Login will always use the default browser.",
+      "default": "",
+      "data": [
+        {
+          "title": "Default",
+          "value": ""
+        },
+        {
+          "title": "Google Chrome",
+          "value": "Google Chrome"
+        },
+        {
+          "title": "Safari",
+          "value": "Safari"
+        },
+        {
+          "title": "Firefox",
+          "value": "Firefox"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "Microsoft Edge"
+        },
+        {
+          "title": "Arc",
+          "value": "Arc"
+        },
+        {
+          "title": "Brave Browser",
+          "value": "Brave Browser"
+        }
+      ]
     }
   ],
   "commands": [
