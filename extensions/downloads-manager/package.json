@@ -171,7 +171,7 @@
     {
       "name": "get-latest-download",
       "title": "Get Latest Download",
-      "description": "Gets the last download from the conigured Downloads folder"
+      "description": "Gets the last download from the configured Downloads folder"
     },
     {
       "name": "copy-latest-download",

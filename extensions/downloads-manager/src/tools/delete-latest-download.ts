@@ -10,7 +10,7 @@ type Input = {
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   return {
-    message: `Are you sure you want to greet ${input.latestDownloadPath}?`,
+    message: `Are you sure you want to delete ${input.latestDownloadPath}?`,
     style: Action.Style.Destructive,
   };
 };
