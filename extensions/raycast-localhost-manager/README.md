@@ -73,9 +73,6 @@ For each listening port, you can:
 - **Start Container** - Start a stopped container
 - **Stop Container** - Stop a running container
 - **Restart Container** - Restart a container
-- **Open Shell** - Open an interactive shell in the container
-- **View Logs** - View container logs
-- **Copy Container ID** - Copy the full container ID
 
 ### ⌨️ **Keyboard Shortcuts**
 

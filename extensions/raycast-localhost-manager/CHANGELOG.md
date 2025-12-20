@@ -1,6 +1,6 @@
 # Localhost Manager Changelog
 
-## [Initial Version] - 2025-09-02
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 - View all TCP and UDP listening ports on macOS
@@ -17,7 +17,7 @@
   - List running containers
   - Display port mappings
   - Show CPU and memory usage
-  - Container management actions (start, stop, restart, shell, logs)
+  - Container management actions (start, stop, restart)
 - Process management actions:
   - Open localhost URL in browser
   - Copy host:port, PID, or command to clipboard
