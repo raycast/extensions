@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { ISearchResponse, IStatusResult } from "./types";
+import { ISearchResponse, IStatusResult, ErrorResult } from "./types";
 import { DOMAIN_RESEARCH_API_URL } from "./constants";
 
 const makeRequest = async <T>(endpoint: string) => {
@@ -19,11 +19,8 @@ const makeRequest = async <T>(endpoint: string) => {
       });
     }
 
-    const errorMessage =
-      (result?.msg as string | undefined) ||
-      (result?.error as string | undefined) ||
-      (result?.message as string | undefined) ||
-      "Unknown error occurred";
+    const errorResult = result as ErrorResult;
+    const errorMessage = errorResult.msg || errorResult.error || errorResult.message || "Unknown error occurred";
 
     throw new Error(errorMessage, {
       cause: response.status,

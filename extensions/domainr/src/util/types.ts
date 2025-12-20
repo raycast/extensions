@@ -1,5 +1,12 @@
 import { Color, Icon, Image } from "@raycast/api";
 
+// API Error Response
+export type ErrorResult = {
+  msg?: string;
+  error?: string;
+  message?: string;
+};
+
 // Search
 type SearchResult = {
   domain: string;
