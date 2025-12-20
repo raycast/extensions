@@ -90,7 +90,8 @@ function AddMailbox() {
     },
   });
   return (
-    <Form navigationTitle={`My Inboxes > Add`}
+    <Form
+      navigationTitle={`My Inboxes > Add`}
       isLoading={isLoading}
       actions={
         <ActionPanel>
