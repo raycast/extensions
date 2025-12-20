@@ -5,10 +5,6 @@ import { withGoogleAuth } from "./components/withGoogleAuth";
 import { createDocFromUrl } from "./helpers/docs";
 import { getFileIconLink } from "./helpers/files";
 
-interface Preferences {
-  preferredBrowser: string;
-}
-
 function StarredFiles() {
   const { preferredBrowser } = getPreferenceValues<Preferences>();
   const { data, isLoading } = useCachedPromise(async () => {

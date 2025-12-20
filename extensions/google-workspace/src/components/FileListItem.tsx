@@ -153,12 +153,15 @@ export default function FileListItem({ file, email, preferredBrowser }: FileList
             }
           />
           {file.parents && file.parents.length > 0 && (
-            <Action.OpenInBrowser
+            <Action
               title="Reveal in Google Drive"
+              icon={Icon.Globe}
               // As of September 2020, a file can have exactly one parent folder
               // It's safe to assume the corresponding folder will be the first one
               // https://developers.google.com/drive/api/guides/ref-single-parent
-              url={`https://drive.google.com/drive/folders/${file.parents[0]}`}
+              onAction={() =>
+                open(`https://drive.google.com/drive/folders/${file.parents![0]}`, preferredBrowser || undefined)
+              }
             />
           )}
           <Action.OpenWith

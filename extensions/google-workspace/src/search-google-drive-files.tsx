@@ -15,10 +15,6 @@ function getSectionTitle(queryType: QueryTypes): string {
   return "Recently Used";
 }
 
-interface Preferences {
-  preferredBrowser: string;
-}
-
 function SearchGoogleDriveFiles() {
   const [query, setQuery] = useState("");
   const [queryType, setQueryType] = useCachedState<QueryTypes>("query type", QueryTypes.fileName);
@@ -28,7 +24,15 @@ function SearchGoogleDriveFiles() {
 
   const [email, setEmail] = useState<string>();
   useEffect(() => {
-    setEmail(getUserEmail());
+    async function fetchEmail() {
+      try {
+        const userEmail = await getUserEmail();
+        setEmail(userEmail);
+      } catch (error) {
+        console.error("Failed to fetch user email:", error);
+      }
+    }
+    fetchEmail();
   }, []);
 
   const { data, isLoading } = useCachedPromise(

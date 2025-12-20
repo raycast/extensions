@@ -2,10 +2,6 @@ import { open, getPreferenceValues } from "@raycast/api";
 import { getUserEmail } from "./api/googleAuth";
 import { withGoogleAuth } from "./components/withGoogleAuth";
 
-interface Preferences {
-  preferredBrowser: string;
-}
-
 async function Command() {
   const { preferredBrowser } = getPreferenceValues<Preferences>();
   const email = await getUserEmail();

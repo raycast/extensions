@@ -3,10 +3,6 @@ import { getUserEmail } from "../api/googleAuth";
 
 export type Prefix = "document" | "forms" | "spreadsheets" | "presentation";
 
-interface Preferences {
-  preferredBrowser: string;
-}
-
 export async function createDocFromUrl(prefix: Prefix, title?: string) {
   const { preferredBrowser } = getPreferenceValues<Preferences>();
   const email = await getUserEmail();
