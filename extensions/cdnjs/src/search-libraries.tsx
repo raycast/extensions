@@ -5,7 +5,13 @@ import { useState } from "react";
 interface LibraryItem {
   name: string;
   latest: string;
-  "github.repo": string | null;
+  github: {
+    user: string;
+    repo: string;
+    stargazers_count: number;
+    forks: number;
+    subscribers_count: number;
+  } | null;
   description: string | null;
   keywords: string[] | null;
 }
@@ -28,7 +34,7 @@ export default function SearchLibraries(props: LaunchProps<{ arguments: Argument
       new URLSearchParams({
         search: searchText,
         limit: limit.toString(),
-        fields: "name,github.repo,description,keywords",
+        fields: "name,github,description,keywords",
       }),
     {
       async parseResponse(response) {
@@ -52,11 +58,11 @@ export default function SearchLibraries(props: LaunchProps<{ arguments: Argument
               markdown={library.description}
               metadata={
                 <List.Item.Detail.Metadata>
-                  {library["github.repo"] ? (
+                  {library.github ? (
                     <List.Item.Detail.Metadata.Link
-                      title="GitHub Repo"
-                      text={library["github.repo"]}
-                      target={library["github.repo"]}
+                      title="GitHub"
+                      text={`${library.github.user}/${library.github.repo}`}
+                      target={`https://github.com/${library.github.user}/${library.github.repo}`}
                     />
                   ) : (
                     <List.Item.Detail.Metadata.Label title="GitHub Repo" icon={Icon.Minus} />
