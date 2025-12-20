@@ -2,6 +2,9 @@ import { Tool, open } from "@raycast/api";
 import fs from "fs";
 import { applyTemplates } from "../api/templating/templating.service";
 import { Obsidian, ObsidianTargetType } from "@/obsidian";
+import { Logger } from "@/api/logger/logger.service";
+
+const logger = new Logger("Append Note Tool");
 
 type Input = {
   /**
@@ -108,6 +111,8 @@ export default async function tool(input: Input) {
       prepend: input.prepend ?? false,
       silent: input.silent ?? true,
     });
+
+    logger.debug(`Opening target: "${target}"`);
 
     await open(target);
 

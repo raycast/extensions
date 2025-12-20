@@ -75,6 +75,7 @@ export function validateNotePath(notePath: string, vaults: ObsidianVault[]): boo
 export enum ObsidianTargetType {
   OpenVault = "obsidian://open?vault=",
   OpenPath = "obsidian://open?path=",
+  OpenWorkspace = "obsidian://adv-uri?",
   DailyNote = "obsidian://adv-uri?daily=true&vault=",
   DailyNoteAppend = "obsidian://adv-uri?daily=true&",
   NewNote = "obsidian://new?vault=",
@@ -84,6 +85,7 @@ export enum ObsidianTargetType {
 export type ObsidianTarget =
   | { type: ObsidianTargetType.OpenVault; vault: ObsidianVault }
   | { type: ObsidianTargetType.OpenPath; path: string }
+  | { type: ObsidianTargetType.OpenWorkspace; vault: ObsidianVault; workspace: string }
   | { type: ObsidianTargetType.DailyNote; vault: ObsidianVault }
   | {
       type: ObsidianTargetType.DailyNoteAppend;
@@ -110,6 +112,15 @@ export function getObsidianTarget(target: ObsidianTarget) {
     }
     case ObsidianTargetType.OpenPath: {
       return ObsidianTargetType.OpenPath + encodeURIComponent(target.path);
+    }
+    case ObsidianTargetType.OpenWorkspace: {
+      return (
+        ObsidianTargetType.OpenWorkspace +
+        "vault=" +
+        encodeURIComponent(target.vault.name) +
+        "&workspace=" +
+        encodeURIComponent(target.workspace)
+      );
     }
     case ObsidianTargetType.DailyNote: {
       return ObsidianTargetType.DailyNote + encodeURIComponent(target.vault.name);
