@@ -1,0 +1,3 @@
+[submodule ".rulesync"]
+	path = .rulesync
+	url = https://github.com/OzTamir/agent-rules.git

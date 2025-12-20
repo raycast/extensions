@@ -1,0 +1,3786 @@
+[
+  {
+    "title": "Aabenraa, DK",
+    "value": "aabenraa"
+  },
+  {
+    "title": "Aabybro, DK",
+    "value": "aabybro"
+  },
+  {
+    "title": "Aachen, DE",
+    "value": "aachen"
+  },
+  {
+    "title": "Aalborg, DK",
+    "value": "aalborg"
+  },
+  {
+    "title": "Äänekoski, FI",
+    "value": "aanekoski"
+  },
+  {
+    "title": "Aarhus, DK",
+    "value": "aarhus"
+  },
+  {
+    "title": "Aarup, DK",
+    "value": "aarup"
+  },
+  {
+    "title": "Acre - Nahariya Area, IL",
+    "value": "acre-nahariya-area"
+  },
+  {
+    "title": "Ādaži, LV",
+    "value": "adazi"
+  },
+  {
+    "title": "Aegina, GR",
+    "value": "aegina"
+  },
+  {
+    "title": "Afula & Emek Yizrael area, IL",
+    "value": "afula-emek-yizrael-area"
+  },
+  {
+    "title": "Agios Nikolaos, GR",
+    "value": "agios-nikolaos"
+  },
+  {
+    "title": "Aglomeracja Śląska, PL",
+    "value": "aglomeracja-slaska"
+  },
+  {
+    "title": "Agrinio, GR",
+    "value": "agrinio"
+  },
+  {
+    "title": "Aigio, GR",
+    "value": "aigio"
+  },
+  {
+    "title": "Ajka, HU",
+    "value": "ajka"
+  },
+  {
+    "title": "Åkersberga, SE",
+    "value": "akersberga"
+  },
+  {
+    "title": "Akita, JP",
+    "value": "akita"
+  },
+  {
+    "title": "Aktau, KZ",
+    "value": "aktau"
+  },
+  {
+    "title": "Aktobe, KZ",
+    "value": "aktobe"
+  },
+  {
+    "title": "Akureyri, IS",
+    "value": "akureyri"
+  },
+  {
+    "title": "Alba Iulia, RO",
+    "value": "alba-iulia"
+  },
+  {
+    "title": "Ålesund, NO",
+    "value": "alesund"
+  },
+  {
+    "title": "Alexandroupoli, GR",
+    "value": "alexandroupoli"
+  },
+  {
+    "title": "Alingsås, SE",
+    "value": "alingsas"
+  },
+  {
+    "title": "Allerød, DK",
+    "value": "alleroed"
+  },
+  {
+    "title": "Almaty, KZ",
+    "value": "almaty"
+  },
+  {
+    "title": "Alta, NO",
+    "value": "alta"
+  },
+  {
+    "title": "Alytus, LT",
+    "value": "alytus"
+  },
+  {
+    "title": "Amaliada, GR",
+    "value": "amaliada"
+  },
+  {
+    "title": "Ammochostos, CY",
+    "value": "ammochostos"
+  },
+  {
+    "title": "Ängelholm, SE",
+    "value": "angelholm"
+  },
+  {
+    "title": "Aomori, JP",
+    "value": "aomori"
+  },
+  {
+    "title": "Aphrodite Hills, CY",
+    "value": "aphrodite-hills"
+  },
+  {
+    "title": "Arad, RO",
+    "value": "arad"
+  },
+  {
+    "title": "Arendal, NO",
+    "value": "arendal"
+  },
+  {
+    "title": "Argos, GR",
+    "value": "argos"
+  },
+  {
+    "title": "Arta, GR",
+    "value": "arta"
+  },
+  {
+    "title": "Asahikawa, JP",
+    "value": "asahikawa"
+  },
+  {
+    "title": "Ashdod and Lachish Area, IL",
+    "value": "ashdod-and-lachish-area"
+  },
+  {
+    "title": "Ashkelon, IL",
+    "value": "ashkelon"
+  },
+  {
+    "title": "Asker og Sandvika, NO",
+    "value": "asker-og-sandvika"
+  },
+  {
+    "title": "Askøy, NO",
+    "value": "askoey"
+  },
+  {
+    "title": "Astana, KZ",
+    "value": "nur-sultan"
+  },
+  {
+    "title": "Athens, GR",
+    "value": "athens"
+  },
+  {
+    "title": "Atyrau, KZ",
+    "value": "atyrau"
+  },
+  {
+    "title": "Augsburg, DE",
+    "value": "augsburg"
+  },
+  {
+    "title": "Bacau, RO",
+    "value": "bacau"
+  },
+  {
+    "title": "Baia Mare, RO",
+    "value": "baia-mare"
+  },
+  {
+    "title": "Baja, HU",
+    "value": "baja"
+  },
+  {
+    "title": "Baku, AZ",
+    "value": "baku"
+  },
+  {
+    "title": "Balatonfüred, HU",
+    "value": "balatonfured"
+  },
+  {
+    "title": "Ballerup-Herlev, DK",
+    "value": "ballerup-herlev"
+  },
+  {
+    "title": "Bánovce nad Bebravou, SK",
+    "value": "banovce-nad-bebravou"
+  },
+  {
+    "title": "Banská Bystrica, SK",
+    "value": "banska-bystrica"
+  },
+  {
+    "title": "Banská Štiavnica, SK",
+    "value": "banska-stiavnica"
+  },
+  {
+    "title": "Bardejov, SK",
+    "value": "bardejov"
+  },
+  {
+    "title": "Batumi, GE",
+    "value": "batumi"
+  },
+  {
+    "title": "Beer Sheva, IL",
+    "value": "beer-sheva"
+  },
+  {
+    "title": "Békéscsaba, HU",
+    "value": "bekescsaba"
+  },
+  {
+    "title": "Belgrade, RS",
+    "value": "belgrade"
+  },
+  {
+    "title": "Bergen, NO",
+    "value": "bergen"
+  },
+  {
+    "title": "Bergen Sør, NO",
+    "value": "bergen-soer"
+  },
+  {
+    "title": "Berlin, DE",
+    "value": "berlin"
+  },
+  {
+    "title": "Beroun-Kraluv Dvur, CZ",
+    "value": "beroun-kraluv-dvur"
+  },
+  {
+    "title": "Białystok, PL",
+    "value": "bialystok"
+  },
+  {
+    "title": "Bielefeld, DE",
+    "value": "bielefeld"
+  },
+  {
+    "title": "Birkerød-Farum, DK",
+    "value": "birkeroed-farum"
+  },
+  {
+    "title": "Bjelovar, HR",
+    "value": "bjelovar"
+  },
+  {
+    "title": "Blagoevgrad, BG",
+    "value": "blagoevgrad"
+  },
+  {
+    "title": "Bled & Lesce, SI",
+    "value": "bled-lesce"
+  },
+  {
+    "title": "Bochum, DE",
+    "value": "bochum"
+  },
+  {
+    "title": "Bodø, NO",
+    "value": "bodoe"
+  },
+  {
+    "title": "Bonn, DE",
+    "value": "bonn"
+  },
+  {
+    "title": "Bor, RS",
+    "value": "bor"
+  },
+  {
+    "title": "Borås, SE",
+    "value": "boras"
+  },
+  {
+    "title": "Borča, RS",
+    "value": "borca"
+  },
+  {
+    "title": "Borlänge, SE",
+    "value": "borlange"
+  },
+  {
+    "title": "Botosani, RO",
+    "value": "botosani"
+  },
+  {
+    "title": "Braila, RO",
+    "value": "braila"
+  },
+  {
+    "title": "Brande, DK",
+    "value": "brande"
+  },
+  {
+    "title": "Brandys nad Labem a Stara Boleslav, CZ",
+    "value": "brandys-nad-labem-a-stara-boleslav"
+  },
+  {
+    "title": "Brasov, RO",
+    "value": "brasov"
+  },
+  {
+    "title": "Bratislava, SK",
+    "value": "bratislava"
+  },
+  {
+    "title": "Bratislava okolie - Východ, SK",
+    "value": "bratislava-okolie---vychod"
+  },
+  {
+    "title": "Bratislava okolie - Západ, SK",
+    "value": "bratislava-okolie---zapad"
+  },
+  {
+    "title": "Bremen, DE",
+    "value": "bremen"
+  },
+  {
+    "title": "Brezno, SK",
+    "value": "brezno"
+  },
+  {
+    "title": "Brno, CZ",
+    "value": "brno"
+  },
+  {
+    "title": "Brønderslev, DK",
+    "value": "broenderslev"
+  },
+  {
+    "title": "Brumunddal, NO",
+    "value": "brumunddal"
+  },
+  {
+    "title": "Brunswick, DE",
+    "value": "brunswick"
+  },
+  {
+    "title": "Bucharest, RO",
+    "value": "bucharest"
+  },
+  {
+    "title": "Budakeszi, HU",
+    "value": "budakeszi"
+  },
+  {
+    "title": "Budaörs, HU",
+    "value": "budaors"
+  },
+  {
+    "title": "Budapest, HU",
+    "value": "budapest"
+  },
+  {
+    "title": "Budapest Park, HU",
+    "value": "budapest-park"
+  },
+  {
+    "title": "Buzau, RO",
+    "value": "buzau"
+  },
+  {
+    "title": "Bydgoszcz, PL",
+    "value": "bydgoszcz"
+  },
+  {
+    "title": "Bytča, SK",
+    "value": "bytca"
+  },
+  {
+    "title": "Čačak, RS",
+    "value": "cacak"
+  },
+  {
+    "title": "Čadca, SK",
+    "value": "cadca"
+  },
+  {
+    "title": "Čakovec, HR",
+    "value": "cakovec"
+  },
+  {
+    "title": "Cegléd, HU",
+    "value": "cegled"
+  },
+  {
+    "title": "Celje, SI",
+    "value": "celje"
+  },
+  {
+    "title": "Cēsis, LV",
+    "value": "cesis"
+  },
+  {
+    "title": "Ceska Lipa, CZ",
+    "value": "ceska-lipa"
+  },
+  {
+    "title": "České Budějovice, CZ",
+    "value": "ceske-budejovice"
+  },
+  {
+    "title": "Chalkida, GR",
+    "value": "chalkida"
+  },
+  {
+    "title": "Chania, GR",
+    "value": "chania"
+  },
+  {
+    "title": "Cheb, CZ",
+    "value": "cheb"
+  },
+  {
+    "title": "Chemnitz, DE",
+    "value": "chemnitz"
+  },
+  {
+    "title": "Chersonissos, GR",
+    "value": "chersonissos"
+  },
+  {
+    "title": "Chios, GR",
+    "value": "chios"
+  },
+  {
+    "title": "Chitose, JP",
+    "value": "chitose"
+  },
+  {
+    "title": "Chomutov, CZ",
+    "value": "chomutov"
+  },
+  {
+    "title": "Chrudim, CZ",
+    "value": "chrudim"
+  },
+  {
+    "title": "Cluj-Napoca, RO",
+    "value": "cluj-napoca"
+  },
+  {
+    "title": "Cologne, DE",
+    "value": "cologne"
+  },
+  {
+    "title": "Constanta, RO",
+    "value": "constanta"
+  },
+  {
+    "title": "Copenhagen, DK",
+    "value": "copenhagen"
+  },
+  {
+    "title": "Corinth, GR",
+    "value": "corinth"
+  },
+  {
+    "title": "Craiova, RO",
+    "value": "craiova"
+  },
+  {
+    "title": "Crikvenica, HR",
+    "value": "crikvenica"
+  },
+  {
+    "title": "Częstochowa, PL",
+    "value": "czestochowa"
+  },
+  {
+    "title": "Đakovo, HR",
+    "value": "dakovo"
+  },
+  {
+    "title": "Darmstadt, DE",
+    "value": "darmstadt"
+  },
+  {
+    "title": "Daruvar, HR",
+    "value": "daruvar"
+  },
+  {
+    "title": "Daugavpils, LV",
+    "value": "daugavpils"
+  },
+  {
+    "title": "Debrecen, HU",
+    "value": "debrecen"
+  },
+  {
+    "title": "Decin, CZ",
+    "value": "decin"
+  },
+  {
+    "title": "Déli agglomeráció, HU",
+    "value": "deli-agglomeracio"
+  },
+  {
+    "title": "Délkeleti agglomeráció, HU",
+    "value": "delkeleti-agglomeracio"
+  },
+  {
+    "title": "Deva, RO",
+    "value": "deva"
+  },
+  {
+    "title": "Dobrichovice-Cernosice-Lety-Revnice, CZ",
+    "value": "dobrichovice-cernosice-lety-revnice"
+  },
+  {
+    "title": "Dolný Kubín, SK",
+    "value": "dolny-kubin"
+  },
+  {
+    "title": "Domžale, SI",
+    "value": "domzale"
+  },
+  {
+    "title": "Dortmund, DE",
+    "value": "dortmund"
+  },
+  {
+    "title": "Drama, GR",
+    "value": "drama"
+  },
+  {
+    "title": "Drammen, NO",
+    "value": "drammen"
+  },
+  {
+    "title": "Dresden, DE",
+    "value": "dresden"
+  },
+  {
+    "title": "Drobeta-Turnu Severin, RO",
+    "value": "drobeta-turnu-severin"
+  },
+  {
+    "title": "Dubnica nad Váhom, SK",
+    "value": "dubnica-nad-vahom"
+  },
+  {
+    "title": "Dubrovnik, HR",
+    "value": "dubrovnik"
+  },
+  {
+    "title": "Duisburg, DE",
+    "value": "duisburg"
+  },
+  {
+    "title": "Dunajská Streda, SK",
+    "value": "dunajska-streda"
+  },
+  {
+    "title": "Dunakeszi, HU",
+    "value": "dunakeszi"
+  },
+  {
+    "title": "Dunaújváros, HU",
+    "value": "dunaujvaros"
+  },
+  {
+    "title": "Durrës, AL",
+    "value": "durres"
+  },
+  {
+    "title": "Düsseldorf, DE",
+    "value": "dusseldorf"
+  },
+  {
+    "title": "Edessa, GR",
+    "value": "edessa"
+  },
+  {
+    "title": "Eger, HU",
+    "value": "eger"
+  },
+  {
+    "title": "Eiker, NO",
+    "value": "eiker"
+  },
+  {
+    "title": "Eilat, IL",
+    "value": "eilat"
+  },
+  {
+    "title": "Ekibastuz, KZ",
+    "value": "ekibastuz"
+  },
+  {
+    "title": "Eleusina, GR",
+    "value": "eleusina"
+  },
+  {
+    "title": "Elverum, NO",
+    "value": "elverum"
+  },
+  {
+    "title": "Enköping, SE",
+    "value": "enkoping"
+  },
+  {
+    "title": "Érd, HU",
+    "value": "erd"
+  },
+  {
+    "title": "Erfurt, DE",
+    "value": "erfurt"
+  },
+  {
+    "title": "Erlangen, DE",
+    "value": "erlangen"
+  },
+  {
+    "title": "ES CON FIELD, JP",
+    "value": "es-con-field"
+  },
+  {
+    "title": "Esbjerg, DK",
+    "value": "esbjerg"
+  },
+  {
+    "title": "Eskilstuna, SE",
+    "value": "eskilstuna"
+  },
+  {
+    "title": "Espoo, FI",
+    "value": "espoo"
+  },
+  {
+    "title": "Essen, DE",
+    "value": "essen"
+  },
+  {
+    "title": "Északi agglomeráció, HU",
+    "value": "eszaki-agglomeracio"
+  },
+  {
+    "title": "Esztergom, HU",
+    "value": "esztergom"
+  },
+  {
+    "title": "Falun, SE",
+    "value": "falun"
+  },
+  {
+    "title": "Ferizaj, XK",
+    "value": "ferizaj"
+  },
+  {
+    "title": "Focsani, RO",
+    "value": "focsani"
+  },
+  {
+    "title": "Follo, NO",
+    "value": "follo"
+  },
+  {
+    "title": "Forssa, FI",
+    "value": "forssa"
+  },
+  {
+    "title": "Frankfurt, DE",
+    "value": "frankfurt"
+  },
+  {
+    "title": "Fredensborg, DK",
+    "value": "fredensborg"
+  },
+  {
+    "title": "Fredericia-Middelfart, DK",
+    "value": "fredericia-middelfart"
+  },
+  {
+    "title": "Frederikshavn, DK",
+    "value": "frederikshavn"
+  },
+  {
+    "title": "Frederikssund, DK",
+    "value": "frederikssund"
+  },
+  {
+    "title": "Frederiksværk, DK",
+    "value": "frederiksvaerk"
+  },
+  {
+    "title": "Fredrikstad, NO",
+    "value": "fredrikstad"
+  },
+  {
+    "title": "Freiburg im Breisgau, DE",
+    "value": "freiburg-im-breisgau"
+  },
+  {
+    "title": "Frydek-Mistek, CZ",
+    "value": "frydek-mistek"
+  },
+  {
+    "title": "Fukuoka, JP",
+    "value": "fukuoka"
+  },
+  {
+    "title": "Fukushima, JP",
+    "value": "fukushima"
+  },
+  {
+    "title": "Fürth, DE",
+    "value": "furth"
+  },
+  {
+    "title": "Gabala, AZ",
+    "value": "gabala"
+  },
+  {
+    "title": "Galanta, SK",
+    "value": "galanta"
+  },
+  {
+    "title": "Galati, RO",
+    "value": "galati"
+  },
+  {
+    "title": "Ganja, AZ",
+    "value": "ganja"
+  },
+  {
+    "title": "Gävle, SE",
+    "value": "gavle"
+  },
+  {
+    "title": "Gdańsk, PL",
+    "value": "gdansk"
+  },
+  {
+    "title": "Gdynia, PL",
+    "value": "gdynia"
+  },
+  {
+    "title": "Gelsenkirchen, DE",
+    "value": "gelsenkirchen"
+  },
+  {
+    "title": "Giannitsa, GR",
+    "value": "giannitsa"
+  },
+  {
+    "title": "Gjøvik og Raufoss, NO",
+    "value": "gjoevik-og-raufoss"
+  },
+  {
+    "title": "Gliwice, PL",
+    "value": "gliwice"
+  },
+  {
+    "title": "Gödöllő, HU",
+    "value": "godollo"
+  },
+  {
+    "title": "Gori, GE",
+    "value": "gori"
+  },
+  {
+    "title": "Göteborg, SE",
+    "value": "goteborg"
+  },
+  {
+    "title": "Göttingen, DE",
+    "value": "gottingen"
+  },
+  {
+    "title": "Gozo, MT",
+    "value": "gozo"
+  },
+  {
+    "title": "Gråsten, DK",
+    "value": "grasten"
+  },
+  {
+    "title": "Graz, AT",
+    "value": "graz"
+  },
+  {
+    "title": "Grenå, DK",
+    "value": "grena"
+  },
+  {
+    "title": "Grimstad, NO",
+    "value": "grimstad"
+  },
+  {
+    "title": "Grocka, RS",
+    "value": "grocka"
+  },
+  {
+    "title": "Guba, AZ",
+    "value": "guba"
+  },
+  {
+    "title": "Gyömrő, HU",
+    "value": "gyomro"
+  },
+  {
+    "title": "Gyöngyös, HU",
+    "value": "gyongyos"
+  },
+  {
+    "title": "Győr, HU",
+    "value": "gyor"
+  },
+  {
+    "title": "Hachinohe, JP",
+    "value": "hachinohe"
+  },
+  {
+    "title": "Haderslev, DK",
+    "value": "haderslev"
+  },
+  {
+    "title": "Haifa & HaKrayot, IL",
+    "value": "haifa"
+  },
+  {
+    "title": "Hajdúszoboszló, HU",
+    "value": "hajduszoboszlo"
+  },
+  {
+    "title": "Hakodate, JP",
+    "value": "hakodate"
+  },
+  {
+    "title": "Halden, NO",
+    "value": "halden"
+  },
+  {
+    "title": "Halmstad, SE",
+    "value": "halmstad"
+  },
+  {
+    "title": "Hamamatsu, JP",
+    "value": "hamamatsu"
+  },
+  {
+    "title": "Hamar, NO",
+    "value": "hamar"
+  },
+  {
+    "title": "Hamburg, DE",
+    "value": "hamburg"
+  },
+  {
+    "title": "Hämeenkyrö, FI",
+    "value": "hameenkyro"
+  },
+  {
+    "title": "Hämeenlinna, FI",
+    "value": "hameenlinna"
+  },
+  {
+    "title": "Hamina, FI",
+    "value": "hamina"
+  },
+  {
+    "title": "Hanau, DE",
+    "value": "hanau"
+  },
+  {
+    "title": "Handlová, SK",
+    "value": "handlova"
+  },
+  {
+    "title": "Hanko, FI",
+    "value": "hanko"
+  },
+  {
+    "title": "Hanover, DE",
+    "value": "hanover"
+  },
+  {
+    "title": "Harstad, NO",
+    "value": "harstad"
+  },
+  {
+    "title": "Hasharon area, IL",
+    "value": "hasharon"
+  },
+  {
+    "title": "Haslev, DK",
+    "value": "haslev"
+  },
+  {
+    "title": "Hässleholm, SE",
+    "value": "hassleholm"
+  },
+  {
+    "title": "Hattula, FI",
+    "value": "hattula"
+  },
+  {
+    "title": "Haugesund, NO",
+    "value": "haugesund"
+  },
+  {
+    "title": "Havířov, CZ",
+    "value": "havirov"
+  },
+  {
+    "title": "Hedehusene, DK",
+    "value": "hedehusene"
+  },
+  {
+    "title": "Heidelberg, DE",
+    "value": "heidelberg"
+  },
+  {
+    "title": "Heilbronn, DE",
+    "value": "heilbronn"
+  },
+  {
+    "title": "Heinola, FI",
+    "value": "heinola"
+  },
+  {
+    "title": "Helsingborg, SE",
+    "value": "helsingborg"
+  },
+  {
+    "title": "Helsingør, DK",
+    "value": "helsingoer"
+  },
+  {
+    "title": "Helsinki, FI",
+    "value": "helsinki"
+  },
+  {
+    "title": "Heraklion, GR",
+    "value": "heraklion"
+  },
+  {
+    "title": "Herning, DK",
+    "value": "herning"
+  },
+  {
+    "title": "Hillerød, DK",
+    "value": "hilleroed"
+  },
+  {
+    "title": "Hirosaki, JP",
+    "value": "hirosaki"
+  },
+  {
+    "title": "Hiroshima, JP",
+    "value": "hiroshima"
+  },
+  {
+    "title": "Hjørring, DK",
+    "value": "hjoerring"
+  },
+  {
+    "title": "Hlohovec, SK",
+    "value": "hlohovec"
+  },
+  {
+    "title": "Hobro, DK",
+    "value": "hobro"
+  },
+  {
+    "title": "Hódmezővásárhely, HU",
+    "value": "hodmezovasarhely"
+  },
+  {
+    "title": "Holbæk, DK",
+    "value": "holbaek"
+  },
+  {
+    "title": "Hollola, FI",
+    "value": "hollola"
+  },
+  {
+    "title": "Holstebro, DK",
+    "value": "holstebro"
+  },
+  {
+    "title": "Hønefoss, NO",
+    "value": "hoenefoss"
+  },
+  {
+    "title": "Hornbæk, DK",
+    "value": "hornbaek"
+  },
+  {
+    "title": "Horsens, DK",
+    "value": "horsens"
+  },
+  {
+    "title": "Hørsholm-Rungsted, DK",
+    "value": "hoersholm-rungsted"
+  },
+  {
+    "title": "Horten, NO",
+    "value": "horten"
+  },
+  {
+    "title": "Hradec Kralove, CZ",
+    "value": "hradec-kralove"
+  },
+  {
+    "title": "Hudiksvall, SE",
+    "value": "hudiksvall"
+  },
+  {
+    "title": "Humenné, SK",
+    "value": "humenne"
+  },
+  {
+    "title": "Hveragerði, IS",
+    "value": "hveragerdi"
+  },
+  {
+    "title": "Hvide Sande, DK",
+    "value": "hvide-sande"
+  },
+  {
+    "title": "Hyvinkää, FI",
+    "value": "hyvinkaa"
+  },
+  {
+    "title": "Iasi, RO",
+    "value": "iasi"
+  },
+  {
+    "title": "Ierapetra, GR",
+    "value": "ierapetra"
+  },
+  {
+    "title": "Igoumenitsa, GR",
+    "value": "igoumenitsa"
+  },
+  {
+    "title": "Ii, FI",
+    "value": "ii"
+  },
+  {
+    "title": "Iisalmi, FI",
+    "value": "iisalmi"
+  },
+  {
+    "title": "Ikast, DK",
+    "value": "ikast"
+  },
+  {
+    "title": "Imatra, FI",
+    "value": "imatra"
+  },
+  {
+    "title": "Indre Østfold, NO",
+    "value": "indre-oestfold"
+  },
+  {
+    "title": "Ingolstadt, DE",
+    "value": "ingolstadt"
+  },
+  {
+    "title": "Inkoo, FI",
+    "value": "inkoo"
+  },
+  {
+    "title": "Ioannina, GR",
+    "value": "ioannina"
+  },
+  {
+    "title": "Ishinomaki, JP",
+    "value": "ishinomaki"
+  },
+  {
+    "title": "Iwaki, JP",
+    "value": "iwaki"
+  },
+  {
+    "title": "Iwamizawa, JP",
+    "value": "iwamizawa"
+  },
+  {
+    "title": "Jablonec nad Nisou, CZ",
+    "value": "jablonec-nad-nisou"
+  },
+  {
+    "title": "Jagodina, RS",
+    "value": "jagodina"
+  },
+  {
+    "title": "Jämsä, FI",
+    "value": "jamsa"
+  },
+  {
+    "title": "Järvenpää, FI",
+    "value": "jarvenpaa"
+  },
+  {
+    "title": "Jēkabpils, LV",
+    "value": "jekabpils"
+  },
+  {
+    "title": "Jelgava, LV",
+    "value": "jelgava"
+  },
+  {
+    "title": "Jerusalem, IL",
+    "value": "jerusalem"
+  },
+  {
+    "title": "Jesenice, SI",
+    "value": "jesenice"
+  },
+  {
+    "title": "Jesenice-Pruhonice, CZ",
+    "value": "jesenice-pruhonice"
+  },
+  {
+    "title": "Jessheim, NO",
+    "value": "jessheim"
+  },
+  {
+    "title": "Jezqazgan, KZ",
+    "value": "jezqazgan"
+  },
+  {
+    "title": "Jihlava, CZ",
+    "value": "jihlava"
+  },
+  {
+    "title": "Jindrichuv Hradec, CZ",
+    "value": "jindrichuv-hradec"
+  },
+  {
+    "title": "Joensuu, FI",
+    "value": "joensuu"
+  },
+  {
+    "title": "Jonava, LT",
+    "value": "jonava"
+  },
+  {
+    "title": "Jönköping, SE",
+    "value": "jonkoping"
+  },
+  {
+    "title": "Jūrmala, LV",
+    "value": "jurmala"
+  },
+  {
+    "title": "Jyväskylä, FI",
+    "value": "jyvaskyla"
+  },
+  {
+    "title": "Kagoshima, JP",
+    "value": "kagoshima"
+  },
+  {
+    "title": "Kajaani, FI",
+    "value": "kajaani"
+  },
+  {
+    "title": "Kalajoki, FI",
+    "value": "kalajoki"
+  },
+  {
+    "title": "Kalamata, GR",
+    "value": "kalamata"
+  },
+  {
+    "title": "Kalampaka, GR",
+    "value": "kalampaka"
+  },
+  {
+    "title": "Kalmar, SE",
+    "value": "kalmar"
+  },
+  {
+    "title": "Kalundborg, DK",
+    "value": "kalundborg1"
+  },
+  {
+    "title": "Kangasala, FI",
+    "value": "kangasala"
+  },
+  {
+    "title": "Kangasniemi, FI",
+    "value": "kangasniemi"
+  },
+  {
+    "title": "Kankaanpää, FI",
+    "value": "kankaanpaa"
+  },
+  {
+    "title": "Kaposvár, HU",
+    "value": "kaposvar"
+  },
+  {
+    "title": "Karaganda, KZ",
+    "value": "karaganda"
+  },
+  {
+    "title": "Karditsa, GR",
+    "value": "karditsa"
+  },
+  {
+    "title": "Karjaa, FI",
+    "value": "karjaa"
+  },
+  {
+    "title": "Karkkila, FI",
+    "value": "karkkila"
+  },
+  {
+    "title": "Karlovac, HR",
+    "value": "karlovac"
+  },
+  {
+    "title": "Karlovy Vary, CZ",
+    "value": "karlovy-vary"
+  },
+  {
+    "title": "Karlskoga, SE",
+    "value": "karlskoga"
+  },
+  {
+    "title": "Karlskrona, SE",
+    "value": "karlskrona"
+  },
+  {
+    "title": "Karlsruhe, DE",
+    "value": "karlsruhe"
+  },
+  {
+    "title": "Karlstad, SE",
+    "value": "karlstad"
+  },
+  {
+    "title": "Karmiel area, IL",
+    "value": "karmiel-area"
+  },
+  {
+    "title": "Karvina, CZ",
+    "value": "karvina"
+  },
+  {
+    "title": "Kaskelen, KZ",
+    "value": "kaskelen"
+  },
+  {
+    "title": "Kassel, DE",
+    "value": "kassel"
+  },
+  {
+    "title": "Kastav / Matulji, HR",
+    "value": "kastav-matulji"
+  },
+  {
+    "title": "Kaštela, HR",
+    "value": "kastela"
+  },
+  {
+    "title": "Kastoria, GR",
+    "value": "kastoria"
+  },
+  {
+    "title": "Katerini, GR",
+    "value": "katerini"
+  },
+  {
+    "title": "Kauhajoki, FI",
+    "value": "kauhajoki"
+  },
+  {
+    "title": "Kaunas, LT",
+    "value": "kaunas"
+  },
+  {
+    "title": "Kavala, GR",
+    "value": "kavala"
+  },
+  {
+    "title": "Kawasaki, JP",
+    "value": "kawasaki"
+  },
+  {
+    "title": "Kazincbarcika, HU",
+    "value": "kazincbarcika"
+  },
+  {
+    "title": "Kecskemét, HU",
+    "value": "kecskemet"
+  },
+  {
+    "title": "Kėdainiai, LT",
+    "value": "kedainiai"
+  },
+  {
+    "title": "Kefalonia, GR",
+    "value": "kefalonia"
+  },
+  {
+    "title": "Keleti agglomeráció, HU",
+    "value": "keleti-agglomeracio"
+  },
+  {
+    "title": "Kemi, FI",
+    "value": "kemi"
+  },
+  {
+    "title": "Kempten (Allgäu), DE",
+    "value": "kempten-allgau"
+  },
+  {
+    "title": "Kerava, FI",
+    "value": "kerava"
+  },
+  {
+    "title": "Kerkyra, GR",
+    "value": "kerkyra"
+  },
+  {
+    "title": "Keszthely, HU",
+    "value": "keszthely"
+  },
+  {
+    "title": "Kežmarok, SK",
+    "value": "kezmarok"
+  },
+  {
+    "title": "Khankendi, AZ",
+    "value": "khankendi"
+  },
+  {
+    "title": "Khirdalan, AZ",
+    "value": "khirdalan"
+  },
+  {
+    "title": "Kiato, GR",
+    "value": "kiato"
+  },
+  {
+    "title": "Kiel, DE",
+    "value": "kiel"
+  },
+  {
+    "title": "Kikinda, RS",
+    "value": "kikinda"
+  },
+  {
+    "title": "Kilkis, GR",
+    "value": "kilkis"
+  },
+  {
+    "title": "Kirkkonummi, FI",
+    "value": "kirkkonummi"
+  },
+  {
+    "title": "Kiryat Shmona area, IL",
+    "value": "kiryat-shmona-area"
+  },
+  {
+    "title": "Kiskunfélegyháza, HU",
+    "value": "kiskunfelegyhaza"
+  },
+  {
+    "title": "Kiskunhalas, HU",
+    "value": "kiskunhalas"
+  },
+  {
+    "title": "Kisvárda, HU",
+    "value": "kisvarda"
+  },
+  {
+    "title": "Kitakyushu, JP",
+    "value": "kitakyushu"
+  },
+  {
+    "title": "Kitami, JP",
+    "value": "kitami"
+  },
+  {
+    "title": "Kittilä, FI",
+    "value": "kittila"
+  },
+  {
+    "title": "Kladno, CZ",
+    "value": "kladno"
+  },
+  {
+    "title": "Klagenfurt, AT",
+    "value": "klagenfurt"
+  },
+  {
+    "title": "Klaipėda, LT",
+    "value": "klaipeda"
+  },
+  {
+    "title": "Klaukkala, FI",
+    "value": "klaukkala"
+  },
+  {
+    "title": "Klepp og Bryne, NO",
+    "value": "klepp-og-bryne"
+  },
+  {
+    "title": "Koblenz, DE",
+    "value": "koblenz"
+  },
+  {
+    "title": "Kobuleti, GE",
+    "value": "kobuleti"
+  },
+  {
+    "title": "Kohtla-Järve, EE",
+    "value": "kohtla-jarve"
+  },
+  {
+    "title": "Kokkola, FI",
+    "value": "kokkola"
+  },
+  {
+    "title": "Kokshetau, KZ",
+    "value": "kokshetau"
+  },
+  {
+    "title": "Kolárovo, SK",
+    "value": "kolarovo"
+  },
+  {
+    "title": "Kolding, DK",
+    "value": "kolding"
+  },
+  {
+    "title": "Kolin, CZ",
+    "value": "kolin"
+  },
+  {
+    "title": "Komárno, SK",
+    "value": "komarno"
+  },
+  {
+    "title": "Komárom, HU",
+    "value": "komarom"
+  },
+  {
+    "title": "Komotini, GR",
+    "value": "komotini"
+  },
+  {
+    "title": "Kongsberg, NO",
+    "value": "kongsberg"
+  },
+  {
+    "title": "Kongsvinger, NO",
+    "value": "kongsvinger"
+  },
+  {
+    "title": "Königs Wusterhausen, DE",
+    "value": "konigs-wusterhausen"
+  },
+  {
+    "title": "Konstancin Jeziorna, PL",
+    "value": "konstancin-jeziorna"
+  },
+  {
+    "title": "Koper & Izola, SI",
+    "value": "koper-izola"
+  },
+  {
+    "title": "Koprivnica, HR",
+    "value": "koprivnica"
+  },
+  {
+    "title": "Koriyama, JP",
+    "value": "koriyama"
+  },
+  {
+    "title": "Korsør, DK",
+    "value": "korsoer"
+  },
+  {
+    "title": "Kos, GR",
+    "value": "kos"
+  },
+  {
+    "title": "Košice, SK",
+    "value": "kosice"
+  },
+  {
+    "title": "Kosshy, KZ",
+    "value": "kosshy"
+  },
+  {
+    "title": "Kostanay, KZ",
+    "value": "kostanay"
+  },
+  {
+    "title": "Kotka, FI",
+    "value": "kotka"
+  },
+  {
+    "title": "Kouvola, FI",
+    "value": "kouvola"
+  },
+  {
+    "title": "Kozani, GR",
+    "value": "kozani"
+  },
+  {
+    "title": "Kragujevac, RS",
+    "value": "kragujevac"
+  },
+  {
+    "title": "Kraków, PL",
+    "value": "krakow"
+  },
+  {
+    "title": "Kraljevo, RS",
+    "value": "kraljevo"
+  },
+  {
+    "title": "Kranj, SI",
+    "value": "kranj"
+  },
+  {
+    "title": "Krefeld, DE",
+    "value": "krefeld"
+  },
+  {
+    "title": "Kremnica, SK",
+    "value": "kremnica"
+  },
+  {
+    "title": "Kristiansand, NO",
+    "value": "kristiansand"
+  },
+  {
+    "title": "Kristianstad, SE",
+    "value": "kristianstad"
+  },
+  {
+    "title": "Kristiansund, NO",
+    "value": "kristiansund"
+  },
+  {
+    "title": "Krupina, SK",
+    "value": "krupina"
+  },
+  {
+    "title": "Kruševac, RS",
+    "value": "krusevac"
+  },
+  {
+    "title": "Kumamoto, JP",
+    "value": "kumamoto"
+  },
+  {
+    "title": "Kungsbacka, SE",
+    "value": "kungsbacka"
+  },
+  {
+    "title": "Kuopio, FI",
+    "value": "kuopio"
+  },
+  {
+    "title": "Kurashiki, JP",
+    "value": "kurashiki"
+  },
+  {
+    "title": "Kure, JP",
+    "value": "kure"
+  },
+  {
+    "title": "Kuressaare, EE",
+    "value": "kuressaare"
+  },
+  {
+    "title": "Kushiro, JP",
+    "value": "kushiro"
+  },
+  {
+    "title": "Kutaisi, GE",
+    "value": "kutaisi"
+  },
+  {
+    "title": "Kutna Hora, CZ",
+    "value": "kutna-hora"
+  },
+  {
+    "title": "Kuusamo, FI",
+    "value": "kuusamo"
+  },
+  {
+    "title": "Kysucké Nové Mesto, SK",
+    "value": "kysucke-nove-mesto"
+  },
+  {
+    "title": "Kyzylorda, KZ",
+    "value": "kyzylorda"
+  },
+  {
+    "title": "Lahti, FI",
+    "value": "lahti"
+  },
+  {
+    "title": "Laihia, FI",
+    "value": "laihia"
+  },
+  {
+    "title": "Lamia, GR",
+    "value": "lamia"
+  },
+  {
+    "title": "Landskrona, SE",
+    "value": "landskrona"
+  },
+  {
+    "title": "Lankaran, AZ",
+    "value": "lankaran"
+  },
+  {
+    "title": "Lappeenranta, FI",
+    "value": "lappeenranta"
+  },
+  {
+    "title": "Lapua, FI",
+    "value": "lapua"
+  },
+  {
+    "title": "Larissa, GR",
+    "value": "larisa"
+  },
+  {
+    "title": "Larnaca, CY",
+    "value": "larnaca"
+  },
+  {
+    "title": "Larvik, NO",
+    "value": "larvik"
+  },
+  {
+    "title": "Laukaa, FI",
+    "value": "laukaa"
+  },
+  {
+    "title": "Lazarevac, RS",
+    "value": "lazarevac"
+  },
+  {
+    "title": "Lefkada, GR",
+    "value": "lefkada"
+  },
+  {
+    "title": "Leipzig, DE",
+    "value": "leipzig"
+  },
+  {
+    "title": "Lempäälä, FI",
+    "value": "lempaala"
+  },
+  {
+    "title": "Leskovac, RS",
+    "value": "leskovac"
+  },
+  {
+    "title": "Levanger og Verdal, NO",
+    "value": "levanger-og-verdal"
+  },
+  {
+    "title": "Leverkusen, DE",
+    "value": "leverkusen"
+  },
+  {
+    "title": "Levi, FI",
+    "value": "levi"
+  },
+  {
+    "title": "Levice, SK",
+    "value": "levice"
+  },
+  {
+    "title": "Liberec, CZ",
+    "value": "liberec"
+  },
+  {
+    "title": "Liepāja, LV",
+    "value": "liepaja"
+  },
+  {
+    "title": "Lieto, FI",
+    "value": "lieto"
+  },
+  {
+    "title": "Lillehammer, NO",
+    "value": "lillehammer"
+  },
+  {
+    "title": "Lillesand SD, NO",
+    "value": "lillesand-sd"
+  },
+  {
+    "title": "Lillestrøm, NO",
+    "value": "lillestrom"
+  },
+  {
+    "title": "Limassol, CY",
+    "value": "limassol"
+  },
+  {
+    "title": "Linköping, SE",
+    "value": "linkoping"
+  },
+  {
+    "title": "Linz, AT",
+    "value": "linz"
+  },
+  {
+    "title": "Liptovský Hrádok, SK",
+    "value": "liptovsky-hradok"
+  },
+  {
+    "title": "Liptovský Mikuláš, SK",
+    "value": "liptovsky-mikulas"
+  },
+  {
+    "title": "Litomerice, CZ",
+    "value": "litomerice"
+  },
+  {
+    "title": "Livadia, GR",
+    "value": "livadia"
+  },
+  {
+    "title": "Ljubljana, SI",
+    "value": "ljubljana"
+  },
+  {
+    "title": "Łódź, PL",
+    "value": "lodz"
+  },
+  {
+    "title": "Lohja, FI",
+    "value": "lohja"
+  },
+  {
+    "title": "Loimaa, FI",
+    "value": "loimaa"
+  },
+  {
+    "title": "Loviisa, FI",
+    "value": "loviisa"
+  },
+  {
+    "title": "Loznica, RS",
+    "value": "loznica"
+  },
+  {
+    "title": "Lübeck, DE",
+    "value": "lubeck"
+  },
+  {
+    "title": "Lublin, PL",
+    "value": "lublin"
+  },
+  {
+    "title": "Ľubovňa, SK",
+    "value": "lubovna"
+  },
+  {
+    "title": "Lučenec, SK",
+    "value": "lucenec"
+  },
+  {
+    "title": "Ludwigsburg, DE",
+    "value": "ludwigsburg"
+  },
+  {
+    "title": "Ludwigshafen, DE",
+    "value": "ludwigshafen"
+  },
+  {
+    "title": "Luleå, SE",
+    "value": "lulea"
+  },
+  {
+    "title": "Lund, SE",
+    "value": "lund"
+  },
+  {
+    "title": "Luxembourg, LU",
+    "value": "luxembourg"
+  },
+  {
+    "title": "Luxembourg South, LU",
+    "value": "luxembourg-south"
+  },
+  {
+    "title": "Lyngby-Gentofte, DK",
+    "value": "lyngby-gentofte"
+  },
+  {
+    "title": "Ma'alot Tarshiha Area, IL",
+    "value": "maalot-tarshiha-area"
+  },
+  {
+    "title": "Magdeburg, DE",
+    "value": "magdeburg"
+  },
+  {
+    "title": "Maikudyk, KZ",
+    "value": "maikudyk"
+  },
+  {
+    "title": "Mainz, DE",
+    "value": "mainz"
+  },
+  {
+    "title": "Makarska, HR",
+    "value": "makarska"
+  },
+  {
+    "title": "Makó, HU",
+    "value": "mako"
+  },
+  {
+    "title": "Malacky, SK",
+    "value": "malacky"
+  },
+  {
+    "title": "Malmö, SE",
+    "value": "malmo"
+  },
+  {
+    "title": "Malta, MT",
+    "value": "malta"
+  },
+  {
+    "title": "Mandal, NO",
+    "value": "mandal"
+  },
+  {
+    "title": "Mannheim, DE",
+    "value": "mannheim"
+  },
+  {
+    "title": "Mäntsälä, FI",
+    "value": "mantsala"
+  },
+  {
+    "title": "Maribo, DK",
+    "value": "maribo"
+  },
+  {
+    "title": "Maribor, SI",
+    "value": "maribor"
+  },
+  {
+    "title": "Mariehamn, FI",
+    "value": "maarianhamina"
+  },
+  {
+    "title": "Marijampolė, LT",
+    "value": "marijampole"
+  },
+  {
+    "title": "Marinići / Viškovo, HR",
+    "value": "marinici-viskovo"
+  },
+  {
+    "title": "Martin, SK",
+    "value": "martin"
+  },
+  {
+    "title": "Masku, FI",
+    "value": "masku"
+  },
+  {
+    "title": "Matsuyama, JP",
+    "value": "matsuyama"
+  },
+  {
+    "title": "Mažeikiai, LT",
+    "value": "mazeikiai"
+  },
+  {
+    "title": "Medias, RO",
+    "value": "medias"
+  },
+  {
+    "title": "Megara, GR",
+    "value": "megara"
+  },
+  {
+    "title": "Mersch, LU",
+    "value": "mersch"
+  },
+  {
+    "title": "Mesogeia, GR",
+    "value": "mesogeia"
+  },
+  {
+    "title": "Mevaseret Zion Area, IL",
+    "value": "mevaseret-zion-area"
+  },
+  {
+    "title": "Michalovce, SK",
+    "value": "michalovce"
+  },
+  {
+    "title": "Mikkeli, FI",
+    "value": "mikkeli"
+  },
+  {
+    "title": "Mingachevir, AZ",
+    "value": "mingachevir"
+  },
+  {
+    "title": "Miskolc, HU",
+    "value": "miskolc"
+  },
+  {
+    "title": "Miyazaki, JP",
+    "value": "miyazaki"
+  },
+  {
+    "title": "Mlada Boleslav, CZ",
+    "value": "mlada-boleslav"
+  },
+  {
+    "title": "Mo i Rana, NO",
+    "value": "mo_i_rana"
+  },
+  {
+    "title": "Modi'in, IL",
+    "value": "modiin"
+  },
+  {
+    "title": "Molde, NO",
+    "value": "molde"
+  },
+  {
+    "title": "Mönchengladbach, DE",
+    "value": "monchengladbach"
+  },
+  {
+    "title": "Mór, HU",
+    "value": "hun-mor"
+  },
+  {
+    "title": "Morioka, JP",
+    "value": "morioka"
+  },
+  {
+    "title": "Mosjøen, NO",
+    "value": "mosjoeen"
+  },
+  {
+    "title": "Mosonmagyaróvár, HU",
+    "value": "mosonmagyarovar"
+  },
+  {
+    "title": "Moss, NO",
+    "value": "moss"
+  },
+  {
+    "title": "Most, CZ",
+    "value": "most"
+  },
+  {
+    "title": "Motala, SE",
+    "value": "motala"
+  },
+  {
+    "title": "Muhos, FI",
+    "value": "muhos"
+  },
+  {
+    "title": "Munich, DE",
+    "value": "munich"
+  },
+  {
+    "title": "Münster, DE",
+    "value": "munster"
+  },
+  {
+    "title": "Muroran, JP",
+    "value": "muroran"
+  },
+  {
+    "title": "Murska Sobota, SI",
+    "value": "murska-sobota"
+  },
+  {
+    "title": "Muurame, FI",
+    "value": "muurame"
+  },
+  {
+    "title": "Mykonos, GR",
+    "value": "mykonos"
+  },
+  {
+    "title": "Mytilene, GR",
+    "value": "mytilene"
+  },
+  {
+    "title": "Naantali, FI",
+    "value": "naantali"
+  },
+  {
+    "title": "Næstved, DK",
+    "value": "naestved"
+  },
+  {
+    "title": "Nafpaktos, GR",
+    "value": "nafpaktos"
+  },
+  {
+    "title": "Nafplio, GR",
+    "value": "nafplio"
+  },
+  {
+    "title": "Nagaoka, JP",
+    "value": "nagaoka"
+  },
+  {
+    "title": "Nagoya, JP",
+    "value": "nagoya"
+  },
+  {
+    "title": "Nagykanizsa, HU",
+    "value": "nagykanizsa"
+  },
+  {
+    "title": "Naha, JP",
+    "value": "naha"
+  },
+  {
+    "title": "Nakhchivan, AZ",
+    "value": "nakhchivan"
+  },
+  {
+    "title": "Námestovo, SK",
+    "value": "namestovo"
+  },
+  {
+    "title": "Narva, EE",
+    "value": "narva"
+  },
+  {
+    "title": "Narvik, NO",
+    "value": "narvik"
+  },
+  {
+    "title": "Nastola, FI",
+    "value": "nastola"
+  },
+  {
+    "title": "Naxos, GR",
+    "value": "naxos"
+  },
+  {
+    "title": "Nazareth - Nof Hagalil area, IL",
+    "value": "nazareth---nof-hagalil-area"
+  },
+  {
+    "title": "Nesoddtangen, NO",
+    "value": "nesoddtangen"
+  },
+  {
+    "title": "Netivot - Sderot area, IL",
+    "value": "netivot-sderot-area"
+  },
+  {
+    "title": "Nicosia, CY",
+    "value": "nicosia"
+  },
+  {
+    "title": "Niigata, JP",
+    "value": "niigata"
+  },
+  {
+    "title": "Nilsiä, FI",
+    "value": "nilsia"
+  },
+  {
+    "title": "Niš, RS",
+    "value": "nis"
+  },
+  {
+    "title": "Nitra, SK",
+    "value": "nitra"
+  },
+  {
+    "title": "Nokia, FI",
+    "value": "nokia"
+  },
+  {
+    "title": "Norrköping, SE",
+    "value": "norrkoping"
+  },
+  {
+    "title": "Norrtälje, SE",
+    "value": "norrtalje"
+  },
+  {
+    "title": "Nova Gorica, SI",
+    "value": "nova-gorica"
+  },
+  {
+    "title": "Nováky, SK",
+    "value": "novaky"
+  },
+  {
+    "title": "Nové Mesto nad Váhom, SK",
+    "value": "nove-mesto-nad-vahom"
+  },
+  {
+    "title": "Nové Zámky, SK",
+    "value": "nove-zamky"
+  },
+  {
+    "title": "Novi Pazar, RS",
+    "value": "novi-pazar"
+  },
+  {
+    "title": "Novi Sad, RS",
+    "value": "novi_sad"
+  },
+  {
+    "title": "Novo mesto, SI",
+    "value": "novo-mesto"
+  },
+  {
+    "title": "Nummela, FI",
+    "value": "nummela"
+  },
+  {
+    "title": "Nuremberg, DE",
+    "value": "nuremberg"
+  },
+  {
+    "title": "Nurmijärvi, FI",
+    "value": "nurmijarvi"
+  },
+  {
+    "title": "Nyborg, DK",
+    "value": "nyborg"
+  },
+  {
+    "title": "Nyíregyháza, HU",
+    "value": "nyiregyhaza"
+  },
+  {
+    "title": "Nykøbing Falster, DK",
+    "value": "nykoebing-falster"
+  },
+  {
+    "title": "Nykøbing Mors, DK",
+    "value": "nykoebing-mors"
+  },
+  {
+    "title": "Nyköping, SE",
+    "value": "nykoping"
+  },
+  {
+    "title": "Oberhausen, DE",
+    "value": "oberhausen"
+  },
+  {
+    "title": "Obihiro, JP",
+    "value": "obihiro"
+  },
+  {
+    "title": "Obrenovac, RS",
+    "value": "obrenovac"
+  },
+  {
+    "title": "Odder, DK",
+    "value": "odder"
+  },
+  {
+    "title": "Odense, DK",
+    "value": "odense"
+  },
+  {
+    "title": "Offenbach, DE",
+    "value": "offenbach"
+  },
+  {
+    "title": "Ogre, LV",
+    "value": "ogre"
+  },
+  {
+    "title": "Okayama, JP",
+    "value": "okayama"
+  },
+  {
+    "title": "Olomouc, CZ",
+    "value": "olomouc"
+  },
+  {
+    "title": "Olsztyn, PL",
+    "value": "olsztyn"
+  },
+  {
+    "title": "Opatija, HR",
+    "value": "opatija"
+  },
+  {
+    "title": "Opava, CZ",
+    "value": "opava"
+  },
+  {
+    "title": "Oradea, RO",
+    "value": "oradea"
+  },
+  {
+    "title": "Oral, KZ",
+    "value": "oral"
+  },
+  {
+    "title": "Örebro, SE",
+    "value": "orebro"
+  },
+  {
+    "title": "Orestiada, GR",
+    "value": "orestiada"
+  },
+  {
+    "title": "Orimattila, FI",
+    "value": "orimattila"
+  },
+  {
+    "title": "Orivesi, FI",
+    "value": "orivesi"
+  },
+  {
+    "title": "Orkanger, NO",
+    "value": "orkanger"
+  },
+  {
+    "title": "Örnsköldsvik, SE",
+    "value": "ornskoldsvik"
+  },
+  {
+    "title": "Osaka, JP",
+    "value": "osaka"
+  },
+  {
+    "title": "Osaki, JP",
+    "value": "osaki"
+  },
+  {
+    "title": "Osijek, HR",
+    "value": "osijek"
+  },
+  {
+    "title": "Oskemen, KZ",
+    "value": "oskemen"
+  },
+  {
+    "title": "Oslo, NO",
+    "value": "oslo"
+  },
+  {
+    "title": "Oslo Lufthavn, NO",
+    "value": "oslo-lufthavn"
+  },
+  {
+    "title": "Osnabrück, DE",
+    "value": "osnabruck"
+  },
+  {
+    "title": "Östersund, SE",
+    "value": "ostersund"
+  },
+  {
+    "title": "Ostrava, CZ",
+    "value": "ostrava"
+  },
+  {
+    "title": "otaru, JP",
+    "value": "otaru"
+  },
+  {
+    "title": "Oulu, FI",
+    "value": "oulu"
+  },
+  {
+    "title": "Øvre Romerike, NO",
+    "value": "ovre-romerike"
+  },
+  {
+    "title": "Paderborn, DE",
+    "value": "paderborn"
+  },
+  {
+    "title": "Paimio, FI",
+    "value": "paimio"
+  },
+  {
+    "title": "Paks, HU",
+    "value": "paks"
+  },
+  {
+    "title": "Palanga, LT",
+    "value": "palanga"
+  },
+  {
+    "title": "Pančevo, RS",
+    "value": "pancevo"
+  },
+  {
+    "title": "Panevėžys, LT",
+    "value": "panevezys"
+  },
+  {
+    "title": "Pápa, HU",
+    "value": "papa"
+  },
+  {
+    "title": "Paphos, CY",
+    "value": "paphos"
+  },
+  {
+    "title": "Parainen, FI",
+    "value": "parainen"
+  },
+  {
+    "title": "Pardes Hanna - Hadera area, IL",
+    "value": "pardes-hanna"
+  },
+  {
+    "title": "Pardubice, CZ",
+    "value": "pardubice"
+  },
+  {
+    "title": "Pärnu, EE",
+    "value": "parnu"
+  },
+  {
+    "title": "Paros, GR",
+    "value": "paros"
+  },
+  {
+    "title": "Partizánske, SK",
+    "value": "partizanske"
+  },
+  {
+    "title": "Patras, GR",
+    "value": "patra"
+  },
+  {
+    "title": "Pavlodar, KZ",
+    "value": "pavlodar"
+  },
+  {
+    "title": "Pécs, HU",
+    "value": "pecs"
+  },
+  {
+    "title": "Petah Tikva - Bik’at Ono, IL",
+    "value": "petah-tikva"
+  },
+  {
+    "title": "Petropavl, KZ",
+    "value": "petropavl"
+  },
+  {
+    "title": "Pezinok, SK",
+    "value": "pezinok"
+  },
+  {
+    "title": "Piaseczno, PL",
+    "value": "piaseczno"
+  },
+  {
+    "title": "Piatra Neamt, RO",
+    "value": "piatra-neamt"
+  },
+  {
+    "title": "Pieksämäki, FI",
+    "value": "pieksamaki"
+  },
+  {
+    "title": "Piešťany, SK",
+    "value": "piestany"
+  },
+  {
+    "title": "Pietarsaari, FI",
+    "value": "pietarsaari"
+  },
+  {
+    "title": "Piikkiö, FI",
+    "value": "piikkio"
+  },
+  {
+    "title": "Pilsen, CZ",
+    "value": "pilsen"
+  },
+  {
+    "title": "Pirot, RS",
+    "value": "pirot"
+  },
+  {
+    "title": "Pisek, CZ",
+    "value": "pisek"
+  },
+  {
+    "title": "Piteå, SE",
+    "value": "pitea"
+  },
+  {
+    "title": "Pitesti, RO",
+    "value": "pitesti"
+  },
+  {
+    "title": "Plázs Siófok, HU",
+    "value": "plazs-siofok"
+  },
+  {
+    "title": "Pleven, BG",
+    "value": "pleven"
+  },
+  {
+    "title": "Ploiesti, RO",
+    "value": "ploiesti"
+  },
+  {
+    "title": "Plovdiv, BG",
+    "value": "plovdiv"
+  },
+  {
+    "title": "Podstrana, HR",
+    "value": "podstrana"
+  },
+  {
+    "title": "Poprad, SK",
+    "value": "poprad"
+  },
+  {
+    "title": "Poreč, HR",
+    "value": "porec"
+  },
+  {
+    "title": "Pori, FI",
+    "value": "pori"
+  },
+  {
+    "title": "Porsgrunn og Skien, NO",
+    "value": "porsgrunn-og-skien"
+  },
+  {
+    "title": "Portorož-Piran-Lucija, SI",
+    "value": "portoroz-piran-lucija"
+  },
+  {
+    "title": "Porvoo, FI",
+    "value": "porvoo"
+  },
+  {
+    "title": "Poti, GE",
+    "value": "poti"
+  },
+  {
+    "title": "Potsdam, DE",
+    "value": "potsdam"
+  },
+  {
+    "title": "Považská Bystrica, SK",
+    "value": "povazska-bystrica"
+  },
+  {
+    "title": "Požarevac, RS",
+    "value": "pozarevac"
+  },
+  {
+    "title": "Požega, HR",
+    "value": "pozega"
+  },
+  {
+    "title": "Poznań, PL",
+    "value": "poznan"
+  },
+  {
+    "title": "Prague, CZ",
+    "value": "prague"
+  },
+  {
+    "title": "Prerov, CZ",
+    "value": "prerov"
+  },
+  {
+    "title": "Prešov, SK",
+    "value": "presov"
+  },
+  {
+    "title": "Preveza, GR",
+    "value": "preveza"
+  },
+  {
+    "title": "Pribram, CZ",
+    "value": "pribram"
+  },
+  {
+    "title": "Prievidza, SK",
+    "value": "prievidza"
+  },
+  {
+    "title": "Pristina, XK",
+    "value": "pristina"
+  },
+  {
+    "title": "Prostějov, CZ",
+    "value": "prostejov"
+  },
+  {
+    "title": "Ptolemaida, GR",
+    "value": "ptolemaida"
+  },
+  {
+    "title": "Ptuj, SI",
+    "value": "ptuj_"
+  },
+  {
+    "title": "Púchov, SK",
+    "value": "puchov"
+  },
+  {
+    "title": "Pula, HR",
+    "value": "pula"
+  },
+  {
+    "title": "Pylos, GR",
+    "value": "pylos"
+  },
+  {
+    "title": "Pyrgos, GR",
+    "value": "pyrgos"
+  },
+  {
+    "title": "Qonaev, KZ",
+    "value": "qonaev"
+  },
+  {
+    "title": "Raahe, FI",
+    "value": "raahe"
+  },
+  {
+    "title": "Rajamäki, FI",
+    "value": "rajamaki"
+  },
+  {
+    "title": "Rajec, SK",
+    "value": "rajec"
+  },
+  {
+    "title": "Rajecké Teplice, SK",
+    "value": "rajecke-teplice"
+  },
+  {
+    "title": "Rakvere, EE",
+    "value": "rakvere"
+  },
+  {
+    "title": "Ramnicu Valcea, RO",
+    "value": "ramnicu-valcea"
+  },
+  {
+    "title": "Randers, DK",
+    "value": "randers"
+  },
+  {
+    "title": "Rauma, FI",
+    "value": "rauma"
+  },
+  {
+    "title": "Regensburg, DE",
+    "value": "regensburg"
+  },
+  {
+    "title": "Remich, LU",
+    "value": "remich"
+  },
+  {
+    "title": "Resita, RO",
+    "value": "resita"
+  },
+  {
+    "title": "Rethymno, GR",
+    "value": "rethymno"
+  },
+  {
+    "title": "Revúca, SK",
+    "value": "revuca"
+  },
+  {
+    "title": "Reykjanesbær, IS",
+    "value": "reykjanesbaer"
+  },
+  {
+    "title": "Reykjavik, IS",
+    "value": "reykjavik"
+  },
+  {
+    "title": "Rēzekne, LV",
+    "value": "rezekne"
+  },
+  {
+    "title": "Rhodes, GR",
+    "value": "rhodes"
+  },
+  {
+    "title": "Ribe, DK",
+    "value": "ribe"
+  },
+  {
+    "title": "Ricany, CZ",
+    "value": "ricany"
+  },
+  {
+    "title": "Riga, LV",
+    "value": "riga"
+  },
+  {
+    "title": "Riihimäki, FI",
+    "value": "riihimaki"
+  },
+  {
+    "title": "Rijeka, HR",
+    "value": "rijeka"
+  },
+  {
+    "title": "Rimavská Sobota, SK",
+    "value": "rimavska-sobota"
+  },
+  {
+    "title": "Ringe, DK",
+    "value": "ringe"
+  },
+  {
+    "title": "Ringkøbing, DK",
+    "value": "ringkoebing"
+  },
+  {
+    "title": "Ringsted, DK",
+    "value": "ringsted"
+  },
+  {
+    "title": "Rishon Lezion & Hashfela area, IL",
+    "value": "rishon-lezion-hashfela-area"
+  },
+  {
+    "title": "Rødby, DK",
+    "value": "roedby"
+  },
+  {
+    "title": "Rosh Pinna - Zefat area, IL",
+    "value": "rosh-pinna---zefat-area"
+  },
+  {
+    "title": "Roskilde, DK",
+    "value": "roskilde"
+  },
+  {
+    "title": "Rostock, DE",
+    "value": "rostock"
+  },
+  {
+    "title": "Rovaniemi, FI",
+    "value": "rovaniemi"
+  },
+  {
+    "title": "Rovinj, HR",
+    "value": "rovinj"
+  },
+  {
+    "title": "Rožňava, SK",
+    "value": "roznava"
+  },
+  {
+    "title": "Rudnyi, KZ",
+    "value": "rudnyi"
+  },
+  {
+    "title": "Ruka, FI",
+    "value": "ruka"
+  },
+  {
+    "title": "Ruokolahti, FI",
+    "value": "ruokolahti"
+  },
+  {
+    "title": "Rustavi, GE",
+    "value": "rustavi"
+  },
+  {
+    "title": "Ružomberok, SK",
+    "value": "ruzomberok"
+  },
+  {
+    "title": "Rzeszów, PL",
+    "value": "rzeszow"
+  },
+  {
+    "title": "Saarbrücken, DE",
+    "value": "saarbrucken"
+  },
+  {
+    "title": "Šabac, RS",
+    "value": "sabac"
+  },
+  {
+    "title": "Sæby, DK",
+    "value": "saeby"
+  },
+  {
+    "title": "Šahy, SK",
+    "value": "sahy"
+  },
+  {
+    "title": "Saitama, JP",
+    "value": "saitama"
+  },
+  {
+    "title": "Šaľa, SK",
+    "value": "sala"
+  },
+  {
+    "title": "Salamina, GR",
+    "value": "salamina"
+  },
+  {
+    "title": "Salaspils, LV",
+    "value": "salaspils"
+  },
+  {
+    "title": "Salgótarján, HU",
+    "value": "salgotarjan"
+  },
+  {
+    "title": "Salo, FI",
+    "value": "salo"
+  },
+  {
+    "title": "Salzburg, AT",
+    "value": "salzburg"
+  },
+  {
+    "title": "Samarkand, UZ",
+    "value": "samarkand"
+  },
+  {
+    "title": "Samobor, HR",
+    "value": "samobor"
+  },
+  {
+    "title": "Šamorín, SK",
+    "value": "samorin"
+  },
+  {
+    "title": "Sandefjord, NO",
+    "value": "sandefjord"
+  },
+  {
+    "title": "Sandnes, NO",
+    "value": "sandnes"
+  },
+  {
+    "title": "Santorini, GR",
+    "value": "santorini"
+  },
+  {
+    "title": "Sapporo, JP",
+    "value": "sapporo"
+  },
+  {
+    "title": "Sarpsborg, NO",
+    "value": "sarpsborg"
+  },
+  {
+    "title": "Sárvár, HU",
+    "value": "sarvar"
+  },
+  {
+    "title": "Sastamala, FI",
+    "value": "sastamala"
+  },
+  {
+    "title": "Satu Mare, RO",
+    "value": "satu-mare"
+  },
+  {
+    "title": "Savonlinna, FI",
+    "value": "savonlinna"
+  },
+  {
+    "title": "Seinäjoki, FI",
+    "value": "seinajoki"
+  },
+  {
+    "title": "Selfoss, IS",
+    "value": "selfossonly"
+  },
+  {
+    "title": "Semey, KZ",
+    "value": "semey"
+  },
+  {
+    "title": "Sendai, JP",
+    "value": "sendai"
+  },
+  {
+    "title": "Senica, SK",
+    "value": "senica"
+  },
+  {
+    "title": "Serres, GR",
+    "value": "serres"
+  },
+  {
+    "title": "Sfantu Gheorghe, RO",
+    "value": "sfantu-gheorghe"
+  },
+  {
+    "title": "Shaki, AZ",
+    "value": "shaki"
+  },
+  {
+    "title": "Shingu, JP",
+    "value": "shingu"
+  },
+  {
+    "title": "Shizuoka, JP",
+    "value": "shizuoka"
+  },
+  {
+    "title": "Shkodër, AL",
+    "value": "shkoder"
+  },
+  {
+    "title": "Shonan, JP",
+    "value": "shonan"
+  },
+  {
+    "title": "Shusha, AZ",
+    "value": "shusha"
+  },
+  {
+    "title": "Shymkent, KZ",
+    "value": "shymkent"
+  },
+  {
+    "title": "Šiauliai, LT",
+    "value": "siauliai"
+  },
+  {
+    "title": "Šibenik, HR",
+    "value": "sibenik"
+  },
+  {
+    "title": "Sibiu, RO",
+    "value": "sibiu"
+  },
+  {
+    "title": "Sigtuna, SE",
+    "value": "sigtuna"
+  },
+  {
+    "title": "Sigulda, LV",
+    "value": "sigulda"
+  },
+  {
+    "title": "Siilinjärvi, FI",
+    "value": "siilinjarvi"
+  },
+  {
+    "title": "Silkeborg, DK",
+    "value": "silkeborg"
+  },
+  {
+    "title": "Siófok, HU",
+    "value": "siofok"
+  },
+  {
+    "title": "Sipoo, FI",
+    "value": "sipoo"
+  },
+  {
+    "title": "Sisak, HR",
+    "value": "sisak"
+  },
+  {
+    "title": "Sitia, GR",
+    "value": "sitia"
+  },
+  {
+    "title": "Skanderborg, DK",
+    "value": "skanderborg"
+  },
+  {
+    "title": "Skellefteå, SE",
+    "value": "skelleftea"
+  },
+  {
+    "title": "Skiathos, GR",
+    "value": "skiathos"
+  },
+  {
+    "title": "Skive, DK",
+    "value": "skive"
+  },
+  {
+    "title": "Skjern, DK",
+    "value": "skjern"
+  },
+  {
+    "title": "Škofja Loka & Medvode, SI",
+    "value": "skofja-loka-medvode"
+  },
+  {
+    "title": "Skopje, MK",
+    "value": "skopje"
+  },
+  {
+    "title": "Skövde, SE",
+    "value": "skovde"
+  },
+  {
+    "title": "Slagelse, DK",
+    "value": "slagelse"
+  },
+  {
+    "title": "Slatina, RO",
+    "value": "slatina"
+  },
+  {
+    "title": "Slavonski Brod, HR",
+    "value": "slavonski-brod"
+  },
+  {
+    "title": "Slovenj Gradec, SI",
+    "value": "slovenj-gradec"
+  },
+  {
+    "title": "Slovenska Bistrica, SI",
+    "value": "slovenska-bistrica"
+  },
+  {
+    "title": "Smederevo, RS",
+    "value": "smederevo"
+  },
+  {
+    "title": "Snina, SK",
+    "value": "snina"
+  },
+  {
+    "title": "Sobrance, SK",
+    "value": "sobrance"
+  },
+  {
+    "title": "Sodankylä, FI",
+    "value": "sodankyla"
+  },
+  {
+    "title": "Södertälje, SE",
+    "value": "sodertalje"
+  },
+  {
+    "title": "Sofia, BG",
+    "value": "sofia"
+  },
+  {
+    "title": "Solin, HR",
+    "value": "solin"
+  },
+  {
+    "title": "Solrød-Køge, DK",
+    "value": "solroed-koege"
+  },
+  {
+    "title": "Sombor, RS",
+    "value": "sombor"
+  },
+  {
+    "title": "Sønderborg, DK",
+    "value": "soenderborg"
+  },
+  {
+    "title": "Sopot, PL",
+    "value": "sopot"
+  },
+  {
+    "title": "Sopron, HU",
+    "value": "sopron"
+  },
+  {
+    "title": "Sorø, DK",
+    "value": "soroe"
+  },
+  {
+    "title": "Sosnowiec, PL",
+    "value": "sosnowiec"
+  },
+  {
+    "title": "Sotkamo, FI",
+    "value": "sotkamo"
+  },
+  {
+    "title": "South Attica, GR",
+    "value": "south-attica"
+  },
+  {
+    "title": "Sparti, GR",
+    "value": "sparti"
+  },
+  {
+    "title": "Spišská Belá, SK",
+    "value": "spisska-bela"
+  },
+  {
+    "title": "Spišská Nová Ves, SK",
+    "value": "spisska-nova-ves"
+  },
+  {
+    "title": "Split, HR",
+    "value": "split"
+  },
+  {
+    "title": "Sremska Mitrovica, RS",
+    "value": "sremska-mitrovica"
+  },
+  {
+    "title": "Stavanger, NO",
+    "value": "stavanger"
+  },
+  {
+    "title": "Steinkjer, NO",
+    "value": "steinkjer"
+  },
+  {
+    "title": "Stjørdal, NO",
+    "value": "stjoerdal"
+  },
+  {
+    "title": "Stockholm, SE",
+    "value": "stockholm"
+  },
+  {
+    "title": "Stord, NO",
+    "value": "stord"
+  },
+  {
+    "title": "Store Heddinge, DK",
+    "value": "store-heddinge"
+  },
+  {
+    "title": "Strakonice, CZ",
+    "value": "strakonice"
+  },
+  {
+    "title": "Struer, DK",
+    "value": "struer"
+  },
+  {
+    "title": "Sturovo, SK",
+    "value": "sturovo"
+  },
+  {
+    "title": "Stuttgart, DE",
+    "value": "stuttgart"
+  },
+  {
+    "title": "Subotica, RS",
+    "value": "subotica"
+  },
+  {
+    "title": "Suceava, RO",
+    "value": "suceava"
+  },
+  {
+    "title": "Sumgait, AZ",
+    "value": "sumgait"
+  },
+  {
+    "title": "Sundsvall, SE",
+    "value": "sundsvall"
+  },
+  {
+    "title": "Suonenjoki, FI",
+    "value": "suonenjoki"
+  },
+  {
+    "title": "Svendborg, DK",
+    "value": "svendborg"
+  },
+  {
+    "title": "Sveti Ivan Zelina, HR",
+    "value": "sveti-ivan-zelina"
+  },
+  {
+    "title": "Syros, GR",
+    "value": "syros"
+  },
+  {
+    "title": "Szarvas, HU",
+    "value": "szarvas"
+  },
+  {
+    "title": "Szczecin, PL",
+    "value": "szczecin"
+  },
+  {
+    "title": "Szczecin-Prawobrzeże, PL",
+    "value": "szczecin-prawobrzeze"
+  },
+  {
+    "title": "Szeged, HU",
+    "value": "szeged"
+  },
+  {
+    "title": "Székesfehérvár, HU",
+    "value": "szekesfehervar"
+  },
+  {
+    "title": "Szekszárd, HU",
+    "value": "szekszard"
+  },
+  {
+    "title": "Szentendre, HU",
+    "value": "szentendre"
+  },
+  {
+    "title": "Szolnok, HU",
+    "value": "szolnok"
+  },
+  {
+    "title": "Szombathely, HU",
+    "value": "szombathely"
+  },
+  {
+    "title": "Tabor, CZ",
+    "value": "tabor"
+  },
+  {
+    "title": "Takamatsu, JP",
+    "value": "takamatsu"
+  },
+  {
+    "title": "Taldykorgan, KZ",
+    "value": "taldykorgan"
+  },
+  {
+    "title": "Talgar, KZ",
+    "value": "talgar"
+  },
+  {
+    "title": "Tallinn, EE",
+    "value": "tallinn"
+  },
+  {
+    "title": "Tammisaari, FI",
+    "value": "tammisaari"
+  },
+  {
+    "title": "Tampere, FI",
+    "value": "tampere"
+  },
+  {
+    "title": "Taraz, KZ",
+    "value": "taraz"
+  },
+  {
+    "title": "Targoviste, RO",
+    "value": "targoviste"
+  },
+  {
+    "title": "Targu Jiu, RO",
+    "value": "targu-jiu"
+  },
+  {
+    "title": "Targu Mures, RO",
+    "value": "targu-mures"
+  },
+  {
+    "title": "Tartu, EE",
+    "value": "tartu"
+  },
+  {
+    "title": "Tashkent, UZ",
+    "value": "tashkent"
+  },
+  {
+    "title": "Tata, HU",
+    "value": "tata"
+  },
+  {
+    "title": "Tatabánya, HU",
+    "value": "tatabanya"
+  },
+  {
+    "title": "Tauragė, LT",
+    "value": "taurage"
+  },
+  {
+    "title": "Tbilisi, GE",
+    "value": "tbilisi"
+  },
+  {
+    "title": "Telavi, GE",
+    "value": "telavi"
+  },
+  {
+    "title": "Telšiai, LT",
+    "value": "telsiai"
+  },
+  {
+    "title": "Temirtau, KZ",
+    "value": "temirtau"
+  },
+  {
+    "title": "Teplice, CZ",
+    "value": "teplice"
+  },
+  {
+    "title": "Tervola, FI",
+    "value": "tervola"
+  },
+  {
+    "title": "Thessaloniki, GR",
+    "value": "thessaloniki"
+  },
+  {
+    "title": "Thisted, DK",
+    "value": "thisted"
+  },
+  {
+    "title": "Thiva, GR",
+    "value": "thiva"
+  },
+  {
+    "title": "Timisoara, RO",
+    "value": "timisoara"
+  },
+  {
+    "title": "Tinos, GR",
+    "value": "tinos"
+  },
+  {
+    "title": "Tirana, AL",
+    "value": "tirana"
+  },
+  {
+    "title": "TLV - Herzliya area, IL",
+    "value": "tel-aviv"
+  },
+  {
+    "title": "Toijala, FI",
+    "value": "toijala"
+  },
+  {
+    "title": "Tokushima, JP",
+    "value": "tokushima"
+  },
+  {
+    "title": "Tokyo, JP",
+    "value": "tokyo"
+  },
+  {
+    "title": "Tomakomai, JP",
+    "value": "tomakomai"
+  },
+  {
+    "title": "Tønsberg, NO",
+    "value": "tonsberg"
+  },
+  {
+    "title": "Topoľčany, SK",
+    "value": "topolcany"
+  },
+  {
+    "title": "Tornio, FI",
+    "value": "tornio"
+  },
+  {
+    "title": "Toruń, PL",
+    "value": "torun"
+  },
+  {
+    "title": "Trbovlje, SI",
+    "value": "trbovlje"
+  },
+  {
+    "title": "Trebic, CZ",
+    "value": "trebic"
+  },
+  {
+    "title": "Trebišov, SK",
+    "value": "trebisov"
+  },
+  {
+    "title": "Trenčín, SK",
+    "value": "trencin"
+  },
+  {
+    "title": "Trencin Grape Festival, SK",
+    "value": "trencin-grape-festival"
+  },
+  {
+    "title": "Trikala, GR",
+    "value": "trikala"
+  },
+  {
+    "title": "Tripoli, GR",
+    "value": "tripoli"
+  },
+  {
+    "title": "Trnava, SK",
+    "value": "trnava"
+  },
+  {
+    "title": "Trogir, HR",
+    "value": "trogir"
+  },
+  {
+    "title": "Troisdorf und Siegburg, DE",
+    "value": "troisdorf-siegburg"
+  },
+  {
+    "title": "Trollhättan, SE",
+    "value": "trollhattan"
+  },
+  {
+    "title": "Tromsø, NO",
+    "value": "tromso"
+  },
+  {
+    "title": "Trondheim, NO",
+    "value": "trondheim"
+  },
+  {
+    "title": "Turany, SK",
+    "value": "turany"
+  },
+  {
+    "title": "Turcianske Teplice, SK",
+    "value": "turcianske-teplice"
+  },
+  {
+    "title": "Turenki, FI",
+    "value": "turenki"
+  },
+  {
+    "title": "Turkestan, KZ",
+    "value": "turkestan"
+  },
+  {
+    "title": "Turku, FI",
+    "value": "turku"
+  },
+  {
+    "title": "Tuuri, FI",
+    "value": "tuuri"
+  },
+  {
+    "title": "Tuusula, FI",
+    "value": "tuusula"
+  },
+  {
+    "title": "Tvrdošín + Trstená, SK",
+    "value": "tvrdosin-trstena"
+  },
+  {
+    "title": "Uddevalla, SE",
+    "value": "uddevalla"
+  },
+  {
+    "title": "Uherske Hradiste, CZ",
+    "value": "uherske-hradiste"
+  },
+  {
+    "title": "Ukmergė, LT",
+    "value": "ukmerge"
+  },
+  {
+    "title": "Ulm, DE",
+    "value": "ulm"
+  },
+  {
+    "title": "Ulvila, FI",
+    "value": "ulvila"
+  },
+  {
+    "title": "Umeå, SE",
+    "value": "umea"
+  },
+  {
+    "title": "Uppsala, SE",
+    "value": "uppsala"
+  },
+  {
+    "title": "Usti nad Labem, CZ",
+    "value": "usti-nad-labem"
+  },
+  {
+    "title": "Utena, LT",
+    "value": "utena"
+  },
+  {
+    "title": "Uzice, RS",
+    "value": "uzice"
+  },
+  {
+    "title": "Vääksy, FI",
+    "value": "vaaksy"
+  },
+  {
+    "title": "Vaasa, FI",
+    "value": "vaasa"
+  },
+  {
+    "title": "Vác, HU",
+    "value": "vac"
+  },
+  {
+    "title": "Valjevo, RS",
+    "value": "valjevo"
+  },
+  {
+    "title": "Valkeakoski, FI",
+    "value": "valkeakoski"
+  },
+  {
+    "title": "Valmiera, LV",
+    "value": "valmiera"
+  },
+  {
+    "title": "Vänersborg, SE",
+    "value": "vanersborg"
+  },
+  {
+    "title": "Vantaa, FI",
+    "value": "vantaa"
+  },
+  {
+    "title": "Varaždin, HR",
+    "value": "varazdin"
+  },
+  {
+    "title": "Varberg, SE",
+    "value": "varberg"
+  },
+  {
+    "title": "Varde, DK",
+    "value": "varde"
+  },
+  {
+    "title": "Varkaus, FI",
+    "value": "varkaus"
+  },
+  {
+    "title": "Varna, BG",
+    "value": "varna"
+  },
+  {
+    "title": "Várpalota, HU",
+    "value": "varpalota"
+  },
+  {
+    "title": "Vaslui, RO",
+    "value": "vaslui"
+  },
+  {
+    "title": "Västerås, SE",
+    "value": "vasteras"
+  },
+  {
+    "title": "Västervik, SE",
+    "value": "vastervik"
+  },
+  {
+    "title": "Växjö, SE",
+    "value": "vaxjo"
+  },
+  {
+    "title": "Vecsés, HU",
+    "value": "vecses"
+  },
+  {
+    "title": "Vejen, DK",
+    "value": "vejen"
+  },
+  {
+    "title": "Vejle, DK",
+    "value": "vejle"
+  },
+  {
+    "title": "Velence, HU",
+    "value": "velence"
+  },
+  {
+    "title": "Velenje, SI",
+    "value": "velenje"
+  },
+  {
+    "title": "Velika Gorica, HR",
+    "value": "velika-gorica"
+  },
+  {
+    "title": "Veľký Krtíš, SK",
+    "value": "velky-krtis"
+  },
+  {
+    "title": "Veľký Meder, SK",
+    "value": "velky-meder"
+  },
+  {
+    "title": "Ventspils, LV",
+    "value": "ventspils"
+  },
+  {
+    "title": "Veresegyház, HU",
+    "value": "veresegyhaz"
+  },
+  {
+    "title": "Veria, GR",
+    "value": "veria"
+  },
+  {
+    "title": "Vestby, NO",
+    "value": "vestby"
+  },
+  {
+    "title": "Vestegnen, DK",
+    "value": "vestegnen"
+  },
+  {
+    "title": "Veszprém, HU",
+    "value": "veszprem"
+  },
+  {
+    "title": "Viborg, DK",
+    "value": "viborg"
+  },
+  {
+    "title": "Vienna, AT",
+    "value": "vienna"
+  },
+  {
+    "title": "Viljandi, EE",
+    "value": "viljandi"
+  },
+  {
+    "title": "Villach, AT",
+    "value": "villach"
+  },
+  {
+    "title": "Vilnius, LT",
+    "value": "vilnius"
+  },
+  {
+    "title": "Vinkovci, HR",
+    "value": "vinkovci"
+  },
+  {
+    "title": "Virovitica, HR",
+    "value": "virovitica"
+  },
+  {
+    "title": "Visby, SE",
+    "value": "visby"
+  },
+  {
+    "title": "Vlora, AL",
+    "value": "vlora"
+  },
+  {
+    "title": "Volos, GR",
+    "value": "volos"
+  },
+  {
+    "title": "Vordingborg, DK",
+    "value": "vordingborg"
+  },
+  {
+    "title": "Vranje, RS",
+    "value": "vranje"
+  },
+  {
+    "title": "Vranov nad Topľou, SK",
+    "value": "vranov-nad-toplou"
+  },
+  {
+    "title": "Vrbové, SK",
+    "value": "vrbove"
+  },
+  {
+    "title": "Vršac, RS",
+    "value": "vrsac"
+  },
+  {
+    "title": "Vukovar, HR",
+    "value": "vukovar"
+  },
+  {
+    "title": "Vuokatti, FI",
+    "value": "vuokatti"
+  },
+  {
+    "title": "Vysoké Tatry + Svit, SK",
+    "value": "vysoke-tatry-svit"
+  },
+  {
+    "title": "Warsaw, PL",
+    "value": "warsaw"
+  },
+  {
+    "title": "Wiesbaden, DE",
+    "value": "wiesbaden"
+  },
+  {
+    "title": "Wiltz, LU",
+    "value": "wiltz"
+  },
+  {
+    "title": "Wolfsburg, DE",
+    "value": "wolfsburg"
+  },
+  {
+    "title": "Wrocław, PL",
+    "value": "wroclaw"
+  },
+  {
+    "title": "Wuppertal, DE",
+    "value": "wuppertal"
+  },
+  {
+    "title": "Würzburg, DE",
+    "value": "wurzburg"
+  },
+  {
+    "title": "Xanthi, GR",
+    "value": "xanthi"
+  },
+  {
+    "title": "Yamagata, JP",
+    "value": "yamagata"
+  },
+  {
+    "title": "Ylivieska, FI",
+    "value": "ylivieska"
+  },
+  {
+    "title": "Ylläs, FI",
+    "value": "yllas"
+  },
+  {
+    "title": "Ylöjärvi, FI",
+    "value": "ylojarvi"
+  },
+  {
+    "title": "Yokneam - Tivon area, IL",
+    "value": "yokneam"
+  },
+  {
+    "title": "Yokohama, JP",
+    "value": "yokohama"
+  },
+  {
+    "title": "Ystad, SE",
+    "value": "ystad"
+  },
+  {
+    "title": "Ytre Enebakk, NO",
+    "value": "ytre-enebakk"
+  },
+  {
+    "title": "Yyteri, FI",
+    "value": "yyteri"
+  },
+  {
+    "title": "Zadar, HR",
+    "value": "zadar"
+  },
+  {
+    "title": "Zagreb, HR",
+    "value": "zagreb"
+  },
+  {
+    "title": "Zakynthos, GR",
+    "value": "zakynthos"
+  },
+  {
+    "title": "Zalaegerszeg, HU",
+    "value": "zalaegerszeg"
+  },
+  {
+    "title": "Zalau, RO",
+    "value": "zalau"
+  },
+  {
+    "title": "Zaprešić, HR",
+    "value": "zapresic"
+  },
+  {
+    "title": "Žarnovica, SK",
+    "value": "zarnovica"
+  },
+  {
+    "title": "Zbraslav-Radotin-Lipence, CZ",
+    "value": "zbraslav-radotin-lipence"
+  },
+  {
+    "title": "Žiar nad Hronom, SK",
+    "value": "ziar-nad-hronom_"
+  },
+  {
+    "title": "Zielona Góra, PL",
+    "value": "zielona-gora"
+  },
+  {
+    "title": "Žilina, SK",
+    "value": "zilina"
+  },
+  {
+    "title": "Zlaté Moravce, SK",
+    "value": "zlate-moravce"
+  },
+  {
+    "title": "Zlatibor, RS",
+    "value": "zlatibor"
+  },
+  {
+    "title": "Zlin, CZ",
+    "value": "zlin"
+  },
+  {
+    "title": "Znojmo, CZ",
+    "value": "znojmo"
+  },
+  {
+    "title": "Zrenjanin, RS",
+    "value": "zrenjanin"
+  },
+  {
+    "title": "Zugdidi, GE",
+    "value": "zugdidi"
+  },
+  {
+    "title": "Zvolen, SK",
+    "value": "zvolen"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "targets": ["cursor", "claudecode", "codexcli"],
+  "features": ["rules", "ignore", "mcp", "commands", "subagents"],
+  "baseDirs": ["."],
+  "delete": true,
+  "verbose": false,
+  "global": false,
+  "simulateCommands": false,
+  "simulateSubagents": false,
+  "modularMcp": false
+}
