@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "api-tester",
+  "title": "API Tester",
+  "description": "Test APIs with a lightweight Postman alternative. Send HTTP requests, manage collections, and inspect responses.",
+  "icon": "command-icon.png",
+  "author": "OffLine",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "api",
+    "http",
+    "rest",
+    "postman",
+    "request",
+    "testing",
+    "curl",
+    "fetch",
+    "axios",
+    "collection",
+    "environment",
+    "variables"
+  ],
+  "screenshots": [
+    {
+      "url": "metadata/Screenshot1.png",
+      "title": "Send HTTP Requests"
+    },
+    {
+      "url": "metadata/Screenshot2.png",
+      "title": "Manage Collections"
+    },
+    {
+      "url": "metadata/Screenshot3.png",
+      "title": "Environment Variables"
+    }
+  ],
+  "commands": [
+    {
+      "name": "new-request",
+      "title": "Send Request",
+      "subtitle": "API Tester",
+      "description": "Send HTTP requests with support for all methods, authentication, and body types",
+      "mode": "view"
+    },
+    {
+      "name": "collections",
+      "title": "Manage Collections",
+      "subtitle": "API Tester",
+      "description": "Organize and manage your API request collections",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Request History",
+      "subtitle": "API Tester",
+      "description": "View and replay your recent API requests",
+      "mode": "view"
+    },
+    {
+      "name": "environments",
+      "title": "Manage Environments",
+      "subtitle": "API Tester",
+      "description": "Create and manage environment variables for your requests",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "requestTimeout",
+      "type": "textfield",
+      "required": false,
+      "title": "Request Timeout",
+      "description": "Default request timeout in milliseconds",
+      "default": "30000"
+    },
+    {
+      "name": "maxHistoryItems",
+      "type": "textfield",
+      "required": false,
+      "title": "Max History Items",
+      "description": "Maximum number of requests to keep in history",
+      "default": "50"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.12.0",
+    "form-data": "^4.0.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist --skip-types",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
