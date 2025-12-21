@@ -93,4 +93,3 @@ export interface ApiResponse {
     appStoreVersionLocalizations?: Record<string, AppStoreVersionLocalization>;
   };
 }
-

@@ -61,9 +61,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={
-        statusFilter === "all" ? "Search apps..." : `Search in ${filterLabel}...`
-      }
+      searchBarPlaceholder={statusFilter === "all" ? "Search apps..." : `Search in ${filterLabel}...`}
     >
       {error && !apps ? (
         <List.EmptyView
@@ -73,16 +71,8 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Retry" icon={Icon.ArrowClockwise} onAction={handleRefresh} />
-              <Action.CopyToClipboard
-                title="Copy Error"
-                content={getRawError(error)}
-                icon={Icon.Clipboard}
-              />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action.CopyToClipboard title="Copy Error" content={getRawError(error)} icon={Icon.Clipboard} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -97,11 +87,7 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <Action
-                title="Show All Apps"
-                icon={Icon.List}
-                onAction={() => setStatusFilter("all")}
-              />
+              <Action title="Show All Apps" icon={Icon.List} onAction={() => setStatusFilter("all")} />
             </ActionPanel>
           }
         />
@@ -171,16 +157,8 @@ function AppListItem({ app, onRefresh, statusFilter, onFilterChange }: AppListIt
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Push
-              title="View Details"
-              icon={Icon.Eye}
-              target={<AppDetailView app={app} />}
-            />
-            <Action.OpenInBrowser
-              title="Open in App Store Connect"
-              url={app.appStoreConnectUrl}
-              icon={Icon.Globe}
-            />
+            <Action.Push title="View Details" icon={Icon.Eye} target={<AppDetailView app={app} />} />
+            <Action.OpenInBrowser title="Open in App Store Connect" url={app.appStoreConnectUrl} icon={Icon.Globe} />
             <Action.CopyToClipboard
               title="Copy Bundle ID"
               content={app.bundleId}
@@ -276,27 +254,16 @@ ${
                 text={getPlatformLabel(app.latestVersion.platform)}
                 icon={getPlatformIcon(app.latestVersion.platform)}
               />
-              <Detail.Metadata.Label
-                title="Created"
-                text={formatDate(app.latestVersion.createdDate)}
-              />
+              <Detail.Metadata.Label title="Created" text={formatDate(app.latestVersion.createdDate)} />
             </>
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link
-            title="App Store Connect"
-            target={app.appStoreConnectUrl}
-            text="Open in Browser"
-          />
+          <Detail.Metadata.Link title="App Store Connect" target={app.appStoreConnectUrl} text="Open in Browser" />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in App Store Connect"
-            url={app.appStoreConnectUrl}
-            icon={Icon.Globe}
-          />
+          <Action.OpenInBrowser title="Open in App Store Connect" url={app.appStoreConnectUrl} icon={Icon.Globe} />
           <Action.CopyToClipboard
             title="Copy Bundle ID"
             content={app.bundleId}

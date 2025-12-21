@@ -72,14 +72,11 @@ export async function fetchApps(): Promise<ProcessedApp[]> {
   return apps.map((app: App) => {
     // Find versions related to this app
     const appVersionIds = app.relationships?.appStoreVersions?.data?.map((v) => v.id) || [];
-    const versions = appVersionIds
-      .map((id) => versionsById[id])
-      .filter((v): v is AppStoreVersion => v !== undefined);
+    const versions = appVersionIds.map((id) => versionsById[id]).filter((v): v is AppStoreVersion => v !== undefined);
 
     // Find the most recent version (by createdDate)
     const latestVersion = versions.sort(
-      (a, b) =>
-        new Date(b.attributes.createdDate).getTime() - new Date(a.attributes.createdDate).getTime(),
+      (a, b) => new Date(b.attributes.createdDate).getTime() - new Date(a.attributes.createdDate).getTime(),
     )[0];
 
     return {
