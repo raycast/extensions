@@ -27,7 +27,7 @@ export default function AllShortcutsCommand() {
   });
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search applications">
       {sortedApps.map((app) => (
         <List.Item
           key={app.slug}
