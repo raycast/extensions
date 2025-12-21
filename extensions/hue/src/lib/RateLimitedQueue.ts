@@ -18,10 +18,12 @@ export default class RateLimitedQueue {
 
   async enqueueRequest<T>(request: () => Promise<T>): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      // Drop requests if queue is at max capacity
+      // If queue is at max capacity, reject the oldest request and replace it with the new one
       if (this.maxQueueLength !== undefined && this.queue.length >= this.maxQueueLength) {
-        resolve(request() as Promise<T>);
-        return;
+        const droppedRequest = this.queue.shift();
+        if (droppedRequest) {
+          droppedRequest.reject(new Error("Request dropped: queue at max capacity"));
+        }
       }
 
       this.queue.push({ request, resolve: resolve as (value: unknown) => void, reject });
