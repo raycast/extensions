@@ -5,6 +5,7 @@
   "description": "Test APIs with a lightweight Postman alternative. Send HTTP requests, manage collections, and inspect responses.",
   "icon": "command-icon.png",
   "author": "OffLine",
+  "platforms": ["macOS", "Windows"],
   "categories": [
     "Developer Tools",
     "Productivity"
