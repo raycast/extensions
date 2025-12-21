@@ -1,0 +1,59 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "timestamp-converter",
+    "title": "Timestamp Converter",
+    "description": "Convert timestamps and dates with timezone support",
+    "icon": "icon.png",
+    "author": "zhanghongnian",
+    "categories": [
+        "Productivity",
+        "Developer Tools"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "index",
+            "title": "Timestamp Converter",
+            "subtitle": "Convert Dates",
+            "description": "Convert between timestamps and human-readable dates",
+            "mode": "view",
+            "icon": "icon.png"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "timezone",
+            "type": "textfield",
+            "required": false,
+            "title": "Default Timezone",
+            "description": "IANA time zone identifier (e.g., 'Asia/Shanghai', 'UTC', 'America/New_York'). Leave empty to use System Local time.",
+            "default": "Asia/Shanghai",
+            "placeholder": "Asia/Shanghai"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.79.0",
+        "date-fns": "^3.6.0",
+        "date-fns-tz": "^3.1.3"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.8",
+        "@types/jest": "^30.0.0",
+        "@types/node": "20.8.10",
+        "@types/react": "18.3.3",
+        "eslint": "^7.32.0",
+        "prettier": "^3.0.0",
+        "typescript": "^5.4.5",
+        "vitest": "^3.2.4"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage"
+    }
+}
