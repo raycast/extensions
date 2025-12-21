@@ -15,7 +15,8 @@
     "bendrucker",
     "vmrjnvc",
     "dinocosta",
-    "janosorcsik"
+    "janosorcsik",
+    "faridrashidi"
   ],
   "license": "MIT",
   "platforms": [
@@ -69,6 +70,13 @@
       "title": "Add New Project",
       "subtitle": "Things",
       "description": "Create a new project",
+      "mode": "view"
+    },
+    {
+      "name": "quick-find",
+      "title": "Quick Find",
+      "subtitle": "Things",
+      "description": "Search across all areas, projects, and to-dos",
       "mode": "view"
     },
     {

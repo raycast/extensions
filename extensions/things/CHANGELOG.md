@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Quick Find] - {PR_MERGE_DATE}
+
+- Added a new command "Quick Find" to search across all areas, projects, and to-dos.
+
 ## [Timeout increasing in AppleScript] - 2025-10-30
 
 - Increased timeout to 60 seconds in AppleScript
