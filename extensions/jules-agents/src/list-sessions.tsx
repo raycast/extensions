@@ -30,7 +30,7 @@ import {
   CopyUrlAction,
 } from "./components/CopyActions";
 import { approvePlan, fetchSessionActivities, sendMessage, useSessionActivities, useSessions } from "./jules";
-import { Activity, Plan, Preferences, Session, SessionState } from "./types";
+import { Activity, Plan, Session, SessionState } from "./types";
 import {
   formatBashOutputMarkdown,
   formatRepoName,
@@ -382,7 +382,11 @@ function SessionConversation(props: { session: Session; mutate: () => Promise<vo
         </ActionPanel>
       }
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter Activities" value={filter} onChange={setFilter}>
+        <List.Dropdown
+          tooltip="Filter Activities"
+          value={filter}
+          onChange={(newValue) => setFilter(newValue as Preferences["defaultActivityFilter"])}
+        >
           <List.Dropdown.Item title="All Activities" value="all" />
           <List.Dropdown.Section>
             <List.Dropdown.Item title="Conversation Only" value="messages" />

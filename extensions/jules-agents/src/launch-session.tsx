@@ -15,7 +15,7 @@ import { useState } from "react";
 import { BranchDropdown } from "./components/BranchDropdown";
 import { SourceDropdown } from "./components/SourceDropdown";
 import { createSession, useSources } from "./jules";
-import { AutomationMode, Preferences, Source } from "./types";
+import { AutomationMode, Source } from "./types";
 import { refreshMenuBar } from "./utils";
 
 type Values = {
