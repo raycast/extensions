@@ -1,6 +1,6 @@
 # Shortcuts Search Changelog
 
-## [Update] - 2025-12-21
+## [Update] - {PR_MERGE_DATE}
 
 - Add support for platform-specific keymaps
 - Add application icons support
