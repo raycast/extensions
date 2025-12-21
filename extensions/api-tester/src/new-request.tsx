@@ -11,7 +11,7 @@ import {
   Clipboard,
   getPreferenceValues,
 } from "@raycast/api";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   ApiRequest,
   ApiResponse,

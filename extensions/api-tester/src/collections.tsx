@@ -12,7 +12,7 @@ import {
   Alert,
   Clipboard,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Collection } from "./types";
 import { getCollections, saveCollections } from "./storage";
 import { generateId } from "./utils";

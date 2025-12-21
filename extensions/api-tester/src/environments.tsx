@@ -11,7 +11,7 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Environment, KeyValue } from "./types";
 import { getEnvironments, saveEnvironments } from "./storage";
 import { generateId } from "./utils";
