@@ -15,8 +15,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "hashcat-modes",
-      "title": "Hashcat Modes",
+      "name": "hashcat-modes-search",
+      "title": "Hashcat Modes Search",
       "description": "Search for hashcat modes with hashes names, examples, and hashes modes.",
       "mode": "view"
     }
