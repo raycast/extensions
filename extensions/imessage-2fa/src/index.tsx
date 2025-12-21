@@ -3,13 +3,26 @@
  * Combines and displays 2FA codes from both iMessage and Email sources
  */
 
-import { List, ActionPanel, Action, Icon, getPreferenceValues, closeMainWindow, Color } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  getPreferenceValues,
+  closeMainWindow,
+  Color,
+  openExtensionPreferences,
+} from "@raycast/api";
 import useInterval from "@use-it/interval";
 import { useState, useCallback, useEffect } from "react";
 import { useMessages } from "./messages";
 import { useEmails } from "./emails";
+import { useGmail } from "./gmail";
 import { Message, SearchType, MessageSource, Preferences, VerificationLink } from "./types";
 import { extractCode, formatDate, extractVerificationLink, extractTextFromBinaryData } from "./utils";
+import { getAccounts } from "./storage";
+import ManageGoogleAccounts from "./account-manager";
+import { OAuthErrorView } from "./components/OAuthErrorView";
 // import applescript from "applescript"; // Unused import
 // import { promisify } from "util"; // Unused import
 import { runAppleScript } from "@raycast/utils";
@@ -24,6 +37,14 @@ export default function Command() {
   const [searchType] = useState<SearchType>("code");
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const [verificationLinks, setVerificationLinks] = useState<VerificationLink[]>([]);
+  const [gmailAccountCount, setGmailAccountCount] = useState<number>(0);
+
+  // Load Gmail account count for empty state logic
+  useEffect(() => {
+    if (preferences.emailSource === "gmail") {
+      getAccounts().then((accounts) => setGmailAccountCount(accounts.length));
+    }
+  }, [preferences.emailSource]);
 
   // Initialize message source based on user preferences
   const [messageSource, setMessageSource] = useState<MessageSource>(() => {
@@ -43,13 +64,22 @@ export default function Command() {
 
   const {
     data: emailData,
-    permissionView: emailPermissionView,
     revalidate: revalidateEmails,
     isInitialLoadComplete: isEmailLoadComplete,
   } = useEmails({
     searchText,
     searchType,
-    enabled: preferences.enabledSources !== "imessage",
+    enabled: preferences.enabledSources !== "imessage" && preferences.emailSource === "applemail",
+  });
+
+  const {
+    data: gmailData,
+    revalidate: revalidateGmail,
+    isLoading: isGmailLoading,
+  } = useGmail({
+    searchText,
+    searchType,
+    enabled: preferences.enabledSources !== "imessage" && preferences.emailSource === "gmail",
   });
 
   // Combine and sort messages based on selected source
@@ -64,7 +94,12 @@ export default function Command() {
         : []
       : messageSource === "email"
       ? preferences.enabledSources !== "imessage"
-        ? emailData?.map((m) => ({ ...m, source: "email" as const })) || []
+        ? [
+            ...(preferences.emailSource === "applemail"
+              ? emailData?.map((m) => ({ ...m, source: "email" as const })) || []
+              : []),
+            ...(preferences.emailSource === "gmail" ? gmailData || [] : []),
+          ]
         : []
       : [
           // When showing all sources, combine and sort by date
@@ -75,9 +110,10 @@ export default function Command() {
                 displayText: extractTextFromBinaryData(m.text),
               })) || []
             : []),
-          ...(preferences.enabledSources !== "imessage"
+          ...(preferences.enabledSources !== "imessage" && preferences.emailSource === "applemail"
             ? emailData?.map((m) => ({ ...m, source: "email" as const })) || []
             : []),
+          ...(preferences.enabledSources !== "imessage" && preferences.emailSource === "gmail" ? gmailData || [] : []),
         ].sort((a, b) => new Date(b.message_date).getTime() - new Date(a.message_date).getTime());
 
   // Process verification links from messages - simplified to avoid update loops
@@ -105,6 +141,7 @@ export default function Command() {
             messageDate: message.message_date,
             sender: message.sender,
             displayText: message.displayText,
+            accountName: message.accountName,
           });
         }
       });
@@ -185,7 +222,12 @@ export default function Command() {
   // Poll for new messages, waiting for initial email load to complete
   useInterval(() => {
     if (preferences.enabledSources !== "email") revalidateMessages();
-    if (preferences.enabledSources !== "imessage" && isEmailLoadComplete) revalidateEmails();
+    if (preferences.enabledSources !== "imessage" && preferences.emailSource === "applemail" && isEmailLoadComplete) {
+      revalidateEmails();
+    }
+    if (preferences.enabledSources !== "imessage" && preferences.emailSource === "gmail" && !isGmailLoading) {
+      revalidateGmail();
+    }
   }, POLLING_INTERVAL);
 
   const handleSourceChange = useCallback((value: string) => {
@@ -194,7 +236,15 @@ export default function Command() {
 
   // Show permission views if needed
   if (messagePermissionView && preferences.enabledSources !== "email") return messagePermissionView;
-  if (emailPermissionView && preferences.enabledSources !== "imessage") return emailPermissionView;
+
+  // Gmail-specific error handling
+  const isGmailEnabled = preferences.enabledSources !== "imessage" && preferences.emailSource === "gmail";
+  if (isGmailEnabled) {
+    // Check for missing OAuth Client ID
+    if (!preferences.gmailClientId || preferences.gmailClientId.trim() === "") {
+      return <OAuthErrorView />;
+    }
+  }
 
   const showSourceDropdown = preferences.enabledSources === "both";
 
@@ -218,6 +268,20 @@ export default function Command() {
       }
       isShowingDetail
       onSearchTextChange={setSearchText}
+      actions={
+        isGmailEnabled ? (
+          <ActionPanel>
+            <ActionPanel.Section title="Gmail">
+              <Action.Push
+                title="Manage Gmail Accounts"
+                icon={Icon.Person}
+                target={<ManageGoogleAccounts />}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+              />
+            </ActionPanel.Section>
+          </ActionPanel>
+        ) : undefined
+      }
     >
       {hasCodesOrLinks ? (
         <>
@@ -232,7 +296,10 @@ export default function Command() {
           {data.filter((msg) => msg.displayText).some((msg) => extractCode(msg.displayText)) && (
             <List.Section title="Authentication Codes">
               {data
-                .filter((msg) => msg.displayText)
+                .filter(
+                  (msg): msg is Message & { source: "email" | "imessage"; displayText: string } =>
+                    !!msg.displayText && !!msg.source
+                )
                 .map((message) => {
                   const code = extractCode(message.displayText);
                   if (!code) {
@@ -249,16 +316,53 @@ export default function Command() {
       ) : (
         <List.EmptyView
           title={
-            !isEmailLoadComplete && preferences.enabledSources !== "imessage"
+            isGmailEnabled && gmailAccountCount === 0
+              ? "Add Your First Gmail Account"
+              : !isEmailLoadComplete &&
+                preferences.enabledSources !== "imessage" &&
+                preferences.emailSource === "applemail"
               ? "Loading emails..."
+              : isGmailEnabled && isGmailLoading
+              ? "Loading Gmail..."
               : "No codes or links found"
           }
           description={
-            !isEmailLoadComplete && preferences.enabledSources !== "imessage"
+            isGmailEnabled && gmailAccountCount === 0
+              ? "Use the 'Manage Gmail Accounts' action to add and authorize your Gmail accounts"
+              : !isEmailLoadComplete &&
+                preferences.enabledSources !== "imessage" &&
+                preferences.emailSource === "applemail"
               ? "Initial email load in progress"
+              : isGmailEnabled && isGmailLoading
+              ? "Checking your Gmail accounts..."
               : "Keeps refreshing every second"
           }
-          icon={!isEmailLoadComplete && preferences.enabledSources !== "imessage" ? Icon.Clock : Icon.MagnifyingGlass}
+          icon={
+            isGmailEnabled && gmailAccountCount === 0
+              ? Icon.Person
+              : !isEmailLoadComplete &&
+                preferences.enabledSources !== "imessage" &&
+                preferences.emailSource === "applemail"
+              ? Icon.Clock
+              : isGmailEnabled && isGmailLoading
+              ? Icon.Clock
+              : Icon.MagnifyingGlass
+          }
+          actions={
+            isGmailEnabled && gmailAccountCount === 0 ? (
+              <ActionPanel>
+                <ActionPanel.Section title="Setup">
+                  <Action.Push
+                    title="Manage Gmail Accounts"
+                    icon={Icon.Person}
+                    target={<ManageGoogleAccounts />}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+                  />
+                  <Action title="Open Extension Settings" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                </ActionPanel.Section>
+              </ActionPanel>
+            ) : undefined
+          }
         />
       )}
     </List>
@@ -280,18 +384,29 @@ const LinkItem = React.memo(({ link }: { link: VerificationLink }) => {
   // Create a more descriptive title based on link type and domain
   const title = link.type === "verification" ? `Verify Email: ${domain}` : `Sign In: ${domain}`;
 
+  const accessories = [];
+
+  // Add account name if present (for Gmail accounts)
+  if (link.accountName) {
+    accessories.push({
+      tag: { value: link.accountName, color: Color.Blue },
+      tooltip: `Gmail Account: ${link.accountName}`,
+    });
+  }
+
+  // Add source indicator
+  accessories.push({
+    text: link.source === "email" ? "Email" : "iMessage",
+    icon: link.source === "email" ? Icon.Envelope : Icon.Message,
+  });
+
   return (
     <List.Item
       id={`link-${link.source}-${link.messageId}`}
       icon={icon}
       title={title}
       subtitle={new Date(link.messageDate).toLocaleTimeString()}
-      accessories={[
-        {
-          text: link.source === "email" ? "Email" : "iMessage",
-          icon: link.source === "email" ? Icon.Envelope : Icon.Message,
-        },
-      ]}
+      accessories={accessories}
       detail={<LinkDetail link={link} />}
       actions={<LinkActions link={link} />}
     />
@@ -312,6 +427,9 @@ function LinkDetail(props: { link: VerificationLink }) {
           <List.Item.Detail.Metadata.Label title="From" text={props.link.sender} />
           <List.Item.Detail.Metadata.Label title="Date" text={formatDate(new Date(props.link.messageDate))} />
           <List.Item.Detail.Metadata.Label title="Source" text={props.link.source === "email" ? "Email" : "iMessage"} />
+          {props.link.accountName && (
+            <List.Item.Detail.Metadata.Label title="Gmail Account" text={props.link.accountName} />
+          )}
         </List.Item.Detail.Metadata>
       }
     />
@@ -320,6 +438,8 @@ function LinkDetail(props: { link: VerificationLink }) {
 
 function LinkActions(props: { link: VerificationLink }) {
   const actionTitle = props.link.type === "verification" ? "Verify Email" : "Sign In";
+  const preferences = getPreferenceValues<Preferences>();
+  const isGmailEnabled = preferences.enabledSources !== "imessage" && preferences.emailSource === "gmail";
 
   return (
     <ActionPanel title="Action">
@@ -344,6 +464,16 @@ function LinkActions(props: { link: VerificationLink }) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>
+      {isGmailEnabled && (
+        <ActionPanel.Section title="Settings">
+          <Action.Push
+            title="Manage Gmail Accounts"
+            icon={Icon.Person}
+            target={<ManageGoogleAccounts />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          />
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
 }
@@ -359,11 +489,22 @@ const MessageItem = React.memo(
     code: string;
     id: string;
   }) => {
+    const accessories = [];
+
+    // Add account name if present (for Gmail accounts)
+    if (message.accountName) {
+      accessories.push({
+        tag: { value: message.accountName, color: Color.Blue },
+        tooltip: `Gmail Account: ${message.accountName}`,
+      });
+    }
+
     return (
       <List.Item
         id={id}
         icon={message.source === "email" ? Icon.Envelope : Icon.Message}
         title={code}
+        accessories={accessories.length > 0 ? accessories : undefined}
         detail={<Detail message={message} code={code} />}
         actions={<Actions message={message} code={code} />}
       />
@@ -384,6 +525,9 @@ function Detail(props: { message: Message; code: string }) {
             title="Source"
             text={props.message.source === "email" ? "Email" : "iMessage"}
           />
+          {props.message.accountName && (
+            <List.Item.Detail.Metadata.Label title="Gmail Account" text={props.message.accountName} />
+          )}
         </List.Item.Detail.Metadata>
       }
     />
@@ -391,6 +535,9 @@ function Detail(props: { message: Message; code: string }) {
 }
 
 function Actions(props: { message: Message; code: string }) {
+  const preferences = getPreferenceValues<Preferences>();
+  const isGmailEnabled = preferences.enabledSources !== "imessage" && preferences.emailSource === "gmail";
+
   return (
     <ActionPanel title="Action">
       <ActionPanel.Section>
@@ -410,6 +557,16 @@ function Actions(props: { message: Message; code: string }) {
           shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
         />
       </ActionPanel.Section>
+      {isGmailEnabled && (
+        <ActionPanel.Section title="Settings">
+          <Action.Push
+            title="Manage Gmail Accounts"
+            icon={Icon.Person}
+            target={<ManageGoogleAccounts />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          />
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
 }

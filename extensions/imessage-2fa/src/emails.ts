@@ -3,14 +3,12 @@
  * Provides functionality to fetch and process 2FA codes from both Apple Mail and Gmail
  */
 
-import { getPreferenceValues, Icon, Color } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { Message, Preferences, SearchType } from "./types";
 import { calculateLookBackMinutes, extractCode, extractVerificationLink } from "./utils";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { runAppleScript } from "@raycast/utils";
-import { getGmailMessages, checkGmailAuth, processGmailContent } from "./gmail";
-import { ErrorView } from "./components/ErrorView";
-import React from "react";
+import { processGmailContent } from "./gmail";
 
 /**
  * Storage interface for managing email message state
@@ -166,10 +164,8 @@ interface UseEmailsOptions {
  */
 export function useEmails(options: UseEmailsOptions) {
   const preferences = getPreferenceValues<Preferences>();
-  const emailSource = preferences.emailSource || "applemail";
   const [data, setData] = useState<Message[]>([]);
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
-  const [permissionView, setPermissionView] = useState<React.ReactElement | null>(null);
 
   // Simple cache to track processed messages
   const messageCache = useRef<Set<string>>(new Set());
@@ -245,48 +241,8 @@ export function useEmails(options: UseEmailsOptions) {
           cutoffTime = new Date(latestTimestamp.current || Date.now() - 60 * 1000);
         }
 
-        let emails: Message[] = [];
-        if (emailSource === "gmail") {
-          if (!preferences.gmailClientId) {
-            setData([]);
-            setPermissionView(
-              React.createElement(ErrorView, {
-                icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
-                title: "Gmail Configuration Required",
-                description: "Please add your Gmail OAuth Client ID in the extension preferences.",
-              })
-            );
-            return;
-          }
-
-          try {
-            const isAuthed = await checkGmailAuth();
-            if (!isAuthed) {
-              setData([]);
-              setPermissionView(
-                React.createElement(ErrorView, {
-                  icon: { source: Icon.Person, tintColor: Color.Blue },
-                  title: "Gmail Authorization Required",
-                  description: "Please authorize access to your Gmail account.",
-                })
-              );
-              return;
-            }
-            emails = await getGmailMessages(options.searchType, cutoffTime);
-          } catch (error) {
-            setData([]);
-            setPermissionView(
-              React.createElement(ErrorView, {
-                icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
-                title: "Gmail Error",
-                description: "Failed to fetch messages from Gmail. Please try again.",
-              })
-            );
-            return;
-          }
-        } else {
-          emails = await getAppleMailMessages(options.searchType, cutoffTime, Array.from(messageCache.current));
-        }
+        // Fetch from Apple Mail (Gmail is now handled by useGmail hook)
+        const emails = await getAppleMailMessages(options.searchType, cutoffTime, Array.from(messageCache.current));
 
         processNewEmails(emails);
 
@@ -309,7 +265,7 @@ export function useEmails(options: UseEmailsOptions) {
         isLoadingRef.current = false;
       }
     },
-    [options.enabled, options.searchType, processNewEmails, emailSource, preferences.enableVerificationLinks]
+    [options.enabled, options.searchType, processNewEmails, preferences.enableVerificationLinks]
   );
 
   // Initial load
@@ -337,7 +293,6 @@ export function useEmails(options: UseEmailsOptions) {
   return {
     data,
     isLoading: !isInitialLoadComplete,
-    permissionView,
     isInitialLoadComplete,
     revalidate: () => fetchEmails(false),
   };

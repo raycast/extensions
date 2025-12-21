@@ -5,6 +5,7 @@ export interface Message {
   text: string;
   displayText: string;
   source?: "email" | "imessage";
+  accountName?: string;
 }
 
 export type LookBackUnitType = "DAYS" | "HOURS" | "MINUTES";
@@ -35,4 +36,5 @@ export interface VerificationLink {
   messageDate: string;
   sender: string;
   displayText: string;
+  accountName?: string;
 }

@@ -1,6 +1,7 @@
 /**
  * Gmail API integration for 2FA code detection
  * Provides functionality to fetch and process 2FA codes from Gmail
+ * Supports multiple Google accounts simultaneously
  */
 
 import { OAuth, getPreferenceValues, Icon } from "@raycast/api";
@@ -8,24 +9,43 @@ import { gmail as gmailClient, auth, gmail_v1 } from "@googleapis/gmail";
 import { Message, Preferences, SearchType } from "./types";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { calculateLookBackMinutes, stripHtmlTags, extractVerificationLink } from "./utils";
+import { getAccounts, Account } from "./storage";
 import fetch from "node-fetch";
 
-// Create an OAuth client ID via https://console.developers.google.com/apis/credentials
-// As application type choose "iOS" (required for PKCE)
-const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.AppURI,
-  providerName: "Google",
-  providerIcon: Icon.Link,
-  providerId: "google",
-  description: "Connect your Google account to access 2FA codes",
-});
+// OAuth client cache to avoid creating multiple instances for the same account
+const oauthClients = new Map<string, OAuth.PKCEClient>();
+
+/**
+ * Get or create an OAuth client for a specific account
+ * Each account gets its own client with a unique providerId
+ */
+function getOAuthClient(accountId: string, accountName: string): OAuth.PKCEClient {
+  const existingClient = oauthClients.get(accountId);
+  if (existingClient) {
+    return existingClient;
+  }
+
+  // Create an OAuth client ID via https://console.developers.google.com/apis/credentials
+  // As application type choose "iOS" (required for PKCE)
+  const client = new OAuth.PKCEClient({
+    redirectMethod: OAuth.RedirectMethod.AppURI,
+    providerName: `Google (${accountName})`,
+    providerIcon: Icon.Link,
+    providerId: `google-${accountId}`,
+    description: `Connect your ${accountName} Google account to access 2FA codes`,
+  });
+
+  oauthClients.set(accountId, client);
+  return client;
+}
 
 function getClientId() {
   const prefs = getPreferenceValues<Preferences>();
   return prefs.gmailClientId || "";
 }
 
-async function authorize(): Promise<void> {
+async function authorize(accountId: string, accountName: string): Promise<void> {
+  const client = getOAuthClient(accountId, accountName);
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
@@ -92,8 +112,9 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
   return tokenResponse;
 }
 
-async function getAuthorizedGmailClient() {
-  await authorize();
+async function getAuthorizedGmailClient(accountId: string, accountName: string) {
+  await authorize(accountId, accountName);
+  const client = getOAuthClient(accountId, accountName);
   const tokens = await client.getTokens();
   if (!tokens?.accessToken) {
     throw new Error("Not authorized");
@@ -219,6 +240,7 @@ function decodeQuotedPrintableUrl(url: string): string {
  * @param plainBody - Plain text content of the email, if available
  * @param snippet - Optional fallback snippet if both body parts are missing
  * @param lookbackMinutes - Optional time window for filtering
+ * @param accountName - Optional account name for multi-account support
  * @returns A processed Message object with text for link detection and displayText for UI/code detection
  */
 export function processGmailContent(
@@ -229,7 +251,8 @@ export function processGmailContent(
   htmlBody: string | null,
   plainBody: string | null,
   snippet = "",
-  lookbackMinutes = 0
+  lookbackMinutes = 0,
+  accountName?: string
 ): Message | null {
   // Double-check message is within our time window
   const msgTime = date.getTime();
@@ -267,6 +290,7 @@ export function processGmailContent(
     // Use display text (subject + preferred plain/cleaned body) for code detection and UI
     displayText: `${subject}\n${textForDisplay || ""}`,
     source: "email" as const,
+    accountName,
   };
 
   // Check if a link was detected in the raw text
@@ -288,13 +312,20 @@ export function processGmailContent(
 }
 
 /**
- * Fetches emails from Gmail API within a specific time window
+ * Fetches emails from Gmail API within a specific time window for a single account
+ * @param accountId - Account identifier
+ * @param accountName - Account display name
  * @param searchType - Type of search (all messages or code-only)
  * @param since - Only fetch messages after this timestamp
  */
-export async function getGmailMessages(searchType: SearchType, since: Date): Promise<Message[]> {
+export async function getGmailMessages(
+  accountId: string,
+  accountName: string,
+  searchType: SearchType,
+  since: Date
+): Promise<Message[]> {
   try {
-    const gmail = await getAuthorizedGmailClient();
+    const gmail = await getAuthorizedGmailClient(accountId, accountName);
     const prefs = getPreferenceValues<Preferences>();
 
     // Convert cutoff time to Unix timestamp for Gmail query
@@ -367,7 +398,8 @@ export async function getGmailMessages(searchType: SearchType, since: Date): Pro
         htmlBody || null,
         plainBody || null,
         msg.snippet || "",
-        lookbackMinutes
+        lookbackMinutes,
+        accountName
       );
     });
 
@@ -379,28 +411,58 @@ export async function getGmailMessages(searchType: SearchType, since: Date): Pro
 }
 
 /**
- * Checks if Gmail OAuth is configured and authenticated
+ * Checks if a specific Gmail account is authenticated
  */
-export async function checkGmailAuth(): Promise<boolean> {
+export async function checkGmailAuth(accountId: string, accountName: string): Promise<boolean> {
   try {
+    const client = getOAuthClient(accountId, accountName);
     const tokens = await client.getTokens();
     if (!tokens?.accessToken) {
       // Trigger authorization if no tokens
-      await authorize();
+      await authorize(accountId, accountName);
       return true;
     }
     return true;
   } catch (error) {
-    console.error("Gmail auth check failed:", error);
+    console.error(`Gmail auth check failed for account ${accountName}:`, error);
     return false;
   }
 }
 
+/**
+ * Check authorization status for a specific account without triggering auth flow
+ */
+export async function isAccountAuthorized(accountId: string, accountName: string): Promise<boolean> {
+  try {
+    const client = getOAuthClient(accountId, accountName);
+    const tokens = await client.getTokens();
+    return !!tokens?.accessToken;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Manually trigger authorization for a specific account
+ */
+export async function authorizeAccount(accountId: string, accountName: string): Promise<void> {
+  await authorize(accountId, accountName);
+}
+
+/**
+ * Multi-account Gmail hook - fetches messages from all configured accounts
+ */
 export function useGmail(options: { searchText?: string; searchType: SearchType; enabled?: boolean }) {
   const [data, setData] = useState<Message[]>([]);
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
   const [isInitialLoadStarted, setIsInitialLoadStarted] = useState(false);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const isLoadingRef = useRef(false);
+
+  // Load accounts on mount
+  useEffect(() => {
+    getAccounts().then(setAccounts);
+  }, []);
 
   // Calculate the cutoff time based on preferences
   const getCutoffTime = useCallback(() => {
@@ -416,13 +478,28 @@ export function useGmail(options: { searchText?: string; searchType: SearchType;
     }
 
     try {
-      console.log("Starting Gmail fetch...");
+      console.log("Starting multi-account Gmail fetch...");
       isLoadingRef.current = true;
       const cutoffTime = getCutoffTime();
-      const messages = await getGmailMessages(options.searchType, cutoffTime);
 
-      if (messages.length > 0) {
-        setData(messages);
+      // Fetch from all accounts in parallel
+      const accountPromises = accounts.map(async (account) => {
+        try {
+          console.log(`Fetching Gmail messages for account: ${account.name}`);
+          return await getGmailMessages(account.id, account.name, options.searchType, cutoffTime);
+        } catch (error) {
+          console.error(`Failed to fetch Gmail messages for account ${account.name}:`, error);
+          // Return empty array on error so other accounts can still succeed
+          return [];
+        }
+      });
+
+      const allMessages = await Promise.all(accountPromises);
+      // Flatten and merge all messages
+      const mergedMessages = allMessages.flat();
+
+      if (mergedMessages.length > 0) {
+        setData(mergedMessages);
       }
 
       setIsInitialLoadComplete(true);
@@ -434,7 +511,7 @@ export function useGmail(options: { searchText?: string; searchType: SearchType;
     } finally {
       isLoadingRef.current = false;
     }
-  }, [options.enabled, options.searchType, getCutoffTime]);
+  }, [options.enabled, options.searchType, getCutoffTime, accounts]);
 
   // Reset state when search parameters change
   useEffect(() => {
@@ -446,18 +523,18 @@ export function useGmail(options: { searchText?: string; searchType: SearchType;
 
   // Initial load
   useEffect(() => {
-    if (!isInitialLoadStarted && options.enabled) {
-      console.log("Starting initial Gmail load");
+    if (!isInitialLoadStarted && options.enabled && accounts.length > 0) {
+      console.log("Starting initial multi-account Gmail load");
       setIsInitialLoadStarted(true);
       fetchMessages();
     }
-  }, [fetchMessages, options.enabled, isInitialLoadStarted]);
+  }, [fetchMessages, options.enabled, isInitialLoadStarted, accounts.length]);
 
   // Periodic refresh
   useEffect(() => {
     if (!isInitialLoadComplete || !options.enabled) return;
 
-    console.log("Setting up Gmail polling");
+    console.log("Setting up multi-account Gmail polling");
     const interval = setInterval(fetchMessages, 10000);
     return () => clearInterval(interval);
   }, [fetchMessages, isInitialLoadComplete, options.enabled]);
