@@ -1,5 +1,9 @@
 # JWT-Decoder Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Updated dependencies to resolve react mismatch error
+
 ## [Maintenance] - 2025-11-12
 
 - Updated dependencies
