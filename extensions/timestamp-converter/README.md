@@ -28,7 +28,7 @@ This is a Raycast extension that allows you to quickly convert between Unix time
     - `now` or leaving it empty -> Shows current time.
 4.  Press `Enter` to copy the selected result to the clipboard.
 
-![Usage Example](assets/usage_example.png)
+![Usage Example](media/usage_example.png)
 
 ## Preferences
 
@@ -36,7 +36,7 @@ This extension contributes the following preferences:
 
 - **Default Timezone**: The IANA time zone identifier to use for conversions (e.g., `Asia/Shanghai`). If left empty, it defaults to `Asia/Shanghai` or can be adjusted to use system settings if logic permits.
 
-![Default Timezone Settings](assets/timezone_settings.png)
+![Default Timezone Settings](media/timezone_settings.png)
 
 
 
