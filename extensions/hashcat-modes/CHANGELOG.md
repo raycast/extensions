@@ -1,8 +1,8 @@
-# Changelog
+# Hashcat Modes Changelog
 
-All notable changes to this project will be documented in this file.
+## [Initial Release] - 2025-12-21
 
-## [1.0.0] - Initial Release
-
-### Added
 - Search functionality for hashcat modes by hash name, hash mode number, or example hash
+- Add search functionality for hashcat modes by hash name, hash mode number, or example hash
+- Add real-time filtering as you type
+- Add copy to clipboard actions for hashcat mode number, hash name, and example hash
