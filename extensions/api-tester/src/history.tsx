@@ -10,7 +10,7 @@ import {
   Alert,
   Detail,
 } from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { RequestHistory } from "./types";
 import { getHistory, clearHistory, saveHistory } from "./storage";
 import { formatTime, formatBytes, getStatusColor, formatJSON } from "./utils";
