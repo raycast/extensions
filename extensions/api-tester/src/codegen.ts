@@ -34,7 +34,9 @@ export function generateCurl(request: ApiRequest): string {
   if (request.method !== "GET" && request.body.type !== "none") {
     if (request.body.type === "json" && request.body.json) {
       curl += ` \\\n  -H "Content-Type: application/json"`;
-      curl += ` \\\n  -d '${request.body.json}'`;
+      // Escape single quotes in JSON for shell safety
+      const escapedJson = request.body.json.replace(/'/g, "'\\''");
+      curl += ` \\\n  -d '${escapedJson}'`;
     } else if (request.body.type === "form-data" && request.body.formData) {
       for (const field of request.body.formData.filter(
         (f) => f.enabled && f.key,
@@ -107,7 +109,14 @@ export function generateFetch(request: ApiRequest): string {
   // Add body
   if (request.method !== "GET" && request.body.type !== "none") {
     if (request.body.type === "json" && request.body.json) {
-      code += `  body: JSON.stringify(${request.body.json})\n`;
+      // Ensure JSON is properly formatted for code generation
+      try {
+        const parsedJson = JSON.parse(request.body.json);
+        code += `  body: JSON.stringify(${JSON.stringify(parsedJson, null, 4).replace(/\n/g, "\n  ")})\n`;
+      } catch {
+        // If not valid JSON, use as string
+        code += `  body: ${JSON.stringify(request.body.json)}\n`;
+      }
     } else if (request.body.type === "form-data" && request.body.formData) {
       code += `  body: (() => {\n`;
       code += `    const formData = new FormData();\n`;
@@ -185,7 +194,14 @@ export function generateAxios(request: ApiRequest): string {
   // Add body
   if (request.method !== "GET" && request.body.type !== "none") {
     if (request.body.type === "json" && request.body.json) {
-      code += `  data: ${request.body.json}\n`;
+      // Ensure JSON is properly formatted for code generation
+      try {
+        const parsedJson = JSON.parse(request.body.json);
+        code += `  data: ${JSON.stringify(parsedJson, null, 4).replace(/\n/g, "\n  ")}\n`;
+      } catch {
+        // If not valid JSON, use as string
+        code += `  data: ${JSON.stringify(request.body.json)}\n`;
+      }
     } else if (request.body.type === "form-data" && request.body.formData) {
       code += `  data: (() => {\n`;
       code += `    const formData = new FormData();\n`;

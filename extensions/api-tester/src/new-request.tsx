@@ -31,11 +31,6 @@ import {
 import { addToHistory } from "./storage";
 import { generateCurl, generateFetch, generateAxios } from "./codegen";
 
-interface Preferences {
-  requestTimeout: string;
-  maxHistoryItems: string;
-}
-
 export default function NewRequest() {
   const [method, setMethod] = useState<HttpMethod>("GET");
   const [url, setUrl] = useState("");
@@ -273,14 +268,20 @@ export default function NewRequest() {
 
       {/* Headers */}
       <Form.Description text="Headers" />
-      {[0, 1, 2].map((i) => (
+      {[0, 1, 2].map((i) => [
         <Form.TextField
-          key={`header_${i}`}
+          key={`header_key_${i}`}
           id={`header_key_${i}`}
-          title={`Header ${i + 1}`}
+          title={`Header ${i + 1} Key`}
           placeholder="Content-Type"
-        />
-      ))}
+        />,
+        <Form.TextField
+          key={`header_value_${i}`}
+          id={`header_value_${i}`}
+          title={`Header ${i + 1} Value`}
+          placeholder="application/json"
+        />,
+      ])}
 
       <Form.Separator />
 

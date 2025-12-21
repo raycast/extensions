@@ -89,10 +89,15 @@ export default function Collections() {
   async function handleExportSingle(collection: Collection) {
     try {
       const json = exportCollection(collection);
+      // Sanitize collection name for safe filename usage
+      const sanitizedName = collection.name
+        .replace(/[<>:"/\\|?*]/g, "_") // Replace invalid filename characters
+        .replace(/\.\./g, "_") // Prevent directory traversal
+        .substring(0, 50); // Limit length
       const filePath = join(
         homedir(),
         "Downloads",
-        `${collection.name}-${Date.now()}.json`,
+        `${sanitizedName}-${Date.now()}.json`,
       );
       await writeFile(filePath, json, "utf-8");
       await showToast({

@@ -136,9 +136,9 @@ src/
 
 6. **Update documentation**
    - README.md - User-facing documentation
-   - FEATURES.md - Feature list
+   - docs/FEATURES.md - Feature list
    - CHANGELOG.md - Version history
-   - EXAMPLES.md - Usage examples
+   - docs/EXAMPLES.md - Usage examples
 
 7. **Test thoroughly**
    - Test on both Windows and macOS if possible
@@ -194,10 +194,10 @@ Use Raycast's built-in icons and colors:
 
 ### What to Document
 
-- **New features** - Add to FEATURES.md
+- **New features** - Add to docs/FEATURES.md
 - **Breaking changes** - Update CHANGELOG.md
-- **API changes** - Update DEVELOPMENT.md
-- **Usage examples** - Add to QUICKSTART.md
+- **API changes** - Update docs/DEVELOPMENT.md
+- **Usage examples** - Add to docs/QUICKSTART.md
 
 ### Documentation Style
 
@@ -486,13 +486,13 @@ Use these free APIs for testing:
 
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+By contributing, you agree that your contributions will be licensed under the MIT License.
 
 **This means:**
 - ✅ Your contributions can be used, modified, and shared freely
-- ❌ Your contributions cannot be used for commercial purposes
+- ✅ Your contributions can be used for commercial purposes
 - ✅ You retain attribution for your work
-- ✅ The project remains free and open for non-commercial use
+- ✅ The project remains free and open for all use
 
 See [LICENSE](LICENSE) file for full details.
 

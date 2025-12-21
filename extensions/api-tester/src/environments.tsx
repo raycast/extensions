@@ -81,63 +81,66 @@ export default function Environments() {
         }
       />
 
-      {environments.map((env) => (
-        <List.Item
-          key={env.id}
-          title={env.name}
-          icon={{
-            source: env.isActive ? Icon.CheckCircle : Icon.Circle,
-            tintColor: env.isActive ? Color.Green : Color.SecondaryText,
-          }}
-          accessories={[
-            {
-              text: `${env.variables.filter((v) => v.enabled).length} variable${env.variables.filter((v) => v.enabled).length !== 1 ? "s" : ""}`,
-            },
-            ...(env.isActive
-              ? [{ tag: { value: "Active", color: Color.Green } }]
-              : []),
-          ]}
-          actions={
-            <ActionPanel>
-              {!env.isActive && (
-                <Action
-                  title="Set as Active"
-                  icon={Icon.CheckCircle}
-                  onAction={() => setActiveEnvironment(env.id)}
-                />
-              )}
-              <Action.Push
-                title="Edit Environment"
-                icon={Icon.Pencil}
-                target={
-                  <EditEnvironmentForm
-                    environment={env}
-                    onUpdated={loadEnvironments}
+      {environments.map((env) => {
+        const enabledVarCount = env.variables.filter((v) => v.enabled).length;
+        return (
+          <List.Item
+            key={env.id}
+            title={env.name}
+            icon={{
+              source: env.isActive ? Icon.CheckCircle : Icon.Circle,
+              tintColor: env.isActive ? Color.Green : Color.SecondaryText,
+            }}
+            accessories={[
+              {
+                text: `${enabledVarCount} variable${enabledVarCount !== 1 ? "s" : ""}`,
+              },
+              ...(env.isActive
+                ? [{ tag: { value: "Active", color: Color.Green } }]
+                : []),
+            ]}
+            actions={
+              <ActionPanel>
+                {!env.isActive && (
+                  <Action
+                    title="Set as Active"
+                    icon={Icon.CheckCircle}
+                    onAction={() => setActiveEnvironment(env.id)}
                   />
-                }
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-              />
-              <Action
-                title="Delete Environment"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={() => deleteEnvironment(env.id)}
-                shortcut={{ modifiers: ["ctrl"], key: "d" }}
-              />
-              <ActionPanel.Section>
+                )}
                 <Action.Push
-                  title="Create Environment"
-                  icon={Icon.Plus}
+                  title="Edit Environment"
+                  icon={Icon.Pencil}
                   target={
-                    <CreateEnvironmentForm onCreated={loadEnvironments} />
+                    <EditEnvironmentForm
+                      environment={env}
+                      onUpdated={loadEnvironments}
+                    />
                   }
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+                <Action
+                  title="Delete Environment"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => deleteEnvironment(env.id)}
+                  shortcut={{ modifiers: ["ctrl"], key: "d" }}
+                />
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Create Environment"
+                    icon={Icon.Plus}
+                    target={
+                      <CreateEnvironmentForm onCreated={loadEnvironments} />
+                    }
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
