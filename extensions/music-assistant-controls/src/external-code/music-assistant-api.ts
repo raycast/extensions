@@ -180,7 +180,7 @@ export class MusicAssistantApi {
         } else if ("message_id" in msg) {
           this.handleResultMessage(msg);
         } else {
-          // unknown message receoved
+          // unknown message received
           console.error("received unknown message", msg);
         }
       })
