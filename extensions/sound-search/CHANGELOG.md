@@ -1,5 +1,9 @@
 # Sound Search Changelog
 
+## [Deprecated Extension] - {PR_MERGE_DATE}
+
+- The API used in this extension is no longer available. You can uninstall from Preferences.
+
 ## [Initial Version] - 2025-11-07
 
 ### Added
