@@ -58,14 +58,14 @@ function HistoryItem({
   );
 }
 
-function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; onTabClosed?: () => void }) {
+function TabListItem(props: { tab: Tab; onTabClosed?: () => void }) {
   return (
     <List.Item
       title={props.tab.title}
       subtitle={props.tab.urlWithoutScheme()}
       keywords={[props.tab.urlWithoutScheme()]}
       actions={<ChromeActions.TabList tab={props.tab} onTabClosed={props.onTabClosed} />}
-      icon={props.useOriginalFavicon ? props.tab.realFavicon() : props.tab.googleFavicon()}
+      icon={props.tab.getFaviconImage()}
     />
   );
 }

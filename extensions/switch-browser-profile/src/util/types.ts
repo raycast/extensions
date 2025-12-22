@@ -51,10 +51,4 @@ export type BrowserHistory = {
   url: string;
   title: string;
   visitTime: string;
-  icon: string;
 };
-
-export interface Preferences {
-  newBlankTabURL: string;
-  newTabURL: string;
-}

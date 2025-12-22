@@ -3,12 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
-export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
-  const faviconFormula = useOriginalFavicon
-    ? `execute t javascript ¬
-        "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
-    : '""';
-
+export async function getOpenTabs(): Promise<Tab[]> {
   await checkAppInstalled();
 
   try {
@@ -21,7 +16,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
           repeat with t in tabs of w
             set _title to get title of t
             set _url to get URL of t
-            set _favicon to ${faviconFormula}
+            set _favicon to ""
             set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
             set _tab_index to _tab_index + 1
           end repeat

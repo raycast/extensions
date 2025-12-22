@@ -21,6 +21,39 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "openTabInProfile",
+      "type": "dropdown",
+      "required": false,
+      "title": "Open Tab In Profile",
+      "description": "Choose which profile to open tabs in when browsing history",
+      "default": "default",
+      "data": [
+        {
+          "title": "Ask Every Time",
+          "value": "default"
+        },
+        {
+          "title": "Current Profile",
+          "value": "profile_current"
+        },
+        {
+          "title": "Original Profile",
+          "value": "profile_original"
+        }
+      ]
+    },
+    {
+      "name": "profilePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Chrome Profile Path",
+      "description": "Custom path to Chrome profiles directory (leave empty to use default)",
+      "placeholder": "~/Library/Application Support/Google/Chrome",
+      "default": ""
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^1.17.0"

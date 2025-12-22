@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Icon, Image, List, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { BrowserHistory } from "../util/types";
 import { useEffect, useState, useRef } from "react";
 import { listProfileHistories, openGoogleChrome, parseHistoryResults, formatAsUrl, isValidUrl } from "../util/util";
+import { getFavicon } from "@raycast/utils";
 
 const HistoryItem = (props: { index: number; history: BrowserHistory; profileDirectory: string }) => {
   const { index, history } = props;
@@ -10,7 +11,7 @@ const HistoryItem = (props: { index: number; history: BrowserHistory; profileDir
       key={index}
       title={history.title}
       subtitle={history.url}
-      icon={history.icon ? { source: history.icon, mask: Image.Mask.Circle } : Icon.Globe}
+      icon={getFavicon(history.url)}
       actions={
         <ActionPanel>
           <Action
@@ -44,7 +45,7 @@ export const ListHistories = (props: { profileDirectory: string }) => {
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [error, setError] = useState<Error>();
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (debounceTimerRef.current) {

@@ -165,21 +165,10 @@ export function parseHistoryResults(response?: string) {
     const results: Record<string, string>[] = JSON.parse(response);
 
     return results.map((item) => {
-      let favicon = "";
-
-      try {
-        const urlObj = new URL(item.url);
-        favicon = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
-      } catch (e) {
-        console.log(e);
-        favicon = "";
-      }
-
       return {
         url: item.url,
         title: item.title || item.url,
         visitTime: item.visitTime,
-        icon: favicon,
       };
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

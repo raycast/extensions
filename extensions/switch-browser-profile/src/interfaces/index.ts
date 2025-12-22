@@ -3,7 +3,6 @@ import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 export interface Preferences {
-  readonly useOriginalFavicon: boolean;
   readonly openTabInProfile: SettingsProfileOpenBehaviour;
   readonly profilePath: string;
 }
@@ -59,15 +58,7 @@ export class Tab {
     }
   }
 
-  realFavicon(): string {
-    try {
-      return new URL(this.favicon || "/favicon.ico", this.url).href;
-    } catch {
-      return this.favicon || "";
-    }
-  }
-
-  googleFavicon(): Image.ImageLike {
+  getFaviconImage(): Image.ImageLike {
     try {
       return getFavicon(this.url);
     } catch {

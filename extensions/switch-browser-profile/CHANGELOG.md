@@ -1,6 +1,6 @@
 # Switch Browser Profile Changelog
 
-## [Initial Version] - 2025-12-20
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 

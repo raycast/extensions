@@ -68,3 +68,9 @@ A powerful Raycast extension for managing Google Chrome profiles, browsing histo
 ## Privacy
 
 All searches and operations are performed locally. No data is sent to external servers except when using the Google search feature.
+
+## References
+
+This extension was inspired by and references code from:
+- [Google Chrome by Codely](https://www.raycast.com/Codely/google-chrome)
+- [Google Chrome Profiles by frouo](https://www.raycast.com/frouo/google-chrome-profiles)

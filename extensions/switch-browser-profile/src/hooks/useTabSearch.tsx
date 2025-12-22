@@ -1,6 +1,5 @@
 import { ReactNode, useState } from "react";
-import { Preferences, SearchResult, Tab } from "../interfaces";
-import { getPreferenceValues } from "@raycast/api";
+import { SearchResult, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { usePromise } from "@raycast/utils";
 import { matchesQuery, parseSearchQuery } from "../util/util";
@@ -9,14 +8,12 @@ import { NotInstalledError } from "../components/not-installed-error";
 import { UnknownError } from "../components/unknown-error";
 
 export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullable<Tab[]> } {
-  const { useOriginalFavicon } = getPreferenceValues<Preferences>();
-
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
   const [isEmpty, setIsEmpty] = useState<boolean>(false);
 
   const { isLoading, data: tabData } = usePromise(
-    async (useOriginalFavicon: boolean, query: string) => {
-      const tabs = await getOpenTabs(useOriginalFavicon);
+    async (query: string) => {
+      const tabs = await getOpenTabs();
       const parsedQuery = parseSearchQuery(query);
       setErrorView(undefined);
       setIsEmpty(tabs.length === 0);
@@ -35,7 +32,7 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
         }
       });
     },
-    [useOriginalFavicon, query],
+    [query],
     {
       onError(error) {
         if (error.message === NOT_INSTALLED_MESSAGE) {
