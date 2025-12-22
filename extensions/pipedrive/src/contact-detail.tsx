@@ -73,7 +73,7 @@ export default function ContactDetail({ id }: { id: string }) {
       }
 
       const picture = extractPicture(person.picture_id);
-      const avatarPath = await ensurePersonAvatarCached(preferences, personId, {
+      const avatarPath = await ensurePersonAvatarCached(preferences, id, {
         pictureKey: picture.pictureKey,
         pictureUrl: picture.pictureUrl,
         signal: abortable.current?.signal,
