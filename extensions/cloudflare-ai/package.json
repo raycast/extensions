@@ -15,7 +15,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "query-clouflare-ai",
+      "name": "query-cloudflare-ai",
       "title": "Query Cloudflare AI",
       "description": "Ask questions to Cloudflare AI models",
       "mode": "view"
