@@ -295,6 +295,27 @@ export default function AddContact({
     return mergedOrganizations.filter((org) => org.name.trim().toLowerCase().includes(term));
   }, [mergedOrganizations, organizationSearchText]);
 
+  useEffect(() => {
+    const term = organizationSearchText.trim();
+    if (term.length < 1) {
+      return;
+    }
+
+    const isAutoSelectable = selectedOrganizationId === "" || selectedOrganizationId === CREATE_ORGANIZATION_VALUE;
+    if (!isAutoSelectable) {
+      return;
+    }
+
+    const firstMatch = filteredOrganizations[0];
+    if (firstMatch) {
+      const nextId = String(firstMatch.id);
+      if (nextId !== selectedOrganizationId) {
+        setSelectedOrganizationId(nextId);
+      }
+      return;
+    }
+  }, [canCreateOrganization, filteredOrganizations, organizationSearchText, selectedOrganizationId]);
+
   const emailTypes = [
     { value: "work", label: "Work" },
     { value: "home", label: "Home" },
@@ -571,16 +592,18 @@ export default function AddContact({
         }}
         onSearchTextChange={setOrganizationSearchText}
       >
-        <Form.Dropdown.Item value="" title="No Organization" />
+        {organizationSearchText.trim().length === 0 || filteredOrganizations.length === 0 ? (
+          <Form.Dropdown.Item value="" title="No Organization" />
+        ) : null}
+        {filteredOrganizations.map((org: Organization) => (
+          <Form.Dropdown.Item key={org.id} value={org.id.toString()} title={org.name} />
+        ))}
         {canCreateOrganization ? (
           <Form.Dropdown.Item
             value={CREATE_ORGANIZATION_VALUE}
             title={`Create Organization "${organizationSearchText.trim()}"`}
           />
         ) : null}
-        {filteredOrganizations.map((org: Organization) => (
-          <Form.Dropdown.Item key={org.id} value={org.id.toString()} title={org.name} />
-        ))}
       </Form.Dropdown>
 
       <Form.TextField
