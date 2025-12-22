@@ -48,10 +48,11 @@ export const formatDate = (timestamp: number): string => {
 
   return date.toLocaleDateString();
 };
+import { ODESLI_API_ENDPOINT } from "./constants";
 
 // Odesli API conversion
 export const convertToOdesliLink = async (text: string): Promise<ConversionResult> => {
-  const response = await fetch(`https://api.song.link/v1-alpha.1/links?url=${encodeURIComponent(text)}`);
+  const response = await fetch(`${ODESLI_API_ENDPOINT}/links?url=${encodeURIComponent(text)}`);
 
   if (!response.ok && response.status === 404) {
     throw new SongNotFoundError();
