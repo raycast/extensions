@@ -1,17 +1,17 @@
-import { getPreferenceValues } from "@raycast/api"
-import { useState, useEffect } from "react"
-import { PREF_POLL_INTERVAL } from "../constants"
+import { getPreferenceValues } from "@raycast/api";
+import { useState, useEffect } from "react";
+import { PREF_POLL_INTERVAL } from "../constants";
 
 /**
  * Folder contents preferences
  */
 export interface FolderContentsPreferences {
-  folderContentsSortPrimary: string
-  folderContentsSortSecondary: string
-  folderContentsSortTertiary: string
-  folderContentsViewType: string
-  gridSeparateSections: boolean
-  showPreviewPane: boolean
+  folderContentsSortPrimary: string;
+  folderContentsSortSecondary: string;
+  folderContentsSortTertiary: string;
+  folderContentsViewType: string;
+  gridSeparateSections: boolean;
+  showPreviewPane: boolean;
 }
 
 /**
@@ -19,13 +19,11 @@ export interface FolderContentsPreferences {
  * Polls for changes every 2 seconds to reflect preference updates
  */
 export function useFolderContentsPreferences(): FolderContentsPreferences {
-  const [prefs, setPrefs] = useState<FolderContentsPreferences>(() =>
-    getPreferenceValues<FolderContentsPreferences>()
-  )
+  const [prefs, setPrefs] = useState<FolderContentsPreferences>(() => getPreferenceValues<FolderContentsPreferences>());
 
   useEffect(() => {
     const update = () => {
-      const current = getPreferenceValues<FolderContentsPreferences>()
+      const current = getPreferenceValues<FolderContentsPreferences>();
       setPrefs((prev) => {
         // Only update if any preference changed
         if (
@@ -36,15 +34,15 @@ export function useFolderContentsPreferences(): FolderContentsPreferences {
           prev.gridSeparateSections !== current.gridSeparateSections ||
           prev.showPreviewPane !== current.showPreviewPane
         ) {
-          return current
+          return current;
         }
-        return prev
-      })
-    }
+        return prev;
+      });
+    };
 
-    const interval = setInterval(update, PREF_POLL_INTERVAL)
-    return () => clearInterval(interval)
-  }, [])
+    const interval = setInterval(update, PREF_POLL_INTERVAL);
+    return () => clearInterval(interval);
+  }, []);
 
-  return prefs
+  return prefs;
 }

@@ -94,18 +94,18 @@ export const CSS_COLORS: Record<string, string> = {
   seashell: "#FFF5EE",
   snow: "#FFFAFA",
   yellowgreen: "#9ACD32",
-}
+};
 
 /**
  * Check if a string is a valid CSS color name
  */
 export function isCssColorName(color: string): boolean {
-  return CSS_COLORS[color.toLowerCase()] !== undefined
+  return CSS_COLORS[color.toLowerCase()] !== undefined;
 }
 
 /**
  * Get hex code for a CSS color name
  */
 export function cssColorToHex(color: string): string | undefined {
-  return CSS_COLORS[color.toLowerCase()]
+  return CSS_COLORS[color.toLowerCase()];
 }

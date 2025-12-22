@@ -1,31 +1,31 @@
-import { useNavigation } from "@raycast/api"
-import React, { useState, useEffect, useCallback } from "react"
-import { updateFolder, getFolderById } from "../storage"
-import { Folder, FolderItem } from "../types"
-import { generateId } from "../utils"
-import { CREATE_NEW_FOLDER_VALUE } from "../constants"
-import FolderEditForm from "../folder-edit-form"
+import { useNavigation } from "@raycast/api";
+import React, { useState, useEffect, useCallback } from "react";
+import { updateFolder, getFolderById } from "../storage";
+import { Folder, FolderItem } from "../types";
+import { generateId } from "../utils";
+import { CREATE_NEW_FOLDER_VALUE } from "../constants";
+import FolderEditForm from "../folder-edit-form";
 
 interface UseNestedFolderCreationOptions {
   /** Current folder being edited (if editing existing) */
-  folder?: Folder
+  folder?: Folder;
   /** All available folders for nesting */
-  availableFolders: Folder[]
+  availableFolders: Folder[];
   /** Current form values for folders field */
-  folderValues: string[] | undefined
+  folderValues: string[] | undefined;
   /** Form setValue function */
-  setValue: (name: "folders", value: string[]) => void
+  setValue: (name: "folders", value: string[]) => void;
   /** Callback when data should be refreshed */
-  onSave: () => void | Promise<void>
+  onSave: () => void | Promise<void>;
   /** Revalidate folders data */
-  revalidate: () => void
+  revalidate: () => void;
 }
 
 interface UseNestedFolderCreationResult {
   /** Callback to handle newly created folder */
-  handleFolderCreated: (newFolderId: string) => Promise<void>
+  handleFolderCreated: (newFolderId: string) => Promise<void>;
   /** Navigate to create folder form - call when CREATE_NEW_FOLDER_VALUE is selected */
-  navigateToCreateFolder: () => void
+  navigateToCreateFolder: () => void;
 }
 
 /**
@@ -44,10 +44,10 @@ export function useNestedFolderCreation({
   onSave,
   revalidate,
 }: UseNestedFolderCreationOptions): UseNestedFolderCreationResult {
-  const { push } = useNavigation()
+  const { push } = useNavigation();
 
   // Track pending new folder ID to add after data refreshes
-  const [pendingNewFolderId, setPendingNewFolderId] = useState<string | null>(null)
+  const [pendingNewFolderId, setPendingNewFolderId] = useState<string | null>(null);
 
   // Handle new folder creation - immediately save the nesting relationship
   const handleFolderCreated = useCallback(
@@ -55,58 +55,58 @@ export function useNestedFolderCreation({
       // If editing an existing folder, immediately add the new folder as nested
       // This ensures the nesting is saved even if user presses Escape
       if (folder) {
-        const newFolder = await getFolderById(newFolderId)
+        const newFolder = await getFolderById(newFolderId);
         const newNestedItem: FolderItem = {
           id: generateId(),
           name: newFolder?.name || "New Folder",
           type: "folder",
           folderId: newFolderId,
-        }
+        };
         await updateFolder(folder.id, {
           items: [...folder.items, newNestedItem],
-        })
-        await onSave()
+        });
+        await onSave();
       }
 
       // Set the pending folder ID - it will be added to form selection once data refreshes
-      setPendingNewFolderId(newFolderId)
+      setPendingNewFolderId(newFolderId);
 
       // Force a revalidation to get fresh data
-      revalidate()
+      revalidate();
 
       // Give the revalidation a moment to complete
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100));
     },
-    [folder, revalidate, onSave]
-  )
+    [folder, revalidate, onSave],
+  );
 
   // Navigate to create folder form
   const navigateToCreateFolder = useCallback(() => {
-    push(<FolderEditForm onSave={onSave} onCreated={handleFolderCreated} hideCreateOption />)
-  }, [push, onSave, handleFolderCreated])
+    push(<FolderEditForm onSave={onSave} onCreated={handleFolderCreated} hideCreateOption />);
+  }, [push, onSave, handleFolderCreated]);
 
   // When folders list updates and we have a pending folder, add it to selection
   useEffect(() => {
     if (pendingNewFolderId && availableFolders.some((f) => f.id === pendingNewFolderId)) {
-      const currentFolders = (folderValues || []).filter((id) => id !== CREATE_NEW_FOLDER_VALUE)
+      const currentFolders = (folderValues || []).filter((id) => id !== CREATE_NEW_FOLDER_VALUE);
       if (!currentFolders.includes(pendingNewFolderId)) {
-        setValue("folders", [...currentFolders, pendingNewFolderId])
+        setValue("folders", [...currentFolders, pendingNewFolderId]);
       }
-      setPendingNewFolderId(null)
+      setPendingNewFolderId(null);
     }
-  }, [availableFolders, pendingNewFolderId, folderValues, setValue])
+  }, [availableFolders, pendingNewFolderId, folderValues, setValue]);
 
   // Detect when "Create New Folder" is selected and navigate to create form
   useEffect(() => {
     if (folderValues?.includes(CREATE_NEW_FOLDER_VALUE)) {
       // Remove the special value from selection
-      const filteredFolders = folderValues.filter((id) => id !== CREATE_NEW_FOLDER_VALUE)
-      setValue("folders", filteredFolders)
+      const filteredFolders = folderValues.filter((id) => id !== CREATE_NEW_FOLDER_VALUE);
+      setValue("folders", filteredFolders);
 
       // Navigate to create form
-      navigateToCreateFolder()
+      navigateToCreateFolder();
     }
-  }, [folderValues, setValue, navigateToCreateFolder])
+  }, [folderValues, setValue, navigateToCreateFolder]);
 
-  return { handleFolderCreated, navigateToCreateFolder }
+  return { handleFolderCreated, navigateToCreateFolder };
 }
