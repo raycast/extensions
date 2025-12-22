@@ -1,6 +1,10 @@
 # Hijri Converter Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [1.0.1] - 2025-12-22
+
+- Improved Menu Bar: Added 1-minute automatic refresh interval to ensure the date stays accurate without manual clicks.
+
+## [Initial Version] - 2025-12-14
 
 - Added Convert Hijri to Gregorian command with live preview
 - Added Convert Gregorian to Hijri command with live preview

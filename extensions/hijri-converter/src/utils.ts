@@ -150,3 +150,16 @@ export function getDayName(gregorian: GregorianDate): string {
 export function getHijriMonthName(month: number): string {
   return HIJRI_MONTHS[month - 1].name;
 }
+
+// Get Hijri date for a specific day offset from today
+export function getHijriDateWithOffset(daysOffset: number): HijriDate {
+  const today = new Date();
+  const targetDate = new Date(today);
+  targetDate.setDate(today.getDate() + daysOffset);
+
+  return convertGregorianToHijri({
+    year: targetDate.getFullYear(),
+    month: targetDate.getMonth() + 1,
+    day: targetDate.getDate(),
+  });
+}

@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hijri-converter",
+  "version": "1.0.1",
   "title": "Hijri Converter",
   "description": "Convert dates between Hijri (Islamic) and Gregorian calendars with live preview, calendar view, and menu bar access.",
   "icon": "extension-icon.png",
@@ -35,7 +36,8 @@
       "name": "menu-bar",
       "title": "Show Hijri Date in Menu Bar",
       "description": "Display the current Hijri date in the menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "1m"
     },
     {
       "name": "hijri-calendar",

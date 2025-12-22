@@ -1,6 +1,6 @@
 import { List, Icon, Clipboard, showHUD, ActionPanel, Action } from "@raycast/api";
 import {
-  getTodayHijri,
+  getHijriDateWithOffset,
   convertHijriToGregorian,
   getHijriMonthName,
   getDayName,
@@ -10,26 +10,10 @@ import {
 
 function getNextDays(count: number): Array<{ hijri: HijriDate; dayName: string }> {
   const days: Array<{ hijri: HijriDate; dayName: string }> = [];
-  const today = getTodayHijri();
 
   for (let i = 0; i < count; i++) {
-    // Calculate the date by adding days
-    let year = today.year;
-    let month = today.month;
-    let day = today.day + i;
-
-    // Simple month overflow handling
-    const monthLengths = [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 29];
-    while (day > monthLengths[month - 1]) {
-      day -= monthLengths[month - 1];
-      month++;
-      if (month > 12) {
-        month = 1;
-        year++;
-      }
-    }
-
-    const hijri: HijriDate = { year, month, day };
+    // Use library conversion for accurate date calculation across month boundaries
+    const hijri = getHijriDateWithOffset(i);
     const gregorian = convertHijriToGregorian(hijri);
     const dayName = getDayName(gregorian);
 
