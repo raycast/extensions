@@ -1,4 +1,4 @@
-import { Application, Icon, open, Color, showToast, Toast } from "@raycast/api";
+import { Application, Icon, open, showToast, Toast } from "@raycast/api";
 import { FolderItem, Folder } from "./types";
 import { getCachedFavicon, extractDomain, isValidFaviconPath } from "./favicon";
 import { isCssColorName, cssColorToHex } from "./css-colors";
