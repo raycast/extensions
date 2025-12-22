@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Form, Icon, List, Toast, getPreferenceValues, popToRoot, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  List,
+  Toast,
+  getPreferenceValues,
+  open,
+  popToRoot,
+  showToast,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import Cards from "./cards";
 
@@ -125,7 +136,7 @@ function CreateBoardForm(props: { onCreated: () => void }) {
 
     // Optional: open the new board in the browser if we got a URL
     if (url) {
-      await showToast({ style: Toast.Style.Success, title: "Opened board in browser" });
+      await open(url);
     }
   }
 
@@ -189,7 +200,7 @@ export default function Command() {
       {(data ?? []).map((b) => (
         <List.Item
           key={b.id}
-          icon={Icon.Layout}
+          icon={Icon.List}
           title={b.name}
           subtitle={b.all_access ? "All access" : "Restricted"}
           accessories={[{ text: new Date(b.created_at).toLocaleDateString() }]}

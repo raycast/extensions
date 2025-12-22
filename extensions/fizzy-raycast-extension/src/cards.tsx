@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Form,
   Icon,
   List,
@@ -155,7 +156,8 @@ function CreateCardForm(props: { boardId: string; boardName: string; onCreated: 
 ======================= */
 
 export default function Cards({ boardId, boardName }: CardsProps) {
-  const { data, isLoading, error, revalidate } = useCachedPromise(() => listCards(boardId), [boardId]);
+  // ✅ Correct overload: pass fetcher + args directly
+  const { data, isLoading, error, revalidate } = useCachedPromise(listCards, [boardId]);
 
   if (error) {
     void showToast({
@@ -167,7 +169,6 @@ export default function Cards({ boardId, boardName }: CardsProps) {
 
   return (
     <List isLoading={isLoading} navigationTitle={boardName}>
-      {/* Empty state */}
       {!isLoading && (data?.length ?? 0) === 0 ? (
         <List.EmptyView
           icon={Icon.Plus}
@@ -185,7 +186,6 @@ export default function Cards({ boardId, boardName }: CardsProps) {
         />
       ) : null}
 
-      {/* Cards */}
       {(data ?? []).map((c) => (
         <List.Item
           key={c.id}
@@ -212,7 +212,8 @@ export default function Cards({ boardId, boardName }: CardsProps) {
                     message: `This will permanently delete “${c.title}”.`,
                     primaryAction: {
                       title: "Delete",
-                      style: Action.Style.Destructive,
+                      // ✅ confirmAlert uses Alert.ActionStyle
+                      style: Alert.ActionStyle.Destructive,
                     },
                   });
 
