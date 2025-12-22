@@ -7,6 +7,7 @@ View 2FA codes from iMessage and Email (Apple Mail or Gmail) in Raycast.
 - Find 2FA codes in iMessage and Email messages
 - Detect and open verification or sign-in links in emails directly
 - Support for both Apple Mail and Gmail as email sources
+- Multiple Gmail account support with individual authorization
 - Configurable search window (minutes, hours, or days)
 - Option to ignore already read messages
 - Real-time code detection and updates
@@ -36,11 +37,19 @@ All preferences can be customized through `Raycast Settings > Extensions > iMess
 
 The extension supports Gmail as an alternative to Apple Mail. The main advantage of using Gmail is that it doesn't require the Apple Mail app to be running in the background.
 
+#### Multi-Account Support
+
+You can add and manage multiple Gmail accounts simultaneously. Each account is authorized independently, allowing you to receive 2FA codes from multiple Gmail inboxes.
+
+**Important:** Each Gmail account you want to add must be added as a test user in the OAuth consent screen in Google Cloud Console (see step 8 below).
+
 To use Gmail:
 
 1. In the extension preferences, change the "Email Source" to "Gmail"
 2. Set up a Gmail OAuth Client ID (see below)
 3. Enter your OAuth Client ID in the extension preferences
+4. Use `Cmd+Shift+M` in the extension to open the Account Manager
+5. Add your Gmail accounts and authorize each one
 
 #### How to get a Gmail OAuth Client ID
 
@@ -72,7 +81,7 @@ You can search on Google or YouTube to get a better process description like e.g
   5. In `User Support Mail` type your own email address
   6. In `Developer Contact Info` type your own email address
   7. Press `Save and Continue`
-  8. Goto to `Test Users` and add the email address you wanna manage via Raycast
+  8. Goto to `Test Users` and add each email address you want to manage via Raycast (required for each Gmail account)
   9. Click on `Credentials` on the left side
   10. Click on the `Create Credentials` on the top (blue text)
   11. Press `OAuth client ID`

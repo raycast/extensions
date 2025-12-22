@@ -1,8 +1,3 @@
-/**
- * Account Manager UI for managing multiple Google accounts
- * Allows users to add, remove, rename, and authorize Gmail accounts
- */
-
 import {
   Action,
   ActionPanel,
@@ -29,7 +24,6 @@ export default function ManageGoogleAccounts() {
   const [authStatuses, setAuthStatuses] = useState<Map<string, boolean>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if OAuth Client ID is configured
   if (!preferences.gmailClientId || preferences.gmailClientId.trim() === "") {
     return <OAuthErrorView />;
   }
@@ -39,7 +33,6 @@ export default function ManageGoogleAccounts() {
     const loadedAccounts = await getAccounts();
     setAccounts(loadedAccounts);
 
-    // Check authorization status for each account
     const statuses = new Map<string, boolean>();
     for (const account of loadedAccounts) {
       const isAuthed = await isAccountAuthorized(account.id, account.name);

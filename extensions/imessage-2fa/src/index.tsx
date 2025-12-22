@@ -39,14 +39,13 @@ export default function Command() {
   const [verificationLinks, setVerificationLinks] = useState<VerificationLink[]>([]);
   const [gmailAccountCount, setGmailAccountCount] = useState<number>(0);
 
-  // Load Gmail account count for empty state logic
+  // Initialize message source based on user preferences
   useEffect(() => {
     if (preferences.emailSource === "gmail") {
       getAccounts().then((accounts) => setGmailAccountCount(accounts.length));
     }
   }, [preferences.emailSource]);
 
-  // Initialize message source based on user preferences
   const [messageSource, setMessageSource] = useState<MessageSource>(() => {
     return preferences.defaultSource || "all";
   });
@@ -102,7 +101,6 @@ export default function Command() {
           ]
         : []
       : [
-          // When showing all sources, combine and sort by date
           ...(preferences.enabledSources !== "email"
             ? messageData?.map((m) => ({
                 ...m,
@@ -234,21 +232,14 @@ export default function Command() {
     setMessageSource(value as MessageSource);
   }, []);
 
-  // Show permission views if needed
   if (messagePermissionView && preferences.enabledSources !== "email") return messagePermissionView;
 
-  // Gmail-specific error handling
   const isGmailEnabled = preferences.enabledSources !== "imessage" && preferences.emailSource === "gmail";
-  if (isGmailEnabled) {
-    // Check for missing OAuth Client ID
-    if (!preferences.gmailClientId || preferences.gmailClientId.trim() === "") {
-      return <OAuthErrorView />;
-    }
+  if (isGmailEnabled && (!preferences.gmailClientId || preferences.gmailClientId.trim() === "")) {
+    return <OAuthErrorView />;
   }
 
   const showSourceDropdown = preferences.enabledSources === "both";
-
-  // When rendering the UI, check if verification links are enabled
   const hasCodesOrLinks =
     data.filter((msg) => msg.displayText).some((msg) => extractCode(msg.displayText)) ||
     (verificationLinks.length > 0 && preferences.enableVerificationLinks !== false);
@@ -371,22 +362,17 @@ export default function Command() {
 
 // Component for displaying verification links
 const LinkItem = React.memo(({ link }: { link: VerificationLink }) => {
-  // Different icons based on link type
   const icon =
     link.type === "verification"
       ? { source: Icon.CheckCircle, tintColor: Color.Green }
       : { source: Icon.Lock, tintColor: Color.Blue };
 
-  // Extract hostname for display
   const hostname = new URL(link.url).hostname;
   const domain = hostname.replace(/^www\./, "");
-
-  // Create a more descriptive title based on link type and domain
   const title = link.type === "verification" ? `Verify Email: ${domain}` : `Sign In: ${domain}`;
 
   const accessories = [];
 
-  // Add account name if present (for Gmail accounts)
   if (link.accountName) {
     accessories.push({
       tag: { value: link.accountName, color: Color.Blue },
@@ -394,7 +380,6 @@ const LinkItem = React.memo(({ link }: { link: VerificationLink }) => {
     });
   }
 
-  // Add source indicator
   accessories.push({
     text: link.source === "email" ? "Email" : "iMessage",
     icon: link.source === "email" ? Icon.Envelope : Icon.Message,

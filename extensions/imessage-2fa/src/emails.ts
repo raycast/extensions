@@ -241,7 +241,6 @@ export function useEmails(options: UseEmailsOptions) {
           cutoffTime = new Date(latestTimestamp.current || Date.now() - 60 * 1000);
         }
 
-        // Fetch from Apple Mail (Gmail is now handled by useGmail hook)
         const emails = await getAppleMailMessages(options.searchType, cutoffTime, Array.from(messageCache.current));
 
         processNewEmails(emails);

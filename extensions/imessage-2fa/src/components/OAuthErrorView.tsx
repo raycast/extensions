@@ -1,8 +1,3 @@
-/**
- * Error view for missing or invalid Gmail OAuth Client ID
- * Provides clear instructions for obtaining and configuring OAuth credentials
- */
-
 import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 
 const GOOGLE_CONSOLE_URL = "https://console.cloud.google.com/apis/credentials";

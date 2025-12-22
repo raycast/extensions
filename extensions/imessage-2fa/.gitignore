@@ -8,3 +8,6 @@
 
 # raycast auto generated env file
 raycast-env.d.ts
+
+# bun lockfile
+bun.lockb

@@ -1,5 +1,12 @@
 # Messages 2FA Changelog
 
+## [Multi-Account Gmail Support] - {PR_MERGE_DATE}
+
+- Add support for multiple Gmail accounts simultaneously
+- Add account manager UI for managing Google accounts
+- Add ability to authorize, rename, and remove Gmail accounts
+- Improve Gmail OAuth setup instructions
+
 ## [Update] - 2025-12-17
 
 - Add support for extracting text from binary data in iMessage messages
