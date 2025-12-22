@@ -13,7 +13,13 @@ import { useCachedPromise } from "@raycast/utils";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import AddOrganization from "./add-organization";
-import { buildPipedriveApiUrl, buildPipedriveWebUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
+import {
+  buildPipedriveApiUrl,
+  buildPipedriveWebUrl,
+  fetchPipedriveJson,
+  isAbortError,
+  type PipedrivePreferences,
+} from "./pipedrive-client";
 import { redactPipedriveSecrets } from "./pipedrive-security";
 
 interface Organization {
@@ -53,7 +59,7 @@ const CREATE_ORGANIZATION_VALUE = "__create_organization__";
 let cachedOrganizations: { data: Organization[]; fetchedAt: number } | undefined;
 
 async function searchPeople(
-  preferences: Preferences,
+  preferences: PipedrivePreferences,
   term: string,
   signal?: AbortSignal,
 ): Promise<Array<{ id: string; title: string }>> {
@@ -82,7 +88,7 @@ async function searchPeople(
     .filter((x): x is { id: string; title: string } => Boolean(x));
 }
 
-async function fetchOrganizations(preferences: Preferences, signal?: AbortSignal): Promise<Organization[]> {
+async function fetchOrganizations(preferences: PipedrivePreferences, signal?: AbortSignal): Promise<Organization[]> {
   if (cachedOrganizations && Date.now() - cachedOrganizations.fetchedAt < ORG_CACHE_TTL_MS) {
     return cachedOrganizations.data;
   }

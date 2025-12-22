@@ -14,7 +14,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import AddContact from "./add-contact";
 import AddOrganization from "./add-organization";
-import { buildPipedriveApiUrl, buildPipedriveWebUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
+import {
+  buildPipedriveApiUrl,
+  buildPipedriveWebUrl,
+  fetchPipedriveJson,
+  isAbortError,
+  type PipedrivePreferences,
+} from "./pipedrive-client";
 import { redactPipedriveSecrets } from "./pipedrive-security";
 
 interface ItemSearchResponse {
@@ -56,7 +62,7 @@ const CREATE_ORGANIZATION_VALUE = "__create_organization__";
 async function itemSearch(
   term: string,
   itemTypes: string,
-  preferences: Preferences,
+  preferences: PipedrivePreferences,
   signal?: AbortSignal,
 ): Promise<Array<{ id: string; title: string }>> {
   const url = buildPipedriveApiUrl(preferences, "/api/v2/itemSearch", {

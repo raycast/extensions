@@ -1,9 +1,6 @@
 import { assertValidPipedriveDomain, redactPipedriveSecrets } from "./pipedrive-security";
 
-export type PipedrivePreferences = {
-  domain: string;
-  apiToken: string;
-};
+export type PipedrivePreferences = Pick<Preferences, "domain" | "apiToken">;
 
 export function isAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === "AbortError";
@@ -27,7 +24,7 @@ export function buildPipedriveApiUrl(
     for (const [key, value] of Object.entries(params)) {
       if (value === undefined || value === null) continue;
       const text = String(value);
-      if (!text) continue;
+      if (text.length === 0) continue;
       url.searchParams.set(key, text);
     }
   }

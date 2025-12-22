@@ -12,7 +12,13 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 
-import { buildPipedriveApiUrl, buildPipedriveWebUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
+import {
+  buildPipedriveApiUrl,
+  buildPipedriveWebUrl,
+  fetchPipedriveJson,
+  isAbortError,
+  type PipedrivePreferences,
+} from "./pipedrive-client";
 import { redactPipedriveSecrets } from "./pipedrive-security";
 
 interface AddOrganizationProps {
@@ -23,7 +29,7 @@ interface AddOrganizationProps {
 }
 
 async function searchOrganizations(
-  preferences: Preferences,
+  preferences: PipedrivePreferences,
   term: string,
   signal?: AbortSignal,
 ): Promise<Array<{ id: string; title: string }>> {
