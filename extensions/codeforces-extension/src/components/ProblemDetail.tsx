@@ -98,6 +98,13 @@ export function ProblemDetail({ contestId, index, problemName }: ProblemDetailPr
 
         const $ = cheerio.load(html);
 
+        if ($("title").text().includes("Cloudflare")) {
+          setContent(
+            "# Request Blocked\n\nIt looks like Codeforces's security provider (Cloudflare) is preventing the problem statement from being loaded here. \n\n**Please use the `Open in Browser` action to view the full problem.**",
+          );
+          return;
+        }
+
         const problemStatement = $(".problem-statement");
 
         const timeLimit = problemStatement.find(".time-limit").text().replace("time limit per test", "").trim();
@@ -116,7 +123,8 @@ export function ProblemDetail({ contestId, index, problemName }: ProblemDetailPr
         const problemId = `${contestId}${index}`;
 
         setContent(`# ${problemId}. ${problemName}\n\n${limitsSection}${markdown}`);
-      } catch {
+      } catch (error) {
+        console.error("Failed to fetch problem content:", error);
         setContent("Failed to load problem content. Please try again later.");
       } finally {
         setIsLoading(false);
