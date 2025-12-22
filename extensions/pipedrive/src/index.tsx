@@ -52,7 +52,7 @@ export default function PipedriveSearch() {
       .join(" ");
   }
 
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.Index>();
   const domainValidation = validatePipedriveDomain(preferences.domain);
   if (!domainValidation.ok) {
     return (
@@ -309,6 +309,9 @@ function SearchListItem({
               }}
             />
             {searchResult.type === "person" && (
+              <Action.Push title="Show Details" target={<ContactDetail id={searchResult.id} />} />
+            )}
+            {searchResult.type === "person" && (
               <Action.Push
                 title="Edit Contact"
                 target={<AddContact personIdToEdit={searchResult.id} onSaved={revalidate} />}
@@ -423,14 +426,13 @@ function useSearch(searchText: string) {
 }
 
 async function performSearch(searchText: string, signal?: AbortSignal): Promise<SearchResult[]> {
-  const { apiToken, domain, limit } = getPreferenceValues<Preferences>();
-  const preferences: Preferences = { apiToken, domain, limit };
+  const preferences = getPreferenceValues<Preferences.Index>();
+  const { limit } = preferences;
 
   const searchUrl = buildPipedriveApiUrl(preferences, "/api/v2/itemSearch", {
-    include_fields: "deal.cc_email",
-    item_types: "deal,person,organization",
     term: searchText,
-    limit,
+    item_types: "deal,person,organization",
+    limit: limit,
   });
 
   const json = await fetchPipedriveJson<{ data: { items: any[] } }>(preferences, searchUrl, { method: "get", signal }); // eslint-disable-line @typescript-eslint/no-explicit-any

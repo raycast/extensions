@@ -18,7 +18,7 @@ type OrganizationResponse = {
 };
 
 export default function OrganizationDetail({ id }: { id: string }) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
   const abortable = useRef<AbortController | null>(null);
 
   const { data, isLoading, revalidate } = useCachedPromise(

@@ -56,12 +56,12 @@ function extractPicture(input: unknown): { pictureKey: string | null; pictureUrl
 }
 
 export default function ContactDetail({ id }: { id: string }) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
   const abortable = useRef<AbortController | null>(null);
 
   const { data, isLoading, revalidate } = useCachedPromise(
-    async (personId: string) => {
-      const url = buildPipedriveApiUrl(preferences, `/api/v1/persons/${personId}`);
+    async (id: string) => {
+      const url = buildPipedriveApiUrl(preferences, `/api/v1/persons/${id}`);
       const json = await fetchPipedriveJson<PersonResponse>(preferences, url, {
         method: "get",
         signal: abortable.current?.signal,

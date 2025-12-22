@@ -6,7 +6,7 @@ import { buildPipedriveApiUrl, fetchPipedriveJson, isAbortError } from "./pipedr
 import { readFileAsBuffer } from "./pipedrive-avatar-cache";
 
 export default function UploadPersonPhoto({ personId, onUploaded }: { personId: string; onUploaded?: () => void }) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
   const { pop } = useNavigation();
 
   async function handleSubmit(values: { file?: string[] }) {
@@ -25,8 +25,9 @@ export default function UploadPersonPhoto({ personId, onUploaded }: { personId: 
       const url = buildPipedriveApiUrl(preferences, `/api/v1/persons/${personId}/picture`);
 
       const bytes = await readFileAsBuffer(filePath);
+      const blobBytes = Uint8Array.from(bytes);
       const form = new FormData();
-      form.append("file", new Blob([bytes]), basename(filePath));
+      form.append("file", new Blob([blobBytes]), basename(filePath));
 
       await fetchPipedriveJson<Record<string, unknown>>(preferences, url, {
         method: "POST",
