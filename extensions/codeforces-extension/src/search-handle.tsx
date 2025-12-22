@@ -56,7 +56,7 @@ function User(name: { value: string }) {
       actions={
         <ActionPanel title="Codeforces Handle">
           <Action.Push
-            title="Contest Histroy"
+            title="Contest History"
             icon={{ source: Icon.AppWindowList }}
             target={<Contest name={name.value} />}
           />
