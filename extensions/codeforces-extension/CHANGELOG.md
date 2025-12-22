@@ -1,5 +1,10 @@
 # Codeforces Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Added rating dropdown for problem search
+- Removed problem view section
+
 ## [Update] - 2025-01-28
 
 - Fixed the flickering issue
