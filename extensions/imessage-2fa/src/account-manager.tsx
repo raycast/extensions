@@ -12,7 +12,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getAccounts, addAccount, removeAccount, renameAccount, Account } from "./storage";
 import { isAccountAuthorized, authorizeAccount } from "./gmail";
 import { OAuthErrorView } from "./components/OAuthErrorView";
@@ -28,7 +28,7 @@ export default function ManageGoogleAccounts() {
     return <OAuthErrorView />;
   }
 
-  const loadAccounts = async () => {
+  const loadAccounts = useCallback(async () => {
     setIsLoading(true);
     const loadedAccounts = await getAccounts();
     setAccounts(loadedAccounts);
@@ -40,11 +40,11 @@ export default function ManageGoogleAccounts() {
     }
     setAuthStatuses(statuses);
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     loadAccounts();
-  }, []);
+  }, [loadAccounts]);
 
   const handleAddAccount = async (name: string) => {
     try {

@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, OAuth } from "@raycast/api";
 import { randomUUID } from "crypto";
 
 export interface Account {
@@ -43,6 +43,16 @@ export async function addAccount(name: string): Promise<Account> {
 export async function removeAccount(accountId: string): Promise<void> {
   const accounts = await getAccounts();
   await saveAccounts(accounts.filter((acc) => acc.id !== accountId));
+
+  // Clean up OAuth tokens for this account
+  const oauthClient = new OAuth.PKCEClient({
+    redirectMethod: OAuth.RedirectMethod.AppURI,
+    providerName: "Google",
+    providerIcon: "command-icon.png",
+    providerId: `google-${accountId}`,
+    description: "Cleanup",
+  });
+  await oauthClient.removeTokens();
 }
 
 export async function renameAccount(accountId: string, newName: string): Promise<void> {
