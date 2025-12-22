@@ -4,8 +4,8 @@
   "title": "Unsure Calc",
   "description": "Lightweight probabilistic calculator that lets you type ranges (with `~`) and arithmetic to see exact bounds plus simulated outcomes and a text histogram.",
   "icon": "extension-icon.png",
-  "author": "wojtek_nowak",
-  "owner": "wojtek_nowak",
+  "author": "PythonicNinja",
+  "owner": "PythonicNinja",
   "platforms": [
     "macOS",
     "Windows"
