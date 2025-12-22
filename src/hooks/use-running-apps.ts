@@ -27,13 +27,10 @@ export function useRunningApps(
     const checkRunningApps = async () => {
       try {
         // Get all running process names in a single AppleScript call
-        const result = await runAppleScript(
-          `tell application "System Events" to get name of every process`,
-          { timeout: 5000 }
-        )
-        const runningProcesses = new Set(
-          result.split(", ").map((name) => name.trim().toLowerCase())
-        )
+        const result = await runAppleScript(`tell application "System Events" to get name of every process`, {
+          timeout: 5000,
+        })
+        const runningProcesses = new Set(result.split(", ").map((name) => name.trim().toLowerCase()))
 
         const running = new Set<string>()
         for (const item of appItems) {

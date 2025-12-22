@@ -42,10 +42,7 @@ export function parseSortPreference(value: string): SortConfig {
     config = { method: "none", direction: "asc" }
   } else {
     const [method, direction] = value.split("-")
-    if (
-      ["alphabetical", "length", "recent"].includes(method) &&
-      ["asc", "desc"].includes(direction)
-    ) {
+    if (["alphabetical", "length", "recent"].includes(method) && ["asc", "desc"].includes(direction)) {
       config = { method: method as SortMethod, direction: direction as SortDirection }
     } else {
       config = { method: value as SortMethod, direction: "asc" }
@@ -60,11 +57,7 @@ export function parseSortPreference(value: string): SortConfig {
  * Get display name for a folder item
  * For nested folders, looks up the actual folder name from allFolders
  */
-export function getItemDisplayName(
-  item: FolderItem,
-  applications?: Application[],
-  allFolders?: Folder[]
-): string {
+export function getItemDisplayName(item: FolderItem, applications?: Application[], allFolders?: Folder[]): string {
   if (item.type === "folder") {
     // Look up the actual folder name if allFolders is provided
     if (allFolders && item.folderId) {
@@ -81,10 +74,7 @@ export function getItemDisplayName(
 /**
  * Find application by item path using multiple matching strategies
  */
-export function findApplicationByItemPath(
-  itemPath: string,
-  applications: Application[]
-): Application | undefined {
+export function findApplicationByItemPath(itemPath: string, applications: Application[]): Application | undefined {
   if (!itemPath) return undefined
 
   // Try exact match first (most common)
@@ -106,20 +96,12 @@ export function findApplicationByItemPath(
 }
 
 // Icon type that includes tinted icons and source URLs
-export type FolderIconType =
-  | Icon
-  | { source: Icon; tintColor: string }
-  | { fileIcon: string }
-  | { source: string }
+export type FolderIconType = Icon | { source: Icon; tintColor: string } | { fileIcon: string } | { source: string }
 
 /**
  * Get icon for a folder item
  */
-export function getItemIcon(
-  item: FolderItem,
-  applications: Application[],
-  folders?: Folder[]
-): FolderIconType {
+export function getItemIcon(item: FolderItem, applications: Application[], folders?: Folder[]): FolderIconType {
   if (item.type === "folder") {
     // Look up the actual folder to get its custom icon and color
     if (folders && item.folderId) {
@@ -236,12 +218,7 @@ function compare<T>(
 /**
  * Multi-level sorting for folders
  */
-export function sortFolders(
-  folders: Folder[],
-  primary: string,
-  secondary: string,
-  tertiary: string
-): Folder[] {
+export function sortFolders(folders: Folder[], primary: string, secondary: string, tertiary: string): Folder[] {
   const configs = [primary, secondary, tertiary].map(parseSortPreference)
 
   if (configs.every((c) => c.method === "none")) return [...folders]
@@ -321,10 +298,7 @@ export function getFolderIconOptions(): Array<{ value: string; title: string; ic
  * Get Icon from icon name string with optional color
  * Returns Icon directly if no color, or Image object with tintColor if color is provided
  */
-export function getFolderIcon(
-  iconName?: string,
-  color?: string
-): Icon | { source: Icon; tintColor: string } {
+export function getFolderIcon(iconName?: string, color?: string): Icon | { source: Icon; tintColor: string } {
   const icon = iconName ? (Icon as Record<string, Icon>)[iconName] || Icon.Folder : Icon.Folder
 
   if (color && isValidHexColor(color)) {

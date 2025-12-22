@@ -90,11 +90,7 @@ export default function FolderEditForm({
     const ancestors = new Set<string>()
 
     // Helper to check if a folder contains the target folder (directly or indirectly)
-    const containsFolder = (
-      checkFolder: Folder,
-      targetId: string,
-      visited: Set<string>
-    ): boolean => {
+    const containsFolder = (checkFolder: Folder, targetId: string, visited: Set<string>): boolean => {
       if (visited.has(checkFolder.id)) return false // Prevent infinite loops
       visited.add(checkFolder.id)
 
@@ -124,11 +120,7 @@ export default function FolderEditForm({
   // Get the IDs of folders currently nested in this folder (allowed to stay)
   const currentlyNestedIds = useMemo(() => {
     if (!folder) return new Set<string>()
-    return new Set(
-      folder.items
-        .filter((item) => item.type === "folder" && item.folderId)
-        .map((item) => item.folderId!)
-    )
+    return new Set(folder.items.filter((item) => item.type === "folder" && item.folderId).map((item) => item.folderId!))
   }, [folder])
 
   // Filter out:
@@ -213,9 +205,7 @@ export default function FolderEditForm({
         for (const url of urls) {
           urlCounts.set(url, (urlCounts.get(url) || 0) + 1)
         }
-        const duplicateUrls = [...urlCounts.entries()]
-          .filter(([, count]) => count > 1)
-          .map(([url]) => url)
+        const duplicateUrls = [...urlCounts.entries()].filter(([, count]) => count > 1).map(([url]) => url)
 
         // Ask about duplicates if any exist
         const includeDuplicates =
@@ -245,9 +235,7 @@ export default function FolderEditForm({
 
       const iconValue = formValues.icon === "Folder" ? undefined : formValues.icon
       const colorValue =
-        formValues.color && isValidHexColor(formValues.color)
-          ? normalizeHexColor(formValues.color)
-          : undefined
+        formValues.color && isValidHexColor(formValues.color) ? normalizeHexColor(formValues.color) : undefined
 
       let newFolderId: string | undefined
 
@@ -350,13 +338,7 @@ export default function FolderEditForm({
                 icon={Icon.NewFolder}
                 title="Create New Folder to Nest"
                 shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-                target={
-                  <FolderEditForm
-                    onSave={onSave}
-                    onCreated={handleFolderCreated}
-                    hideCreateOption
-                  />
-                }
+                target={<FolderEditForm onSave={onSave} onCreated={handleFolderCreated} hideCreateOption />}
               />
             </ActionPanel.Section>
           )}
@@ -387,11 +369,7 @@ export default function FolderEditForm({
 
       <Form.Separator />
 
-      <Form.TagPicker
-        title="Applications"
-        placeholder="Select applications..."
-        {...itemProps.applications}
-      >
+      <Form.TagPicker title="Applications" placeholder="Select applications..." {...itemProps.applications}>
         {applications.map((app) => (
           <Form.TagPicker.Item
             key={app.path}
@@ -420,12 +398,7 @@ export default function FolderEditForm({
           />
         )}
         {availableFolders.map((f) => (
-          <Form.TagPicker.Item
-            key={f.id}
-            value={f.id}
-            title={f.name}
-            icon={getFolderIcon(f.icon, f.color)}
-          />
+          <Form.TagPicker.Item key={f.id} value={f.id} title={f.name} icon={getFolderIcon(f.icon, f.color)} />
         ))}
       </Form.TagPicker>
     </Form>

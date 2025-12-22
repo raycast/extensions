@@ -109,4 +109,3 @@ export function isCssColorName(color: string): boolean {
 export function cssColorToHex(color: string): string | undefined {
   return CSS_COLORS[color.toLowerCase()]
 }
-

@@ -1,13 +1,7 @@
 import { Application, showToast, Toast, confirmAlert } from "@raycast/api"
 import { Folder, FolderItem } from "./types"
 import { createWebsiteItem } from "./utils"
-import {
-  normalizeUrl,
-  isValidUrl,
-  fetchAndCacheFavicon,
-  fetchWebsiteTitle,
-  extractDomain,
-} from "./favicon"
+import { normalizeUrl, isValidUrl, fetchAndCacheFavicon, fetchWebsiteTitle, extractDomain } from "./favicon"
 
 // Shared content type for both forms
 export type ContentType = "applications" | "websites" | "folders"
@@ -161,10 +155,7 @@ export function validateWebsiteUrls(input: string | undefined): string | undefin
  * Find duplicate URLs that already exist in the folder
  * Returns the list of duplicate URLs with their display names
  */
-export function findDuplicateUrls(
-  urlInput: string,
-  existingItems: FolderItem[]
-): { url: string; name: string }[] {
+export function findDuplicateUrls(urlInput: string, existingItems: FolderItem[]): { url: string; name: string }[] {
   const urlLines = parseWebsiteUrls(urlInput)
   if (urlLines.length === 0) return []
 
@@ -172,9 +163,7 @@ export function findDuplicateUrls(
   const existingByUrl = new Map(filterWebsites(existingItems).map((w) => [normalizeUrl(w.url), w]))
 
   // Find duplicates
-  return urlLines
-    .filter((url) => existingByUrl.has(url))
-    .map((url) => ({ url, name: existingByUrl.get(url)!.name }))
+  return urlLines.filter((url) => existingByUrl.has(url)).map((url) => ({ url, name: existingByUrl.get(url)!.name }))
 }
 
 export interface DuplicateInfo {
@@ -204,9 +193,7 @@ export async function confirmDuplicates(
     skipAction = "Skip Duplicates",
   } = options
 
-  const duplicateList = duplicates
-    .map((d) => (d.type ? `• ${d.name} (${d.type})` : `• ${d.name}`))
-    .join("\n")
+  const duplicateList = duplicates.map((d) => (d.type ? `• ${d.name} (${d.type})` : `• ${d.name}`)).join("\n")
 
   const itemWord = duplicates.length === 1 ? itemType : `${itemType}s`
   const message =
@@ -226,9 +213,7 @@ export async function confirmDuplicates(
  * Show confirmation dialog for duplicate URLs
  * Returns true if user wants to add duplicates, false otherwise
  */
-export async function confirmDuplicateUrls(
-  duplicates: { url: string; name: string }[]
-): Promise<boolean> {
+export async function confirmDuplicateUrls(duplicates: { url: string; name: string }[]): Promise<boolean> {
   return confirmDuplicates(
     duplicates.map((d) => ({ name: d.name })),
     { title: "Duplicate Websites Found", itemType: "website" }
@@ -256,16 +241,12 @@ export async function processWebsiteUrls(
   const existingByUrl = new Map(filterWebsites(existingItems).map((w) => [normalizeUrl(w.url), w]))
 
   // Determine which entries to process
-  const entriesToProcess = includeDuplicates
-    ? urlEntries
-    : urlEntries.filter((entry) => !existingByUrl.has(entry.url))
+  const entriesToProcess = includeDuplicates ? urlEntries : urlEntries.filter((entry) => !existingByUrl.has(entry.url))
 
   if (entriesToProcess.length === 0) return []
 
   // Count new URLs that need fetching (not in existing items AND no custom title)
-  const urlsNeedingFetch = entriesToProcess.filter(
-    (entry) => !existingByUrl.has(entry.url) && !entry.title
-  )
+  const urlsNeedingFetch = entriesToProcess.filter((entry) => !existingByUrl.has(entry.url) && !entry.title)
 
   if (urlsNeedingFetch.length > 0) {
     await showToast({
@@ -287,10 +268,7 @@ export async function processWebsiteUrls(
       items.push(createWebsiteItem(entry.url, entry.title, iconPath))
     } else {
       // Fetch both title and favicon for new URLs
-      const [title, iconPath] = await Promise.all([
-        fetchWebsiteTitle(entry.url),
-        fetchAndCacheFavicon(entry.url),
-      ])
+      const [title, iconPath] = await Promise.all([fetchWebsiteTitle(entry.url), fetchAndCacheFavicon(entry.url)])
       items.push(createWebsiteItem(entry.url, title, iconPath))
     }
   }
@@ -321,9 +299,7 @@ export function extractWebsiteUrls(items: FolderItem[]): string {
  */
 export function extractAppPaths(items: FolderItem[], applications: Application[]): string[] {
   return filterApplications(items).map((i) => {
-    const app = applications.find(
-      (a) => a.path === i.path || a.name === i.path || a.bundleId === i.path
-    )
+    const app = applications.find((a) => a.path === i.path || a.name === i.path || a.bundleId === i.path)
     return app?.path || i.path
   })
 }

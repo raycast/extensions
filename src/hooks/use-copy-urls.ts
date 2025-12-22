@@ -29,10 +29,7 @@ interface UseCopyUrlsResult {
  * Reusable across folder list and folder contents views
  */
 export function useCopyUrls(folder: Folder | undefined, allFolders: Folder[]): UseCopyUrlsResult {
-  const collectedUrls = useMemo(
-    () => (folder ? collectFolderUrls(folder, allFolders) : []),
-    [folder, allFolders]
-  )
+  const collectedUrls = useMemo(() => (folder ? collectFolderUrls(folder, allFolders) : []), [folder, allFolders])
 
   const hasUrls = collectedUrls.length > 0
 
@@ -69,4 +66,3 @@ export function useCopyUrls(folder: Folder | undefined, allFolders: Folder[]): U
     copyAsList,
   }
 }
-

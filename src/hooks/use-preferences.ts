@@ -19,9 +19,7 @@ export interface FolderContentsPreferences {
  * Polls for changes every 2 seconds to reflect preference updates
  */
 export function useFolderContentsPreferences(): FolderContentsPreferences {
-  const [prefs, setPrefs] = useState<FolderContentsPreferences>(() =>
-    getPreferenceValues<FolderContentsPreferences>()
-  )
+  const [prefs, setPrefs] = useState<FolderContentsPreferences>(() => getPreferenceValues<FolderContentsPreferences>())
 
   useEffect(() => {
     const update = () => {

@@ -4,7 +4,7 @@
 
 1. **Update Author**: Edit `package.json` and replace `"your-username"` with your Raycast username/author name.
 
-2. **Add Icon**: 
+2. **Add Icon**:
    - Create a 512x512 pixel PNG icon
    - Save it as `assets/icon.png`
    - Optionally add `assets/icon@dark.png` for dark mode support
@@ -12,12 +12,14 @@
 ## Installation Steps
 
 1. **Install Dependencies**:
+
    ```bash
    cd /Users/jace/Desktop/launchpad-folders
    npm install
    ```
 
 2. **Start Development Mode**:
+
    ```bash
    npm run dev
    ```
@@ -52,4 +54,3 @@
 - If you see import errors, make sure you've run `npm install`
 - If commands don't appear, make sure you've imported the extension in Raycast
 - If applications don't launch, check that you're on macOS and the app paths are correct
-

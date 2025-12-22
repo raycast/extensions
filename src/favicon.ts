@@ -22,13 +22,11 @@ const FAVICON_SOURCES = {
   // Apple touch icon - often higher quality (128x128+)
   appleTouchIcon: (hostname: string) => `https://${hostname}/apple-touch-icon.png`,
   // DuckDuckGo - privacy-focused alternative
-  duckduckgo: (hostname: string) =>
-    `https://icons.duckduckgo.com/ip3/${encodeURIComponent(hostname)}.ico`,
+  duckduckgo: (hostname: string) => `https://icons.duckduckgo.com/ip3/${encodeURIComponent(hostname)}.ico`,
   // Icon Horse - aggregates multiple sources
   iconHorse: (hostname: string) => `https://icon.horse/icon/${encodeURIComponent(hostname)}`,
   // Yandex - good for international sites
-  yandex: (hostname: string) =>
-    `https://favicon.yandex.net/favicon/${encodeURIComponent(hostname)}`,
+  yandex: (hostname: string) => `https://favicon.yandex.net/favicon/${encodeURIComponent(hostname)}`,
 }
 
 // Cache directory initialization (lazy, only once)
@@ -158,10 +156,7 @@ async function fetchFirstSuccessfulFavicon(hostname: string): Promise<Buffer | u
  * @param url - The website URL to fetch favicon for
  * @param forceRefresh - If true, bypasses cache and fetches fresh
  */
-export async function fetchAndCacheFavicon(
-  url: string,
-  forceRefresh = false
-): Promise<string | undefined> {
+export async function fetchAndCacheFavicon(url: string, forceRefresh = false): Promise<string | undefined> {
   try {
     // Return cached version unless force refresh requested
     if (!forceRefresh) {

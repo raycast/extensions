@@ -126,11 +126,7 @@ export default function ImportFoldersForm() {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.SubmitForm
-              icon={Icon.Download}
-              title="Import Folders"
-              onSubmit={handleImport}
-            />
+            <Action.SubmitForm icon={Icon.Download} title="Import Folders" onSubmit={handleImport} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -144,12 +140,7 @@ export default function ImportFoldersForm() {
         info="Paste the JSON from a previous export. Works with single folder or multi-folder backups."
       />
 
-      <Form.Dropdown
-        id="mode"
-        title="Import Mode"
-        value={importMode}
-        onChange={(v) => setImportMode(v as ImportMode)}
-      >
+      <Form.Dropdown id="mode" title="Import Mode" value={importMode} onChange={(v) => setImportMode(v as ImportMode)}>
         <Form.Dropdown.Item value="merge" title="Merge" icon={Icon.Plus} />
         <Form.Dropdown.Item value="replace" title="Replace All" icon={Icon.ArrowClockwise} />
       </Form.Dropdown>

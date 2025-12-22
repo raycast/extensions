@@ -76,9 +76,7 @@ export const FolderPreviewDetail = memo(function FolderPreviewDetail({
         <List.Item.Detail.Metadata>
           {parentFolders.length > 0 && (
             <>
-              <List.Item.Detail.Metadata.Label
-                title={`Parent ${pluralize(parentFolders.length, "Folder")}`}
-              />
+              <List.Item.Detail.Metadata.Label title={`Parent ${pluralize(parentFolders.length, "Folder")}`} />
               {parentFolders.map((parent) => (
                 <List.Item.Detail.Metadata.Label
                   key={parent.id}
@@ -96,9 +94,7 @@ export const FolderPreviewDetail = memo(function FolderPreviewDetail({
           {applicationItems.length > 0 && (
             <>
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label
-                title={`Applications (${applicationItems.length})`}
-              />
+              <List.Item.Detail.Metadata.Label title={`Applications (${applicationItems.length})`} />
               {applicationItems.map((item) => (
                 <List.Item.Detail.Metadata.Label
                   key={item.id}
@@ -159,9 +155,7 @@ export function useFolderPreviewDetail(
         f.items.some((item) => item.type === "folder" && item.folderId === folder.id)
       )
       if (folder.items.length === 0 && !hasParents) return undefined
-      return (
-        <FolderPreviewDetail folder={folder} applications={applications} allFolders={folders} />
-      )
+      return <FolderPreviewDetail folder={folder} applications={applications} allFolders={folders} />
     }
   }, [showPreviewPane, applications, allFolders])
 }

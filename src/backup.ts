@@ -47,9 +47,7 @@ function getCurrentPreferences(): ExportedPreferences {
  */
 async function getNestedFolders(folder: Folder, allFolders: Folder[]): Promise<Folder[]> {
   const result: Folder[] = [folder]
-  const nestedIds = folder.items
-    .filter((item) => item.type === "folder" && item.folderId)
-    .map((item) => item.folderId!)
+  const nestedIds = folder.items.filter((item) => item.type === "folder" && item.folderId).map((item) => item.folderId!)
 
   for (const nestedId of nestedIds) {
     const nestedFolder = allFolders.find((f) => f.id === nestedId)

@@ -23,10 +23,7 @@ function MoveToFolderForm({ item, currentFolder, onMove }: MoveToFolderFormProps
   const { folders: allFolders, isLoading } = useFoldersData()
   const { applications } = useApplicationsData()
 
-  const itemName = useMemo(
-    () => getItemDisplayName(item, applications, allFolders),
-    [item, applications, allFolders]
-  )
+  const itemName = useMemo(() => getItemDisplayName(item, applications, allFolders), [item, applications, allFolders])
 
   // Get nested folder IDs for categorization
   const nestedFolderIds = useMemo(() => getNestedFolderIds(allFolders), [allFolders])
@@ -90,11 +87,7 @@ function MoveToFolderForm({ item, currentFolder, onMove }: MoveToFolderFormProps
         icon={getFolderIcon(folder.icon, folder.color)}
         actions={
           <ActionPanel>
-            <Action
-              title={`Move to "${folder.name}"`}
-              icon={Icon.ArrowRight}
-              onAction={() => handleMove(folder)}
-            />
+            <Action title={`Move to "${folder.name}"`} icon={Icon.ArrowRight} onAction={() => handleMove(folder)} />
           </ActionPanel>
         }
       />
@@ -103,11 +96,7 @@ function MoveToFolderForm({ item, currentFolder, onMove }: MoveToFolderFormProps
   )
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={`Move "${itemName}" to...`}
-      searchBarPlaceholder="Search folders..."
-    >
+    <List isLoading={isLoading} navigationTitle={`Move "${itemName}" to...`} searchBarPlaceholder="Search folders...">
       {totalAvailable === 0 ? (
         <List.EmptyView
           icon={Icon.Folder}

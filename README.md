@@ -12,42 +12,49 @@ Think of it as Launchpad folders meets browser bookmarks, but faster, more power
 <summary><strong>Where is my data stored?</strong></summary>
 
 All data is stored locally using Raycast's LocalStorage. Nothing is sent to external servers. Favicons are cached locally in `~/Library/Application Support/com.raycast.macos/extensions/folders/`.
+
 </details>
 
 <details>
 <summary><strong>Can I sync folders across multiple Macs?</strong></summary>
 
 Not automatically, but you can use **Export All Folders** to create a backup JSON, then **Import Folders** on another Mac. The JSON is also copied to your clipboard for easy transfer.
+
 </details>
 
 <details>
 <summary><strong>Why isn't my favicon loading?</strong></summary>
 
 The extension tries 6 different favicon sources in parallel. If all fail, a globe icon is shown instead. You can manually refresh by selecting the website and pressing `⌘R` (Refresh Favicon).
+
 </details>
 
 <details>
 <summary><strong>How do I add a website with a custom name?</strong></summary>
 
 Use markdown link syntax: `[My Custom Name](https://example.com)`. Plain URLs will auto-fetch the page title instead.
+
 </details>
 
 <details>
 <summary><strong>Can folders be nested multiple levels deep?</strong></summary>
 
 Yes! You can nest folders inside other nested folders. The breadcrumb path shows your location like `Work → Tools → Utilities`.
+
 </details>
 
 <details>
 <summary><strong>How do I move an item to a different folder?</strong></summary>
 
 Select any item inside a folder and press `⌘M` to open the move dialog. Choose a destination and the item is moved instantly.
+
 </details>
 
 <details>
 <summary><strong>What color formats are supported?</strong></summary>
 
 CSS color names (`coral`, `skyblue`), hex with hash (`#FF5733`), hex without hash (`FF5733`), and shorthand hex (`F53` → `#FF5533`).
+
 </details>
 
 <details>
@@ -60,6 +67,7 @@ Create a **Quicklink** for the folder:
 3. Give it a name and save
 
 Now you can search for that folder directly from Raycast's root search without opening the Folders extension first. Your folder's custom icon is automatically applied to the quicklink.
+
 </details>
 
 ---
@@ -95,37 +103,37 @@ Now you can search for that folder directly from Raycast's root search without o
 
 ### 📁 Folder Management
 
-| Feature | Description |
-|---------|-------------|
+| Feature            | Description                                                                |
+| ------------------ | -------------------------------------------------------------------------- |
 | **Custom Folders** | Group applications, websites, and other folders into organized collections |
-| **Nested Folders** | Create hierarchical folder structures for deeper organization |
-| **Custom Icons** | Choose from 100+ Raycast icons to personalize each folder |
-| **Custom Colors** | Tint folder icons with CSS color names or hex codes |
-| **Default Color** | Configure a default color for all newly created folders |
+| **Nested Folders** | Create hierarchical folder structures for deeper organization              |
+| **Custom Icons**   | Choose from 100+ Raycast icons to personalize each folder                  |
+| **Custom Colors**  | Tint folder icons with CSS color names or hex codes                        |
+| **Default Color**  | Configure a default color for all newly created folders                    |
 
 #### Supported Color Formats
 
 You can specify folder colors in multiple formats:
 
-| Format | Example | Result |
-|--------|---------|--------|
-| CSS color name | `coral` | `#FF7F50` |
-| Hex (with #) | `#FF5733` | `#FF5733` |
-| Hex (without #) | `FF5733` | `#FF5733` |
+| Format          | Example   | Result    |
+| --------------- | --------- | --------- |
+| CSS color name  | `coral`   | `#FF7F50` |
+| Hex (with #)    | `#FF5733` | `#FF5733` |
+| Hex (without #) | `FF5733`  | `#FF5733` |
 
 **Common CSS colors:** `red`, `orange`, `yellow`, `green`, `blue`, `purple`, `pink`, `coral`, `gold`, `crimson`, `indigo`, `teal`, `navy`, `skyblue`, `salmon`, `turquoise`, `violet`, and [80+ more](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color).
 
 ### 🌐 Website Support
 
-| Feature | Description |
-|---------|-------------|
-| **Add URLs** | Include website bookmarks in any folder |
-| **Auto Favicon** | Favicons fetched from 6 sources in parallel (Google, DuckDuckGo, Icon Horse, Yandex, direct, Apple) |
-| **Refresh Favicon** | Manually re-fetch favicon with `⌘R` if it didn't load correctly |
-| **Auto Titles** | Page titles are fetched automatically from websites |
-| **Custom Titles** | Use markdown syntax `[Title](URL)` for custom names |
-| **Edit Websites** | Modify website names and URLs after adding |
-| **Open All** | Launch all websites in a folder at once |
+| Feature             | Description                                                                                         |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| **Add URLs**        | Include website bookmarks in any folder                                                             |
+| **Auto Favicon**    | Favicons fetched from 6 sources in parallel (Google, DuckDuckGo, Icon Horse, Yandex, direct, Apple) |
+| **Refresh Favicon** | Manually re-fetch favicon with `⌘R` if it didn't load correctly                                     |
+| **Auto Titles**     | Page titles are fetched automatically from websites                                                 |
+| **Custom Titles**   | Use markdown syntax `[Title](URL)` for custom names                                                 |
+| **Edit Websites**   | Modify website names and URLs after adding                                                          |
+| **Open All**        | Launch all websites in a folder at once                                                             |
 
 #### Markdown Link Syntax
 
@@ -144,39 +152,39 @@ https://google.com
 
 ### 🔍 Smart Search & Navigation
 
-| Feature | Description |
-|---------|-------------|
-| **Instant Search** | Find folders with Raycast's blazing-fast fuzzy search |
+| Feature              | Description                                               |
+| -------------------- | --------------------------------------------------------- |
+| **Instant Search**   | Find folders with Raycast's blazing-fast fuzzy search     |
 | **Breadcrumb Paths** | See full navigation paths like `Work → Tools → Utilities` |
-| **Section Grouping** | Top-level and nested folders are displayed separately |
-| **Recent Access** | Items track when they were last accessed for sorting |
+| **Section Grouping** | Top-level and nested folders are displayed separately     |
+| **Recent Access**    | Items track when they were last accessed for sorting      |
 
 ### 📋 Display Options
 
-| Feature | Description |
-|---------|-------------|
-| **List View** | Classic list with icons, titles, and subtitles |
-| **Grid View** | Visual grid layout for browsing |
-| **Preview Pane** | Side panel showing folder contents without opening |
+| Feature               | Description                                             |
+| --------------------- | ------------------------------------------------------- |
+| **List View**         | Classic list with icons, titles, and subtitles          |
+| **Grid View**         | Visual grid layout for browsing                         |
+| **Preview Pane**      | Side panel showing folder contents without opening      |
 | **Separate Sections** | Group apps, websites, and folders into labeled sections |
-| **Item Counts** | See how many items are in each section |
+| **Item Counts**       | See how many items are in each section                  |
 
 ### 📋 Copy & Share
 
-| Feature | Description |
-|---------|-------------|
-| **Copy as Markdown** | Copy folder URLs as bullet points with nested structure |
-| **Copy as List** | Copy all URLs as a plain list, sorted by length |
-| **Includes Nested Folders** | Recursively includes URLs from all nested folders |
+| Feature                     | Description                                             |
+| --------------------------- | ------------------------------------------------------- |
+| **Copy as Markdown**        | Copy folder URLs as bullet points with nested structure |
+| **Copy as List**            | Copy all URLs as a plain list, sorted by length         |
+| **Includes Nested Folders** | Recursively includes URLs from all nested folders       |
 
 ### 💾 Backup & Restore
 
-| Feature | Description |
-|---------|-------------|
-| **Export Single Folder** | Export one folder (including nested folders) to JSON |
-| **Export All Folders** | Create a complete backup of all folders |
-| **Import Folders** | Restore from backup with merge or replace options |
-| **Clipboard Copy** | Exports are also copied to clipboard for easy sharing |
+| Feature                  | Description                                                      |
+| ------------------------ | ---------------------------------------------------------------- |
+| **Export Single Folder** | Export one folder (including nested folders) to JSON             |
+| **Export All Folders**   | Create a complete backup of all folders                          |
+| **Import Folders**       | Restore from backup with merge or replace options                |
+| **Clipboard Copy**       | Exports are also copied to clipboard for easy sharing            |
 | **Preferences Included** | Exports include your sort order, view type, and display settings |
 
 ---
@@ -185,36 +193,36 @@ https://google.com
 
 ### From the Folder List
 
-| Shortcut | Action |
-|----------|--------|
-| `↵` | Open selected folder |
-| `⌘N` | Create new folder |
-| `⌘E` | Edit selected folder |
-| `⌘O` | Open all applications in folder |
-| `⌘⇧O` | Open all websites in folder |
-| `⌘⇧M` | Copy all URLs as markdown |
-| `⌘⇧L` | Copy all URLs as list |
-| `⌘⇧C` | Create quicklink to folder |
-| `⌘⌥C` | Copy quicklink URL |
-| `⌘⇧E` | Export selected folder |
-| `⌃⇧X` | Empty folder (remove all contents) |
-| `⌃X` | Delete folder |
+| Shortcut | Action                             |
+| -------- | ---------------------------------- |
+| `↵`      | Open selected folder               |
+| `⌘N`     | Create new folder                  |
+| `⌘E`     | Edit selected folder               |
+| `⌘O`     | Open all applications in folder    |
+| `⌘⇧O`    | Open all websites in folder        |
+| `⌘⇧M`    | Copy all URLs as markdown          |
+| `⌘⇧L`    | Copy all URLs as list              |
+| `⌘⇧C`    | Create quicklink to folder         |
+| `⌘⌥C`    | Copy quicklink URL                 |
+| `⌘⇧E`    | Export selected folder             |
+| `⌃⇧X`    | Empty folder (remove all contents) |
+| `⌃X`     | Delete folder                      |
 
 ### From Folder Contents
 
-| Shortcut | Action |
-|----------|--------|
-| `↵` | Open selected item |
-| `⌘E` | Edit selected item (website or nested folder) |
-| `⌘R` | Refresh favicon (websites only) |
-| `⌘M` | Move item to another folder |
-| `⌘D` | Duplicate item |
-| `⌘O` | Open all applications |
-| `⌘⇧O` | Open all websites |
-| `⌘⇧M` | Copy all URLs as markdown |
-| `⌘⇧L` | Copy all URLs as list |
-| `⌘⇧Q` | Quit all running applications |
-| `⌘⌫` | Remove item from folder |
+| Shortcut | Action                                        |
+| -------- | --------------------------------------------- |
+| `↵`      | Open selected item                            |
+| `⌘E`     | Edit selected item (website or nested folder) |
+| `⌘R`     | Refresh favicon (websites only)               |
+| `⌘M`     | Move item to another folder                   |
+| `⌘D`     | Duplicate item                                |
+| `⌘O`     | Open all applications                         |
+| `⌘⇧O`    | Open all websites                             |
+| `⌘⇧M`    | Copy all URLs as markdown                     |
+| `⌘⇧L`    | Copy all URLs as list                         |
+| `⌘⇧Q`    | Quit all running applications                 |
+| `⌘⌫`     | Remove item from folder                       |
 
 ---
 
@@ -226,33 +234,33 @@ Access preferences via Raycast Settings → Extensions → Folders.
 
 Configure up to three levels of sorting priority for folder contents:
 
-| Level | Purpose |
-|-------|---------|
-| **🥇 Primary Sort** | Main sorting method |
+| Level                 | Purpose                         |
+| --------------------- | ------------------------------- |
+| **🥇 Primary Sort**   | Main sorting method             |
 | **🥈 Secondary Sort** | Tiebreaker when items are equal |
-| **🥉 Tertiary Sort** | Final tiebreaker |
+| **🥉 Tertiary Sort**  | Final tiebreaker                |
 
 **Available sort methods:**
 
-| Method | Options |
-|--------|---------|
-| Alphabetical | A → Z, Z → A |
-| Length | Short → Long, Long → Short |
-| Recent | Old → New, New → Old |
-| None | No sorting (preserve order) |
+| Method       | Options                     |
+| ------------ | --------------------------- |
+| Alphabetical | A → Z, Z → A                |
+| Length       | Short → Long, Long → Short  |
+| Recent       | Old → New, New → Old        |
+| None         | No sorting (preserve order) |
 
 ### Display
 
-| Preference | Description |
-|------------|-------------|
-| **View Type** | List or Grid view for folder contents |
-| **Preview Pane** | Show folder contents in a side panel |
+| Preference            | Description                                  |
+| --------------------- | -------------------------------------------- |
+| **View Type**         | List or Grid view for folder contents        |
+| **Preview Pane**      | Show folder contents in a side panel         |
 | **Separate Sections** | Group apps, websites, and folders separately |
 
 ### Appearance
 
-| Preference | Description |
-|------------|-------------|
+| Preference               | Description                                     |
+| ------------------------ | ----------------------------------------------- |
 | **Default Folder Color** | Hex color to pre-fill when creating new folders |
 
 ---
@@ -454,11 +462,11 @@ MIT License — Free to use, modify, and distribute.
 
 A few hidden conveniences you might enjoy:
 
-| Feature | What it does |
-|---------|--------------|
-| **"dot" → "."** | Type `discorddotcom` and it becomes `discord.com`. Works for any TLD: `jadotmt` → `ja.mt` |
-| **Shorthand hex** | Type `F53` instead of `#FF5533` — it auto-expands |
-| **CSS colors** | Use `coral` or `skyblue` instead of memorizing hex codes |
+| Feature           | What it does                                                                              |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| **"dot" → "."**   | Type `discorddotcom` and it becomes `discord.com`. Works for any TLD: `jadotmt` → `ja.mt` |
+| **Shorthand hex** | Type `F53` instead of `#FF5533` — it auto-expands                                         |
+| **CSS colors**    | Use `coral` or `skyblue` instead of memorizing hex codes                                  |
 
 ---
 

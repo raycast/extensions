@@ -1,23 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  Grid,
-  open,
-  useNavigation,
-  confirmAlert,
-  Alert,
-} from "@raycast/api"
+import { Action, ActionPanel, Icon, List, Grid, open, useNavigation, confirmAlert, Alert } from "@raycast/api"
 import { useCachedPromise } from "@raycast/utils"
 import React, { useMemo, useCallback, memo } from "react"
-import {
-  getFolderById,
-  recordFolderAccess,
-  recordItemAccess,
-  invalidateFoldersCache,
-  updateFolder,
-} from "./storage"
+import { getFolderById, recordFolderAccess, recordItemAccess, invalidateFoldersCache, updateFolder } from "./storage"
 import { FolderItem, Folder } from "./types"
 import {
   getItemDisplayName,
@@ -32,13 +16,7 @@ import {
   toastFailure,
   toastLoading,
 } from "./utils"
-import {
-  useApplicationsData,
-  useFoldersData,
-  useFolderContentsPreferences,
-  useRunningApps,
-  useCopyUrls,
-} from "./hooks"
+import { useApplicationsData, useFoldersData, useFolderContentsPreferences, useRunningApps, useCopyUrls } from "./hooks"
 import { filterApplications, filterWebsites } from "./form-utils"
 import { fetchAndCacheFavicon } from "./favicon"
 import AddItemsForm from "./components/add-items-form"
@@ -81,26 +59,14 @@ const OpenNestedFolderAction = memo(function OpenNestedFolderAction({
     await recordItemAccess(folderId, itemId)
     onAccessRecorded?.()
     const newPath = `${currentPath} → ${itemName}`
-    push(
-      <FolderContentsViewWrapper
-        folderId={itemFolderId}
-        folderName={itemName}
-        parentPath={newPath}
-      />
-    )
+    push(<FolderContentsViewWrapper folderId={itemFolderId} folderName={itemName} parentPath={newPath} />)
   }, [folderId, itemId, itemFolderId, itemName, currentPath, onAccessRecorded, push])
 
   return <Action title="Open Folder" icon={Icon.ArrowRight} onAction={handleOpen} />
 })
 
 // Add Items action component - memoized for performance
-const AddItemsAction = memo(function AddItemsAction({
-  folder,
-  onSave,
-}: {
-  folder: Folder
-  onSave: () => void
-}) {
+const AddItemsAction = memo(function AddItemsAction({ folder, onSave }: { folder: Folder; onSave: () => void }) {
   return (
     <Action.Push
       title="Add Items"
@@ -111,11 +77,7 @@ const AddItemsAction = memo(function AddItemsAction({
   )
 })
 
-export default function FolderContentsView({
-  folderId,
-  folderName,
-  parentPath,
-}: FolderContentsViewProps) {
+export default function FolderContentsView({ folderId, folderName, parentPath }: FolderContentsViewProps) {
   // Build the display path for navigation title
   const displayPath = parentPath || folderName
 
@@ -173,13 +135,7 @@ export default function FolderContentsView({
       if (item.type === "folder" && item.folderId) {
         const nestedFolder = allFolders.find((f) => f.id === item.folderId)
         if (nestedFolder) {
-          return (
-            <FolderPreviewDetail
-              folder={nestedFolder}
-              applications={applications}
-              allFolders={allFolders}
-            />
-          )
+          return <FolderPreviewDetail folder={nestedFolder} applications={applications} allFolders={allFolders} />
         }
       }
 
@@ -209,9 +165,7 @@ export default function FolderContentsView({
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="Type" text="Website" />
                 <List.Item.Detail.Metadata.Label title="Title" text={item.name} />
-                {item.url && (
-                  <List.Item.Detail.Metadata.Link title="URL" text={item.url} target={item.url} />
-                )}
+                {item.url && <List.Item.Detail.Metadata.Link title="URL" text={item.url} target={item.url} />}
               </List.Item.Detail.Metadata>
             }
           />
@@ -257,10 +211,7 @@ export default function FolderContentsView({
 
   // Find duplicate items in the folder (same URL for websites, same path for apps)
   const duplicateInfo = useMemo(
-    () =>
-      folder
-        ? findDuplicateItems(folder.items)
-        : { hasDuplicates: false, duplicateCount: 0, uniqueItems: [] },
+    () => (folder ? findDuplicateItems(folder.items) : { hasDuplicates: false, duplicateCount: 0, uniqueItems: [] }),
     [folder]
   )
 
@@ -323,9 +274,7 @@ export default function FolderContentsView({
       const newIconPath = await fetchAndCacheFavicon(item.url, true)
 
       // Update the item with the new icon path
-      const updatedItems = folder.items.map((i) =>
-        i.id === item.id ? { ...i, icon: newIconPath } : i
-      )
+      const updatedItems = folder.items.map((i) => (i.id === item.id ? { ...i, icon: newIconPath } : i))
 
       await updateFolder(folderId, { items: updatedItems })
 
@@ -384,10 +333,7 @@ export default function FolderContentsView({
   // Track running applications
   const { hasRunningApps, quitAllRunningApps } = useRunningApps(appItemsList, applications)
 
-  const handleQuitAllApplications = useCallback(
-    () => quitAllRunningApps(folderName),
-    [quitAllRunningApps, folderName]
-  )
+  const handleQuitAllApplications = useCallback(() => quitAllRunningApps(folderName), [quitAllRunningApps, folderName])
 
   const renderActions = useCallback(
     (item: FolderItem) => (
@@ -395,11 +341,7 @@ export default function FolderContentsView({
         {/* Primary Action */}
         <ActionPanel.Section>
           {item.type === "application" ? (
-            <Action
-              title="Open Application"
-              icon={Icon.ArrowRight}
-              onAction={() => handleOpenItem(item)}
-            />
+            <Action title="Open Application" icon={Icon.ArrowRight} onAction={() => handleOpenItem(item)} />
           ) : item.type === "website" ? (
             <Action title="Open Website" icon={Icon.Globe} onAction={() => handleOpenItem(item)} />
           ) : item.folderId ? (
@@ -412,11 +354,7 @@ export default function FolderContentsView({
               onAccessRecorded={revalidate}
             />
           ) : (
-            <Action
-              title="Open Folder"
-              icon={Icon.ArrowRight}
-              onAction={() => handleOpenItem(item)}
-            />
+            <Action title="Open Folder" icon={Icon.ArrowRight} onAction={() => handleOpenItem(item)} />
           )}
         </ActionPanel.Section>
 
@@ -498,11 +436,7 @@ export default function FolderContentsView({
                   icon={Icon.Pencil}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                   target={
-                    <FolderEditForm
-                      folder={nestedFolder}
-                      onSave={handleSave}
-                      navigateToFolderAfterSave={false}
-                    />
+                    <FolderEditForm folder={nestedFolder} onSave={handleSave} navigateToFolderAfterSave={false} />
                   }
                 />
               ) : null
@@ -515,7 +449,7 @@ export default function FolderContentsView({
           />
           {folder && allFolders.length > 1 && (
             <Action.Push
-              title="Move to Folder..."
+              title="Move to Folder…"
               icon={Icon.ArrowRightCircle}
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               target={<MoveToFolderForm item={item} currentFolder={folder} onMove={handleSave} />}
@@ -611,10 +545,7 @@ export default function FolderContentsView({
         ) : separateSections ? (
           <>
             {appItems.length > 0 && (
-              <Grid.Section
-                title="Applications"
-                subtitle={`${appItems.length} ${pluralize(appItems.length, "app")}`}
-              >
+              <Grid.Section title="Applications" subtitle={`${appItems.length} ${pluralize(appItems.length, "app")}`}>
                 {appItems.map((item) => (
                   <Grid.Item
                     key={item.id}
@@ -667,13 +598,7 @@ export default function FolderContentsView({
               key={item.id}
               id={item.id}
               title={getItemDisplayName(item, applications, allFolders)}
-              subtitle={
-                item.type === "folder"
-                  ? "Folder"
-                  : item.type === "website"
-                    ? "Website"
-                    : "Application"
-              }
+              subtitle={item.type === "folder" ? "Folder" : item.type === "website" ? "Website" : "Application"}
               content={getItemIcon(item, applications, allFolders)}
               actions={renderActions(item)}
             />
@@ -699,10 +624,7 @@ export default function FolderContentsView({
       ) : separateSections ? (
         <>
           {appItems.length > 0 && (
-            <List.Section
-              title="Applications"
-              subtitle={`${appItems.length} ${pluralize(appItems.length, "app")}`}
-            >
+            <List.Section title="Applications" subtitle={`${appItems.length} ${pluralize(appItems.length, "app")}`}>
               {appItems.map((item) => (
                 <List.Item
                   key={item.id}

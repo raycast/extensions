@@ -22,9 +22,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   // Handle deeplink context - render folder contents directly if opened via quicklink
   const context = props.launchContext as LaunchContext | undefined
   if (context?.folderId) {
-    return (
-      <FolderContentsView folderId={context.folderId} folderName={context.folderName || "Folder"} />
-    )
+    return <FolderContentsView folderId={context.folderId} folderName={context.folderName || "Folder"} />
   }
 
   const { showPreviewPane = false } = getPreferenceValues<Preferences>()
@@ -62,11 +60,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
         key={folder.id}
         id={folder.id}
         title={folder.name}
-        subtitle={
-          showPreviewPane
-            ? undefined
-            : `${folder.items.length} ${pluralize(folder.items.length, "item")}`
-        }
+        subtitle={showPreviewPane ? undefined : `${folder.items.length} ${pluralize(folder.items.length, "item")}`}
         icon={getFolderIcon(folder.icon, folder.color)}
         keywords={generateFolderKeywords(folder.name)}
         actions={<FolderItemActions folder={folder} onFolderChange={handleSave} />}
@@ -77,12 +71,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   )
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search folders..."
-      filtering
-      isShowingDetail={showPreviewPane}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search folders..." filtering isShowingDetail={showPreviewPane}>
       {isEmpty ? (
         <List.EmptyView
           {...NO_FOLDERS_VIEW}
@@ -92,11 +81,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
                 <CreateFolderAction />
               </ActionPanel.Section>
               <ActionPanel.Section title="Backup">
-                <Action.Push
-                  title="Import Folders"
-                  icon={Icon.Download}
-                  target={<ImportFoldersForm />}
-                />
+                <Action.Push title="Import Folders" icon={Icon.Download} target={<ImportFoldersForm />} />
               </ActionPanel.Section>
             </ActionPanel>
           }
