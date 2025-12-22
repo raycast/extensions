@@ -4,10 +4,6 @@ import * as fs from "fs";
 import * as fsPromises from "fs/promises";
 import * as path from "path";
 
-interface Preferences {
-  dataPath: string;
-}
-
 // Types
 export type ItemStatus = "active" | "archived";
 
@@ -110,7 +106,7 @@ interface Database {
 
 // File path from preferences
 function getDbPath(): string {
-  const { dataPath } = getPreferenceValues<Preferences>();
+  const { dataPath } = getPreferenceValues();
   return dataPath.replace(/^~/, process.env.HOME || "");
 }
 
