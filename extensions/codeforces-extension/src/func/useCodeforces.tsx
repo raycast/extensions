@@ -1,9 +1,10 @@
 /**
- * Typed wrapper around @raycast/utils' `useFetch` for Codeforces API calls.
+ * Typed wrapper around @raycast/utils's `useCachedPromise` for Codeforces API calls.
  */
 
-import { showFailureToast, useFetch } from "@raycast/utils";
-import { useMemo, useEffect } from "react";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
+import fetch from "node-fetch";
 import { CODEFORCES_API_BASE } from "../constants";
 import type { ApiResponse } from "../types/codeforces";
 
@@ -11,9 +12,6 @@ export type QueryParams = Record<string, string | number | boolean | Array<strin
 
 /**
  * Build a Codeforces-style query string from params.
- * - Arrays are joined with ';'
- * - Booleans become 'true'/'false'
- * - Values are URI-encoded
  */
 export function buildQueryParams(params?: QueryParams): string {
   if (!params) return "";
@@ -36,84 +34,59 @@ export function buildQueryParams(params?: QueryParams): string {
 }
 
 /**
- * Runtime type guard for ApiResponse<T>.
- * We check the presence and shape of `status` (string) and allow optional `result`/`comment`.
+ * The core fetcher function for the Codeforces API.
+ * It handles URL construction, the fetch request, and checking the response status.
+ * Throws an error if the network request fails or if the API returns a "FAILED" status.
  */
-function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
-  if (!value || typeof value !== "object") return false;
-  // 'status' is required by Codeforces API response shape
-  const obj = value as Record<string, unknown>;
-  return "status" in obj && typeof obj.status === "string";
+async function fetchCodeforces<T>(methodPath: string, params?: QueryParams): Promise<ApiResponse<T>> {
+  const query = buildQueryParams(params);
+  const url = `${CODEFORCES_API_BASE}${methodPath}${query}`;
+
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Network request failed: ${response.statusText}`);
+  }
+
+  const json = (await response.json()) as ApiResponse<T>;
+
+  if (json.status !== "OK") {
+    throw new Error(json.comment || "Codeforces API returned status 'FAILED'");
+  }
+
+  return json;
 }
 
 /**
- * useCodeforces hook
- * - methodPath: e.g. "user.info", "contest.status"
- * - params: query params encoded using Codeforces conventions
+ * A generic, non-paginated hook for fetching data from the Codeforces API.
+ *
+ * It uses `@raycast/utils/useCachedPromise` for caching and revalidation.
+ * It handles API-level errors and network errors, showing a failure toast.
  */
 export function useCodeforces<T>(methodPath: string, params?: QueryParams) {
-  const query = useMemo(() => buildQueryParams(params), [params]);
-  const url = useMemo(() => `${CODEFORCES_API_BASE}${methodPath}${query}`, [methodPath, query]);
+  const { isLoading, data, error, revalidate } = useCachedPromise(
+    (path, p) => fetchCodeforces<T>(path, p),
+    [methodPath, JSON.stringify(params)], // use stringify for stable dependency
+    {
+      keepPreviousData: true,
+    },
+  );
 
-  // Use generic to type data as ApiResponse<T> | undefined
-  const { isLoading, data, error, revalidate } = useFetch<ApiResponse<T>>(url, { keepPreviousData: true });
-
-  // Network / fetch errors -> toast + console
   useEffect(() => {
     if (!error) return;
-    try {
-      console.error(`[useCodeforces] network error for ${url}`, error);
-    } catch {
-      /* ignore */
-    }
-
-    try {
-      void showFailureToast(error, { title: "Network Error" });
-    } catch {
-      /* ignore toast errors */
-    }
-  }, [error, url]);
-
-  // API-level errors (status !== "OK") -> toast + console
-  useEffect(() => {
-    // If still loading or no data, nothing to do.
-    if (isLoading || data === undefined) return;
-
-    // Guard the shape of `data` at runtime.
-    if (!isApiResponse<T>(data)) {
-      // If data is unexpected, log and surface a toast to help debugging.
-      try {
-        console.error(`[useCodeforces] unexpected response shape for ${url}`, data);
-        void showFailureToast("Unexpected response shape", { title: "Codeforces API Error" });
-      } catch {
-        /* ignore toast errors */
-      }
-      return;
-    }
-
-    if (data.status !== "OK") {
-      try {
-        console.error(`[useCodeforces] API FAILED: ${url} comment=${data.comment ?? ""}`);
-      } catch {
-        /* ignore */
-      }
-
-      try {
-        const message = data.comment ?? `status=${data.status}`;
-        void showFailureToast(message, { title: "Codeforces API Error" });
-      } catch {
-        /* ignore toast errors */
-      }
-    }
-  }, [isLoading, data, url]);
+    showFailureToast(error, { title: "Could not fetch data" });
+  }, [error]);
 
   return {
     isLoading,
     error,
-    // If `data` conforms to ApiResponse<T>, return its result; otherwise undefined.
-    result: isApiResponse<T>(data) ? data.result : undefined,
-    raw: isApiResponse<T>(data) ? data : undefined,
-    url,
+    result: data?.result, // backwards-compatible: components expect the `result` field
+    raw: data, // The full ApiResponse
     revalidate,
   };
 }
