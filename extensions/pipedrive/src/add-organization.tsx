@@ -65,7 +65,7 @@ export default function AddOrganization({
   onSaved,
 }: AddOrganizationProps = {}) {
   const { pop } = useNavigation();
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditing = Boolean(organizationIdToEdit);

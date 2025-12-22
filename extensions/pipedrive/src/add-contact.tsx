@@ -113,7 +113,7 @@ export default function AddContact({
   onSaved,
 }: AddContactProps = {}) {
   const { pop, push } = useNavigation();
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.AddContact>();
 
   const isEditing = Boolean(personIdToEdit);
 
@@ -284,6 +284,15 @@ export default function AddContact({
     const term = organizationSearchText.trim();
     if (term.length < 2) return false;
     return !mergedOrganizations.some((org) => org.name.trim().toLowerCase() === term.toLowerCase());
+  }, [mergedOrganizations, organizationSearchText]);
+
+  const filteredOrganizations = useMemo(() => {
+    const term = organizationSearchText.trim().toLowerCase();
+    if (!term) {
+      return mergedOrganizations;
+    }
+
+    return mergedOrganizations.filter((org) => org.name.trim().toLowerCase().includes(term));
   }, [mergedOrganizations, organizationSearchText]);
 
   const emailTypes = [
@@ -569,7 +578,7 @@ export default function AddContact({
             title={`Create Organization "${organizationSearchText.trim()}"`}
           />
         ) : null}
-        {mergedOrganizations.map((org: Organization) => (
+        {filteredOrganizations.map((org: Organization) => (
           <Form.Dropdown.Item key={org.id} value={org.id.toString()} title={org.name} />
         ))}
       </Form.Dropdown>

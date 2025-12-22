@@ -97,7 +97,7 @@ export default function AddDeal({
   onSaved,
 }: AddDealProps = {}) {
   const { pop, push } = useNavigation();
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.AddDeal>();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = Boolean(dealIdToEdit);

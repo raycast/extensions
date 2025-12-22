@@ -52,7 +52,7 @@ export default function PipedriveSearch() {
       .join(" ");
   }
 
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
   const domainValidation = validatePipedriveDomain(preferences.domain);
   if (!domainValidation.ok) {
     return (
@@ -426,8 +426,8 @@ function useSearch(searchText: string) {
 }
 
 async function performSearch(searchText: string, signal?: AbortSignal): Promise<SearchResult[]> {
-  const preferences = getPreferenceValues<Preferences>();
-  const { apiToken, domain, limit } = preferences;
+  const preferences = getPreferenceValues<Preferences.Index>();
+  const { limit } = preferences;
 
   const searchUrl = buildPipedriveApiUrl(preferences, "/api/v2/itemSearch", {
     term: searchText,
