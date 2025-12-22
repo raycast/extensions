@@ -2,7 +2,7 @@
 
 ## [Fixes] - {PR_MERGE_DATE}
 
-- Fixed an issue where the command would not work if the clipboard text had leading or trailing spaces (Fixes https://github.com/raycast/extensions/issues/23711)
+- Fixes https://github.com/raycast/extensions/issues/23711
 - Minor refactors
 
 ## [Add argument support to the command] - 2025-12-02

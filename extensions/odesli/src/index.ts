@@ -10,7 +10,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     text = urlArg;
   } else {
     const result = await getTextFromSelectionOrClipboard();
-    text = result.text;
+    text = result.text?.trim();
   }
 
   if (!text) {

@@ -1,6 +1,7 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
 import { ConversionResult, SongInfo } from "./types";
 import { addToHistory } from "./storage";
+import { ODESLI_API_ENDPOINT } from "./constants";
 
 // Clipboard and selection helper
 export const getTextFromSelectionOrClipboard = async () => {
@@ -48,7 +49,6 @@ export const formatDate = (timestamp: number): string => {
 
   return date.toLocaleDateString();
 };
-import { ODESLI_API_ENDPOINT } from "./constants";
 
 // Odesli API conversion
 export const convertToOdesliLink = async (text: string): Promise<ConversionResult> => {
