@@ -116,7 +116,7 @@ export function ProblemDetail({ contestId, index, problemName }: ProblemDetailPr
         const problemId = `${contestId}${index}`;
 
         setContent(`# ${problemId}. ${problemName}\n\n${limitsSection}${markdown}`);
-      } catch (error) {
+      } catch {
         setContent("Failed to load problem content. Please try again later.");
       } finally {
         setIsLoading(false);

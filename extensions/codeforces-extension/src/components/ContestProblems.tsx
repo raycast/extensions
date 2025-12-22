@@ -1,44 +1,32 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Action, ActionPanel, Color, List } from "@raycast/api";
-import { CODEFORCES_API_BASE, CODEFORCES_BASE } from "../constants";
-import { useFetch } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useState, useMemo } from "react";
+import { CODEFORCES_BASE } from "../constants";
+import { useCodeforces } from "../func/useCodeforces";
+import type { ContestStandings, Problem } from "../types/codeforces";
 
-export function ContestProblems(value: { name_value: any; id: any }) {
-  const id = value.id;
-  const name_value = value.name_value;
-  const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}contest.standings?contestId=${id}&count=1`, {
-    keepPreviousData: true,
-    keepalive: true,
+/**
+ * Displays problems for a contest.
+ *
+ * Props:
+ * - `name_value`: contest name shown in navigation/title
+ * - `id`: contest id (string or number)
+ */
+export function ContestProblems({ name_value, id }: { name_value: string; id: string | number }) {
+  // Fetch contest standings (we request `count=1` to only retrieve the problems block)
+  const { isLoading, result } = useCodeforces<ContestStandings>("contest.standings", {
+    contestId: id,
+    count: 1,
   });
-  if (error) {
-    console.log(`Error while fetching details:\n${error}`);
-  }
 
-  interface Problem {
-    contestId: number;
-    index: string;
-    name: string;
-    type: string;
-    points: number;
-    rating: number;
-    tags: string[];
-  }
+  const problems: Problem[] = result?.problems ?? [];
 
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [filteredList, filterList] = useState(problems);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState<string>("");
 
-  useEffect(() => {
-    if (!isLoading) {
-      setProblems((data as any).result.problems);
-      filterList((data as any).result.problems);
-    }
-  }, [isLoading]);
-
-  useEffect(() => {
-    filterList(problems.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase())));
-  }, [searchText]);
+  const filtered = useMemo(() => {
+    const q = (searchText ?? "").toLowerCase().trim();
+    if (!q) return problems;
+    return problems.filter((p) => (p.name ?? "").toLowerCase().includes(q));
+  }, [problems, searchText]);
 
   return (
     <List
@@ -49,22 +37,27 @@ export function ContestProblems(value: { name_value: any; id: any }) {
       navigationTitle={`${name_value} Problems`}
       searchBarPlaceholder="Search By Name"
     >
-      {filteredList.map((problem) => (
-        <List.Item
-          key={problem.index}
-          title={`${problem.index}. ${problem.name}`}
-          accessories={[{ tag: { value: `${problem.rating}`, color: Color.PrimaryText } }]}
-          actions={
-            <ActionPanel title="Contests Problems">
-              <Action.OpenInBrowser url={`${CODEFORCES_BASE}contest/${problem.contestId}/problem/${problem.index}`} />
-              <Action.CopyToClipboard
-                title="Copy Problem URL"
-                content={`${CODEFORCES_BASE}contest/${problem.contestId}/${problem.index}`}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {filtered.map((problem) => {
+        const contestId = problem.contestId ?? id;
+        const ratingTag = problem.rating ? `${problem.rating}` : "Unrated";
+
+        return (
+          <List.Item
+            key={`${contestId}:${problem.index}`}
+            title={`${problem.index}. ${problem.name}`}
+            accessories={[{ tag: { value: ratingTag, color: Color.PrimaryText } }]}
+            actions={
+              <ActionPanel title="Contests Problems">
+                <Action.OpenInBrowser url={`${CODEFORCES_BASE}contest/${contestId}/problem/${problem.index}`} />
+                <Action.CopyToClipboard
+                  title="Copy Problem URL"
+                  content={`${CODEFORCES_BASE}contest/${contestId}/${problem.index}`}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
