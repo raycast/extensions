@@ -16,7 +16,7 @@
       "subtitle": "Activate controls from the menubar",
       "description": "Activates the menu bar, showing the current song and controls for all players.",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "10s"
     },
     {
       "name": "next-song",

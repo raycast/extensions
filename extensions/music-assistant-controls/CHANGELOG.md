@@ -10,6 +10,8 @@
 ### 🧠 Reliability
 
 - Loads players, queues, and providers immediately after connecting so the menu bar and commands always have up-to-date data.
+- Menu bar command refreshes more often, so state should match the current song a lot more accurately.
+- Paused song no longer perpatually displayed in the menu bar, only in the dropdown.
 
 
 ## [Volume Control Features] - 2025-09-12
