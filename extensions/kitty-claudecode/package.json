@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kitty-claudecode",
+  "title": "Kitty terminal with ClaudeCode",
+  "description": "Help you manage your Kitty tabs and claude code projects",
+  "version": "1.0.0",
+  "author": "andyliao14",
+  "icon": "icon.png",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "kitty",
+    "terminal",
+    "tabs",
+    "productivity"
+  ],
+  "license": "MIT",
+  "engines": {
+    "raycast": ">=1.104.0",
+    "node": ">=22.0.0"
+  },
+  "commands": [
+    {
+      "name": "list-tabs",
+      "title": "List Kitty Tabs",
+      "description": "List all Kitty terminal tabs",
+      "entry": "src/list-tabs.tsx",
+      "mode": "view"
+    },
+    {
+      "name": "list-projects",
+      "title": "Claude Projects",
+      "description": "Browse Claude Code project history",
+      "entry": "src/list-projects.tsx",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "node test-kitty.js"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/utils": "^2.2.2",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.8.2",
+    "prettier": "^3.5.3",
+    "esbuild": "^0.23.1",
+    "eslint": "^9.22.0"
+  },
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ]
+}

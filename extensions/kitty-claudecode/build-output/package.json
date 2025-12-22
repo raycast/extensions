@@ -1,0 +1,65 @@
+{
+  "name": "raycast-kitty-tabs",
+  "title": "Kitty Tabs",
+  "description": "List and activate Kitty terminal tabs from Raycast",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "icon": "icon.png",
+  "keywords": [
+    "kitty",
+    "terminal",
+    "tabs",
+    "productivity"
+  ],
+  "license": "MIT",
+  "engines": {
+    "raycast": ">=1.104.0",
+    "node": ">=22.0.0"
+  },
+  "commands": [
+    {
+      "name": "list-tabs",
+      "title": "List Kitty Tabs",
+      "description": "List all Kitty terminal tabs",
+      "entry": "src/list-tabs.tsx"
+    },
+    {
+      "name": "query-tabs",
+      "title": "Query Kitty Tabs",
+      "description": "Query and search all Kitty terminal tabs",
+      "entry": "src/query-tabs.tsx"
+    }
+  ],
+  "scripts": {
+    "build": "tsc --noEmit",
+    "dev": "tsc --noEmit",
+    "raycast:dev": "ray develop",
+    "raycast:build": "raycast-extension build",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "node test-kitty.js"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/utils": "^2.2.2",
+    "@raycast/eslint-config": "^1.0.3",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.7.2",
+    "prettier": "^3.4.2",
+    "esbuild": "^0.23.1",
+    "eslint": "^8.57.0"
+  },
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ]
+}
