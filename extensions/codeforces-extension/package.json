@@ -55,12 +55,10 @@
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.2",
     "cheerio": "^1.1.2",
-    "lodash": "^4.17.21",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/lodash": "^4.17.15",
     "@types/node": "^22.13.10",
     "@types/node-fetch": "^2.6.13",
     "@types/react": "^19.0.10",

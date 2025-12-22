@@ -1,5 +1,12 @@
 # Codeforces Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Updated Codeforces API documentation
+- Added support for filtering problems by difficulty
+- Added pagination for problem lists
+- Improved error handling for problem fetching
+
 ## [Update] - 2025-01-28
 
 - Fixed the flickering issue
