@@ -13,11 +13,6 @@ import {
 import { getProgressIcon } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
-interface Preferences {
-  language: string;
-  platform: string;
-}
-
 interface TldrPage {
   name: string;
   platform: string;
@@ -36,6 +31,34 @@ const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 const PLATFORMS = ["common", "linux", "osx", "windows", "android", "freebsd", "netbsd", "openbsd", "sunos"];
 
+interface GitHubTreeItem {
+  path: string;
+  type: string;
+}
+
+// Simple fetch with retry for network resilience
+async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url);
+
+      // For errors, use exponential backoff
+      if (!response.ok && attempt < maxRetries - 1) {
+        const delay = Math.min(1000 * Math.pow(2, attempt), 10000);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      return response;
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error;
+      const delay = Math.min(1000 * Math.pow(2, attempt), 10000);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error("Max retries reached");
+}
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +66,7 @@ export default function Command() {
   const [pages, setPages] = useState<TldrPage[]>([]);
   const [filteredPages, setFilteredPages] = useState<TldrPage[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Search>();
 
   useEffect(() => {
     loadCache();
@@ -89,32 +112,68 @@ export default function Command() {
       const language = preferences.language || "en";
       const totalPlatforms = PLATFORMS.length;
 
-      // Fetch index of all pages
+      // Optimized hybrid approach:
+      // 1. Single GitHub API call to get ALL file paths (tree API with recursive=1)
+      // 2. Fetch content from CDN (raw.githubusercontent.com - no rate limits)
+
+      toast.message = "Fetching file tree...";
+
+      // Fetch entire tree in ONE API call
+      const treeUrl = "https://api.github.com/repos/tldr-pages/tldr/git/trees/main?recursive=1";
+      const treeResponse = await fetchWithRetry(treeUrl);
+
+      if (!treeResponse.ok) {
+        throw new Error(`Failed to fetch tree: ${treeResponse.statusText}`);
+      }
+
+      const treeData = (await treeResponse.json()) as { tree: GitHubTreeItem[] };
+      const pagesPrefix = language === "en" ? "pages/" : `pages.${language}/`;
+
+      // Group files by platform
+      const filesByPlatform: Record<string, string[]> = {};
+      for (const item of treeData.tree) {
+        if (item.type === "blob" && item.path.startsWith(pagesPrefix) && item.path.endsWith(".md")) {
+          const relativePath = item.path.substring(pagesPrefix.length);
+          const parts = relativePath.split("/");
+          if (parts.length === 2) {
+            const [platform, filename] = parts;
+            if (PLATFORMS.includes(platform)) {
+              if (!filesByPlatform[platform]) {
+                filesByPlatform[platform] = [];
+              }
+              filesByPlatform[platform].push(filename);
+            }
+          }
+        }
+      }
+
+      // Fetch content for each platform
       for (let i = 0; i < PLATFORMS.length; i++) {
         const platform = PLATFORMS[i];
+        const mdFiles = filesByPlatform[platform] || [];
+
+        if (mdFiles.length === 0) continue;
+
         const progress = i / totalPlatforms;
         setLoadingProgress(progress);
 
         toast.message = `Fetching ${platform} (${i + 1}/${totalPlatforms})...`;
 
         try {
-          const indexUrl = `https://api.github.com/repos/tldr-pages/tldr/contents/pages${language === "en" ? "" : "." + language}/${platform}`;
-          const response = await fetch(indexUrl);
-
-          if (!response.ok) continue;
-
-          const files = (await response.json()) as Array<{ name: string; download_url: string }>;
-          const mdFiles = files.filter((f) => f.name.endsWith(".md"));
-
-          // Fetch in batches of 20 for better performance
-          const BATCH_SIZE = 20;
+          // Fetch content from CDN (no rate limits)
+          // Fetch in batches of 50 for better performance
+          const BATCH_SIZE = 50;
           for (let j = 0; j < mdFiles.length; j += BATCH_SIZE) {
             const batch = mdFiles.slice(j, j + BATCH_SIZE);
 
             const batchResults = await Promise.allSettled(
               batch.map(async (file) => {
-                const name = file.name.replace(".md", "");
-                const contentResponse = await fetch(file.download_url);
+                const name = file.replace(".md", "");
+                const contentUrl = `https://raw.githubusercontent.com/tldr-pages/tldr/main/${pagesPrefix}${platform}/${file}`;
+                const contentResponse = await fetch(contentUrl);
+                if (!contentResponse.ok) {
+                  throw new Error(`Failed to fetch ${name}: ${contentResponse.statusText}`);
+                }
                 const content = await contentResponse.text();
                 return { name, platform, language, content };
               }),
@@ -316,7 +375,11 @@ function PageDetail({ page, allVariants }: { page: TldrPage; allVariants: TldrPa
   const copyCommand = (content: string) => {
     const codeBlocks = content.match(/`[^`]+`/g);
     if (codeBlocks && codeBlocks.length > 0) {
-      const command = codeBlocks[0].replace(/`/g, "").replace(/\{\{[^}]+\}\}/g, "");
+      const command = codeBlocks[0]
+        .replace(/`/g, "")
+        .replace(/\{\{[^}]+\}\}/g, "<placeholder>")
+        .replace(/\s+/g, " ")
+        .trim();
       return command;
     }
     return "";
