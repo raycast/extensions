@@ -420,6 +420,46 @@ export default function AddDeal({
     return !mergedOrganizationOptions.some((o) => o.title.trim().toLowerCase() === term.toLowerCase());
   }, [mergedOrganizationOptions, organizationSearchText]);
 
+  useEffect(() => {
+    const term = personSearchText.trim();
+    if (term.length < 1) {
+      return;
+    }
+
+    const isAutoSelectable = selectedPersonId === "" || selectedPersonId === CREATE_PERSON_VALUE;
+    if (!isAutoSelectable) {
+      return;
+    }
+
+    const firstMatch = personOptions[0];
+    if (firstMatch) {
+      if (firstMatch.id !== selectedPersonId) {
+        setSelectedPersonId(firstMatch.id);
+      }
+      return;
+    }
+  }, [canCreatePerson, personOptions, personSearchText, selectedPersonId]);
+
+  useEffect(() => {
+    const term = organizationSearchText.trim();
+    if (term.length < 1) {
+      return;
+    }
+
+    const isAutoSelectable = selectedOrganizationId === "" || selectedOrganizationId === CREATE_ORGANIZATION_VALUE;
+    if (!isAutoSelectable) {
+      return;
+    }
+
+    const firstMatch = organizationOptions[0];
+    if (firstMatch) {
+      if (firstMatch.id !== selectedOrganizationId) {
+        setSelectedOrganizationId(firstMatch.id);
+      }
+      return;
+    }
+  }, [canCreateOrganization, organizationOptions, organizationSearchText, selectedOrganizationId]);
+
   return (
     <Form
       isLoading={isSubmitting || isLoadingDeal}
@@ -480,13 +520,15 @@ export default function AddDeal({
         throttle
         onSearchTextChange={setPersonSearchText}
       >
-        <Form.Dropdown.Item value="" title="No Person" />
-        {canCreatePerson ? (
-          <Form.Dropdown.Item value={CREATE_PERSON_VALUE} title={`Create Contact "${personSearchText.trim()}"`} />
+        {personSearchText.trim().length === 0 || mergedPersonOptions.length === 0 ? (
+          <Form.Dropdown.Item value="" title="No Person" />
         ) : null}
         {mergedPersonOptions.map((p) => (
           <Form.Dropdown.Item key={p.id} value={p.id} title={p.title} />
         ))}
+        {canCreatePerson ? (
+          <Form.Dropdown.Item value={CREATE_PERSON_VALUE} title={`Create Contact "${personSearchText.trim()}"`} />
+        ) : null}
       </Form.Dropdown>
       <Form.Dropdown
         id="organizationId"
@@ -521,16 +563,18 @@ export default function AddDeal({
         throttle
         onSearchTextChange={setOrganizationSearchText}
       >
-        <Form.Dropdown.Item value="" title="No Organization" />
+        {organizationSearchText.trim().length === 0 || mergedOrganizationOptions.length === 0 ? (
+          <Form.Dropdown.Item value="" title="No Organization" />
+        ) : null}
+        {mergedOrganizationOptions.map((o) => (
+          <Form.Dropdown.Item key={o.id} value={o.id} title={o.title} />
+        ))}
         {canCreateOrganization ? (
           <Form.Dropdown.Item
             value={CREATE_ORGANIZATION_VALUE}
             title={`Create Organization "${organizationSearchText.trim()}"`}
           />
         ) : null}
-        {mergedOrganizationOptions.map((o) => (
-          <Form.Dropdown.Item key={o.id} value={o.id} title={o.title} />
-        ))}
       </Form.Dropdown>
     </Form>
   );
