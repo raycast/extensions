@@ -1,9 +1,9 @@
 import { Detail } from "@raycast/api";
-import FileSizeFormat from "@saekitominaga/file-size-format";
 
 import { GifActions } from "./GifActions";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
 import { getServiceFromUrl } from "../lib/getServiceFromUrl";
+import { formatFileSize } from "../lib/formatFileSize";
 import { getServiceTitle } from "../preferences";
 
 type GifDetailsProps = {
@@ -44,7 +44,7 @@ export function GifDetails(props: GifDetailsProps) {
           <Detail.Metadata.Label title="Title" text={title} />
           {metadata?.width ? <Detail.Metadata.Label title="Width" text={`${metadata.width.toString()}px`} /> : null}
           {metadata?.height ? <Detail.Metadata.Label title="Height" text={`${metadata.height.toString()}px`} /> : null}
-          {metadata?.size && <Detail.Metadata.Label title="Size" text={FileSizeFormat.si(metadata?.size)} />}
+          {metadata?.size && <Detail.Metadata.Label title="Size" text={formatFileSize(metadata?.size)} />}
           {labels}
           {links}
           {tags}

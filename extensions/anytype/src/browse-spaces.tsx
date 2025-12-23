@@ -1,6 +1,6 @@
 import { EnsureAuthenticated, SpaceList } from "./components";
 
-const searchPlaceholder = "Search spaces...";
+const searchPlaceholder = "Search channels...";
 
 export default function Command() {
   return (

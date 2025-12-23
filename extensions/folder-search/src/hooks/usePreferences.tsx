@@ -1,133 +1,86 @@
-import { useState, useEffect } from "react";
-import { LocalStorage, environment } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { getPreferenceValues, environment } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { log } from "../utils";
-import { SpotlightSearchPreferences } from "../types";
 import { userInfo } from "os";
 
+// Raycast preferences from package.json
+export interface RaycastPreferences {
+  maxResults: string;
+  filterLibraryFolders: boolean;
+  pluginsEnabled: boolean;
+  pluginsFolder: string;
+}
+
+// Dynamic preferences stored in LocalStorage
+interface PreferencesState {
+  searchScope: string;
+  isShowingDetail: boolean;
+  showNonCloudLibraryPaths: boolean;
+}
+
+const defaultPreferences: PreferencesState = {
+  searchScope: userInfo().homedir,
+  isShowingDetail: false,
+  showNonCloudLibraryPaths: false,
+};
+
 /**
- * Hook for managing user preferences
+ * Hook for managing both Raycast preferences and dynamic preferences
  */
 export function usePreferences() {
-  const [searchScope, setSearchScope] = useState<string>(userInfo().homedir);
-  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
-  const [showNonCloudLibraryPaths, setShowNonCloudLibraryPaths] = useState<boolean>(false);
-  const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
+  // Get Raycast preferences
+  const raycastPrefs = getPreferenceValues<RaycastPreferences>();
 
-  // Load preferences on mount
-  useEffect(() => {
-    const loadPreferences = async () => {
-      try {
-        log("debug", "usePreferences", "Loading preferences");
+  // Get dynamic preferences from LocalStorage
+  const {
+    value: preferences,
+    setValue: setPreferences,
+    isLoading,
+  } = useLocalStorage<PreferencesState>(`${environment.extensionName}-preferences`, defaultPreferences);
 
-        // Get preferences from LocalStorage
-        const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
+  const currentPrefs = preferences || defaultPreferences;
 
-        if (maybePreferences) {
-          try {
-            const preferences = JSON.parse(maybePreferences as string);
+  // Individual setters for backward compatibility
+  const setSearchScope = (value: string) => {
+    log("debug", "usePreferences", "Updating search scope", { value });
+    setPreferences({
+      ...currentPrefs,
+      searchScope: value,
+    });
+  };
 
-            // Update state with loaded preferences
-            setSearchScope(preferences?.searchScope || userInfo().homedir);
-            setIsShowingDetail(preferences?.isShowingDetail !== undefined ? preferences.isShowingDetail : true);
-            setShowNonCloudLibraryPaths(preferences?.showNonCloudLibraryPaths || false);
+  const setIsShowingDetail = (value: boolean) => {
+    log("debug", "usePreferences", "Updating detail view", { value });
+    setPreferences({
+      ...currentPrefs,
+      isShowingDetail: value,
+    });
+  };
 
-            log("debug", "usePreferences", "Loaded preferences", {
-              searchScope: preferences?.searchScope,
-              isShowingDetail: preferences?.isShowingDetail,
-              showNonCloudLibraryPaths: preferences?.showNonCloudLibraryPaths,
-            });
-          } catch (error) {
-            log("error", "usePreferences", "Error parsing preferences from storage", {
-              error: error instanceof Error ? error.message : String(error),
-            });
-          }
-        }
-
-        setHasCheckedPreferences(true);
-      } catch (error) {
-        log("error", "usePreferences", "Error loading preferences", {
-          error: error instanceof Error ? error.message : String(error),
-        });
-        showFailureToast({ title: "Could not read preferences" });
-        setHasCheckedPreferences(true);
-      }
-    };
-
-    loadPreferences();
-  }, []);
-
-  // Save preferences when they change
-  useEffect(() => {
-    if (!hasCheckedPreferences) return;
-
-    const savePreferences = async () => {
-      try {
-        // Get current preferences to update only changed values
-        const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
-        let currentPrefs: Partial<SpotlightSearchPreferences> = {};
-        let hasChanged = false;
-
-        if (maybePreferences) {
-          try {
-            currentPrefs = JSON.parse(maybePreferences as string);
-
-            // Check if any values have actually changed
-            hasChanged =
-              currentPrefs.searchScope !== searchScope ||
-              currentPrefs.isShowingDetail !== isShowingDetail ||
-              currentPrefs.showNonCloudLibraryPaths !== showNonCloudLibraryPaths;
-
-            if (!hasChanged) {
-              log("debug", "usePreferences", "No preference changes detected, skipping save");
-              return;
-            }
-          } catch {
-            log("error", "usePreferences", "Error parsing existing preferences");
-            hasChanged = true; // Force save if we can't parse current prefs
-          }
-        } else {
-          // No existing preferences, consider this a change
-          hasChanged = true;
-        }
-
-        // Only save if something changed
-        if (hasChanged) {
-          // Update with new values
-          const updatedPrefs = {
-            ...currentPrefs,
-            searchScope,
-            isShowingDetail,
-            showNonCloudLibraryPaths,
-          };
-
-          // Save to localStorage
-          await LocalStorage.setItem(`${environment.extensionName}-preferences`, JSON.stringify(updatedPrefs));
-
-          log("debug", "usePreferences", "Saved preferences", {
-            searchScope,
-            isShowingDetail,
-            showNonCloudLibraryPaths,
-          });
-        }
-      } catch (error) {
-        log("error", "usePreferences", "Error saving preferences", {
-          error: error instanceof Error ? error.message : String(error),
-        });
-        showFailureToast({ title: "Could not save preferences" });
-      }
-    };
-
-    savePreferences();
-  }, [searchScope, isShowingDetail, showNonCloudLibraryPaths, hasCheckedPreferences]);
+  const setShowNonCloudLibraryPaths = (value: boolean) => {
+    log("debug", "usePreferences", "Updating library paths setting", { value });
+    setPreferences({
+      ...currentPrefs,
+      showNonCloudLibraryPaths: value,
+    });
+  };
 
   return {
-    searchScope,
+    // Raycast preferences
+    maxResults: parseInt(raycastPrefs.maxResults) || 250,
+    filterLibraryFolders: raycastPrefs.filterLibraryFolders,
+    pluginsEnabled: raycastPrefs.pluginsEnabled,
+    pluginsFolder: raycastPrefs.pluginsFolder,
+
+    // Dynamic preferences
+    searchScope: currentPrefs.searchScope,
     setSearchScope,
-    isShowingDetail,
+    isShowingDetail: currentPrefs.isShowingDetail,
     setIsShowingDetail,
-    showNonCloudLibraryPaths,
+    showNonCloudLibraryPaths: currentPrefs.showNonCloudLibraryPaths,
     setShowNonCloudLibraryPaths,
-    hasCheckedPreferences,
+
+    // UI
+    hasCheckedPreferences: !isLoading, // Fixed: when not loading, preferences are checked
   };
 }

@@ -1,5 +1,14 @@
 # Browser Tabs Changelog
 
+## [New Icon Style] - 2025-07-07
+
+- Optimize extension icons for macOS Tahoe
+
+## [Fix Duplicated Tab Issue & Remove TeX Live Utility (Not Browser)] - 2025-06-11
+
+- Added a `bundleId` check when filtering open apps to exclude non-app-bundle processes (e.g., Edge aliases without a bundleId)
+- Added `TeX` to the `unsupportedBrowsers` list, as it's not a browser app (this list may expand over time)
+
 ## [Remove Zen Browser] - 2024-10-29
 
 - Remove Zen Browser as it is not supported.

@@ -6,7 +6,8 @@
   "icon": "logo.png",
   "author": "zan",
   "contributors": [
-    "xmok"
+    "xmok",
+    "MaicolBen"
   ],
   "categories": [
     "Media",
@@ -16,9 +17,17 @@
   "commands": [
     {
       "name": "index",
-      "title": "Matter",
+      "title": "List saved articles",
+      "subtitle": "Matter",
       "description": "View your saved for later articles in your Matter account.",
       "mode": "view"
+    },
+    {
+      "name": "bookmark-url",
+      "title": "Bookmark URL",
+      "subtitle": "Matter",
+      "description": "Bookmark a URL from your clipboard in Matter.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

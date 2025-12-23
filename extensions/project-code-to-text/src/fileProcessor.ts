@@ -27,9 +27,14 @@ import { Stats } from "fs";
  */
 async function loadIgnoreFilter(
   projectRoot: string,
+  additionalIgnorePatterns?: string[],
 ): Promise<{ filter: ReturnType<typeof ignore>; gitignoreUsed: boolean }> {
   // Start with hardcoded base ignore patterns
   const ig = ignore().add(HARDCODED_BASE_IGNORE_PATTERNS as string[]);
+
+  if (additionalIgnorePatterns) {
+    ig.add(additionalIgnorePatterns as string[]);
+  }
 
   const gitignorePath = path.join(projectRoot, ".gitignore");
   let gitignoreUsed = false;
@@ -255,28 +260,37 @@ async function processDirectoryRecursive(options: ProcessDirectoryOptions): Prom
 }
 
 /**
- * Generates a single string containing the project's code structure and file contents.
- * @param config Configuration object for generation, including AI instruction preference.
- * @param onProgress Optional callback for reporting progress during processing.
- * @returns A promise that resolves to the complete project code string.
+ * Processes a mixed selection of files and directories.
+ * Files are processed directly, directories are processed recursively.
+ * @param config Configuration with selected file and directory paths.
+ * @param onProgress Optional callback for reporting progress.
+ * @returns A promise that resolves to an array of ProjectEntry objects.
  */
-export async function generateProjectCodeString(
+async function processMixedSelection(
   config: FileProcessorConfig,
   onProgress?: (progress: { message: string; details?: string }) => void,
-): Promise<string> {
-  const { projectDirectory, maxFileSizeBytes, includeAiInstructions } = config;
+): Promise<ProjectEntry[]> {
+  const { projectDirectory, selectedFilePaths = [], maxFileSizeBytes } = config;
   const projectRoot = path.resolve(projectDirectory);
+  const entries: ProjectEntry[] = [];
 
   const progressCallback = (message: string, details?: string) => {
     if (onProgress) onProgress({ message, details });
   };
 
+  // Load ignore filter once for the entire process
   progressCallback("Loading ignore rules...");
-  const { filter: ignoreFilter, gitignoreUsed } = await loadIgnoreFilter(projectRoot);
+  // Parse additional ignore patterns from string (comma-separated)
+  const { additionalIgnorePatterns: configAdditionalPatterns } = config;
+  const additionalPatterns = configAdditionalPatterns
+    ? configAdditionalPatterns
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0)
+    : undefined;
+  const { filter: ignoreFilter } = await loadIgnoreFilter(projectRoot, additionalPatterns);
 
-  progressCallback("Scanning project files...");
-
-  // Initialize safety limits
+  // Initialize safety limits for directory processing
   const safetyLimits = {
     maxFiles: SAFETY_LIMITS.MAX_FILES,
     maxScanTimeMs: SAFETY_LIMITS.MAX_SCAN_TIME_MS,
@@ -286,65 +300,283 @@ export async function generateProjectCodeString(
     totalSize: 0,
   };
 
-  let projectStructure: ProjectEntry[];
-  try {
-    projectStructure = await processDirectoryRecursive({
-      projectRoot,
-      currentPath: projectRoot,
-      ignoreFilter,
-      maxFileSizeBytes,
-      safetyLimits,
-      onProgress: (progressUpdate) => {
-        if (safetyLimits.filesProcessed >= SAFETY_LIMITS.FILES_WARNING_THRESHOLD) {
-          progressCallback(
-            "Scanning (large project)",
-            `${progressUpdate.scannedPath} (${safetyLimits.filesProcessed} files)`,
-          );
-        } else {
-          progressCallback("Scanning", progressUpdate.scannedPath);
+  for (let i = 0; i < selectedFilePaths.length; i++) {
+    const entryPath = selectedFilePaths[i];
+    const basename = path.basename(entryPath);
+    progressCallback(`Processing ${i + 1}/${selectedFilePaths.length}`, basename);
+
+    try {
+      const stats = await fs.stat(entryPath);
+      let relativePath = path.relative(projectRoot, entryPath);
+      // Handle case where entryPath is the same as projectRoot
+      if (relativePath === "" || relativePath === ".") {
+        relativePath = path.basename(entryPath);
+      }
+
+      if (stats.isFile()) {
+        // Process file
+        const fileLanguage = getFileLanguage(entryPath);
+        const fileContent = await readFileContent(entryPath, stats, maxFileSizeBytes);
+
+        entries.push({
+          name: basename,
+          type: "file",
+          path: relativePath,
+          size: stats.size,
+          language: fileLanguage,
+          content: fileContent,
+        });
+
+        // Update safety counters
+        safetyLimits.filesProcessed++;
+        safetyLimits.totalSize += stats.size || 0;
+      } else if (stats.isDirectory()) {
+        // Process directory recursively
+        progressCallback(`Scanning directory: ${basename}...`);
+
+        // Check if directory itself should be ignored
+        let relativePathForIgnore = relativePath.replace(/\\/g, "/");
+        if (relativePathForIgnore === "") relativePathForIgnore = ".";
+        const pathToCheck = `${relativePathForIgnore}/`;
+        if (ignoreFilter.ignores(pathToCheck)) {
+          progressCallback(`Skipping ignored directory: ${basename}`);
+          continue;
         }
-      },
-    });
-  } catch (error) {
-    const errorMessage = (error as Error).message;
-    if (errorMessage.includes("limit exceeded")) {
-      throw new Error(
-        `Project too large: ${errorMessage}. Consider using .gitignore or processing a smaller directory.`,
-      );
+
+        const children = await processDirectoryRecursive({
+          projectRoot,
+          currentPath: entryPath,
+          ignoreFilter,
+          maxFileSizeBytes,
+          onProgress: (progressUpdate) => {
+            if (safetyLimits.filesProcessed >= SAFETY_LIMITS.FILES_WARNING_THRESHOLD) {
+              progressCallback(
+                `Scanning ${basename} (large)`,
+                `${progressUpdate.scannedPath} (${safetyLimits.filesProcessed} files)`,
+              );
+            } else {
+              progressCallback(`Scanning ${basename}`, progressUpdate.scannedPath);
+            }
+          },
+          safetyLimits,
+        });
+
+        // Include directory if it has non-ignored children
+        if (children.length > 0) {
+          entries.push({
+            name: basename,
+            type: "directory",
+            path: relativePath,
+            children: children,
+            size: stats.size,
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`Error processing selected path ${entryPath}:`, (error as Error).message);
+      // Add an entry indicating the error
+      const relativePath = path.relative(projectRoot, entryPath);
+      // Try to determine if it's a directory by checking if stats was defined
+      let entryType: "file" | "directory" = "file";
+      try {
+        const errorStats = await fs.stat(entryPath);
+        entryType = errorStats.isDirectory() ? "directory" : "file";
+      } catch {
+        // If we can't determine, default to file
+        entryType = "file";
+      }
+      entries.push({
+        name: path.basename(entryPath),
+        type: entryType,
+        path: relativePath,
+        content: `[Error reading ${entryType}: ${(error as Error).message}]`,
+      });
     }
-    throw error;
+  }
+
+  return entries;
+}
+
+/**
+ * Estimates the number of tokens in a text string using a simple heuristic.
+ * Uses the approximation: 1 token ≈ 4 characters for English code.
+ * @param content The text content to estimate tokens for.
+ * @returns The estimated number of tokens.
+ */
+function estimateTokens(content: string): number {
+  return Math.ceil(content.length / 4);
+}
+
+/**
+ * Generates a single string containing the project's code structure and file contents.
+ * @param config Configuration object for generation, including AI instruction preference.
+ * @param onProgress Optional callback for reporting progress during processing.
+ * @returns A promise that resolves to the complete project code string.
+ */
+export async function generateProjectCodeString(
+  config: FileProcessorConfig,
+  onProgress?: (progress: { message: string; details?: string }) => void,
+): Promise<string> {
+  const {
+    projectDirectory,
+    maxFileSizeBytes,
+    includeAiInstructions,
+    processOnlySelectedFiles,
+    selectedFilePaths,
+    additionalIgnorePatterns,
+  } = config;
+  const projectRoot = path.resolve(projectDirectory);
+
+  const progressCallback = (message: string, details?: string) => {
+    if (onProgress) onProgress({ message, details });
+  };
+
+  let projectStructure: ProjectEntry[];
+  let gitignoreUsed = false;
+
+  if (processOnlySelectedFiles && selectedFilePaths && selectedFilePaths.length > 0) {
+    // Process selected files and directories
+    progressCallback("Processing selected files and directories...");
+    try {
+      projectStructure = await processMixedSelection(config, onProgress);
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      if (errorMessage.includes("limit exceeded")) {
+        throw new Error(
+          `Project too large: ${errorMessage}. Consider selecting fewer files/directories or using .gitignore.`,
+        );
+      }
+      // Check for memory-related errors
+      if (errorMessage.includes("heap") || errorMessage.includes("memory")) {
+        throw new Error(
+          `Memory limit exceeded. The selected files/directories are too large to process. Please select fewer items or use .gitignore.`,
+        );
+      }
+      throw error;
+    }
+  } else {
+    // Process entire directory structure
+    progressCallback("Loading ignore rules...");
+    // Parse additional ignore patterns from string (comma-separated)
+    const additionalPatterns = additionalIgnorePatterns
+      ? additionalIgnorePatterns
+          .split(",")
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0)
+      : undefined;
+    const ignoreResult = await loadIgnoreFilter(projectRoot, additionalPatterns);
+    gitignoreUsed = ignoreResult.gitignoreUsed;
+
+    progressCallback("Scanning project files...");
+
+    // Initialize safety limits
+    const safetyLimits = {
+      maxFiles: SAFETY_LIMITS.MAX_FILES,
+      maxScanTimeMs: SAFETY_LIMITS.MAX_SCAN_TIME_MS,
+      maxTotalSizeBytes: SAFETY_LIMITS.MAX_TOTAL_SIZE_BYTES,
+      startTime: Date.now(),
+      filesProcessed: 0,
+      totalSize: 0,
+    };
+
+    try {
+      projectStructure = await processDirectoryRecursive({
+        projectRoot,
+        currentPath: projectRoot,
+        ignoreFilter: ignoreResult.filter,
+        maxFileSizeBytes,
+        safetyLimits,
+        onProgress: (progressUpdate) => {
+          if (safetyLimits.filesProcessed >= SAFETY_LIMITS.FILES_WARNING_THRESHOLD) {
+            progressCallback(
+              "Scanning (large project)",
+              `${progressUpdate.scannedPath} (${safetyLimits.filesProcessed} files)`,
+            );
+          } else {
+            progressCallback("Scanning", progressUpdate.scannedPath);
+          }
+        },
+      });
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      if (errorMessage.includes("limit exceeded")) {
+        throw new Error(
+          `Project too large: ${errorMessage}. Consider using .gitignore, selecting specific files/directories, or processing a smaller directory.`,
+        );
+      }
+      // Check for memory-related errors
+      if (errorMessage.includes("heap") || errorMessage.includes("memory")) {
+        throw new Error(
+          `Memory limit exceeded. The project is too large to process. Please select specific files/directories or use .gitignore to exclude large files.`,
+        );
+      }
+      throw error;
+    }
   }
 
   progressCallback("Formatting output...");
 
-  let output = "";
+  // Use array-based string building for better memory efficiency
+  const outputParts: string[] = [];
 
   if (includeAiInstructions) {
-    output += "<ai_instruction>\n" + AI_INSTRUCTION_CONTENT + "</ai_instruction>\n\n";
+    outputParts.push("<ai_instruction>\n" + AI_INSTRUCTION_CONTENT + "</ai_instruction>\n\n");
   }
 
-  output += "<metadata>\n";
-  output += `  Date created: ${new Date().toISOString()}\n`;
-  output += `  Project root: ${projectRoot}\n`;
-  output += `  Max file size for content: ${bytesToMB(maxFileSizeBytes).toFixed(2)} MB\n`;
-  output += `  .gitignore used: ${gitignoreUsed ? "Yes" : "No"}\n`;
-  output += `  AI instructions included: ${includeAiInstructions ? "Yes" : "No"}\n`;
-  output += "</metadata>\n\n";
+  // Build metadata section
+  const metadataLines: string[] = [];
+  metadataLines.push("  Date created: " + new Date().toISOString());
+  metadataLines.push("  Project root: " + projectRoot);
+  metadataLines.push("  Processing mode: " + (processOnlySelectedFiles ? "Selected files only" : "Entire directory"));
+  if (processOnlySelectedFiles && selectedFilePaths) {
+    metadataLines.push("  Selected files: " + selectedFilePaths.length);
+  }
+  metadataLines.push("  Max file size for content: " + bytesToMB(maxFileSizeBytes).toFixed(2) + " MB");
+  metadataLines.push("  .gitignore used: " + (gitignoreUsed ? "Yes" : "No"));
+  metadataLines.push("  AI instructions included: " + (includeAiInstructions ? "Yes" : "No"));
+  // Token count will be added later after calculation
 
-  output += "<project_structure>\n";
-  output += formatProjectStructure(projectStructure);
-  output += "</project_structure>\n\n";
+  outputParts.push("<metadata>\n" + metadataLines.join("\n") + "\n");
 
-  output += "<file_contents>";
+  // Format project structure
+  outputParts.push("<project_structure>\n");
+  outputParts.push(formatProjectStructure(projectStructure));
+  outputParts.push("</project_structure>\n\n");
+
+  // Format file contents in batches to reduce memory pressure
+  outputParts.push("<file_contents>");
+  progressCallback("Formatting file contents...");
   const fileContents = formatFileContents(projectStructure);
-  output += fileContents;
+  outputParts.push(fileContents);
   if (projectStructure.length > 0 && fileContents.trim() !== "") {
-    output += "\n"; // Ensure a newline after the last </file> if content exists
+    outputParts.push("\n");
   }
-  output += "</file_contents>\n";
+  outputParts.push("</file_contents>\n");
 
   if (includeAiInstructions) {
-    output += "\n<ai_analysis_guide>\n" + AI_ANALYSIS_GUIDE_CONTENT + "</ai_analysis_guide>\n";
+    outputParts.push("\n<ai_analysis_guide>\n" + AI_ANALYSIS_GUIDE_CONTENT + "</ai_analysis_guide>\n");
+  }
+
+  // Join all parts
+  let output = outputParts.join("");
+
+  // Calculate estimated tokens and add to metadata
+  const estimatedTokens = estimateTokens(output);
+  // Insert token count into metadata section
+  const metadataEndIndex = output.indexOf("</metadata>");
+  if (metadataEndIndex !== -1) {
+    const beforeMetadataEnd = output.substring(0, metadataEndIndex);
+    const afterMetadataEnd = output.substring(metadataEndIndex);
+    output = beforeMetadataEnd + "  Estimated tokens: ~" + estimatedTokens + "\n" + afterMetadataEnd;
+  }
+
+  // Try to trigger garbage collection if available (Node.js with --expose-gc flag)
+  if (global.gc && typeof global.gc === "function") {
+    try {
+      global.gc();
+    } catch {
+      // GC not available or failed, ignore
+    }
   }
 
   progressCallback("Generation complete!");

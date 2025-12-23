@@ -8,7 +8,7 @@ import { CourseSummary, CourseSummarySchema } from "./utils/nusmods";
 
 const now = new Date();
 const currentYear = now.getFullYear();
-const isFirstHalfOfTheYear = now.getMonth() + 1 < 8; // New semester starts in August
+const isFirstHalfOfTheYear = now.getMonth() + 1 < 7; // New semester starts in August, but NUSMods data is updated in July
 const currentAcadYear = isFirstHalfOfTheYear
   ? `${currentYear - 1}-${currentYear}`
   : `${currentYear}-${currentYear + 1}`;

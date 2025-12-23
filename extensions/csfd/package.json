@@ -1,0 +1,891 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "csfd",
+  "title": "ČSFD",
+  "description": "Search for movies/tv shows and other in Czech-Slovak Movie Database",
+  "icon": "icon-512.png",
+  "author": "adam_vyborny",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-movies-tv-shows",
+      "title": "Search Movies/TV Shows",
+      "description": "Search for movies and TV shows in ČSFD",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.17.0",
+    "node-csfd-api": "^2.11.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "tools": [
+    {
+      "name": "search-movies",
+      "title": "Search for Movies",
+      "description": "Search for movies and TV shows on ČSFD (Czech-Slovak Film Database), including year and rough rating"
+    },
+    {
+      "name": "get-movie-details",
+      "title": "Get Movie Details",
+      "description": "Get detailed information about a movie or TV show from ČSFD, including precise rating, cast, and where to watch"
+    }
+  ],
+  "ai": {
+    "instructions": "You are a movie search assistant for ČSFD (Czech-Slovak Film Database). When users mention movies or need information about specific films, you can help them search and provide details..\n\nKey behaviors:\n- For movie searches, use the search-movies tool first to find matches\n- When searching for a specific movie/TV show by title, always follow up with get-movie-details to provide comprehensive information\n- To get detailed information about a specific movie, use the get-movie-details tool with the movie ID\n- Interpret user intent carefully - they may want to search for a movie or get details about one they already know\n- When a user mentions a movie title, offer to search for it\n- Present search results in a clear format, highlighting key information like title, year, and rating\n- For movie details, highlight important information like rating, genres, and where to watch. When user asks about rating, always get movie detail as you get precies rating. Do NOT include not relevant search results.\n\nSearch parameters:\n- When searching for a specific movie/TV show (user mentions exact title), use limit: 1\n- When searching for TV shows specifically, use contentType: \"tvshows\" and limit: 5\n- When searching for movies specifically, use contentType: \"movies\" and limit: 1 for specific titles\n- For general searches, use the default limit (no limit parameter needed)",
+    "evals": [
+      {
+        "input": "@csfd Search for the movie Inception",
+        "usedAsExample": true,
+        "mocks": {
+          "search-movies": {
+            "message": "Found 1 result for \"Inception\"",
+            "results": [
+              {
+                "id": 64768,
+                "title": "Inception",
+                "year": 2010,
+                "type": "movie",
+                "colorRating": "good",
+                "poster": "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/158/180/158180052_2e67c1.jpg",
+                "creators": {
+                  "directors": [
+                    {
+                      "id": 3635,
+                      "name": "Christopher Nolan",
+                      "url": "https://www.csfd.cz/tvurce/3635-christopher-nolan/"
+                    }
+                  ],
+                  "actors": [
+                    {
+                      "id": 838,
+                      "name": "Leonardo DiCaprio",
+                      "url": "https://www.csfd.cz/tvurce/838-leonardo-dicaprio/"
+                    }
+                  ]
+                },
+                "origins": ["USA", "Velká Británie"],
+                "url": "https://www.csfd.cz/film/64768-inception/"
+              }
+            ],
+            "totalCount": 1
+          },
+          "get-movie-details": {
+            "id": 64768,
+            "title": "Inception",
+            "year": 2010,
+            "rating": 88,
+            "colorRating": "good",
+            "duration": 148,
+            "genres": ["Sci-Fi", "Action", "Thriller"],
+            "origins": ["USA", "Velká Británie"],
+            "poster": "https://image.pmgstatic.com/cache/resized/w1080/files/images/film/posters/158/180/158180052_2e67c1.jpg",
+            "description": "Dom Cobb je zručný zloděj, největší na světě v nebezpečném umění extrakce: krade cenné tajemství z hlubin nevědomí během snového stavu, kdy je mysl nejvíce zranitelná.",
+            "cast": {
+              "directors": "Christopher Nolan",
+              "actors": "Leonardo DiCaprio, Marion Cotillard, Tom Hardy, Ellen Page, Joseph Gordon-Levitt"
+            },
+            "url": "https://www.csfd.cz/film/64768",
+            "watchOn": [
+              {
+                "title": "Netflix",
+                "url": "https://www.netflix.com/title/70131314"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-movies",
+              "arguments": {
+                "query": "Inception",
+                "contentType": "movies",
+                "limit": 1
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-movie-details",
+              "arguments": {
+                "movieId": 64768
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@csfd Show me details about Interstellar",
+        "usedAsExample": true,
+        "mocks": {
+          "search-movies": {
+            "message": "Found 1 result for \"Interstellar\"",
+            "results": [
+              {
+                "id": 278133,
+                "title": "Interstellar",
+                "year": 2014,
+                "type": "movie",
+                "colorRating": "good",
+                "poster": "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/162/784/162784693_1653c1.jpg",
+                "creators": {
+                  "directors": [
+                    {
+                      "id": 3635,
+                      "name": "Christopher Nolan",
+                      "url": "https://www.csfd.cz/tvurce/3635-christopher-nolan/"
+                    }
+                  ],
+                  "actors": [
+                    {
+                      "id": 1194,
+                      "name": "Matthew McConaughey",
+                      "url": "https://www.csfd.cz/tvurce/1194-matthew-mcconaughey/"
+                    }
+                  ]
+                },
+                "origins": ["USA", "Velká Británie"],
+                "url": "https://www.csfd.cz/film/278133-interstellar/"
+              }
+            ],
+            "totalCount": 1
+          },
+          "get-movie-details": {
+            "id": 278133,
+            "title": "Interstellar",
+            "year": 2014,
+            "rating": 90,
+            "colorRating": "good",
+            "duration": 169,
+            "genres": ["Sci-Fi", "Drama", "Thriller"],
+            "origins": ["USA", "Velká Británie"],
+            "poster": "https://image.pmgstatic.com/cache/resized/w1080/files/images/film/posters/162/784/162784693_1653c1.jpg",
+            "description": "Skupina výzkumníků a průzkumníků, vedená Cooperem, se vydává na nejdůležitější misi v lidské historii; cestují za hranice této galaxie, aby objevili, zda má lidstvo budoucnost mezi hvězdami.",
+            "cast": {
+              "directors": "Christopher Nolan",
+              "actors": "Matthew McConaughey, Anne Hathaway, Jessica Chastain, Michael Caine, Casey Affleck"
+            },
+            "url": "https://www.csfd.cz/film/278133",
+            "watchOn": [
+              {
+                "title": "Netflix",
+                "url": "https://www.netflix.com/title/70305903"
+              },
+              {
+                "title": "Apple TV+",
+                "url": "https://tv.apple.com/movie/interstellar"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-movies",
+              "arguments": {
+                "query": "Interstellar",
+                "contentType": "movies",
+                "limit": 1
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-movie-details",
+              "arguments": {
+                "movieId": 278133
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input" : "Where can I watch Simpsons TV Show? @csfd ",
+        "mocks" : {
+          "get-movie-details" : {
+            "cast" : {
+              "actors" : "Dan Castellaneta, Julie Kavner, Nancy Cartwright, Yeardley Smith, Harry Shearer",
+              "directors" : "Mike B. Anderson, Mark Kirkland, Steven Dean Moore, Bob Anderson, Matthew Nastuk, Jim Reardon, David Silverman, Mike Frank Polcino, Wesley Archer, Nancy Kruse, Lance Kramer, Chris Clements, Chuck Sheetz, Rob Oliver, Rich Moore, Matthew Faughnan, Jeffrey Lynch, Timothy Bailey, Susie Dietter, Pete Michels, Raymond S. Persi, Carlos Baeza, Swinton O. Scott III, Dominic Polcino, Neil Affleck, Michael Marcantel, Lauren MacMullan, Matthew Schofield, Ralph Sosa, Mark Ervin, Jen Kamerman, Milton Gray, Brad Bird, Kent Butterworth, Gregg Vanzo, Alan Smart, David Mirkin, Klay Hall, Shaun Cashman, John Harvatine IV, Jennifer Moeller, Debbie Mahan, Gabriel DeFrancesco, Gabor Csupo, Eric Koenig"
+            },
+            "colorRating" : "good",
+            "description" : "Natvrdlý lenoch Homer, pedantská puťka Marge, drzounský Bart, přechytralá Líza a roztomilá Maggie – to jsou členové rodiny nejslavnějšího a nejpopulárnějšího animovaného seriálu Simpsonovi.Už dvacet let se jich miliony fanoušků na celém světě nemohou nabažit a v pravidelných intervalech nakukují do zákulisí legendárního Springfieldu, aby byli svědky neuvěřitelných dobrodružství bláznivé, ale přesto vlastně normální americké rodinky. Simpsonovi si získali své obecenstvo především neotřelým a trochu drsným humorem, s nímž vykreslují typickou americkou rodinu z městečka Springfield. Ta se skládá z pěti naprosto odlišných lidí, pro které je občas pořádně těžké se sebou vyjít. Nemluvě o ostatních obyvatelích města, v němž to opravdu neustále žije – je tu vlastní upadlá kultura, zkorumpovaná politika, drsná mafie a lenivá policie, ale také prostí občané, kteří se každý týden chodí kát do místního kostela. V neposlední řadě si mohou diváci všimnout jednoho všudypřítomného detailu – Simpsonovi totiž téměř v každé scénce něco nebo někoho parodují – ať už jde o svět filmový, hudební, politický, ale i náboženský. Tvůrci seriálu se zkrátka s velkou odvahou pouštějí do neustálých provokací osob a institucí z reálného života.(TV Prima)",
+            "duration" : 17154,
+            "genres" : [
+              "Animovaný",
+              "Komedie"
+            ],
+            "id" : 72489,
+            "origins" : [
+              "USA"
+            ],
+            "poster" : "https://image.pmgstatic.com/cache/resized/w1080/files/images/film/posters/166/402/166402931_d24f3c.jpg",
+            "rating" : 92,
+            "title" : "Simpsonovi",
+            "url" : "https://www.csfd.cz/film/72489",
+            "watchOn" : [
+              {
+                "title" : "Disney+",
+                "url" : "https://www.disneyplus.com/cs-cz/series/the-simpsons/3ZoBZ52QHb4x"
+              },
+              {
+                "title" : "Lepší.TV",
+                "url" : "https://www.lepsi.tv/top_tv/serial/simpsonovi-online?utm_source=csfd&utm_content=csfd"
+              },
+              {
+                "title" : "SledovaniTV",
+                "url" : "https://sledovanitv.cz/epg/event/primacool:20250324615348a9cf91bfe7e29d3ddff2809e4d"
+              },
+              {
+                "title" : "DVD",
+                "url" : "https://www.martinus.cz/?uItem=846821"
+              }
+            ],
+            "year" : 1989
+          },
+          "search-movies" : {
+            "message" : "Found 7 results for \"Simpsons\"",
+            "results" : [
+              {
+                "colorRating" : "good",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 11255,
+                      "name" : "Dan Castellaneta",
+                      "url" : "https://www.csfd.cz/tvurce/11255-dan-castellaneta/"
+                    },
+                    {
+                      "id" : 11585,
+                      "name" : "Julie Kavner",
+                      "url" : "https://www.csfd.cz/tvurce/11585-julie-kavner/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 296039,
+                      "name" : "Mike B. Anderson",
+                      "url" : "https://www.csfd.cz/tvurce/296039-mike-b-anderson/"
+                    },
+                    {
+                      "id" : 284739,
+                      "name" : "Mark Kirkland",
+                      "url" : "https://www.csfd.cz/tvurce/284739-mark-kirkland/"
+                    }
+                  ]
+                },
+                "id" : 72489,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/166/402/166402931_d24f3c.jpg",
+                "title" : "Simpsonovi",
+                "type" : "tvshow",
+                "url" : "https://www.csfd.cz/film/72489-simpsonovi/",
+                "year" : 1989
+              },
+              {
+                "colorRating" : "average",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 11255,
+                      "name" : "Dan Castellaneta",
+                      "url" : "https://www.csfd.cz/tvurce/11255-dan-castellaneta/"
+                    },
+                    {
+                      "id" : 11585,
+                      "name" : "Julie Kavner",
+                      "url" : "https://www.csfd.cz/tvurce/11585-julie-kavner/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 296039,
+                      "name" : "Mike B. Anderson",
+                      "url" : "https://www.csfd.cz/tvurce/296039-mike-b-anderson/"
+                    },
+                    {
+                      "id" : 64823,
+                      "name" : "Steven Dean Moore",
+                      "url" : "https://www.csfd.cz/tvurce/64823-steven-dean-moore/"
+                    }
+                  ]
+                },
+                "id" : 72489,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/168/639/168639242_uin5ni.png",
+                "title" : "Simpsonovi - Série 35",
+                "type" : "tvshow",
+                "url" : "https://www.csfd.cz/film/72489-simpsonovi/1364303-serie-35/",
+                "year" : 2023
+              },
+              {
+                "colorRating" : "average",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 11255,
+                      "name" : "Dan Castellaneta",
+                      "url" : "https://www.csfd.cz/tvurce/11255-dan-castellaneta/"
+                    },
+                    {
+                      "id" : 11585,
+                      "name" : "Julie Kavner",
+                      "url" : "https://www.csfd.cz/tvurce/11585-julie-kavner/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 291288,
+                      "name" : "Rob Oliver",
+                      "url" : "https://www.csfd.cz/tvurce/291288-rob-oliver/"
+                    },
+                    {
+                      "id" : 291383,
+                      "name" : "Timothy Bailey",
+                      "url" : "https://www.csfd.cz/tvurce/291383-timothy-bailey/"
+                    }
+                  ]
+                },
+                "id" : 72489,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/169/613/169613112_k6m9i8.jpg",
+                "title" : "Simpsonovi - Série 36",
+                "type" : "tvshow",
+                "url" : "https://www.csfd.cz/film/72489-simpsonovi/1521444-serie-36/",
+                "year" : 2024
+              },
+              {
+                "colorRating" : "good",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 11255,
+                      "name" : "Dan Castellaneta",
+                      "url" : "https://www.csfd.cz/tvurce/11255-dan-castellaneta/"
+                    },
+                    {
+                      "id" : 11585,
+                      "name" : "Julie Kavner",
+                      "url" : "https://www.csfd.cz/tvurce/11585-julie-kavner/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 284739,
+                      "name" : "Mark Kirkland",
+                      "url" : "https://www.csfd.cz/tvurce/284739-mark-kirkland/"
+                    },
+                    {
+                      "id" : 35041,
+                      "name" : "Rich Moore",
+                      "url" : "https://www.csfd.cz/tvurce/35041-rich-moore/"
+                    }
+                  ]
+                },
+                "id" : 72489,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/158/294/158294127_cc47ad.jpg",
+                "title" : "Simpsonovi - Série 5",
+                "type" : "tvshow",
+                "url" : "https://www.csfd.cz/film/72489-simpsonovi/474508-serie-5/",
+                "year" : 1993
+              },
+              {
+                "colorRating" : "good",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 11255,
+                      "name" : "Dan Castellaneta",
+                      "url" : "https://www.csfd.cz/tvurce/11255-dan-castellaneta/"
+                    },
+                    {
+                      "id" : 11585,
+                      "name" : "Julie Kavner",
+                      "url" : "https://www.csfd.cz/tvurce/11585-julie-kavner/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 64823,
+                      "name" : "Steven Dean Moore",
+                      "url" : "https://www.csfd.cz/tvurce/64823-steven-dean-moore/"
+                    },
+                    {
+                      "id" : 64825,
+                      "name" : "Jim Reardon",
+                      "url" : "https://www.csfd.cz/tvurce/64825-jim-reardon/"
+                    }
+                  ]
+                },
+                "id" : 72489,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/000/359/359041_b8b8e1.jpg",
+                "title" : "Simpsonovi - Série 9",
+                "type" : "tvshow",
+                "url" : "https://www.csfd.cz/film/72489-simpsonovi/475881-serie-9/",
+                "year" : 1997
+              }
+            ],
+            "totalCount" : 7
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "contentType" : "tvshows",
+                "limit" : 5,
+                "query" : "Simpsons"
+              },
+              "name" : "search-movies"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "movieId" : 72489
+              },
+              "name" : "get-movie-details"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "What is rating for Forrest Gump? @csfd ",
+        "mocks" : {
+          "get-movie-details" : {
+            "cast" : {
+              "actors" : "Tom Hanks, Robin Wright, Gary Sinise, Mykelti Williamson, Sally Field",
+              "directors" : "Robert Zemeckis"
+            },
+            "colorRating" : "good",
+            "description" : "Zemeckisův film je brilantním shrnutím dosavadních režisérových poznatků o možnostech \"comicsového\" vyprávění. Formálně i obsahově nejméně konvenční z jeho snímků přesvědčuje komediálními gagy i naléhavě patetickým tónem. Jeho hrdinou je prosťáček Forrest Gump, typický obyčejný muž, který od dětství dělal, co se mu řeklo. Do života si tak odnesl několik ponaučení své pečlivé maminky a osvědčené pravidlo, jež se mu hodí mnohokrát v nejrůznějších situacích: Když se dostaneš do problémů, utíkej. Forrest proutíká školou, jako hráč amerického fotbalu i univerzitou, potom peklem vietnamské války a zoufalstvím nad matčinou smrtí. Vždycky je totiž někdo nebo něco, co po něm skutečně či obrazně \"hází kameny\". Nakonec však Forrest poznává, že jsou i jiná řešení situací než útěk. Svůj život spojuje s kamarádkou ze školy Jenny, která pro něj zůstane provždycky jedinou láskou, s přítelem z vojny, černochem Bubbou, který dá směr jeho úvahám o lovu krevet a s poručíkem Taylorem, jemuž ve Vietnamu zachrání život. Forrestova životní pouť od 50. do 80. let je koncipovaná jako totálně \"bezelstné\" vyprávění hrdiny, neschopného obecnějšího hodnocení situace. Forrest jako sportovec i jako válečný hrdina se setkává se slavnými lidmi, které nakonec vždycky někdo zastřelí (J. F. Kennedy, J. Lennon). Také jeho bližní umírají, ale on sám zůstává. Empiricky se dopracovává od impulsivního útěku před životem k úvahám o lidském osudu a o Bohu. Soukromý hrdinův osud zároveň postihuje třicet let poválečných amerických dějin.(oficiální text distributora)",
+            "duration" : 142,
+            "genres" : [
+              "Drama",
+              "Komedie",
+              "Romantický"
+            ],
+            "id" : 10135,
+            "origins" : [
+              "USA"
+            ],
+            "poster" : "https://image.pmgstatic.com/cache/resized/w1080/files/images/film/posters/158/988/158988468_acc7b5.jpg",
+            "rating" : 94,
+            "title" : "Forrest Gump",
+            "url" : "https://www.csfd.cz/film/10135",
+            "watchOn" : [
+              {
+                "title" : "SkyShowtime",
+                "url" : "https://www.skyshowtime.com/cz/stream/movies/forrest-gump/6a2c3789-01da-3bc6-b805-38857f6df934"
+              },
+              {
+                "title" : "Apple TV+",
+                "url" : "https://srv.clickfuse.com/ads/adclkr.php?id=100006636&url=https%3A//tv.apple.com/cz/movie/forrest-gump/umc.cmc.5ov9f55aw8qvmd5pumhgnwu3e"
+              },
+              {
+                "title" : "Rakuten.tv",
+                "url" : "https://rakuten.tv/cz/movies/forrest-gump"
+              },
+              {
+                "title" : "YouTube Movies",
+                "url" : "https://www.youtube.com/watch?v=77ij5gCTjYU"
+              },
+              {
+                "title" : "DVD",
+                "url" : "https://www.martinus.cz/?uItem=93150"
+              },
+              {
+                "title" : "Blu-ray",
+                "url" : "https://www.martinus.cz/?uItem=242368"
+              },
+              {
+                "title" : "Kniha",
+                "url" : "https://www.martinus.cz/?uItem=45196"
+              }
+            ],
+            "year" : 1994
+          },
+          "search-movies" : {
+            "message" : "Found 7 results for \"Forrest Gump\"",
+            "results" : [
+              {
+                "colorRating" : "good",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 330,
+                      "name" : "Tom Hanks",
+                      "url" : "https://www.csfd.cz/tvurce/330-tom-hanks/"
+                    },
+                    {
+                      "id" : 604,
+                      "name" : "Robin Wright",
+                      "url" : "https://www.csfd.cz/tvurce/604-robin-wright/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 3137,
+                      "name" : "Robert Zemeckis",
+                      "url" : "https://www.csfd.cz/tvurce/3137-robert-zemeckis/"
+                    }
+                  ]
+                },
+                "id" : 10135,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/158/988/158988468_acc7b5.jpg",
+                "title" : "Forrest Gump",
+                "type" : "movie",
+                "url" : "https://www.csfd.cz/film/10135-forrest-gump/",
+                "year" : 1994
+              }
+            ],
+            "totalCount" : 7
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "contentType" : "movies",
+                "limit" : 1,
+                "query" : "Forrest Gump"
+              },
+              "name" : "search-movies"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "movieId" : 10135
+              },
+              "name" : "get-movie-details"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "How long is Green Mile? @csfd ",
+        "mocks" : {
+          "get-movie-details" : {
+            "cast" : {
+              "actors" : "Tom Hanks, David Morse, Bonnie Hunt, Michael Clarke Duncan, James Cromwell",
+              "directors" : "Frank Darabont"
+            },
+            "colorRating" : "good",
+            "description" : "Na začátku příběhu se potkáme se starým mužem Paulem Edgecombem (Dabbs Greer). Žije v domově s pečovatelskou službou a právě se dojatě dívá na starý film s Fredem Astairem. Snad až příliš dojatě, protože jedna ze sester ho musí zkontrolovat, když slyší všechny ty vzlyky. Paul je tak naměkko, že jí začne vypravovat svůj příběh starý 60 let, který ještě nikomu nevypravoval. Kolem roku 1935 v Louisianě, mladý Paul (teď už Tom Hanks) pracuje jako dozorce ve vězení pro těžké zločince, kteří jsou odsud posíláni na smrt. Paul není jen \"zaměstnancem\", ale bystrým pozorovatelem, který citlivě vnímá rázovité postavy těžkých zločinců i jejich osudy. Setkává se například s s černým obrem Johnem, který má ruce jako lopaty a je obviněn z vraždy dvou dětí. Nemůže uvěřit, že člověk, který se bojí spát potmě by byl schopen tak hrůzného činu. Je tu také hluboce věřící Arlen, a bláznivý psychopat zvaný Divoký Bill, ale je tu také ta hrůzostrašná chodba, natřená na zeleno, které všichni říkají \"Zelená míle\", je to cesta, na konci které čeká smrt, pokud se nestane zázrak.(oficiální text distributora)",
+            "duration" : 188,
+            "genres" : [
+              "Drama",
+              "Mysteriózní",
+              "Krimi"
+            ],
+            "id" : 2292,
+            "origins" : [
+              "USA"
+            ],
+            "poster" : "https://image.pmgstatic.com/cache/resized/w1080/files/images/film/posters/000/079/79050_b712c4.jpg",
+            "rating" : 93,
+            "title" : "Zelená míle",
+            "url" : "https://www.csfd.cz/film/2292",
+            "watchOn" : [
+              {
+                "title" : "SkyShowtime",
+                "url" : "https://www.skyshowtime.com/cz/stream/movies/zelena-mile/5bc8599d-bcf9-3c62-8b16-d9389ab32ea7"
+              },
+              {
+                "title" : "Apple TV+",
+                "url" : "https://srv.clickfuse.com/ads/adclkr.php?id=100006636&url=https%3A//tv.apple.com/cz/movie/the-green-mile/umc.cmc.7hcm0jk7o0ko95ghs171h7v41"
+              },
+              {
+                "title" : "Rakuten.tv",
+                "url" : "https://rakuten.tv/cz/movies/the-green-mile"
+              },
+              {
+                "title" : "YouTube Movies",
+                "url" : "https://www.youtube.com/watch?v=WKKiIRbwLQY"
+              },
+              {
+                "title" : "DVD",
+                "url" : "https://www.martinus.cz/?uItem=2136153"
+              },
+              {
+                "title" : "Kniha",
+                "url" : "https://www.martinus.cz/?uItem=166923"
+              }
+            ],
+            "year" : 1999
+          },
+          "search-movies" : {
+            "message" : "Found 7 results for \"Green Mile\"",
+            "results" : [
+              {
+                "colorRating" : "good",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 330,
+                      "name" : "Tom Hanks",
+                      "url" : "https://www.csfd.cz/tvurce/330-tom-hanks/"
+                    },
+                    {
+                      "id" : 324,
+                      "name" : "David Morse",
+                      "url" : "https://www.csfd.cz/tvurce/324-david-morse/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 2869,
+                      "name" : "Frank Darabont",
+                      "url" : "https://www.csfd.cz/tvurce/2869-frank-darabont/"
+                    }
+                  ]
+                },
+                "id" : 2292,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/000/079/79050_b712c4.jpg",
+                "title" : "Zelená míle",
+                "type" : "movie",
+                "url" : "https://www.csfd.cz/film/2292-zelena-mile/",
+                "year" : 1999
+              },
+              {
+                "colorRating" : "unknown",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 9441,
+                      "name" : "Brent Briscoe",
+                      "url" : "https://www.csfd.cz/tvurce/9441-brent-briscoe/"
+                    },
+                    {
+                      "id" : 4852,
+                      "name" : "Patricia Clarkson",
+                      "url" : "https://www.csfd.cz/tvurce/4852-patricia-clarkson/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 733662,
+                      "name" : "Constantine Nasr",
+                      "url" : "https://www.csfd.cz/tvurce/733662-constantine-nasr/"
+                    }
+                  ]
+                },
+                "id" : 311842,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+                "title" : "Miracles and Mystery: Creating 'The Green Mile'",
+                "type" : "movie",
+                "url" : "https://www.csfd.cz/film/311842-miracles-and-mystery-creating-the-green-mile/",
+                "year" : 2006
+              },
+              {
+                "colorRating" : "good",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 203,
+                      "name" : "William Sadler",
+                      "url" : "https://www.csfd.cz/tvurce/203-william-sadler/"
+                    },
+                    {
+                      "id" : 324,
+                      "name" : "David Morse",
+                      "url" : "https://www.csfd.cz/tvurce/324-david-morse/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 733662,
+                      "name" : "Constantine Nasr",
+                      "url" : "https://www.csfd.cz/tvurce/733662-constantine-nasr/"
+                    }
+                  ]
+                },
+                "id" : 89554,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+                "title" : "Walking the Mile",
+                "type" : "movie",
+                "url" : "https://www.csfd.cz/film/89554-walking-the-mile/",
+                "year" : 2000
+              },
+              {
+                "colorRating" : "good",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 552,
+                      "name" : "Bonnie Hunt",
+                      "url" : "https://www.csfd.cz/tvurce/552-bonnie-hunt/"
+                    },
+                    {
+                      "id" : 491,
+                      "name" : "Gary Sinise",
+                      "url" : "https://www.csfd.cz/tvurce/491-gary-sinise/"
+                    }
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 15137,
+                      "name" : "Doug Hutchison",
+                      "url" : "https://www.csfd.cz/tvurce/15137-doug-hutchison/"
+                    }
+                  ]
+                },
+                "id" : 73363,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+                "title" : "The Miracle of the Green Mile",
+                "type" : "movie",
+                "url" : "https://www.csfd.cz/film/73363-the-miracle-of-the-green-mile/",
+                "year" : 1999
+              },
+              {
+                "colorRating" : "good",
+                "creators" : {
+                  "actors" : [
+      
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 9039,
+                      "name" : "Zdeněk Miler",
+                      "url" : "https://www.csfd.cz/tvurce/9039-zdenek-miler/"
+                    }
+                  ]
+                },
+                "id" : 130721,
+                "origins" : [
+                  "Československo"
+                ],
+                "poster" : "https://image.pmgstatic.com/cache/resized/w60h85/files/images/film/posters/000/036/36591_5ddbc5.jpg",
+                "title" : "Krtek a zelená hvězda",
+                "type" : "movie",
+                "url" : "https://www.csfd.cz/film/130721-krtek-a-zelena-hvezda/",
+                "year" : 1969
+              },
+              {
+                "colorRating" : "unknown",
+                "creators" : {
+                  "actors" : [
+                    {
+                      "id" : 53832,
+                      "name" : "Michelle Bauer",
+                      "url" : "https://www.csfd.cz/tvurce/53832-michelle-bauer/"
+                    },
+                    {
+                      "id" : 303597,
+                      "name" : "Jason Whitman",
+                      "url" : "https://www.csfd.cz/tvurce/303597-jason-whitman/"
+                    }
+                  ],
+                  "directors" : [
+      
+                  ]
+                },
+                "id" : 492165,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+                "title" : "Greek File",
+                "type" : "movie",
+                "url" : "https://www.csfd.cz/film/492165-greek-file/",
+                "year" : 1987
+              },
+              {
+                "colorRating" : "unknown",
+                "creators" : {
+                  "actors" : [
+      
+                  ],
+                  "directors" : [
+                    {
+                      "id" : 512279,
+                      "name" : "Roderick Angle",
+                      "url" : "https://www.csfd.cz/tvurce/512279-roderick-angle/"
+                    }
+                  ]
+                },
+                "id" : 776747,
+                "origins" : [
+                  "USA"
+                ],
+                "poster" : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+                "title" : "Mike Osterhout & the Church of the Little Green Man",
+                "type" : "movie",
+                "url" : "https://www.csfd.cz/film/776747-mike-osterhout-the-church-of-the-little-green-man/",
+                "year" : 2019
+              }
+            ],
+            "totalCount" : 7
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "contentType" : "movies",
+                "query" : "Green Mile",
+                "limit" : 1
+              },
+              "name" : "search-movies"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "movieId" : 2292
+              },
+              "name" : "get-movie-details"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

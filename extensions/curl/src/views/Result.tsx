@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, Detail, useNavigation } from "@raycast/api";
+/* eslint-disable @raycast/prefer-title-case */
+import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import { AxiosRequestConfig } from "axios";
 import { methodColors } from "../../utils";
 

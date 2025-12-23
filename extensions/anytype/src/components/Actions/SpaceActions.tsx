@@ -105,13 +105,13 @@ export function SpaceActions({ space, mutate, isPinned, searchText }: SpaceActio
         <>
           <Action
             icon={Icon.ArrowUp}
-            title="Move Up in Pinned" // eslint-disable-line @raycast/prefer-title-case
+            title="Move Up in Pinned"
             shortcut={{ modifiers: ["opt", "cmd"], key: "arrowUp" }}
             onAction={handleMoveUpInFavorites}
           />
           <Action
             icon={Icon.ArrowDown}
-            title="Move Down in Pinned" // eslint-disable-line @raycast/prefer-title-case
+            title="Move Down in Pinned"
             shortcut={{ modifiers: ["opt", "cmd"], key: "arrowDown" }}
             onAction={handleMoveDownInFavorites}
           />

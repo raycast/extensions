@@ -51,6 +51,8 @@ insert the result into the frontmost application or copy it to the clipboard.
 
 ![AI command in action](metadata/9.png)
 
+> Windows 11+ is supported. For vision commands, selected images are read from the active File Explorer window or from the clipboard (both platforms).
+
 # Models
 
 GPT-4o model supports vision capabilities, which can be enabled in the Models Command when creating or editing a model.

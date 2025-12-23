@@ -27,6 +27,34 @@ export function ClientCommand() {
       searchBarAccessory={<MembershipAccessory />}
       isShowingDetail={isShowingDetail}
     >
+      {orgId && !sorted?.length && !clients.error && (
+        <List.EmptyView
+          icon={Icon.Person}
+          title="No clients found"
+          description="Create your first client now!"
+          actions={
+            <CrudActions
+              name="Client"
+              onNew={() =>
+                navigation.push(
+                  <Entry>
+                    <ClientForm
+                      onSubmit={async (values) => {
+                        await tryWithToast(
+                          () => api.createClient(values, { params: { organization: orgId } }),
+                          messageBuilder("create", "client", values.name),
+                        );
+                        clients.refetch();
+                        navigation.pop();
+                      }}
+                    />
+                  </Entry>,
+                )
+              }
+            />
+          }
+        />
+      )}
       {orgId &&
         sorted?.map((client) => (
           <List.Item

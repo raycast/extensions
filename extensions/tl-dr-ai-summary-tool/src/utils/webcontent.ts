@@ -1,5 +1,5 @@
 import { debugableAxios } from "./httpclient";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 
 /**
  * Remove some useless html by regex, which costs less memory then cheerio

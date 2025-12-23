@@ -1,7 +1,8 @@
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { CreateObjectFormValues } from "../components";
-import { bundledTypeKeys, fetchAllTemplatesForSpace, fetchAllTypesForSpace } from "../utils";
+import { bundledTypeKeys, fetchAllTemplatesForSpace, fetchAllTypesForSpace, memberMatchesSearch } from "../utils";
+import { useMembers } from "./useMembers";
 import { useSearch } from "./useSearch";
 import { useSpaces } from "./useSpaces";
 
@@ -53,23 +54,33 @@ export function useCreateObjectData(initialValues?: CreateObjectFormValues) {
   });
 
   const { objects, objectsError, isLoadingObjects } = useSearch(selectedSpaceId, objectSearchText, []);
+  const { members, membersError, isLoadingMembers } = useMembers(selectedSpaceId, objectSearchText);
+
+  const filteredMembers = useMemo(() => {
+    return members.filter((member) => memberMatchesSearch(member, objectSearchText));
+  }, [members, objectSearchText]);
+
+  const combinedObjects = useMemo(() => {
+    return [...(objects || []), ...filteredMembers];
+  }, [objects, filteredMembers]);
 
   useEffect(() => {
-    if (spacesError || typesError || templatesError || listsError || objectsError) {
-      showFailureToast(spacesError || typesError || templatesError || listsError || objectsError, {
+    if (spacesError || typesError || templatesError || listsError || objectsError || membersError) {
+      showFailureToast(spacesError || typesError || templatesError || listsError || objectsError || membersError, {
         title: "Failed to fetch latest data",
       });
     }
-  }, [spacesError, typesError, templatesError, listsError, objectsError]);
+  }, [spacesError, typesError, templatesError, listsError, objectsError, membersError]);
 
-  const isLoading = isLoadingSpaces || isLoadingTypes || isLoadingTemplates || isLoadingLists || isLoadingObjects;
+  const isLoadingData =
+    isLoadingSpaces || isLoadingTypes || isLoadingTemplates || isLoadingLists || isLoadingObjects || isLoadingMembers;
 
   return {
     spaces,
     types,
     templates,
     lists,
-    objects,
+    objects: combinedObjects,
     selectedSpaceId,
     setSelectedSpaceId,
     selectedTypeId,
@@ -82,6 +93,6 @@ export function useCreateObjectData(initialValues?: CreateObjectFormValues) {
     setListSearchText,
     objectSearchText,
     setObjectSearchText,
-    isLoading,
+    isLoadingData,
   };
 }

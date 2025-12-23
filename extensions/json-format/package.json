@@ -117,5 +117,9 @@
     "publish": "npx @raycast/api@latest publish",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

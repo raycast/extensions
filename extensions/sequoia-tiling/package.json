@@ -1,0 +1,630 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sequoia-tiling",
+  "title": "Sequoia Window Tiling",
+  "description": "Map macOS Sequoia tiling commands to Raycast actions with friendly shortcuts.",
+  "icon": "icon.png",
+  "author": "yazanzaid00",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fill",
+      "title": "Fill",
+      "subtitle": "Window",
+      "description": "Expand the active window to fill the desktop.",
+      "icon": "window-tiling/fill.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "f"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Fill' item in the Window menu",
+          "default": "Fill",
+          "placeholder": "Fill",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "center",
+      "title": "Center",
+      "subtitle": "Window",
+      "description": "Center the active window on the desktop.",
+      "icon": "window-tiling/center.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "c"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Center' item in the Window menu",
+          "default": "Center",
+          "placeholder": "Center",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "leftHalf",
+      "title": "Left",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the left half of the desktop.",
+      "icon": "window-tiling/leftHalf.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "left"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Left' item in Window → Move & Resize",
+          "default": "Left",
+          "placeholder": "Left",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "rightHalf",
+      "title": "Right",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the right half of the desktop.",
+      "icon": "window-tiling/rightHalf.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "right"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Right' item in Window → Move & Resize",
+          "default": "Right",
+          "placeholder": "Right",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "topHalf",
+      "title": "Top",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the top half of the desktop.",
+      "icon": "window-tiling/topHalf.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "up"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Top' item in Window → Move & Resize",
+          "default": "Top",
+          "placeholder": "Top",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "bottomHalf",
+      "title": "Bottom",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the bottom half of the desktop.",
+      "icon": "window-tiling/bottomHalf.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "down"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Bottom Half' item in Window → Move & Resize",
+          "default": "Bottom",
+          "placeholder": "Bottom",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "topLeft",
+      "title": "Top Left",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the top-left corner of the desktop.",
+      "icon": "window-tiling/topLeft.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Top Left' (or similar) menu item for quarter tiling",
+          "default": "Top Left",
+          "placeholder": "Top Left",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "topRight",
+      "title": "Top Right",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the top-right corner of the desktop.",
+      "icon": "window-tiling/topRight.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Top Right' (or similar) menu item for quarter tiling",
+          "default": "Top Right",
+          "placeholder": "Top Right",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "bottomLeft",
+      "title": "Bottom Left",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the bottom-left corner of the desktop.",
+      "icon": "window-tiling/bottomLeft.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Bottom Left' (or similar) menu item for quarter tiling",
+          "default": "Bottom Left",
+          "placeholder": "Bottom Left",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "bottomRight",
+      "title": "Bottom Right",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the bottom-right corner of the desktop.",
+      "icon": "window-tiling/bottomRight.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Bottom Right' (or similar) menu item for quarter tiling",
+          "default": "Bottom Right",
+          "placeholder": "Bottom Right",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "restoreSize",
+      "title": "Return to Previous Size",
+      "subtitle": "Move & Resize",
+      "description": "Make the active window the size it was before it was tiled.",
+      "icon": "window-tiling/restoreSize.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "r"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Return to Previous Size' menu item in Window → Move & Resize",
+          "default": "Return to Previous Size",
+          "placeholder": "Return to Previous Size",
+          "required": false
+        },
+        {
+          "name": "alsoRaycastRestore",
+          "type": "checkbox",
+          "label": "Also run Raycast Restore",
+          "description": "Run Raycast’s Window-Management Restore after the macOS action.",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "leftAndRight",
+      "title": "Left & Right",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the left half of the desktop and move the second window to the right half of the desktop.",
+      "icon": "window-tiling/leftAndRight.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ],
+        "key": "left"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Left & Right' menu item.",
+          "default": "Left & Right",
+          "placeholder": "Left & Right",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "rightAndLeft",
+      "title": "Right & Left",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the right half of the desktop and move the second window to the left half of the desktop.",
+      "icon": "window-tiling/rightAndLeft.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ],
+        "key": "right"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Right & Left' menu item.",
+          "default": "Right & Left",
+          "placeholder": "Right & Left",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "topAndBottom",
+      "title": "Top & Bottom",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the top half of the desktop and move the second window to the bottom half of the desktop.",
+      "icon": "window-tiling/topAndBottom.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ],
+        "key": "up"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Top & Bottom' menu item.",
+          "default": "Top & Bottom",
+          "placeholder": "Top & Bottom",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "bottomAndTop",
+      "title": "Bottom & Top",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the bottom half of the desktop and move the second window to the top half of the desktop.",
+      "icon": "window-tiling/bottomAndTop.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ],
+        "key": "down"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Bottom & Top' menu item.",
+          "default": "Bottom & Top",
+          "placeholder": "Bottom & Top",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quarters",
+      "title": "Quarters",
+      "subtitle": "Move & Resize",
+      "description": "Arrange windows in the top-left, top-right, bottom-left, and bottom-right corners of the desktop.",
+      "icon": "window-tiling/quarters.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Quarters' menu item.",
+          "default": "Quarters",
+          "placeholder": "Quarters",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "leftAndQuarters",
+      "title": "Left & Quarters",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the left half of the desktop, move the second window to the top-right corner of the desktop, and move the third window to the bottom-right corner of the desktop.",
+      "icon": "window-tiling/leftAndQuarters.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "left"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Left & Quarters' menu item.",
+          "default": "Left & Quarters",
+          "placeholder": "Left & Quarters",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "rightAndQuarters",
+      "title": "Right & Quarters",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the right half of the desktop, move the second window to the top-left corner of the desktop, and move the third window to the bottom-left corner of the desktop.",
+      "icon": "window-tiling/rightAndQuarters.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "right"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Right & Quarters' menu item.",
+          "default": "Right & Quarters",
+          "placeholder": "Right & Quarters",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "topAndQuarters",
+      "title": "Top & Quarters",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the top half of the desktop, move the second window to the bottom-left corner of the desktop, and move the third window to the bottom-right corner of the desktop.",
+      "icon": "window-tiling/topAndQuarters.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "up"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Top & Quarters' menu item.",
+          "default": "Top & Quarters",
+          "placeholder": "Top & Quarters",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "bottomAndQuarters",
+      "title": "Bottom & Quarters",
+      "subtitle": "Move & Resize",
+      "description": "Move the active window to the bottom half of the desktop, move the second window to the top-left corner of the desktop, and move the third window to the top-right corner of the desktop.",
+      "icon": "window-tiling/bottomAndQuarters.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "down"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Bottom & Quarters' menu item.",
+          "default": "Bottom & Quarters",
+          "placeholder": "Bottom & Quarters",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "leftOfScreen",
+      "title": "Left of Screen",
+      "subtitle": "Full Screen Tile",
+      "description": "Expand the active window to Split View on the left.",
+      "icon": "window-tiling/leftOfScreen.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Left of Screen' menu item.",
+          "default": "Left of Screen",
+          "placeholder": "Left of Screen",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "rightOfScreen",
+      "title": "Right of Screen",
+      "subtitle": "Full Screen Tile",
+      "description": "Expand the active window to Split View on the right.",
+      "icon": "window-tiling/rightOfScreen.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Right of Screen' menu item.",
+          "default": "Right of Screen",
+          "placeholder": "Right of Screen",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "zoom",
+      "title": "Zoom",
+      "subtitle": "Window",
+      "description": "Toggle the active window between its standard size and its previous size/position.",
+      "icon": "window-tiling/zoom.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Zoom' item in the Window menu",
+          "default": "Zoom",
+          "placeholder": "Zoom",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.0"
+  },
+  "preferences": [
+    {
+      "name": "windowMenuTitle",
+      "type": "textfield",
+      "required": false,
+      "title": "Window Menu Title",
+      "description": "The title of the main 'Window' menu in most applications.",
+      "default": "Window",
+      "placeholder": "Window"
+    },
+    {
+      "name": "moveResizeMenuTitle",
+      "type": "textfield",
+      "required": false,
+      "title": "Move & Resize Menu Title",
+      "description": "The title of the 'Move & Resize' submenu under the Window menu.",
+      "default": "Move & Resize",
+      "placeholder": "Move & Resize"
+    },
+    {
+      "name": "fullScreenTileMenuTitle",
+      "type": "textfield",
+      "required": false,
+      "title": "Full Screen Tile Menu Title",
+      "description": "The title of the 'Full Screen Tile' submenu under the Window menu.",
+      "default": "Full Screen Tile",
+      "placeholder": "Full Screen Tile"
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "raycast": {
+    "schemaVersion": 1,
+    "requirements": {
+      "macos": "15"
+    }
+  },
+  "categories": [
+    "System"
+  ],
+  "repository": "https://github.com/yazanzaid00/sequoia-tiling",
+  "keywords": [
+    "window management",
+    "tiling",
+    "sequoia",
+    "macOS 15"
+  ],
+  "version": "0.0.1"
+}

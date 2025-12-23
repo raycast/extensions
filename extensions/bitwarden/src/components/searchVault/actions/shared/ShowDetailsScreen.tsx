@@ -60,7 +60,14 @@ function ShowDetailsScreen<TDetails extends Constraint>(props: ShowDetailsScreen
                   title={`Copy ${getTitle(fieldKey, titleMap)}`}
                   icon={Icon.Clipboard}
                   onAction={handleCopyField(content)}
-                  shortcut={shortcutKey ? { modifiers: ["cmd"], key: shortcutKey } : undefined}
+                  shortcut={
+                    shortcutKey
+                      ? {
+                          macOS: { key: shortcutKey, modifiers: ["opt"] },
+                          windows: { key: shortcutKey, modifiers: ["alt"] },
+                        }
+                      : undefined
+                  }
                 />
               );
             })}

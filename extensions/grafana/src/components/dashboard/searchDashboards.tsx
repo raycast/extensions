@@ -7,8 +7,8 @@ import { useFetch, useFrecencySorting } from "@raycast/utils";
 import { URLSearchParams } from "url";
 
 const dashboardschema = z.object({
-  id: z.string({ coerce: true }),
-  uid: z.string({ coerce: true }),
+  id: z.coerce.string(),
+  uid: z.coerce.string(),
   title: z.string(),
   uri: z.string(),
   url: z.string(),

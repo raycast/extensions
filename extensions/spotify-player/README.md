@@ -102,6 +102,10 @@ Use this to copy the URL of the current song/episode.
 
 Use this to copy the artist and track title of the current song/episode.
 
+### Find Lyrics
+
+Use this to find and display lyrics for the currently playing song. The lyrics are fetched from Genius and displayed directly within Raycast, preserving section structure like [Intro], [Verse], and [Chorus]. Includes options to copy the lyrics or song information.
+
 ### Just Play
 
 Use this to quickly start playing a song based on your query.

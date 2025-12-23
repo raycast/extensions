@@ -2,19 +2,18 @@ import { Action, ActionPanel, List, showToast, Toast, Clipboard, showHUD, popToR
 import { getFormattedColor } from "../utils";
 import { ColorFormatType } from "../types";
 
-interface ColorFormatProps {
+type ColorFormatProps = {
   text: string;
   title: string;
-  subtitle: string;
   value: string;
-}
+};
 
-async function getConvertedColor(text: string, format: ColorFormatType) {
+function getConvertedColor(text: string, format: ColorFormatType) {
   try {
     const convertedColor = getFormattedColor(text, format);
     return convertedColor;
   } catch {
-    await showToast({
+    showToast({
       style: Toast.Style.Failure,
       title: "Conversion failed",
       message: `"${text}" is not a valid color.`,
@@ -22,17 +21,19 @@ async function getConvertedColor(text: string, format: ColorFormatType) {
   }
 }
 
-export const ColorConvertListItem = ({ text, title, subtitle, value }: ColorFormatProps) => {
+export const ColorConvertListItem = ({ text, title, value }: ColorFormatProps) => {
+  const convertedColor = getConvertedColor(text, value as ColorFormatType);
+  if (!convertedColor) return null;
+
   return (
     <List.Item
       title={title}
-      subtitle={subtitle}
+      subtitle={convertedColor}
       actions={
         <ActionPanel>
           <Action
             title="Copy Converted Color"
             onAction={async () => {
-              const convertedColor = await getConvertedColor(text, value as ColorFormatType);
               if (convertedColor) {
                 await Clipboard.copy(convertedColor);
                 await showHUD("Copied color to clipboard");

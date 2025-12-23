@@ -1,50 +1,17 @@
-import { Color, Icon } from "@raycast/api";
-import * as t from "io-ts";
-import { match } from "ts-pattern";
+import { Color, Icon, Image } from "@raycast/api";
 
 // Search
-export const SearchResult = t.type({
-  domain: t.string,
-  host: t.string,
-  subdomain: t.string,
-  zone: t.string,
-  path: t.string,
-  registerURL: t.string,
-});
-
-export const SearchResponse = t.type({
-  results: t.array(SearchResult),
-});
-
-export type ISearchResult = t.TypeOf<typeof SearchResult>;
-export type ISearchResponse = t.TypeOf<typeof SearchResponse>;
+type SearchResult = {
+  domain: string;
+  subdomain: string;
+  zone: string;
+};
+type SearchResponse = {
+  results: SearchResult[];
+};
+export type ISearchResponse = SearchResponse;
 
 // Status
-export const StatusResult = t.type({
-  domain: t.string,
-  zone: t.string,
-  status: t.string,
-  summary: t.string,
-});
-
-export const StatusResponse = t.type({
-  status: t.array(StatusResult),
-});
-
-export type IStatusResult = t.TypeOf<typeof StatusResult>;
-export type IStatusResponse = t.TypeOf<typeof StatusResponse>;
-
-export enum DomainStatus {
-  Unknown = "Unknown",
-  Available = "Available",
-  Pending = "Available",
-  Disallowed = "Disallowed",
-  Invalid = "Invalid",
-  Reserved = "Reserved",
-  Taken = "Taken",
-  Aftermarket = "Aftermarket",
-}
-
 export type Status =
   | "unknown"
   | "undelegated"
@@ -66,22 +33,42 @@ export type Status =
   | "tld"
   | "zone"
   | "deleting";
-
-export type SearchResultWithStatus = ISearchResult & {
+type StatusResult = {
+  domain: string;
+  zone: string;
   status: Status;
+  tags: string;
 };
+export type IStatusResult = StatusResult;
 
-export const getStatusIcon = (status: string) =>
-  match(status)
-    .with(DomainStatus.Available, () => ({
-      source: Icon.Checkmark,
-      tintColor: Color.Green,
-    }))
-    .with(DomainStatus.Aftermarket, () => ({
-      source: Icon.QuestionMark,
-      tintColor: Color.Yellow,
-    }))
-    .otherwise(() => ({
-      source: Icon.XmarkCircle,
-      tintColor: Color.Red,
-    }));
+export enum DomainStatus {
+  Unknown = "Unknown",
+  Available = "Available",
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
+  Pending = "Available",
+  Disallowed = "Disallowed",
+  Invalid = "Invalid",
+  Reserved = "Reserved",
+  Taken = "Taken",
+  Aftermarket = "Aftermarket",
+}
+
+export const getStatusIcon = (status: DomainStatus): Image.ImageLike => {
+  switch (status) {
+    case DomainStatus.Available:
+      return {
+        source: Icon.Checkmark,
+        tintColor: Color.Green,
+      };
+    case DomainStatus.Aftermarket:
+      return {
+        source: Icon.QuestionMark,
+        tintColor: Color.Yellow,
+      };
+    default:
+      return {
+        source: Icon.XMarkCircle,
+        tintColor: Color.Red,
+      };
+  }
+};

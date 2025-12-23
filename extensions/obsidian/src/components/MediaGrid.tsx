@@ -1,22 +1,20 @@
+import { ObsidianVault } from "@/obsidian";
 import { Action, ActionPanel, getPreferenceValues, Grid, Image } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-
-import { Media, MediaSearchArguments } from "../utils/interfaces";
+import { filterMedia } from "../api/search/search.service";
 import { OpenPathInObsidianAction, ShowPathInFinderAction } from "../utils/actions";
-import { getListOfMediaFileExtensions } from "../utils/utils";
 import { IMAGE_SIZE_MAPPING } from "../utils/constants";
-import { filterMedia } from "../utils/search";
-import { useMedia, useNotes } from "../utils/hooks";
+import { useMedia } from "../utils/hooks";
+import { Media, MediaSearchArguments } from "../utils/interfaces";
 import { SearchMediaPreferences } from "../utils/preferences";
-import { Vault } from "../api/vault/vault.types";
+import { getIconFor, getListOfMediaFileExtensions } from "../utils/utils";
 
-export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArguments }) {
+export function MediaGrid(props: { vault: ObsidianVault; searchArguments: MediaSearchArguments }) {
   const { vault, searchArguments } = props;
 
   const { ready, media } = useMedia(vault);
   const [mediaList, setMediaList] = useState<Media[]>([]);
   const [allMedia, setAllMedia] = useState<Media[]>([]);
-  const [notes] = useNotes(vault);
 
   useEffect(() => {
     if (ready) {
@@ -28,8 +26,13 @@ export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArg
   const extensions = getListOfMediaFileExtensions(allMedia);
   const { imageSize } = getPreferenceValues<SearchMediaPreferences>();
 
-  const [searchText, setSearchText] = useState(searchArguments?.searchArgument ?? "");
-  const list = useMemo(() => filterMedia(mediaList, searchText, notes), [mediaList, searchText]);
+  const [searchText, setSearchText] = useState(searchArguments.searchArgument);
+  let mediaType = searchArguments.typeArgument;
+  if (!mediaType) mediaType = "all";
+  else if (!mediaType.startsWith(".")) {
+    mediaType = `.${mediaType}`;
+  }
+  const list = useMemo(() => filterMedia(mediaList, searchText), [mediaList, searchText]);
 
   return (
     <Grid
@@ -42,7 +45,7 @@ export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArg
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Filter by type"
-          defaultValue={searchArguments.typeArgument}
+          defaultValue={mediaType}
           onChange={(value) => {
             if (value != "all") {
               setMediaList(allMedia.filter((media) => media.path.endsWith(value)));
@@ -59,10 +62,11 @@ export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArg
       }
     >
       {list.map((m) => {
+        const icon = getIconFor(m.path);
         return (
           <Grid.Item
             title={m.title}
-            content={{ source: m.icon.source, mask: Image.Mask.RoundedRectangle }}
+            content={{ source: icon.source, mask: Image.Mask.RoundedRectangle }}
             key={m.path}
             quickLook={{ path: m.path, name: m.title }}
             actions={

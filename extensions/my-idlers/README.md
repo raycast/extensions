@@ -25,3 +25,23 @@ At the moment, MyIdlers does not have a setting for "Unlimited" but some service
 This extension is tested to work with the following versions:
 - `2.3.2`
 - `3.0.0`
+
+## 👀 More
+
+Want to manage your items using extension? Try some of these:
+
+### Domain
+<a title="Install porkbun Raycast Extension" href="https://www.raycast.com/xmok/porkbun"><img src="https://www.raycast.com/xmok/porkbun/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install spaceship Raycast Extension" href="https://www.raycast.com/xmok/spaceship"><img src="https://www.raycast.com/xmok/spaceship/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
+### Shared / Reseller
+<a title="Install cpanel Raycast Extension" href="https://www.raycast.com/xmok/cpanel"><img src="https://www.raycast.com/xmok/cpanel/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install directadmin-reseller Raycast Extension" href="https://www.raycast.com/xmok/directadmin-reseller"><img src="https://www.raycast.com/xmok/directadmin-reseller/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
+### VPS
+<a title="Install solusvm-2 Raycast Extension" href="https://www.raycast.com/xmok/solusvm-2"><img src="https://www.raycast.com/xmok/solusvm-2/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install virtualizor-enduser Raycast Extension" href="https://www.raycast.com/xmok/virtualizor-enduser"><img src="https://www.raycast.com/xmok/virtualizor-enduser/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
+### Even More
+
+> https://www.raycast.com/xmok

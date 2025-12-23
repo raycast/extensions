@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Project, ProjectLink } from "../types";
-import { getLinks, deleteLink } from "../utils/storage";
+import { getLinks, deleteLink, updateProjectUsage } from "../utils/storage";
 import { LinkForm } from "./LinkForm";
 import { showFailureToast, getFavicon } from "@raycast/utils";
 import { OpenAllLinksAction } from "./actions/OpenAllLinksAction";
@@ -40,6 +40,10 @@ export function ProjectView({ project }: ProjectViewProps) {
 
   useEffect(() => {
     loadLinks();
+    // Track project usage when component mounts
+    updateProjectUsage(project.id).catch((error) => {
+      showFailureToast(error, { title: "Failed to update project usage" });
+    });
   }, [project.id]);
 
   return (

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ovhcloud",
+  "title": "OVHcloud",
+  "description": "Manage Domains in OVHCloud",
+  "icon": "white-cloud-blue-bg.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "ovh_endpoint",
+      "title": "OVH API Endpoint",
+      "description": "OVH API Endpoint",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "OVH Europe",
+          "value":"eu.api.ovh.com"
+        },
+        {
+         "title": "OVH US",
+          "value":"api.us.ovhcloud.com"
+        },
+        {
+         "title": "OVH North America",
+          "value":"ca.api.ovh.com"
+        },
+        {
+         "title": "SoYouStart Europe",
+          "value":"eu.api.soyoustart.com"
+        },
+        {
+         "title": "SoYouStart North America",
+          "value":"ca.api.soyoustart.com"
+        },
+        {
+         "title": "Kimsufi Europe",
+          "value":"eu.api.kimsufi.com"
+        },
+        {
+         "title": "Kimsufi North America",
+          "value":"ca.api.kimsufi.com"
+        }
+      ]
+    },
+    {
+      "name": "application_key",
+      "title": "Application Key",
+      "placeholder": "XXX...XXX",
+      "description": "OVH API Application Key",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "application_secret",
+      "title": "Application Secret",
+      "placeholder": "XXX...XXX",
+      "description": "OVH API Application Secret",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "consumer_key",
+      "title": "Consumer Key",
+      "placeholder": "XXX...XXX",
+      "description": "OVH API Consumer Key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "manage-domains",
+      "title": "Manage Domains",
+      "subtitle": "OVHcloud",
+      "description": "Manage Domains, DNS Records, Nameservers",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -11,6 +11,7 @@ export default function Command() {
     isLoading: true,
     easings: [],
   });
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -44,8 +45,19 @@ export default function Command() {
     [state.easings, setState],
   );
 
+  const filteredEasings = state.easings.filter(
+    (easing) =>
+      easing.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      easing.type.toLowerCase().includes(searchText.toLowerCase()),
+  );
+
   return (
-    <Grid columns={8} inset={Grid.Inset.Zero}>
+    <Grid
+      columns={8}
+      inset={Grid.Inset.Zero}
+      searchBarPlaceholder="Search custom easings..."
+      onSearchTextChange={setSearchText}
+    >
       <Grid.Section title="Ease In Out">
         {gridItem("sine", "in", "out")}
         {gridItem("quad", "in", "out")}
@@ -80,7 +92,7 @@ export default function Command() {
       </Grid.Section>
 
       <Grid.Section title="Custom">
-        {state.easings.map((e, index) =>
+        {filteredEasings.map((e, index) =>
           customGridItem(e.id, e.title, e.type, e.value, () => handleDelete(index, e.title)),
         )}
       </Grid.Section>

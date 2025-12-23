@@ -5,6 +5,9 @@
   "description": "Browses shadcn/vue documentation, components, and commands.",
   "icon": "shadcn-vue-icon.png",
   "author": "selemondev",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Developer Tools",
     "Documentation",

@@ -1,6 +1,24 @@
-# G-Cloud Changelog
+# Google Cloud CLI Changelog
 
-## [0.1.31] - {MERGE_DATE}
+## [1.0.0] - 2025-12-15
+- Added Streamer Mode - hide sensitive data (emails, IPs, secrets) with Cmd+Shift+H
+- Added Windows compatibility
+- Added Cloud Run service support
+- Added Cloud Logging service support
+- Added Doctor view for diagnostics and troubleshooting gcloud setup
+- Added REST API layer for faster performance
+- Added gcloud CLI auto-detection - no more manual path configuration required
+- Removed redundant per-service commands, improving ergonomics
+- Improved error handling
+- Improved UI and date formatting
+
+## [0.1.32] - 2025-07-08
+- Add Secret Manager command for managing Google Cloud secrets
+- Add secure secret value viewing with confirmation dialogs
+- Add version management for secrets (create, enable, disable, destroy)
+- Add search and filtering capabilities for secrets
+
+## [0.1.31] - 2025-03-24
 - feature: Commands for each service.
 - feature: QuickSwitcher, quick switch between projects inside same service.
 - fix: Storage Service now retrieves folders and sub-folders.

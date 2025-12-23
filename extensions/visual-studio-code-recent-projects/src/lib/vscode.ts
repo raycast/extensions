@@ -3,7 +3,7 @@ import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import { fileExists } from "../utils";
+import { fileExists, isWin } from "../utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -66,9 +66,11 @@ function getNLSVariable(text: string | undefined): string | undefined {
   }
 }
 const cliPaths: Record<string, string> = {
+  Antigravity: "/Applications/Antigravity.app/Contents/Resources/app/bin/antigravity",
   Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
   "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
   Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
+  Kiro: "/Applications/Kiro.app/Contents/Resources/app/bin/kiro",
   Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
   Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
   "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
@@ -77,7 +79,29 @@ const cliPaths: Record<string, string> = {
   Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
 };
 
+const cliPathsWindows: Record<string, string> = {
+  Code: `${os.homedir()}\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code.cmd`,
+  "Code - Insiders": `${os.homedir()}\\AppData\\Local\\Programs\\Microsoft VS Code Insiders\\bin\\code-insiders.cmd`,
+  /*
+  Cursor: "C:\\Program Files\\Cursor\\bin\\cursor.cmd",
+  Kiro: "C:\\Program Files\\Kiro\\bin\\kiro.cmd",
+  Positron: "C:\\Program Files\\Positron\\bin\\code.cmd",
+  Trae: "C:\\Program Files\\Trae\\bin\\marscode.cmd",
+  "Trae CN": "C:\\Program Files\\Trae CN\\bin\\marscode.cmd",
+  VSCodium: "C:\\Program Files\\VSCodium\\bin\\codium.cmd",
+  "VSCodium - Insiders": "C:\\Program Files\\VSCodium - Insiders\\bin\\codium-insiders.cmd",
+  Windsurf: "C:\\Program Files (x86)\\Windsurf IDE for JavaScript and TypeScript (x64)\\bin\\windsurf.cmd",
+  */
+};
+
 export function getVSCodeCLIFilename(): string {
+  if (isWin) {
+    const name = cliPathsWindows[getBuildNamePreference()];
+    if (!name || name.length <= 0) {
+      return cliPathsWindows.Code;
+    }
+    return name;
+  }
   const name = cliPaths[getBuildNamePreference()];
   if (!name || name.length <= 0) {
     return cliPaths.Code;
@@ -151,7 +175,7 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
         const extFsPath =
           typeof e.location === "string"
             ? path.join(extensionsRootFolder, e.location)
-            : e.location.fsPath ?? e.location.path;
+            : (e.location.fsPath ?? e.location.path);
         const packageFilename = path.join(extFsPath, "package.json");
         const pkgInfo = await getPackageJSONInfo(packageFilename);
         result.push({
@@ -181,9 +205,11 @@ export function getBuildNamePreference(): string {
 }
 
 const buildSchemes: Record<string, string> = {
+  Antigravity: "antigravity",
   Code: "vscode",
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",
+  Kiro: "kiro",
   VSCodium: "vscode-oss",
   Positron: "positron",
   Windsurf: "windsurf",

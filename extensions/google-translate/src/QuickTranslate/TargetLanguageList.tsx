@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, clearSearchBar } from "@raycast/api";
 import React from "react";
 import { useTargetLanguages } from "../hooks";
-import { getLanguageFlag, getLanguageFlagByCode, languages, supportedLanguagesByCode } from "../languages";
+import { languages, supportedLanguagesByCode } from "../languages";
 import { AUTO_DETECT } from "../simple-translate";
 
 export const TargetLanguageList: React.VFC = () => {
@@ -13,7 +13,7 @@ export const TargetLanguageList: React.VFC = () => {
         {targetLanguages.map((lang) => (
           <List.Item
             key={lang}
-            title={`${getLanguageFlagByCode(lang)}   ${supportedLanguagesByCode[lang].name}`}
+            title={supportedLanguagesByCode[lang].name}
             subtitle={lang}
             actions={
               targetLanguages.length === 1 && targetLanguages[0] === "en" ? undefined : (
@@ -67,7 +67,7 @@ export const TargetLanguageList: React.VFC = () => {
           .map((lang) => (
             <List.Item
               key={lang.code}
-              title={`${getLanguageFlag(lang)}   ${lang.name}`}
+              title={lang.name}
               subtitle={lang.code}
               actions={
                 <ActionPanel>

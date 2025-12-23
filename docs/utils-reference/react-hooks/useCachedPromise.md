@@ -22,7 +22,7 @@ function useCachedPromise<T, U>(
   options?: {
     initialData?: U;
     keepPreviousData?: boolean;
-    abortable?: MutableRefObject<AbortController | null | undefined>;
+    abortable?: RefObject<AbortController | null | undefined>;
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: Result<T>) => void;

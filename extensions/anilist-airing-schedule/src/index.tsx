@@ -54,7 +54,7 @@ export default function SearchAnimeGrid() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title="More info"
+                    title="More Info"
                     icon={Icon.Info}
                     target={<MoreInfo anime={anime} />}
                   />

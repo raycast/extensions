@@ -23,7 +23,20 @@ export function getError(error: unknown): ErrorObj {
     } else {
       return error.data.error;
     }
+  } else if (error instanceof Error) {
+    return {
+      status: 500,
+      message: error.message,
+      reason: "UNKNOWN_ERROR",
+    };
+  } else if (typeof error === "string") {
+    return {
+      status: 500,
+      message: error,
+      reason: "UNKNOWN_ERROR",
+    };
   }
+
   return {
     status: 500,
     message: "Unknown error",

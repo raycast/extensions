@@ -1,6 +1,23 @@
 # QR Code Generator Changelog
 
-## [Improved User Experience] - 2025-05-30
+## [Maintenance] - 2025-12-12
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
+## [Enhancement] - 2025-10-03
+
+- Added a new action to copy QR code to clipboard
+
+## [Better Visibility in Raycast UI] - 2025-08-25
+
+- Added [Generate QR Code from Selection] Command
+
+## [Better Visibility in Raycast UI] - 2025-06-18
+
+- Added internal argument to generate QR codes with a white background for visibility
+
+## [Improved User Experience] - 2025-06-18
 
 - Added success toast notification when generating QR code from clipboard
 - Adjusted clipboard-generated QR code height to 355px to prevent overflow and scrolling in Raycast window

@@ -10,6 +10,8 @@
 type ExtensionPreferences = {
   /** Projects Path - The path to the folder containing your projects */
   "projectsPath": string,
+  /** Primary Action - The primary action to perform when pressing Enter on a project */
+  "primaryAction": "open-in-editor" | "open-in-terminal" | "start-development" | "open-url" | "open-git-remotes",
   /** Max Scanning Levels (folder recursion) - The max number of levels to scan for projects */
   "maxScanningLevels": string,
   /** Enable Projects Caching - Enable caching of projects to avoid scanning directories every time (you can clear it by using the "Clear Cache" command) */
@@ -17,11 +19,11 @@ type ExtensionPreferences = {
   /** Group projects by folder - Group projects by folder */
   "enableProjectsGrouping": boolean,
   /** Editor App - The editor app to use */
-  "editorApp": import("@raycast/api").Application,
+  "editorApp"?: import("@raycast/api").Application,
   /** Terminal App - The terminal app to use */
-  "terminalApp": import("@raycast/api").Application,
+  "terminalApp"?: import("@raycast/api").Application,
   /** Browser App - The browser app to use */
-  "browserApp": import("@raycast/api").Application,
+  "browserApp"?: import("@raycast/api").Application,
   /** Local Project URL Template - The template for the URL of your projects (use {project} as placeholder for the project name, additionally you can use any placeholder defined in the project config file) */
   "localProjectUrlTemplate": string,
   /** Resize Editor Window After Launch - Resize the editor window after launching a project */
@@ -43,12 +45,3 @@ declare namespace Arguments {
   export type List = {}
 }
 
-
-declare module "swift:*" {
-  function run<T = unknown, U = any>(command: string, input?: U): Promise<T>;
-  export default run;
-	export class SwiftError extends Error {
-    stderr: string;
-    stdout: string;
-  }
-}

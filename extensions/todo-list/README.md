@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/command-icon.png" width="150" height="150" />
+</p>
+
 # Todo List
 
 An extension for creating and managing a todo list. Create and delete items, mark tasks as completed and pin important items.

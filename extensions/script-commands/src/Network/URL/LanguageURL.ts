@@ -1,4 +1,4 @@
-import { URLConstants } from "@constants";
+import { URLConstants } from "Const";
 
 export const languageURL = (language: string) => {
   const imagesURL = `${URLConstants.baseRawURL}/images`;

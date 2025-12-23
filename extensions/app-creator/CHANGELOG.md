@@ -1,6 +1,6 @@
 # App Creator Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-03-13
 
 Introducing App Creator for Raycast AI! This extension allows Raycast AI to create Web Apps for any purpose. Simply ask for an app, and have it done, in front of you within seconds.
 

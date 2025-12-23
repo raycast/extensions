@@ -1,5 +1,13 @@
 # Hue Changelog
 
+## [Update HTTPS support] - 2025-06-13
+
+- Add CA Certificate
+- Fix bridge ID matching
+- Drop support for self-signed certificates, as all Hue Bridges can now be updated to use HTTPS with a valid root
+  certificate
+- Update dependencies
+
 ## [Improvements and bug fixes] - 2025-12-23
 
 - Add Windows support

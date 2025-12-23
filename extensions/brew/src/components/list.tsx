@@ -1,5 +1,7 @@
+import React from "react";
 import { Color, Icon, List } from "@raycast/api";
-import { brewFormatVersion, brewIsInstalled, brewName, Cask, Formula } from "../brew";
+import { getProgressIcon } from "@raycast/utils";
+import { brewFormatVersion, brewIsInstalled, brewName, Cask, Formula } from "../utils";
 import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
 
 const tertiaryTextColor: Color.Dynamic = {
@@ -12,44 +14,64 @@ export interface FormulaListProps {
   formulae: Formula[];
   casks: Cask[];
   searchBarPlaceholder: string;
-  searchBarAccessory?: JSX.Element;
+  searchBarAccessory?: React.ComponentProps<typeof List>["searchBarAccessory"];
   onSearchTextChange?: (q: string) => void;
   isInstalled: (name: string) => boolean;
   onAction: () => void;
+  filtering?: boolean;
+  dataFetched?: boolean;
 }
 
-export function FormulaList(props: FormulaListProps): JSX.Element {
+export function FormulaList(props: FormulaListProps) {
   const formulae = props.formulae;
   const casks = props.casks;
+  const hasResults = formulae.length > 0 || casks.length > 0;
+
   return (
     <List
       searchBarPlaceholder={props.searchBarPlaceholder}
       searchBarAccessory={props.searchBarAccessory}
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
+      filtering={props.filtering ?? true}
+      throttle
     >
-      <List.Section title="Formulae">
-        {formulae.map((formula) => (
-          <FormulaListItem
-            key={`formula-${formula.name}`}
-            formula={formula}
-            isInstalled={props.isInstalled}
-            onAction={props.onAction}
-          />
-        ))}
-        {formulae.isTruncated() && <MoreListItem />}
-      </List.Section>
-      <List.Section title="Casks">
-        {props.casks.map((cask) => (
-          <CaskListItem
-            key={`cask-${cask.token}`}
-            cask={cask}
-            isInstalled={props.isInstalled}
-            onAction={props.onAction}
-          />
-        ))}
-        {casks.isTruncated() && <MoreListItem />}
-      </List.Section>
+      {!hasResults && (props.isLoading || !props.dataFetched) && (
+        <List.EmptyView
+          icon={getProgressIcon(0.5)}
+          title="Loading Packages"
+          description="Fetching casks and formulae from Homebrew..."
+        />
+      )}
+      {!hasResults && !props.isLoading && props.dataFetched && (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="No Results" description="No packages found" />
+      )}
+      {formulae.length > 0 && (
+        <List.Section title="Formulae">
+          {formulae.map((formula) => (
+            <FormulaListItem
+              key={`formula-${formula.name}`}
+              formula={formula}
+              isInstalled={props.isInstalled}
+              onAction={props.onAction}
+            />
+          ))}
+          {formulae.isTruncated() && <MoreListItem />}
+        </List.Section>
+      )}
+      {casks.length > 0 && (
+        <List.Section title="Casks">
+          {casks.map((cask) => (
+            <CaskListItem
+              key={`cask-${cask.token}`}
+              cask={cask}
+              isInstalled={props.isInstalled}
+              onAction={props.onAction}
+            />
+          ))}
+          {casks.isTruncated() && <MoreListItem />}
+        </List.Section>
+      )}
     </List>
   );
 }
@@ -58,7 +80,7 @@ export function FormulaListItem(props: {
   formula: Formula;
   isInstalled: (name: string) => boolean;
   onAction: () => void;
-}): JSX.Element {
+}) {
   const formula = props.formula;
   let version = formula.versions.stable;
   let tintColor: Color.ColorLike = tertiaryTextColor;
@@ -92,11 +114,7 @@ export function FormulaListItem(props: {
   );
 }
 
-export function CaskListItem(props: {
-  cask: Cask;
-  isInstalled: (name: string) => boolean;
-  onAction: () => void;
-}): JSX.Element {
+export function CaskListItem(props: { cask: Cask; isInstalled: (name: string) => boolean; onAction: () => void }) {
   const cask = props.cask;
   let version = cask.version;
   let tintColor: Color.ColorLike = tertiaryTextColor;
@@ -125,6 +143,6 @@ export function CaskListItem(props: {
   );
 }
 
-export function MoreListItem(): JSX.Element {
+export function MoreListItem() {
   return <List.Item title="" icon={Icon.Dot} />;
 }

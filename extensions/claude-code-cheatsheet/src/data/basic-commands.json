@@ -1,0 +1,135 @@
+{
+  "id": "basic",
+  "title": "Basic Commands",
+  "description": "Basic Claude Code CLI commands and operations",
+  "commands": [
+    {
+      "id": "claude",
+      "name": "claude",
+      "description": "Starts an interactive REPL session, allowing for a back-and-forth conversation with Claude.",
+      "usage": "claude",
+      "example": "claude",
+      "category": "basic",
+      "tags": ["REPL", "basic", "interactive"]
+    },
+    {
+      "id": "claude-query",
+      "name": "claude \"query\"",
+      "description": "Starts a REPL session with an initial prompt, immediately beginning the conversation with a specific query.",
+      "usage": "claude \"<initial-prompt>\"",
+      "example": "claude \"Please review this code\"",
+      "category": "basic",
+      "tags": ["initial", "interactive", "prompt"]
+    },
+    {
+      "id": "claude-print",
+      "name": "claude -p",
+      "description": "Runs a single, one-off query and prints the response directly to the console without entering interactive mode.",
+      "usage": "claude -p \"<query>\"",
+      "example": "claude -p \"Please explain this function\"",
+      "category": "basic",
+      "tags": ["non-interactive", "one-shot", "print"]
+    },
+    {
+      "id": "claude-continue",
+      "name": "claude -c",
+      "description": "Continues the most recent conversation from your history, picking up right where you left off.",
+      "usage": "claude -c",
+      "example": "claude -c",
+      "category": "basic",
+      "tags": ["continue", "conversation", "latest", "resume"]
+    },
+    {
+      "id": "claude-config",
+      "name": "claude config",
+      "description": "Manage local and global configuration settings. Allows you to customize aspects like the UI theme, default model, and other operational parameters. For example, to set the theme to dark globally, use 'claude config set -g theme dark'.",
+      "usage": "claude config",
+      "example": "claude config set -g theme dark",
+      "deprecated": true,
+      "alternative": "Use settings.json configuration file instead",
+      "category": "basic",
+      "tags": ["config", "deprecated", "management", "settings"]
+    },
+    {
+      "id": "claude-update",
+      "name": "claude update",
+      "description": "Checks for any available updates to the Claude Code CLI and installs them if found, keeping your tool current.",
+      "usage": "claude update",
+      "example": "claude update",
+      "category": "basic",
+      "tags": ["latest", "maintenance", "update", "upgrade"]
+    },
+    {
+      "id": "claude-mcp",
+      "name": "claude mcp",
+      "description": "Configure and manage Multi-Claude Protocol (MCP) servers for advanced, multi-agent workflows.",
+      "usage": "claude mcp",
+      "example": "claude mcp",
+      "category": "basic",
+      "tags": ["MCP", "configuration", "protocol", "server"]
+    },
+    {
+      "id": "claude-migrate-installer",
+      "name": "claude migrate-installer",
+      "description": "Migrates your installation from a global npm package to a local, version-controlled setup.",
+      "usage": "claude migrate-installer",
+      "example": "claude migrate-installer",
+      "category": "basic",
+      "tags": ["installation", "local", "migration", "npm"]
+    },
+    {
+      "id": "claude-doctor",
+      "name": "claude doctor",
+      "description": "Runs a diagnostic check on your Claude Code installation and auto-updater to ensure everything is functioning correctly.",
+      "usage": "claude doctor",
+      "example": "claude doctor",
+      "category": "basic",
+      "tags": ["check", "diagnosis", "health", "status"]
+    },
+    {
+      "id": "claude-pipe",
+      "name": "pipe | claude",
+      "description": "Processes content piped from other command-line tools, allowing you to chain commands and pass data to Claude.",
+      "usage": "command | claude -p \"<query>\"",
+      "example": "cat logs.txt | claude -p \"analyze these errors\"",
+      "category": "basic",
+      "tags": ["input", "integration", "pipe", "stream"]
+    },
+    {
+      "id": "claude-continue-print",
+      "name": "claude -c -p \"query\"",
+      "description": "Continues the most recent conversation non-interactively via the SDK, useful for automated scripts.",
+      "usage": "claude -c -p \"<query>\"",
+      "example": "claude -c -p \"Check for type errors\"",
+      "category": "basic",
+      "tags": ["continue", "non-interactive", "sdk"]
+    },
+    {
+      "id": "claude-resume-session",
+      "name": "claude -r \"<session-id>\"",
+      "description": "Resumes a specific, previously started session using its unique ID, allowing you to jump back into a past context.",
+      "usage": "claude -r \"<session-id>\" \"<query>\"",
+      "example": "claude -r \"ab-cde-123\" \"Finish writing this function\"",
+      "category": "basic",
+      "tags": ["id", "resume", "session"]
+    },
+    {
+      "id": "claude-setup-token",
+      "name": "claude setup-token",
+      "description": "Set up a long-lived authentication token (requires Claude subscription).",
+      "usage": "claude setup-token",
+      "example": "claude setup-token",
+      "category": "basic",
+      "tags": ["auth", "setup", "subscription", "token"]
+    },
+    {
+      "id": "claude-install",
+      "name": "claude install",
+      "description": "Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version).",
+      "usage": "claude install [target]",
+      "example": "claude install stable",
+      "category": "basic",
+      "tags": ["build", "install", "native", "version"]
+    }
+  ]
+}

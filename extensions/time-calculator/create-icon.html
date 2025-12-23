@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Time Calculator Icon</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f0f0;
+        }
+        canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="512" height="512"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Background
+        ctx.fillStyle = '#007AFF';
+        ctx.fillRect(0, 0, 512, 512);
+        
+        // White circle background
+        ctx.beginPath();
+        ctx.arc(256, 256, 200, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        
+        // Clock face
+        ctx.beginPath();
+        ctx.arc(256, 256, 180, 0, Math.PI * 2);
+        ctx.strokeStyle = '#007AFF';
+        ctx.lineWidth = 8;
+        ctx.stroke();
+        
+        // Clock hands
+        ctx.strokeStyle = '#007AFF';
+        ctx.lineWidth = 6;
+        
+        // Hour hand pointing to 8
+        ctx.beginPath();
+        ctx.moveTo(256, 256);
+        ctx.lineTo(256 + 90 * Math.cos(-Math.PI/2 + (8 * Math.PI/6)), 
+                   256 + 90 * Math.sin(-Math.PI/2 + (8 * Math.PI/6)));
+        ctx.stroke();
+        
+        // Minute hand pointing to 30
+        ctx.beginPath();
+        ctx.moveTo(256, 256);
+        ctx.lineTo(256 + 130 * Math.cos(-Math.PI/2 + (6 * Math.PI/6)), 
+                   256 + 130 * Math.sin(-Math.PI/2 + (6 * Math.PI/6)));
+        ctx.stroke();
+        
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(256, 256, 10, 0, Math.PI * 2);
+        ctx.fillStyle = '#007AFF';
+        ctx.fill();
+        
+        // Plus sign overlay
+        ctx.strokeStyle = '#007AFF';
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        
+        // Horizontal line
+        ctx.beginPath();
+        ctx.moveTo(356, 356);
+        ctx.lineTo(436, 356);
+        ctx.stroke();
+        
+        // Vertical line
+        ctx.beginPath();
+        ctx.moveTo(396, 316);
+        ctx.lineTo(396, 396);
+        ctx.stroke();
+        
+        // Download link
+        const link = document.createElement('a');
+        link.download = 'icon.png';
+        link.href = canvas.toDataURL();
+        link.textContent = 'Download Icon';
+        link.style.position = 'absolute';
+        link.style.bottom = '20px';
+        link.style.padding = '10px 20px';
+        link.style.background = '#007AFF';
+        link.style.color = 'white';
+        link.style.textDecoration = 'none';
+        link.style.borderRadius = '5px';
+        document.body.appendChild(link);
+    </script>
+</body>
+</html>

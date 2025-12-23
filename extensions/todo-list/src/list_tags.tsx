@@ -20,7 +20,7 @@ const ListTags = () => {
             }
           }
           return null;
-        })
+        }),
       )}
     </List.Dropdown>
   );

@@ -7,7 +7,7 @@ const useShowDetailSetting = () => {
   const [showDetailSetting, setShowDetailSetting] = useState<boolean>(true);
 
   const toggleShowDetailSetting = async () => {
-    const newSetting = !(await LocalStorage.getItem<boolean>(key)) ?? true;
+    const newSetting = !((await LocalStorage.getItem<boolean>(key)) ?? true);
     await LocalStorage.setItem(key, newSetting);
     setShowDetailSetting(newSetting);
   };

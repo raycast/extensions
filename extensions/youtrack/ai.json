@@ -1,0 +1,149 @@
+{
+  "instructions": "When you don't know the project, ask for it. Never assume project name. It must be explicitly provided or it should have hashtag before its name. Return cached projects as 'known projects'.",
+  "evals": [
+    {
+      "input": "@youtrack list projects",
+      "mocks": {
+        "get-projects": [
+          {
+            "id": "0-1",
+            "name": "Another project",
+            "shortName": "ANOTHER"
+          },
+          {
+            "id": "0-0",
+            "name": "Demo project",
+            "shortName": "DEMO"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {},
+            "name": "get-projects"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@youtrack list 2 issues in DEMO project",
+      "mocks": {
+        "get-issues": [
+          {
+            "created": "Thu Jun 19 2025",
+            "customFields": [],
+            "date": "Thu Jun 19 2025",
+            "description": "testing",
+            "id": "DEMO-1",
+            "project": {
+              "id": "0-0",
+              "name": "Demo project",
+              "shortName": "DEMO"
+            },
+            "resolved": false,
+            "summary": "hello"
+          },
+          {
+            "created": "Thu Jun 19 2025",
+            "customFields": [],
+            "date": "Thu Jun 19 2025",
+            "description": "testing2",
+            "id": "DEMO-2",
+            "project": {
+              "id": "0-0",
+              "name": "Demo project",
+              "shortName": "DEMO"
+            },
+            "resolved": true,
+            "summary": "hello"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {
+              "project": "DEMO",
+              "top": 2
+            },
+            "name": "get-issues"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@youtrack create issue 'my issue' in demo project, add 1h work, and assign to admin",
+      "mocks": {
+        "create-issue": {
+          "idReadable": "DEMO-27",
+          "project": {
+            "name": "Demo project",
+            "shortName": "DEMO"
+          },
+          "summary": "my issue"
+        },
+        "get-projects": [
+          {
+            "id": "0-0",
+            "name": "Demo project",
+            "shortName": "DEMO"
+          }
+        ],
+        "get-self": {
+          "$type": "Me",
+          "avatarUrl": "/hub/api/rest/avatar/d626e133-84a9-4371-bda1-187999b5fce0?s=48",
+          "email": null,
+          "fullName": "admin",
+          "id": "2-1",
+          "login": "admin"
+        },
+        "get-users": [
+          {
+            "avatarUrl": "/hub/api/rest/avatar/d626e133-84a9-4371-bda1-187999b5fce0?s=48",
+            "email": null,
+            "fullName": "admin",
+            "id": "2-1",
+            "login": "admin"
+          }
+        ],
+        "apply-command": {
+          "command": "work 1h",
+          "idReadable": "DEMO-27",
+          "comment": ""
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {
+              "project": "DEMO",
+              "summary": "my issue"
+            },
+            "name": "create-issue"
+          }
+        },
+        {
+          "callsTool": {
+            "arguments": {
+              "command": "work 1h",
+              "comment": "",
+              "idReadable": "DEMO-27"
+            },
+            "name": "apply-command"
+          }
+        },
+        {
+          "callsTool": {
+            "arguments": {
+              "command": "for admin",
+              "comment": "",
+              "idReadable": "DEMO-27"
+            },
+            "name": "apply-command"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,5 @@
-import { runAppleScript } from "@raycast/utils";
-import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
+import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { EpisodeObject, TrackObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
@@ -33,12 +32,10 @@ export async function seek(position: number): Promise<"next" | "position" | "err
       error?.toLocaleLowerCase().includes("premium required")
     ) {
       if (playNext) {
-        const script = buildScriptEnsuringSpotifyIsRunning("next track");
-        await runAppleScript(script);
+        await runSpotifyScript(SpotifyScriptType.NextTrack);
         return "next";
       } else {
-        const script = buildScriptEnsuringSpotifyIsRunning(`set player position to ${position}`);
-        await runAppleScript(script);
+        await runSpotifyScript(SpotifyScriptType.SetPosition, false, position);
         return "position";
       }
     }

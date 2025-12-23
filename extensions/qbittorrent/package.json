@@ -6,7 +6,8 @@
   "icon": "qbittorrent.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "timmevandermeer"
+    "timmevandermeer",
+    "taken"
   ],
   "pastContributors": [
     "J3n5en"
@@ -61,6 +62,15 @@
       "placeholder": "0",
       "default": "0",
       "required": false
+    },
+    {
+      "name": "redirectAfterAdding",
+      "title": "Go To Current Torrents After Adding",
+      "type": "checkbox",
+      "description": "Whether to redirect to the current torrents view after adding new torrents.",
+      "default": false,
+      "required": false,
+      "label": "Go to current torrents after adding"
     }
   ],
   "dependencies": {
@@ -85,5 +95,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }

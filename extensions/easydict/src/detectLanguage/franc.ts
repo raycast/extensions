@@ -52,7 +52,7 @@ export function francLanguageDetect(text: string, confirmedConfidence = 0.8): De
   for (const [languageId, confidence] of detectedYoudaoLanguageArray) {
     if (confidence > confirmedConfidence && isPreferredLanguage(languageId)) {
       console.log(
-        `---> franc detect confirmed language: ${languageId}, confidence: ${confidence} (>${confirmedConfidence})`
+        `---> franc detect confirmed language: ${languageId}, confidence: ${confidence} (>${confirmedConfidence})`,
       );
       detectedLanguageId = languageId;
       confirmed = true;

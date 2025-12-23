@@ -1,11 +1,14 @@
+import cleanupSongTitle from "./cleanupSongTitle";
+
 type FormatTitleParams = {
   name?: string;
   artistName?: string;
   hideArtistName?: boolean;
+  cleanupTitle?: boolean;
   maxTextLength?: string;
 };
 
-export function formatTitle({ name, artistName, hideArtistName, maxTextLength }: FormatTitleParams) {
+export function formatTitle({ name, artistName, hideArtistName, maxTextLength, cleanupTitle }: FormatTitleParams) {
   const max = maxTextLength ? Number(maxTextLength) : 30;
 
   if (max === 0) {
@@ -16,7 +19,8 @@ export function formatTitle({ name, artistName, hideArtistName, maxTextLength }:
     return "";
   }
 
-  const title = hideArtistName ? name : `${name} · ${artistName}`;
+  const filteredName = cleanupTitle ? cleanupSongTitle(name) : name;
+  const title = hideArtistName ? filteredName : `${filteredName} · ${artistName}`;
 
   if (title.length <= max) {
     return title;

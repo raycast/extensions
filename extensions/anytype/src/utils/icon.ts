@@ -1,6 +1,6 @@
 import { Icon, Image } from "@raycast/api";
 import fetch from "node-fetch";
-import { IconFormat, ObjectIcon, ObjectLayout, RawType } from "../models";
+import { IconFormat, IconName, ObjectIcon, ObjectLayout, RawType } from "../models";
 import { colorToHex, iconWidth } from "./constant";
 
 /**
@@ -10,16 +10,11 @@ import { colorToHex, iconWidth } from "./constant";
  * @param type The type of the object .
  * @returns The base64 data URI or Raycast Icon.
  */
-export async function getIconWithFallback(icon: ObjectIcon, layout: string, type?: RawType): Promise<Image.ImageLike> {
-  // notes always show grey type icon
-  if (layout === ObjectLayout.Note) {
-    if (type?.icon.format === IconFormat.Icon && type?.icon.name) {
-      return getCustomTypeIcon(type.icon.name, "grey");
-    } else {
-      console.warn("note type has no icon", type);
-    }
-  }
-
+export async function getIconWithFallback(
+  icon: ObjectIcon | null,
+  layout: string,
+  type?: RawType | null,
+): Promise<Image.ImageLike> {
   if (icon && icon.format) {
     // type built-in icons
     if (icon.format === IconFormat.Icon && icon.name) {
@@ -32,10 +27,6 @@ export async function getIconWithFallback(icon: ObjectIcon, layout: string, type
       if (fileSource) {
         return { source: fileSource, mask: getMaskForObject(icon.file, layout) };
       }
-      if (type?.icon.format === IconFormat.Icon && type?.icon.name) {
-        return getCustomTypeIcon(type.icon.name, "grey");
-      }
-      return await fallbackToLayout(layout);
     }
 
     // regular emoji
@@ -45,8 +36,8 @@ export async function getIconWithFallback(icon: ObjectIcon, layout: string, type
   }
 
   // fallback to grey version of type built-in icon
-  if (type?.icon && type.icon.format === IconFormat.Icon && type.icon.name) {
-    return getCustomTypeIcon(type?.icon.name, "grey");
+  if (type && type.icon && type.icon.format === IconFormat.Icon && type.icon.name) {
+    return getCustomTypeIcon(type.icon.name, "grey");
   }
 
   // fallback to layout
@@ -61,22 +52,24 @@ export async function getIconWithFallback(icon: ObjectIcon, layout: string, type
 async function fallbackToLayout(layout: string): Promise<Image.ImageLike> {
   switch (layout) {
     case ObjectLayout.Action:
-      return getCustomTypeIcon("checkbox", "grey");
+      return getCustomTypeIcon(IconName.Checkbox, "grey");
     case ObjectLayout.Set:
     case ObjectLayout.Collection:
-      return getCustomTypeIcon("layers", "grey");
+      return getCustomTypeIcon(IconName.Layers, "grey");
     case ObjectLayout.Participant:
-      return getCustomTypeIcon("person", "grey");
+      return getCustomTypeIcon(IconName.Person, "grey");
     case ObjectLayout.Bookmark:
-      return getCustomTypeIcon("bookmark", "grey");
+      return getCustomTypeIcon(IconName.Bookmark, "grey");
     case "type":
-      return getCustomTypeIcon("extension-puzzle", "grey");
+      return getCustomTypeIcon(IconName.ExtensionPuzzle, "grey");
     case "template":
-      return getCustomTypeIcon("copy", "grey");
+      return getCustomTypeIcon(IconName.Copy, "grey");
     case "space":
-      return Icon.BullsEye;
+      return { source: "icons/space/space.svg", tintColor: { light: colorToHex["grey"], dark: colorToHex["grey"] } };
+    case "chat":
+      return { source: "icons/space/chat.svg", tintColor: { light: colorToHex["grey"], dark: colorToHex["grey"] } };
     default:
-      return getCustomTypeIcon("document", "grey");
+      return getCustomTypeIcon(IconName.Document, "grey");
   }
 }
 
@@ -141,7 +134,8 @@ export async function fetchWithTimeout(url: string, timeout: number): Promise<st
  * @returns The mask to use for the object.
  */
 export function getMaskForObject(icon: Image.ImageLike, layout: string): Image.Mask {
-  return (layout === ObjectLayout.Participant || layout === ObjectLayout.Profile) && icon != Icon.Document
+  return (layout === ObjectLayout.Participant || layout === ObjectLayout.Profile || layout === "chat") &&
+    icon != Icon.Document
     ? Image.Mask.Circle
     : Image.Mask.RoundedRectangle;
 }

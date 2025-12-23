@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import fetch, { Headers as FetchHeaders } from "node-fetch";
 import { currentApiVersion, errorConnectionMessage, localStorageKeys } from "./constant";
 import { checkResponseError } from "./error";
@@ -22,11 +22,12 @@ export interface ApiResponse<T> {
  */
 export async function apiFetch<T>(url: string, options: FetchOptions): Promise<ApiResponse<T>> {
   try {
-    const token = await LocalStorage.getItem(localStorageKeys.appKey);
+    const token = getPreferenceValues().apiKey || (await LocalStorage.getItem(localStorageKeys.apiKey));
+
     const response = await fetch(url, {
       method: options.method,
       headers: {
-        Authorization: token ? `Bearer ${token}` : "",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         "Content-Type": "application/json",
         "Anytype-Version": currentApiVersion,
         ...options.headers,
@@ -42,7 +43,7 @@ export async function apiFetch<T>(url: string, options: FetchOptions): Promise<A
         payload: json,
         headers: response.headers,
       };
-    } catch (jsonError) {
+    } catch {
       throw new Error("Failed to parse JSON response");
     }
   } catch (error) {

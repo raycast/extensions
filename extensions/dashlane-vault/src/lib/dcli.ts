@@ -11,6 +11,7 @@ import {
   MasterPasswordMissingError,
   ParseError,
   TimeoutError,
+  TouchIDVerificationFailed,
   captureException,
   getErrorAction,
   getErrorString,
@@ -32,51 +33,52 @@ async function dcli(...args: string[]) {
     throw new CLIVersionNotSupportedError("Dashlane CLI version 6.2415.0 not supported");
   }
 
-  return cliQueue.add<string>(
-    async () => {
-      try {
-        const { stdout } = await execa(CLI_PATH, args, {
-          timeout: 15_000,
-          ...(preferences.masterPassword && {
-            env: {
-              DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
-            },
-          }),
-        });
+  return cliQueue.add<string>(async () => {
+    try {
+      const { stdout } = await execa(CLI_PATH, args, {
+        timeout: 15_000,
+        ...(preferences.masterPassword && {
+          env: {
+            DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
+          },
+        }),
+      });
 
-        if (preferences.biometrics) {
-          execaCommand("open -a Raycast.app");
-        }
-
-        return stdout;
-      } catch (error) {
-        if (error instanceof ExecaError) {
-          if (error.timedOut) {
-            const stderr = error.stderr as unknown as string;
-            if (stderr.includes("Please enter your master password")) {
-              throw new MasterPasswordMissingError(error.stack ?? error.message);
-            }
-
-            if (stderr.includes("Please enter your email address")) {
-              throw new CLINotLoggedInError(error.stack ?? error.message);
-            }
-
-            throw new TimeoutError(error.stack ?? error.message);
-          }
-
-          if (error.code === "ENOENT") {
-            throw new CLINotFoundError(
-              `CLI not found at path: ${CLI_PATH}. Please verify the path in preferences.`,
-              error.stack,
-            );
-          }
-        }
-
-        throw error;
+      if (preferences.biometrics) {
+        execaCommand("open -a Raycast.app");
       }
-    },
-    { throwOnTimeout: true },
-  );
+
+      return stdout;
+    } catch (error) {
+      if (error instanceof ExecaError) {
+        if (error.timedOut) {
+          const stderr = error.stderr as unknown as string;
+          if (stderr.includes("Please enter your master password")) {
+            throw new MasterPasswordMissingError(error.stack ?? error.message);
+          }
+
+          if (stderr.includes("Please enter your email address")) {
+            throw new CLINotLoggedInError(error.stack ?? error.message);
+          }
+
+          if (stderr.includes("Touch ID verification failed")) {
+            throw new TouchIDVerificationFailed(error.stack ?? error.message);
+          }
+
+          throw new TimeoutError(error.stack ?? error.message);
+        }
+
+        if (error.code === "ENOENT") {
+          throw new CLINotFoundError(
+            `CLI not found at path: ${CLI_PATH}. Please verify the path in preferences.`,
+            error.stack,
+          );
+        }
+      }
+
+      throw error;
+    }
+  });
 }
 
 export async function syncVault() {
@@ -197,7 +199,7 @@ function parseNotes(jsonString: string): VaultNote[] {
       if (item.attachments && typeof item.attachments === "string") {
         try {
           item.attachments = JSON.parse(item.attachments);
-        } catch (error) {
+        } catch {
           // Do nothing
         }
       }
@@ -235,7 +237,7 @@ async function getCLIVersion() {
 
     const result = await execa(CLI_PATH, ["--version"]);
     return result.stdout;
-  } catch (error) {
+  } catch {
     return undefined;
   }
 }

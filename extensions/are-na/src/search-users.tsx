@@ -4,10 +4,6 @@ import { useArena } from "./hooks/useArena";
 import type { SearchUsersResponse, User } from "./api/types";
 import { usePromise, showFailureToast } from "@raycast/utils";
 
-interface SearchArguments {
-  query: string;
-}
-
 function Actions({ user }: { user: User }) {
   return (
     <ActionPanel title={user.full_name ?? ""}>
@@ -33,7 +29,7 @@ function UserListItem({ user }: { user: User }) {
   );
 }
 
-export default function Command(props: LaunchProps<{ arguments: SearchArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchUsers }>) {
   const abortable = useRef<AbortController>(new AbortController());
   const arena = useArena();
   const { query } = props.arguments;

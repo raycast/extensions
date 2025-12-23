@@ -29,7 +29,7 @@ export default function Command({ arguments: { url } }: LaunchProps<{ arguments:
           popToRoot();
           return;
         }
-      } catch (error: unknown) {
+      } catch {
         await showToast({
           style: Toast.Style.Failure,
           title: "Can't get open graph information",

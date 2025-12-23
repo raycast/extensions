@@ -16,6 +16,13 @@ export type HueBridgeState = {
   matches: (value: StateValue) => boolean;
 };
 
+export interface Preferences {
+  transitionTime?: string;
+  toggleAllLights?: "off" | "on";
+  bridgeIpAddress?: string;
+  bridgeUsername?: string;
+}
+
 export type HueContext = {
   bridgeIpAddress?: string;
   bridgeUsername?: string;

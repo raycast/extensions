@@ -56,15 +56,20 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     const sourceLanguage = props?.launchContext?.sourceLanguage;
     return <TranslationView translation={translation} sourceLanguage={sourceLanguage} />;
   }
-  const { defaultTargetLanguage, showTransliteration, showFormalityConfig, closeRaycastAfterTranslation } =
-    getPreferenceValues<Preferences>();
+  const {
+    defaultTargetLanguage,
+    showTransliteration,
+    showFormalityConfig,
+    closeRaycastAfterTranslation,
+    defaultFormality,
+  } = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
   const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
   const [translation, setTranslation] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage | "">("");
   const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
-  const [formality, setFormality] = useState<Formality>("default");
+  const [formality, setFormality] = useState<Formality>(defaultFormality ?? "default");
 
   // set the source text to the selected text if no fallback text is provided
   // if there is no selected text, then just leave the source text empty

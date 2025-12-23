@@ -1,60 +1,33 @@
-import { showHUD, Clipboard, open, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
-import invariant from "tiny-invariant";
+import { Clipboard, open, showToast, Toast, getPreferenceValues, showHUD, LaunchProps } from "@raycast/api";
 
-interface Preferences {
-  ttl: string;
-  domain: string;
-}
+export default async function main(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  const preferences = getPreferenceValues<Preferences>();
+  const ttl = parseInt(props.arguments.ttl || preferences.ttl) || null;
+  const title = props.arguments.title || "Untitled";
 
-export default async function main() {
-  const text = await Clipboard.readText();
-
-  if (!text) {
-    showHUD("No text found in clipboard");
-    return;
-  }
-
+  const toast = await showToast(Toast.Style.Animated, "Reading from Clipboard");
   try {
+    const text = await Clipboard.readText();
+    if (!text) throw new Error("No text found in Clipboard");
     const json = JSON.parse(text);
 
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Uploading JSON",
-    });
-
-    const document = await createNewDocument("Untitled", json);
+    toast.title = "Uploading JSON";
+    const document = await createNewDocument(title, json, ttl);
 
     await toast.hide();
-
+    await showHUD("✅ Uploaded");
     await open(document.location);
   } catch (error) {
-    if (error instanceof Error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Something went wrong",
-        message: error.message,
-      });
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Something went wrong",
-        message: "Unknown error",
-      });
-    }
+    const message = error instanceof Error ? error.message : "Unknown error";
+    toast.style = Toast.Style.Failure;
+    toast.title = "Something went wrong";
+    toast.message = message;
   }
 }
-
-const getTTL = () => {
-  const preferences = getPreferenceValues<Preferences>();
-  const ttl = parseInt(preferences.ttl);
-  return ttl > 0 ? ttl : null;
-};
 
 const getEndpoint = () => {
   const preferences = getPreferenceValues<Preferences>();
-  const domain = String(preferences.domain);
-  invariant(domain, "domain is undefined");
+  const domain = preferences.domain || "https://jsonhero.io";
 
   const endpoint = new URL(domain);
   endpoint.pathname = "/api/create.json";
@@ -63,27 +36,30 @@ const getEndpoint = () => {
   return endpoint.toString();
 };
 
-async function createNewDocument(title: string, json: unknown): Promise<{ id: string; location: string }> {
+async function createNewDocument(
+  title: string,
+  json: unknown,
+  ttl: number | null,
+): Promise<{ id: string; location: string }> {
   const options = {
     method: "POST",
     headers: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       title,
       content: json,
-      ttl: getTTL(),
+      ttl,
     }),
   };
 
   const endpoint = getEndpoint();
 
   const response = await fetch(endpoint, options);
-  const jsonResponse = await response.json();
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-  invariant(jsonResponse, "jsonResponse is undefined");
-  invariant(typeof jsonResponse === "object", "jsonResponse is not an object");
+  const jsonResponse = (await response.json()) as { id: string; location: string };
+  if (!jsonResponse.id || !jsonResponse.location) throw new Error("Invalid response format");
 
-  return jsonResponse as { id: string; location: string };
+  return jsonResponse;
 }

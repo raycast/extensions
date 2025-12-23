@@ -8,9 +8,11 @@
   "contributors": [
     "samuelkraft",
     "ridemountainpig",
-    "aryan_thatte"
+    "aryan_thatte",
+    "0xdhrv"
   ],
   "license": "MIT",
+  "type": "module",
   "keywords": [
     "date",
     "remember",
@@ -48,6 +50,32 @@
       "interval": "1d"
     }
   ],
+  "tools": [
+    {
+      "name": "add-date",
+      "title": "Add Date",
+      "description": "Add a new date to remember",
+      "path": "src/tools/add-date.ts"
+    },
+    {
+      "name": "list-dates",
+      "title": "List Dates",
+      "description": "List all remembered dates",
+      "path": "src/tools/list-dates.ts"
+    },
+    {
+      "name": "delete-date",
+      "title": "Delete Date",
+      "description": "Delete a remembered date",
+      "path": "src/tools/delete-date.ts"
+    },
+    {
+      "name": "edit-date",
+      "title": "Edit Date",
+      "description": "Edit a remembered date",
+      "path": "src/tools/edit-date.ts"
+    }
+  ],
   "preferences": [
     {
       "name": "showDate",
@@ -71,18 +99,305 @@
   "categories": [
     "Productivity"
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@remember-the-date add my birthday on December 25th 2024",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"my birthday\" to your remembered dates.",
+            "item": {
+              "id": "test-id-123",
+              "name": "my birthday",
+              "subtitle": "",
+              "date": "2024-12-25",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date"
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date remember a week ago as my cat's 2nd birthday",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"Cat's 2nd birthday\" to your remembered dates.",
+            "item": {
+              "id": "test-id-456",
+              "name": "Cat's 2nd birthday",
+              "subtitle": "",
+              "date": "2025-11-18",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "Cat's 2nd birthday",
+              "subtitle": "",
+              "date": "2025-11-18"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date add yesterday as the day I finished my project",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"The day I finished my project\" to your remembered dates.",
+            "item": {
+              "id": "test-id-123",
+              "name": "The day I finished my project",
+              "subtitle": "",
+              "date": "2025-11-24",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "The day I finished my project",
+              "subtitle": "",
+              "date": "2025-11-24"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date remember 3 days ago as my doctor appointment",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"Doctor appointment\" to your remembered dates.",
+            "item": {
+              "id": "test-id-789",
+              "name": "Doctor appointment",
+              "subtitle": "",
+              "date": "2025-11-22",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "Doctor appointment",
+              "subtitle": "",
+              "date": "2025-11-22"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date add wedding anniversary as the day we got married in Hawaii",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"Wedding anniversary\" to your remembered dates.",
+            "item": {
+              "id": "test-id-789",
+              "name": "Wedding anniversary",
+              "subtitle": "The day we got married in Hawaii",
+              "date": "2024-06-15",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "Wedding anniversary",
+              "subtitle": "The day we got married in Hawaii",
+              "date": "2024-06-15"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date add last Friday as my job interview",
+        "mocks": {
+          "add-date": {
+            "success": true,
+            "message": "Successfully added \"Job interview\" to your remembered dates.",
+            "item": {
+              "id": "test-id-999",
+              "name": "Job interview",
+              "subtitle": "",
+              "date": "2025-11-21",
+              "icon": "calendar",
+              "color": "blue"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "add-date",
+            "input": {
+              "name": "Job interview",
+              "subtitle": "",
+              "date": "2025-11-21"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date show me all my dates",
+        "mocks": {
+          "list-dates": {
+            "success": true,
+            "count": 2,
+            "items": [
+              {
+                "id": "test-id-1",
+                "name": "Anniversary",
+                "subtitle": "Wedding anniversary",
+                "date": "2024-06-15"
+              },
+              {
+                "id": "test-id-2",
+                "name": "Birthday",
+                "subtitle": "Mom's birthday",
+                "date": "2024-08-22"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-dates"
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date find dates with birthday",
+        "mocks": {
+          "list-dates": {
+            "success": true,
+            "count": 1,
+            "items": [
+              {
+                "id": "test-id-2",
+                "name": "Birthday",
+                "subtitle": "Mom's birthday",
+                "date": "2024-08-22"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-dates"
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date edit the anniversary date to June 16th 2024",
+        "mocks": {
+          "list-dates": {
+            "success": true,
+            "count": 1,
+            "items": [
+              {
+                "id": "test-id-1",
+                "name": "Anniversary",
+                "subtitle": "Wedding anniversary",
+                "date": "2024-06-15"
+              }
+            ]
+          },
+          "edit-date": {
+            "success": true,
+            "message": "Successfully updated \"Anniversary\".",
+            "originalItem": {
+              "id": "test-id-1",
+              "name": "Anniversary",
+              "subtitle": "Wedding anniversary",
+              "date": "2024-06-15"
+            },
+            "updatedItem": {
+              "id": "test-id-1",
+              "name": "Anniversary",
+              "subtitle": "Wedding anniversary",
+              "date": "2024-06-16"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-dates"
+          },
+          {
+            "callsTool": "edit-date"
+          }
+        ]
+      },
+      {
+        "input": "@remember-the-date delete the birthday date",
+        "mocks": {
+          "list-dates": {
+            "success": true,
+            "count": 1,
+            "items": [
+              {
+                "id": "test-id-2",
+                "name": "Birthday",
+                "subtitle": "Mom's birthday",
+                "date": "2024-08-22"
+              }
+            ]
+          },
+          "delete-date": {
+            "success": true,
+            "message": "Successfully deleted \"Birthday\" from your remembered dates.",
+            "deletedItem": {
+              "id": "test-id-2",
+              "name": "Birthday",
+              "subtitle": "Mom's birthday",
+              "date": "2024-08-22"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-dates"
+          },
+          {
+            "callsTool": "delete-date"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.58.0",
-    "@raycast/utils": "^1.14.0",
-    "moment": "^2.29.1",
-    "nanoid": "^3.3.1"
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2",
+    "moment": "^2.30.1",
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
-    "eslint": "^7.32.0",
-    "prettier": "^3.0.3",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -90,5 +405,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

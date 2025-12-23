@@ -1,13 +1,10 @@
-import { Application, Detail, List, getFrontmostApplication } from "@raycast/api";
+import type { Application } from "@raycast/api";
+import { Detail, List, getFrontmostApplication } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ProcessOutput } from "zx";
 import { capitalCase, kebabCase } from "change-case";
-
 import { commandNotFoundMd, noContentMd } from "./content/messages";
-
-import { FormattedMatch } from "./lib/types";
+import type { FormattedMatch } from "./lib/types";
 import { getEspansoConfig, getMatches, sortMatches } from "./lib/utils";
-
 import CategoryDropdown from "./components/category-dropdown";
 import MatchItem from "./components/match-item";
 
@@ -17,7 +14,7 @@ export default function Command() {
   const [filteredItems, setFilteredItems] = useState<FormattedMatch[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [error, setError] = useState<ProcessOutput | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [application, setApplication] = useState<Application | undefined>(undefined);
 
   useEffect(() => {
@@ -27,7 +24,7 @@ export default function Command() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
+        const { packages: packageFilesDirectory, match: matchFilesDirectory } = getEspansoConfig();
 
         const combinedMatches = [
           ...getMatches(packageFilesDirectory, { packagePath: true }),
@@ -37,22 +34,24 @@ export default function Command() {
         const sortedMatches = sortMatches(combinedMatches);
 
         const categoriesSet = new Set<string>();
-        const formattedMatches: FormattedMatch[] = sortedMatches
-          .filter((match) => !match.form) // Filter out items with a `form` property
-          .map((match, index) => {
-            const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
-            let category = pathParts[0]?.replace(".yml", "") ?? "";
-            let subcategory = pathParts[1]?.replace(".yml", "");
 
+        const formattedMatches: FormattedMatch[] = sortedMatches
+          .filter((match) => !match.form)
+          .map((match, index) => {
+            let category = match.category;
+            let subcategory = "";
+            if (!category) {
+              const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
+              category = pathParts[0]?.replace(".yml", "") ?? "";
+              subcategory = pathParts[1]?.replace(".yml", "");
+            }
             if (subcategory?.toLowerCase() === "index" || subcategory === category) {
               subcategory = "";
             } else {
               subcategory = kebabCase(subcategory ?? "");
             }
-
             category = kebabCase(category);
             categoriesSet.add(category);
-
             return {
               ...match,
               category,
@@ -76,11 +75,10 @@ export default function Command() {
         setCategories(["all", ...sortedCategories]);
         setIsLoading(false);
       } catch (err) {
-        setError(err instanceof ProcessOutput ? err : null);
+        setError(err instanceof Error ? err : null);
         setIsLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -89,8 +87,8 @@ export default function Command() {
   }, [selectedCategory, items]);
 
   if (error) {
-    const notFound = /command not found/.test(error.stderr);
-    return <Detail markdown={notFound ? commandNotFoundMd : error.stderr} />;
+    const notFound = /command not found/.test(error.message);
+    return <Detail markdown={notFound ? commandNotFoundMd : error.message} />;
   }
 
   if (!isLoading && items.length === 0) {
