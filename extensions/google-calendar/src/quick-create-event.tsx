@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  Toast,
-  showToast,
-  closeMainWindow,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast, closeMainWindow, Keyboard } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { nanoid } from "nanoid";
 import Fuse from "fuse.js";
@@ -32,28 +23,43 @@ interface QuickEvent {
 
 const TIMEZONE_OFFSETS: Record<string, number> = {
   // US timezones (full)
-  EST: -300, EDT: -240,
-  CST: -360, CDT: -300,
-  MST: -420, MDT: -360,
-  PST: -480, PDT: -420,
-  AKST: -540, AKDT: -480,
+  EST: -300,
+  EDT: -240,
+  CST: -360,
+  CDT: -300,
+  MST: -420,
+  MDT: -360,
+  PST: -480,
+  PDT: -420,
+  AKST: -540,
+  AKDT: -480,
   HST: -600,
   // US timezones (short) - map to standard time
-  ET: -300, CT: -360, MT: -420, PT: -480,
+  ET: -300,
+  CT: -360,
+  MT: -420,
+  PT: -480,
   // European
-  GMT: 0, UTC: 0,
-  WET: 0, WEST: 60,
-  CET: 60, CEST: 120,
-  EET: 120, EEST: 180,
+  GMT: 0,
+  UTC: 0,
+  WET: 0,
+  WEST: 60,
+  CET: 60,
+  CEST: 120,
+  EET: 120,
+  EEST: 180,
   // Asia/Pacific
   IST: 330,
   JST: 540,
-  AEST: 600, AEDT: 660,
-  NZST: 720, NZDT: 780,
+  AEST: 600,
+  AEDT: 660,
+  NZST: 720,
+  NZDT: 780,
 };
 
 function extractTimezone(query: string): { query: string; timezone: string | null; offsetMinutes: number | null } {
-  const tzList = "EST|EDT|CST|CDT|MST|MDT|PST|PDT|AKST|AKDT|HST|ET|CT|MT|PT|GMT|UTC|WET|WEST|CET|CEST|EET|EEST|IST|JST|AEST|AEDT|NZST|NZDT";
+  const tzList =
+    "EST|EDT|CST|CDT|MST|MDT|PST|PDT|AKST|AKDT|HST|ET|CT|MT|PT|GMT|UTC|WET|WEST|CET|CEST|EET|EEST|IST|JST|AEST|AEDT|NZST|NZDT";
   const tzPattern = new RegExp(`\\b(\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)?)\\s+(${tzList})\\b`, "gi");
 
   const match = query.match(tzPattern);
@@ -64,7 +70,7 @@ function extractTimezone(query: string): { query: string; timezone: string | nul
       const tz = tzMatch[1].toUpperCase();
       const offset = TIMEZONE_OFFSETS[tz];
       if (offset !== undefined) {
-        const cleanedQuery = query.replace(new RegExp(`\\s+${tz}\\b`, 'gi'), '');
+        const cleanedQuery = query.replace(new RegExp(`\\s+${tz}\\b`, "gi"), "");
         return { query: cleanedQuery, timezone: tz, offsetMinutes: offset };
       }
     }
@@ -120,7 +126,7 @@ function preprocessQuery(query: string): string {
     const m = minutes ? parseInt(minutes, 10) : 0;
     const date = new Date();
     date.setHours(h, m, 0, 0);
-    return format(date, 'h:mm aa');
+    return format(date, "h:mm aa");
   });
 
   return query;
@@ -164,9 +170,12 @@ function formatRelativeDay(date: Date): string {
   const diffDays = Math.floor((startOfDay(date).getTime() - startOfDay(now).getTime()) / (1000 * 60 * 60 * 24));
 
   switch (diffDays) {
-    case -1: return "yesterday";
-    case 0: return "today";
-    case 1: return "tomorrow";
+    case -1:
+      return "yesterday";
+    case 0:
+      return "today";
+    case 1:
+      return "tomorrow";
     case 2:
     case 3:
     case 4:
@@ -195,9 +204,7 @@ function QuickCreateEvent() {
 
   // Get calendar names and ID mapping
   const calendars = useMemo(() => {
-    const all = [...calendarsData.selected, ...calendarsData.unselected].filter(
-      (cal) => cal.accessRole === "owner"
-    );
+    const all = [...calendarsData.selected, ...calendarsData.unselected].filter((cal) => cal.accessRole === "owner");
     return all.map((cal) => ({
       id: cal.primary ? "primary" : cal.id!,
       name: cal.summaryOverride ?? cal.summary ?? "Unknown",
@@ -214,7 +221,7 @@ function QuickCreateEvent() {
 
     // Extract calendar selector (/work, /personal, etc.)
     let matchedCalendar: string | undefined;
-    const calendarMatch = query.match(/\s\/([^\s\/]+)\s*$/);
+    const calendarMatch = query.match(/\s\/([^\s/]+)\s*$/);
     if (calendarMatch) {
       const calendarInput = calendarMatch[1];
       matchedCalendar = matchCalendar(calendarInput, calendarNames);
@@ -326,7 +333,9 @@ function QuickCreateEvent() {
             icon={Icon.Calendar}
             accessories={[
               ...(parsedEvent.timezone ? [{ tag: { value: parsedEvent.timezone, color: "#34C759" } }] : []),
-              ...(parsedEvent.matchedCalendar ? [{ tag: { value: parsedEvent.matchedCalendar, color: "#007AFF" } }] : []),
+              ...(parsedEvent.matchedCalendar
+                ? [{ tag: { value: parsedEvent.matchedCalendar, color: "#007AFF" } }]
+                : []),
             ]}
             actions={
               <ActionPanel title="Add to calendar">

@@ -1,5 +1,14 @@
 # Google Calendar Changelog
 
+## [1.4.0] - 2025-12-23
+
+- Add new "Quick Create Event" command with natural language parsing
+  - Calendar selector with `/calendarname` syntax and fuzzy matching
+  - Time range parsing (e.g., "2-3pm", "2pm-3pm")
+  - Timezone support (e.g., "3pm EST", "3pm ET")
+  - Smart date handling for past dates (auto-advance to next year)
+  - EU time formats (14h, 14h30)
+
 ## [1.3.1] - 2025-11-25
 
 - Allow the user to configure if they wish to open a meeting directly as the default action instead of the calendar event, defaults to the existing behaviour.
