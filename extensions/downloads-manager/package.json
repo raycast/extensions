@@ -295,6 +295,7 @@
       {
         "input" : "@downloads-manager paste my latest download",
         "mocks" : {
+          "paste-latest-download": "Success",
           "get-latest-download" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
         },
         "expected" : [
