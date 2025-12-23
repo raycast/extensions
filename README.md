@@ -63,8 +63,9 @@ Search for **IPScan** and install it with one click.
 ## 🖼 Preview
 
 <p align="center">
-  <img src="images/store-logo.webp" height="128" alt="IPScan Logo">
+  <img src="assets/extension_icon.png" height="128" alt="IPScan Logo">
 </p>
+
 
 ---
 
