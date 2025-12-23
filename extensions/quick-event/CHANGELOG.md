@@ -1,6 +1,6 @@
 # Quick Event Changelog
 
-## [Calendar selector, time ranges, timezones, smart dates] - 2025-12-23
+## [Calendar selector, time ranges, timezones, smart dates] - {PR_MERGE_DATE}
 
 - Add calendar selector with `/calendarname` syntax and fuzzy matching
 - Add time range parsing (e.g., "2-3pm", "2pm-3pm")
