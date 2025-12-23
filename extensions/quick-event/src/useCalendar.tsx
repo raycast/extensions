@@ -10,13 +10,15 @@ import Sherlock from 'sherlockjs';
 
 // Timezone offsets in minutes from UTC
 const TIMEZONE_OFFSETS: Record<string, number> = {
-  // US timezones
+  // US timezones (full)
   EST: -300, EDT: -240,
   CST: -360, CDT: -300,
   MST: -420, MDT: -360,
   PST: -480, PDT: -420,
   AKST: -540, AKDT: -480,
   HST: -600,
+  // US timezones (short) - map to standard time
+  ET: -300, CT: -360, MT: -420, PT: -480,
   // European
   GMT: 0, UTC: 0,
   WET: 0, WEST: 60,
@@ -31,13 +33,14 @@ const TIMEZONE_OFFSETS: Record<string, number> = {
 };
 
 function extractTimezone(query: string): { query: string; timezone: string | null; offsetMinutes: number | null } {
-  // Match timezone at end of time expressions, e.g., "3pm EST", "15:00 GMT"
-  const tzPattern = /\b(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s+(EST|EDT|CST|CDT|MST|MDT|PST|PDT|AKST|AKDT|HST|GMT|UTC|WET|WEST|CET|CEST|EET|EEST|IST|JST|AEST|AEDT|NZST|NZDT)\b/gi;
+  // Match timezone at end of time expressions, e.g., "3pm EST", "3pm ET", "15:00 GMT"
+  const tzList = "EST|EDT|CST|CDT|MST|MDT|PST|PDT|AKST|AKDT|HST|ET|CT|MT|PT|GMT|UTC|WET|WEST|CET|CEST|EET|EEST|IST|JST|AEST|AEDT|NZST|NZDT";
+  const tzPattern = new RegExp(`\\b(\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)?)\\s+(${tzList})\\b`, "gi");
 
   const match = query.match(tzPattern);
   if (match) {
     const fullMatch = match[0];
-    const tzMatch = fullMatch.match(/(EST|EDT|CST|CDT|MST|MDT|PST|PDT|AKST|AKDT|HST|GMT|UTC|WET|WEST|CET|CEST|EET|EEST|IST|JST|AEST|AEDT|NZST|NZDT)$/i);
+    const tzMatch = fullMatch.match(new RegExp(`(${tzList})$`, "i"));
     if (tzMatch) {
       const tz = tzMatch[1].toUpperCase();
       const offset = TIMEZONE_OFFSETS[tz];
@@ -57,7 +60,7 @@ function applyTimezone(date: Date, offsetMinutes: number): Date {
   // Calculate difference: we want to convert FROM the specified timezone TO local
   const diffMinutes = -offsetMinutes - localOffset;
   // Adjust the date
-  return new Date(date.getTime() - diffMinutes * 60 * 1000);
+  return new Date(date.getTime() + diffMinutes * 60 * 1000);
 }
 
 function adjustPastDate(date: Date, isAllDay: boolean): Date {
