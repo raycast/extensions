@@ -76,7 +76,7 @@ export type OutgoingMessageForm = {
 };
 
 export type OutgoingMessage = {
-  account: string;
+  from: string;
   to: string[];
   cc: string[];
   bcc: string[];
