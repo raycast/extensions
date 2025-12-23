@@ -1,31 +1,78 @@
-<p align="center">
-  <img src="images/store-logo.webp" height="128">
-  <h1 align="center">Raycast Extensions</h1>
-</p>
+# 🔎 IPScan – Raycast Extension
+
+**IPScan** is a lightweight and fast Raycast extension that lets you **scan IP addresses and ports directly from the Command Palette**, without using the terminal or external tools.
+
+Perfect for quick checks in local networks and development environments.
+
+---
+
+## ⚙️ Features
+
+- 🔍 **IP & Port Scanner**  
+  Scan a single IP address (e.g. `192.168.1.10`) and view **open ports**.
+
+- ⚡ **Instant access from Raycast**  
+  Start scans in seconds, directly from Raycast.
+
+- 🪶 **Lightweight & fast**  
+  Optimized for speed with minimal system impact.
+
+---
+
+## ✅ Ideal For
+
+- 👨‍💻 **Developers** verifying services in test environments
+- 🛠 **Sysadmins and power users** needing quick network checks
+- 🚀 Anyone who wants an IP scanner always at their fingertips
+
+---
+
+## 🚀 How to Use
+
+1. Open **Raycast** (`⌘ + Space`)
+2. Type **IPScan**
+3. Enter an IP address
+4. Press **Enter** to start the scan
+
+---
+
+## 📋 Requirements
+
+- macOS **12.0** or newer
+- Raycast **v1.68+**
+- Network permissions enabled for Raycast
+
+---
+
+## 📦 Installation
+
+Available on the **Raycast Store**.  
+Search for **IPScan** and install it with one click.
+
+---
+
+## 🧩 Tech Stack
+
+- Raycast Extensions API
+- React
+- TypeScript
+- Native macOS networking
+
+---
+
+## 🖼 Preview
 
 <p align="center">
-  <a aria-label="Follow Raycast on X" href="https://x.com/raycast">
-    <img alt="" src="https://img.shields.io/badge/Follow%20@raycast-black.svg?style=for-the-badge&logo=X">
-  </a>
-  <a aria-label="Join the community on Slack" href="https://raycast.com/community">
-    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Slack">
-  </a>
+  <img src="images/store-logo.webp" height="128" alt="IPScan Logo">
 </p>
 
-[Raycast](https://raycast.com/) lets you control your tools with a few keystrokes. This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples of how to extend Raycast using React.
+---
 
-![Header](images/header.webp)
+## 🤝 Community & Support
 
-## Getting Started
+- 🌐 [Raycast](https://raycast.com/)
+- 💬 [Community Slack](https://raycast.com/community)
+- 🐛 [Report an issue](https://github.com/raycast/extensions/issues/new/choose)
 
-Visit [https://developers.raycast.com](https://developers.raycast.com) to get started with our API. If you want to discover and install extensions, check out [our Store](https://raycast.com/store).
-
-Be sure to read and follow our [Community](https://manual.raycast.com/community-guidelines) and [Extension](https://manual.raycast.com/extensions) guidelines and [Acceptable Use Policy](https://www.raycast.com/aup) when submitting your extension and interacting with other folks in this repository.
-
-## Feedback
-
-Raycast wouldn't be where it is without the feedback from our community, so we would be happy to hear what you think of the API / DevX and how we can improve. Please use [GitHub issues](https://github.com/raycast/extensions/issues/new/choose) for everything API related (bugs, improvements suggestions, developer experience, docs, etc). We have a few [templates](https://developers.raycast.com/examples) that should help you get started.
-
-## Community
-
-Join our [Slack community](https://raycast.com/community) to share your extension, debug nasty bugs or simply get to know like-minded folks.
+Please follow the **Community Guidelines** and **Extension Guidelines** when contributing or submitting updates.
+ 
