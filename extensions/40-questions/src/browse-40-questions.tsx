@@ -1,14 +1,14 @@
 import { ActionPanel, Action, List, getPreferenceValues, Clipboard, PreferenceValues, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ensureQuestionsLoaded, loadQuestionsFile, loadAnswersFile } from "./storage";
-import { Answer, QuestionsFile } from "./types";
+import { AnswersFile, QuestionsFile } from "./types";
 import { exportQuestionsAsMarkdown } from "./questions";
 import AnswersCommand from "./answer-40-questions";
 
 export default function Command() {
   const prefs = getPreferenceValues<PreferenceValues>();
   const [questionsFile, setQuestionsFile] = useState<QuestionsFile | null>(null);
-  const [answers, setAnswers] = useState<Record<string, Record<string, Answer>>>({});
+  const [answers, setAnswers] = useState<AnswersFile>({});
   const currentYear = new Date().getFullYear();
   const [filterYear, setFilterYear] = useState(currentYear);
   const [isLoading, setIsLoading] = useState(true);

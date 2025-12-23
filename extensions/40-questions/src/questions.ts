@@ -1,4 +1,4 @@
-import { Answer, QuestionsFile } from "./types";
+import { Answer, AnswerPayload, QuestionsFile } from "./types";
 
 export const currentYear = new Date().getFullYear();
 
@@ -23,7 +23,7 @@ export function parseMarkdownToQuestions(markdown: string, language = "en", vers
 
 export function exportQuestionsAsMarkdown(
   questionsFile: QuestionsFile,
-  answersFile?: Record<string, Record<string, Answer>>,
+  answersFile?: Record<string, Record<string, AnswerPayload>>,
   year: number = currentYear,
 ): string {
   const lines: string[] = [];
