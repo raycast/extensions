@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ensureQuestionsLoaded, loadQuestionsFile, saveAnswer, loadAnswersFile } from "./storage";
-import { Answer, QuestionsFile } from "./types";
+import { AnswersFile, QuestionsFile } from "./types";
 import { currentYear } from "./questions";
 
 export default function Command({
@@ -17,7 +17,7 @@ export default function Command({
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [questions, setQuestions] = useState<QuestionsFile | null>(null);
-  const [answers, setAnswers] = useState<Record<string, Record<string, Answer>>>({});
+  const [answers, setAnswers] = useState<AnswersFile>({});
 
   useEffect(() => {
     (async () => {

@@ -22,7 +22,7 @@ export type QuestionPayload = {
   tags?: string[];
 };
 
-export type AnswersFile = Record<string, Record<string, AnswerPayload>>;
+export type AnswersFile = Record<string, Record<string, AnswerPayload>>; // { "2023": { "1": AnswerPayload, "2": AnswerPayload } }
 
 export type AnswerPayload = {
   id: string;
