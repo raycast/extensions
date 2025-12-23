@@ -83,13 +83,17 @@ export default function DealDetail({ id }: { id: string }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Push title="Edit Deal" target={<AddDeal dealIdToEdit={id} onSaved={revalidate} />} icon="✏️" />
+            <Action.Push
+              title="Edit Deal"
+              target={<AddDeal key={`edit-deal-${id}`} dealIdToEdit={id} onSaved={revalidate} />}
+              icon="✏️"
+            />
             <Action.OpenInBrowser
               title="Open in Browser"
               url={itemUrl}
               shortcut={{
-                macOS: { modifiers: ["cmd"], key: "enter" },
-                Windows: { modifiers: ["ctrl"], key: "enter" },
+                macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
               }}
             />
           </ActionPanel.Section>

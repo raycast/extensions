@@ -314,21 +314,33 @@ function SearchListItem({
             {searchResult.type === "person" && (
               <Action.Push
                 title="Edit Contact"
-                target={<AddContact personIdToEdit={searchResult.id} onSaved={revalidate} />}
+                target={
+                  <AddContact
+                    key={`edit-contact-${searchResult.id}`}
+                    personIdToEdit={searchResult.id}
+                    onSaved={revalidate}
+                  />
+                }
                 icon="✏️"
               />
             )}
             {searchResult.type === "organization" && (
               <Action.Push
                 title="Edit Organization"
-                target={<AddOrganization organizationIdToEdit={searchResult.id} onSaved={revalidate} />}
+                target={
+                  <AddOrganization
+                    key={`edit-organization-${searchResult.id}`}
+                    organizationIdToEdit={searchResult.id}
+                    onSaved={revalidate}
+                  />
+                }
                 icon="✏️"
               />
             )}
             {searchResult.type === "deal" && (
               <Action.Push
                 title="Edit Deal"
-                target={<AddDeal dealIdToEdit={searchResult.id} onSaved={revalidate} />}
+                target={<AddDeal key={`edit-deal-${searchResult.id}`} dealIdToEdit={searchResult.id} onSaved={revalidate} />}
                 icon="✏️"
               />
             )}

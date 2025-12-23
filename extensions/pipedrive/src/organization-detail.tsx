@@ -73,15 +73,15 @@ export default function OrganizationDetail({ id }: { id: string }) {
           <ActionPanel.Section>
             <Action.Push
               title="Edit Organization"
-              target={<AddOrganization organizationIdToEdit={id} onSaved={revalidate} />}
+              target={<AddOrganization key={`edit-organization-${id}`} organizationIdToEdit={id} onSaved={revalidate} />}
               icon="✏️"
             />
             <Action.OpenInBrowser
               title="Open in Browser"
               url={itemUrl}
               shortcut={{
-                macOS: { modifiers: ["cmd"], key: "enter" },
-                Windows: { modifiers: ["ctrl"], key: "enter" },
+                macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
               }}
             />
           </ActionPanel.Section>

@@ -135,15 +135,15 @@ export default function ContactDetail({ id }: { id: string }) {
           <ActionPanel.Section>
             <Action.Push
               title="Edit Contact"
-              target={<AddContact personIdToEdit={id} onSaved={revalidate} />}
+              target={<AddContact key={`edit-contact-${id}`} personIdToEdit={id} onSaved={revalidate} />}
               icon="✏️"
             />
             <Action.OpenInBrowser
               title="Open in Browser"
               url={itemUrl}
               shortcut={{
-                macOS: { modifiers: ["cmd"], key: "enter" },
-                Windows: { modifiers: ["ctrl"], key: "enter" },
+                macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
               }}
             />
             <Action.Push title="Upload Photo" target={<UploadPersonPhoto personId={id} onUploaded={revalidate} />} />

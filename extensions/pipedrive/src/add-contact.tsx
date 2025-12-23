@@ -239,11 +239,19 @@ export default function AddContact({
     }
   }, [prefillOrganizationId, prefillOrganizationName]);
 
-  const didPrefillFromExistingPerson = useRef(false);
+  const lastHydratedPersonId = useRef<string | null>(null);
   useEffect(() => {
-    if (!existingPerson || didPrefillFromExistingPerson.current) return;
+    if (!existingPerson) return;
 
-    didPrefillFromExistingPerson.current = true;
+    const shouldHydrate =
+      lastHydratedPersonId.current !== existingPerson.id ||
+      (isEditing && nameValue.trim().length === 0 && existingPerson.name.trim().length > 0);
+
+    if (!shouldHydrate) {
+      return;
+    }
+
+    lastHydratedPersonId.current = existingPerson.id;
 
     setNameValue(existingPerson.name);
     setSelectedOrganizationId(existingPerson.organizationId);
@@ -260,7 +268,7 @@ export default function AddContact({
     setJobTitleValue(existingPerson.jobTitle);
     setEmails(existingPerson.emails.length > 0 ? existingPerson.emails : [{ value: "", label: "work" }]);
     setPhones(existingPerson.phones.length > 0 ? existingPerson.phones : [{ value: "", label: "work" }]);
-  }, [existingPerson]);
+  }, [existingPerson, isEditing, nameValue]);
 
   const mergedOrganizations = useMemo(() => {
     const merged: Organization[] = [];

@@ -179,10 +179,19 @@ export default function AddDeal({
     },
   );
 
-  const didPrefillFromExistingDeal = useRef(false);
+  const lastHydratedDealId = useRef<string | null>(null);
   useEffect(() => {
-    if (!existingDeal || didPrefillFromExistingDeal.current) return;
-    didPrefillFromExistingDeal.current = true;
+    if (!existingDeal) return;
+
+    const shouldHydrate =
+      lastHydratedDealId.current !== existingDeal.id ||
+      (isEditing && titleValue.trim().length === 0 && existingDeal.title.trim().length > 0);
+
+    if (!shouldHydrate) {
+      return;
+    }
+
+    lastHydratedDealId.current = existingDeal.id;
 
     setTitleValue(existingDeal.title);
     setValueValue(existingDeal.value);
@@ -196,7 +205,7 @@ export default function AddDeal({
     if (existingDeal.organizationId && existingDeal.organizationName) {
       setEditOrganizationOption({ id: existingDeal.organizationId, title: existingDeal.organizationName });
     }
-  }, [existingDeal]);
+  }, [existingDeal, isEditing, titleValue]);
 
   const personAbortable = useRef<AbortController | null>(null);
   const orgAbortable = useRef<AbortController | null>(null);

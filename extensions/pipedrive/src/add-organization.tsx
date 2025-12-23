@@ -67,6 +67,7 @@ export default function AddOrganization({
   const { pop } = useNavigation();
   const preferences = getPreferenceValues<Preferences.Index>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nameValue, setNameValue] = useState(prefillName || "");
 
   const isEditing = Boolean(organizationIdToEdit);
 
@@ -77,12 +78,27 @@ export default function AddOrganization({
 
       const url = buildPipedriveApiUrl(preferences, `/api/v1/organizations/${organizationId}`);
 
-      const json = await fetchPipedriveJson<{ data?: { id: number; name: string } }>(preferences, url, {
+      const json = await fetchPipedriveJson<{ data?: unknown }>(preferences, url, {
         method: "get",
         signal: orgAbortable.current?.signal,
       });
-      if (!json.data?.id) return null;
-      return { id: String(json.data.id), name: json.data.name };
+
+      const anyJson = json as { data?: unknown };
+      const rawData = anyJson.data;
+      const entity =
+        rawData && typeof rawData === "object" && "data" in (rawData as Record<string, unknown>)
+          ? ((rawData as Record<string, unknown>).data as unknown)
+          : rawData;
+
+      if (!entity || typeof entity !== "object") return null;
+      const entityObj = entity as Record<string, unknown>;
+      const id = entityObj.id;
+      const name = entityObj.name;
+      if ((typeof id !== "number" && typeof id !== "string") || typeof name !== "string") {
+        return null;
+      }
+
+      return { id: String(id), name };
     },
     [organizationIdToEdit || ""],
     {
@@ -106,6 +122,47 @@ export default function AddOrganization({
   useEffect(() => {
     return () => submitAbortable.current?.abort();
   }, []);
+
+  const lastHydratedOrganizationId = useRef<string | null>(null);
+  useEffect(() => {
+    if (!organizationIdToEdit) {
+      setNameValue(prefillName || "");
+    }
+  }, [organizationIdToEdit, prefillName]);
+
+  const didWarnMissingOrganization = useRef(false);
+  useEffect(() => {
+    didWarnMissingOrganization.current = false;
+  }, [organizationIdToEdit]);
+
+  useEffect(() => {
+    if (!organizationIdToEdit) return;
+    if (isLoadingOrganization) return;
+    if (existingOrganization) return;
+    if (didWarnMissingOrganization.current) return;
+
+    didWarnMissingOrganization.current = true;
+    void showToast({
+      style: Toast.Style.Failure,
+      title: "Organization not found",
+      message: "Could not load the organization details for editing.",
+    });
+  }, [existingOrganization, isLoadingOrganization, organizationIdToEdit]);
+
+  useEffect(() => {
+    if (!existingOrganization) return;
+
+    const shouldHydrate =
+      lastHydratedOrganizationId.current !== existingOrganization.id ||
+      (isEditing && nameValue.trim().length === 0 && existingOrganization.name.trim().length > 0);
+
+    if (!shouldHydrate) {
+      return;
+    }
+
+    lastHydratedOrganizationId.current = existingOrganization.id;
+    setNameValue((existingOrganization.name || "").trim());
+  }, [existingOrganization, isEditing, nameValue]);
 
   async function handleSubmit(values: { name: string; note?: string }) {
     const name = (values.name || "").trim();
@@ -252,7 +309,8 @@ export default function AddOrganization({
         id="name"
         title="Organization Name"
         placeholder="Enter organization name"
-        defaultValue={existingOrganization?.name || prefillName || ""}
+        value={nameValue}
+        onChange={setNameValue}
       />
       <Form.TextArea id="note" title="Note" placeholder="Optional note" />
     </Form>
