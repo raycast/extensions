@@ -6,12 +6,9 @@ import {
   useNavigation,
   Color,
 } from "@raycast/api";
+import { useResults } from "./hooks/store/test/useResults";
 
 interface Props {
-  correctChars: number;
-  wrongChars: number;
-  typedChars: number;
-  timeInMinutes: number;
   onRestart: () => void;
 }
 
@@ -39,14 +36,10 @@ const getRank = (wpm: number) => {
   return { title: "Typing God", icon: Icon.Crown, color: Color.Red };
 };
 
-export default function Results({
-  correctChars,
-  wrongChars,
-  typedChars,
-  timeInMinutes,
-  onRestart,
-}: Props) {
+export default function Results({ onRestart }: Props) {
   const { pop } = useNavigation();
+
+  const { correctChars, wrongChars, typedChars, timeInMinutes } = useResults();
 
   const totalChars = correctChars + wrongChars;
 

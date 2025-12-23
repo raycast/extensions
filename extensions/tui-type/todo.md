@@ -1,8 +1,12 @@
+- [ ] better code
+  - [ ] bug;
+    - [ ] make sure no caps if punctuation is off
+    - [ ] The `value` provided to `Form.Dropdown` does not match any of its items. '10' is not a member of ['0', '1', '2', '3']. 06:51:48 The `value` provided to `Form.Dropdown` does not match any of its items. '0' is not a member of ['10', '25', '50', '100'].
+  - [ ] scale char/line based on char size (and allow for larger text)
 - More/better settings:
   - [ ] Custom time
   - [ ] Custom word amount
-- [ ] improved results
-  - [ ] better stats
 - [ ] stats-over-time
 - in index view show more information about the current test
   - make option to tweak this
+  - caplocks indicator

@@ -1,38 +1,26 @@
 import { List, Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
-import { useCallback } from "react";
-import { useTypingGame } from "./hooks/useTypingGame";
+import { useCallback, useEffect } from "react";
+import { useTest } from "./hooks/store/test/useTest";
+import { useTestStore } from "./hooks/store/test/useTestState";
 import TypingTest from "./components/typing-test";
 import { LanguageSelector } from "./components/settings/language";
 import { ModeSettingsForm } from "./components/settings/game-mode";
 import { AppearanceSettingsForm } from "./components/settings/appearance";
 import Results from "./results";
+import { useSettingsStore } from "./hooks/store/settings/useSettings";
+import { QUOTE_GROUPS, TYPING_AREA_ID } from "./constants";
 
-function GameDetail({
-  gameState,
-}: {
-  gameState: ReturnType<typeof useTypingGame>;
-}) {
-  const markdown = TypingTest(gameState);
-  return <List.Item.Detail markdown={markdown} />;
+function TestDetail() {
+  return <List.Item.Detail markdown={TypingTest()} />;
 }
 
-export default function TypingGame() {
+export default function Index() {
   const { push, pop } = useNavigation();
 
   const onFinish = useCallback(
-    (results: {
-      correctChars: number;
-      wrongChars: number;
-      typedChars: number;
-      timeInMinutes: number;
-      onRestart: () => void;
-    }) => {
+    (results: { onRestart: () => void }) => {
       push(
         <Results
-          correctChars={results.correctChars}
-          wrongChars={results.wrongChars}
-          typedChars={results.typedChars}
-          timeInMinutes={results.timeInMinutes}
           onRestart={() => {
             results.onRestart();
             pop();
@@ -43,66 +31,62 @@ export default function TypingGame() {
     [push, pop],
   );
 
-  const gameState = useTypingGame(onFinish);
+  const { language, mode, limit, usePunctuation, useNumbers } =
+    useSettingsStore();
+
+  const { searchText, isFinished, forcedSelectionId, quoteSource } =
+    useTestStore();
+
+  const modeSubtitle = (() => {
+    if (mode === "quote") {
+      const group = QUOTE_GROUPS.find((g) => g.id === limit);
+      return `Quote (${group?.label || "Random"})`;
+    }
+    const base = mode === "time" ? `${limit}s` : `${limit} words`;
+    const mods = [];
+    if (usePunctuation) mods.push("Punctuation");
+    if (useNumbers) mods.push("Numbers");
+    return mods.length > 0 ? `${base} + ${mods.join(", ")}` : base;
+  })();
 
   const {
-    // State
-    searchText,
-    isFinished,
-    isLoadingWords,
-    isLoadingQuotes,
-    forcedSelectionId,
-    quoteSource,
-    modeSubtitle,
-
-    // Settings
-    mode,
-    limit,
-    language,
-    renderMode,
-    updateFreq,
-    svgSettings,
-    termSettings,
-    usePunctuation,
-    useNumbers,
-
-    // Actions
-    setModeAndReset,
-    setLanguage,
-    setRenderMode,
-    setUpdateFreq,
-    setSvgSettings,
-    setTermSettings,
-    resetGame,
+    typingDataIsLoading,
+    resetTest,
     handleInputChange,
     onSelectionChange,
-  } = gameState;
+  } = useTest(onFinish);
+
+  useEffect(() => {
+    resetTest();
+  }, []);
+
+  const testRender = TestDetail();
 
   return (
     <List
-      isLoading={isLoadingWords || isLoadingQuotes}
+      isLoading={typingDataIsLoading}
       searchText={searchText}
       onSearchTextChange={handleInputChange}
       searchBarPlaceholder={isFinished ? "Finished" : "Type to start..."}
-      enableFiltering={false}
+      filtering={false}
       isShowingDetail={true}
       selectedItemId={forcedSelectionId}
       onSelectionChange={onSelectionChange}
     >
       <List.Section title="Typing area">
         <List.Item
-          id="typing-area"
+          id={TYPING_AREA_ID}
           title={quoteSource ? "Quote Test" : "Typing Test"}
           subtitle={quoteSource || modeSubtitle}
           icon={Icon.GameController}
-          detail={<GameDetail gameState={gameState} />}
+          detail={testRender}
           actions={
             <ActionPanel>
               <Action
                 title="Restart Test"
                 icon={Icon.RotateClockwise}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={() => resetGame(undefined, undefined, true)}
+                onAction={() => resetTest(undefined, undefined)}
               />
             </ActionPanel>
           }
@@ -114,17 +98,12 @@ export default function TypingGame() {
           title="Language"
           subtitle={language}
           icon={Icon.Globe}
-          detail={<GameDetail gameState={gameState} />}
+          detail={testRender}
           actions={
             <ActionPanel>
               <Action.Push
                 title="Select Language"
-                target={
-                  <LanguageSelector
-                    currentLanguage={language}
-                    onSelect={setLanguage}
-                  />
-                }
+                target={<LanguageSelector />}
               />
             </ActionPanel>
           }
@@ -134,21 +113,10 @@ export default function TypingGame() {
           title="Game Mode"
           subtitle={modeSubtitle}
           icon={Icon.Stopwatch}
-          detail={<GameDetail gameState={gameState} />}
+          detail={testRender}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Change Mode"
-                target={
-                  <ModeSettingsForm
-                    currentMode={mode}
-                    currentLimit={limit}
-                    includePunctuation={usePunctuation}
-                    includeNumbers={useNumbers}
-                    onSave={setModeAndReset}
-                  />
-                }
-              />
+              <Action.Push title="Change Mode" target={<ModeSettingsForm />} />
             </ActionPanel>
           }
         />
@@ -157,23 +125,12 @@ export default function TypingGame() {
           title="Appearance Settings"
           subtitle="Colors, Fonts, Renderer"
           icon={Icon.Eye}
-          detail={<GameDetail gameState={gameState} />}
+          detail={testRender}
           actions={
             <ActionPanel>
               <Action.Push
                 title="Configure"
-                target={
-                  <AppearanceSettingsForm
-                    renderMode={renderMode}
-                    setRenderMode={setRenderMode}
-                    freq={updateFreq}
-                    setFreq={setUpdateFreq}
-                    svgSettings={svgSettings}
-                    setSvgSettings={setSvgSettings}
-                    termSettings={termSettings}
-                    setTermSettings={setTermSettings}
-                  />
-                }
+                target={<AppearanceSettingsForm />}
               />
             </ActionPanel>
           }

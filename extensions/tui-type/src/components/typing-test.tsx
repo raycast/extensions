@@ -1,24 +1,34 @@
 import { useMemo } from "react";
 import { render } from "./renderer/renderer";
-import { TypingGameState } from "../hooks/useTypingGame";
+import { useTestStore } from "../hooks/store/test/useTestState";
+import { useSettingsStore } from "../hooks/store/settings/useSettings";
+import { getCharsPerLine } from "../config/render-mode-config";
 
-interface TypingTestProps extends TypingGameState {}
+export default function TypingTest() {
+  const { words, visualTick, typedWords, currentInput } = useTestStore();
+  const { renderMode, svgSettings, termSettings } = useSettingsStore();
 
-export default function TypingTest(props: TypingTestProps) {
-  const {
-    words,
-    linesLayout,
-    typedWordsRef,
-    currentInputRef,
-    renderMode,
-    svgSettings,
-    termSettings,
-    visualTick,
-  } = props;
+  const charsLimit = getCharsPerLine(renderMode);
+  const linesLayout = (() => {
+    const lines: number[][] = [];
+    let currentLine: number[] = [];
+    let currentLen = 0;
+    words.forEach((word, index) => {
+      if (currentLen + word.length + 1 > charsLimit) {
+        lines.push(currentLine);
+        currentLine = [];
+        currentLen = 0;
+      }
+      currentLine.push(index);
+      currentLen += word.length + 1;
+    });
+    if (currentLine.length > 0) lines.push(currentLine);
+    return lines;
+  })();
 
   const markdownContent = useMemo(() => {
     if (words.length === 0) return "";
-    const activeWordIndex = typedWordsRef.current.length;
+    const activeWordIndex = typedWords.length;
     let activeLineIdx = 0;
     for (let i = 0; i < linesLayout.length; i++) {
       if (linesLayout[i].includes(activeWordIndex)) {
@@ -30,8 +40,8 @@ export default function TypingTest(props: TypingTestProps) {
       activeLineIdx,
       linesLayout,
       words,
-      typedWordsRef.current,
-      currentInputRef.current,
+      typedWords,
+      currentInput,
       renderMode,
       svgSettings,
       termSettings,
@@ -39,8 +49,8 @@ export default function TypingTest(props: TypingTestProps) {
   }, [
     words,
     linesLayout,
-    typedWordsRef,
-    currentInputRef,
+    typedWords,
+    currentInput,
     renderMode,
     svgSettings,
     termSettings,

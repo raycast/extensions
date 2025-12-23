@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Form, Color, useNavigation } from "@raycast/api";
-import { useState } from "react";
 import {
   RenderMode,
   UpdateFreq,
@@ -10,42 +9,29 @@ import { SVG_SETTINGS_CONFIG } from "../../config/svg-config";
 import { TERMINAL_SETTINGS_CONFIG } from "../../config/terminal-config";
 import { UPDATE_FREQ_OPTIONS } from "../../config/update-frequency-config";
 import { RENDER_MODE_OPTIONS } from "../../config/render-mode-config";
+import { useSettingsStore } from "../../hooks/store/settings/useSettings";
 
-export function AppearanceSettingsForm({
-  renderMode,
-  setRenderMode,
-  freq,
-  setFreq,
-  svgSettings,
-  setSvgSettings,
-  termSettings,
-  setTermSettings,
-}: {
-  renderMode: RenderMode;
-  setRenderMode: (m: RenderMode) => void;
-  freq: UpdateFreq;
-  setFreq: (f: UpdateFreq) => void;
-  svgSettings: SvgSettings;
-  setSvgSettings: (s: SvgSettings) => void;
-  termSettings: TerminalSettings;
-  setTermSettings: (s: TerminalSettings) => void;
-}) {
+export function AppearanceSettingsForm() {
+  const {
+    renderMode,
+    setRenderMode,
+    updateFreq,
+    setUpdateFreq,
+    svgSettings,
+    setSvgSettings,
+    termSettings,
+    setTermSettings,
+  } = useSettingsStore();
+
   const { pop } = useNavigation();
 
-  const [localMode, setLocalMode] = useState<RenderMode>(renderMode);
-  const [localFreq, setLocalFreq] = useState<UpdateFreq>(freq);
-  const [localSvg, setLocalSvg] = useState<SvgSettings>(svgSettings);
-  const [localTerm, setLocalTerm] = useState<TerminalSettings>(termSettings);
-
   const handleSvgChange = (key: keyof SvgSettings, value: string) => {
-    const newSettings = { ...localSvg, [key]: value };
-    setLocalSvg(newSettings);
+    const newSettings = { ...svgSettings, [key]: value };
     setSvgSettings(newSettings);
   };
 
   const handleTermChange = (key: keyof TerminalSettings, value: string) => {
-    const newSettings = { ...localTerm, [key]: value };
-    setLocalTerm(newSettings);
+    const newSettings = { ...termSettings, [key]: value };
     setTermSettings(newSettings);
   };
 
@@ -60,12 +46,8 @@ export function AppearanceSettingsForm({
       <Form.Dropdown
         id="renderMode"
         title="Render Engine"
-        value={localMode}
-        onChange={(val) => {
-          const m = val as RenderMode;
-          setLocalMode(m);
-          setRenderMode(m);
-        }}
+        value={renderMode}
+        onChange={(val) => setRenderMode(val as RenderMode)}
       >
         {RENDER_MODE_OPTIONS.map((option) => (
           <Form.Dropdown.Item
@@ -80,12 +62,8 @@ export function AppearanceSettingsForm({
       <Form.Dropdown
         id="freq"
         title="Update Frequency"
-        value={localFreq}
-        onChange={(val) => {
-          const f = val as UpdateFreq;
-          setLocalFreq(f);
-          setFreq(f);
-        }}
+        value={updateFreq}
+        onChange={(val) => setUpdateFreq(val as UpdateFreq)}
       >
         {UPDATE_FREQ_OPTIONS.map((option) => (
           <Form.Dropdown.Item
@@ -98,7 +76,7 @@ export function AppearanceSettingsForm({
 
       <Form.Separator />
 
-      {localMode === "svg" ? (
+      {renderMode === "svg" ? (
         <>
           <Form.Description text="SVG Appearance" />
           {SVG_SETTINGS_CONFIG.map((setting) => (
@@ -106,7 +84,7 @@ export function AppearanceSettingsForm({
               key={setting.key}
               id={setting.key}
               title={setting.title}
-              value={localSvg[setting.key]}
+              value={svgSettings[setting.key]}
               onChange={(val) => handleSvgChange(setting.key, val)}
             >
               {setting.options.map((option) => (
@@ -138,7 +116,7 @@ export function AppearanceSettingsForm({
               key={setting.key}
               id={setting.key}
               title={setting.title}
-              value={localTerm[setting.key]}
+              value={termSettings[setting.key]}
               onChange={(val) => handleTermChange(setting.key, val)}
             >
               {setting.options.map((option) => (

@@ -1,41 +1,21 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { useState } from "react";
 import { Mode } from "../../types";
 import { QUOTE_GROUPS } from "../../constants";
+import { useSettingsStore } from "../../hooks/store/settings/useSettings";
 
-export function ModeSettingsForm({
-  currentMode,
-  currentLimit,
-  includePunctuation,
-  includeNumbers,
-  onSave,
-}: {
-  currentMode: Mode;
-  currentLimit: number;
-  includePunctuation: boolean;
-  includeNumbers: boolean;
-  onSave: (m: Mode, l: number, p: boolean, n: boolean) => void;
-}) {
+export function ModeSettingsForm() {
   const { pop } = useNavigation();
 
-  const [mode, setMode] = useState<Mode>(currentMode);
-  const [limit, setLimit] = useState<string>(currentLimit.toString());
-  const [punct, setPunct] = useState<boolean>(includePunctuation);
-  const [nums, setNums] = useState<boolean>(includeNumbers);
-
-  const handleSave = (
-    newMode: Mode,
-    newLimit: string,
-    newPunct: boolean,
-    newNums: boolean,
-  ) => {
-    setMode(newMode);
-    setLimit(newLimit);
-    setPunct(newPunct);
-    setNums(newNums);
-
-    onSave(newMode, parseInt(newLimit), newPunct, newNums);
-  };
+  const {
+    mode,
+    setMode,
+    limit,
+    setLimit,
+    usePunctuation,
+    setUsePunctuation,
+    useNumbers,
+    setUseNumbers,
+  } = useSettingsStore();
 
   return (
     <Form
@@ -49,7 +29,7 @@ export function ModeSettingsForm({
         id="mode"
         title="Game Mode"
         value={mode}
-        onChange={(val) => handleSave(val as Mode, limit, punct, nums)}
+        onChange={(val) => setMode(val as Mode)}
       >
         <Form.Dropdown.Item
           value="time"
@@ -68,8 +48,8 @@ export function ModeSettingsForm({
         <Form.Dropdown
           id="limit_time"
           title="Duration"
-          value={limit}
-          onChange={(val) => handleSave(mode, val, punct, nums)}
+          value={`${limit}`}
+          onChange={(val) => setLimit(+val)}
         >
           {[15, 30, 60, 120].map((val) => (
             <Form.Dropdown.Item
@@ -85,8 +65,8 @@ export function ModeSettingsForm({
         <Form.Dropdown
           id="limit_words"
           title="Word Count"
-          value={limit}
-          onChange={(val) => handleSave(mode, val, punct, nums)}
+          value={`${limit}`}
+          onChange={(val) => setLimit(+val)}
         >
           {[10, 25, 50, 100].map((val) => (
             <Form.Dropdown.Item
@@ -102,8 +82,8 @@ export function ModeSettingsForm({
         <Form.Dropdown
           id="limit_quote"
           title="Quote Length"
-          value={limit}
-          onChange={(val) => handleSave(mode, val, punct, nums)}
+          value={`${limit}`}
+          onChange={(val) => setLimit(+val)}
         >
           {QUOTE_GROUPS.map((grp) => (
             <Form.Dropdown.Item
@@ -123,14 +103,14 @@ export function ModeSettingsForm({
           <Form.Checkbox
             id="punctuation"
             label="Include Punctuation"
-            value={punct}
-            onChange={(val) => handleSave(mode, limit, val, nums)}
+            value={usePunctuation}
+            onChange={(val) => setUsePunctuation(val)}
           />
           <Form.Checkbox
             id="numbers"
             label="Include Numbers"
-            value={nums}
-            onChange={(val) => handleSave(mode, limit, punct, val)}
+            value={useNumbers}
+            onChange={(val) => setUseNumbers(val)}
           />
         </>
       )}
