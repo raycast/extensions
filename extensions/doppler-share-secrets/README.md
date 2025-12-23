@@ -18,8 +18,8 @@ An extensive walk-through on how to build such an extension can be found on the 
 
 3. (OPTIONAL) **Get Personal Token** to View Projects:
 
-    a. `Navigate` to "Personal Tokens" (https://dashboard.doppler.com/workplace/SLUG/tokens/personal)
+   a. `Navigate` to "Personal Tokens" (https://dashboard.doppler.com/workplace/SLUG/tokens/personal)
 
-    b. `Click` "Create a personal token" then "Create"
+   b. `Click` "Create a personal token" then "Create"
 
-    c. `Copy` and `Paste` the token in **Command Preferences**
+   c. `Copy` and `Paste` the token in **Command Preferences**
