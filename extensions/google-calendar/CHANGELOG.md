@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [1.4.0] - 2025-12-23
+## [1.4.0] - {PR_MERGE_DATE}
 
 - Add new "Quick Create Event" command with natural language parsing
   - Calendar selector with `/calendarname` syntax and fuzzy matching
