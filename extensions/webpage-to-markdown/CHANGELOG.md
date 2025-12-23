@@ -1,5 +1,10 @@
 # Webpage to Markdown Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## 2025-02-01
