@@ -328,14 +328,12 @@ async function handleToggle(
     });
 
     toast.style = Style.Success;
-    toast.title = groupedLight.on?.on ? `Turned ${group.metadata.name} off` : `Turned ${group.metadata.name} on`;
+    toast.title = `Turned ${groupedLight?.on?.on ? "off" : "on"} ${group.metadata.name}`;
     await toast.show();
   } catch (error) {
     console.error(error);
     toast.style = Style.Failure;
-    toast.title = groupedLight?.on?.on
-      ? `Failed turning ${group.metadata.name} off`
-      : `Failed turning ${group.metadata.name} on`;
+    toast.title = `Failed turning ${groupedLight?.on?.on ? "off" : "on"} ${group.metadata.name}`;
     toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
@@ -377,9 +375,7 @@ async function handleSetBrightness(
     });
 
     toast.style = Style.Success;
-    toast.title = `Set brightness of ${group.metadata.name} to ${(brightness / 100).toLocaleString("en", {
-      style: "percent",
-    })}.`;
+    toast.title = `Set brightness of ${group.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}.`;
     await toast.show();
   } catch (error) {
     toast.style = Style.Failure;
@@ -428,17 +424,11 @@ async function handleBrightnessChange(
     });
 
     toast.style = Style.Success;
-    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${group.metadata.name} to ${(
-      adjustedBrightness / 100
-    ).toLocaleString("en", {
-      style: "percent",
-    })}`;
+    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${group.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", { style: "percent" })}`;
     await toast.show();
   } catch (error) {
     toast.style = Style.Failure;
-    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${
-      group.metadata.name
-    }`;
+    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${group.metadata.name}`;
     toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
