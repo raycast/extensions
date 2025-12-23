@@ -13,7 +13,7 @@ import {
   openCommandPreferences,
 } from '@raycast/api';
 import { useForm, FormValidation, usePromise } from '@raycast/utils';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import * as nodeOs from 'node:os';
 import * as childProcess from 'node:child_process';
 import {
@@ -613,7 +613,7 @@ ${t('email_thanks')}`;
               onAction={onReanalyze}
             />
             <Action.Open
-              title="Open Json Report"
+              title="Open JSON Report"
               target={reportPath}
               icon={Icon.Code}
             />
@@ -820,7 +820,10 @@ export default function Command() {
         placeholder={t('form_url_placeholder')}
         {...itemProps.url}
       />
-      <Form.Dropdown title={t('form_device_title')} {...itemProps.device}>
+      <Form.Dropdown
+        title={t('form_device_title')}
+        {...(itemProps.device as any)}
+      >
         <Form.Dropdown.Item
           value="mobile"
           title={t('mobile')}
