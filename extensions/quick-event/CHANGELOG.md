@@ -1,5 +1,12 @@
 # Quick Event Changelog
 
+## [Calendar selector, time ranges, timezones, smart dates] - 2025-12-23
+
+- Add calendar selector with `/calendarname` syntax and fuzzy matching
+- Add time range parsing (e.g., "2-3pm", "2pm-3pm")
+- Add timezone support (e.g., "3pm EST", "3pm ET")
+- Add smart date handling for past dates (auto-advance to next year)
+
 ## [Update] - 2025-06-10
 
 - Update location parsing to use "@" and replace AI.ask. It now supports locations in `@location`, `@location-location`, or `@(location)`
