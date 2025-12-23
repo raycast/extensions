@@ -9,7 +9,8 @@
     "j3lte",
     "markusjura",
     "fabitosh",
-    "geekyed"
+    "geekyed",
+    "alexpriest"
   ],
   "categories": [
     "Productivity",
@@ -17,6 +18,13 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "quick-create-event",
+      "title": "Quick Create Event",
+      "subtitle": "Google Calendar",
+      "description": "Create an event using natural language (e.g., 'Lunch tomorrow 12-1pm /work')",
+      "mode": "view"
+    },
     {
       "name": "create-event",
       "title": "Create Event",
@@ -157,9 +165,11 @@
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
+    "fuse.js": "^7.1.0",
     "humanize-duration": "^3.32.1",
     "nanoid": "^5.1.5",
-    "parse-duration": "^2.1.4"
+    "parse-duration": "^2.1.4",
+    "sherlockjs": "^1.4.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
