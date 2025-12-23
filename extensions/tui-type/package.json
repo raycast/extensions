@@ -39,22 +39,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "@types/react-dom": "18.2.12",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.4.5"
-  },
-  "overrides": {
-    "@types/react": "18.2.27",
-    "@types/react-dom": "18.2.12"
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "version": "1.0.0",
   "main": "index.js"
