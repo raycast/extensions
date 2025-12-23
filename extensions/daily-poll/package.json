@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "daily-poll",
+  "title": "Daily Poll",
+  "description": "Daily polls with voting using Supabase",
+  "icon": "icon.png",
+  "author": "dylan_landman",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "poll",
+      "title": "Vote on Today's Poll",
+      "description": "Vote on today's poll",
+      "mode": "view"
+    },
+    {
+      "name": "previous-polls",
+      "title": "Previous Polls",
+      "description": "View previous poll results",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "maxPolls",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Polls to Show",
+          "description": "Maximum number of previous polls to display (default: 50)",
+          "default": "50",
+          "placeholder": "50"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.48",
+    "@types/uuid": "^9.0.7",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
