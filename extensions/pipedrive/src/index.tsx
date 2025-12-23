@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Keyboard, List } from "@raycast/api";
 import { useState, useMemo, useCallback } from "react";
 import { useCachedPromise } from "@raycast/utils";
 
@@ -33,42 +33,32 @@ export default function PipedriveSearch() {
   const addNewOrganizationURL = `https://${preferences.domain}/organizations#dialog/organization/add`;
   const openEmailURL = `https://${preferences.domain}/mail/inbox`;
   const openActivitiesURL = `https://${preferences.domain}/activities/list`;
-  const addNewPersonShortcut = { modifiers: ["cmd"], key: "n" };
-  const addNewDealShortcut = { modifiers: ["cmd"], key: "d" };
-  const addNewOrganizationShortcut = { modifiers: ["cmd"], key: "o" };
-  const openEmailShortcut = { modifiers: ["cmd"], key: "e" };
-  const openActivitiesShortcut = { modifiers: ["cmd"], key: "t" };
 
   const openInBrowserItems = [
     {
       id: "addNewPerson",
       title: emojiMap["person"] + "   Add New Person",
       url: addNewPersonURL,
-      shortcut: addNewPersonShortcut,
     },
     {
       id: "addNewDeal",
       title: emojiMap["deal"] + "   Add New Deal",
       url: addNewDealURL,
-      shortcut: addNewDealShortcut,
     },
     {
       id: "addNewOrganization",
       title: emojiMap["organization"] + "   Add New Organization",
       url: addNewOrganizationURL,
-      shortcut: addNewOrganizationShortcut,
     },
     {
       id: "openEmail",
       title: emojiMap["email"] + "   Open Email",
       url: openEmailURL,
-      shortcut: openEmailShortcut,
     },
     {
       id: "openActivities",
       title: emojiMap["activities"] + "   Open Activities",
       url: openActivitiesURL,
-      shortcut: openActivitiesShortcut,
     },
   ];
 
@@ -86,31 +76,31 @@ export default function PipedriveSearch() {
                   <Action.OpenInBrowser
                     title="Add New Person"
                     url={addNewPersonURL}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     icon={emojiMap["person"]}
                   />
                   <Action.OpenInBrowser
                     title="Add New Deal"
                     url={addNewDealURL}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
                     icon={emojiMap["deal"]}
                   />
                   <Action.OpenInBrowser
                     title="Add New Organization"
                     url={addNewOrganizationURL}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     icon={emojiMap["organization"]}
                   />
                   <Action.OpenInBrowser
                     title="Open Email"
                     url={openEmailURL}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "e" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
                     icon={emojiMap["email"]}
                   />
                   <Action.OpenInBrowser
                     title="Open Activities"
                     url={openActivitiesURL}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                     icon={emojiMap["activities"]}
                   />
                 </ActionPanel.Section>
@@ -197,33 +187,40 @@ function SearchListItem({
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={itemUrl} />
             {name && (
-              <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "n" }} />
+              <Action.CopyToClipboard title="Copy Name" content={name} shortcut={Keyboard.Shortcut.Common.New} />
             )}
             {email && (
-              <Action.CopyToClipboard title="Copy Email" content={email} shortcut={{ modifiers: ["cmd"], key: "e" }} />
+              <Action.CopyToClipboard title="Copy Email" content={email} shortcut={Keyboard.Shortcut.Common.Edit} />
             )}
             {phone && (
-              <Action.CopyToClipboard title="Copy Phone" content={phone} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+              <Action.CopyToClipboard
+                title="Copy Phone"
+                content={phone}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+              />
             )}
             {organization && (
               <Action.CopyToClipboard
                 title="Copy Organization"
                 content={organization}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.Open}
               />
             )}
             {ccEmail && (
               <Action.CopyToClipboard
                 title="Copy Deal Name"
                 content={ccEmail}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.Duplicate}
               />
             )}
             {subtitle === "org" && (
               <Action.CopyToClipboard
                 title="Copy Organization Name"
                 content={title}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "o" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "o" },
+                }}
               />
             )}
           </ActionPanel.Section>

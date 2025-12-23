@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import {
   Action,
   ActionPanel,
@@ -8,6 +7,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Icon,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import path from "path";
@@ -82,7 +82,8 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
       }
 
       // Convert the response to a buffer
-      const buffer = await response.buffer();
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
       const homeDir = process.env.HOME;
       let dir = path.join(homeDir || "", "Downloads");
@@ -96,8 +97,6 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
       writeFileSync(downloadsPath, buffer);
 
       await afterDownload(dir);
-
-      await popToRoot();
 
       await showToast({
         style: Toast.Style.Success,
@@ -164,23 +163,31 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
   if (isLoading) {
     return (
       <Form>
-        <Form.Description text="Loading Code.Quarkus metadata... Please wait." />
+        <Form.Description text="🔄 Loading Quarkus extensions..." />
+        <Form.Description text={`Fetching available dependencies for Quarkus ${version?.platformVersion || ""}...`} />
       </Form>
     );
   }
 
-  if (!dependencies) {
+  if (!dependencies || dependencies.length === 0) {
     return (
-      <Form>
-        <Form.Description text="Failed to load dependencies. Please try again." />
-        <ActionPanel>
-          <Action
-            title="Retry"
-            onAction={() => {
-              fetchDependencies();
-            }}
-          />
-        </ActionPanel>
+      <Form
+        actions={
+          <ActionPanel>
+            <Action
+              title="Retry"
+              icon={Icon.RotateClockwise}
+              onAction={() => {
+                fetchDependencies();
+              }}
+            />
+            <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
+          </ActionPanel>
+        }
+      >
+        <Form.Description text="❌ Failed to load dependencies" />
+        <Form.Description text="Unable to fetch Quarkus extensions. Please check your connection and try again." />
       </Form>
     );
   }
@@ -189,31 +196,28 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Generate Project" />
-          <Action title="Back" onAction={pop} />
-          <Action.OpenInBrowser url={getUrl()} />
-          <Action.CopyToClipboard title="Copy Quarkus Configuration" content={getUrl()} />
-          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+          <Action.SubmitForm icon={Icon.Download} onSubmit={handleSubmit} title="Generate Project" />
+          <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
+          <Action.OpenInBrowser icon={Icon.Globe} title="Open in Browser" url={getUrl()} />
+          <Action.CopyToClipboard icon={Icon.Clipboard} title="Copy Configuration URL" content={getUrl()} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
         </ActionPanel>
       }
       navigationTitle={"Add dependencies to your new Quarkus project"}
     >
-      <Form.Description title="Quarkus version" text={version?.platformVersion + (version?.lts ? " [LTS]" : "")} />
-      <Form.Description title="Build tool" text={configuration.buildTool} />
-      <Form.Description title="Group" text={configuration.group} />
-      <Form.Description title="Artifact" text={configuration.artifact} />
-      <Form.Description title="Version" text={configuration.version} />
-      <Form.Description title="Java version" text={configuration.javaVersion} />
-      <Form.Description title="Sarter Code" text={configuration.starterCode ? "Yes" : "No"} />
+      <Form.Description text={`Quarkus version: ${version?.platformVersion + (version?.lts ? " [LTS]" : "")}`} />
+      <Form.Description text={`Build tool: ${configuration.buildTool}`} />
+      <Form.Description text={`Group: ${configuration.group}`} />
+      <Form.Description text={`Artifact: ${configuration.artifact}`} />
+      <Form.Description text={`Version: ${configuration.version}`} />
+      <Form.Description text={`Java version: ${configuration.javaVersion}`} />
+      <Form.Description text={`Starter Code: ${configuration.starterCode ? "Yes" : "No"}`} />
       <Form.Separator />
       <Form.TagPicker id="dependencies" title="Dependencies" onChange={setConfigDependencies}>
-        {dependencies.map((dep) => (
-          <Form.TagPicker.Item
-            key={dep.id + ":" + dep.order}
-            value={dep.id}
-            title={dep.name + " [" + dep.id.split(":")[1] + "]"}
-          />
-        ))}
+        {dependencies.map((dep) => {
+          const icon = dep.platform ? Icon.Star : dep.providesExampleCode ? Icon.Code : Icon.Box;
+          return <Form.TagPicker.Item key={dep.id + ":" + dep.order} value={dep.id} title={dep.name} icon={icon} />;
+        })}
       </Form.TagPicker>
     </Form>
   );

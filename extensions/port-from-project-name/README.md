@@ -5,6 +5,7 @@ A Raycast extension that generates unique 4-digit ports for your development pro
 ## Features
 
 - **Deterministic Port Generation**: Same project name always generates the same port
+- **Edit Ports**: Manually override any port to your preferred value
 - **Port History**: Keeps track of all generated ports with timestamps
 - **Quick Access**: Generate ports directly from Raycast with a simple command
 - **History Management**: View, search, and manage your port history
@@ -39,7 +40,10 @@ Use the "Port History" command to:
 - See when each port was first created and last updated
 - Search through your port history
 - Copy port numbers to clipboard
+- **Edit ports** to any value you prefer (use ⌘E or ctrl+E or the "Edit Port" action)
 - Delete individual entries or clear all history
+
+When you edit a port, it becomes "locked" - future generations for other projects will automatically avoid colliding with your custom port.
 
 ## How It Works
 
@@ -55,7 +59,9 @@ The extension uses a deterministic algorithm to generate ports:
 ## Important Notes
 
 - **Deterministic**: The same project name always generates the same port
-- **Collision possibility**: Different project names may occasionally generate the same port. With 9,000 possible ports (1000-9999), collisions are rare but possible in practice (~42% collision probability with 100 projects).
+- **Collision possibility**: Different project names may occasionally generate the same port. With 9,000 possible ports (1000-9999), collisions are rare but possible in practice (~42% collision probability with 100 projects)
+- **Edited ports are protected**: Once you manually edit a port, it won't be overwritten by future generations
+- **Smart collision avoidance**: If a generated port would conflict with a manually edited port, it automatically shifts to the next available port
 
 ## Privacy
 

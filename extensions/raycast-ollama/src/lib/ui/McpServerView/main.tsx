@@ -75,7 +75,7 @@ export function McpServerView(): React.JSX.Element {
     return <List.Item.Detail markdown={configMarkdown} />;
   }
 
-  const form = React.useRef<React.JSX.Element | undefined>();
+  const form = React.useRef<React.JSX.Element | undefined>(undefined);
   React.useEffect(() => {
     if (McpServer && !showForm) {
       form.current = <McpServerFormConfig setShow={setShowForm} config={McpServer} setConfig={setMcpServer} />;

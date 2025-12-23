@@ -1,5 +1,10 @@
 # QR Code Generator Changelog
 
+## [Maintenance] - 2025-12-12
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Enhancement] - 2025-10-03
 
 - Added a new action to copy QR code to clipboard

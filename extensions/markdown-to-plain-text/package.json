@@ -8,6 +8,10 @@
   "contributors": [
     "litomore"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -21,18 +25,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.2",
+    "@raycast/api": "^1.103.10",
     "markdown-it": "^14.1.0",
     "markdown-it-plain-text": "^0.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "2.0.4",
+    "@raycast/eslint-config": "2.1.1",
     "@types/markdown-it": "^14.1.2",
-    "@types/node": "24.0.3",
-    "@types/react": "19.1.8",
-    "eslint": "^9.29.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

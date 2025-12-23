@@ -105,12 +105,17 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
     setHistory(nextRepositories);
   }
 
-  // Converting query filter string to regexp:
-  const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
+  let data = history;
 
-  const data = history
-    .filter((r) => r.nameWithOwner.toLowerCase().includes(searchText?.toLowerCase() ?? ""))
-    .filter((r) => r.nameWithOwner.match(repositoryFilter));
+  if (searchText) {
+    data = data.filter((r) => r.nameWithOwner.toLowerCase().includes(searchText.toLowerCase()));
+  }
+
+  if (searchFilter) {
+    // Converting query filter string to regexp:
+    const repositoryFilter = `${searchFilter.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
+    data = data.filter((r) => r.nameWithOwner.match(repositoryFilter));
+  }
 
   return { data, visitRepository };
 }
@@ -153,10 +158,16 @@ export const buildCloneCommand = (
   options?: Partial<AdditionalCloneFormatOptions>,
 ): string => {
   const gitFlag = options?.gitFlags?.join(" ") ?? "";
-  const targetDir = options?.targetDir ?? "";
+  const targetDir = (options?.targetDir ?? "").replace(/"/g, '\\"');
 
   const cloneUrl = formatRepositoryUrl(repoNameWithOwner, cloneProtocol);
-  return `git clone ${gitFlag} ${cloneUrl} "${targetDir.replace(/"/g, '\\"')}"`;
+  let cloneCmd = `git clone ${gitFlag} ${cloneUrl}`;
+
+  if (targetDir) {
+    cloneCmd += ` "${targetDir}"`;
+  }
+
+  return cloneCmd;
 };
 
 type AdditionalCloneFormatOptions = {

@@ -62,7 +62,6 @@ export default function Command() {
           ? { tags: selectedTagObjects.filter((t) => t !== undefined).map((t) => t.name) }
           : {}),
       };
-      console.log("Create note body:", body);
       const response = await fetch(`${preferences.apiUrl}/api/note`, {
         method: "POST",
         headers: {
@@ -71,7 +70,6 @@ export default function Command() {
         },
         body: JSON.stringify(body),
       });
-      console.log("Create note response:", response.status, response.statusText);
 
       if (response.ok) {
         showToast({ title: "Note created successfully", style: Toast.Style.Success });

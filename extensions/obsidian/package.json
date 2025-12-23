@@ -16,7 +16,10 @@
     "adamadamsmusic",
     "fservais",
     "psychomane",
-    "denis_ufimtsev"
+    "denis_ufimtsev",
+    "sapoepsilon",
+    "theherk",
+    "chris_van_es"
   ],
   "license": "MIT",
   "preferences": [
@@ -326,7 +329,16 @@
       "title": "Daily Note",
       "subtitle": "Obsidian",
       "description": "Open daily note in Obsidian. Will create new daily note when it doesn't exist yet.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "vaultName",
+          "type": "textfield",
+          "title": "Obsidian Vault",
+          "required": false,
+          "description": "Name of Obsidian vault. If not given, a selector is presented."
+        }
+      ]
     },
     {
       "name": "createNoteCommand",
@@ -342,6 +354,15 @@
           "title": "Blank Note",
           "required": false,
           "description": "Create a blank note",
+          "default": false
+        },
+        {
+          "name": "focusContentArea",
+          "type": "checkbox",
+          "label": "Auto Focus Content Field",
+          "title": "Auto Focus Content Field",
+          "required": false,
+          "description": "Let's you auto focus on the content field rather than the name field",
           "default": false
         },
         {
@@ -596,32 +617,86 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "getVaults",
+      "title": "Get Vaults",
+      "description": "Get a list of all available Obsidian vaults with their names and paths",
+      "instructions": "Use this tool when you need to know what Obsidian vaults are available. This is useful before using other tools that require a vault name. Call this proactively if the user's request involves vaults but doesn't specify which one."
+    },
+    {
+      "name": "searchNote",
+      "title": "Search Note",
+      "description": "Search for notes in Obsidian vaults by name or content and return a list of matching notes with their locations",
+      "instructions": "Use this tool to find notes. Returns a list of matching notes with vault name and path. Does not open Obsidian. Always provide a vault name if the user specified or hinted at some vault name the note could be located in. Specifying a vault name is very important. Only keep it empty when the user did not mention anything in that direction."
+    },
+    {
+      "name": "createNote",
+      "title": "Create Note",
+      "description": "Create a new note in an Obsidian vault or create/open today's daily note",
+      "instructions": "Use this tool to create new notes or work with daily notes. For regular notes: supports tags, custom paths within vaults, and templates. For daily notes: set useDailyNote to true (requires Advanced URI plugin in Obsidian). Does not open Obsidian for regular notes unless specified. If you need to know available vaults, use getVaults first."
+    },
+    {
+      "name": "openNote",
+      "title": "Open Note",
+      "description": "Open a note in Obsidian application",
+      "instructions": "Use this tool ONLY when the user EXPLICITLY wants you to open a note in Obsidian. Do NOT use it in any other case."
+    },
+    {
+      "name": "appendNote",
+      "title": "Append to Note",
+      "description": "Append or prepend content to an existing note or today's daily note",
+      "instructions": "Use this tool to add content to existing notes or daily notes. For regular notes: provide notePath. For daily notes: set useDailyNote to true (requires Advanced URI plugin). Supports prepending, headings, and template expansion. Silent mode available for daily notes. If you need to know available vaults, use getVaults first."
+    },
+    {
+      "name": "readNote",
+      "title": "Read Note",
+      "description": "Read the full content of a specific note by its full path",
+      "instructions": "Use this tool to read the complete content of a note when you have the exact path. Use this after searchNote to get the full content of a specific note."
+    },
+    {
+      "name": "updateNote",
+      "title": "Update Note",
+      "description": "Update a note by replacing specific content with new content",
+      "instructions": "Use this tool to edit existing note content by replacing specific sections. Provide the exact text to find (oldContent) and what to replace it with (newContent). The oldContent must exactly match the text in the note. Does not open Obsidian."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.94.0",
     "@types/uuid": "^8.3.4",
     "fuse.js": "^7.0.0",
     "luxon": "^3.4.4",
+    "minisearch": "^7.1.2",
+    "pako": "^2.1.0",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/luxon": "^3.4.2",
-    "@types/node": "22.13.10",
+    "@types/node": "^22.14.1",
+    "@types/pako": "^2.0.3",
     "@types/react": "19.0.10",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^8.42.0",
     "prettier": "^2.8.8",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "vitest": "^3.1.1"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "help": "ray --help",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "test:watch": "vitest",
     "publish": "ray publish"
   },
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "version": "1.0.0"
 }

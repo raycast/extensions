@@ -1,10 +1,17 @@
 # Prism Launcher Changelog
 
+## [Fix] - 2025-12-01
+
+- Actual temp fix for windows
+- Added loading state to prevent flashing of Prism Launcher not installed
+
 ## [Fix] - 2025-11-27
+
 - Temporary fix for Windows
 - Optimisation
 
 ## [New Addition] - 2025-11-24
+
 - Added support for custom instance folders
 - Added support for custom Prism Launcher installation paths
 - Refactored code to use usePromise hook for better async handling

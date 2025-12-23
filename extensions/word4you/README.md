@@ -9,6 +9,7 @@ Raycast extension for quick/enriched UI interaction with the word4you CLI.
 - 🔄 **Bi-directional Translation**: Seamless translation between Chinese and English
 - 🤖 **Dual AI Providers**: Support for both Google Gemini and Qwen APIs
 - 📝 **Smart Classification**: Automatically detects input type (word/phrase/sentence) and language
+- ✍️ **Compose Words**: Generate sentences using two random saved words for practice
 - 😻 **Rich UI**: Beautiful interface with better UX compared to CLI
 - 🔊 **CRUD Management**: Complete management of your markdown vocabulary notebook
 
@@ -37,7 +38,8 @@ Raycast extension for quick/enriched UI interaction with the word4you CLI.
 1. **Query Explanations**: Support for words, phrases, and sentences in multiple languages
 2. **Language Detection**: Automatically detects English, Chinese, or mixed-language input
 3. **Bi-directional Translation**: Translate between Chinese and English seamlessly
-4. **Save to Vocabulary**: Store structured explanations in your markdown notebook
-5. **Update Explanations**: Refresh saved entries with new AI-generated content
-6. **Delete Entries**: Remove words from your vocabulary notebook
-7. **Provider Selection**: Choose between Gemini and Qwen AI providers
+4. **Compose Words**: Generate sentences using two random saved words with AI
+5. **Save to Vocabulary**: Store structured explanations in your markdown notebook
+6. **Update Explanations**: Refresh saved entries with new AI-generated content
+7. **Delete Entries**: Remove words from your vocabulary notebook
+8. **Provider Selection**: Choose between Gemini and Qwen AI providers

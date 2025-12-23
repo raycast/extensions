@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useState } from "react";
-import { DiaListItems } from "./components/DiaListItems";
-import { useBookmarkSearch } from "./hooks/useBookmarkSearch";
+import { useBookmarkSearch } from "./bookmarks";
+import { BookmarkListItem } from "./components/BookmarkListItem";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
@@ -62,7 +62,7 @@ export default function Command() {
       {!searchText && folders.length > 0 && (
         <List.Section title="Folders">
           {folders.map((item) => (
-            <DiaListItems.Bookmark key={item.id} item={item} onNavigate={handleNavigate} />
+            <BookmarkListItem key={item.id} item={item} onNavigate={handleNavigate} />
           ))}
         </List.Section>
       )}
@@ -70,7 +70,7 @@ export default function Command() {
       {!searchText && bookmarks.length > 0 && (
         <List.Section title={folders.length > 0 ? "Bookmarks" : undefined}>
           {bookmarks.map((item) => (
-            <DiaListItems.Bookmark key={item.id} item={item} onNavigate={handleNavigate} />
+            <BookmarkListItem key={item.id} item={item} onNavigate={handleNavigate} />
           ))}
         </List.Section>
       )}
@@ -78,7 +78,7 @@ export default function Command() {
       {searchText && items.length > 0 && (
         <List.Section title={`${items.length} result${items.length !== 1 ? "s" : ""}`}>
           {items.map((item) => (
-            <DiaListItems.Bookmark key={item.id} item={item} onNavigate={handleNavigate} />
+            <BookmarkListItem key={item.id} item={item} onNavigate={handleNavigate} />
           ))}
         </List.Section>
       )}

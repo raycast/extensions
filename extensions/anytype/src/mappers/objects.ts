@@ -10,7 +10,7 @@ import {
   SpaceObject,
   SpaceObjectWithBody,
 } from "../models";
-import { bundledPropKeys, getIconWithFallback, propKeys } from "../utils";
+import { bundledPropKeys, getIconWithFallback, getNameWithSnippetFallback, linkedItemsMax, propKeys } from "../utils";
 import { mapTag } from "./properties";
 import { mapType } from "./types";
 
@@ -26,9 +26,7 @@ export async function mapObjects(objects: RawSpaceObject[]): Promise<SpaceObject
       return {
         ...object,
         icon: await getIconWithFallback(object.icon, object.layout, object.type),
-        name:
-          object.name?.trim() ||
-          (object.snippet.includes("\n") ? `${object.snippet.split("\n")[0]}...` : object.snippet || "Untitled"),
+        name: getNameWithSnippetFallback(object.name, object.snippet),
         type: await mapType(object.type),
         properties: await Promise.all(
           (object.properties?.filter((property) => {
@@ -102,9 +100,14 @@ export async function mapObject(
           break;
         case PropertyFormat.Files:
           if (property.files) {
+            const originalCount = Array.isArray(property.files) ? property.files.length : 0;
+            const limitedFiles = Array.isArray(property.files)
+              ? property.files.slice(0, linkedItemsMax)
+              : property.files;
             mappedProperty = {
               ...mappedProperty,
-              files: await mapObjectWithoutProperties(object.space_id, property.files),
+              files: await mapObjectWithoutProperties(object.space_id, limitedFiles),
+              moreCount: Math.max(0, originalCount - (Array.isArray(limitedFiles) ? limitedFiles.length : 0)),
             };
           }
           break;
@@ -134,9 +137,14 @@ export async function mapObject(
           break;
         case PropertyFormat.Objects:
           if (property.objects) {
+            const originalCount = Array.isArray(property.objects) ? property.objects.length : 0;
+            const limitedObjects = Array.isArray(property.objects)
+              ? property.objects.slice(0, linkedItemsMax)
+              : property.objects;
             mappedProperty = {
               ...mappedProperty,
-              objects: await mapObjectWithoutProperties(object.space_id, property.objects),
+              objects: await mapObjectWithoutProperties(object.space_id, limitedObjects),
+              moreCount: Math.max(0, originalCount - (Array.isArray(limitedObjects) ? limitedObjects.length : 0)),
             };
           }
           break;
@@ -151,9 +159,7 @@ export async function mapObject(
   return {
     ...object,
     icon,
-    name:
-      object.name?.trim() ||
-      (object.snippet.includes("\n") ? `${object.snippet.split("\n")[0]}...` : object.snippet || "Untitled"),
+    name: getNameWithSnippetFallback(object.name, object.snippet),
     type: await mapType(object.type),
     properties: mappedProperties,
   };

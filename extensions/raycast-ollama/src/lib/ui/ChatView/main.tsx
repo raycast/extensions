@@ -18,7 +18,7 @@ import { RaycastImage } from "../../types";
  * Return JSX element for chat view.
  * @returns {JSX.Element} Raycast Chat View.
  */
-export function ChatView(): JSX.Element {
+export function ChatView() {
   const {
     data: ChatNames,
     revalidate: RevalidateChatNames,
@@ -88,7 +88,7 @@ export function ChatView(): JSX.Element {
    * @param props - Selected Chat Message
    * @returns Action Panel
    */
-  function ActionMessage(props: { message?: RaycastChatMessage }): JSX.Element {
+  function ActionMessage(props: { message?: RaycastChatMessage }) {
     return (
       <ActionPanel>
         {!IsLoading && Query && Chat && ChatModelsAvailable && (
@@ -215,7 +215,7 @@ export function ChatView(): JSX.Element {
    * @param props - Chat Message
    * @returns JSX Element
    */
-  function DetailMetadataMessage(props: { message: RaycastChatMessage }): JSX.Element {
+  function DetailMetadataMessage(props: { message: RaycastChatMessage }) {
     return (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Model" text={props.message.model} />
