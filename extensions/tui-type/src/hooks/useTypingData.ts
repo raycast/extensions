@@ -8,24 +8,19 @@ export const useSupportedLanguages = () => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    let mounted = true;
     setIsLoading(true);
 
     typingService
       .getLanguages()
       .then((data) => {
-        if (mounted) setLanguages(data);
+        setLanguages(data);
       })
       .catch((err) => {
-        if (mounted) setError(err);
+        setError(err);
       })
       .finally(() => {
-        if (mounted) setIsLoading(false);
+        setIsLoading(false);
       });
-
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   return { languages, isLoading, error };
@@ -38,7 +33,6 @@ export const useTypingContent = (language: string, mode: Mode) => {
   useEffect(() => {
     if (!language) return;
 
-    let mounted = true;
     setIsLoading(true);
     setContent(null);
 
@@ -49,18 +43,14 @@ export const useTypingContent = (language: string, mode: Mode) => {
 
     fetcher
       .then((data) => {
-        if (mounted) setContent(data);
+        setContent(data);
       })
       .catch((err) => {
         console.error(err);
       })
       .finally(() => {
-        if (mounted) setIsLoading(false);
+        setIsLoading(false);
       });
-
-    return () => {
-      mounted = false;
-    };
   }, [language, mode]);
 
   return { content, isLoading };

@@ -145,7 +145,11 @@ export function useTest(
   useEffect(() => {
     if (typingDataIsLoading) return;
 
-    resetTest();
+    const debounceTimeout = setTimeout(() => {
+      resetTest();
+    }, 50);
+
+    return () => clearTimeout(debounceTimeout);
   }, [limit, typingDataIsLoading, usePunctuation, useNumbers]);
 
   const onSelectionChange = (id: string | null) => {

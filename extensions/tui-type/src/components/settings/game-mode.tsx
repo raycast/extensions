@@ -17,6 +17,21 @@ export function ModeSettingsForm() {
     setUseNumbers,
   } = useSettingsStore();
 
+  const timeOptions = [15, 30, 60, 120];
+  const wordOptions = [10, 25, 50, 100];
+  const quoteOptions = QUOTE_GROUPS;
+
+  const setModeAndOptions = (newMode: Mode) => {
+    setMode(newMode);
+    if (newMode === "time") {
+      setLimit(timeOptions[0]);
+    } else if (newMode === "words") {
+      setLimit(wordOptions[0]);
+    } else if (newMode === "quote") {
+      setLimit(quoteOptions[0].id);
+    }
+  };
+
   return (
     <Form
       actions={
@@ -29,7 +44,7 @@ export function ModeSettingsForm() {
         id="mode"
         title="Game Mode"
         value={mode}
-        onChange={(val) => setMode(val as Mode)}
+        onChange={(val) => setModeAndOptions(val as Mode)}
       >
         <Form.Dropdown.Item
           value="time"
@@ -51,7 +66,7 @@ export function ModeSettingsForm() {
           value={`${limit}`}
           onChange={(val) => setLimit(+val)}
         >
-          {[15, 30, 60, 120].map((val) => (
+          {timeOptions.map((val) => (
             <Form.Dropdown.Item
               key={val}
               value={val.toString()}
@@ -68,7 +83,7 @@ export function ModeSettingsForm() {
           value={`${limit}`}
           onChange={(val) => setLimit(+val)}
         >
-          {[10, 25, 50, 100].map((val) => (
+          {wordOptions.map((val) => (
             <Form.Dropdown.Item
               key={val}
               value={val.toString()}
@@ -85,7 +100,7 @@ export function ModeSettingsForm() {
           value={`${limit}`}
           onChange={(val) => setLimit(+val)}
         >
-          {QUOTE_GROUPS.map((grp) => (
+          {quoteOptions.map((grp) => (
             <Form.Dropdown.Item
               key={grp.id}
               value={grp.id.toString()}
@@ -95,7 +110,6 @@ export function ModeSettingsForm() {
         </Form.Dropdown>
       )}
 
-      {/* NEW: Toggles for Punctuation and Numbers */}
       {mode !== "quote" && (
         <>
           <Form.Separator />
