@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "get-api-key",
+  "title": "Hockeystack Utils",
+  "description": "Hockeystack Utils",
+  "icon": "extension-icon.png",
+  "author": "leofmds",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "hockeyStackPath",
+      "title": "HockeyStack Path",
+      "placeholder": "/path/to/your/hockeystack/project",
+      "label": "",
+      "description": "Absolute path to HockeyStack project. Mandatory so we can find the customer and run scripts",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "apikey",
+      "title": "Apikey",
+      "description": "Get the API key from a customer",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "customer",
+          "type": "text",
+          "placeholder": "hockeystack",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "impersonate",
+      "title": "Impersonate",
+      "description": "Impersonate a customer",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "customer",
+          "type": "text",
+          "placeholder": "hockeystack",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "timestamp",
+      "title": "Timestamp",
+      "description": "Get the timestamp from a date",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "year",
+          "type": "text",
+          "placeholder": "2025",
+          "required": true
+        },
+        {
+          "name": "month",
+          "type": "text",
+          "placeholder": "01",
+          "required": true
+        },
+        {
+          "name": "day",
+          "type": "text",
+          "placeholder": "01",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "pdd",
+      "title": "Pull Dev Data",
+      "description": "Pull development data for a customer using pull_dev_data.py",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "customer",
+          "type": "text",
+          "placeholder": "hockeystack",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "unapikey",
+      "title": "Unapikey",
+      "description": "Get the domain name from an API key",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "apikey",
+          "type": "text",
+          "placeholder": "abc123...",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
