@@ -16,38 +16,19 @@ import {
   getPreferenceValues,
   LaunchProps,
   open,
-  confirmAlert,
-  Alert,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import {
-  detectIOCType,
-  defangIOC,
-  refangIOC,
-  extractIOCStrings,
-} from "./utils/ioc-detection";
+import { detectIOCType, defangIOC, refangIOC } from "./utils/ioc-detection";
 import { getEnabledSourcesForIOCType } from "./utils/osint-sources";
 import { buildSearchURL } from "./utils/url-builder";
 import {
   IOCType,
   IOCDetectionResult,
   OSINTSource,
-  ExtensionPreferences,
   SearchResult,
 } from "./types";
-import {
-  addRecentIOC,
-  getStoredIOCs,
-  removeIOC,
-  StoredIOC,
-  toggleStarIOC,
-  clearHistory,
-} from "./utils/storage";
-
-interface IOCWithResults {
-  detection: IOCDetectionResult;
-  results: SearchResult[];
-}
+import { getFavorites, toggleFavorite } from "./utils/favorites";
 
 interface SearchIOCArguments {
   ioc?: string;
@@ -60,18 +41,17 @@ export default function SearchIOCCommand(
   const [iocDetection, setIocDetection] = useState<IOCDetectionResult | null>(
     null,
   );
-  const [iocResults, setIocResults] = useState<IOCWithResults[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [storedIOCs, setStoredIOCs] = useState<StoredIOC[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  // Load stored IOCs on mount
+  // Load favorites on mount
   useEffect(() => {
-    const loadStored = async () => {
-      const items = await getStoredIOCs();
-      setStoredIOCs(items);
+    const loadFavorites = async () => {
+      const favs = await getFavorites();
+      setFavorites(favs);
     };
-    loadStored();
+    loadFavorites();
   }, []);
 
   // Auto-detect IOC type when search text changes
@@ -79,7 +59,7 @@ export default function SearchIOCCommand(
     const detectAndSearch = async () => {
       if (!searchText.trim()) {
         setIocDetection(null);
-        setIocResults([]);
+        setSearchResults([]);
         return;
       }
 
@@ -87,76 +67,51 @@ export default function SearchIOCCommand(
 
       try {
         // Get preferences inside the effect
-        const preferences = getPreferenceValues<ExtensionPreferences>();
-        // Extract IOC-like tokens from arbitrary pasted text (emails, logs, etc.)
-        const lines = extractIOCStrings(searchText).map((part) => part.trim());
+        const preferences = getPreferenceValues();
 
-        if (lines.length === 0) {
-          setIocDetection(null);
-          setIocResults([]);
-          return;
-        }
+        // Refang the IOC first if it's defanged
+        const refangedIOC = refangIOC(searchText.trim());
+        const detection = detectIOCType(refangedIOC);
+        setIocDetection(detection);
 
-        const perIocResults: IOCWithResults[] = [];
-        let firstDetection: IOCDetectionResult | null = null;
+        if (detection.isValid && detection.type !== "unknown") {
+          // Get enabled sources for this IOC type
+          const sources = getEnabledSourcesForIOCType(
+            detection.type,
+            preferences,
+          );
 
-        for (const line of lines) {
-          const refangedIOC = refangIOC(line);
-          const detection = detectIOCType(refangedIOC);
-
-          if (!firstDetection) {
-            firstDetection = detection;
-          }
-
-          if (detection.isValid && detection.type !== "unknown") {
-            const sources = await getEnabledSourcesForIOCType(
+          // Build search results
+          const results: SearchResult[] = [];
+          for (const source of sources) {
+            const url = await buildSearchURL(
+              source.id,
+              detection.value,
               detection.type,
-              preferences,
             );
-
-            const results: SearchResult[] = [];
-            for (const source of sources) {
-              const url = await buildSearchURL(
-                source.id,
-                detection.value,
-                detection.type,
-              );
-              results.push({
-                source,
-                url,
-                ioc: detection.value,
-                iocType: detection.type,
-              });
-            }
-
-            if (results.length > 0) {
-              perIocResults.push({ detection, results });
-
-              await addRecentIOC(detection.value, detection.type);
-            }
+            results.push({
+              source,
+              url,
+              ioc: detection.value,
+              iocType: detection.type,
+            });
           }
-        }
 
-        const updatedStored = await getStoredIOCs();
-        setStoredIOCs(updatedStored);
-        setIocDetection(firstDetection);
-        setIocResults(perIocResults);
-
-        if (perIocResults.length === 0 && searchText.length > 3) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Unknown or Unsupported IOCs",
-            message:
-              "Could not detect valid IOC types. Try a specific search command.",
-          });
+          setSearchResults(results);
+        } else {
+          setSearchResults([]);
+          if (searchText.length > 3) {
+            showFailureToast({
+              title: "Unknown IOC Type",
+              message: "Could not detect IOC type. Try a specific search command.",
+            });
+          }
         }
       } catch (error) {
         console.error("Error detecting IOC:", error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message:
-            error instanceof Error ? error.message : "Failed to detect IOC",
+        showFailureToast({
+          title: "Error detecting IOC",
+          message: error.message,
         });
       } finally {
         setIsLoading(false);
@@ -168,7 +123,47 @@ export default function SearchIOCCommand(
   }, [searchText]);
 
   // Get preferences for the render
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues();
+
+  // Consolidate EmptyView props to ensure only one `List.EmptyView` is rendered
+  const emptyViewProps = (() => {
+    if (!searchText) {
+      return {
+        icon: { source: Icon.MagnifyingGlass, tintColor: Color.SecondaryText },
+        title: "Search for IOCs",
+        description:
+          "Enter an IP address, domain, URL, or file hash to search across OSINT platforms",
+      } as const;
+    }
+
+    if (searchText && !iocDetection) {
+      return {
+        icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
+        title: "Detecting IOC Type...",
+        description: "Analyzing your input...",
+      } as const;
+    }
+
+    if (iocDetection && !iocDetection.isValid) {
+      return {
+        icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
+        title: "Invalid IOC",
+        description:
+          "Could not detect a valid IOC type. Try using a specific search command.",
+      } as const;
+    }
+
+    if (iocDetection && iocDetection.isValid && searchResults.length === 0) {
+      return {
+        icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
+        title: "No Sources Available",
+        description:
+          "No OSINT sources are enabled for this IOC type. Check your preferences.",
+      } as const;
+    }
+
+    return null;
+  })();
 
   // Get IOC type icon and color
   const getIOCTypeDisplay = (
@@ -200,23 +195,11 @@ export default function SearchIOCCommand(
       "IP Intelligence": "🌐",
       "URL/Domain Analysis": "🔗",
       "Malware Analysis": "🦠",
-      "Threat Intelligence": "📡",
+      "Threat Feeds": "📡",
       "Certificate/SSL": "🔒",
     };
     return icons[category] || "🔍";
   };
-
-  const filteredResults = (results: SearchResult[]): SearchResult[] => {
-    if (selectedCategory === "all") {
-      return results;
-    }
-    return results.filter(
-      (result) => result.source.category === selectedCategory,
-    );
-  };
-
-  const starredIOCs = storedIOCs.filter((item) => item.starred);
-  const recentIOCs = storedIOCs.filter((item) => !item.starred);
 
   return (
     <List
@@ -224,443 +207,170 @@ export default function SearchIOCCommand(
       searchBarPlaceholder="Enter IOC (IP, domain, URL, or hash)..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarAccessory={
-        storedIOCs.length > 0 || iocResults.length > 0 ? (
-          <List.Dropdown
-            tooltip="Filter by Source Category"
-            storeValue
-            onChange={setSelectedCategory}
-          >
-            <List.Dropdown.Item title="All Categories" value="all" />
-            <List.Dropdown.Item title="Multi-Purpose" value="Multi-Purpose" />
-            <List.Dropdown.Item
-              title="IP Intelligence"
-              value="IP Intelligence"
-            />
-            <List.Dropdown.Item
-              title="URL/Domain Analysis"
-              value="URL/Domain Analysis"
-            />
-            <List.Dropdown.Item
-              title="Malware Analysis"
-              value="Malware Analysis"
-            />
-            <List.Dropdown.Item
-              title="Threat Intelligence"
-              value="Threat Intelligence"
-            />
-            <List.Dropdown.Item
-              title="Certificate/SSL"
-              value="Certificate/SSL"
-            />
-          </List.Dropdown>
-        ) : undefined
-      }
       throttle
     >
-      {!searchText && storedIOCs.length === 0 && (
-        <List.EmptyView
-          icon={{
-            source: Icon.MagnifyingGlass,
-            tintColor: Color.SecondaryText,
-          }}
-          title="Search for IOCs"
-          description="Paste logs, emails, or text blobs and we'll extract IOCs automatically (IPs, domains, URLs, hashes, emails)."
-        />
-      )}
-
-      {!searchText && storedIOCs.length > 0 && (
+      {emptyViewProps && <List.EmptyView {...emptyViewProps} />}
+      {iocDetection && iocDetection.isValid && searchResults.length > 0 && (
         <>
-          {starredIOCs.length > 0 && (
-            <List.Section title="Starred IOCs">
-              {starredIOCs.map((item) => {
-                const typeDisplay = getIOCTypeDisplay(item.type);
-                return (
-                  <List.Item
-                    key={`starred-${item.type}-${item.value}`}
-                    icon={{
-                      source: typeDisplay.icon,
-                      tintColor: typeDisplay.color,
-                    }}
-                    title={item.value}
-                    subtitle={typeDisplay.label}
-                    accessories={[{ icon: Icon.Star }]}
-                    actions={
-                      <ActionPanel>
-                        <Action
-                          title="Search This Ioc"
-                          icon={Icon.MagnifyingGlass}
-                          onAction={() => setSearchText(item.value)}
-                        />
-                        <Action
-                          title="Unstar Ioc"
-                          icon={Icon.StarDisabled}
-                          onAction={async () => {
-                            await toggleStarIOC(item.value, item.type);
-                            const updated = await getStoredIOCs();
-                            setStoredIOCs(updated);
-                          }}
-                        />
-                        <Action
-                          title="Remove from History"
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          onAction={async () => {
-                            await removeIOC(item.value, item.type);
-                            const updated = await getStoredIOCs();
-                            setStoredIOCs(updated);
-                          }}
-                        />
-                        <Action
-                          title="Clear All History"
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          shortcut={{
-                            modifiers: ["cmd", "shift"],
-                            key: "delete",
-                          }}
-                          onAction={async () => {
-                            if (
-                              await confirmAlert({
-                                title: "Clear All History?",
-                                message: "This action cannot be undone.",
-                                primaryAction: {
-                                  title: "Clear History",
-                                  style: Alert.ActionStyle.Destructive,
-                                },
-                              })
-                            ) {
-                              await clearHistory();
-                              setStoredIOCs([]);
-                              showToast({
-                                style: Toast.Style.Success,
-                                title: "History Cleared",
-                              });
-                            }
-                          }}
-                        />
-                      </ActionPanel>
-                    }
-                  />
-                );
-              })}
-            </List.Section>
-          )}
+          <List.Section
+            title={`${getIOCTypeDisplay(iocDetection.type).label} Detected`}
+            subtitle={`${searchResults.length} sources available`}
+          >
+            {searchResults.map((result: SearchResult) => {
+              const typeDisplay = getIOCTypeDisplay(result.iocType);
+              const categoryIcon = getCategoryIcon(result.source.category);
 
-          {recentIOCs.length > 0 && (
-            <List.Section title="Recent IOCs">
-              {recentIOCs.map((item) => {
-                const typeDisplay = getIOCTypeDisplay(item.type);
-                return (
-                  <List.Item
-                    key={`recent-${item.type}-${item.value}`}
-                    icon={{
-                      source: typeDisplay.icon,
-                      tintColor: typeDisplay.color,
-                    }}
-                    title={item.value}
-                    subtitle={typeDisplay.label}
-                    actions={
-                      <ActionPanel>
-                        <Action
-                          title="Search This Ioc"
-                          icon={Icon.MagnifyingGlass}
-                          onAction={() => setSearchText(item.value)}
-                        />
-                        <Action
-                          title="Star Ioc"
-                          icon={Icon.Star}
-                          onAction={async () => {
-                            await toggleStarIOC(item.value, item.type);
-                            const updated = await getStoredIOCs();
-                            setStoredIOCs(updated);
-                          }}
-                        />
-                        <Action
-                          title="Remove from History"
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          onAction={async () => {
-                            await removeIOC(item.value, item.type);
-                            const updated = await getStoredIOCs();
-                            setStoredIOCs(updated);
-                          }}
-                        />
-                        <Action
-                          title="Clear All History"
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          shortcut={{
-                            modifiers: ["cmd", "shift"],
-                            key: "delete",
-                          }}
-                          onAction={async () => {
-                            if (
-                              await confirmAlert({
-                                title: "Clear All History?",
-                                message: "This action cannot be undone.",
-                                primaryAction: {
-                                  title: "Clear History",
-                                  style: Alert.ActionStyle.Destructive,
-                                },
-                              })
-                            ) {
-                              await clearHistory();
-                              setStoredIOCs([]);
-                              showToast({
-                                style: Toast.Style.Success,
-                                title: "History Cleared",
-                              });
-                            }
-                          }}
-                        />
-                      </ActionPanel>
-                    }
-                  />
-                );
-              })}
-            </List.Section>
-          )}
-        </>
-      )}
-
-      {searchText && !iocDetection && (
-        <List.EmptyView
-          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-          title="Detecting IOC Type..."
-          description="Analyzing your input..."
-        />
-      )}
-
-      {iocDetection && !iocDetection.isValid && (
-        <List.EmptyView
-          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-          title="Invalid IOC"
-          description="Could not detect a valid IOC type. Try using a specific search command."
-        />
-      )}
-
-      {iocDetection && iocDetection.isValid && iocResults.length === 0 && (
-        <List.EmptyView
-          icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
-          title="No Sources Available"
-          description="No OSINT sources are enabled for this IOC type. Check your preferences."
-        />
-      )}
-
-      {iocResults.length > 0 && (
-        <>
-          {iocResults.map(({ detection, results }) => {
-            const filtered = filteredResults(results);
-            if (filtered.length === 0) {
-              return null;
-            }
-
-            const typeDisplay = getIOCTypeDisplay(detection.type);
-
-            const countsByCategory = filtered.reduce<Record<string, number>>(
-              (acc, r) => {
-                acc[r.source.category] = (acc[r.source.category] ?? 0) + 1;
-                return acc;
-              },
-              {},
-            );
-
-            const summaryText =
-              Object.entries(countsByCategory)
-                .map(([cat, count]) => `${count} ${cat}`)
-                .join(" • ") || `${filtered.length} sources`;
-
-            const summaryOnly = Boolean(preferences.summary_only_mode);
-
-            return (
-              <List.Section
-                key={`${detection.type}-${detection.value}`}
-                title={`${detection.value}`}
-                subtitle={`${typeDisplay.label} • ${filtered.length} sources`}
-              >
+              return (
                 <List.Item
-                  key={`${detection.value}-summary`}
-                  icon={{
-                    source: typeDisplay.icon,
-                    tintColor: typeDisplay.color,
-                  }}
-                  title="Summary"
-                  subtitle={summaryText}
-                  accessories={[{ text: `${filtered.length} sources` }]}
+                  key={result.source.id}
+                  id={result.source.id}
+                  icon={{ source: Icon.Globe, tintColor: typeDisplay.color }}
+                  title={result.source.name}
+                  subtitle={result.source.description}
+                  accessories={[
+                    { text: result.source.category, icon: categoryIcon },
+                    result.source.isFree
+                      ? {
+                          text: "Free",
+                          icon: Icon.Check,
+                          tooltip: "Free to use",
+                        }
+                      : {
+                          text: "Paid",
+                          icon: Icon.Lock,
+                          tooltip: "Requires subscription",
+                        },
+                    favorites.includes(result.source.id)
+                      ? {
+                          icon: Icon.Star,
+                          tooltip: "Favorite",
+                        }
+                      : {},
+                  ]}
                   actions={
                     <ActionPanel>
-                      <Action
-                        title="Open All Sources for This Ioc"
-                        icon={Icon.AppWindowGrid3x3}
-                        shortcut={{
-                          modifiers: ["cmd", "shift"],
-                          key: "o",
-                        }}
-                        onAction={async () => {
-                          const toOpen = filtered.slice(0, 5);
-                          for (const res of toOpen) {
-                            await open(res.url);
-                          }
-                          if (filtered.length > 5) {
+                      <ActionPanel.Section title="Actions">
+                        <Action.OpenInBrowser
+                          title={`Search in ${result.source.name}`}
+                          url={result.url}
+                          icon={Icon.MagnifyingGlass}
+                          onOpen={() => {
+                            if (preferences.copy_on_select) {
+                              Clipboard.copy(result.ioc);
+                              showToast({
+                                style: Toast.Style.Success,
+                                title: "IOC Copied",
+                                message: `${result.ioc} copied to clipboard`,
+                              });
+                            }
+                          }}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Search URL"
+                          content={result.url}
+                          shortcut={{ modifiers: ["cmd"], key: "c" }}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Ioc"
+                          content={result.ioc}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Defanged Ioc"
+                          content={defangIOC(result.ioc, result.iocType)}
+                          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section title="Open All">
+                        <Action
+                          title="Open All Favorites"
+                          icon={Icon.Star}
+                          shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
+                          onAction={async () => {
+                            const favoriteResults = searchResults.filter(
+                              (res) => favorites.includes(res.source.id),
+                            );
+                            if (favoriteResults.length === 0) {
+                              await showFailureToast(
+                                new Error("No favorite sources for this IOC type"),
+                                { title: "No Favorites" }
+                              );
+                              return;
+                            }
+                            for (const res of favoriteResults) {
+                              await open(res.url);
+                            }
                             showToast({
                               style: Toast.Style.Success,
-                              title: "Opened First 5 Sources",
-                              message: `${filtered.length - 5} more sources available`,
+                              title: "Opened Favorites",
+                              message: `Opened ${favoriteResults.length} favorite sources`,
                             });
+                          }}
+                        />
+                        <Action
+                          title="Open All Sources"
+                          icon={Icon.AppWindowGrid3x3}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                          onAction={async () => {
+                            for (const res of searchResults) {
+                              await open(res.url);
+                            }
+                            showToast({
+                              style: Toast.Style.Success,
+                              title: "Opened All Sources",
+                              message: `Opened ${searchResults.length} sources`,
+                            });
+                          }}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section title="Favorites">
+                        <Action
+                          title={
+                            favorites.includes(result.source.id)
+                              ? "Remove from Favorites"
+                              : "Add to Favorites"
                           }
-                        }}
-                      />
+                          icon={
+                            favorites.includes(result.source.id)
+                              ? Icon.StarDisabled
+                              : Icon.Star
+                          }
+                          shortcut={{ modifiers: ["cmd"], key: "f" }}
+                          onAction={async () => {
+                            const newIsFavorite = await toggleFavorite(
+                              result.source.id,
+                            );
+                            const updatedFavorites = await getFavorites();
+                            setFavorites(updatedFavorites);
+                            showToast({
+                              style: Toast.Style.Success,
+                              title: newIsFavorite
+                                ? "Added to Favorites"
+                                : "Removed from Favorites",
+                              message: result.source.name,
+                            });
+                          }}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section title="Info">
+                        <Action.Push
+                          title="View Source Details"
+                          icon={Icon.Info}
+                          target={
+                            <SourceDetailView
+                              source={result.source}
+                              ioc={result.ioc}
+                              url={result.url}
+                            />
+                          }
+                        />
+                      </ActionPanel.Section>
                     </ActionPanel>
                   }
                 />
-
-                {!summaryOnly &&
-                  filtered.map((result) => {
-                    const resultTypeDisplay = getIOCTypeDisplay(result.iocType);
-                    const categoryIcon = getCategoryIcon(
-                      result.source.category,
-                    );
-
-                    return (
-                      <List.Item
-                        key={`${detection.value}-${result.source.id}`}
-                        id={result.source.id}
-                        icon={{
-                          source: Icon.Globe,
-                          tintColor: resultTypeDisplay.color,
-                        }}
-                        title={result.source.name}
-                        subtitle={result.source.description}
-                        accessories={[
-                          { text: result.source.category, icon: categoryIcon },
-                          result.source.isFree
-                            ? {
-                                text: "Free",
-                                icon: Icon.Check,
-                                tooltip: "Free to use",
-                              }
-                            : {
-                                text: "Paid",
-                                icon: Icon.Lock,
-                                tooltip: "Requires subscription",
-                              },
-                        ]}
-                        actions={
-                          <ActionPanel>
-                            <ActionPanel.Section title="Actions">
-                              <Action.OpenInBrowser
-                                title={`Search in ${result.source.name}`}
-                                url={result.url}
-                                icon={Icon.MagnifyingGlass}
-                                onOpen={() => {
-                                  if (preferences.copy_on_select) {
-                                    Clipboard.copy(result.ioc);
-                                    showToast({
-                                      style: Toast.Style.Success,
-                                      title: "IOC Copied",
-                                      message: `${result.ioc} copied to clipboard`,
-                                    });
-                                  }
-                                }}
-                              />
-                              <Action.CopyToClipboard
-                                title="Copy Search URL"
-                                content={result.url}
-                                shortcut={{ modifiers: ["cmd"], key: "c" }}
-                              />
-                              <Action.CopyToClipboard
-                                title="Copy Ioc"
-                                content={result.ioc}
-                                shortcut={{
-                                  modifiers: ["cmd", "shift"],
-                                  key: "c",
-                                }}
-                              />
-                              <Action.CopyToClipboard
-                                title="Copy Defanged Ioc"
-                                content={defangIOC(result.ioc, result.iocType)}
-                                shortcut={{
-                                  modifiers: ["cmd", "opt"],
-                                  key: "c",
-                                }}
-                              />
-                              <Action
-                                title="Open All Sources for This Ioc"
-                                icon={Icon.AppWindowGrid3x3}
-                                shortcut={{
-                                  modifiers: ["cmd", "shift"],
-                                  key: "o",
-                                }}
-                                onAction={async () => {
-                                  const toOpen = filtered.slice(0, 5);
-                                  for (const res of toOpen) {
-                                    await open(res.url);
-                                  }
-                                  if (filtered.length > 5) {
-                                    showToast({
-                                      style: Toast.Style.Success,
-                                      title: "Opened First 5 Sources",
-                                      message: `${filtered.length - 5} more sources available`,
-                                    });
-                                  }
-                                }}
-                              />
-                            </ActionPanel.Section>
-                            <ActionPanel.Section title="Info">
-                              <Action.Push
-                                title="View Source Details"
-                                icon={Icon.Info}
-                                target={
-                                  <SourceDetailView
-                                    source={result.source}
-                                    ioc={result.ioc}
-                                    url={result.url}
-                                  />
-                                }
-                              />
-
-                              {detection.type === "email" &&
-                                preferences.show_hibp_quick_link !== false &&
-                                (() => {
-                                  const hibp = filtered.find(
-                                    (r) => r.source.id === "haveibeenpwned",
-                                  );
-                                  if (!hibp) return null;
-                                  return (
-                                    <List.Item
-                                      key={`${detection.value}-hibp`}
-                                      icon={{
-                                        source: Icon.Envelope,
-                                        tintColor: Color.Yellow,
-                                      }}
-                                      title="Quick Check: Have I Been Pwned"
-                                      subtitle="Check if this email appeared in a breach"
-                                      accessories={[]}
-                                      actions={
-                                        <ActionPanel>
-                                          <Action.OpenInBrowser
-                                            title="Open Have I Been Pwned"
-                                            url={hibp.url}
-                                          />
-                                          <Action.CopyToClipboard
-                                            title="Copy Hibp URL"
-                                            content={hibp.url}
-                                          />
-                                        </ActionPanel>
-                                      }
-                                    />
-                                  );
-                                })()}
-                            </ActionPanel.Section>
-                          </ActionPanel>
-                        }
-                      />
-                    );
-                  })}
-              </List.Section>
-            );
-          })}
+              );
+            })}
+          </List.Section>
         </>
       )}
     </List>
