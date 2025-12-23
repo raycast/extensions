@@ -4,10 +4,8 @@ import { CalendarEvent } from './types';
 import { executeJxa, useCalendar } from './useCalendar';
 
 export default function Command() {
-  const { isLoading, results, parse } = useCalendar();
+  const { isLoading, results, calendars, parse } = useCalendar();
   const preferences = getPreferenceValues();
-
-  const calendars = String(preferences.calendars).split(',');
   const focusOnComplete = preferences.focus;
 
   const createEvent = async (item: CalendarEvent, calendarName: string) => {
@@ -45,18 +43,43 @@ export default function Command() {
     executeJxa(script);
   };
 
+  const getSubtitle = (item: CalendarEvent) => {
+    const dateStr = formatDate(item) || 'No date';
+    if (item.matchedCalendar) {
+      return `${dateStr} → ${item.matchedCalendar}`;
+    }
+    return dateStr;
+  };
+
+  const getOrderedCalendars = (item: CalendarEvent) => {
+    if (!item.matchedCalendar) {
+      return calendars;
+    }
+    // Put matched calendar first
+    return [item.matchedCalendar, ...calendars.filter((c) => c !== item.matchedCalendar)];
+  };
+
   return (
-    <List isLoading={isLoading} onSearchTextChange={parse} searchBarPlaceholder="E.g. Movie at 7pm on Friday" throttle>
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={parse}
+      searchBarPlaceholder="E.g. Movie at 7pm on Friday /work"
+      throttle
+    >
       <List.Section title="Your quick event">
         {results.map((item) => (
           <List.Item
             key={item.id}
             title={item.eventTitle || 'Untitled event'}
-            subtitle={formatDate(item) || 'No date'}
+            subtitle={getSubtitle(item)}
             icon={Icon.Calendar}
+            accessories={[
+              ...(item.timezone ? [{ tag: { value: item.timezone, color: '#34C759' } }] : []),
+              ...(item.matchedCalendar ? [{ tag: { value: item.matchedCalendar, color: '#007AFF' } }] : []),
+            ]}
             actions={
-              <ActionPanel title="Add to a different calendar">
-                {calendars.map((calendar, index) => (
+              <ActionPanel title="Add to calendar">
+                {getOrderedCalendars(item).map((calendar, index) => (
                   <Action
                     key={calendar}
                     title={`Add to '${calendar}' Calendar`}

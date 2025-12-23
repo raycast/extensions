@@ -50,7 +50,20 @@ export const formatDate = (item: CalendarEvent): string => {
 };
 
 export const preprocessQuery = (query: string): string => {
-  // Match patterns like 14u, 14h, 14u40, etc.
+  // Convert time ranges like "2-3pm", "2:30-3:30pm", "10-11am" to "from 2pm to 3pm" format
+  // Using "from X to Y" helps Sherlock parse time ranges without confusing the "to" with dates
+  const timeRangePattern = /\b(\d{1,2}(?::\d{2})?)\s*-\s*(\d{1,2}(?::\d{2})?)\s*(am|pm)\b/gi;
+  query = query.replace(timeRangePattern, (_, start, end, ampm) => {
+    return `from ${start}${ampm} to ${end}${ampm}`;
+  });
+
+  // Also handle "2pm-3pm" format (where am/pm is on both sides)
+  const timeRangeWithBothPattern = /\b(\d{1,2}(?::\d{2})?)\s*(am|pm)\s*-\s*(\d{1,2}(?::\d{2})?)\s*(am|pm)\b/gi;
+  query = query.replace(timeRangeWithBothPattern, (_, start, ampm1, end, ampm2) => {
+    return `from ${start}${ampm1} to ${end}${ampm2}`;
+  });
+
+  // Match patterns like 14u, 14h, 14u40, etc. (EU time formats)
   const timePattern = /\b(\d{1,2})([uUhH])(\d{2})?\b/g;
   query = query.replace(timePattern, (match, hour, _, minutes) => {
     hour = parseInt(hour, 10);

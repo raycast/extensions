@@ -41,8 +41,33 @@ The `Your calendars` text field is _required_
 Optional Preferences:
 - Checkbox - Focus on completion (i.e. open Calendar app on completion)
 
+## Features
+
+### Calendar Selection
+Append `/calendarname` to quickly select which calendar to use:
+- `Lunch with Sarah tomorrow at noon /work`
+- `Dentist Friday 2pm /personal`
+- `/w` matches "Work" if it's the only calendar starting with W (fuzzy matching)
+
+### Time Ranges
+Time ranges like `2-3pm` are now parsed correctly:
+- `Piano tuning tomorrow 2-3pm`
+- `Meeting 10-11:30am Friday`
+
+### Timezone Support
+Specify a timezone after the time:
+- `Call with NYC team 3pm EST tomorrow`
+- `Standup 9am PST Monday`
+
+Supported: EST/EDT, CST/CDT, MST/MDT, PST/PDT, GMT/UTC, CET/CEST, JST, AEST/AEDT, and more.
+
+### Smart Date Handling
+- Past dates automatically advance to next year (e.g., "Dec 18" in late December → Dec 18 next year)
+
 ## Create Event Examples
 
+- `Team lunch tomorrow 12-1pm /work`
+- `Flight to NYC Friday 3pm EST`
 - February 24 at 3pm - 2pm March 3
 - Vacation is in 4 weeks...
 - Christmas is on December 25th.
@@ -50,7 +75,6 @@ Optional Preferences:
 - Let's have lunch on the 3rd.
 - The retreat is from Jan 12 - 29.
 - Bake a cake tomorrow.
-- Use Tabule today!
 
 ## Author
 

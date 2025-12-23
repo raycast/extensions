@@ -6,4 +6,6 @@ export interface CalendarEvent {
   isAllDay: boolean;
   validated: boolean;
   location?: string;
+  matchedCalendar?: string;
+  timezone?: string;
 }
