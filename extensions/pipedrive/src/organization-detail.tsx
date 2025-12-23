@@ -73,7 +73,9 @@ export default function OrganizationDetail({ id }: { id: string }) {
           <ActionPanel.Section>
             <Action.Push
               title="Edit Organization"
-              target={<AddOrganization key={`edit-organization-${id}`} organizationIdToEdit={id} onSaved={revalidate} />}
+              target={
+                <AddOrganization key={`edit-organization-${id}`} organizationIdToEdit={id} onSaved={revalidate} />
+              }
               icon="✏️"
             />
             <Action.OpenInBrowser

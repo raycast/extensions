@@ -340,7 +340,9 @@ function SearchListItem({
             {searchResult.type === "deal" && (
               <Action.Push
                 title="Edit Deal"
-                target={<AddDeal key={`edit-deal-${searchResult.id}`} dealIdToEdit={searchResult.id} onSaved={revalidate} />}
+                target={
+                  <AddDeal key={`edit-deal-${searchResult.id}`} dealIdToEdit={searchResult.id} onSaved={revalidate} />
+                }
                 icon="✏️"
               />
             )}
