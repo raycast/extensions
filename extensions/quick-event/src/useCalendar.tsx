@@ -11,36 +11,51 @@ import Sherlock from 'sherlockjs';
 // Timezone offsets in minutes from UTC
 const TIMEZONE_OFFSETS: Record<string, number> = {
   // US timezones (full)
-  EST: -300, EDT: -240,
-  CST: -360, CDT: -300,
-  MST: -420, MDT: -360,
-  PST: -480, PDT: -420,
-  AKST: -540, AKDT: -480,
+  EST: -300,
+  EDT: -240,
+  CST: -360,
+  CDT: -300,
+  MST: -420,
+  MDT: -360,
+  PST: -480,
+  PDT: -420,
+  AKST: -540,
+  AKDT: -480,
   HST: -600,
   // US timezones (short) - map to standard time
-  ET: -300, CT: -360, MT: -420, PT: -480,
+  ET: -300,
+  CT: -360,
+  MT: -420,
+  PT: -480,
   // European
-  GMT: 0, UTC: 0,
-  WET: 0, WEST: 60,
-  CET: 60, CEST: 120,
-  EET: 120, EEST: 180,
+  GMT: 0,
+  UTC: 0,
+  WET: 0,
+  WEST: 60,
+  CET: 60,
+  CEST: 120,
+  EET: 120,
+  EEST: 180,
   // Asia/Pacific
   IST: 330,
   JST: 540,
   CST_CHINA: 480,
-  AEST: 600, AEDT: 660,
-  NZST: 720, NZDT: 780,
+  AEST: 600,
+  AEDT: 660,
+  NZST: 720,
+  NZDT: 780,
 };
 
 function extractTimezone(query: string): { query: string; timezone: string | null; offsetMinutes: number | null } {
   // Match timezone at end of time expressions, e.g., "3pm EST", "3pm ET", "15:00 GMT"
-  const tzList = "EST|EDT|CST|CDT|MST|MDT|PST|PDT|AKST|AKDT|HST|ET|CT|MT|PT|GMT|UTC|WET|WEST|CET|CEST|EET|EEST|IST|JST|AEST|AEDT|NZST|NZDT";
-  const tzPattern = new RegExp(`\\b(\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)?)\\s+(${tzList})\\b`, "gi");
+  const tzList =
+    'EST|EDT|CST|CDT|MST|MDT|PST|PDT|AKST|AKDT|HST|ET|CT|MT|PT|GMT|UTC|WET|WEST|CET|CEST|EET|EEST|IST|JST|AEST|AEDT|NZST|NZDT';
+  const tzPattern = new RegExp(`\\b(\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)?)\\s+(${tzList})\\b`, 'gi');
 
   const match = query.match(tzPattern);
   if (match) {
     const fullMatch = match[0];
-    const tzMatch = fullMatch.match(new RegExp(`(${tzList})$`, "i"));
+    const tzMatch = fullMatch.match(new RegExp(`(${tzList})$`, 'i'));
     if (tzMatch) {
       const tz = tzMatch[1].toUpperCase();
       const offset = TIMEZONE_OFFSETS[tz];
@@ -129,7 +144,9 @@ export function useCalendar() {
   const [calendarText, setCalendarText] = useState('');
 
   const preferences = getPreferenceValues();
-  const calendars = String(preferences.calendars).split(',').map((c: string) => c.trim());
+  const calendars = String(preferences.calendars)
+    .split(',')
+    .map((c: string) => c.trim());
 
   async function parse(query: string) {
     try {
@@ -141,7 +158,7 @@ export function useCalendar() {
       } else {
         // Extract calendar selector (e.g., "/work" or "/personal") - must be at end of string
         let matchedCalendar: string | undefined;
-        const calendarMatch = query.match(/\s\/([^\s\/]+)\s*$/);
+        const calendarMatch = query.match(/\s\/([^\s/]+)\s*$/);
         if (calendarMatch) {
           const calendarInput = calendarMatch[1];
           matchedCalendar = matchCalendar(calendarInput, calendars);
