@@ -17,6 +17,7 @@ import {
   LaunchProps,
   open,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { detectIOCType, defangIOC, refangIOC } from "./utils/ioc-detection";
 import { getEnabledSourcesForIOCType } from "./utils/osint-sources";
@@ -25,7 +26,6 @@ import {
   IOCType,
   IOCDetectionResult,
   OSINTSource,
-  ExtensionPreferences,
   SearchResult,
 } from "./types";
 import { getFavorites, toggleFavorite } from "./utils/favorites";
@@ -67,7 +67,7 @@ export default function SearchIOCCommand(
 
       try {
         // Get preferences inside the effect
-        const preferences = getPreferenceValues<ExtensionPreferences>();
+        const preferences = getPreferenceValues();
 
         // Refang the IOC first if it's defanged
         const refangedIOC = refangIOC(searchText.trim());
@@ -101,21 +101,17 @@ export default function SearchIOCCommand(
         } else {
           setSearchResults([]);
           if (searchText.length > 3) {
-            showToast({
-              style: Toast.Style.Failure,
+            showFailureToast({
               title: "Unknown IOC Type",
-              message:
-                "Could not detect IOC type. Try a specific search command.",
+              message: "Could not detect IOC type. Try a specific search command.",
             });
           }
         }
       } catch (error) {
         console.error("Error detecting IOC:", error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message:
-            error instanceof Error ? error.message : "Failed to detect IOC",
+        showFailureToast({
+          title: "Error detecting IOC",
+          message: error.message,
         });
       } finally {
         setIsLoading(false);
@@ -127,7 +123,7 @@ export default function SearchIOCCommand(
   }, [searchText]);
 
   // Get preferences for the render
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues();
 
   // Consolidate EmptyView props to ensure only one `List.EmptyView` is rendered
   const emptyViewProps = (() => {
@@ -275,12 +271,12 @@ export default function SearchIOCCommand(
                           shortcut={{ modifiers: ["cmd"], key: "c" }}
                         />
                         <Action.CopyToClipboard
-                          title="Copy IOC"
+                          title="Copy Ioc"
                           content={result.ioc}
                           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                         />
                         <Action.CopyToClipboard
-                          title="Copy Defanged IOC"
+                          title="Copy Defanged Ioc"
                           content={defangIOC(result.ioc, result.iocType)}
                           shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
                         />
@@ -295,12 +291,10 @@ export default function SearchIOCCommand(
                               (res) => favorites.includes(res.source.id),
                             );
                             if (favoriteResults.length === 0) {
-                              showToast({
-                                style: Toast.Style.Failure,
-                                title: "No Favorites",
-                                message:
-                                  "No favorite sources for this IOC type",
-                              });
+                              await showFailureToast(
+                                new Error("No favorite sources for this IOC type"),
+                                { title: "No Favorites" }
+                              );
                               return;
                             }
                             for (const res of favoriteResults) {
@@ -432,7 +426,7 @@ ${
           <ActionPanel>
             <Action.OpenInBrowser title="Open in Browser" url={url} />
             <Action.CopyToClipboard title="Copy URL" content={url} />
-            <Action.CopyToClipboard title="Copy IOC" content={ioc} />
+            <Action.CopyToClipboard title="Copy Ioc" content={ioc} />
           </ActionPanel>
         }
       />
