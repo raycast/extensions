@@ -6,7 +6,10 @@
 
 import { IOCType } from "../types";
 import { sha256 } from "./ioc-detection";
-import { getSourceByIdAsync } from "./osint-sources";
+
+function encodeKeywordSearch(keyword: string, value: string): string {
+  return encodeURIComponent(`${keyword}:${value}`);
+}
 
 /**
  * Build search URL for a given OSINT source and IOC
@@ -17,7 +20,6 @@ export async function buildSearchURL(
   iocType: IOCType,
 ): Promise<string> {
   const encodedIOC = encodeURIComponent(ioc);
-  const base64IOC = Buffer.from(ioc).toString("base64");
 
   switch (sourceId) {
     // VirusTotal
@@ -53,10 +55,6 @@ export async function buildSearchURL(
     case "greynoise":
       return `https://viz.greynoise.io/ip/${encodedIOC}`;
 
-    // IPQualityScore
-    case "ipqualityscore":
-      return `https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/${encodedIOC}`;
-
     // URLScan.io
     case "urlscan":
       if (iocType === "url") {
@@ -74,15 +72,6 @@ export async function buildSearchURL(
     case "whois":
       return `https://who.is/whois/${encodedIOC}`;
 
-    // SecurityTrails
-    case "securitytrails":
-      if (iocType === "domain") {
-        return `https://securitytrails.com/domain/${encodedIOC}/dns`;
-      } else if (iocType === "ip") {
-        return `https://securitytrails.com/list/ip/${encodedIOC}`;
-      }
-      return `https://securitytrails.com/`;
-
     // Hybrid Analysis
     case "hybridanalysis":
       if (iocType === "hash") {
@@ -94,18 +83,25 @@ export async function buildSearchURL(
       }
       return `https://www.hybrid-analysis.com/search?query=${encodedIOC}`;
 
-    // ANY.RUN
-    case "anyrun":
-      if (iocType === "hash") {
-        return `https://app.any.run/submissions/#?search=${encodedIOC}`;
-      } else if (iocType === "url" || iocType === "domain") {
-        return `https://any.run/search/?q=${encodedIOC}`;
-      }
-      return `https://any.run/search/?q=${encodedIOC}`;
-
     // Joe Sandbox
-    case "joesandbox":
-      return `https://www.joesandbox.com/search?q=${encodedIOC}`;
+    case "joesandbox": {
+      if (iocType === "hash") {
+        // Joe Sandbox uses specific hash type parameters
+        // We need to determine the hash type from the length
+        const hashLength = ioc.length;
+        if (hashLength === 32) {
+          return `https://www.joesandbox.com/analysis/search?md5=${encodedIOC}`;
+        } else if (hashLength === 40) {
+          return `https://www.joesandbox.com/analysis/search?sha1=${encodedIOC}`;
+        } else if (hashLength === 64) {
+          return `https://www.joesandbox.com/analysis/search?sha256=${encodedIOC}`;
+        }
+        return `https://www.joesandbox.com/analysis/search?q=${encodedIOC}`;
+      } else if (iocType === "ip") {
+        return `https://www.joesandbox.com/analysis/search?ioc-public-ip=${encodedIOC}`;
+      }
+      return `https://www.joesandbox.com/analysis/search?q=${encodedIOC}`;
+    }
 
     // MalwareBazaar
     case "malwarebazaar":
@@ -114,26 +110,19 @@ export async function buildSearchURL(
     // ThreatFox
     case "threatfox":
       if (iocType === "ip" || iocType === "ipv6") {
-        return `https://threatfox.abuse.ch/browse/#ip:${encodedIOC}`;
+        return `https://threatfox.abuse.ch/browse/#${encodeKeywordSearch("ip", ioc)}`;
       } else if (iocType === "domain") {
-        return `https://threatfox.abuse.ch/browse/#domain:${encodedIOC}`;
+        return `https://threatfox.abuse.ch/browse/#${encodeKeywordSearch("domain", ioc)}`;
       } else if (iocType === "hash") {
-        return `https://threatfox.abuse.ch/browse/#hash:${encodedIOC}`;
+        return `https://threatfox.abuse.ch/browse/#${encodeKeywordSearch("hash", ioc)}`;
       } else if (iocType === "url") {
-        return `https://threatfox.abuse.ch/browse/#url:${encodedIOC}`;
+        return `https://threatfox.abuse.ch/browse/#${encodeKeywordSearch("url", ioc)}`;
       }
-      return `https://threatfox.abuse.ch/browse/#${encodedIOC}`;
+      return `https://threatfox.abuse.ch/browse/#${encodeURIComponent(ioc)}`;
 
     // threat.rip
     case "threatrip":
-      if (iocType === "hash") {
-        return `https://threat.rip/search?q=hash%253A${encodedIOC}`;
-      } else if (iocType === "ip" || iocType === "ipv6") {
-        return `https://threat.rip/search?q=ip%253A${encodedIOC}`;
-      } else if (iocType === "domain") {
-        return `https://threat.rip/search?q=domain%253A${encodedIOC}`;
-      }
-      return `https://threat.rip/search?q=${encodedIOC}`;
+      return `https://threat.rip/search?q=${encodeURIComponent(`hash:${ioc}`)}`;
 
     // IBM X-Force Exchange
     case "xforce":
@@ -149,12 +138,10 @@ export async function buildSearchURL(
       return `https://exchange.xforce.ibmcloud.com/`;
 
     // Pulsedive
-    case "pulsedive":
+    case "pulsedive": {
+      const base64IOC = Buffer.from(ioc).toString("base64");
       return `https://pulsedive.com/indicator/?ioc=${base64IOC}`;
-
-    // Have I Been Pwned
-    case "haveibeenpwned":
-      return `https://haveibeenpwned.com/unifiedsearch/${encodedIOC}`;
+    }
 
     // Kaspersky OpenTIP
     case "opentip":
@@ -174,16 +161,6 @@ export async function buildSearchURL(
       return `https://crt.sh/?q=${encodedIOC}`;
 
     default:
-      // If this is a user-provided custom source (from LocalStorage), try to honor its URL template
-      try {
-        const custom = await getSourceByIdAsync(sourceId);
-        if (custom && custom.url) {
-          const replaced = custom.url.replace(/\$\{ioc\}/g, encodedIOC);
-          return replaced;
-        }
-      } catch {
-        // ignore and fallback
-      }
       return `https://www.google.com/search?q=${encodedIOC}`;
   }
 }
@@ -208,7 +185,22 @@ async function buildVirusTotalURL(
     case "url":
       // For URLs, we need to compute SHA-256 hash
       try {
-        const urlHash = await sha256(ioc);
+        // Normalize URL like VirusTotal does
+        let normalizedUrl = ioc;
+        try {
+          const urlObj = new URL(ioc);
+          // Add trailing slash if there's no path
+          if (urlObj.pathname === "") {
+            urlObj.pathname = "/";
+          }
+          normalizedUrl = urlObj.toString();
+        } catch {
+          // If URL parsing fails, try adding trailing slash if it ends with domain
+          if (!ioc.includes("/", ioc.indexOf("://") + 3)) {
+            normalizedUrl = ioc + "/";
+          }
+        }
+        const urlHash = await sha256(normalizedUrl);
         return `https://www.virustotal.com/gui/url/${urlHash}`;
       } catch {
         // Fallback to search if hash computation fails
