@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Toast, getPreferenceValues, showToast, useNavigation } from "@raycast/api";
-import { basename } from "path";
+import { basename, extname } from "path";
 import { stat } from "fs/promises";
 
 import { buildPipedriveApiUrl, fetchPipedriveJson, isAbortError } from "./pipedrive-client";
@@ -9,10 +9,31 @@ export default function UploadPersonPhoto({ personId, onUploaded }: { personId: 
   const preferences = getPreferenceValues<Preferences.Index>();
   const { pop } = useNavigation();
 
+  function inferMimeType(filePath: string): string | null {
+    const ext = extname(filePath).toLowerCase();
+    switch (ext) {
+      case ".png":
+        return "image/png";
+      case ".jpg":
+      case ".jpeg":
+        return "image/jpeg";
+      case ".gif":
+        return "image/gif";
+      default:
+        return null;
+    }
+  }
+
   async function handleSubmit(values: { file?: string[] }) {
     const filePath = values.file?.[0];
     if (!filePath) {
       await showToast({ style: Toast.Style.Failure, title: "Choose an image" });
+      return;
+    }
+
+    const mimeType = inferMimeType(filePath);
+    if (!mimeType) {
+      await showToast({ style: Toast.Style.Failure, title: "Unsupported image type", message: "Use PNG or JPG." });
       return;
     }
 
@@ -26,8 +47,9 @@ export default function UploadPersonPhoto({ personId, onUploaded }: { personId: 
 
       const bytes = await readFileAsBuffer(filePath);
       const blobBytes = Uint8Array.from(bytes);
+      const filename = basename(filePath);
       const form = new FormData();
-      form.append("file", new Blob([blobBytes]), basename(filePath));
+      form.append("file", new Blob([blobBytes], { type: mimeType }), filename);
 
       await fetchPipedriveJson<Record<string, unknown>>(preferences, url, {
         method: "POST",
