@@ -11,7 +11,7 @@ import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import SetScene from "./setScene";
 import { getColorFromLight, getLightsFromGroup } from "./helpers/hueResources";
-import { getTransitionTimeInMs, optimisticUpdates } from "./helpers/raycast";
+import { getTransitionTimeInMs, optimisticGroupUpdate } from "./helpers/raycast";
 import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
 import chroma from "chroma-js";
 import Style = Toast.Style;
@@ -273,7 +273,7 @@ function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
 }
 
 async function handleToggle(
-  { hueBridgeState, groupedLights, setGroupedLights, zones }: ReturnType<typeof useHue>,
+  { hueBridgeState, groupedLights, setGroupedLights, setLights, zones }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   groupLights: Light[],
   groupedLight: GroupedLight | undefined,
@@ -286,7 +286,7 @@ async function handleToggle(
     if (groupedLight === undefined) throw new Error("Light group not found.");
     if (!rateLimiter.canExecute()) return;
 
-    const changes = {
+    const changesToGroup = {
       on: { on: !groupedLight.on?.on },
       // No dynamics when toggling groups, as that causes the brightness to the set to the lowest possible level,
       //   even when only applied to toggling off.
@@ -308,15 +308,22 @@ async function handleToggle(
         )
         // Filter out undefined grouped lights
         .filter((zoneGroupedLight): zoneGroupedLight is GroupedLight => zoneGroupedLight !== undefined)
-        .map((zoneGroupedLight) => [zoneGroupedLight.id, changes]),
+        .map((zoneGroupedLight) => [zoneGroupedLight.id, changesToGroup]),
     )
       // Add the grouped light that triggered the action
-      .set(groupedLight.id, changes);
+      .set(groupedLight.id, changesToGroup);
 
-    const undoOptimisticGroupedLightsUpdate = optimisticUpdates(changesToGroupedLights, setGroupedLights);
-    await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((error: Error) => {
+    const changesToLights = new Map(groupLights.map((light) => [light.id, changesToGroup]));
+
+    const undoOptimisticUpdate = optimisticGroupUpdate(
+      changesToLights,
+      changesToGroupedLights,
+      setLights,
+      setGroupedLights,
+    );
+    await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changesToGroup).catch((error: Error) => {
       if (error.message === 'device (grouped_light) is "soft off", command (.on) may not have effect') return;
-      undoOptimisticGroupedLightsUpdate();
+      undoOptimisticUpdate();
       throw error;
     });
 
@@ -335,7 +342,7 @@ async function handleToggle(
 }
 
 async function handleSetBrightness(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  { hueBridgeState, setLights, setGroupedLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   groupLights: Light[],
   groupedLight: GroupedLight | undefined,
@@ -355,10 +362,17 @@ async function handleSetBrightness(
       dynamics: { duration: getTransitionTimeInMs() },
     };
 
+    const changesToGroupedLights = new Map([[groupedLight.id, changes]]);
     const changesToLights = new Map(groupLights.map((light) => [light.id, changes]));
-    const undoOptimisticUpdates = optimisticUpdates(changesToLights, setLights);
+
+    const undoOptimisticUpdate = optimisticGroupUpdate(
+      changesToLights,
+      changesToGroupedLights,
+      setLights,
+      setGroupedLights,
+    );
     await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((e: Error) => {
-      undoOptimisticUpdates();
+      undoOptimisticUpdate();
       throw e;
     });
 
@@ -376,7 +390,7 @@ async function handleSetBrightness(
 }
 
 async function handleBrightnessChange(
-  { hueBridgeState, lights, setLights }: ReturnType<typeof useHue>,
+  { hueBridgeState, lights, setLights, setGroupedLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   groupedLight: GroupedLight | undefined,
   group: Group,
@@ -399,10 +413,17 @@ async function handleBrightnessChange(
       dynamics: { duration: getTransitionTimeInMs() },
     };
 
+    const changesToGroupedLights = new Map([[groupedLight.id, changes]]);
     const changesToLights = new Map(getLightsFromGroup(lights, group).map((light) => [light.id, changes]));
-    const undoOptimisticUpdates = optimisticUpdates(changesToLights, setLights);
+
+    const undoOptimisticUpdate = optimisticGroupUpdate(
+      changesToLights,
+      changesToGroupedLights,
+      setLights,
+      setGroupedLights,
+    );
     await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((e: Error) => {
-      undoOptimisticUpdates();
+      undoOptimisticUpdate();
       throw e;
     });
 

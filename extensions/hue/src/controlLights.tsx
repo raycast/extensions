@@ -108,7 +108,9 @@ function Light(props: {
             {props.light.dimming !== undefined && (
               <SetBrightnessAction
                 light={props.light}
-                onSet={(percentage: number) => handleSetBrightness(props.useHue, props.light, percentage)}
+                onSet={(percentage: number) =>
+                  handleSetBrightness(props.useHue, props.rateLimiter, props.light, percentage)
+                }
               />
             )}
             {props.light.dimming !== undefined && (
@@ -129,7 +131,7 @@ function Light(props: {
             {props.light.color !== undefined && (
               <SetColorAction
                 light={props.light}
-                onSet={(color: CssColor) => handleSetColor(props.useHue, props.light, color)}
+                onSet={(color: CssColor) => handleSetColor(props.useHue, props.rateLimiter, props.light, color)}
               />
             )}
             {props.light.color_temperature !== undefined && (
@@ -317,6 +319,7 @@ async function handleToggle(
 
 async function handleSetBrightness(
   { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
   brightness: number,
 ) {
@@ -324,6 +327,8 @@ async function handleSetBrightness(
 
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.dimming === undefined) throw new Error("Light does not support dimming.");
+    if (!rateLimiter.canExecute()) return;
 
     const changes = {
       on: { on: true },
@@ -396,12 +401,18 @@ async function handleBrightnessChange(
   }
 }
 
-async function handleSetColor({ hueBridgeState, setLights }: ReturnType<typeof useHue>, light: Light, color: CssColor) {
+async function handleSetColor(
+  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  light: Light,
+  color: CssColor,
+) {
   const toast = new Toast({ title: "" });
 
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (light.color === undefined) throw new Error("Light does not support colors.");
+    if (!rateLimiter.canExecute()) return;
 
     const { xy, brightness } = hexToXy(color.value);
 
