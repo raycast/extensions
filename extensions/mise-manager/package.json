@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mise-manager",
+  "title": "Mise Manager",
+  "description": "Manage mise tools, plugins, and configuration directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "imbolt",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-installed",
+      "title": "Installed Tools",
+      "description": "Inspect installed mise tools and their versions.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Registry",
+      "description": "Search the mise registry and install tools.",
+      "mode": "view"
+    },
+    {
+      "name": "prune",
+      "title": "Prune",
+      "description": "Remove unused tool versions from disk.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-outdated",
+      "title": "Outdated Tools",
+      "description": "List installed tools with available upgrades.",
+      "mode": "view"
+    },
+    {
+      "name": "doctor",
+      "title": "Doctor",
+      "description": "Run mise doctor and review environment diagnostics.",
+      "mode": "view"
+    },
+    {
+      "name": "settings",
+      "title": "Settings",
+      "description": "View and update mise configuration options.",
+      "mode": "view"
+    },
+    {
+      "name": "add-plugin",
+      "title": "Add Plugin",
+      "description": "Install a new mise plugin by name or git URL.",
+      "mode": "view"
+    },
+    {
+      "name": "remove-plugin",
+      "title": "Remove Plugin",
+      "description": "Uninstall a previously added mise plugin.",
+      "mode": "view"
+    },
+    {
+      "name": "open-cache-directory",
+      "title": "Open Cache Directory",
+      "description": "Reveal the mise cache directory in Finder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "install-using-backend",
+      "title": "Install Using Backend",
+      "description": "Install a tool using a specific backend and scope.",
+      "mode": "view"
+    },
+    {
+      "name": "upgrade-mise",
+      "title": "Upgrade Mise",
+      "description": "Update the mise CLI to the latest version.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upgrade-tool",
+      "title": "Upgrade Tool",
+      "description": "Select and upgrade an installed tool.",
+      "mode": "view"
+    },
+    {
+      "name": "clean-cache",
+      "title": "Clean Cache",
+      "description": "Clean mise cache to free up space.",
+      "mode": "no-view"
+    },
+    {
+      "name": "update-plugins",
+      "title": "Update Plugins",
+      "description": "Update all installed mise plugins.",
+      "mode": "no-view"
+    },
+    {
+      "name": "run-task",
+      "title": "Run Task",
+      "description": "List and run project tasks defined in mise.toml.",
+      "mode": "view"
+    },
+    {
+      "name": "reshim",
+      "title": "Reshim",
+      "description": "Regenerate mise shims.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
