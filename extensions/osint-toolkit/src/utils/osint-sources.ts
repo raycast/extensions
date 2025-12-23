@@ -127,7 +127,7 @@ export const OSINT_SOURCES: OSINTSource[] = [
     id: "webcheck",
     name: "WebCheck",
     description: "All-in-one website analysis tool",
-    url: "https://web-check.as93.net",
+    url: "https://web-check.xyz",
     category: "URL/Domain Analysis",
     supportedTypes: ["domain", "url"],
     requiresAuth: false,
