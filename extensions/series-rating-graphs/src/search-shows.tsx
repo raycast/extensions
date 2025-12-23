@@ -31,7 +31,7 @@ export default function Command() {
       keepPreviousData: true,
     },
   );
-  res.data = { titles: res.data?.titles?.filter((item) => item.type === "tvSeries") || [] };
+  const filteredShows = res.data?.titles?.filter((item) => item.type === "tvSeries") || [];
 
   const shiftEnterShortcut: Keyboard.Shortcut = {
     macOS: { modifiers: ["shift"], key: "return" },
@@ -70,7 +70,7 @@ export default function Command() {
           <Grid.EmptyView title="Loading…" icon={Icon.Hourglass} description="Fetching results…" />
         ) : searchText ? (
           <Grid.Section>
-            {res.data?.titles?.map((show) => (
+            {filteredShows.map((show) => (
               <Grid.Item
                 key={show.id}
                 content={{
@@ -132,7 +132,7 @@ export default function Command() {
         <List.EmptyView title="Loading…" icon={Icon.Hourglass} description="Fetching results…" />
       ) : searchText ? (
         <List.Section>
-          {res.data?.titles?.map((show) => (
+          {filteredShows.map((show) => (
             <List.Item
               key={show.id}
               icon={{
