@@ -1,397 +1,365 @@
-/**
- * OSINT Sources Configuration
- *
- * Defines all OSINT platforms and their configurations
- */
+import { OSINTSource, OSINTCategory } from "../types/osint-types";
 
-import { OSINTSource, IOCType } from "../types";
-import { LocalStorage } from "@raycast/api";
+export const osintSources: OSINTSource[] = [
+  // General Search & Intelligence
+  {
+    id: "google",
+    name: "Google Search",
+    category: OSINTCategory.GENERAL,
+    url: "https://www.google.com/search?q=",
+    description: "Search the web using Google",
+    requiresInput: true,
+  },
+  {
+    id: "duckduckgo",
+    name: "DuckDuckGo",
+    category: OSINTCategory.GENERAL,
+    url: "https://duckduckgo.com/?q=",
+    description: "Privacy-focused search engine",
+    requiresInput: true,
+  },
+  {
+    id: "bing",
+    name: "Bing Search",
+    category: OSINTCategory.GENERAL,
+    url: "https://www.bing.com/search?q=",
+    description: "Microsoft's search engine",
+    requiresInput: true,
+  },
 
-export const OSINT_SOURCES: OSINTSource[] = [
-  // Multi-purpose platforms
+  // Social Media
+  {
+    id: "twitter",
+    name: "Twitter/X Search",
+    category: OSINTCategory.SOCIAL_MEDIA,
+    url: "https://twitter.com/search?q=",
+    description: "Search Twitter/X for posts and users",
+    requiresInput: true,
+  },
+  {
+    id: "linkedin",
+    name: "LinkedIn",
+    category: OSINTCategory.SOCIAL_MEDIA,
+    url: "https://www.linkedin.com/search/results/all/?keywords=",
+    description: "Search LinkedIn profiles and companies",
+    requiresInput: true,
+  },
+  {
+    id: "facebook",
+    name: "Facebook Search",
+    category: OSINTCategory.SOCIAL_MEDIA,
+    url: "https://www.facebook.com/search/top?q=",
+    description: "Search Facebook posts and profiles",
+    requiresInput: true,
+  },
+  {
+    id: "instagram",
+    name: "Instagram",
+    category: OSINTCategory.SOCIAL_MEDIA,
+    url: "https://www.instagram.com/",
+    description: "Search Instagram profiles",
+    requiresInput: true,
+  },
+  {
+    id: "reddit",
+    name: "Reddit Search",
+    category: OSINTCategory.SOCIAL_MEDIA,
+    url: "https://www.reddit.com/search?q=",
+    description: "Search Reddit posts and comments",
+    requiresInput: true,
+  },
+
+  // Domain & IP Intelligence
+  {
+    id: "whois",
+    name: "WHOIS Lookup",
+    category: OSINTCategory.DOMAIN_IP,
+    url: "https://who.is/whois/",
+    description: "Domain registration information",
+    requiresInput: true,
+  },
   {
     id: "virustotal",
     name: "VirusTotal",
-    description: "Analyze suspicious files, URLs, domains and IP addresses",
-    url: "https://www.virustotal.com",
-    category: "Multi-Purpose",
-    supportedTypes: ["ip", "ipv6", "domain", "url", "hash"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "virus",
-  },
-  {
-    id: "alienvault",
-    name: "AlienVault OTX",
-    description: "Open Threat Exchange - collaborative threat intelligence",
-    url: "https://otx.alienvault.com",
-    category: "Multi-Purpose",
-    supportedTypes: ["ip", "ipv6", "domain", "url", "hash"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "alien",
-  },
-  {
-    id: "pulsedive",
-    name: "Pulsedive",
-    description: "Free threat intelligence platform",
-    url: "https://pulsedive.com",
-    category: "Multi-Purpose",
-    supportedTypes: ["ip", "ipv6", "domain", "url", "hash", "email"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "wave",
-  },
-  {
-    id: "opentip",
-    name: "Kaspersky OpenTIP",
-    description: "Kaspersky's threat intelligence platform",
-    url: "https://opentip.kaspersky.com",
-    category: "Multi-Purpose",
-    supportedTypes: ["domain", "url", "hash"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "lock",
-  },
-
-  // IP Intelligence
-  {
-    id: "abuseipdb",
-    name: "AbuseIPDB",
-    description: "IP address threat intelligence and blacklist service",
-    url: "https://www.abuseipdb.com",
-    category: "IP Intelligence",
-    supportedTypes: ["ip", "ipv6"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "block",
+    category: OSINTCategory.DOMAIN_IP,
+    url: "https://www.virustotal.com/gui/search/",
+    description: "Analyze suspicious files, URLs, domains and IPs",
+    requiresInput: true,
   },
   {
     id: "shodan",
     name: "Shodan",
-    description: "Search engine for internet-connected devices",
-    url: "https://www.shodan.io",
-    category: "IP Intelligence",
-    supportedTypes: ["ip"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "search",
+    category: OSINTCategory.DOMAIN_IP,
+    url: "https://www.shodan.io/search?query=",
+    description: "Search engine for Internet-connected devices",
+    requiresInput: true,
   },
   {
-    id: "ipinfo",
-    name: "ipinfo.io",
-    description: "Comprehensive IP address data and API",
-    url: "https://ipinfo.io",
-    category: "IP Intelligence",
-    supportedTypes: ["ip", "ipv6"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "globe",
-  },
-  {
-    id: "greynoise",
-    name: "GreyNoise",
-    description: "Internet background noise intelligence",
-    url: "https://viz.greynoise.io",
-    category: "IP Intelligence",
-    supportedTypes: ["ip"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "radio",
-  },
-  {
-    id: "ipqualityscore",
-    name: "IPQualityScore",
-    description: "Fraud detection and IP reputation service",
-    url: "https://www.ipqualityscore.com",
-    category: "IP Intelligence",
-    supportedTypes: ["ip"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "target",
-  },
-
-  // URL Analysis
-  {
-    id: "urlscan",
-    name: "URLScan.io",
-    description: "Website scanner and domain investigation",
-    url: "https://urlscan.io",
-    category: "URL/Domain Analysis",
-    supportedTypes: ["url", "domain"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "link",
-  },
-  {
-    id: "webcheck",
-    name: "WebCheck",
-    description: "All-in-one website analysis tool",
-    url: "https://web-check.xyz",
-    category: "URL/Domain Analysis",
-    supportedTypes: ["domain", "url"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "check",
-  },
-  {
-    id: "whois",
-    name: "WHOIS",
-    description: "Domain registration information lookup",
-    url: "https://whois.com",
-    category: "URL/Domain Analysis",
-    supportedTypes: ["domain"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "info",
+    id: "censys",
+    name: "Censys",
+    category: OSINTCategory.DOMAIN_IP,
+    url: "https://search.censys.io/search?q=",
+    description: "Search engine for Internet-connected devices and certificates",
+    requiresInput: true,
   },
   {
     id: "securitytrails",
     name: "SecurityTrails",
-    description: "Domain and DNS intelligence",
-    url: "https://securitytrails.com",
-    category: "URL/Domain Analysis",
-    supportedTypes: ["domain"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "trail",
+    category: OSINTCategory.DOMAIN_IP,
+    url: "https://securitytrails.com/domain/",
+    description: "Domain and IP history",
+    requiresInput: true,
+  },
+  {
+    id: "urlscan",
+    name: "URLScan.io",
+    category: OSINTCategory.DOMAIN_IP,
+    url: "https://urlscan.io/search/#",
+    description: "URL scanner and analyzer",
+    requiresInput: true,
+  },
+  {
+    id: "webcheck",
+    name: "WebCheck",
+    category: OSINTCategory.DOMAIN_IP,
+    url: "https://web-check.xyz",
+    description: "All-in-one website analyzer",
+    requiresInput: false,
   },
 
-  // Malware Analysis
+  // Email Intelligence
   {
-    id: "hybridanalysis",
-    name: "Hybrid Analysis",
-    description: "Free automated malware analysis service",
-    url: "https://www.hybrid-analysis.com",
-    category: "Malware Analysis",
-    supportedTypes: ["hash", "url"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "dna",
+    id: "hunter",
+    name: "Hunter.io",
+    category: OSINTCategory.EMAIL,
+    url: "https://hunter.io/search/",
+    description: "Find email addresses associated with a domain",
+    requiresInput: true,
   },
   {
-    id: "anyrun",
-    name: "ANY.RUN",
-    description: "Interactive online malware sandbox",
-    url: "https://app.any.run",
-    category: "Malware Analysis",
-    supportedTypes: ["hash", "url"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "run",
+    id: "emailrep",
+    name: "EmailRep",
+    category: OSINTCategory.EMAIL,
+    url: "https://emailrep.io/",
+    description: "Email reputation lookup",
+    requiresInput: true,
   },
   {
-    id: "joesandbox",
-    name: "Joe Sandbox",
-    description: "Advanced malware analysis platform",
-    url: "https://www.joesandbox.com",
-    category: "Malware Analysis",
-    supportedTypes: ["hash", "url"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "sandbox",
+    id: "haveibeenpwned",
+    name: "Have I Been Pwned",
+    category: OSINTCategory.EMAIL,
+    url: "https://haveibeenpwned.com/",
+    description: "Check if email has been in a data breach",
+    requiresInput: false,
+  },
+
+  // People & Username Search
+  {
+    id: "pipl",
+    name: "Pipl",
+    category: OSINTCategory.PEOPLE,
+    url: "https://pipl.com/search/?q=",
+    description: "People search engine",
+    requiresInput: true,
   },
   {
-    id: "malwarebazaar",
-    name: "MalwareBazaar",
-    description: "Malware sample sharing platform",
-    url: "https://bazaar.abuse.ch",
-    category: "Malware Analysis",
-    supportedTypes: ["hash"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "shop",
+    id: "whitepages",
+    name: "Whitepages",
+    category: OSINTCategory.PEOPLE,
+    url: "https://www.whitepages.com/name/",
+    description: "US phone and address lookup",
+    requiresInput: true,
+  },
+  {
+    id: "namechk",
+    name: "Namechk",
+    category: OSINTCategory.PEOPLE,
+    url: "https://namechk.com/",
+    description: "Check username availability across platforms",
+    requiresInput: false,
+  },
+  {
+    id: "sherlock",
+    name: "Sherlock Project",
+    category: OSINTCategory.PEOPLE,
+    url: "https://sherlock-project.github.io/",
+    description: "Hunt down social media accounts by username",
+    requiresInput: false,
+  },
+
+  // Data Breaches & Leaks
+  {
+    id: "dehashed",
+    name: "DeHashed",
+    category: OSINTCategory.BREACH_DATA,
+    url: "https://dehashed.com/search?query=",
+    description: "Search through data breaches",
+    requiresInput: true,
+  },
+  {
+    id: "intelx",
+    name: "Intelligence X",
+    category: OSINTCategory.BREACH_DATA,
+    url: "https://intelx.io/",
+    description: "Search engine for data breaches and leaks",
+    requiresInput: false,
+  },
+  {
+    id: "leakcheck",
+    name: "LeakCheck",
+    category: OSINTCategory.BREACH_DATA,
+    url: "https://leakcheck.io/",
+    description: "Data breach search engine",
+    requiresInput: false,
+  },
+
+  // Code & Developer
+  {
+    id: "github",
+    name: "GitHub Search",
+    category: OSINTCategory.CODE,
+    url: "https://github.com/search?q=",
+    description: "Search GitHub repositories and code",
+    requiresInput: true,
+  },
+  {
+    id: "gitlab",
+    name: "GitLab Search",
+    category: OSINTCategory.CODE,
+    url: "https://gitlab.com/search?search=",
+    description: "Search GitLab projects",
+    requiresInput: true,
+  },
+  {
+    id: "pastebin",
+    name: "Pastebin",
+    category: OSINTCategory.CODE,
+    url: "https://pastebin.com/",
+    description: "Search code snippets and pastes",
+    requiresInput: false,
+  },
+
+  // Geolocation
+  {
+    id: "google-maps",
+    name: "Google Maps",
+    category: OSINTCategory.GEOLOCATION,
+    url: "https://www.google.com/maps/search/",
+    description: "Search locations and places",
+    requiresInput: true,
+  },
+  {
+    id: "wigle",
+    name: "WiGLE",
+    category: OSINTCategory.GEOLOCATION,
+    url: "https://wigle.net/",
+    description: "Wireless network mapping",
+    requiresInput: false,
+  },
+
+  // Document & File Search
+  {
+    id: "google-docs",
+    name: "Google Docs Search",
+    category: OSINTCategory.DOCUMENTS,
+    url: "https://www.google.com/search?q=filetype:pdf+",
+    description: "Search for documents using Google",
+    requiresInput: true,
+  },
+  {
+    id: "scribd",
+    name: "Scribd",
+    category: OSINTCategory.DOCUMENTS,
+    url: "https://www.scribd.com/search?query=",
+    description: "Document sharing platform",
+    requiresInput: true,
+  },
+
+  // Cryptocurrency
+  {
+    id: "blockchain",
+    name: "Blockchain.com",
+    category: OSINTCategory.CRYPTO,
+    url: "https://www.blockchain.com/explorer/search?search=",
+    description: "Bitcoin blockchain explorer",
+    requiresInput: true,
+  },
+  {
+    id: "etherscan",
+    name: "Etherscan",
+    category: OSINTCategory.CRYPTO,
+    url: "https://etherscan.io/search?q=",
+    description: "Ethereum blockchain explorer",
+    requiresInput: true,
+  },
+
+  // Dark Web
+  {
+    id: "onionscan",
+    name: "OnionScan",
+    category: OSINTCategory.DARK_WEB,
+    url: "https://github.com/s-rah/onionscan",
+    description: "Dark web site scanner",
+    requiresInput: false,
+  },
+  {
+    id: "ahmia",
+    name: "Ahmia",
+    category: OSINTCategory.DARK_WEB,
+    url: "https://ahmia.fi/search/?q=",
+    description: "Search engine for Tor hidden services",
+    requiresInput: true,
   },
 
   // Threat Intelligence
   {
-    id: "threatfox",
-    name: "ThreatFox",
-    description: "IOC sharing platform by abuse.ch",
-    url: "https://threatfox.abuse.ch",
-    category: "Threat Intelligence",
-    supportedTypes: ["ip", "domain", "url", "hash", "email"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "fox",
+    id: "alienvault",
+    name: "AlienVault OTX",
+    category: OSINTCategory.THREAT_INTEL,
+    url: "https://otx.alienvault.com/browse/global/pulses",
+    description: "Open threat intelligence community",
+    requiresInput: false,
   },
   {
-    id: "threatrip",
-    name: "threat.rip",
-    description: "Fast and simple threat intelligence",
-    url: "https://threat.rip",
-    category: "Threat Intelligence",
-    supportedTypes: ["ip"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "grave",
+    id: "threatcrowd",
+    name: "ThreatCrowd",
+    category: OSINTCategory.THREAT_INTEL,
+    url: "https://www.threatcrowd.org/searchApi/v2/domain/report/?domain=",
+    description: "Threat intelligence search engine",
+    requiresInput: true,
   },
   {
-    id: "xforce",
-    name: "IBM X-Force Exchange",
-    description: "Threat intelligence sharing platform",
-    url: "https://exchange.xforce.ibmcloud.com",
-    category: "Threat Intelligence",
-    supportedTypes: ["ip", "domain", "url", "hash"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "force",
+    id: "abuseipdb",
+    name: "AbuseIPDB",
+    category: OSINTCategory.THREAT_INTEL,
+    url: "https://www.abuseipdb.com/check/",
+    description: "IP address abuse database",
+    requiresInput: true,
   },
 
-  // SSL/Certificate
+  // Images & Visual
   {
-    id: "censys",
-    name: "Censys",
-    description: "Internet-wide search engine for devices and certificates",
-    url: "https://search.censys.io",
-    category: "Certificate/SSL",
-    supportedTypes: ["ip", "domain"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "cert",
+    id: "google-images",
+    name: "Google Images",
+    category: OSINTCategory.IMAGES,
+    url: "https://images.google.com/",
+    description: "Reverse image search",
+    requiresInput: false,
   },
   {
-    id: "crtsh",
-    name: "crt.sh",
-    description: "Certificate transparency log search",
-    url: "https://crt.sh",
-    category: "Certificate/SSL",
-    supportedTypes: ["domain"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "certificate",
+    id: "tineye",
+    name: "TinEye",
+    category: OSINTCategory.IMAGES,
+    url: "https://tineye.com/",
+    description: "Reverse image search",
+    requiresInput: false,
   },
-  // Email-specific sources
   {
-    id: "haveibeenpwned",
-    name: "Have I Been Pwned",
-    description: "Check whether an email has appeared in a data breach",
-    url: "https://haveibeenpwned.com/unifiedsearch/${ioc}",
-    category: "Threat Intelligence",
-    supportedTypes: ["email"],
-    requiresAuth: false,
-    isFree: true,
-    icon: "shield",
+    id: "yandex-images",
+    name: "Yandex Images",
+    category: OSINTCategory.IMAGES,
+    url: "https://yandex.com/images/",
+    description: "Reverse image search",
+    requiresInput: false,
   },
 ];
-
-/**
- * Get OSINT sources for a specific IOC type
- */
-export function getSourcesForIOCType(iocType: IOCType): OSINTSource[] {
-  return OSINT_SOURCES.filter((source) =>
-    source.supportedTypes.includes(iocType),
-  );
-}
-
-/**
- * Get a specific OSINT source by ID
- */
-export function getSourceById(id: string): OSINTSource | undefined {
-  return OSINT_SOURCES.find((source) => source.id === id);
-}
-
-// Storage key for user-defined custom sources
-const CUSTOM_SOURCES_KEY = "custom_osint_sources";
-
-/**
- * Return custom sources stored by the user in LocalStorage
- */
-export async function getCustomSources(): Promise<OSINTSource[]> {
-  const raw = await LocalStorage.getItem<string>(CUSTOM_SOURCES_KEY);
-  if (!raw) {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as OSINTSource[];
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed;
-  } catch {
-    return [];
-  }
-}
-
-export async function saveCustomSources(sources: OSINTSource[]): Promise<void> {
-  await LocalStorage.setItem(CUSTOM_SOURCES_KEY, JSON.stringify(sources));
-}
-
-export async function addCustomSource(source: OSINTSource): Promise<void> {
-  const current = await getCustomSources();
-  // avoid duplicates; id must be unique
-  const existsIndex = current.findIndex((s) => s.id === source.id);
-  if (existsIndex >= 0) {
-    current[existsIndex] = source;
-  } else {
-    current.unshift(source);
-  }
-  await saveCustomSources(current);
-}
-
-export async function removeCustomSource(id: string): Promise<void> {
-  const current = await getCustomSources();
-  const filtered = current.filter((s) => s.id !== id);
-  await saveCustomSources(filtered);
-}
-
-/**
- * Returns all sources (bundled + custom) merged.
- */
-export async function getAllSources(): Promise<OSINTSource[]> {
-  const custom = await getCustomSources();
-  // Custom sources can override or extend builtin ones (by id)
-  const customIds = new Set(custom.map((s) => s.id));
-  const merged = OSINT_SOURCES.filter((s) => !customIds.has(s.id)).concat(
-    custom,
-  );
-  return merged;
-}
-
-/**
- * Check if a source is enabled in preferences
- */
-export function isSourceEnabled(
-  source: OSINTSource,
-  preferences: Record<string, unknown>,
-): boolean {
-  // If a source has explicit `enabled` property (custom sources), use that
-  const maybeEnabled = (
-    source as Partial<OSINTSource> & {
-      enabled?: boolean;
-    }
-  ).enabled;
-  if (maybeEnabled !== undefined) {
-    return maybeEnabled;
-  }
-
-  const prefKey = `enable_${source.id}`;
-  const isEnabled = preferences[prefKey];
-
-  // If preference doesn't exist, default to true
-  return isEnabled === undefined ? true : Boolean(isEnabled);
-}
-
-/**
- * Get all enabled sources for an IOC type
- */
-export async function getEnabledSourcesForIOCType(
-  iocType: IOCType,
-  preferences: Record<string, unknown>,
-): Promise<OSINTSource[]> {
-  const all = await getAllSources();
-  return all
-    .filter((source) => source.supportedTypes.includes(iocType))
-    .filter((source) => isSourceEnabled(source, preferences));
-}
-
-/**
- * Get a source by id searching through bundled + custom sources
- */
-export async function getSourceByIdAsync(
-  id: string,
-): Promise<OSINTSource | undefined> {
-  const all = await getAllSources();
-  return all.find((s) => s.id === id);
-}
