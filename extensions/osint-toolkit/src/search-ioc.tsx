@@ -103,7 +103,8 @@ export default function SearchIOCCommand(
           if (searchText.length > 3) {
             showFailureToast({
               title: "Unknown IOC Type",
-              message: "Could not detect IOC type. Try a specific search command.",
+              message:
+                "Could not detect IOC type. Try a specific search command.",
             });
           }
         }
@@ -292,8 +293,10 @@ export default function SearchIOCCommand(
                             );
                             if (favoriteResults.length === 0) {
                               await showFailureToast(
-                                new Error("No favorite sources for this IOC type"),
-                                { title: "No Favorites" }
+                                new Error(
+                                  "No favorite sources for this IOC type",
+                                ),
+                                { title: "No Favorites" },
                               );
                               return;
                             }
