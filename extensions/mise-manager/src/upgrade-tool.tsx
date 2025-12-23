@@ -55,7 +55,7 @@ function UpgradeToolItem({ tool, onRefresh }: { tool: MiseInstalledTool; onRefre
       icon={{ source: Icon.ArrowUpCircle, tintColor: Color.Blue }}
       accessories={[
         currentVersion ? { text: currentVersion, icon: Icon.Circle, tooltip: "Current Version" } : undefined,
-      ].filter(Boolean)}
+      ].filter(Boolean) as List.Item.Accessory[]}
       actions={
         <ActionPanel>
           <Action

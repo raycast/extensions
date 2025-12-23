@@ -14,6 +14,7 @@ import type {
   MiseRegistryEntry,
   MiseSetting,
   MiseToolVersion,
+  MiseTask,
 } from "./types";
 
 // Re-export types and utils so consumers don't break
@@ -182,6 +183,7 @@ export async function listInstalledTools(): Promise<MiseInstalledTool[]> {
       .filter(Boolean) as MiseToolVersion[];
 
     versions.sort((a, b) => {
+      if (!a || !b) return 0;
       if (a.isActive !== b.isActive) {
         return a.isActive ? -1 : 1;
       }
@@ -276,7 +278,10 @@ export async function listOutdatedTools(): Promise<MiseOutdatedTool[]> {
       } satisfies MiseOutdatedTool;
     })
     .filter(Boolean)
-    .sort((a, b) => a.name.localeCompare(b.name)) as MiseOutdatedTool[];
+    .sort((a, b) => {
+      if (!a || !b) return 0;
+      return a.name.localeCompare(b.name);
+    }) as MiseOutdatedTool[];
 }
 
 export async function searchMiseRegistry(query: string): Promise<MiseRegistryEntry[]> {

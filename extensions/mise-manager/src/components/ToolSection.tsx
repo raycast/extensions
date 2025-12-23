@@ -271,7 +271,6 @@ function PinToProjectForm({ toolName, version }: { toolName: string; version: st
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
-        placeholder="Select a folder..."
       />
     </Form>
   );

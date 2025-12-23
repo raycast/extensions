@@ -61,7 +61,6 @@ function DoctorMetadata({ data }: { data: MiseDoctorResult }) {
         title="mise Version"
         text={data.version}
         icon={booleanIcon(data.self_update_available).source} // Use icon from self_update_available
-        tooltip={data.self_update_available ? "Update Available" : "Up to Date"}
       />
       {data.build_info ? (
         <>
@@ -121,7 +120,7 @@ function DoctorMetadata({ data }: { data: MiseDoctorResult }) {
       {Object.keys(data.env_vars).length > 0 && (
         <Detail.Metadata.TagList title="Environment Variables">
           {Object.entries(data.env_vars).map(([key, value]) => (
-            <Detail.Metadata.TagList.Item key={key} text={`${key}=${value}`} icon={Icon.Variable} />
+            <Detail.Metadata.TagList.Item key={key} text={`${key}=${value}`} icon={Icon.Tag} />
           ))}
         </Detail.Metadata.TagList>
       )}
@@ -129,7 +128,7 @@ function DoctorMetadata({ data }: { data: MiseDoctorResult }) {
       {data.paths.length > 0 && (
         <Detail.Metadata.TagList title="PATH Entries">
           {data.paths.map((path) => (
-            <Detail.Metadata.TagList.Item key={path} text={path} icon={Icon.TwoArrowsBlockToLine} />
+            <Detail.Metadata.TagList.Item key={path} text={path} icon={Icon.List} />
           ))}
         </Detail.Metadata.TagList>
       )}

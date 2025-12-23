@@ -36,7 +36,7 @@ export default function SettingsCommand() {
 }
 
 function getSettingIcon(key: string) {
-  if (key.includes("experimental")) return Icon.Beaker;
+  if (key.includes("experimental")) return Icon.ComputerChip;
   if (key.includes("verbose") || key.includes("debug") || key.includes("log")) return Icon.Terminal;
   if (key.includes("jobs")) return Icon.Layers;
   if (key.includes("shim")) return Icon.Link;
@@ -61,7 +61,7 @@ function SettingItem({ setting, onRefresh }: { setting: MiseSetting; onRefresh: 
           {isBoolean ? (
             <Action
               title={`Toggle ${setting.key}`}
-              icon={setting.value === "true" ? Icon.ToggleOn : Icon.ToggleOff}
+              icon={setting.value === "true" ? Icon.CheckCircle : Icon.Circle}
               onAction={async () => {
                 const toast = await showToast({
                   style: Toast.Style.Animated,
