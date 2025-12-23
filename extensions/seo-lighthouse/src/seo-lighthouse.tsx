@@ -8,16 +8,84 @@ import {
   showToast,
   Toast,
   getPreferenceValues,
+  useNavigation,
+  AI,
   openCommandPreferences,
 } from '@raycast/api';
-import { useState, useEffect } from 'react';
-import * as childProcess from 'node:child_process';
-import * as nodePath from 'node:path';
+import { useForm, FormValidation, usePromise } from '@raycast/utils';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import * as nodeOs from 'node:os';
-import * as nodeFs from 'node:fs/promises';
-import { promisify } from 'node:util';
+import * as childProcess from 'node:child_process';
+import {
+  runLighthouseAudit,
+  LighthouseReport,
+  LighthouseOptions,
+  processUrl,
+} from './utils/lighthouse';
+import { t } from './utils/i18n';
 
-const execPromise = promisify(childProcess.exec);
+function DetailedAuditsView({ report }: { report: LighthouseReport }) {
+  const generateMarkdown = () => {
+    const descMap: Record<string, string> = {
+      interactive: t('desc_interactive'),
+      'first-contentful-paint': t('desc_fcp'),
+      'largest-contentful-paint': t('desc_lcp'),
+      'speed-index': t('desc_speed_index'),
+      'total-blocking-time': t('desc_tbt'),
+      'cumulative-layout-shift': t('desc_cls'),
+      'main-thread-tasks': t('desc_mainthread'),
+      'total-byte-weight': t('desc_totalbyte'),
+    };
+
+    let markdown = `# ${t('detailed_fields_title')}\n\n`;
+
+    const categories = [
+      { id: 'performance', title: t('performance') },
+      { id: 'accessibility', title: t('accessibility') },
+      { id: 'best-practices', title: t('best_practices') },
+      { id: 'seo', title: t('seo') },
+    ];
+
+    categories.forEach(cat => {
+      markdown += `## ${cat.title}\n\n`;
+      const categoryAudits =
+        report.categories?.[cat.id as keyof typeof report.categories]
+          ?.auditRefs || [];
+      const audits = categoryAudits
+        .map(ref => report.audits?.[ref.id])
+        .filter((a): a is NonNullable<typeof a> => !!a && (a.score || 1) < 0.9)
+        .sort((a, b) => (a.score || 0) - (b.score || 0));
+
+      if (audits.length === 0) {
+        markdown += `_${t('no_issues_found')}_\n\n`;
+      } else {
+        markdown += `| ${t('status')} | ${t('field')} | ${t('description')} |\n|:---:|:---|:---|\n`;
+        audits.forEach(audit => {
+          const score = audit.score ?? 0;
+          const statusIcon = score >= 0.9 ? '🟢' : score >= 0.5 ? '🟡' : '🔴';
+          const descKey = (audit.id || '').replace(/_/g, '-');
+          const cleanDesc =
+            descMap[descKey] ||
+            audit.description
+              ?.replace(/\[Learn more\].*/, '')
+              .replace(/<br\s*\/?>/gi, ' ') ||
+            '';
+          markdown += `| ${statusIcon} | **${audit.title || '-'}** | ${cleanDesc || '-'} |\n`;
+        });
+        markdown += '\n';
+      }
+    });
+
+    return markdown;
+  };
+
+  return <Detail markdown={generateMarkdown()} />;
+}
+
+interface Preferences {
+  outputPath?: string;
+  lighthousePath?: string;
+}
 
 interface FormValues {
   url: string;
@@ -29,576 +97,756 @@ interface FormValues {
   outputPath: string;
 }
 
-interface Preferences {
-  outputPath?: string;
-  lighthousePath?: string;
-}
-
-interface LighthouseReport {
-  categories?: {
-    performance?: { score: number; title?: string };
-    accessibility?: { score: number; title?: string };
-    'best-practices'?: { score: number; title?: string };
-    seo?: { score: number; title?: string };
-  };
-  audits?: {
-    [key: string]: {
-      title?: string;
-      description?: string;
-      displayValue?: string;
-      score?: number | null;
-    };
-  };
-}
-
-function expandHomeDir(filePath: string): string {
-  if (filePath.startsWith('~')) {
-    return nodePath.join(nodeOs.homedir(), filePath.slice(1));
-  }
-  return filePath;
-}
-
-// Utility function to validate and process URL
-function processUrl(url: string): string {
-  // Trim whitespace
-  url = url.trim();
-
-  // Check if URL is already prefixed with http:// or https://
-  if (/^https?:\/\//i.test(url)) {
-    return url;
-  }
-
-  // Remove any leading www.
-  url = url.replace(/^www\./i, '');
-
-  // Add https:// by default
-  return `https://${url}`;
-}
-
-// Validate URL format
-function isValidUrl(url: string): boolean {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// Lighthouse Path Finding Function
-async function findLighthousePath(
-  preferences: Preferences
-): Promise<string | null> {
-  // First check preferences path if set
-  if (preferences.lighthousePath) {
-    const expandedPath = expandHomeDir(preferences.lighthousePath);
-    try {
-      await nodeFs.access(expandedPath, nodeFs.constants.X_OK);
-      return expandedPath;
-    } catch (error) {
-      // Silently continue if preference path is invalid
-    }
-  }
-
-  // Define all potential paths
-  const potentialPaths = [
-    // Global CLI paths first (most likely to exist)
-    '/opt/homebrew/bin/lighthouse',
-    '/usr/local/bin/lighthouse',
-    '/usr/bin/lighthouse',
-    `${nodeOs.homedir()}/.npm-global/bin/lighthouse`,
-
-    // Then check CLI index.js files
-    '/opt/homebrew/lib/node_modules/lighthouse/cli/index.js',
-    '/usr/local/lib/node_modules/lighthouse/cli/index.js',
-    '/usr/lib/node_modules/lighthouse/cli/index.js',
-    `${nodeOs.homedir()}/.npm-global/lib/node_modules/lighthouse/cli/index.js`,
-    nodePath.join(
-      nodeOs.homedir(),
-      '.npm/lib/node_modules/lighthouse/cli/index.js'
-    ),
-
-    // Local installation paths (least likely)
-    nodePath.join(__dirname, 'node_modules', '.bin', 'lighthouse'),
-    nodePath.join(__dirname, 'node_modules', 'lighthouse', 'cli', 'index.js'),
-  ];
-
-  // Try all paths silently
-  for (const potentialPath of potentialPaths) {
-    try {
-      await nodeFs.access(potentialPath, nodeFs.constants.X_OK);
-      return potentialPath;
-    } catch {
-      // Silently continue to next path
-    }
-  }
-
-  // Try using 'which' command as last resort
-  try {
-    const { stdout } = await execPromise('which lighthouse');
-    const path = stdout.trim();
-    if (path) {
-      await nodeFs.access(path, nodeFs.constants.X_OK);
-      return path;
-    }
-  } catch {
-    // Silently handle which command failure
-  }
-
-  // If no path is found but we know lighthouse is installed globally,
-  // return just 'lighthouse' as a fallback
-  try {
-    await execPromise('lighthouse --version');
-    return 'lighthouse';
-  } catch {
-    // Only log error if we truly can't find lighthouse anywhere
-    console.error('Lighthouse not found in system');
-    return null;
-  }
-}
-
-// Lighthouse Report View Component
-function LighthouseReportView({ reportPath }: { reportPath: string }) {
-  const [report, setReport] = useState<LighthouseReport | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadReport() {
-      try {
-        const reportContent = await nodeFs.readFile(reportPath, 'utf-8');
-        const parsedReport = JSON.parse(reportContent);
-
-        // Validate report structure
-        if (!parsedReport.categories && !parsedReport.audits) {
-          throw new Error('Invalid Lighthouse report format');
-        }
-
-        setReport(parsedReport);
-      } catch (error) {
-        console.error('Failed to load report:', error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : 'Unknown error loading report'
-        );
-      }
-    }
-    loadReport();
-  }, [reportPath]);
-
-  if (error) {
-    return <Detail markdown={`Error loading report: ${error}`} />;
-  }
-
-  if (!report) {
-    return <Detail markdown="Loading report..." />;
-  }
-
-  const renderScoreIcon = (score: number) => {
-    if (score >= 0.9)
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
-    if (score >= 0.5) return { source: Icon.Warning, tintColor: Color.Yellow };
-    return { source: Icon.XMarkCircle, tintColor: Color.Red };
-  };
+function LighthouseReportView({
+  reportPath,
+  report,
+  originalUrl,
+  onReanalyze,
+}: {
+  reportPath: string;
+  report: LighthouseReport;
+  originalUrl: string;
+  onReanalyze: () => void;
+}) {
+  const [aiAnalysis, setAiAnalysis] = useState<string>('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const isMac = nodeOs.platform() === 'darwin';
 
   const formatScore = (score: number | undefined) =>
-    score !== undefined ? `${Math.round(score * 100)}%` : 'N/A';
+    score !== undefined ? `${Math.round(score * 100)}` : 'N/A';
 
-  // Dynamic markdown content generation
-  const generateMarkdownContent = () => {
-    let markdownContent =
-      '# Lighthouse Analysis Report\n\n## Overall Scores\n\n';
-    markdownContent += '| Category | Score | Status |\n';
-    markdownContent += '| -------- | ----- | ------ |\n';
-
-    const categories = [
-      { key: 'performance', name: 'Performance' },
-      { key: 'accessibility', name: 'Accessibility' },
-      { key: 'best-practices', name: 'Best Practices' },
-      { key: 'seo', name: 'SEO' },
-    ];
-
-    categories.forEach(({ key, name }) => {
-      const category =
-        report.categories?.[
-          key as 'performance' | 'accessibility' | 'best-practices' | 'seo'
-        ];
-      if (category) {
-        markdownContent += `| ${name} | ${formatScore(category.score)} | ${formatScore(category.score)} |\n`;
-      }
-    });
-
-    // Performance Metrics
-    markdownContent +=
-      '\n## Key Performance Metrics\n\n### Core Web Vitals\n\n';
-
-    const performanceMetrics = [
-      'first-contentful-paint',
-      'largest-contentful-paint',
-      'total-blocking-time',
-      'cumulative-layout-shift',
-      'interactive',
-      'speed-index',
-    ];
-
-    performanceMetrics.forEach(metric => {
-      const audit = report.audits?.[metric];
-      if (audit) {
-        markdownContent += `- **${audit.title || metric}**: ${audit.displayValue || 'N/A'}\n`;
-      }
-    });
-
-    return markdownContent;
+  const getHostname = (url: string) => {
+    try {
+      return new URL(processUrl(url)).hostname;
+    } catch {
+      return url;
+    }
   };
 
-  // Dynamic metadata generation
-  const generateMetadataLabels = () => {
-    const categories = [
-      { key: 'performance', name: 'Performance' },
-      { key: 'accessibility', name: 'Accessibility' },
-      { key: 'best-practices', name: 'Best Practices' },
-      { key: 'seo', name: 'SEO' },
+  const getScoreColor = (score: number) => {
+    if (score >= 0.9) return Color.Green;
+    if (score >= 0.5) return Color.Yellow;
+    return Color.Red;
+  };
+
+  const getStatusIcon = (score: number | null | undefined) => {
+    if (score === null || score === undefined) return '⚪️';
+    if (score >= 0.9) return '🟢';
+    if (score >= 0.5) return '🟡';
+    return '🔴';
+  };
+
+  const formatRating = (score?: number | null) => {
+    if (score === null || score === undefined) return 'unknown';
+    if (score >= 0.9) return 'good';
+    if (score >= 0.5) return 'medium';
+    return 'poor';
+  };
+
+  const generateMarkdownContent = () => {
+    let markdown = `# ${t('report_title')}\n\n`;
+
+    // AI Analysis Section
+    if (aiAnalysis) {
+      markdown += `> [!TIP]\n> **AI Insights**\n>\n${aiAnalysis
+        .split('\n')
+        .map(l => `> ${l}`)
+        .join('\n')}\n\n---\n\n`;
+    } else if (isAiLoading) {
+      markdown += `> [!NOTE]\n> **AI is analyzing findings...**\n\n---\n\n`;
+    }
+
+    markdown += `## Performance & Core Metrics (Críticos)\n\n`;
+    markdown += `| ${t('status')} | Métrica | Valor | Referencia |\n| :---: | :--- | :--- | :--- |\n`;
+    const perfMetrics = [
+      {
+        id: 'largest-contentful-paint',
+        title: 'LCP (Largest Contentful Paint)',
+        bench: '< 2.5s',
+      },
+      { id: 'speed-index', title: 'Speed Index', bench: '< 3.4s' },
+      {
+        id: 'first-contentful-paint',
+        title: 'FCP (First Contentful Paint)',
+        bench: '< 1.8s',
+      },
+      {
+        id: 'server-response-time',
+        title: 'TTFB (Time to First Byte)',
+        bench: '< 0.8s',
+      },
+      {
+        id: 'cumulative-layout-shift',
+        title: 'CLS (Cumulative Layout Shift)',
+        bench: '< 0.1',
+      },
+      { id: 'main-thread-tasks', title: 'Main Thread Work', bench: '< 2s' },
+      { id: 'total-byte-weight', title: 'Total Byte Weight', bench: '< 1.6MB' },
+    ];
+    perfMetrics.forEach(m => {
+      const audit = report.audits?.[m.id];
+      if (audit) {
+        markdown += `| ${getStatusIcon(audit.score)} | ${m.title} | **${audit.displayValue || '-'}** | \`${m.bench}\` |\n`;
+      }
+    });
+
+    markdown += `\n## SEO & Accessibility (Marketing)\n\n`;
+    markdown += `| ${t('status')} | Campo | Valor |\n|:---:|:---|:---|\n`;
+    const seoScore = report.categories?.seo?.score;
+    const accScore = report.categories?.accessibility?.score;
+    if (seoScore !== undefined || accScore !== undefined) {
+      if (seoScore !== undefined)
+        markdown += `| ${getStatusIcon(seoScore)} | SEO (score) | ${formatScore(seoScore)}% |\n`;
+      if (accScore !== undefined)
+        markdown += `| ${getStatusIcon(accScore)} | Accessibility (score) | ${formatScore(accScore)}% |\n`;
+    }
+    const seoFields = [
+      { id: 'document-title', label: 'Title tag' },
+      { id: 'meta-description', label: 'Meta description' },
+      { id: 'canonical', label: 'Canonical URL' },
+      { id: 'html-has-lang', label: 'Idioma (html lang)' },
+      { id: 'structured-data', label: 'Structured Data' },
+    ];
+    seoFields.forEach(f => {
+      const audit = report.audits?.[f.id];
+      if (audit) {
+        const extra =
+          f.id === 'structured-data' && audit.details?.items
+            ? ` (${
+                (audit.details.items as any[])
+                  .map((i: any) => i?.type || i?.name)
+                  .filter(Boolean)
+                  .join(', ') || 'sin tipos'
+              })`
+            : '';
+        markdown += `| ${getStatusIcon(audit.score)} | ${f.label} | ${audit.displayValue || audit.title || '-'}${extra} |\n`;
+      }
+    });
+
+    const opportunities = Object.values(report.audits || {})
+      .filter(a => a.details && (a.details as any).type === 'opportunity')
+      .slice(0, 5);
+    if (opportunities.length > 0) {
+      markdown += `\n## Oportunidades Prioritarias (High ROI)\n`;
+      markdown += `| ${t('status')} | Audit | Ahorro estimado | Ítems |\n|:---:|:---|:---|:---|\n`;
+      opportunities.forEach(op => {
+        const savingsMs = (op.details as any).overallSavingsMs;
+        const savingsBytes = (op.details as any).overallSavingsBytes;
+        const savings =
+          savingsMs || savingsBytes
+            ? `${savingsMs ? `${Math.round(savingsMs)} ms` : ''}${savingsMs && savingsBytes ? ' · ' : ''}${savingsBytes ? `${Math.round(savingsBytes / 1024)} KB` : ''}`
+            : '-';
+        const items = Array.isArray((op.details as any).items)
+          ? (op.details as any).items
+          : [];
+        const firstUrl = items.find((i: any) => i?.url)?.url;
+        const itemsInfo = `${items.length} ${firstUrl ? `(${firstUrl})` : ''}`;
+        markdown += `| ${getStatusIcon(op.score)} | **${op.title}** | ${savings} | ${itemsInfo} |\n`;
+      });
+    }
+
+    const diagnostics = [
+      { id: 'dom-size', label: 'DOM Size (nodos)' },
+      { id: 'unused-javascript', label: 'Unused JavaScript' },
+      { id: 'unused-css-rules', label: 'Unused CSS' },
+      { id: 'third-party-summary', label: 'Third-party blocking time' },
+      { id: 'offscreen-images', label: 'Offscreen images' },
+    ];
+    const diagAudits = diagnostics
+      .map(d => ({ ...d, audit: report.audits?.[d.id] }))
+      .filter(d => d.audit);
+    if (diagAudits.length) {
+      markdown += `\n## Diagnósticos Técnicos (Debugging)\n`;
+      diagAudits.forEach(d => {
+        const details = (d.audit as any)?.details;
+        const blocking =
+          d.id === 'third-party-summary' && details?.summary?.blockingTime
+            ? ` (${Math.round(details.summary.blockingTime)} ms)`
+            : '';
+        markdown += `- ${d.label}: ${d.audit?.displayValue || '-'}${blocking}\n`;
+      });
+    }
+
+    const warnings = (report as any).runWarnings as string[] | undefined;
+    if (warnings && warnings.length) {
+      markdown += `\n### Advertencias de ejecución\n`;
+      warnings.forEach(w => {
+        markdown += `- ⚠️ ${w}\n`;
+      });
+    }
+
+    markdown += `\n---\n\n`;
+    markdown += `_${t('view_detailed_audits')} in the actions menu (Cmd + D)._\n`;
+
+    return markdown;
+  };
+
+  const generateMetadata = () => {
+    const categoriesToShow = [
+      { key: 'performance', name: t('performance') },
+      { id: 'accessibility', name: t('accessibility') },
+      { id: 'best-practices', name: t('best_practices') },
+      { id: 'seo', name: t('seo') },
     ];
 
-    return categories
-      .filter(
-        ({ key }) =>
-          report.categories?.[
-            key as 'performance' | 'accessibility' | 'best-practices' | 'seo'
-          ]
-      )
-      .map(({ key, name }) => {
-        const category =
-          report.categories?.[
-            key as 'performance' | 'accessibility' | 'best-practices' | 'seo'
-          ];
-        return category ? (
+    const reportCreatedText = (() => {
+      const ts = (report as any).fetchTime;
+      const date = ts ? new Date(ts) : new Date();
+      return date.toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    })();
+    const lhVersion = (report as any).lighthouseVersion as string | undefined;
+    const auditDuration = (() => {
+      const total = (report as any).timing?.total as number | undefined;
+      return total ? `${Math.round(total / 1000)}s` : undefined;
+    })();
+
+    return (
+      <Detail.Metadata>
+        <Detail.Metadata.TagList title={t('overall_scores')}>
+          {categoriesToShow.map(catInfo => {
+            const key = (catInfo as any).key || (catInfo as any).id;
+            const cat =
+              report.categories?.[key as keyof typeof report.categories];
+            if (!cat) return null;
+            const score = cat.score || 0;
+            return (
+              <Detail.Metadata.TagList.Item
+                key={key}
+                text={`${catInfo.name}: ${formatScore(score)}%`}
+                color={getScoreColor(score)}
+              />
+            );
+          })}
+        </Detail.Metadata.TagList>
+        <Detail.Metadata.Separator />
+        <Detail.Metadata.Label
+          title={t('analysis_domain')}
+          text={getHostname(originalUrl)}
+          icon={Icon.Globe}
+        />
+        <Detail.Metadata.Label
+          title={t('device_mode')}
+          text={
+            report.configSettings?.formFactor === 'mobile'
+              ? t('mobile')
+              : t('desktop')
+          }
+          icon={
+            report.configSettings?.formFactor === 'mobile'
+              ? Icon.Mobile
+              : Icon.Monitor
+          }
+        />
+        <Detail.Metadata.Separator />
+        <Detail.Metadata.Label
+          title={t('report_created')}
+          text={reportCreatedText}
+        />
+        {lhVersion ? (
+          <Detail.Metadata.Label title="Lighthouse" text={`v${lhVersion}`} />
+        ) : null}
+        {auditDuration ? (
           <Detail.Metadata.Label
-            key={key}
-            title={`${name} Score`}
-            text={formatScore(category.score)}
-            icon={renderScoreIcon(category.score)}
+            title="Duración auditoría"
+            text={auditDuration}
+            icon={Icon.Clock}
           />
-        ) : null;
-      })
-      .filter(Boolean);
+        ) : null}
+      </Detail.Metadata>
+    );
+  };
+
+  const handleAskAI = async () => {
+    if (isAiLoading) return;
+    setIsAiLoading(true);
+    setAiAnalysis('');
+    try {
+      const scores = {
+        performance: report.categories?.performance?.score
+          ? Math.round((report.categories.performance.score || 0) * 100)
+          : undefined,
+        accessibility: report.categories?.accessibility?.score
+          ? Math.round((report.categories.accessibility.score || 0) * 100)
+          : undefined,
+        seo: report.categories?.seo?.score
+          ? Math.round((report.categories.seo.score || 0) * 100)
+          : undefined,
+        best_practices: report.categories?.['best-practices']?.score
+          ? Math.round((report.categories['best-practices'].score || 0) * 100)
+          : undefined,
+        pwa: report.categories?.pwa?.score
+          ? Math.round((report.categories.pwa.score || 0) * 100)
+          : undefined,
+      };
+
+      const pickAudit = (id: string) => report.audits?.[id];
+      const vitals = {
+        lcp: {
+          value: pickAudit('largest-contentful-paint')?.displayValue,
+          rating: formatRating(pickAudit('largest-contentful-paint')?.score),
+        },
+        cls: {
+          value: pickAudit('cumulative-layout-shift')?.displayValue,
+          rating: formatRating(pickAudit('cumulative-layout-shift')?.score),
+        },
+        ttfb: {
+          value: pickAudit('server-response-time')?.displayValue,
+          rating: formatRating(pickAudit('server-response-time')?.score),
+        },
+        fcp: {
+          value: pickAudit('first-contentful-paint')?.displayValue,
+          rating: formatRating(pickAudit('first-contentful-paint')?.score),
+        },
+        speedIndex: {
+          value: pickAudit('speed-index')?.displayValue,
+          rating: formatRating(pickAudit('speed-index')?.score),
+        },
+      };
+
+      const opportunities = Object.values(report.audits || {})
+        .filter(a => a.details && (a.details as any).type === 'opportunity')
+        .slice(0, 5)
+        .map(op => {
+          const items = Array.isArray((op.details as any).items)
+            ? (op.details as any).items
+            : [];
+          const firstUrl = items.find((i: any) => i?.url)?.url;
+          return {
+            id: op.id,
+            title: op.title,
+            impactMs: (op.details as any).overallSavingsMs,
+            impactBytes: (op.details as any).overallSavingsBytes,
+            priority: formatRating(op.score),
+            exampleUrl: firstUrl,
+          };
+        });
+
+      const failingAudits = Object.values(report.audits || {})
+        .filter(a => (a.score || 1) < 0.5 && a.title)
+        .slice(0, 5)
+        .map(a => ({
+          id: a.id,
+          title: a.title,
+          score: a.score,
+        }));
+
+      const warnings = (report as any).runWarnings || [];
+
+      const ctx = {
+        url: originalUrl,
+        timestamp: (report as any).fetchTime,
+        version: (report as any).lighthouseVersion,
+        scores,
+        vitals,
+        issues: failingAudits,
+        opportunities,
+        seo: {
+          title: pickAudit('document-title')?.displayValue,
+          description: pickAudit('meta-description')?.displayValue,
+          canonical: pickAudit('canonical')?.displayValue,
+          lang: pickAudit('html-has-lang')?.displayValue,
+          structuredDataTypes: (
+            pickAudit('structured-data')?.details?.items || []
+          )
+            .map((i: any) => i?.type || i?.name)
+            .filter(Boolean),
+          structuredDataErrors: (
+            pickAudit('structured-data')?.details?.items || []
+          )
+            .map((i: any) => i?.errors)
+            .flat()
+            .filter(Boolean),
+        },
+        warnings,
+      };
+
+      const prompt = `Act as an expert SEO/Performance engineer. Here is the Lighthouse context (JSON):
+${JSON.stringify(ctx, null, 2)}
+
+Give a brief executive summary in ${t('language_name')}. Highlight the biggest bottleneck and 3 concrete fixes (short bullets). Focus on performance, accessibility, and SEO impact.`;
+
+      const answer = await AI.ask(prompt);
+      if (answer) {
+        setAiAnalysis(answer);
+      } else {
+        throw new Error('AI returned an empty response');
+      }
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'AI Insights Unavailable',
+        message: 'Could not reach AI services. Please try again.',
+      });
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  const getEmailBody = () => {
+    const scores = Object.entries(report.categories || {})
+      .map(
+        ([k, v]) => `${k.toUpperCase()}: ${Math.round((v.score || 0) * 100)}%`
+      )
+      .join('\n');
+
+    const scoreLines = Object.entries(report.categories || {})
+      .map(
+        ([key, value]) =>
+          `• ${t(key)} — ${Math.round((value.score || 0) * 100)}%`
+      )
+      .join('\n');
+
+    const aiBlock = aiAnalysis ? aiAnalysis : t('email_no_ai');
+
+    const fullBody = `${t('email_greeting')}
+
+${t('email_intro')} ${originalUrl}
+
+${t('email_scores_title')}:
+${scoreLines || scores}
+
+${t('email_ai_title')}:
+${aiBlock}
+
+${t('email_details_title')}:
+${t('email_report_path')}: ${reportPath}
+
+${t('email_footer')}
+${t('email_thanks')}`;
+
+    if (fullBody.length > 1800) {
+      return fullBody.substring(0, 1797) + '...';
+    }
+    return fullBody;
+  };
+
+  const openMailDraft = async (subject: string, body: string) => {
+    const script = `
+      tell application "Mail"
+        set newMessage to make new outgoing message with properties {visible:true, subject:${JSON.stringify(
+          subject
+        )}, content:${JSON.stringify(body)} & "\\n\\n"}
+        tell newMessage
+          make new to recipient at end of to recipients with properties {address:""}
+          activate
+        end tell
+      end tell`;
+
+    return new Promise<void>((resolve, reject) => {
+      childProcess.execFile('osascript', ['-e', script], error => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  };
+
+  const handleComposeMail = async () => {
+    try {
+      await openMailDraft(
+        `${t('report_title')}: ${getHostname(originalUrl)}`,
+        getEmailBody()
+      );
+      showToast({
+        style: Toast.Style.Success,
+        title: t('send_to_developer'),
+        message: 'Borrador creado en Mail',
+      });
+    } catch (error: any) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'No se pudo crear el borrador',
+        message: error?.message || 'Revisa que la app Mail esté instalada',
+      });
+    }
   };
 
   return (
     <Detail
       markdown={generateMarkdownContent()}
-      metadata={<Detail.Metadata>{generateMetadataLabels()}</Detail.Metadata>}
+      metadata={generateMetadata()}
       actions={
         <ActionPanel>
-          <Action.Open
-            title="Open Json Report"
-            target={reportPath}
-            icon={Icon.Document}
-          />
-          <Action.ShowInFinder path={reportPath} title="Show in Finder" />
-          <Action.OpenWith path={reportPath} />
+          <ActionPanel.Section title="AI & Feedback">
+            <Action
+              title={t('ask_ai')}
+              icon={Icon.Stars}
+              onAction={handleAskAI}
+              shortcut={{ modifiers: ['cmd'], key: 'i' }}
+            />
+            <Action.Push
+              title={t('view_detailed_audits')}
+              icon={Icon.List}
+              target={<DetailedAuditsView report={report} />}
+              shortcut={{ modifiers: ['cmd'], key: 'd' }}
+            />
+            {isMac ? (
+              <Action
+                title={t('send_email')}
+                icon={Icon.Envelope}
+                onAction={handleComposeMail}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
+              />
+            ) : (
+              <Action
+                title="Send Email (macos)"
+                icon={Icon.Envelope}
+                onAction={() =>
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: 'No disponible en Windows',
+                    message: 'El borrador de Mail solo funciona en macOS.',
+                  })
+                }
+              />
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Report Management">
+            <Action
+              title="Re-analyze"
+              icon={Icon.ArrowClockwise}
+              onAction={onReanalyze}
+            />
+            <Action.Open
+              title="Open Json Report"
+              target={reportPath}
+              icon={Icon.Code}
+            />
+            <Action.ShowInFinder
+              path={reportPath}
+              icon={Icon.Finder}
+              title={t('show_in_finder')}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
 }
 
-export default function Command() {
-  const preferences: Preferences = getPreferenceValues<Preferences>();
-  const [reportPath, setReportPath] = useState<string | null>(null);
-  const [outputPath, setOutputPath] = useState<string>(
-    preferences.outputPath || nodeOs.tmpdir()
+function ReportLoader({ options }: { options: LighthouseOptions }) {
+  const [reanalyzeCount, setReanalyzeCount] = useState(0);
+  const currentOptions = useMemo(
+    () => ({ ...options, force: reanalyzeCount > 0 }),
+    [options, reanalyzeCount]
   );
-  const [lighthousePath, setLighthousePath] = useState<string>(
-    preferences.lighthousePath || ''
+  const [progressPct, setProgressPct] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressTexts = [
+    { upTo: 20, text: 'Preparando entorno y resolviendo DNS...' },
+    { upTo: 45, text: 'Midiendo rendimiento y tiempos críticos...' },
+    { upTo: 70, text: 'Auditando accesibilidad y mejores prácticas...' },
+    { upTo: 90, text: 'Evaluando SEO y metadatos...' },
+    { upTo: 99, text: 'Generando reporte enriquecido...' },
+    { upTo: 100, text: 'Listo: presentando resultados.' },
+  ];
+
+  const { isLoading, data, error, revalidate } = usePromise(
+    runLighthouseAudit,
+    [currentOptions],
+    {
+      onError: () => {},
+    }
   );
 
   useEffect(() => {
-    // If lighthousePath is not set, try to find it
-    if (!lighthousePath) {
-      const findPath = async () => {
-        const foundPath = await findLighthousePath(preferences);
-        if (foundPath) {
-          setLighthousePath(foundPath);
-        } else {
-          //console.error('Lighthouse CLI not found.');
-        }
-      };
-      findPath();
+    if (!isLoading && data) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      setProgressPct(100);
+      return;
     }
-  }, [lighthousePath, preferences]);
+    if (!isLoading && !data) return;
 
-  // If a report path exists, show the report view
-  if (reportPath) {
-    return <LighthouseReportView reportPath={reportPath} />;
-  }
-
-  async function handleChooseDirectory() {
-    try {
-      const { stdout } = await execPromise(`
-        osascript -e 'POSIX path of (choose folder with prompt "Select Output Directory")'
-      `);
-      const selectedPath = stdout.trim();
-      if (selectedPath) {
-        setOutputPath(selectedPath);
-        await showToast({
-          style: Toast.Style.Success,
-          title: 'Directory Selected',
-          message: `Output path set to: ${selectedPath}`,
-        });
-      }
-    } catch (error) {
-      console.error('Directory selection failed:', error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: 'Directory Selection Failed',
-        message: 'Could not set the output path.',
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setProgressPct(prev => (prev === 0 ? 0 : prev));
+    intervalRef.current = setInterval(() => {
+      setProgressPct(prev => {
+        const next =
+          prev < 20
+            ? prev + 2
+            : prev < 50
+              ? prev + 3
+              : prev < 70
+                ? prev + 5
+                : prev < 90
+                  ? prev + 7
+                  : prev + 5;
+        return Math.min(next, 98);
       });
-    }
+    }, 750);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    };
+  }, [isLoading, data]);
+
+  const handleReanalyze = () => {
+    setReanalyzeCount(c => c + 1);
+    revalidate();
+  };
+
+  if (error) {
+    const isInstallError = error.message.includes('npm install -g lighthouse');
+
+    return (
+      <Detail
+        markdown={
+          isInstallError
+            ? `# ${t('lighthouse_missing_title')}\n\nGoogle Lighthouse CLI is required.\n\n\`\`\`bash\nnpm install -g lighthouse\n\`\`\``
+            : `# ${t('audit_error_title')}\n\n${error.message}`
+        }
+        actions={
+          <ActionPanel>
+            {isInstallError ? (
+              <Action.CopyToClipboard
+                title={t('copy_install_command')}
+                content="npm install -g lighthouse"
+              />
+            ) : null}
+            <Action
+              title={t('try_again')}
+              icon={Icon.ArrowClockwise}
+              onAction={revalidate}
+            />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
-  async function handleSubmit(values: FormValues): Promise<void> {
-    await showToast({
-      style: Toast.Style.Animated,
-      title: 'Running Lighthouse Analysis...',
-    });
-
-    try {
-      // Validate URL
-      if (!values.url) {
-        throw new Error('URL is required');
+  if (isLoading || !data) {
+    const hostname = (() => {
+      try {
+        return new URL(processUrl(options.url)).hostname;
+      } catch {
+        return options.url;
       }
+    })();
+    const phase =
+      progressTexts.find(p => progressPct <= p.upTo) ||
+      progressTexts[progressTexts.length - 1];
+    const bar = (() => {
+      const pct = data ? 100 : Math.min(progressPct, 98);
+      const barLength = 50;
+      const filled = Math.round((pct / 100) * barLength);
+      return `[${'█'.repeat(filled).padEnd(barLength, '░')}] ${pct}%`;
+    })();
+    return (
+      <Detail
+        isLoading={true}
+        markdown={`# ${t('loading_summary')}\n\n${t('analyzing')}\n\n**Domain:** ${hostname}\n\n![Party Parrot](https://cultofthepartyparrot.com/parrots/hd/parrot.gif)\n\n${bar}\n\n_${phase.text}_`}
+      />
+    );
+  }
 
-      // Process and validate URL
-      const formattedUrl = processUrl(values.url);
-      if (!isValidUrl(formattedUrl)) {
-        throw new Error('Invalid URL format');
-      }
+  return (
+    <LighthouseReportView
+      reportPath={data.reportPath}
+      report={data.report}
+      originalUrl={options.url}
+      onReanalyze={handleReanalyze}
+    />
+  );
+}
 
-      // Find Lighthouse path
-      const finalLighthousePath = await findLighthousePath(preferences);
-      if (!finalLighthousePath) {
-        if (!preferences.lighthousePath) {
-          throw new Error(
-            'Lighthouse CLI not found. Please set the path manually in settings or install globally using:\n\nnpm install -g lighthouse'
-          );
-        } else {
-          throw new Error(
-            'Specified Lighthouse CLI path is invalid. Please set the path manually in settings.'
-          );
-        }
-      }
+export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+  const { push } = useNavigation();
 
-      // Prepare categories
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    initialValues: {
+      device: 'mobile',
+      performance: true,
+      accessibility: true,
+      bestPractices: true,
+      seo: true,
+      outputPath: preferences.outputPath || nodeOs.tmpdir(),
+    },
+    validation: {
+      url: FormValidation.Required,
+      outputPath: value => {
+        if (!value) return 'Output path is required';
+        return undefined;
+      },
+    },
+    onSubmit: values => {
       const categories: string[] = [];
       if (values.performance) categories.push('performance');
       if (values.accessibility) categories.push('accessibility');
       if (values.bestPractices) categories.push('best-practices');
       if (values.seo) categories.push('seo');
 
-      // Fallback to all categories if none selected
-      const finalCategories =
-        categories.length > 0
-          ? categories
-          : ['performance', 'accessibility', 'best-practices', 'seo'];
-
-      // Prepare output path from form or preferences or fallback to temp directory
-      const finalOutputDirectory =
-        values.outputPath || preferences.outputPath || nodeOs.tmpdir();
-
-      // Create the output directory if it doesn't exist
-      try {
-        await nodeFs.mkdir(finalOutputDirectory, { recursive: true });
-        const stats = await nodeFs.stat(finalOutputDirectory);
-        if (!stats.isDirectory()) {
-          throw new Error('Selected output path is not a directory.');
-        }
-      } catch (error) {
-        console.error('Output directory validation failed:', error);
-        throw new Error(
-          'Invalid output path. Please provide a valid directory.'
-        );
-      }
-
-      const outputFilePath = nodePath.join(
-        finalOutputDirectory,
-        `lighthouse-report-${Date.now()}.json`
+      push(
+        <ReportLoader
+          options={{
+            url: values.url,
+            device: values.device,
+            categories,
+            outputPath: values.outputPath,
+            lighthousePath: preferences.lighthousePath,
+          }}
+        />
       );
-
-      // Construct Lighthouse CLI command with enhanced configuration
-      const command = [
-        `"${finalLighthousePath}"`,
-        `"${formattedUrl}"`,
-        `--output=json`,
-        `--output-path="${outputFilePath}"`,
-        `--only-categories=${finalCategories.join(',')}`,
-        '--quiet',
-        '--disable-full-page-screenshot',
-        '--disable-storage-reset',
-        '--throttling-method=devtools',
-        '--max-wait-for-load=45000', // Increase max wait time
-        '--max-timeout=90000', // Increase overall timeout
-        '--chrome-flags="--headless --no-sandbox --disable-gpu --disable-web-security --allow-insecure-localhost"',
-      ];
-
-      // Add device-specific settings
-      if (values.device === 'desktop') {
-        command.push('--preset=desktop');
-      } else {
-        command.push('--form-factor=mobile');
-      }
-
-      const fullCommand = command.join(' ');
-      console.log('Executing Lighthouse command:', fullCommand);
-
-      try {
-        // Execute Lighthouse with enhanced error handling
-        await execPromise(fullCommand, {
-          env: {
-            ...process.env,
-            PATH: `/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${process.env.PATH || ''}`,
-          },
-          shell: '/bin/bash', // Specify the shell
-          maxBuffer: 1024 * 1024 * 10, // Increase buffer size
-          timeout: 120000, // 2-minute timeout
-        });
-
-        // Check if report was created
-        try {
-          await nodeFs.access(outputFilePath);
-        } catch (error) {
-          console.error('Report generation failed:', error);
-          throw new Error('Failed to generate Lighthouse report');
-        }
-
-        // Update success toast
-        await showToast({
-          style: Toast.Style.Success,
-          title: 'Analysis Complete',
-          message: `JSON Report saved to: ${outputFilePath}`,
-        });
-
-        // Set the report path to trigger report view
-        setReportPath(outputFilePath);
-      } catch (execError: any) {
-        // More detailed error handling for Lighthouse execution
-        console.error('Lighthouse Execution Error:', execError);
-
-        // Specific error handling for common scenarios
-        const errorMessage = execError.stderr || execError.message;
-
-        if (
-          errorMessage.includes('503') ||
-          errorMessage.includes('Unable to reliably load the page')
-        ) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: 'Website Unavailable',
-            message:
-              'The website is temporarily unavailable or blocking the analysis. Please try again later.',
-          });
-          return; // Prevent further error handling
-        }
-
-        // Generic error handling
-        await showToast({
-          style: Toast.Style.Failure,
-          title: 'Lighthouse Analysis Failed',
-          message: errorMessage || 'An unexpected error occurred',
-        });
-      }
-    } catch (error) {
-      console.error('Lighthouse Analysis Error:', error);
-
-      // Detailed error handling
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'Failed to run Lighthouse analysis';
-
-      // Update failure toast with specific guidance
-      await showToast({
-        style: Toast.Style.Failure,
-        title: 'Analysis Failed',
-        message: errorMessage,
-      });
-
-      // Additional specific error handling
-      if (
-        errorMessage.includes('Lighthouse CLI not found') ||
-        errorMessage.includes('invalid')
-      ) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: 'Lighthouse CLI Path Issue',
-          message:
-            'Please set the Lighthouse CLI path manually in the extension settings.',
-        });
-      }
-    }
-  }
-
-  async function handleChangeLighthousePath(): Promise<void> {
-    await openCommandPreferences();
-  }
+    },
+  });
 
   return (
     <Form
       actions={
-        <ActionPanel title="Extension Preferences">
+        <ActionPanel>
           <Action.SubmitForm
-            title="Run Lighthouse Analysis"
-            icon={Icon.MagnifyingGlass}
+            title={t('form_analyze_button')}
+            icon={Icon.Check}
             onSubmit={handleSubmit}
           />
           <Action
-            title="Open Extension Preferences"
-            onAction={handleChangeLighthousePath}
+            title="Open Preferences"
             icon={Icon.Gear}
-          />
-          <Action
-            title="Choose Output Directory"
-            onAction={handleChooseDirectory}
-            icon={Icon.Folder}
+            onAction={openCommandPreferences}
           />
         </ActionPanel>
       }
     >
+      <Form.Description text={t('form_section_basic')} />
       <Form.TextField
-        id="url"
-        title="Website URL"
-        placeholder="example.com"
-        autoFocus
+        title={t('form_url_title')}
+        placeholder={t('form_url_placeholder')}
+        {...itemProps.url}
       />
-
-      <Form.Dropdown id="device" title="Device" defaultValue="mobile">
-        <Form.Dropdown.Item value="mobile" title="Mobile" />
-        <Form.Dropdown.Item value="desktop" title="Desktop" />
+      <Form.Dropdown title={t('form_device_title')} {...itemProps.device}>
+        <Form.Dropdown.Item
+          value="mobile"
+          title={t('mobile')}
+          icon={Icon.Mobile}
+        />
+        <Form.Dropdown.Item
+          value="desktop"
+          title={t('desktop')}
+          icon={Icon.Monitor}
+        />
       </Form.Dropdown>
 
-      <Form.Checkbox id="performance" label="Performance" defaultValue={true} />
-      <Form.Checkbox
-        id="accessibility"
-        label="Accessibility"
-        defaultValue={true}
-      />
-      <Form.Checkbox
-        id="bestPractices"
-        label="Best Practices"
-        defaultValue={true}
-      />
-      <Form.Checkbox id="seo" label="SEO" defaultValue={true} />
+      <Form.Separator />
+      <Form.Description text={t('form_section_categories')} />
+      <Form.Checkbox label={t('form_perf_title')} {...itemProps.performance} />
+      <Form.Checkbox label={t('form_acc_title')} {...itemProps.accessibility} />
+      <Form.Checkbox label={t('form_bp_title')} {...itemProps.bestPractices} />
+      <Form.Checkbox label={t('form_seo_title')} {...itemProps.seo} />
+
+      <Form.Separator />
+      <Form.Description text={t('form_section_advanced')} />
       <Form.TextField
-        id="outputPath"
-        title="Download Report Path"
-        placeholder="Enter directory path or use the button above"
-        value={outputPath}
-        onChange={newValue => setOutputPath(newValue)}
+        title={t('form_output_title')}
+        {...itemProps.outputPath}
       />
-      <Form.Description
-        title="Choose Output Directory"
-        text="Click the 'Choose Output Directory' button in the actions panel above to select a folder where the JSON report will be saved."
-      />
+      <Form.Description text={t('form_output_helper')} />
     </Form>
   );
 }
