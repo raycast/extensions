@@ -1,5 +1,10 @@
 # Fathom for Raycast Changelog
 
+## Improve Full-Text Search - {PR_MERGE_DATE}
+
+- Fixed `get-meeting-details` tool to paginate through all meetings when searching by title
+- Changed "Refresh Cache" shortcut to use `Keyboard.Shortcut.Common.Refresh` for Raycast consistency
+
 ## Update to Fathom SDK 0.0.36 - 2025-11-09
 
 ### Changed
