@@ -1,5 +1,9 @@
 # Vercast Changelog
 
+## [2.13] - {PR_MERGE_DATE}
+
+- Added `Latest Deployment` command to open the latest deployment target or the Vercel dashboard
+
 ## [2.12] - 2025-12-12
 
 - Added Recent Deployments Menu Bar
