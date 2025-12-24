@@ -42,7 +42,7 @@ export function getColorsFromScene(scene: Scene): Palette {
       const uniqueXY = new Set(colors.map((c) => c.color.xy));
       return colors
         .filter((c) => uniqueXY.has(c.color.xy))
-        .map((c) => xyToRgbHexString(c.color.xy, c.color.dimming.brightness));
+        .map((c) => xyToRgbHexString(c.color.xy, c.color.dimming?.brightness));
     },
     // 2. Action colors
     () => {
