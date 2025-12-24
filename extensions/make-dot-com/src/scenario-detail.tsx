@@ -29,10 +29,6 @@ type Props = {
   lastReset?: string | null;
 };
 
-type Preferences = {
-  showUserEmails: boolean;
-};
-
 function statusLabel(s: MakeScenario): string {
   const base = s.isActive ? "Live" : "Disabled";
   const flags = [

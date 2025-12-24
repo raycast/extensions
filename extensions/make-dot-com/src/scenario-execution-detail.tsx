@@ -19,10 +19,6 @@ import type {
   ScenarioLog,
 } from "./types";
 
-type Preferences = {
-  allowCopyExecutionPayloads: boolean;
-};
-
 type Props = {
   client: MakeClient;
   baseUrl: string;

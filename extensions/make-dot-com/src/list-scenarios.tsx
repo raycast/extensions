@@ -24,11 +24,6 @@ import type {
   ScenarioConsumption,
 } from "./types";
 
-type Preferences = {
-  baseUrl: string;
-  apiToken: string;
-};
-
 type StatusFilter = "all" | "live" | "disabled";
 
 type SortMode = "ops" | "name" | "lastEdit";
@@ -101,7 +96,7 @@ function computeTrendText(opts: {
 }
 
 export default function ListScenariosCommand() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.ListScenarios>();
   const client = useMemo(
     () => new MakeClient({ baseUrl: prefs.baseUrl, apiToken: prefs.apiToken }),
     [prefs.baseUrl, prefs.apiToken],
