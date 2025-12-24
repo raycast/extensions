@@ -21,8 +21,8 @@ function debugLog(message: string, data?: unknown) {
  * Build headers for API requests
  * @param apiKey - Optional API key for authentication
  */
-export function buildHeaders(apiKey?: string): HeadersInit {
-  const headers: HeadersInit = {
+export function buildHeaders(apiKey?: string): Record<string, string> {
+  const headers: Record<string, string> = {
     Accept: "application/json",
   };
 
@@ -103,9 +103,9 @@ export async function search(query: string): Promise<SearchResponse> {
       throw handleAPIError(null, response.status);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as SearchResponse;
     debugLog(`Search results count: ${data.results?.length || 0}`);
-    return data as SearchResponse;
+    return data;
   } catch (error) {
     // If it's already an APIError, rethrow it
     if (error && typeof error === "object" && "status" in error) {
@@ -138,7 +138,7 @@ export async function getDocs(libraryId: string, tokens?: number): Promise<strin
   debugLog(`Docs request: ${libraryId}`);
 
   // For documentation endpoint, we don't need Accept: application/json
-  const headers: HeadersInit = {};
+  const headers: Record<string, string> = {};
   if (preferences.apiKey) {
     headers.Authorization = `Bearer ${preferences.apiKey}`;
   }
@@ -184,7 +184,7 @@ export async function getLlmsTxt(libraryId: string, tokens?: number): Promise<st
 
   debugLog(`llms.txt request: ${libraryId} with ${tokenLimit} tokens`);
 
-  const headers: HeadersInit = {};
+  const headers: Record<string, string> = {};
   if (preferences.apiKey) {
     headers.Authorization = `Bearer ${preferences.apiKey}`;
   }
