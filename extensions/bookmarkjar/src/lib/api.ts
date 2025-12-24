@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const API_URL = "https://bookmarkjar.com";
 
-interface Preferences {
-  apiKey: string;
-}
-
 interface BookmarkPayload {
   url: string;
   title: string;
@@ -38,7 +34,7 @@ export class BookmarkError extends Error {
 }
 
 export async function addBookmark(url: string): Promise<SyncResponse> {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey } = getPreferenceValues<ExtensionPreferences>();
 
   const bookmark: BookmarkPayload = {
     url,
