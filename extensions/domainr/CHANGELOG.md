@@ -1,6 +1,6 @@
 # Domainr Changelog
 
-## [Updated README and Tweaked UI] - {PR_MERGE_DATE}
+## [Updated README and Tweaked UI] - 2025-12-24
 
 - Updated README to require enabling Fastly Domain Research API
 - Updated domain availability descriptions
