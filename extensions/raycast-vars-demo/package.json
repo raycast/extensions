@@ -1,0 +1,30 @@
+{
+  "name": "raycast-vars-demo",
+  "title": "Variables Demo",
+  "description": "Demo Raycast extension with a persistent counter.",
+  "icon": "icon.png",
+  "author": "bischoff99",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Counter",
+      "description": "Increment and reset a saved counter.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.0.0"
+  },
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build",
+    "publish": "ray publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.1",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  }
+}
