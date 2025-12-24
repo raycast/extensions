@@ -17,17 +17,13 @@ export default async function (input: Input) {
   }
 
   // Collect all email addresses from all accounts
-  const allEmails: Array<{ email: string; accountName: string; accountId: string }> = [];
-
-  for (const account of accounts) {
-    for (const email of account.emails) {
-      allEmails.push({
-        email,
-        accountName: account.name,
-        accountId: account.id,
-      });
-    }
-  }
+  const allEmails = accounts.flatMap((account) =>
+    account.emails.map((email) => ({
+      email,
+      accountName: account.name,
+      accountId: account.id,
+    })),
+  );
 
   // Filter by query if provided
   if (input.query) {
