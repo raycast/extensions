@@ -1,6 +1,6 @@
 # Webpage to Markdown Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-12-24
 
 - Add support for Windows platform.
 - Bump all dependencies to the latest.
