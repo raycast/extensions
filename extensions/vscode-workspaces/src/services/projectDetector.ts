@@ -149,7 +149,7 @@ export const projectTypes: ProjectType[] = [
   },
   {
     id: "rust",
-    icon: iconPath("rust", "rust-plain.svg"),
+    icon: iconPath("rust", "rust-original.svg"),
     async test(dir) {
       return fileExists(dir, "Cargo.toml");
     },
