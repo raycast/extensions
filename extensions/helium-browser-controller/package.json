@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "helium-browser-controller",
+  "title": "Helium Browser",
+  "description": "Opens a new non-private Helium browser window",
+  "icon": "icon.png",
+  "author": "Just_Me",
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "open-helium",
+      "title": "Open Helium Window",
+      "subtitle": "Browser",
+      "description": "Opens a new non-private Helium browser window",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "entry": "src/open-helium.ts"
+    },
+    {
+      "name": "create-tab",
+      "title": "Create Tab",
+      "subtitle": "Browser",
+      "description": "Creates a new tab in Helium browser",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "entry": "src/create-tab.ts"
+    },
+    {
+      "name": "open-new-browser-window",
+      "title": "Open New Browser Window",
+      "subtitle": "Browser",
+      "description": "Opens a new Helium browser window",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "entry": "src/open-new-browser-window.ts"
+    },
+    {
+      "name": "open-private-window",
+      "title": "Open Private Window",
+      "subtitle": "Browser",
+      "description": "Opens a new private/incognito Helium browser window",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "entry": "src/open-private-window.ts"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Browser",
+      "description": "Search and open from Helium browser history",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "entry": "src/search-history.tsx"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Browser",
+      "description": "Search and manage Helium browser bookmarks",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "entry": "src/search-bookmarks.tsx"
+    },
+    {
+      "name": "close-browser",
+      "title": "Close Browser",
+      "subtitle": "Browser",
+      "description": "Closes all Helium/Chrome browser windows",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "entry": "src/close-browser.ts"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "heliumPath",
+      "title": "Helium Path",
+      "description": "Custom path to Helium executable",
+      "type": "file",
+      "required": false,
+      "placeholder": "C:\\Users\\You\\AppData\\Local\\imput\\Helium\\Application\\chrome.exe"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "sharp": "^0.34.5",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "cross-env CHOKIDAR_USEPOLLING=true ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
