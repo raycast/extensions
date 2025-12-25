@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] - Initial Release
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -14,4 +14,3 @@ All notable changes to this project will be documented in this file.
 - Automatic filtering of common build folders (node_modules, dist, etc.)
 - Multiple actions: Open with Antigravity, Show in Finder, Copy Path
 - Display last modified time for projects
-

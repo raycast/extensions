@@ -65,5 +65,5 @@ export function getDefaultSearchFolder(): string {
     return process.env.ANTIGRAVITY_PROJECTS_DIR;
   }
 
-  return "/Users/rocsun/Code";
+  return path.join(homedir(), "Code");
 }
