@@ -173,22 +173,30 @@ export default function FileListItem({
             shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
 
-          {file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory && (
-            <Action
-              title="Enter Directory"
-              icon={Icon.ArrowRight}
-              onAction={() => onEnterDirectory(file)}
-              shortcut={{ modifiers: [], key: "tab" }}
-            />
-          )}
+          {((file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory) ||
+            (currentParentId && goToParent)) && (
+            <ActionPanel.Section>
+              {file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory && (
+                <Action
+                  title="Enter Directory"
+                  icon={Icon.ArrowRight}
+                  onAction={() => onEnterDirectory(file)}
+                  shortcut={{ modifiers: [], key: "tab" }}
+                />
+              )}
 
-          {currentParentId && goToParent && (
-            <Action
-              title="Go to Parent Directory"
-              icon={Icon.ArrowLeft}
-              onAction={() => goToParent()}
-              shortcut={{ macOS: { modifiers: ["shift"], key: "tab" }, Windows: { modifiers: ["shift"], key: "tab" } }}
-            />
+              {currentParentId && goToParent && (
+                <Action
+                  title="Go to Parent Directory"
+                  icon={Icon.ArrowLeft}
+                  onAction={() => goToParent()}
+                  shortcut={{
+                    macOS: { modifiers: ["shift"], key: "tab" },
+                    Windows: { modifiers: ["shift"], key: "tab" },
+                  }}
+                />
+              )}
+            </ActionPanel.Section>
           )}
 
           {file.webContentLink && (
