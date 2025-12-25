@@ -5,10 +5,18 @@ import { useSearchHistory } from "./dia";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
-  const { isLoading, data, permissionView, revalidate } = useSearchHistory(searchText);
+  const { isLoading, data, permissionView, revalidate, error } = useSearchHistory(searchText);
 
   if (permissionView) {
     return permissionView;
+  }
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView title="Error" description={error.message} />
+      </List>
+    );
   }
 
   return (

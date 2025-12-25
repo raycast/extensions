@@ -1,7 +1,7 @@
-import { runAppleScript, usePromise, useSQL } from "@raycast/utils";
+import { runAppleScript, showFailureToast, usePromise, useSQL } from "@raycast/utils";
 import { resolve } from "path";
 import { homedir } from "os";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import dedent from "dedent";
 import { escapeAppleScriptString, escapeSQLLikePattern } from "./utils";
 import { getBookmarksTree, type BookmarkDirectory } from "./bookmarks";
@@ -136,7 +136,11 @@ function getHistoryQuery(searchText?: string, limit = 100) {
 
 export function useSearchHistory(searchText?: string, options: { limit?: number } = {}) {
   const historyPath = getHistoryPath();
-
+  if (!existsSync(historyPath)) {
+    const error = new Error("The database does not exist");
+    showFailureToast(error);
+    return { isLoading: false, error, data: [], permissionView: null, revalidate: () => {} };
+  }
   // getHistoryQuery now handles escaping internally
   const historyQuery = getHistoryQuery(searchText, options?.limit);
 
