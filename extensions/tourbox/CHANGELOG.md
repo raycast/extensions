@@ -1,6 +1,6 @@
 # TourBox Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-12-25
 
 - Fix broken API implementations
 - Bump all dependencies to the latest
