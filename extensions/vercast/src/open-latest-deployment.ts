@@ -2,10 +2,6 @@ import { getPreferenceValues, LocalStorage, open, openCommandPreferences, showTo
 import { fetchLatestDeployment, fetchTeams, fetchUser, getDeploymentURL } from "./vercel";
 import isValidToken from "./utils/is-valid-token";
 
-interface Preferences {
-  openTarget?: "vercel" | "deployUrl";
-}
-
 export default async function Command() {
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -52,7 +48,7 @@ export default async function Command() {
   }
 
   // Determine which URL to open based on preferences
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.OpenLatestDeployment>();
   const openTarget = preferences.openTarget ?? "vercel";
 
   let url: string;

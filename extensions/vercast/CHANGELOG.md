@@ -2,7 +2,7 @@
 
 ## [2.13] - {PR_MERGE_DATE}
 
-- Added `Latest Deployment` command to open the latest deployment target or the Vercel dashboard
+- Added `Open Latest Deployment` command to open the latest deployment target or the Vercel dashboard
 
 ## [2.12] - 2025-12-12
 
