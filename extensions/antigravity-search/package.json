@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "antigravity-search",
+  "title": "Antigravity Search",
+  "description": "Search and open projects in your code directory with Antigravity IDE",
+  "icon": "extension-icon.png",
+  "author": "roc_sun",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Antigravity Projects",
+      "description": "Search projects to open with Antigravity IDE",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "projectsDirectory",
+      "title": "Projects Directory",
+      "type": "directory",
+      "required": false,
+      "default": "~/Code",
+      "description": "The path to the directory to search for projects"
+    },
+    {
+      "name": "searchDepth",
+      "title": "Search Depth",
+      "type": "textfield",
+      "required": false,
+      "default": "3",
+      "description": "How many levels deep to search for folders (1-5)"
+    },
+    {
+      "name": "agyCommandPath",
+      "title": "Antigravity Command Path",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "description": "Full path to the agy command (leave empty to use default: ~/.antigravity/antigravity/bin/agy)"
+    },
+    {
+      "name": "ignoredFoldersPattern",
+      "title": "Ignored Folders Pattern",
+      "type": "textfield",
+      "required": false,
+      "default": "^\\.|^(node_modules|venv|__pycache__|target|dist|build|vendor|bower_components)$",
+      "description": "Regex pattern for folders to ignore during search (leave empty to use default)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.18.0",
+    "dayjs": "^1.11.19",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.7",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "pnpx @raycast/api@latest publish",
+    "pull-contributions": "pnpx @raycast/api@latest pull-contributions",
+    "ray": "ray"
+  },
+  "volta": {
+    "node": "22.21.1"
+  }
+}
