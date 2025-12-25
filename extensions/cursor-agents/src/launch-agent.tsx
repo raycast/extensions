@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, open, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  open,
+  showToast,
+  Toast,
+  useNavigation,
+  Keyboard,
+} from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedState, useForm } from "@raycast/utils";
 import { launchAgent, useModels } from "./cursor";
 import { processImages, refreshMenuBar } from "./utils";
@@ -128,20 +139,14 @@ export default function Command() {
           title: "Launched background agent",
           primaryAction: {
             title: "Open in Browser",
-            shortcut: {
-              macOS: { modifiers: ["cmd", "shift"], key: "o" },
-              windows: { modifiers: ["ctrl", "shift"], key: "o" },
-            },
+            shortcut: Keyboard.Shortcut.Common.OpenWith,
             async onAction() {
               await open(response.target.url);
             },
           },
           secondaryAction: {
             title: "Copy URL",
-            shortcut: {
-              macOS: { modifiers: ["cmd", "shift"], key: "c" },
-              windows: { modifiers: ["ctrl", "shift"], key: "c" },
-            },
+            shortcut: Keyboard.Shortcut.Common.Copy,
             async onAction() {
               await Clipboard.copy(response.target.url);
             },

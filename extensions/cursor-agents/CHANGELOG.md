@@ -1,5 +1,10 @@
 # Cursor Agents Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Fix the keyboard shortcut error.
+- Bump all dependencies to the latest.
+
 ## [Windows Support] - 2025-10-30
 
 - Added Windows platform support
