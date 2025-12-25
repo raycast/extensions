@@ -97,7 +97,6 @@ function SearchGoogleDriveFiles() {
                 }}
               />
             )}
-            <Action.OpenInBrowser title="Open Google Drive" icon="google-drive.png" url="https://drive.google.com" />
           </ActionPanel>
         }
       />
