@@ -90,5 +90,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "test": "jest"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
