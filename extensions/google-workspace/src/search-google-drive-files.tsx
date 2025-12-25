@@ -91,10 +91,7 @@ function SearchGoogleDriveFiles() {
                 title="Go to Parent Directory"
                 icon={Icon.ArrowLeft}
                 onAction={() => goToParent()}
-                shortcut={{
-                  macOS: { modifiers: ["shift"], key: "tab" },
-                  Windows: { modifiers: ["shift"], key: "tab" },
-                }}
+                shortcut={{ modifiers: ["shift"], key: "tab" }}
               />
             )}
           </ActionPanel>
