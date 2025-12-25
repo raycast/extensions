@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [New Open Workspace command, Callout Support, Copy Files Action] - {PR_MERGE_DATE}
+## [New Open Workspace command, Callout Support, Copy Files Action] - 2025-12-25
 
 - Adds new Open Workspace command that shows a list of all workspaces in your vault. Requires advanced URI plugin and workspaces core plugin to be enabled
 - Adds callout support by rendering them as quotes with emojis
