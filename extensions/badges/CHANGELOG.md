@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-12-25
 
 - Add support for Windows
 - Change tag active color to blue for better accessibility
