@@ -189,7 +189,7 @@ export default function FileListItem({
                 <Action
                   title="Go to Parent Directory"
                   icon={Icon.ArrowLeft}
-                  onAction={() => goToParent()}
+                  onAction={goToParent}
                   shortcut={{
                     macOS: { modifiers: ["shift"], key: "tab" },
                     Windows: { modifiers: ["shift"], key: "tab" },
