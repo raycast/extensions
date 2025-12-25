@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Handle error in Search History + Fix CHANGELOG Dates] - {PR_MERGE_DATE}
+## [Handle error in Search History + Fix CHANGELOG Dates] - 2025-12-25
 
 - Handle error in Search History when file is not found
 - Fix the format of CHANGELOG to render dates properly
