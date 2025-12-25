@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [AI tools] - {PR_MERGE_DATE}
+## [AI tools] - 2025-12-25
 
 - Added the `Get Latest Download` tool to get the path of the latest download with Raycast AI.
 - Added the `Copy Latest Download` tool to copy the latest download with Raycast AI.
