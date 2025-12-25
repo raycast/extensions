@@ -136,17 +136,22 @@ function getHistoryQuery(searchText?: string, limit = 100) {
 
 export function useSearchHistory(searchText?: string, options: { limit?: number } = {}) {
   const historyPath = getHistoryPath();
-  if (!existsSync(historyPath)) {
+  // getHistoryQuery now handles escaping internally
+  const historyQuery = getHistoryQuery(searchText, options?.limit);
+
+  const dbExists = existsSync(historyPath);
+  // const result = useSQL<HistoryItem>(dbExists ? historyPath : __filename, historyQuery, {
+  const result = useSQL<HistoryItem>(dbExists ? historyPath : __filename, historyQuery, {
+    permissionPriming: "This extension needs access to read your Dia browser history.",
+    execute: dbExists,
+  });
+
+  if (!dbExists) {
     const error = new Error("The database does not exist");
     showFailureToast(error);
     return { isLoading: false, error, data: [], permissionView: null, revalidate: () => {} };
   }
-  // getHistoryQuery now handles escaping internally
-  const historyQuery = getHistoryQuery(searchText, options?.limit);
-
-  return useSQL<HistoryItem>(historyPath, historyQuery, {
-    permissionPriming: "This extension needs access to read your Dia browser history.",
-  });
+  return result;
 }
 
 async function getTabs() {
