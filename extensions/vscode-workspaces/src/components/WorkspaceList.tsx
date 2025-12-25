@@ -86,7 +86,7 @@ export default function WorkspaceList({
               <ActionPanel>
                 <ActionPanel.Section title="Open">
                   <Action title="Open in VS Code" icon={Icon.Code} onAction={async () => await onOpen(w)} />
-                  <Action.OpenWith path={w.path} />
+                  <Action.OpenWith shortcut={Keyboard.Shortcut.Common.OpenWith} path={w.path} />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Quick Actions">
                   <Action
@@ -103,7 +103,7 @@ export default function WorkspaceList({
                   />
                   <Action
                     title={process.platform === "darwin" ? "Reveal in Finder" : "Reveal in Explorer"}
-                    icon={Icon.Finder}
+                    icon={process.platform === "darwin" ? Icon.Finder : Icon.Folder}
                     shortcut={{ Windows: { modifiers: ["ctrl"], key: "e" }, macOS: { modifiers: ["cmd"], key: "e" } }}
                     onAction={async () => await onRevealInFinder(w)}
                   />

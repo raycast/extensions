@@ -2,6 +2,13 @@
 
 ## [Bugfix & Improvements] - {PR_MERGE_DATE}
 
+- Added OpenWith action in the action panel
+- Use Raycast's safe open API to open terminal and finder
+- Fixed action panel shortcuts for both platforms
+- Improved toast messages
+
+## [Bugfix & Improvements] - {PR_MERGE_DATE}
+
 - Fixed rust devicon URL
 
 ## [Major Feature Update] - {PR_MERGE_DATE}
