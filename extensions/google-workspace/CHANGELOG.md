@@ -1,6 +1,6 @@
 # Google Workspace Changelog
 
-## [Folder Navigation Enhancements] - {PR_MERGE_DATE}
+## [Folder Navigation Enhancements] - 2025-12-25
 
 ### Added
 
