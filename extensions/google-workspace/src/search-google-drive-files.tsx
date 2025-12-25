@@ -38,16 +38,9 @@ function SearchGoogleDriveFiles() {
   };
 
   const goToParent = async () => {
-    if (!parentId) {
-      setParentId(undefined);
-      return;
-    }
+    if (!parentId) return;
     const parents = await getFileParentsById(parentId);
-    if (!parents || parents.length === 0) {
-      setParentId(undefined);
-    } else {
-      setParentId(parents[0]);
-    }
+    setParentId(parents.length > 0 ? parents[0] : undefined);
   };
 
   return (
