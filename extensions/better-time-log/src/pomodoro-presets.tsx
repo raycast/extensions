@@ -97,7 +97,7 @@ export default function PomodoroPresetsCommand() {
             title={preset.title}
             subtitle={preset.description}
             accessories={[{ tag: { value: preset.detail } }]}
-            icon={Icon.Timer}
+            icon={Icon.Clock}
             actions={
               <ActionPanel>
                 <Action
