@@ -1,5 +1,13 @@
 # Change Case Changelog
 
+## [Refactor and ESLint Compatibility] - {PR_MERGE_DATE}
+
+- Renamed `spongeCase` to `alternatingCase` for better clarity
+- Updated function names and aliases to prioritize "alternating" while maintaining backward compatibility
+- Resolved ESLint configuration compatibility issues
+- Removed duplicate ESLint config files
+- Downgraded to ESLint 8 for Raycast extension compatibility
+
 ## [Enable `fallback text`. support] - 2025-12-16
 
 - You can use the extension in fallback mode (ref: [Issue #23577](https://github.com/raycast/extensions/issues/23577))
