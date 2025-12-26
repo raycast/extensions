@@ -2,7 +2,7 @@
 
 ## [Unreleased] - {PR_MERGE_DATE}
 
-- renamed "Domainr (Fastly Domain Search)" to "Fastly Domain Search (Formerly Domainr)"
+- Renamed "Domainr (Fastly Domain Search)" to "Fastly Domain Search (formerly Domainr)"
 
 ## [Updated README and Tweaked UI] - 2025-12-24
 
