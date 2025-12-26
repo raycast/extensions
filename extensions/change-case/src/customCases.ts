@@ -11,11 +11,13 @@ const isAlphabetic = (char: string) => ALPHABETIC_REGEX.test(char);
 
 // Alternating Case: AlTeRnAtInG cAsE (alternating case pattern)
 export const alternatingCase = (input: string) => {
+  let alphabeticCount = 0;
   return input
     .split("")
-    .map((char, index) => {
+    .map((char) => {
       if (!isAlphabetic(char)) return char;
-      return index % 2 === 0 ? char.toUpperCase() : char.toLowerCase();
+      alphabeticCount++;
+      return alphabeticCount % 2 === 1 ? char.toUpperCase() : char.toLowerCase();
     })
     .join("");
 };
