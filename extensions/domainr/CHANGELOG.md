@@ -1,4 +1,7 @@
 # Domainr Changelog
+## [Unreleased] - {PR_MERGE_DATE}
+
+- Updated extension title to "Fastly Domain Search (Formerly Domainr)"
 
 ## [Updated README and Tweaked UI] - 2025-12-24
 
