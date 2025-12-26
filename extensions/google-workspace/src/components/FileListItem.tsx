@@ -183,8 +183,7 @@ export default function FileListItem({
             shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
 
-          {((file.mimeType === "application/vnd.google-apps.folder" && 
-            ) ||
+          {((file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory) ||
             (currentParentId && goToParent)) && (
             <ActionPanel.Section>
               {file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory && (
