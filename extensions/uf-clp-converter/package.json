@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "uf-clp-converter",
+  "title": "UF to CLP Converter",
+  "description": "Convert between UF (Unidad de Fomento) and CLP (Chilean Peso) using real-time UF values from mindicador.cl",
+  "icon": "icon.png",
+  "author": "diegopinochet",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "packageManager": "pnpm@9.0.0",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert UF/CLP",
+      "description": "Convert between UF and CLP",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
+

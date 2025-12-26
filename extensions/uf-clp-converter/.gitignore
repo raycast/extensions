@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.raycast/
+package-lock.json
+yarn.lock
+.venv/
+__pycache__/
+*.pyc
+
