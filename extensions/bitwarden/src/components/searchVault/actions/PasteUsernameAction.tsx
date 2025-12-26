@@ -28,6 +28,10 @@ function PasteUsernameAction() {
       icon={Icon.Window}
       onAction={pasteUsername}
       repromptDescription={`Pasting the username of <${selectedItem.name}>`}
+      shortcut={{
+        macOS: { key: "u", modifiers: ["cmd", "opt"] },
+        windows: { key: "u", modifiers: ["ctrl", "alt"] },
+      }}
     />
   );
 }
