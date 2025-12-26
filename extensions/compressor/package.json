@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "compressor",
+  "title": "Compressor",
+  "description": "Compress Images and Videos in one click for web",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compress-files",
+      "title": "Compress Files",
+      "description": "Compress selected images and videos",
+      "mode": "no-view"
+    },
+    {
+      "name": "resize-files",
+      "title": "Resize Files",
+      "description": "Resize images and videos to web-optimized dimensions",
+      "mode": "view"
+    },
+    {
+      "name": "optimize-for-web",
+      "title": "Optimize for Web",
+      "description": "Resize and compress files for web usage",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "ffmpeg-static": "^5.3.0",
+    "file-type": "^21.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "preferences": [
+    {
+      "name": "outputFolderName",
+      "type": "textfield",
+      "title": "Output Folder Name",
+      "description": "Folder name where optimized files will be saved (relative to source file)",
+      "default": "Optimized",
+      "required": false
+    }
+  ],
+  "author": "webistory",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Design Tools",
+    "Web",
+    "Media"
+  ]
+}
