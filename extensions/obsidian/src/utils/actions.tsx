@@ -40,6 +40,17 @@ export function ShowPathInFinderAction(props: { path: string }) {
   );
 }
 
+export function CopyPathAction(props: { path: string }) {
+  const { path } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy File Path"
+      content={path}
+      shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
+    />
+  );
+}
+
 export function EditNoteAction(props: {
   note: NoteWithContent;
   vault: ObsidianVault;
@@ -114,6 +125,17 @@ export function CopyNoteTitleAction(props: { note: Note }) {
   const { note } = props;
   return (
     <Action.CopyToClipboard title="Copy Note Title" content={note.title} shortcut={{ modifiers: ["opt"], key: "t" }} />
+  );
+}
+
+export function CopyNotePathAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy File Path"
+      content={note.path}
+      shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
+    />
   );
 }
 
@@ -275,6 +297,17 @@ export function ShowVaultInFinderAction(props: { vault: ObsidianVault }) {
   return <Action.ShowInFinder title="Show in Finder" icon={Icon.Finder} path={vault.path} />;
 }
 
+export function CopyVaultPathAction(props: { vault: ObsidianVault }) {
+  const { vault } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy File Path"
+      content={vault.path}
+      shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
+    />
+  );
+}
+
 // export function ShowMentioningNotesAction(props: { vault: Vault; str: string; notes: Note[] }) {
 //   const { vault, str, notes } = props;
 //   const filteredNotes = notes.filter((note: Note) => note.content.includes(str));
@@ -371,6 +404,7 @@ export function NoteActions(props: {
       <AppendSelectedTextToNoteAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
       <CopyNoteAction note={note} />
       <CopyNoteTitleAction note={note} />
+      <CopyNotePathAction note={note} />
       <PasteNoteAction note={note} />
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />

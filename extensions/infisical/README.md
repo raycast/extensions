@@ -34,9 +34,10 @@ This is a Raycast extension for [Infisical](https://infisical.com/) - _Secrets m
 
     d. **Client Secret** - `Paste` using instructions from previous section
 
-## 🗒️ Note
+## 🗒️ Notes
 
-Once you have successfully authenticated, the extension will attempt to `verify` and `renew` token on each subsequent run; In normal cases the `token` is valid for 30 days so you can `check` "Disable Token Verification" to disable this behavior.
+- Once you have successfully authenticated, the extension will attempt to `verify` and `renew` token on each subsequent run; In normal cases the `token` is valid for 30 days so you can `check` "Disable Token Verification" in `Preferences` to disable this behavior.
+- You can `copy` or `save` all secrets of an **environment** in _.env_ format (`change` the environment using the `dropdown`). The file is `saved` in the "Downloads" folder (if the environment is not "production", the environment is appended to the extension e.g. `.env.dev`)
 
 ---
 
@@ -46,4 +47,5 @@ Looking for more cool OSS extensions? Try these:
 <a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install keygen Raycast Extension" href="https://www.raycast.com/xmok/keygen"><img src="https://www.raycast.com/xmok/keygen/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install umami Raycast Extension" href="https://www.raycast.com/xmok/umami"><img src="https://www.raycast.com/xmok/umami/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install vanguard-backup Raycast Extension" href="https://www.raycast.com/xmok/vanguard-backup"><img src="https://www.raycast.com/xmok/vanguard-backup/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

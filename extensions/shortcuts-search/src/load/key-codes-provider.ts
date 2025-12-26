@@ -1,32 +1,33 @@
-import fetch from "cross-fetch";
-import { useRefreshableCachedState } from "./use-refreshable-cached-state";
+import { useFetch } from "@raycast/utils";
 
-export type KeyCodes = Map<string, string>;
+export type KeyCodes = Record<string, string>;
 
 interface IncomingKeyCodes {
   keyCodes: [string, string][];
 }
 
-const cacheKey = "key-codes";
-
 interface UseKeyCodesResult {
   isLoading: boolean;
-  data: Map<string, string> | undefined;
+  data: KeyCodes | undefined;
   revalidate: () => void;
 }
 
 export default function useKeyCodes(): UseKeyCodesResult {
-  return useRefreshableCachedState<IncomingKeyCodes, Map<string, string> | undefined>(
-    cacheKey,
-    async () => {
-      console.log("Fetching key codes");
-      const res = await fetch("https://hotkys.com/data/key-codes.json");
-      const json: IncomingKeyCodes = await res.json();
-      return json;
-    },
+  const { isLoading, data, revalidate } = useFetch<IncomingKeyCodes, undefined, KeyCodes>(
+    "https://hotkys.com/data/key-codes.json",
     {
-      dataParser: (incomingKeyCodes: IncomingKeyCodes | undefined) =>
-        incomingKeyCodes ? new Map<string, string>(incomingKeyCodes.keyCodes) : undefined,
+      mapResult: (result) => ({
+        data: Object.fromEntries(result.keyCodes),
+      }),
+      failureToastOptions: {
+        title: "Failed to load key codes",
+      },
     }
   );
+
+  return {
+    isLoading,
+    data,
+    revalidate,
+  };
 }

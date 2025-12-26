@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "infomaniak",
+  "title": "Infomaniak",
+  "description": "Sovereign Cloud Service Provider",
+  "icon": "k-icon.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "user-management",
+      "title": "User Management",
+      "description": "Manage your Infomaniak account",
+      "mode": "view"
+    },
+    {
+      "name": "kdrive",
+      "title": "kDrive",
+      "description": "Manage your kDrive files",
+      "mode": "view",
+      "icon": "kdrive.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "placeholder": "XXX...xxX",
+      "description": "API Token from Infomaniak Dashboard",
+      "required": true,
+      "type": "password"
+    },
+    {
+      "name": "account_id",
+      "title": "Account ID",
+      "placeholder": "xxxxxxx",
+      "description": "The default Account ID to use",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "filesize": "^11.0.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -7,9 +7,19 @@ type FileListItemProps = {
   file: File;
   email?: string;
   preferredBrowser?: string;
+  onEnterDirectory?: (file: File) => void;
+  goToParent?: () => void;
+  currentParentId?: string | undefined;
 };
 
-export default function FileListItem({ file, email, preferredBrowser }: FileListItemProps) {
+export default function FileListItem({
+  file,
+  email,
+  preferredBrowser,
+  onEnterDirectory,
+  goToParent,
+  currentParentId,
+}: FileListItemProps) {
   const createdTime = file.createdTime ? new Date(file.createdTime) : null;
   const modifiedByMeTime = file.modifiedByMeTime ? new Date(file.modifiedByMeTime) : null;
   const viewedByMeTime = file.viewedByMeTime ? new Date(file.viewedByMeTime) : null;
@@ -172,6 +182,33 @@ export default function FileListItem({ file, email, preferredBrowser }: FileList
             }`}
             shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
+
+          {((file.mimeType === "application/vnd.google-apps.folder" && 
+            ) ||
+            (currentParentId && goToParent)) && (
+            <ActionPanel.Section>
+              {file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory && (
+                <Action
+                  title="Enter Directory"
+                  icon={Icon.ArrowRight}
+                  onAction={() => onEnterDirectory(file)}
+                  shortcut={{ modifiers: [], key: "tab" }}
+                />
+              )}
+
+              {currentParentId && goToParent && (
+                <Action
+                  title="Go to Parent Directory"
+                  icon={Icon.ArrowLeft}
+                  onAction={goToParent}
+                  shortcut={{
+                    macOS: { modifiers: ["shift"], key: "tab" },
+                    Windows: { modifiers: ["shift"], key: "tab" },
+                  }}
+                />
+              )}
+            </ActionPanel.Section>
+          )}
 
           {file.webContentLink && (
             <Action

@@ -15,7 +15,7 @@ export function useHueBridgeMachine(
 
   const [hueBridgeState, send] = useMachine(machine);
   const sendHueMessage: SendHueMessage = (message: HueMessage) => {
-    send(message.toUpperCase());
+    send({ type: message.toUpperCase() });
   };
 
   return {
