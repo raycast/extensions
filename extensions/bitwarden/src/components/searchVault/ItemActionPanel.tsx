@@ -40,10 +40,8 @@ const VaultItemActionPanel = () => {
           </ComponentReverser>
           <CopyTotpAction />
           <PasteTotpAction />
-          <ComponentReverser reverse={primaryAction === "paste"}>
-            <CopyUsernameAction />
-            <PasteUsernameAction />
-          </ComponentReverser>
+          <CopyUsernameAction />
+          <PasteUsernameAction />
           <OpenUrlInBrowserAction />
           <CopyLoginUrisActions />
           <ShowNotesAction />
