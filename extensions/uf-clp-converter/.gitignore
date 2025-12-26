@@ -4,7 +4,6 @@ dist/
 *.log
 .env
 .raycast/
-package-lock.json
 yarn.lock
 .venv/
 __pycache__/

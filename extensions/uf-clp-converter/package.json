@@ -10,7 +10,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "packageManager": "pnpm@9.0.0",
   "commands": [
     {
       "name": "index",

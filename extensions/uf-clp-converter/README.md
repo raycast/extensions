@@ -33,16 +33,16 @@ UF values are fetched from [mindicador.cl](https://mindicador.cl/api/uf), a free
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Run in development mode
-pnpm dev
+npm run dev
 
 # Build for production
-pnpm build
+npm run build
 
 # Lint code
-pnpm lint
+npm run lint
 ```
 
 ## Publishing to Raycast Store
@@ -55,13 +55,13 @@ Before publishing, make sure:
    - ✅ All code is tested and working
    - ✅ Icon is properly set (`assets/icon.png`)
    - ✅ `package.json` has correct metadata
-   - ✅ Build passes (`pnpm build`)
-   - ✅ Lint passes (`pnpm lint`)
+   - ✅ Build passes (`npm run build`)
+   - ✅ Lint passes (`npm run lint`)
 
 Then publish with:
 
 ```bash
-pnpm publish
+npm run publish
 ```
 
 This will:
