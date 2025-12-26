@@ -101,10 +101,12 @@ export default function Command() {
 
   if (error && !ufValue) {
     return (
+      // @ts-expect-error - React 19 types compatibility issue with @raycast/api
       <List
         searchBarPlaceholder="Enter amount to convert..."
         onSearchTextChange={setSearchText}
       >
+        {/* @ts-expect-error - React 19 types compatibility issue with @raycast/api */}
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Error loading UF value"
@@ -115,6 +117,7 @@ export default function Command() {
   }
 
   return (
+    // @ts-expect-error - React 19 types compatibility issue with @raycast/api
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Enter amount (e.g., 1000 or 1.5 UF)..."
@@ -122,18 +125,22 @@ export default function Command() {
       searchText={searchText}
     >
       {ufValue && (
+        // @ts-expect-error - React 19 types compatibility issue with @raycast/api
         <List.Section
           title={`Current UF Value: ${formatCLP(ufValue)} CLP${ufDate ? ` (${ufDate})` : ""}`}
         >
           {amount !== null ? (
             <>
               {(direction === "uf" || showBoth) && ufToClpResult !== null && (
+                // @ts-expect-error - React 19 types compatibility issue with @raycast/api
                 <List.Item
                   title={`${formatUF(amount)} UF = ${formatCLP(ufToClpResult)} CLP`}
                   subtitle={`${formatCLPForClipboard(ufToClpResult)} CLP`}
                   icon={Icon.Calculator}
                   actions={
+                    // @ts-expect-error - React 19 types compatibility issue with @raycast/api
                     <ActionPanel>
+                      {/* @ts-expect-error - React 19 types compatibility issue with @raycast/api */}
                       <Action
                         title="Copy to Clipboard"
                         icon={Icon.Clipboard}
@@ -147,12 +154,15 @@ export default function Command() {
                 />
               )}
               {(direction === "clp" || showBoth) && clpToUfResult !== null && (
+                // @ts-expect-error - React 19 types compatibility issue with @raycast/api
                 <List.Item
                   title={`${formatCLP(amount)} CLP = ${formatUF(clpToUfResult)} UF`}
                   subtitle={`${formatUFForClipboard(clpToUfResult)} UF`}
                   icon={Icon.Calculator}
                   actions={
+                    // @ts-expect-error - React 19 types compatibility issue with @raycast/api
                     <ActionPanel>
+                      {/* @ts-expect-error - React 19 types compatibility issue with @raycast/api */}
                       <Action
                         title="Copy to Clipboard"
                         icon={Icon.Clipboard}
@@ -167,12 +177,14 @@ export default function Command() {
               )}
             </>
           ) : searchText ? (
+            // @ts-expect-error - React 19 types compatibility issue with @raycast/api
             <List.Item
               title="Invalid amount"
               subtitle="Enter a valid number"
               icon={Icon.ExclamationMark}
             />
           ) : (
+            // @ts-expect-error - React 19 types compatibility issue with @raycast/api
             <List.Item
               title="Enter an amount to convert"
               subtitle="Example: 1000, 1.5 UF, or 50000 CLP"
@@ -183,13 +195,17 @@ export default function Command() {
       )}
 
       {!isLoading && ufValue && (
+        // @ts-expect-error - React 19 types compatibility issue with @raycast/api
         <List.Section title="Actions">
+          {/* @ts-expect-error - React 19 types compatibility issue with @raycast/api */}
           <List.Item
             title="Refresh UF Value"
             subtitle="Reload the current UF value from API"
             icon={Icon.ArrowClockwise}
             actions={
+              // @ts-expect-error - React 19 types compatibility issue with @raycast/api
               <ActionPanel>
+                {/* @ts-expect-error - React 19 types compatibility issue with @raycast/api */}
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
