@@ -1,0 +1,13 @@
+# Screenshots Folder
+
+Place your extension screenshots here. According to Raycast documentation:
+
+1. **For README**: Place media files here and reference them in your README.md
+2. **For Store**: Screenshots are configured in package.json under the "screenshots" field
+
+## Suggested Screenshots:
+- Main conversion view showing UF to CLP conversion
+- CLP to UF conversion example
+- Empty state view
+- Action panel with copy functionality
+

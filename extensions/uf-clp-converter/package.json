@@ -10,6 +10,16 @@
     "Productivity"
   ],
   "license": "MIT",
+  "screenshots": [
+    {
+      "title": "UF to CLP Conversion",
+      "path": "media/screenshot-1.png"
+    },
+    {
+      "title": "CLP to UF Conversion",
+      "path": "media/screenshot-2.png"
+    }
+  ],
   "commands": [
     {
       "name": "index",
@@ -35,6 +45,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
