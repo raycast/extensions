@@ -7,7 +7,10 @@ export type CaseFunction = (input: string, options?: changeCase.Options) => stri
 
 const ALPHABETIC_REGEX = /\p{L}/u;
 
-export const spongeCase = (input: string) => {
+const isAlphabetic = (char: string) => ALPHABETIC_REGEX.test(char);
+
+// Alternating Case: AlTeRnAtInG cAsE (alternating case pattern)
+export const alternatingCase = (input: string) => {
   return input
     .split("")
     .map((char, index) => {
@@ -16,6 +19,8 @@ export const spongeCase = (input: string) => {
     })
     .join("");
 };
+
+export const spongeCase = alternatingCase;
 
 export const randomCase = (input: string) => {
   return input

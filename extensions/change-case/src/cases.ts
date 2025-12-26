@@ -8,7 +8,7 @@ import {
   upperCase,
   upperFirst,
   titleCase,
-  spongeCase,
+  alternatingCase,
   randomCase,
   swapCase,
   sentenceCase,
@@ -35,7 +35,7 @@ export const functions: CaseFunctions = {
   "Random Case": randomCase,
   "Sentence Case": sentenceCase,
   "Snake Case": changeCase.snakeCase,
-  "Sponge Case": spongeCase,
+  "Alternating Case": alternatingCase,
   "Swap Case": swapCase,
   "Title Case": titleCase,
   "Upper Case": upperCase,
@@ -51,7 +51,7 @@ export const aliases: Record<CaseType, string[]> = {
   "Kebab Case": ["dash", "slug", "param"],
   "Random Case": ["random"],
   "Swap Case": ["reverse"],
-  "Sponge Case": ["sponge", "alternating"],
+  "Alternating Case": ["alternating", "sponge"],
   "Constant Case": ["macro"],
 };
 
