@@ -272,7 +272,6 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter"
-          storeValue
           onChange={(value) => {
             if (value === "popularity" || value === "name") {
               setSortBy(value as SortOption);
