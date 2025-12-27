@@ -59,7 +59,7 @@ export default function ProjectActions({
       <ActionPanel.Section>
         <Action icon={Icons.ArrowSquareOut} title={`Open in ${project.app.name}`} onAction={handleOpen} />
         <Action
-          icon={isFavorite ? Icons.Star : Icons.StarFilled}
+          icon={isFavorite ? Icons.StarFilled : Icons.Star}
           title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
           shortcut={SHORTCUTS.TOGGLE_FAVORITE}
           onAction={handleToggleFavorite}

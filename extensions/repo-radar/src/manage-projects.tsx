@@ -66,7 +66,7 @@ export default function ManageProjects() {
                     target={<ProjectForm project={project} groups={groups} onSave={refresh} />}
                   />
                   <Action
-                    icon={project.isFavorite ? Icons.Star : Icons.StarFilled}
+                    icon={project.isFavorite ? Icons.StarFilled : Icons.Star}
                     title={project.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                     shortcut={SHORTCUTS.TOGGLE_FAVORITE}
                     onAction={() => handleToggleFavorite(project)}

@@ -1,15 +1,31 @@
-import { List, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
-import { useState } from "react";
+import { List, ActionPanel, Action, Icon, Keyboard, LaunchProps, popToRoot } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { useProjects, SORT_OPTIONS } from "./hooks/useProjects";
 import { ProjectListItem, EmptyView } from "./components";
-import { ProjectWithStatus } from "./types";
+import { ProjectWithStatus, OpenProjectContext } from "./types";
+import { getProjectById } from "./lib/storage";
+import { openProjectWithHUD } from "./lib/ide";
 
 // ============================================
 // Go Command - Main Project Launcher
 // ============================================
 
-export default function GoCommand() {
+export default function GoCommand({ launchContext }: LaunchProps<{ launchContext?: OpenProjectContext }>) {
   const { projects, groups, isLoading, refresh, deleteProject, toggleFavorite, sortBy, setSortBy } = useProjects();
+
+  // Handle deeplink: open project directly if launched with projectId
+  useEffect(() => {
+    async function handleDeeplink() {
+      if (launchContext?.projectId) {
+        const project = await getProjectById(launchContext.projectId);
+        if (project) {
+          await openProjectWithHUD(project);
+          await popToRoot();
+        }
+      }
+    }
+    handleDeeplink();
+  }, [launchContext]);
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
 
   // Filter projects by selected group
