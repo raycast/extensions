@@ -1,6 +1,11 @@
 # Brave Changelog
 
-## [Bookmarklets Support] - {PR_MERGE_DATE}
+## [Bookmark Folder Search] - {PR_MERGE_DATE}
+
+- Added support for searching bookmark folders.
+- Added an action to open all bookmarks in a folder simultaneously.
+
+## [Bookmarklets Support] - 2025-12-19
 
 - Added support for executing bookmarklets
 

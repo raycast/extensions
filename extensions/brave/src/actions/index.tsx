@@ -40,6 +40,55 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
     .map((line) => Tab.parse(line));
 }
 
+export async function openAllBookmarksInFolder({
+  urls,
+  profileCurrent,
+  openTabInProfile,
+}: {
+  urls: string[];
+  profileCurrent: string;
+  openTabInProfile: Preferences["openTabInProfile"];
+}): Promise<boolean | string> {
+  const { browserOption } = getPreferenceValues<Preferences>();
+
+  const buildArgs = (profile?: string): string[] => {
+    const args: string[] = [];
+    if (profile) {
+      args.push(`--profile-directory=${profile}`);
+    }
+    return args;
+  };
+
+  let args: string[] = [];
+  switch (openTabInProfile) {
+    case SettingsProfileOpenBehaviour.Default:
+      args = buildArgs();
+      break;
+    case SettingsProfileOpenBehaviour.ProfileCurrent:
+      args = buildArgs(profileCurrent);
+      break;
+    case SettingsProfileOpenBehaviour.ProfileOriginal:
+      // This is not supported when opening multiple urls, so we fallback to the current profile
+      args = buildArgs(profileCurrent);
+      break;
+  }
+
+  const urlsString = urls.map((url) => `"${url}"`).join(" ");
+  const argsString = args.map((arg) => `"${arg}"`).join(" ");
+  const command = `open -na "${browserOption}" --args ${argsString} ${urlsString}`;
+
+  return new Promise((resolve, reject) => {
+    exec(command, (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        closeMainWindow({ clearRootSearch: true });
+        resolve(true);
+      }
+    });
+  });
+}
+
 export async function openNewTab({
   url,
   query,

@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
-import { closeTab, executeJavascript, openNewTab, setActiveTab } from "../actions";
+import { closeTab, executeJavascript, openNewTab, setActiveTab, openAllBookmarksInFolder } from "../actions";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "../constants";
@@ -9,6 +9,27 @@ export class BraveActions {
   public static NewTab = NewTabActions;
   public static TabList = TabListItemActions;
   public static TabHistory = HistoryItemActions;
+  public static OpenAllBookmarksInFolder = OpenAllBookmarksInFolderAction;
+}
+
+function OpenAllBookmarksInFolderAction(props: { urls: string[]; profile: string }) {
+  const { openTabInProfile } = getPreferenceValues<Preferences>();
+  const [profileCurrent] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
+
+  return (
+    <ActionPanel title="Open All Bookmarks In Folder">
+      <Action
+        title="Open All Bookmarks in Folder"
+        onAction={() =>
+          openAllBookmarksInFolder({
+            urls: props.urls,
+            profileCurrent: profileCurrent,
+            openTabInProfile: openTabInProfile,
+          })
+        }
+      />
+    </ActionPanel>
+  );
 }
 
 function NewTabActions({ query, incognito }: { query?: string; incognito?: boolean }): ReactElement {

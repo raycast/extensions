@@ -45,6 +45,13 @@
       "subtitle": "Brave",
       "description": "Search browser bookmarks.",
       "mode": "view"
+    },
+    {
+      "name": "search-bookmark-folders",
+      "title": "Search Brave Bookmark Folders",
+      "subtitle": "Brave",
+      "description": "Search browser bookmark folders.",
+      "mode": "view"
     }
   ],
   "preferences": [

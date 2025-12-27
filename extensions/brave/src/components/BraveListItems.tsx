@@ -1,4 +1,4 @@
-import { HistoryEntry, Tab } from "../interfaces";
+import { BookmarkFolder, HistoryEntry, Tab } from "../interfaces";
 import { ReactElement } from "react";
 import { getFavicon } from "@raycast/utils";
 import { Icon, List } from "@raycast/api";
@@ -7,6 +7,7 @@ import { BraveActions } from ".";
 export class BraveListItems {
   public static TabList = TabListItem;
   public static TabHistory = HistoryItem;
+  public static BookmarkFolder = BookmarkFolderItem;
 }
 
 function isValidHttpUrl(url: string): boolean {
@@ -28,6 +29,24 @@ function getUrlKeywords(url: string): string[] {
   } catch {
     return [url];
   }
+}
+function BookmarkFolderItem({
+  profile,
+  entry: { name, children, id },
+}: {
+  entry: BookmarkFolder;
+  profile: string;
+}): ReactElement {
+  const urls = children.filter((c) => c.type === "url").map((c) => c.url);
+  return (
+    <List.Item
+      id={`${profile}-${id}`}
+      title={name}
+      subtitle={`${urls.length} bookmarks`}
+      icon={Icon.Folder}
+      actions={<BraveActions.OpenAllBookmarksInFolder urls={urls as string[]} profile={profile} />}
+    />
+  );
 }
 
 function HistoryItem({ profile, entry: { url, title, id } }: { entry: HistoryEntry; profile: string }): ReactElement {
