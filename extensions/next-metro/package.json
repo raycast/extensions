@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "next-metro",
+  "title": "Next Metro",
+  "description": "Get real-time Paris metro departure times for your favorite stops",
+  "icon": "extension-icon.png",
+  "author": "jvlxz",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-next-metro",
+      "title": "Check Next Metro",
+      "subtitle": "Next Departures",
+      "description": "View upcoming metro departures at your configured stop",
+      "mode": "view"
+    },
+    {
+      "name": "onboarding",
+      "title": "Configure Stop",
+      "subtitle": "Change your stop",
+      "description": "Select your metro line and stop",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Next Metro Menu Bar",
+      "subtitle": "Show next metro departure in the menu bar",
+      "description": "Show next metro departure in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "PRIM API Key",
+      "description": "Your API key from prim.iledefrance-mobilites.fr",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "menuBarDisplayMode",
+      "title": "Menu Bar Display",
+      "description": "How to show departure info in the menu bar",
+      "type": "dropdown",
+      "required": false,
+      "default": "leave",
+      "data": [
+        { "title": "When to leave", "value": "leave" },
+        { "title": "Next metro time", "value": "metro" },
+        { "title": "Countdown only", "value": "countdown" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
