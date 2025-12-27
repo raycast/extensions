@@ -1,10 +1,11 @@
 import { List, ActionPanel, Action, Icon, Keyboard, LaunchProps, popToRoot } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useProjects, SORT_OPTIONS } from "./hooks/useProjects";
 import { ProjectListItem, EmptyView } from "./components";
 import { Project, OpenProjectContext } from "./types";
 import { getProjectById } from "./lib/storage";
 import { openProjectWithHUD } from "./lib/ide";
+import { getIconForGroup } from "./constants";
 
 // ============================================
 // Go Command - Main Project Launcher
@@ -27,6 +28,17 @@ export default function GoCommand({ launchContext }: LaunchProps<{ launchContext
     handleDeeplink();
   }, [launchContext]);
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
+
+  // Build group icon lookup from projects
+  const groupIconMap = useMemo(() => {
+    const map: Record<string, string | undefined> = {};
+    for (const project of projects) {
+      if (project.group && project.groupIcon && !map[project.group]) {
+        map[project.group] = project.groupIcon;
+      }
+    }
+    return map;
+  }, [projects]);
 
   // Filter projects by selected group
   const filteredProjects =
@@ -52,7 +64,12 @@ export default function GoCommand({ launchContext }: LaunchProps<{ launchContext
           {groups.length > 0 && (
             <List.Dropdown.Section title="Groups">
               {groups.map((group) => (
-                <List.Dropdown.Item key={group} title={group} value={group} icon={Icon.Folder} />
+                <List.Dropdown.Item
+                  key={group}
+                  title={group}
+                  value={group}
+                  icon={getIconForGroup(group, groupIconMap[group])}
+                />
               ))}
             </List.Dropdown.Section>
           )}

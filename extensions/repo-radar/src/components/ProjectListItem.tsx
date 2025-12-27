@@ -87,10 +87,9 @@ function getAccessories(project: Project): List.Item.Accessory[] {
     });
   }
 
-  // Group tag with icon
+  // Group icon only
   if (project.group) {
     accessories.push({
-      tag: { value: project.group },
       icon: getIconForGroup(project.group, project.groupIcon),
       tooltip: `Group: ${project.group}`,
     });
