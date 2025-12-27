@@ -19,6 +19,15 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your PulseMCP API key. Contact hello@pulsemcp.com to request access.",
+      "type": "password",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^1.17.0"
@@ -28,6 +37,7 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
+    "eslint-plugin-no-secrets": "^2.2.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "vitest": "^4.0.16"
