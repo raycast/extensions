@@ -1,6 +1,6 @@
 # QR Code Generator Changelog
 
-## [Improve UX] - {PR_MERGE_DATE}
+## [Improve UX] - 2025-12-27
 
 - Persist the selected format in the dropdown
 - Allow users to return to QR editing in inline mode
