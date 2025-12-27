@@ -6,9 +6,18 @@ import { formatDateTime, formatDuration } from "../helpers/formatters";
 type FileListItemProps = {
   file: File;
   email?: string;
+  onEnterDirectory?: (file: File) => void;
+  goToParent?: () => void;
+  currentParentId?: string | undefined;
 };
 
-export default function FileListItem({ file, email }: FileListItemProps) {
+export default function FileListItem({
+  file,
+  email,
+  onEnterDirectory,
+  goToParent,
+  currentParentId,
+}: FileListItemProps) {
   const createdTime = file.createdTime ? new Date(file.createdTime) : null;
   const modifiedByMeTime = file.modifiedByMeTime ? new Date(file.modifiedByMeTime) : null;
   const viewedByMeTime = file.viewedByMeTime ? new Date(file.viewedByMeTime) : null;
@@ -28,8 +37,9 @@ export default function FileListItem({ file, email }: FileListItemProps) {
       })()
     : null;
 
-  const iconUrl = getFileIconLink(file.mimeType, 256);
-  const markdown = `<img src="${iconUrl}" alt="${file.name}" width="185" />`;
+  // Use thumbnail if available, otherwise use icon
+  const imageUrl = file.thumbnailLink || getFileIconLink(file.mimeType, 256);
+  const markdown = `<img src="${imageUrl}" alt="${file.name}" width="185" />`;
 
   const detail = (
     <List.Item.Detail
@@ -119,7 +129,7 @@ export default function FileListItem({ file, email }: FileListItemProps) {
               {file.shared && (
                 <List.Item.Detail.Metadata.TagList title="Sharing">
                   <List.Item.Detail.Metadata.TagList.Item text="Shared" color={Color.Blue} />
-                  {file.viewersCanCopyContent === false && (
+                  {file.copyRequiresWriterPermission === true && (
                     <List.Item.Detail.Metadata.TagList.Item text="Copy Protected" color={Color.Orange} />
                   )}
                 </List.Item.Detail.Metadata.TagList>
@@ -162,6 +172,32 @@ export default function FileListItem({ file, email }: FileListItemProps) {
             }`}
             shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
+
+          {((file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory) ||
+            (currentParentId && goToParent)) && (
+            <ActionPanel.Section>
+              {file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory && (
+                <Action
+                  title="Enter Directory"
+                  icon={Icon.ArrowRight}
+                  onAction={() => onEnterDirectory(file)}
+                  shortcut={{ modifiers: [], key: "tab" }}
+                />
+              )}
+
+              {currentParentId && goToParent && (
+                <Action
+                  title="Go to Parent Directory"
+                  icon={Icon.ArrowLeft}
+                  onAction={goToParent}
+                  shortcut={{
+                    macOS: { modifiers: ["shift"], key: "tab" },
+                    Windows: { modifiers: ["shift"], key: "tab" },
+                  }}
+                />
+              )}
+            </ActionPanel.Section>
+          )}
 
           {file.webContentLink && (
             <Action

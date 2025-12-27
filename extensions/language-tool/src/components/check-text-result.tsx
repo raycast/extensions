@@ -3,6 +3,7 @@ import type { CheckTextResponse } from "../types";
 import { useTextCorrections } from "../hooks/use-text-corrections";
 import { ResultMetadata } from "./result-metadata";
 import { ResultActions } from "./result-actions";
+import { filterValidMatches } from "../utils/match-filter";
 
 type CheckTextResultProps = {
   result: CheckTextResponse;
@@ -10,6 +11,9 @@ type CheckTextResultProps = {
 };
 
 export function CheckTextResult({ result, textChecked }: CheckTextResultProps) {
+  // Filter out matches with invalid replacements before processing
+  const filteredResult = filterValidMatches(result);
+
   // Hook manages all correction logic
   const {
     correctedText,
@@ -20,7 +24,7 @@ export function CheckTextResult({ result, textChecked }: CheckTextResultProps) {
     copyToClipboard,
     pasteText,
     resetCorrections,
-  } = useTextCorrections(textChecked, result);
+  } = useTextCorrections(textChecked, filteredResult);
 
   const markdown = `# Corrected Text\n\n${correctedText}`;
 
@@ -30,13 +34,13 @@ export function CheckTextResult({ result, textChecked }: CheckTextResultProps) {
       navigationTitle="Check Results"
       metadata={
         <ResultMetadata
-          result={result}
+          result={filteredResult}
           appliedSuggestions={appliedSuggestions}
         />
       }
       actions={
         <ResultActions
-          result={result}
+          result={filteredResult}
           appliedSuggestions={appliedSuggestions}
           applyAllAndPaste={applyAllAndPaste}
           pasteText={pasteText}

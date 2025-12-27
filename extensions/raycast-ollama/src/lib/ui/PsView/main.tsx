@@ -21,7 +21,7 @@ export function PsView(): React.JSX.Element {
   } = usePromise(GetModels, [SelectedServer], { abortable: abort });
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
 
-  function SearchBarAccessory(): JSX.Element {
+  function SearchBarAccessory() {
     return (
       <List.Dropdown
         tooltip="Available Server"

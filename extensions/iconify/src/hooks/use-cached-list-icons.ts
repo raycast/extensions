@@ -7,7 +7,7 @@ import { useRef } from "react";
 export const useCachedListIcons = (set?: DataSet) => {
   //@ts-expect-error React issue, this works fine
   const abortable = useRef<AbortController>();
-  const { isLoading, data } = usePromise(
+  const { data, ...rest } = usePromise(
     async (set?: DataSet) => {
       if (!set) return [];
       const cacheId = `set-${set.id}`;
@@ -30,7 +30,7 @@ export const useCachedListIcons = (set?: DataSet) => {
     },
   );
   return {
-    isLoading,
+    ...rest,
     data: data ?? [],
   };
 };

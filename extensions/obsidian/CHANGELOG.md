@@ -1,5 +1,14 @@
 # Obsidian Changelog
 
+## [New Open Workspace command, Callout Support, Copy Files Action] - 2025-12-25
+
+- Adds new Open Workspace command that shows a list of all workspaces in your vault. Requires advanced URI plugin and workspaces core plugin to be enabled
+- Adds callout support by rendering them as quotes with emojis
+- Adds "Copy File Path" action (opt + shift + c) to notes, vaults, and media items
+- Fixes bookmarked notes not shown in the menubar
+- Fixes Create Note AI tool prepending "undefined" to all notes
+- Improved test coverage to 83%
+
 ## [Welcoming AI, Sort Notes, Better Tag Search, Code Improvements] - 2025-12-16
 
 - Adds new syntax to search for tagged notes: "tag:someTag". This can be used in combination with a normal search. For example "tag:someTag some text", this searches for notes with the tag "someTag" and then filters those notes with "some text"

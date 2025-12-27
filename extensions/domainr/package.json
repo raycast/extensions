@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "domainr",
   "title": "Domainr (Fastly Domain Search)",
-  "description": "Search domains availability with Domainr",
+  "description": "Search domains availability with Fastly Domain Research API",
   "icon": "icon.png",
   "author": "fedevitaledev",
   "contributors": [
-    "xmok"
+    "xmok",
+    "chrismessina"
   ],
   "license": "MIT",
   "commands": [

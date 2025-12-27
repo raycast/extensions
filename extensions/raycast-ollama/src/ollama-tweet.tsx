@@ -8,7 +8,7 @@ import { OllamaApiModelCapability } from "./lib/ollama/enum";
 const pref = getPreferenceValues<Preferences>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
-export default function Command(): JSX.Element {
+export default function Command() {
   const c = CommandAnswer.TWEET;
   const p = `You're an expert in the field and have the perfect opportunity to share your ideas and insights with a huge audience!. Rewrite the text as a tweet that is:
 - Casual and upbeat

@@ -53,6 +53,13 @@
       "subtitle": "Arc Helper",
       "description": "Open Arc Raiders interactive maps in browser",
       "mode": "view"
+    },
+    {
+      "name": "blueprints",
+      "title": "My Blueprints",
+      "subtitle": "Arc Helper",
+      "description": "Track your blueprint collection progress",
+      "mode": "view"
     }
   ],
   "dependencies": {

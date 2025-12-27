@@ -81,7 +81,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
             skipRecordsWithError: true,
             skipRecordsWithEmptyValues: true,
           });
-        } catch (error) {
+        } catch {
           return [];
         }
       },

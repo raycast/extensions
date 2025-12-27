@@ -1,5 +1,7 @@
 # Changelog
 
+## [Added Windows Support] - 2025-12-16
+
 ## [Feature] - 2025-12-08
 
 - Windows 11 support: vision commands can read selected images from File Explorer; app icon resolution falls back to executable paths on Windows.

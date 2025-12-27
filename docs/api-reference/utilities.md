@@ -98,10 +98,10 @@ async function getFrontmostApplication(): Promise<Application>;
 ```typescript
 import { getFrontmostApplication } from "@raycast/api";
 
-export default async function Command() => {
+export default async function Command() {
   const frontmostApplication = await getFrontmostApplication();
   console.log(`The frontmost application is: ${frontmostApplication.name}`);
-};
+}
 ```
 
 #### Return
@@ -232,7 +232,7 @@ export default async function Command() {
 
 #### Parameters
 
-<FunctionParametersTableFromJSDoc name="open" />
+<FunctionParametersTableFromJSDoc name="captureException" />
 
 ## Types
 
@@ -240,7 +240,7 @@ export default async function Command() {
 
 An object that represents a locally installed application on the system.
 
-It can be used to open files or folders in a specific application. Use [getApplications](#getapplications) or 
+It can be used to open files or folders in a specific application. Use [getApplications](#getapplications) or
 [getDefaultApplication](#getdefaultapplication) to get applications that can open a specific file or folder.
 
 #### Properties
