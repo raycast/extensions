@@ -1,0 +1,177 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tinys3",
+  "title": "TinyS3",
+  "description": "Get the image from the clipboard and upload it to S3-compatible object storage, with optional configuration to compress images using the TinyPNG API before upload. After uploading, return the image URL in the specified format.",
+  "icon": "extension-icon.png",
+  "author": "fl0w1nd",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compress-and-upload-to-s3",
+      "title": "Compress & Upload Clipboard Image",
+      "subtitle": "TinyS3",
+      "description": "Compresses the clipboard image using TinyPNG and uploads it to S3.",
+      "mode": "view"
+    },
+    {
+      "name": "direct-upload-to-s3",
+      "title": "Upload Clipboard Image",
+      "subtitle": "TinyS3",
+      "description": "Uploads the clipboard image directly to S3 without any compression.",
+      "mode": "view"
+    },
+    {
+      "name": "upload-selected-finder-images",
+      "title": "Upload Selected Finder Images",
+      "subtitle": "TinyS3",
+      "description": "Uploads images selected in Finder directly to S3.",
+      "mode": "no-view"
+    },
+    {
+      "name": "compress-upload-selected-finder-images",
+      "title": "Compress & Upload Selected Finder Images",
+      "subtitle": "TinyS3",
+      "description": "Compresses images selected in Finder using TinyPNG and uploads to S3.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "s3Endpoint",
+      "title": "S3 Endpoint",
+      "description": "S3-compatible service endpoint URL (e.g., https://s3.amazonaws.com)",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "s3Region",
+      "title": "S3 Region",
+      "description": "S3 region (e.g., us-east-1, auto)",
+      "type": "textfield",
+      "required": true,
+      "default": "auto"
+    },
+    {
+      "name": "s3Bucket",
+      "title": "S3 Bucket",
+      "description": "S3 bucket name",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "s3AccessKeyId",
+      "title": "S3 Access Key ID",
+      "description": "S3 Access Key ID (similar to username)",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "s3SecretAccessKey",
+      "title": "S3 Secret Access Key",
+      "description": "S3 Secret Access Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "s3KeyPrefix",
+      "title": "S3 Key Prefix",
+      "description": "Prefix for uploaded files (e.g., uploads/)",
+      "type": "textfield",
+      "required": false,
+      "default": "uploads/"
+    },
+    {
+      "name": "s3PathStyle",
+      "title": "S3 URL Style",
+      "description": "Path style: endpoint/bucket/key, Virtual-hosted style: bucket.endpoint/key",
+      "type": "dropdown",
+      "required": true,
+      "default": "path",
+      "data": [
+        {
+          "title": "Path Style",
+          "value": "path"
+        },
+        {
+          "title": "Virtual-Hosted Style",
+          "value": "virtual"
+        }
+      ]
+    },
+    {
+      "name": "useCustomPublicUrl",
+      "title": "Use Custom Public URL",
+      "description": "Enable to use custom URL base instead of S3 endpoint",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use Custom Public URL Base"
+    },
+    {
+      "name": "publicUrlBase",
+      "title": "Public URL Base",
+      "description": "Custom base URL for public access (e.g., https://cdn.example.com/mybucket)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "urlFormat",
+      "title": "URL Output Format",
+      "description": "Format of the copied URL",
+      "type": "dropdown",
+      "required": true,
+      "default": "raw",
+      "data": [
+        {
+          "title": "Raw URL",
+          "value": "raw"
+        },
+        {
+          "title": "Markdown",
+          "value": "markdown"
+        },
+        {
+          "title": "BBCode",
+          "value": "bbcode"
+        }
+      ]
+    },
+    {
+      "name": "tinypngApiKey",
+      "title": "TinyPNG API Key",
+      "description": "API key for TinyPNG compression (required for compress command)",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.700.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\n\nIt seems like you are trying to publish the Raycast extension to npm.\n\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\n\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
