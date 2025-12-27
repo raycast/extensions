@@ -8,10 +8,10 @@ interface QRLoginProps {
 }
 
 export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
-  const timer = useRef<NodeJS.Timeout>();
+  const timer = useRef<NodeJS.Timeout | undefined>(undefined);
   const unmountedRef = useRef(false);
   const tokenRef = useRef('');
-  const userRef = useRef<QRCodeUser | null>();
+  const userRef = useRef<QRCodeUser | null>(null);
   const [markdown, setMarkdown] = useState<string>();
   const [status, setStatus] = useState(QRCodeStatus.Init);
 
