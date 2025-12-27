@@ -327,8 +327,8 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.19.3",
     "@types/react": "^19.2.7",
-    "@typescript-eslint/eslint-plugin": "^8.50.1",
-    "@typescript-eslint/parser": "^8.50.1",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3"
