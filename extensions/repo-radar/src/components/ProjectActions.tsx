@@ -1,9 +1,10 @@
-import { ActionPanel, Action, confirmAlert, Alert } from "@raycast/api";
+import { ActionPanel, Action, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
 import { ReactNode } from "react";
-import { Project, ProjectWithStatus } from "../types";
+import { Project } from "../types";
 import { SHORTCUTS, Icons } from "../constants";
 import { openProjectWithToast } from "../lib/ide";
 import { createProjectDeeplink } from "../utils/deeplink";
+import { getCombinedGitStatus } from "../lib/git";
 import ProjectForm from "./ProjectForm";
 
 // ============================================
@@ -11,7 +12,7 @@ import ProjectForm from "./ProjectForm";
 // ============================================
 
 interface ProjectActionsProps {
-  project: Project | ProjectWithStatus;
+  project: Project;
   groups: string[];
   onRefresh: () => void;
   onDelete: (project: Project) => Promise<boolean>;
@@ -49,6 +50,33 @@ export default function ProjectActions({
 
   const handleToggleFavorite = async () => {
     await onToggleFavorite(project);
+  };
+
+  const handleGitStatus = async () => {
+    const gitStatus = getCombinedGitStatus(project.paths);
+
+    if (!gitStatus || !gitStatus.isGitRepo) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Not a Git Repository",
+        message: project.alias,
+      });
+      return;
+    }
+
+    const { branch, ahead, behind, hasChanges } = gitStatus;
+    const parts: string[] = [];
+
+    if (branch) parts.push(`Branch: ${branch}`);
+    if (ahead && ahead > 0) parts.push(`↑ ${ahead} ahead`);
+    if (behind && behind > 0) parts.push(`↓ ${behind} behind`);
+    if (hasChanges) parts.push("● Uncommitted changes");
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: branch || "Git Status",
+      message: parts.slice(1).join(" · ") || "Clean",
+    });
   };
 
   const isFavorite = project.isFavorite ?? false;
@@ -94,6 +122,11 @@ export default function ProjectActions({
             link: createProjectDeeplink(project.id),
           }}
         />
+      </ActionPanel.Section>
+
+      {/* Git */}
+      <ActionPanel.Section title="Git">
+        <Action icon={Icons.GitBranch} title="Git Status" shortcut={SHORTCUTS.GIT_STATUS} onAction={handleGitStatus} />
       </ActionPanel.Section>
 
       {/* Sort (from parent) */}

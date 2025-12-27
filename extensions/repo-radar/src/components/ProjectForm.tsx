@@ -4,7 +4,7 @@ import { ProjectFormProps, AppInfo, OpenMode } from "../types";
 import { addProject, updateProject, isAliasExists } from "../lib/storage";
 import { useApplications, useTerminals } from "../hooks/useApplications";
 import { createProjectDeeplink } from "../utils/deeplink";
-import { DEFAULT_GROUPS, supportsMultiWorkspace, Icons } from "../constants";
+import { DEFAULT_GROUPS, GROUP_ICON_OPTIONS, getIconForGroup, supportsMultiWorkspace, Icons } from "../constants";
 
 // ============================================
 // Form Values Interface
@@ -17,6 +17,7 @@ interface FormValues {
   openMode: OpenMode;
   terminalBundleId: string;
   group: string;
+  groupIcon: string;
   createQuicklink: boolean;
 }
 
@@ -36,6 +37,7 @@ export default function ProjectForm({ project, groups = [], onSave }: ProjectFor
   const [selectedOpenMode, setSelectedOpenMode] = useState<OpenMode>(project?.openMode || "ide");
   const [selectedGroup, setSelectedGroup] = useState<string>(project?.group || "");
   const [customGroup, setCustomGroup] = useState<string>("");
+  const [customGroupIcon, setCustomGroupIcon] = useState<string>(project?.groupIcon || "Folder");
 
   const isEditing = !!project;
   const isCreatingNewGroup = selectedGroup === "__new__";
@@ -48,7 +50,8 @@ export default function ProjectForm({ project, groups = [], onSave }: ProjectFor
   const selectedAppName = applications.find((app) => app.bundleId === selectedAppBundleId)?.name;
 
   // Combine existing groups with default groups
-  const allGroups = [...new Set([...groups, ...DEFAULT_GROUPS])];
+  const defaultGroupNames = DEFAULT_GROUPS.map((g) => g.name);
+  const allGroupNames = Array.from(new Set([...defaultGroupNames, ...groups]));
 
   async function handleSubmit(values: FormValues) {
     // Validate alias
@@ -132,8 +135,11 @@ export default function ProjectForm({ project, groups = [], onSave }: ProjectFor
         ? { name: selectedTerminal.name, bundleId: selectedTerminal.bundleId, path: selectedTerminal.path }
         : undefined;
 
-      // Determine the final group value
+      // Determine the final group value and icon
       const finalGroup = values.group === "__new__" ? customGroup.trim() || undefined : values.group || undefined;
+      // Only save groupIcon for custom groups (not default groups)
+      const isDefaultGroup = DEFAULT_GROUPS.some((g) => g.name === finalGroup);
+      const finalGroupIcon = finalGroup && !isDefaultGroup ? customGroupIcon : undefined;
 
       if (isEditing && project) {
         await updateProject(project.id, {
@@ -143,6 +149,7 @@ export default function ProjectForm({ project, groups = [], onSave }: ProjectFor
           openMode,
           terminal: terminalInfo,
           group: finalGroup,
+          groupIcon: finalGroupIcon,
         });
         await showToast({
           style: Toast.Style.Success,
@@ -159,6 +166,7 @@ export default function ProjectForm({ project, groups = [], onSave }: ProjectFor
           openMode,
           terminal: terminalInfo,
           group: finalGroup,
+          groupIcon: finalGroupIcon,
         });
         await showToast({
           style: Toast.Style.Success,
@@ -292,8 +300,13 @@ export default function ProjectForm({ project, groups = [], onSave }: ProjectFor
         onChange={setSelectedGroup}
       >
         <Form.Dropdown.Item key="" value="" title="No Group" icon={Icons.Minus} />
-        {allGroups.map((group) => (
-          <Form.Dropdown.Item key={group} value={group} title={group} icon={Icons.Folder} />
+        {allGroupNames.map((groupName) => (
+          <Form.Dropdown.Item
+            key={groupName}
+            value={groupName}
+            title={groupName}
+            icon={getIconForGroup(groupName, project?.groupIcon)}
+          />
         ))}
         <Form.Dropdown.Section title="Custom">
           <Form.Dropdown.Item key="__new__" value="__new__" title="Create New Group..." icon={Icons.Plus} />
@@ -301,13 +314,20 @@ export default function ProjectForm({ project, groups = [], onSave }: ProjectFor
       </Form.Dropdown>
 
       {isCreatingNewGroup && (
-        <Form.TextField
-          id="customGroup"
-          title="New Group Name"
-          placeholder="Enter group name"
-          value={customGroup}
-          onChange={setCustomGroup}
-        />
+        <>
+          <Form.TextField
+            id="customGroup"
+            title="New Group Name"
+            placeholder="Enter group name"
+            value={customGroup}
+            onChange={setCustomGroup}
+          />
+          <Form.Dropdown id="groupIcon" title="Group Icon" value={customGroupIcon} onChange={setCustomGroupIcon}>
+            {GROUP_ICON_OPTIONS.map((opt) => (
+              <Form.Dropdown.Item key={opt.value} value={opt.value} title={opt.label} icon={opt.icon} />
+            ))}
+          </Form.Dropdown>
+        </>
       )}
 
       {!isEditing && (
@@ -317,7 +337,7 @@ export default function ProjectForm({ project, groups = [], onSave }: ProjectFor
             id="createQuicklink"
             label="Create Quicklink"
             info="Access this project from Raycast root search"
-            defaultValue={true}
+            defaultValue={false}
           />
         </>
       )}

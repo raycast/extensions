@@ -1,4 +1,4 @@
-import { Keyboard } from "@raycast/api";
+import { Icon, Keyboard } from "@raycast/api";
 
 // Re-export icons
 export { Icons } from "./icons";
@@ -24,13 +24,55 @@ export const SHORTCUTS: Record<string, Keyboard.Shortcut> = {
   CREATE_QUICKLINK: { modifiers: ["cmd", "shift"], key: "q" },
   TOGGLE_FAVORITE: { modifiers: ["cmd"], key: "s" },
   SET_GROUP: { modifiers: ["cmd"], key: "g" },
+  GIT_STATUS: { modifiers: ["cmd", "shift"], key: "g" },
 };
 
 // ============================================
 // Default Groups
 // ============================================
 
-export const DEFAULT_GROUPS = ["Work", "Personal", "Open Source"] as const;
+export interface GroupConfig {
+  name: string;
+  icon: Icon;
+}
+
+export const DEFAULT_GROUPS: GroupConfig[] = [
+  { name: "Work", icon: Icon.Building },
+  { name: "Personal", icon: Icon.Person },
+];
+
+// Icons available for custom groups
+export const GROUP_ICON_OPTIONS: { value: string; icon: Icon; label: string }[] = [
+  { value: "Folder", icon: Icon.Folder, label: "Folder" },
+  { value: "Building", icon: Icon.Building, label: "Work" },
+  { value: "Person", icon: Icon.Person, label: "Person" },
+  { value: "Globe", icon: Icon.Globe, label: "Globe" },
+  { value: "Code", icon: Icon.Code, label: "Code" },
+  { value: "Book", icon: Icon.Book, label: "Book" },
+  { value: "Hammer", icon: Icon.Hammer, label: "Tools" },
+  { value: "Gamepad", icon: Icon.GameController, label: "Game" },
+  { value: "Heart", icon: Icon.Heart, label: "Heart" },
+  { value: "Star", icon: Icon.Star, label: "Star" },
+  { value: "LightBulb", icon: Icon.LightBulb, label: "Idea" },
+  { value: "Box", icon: Icon.Box, label: "Box" },
+];
+
+// Get icon by value string
+export function getGroupIcon(iconValue: string | undefined): Icon {
+  if (!iconValue) return Icon.Folder;
+  const found = GROUP_ICON_OPTIONS.find((opt) => opt.value === iconValue);
+  return found?.icon ?? Icon.Folder;
+}
+
+// Get icon for a group (default or custom)
+export function getIconForGroup(groupName: string, customIcon?: string): Icon {
+  // Check if it's a default group
+  const defaultGroup = DEFAULT_GROUPS.find((g) => g.name === groupName);
+  if (defaultGroup) return defaultGroup.icon;
+
+  // Use custom icon or fallback
+  return getGroupIcon(customIcon);
+}
 
 // ============================================
 // IDE Multi-Workspace Support

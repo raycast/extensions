@@ -16,6 +16,7 @@ export interface Project {
   lastOpenedAt?: number;
   // Feature: Groups
   group?: string;
+  groupIcon?: string; // Icon value for custom groups
   // Feature: Terminal Support
   openMode?: OpenMode; // Default: "ide" for backwards compatibility
   terminal?: AppInfo; // Terminal app (optional)
@@ -46,10 +47,6 @@ export interface GitStatus {
 // ============================================
 // Component Props Types
 // ============================================
-
-export interface ProjectWithStatus extends Project {
-  gitStatus: GitStatus | null;
-}
 
 export interface ProjectFormProps {
   project?: Project;

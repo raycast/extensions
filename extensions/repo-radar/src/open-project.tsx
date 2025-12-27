@@ -2,7 +2,7 @@ import { List, ActionPanel, Action, Icon, Keyboard, LaunchProps, popToRoot } fro
 import { useState, useEffect } from "react";
 import { useProjects, SORT_OPTIONS } from "./hooks/useProjects";
 import { ProjectListItem, EmptyView } from "./components";
-import { ProjectWithStatus, OpenProjectContext } from "./types";
+import { Project, OpenProjectContext } from "./types";
 import { getProjectById } from "./lib/storage";
 import { openProjectWithHUD } from "./lib/ide";
 
@@ -103,8 +103,8 @@ export default function GoCommand({ launchContext }: LaunchProps<{ launchContext
 // Helper Functions
 // ============================================
 
-function groupProjectsByCategory(projects: ProjectWithStatus[]): Record<string, ProjectWithStatus[]> {
-  const result: Record<string, ProjectWithStatus[]> = {};
+function groupProjectsByCategory(projects: Project[]): Record<string, Project[]> {
+  const result: Record<string, Project[]> = {};
 
   // First, favorites
   const favorites = projects.filter((p) => p.isFavorite);
@@ -114,7 +114,7 @@ function groupProjectsByCategory(projects: ProjectWithStatus[]): Record<string, 
 
   // Then, group by group name
   const nonFavorites = projects.filter((p) => !p.isFavorite);
-  const grouped = new Map<string, ProjectWithStatus[]>();
+  const grouped = new Map<string, Project[]>();
 
   for (const project of nonFavorites) {
     const groupName = project.group || "Ungrouped";

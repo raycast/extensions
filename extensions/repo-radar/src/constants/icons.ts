@@ -1,47 +1,39 @@
-// ============================================
-// Phosphor Icons (Local Assets)
-// https://phosphoricons.com/
-// ============================================
-
-// Helper to reference local icon
-function icon(name: string): string {
-  return `icons/${name}.svg`;
-}
+import { Icon } from "@raycast/api";
 
 // ============================================
-// Icon Definitions
+// Raycast Built-in Icons
 // ============================================
 
 export const Icons = {
   // Actions
-  Plus: icon("plus"),
-  Pencil: icon("pencil-simple"),
-  Trash: icon("trash"),
-  Check: icon("check"),
+  Plus: Icon.Plus,
+  Pencil: Icon.Pencil,
+  Trash: Icon.Trash,
+  Check: Icon.Check,
 
   // Navigation / UI
-  Document: icon("file-text"),
-  Folder: icon("folder"),
-  FolderOpen: icon("folder-open"),
-  ArrowSquareOut: icon("arrow-square-out"),
-  Minus: icon("minus"),
+  Document: Icon.Document,
+  Folder: Icon.Folder,
+  FolderOpen: Icon.Folder,
+  ArrowSquareOut: Icon.ArrowNe,
+  Minus: Icon.Minus,
 
   // Favorites
-  Star: icon("star"),
-  StarFilled: icon("star-fill"),
+  Star: Icon.Star,
+  StarFilled: Icon.Star,
 
   // Git
-  GitBranch: icon("git-branch"),
-  GitDiff: icon("git-diff"),
+  GitBranch: Icon.Terminal,
+  GitDiff: Icon.Document,
 
   // Status indicators
-  Circle: icon("circle-fill"),
-  CheckCircle: icon("check-circle-fill"),
-  WarningCircle: icon("warning-circle-fill"),
+  Circle: Icon.Circle,
+  CheckCircle: Icon.CheckCircle,
+  WarningCircle: Icon.Warning,
 
   // Misc
-  Copy: icon("copy"),
-  Link: icon("link"),
-  MagnifyingGlass: icon("magnifying-glass"),
-  Finder: icon("folder-open"),
+  Copy: Icon.Clipboard,
+  Link: Icon.Link,
+  MagnifyingGlass: Icon.MagnifyingGlass,
+  Finder: Icon.Finder,
 } as const;

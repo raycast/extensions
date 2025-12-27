@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { showToast, Toast } from "@raycast/api";
-import { Project, ProjectWithStatus } from "../types";
+import { Project } from "../types";
 import {
   getProjects,
   deleteProject as removeProject,
   toggleFavorite as toggleFavoriteStorage,
   getGroups as getGroupsStorage,
 } from "../lib/storage";
-import { getCombinedGitStatus } from "../lib/git";
 
 // ============================================
 // Sorting Logic
@@ -24,59 +23,39 @@ export const SORT_OPTIONS: { value: SortOption; title: string }[] = [
 
 function sortProjects<T extends Project>(projects: T[], sortBy: SortOption = "smart"): T[] {
   return [...projects].sort((a, b) => {
-    // Always put favorites first for all sort modes
     if (a.isFavorite && !b.isFavorite) return -1;
     if (!a.isFavorite && b.isFavorite) return 1;
 
     switch (sortBy) {
       case "recent": {
-        // By last opened time (most recent first)
         const aOpened = a.lastOpenedAt || 0;
         const bOpened = b.lastOpenedAt || 0;
         return bOpened - aOpened;
       }
-
       case "alphabetical":
-        // Alphabetically by alias
         return a.alias.localeCompare(b.alias);
-
       case "created":
-        // By creation date (newest first)
         return b.createdAt - a.createdAt;
-
       case "smart":
       default: {
-        // Smart: recent > created (with decay)
         const now = Date.now();
-        const aScore = calculateSmartScore(a, now);
-        const bScore = calculateSmartScore(b, now);
-        return bScore - aScore;
+        return calculateSmartScore(b, now) - calculateSmartScore(a, now);
       }
     }
   });
 }
 
-// Calculate a "frecency" score based on recency and frequency
 function calculateSmartScore(project: Project, now: number): number {
   let score = 0;
-
-  // Recency boost: recently opened projects get higher scores
   if (project.lastOpenedAt) {
     const hoursAgo = (now - project.lastOpenedAt) / (1000 * 60 * 60);
-    if (hoursAgo < 1)
-      score += 100; // Last hour
-    else if (hoursAgo < 24)
-      score += 80; // Today
-    else if (hoursAgo < 168)
-      score += 50; // This week
-    else if (hoursAgo < 720)
-      score += 20; // This month
-    else score += 5; // Older
+    if (hoursAgo < 1) score += 100;
+    else if (hoursAgo < 24) score += 80;
+    else if (hoursAgo < 168) score += 50;
+    else if (hoursAgo < 720) score += 20;
+    else score += 5;
   }
-
-  // Creation date as tiebreaker
   score += (project.createdAt / now) * 10;
-
   return score;
 }
 
@@ -85,7 +64,7 @@ function calculateSmartScore(project: Project, now: number): number {
 // ============================================
 
 interface UseProjectsReturn {
-  projects: ProjectWithStatus[];
+  projects: Project[];
   groups: string[];
   isLoading: boolean;
   sortBy: SortOption;
@@ -96,7 +75,7 @@ interface UseProjectsReturn {
 }
 
 export function useProjects(): UseProjectsReturn {
-  const [projects, setProjects] = useState<ProjectWithStatus[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [groups, setGroups] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>("smart");
@@ -104,15 +83,8 @@ export function useProjects(): UseProjectsReturn {
   const loadProjects = useCallback(async () => {
     setIsLoading(true);
     try {
-      const storedProjects = await getProjects();
-      const storedGroups = await getGroupsStorage();
-
-      const projectsWithStatus: ProjectWithStatus[] = storedProjects.map((project) => ({
-        ...project,
-        gitStatus: getCombinedGitStatus(project.paths),
-      }));
-
-      setProjects(sortProjects(projectsWithStatus, sortBy));
+      const [storedProjects, storedGroups] = await Promise.all([getProjects(), getGroupsStorage()]);
+      setProjects(sortProjects(storedProjects, sortBy));
       setGroups(storedGroups);
     } catch (error) {
       await showToast({
@@ -125,12 +97,20 @@ export function useProjects(): UseProjectsReturn {
     }
   }, [sortBy]);
 
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
+
   // Re-sort when sortBy changes
   useEffect(() => {
     if (projects.length > 0) {
       setProjects((prev) => sortProjects([...prev], sortBy));
     }
   }, [sortBy]);
+
+  const refresh = useCallback(async () => {
+    await loadProjects();
+  }, [loadProjects]);
 
   const deleteProject = useCallback(
     async (project: Project): Promise<boolean> => {
@@ -161,17 +141,13 @@ export function useProjects(): UseProjectsReturn {
     [loadProjects],
   );
 
-  useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
-
   return {
     projects,
     groups,
     isLoading,
     sortBy,
     setSortBy,
-    refresh: loadProjects,
+    refresh,
     deleteProject,
     toggleFavorite,
   };
@@ -198,8 +174,7 @@ export function useProjectsSimple(): UseProjectsSimpleReturn {
   const loadProjects = useCallback(async () => {
     setIsLoading(true);
     try {
-      const storedProjects = await getProjects();
-      const storedGroups = await getGroupsStorage();
+      const [storedProjects, storedGroups] = await Promise.all([getProjects(), getGroupsStorage()]);
       setProjects(sortProjects(storedProjects));
       setGroups(storedGroups);
     } catch (error) {
@@ -212,6 +187,14 @@ export function useProjectsSimple(): UseProjectsSimpleReturn {
       setIsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
+
+  const refresh = useCallback(async () => {
+    await loadProjects();
+  }, [loadProjects]);
 
   const deleteProject = useCallback(
     async (project: Project): Promise<boolean> => {
@@ -242,15 +225,11 @@ export function useProjectsSimple(): UseProjectsSimpleReturn {
     [loadProjects],
   );
 
-  useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
-
   return {
     projects,
     groups,
     isLoading,
-    refresh: loadProjects,
+    refresh,
     deleteProject,
     toggleFavorite,
   };
