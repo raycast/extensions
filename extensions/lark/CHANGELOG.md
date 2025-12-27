@@ -1,5 +1,10 @@
 # Lark Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Support for parent folder display
+- Update project dependencies
+
 ## [Update] - 2024-07-04
 
 - Support emoji icon

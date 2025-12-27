@@ -60,6 +60,7 @@ export interface NodeEntity {
     size?: string;
     subtype?: 'pptx' | 'json' | 'zip' | 'mov' | 'pdf' | 'xlsx' | 'key';
     version?: string;
+    parent_folder_name?: string;
   };
   thumbnail_extra: {
     url: string;

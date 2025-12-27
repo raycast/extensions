@@ -12,7 +12,7 @@ export interface SpaceListItemProps {
 export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actions }) => {
   let id: string;
   let title: string;
-  let subtitle: string | undefined;
+  let subtitle: List.Item.Props['subtitle'];
   let time: {
     short: string;
     full: string;
@@ -24,6 +24,13 @@ export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actio
   if (isNodeEntity(node)) {
     id = node.obj_token;
     title = node.name;
+    const parentFolderName = node.extra?.parent_folder_name;
+    if (parentFolderName) {
+      subtitle = {
+        value: parentFolderName,
+        tooltip: `Parent folder: ${parentFolderName}`,
+      };
+    }
     time = {
       short: timeSince(node.activity_time),
       full: `Last visit: ${timeFormat(node.activity_time)}`,

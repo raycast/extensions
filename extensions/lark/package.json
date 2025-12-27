@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lark",
   "title": "Lark Documents",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Quickly search documents from Feishu/Lark.",
   "keywords": [
     "feishu",
@@ -10,6 +10,12 @@
   ],
   "icon": "logo.png",
   "author": "tmk",
+  "contributors": [
+    "tofrankie"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -107,6 +113,6 @@
     "eslint": "^8.16.0",
     "eslint-config-prettier": "^8.5.0",
     "prettier": "^3.0.0",
-        "typescript": "^5.0.4"
+    "typescript": "^5.0.4"
   }
 }
