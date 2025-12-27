@@ -28,7 +28,7 @@ export function SpaceListItem({ node, owner, actions }: SpaceListItemProps) {
     if (parentFolderName) {
       subtitle = {
         value: parentFolderName,
-        tooltip: `Parent folder: ${parentFolderName}`,
+        tooltip: `Folder: ${parentFolderName}`,
       };
     }
     time = {
