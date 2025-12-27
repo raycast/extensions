@@ -13,7 +13,7 @@ export default function Command() {
     <List isLoading={isLoading} searchBarPlaceholder="Search in bookmark folders...">
       <List.Section title="Bookmark Folders">
         {data?.map((e) => (
-          <BraveListItems.BookmarkFolder key={e.id} entry={e} profile={profile} />
+          <BraveListItems.BookmarkFolder key={e.id} entry={e} profile={profile.id} />
         ))}
       </List.Section>
     </List>
