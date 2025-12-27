@@ -83,7 +83,7 @@ const RecentDocumentsView: React.FC<{
             actions={
               <Action
                 icon={Icon.Trash}
-                title="Remove From Recent Documents"
+                title="Remove from Recent Documents"
                 shortcut={{ key: 'x', modifiers: ['ctrl'] }}
                 onAction={() => onRemove?.(nodeId)}
               />

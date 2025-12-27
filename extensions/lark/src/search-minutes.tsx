@@ -81,7 +81,7 @@ const RecentDocumentsView: React.FC<{
             actions={
               <Action
                 icon={Icon.Trash}
-                title="Remove From Recent Minutes"
+                title="Remove from Recent Minutes"
                 shortcut={{ key: 'x', modifiers: ['ctrl'] }}
                 onAction={() => onRemove?.(minuteItem.object_token)}
               />
