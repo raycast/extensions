@@ -60,7 +60,7 @@ export default function GoCommand() {
                 sortActions={
                   <ActionPanel.Submenu
                     title="Sort by"
-                    icon={Icon.ArrowsUpDown}
+                    icon={Icon.Filter}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   >
                     {SORT_OPTIONS.map((option, index) => (
