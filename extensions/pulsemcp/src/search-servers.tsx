@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, Detail, Keyboard, Color, getPreferenceValues } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Detail, Keyboard, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { formatNumber, formatDate, extractAuthor, getAuthorUrl } from "./utils";
@@ -73,11 +73,8 @@ interface PulseResponse {
 }
 
 const BASE_URL = "https://api.pulsemcp.com/v0.1";
+const API_KEY = "ee8403eb-e9f7-4b10-8125-c821c14dce5d"; // eslint-disable-line no-secrets/no-secrets
 const TENANT_ID = "pulsemcp-all";
-
-interface Preferences {
-  apiKey: string;
-}
 
 function ServerDetail({ entry }: { entry: ServerEntry }) {
   const server = entry.server;
@@ -222,7 +219,6 @@ ${server
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("popularity");
   const [transportFilter, setTransportFilter] = useState<TransportFilter>("all");
@@ -231,7 +227,7 @@ export default function Command() {
     `${BASE_URL}/servers?search=${encodeURIComponent(searchText)}&limit=50&version=latest`,
     {
       headers: {
-        "X-API-Key": preferences.apiKey,
+        "X-API-Key": API_KEY,
         "X-Tenant-ID": TENANT_ID,
       },
       keepPreviousData: true,

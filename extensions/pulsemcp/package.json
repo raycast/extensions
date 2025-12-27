@@ -19,15 +19,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "apiKey",
-      "title": "API Key",
-      "description": "Your PulseMCP API key. Contact hello@pulsemcp.com to request access.",
-      "type": "password",
-      "required": true
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^1.17.0"
