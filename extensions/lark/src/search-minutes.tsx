@@ -16,7 +16,7 @@ import { preference } from './utils/config';
 import { timeFormat, timeSince } from './utils/time';
 import { trimTagsAndDecodeEntities } from './utils/string';
 
-const SearchMinutesView: React.FC = () => {
+function SearchMinutesView() {
   const [cachedRecentList, setCachedRecentList] = useCachedState<RecentList | null>(StorageKey.MinutesRecentList, null);
   const [searchKeywords, setSearchKeywords] = useState('');
   const {
@@ -60,16 +60,13 @@ const SearchMinutesView: React.FC = () => {
       ) : null}
     </List>
   );
-};
+}
 
 const isRecentList = (list: RecentList | SearchResults): list is RecentList => {
   return 'list' in list;
 };
 
-const RecentDocumentsView: React.FC<{
-  list: RecentList;
-  onRemove?: (objToken: string) => void;
-}> = ({ list, onRemove }) => {
+function RecentDocumentsView({ list, onRemove }: { list: RecentList; onRemove?: (objToken: string) => void }) {
   if (!list || !list.list) return null;
   return (
     <List.Section title="Recent Minutes" subtitle={`${list.list.length}`}>
@@ -91,9 +88,9 @@ const RecentDocumentsView: React.FC<{
       })}
     </List.Section>
   );
-};
+}
 
-const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
+function SearchResultView({ list }: { list: SearchResults }) {
   if (!list || !list.meetings) return null;
   return (
     <List.Section title="Search Results" subtitle={`${list.meetings.length}`}>
@@ -102,7 +99,7 @@ const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
       })}
     </List.Section>
   );
-};
+}
 
 function MinuteItem({
   topic,
@@ -115,7 +112,7 @@ function MinuteItem({
   url: string;
   start_time: number;
   owner_name?: string;
-  actions?: React.ReactElement;
+  actions?: React.ReactNode;
 }) {
   const time = {
     short: timeSince(start_time, true),

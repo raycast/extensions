@@ -6,10 +6,10 @@ import { timeFormat, timeSince } from '../../utils/time';
 export interface SpaceListItemProps {
   node: NodeEntity | ObjEntity;
   owner?: UserEntity;
-  actions?: React.ReactElement;
+  actions?: React.ReactNode;
 }
 
-export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actions }) => {
+export function SpaceListItem({ node, owner, actions }: SpaceListItemProps) {
   let id: string;
   let title: string;
   let subtitle: List.Item.Props['subtitle'];
@@ -64,7 +64,7 @@ export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actio
       }
     />
   );
-};
+}
 
 function getSpaceItemIcon(node: NodeEntity | ObjEntity): Image.ImageLike {
   if (isNodeEntity(node) && node.icon_info) {

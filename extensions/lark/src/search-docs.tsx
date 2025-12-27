@@ -15,7 +15,7 @@ import {
 import { StorageKey } from './utils/storage';
 import { preference } from './utils/config';
 
-const SearchDocsView: React.FC = () => {
+function SearchDocsView() {
   const [cachedRecentList, setCachedRecentList] = useCachedState<RecentList | null>(StorageKey.DocsRecentList, null);
   const [searchKeywords, setSearchKeywords] = useState('');
   const {
@@ -59,16 +59,13 @@ const SearchDocsView: React.FC = () => {
       ) : null}
     </List>
   );
-};
+}
 
 const isRecentList = (list: RecentList | SearchResults): list is RecentList => {
   return 'nodes' in list.entities;
 };
 
-const RecentDocumentsView: React.FC<{
-  list: RecentList;
-  onRemove?: (objToken: string) => void;
-}> = ({ list, onRemove }) => {
+function RecentDocumentsView({ list, onRemove }: { list: RecentList; onRemove?: (objToken: string) => void }) {
   return (
     <List.Section title="Recent Documents" subtitle={`${list.node_list.length}`}>
       {list.node_list.map((nodeId) => {
@@ -93,9 +90,9 @@ const RecentDocumentsView: React.FC<{
       })}
     </List.Section>
   );
-};
+}
 
-const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
+function SearchResultView({ list }: { list: SearchResults }) {
   return (
     <List.Section title="Search Results" subtitle={`${list.tokens.length}`}>
       {list.tokens.map((nodeId) => {
@@ -106,6 +103,6 @@ const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
       })}
     </List.Section>
   );
-};
+}
 
 export default withAuth(withQuery(SearchDocsView));

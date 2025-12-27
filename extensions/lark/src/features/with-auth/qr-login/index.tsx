@@ -7,7 +7,7 @@ interface QRLoginProps {
   onConfirm: (cookies: string[]) => void;
 }
 
-export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
+export function QRLogin({ onConfirm }: QRLoginProps) {
   const timer = useRef<NodeJS.Timeout | undefined>(undefined);
   const unmountedRef = useRef(false);
   const tokenRef = useRef('');
@@ -105,7 +105,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
       }
     />
   );
-};
+}
 
 async function getQRCodeMarkdownContent(token: string): Promise<string> {
   const qrCodeData = await toDataURL(

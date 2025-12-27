@@ -7,7 +7,7 @@ import { checkAuthState, setAuthData } from '../../services/shared';
 import { DOMAIN } from '../../utils/config';
 import { QRLogin } from './qr-login';
 
-const AuthGuard = ({ children }: { children: React.ReactElement }) => {
+const AuthGuard = ({ children }: React.PropsWithChildren) => {
   const isAuthenticated = useAtomValue(isAuthenticatedAtom);
   const [checked, setChecked] = useState(isAuthenticated);
   const [, refresh] = useState(0);
@@ -49,7 +49,7 @@ const MissingDomain = () => {
 };
 
 export const withAuth =
-  <T extends Record<string, unknown>>(Component: React.ComponentType<T>): React.FC<T> =>
+  <T extends Record<string, unknown>>(Component: React.ComponentType<T>) =>
   (props: T) => (
     <AuthGuard>
       <Component {...props} />
