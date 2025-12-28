@@ -1,6 +1,6 @@
 # Google Cloud CLI Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2025-12-28
 - Added optimistic UI updates for VM start/stop actions
 - Fixed Streamer Mode not hiding "Copy Latest Value" action in Secrets list
 - Fixed Streamer Mode toggle not updating secret value display in real-time
