@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Overview",
+    "items": [
+      {
+        "title": "Installation",
+        "documentation": "https://www.radix-ui.com/colors/docs/overview/installation",
+        "description": "How to install Radix Colors."
+      },
+      {
+        "title": "Usage",
+        "documentation": "https://www.radix-ui.com/colors/docs/overview/usage",
+        "description": "How to use Radix Colors with various styling solutions."
+      },
+      {
+        "title": "Aliasing",
+        "documentation": "https://www.radix-ui.com/colors/docs/overview/aliasing",
+        "description": "A guide to providing semantic aliases for colors."
+      },
+      {
+        "title": "Custom palettes",
+        "documentation": "https://www.radix-ui.com/colors/docs/overview/custom-palettes",
+        "description": "Learn how to create custom Radix Colors palettes."
+      },
+      {
+        "title": "Releases",
+        "documentation": "https://www.radix-ui.com/colors/docs/overview/releases",
+        "description": "Radix Colors releases and changelog."
+      }
+    ]
+  },
+  {
+    "title": "Palette composition",
+    "items": [
+      {
+        "title": "Scales",
+        "documentation": "https://www.radix-ui.com/colors/docs/palette-composition/scales",
+        "description": "An overview of all Radix Colors scales."
+      },
+      {
+        "title": "Composing a palette",
+        "documentation": "https://www.radix-ui.com/colors/docs/palette-composition/composing-a-palette",
+        "description": "A guide to composing a color palette with Radix Colors."
+      },
+      {
+        "title": "Understanding the scale",
+        "documentation": "https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale",
+        "description": "Learn which scale step is the most appropriate for each use case."
+      }
+    ]
+  }
+]

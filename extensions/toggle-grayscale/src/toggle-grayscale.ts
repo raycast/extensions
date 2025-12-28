@@ -19,9 +19,9 @@ tell application "System Events"
 		repeat until (exists window 1)
 			delay 0.1
 		end repeat
-		
+
 		-- Toggle Color filters
-		click checkbox 1 of group 5 of scroll area 1 of group 1 of group 2 of splitter group 1 of group 1 of window 1
+		click checkbox 1 of group 5 of scroll area 1 of group 1 of group 3 of splitter group 1 of group 1 of window 1
 	end tell
 end tell
 

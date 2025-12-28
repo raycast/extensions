@@ -8,12 +8,9 @@ import {
   Icon,
   confirmAlert,
   Form,
-  Detail,
   Color,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { exec } from "child_process";
-import { promisify } from "util";
 import StorageObjectsView from "./StorageObjectsView";
 import BucketLifecycleView from "./BucketLifecycleView";
 import BucketIAMView from "./BucketIAMView";
@@ -23,8 +20,8 @@ import StorageStatsView from "./StorageStatsView";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { showFailureToast } from "@raycast/utils";
 import { initializeQuickLink } from "../../utils/QuickLinks";
-
-const execPromise = promisify(exec);
+import { listStorageBuckets, createStorageBucket, deleteStorageBucket } from "../../utils/gcpApi";
+import { LogsView } from "../logs-service";
 
 interface StorageBucketViewProps {
   projectId: string;
@@ -43,7 +40,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   const [isLoading, setIsLoading] = useState(true);
   const [buckets, setBuckets] = useState<Bucket[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>("");
   const { push, pop } = useNavigation();
 
   useEffect(() => {
@@ -67,81 +63,37 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
     });
 
     try {
-      const { stdout: projectInfo } = await execPromise(`${gcloudPath} config get-value project`);
-      const currentProject = projectInfo.trim();
+      const bucketList = await listStorageBuckets(gcloudPath, projectId);
 
-      if (!currentProject || currentProject === "(unset)" || currentProject === "undefined") {
-        setError("No project selected. Please select a project first.");
-        setIsLoading(false);
+      if (bucketList.length === 0) {
+        setBuckets([]);
         showToast({
-          style: Toast.Style.Failure,
-          title: "No project selected",
-          message: "Please select a project first",
+          style: Toast.Style.Success,
+          title: "No buckets found",
+          message: "Create a bucket to get started",
         });
+        setIsLoading(false);
         return;
       }
 
-      let debugText = `Current project: ${currentProject}\n`;
+      const mappedBuckets = bucketList.map((bucket) => ({
+        id: bucket.id || bucket.name,
+        name: bucket.name.replace("gs://", ""),
+        location: bucket.location || "Unknown",
+        storageClass: bucket.storageClass || "STANDARD",
+        created: bucket.timeCreated || new Date().toISOString(),
+      }));
 
-      try {
-        const command = `${gcloudPath} storage buckets list --project=${projectId} --format=json`;
-
-        debugText += `Executing command: ${command}\n`;
-
-        const { stdout, stderr } = await execPromise(command);
-
-        if (stderr && stderr.includes("ERROR")) {
-          throw new Error(stderr);
-        }
-
-        if (!stdout || stdout.trim() === "") {
-          setBuckets([]);
-          debugText += "No buckets found or empty result\n";
-          showToast({
-            style: Toast.Style.Success,
-            title: "No buckets found",
-            message: "Create a bucket to get started",
-          });
-          setDebugInfo(debugText);
-          setIsLoading(false);
-          return;
-        }
-
-        const bucketList = JSON.parse(stdout);
-        debugText += `Found ${bucketList.length} buckets\n`;
-
-        const mappedBuckets = bucketList.map(
-          (bucket: { id: string; name: string; location: string; storageClass: string; timeCreated: string }) => ({
-            id: bucket.id || bucket.name,
-            name: bucket.name.replace("gs://", ""),
-            location: bucket.location || "Unknown",
-            storageClass: bucket.storageClass || "STANDARD",
-            created: bucket.timeCreated || new Date().toISOString(),
-          }),
-        );
-
-        setBuckets(mappedBuckets);
-        showToast({
-          style: Toast.Style.Success,
-          title: "Buckets loaded",
-          message: `Found ${mappedBuckets.length} buckets`,
-        });
-      } catch (error: unknown) {
-        console.error("Error listing buckets:", error);
-        debugText += `Error: ${error instanceof Error ? error.message : String(error)}\n`;
-        setError(`Failed to list buckets: ${error instanceof Error ? error.message : String(error)}`);
-        showFailureToast("Failed to list buckets", {
-          title: "Failed to list buckets",
-          message: error instanceof Error ? error.message : String(error),
-        });
-      }
-
-      setDebugInfo(debugText);
+      setBuckets(mappedBuckets);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Buckets loaded",
+        message: `Found ${mappedBuckets.length} buckets`,
+      });
     } catch (error: unknown) {
-      console.error("Error getting project:", error);
-      setError(`Failed to get project: ${error instanceof Error ? error.message : String(error)}`);
-      showFailureToast("Failed to get project", {
-        title: "Failed to get project",
+      setError(`Failed to list buckets: ${error instanceof Error ? error.message : String(error)}`);
+      showFailureToast("Failed to list buckets", {
+        title: "Failed to list buckets",
         message: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -151,13 +103,8 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
 
   async function createBucket(values: { name: string; location: string; storageClass: string }) {
     try {
-      const command = `${gcloudPath} storage buckets create gs://${values.name} --location=${values.location} --storage-class=${values.storageClass} --project=${projectId}`;
-
-      const { stderr } = await execPromise(command);
-
-      if (stderr && stderr.includes("ERROR")) {
-        throw new Error(stderr);
-      }
+      // Use REST API instead of gcloud CLI
+      await createStorageBucket(gcloudPath, projectId, values.name, values.location, values.storageClass);
 
       showToast({
         style: Toast.Style.Success,
@@ -193,13 +140,8 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       });
 
       try {
-        const command = `${gcloudPath} storage buckets delete gs://${bucketName} --project=${projectId} --force-delete-object`;
-
-        const { stderr } = await execPromise(command);
-
-        if (stderr && stderr.includes("ERROR")) {
-          throw new Error(stderr);
-        }
+        // Use REST API instead of gcloud CLI
+        await deleteStorageBucket(gcloudPath, bucketName);
 
         deletingToast.hide();
         showToast({
@@ -224,10 +166,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
 
   function viewBucketObjects(bucketName: string) {
     push(<StorageObjectsView projectId={projectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
-  }
-
-  function showDebugInfo() {
-    push(<Detail markdown={debugInfo} navigationTitle="Debug Info" />);
   }
 
   function getStorageClassIcon(storageClass: string) {
@@ -267,7 +205,15 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
 
   function formatDate(dateString: string) {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + " " + date.toLocaleTimeString();
+    const month = (date.getMonth() + 1).toString();
+    const day = date.getDate().toString();
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const seconds = date.getSeconds().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hour12 = hours % 12 || 12;
+    return `${month}/${day}/${year} ${hour12}:${minutes}:${seconds} ${ampm}`;
   }
 
   function showCreateBucketForm() {
@@ -377,7 +323,13 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
         <ActionPanel>
           <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />
           <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchBuckets} />
-          <Action title="Show Debug Info" icon={Icon.Terminal} onAction={showDebugInfo} />
+          <Action
+            title="View Logs"
+            icon={Icon.Terminal}
+            onAction={() =>
+              push(<LogsView projectId={projectId} gcloudPath={gcloudPath} initialResourceType="gcs_bucket" />)
+            }
+          />
           <Action title="View Storage Statistics" icon={Icon.BarChart} onAction={() => viewBucketStats("")} />
           <Action title="View Iam Members" icon={Icon.Person} onAction={viewIAMMembers} />
           <Action title="View Iam Members by Principal" icon={Icon.PersonCircle} onAction={viewIAMMembersByPrincipal} />

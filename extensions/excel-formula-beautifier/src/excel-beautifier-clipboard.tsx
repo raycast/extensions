@@ -1,23 +1,24 @@
-import { Detail, Clipboard, showToast, Toast } from "@raycast/api";
+import { Detail, Clipboard, showToast, Toast, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ExcelFormulaBeautifier } from "./parser/excel-formula-parser";
-
-interface FormulaData {
-  original: string;
-  beautified: string;
-}
+import { ExcelFormulaParser } from "./parser/parser";
+import { extractFormulasFromExpression } from "./parser/formula-extractor";
 
 export default function Command() {
-  const [formulaData, setFormulaData] = useState<FormulaData | null>(null);
+  const [beautified, setBeautified] = useState<string | null>(null);
+  const [formulas, setFormulas] = useState<ReturnType<typeof extractFormulasFromExpression>>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function getClipboardContent() {
       try {
         const clipboardContent = await Clipboard.readText();
         if (!clipboardContent) {
-          setError("No text found in clipboard");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: "No text found in clipboard",
+          });
           setIsLoading(false);
           return;
         }
@@ -25,7 +26,6 @@ export default function Command() {
         // Check if it looks like an Excel formula
         const trimmed = clipboardContent.trim();
         if (!trimmed.startsWith("=")) {
-          // Try to beautify anyway, maybe user copied formula without =
           showToast({
             style: Toast.Style.Animated,
             title: "Warning",
@@ -35,22 +35,33 @@ export default function Command() {
 
         try {
           // Use our custom formatter with the new parser
-          const beautified = ExcelFormulaBeautifier.rawText(trimmed);
-          setFormulaData({
-            original: trimmed,
-            beautified: beautified,
+          const result = ExcelFormulaBeautifier.rawText(trimmed);
+          setBeautified(result);
+
+          // Extract formulas used in the expression
+          const parsed = ExcelFormulaParser.parse(trimmed);
+          const usedFormulas = extractFormulasFromExpression(parsed);
+          setFormulas(usedFormulas);
+
+          showToast({
+            style: Toast.Style.Success,
+            title: "Success",
+            message: "Formula beautified",
           });
         } catch (formulaError) {
-          // If beautification fails, show error with the original content
-          setError(
-            `Invalid Excel formula: ${formulaError instanceof Error ? formulaError.message : String(formulaError)}`,
-          );
-          setIsLoading(false);
-          return;
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid Excel formula",
+            message: formulaError instanceof Error ? formulaError.message : String(formulaError),
+          });
         }
         setIsLoading(false);
       } catch (err) {
-        setError(`Failed to read clipboard: ${err}`);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: `Failed to read clipboard: ${err}`,
+        });
         setIsLoading(false);
       }
     }
@@ -62,24 +73,87 @@ export default function Command() {
     return <Detail isLoading={true} markdown="Reading from clipboard..." />;
   }
 
-  if (error) {
-    return <Detail markdown={`# Error\n\n${error}`} />;
-  }
-
-  if (!formulaData) {
+  if (!beautified) {
     return <Detail markdown="# No formula data available" />;
   }
 
-  const markdown = `## Original Formula
-\`\`\`excel
-${formulaData.original}
-\`\`\`
+  const markdown = `# Beautified Formula
 
-## Beautified Formula
 \`\`\`excel
-${formulaData.beautified}
+${beautified}
 \`\`\`
 `;
 
-  return <Detail markdown={markdown} />;
+  const getCategoryColor = (category: string | undefined): string => {
+    const colorMap: Record<string, string> = {
+      Basic: "#4CAF50",
+      Conditional: "#2196F3",
+      Lookup: "#FF9800",
+      Text: "#9C27B0",
+      Math: "#F44336",
+      Date: "#00BCD4",
+    };
+    return colorMap[category || ""] || "#9E9E9E";
+  };
+
+  const renderDocumentation = () => {
+    const elements: React.ReactNode[] = [];
+    formulas.forEach((formula) => {
+      elements.push(
+        <Detail.Metadata.Label
+          key={`${formula.name}-desc`}
+          title={formula.name}
+          text={formula.doc?.description || "No documentation available"}
+        />,
+      );
+      if (formula.doc) {
+        elements.push(
+          <Detail.Metadata.TagList key={`${formula.name}-cat`} title="Category">
+            <Detail.Metadata.TagList.Item text={formula.doc.category} color={getCategoryColor(formula.doc.category)} />
+          </Detail.Metadata.TagList>,
+        );
+        elements.push(<Detail.Metadata.Label key={`${formula.name}-syn`} title="Syntax" text={formula.doc.syntax} />);
+        elements.push(<Detail.Metadata.Label key={`${formula.name}-ex`} title="Example" text={formula.doc.example} />);
+        elements.push(<Detail.Metadata.Separator key={`${formula.name}-sep`} />);
+      }
+    });
+
+    return elements;
+  };
+
+  return (
+    <Detail
+      markdown={markdown}
+      metadata={
+        <Detail.Metadata>
+          {formulas.length > 0 && (
+            <>
+              <Detail.Metadata.TagList title="Formulas Used">
+                {formulas.map((formula) => (
+                  <Detail.Metadata.TagList.Item
+                    key={formula.name}
+                    text={`${formula.name}${formula.count > 1 ? ` ×${formula.count}` : ""}`}
+                    color={getCategoryColor(formula.doc?.category)}
+                  />
+                ))}
+              </Detail.Metadata.TagList>
+
+              <Detail.Metadata.Separator />
+
+              {renderDocumentation()}
+            </>
+          )}
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard
+            title="Copy Beautified Formula"
+            content={beautified}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }

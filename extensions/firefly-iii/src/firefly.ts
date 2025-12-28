@@ -10,12 +10,13 @@ async function makeRequest<T>(endpoint: string, options?: RequestInit) {
   const response = await fetch(buildUrl(`api/v1/${endpoint}`), {
     ...options,
     headers: {
-      Accept: "application/json",
+      Accept: "application/vnd.api+json",
       "Content-Type": "application/json",
       Authorization: `Bearer ${firefly_pat}`,
     },
   });
-  if (!response.headers.get("content-type")?.includes("application/json")) throw new Error(response.statusText);
+  const validContentTypes = ["application/json", "application/vnd.api+json"];
+  if (!validContentTypes.includes(response.headers.get("content-type") ?? "")) throw new Error(response.statusText);
   const result = await response.json();
   if (!response.ok) throw new Error((result as Error).message);
   return result as T;

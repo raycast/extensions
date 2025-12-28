@@ -1,5 +1,9 @@
 # Type Snob Changelog
 
+## [Update] - 2025-11-17
+
+- Added keyboard shortcut for copying HTML entity (Cmd+Opt+C on Mac, Ctrl+Alt+C on Windows)
+
 ## [Major update] - 2025-11-14
 
 - Moved characters to JSON for easier upkeep and maintenance

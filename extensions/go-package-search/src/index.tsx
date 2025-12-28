@@ -1,13 +1,19 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
-import fetch, { AbortError } from "node-fetch";
+import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
+import { useState, useRef } from "react";
 import { parse } from "node-html-parser";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [searchText, setSearchText] = useState("");
+  const state = useSearch(searchText);
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Go packages..." throttle>
+    <List
+      isLoading={state.isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Go packages..."
+      throttle
+    >
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.path ?? searchResult.url} searchResult={searchResult} />
@@ -38,8 +44,16 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           <Action.OpenInBrowser url={searchResult.url} />
           {searchResult.path ? (
             <ActionPanel.Section title="Go">
-              <Action.CopyToClipboard title="Copy Package Path" content={searchResult.path} />
-              <Action.CopyToClipboard title="Copy Download Command" content={`go get ${searchResult.path}`} />
+              <Action.CopyToClipboard
+                title="Copy Package Path"
+                content={searchResult.path}
+                shortcut={Keyboard.Shortcut.Common.CopyPath}
+              />
+              <Action.CopyToClipboard
+                title="Copy Download Command"
+                content={`go get ${searchResult.path}`}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
             </ActionPanel.Section>
           ) : null}
         </ActionPanel>
@@ -48,56 +62,27 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+function useSearch(search: string) {
   const cancelRef = useRef<AbortController | null>(null);
 
-  const search = useCallback(
+  const { isLoading, data } = useCachedPromise(
     async function search(searchText: string) {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      try {
-        const results = await performSearch(searchText, cancelRef.current.signal);
-        setState((oldState) => ({
-          ...oldState,
-          results: results,
-          isLoading: false,
-        }));
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-
-        if (error instanceof AbortError) {
-          return;
-        }
-
-        console.error("search error", error);
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
-      }
+      const results = await performSearch(searchText, cancelRef.current?.signal);
+      return results;
     },
-    [cancelRef, setState]
+    [search],
+    {
+      abortable: cancelRef,
+      failureToastOptions: {
+        title: "Could not perform search",
+      },
+      initialData: [],
+    },
   );
-
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  return {
-    state: state,
-    search: search,
-  };
+  return { isLoading, results: data };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+async function performSearch(searchText: string, signal?: AbortSignal): Promise<SearchResult[]> {
   const hasSearchText = searchText.length !== 0;
   const searchItem: SearchResult = {
     name: hasSearchText ? `Search ${searchText}` : "Open pkg.go.dev",
@@ -159,11 +144,6 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     });
   });
   return results;
-}
-
-interface SearchState {
-  results: SearchResult[];
-  isLoading: boolean;
 }
 
 interface SearchResult {

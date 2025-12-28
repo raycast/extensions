@@ -1,7 +1,7 @@
-import { Color, Icon, Image, LocalStorage } from "@raycast/api";
-import Asset = Image.Asset;
 import { ConnectorProvider, GetAgentConfigurationsResponseType, MeResponseType } from "@dust-tt/client";
+import { Color, Icon, Image, LocalStorage } from "@raycast/api";
 import { jwtDecode } from "jwt-decode";
+import Asset = Image.Asset;
 
 export interface AgentType {
   sId: string;
@@ -20,7 +20,7 @@ interface ConnectorProviderConfig {
   color: Color;
   name: string;
 }
-export const ConnectorProviders: Record<ConnectorProvider, ConnectorProviderConfig> = {
+export const ConnectorProviders: Partial<Record<ConnectorProvider, ConnectorProviderConfig>> = {
   github: {
     icon: "icons/github.svg",
     color: Color.PrimaryText,

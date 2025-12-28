@@ -14,6 +14,7 @@ import {
 import { useCachedPromise, MutatePromise, useForm, FormValidation } from "@raycast/utils";
 import { useContext } from "react";
 import { SDKContext, sdk } from "../sdk";
+import CopyIDAction from "../common/CopyIDAction";
 
 export default function Variables({ siteId }: { siteId: string }) {
   const { sites } = useContext(SDKContext);
@@ -88,6 +89,8 @@ export default function Variables({ siteId }: { siteId: string }) {
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Key to Clipboard" content={variable.key} />
                 <Action.CopyToClipboard title="Copy Value to Clipboard" content={variable.value} />
+                <CopyIDAction item={variable} />
+
                 <Action.Push
                   icon={Icon.PlusCircle}
                   title="Create Variable"

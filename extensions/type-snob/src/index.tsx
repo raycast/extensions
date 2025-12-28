@@ -98,7 +98,10 @@ export default function Command() {
                       title="Copy HTML Entity"
                       content={char.html}
                       icon={Icon.Code}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "opt"], key: "c" },
+                        Windows: { modifiers: ["ctrl", "alt"], key: "c" },
+                      }}
                     />
                   )}
                 </ActionPanel>

@@ -48,14 +48,14 @@ export const SaveCurrentLanguageSet: React.FC<{ languageSet: LanguageCodeSet; on
       subtitle={formatLanguageSet(languageSet)}
       actions={
         <ActionPanel>
-          <Action title="Save current set" onAction={onSelect} />
+          <Action title="Save Current Set" onAction={onSelect} />
         </ActionPanel>
       }
     />
   );
 };
 
-export const LanguagesManagerList: React.VFC = () => {
+export const LanguagesManagerList: React.FC = () => {
   const navigation = useNavigation();
   const preferencesLanguageSet = usePreferencesLanguageSet();
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
@@ -65,7 +65,7 @@ export const LanguagesManagerList: React.VFC = () => {
     <List
       actions={
         <ActionPanel>
-          <Action title="Remove all" onAction={() => setLanguages([])} />
+          <Action title="Remove All" onAction={() => setLanguages([])} />
         </ActionPanel>
       }
     >
@@ -75,7 +75,8 @@ export const LanguagesManagerList: React.VFC = () => {
         actions={
           <ActionPanel>
             <Action.Push
-              title="Add new language set..."
+              icon={Icon.Plus}
+              title="Add New Language Set…"
               target={
                 <AddLanguageForm
                   onAddLanguage={(langSet) => {

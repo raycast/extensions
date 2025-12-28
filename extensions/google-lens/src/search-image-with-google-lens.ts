@@ -11,7 +11,7 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { promisify } from "util";
 import { exec as execCb } from "child_process";
-import { tmpdir } from "os";
+import { tmpdir, platform } from "os";
 import { join } from "path";
 import { existsSync } from "fs";
 import { readFile, unlink } from "fs/promises";
@@ -25,6 +25,7 @@ const exec = promisify(execCb);
 export default async () => {
   const preferences = getPreferenceValues();
   const turnOffUploadAlert = preferences.turnOffUploadAlert;
+  const isWindows = platform() === "win32";
 
   let usedScreenshot = false;
   let filePath = "";
@@ -44,25 +45,27 @@ export default async () => {
   }
 
   try {
-    // Check if Finder is the frontmost application
-    const frontmostApplication = await getFrontmostApplication();
-    if (frontmostApplication.name === "Finder") {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Checking selected image in Finder...",
-      });
-      const selectedItems = await getSelectedFinderItems();
-      if (selectedItems.length > 0) {
-        const selectedFile = selectedItems[0];
-        filePath = selectedFile.path;
-        fileExtension = filePath.split(".").pop()?.toLowerCase() ?? "";
-        if (!fileExtension || !ACCEPTED_TYPES.includes(fileExtension)) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Unsupported image type",
-            message: `Supported types: ${ACCEPTED_TYPES.join(", ")}`,
-          });
-          return;
+    if (!isWindows) {
+      // Check if Finder is the frontmost application
+      const frontmostApplication = await getFrontmostApplication();
+      if (frontmostApplication.name === "Finder") {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: "Checking selected image in Finder...",
+        });
+        const selectedItems = await getSelectedFinderItems();
+        if (selectedItems.length > 0) {
+          const selectedFile = selectedItems[0];
+          filePath = selectedFile.path;
+          fileExtension = filePath.split(".").pop()?.toLowerCase() ?? "";
+          if (!fileExtension || !ACCEPTED_TYPES.includes(fileExtension)) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Unsupported image type",
+              message: `Supported types: ${ACCEPTED_TYPES.join(", ")}`,
+            });
+            return;
+          }
         }
       }
     }
@@ -80,7 +83,16 @@ export default async () => {
         toast.hide();
       }, 1500);
       await closeMainWindow();
-      await exec(`/usr/sbin/screencapture -i ${filePath}`);
+
+      if (isWindows) {
+        const windowsPath = filePath.replace(/\//g, "\\");
+        await exec(
+          `powershell -Command "& {Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; [System.Windows.Forms.Clipboard]::Clear(); Start-Process 'explorer.exe' 'ms-screenclip:'; $maxWait = 240; while ($maxWait -gt 0) { if ([System.Windows.Forms.Clipboard]::ContainsImage()) { $img = [System.Windows.Forms.Clipboard]::GetImage(); $img.Save('${windowsPath}', [System.Drawing.Imaging.ImageFormat]::Png); exit 0; } Start-Sleep -Milliseconds 250; $maxWait--; }; exit 1; }"`,
+        );
+      } else {
+        await exec(`/usr/sbin/screencapture -i "${filePath}"`);
+      }
+
       if (!existsSync(filePath)) {
         await showToast({
           style: Toast.Style.Failure,
@@ -104,8 +116,9 @@ export default async () => {
 
     const buffer = await readFile(filePath);
     const form = new FormData();
+    const separator = platform() === "win32" ? "\\" : "/";
     form.append("image", buffer, {
-      filename: filePath.split("/").pop(),
+      filename: filePath.split(separator).pop(),
       contentType: `image/${fileExtension}`,
     });
 

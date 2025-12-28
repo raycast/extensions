@@ -38,6 +38,13 @@
       "mode": "view"
     },
     {
+      "name": "manage-servers",
+      "title": "Manage Servers",
+      "subtitle": "Zeabur",
+      "description": "Manage Zeabur Servers",
+      "mode": "view"
+    },
+    {
       "name": "deploy-project",
       "title": "Deploy Project",
       "subtitle": "Zeabur",
@@ -49,6 +56,13 @@
       "title": "Menu Bar Projects",
       "subtitle": "Zeabur",
       "description": "See your Zeabur projects at a glance",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "menu-bar-deployment",
+      "title": "Menu Bar Deployment",
+      "subtitle": "Zeabur",
+      "description": "See your Zeabur deployments at a glance",
       "mode": "menu-bar"
     }
   ],

@@ -1,5 +1,15 @@
 # UploadThing Changelog
 
+## [2.0.4] - 2025-12-09
+
+- Delete now has a `shortcut` and is **optimistic**
+- Fixed error "Invalid signing secret" when uploading (ref: [Issue #23530](https://github.com/raycast/extensions/issues/23530))
+
+## [2.0.3] - 2025-11-24
+
+- Added copy url to clipboard and delete file action
+- Added an option to choose default action (copy to clipboard or open in browser)
+
 ## [2.0.2] - 2025-11-09
 
 - Toggled on windows support

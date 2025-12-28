@@ -1,16 +1,18 @@
 import { Action, ActionPanel, Form, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
+import fs from "fs";
 import QRCode from "qrcode";
 import { useState } from "react";
-import { generateQRCode, getQRCodePath, QRCodeView, copyQRCodeToClipboard } from "./utils";
-import { FormValidation, useForm, showFailureToast } from "@raycast/utils";
-import fs from "fs";
-import { QR_OPTIONS, SVG_OPTIONS, QR_OPTIONS_PREVIEW } from "./config";
+import { QR_OPTIONS, QR_OPTIONS_PREVIEW, SVG_OPTIONS } from "./config";
+import { copyQRCodeToClipboard, generateQRCode, getQRCodePath, QRCodeView } from "./utils";
+
+type FormatValue = "png" | "svg" | "png-bg";
 
 interface FormValues {
   url: string;
   inline: boolean;
   copy?: boolean;
-  format: "png" | "svg" | "png-bg";
+  format: FormatValue;
 }
 
 interface Preferences {
@@ -76,9 +78,7 @@ export default function Command() {
     },
     validation: {
       url: FormValidation.Required,
-    },
-    initialValues: {
-      format: "png",
+      format: FormValidation.Required,
     },
   });
 
@@ -138,7 +138,7 @@ export default function Command() {
   };
 
   if (qrData) {
-    return <QRCodeView qrData={qrData} height={350} />;
+    return <QRCodeView qrData={qrData} height={350} onBack={() => setQrData(undefined)} />;
   }
 
   return (
@@ -147,8 +147,11 @@ export default function Command() {
       <Form.Dropdown
         id="format"
         title="Format"
+        storeValue
         value={itemProps.format.value}
-        onChange={(value) => itemProps.format.onChange?.(value as "png" | "svg" | "png-bg")}
+        onChange={(value) => {
+          itemProps.format.onChange?.(value as FormatValue);
+        }}
       >
         <Form.Dropdown.Item value="png" title="PNG (Transparent)" />
         <Form.Dropdown.Item value="png-bg" title="PNG (w/BG)" />

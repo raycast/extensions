@@ -32,6 +32,22 @@ export function convertSDKMeeting(m: SDKMeeting): Meeting {
   // Extract action items count
   const actionItemsCount = m.actionItems?.length || 0;
 
+  // Extract summary text from defaultSummary
+  const summaryText = m.defaultSummary?.markdownFormatted || undefined;
+
+  // Extract transcript text from transcript array
+  let transcriptText: string | undefined;
+  if (m.transcript && Array.isArray(m.transcript) && m.transcript.length > 0) {
+    transcriptText = m.transcript
+      .map((item) => {
+        const speaker = item.speaker?.displayName || "Unknown";
+        const timestamp = item.timestamp || "";
+        const text = item.text || "";
+        return `${speaker} [${timestamp}]: ${text}`;
+      })
+      .join("\n");
+  }
+
   return {
     id: recordingId,
     title: m.title || "Untitled",
@@ -49,6 +65,8 @@ export function convertSDKMeeting(m: SDKMeeting): Meeting {
     recordingId,
     actionItemsCount,
     actionItems: m.actionItems || undefined,
+    summaryText,
+    transcriptText,
     calendarInvitees: m.calendarInvitees.map((inv) => inv.email).filter((email): email is string => email != null),
     calendarInviteesDomains: Array.from(
       new Set(
