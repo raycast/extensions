@@ -17,19 +17,19 @@
     {
       "name": "generate-ids",
       "title": "Generate Identifiers...",
-      "description": "Generate IPs, IMEIs, MAC, MSISDN, UUID, and ICCID.",
+      "description": "ID Playground",
       "mode": "view"
     },
     {
       "name": "detect-ip",
       "title": "Detect IP",
-      "description": "Detect your IP address.",
+      "description": "ID Playground",
       "mode": "no-view"
     },
     {
       "name": "validate-ids",
       "title": "Validate Identifiers...",
-      "description": "Validate IMEI, IBAN, ICCID, and UUID.",
+      "description": "ID Playground",
       "mode": "view"
     }
   ],

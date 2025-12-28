@@ -10,10 +10,13 @@ export function generateIMEI(): string {
   }
 
   // Calculate Luhn check digit
+  // For IMEI: double every second digit starting from the right
+  // This means doubling digits at odd indices (0-indexed) when counting from the left
   let sum = 0;
   for (let i = 0; i < 14; i++) {
     let digit = digits[i];
-    if (i % 2 === 0) {
+    if (i % 2 === 1) {
+      // Odd indices (1, 3, 5, 7, 9, 11, 13) get doubled
       digit *= 2;
       if (digit > 9) {
         digit -= 9;
