@@ -2,6 +2,7 @@ import { List, Icon, ActionPanel, Action, Detail, Keyboard, Color } from "@rayca
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { formatNumber, formatDate, extractAuthor, getAuthorUrl } from "./utils";
+import { parseDropdownValue } from "./dropdown-utils";
 
 type SortOption = "popularity" | "name";
 type TransportFilter = "all" | "http" | "stdio";
@@ -271,23 +272,25 @@ export default function Command() {
       throttle
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Filter"
+          tooltip="Sort & Filter"
+          storeValue
           onChange={(value) => {
-            if (value === "popularity" || value === "name") {
-              setSortBy(value as SortOption);
-            } else {
-              setTransportFilter(value as TransportFilter);
+            const [type, val] = parseDropdownValue(value);
+            if (type === "sort") {
+              setSortBy(val as SortOption);
+            } else if (type === "transport") {
+              setTransportFilter(val as TransportFilter);
             }
           }}
         >
-          <List.Dropdown.Section title="Sort">
-            <List.Dropdown.Item title="Most Popular" value="popularity" icon={Icon.Person} />
-            <List.Dropdown.Item title="Name (A-Z)" value="name" icon={Icon.Text} />
+          <List.Dropdown.Section title="Sort By">
+            <List.Dropdown.Item title="Most Popular" value="sort:popularity" icon={Icon.Person} />
+            <List.Dropdown.Item title="Name (A-Z)" value="sort:name" icon={Icon.Text} />
           </List.Dropdown.Section>
-          <List.Dropdown.Section title="Transport">
-            <List.Dropdown.Item title="All Transports" value="all" icon={Icon.Globe} />
-            <List.Dropdown.Item title="HTTP (Remote)" value="http" icon={Icon.Network} />
-            <List.Dropdown.Item title="stdio (Local)" value="stdio" icon={Icon.Terminal} />
+          <List.Dropdown.Section title="Filter by Transport">
+            <List.Dropdown.Item title="All Transports" value="transport:all" icon={Icon.Globe} />
+            <List.Dropdown.Item title="HTTP (Remote)" value="transport:http" icon={Icon.Network} />
+            <List.Dropdown.Item title="stdio (Local)" value="transport:stdio" icon={Icon.Terminal} />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
@@ -334,7 +337,6 @@ export default function Command() {
                       },
                     ]
                   : []),
-                ...(server.$schema ? [{ tag: { value: "server.json", color: Color.Blue } }] : []),
                 ...(meta?.visitorsEstimateTotal
                   ? [
                       {
