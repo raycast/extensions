@@ -1,17 +1,8 @@
-import { closeMainWindow } from "@raycast/api";
-import { Form, LaunchProps } from "@raycast/api";
-
+import { closeMainWindow, LaunchProps } from "@raycast/api";
 import { exec } from "child_process";
 
-interface Args {
-  time?: string;
-}
-
-export default async (props: LaunchProps<{ arguments: Args }>) => {
-  if (props.arguments.time) {
-    exec(`/usr/sbin/screencapture -i -p -T ${props.arguments.time}`);
-  } else {
-    exec("/usr/sbin/screencapture -i -p -T 5");
-  }
+export default async (props: LaunchProps<{ arguments: { time?: string } }>) => {
+  const delay = props.arguments.time || "5"; // Defaults to 5 if empty
+  exec(`/usr/sbin/screencapture -T ${delay} ~/Desktop/timed_shot.png`);
   await closeMainWindow();
 };

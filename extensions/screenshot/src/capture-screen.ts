@@ -2,6 +2,6 @@ import { closeMainWindow } from "@raycast/api";
 import { exec } from "child_process";
 
 export default async () => {
-  exec("/usr/sbin/screencapture -p");
+  exec("/usr/sbin/screencapture ~/Desktop/screen.png");
   await closeMainWindow();
 };
