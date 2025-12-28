@@ -1,29 +1,29 @@
-import React, { useState } from 'react';
-import { Action, Icon, List, showToast, Toast } from '@raycast/api';
-import { useCachedState } from '@raycast/utils';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { SpaceListItem } from './components/space-list-item';
-import { withAuth } from './features/with-auth';
-import { withQuery } from './features/with-query';
+import React, { useState } from "react";
+import { Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { SpaceListItem } from "./components/space-list-item";
+import { withAuth } from "./features/with-auth";
+import { withQuery } from "./features/with-query";
 import {
   fetchRecentDocsList,
   searchDocs,
   removeRecentDocument,
   RecentDocsListResponse as RecentList,
   SearchDocsResponse as SearchResults,
-} from './services/space';
-import { StorageKey } from './utils/storage';
-import { preference } from './utils/config';
+} from "./services/space";
+import { StorageKey } from "./utils/storage";
+import { preference } from "./utils/config";
 
 function SearchDocsView() {
   const [cachedRecentList, setCachedRecentList] = useCachedState<RecentList | null>(StorageKey.DocsRecentList, null);
-  const [searchKeywords, setSearchKeywords] = useState('');
+  const [searchKeywords, setSearchKeywords] = useState("");
   const {
     isFetching,
     data: documentList,
     refetch,
   } = useQuery<SearchResults | RecentList | null>({
-    queryKey: ['SearchDocsView', searchKeywords],
+    queryKey: ["SearchDocsView", searchKeywords],
     queryFn: ({ signal }) =>
       searchKeywords
         ? searchDocs({ query: searchKeywords }, signal)
@@ -35,10 +35,10 @@ function SearchDocsView() {
   });
 
   const handleRemoveRecent = async (objToken: string) => {
-    showToast({ title: 'Removing', style: Toast.Style.Animated });
+    showToast({ title: "Removing", style: Toast.Style.Animated });
     const result = await removeRecentDocument(objToken);
     if (result) {
-      showToast(Toast.Style.Success, 'Removed successfully');
+      showToast(Toast.Style.Success, "Removed successfully");
       refetch();
     }
   };
@@ -62,7 +62,7 @@ function SearchDocsView() {
 }
 
 const isRecentList = (list: RecentList | SearchResults): list is RecentList => {
-  return 'nodes' in list.entities;
+  return "nodes" in list.entities;
 };
 
 function RecentDocumentsView({ list, onRemove }: { list: RecentList; onRemove?: (objToken: string) => void }) {
@@ -81,7 +81,7 @@ function RecentDocumentsView({ list, onRemove }: { list: RecentList; onRemove?: 
               <Action
                 icon={Icon.Trash}
                 title="Remove from Recent Documents"
-                shortcut={{ key: 'x', modifiers: ['ctrl'] }}
+                shortcut={{ key: "x", modifiers: ["ctrl"] }}
                 onAction={() => onRemove?.(nodeId)}
               />
             }

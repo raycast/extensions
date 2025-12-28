@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Image, List } from '@raycast/api';
-import { getAvatarIcon } from '@raycast/utils';
-import { NodeEntity, ObjEntity, UserEntity, NodeType, isNodeEntity } from '../../services/space';
-import { timeFormat, timeSince } from '../../utils/time';
+import { Action, ActionPanel, Image, List } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
+import { NodeEntity, ObjEntity, UserEntity, NodeType, isNodeEntity } from "../../services/space";
+import { timeFormat, timeSince } from "../../utils/time";
 
 export interface SpaceListItemProps {
   node: NodeEntity | ObjEntity;
@@ -12,12 +12,12 @@ export interface SpaceListItemProps {
 export function SpaceListItem({ node, owner, actions }: SpaceListItemProps) {
   let id: string;
   let title: string;
-  let subtitle: List.Item.Props['subtitle'];
+  let subtitle: List.Item.Props["subtitle"];
   let time: {
     short: string;
     full: string;
   };
-  const ownerName = owner?.name || '';
+  const ownerName = owner?.name || "";
   const ownerAvatar = owner ? owner.avatar_url : getAvatarIcon(ownerName);
   const icon = getSpaceItemIcon(node);
 
@@ -49,7 +49,7 @@ export function SpaceListItem({ node, owner, actions }: SpaceListItemProps) {
     <List.Item
       id={id}
       icon={icon}
-      title={title || 'Untitled'}
+      title={title || "Untitled"}
       subtitle={subtitle}
       accessories={[
         { text: time.short, tooltip: time.full },
@@ -70,8 +70,8 @@ function getSpaceItemIcon(node: NodeEntity | ObjEntity): Image.ImageLike {
   if (isNodeEntity(node) && node.icon_info) {
     try {
       const iconInfo = JSON.parse(node.icon_info);
-      if (iconInfo.type === 1 && typeof iconInfo.key === 'string') {
-        const codePoints = iconInfo.key.split('-').map((hex: string) => parseInt(hex, 16));
+      if (iconInfo.type === 1 && typeof iconInfo.key === "string") {
+        const codePoints = iconInfo.key.split("-").map((hex: string) => parseInt(hex, 16));
         return String.fromCodePoint(...codePoints);
       }
     } catch {

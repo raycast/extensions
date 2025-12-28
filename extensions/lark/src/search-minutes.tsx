@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
-import { Action, ActionPanel, Icon, List, showToast, Toast } from '@raycast/api';
-import { useCachedState } from '@raycast/utils';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { withAuth } from './features/with-auth';
-import { withQuery } from './features/with-query';
+import React, { useState } from "react";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { withAuth } from "./features/with-auth";
+import { withQuery } from "./features/with-query";
 import {
   RecentMinutesListResponse as RecentList,
   SearchMinutesResponse as SearchResults,
   fetchRecentMinutesList,
   searchMinutes,
   removeRecentMinute,
-} from './services/minutes';
-import { StorageKey } from './utils/storage';
-import { preference } from './utils/config';
-import { timeFormat, timeSince } from './utils/time';
-import { trimTagsAndDecodeEntities } from './utils/string';
+} from "./services/minutes";
+import { StorageKey } from "./utils/storage";
+import { preference } from "./utils/config";
+import { timeFormat, timeSince } from "./utils/time";
+import { trimTagsAndDecodeEntities } from "./utils/string";
 
 function SearchMinutesView() {
   const [cachedRecentList, setCachedRecentList] = useCachedState<RecentList | null>(StorageKey.MinutesRecentList, null);
-  const [searchKeywords, setSearchKeywords] = useState('');
+  const [searchKeywords, setSearchKeywords] = useState("");
   const {
     isFetching,
     data: documentList,
     refetch,
   } = useQuery<SearchResults | RecentList | null>({
-    queryKey: ['SearchMinutesView', searchKeywords],
+    queryKey: ["SearchMinutesView", searchKeywords],
     queryFn: ({ signal }) =>
       searchKeywords
         ? searchMinutes({ query: searchKeywords }, signal)
@@ -36,10 +36,10 @@ function SearchMinutesView() {
   });
 
   const handleRemoveRecent = async (objToken: string) => {
-    showToast({ title: 'Removing', style: Toast.Style.Animated });
+    showToast({ title: "Removing", style: Toast.Style.Animated });
     const result = await removeRecentMinute(objToken);
     if (result) {
-      showToast(Toast.Style.Success, 'Removed successfully');
+      showToast(Toast.Style.Success, "Removed successfully");
       refetch();
     }
   };
@@ -63,7 +63,7 @@ function SearchMinutesView() {
 }
 
 const isRecentList = (list: RecentList | SearchResults): list is RecentList => {
-  return 'list' in list;
+  return "list" in list;
 };
 
 function RecentDocumentsView({ list, onRemove }: { list: RecentList; onRemove?: (objToken: string) => void }) {
@@ -79,7 +79,7 @@ function RecentDocumentsView({ list, onRemove }: { list: RecentList; onRemove?: 
               <Action
                 icon={Icon.Trash}
                 title="Remove from Recent Minutes"
-                shortcut={{ key: 'x', modifiers: ['ctrl'] }}
+                shortcut={{ key: "x", modifiers: ["ctrl"] }}
                 onAction={() => onRemove?.(minuteItem.object_token)}
               />
             }
@@ -118,7 +118,7 @@ function MinuteItem({
     short: timeSince(start_time, true),
     full: `Time: ${timeFormat(start_time, true)}`,
   };
-  const trimmedTopic = trimTagsAndDecodeEntities(topic || 'Untitled');
+  const trimmedTopic = trimTagsAndDecodeEntities(topic || "Untitled");
   return (
     <List.Item
       id={url}
