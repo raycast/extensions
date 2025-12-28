@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import { useHabits } from "./hooks/useHabits";
 import { HabitService } from "./api/habitService";
 import { getToday_YYYYMMDD } from "./utils/date";
+import { isHabitDueOnDate } from "./utils/frequency";
 import { getProgressBar } from "./utils/progress";
 import { CreateHabitForm } from "./components/CreateHabitForm";
 import { EditHabitForm } from "./components/EditHabitForm";
@@ -27,7 +28,9 @@ export default function Command() {
 
   useEffect(() => {
     async function updateMetadata() {
-      const pendingCount = activeHabits.filter((h) => !h.todayLog).length;
+      const pendingCount = activeHabits.filter(
+        (h) => !h.todayLog && isHabitDueOnDate(h.frequency, today)
+      ).length;
       await updateCommandMetadata({
         subtitle: `${pendingCount} habit${
           pendingCount === 1 ? "" : "s"
@@ -102,11 +105,14 @@ export default function Command() {
           const isCompleted = habit.todayLog?.status === "completed";
           const isSkipped = habit.todayLog?.status === "skipped";
 
+          const isDue = isHabitDueOnDate(habit.frequency, today);
           let icon = { source: Icon.Circle, tintColor: Color.PrimaryText };
           if (isCompleted)
             icon = { source: Icon.CheckCircle, tintColor: Color.Green };
-          if (isSkipped)
+          else if (isSkipped)
             icon = { source: Icon.MinusCircle, tintColor: Color.SecondaryText };
+          else if (!isDue)
+            icon = { source: Icon.Circle, tintColor: Color.SecondaryText }; // Grey circle for not due
 
           return (
             <List.Item
@@ -118,7 +124,15 @@ export default function Command() {
               icon={icon}
               accessories={[
                 { text: `Streak: ${habit.stats.current}` },
-                { text: isCompleted ? "Done" : isSkipped ? "Skipped" : "" },
+                {
+                  text: isCompleted
+                    ? "Done"
+                    : isSkipped
+                    ? "Skipped"
+                    : !isDue
+                    ? "Not Due"
+                    : "",
+                },
               ]}
               actions={
                 <ActionPanel>
@@ -208,6 +222,12 @@ export default function Command() {
                     icon={Icon.Play}
                     onAction={() => handleTogglePause(habit.id)}
                   />
+                  <Action.Push
+                    title="Add Habit"
+                    icon={Icon.Plus}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    target={<CreateHabitForm onRevalidate={revalidate} />}
+                  />
                   <Action
                     title="Delete"
                     style={Action.Style.Destructive}
@@ -230,6 +250,7 @@ export default function Command() {
               <Action.Push
                 title="Add Habit"
                 icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={<CreateHabitForm onRevalidate={revalidate} />}
               />
             </ActionPanel>

@@ -11,7 +11,9 @@ import {
   isToday,
   addMonths,
   subMonths,
+  isFuture,
 } from "date-fns";
+import { isHabitDueOnDate } from "../utils/frequency";
 
 export function HabitCalendar({ habit }: { habit: Habit }) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -50,12 +52,21 @@ export function HabitCalendar({ habit }: { habit: Habit }) {
       const log = logs[dateStr];
 
       let symbol = format(day, "d"); // Default number
+      const isDue = isHabitDueOnDate(habit.frequency, dateStr);
 
       if (log) {
         if (log.status === "completed") symbol = "✅";
         else if (log.status === "skipped") symbol = "➖";
+      } else if (!isDue) {
+        // Not a due day - show faded/dimmed
+        symbol = `~~${symbol}~~`; // Strikethrough for not due
       } else if (isToday(day)) {
         symbol = `**${symbol}**`; // Bold today
+      } else if (isFuture(day)) {
+        // Future due day - just show number
+      } else {
+        // Past due day not completed - show with X
+        symbol = `❌`;
       }
 
       currentWeek[dayOfWeek] = symbol;

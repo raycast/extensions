@@ -14,8 +14,8 @@ export class HabitService {
     const results = await Promise.all(
       habits.map(async (habit) => {
         const logs = await StorageService.getLogs(habit.id);
-        const currentStreak = calculateStreak(logs);
-        const longestStreak = calculateLongestStreak(logs);
+        const currentStreak = calculateStreak(logs, habit.frequency);
+        const longestStreak = calculateLongestStreak(logs, habit.frequency);
         const todayLog = logs[today];
 
         // Calculate total completions (last 30 days?)
@@ -100,6 +100,15 @@ export class HabitService {
     const habit = habits.find((h) => h.id === habitId);
     if (habit) {
       habit.name = name;
+      await StorageService.updateHabit(habit);
+    }
+  }
+
+  static async updateHabit(habitId: string, updates: Partial<Habit>) {
+    const habits = await StorageService.getHabits();
+    const habit = habits.find((h) => h.id === habitId);
+    if (habit) {
+      Object.assign(habit, updates);
       await StorageService.updateHabit(habit);
     }
   }

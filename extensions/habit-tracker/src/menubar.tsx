@@ -3,6 +3,7 @@ import { useHabits } from "./hooks/useHabits";
 import { StorageService } from "./api/storage";
 import { HabitService } from "./api/habitService";
 import { getToday_YYYYMMDD } from "./utils/date";
+import { isHabitDueOnDate } from "./utils/frequency";
 import { Habit } from "./types/habit";
 
 export default function Command() {
@@ -78,7 +79,10 @@ function RealMenuBar({
     if (!habitsLoading) load();
   }, [habits, habitsLoading]);
 
-  const activeHabits = habits.filter((h) => !h.archived && !h.is_paused);
+  const today = getToday_YYYYMMDD();
+  const activeHabits = habits.filter(
+    (h) => !h.archived && !h.is_paused && isHabitDueOnDate(h.frequency, today)
+  );
   const pending = activeHabits.filter((h) => !todayLogs[h.id]);
   const completedCount = activeHabits.length - pending.length;
 

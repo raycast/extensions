@@ -1,4 +1,5 @@
 import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { CreateHabitForm } from "./components/CreateHabitForm";
 import { useHabits } from "./hooks/useHabits";
 
 import { subDays, format } from "date-fns";
@@ -85,6 +86,12 @@ function MissedList() {
                   title="Skip"
                   icon={Icon.Minus}
                   onAction={() => handleSkip(item.habit, item.date)}
+                />
+                <Action.Push
+                  title="Add Habit"
+                  icon={Icon.Plus}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  target={<CreateHabitForm onRevalidate={revalidate} />}
                 />
               </ActionPanel>
             }

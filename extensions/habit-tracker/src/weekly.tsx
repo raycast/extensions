@@ -1,4 +1,5 @@
 import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { CreateHabitForm } from "./components/CreateHabitForm";
 import { useHabits } from "./hooks/useHabits";
 import { StorageService } from "./api/storage";
 import { useState, useMemo } from "react";
@@ -16,7 +17,7 @@ export default function Command() {
 }
 
 function WeeklyReview() {
-  const { habits, isLoading } = useHabits();
+  const { habits, isLoading, revalidate } = useHabits();
   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = last week
   const [stats, setStats] = useState<
     { habit: Habit; completed: number; total: number }[]
@@ -82,6 +83,12 @@ function WeeklyReview() {
           <Action
             title="Next Week"
             onAction={() => setWeekOffset((o) => o + 1)}
+          />
+          <Action.Push
+            title="Add Habit"
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            target={<CreateHabitForm onRevalidate={revalidate} />}
           />
         </ActionPanel>
       }

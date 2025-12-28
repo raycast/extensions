@@ -1,4 +1,5 @@
-import { DayLog } from "../types/habit";
+import { DayLog, Frequency } from "../types/habit";
+import { isHabitDueOnDate } from "./frequency";
 import {
   getToday_YYYYMMDD,
   getYesterday_YYYYMMDD,
@@ -6,7 +7,10 @@ import {
 } from "./date";
 import { subDays, format } from "date-fns";
 
-export function calculateStreak(logs: Record<string, DayLog>): number {
+export function calculateStreak(
+  logs: Record<string, DayLog>,
+  frequency: Frequency
+): number {
   const today = getToday_YYYYMMDD();
   const yesterday = getYesterday_YYYYMMDD();
 
@@ -42,23 +46,23 @@ export function calculateStreak(logs: Record<string, DayLog>): number {
   // Max validation to avoid infinite loops (e.g. 10 years)
   for (let i = 0; i < 365 * 5; i++) {
     const log = logs[dateStr];
+    const isDue = isHabitDueOnDate(frequency, dateStr);
 
     if (!log) {
-      // No log found for this date.
-      // Is this a break?
-      // If we are at the very start (today/yesterday logic handled above), this is a break.
-      // EXCEPT: if the habit is restricted to specific days (frequency array).
-      // If today is a "rest day" (not in frequency), it acts like a Skip.
-      // TODO: Implement frequency check. For now assuming "daily".
-
-      // If frequency is daily, a missing log breaks the streak.
-      break;
-    }
-
-    if (log.status === "completed") {
-      streak++;
-    } else if (log.status === "skipped") {
-      // Continue, don't increment, don't break.
+      // No log found for this date
+      if (!isDue) {
+        // Not due today - skip this day, don't break streak
+        // Move to previous day and continue
+      } else {
+        // Was due but not logged - streak is broken
+        break;
+      }
+    } else {
+      // Log exists
+      if (log.status === "completed") {
+        streak++;
+      }
+      // If skipped, don't increment but don't break either
     }
 
     // Move to previous day
@@ -69,7 +73,10 @@ export function calculateStreak(logs: Record<string, DayLog>): number {
   return streak;
 }
 
-export function calculateLongestStreak(logs: Record<string, DayLog>): number {
+export function calculateLongestStreak(
+  logs: Record<string, DayLog>,
+  frequency: Frequency
+): number {
   // Sort dates
   const sortedDates = Object.keys(logs).sort();
   if (sortedDates.length === 0) return 0;
@@ -97,13 +104,40 @@ export function calculateLongestStreak(logs: Record<string, DayLog>): number {
     if (diffDays === 1) {
       if (log.status === "completed") {
         tempStreak++;
-      } else if (log.status === "skipped") {
-        // maintain
       }
+      // If skipped, maintain existing tempStreak
     } else {
-      // Gap detected. Break.
-      if (log.status === "completed") tempStreak = 1;
-      else tempStreak = 0;
+      // Gap > 1 day. Check if the gap days were due.
+      // If ALL gap days were NOT DUE, we continue.
+      // If ANY gap day was DUE, we break (reset to 0 or 1).
+
+      let validGap = true;
+      // Check days between prevDateVal and currentDateTimes
+      // Start from prev + 1 day
+      // End at current - 1 day
+      const startGap = new Date(prevDateVal);
+      startGap.setDate(startGap.getDate() + 1);
+
+      const endGap = new Date(currentDateTimes);
+      // Loop
+      const loopDate = startGap;
+      while (loopDate < endGap) {
+        const checkStr = format(loopDate, "yyyy-MM-dd");
+        if (isHabitDueOnDate(frequency, checkStr)) {
+          validGap = false;
+          break;
+        }
+        loopDate.setDate(loopDate.getDate() + 1);
+      }
+
+      if (validGap) {
+        if (log.status === "completed") tempStreak++;
+        // else maintain
+      } else {
+        // Break
+        if (log.status === "completed") tempStreak = 1;
+        else tempStreak = 0;
+      }
     }
 
     maxStreak = Math.max(maxStreak, tempStreak);

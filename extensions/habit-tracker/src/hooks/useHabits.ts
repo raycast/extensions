@@ -15,7 +15,9 @@ export function useHabits() {
       const data = await HabitService.getHabitsWithStats();
       setHabits(data);
     } catch (e) {
-      showToast(Toast.Style.Failure, "Failed to load habits");
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      showToast(Toast.Style.Failure, "Failed to load habits", msg);
+      console.error(e);
     } finally {
       setIsLoading(false);
     }
