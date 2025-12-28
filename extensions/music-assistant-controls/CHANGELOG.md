@@ -1,6 +1,6 @@
 # Music Assistant Controls Changelog
 
-## [Update for breaking changes in Music Assistant API] - {PR_MERGE_DATE}
+## [Update for breaking changes in Music Assistant API] - 2025-12-28
 
 ### ✅ Compatibility
 
