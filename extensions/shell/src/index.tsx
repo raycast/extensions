@@ -611,6 +611,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
       isLoading={history === undefined}
       enableFiltering={false}
       onSearchTextChange={setCmd}
+      searchText={cmd}
       navigationTitle="Shell command"
       searchBarPlaceholder="Enter shell-command"
     >
@@ -629,6 +630,16 @@ export default function Command(props: { arguments?: ShellArguments }) {
                     onPush={() => addToRecentlyUsed(command)}
                     target={<Result cmd={command} />}
                   />
+                  {recentlyUsed.length > 0 ? (
+                    <Action
+                      title="Edit executed command"
+                      icon={Icon.Pencil}
+                      onAction={() => {
+                        const lastCommand = recentlyUsed.at(index) ?? "";
+                        setCmd(lastCommand ?? "");
+                      }}
+                    />
+                  ) : null}
                   {!isWindows && (
                     <>
                       {kittyInstalled ? (
