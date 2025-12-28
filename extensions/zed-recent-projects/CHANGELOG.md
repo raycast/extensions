@@ -1,6 +1,6 @@
 #  Zed Recent Projects Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-12-28
 
 - Added Windows support.
 
