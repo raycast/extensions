@@ -1,0 +1,76 @@
+{
+    "name": "habit-tracker",
+    "title": "Habit Tracker",
+    "description": "A minimal, offline-first habit tracker.",
+    "icon": "command-icon.png",
+    "author": "pgyogesh",
+    "categories": [
+        "Productivity",
+        "System"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "index",
+            "title": "Habit Tracker",
+            "subtitle": "Manage Habits",
+            "description": "View and manage your habits",
+            "mode": "view"
+        },
+        {
+            "name": "insights",
+            "title": "Habit Insights",
+            "subtitle": "Streaks & Stats",
+            "description": "View strongest and weakest habits",
+            "mode": "view"
+        },
+        {
+            "name": "missed",
+            "title": "Missed Habits",
+            "subtitle": "Review",
+            "description": "View habits missed in the last few days",
+            "mode": "view"
+        },
+        {
+            "name": "weekly",
+            "title": "Weekly Review",
+            "subtitle": "Summary",
+            "description": "Weekly performance summary",
+            "mode": "view"
+        },
+        {
+            "name": "menubar",
+            "title": "Habit Widgets",
+            "subtitle": "Menu Bar",
+            "description": "Check pending habits at a glance",
+            "mode": "menu-bar",
+            "interval": "30m"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.93.0",
+        "@raycast/utils": "^1.10.0",
+        "date-fns": "^3.0.0",
+        "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.11",
+        "@types/node": "20.8.10",
+        "@types/react": "18.3.3",
+        "@types/uuid": "^9.0.7",
+        "eslint": "^8.57.0",
+        "prettier": "^2.5.1",
+        "react": "18.3.1",
+        "typescript": "^5.2.2"
+    },
+    "overrides": {
+        "@types/react": "18.3.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
