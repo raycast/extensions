@@ -1,6 +1,6 @@
 # Pipedrive Changelog
 
-## [Create & Edit Deals, Contacts, Organizations] - {PR_MERGE_DATE}
+## [Create & Edit Deals, Contacts, Organizations] - 2025-12-28
 
 ### New Features
 
