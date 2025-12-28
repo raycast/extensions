@@ -15,7 +15,9 @@ export default function Command(props: { arguments: Arguments.Index }) {
       searchText={searchText}
     >
       <List.Section title="Suggestions" subtitle={`${data?.length ?? 0}`}>
-        {data?.map((searchResult) => <SearchListItem key={searchResult.preview} searchResult={searchResult} />)}
+        {data?.map((searchResult) => (
+          <SearchListItem key={searchResult.preview} searchResult={searchResult} />
+        ))}
       </List.Section>
     </List>
   );
