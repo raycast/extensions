@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kibana-discover",
+  "title": "Kibana Discover",
+  "description": "Search and open Kibana data views in Discover",
+  "icon": "command-icon.png",
+  "author": "bunthoeun_tok",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-data-views",
+      "title": "Search Data Views",
+      "description": "Search and open Kibana data views with live filtering",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-data-views",
+      "title": "Refresh Data Views",
+      "description": "Fetch latest data views from Kibana and update cache",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instancesJson",
+      "type": "textfield",
+      "required": true,
+      "title": "Kibana Instances (JSON)",
+      "description": "JSON array of Kibana instances. Optional: add 'commonFields' array to customize available fields per instance.",
+      "placeholder": "[{\"name\":\"Production\",\"url\":\"https://kibana.example.com\",\"username\":\"elastic\",\"password\":\"pass\",\"commonFields\":[\"TraceId\",\"message\",\"level\"]}]"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
