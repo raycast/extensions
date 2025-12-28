@@ -38,7 +38,7 @@ export default function Command() {
           />
         ))}
       </List.Section>
-      <List.Section title="Needs Attention (Shortest Stream)">
+      <List.Section title="Needs Attention (Shortest Streak)">
         {weakest.map((h) => (
           <List.Item
             key={h.id}
