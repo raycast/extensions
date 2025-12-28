@@ -1,6 +1,6 @@
 # Atlassian Data Center Changelog
 
-## [v1.0.1] - {PR_MERGE_DATE}
+## [v1.0.1] - 2025-12-28
 
 - Update dependencies
 - Update README.md
