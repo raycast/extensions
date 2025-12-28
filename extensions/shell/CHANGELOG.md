@@ -1,6 +1,6 @@
 # shell Changelog
 
-## [Edit executed command] - 2025-12-28
+## [Edit executed command] - {PR_MERGE_DATE}
 
 Add an option to edit an executed command in the input field to run it again faster.
 Closes [#24012](https://github.com/raycast/extensions/issues/24012#issuecomment-3694486201).
