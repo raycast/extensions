@@ -1,12 +1,10 @@
 import type { LaunchProps } from "@raycast/api";
 import { closeMainWindow, getSelectedText, open, showHUD, getPreferenceValues } from "@raycast/api";
-import fetch from "cross-fetch";
+import { WAYBACK_BASE_URL, WAYBACK_API_URL, urlRegex } from "./lib";
 
 type WaybackArguments = {
   url: string;
 };
-
-const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
 
 export default async function main(props: LaunchProps<{ arguments: WaybackArguments }>) {
   closeMainWindow();
@@ -30,21 +28,31 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
 }
 
 async function openPage(webpageUrl: string) {
-  // Check if the user prefers to open the overview page instead of the snapshot
-  const openOverview = getPreferenceValues<Preferences>().openOverview;
+  const { defaultView } = getPreferenceValues<Preferences>();
 
   try {
-    const res = await fetch(`https://archive.org/wayback/available?url=${webpageUrl}`);
+    const res = await fetch(`${WAYBACK_API_URL}?url=${webpageUrl}`);
 
     if (res.status >= 400) {
       return showHUD("❌ Bad response from server");
     }
 
-    const archive = await res.json();
+    const archive = (await res.json()) as {
+      archived_snapshots?: {
+        closest?: {
+          url: string;
+        };
+      };
+    };
 
     if (archive.archived_snapshots?.closest?.url) {
-      if (openOverview) {
-        await open(`https://web.archive.org/web/*/${webpageUrl}`);
+      if (defaultView && defaultView !== "snapshot") {
+        // URLs view needs special handling: use "web/*" path with trailing wildcard on URL
+        if (defaultView === "web/urls") {
+          await open(`${WAYBACK_BASE_URL}/web/*/${webpageUrl}*`);
+          return;
+        }
+        await open(`${WAYBACK_BASE_URL}/${defaultView}/${webpageUrl}`);
         return;
       }
 
@@ -54,7 +62,7 @@ async function openPage(webpageUrl: string) {
     }
 
     return showHUD("❌ No archived version found");
-  } catch (err) {
+  } catch {
     return showHUD(`❌ An error occurred, try again later`);
   }
 }

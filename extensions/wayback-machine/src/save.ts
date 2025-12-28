@@ -1,5 +1,6 @@
 import type { LaunchProps } from "@raycast/api";
-import { getSelectedText, showToast, Toast } from "@raycast/api";
+import { getSelectedText } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { savePage, urlRegex } from "./lib";
 
 type WaybackArguments = {
@@ -16,12 +17,12 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
     const selectedText = await getSelectedText();
 
     if (!urlRegex.test(selectedText)) {
-      await showToast({ style: Toast.Style.Failure, title: "No domain found" });
+      await showFailureToast("No domain found");
       return;
     }
 
     await savePage(selectedText);
   } catch (error) {
-    console.error(error);
+    await showFailureToast(error, { title: "Could not get selected text" });
   }
 }

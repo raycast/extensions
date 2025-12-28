@@ -1,5 +1,14 @@
 # Wayback Machine Changelog
 
+## [Update dependencies & add Default View preference] - {PR_MERGE_DATE}
+
+- Add preference to set default view to open on Wayback Machine
+- Update README
+- Migrate failure toasts to use showFailureToast
+- Update dependencies and ESLint migration
+- Tidied codebase
+- Refreshed icon
+
 ## [Preferences update] - 2024-12-19
 
 - Add a preference to open the overview page on Wayback, instead of the latest snapshot
