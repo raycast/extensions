@@ -1,7 +1,14 @@
-import { closeMainWindow } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 export default async () => {
-  exec("/usr/sbin/screencapture ~/Desktop/screen.png");
-  await closeMainWindow();
+  try {
+    await execAsync("/usr/sbin/screencapture ~/Desktop/screen.png");
+    showHUD("Screenshot saved to Desktop");
+  } catch (error) {
+    showHUD("Error: " + (error instanceof Error ? error.message : String(error)));
+  }
 };

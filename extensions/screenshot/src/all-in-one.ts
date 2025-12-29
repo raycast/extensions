@@ -1,4 +1,4 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 
@@ -11,5 +11,4 @@ export default async () => {
   } catch (error) {
     showHUD("Error: Permission denied or command failed: " + (error instanceof Error ? error.message : String(error)));
   }
-  await closeMainWindow();
 };
