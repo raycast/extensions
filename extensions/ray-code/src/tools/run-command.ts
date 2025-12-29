@@ -58,7 +58,7 @@ export default async function ({ command, cwd, timeout = DEFAULT_TIMEOUT }: Inpu
   const userShell = process.env.SHELL || "/bin/zsh";
 
   try {
-    const { stdout, stderr } = await execFileAsync(userShell, ["-l", "-i", "-c", command], {
+    const { stdout, stderr } = await execFileAsync(userShell, ["-l", "-c", command], {
       cwd: workingDir,
       timeout,
       maxBuffer: 1024 * 1024 * 5, // 5MB buffer

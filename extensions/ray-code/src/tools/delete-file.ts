@@ -22,11 +22,10 @@ export async function confirmation({ path }: Input) {
   }
 
   return {
-    message: `Are you sure you want to delete this file?`,
+    message: `Are you sure you want to move this file to trash?`,
     info: [
       { name: "File Path", value: path },
-      { name: "Action", value: "Delete File" },
-      { name: "Warning", value: "This action cannot be undone" },
+      { name: "Action", value: "Move to Trash" },
     ],
   };
 }
