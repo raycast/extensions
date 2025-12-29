@@ -26,7 +26,11 @@ The [Wayback Machine](https://archive.org/web/) is a digital archive of the Worl
 
 ### Settings & Preferences
 
-You can configure the extension to open specific views by default:
+You can configure the extension with the following preferences:
+
+**Default View**
+
+Choose which view to open by default when accessing the Wayback Machine:
 
 - **Latest Snapshot**: The most recent archived version.
 - **Calendar**: A visual calendar of all snapshots.
@@ -34,7 +38,10 @@ You can configure the extension to open specific views by default:
 - **Summary**: Key details about the site's archival history.
 - **Collections**: The specific web archives the site belongs to.
 
+**Check for Snapshots**
+
+Enable this option to verify that an archived snapshot exists before opening the Wayback Machine. When enabled, the extension will check the API and show "No archived version found" if no snapshots exist. This adds a slight delay but provides confirmation. Disabled by default for faster performance.
+
 ## Requirements
 
 - To use the **Open Current Tab** command, you must have the [Raycast Browser Extension](https://raycast.com/browser-extension) installed and active.
-

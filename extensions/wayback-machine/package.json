@@ -95,6 +95,15 @@
         }
       ],
       "required": false
+    },
+    {
+      "name": "checkForSnapshots",
+      "title": "Check for Snapshots?",
+      "label": "Enable",
+      "description": "Check if an archived snapshot exists before opening. Disable for faster performance.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {

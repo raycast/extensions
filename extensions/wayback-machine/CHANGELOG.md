@@ -2,10 +2,12 @@
 
 ## [Update dependencies & add Default View preference] - {PR_MERGE_DATE}
 
-- Add preference to set default view to open on Wayback Machine
-- Update README
-- Migrate failure toasts to use showFailureToast
-- Update dependencies and ESLint migration
+- Added preference to set default view to open on Wayback Machine
+- Added preference to check for snapshots before opening
+- Updated README
+- Improved URL detection logic
+- Migrated failure toasts to use showFailureToast
+- Updated dependencies and ESLint migration
 - Tidied codebase
 - Refreshed icon
 

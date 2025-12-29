@@ -1,28 +1,29 @@
 import type { LaunchProps } from "@raycast/api";
 import { getSelectedText } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { savePage, urlRegex } from "./lib";
+import { savePage, isValidUrl, extractUrls } from "./lib";
 
 type WaybackArguments = {
   url: string;
 };
 
 export default async function main(props: LaunchProps<{ arguments: WaybackArguments }>) {
-  if (props.arguments.url && urlRegex.test(props.arguments.url)) {
+  if (props.arguments.url && isValidUrl(props.arguments.url)) {
     await savePage(props.arguments.url);
     return;
   }
 
   try {
     const selectedText = await getSelectedText();
+    const urls = extractUrls(selectedText);
 
-    if (!urlRegex.test(selectedText)) {
+    if (urls.length === 0) {
       await showFailureToast("No domain found");
       return;
     }
 
-    await savePage(selectedText);
+    await savePage(urls[0]);
   } catch (error) {
-    await showFailureToast(error, { title: "Could not get selected text" });
+    await showFailureToast(error, { title: "No URL provided or selected" });
   }
 }
