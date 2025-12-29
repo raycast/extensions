@@ -1,51 +1,25 @@
-# Changelog
+# Habit Tracker Changelog
 
-All notable changes to the Habit Tracker extension will be documented in this file.
-
-## [1.1.0] - 2024-12-28
+## [Enhanced Insights & Custom Frequencies] - {PR_MERGE_DATE}
 
 ### Added
+- Custom frequency support: Create habits for specific days of the week (Mon, Wed, Fri, etc.)
+- Enhanced Insights view with three sections: Best Current Streaks, Longest Streaks Ever, Needs Attention
+- Visual stats: 30-day completion progress bar for each habit
+- Live metadata: Pending habits count shown in command subtitle
+- Menu bar command: Quick-access widget with one-click completion
+- Calendar view: Monthly history with emoji indicators (✅ ➖ ❌) and frequency awareness
+- Missed habits view: Review and log habits from the last 3 days
+- Weekly review: Summary of weekly completion rates
+- Global `Cmd+N` shortcut to create habits from any view
 
-- **Custom Frequency Support**: Create habits for specific days of the week (e.g., Mon, Wed, Fri)
-  - New frequency selector in Create/Edit habit forms
-  - Smart streak calculation that respects custom schedules
-  - Non-due days don't break streaks
-  - Menu bar only shows habits due today
-  - Calendar view distinguishes due vs. non-due days
-
-- **Visual Stats**: 30-day completion progress bar displayed for each habit in the main list
-
-- **Live Metadata**: Pending habits count shown in the Raycast command subtitle before opening
-
-- **Menu Bar Command**: Quick-access widget showing pending habits with one-click completion
-
-- **Calendar View**: Monthly habit history visualization with emoji indicators:
-  - ✅ Completed
-  - ➖ Skipped
-  - ❌ Missed (past due days)
-  - ~~strikethrough~~ Non-due days
-
-- **Missed Habits View**: Review and log habits from the last 3 days
-
-- **Weekly Review**: Summary of weekly completion rates per habit
-
-- **Global Shortcuts**: `Cmd+N` to create a habit from any view
-
-### Fixed
-
-- ESLint circular dependency error resolved by using compatible `@raycast/eslint-config@1.0.11`
-- Streak calculation bug when handling custom frequencies
-- Various unused variable and type errors cleaned up
 
 ### Changed
+- Menu bar now only shows habits due today
+- Calendar view distinguishes due vs. non-due days with strikethrough
+- Progress visualization now uses Raycast's `getProgressIcon` for cleaner UI in habits list and weekly review
 
-- **Enhanced Insights View**: Now shows three sections:
-  - 🔥 Best Current Streaks (top 3)
-  - 🏆 Longest Streaks Ever (top 3 all-time)
-  - ⚠️ Needs Attention (bottom 3 with comparison to best)
-- Insights section title corrected from "Shortest Stream" to "Shortest Streak"
-
-## [1.0.0] - Initial Release
+## [Initial Release] - 2025-12-27
 
 - Core habit tracking with daily logging
 - Streak tracking (current and longest)

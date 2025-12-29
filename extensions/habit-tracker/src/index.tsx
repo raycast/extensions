@@ -15,7 +15,7 @@ import { useHabits } from "./hooks/useHabits";
 import { HabitService } from "./api/habitService";
 import { getToday_YYYYMMDD } from "./utils/date";
 import { isHabitDueOnDate } from "./utils/frequency";
-import { getProgressBar } from "./utils/progress";
+import { getProgressIcon } from "@raycast/utils";
 import { CreateHabitForm } from "./components/CreateHabitForm";
 import { EditHabitForm } from "./components/EditHabitForm";
 import { HabitDetails } from "./components/HabitDetails";
@@ -118,12 +118,17 @@ export default function Command() {
             <List.Item
               key={habit.id}
               title={habit.name}
-              subtitle={`Month ${getProgressBar(
-                habit.stats.completion_rate_30d
-              )} ${habit.stats.completion_rate_30d}%`}
+              subtitle={`${habit.stats.completion_rate_30d}% (30d)`}
               icon={icon}
               accessories={[
-                { text: `Streak: ${habit.stats.current}` },
+                {
+                  icon: getProgressIcon(
+                    habit.stats.completion_rate_30d / 100,
+                    Color.Green
+                  ),
+                  tooltip: "30-day completion rate",
+                },
+                { text: `🔥 ${habit.stats.current}` },
                 {
                   text: isCompleted
                     ? "Done"

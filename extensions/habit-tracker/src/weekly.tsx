@@ -1,4 +1,5 @@
 import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
 import { CreateHabitForm } from "./components/CreateHabitForm";
 import { useHabits } from "./hooks/useHabits";
 import { StorageService } from "./api/storage";
@@ -96,23 +97,17 @@ function WeeklyReview() {
       <List.Section title={`Summary: ${weekLabel} `}>
         {stats.map((s) => {
           const rate = Math.round((s.completed / 7) * 100);
-          let icon = Icon.Circle;
-          let color = Color.Red;
-          if (rate >= 80) {
-            icon = Icon.CheckCircle;
-            color = Color.Green;
-          } else if (rate >= 50) {
-            icon = Icon.Circle;
-            color = Color.Yellow;
-          }
 
           return (
             <List.Item
               key={s.habit.id}
               title={s.habit.name}
               subtitle={`${s.completed}/7 days (${rate}%)`}
-              icon={{ source: icon, tintColor: color }}
-              accessories={[{ text: s.completed.toString(), icon: Icon.Check }]}
+              icon={getProgressIcon(
+                rate / 100,
+                rate >= 80 ? Color.Green : rate >= 50 ? Color.Yellow : Color.Red
+              )}
+              accessories={[{ text: `${s.completed}`, icon: Icon.Check }]}
             />
           );
         })}
