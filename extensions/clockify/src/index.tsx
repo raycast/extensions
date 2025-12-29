@@ -429,7 +429,7 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
   const defaultStart = new Date();
   defaultStart.setHours(defaultStart.getHours() - 1);
 
-  const { handleSubmit, itemProps, setValidationError } = useForm<{
+  const { handleSubmit, itemProps, values } = useForm<{
     projectId: string;
     taskId?: string;
     description?: string;
@@ -449,17 +449,15 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
         if (value > new Date()) {
           return "End time cannot be in the future";
         }
+        if (values.startDate && value <= values.startDate) {
+          return "End time must be after start time";
+        }
         return undefined;
       },
     },
     async onSubmit(formValues) {
       const { projectId, taskId, description, tagIds, startDate, endDate } = formValues;
       if (!startDate || !endDate) return;
-
-      if (endDate <= startDate) {
-        setValidationError("endDate", "End time must be after start time");
-        return;
-      }
 
       showToast(Toast.Style.Animated, "Adding time entry...");
 
