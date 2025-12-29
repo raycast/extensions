@@ -1,0 +1,77 @@
+{
+  "name": "audio-priority",
+  "title": "Audio Priority",
+  "description": "Audio Priority for input/output devices with auto switching.",
+  "icon": "command-icon.png",
+  "author": "mateus_badalotti",
+  "keywords": [
+    "sound",
+    "manager",
+    "switch"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "auto-switch-input",
+      "title": "Toggle Auto Switch (Input)",
+      "subtitle": "Disabled",
+      "description": "Enable or disable automatic switching for input devices.",
+      "mode": "no-view",
+      "interval": "20s"
+    },
+    {
+      "name": "auto-switch-output",
+      "title": "Toggle Auto Switch (Output)",
+      "subtitle": "Disabled",
+      "description": "Enable or disable automatic switching for output devices.",
+      "mode": "no-view",
+      "interval": "20s"
+    },
+    {
+      "name": "customize-order",
+      "title": "Customize Device Order",
+      "subtitle": "Audio Priority",
+      "description": "Set the priority order for input and output devices.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "systemOutput",
+      "required": false,
+      "title": "Play Sound Effects Through Current Output",
+      "description": "Play system sounds through current output.",
+      "label": "Update system sounds output",
+      "type": "checkbox",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.12.0",
+    "@spotxyz/macos-audio-devices": "1.5.0",
+    "execa": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.2.5",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "copy-binary": "cp node_modules/@spotxyz/macos-audio-devices/audio-devices assets/audio-devices",
+    "build": "npm run copy-binary && ray build -e dist",
+    "dev": "npm run copy-binary && ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
