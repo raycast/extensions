@@ -1,5 +1,12 @@
 # HackMD Changelog
 
+## [Add custom pin action and workspace grouping] - {PR_MERGE_DATE}
+
+- Add custom Pin/Unpin action for notes (`cmd + shift + p`)
+- Consolidated "Pinned" section at the top of note lists
+- Notes are now grouped by workspace (Personal vs Team) in the browse view
+- Added workspace and pinned icons to list items and note details for better context
+
 ## [Maintenance] - 2025-10-13
 
 - Add support for Windows platform.
