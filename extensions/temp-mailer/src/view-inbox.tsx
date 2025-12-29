@@ -46,9 +46,9 @@ export default function Command() {
   };
 
   const fetchMailDetails = async (mails: MailItem[], address: string) => {
+    const tempMailInstance = new TempMail(address);
     const detailEntries = await Promise.all(
       mails.map(async (mail) => {
-        const tempMailInstance = new TempMail(address);
         const details = await tempMailInstance.fetchMailById(mail.mail_id);
         if (!details) return null;
 
