@@ -1,5 +1,6 @@
-import { execSync } from "child_process";
+import { runAppleScript } from "@raycast/utils";
 import { TerminalExecutor, TerminalExecuteParams } from "../types";
+import { escapeShellArg, escapeAppleScriptString } from "../utils/escape";
 
 // ============================================
 // Terminal.app Executor (macOS built-in)
@@ -7,12 +8,14 @@ import { TerminalExecutor, TerminalExecuteParams } from "../types";
 
 export class TerminalAppExecutor implements TerminalExecutor {
   async execute({ path, command }: TerminalExecuteParams): Promise<void> {
-    const script = command ? `cd "${path}" && ${command}` : `cd "${path}"`;
+    // Build safe shell command with escaped arguments
+    const safePath = escapeShellArg(path);
+    const script = command ? `cd ${safePath} && ${escapeShellArg(command)}` : `cd ${safePath}`;
 
-    // Escape double quotes for AppleScript
-    const escapedScript = script.replace(/"/g, '\\"');
+    // Escape for AppleScript string
+    const escapedScript = escapeAppleScriptString(script);
     const appleScript = `tell application "Terminal" to do script "${escapedScript}"`;
 
-    execSync(`osascript -e '${appleScript}'`);
+    await runAppleScript(appleScript);
   }
 }

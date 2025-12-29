@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import { TerminalExecutor, TerminalExecuteParams } from "../types";
+import { escapeShellArg } from "../utils/escape";
 
 // ============================================
 // Kitty Executor
@@ -10,12 +11,16 @@ export class KittyExecutor implements TerminalExecutor {
     const kittyPath = "/Applications/kitty.app/Contents/MacOS/kitty";
 
     return new Promise((resolve, reject) => {
+      // Escape path for safe shell usage
+      const safePath = escapeShellArg(path);
+
       let cmd: string;
       if (command) {
-        // Use shell to cd and run command
-        cmd = `"${kittyPath}" --directory "${path}" sh -c "${command}; exec $SHELL"`;
+        // Use sh -c with properly escaped arguments
+        const shellScript = escapeShellArg(`${command}; exec $SHELL`);
+        cmd = `${escapeShellArg(kittyPath)} --directory ${safePath} sh -c ${shellScript}`;
       } else {
-        cmd = `"${kittyPath}" --directory "${path}"`;
+        cmd = `${escapeShellArg(kittyPath)} --directory ${safePath}`;
       }
 
       exec(cmd, (error) => {

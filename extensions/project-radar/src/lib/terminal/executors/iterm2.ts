@@ -1,5 +1,6 @@
-import { execSync } from "child_process";
+import { runAppleScript } from "@raycast/utils";
 import { TerminalExecutor, TerminalExecuteParams } from "../types";
+import { escapeShellArg, escapeAppleScriptString } from "../utils/escape";
 
 // ============================================
 // iTerm2 Executor
@@ -7,22 +8,22 @@ import { TerminalExecutor, TerminalExecuteParams } from "../types";
 
 export class ITerm2Executor implements TerminalExecutor {
   async execute({ path, command }: TerminalExecuteParams): Promise<void> {
-    const script = command ? `cd "${path}" && ${command}` : `cd "${path}"`;
+    // Build safe shell command with escaped arguments
+    const safePath = escapeShellArg(path);
+    const script = command ? `cd ${safePath} && ${escapeShellArg(command)}` : `cd ${safePath}`;
 
-    // Escape double quotes for AppleScript
-    const escapedScript = script.replace(/"/g, '\\"');
+    // Escape for AppleScript string
+    const escapedScript = escapeAppleScriptString(script);
 
-    // Use multiple -e flags to build the AppleScript
-    const appleScriptParts = [
-      'tell application "iTerm2"',
-      "create window with default profile",
-      "tell current session of current window",
-      `write text "${escapedScript}"`,
-      "end tell",
-      "end tell",
-    ];
+    const appleScript = `
+      tell application "iTerm2"
+        create window with default profile
+        tell current session of current window
+          write text "${escapedScript}"
+        end tell
+      end tell
+    `;
 
-    const args = appleScriptParts.map((part) => `-e '${part}'`).join(" ");
-    execSync(`osascript ${args}`);
+    await runAppleScript(appleScript);
   }
 }

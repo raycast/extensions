@@ -63,10 +63,9 @@ export default function ProjectForm({ project, groups = [], onSave }: ProjectFor
 
   // Track selected paths and app for multi-workspace warning
   const [selectedPaths, setSelectedPaths] = useState<string[]>(project?.paths || []);
-  const [selectedAppBundleId, setSelectedAppBundleId] = useState<string | undefined>(project?.app?.bundleId);
-  const [selectedTerminalBundleId, setSelectedTerminalBundleId] = useState<string | undefined>(
-    project?.terminal?.bundleId,
-  );
+  // Use empty string instead of undefined to keep dropdowns controlled
+  const [selectedAppBundleId, setSelectedAppBundleId] = useState<string>(project?.app?.bundleId || "");
+  const [selectedTerminalBundleId, setSelectedTerminalBundleId] = useState<string>(project?.terminal?.bundleId || "");
   const [selectedOpenMode, setSelectedOpenMode] = useState<OpenMode>(project?.openMode || "ide");
   const [selectedGroup, setSelectedGroup] = useState<string>(project?.group || "");
   const [customGroup, setCustomGroup] = useState<string>("");
