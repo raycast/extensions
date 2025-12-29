@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clipboard-history",
+  "title": "Clipboard History",
+  "description": "Restore any previous clipboard entry with a hotkey",
+  "icon": "extension-icon.png",
+  "author": "Doji-Hammer",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Browse History",
+      "description": "Pick an entry to restore",
+      "mode": "view"
+    },
+    {
+      "name": "restore-1",
+      "title": "Restore 1st Previous",
+      "description": "Restore the most-recent history item",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-2",
+      "title": "Restore 2nd Previous",
+      "description": "Restore the 2nd history item",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-3",
+      "title": "Restore 3rd Previous",
+      "description": "Restore the 3rd history item",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-4",
+      "title": "Restore 4th Previous",
+      "description": "Restore the 4th history item",
+      "mode": "no-view"
+    },
+    {
+      "name": "cycle",
+      "title": "Cycle Clipboard",
+      "description": "Cycle through recent clipboard entries with repeated presses",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "maxItems",
+      "type": "textfield",
+      "title": "Max history items",
+      "default": "50",
+      "required": false,
+      "description": "Maximum number of clipboard entries to store"
+    },
+    {
+      "name": "pollInterval",
+      "type": "textfield",
+      "title": "Poll interval (ms)",
+      "default": "500",
+      "required": false,
+      "description": "How often to check for new clipboard content"
+    },
+    {
+      "name": "cycleLimit",
+      "type": "textfield",
+      "title": "Cycle limit",
+      "default": "5",
+      "required": false,
+      "description": "Maximum number of entries to cycle through"
+    },
+    {
+      "name": "cycleTimeout",
+      "type": "textfield",
+      "title": "Cycle timeout (ms)",
+      "default": "2000",
+      "required": false,
+      "description": "Time window for consecutive cycle presses before resetting"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.2",
+    "@types/react": "18.3.18",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
