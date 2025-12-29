@@ -1,11 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { resolve, relative } from "node:path";
 
-interface Preferences {
-  workspaceRoot: string;
-  autoEdit?: boolean;
-}
-
 export const getWorkspaceRoot = () => {
   const preferences = getPreferenceValues<Preferences>();
 

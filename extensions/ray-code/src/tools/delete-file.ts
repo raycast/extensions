@@ -1,4 +1,4 @@
-import { unlink } from "node:fs/promises";
+import { trash } from "@raycast/api";
 import { resolveAndValidatePath, isAutoEditEnabled } from "../utils/workspace";
 import { existsSync } from "node:fs";
 
@@ -39,8 +39,8 @@ export default async function ({ path }: Input) {
     throw new Error(`File does not exist: ${path}`);
   }
 
-  // Delete the file
-  await unlink(filePath);
+  // Delete the file (moves to trash for safer deletion)
+  await trash(filePath);
 
   return {
     success: true,

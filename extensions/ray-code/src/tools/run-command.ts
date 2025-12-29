@@ -1,8 +1,8 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { getWorkspaceRoot, resolveAndValidatePath } from "../utils/workspace";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 type Input = {
   /**
@@ -53,12 +53,12 @@ export default async function ({ command, cwd, timeout = DEFAULT_TIMEOUT }: Inpu
   const workingDir = cwd ? resolveAndValidatePath(cwd) : workspaceRoot;
 
   // Use the user's interactive login shell to execute commands
+  // Using execFile with argument array prevents shell injection by avoiding shell interpretation
   const userShell = process.env.SHELL || "/bin/zsh";
 
-  const wrappedCommand = `${userShell} -l -i -c ${JSON.stringify(command)}`;
-
   try {
-    const { stdout, stderr } = await execAsync(wrappedCommand, {
+    // Pass command as a single argument to -c, avoiding shell metacharacter interpretation
+    const { stdout, stderr } = await execFileAsync(userShell, ["-l", "-i", "-c", command], {
       cwd: workingDir,
       timeout,
       maxBuffer: 1024 * 1024 * 5, // 5MB buffer

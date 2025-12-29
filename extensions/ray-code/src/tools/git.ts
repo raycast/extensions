@@ -1,8 +1,8 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { getWorkspaceRoot, isAutoEditEnabled } from "../utils/workspace";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 type GitSubcommand =
   | "status"
@@ -133,11 +133,12 @@ export default async function ({ subcommand, args = "" }: Input) {
   const command = `git ${subcommand}${args ? ` ${args}` : ""}`;
 
   // Use interactive login shell to ensure git is found
+  // Using execFile with argument array prevents shell injection by avoiding shell interpretation
   const userShell = process.env.SHELL || "/bin/zsh";
-  const wrappedCommand = `${userShell} -l -i -c ${JSON.stringify(command)}`;
 
   try {
-    const { stdout, stderr } = await execAsync(wrappedCommand, {
+    // Pass command as a single argument to -c, avoiding shell metacharacter interpretation
+    const { stdout, stderr } = await execFileAsync(userShell, ["-l", "-i", "-c", command], {
       cwd: workspaceRoot,
       timeout: DEFAULT_TIMEOUT,
       maxBuffer: 1024 * 1024 * 5, // 5MB buffer
