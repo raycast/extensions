@@ -1,4 +1,4 @@
-import { closeMainWindow, getPreferenceValues, LaunchProps, showHUD, Toast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, LaunchProps, Toast } from "@raycast/api";
 
 import { createBookmark, getLinkTitle } from "./helpers/utils";
 
@@ -12,6 +12,13 @@ export default async function QuickAddBookmark(props: LaunchProps<{ arguments: A
 
     if (!url) {
       throw new Error("URL is required");
+    }
+
+    // Validate URL format
+    try {
+      new URL(url);
+    } catch {
+      throw new Error("Invalid URL");
     }
 
     // Auto-fetch title
@@ -33,8 +40,9 @@ export default async function QuickAddBookmark(props: LaunchProps<{ arguments: A
       throw new Error("Failed to save bookmark");
     }
 
+    toast.style = Toast.Style.Success;
+    toast.title = "Bookmark saved";
     await closeMainWindow({ clearRootSearch: true });
-    await showHUD("Bookmark saved");
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to save bookmark";
