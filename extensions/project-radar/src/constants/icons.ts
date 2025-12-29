@@ -25,7 +25,7 @@ export const Icons = {
   Star: Icon.Star,
 
   // Git
-  GitBranch: Icon.Terminal,
+  GitBranch: Icon.Shuffle,
 
   // Status indicators
   Circle: Icon.Circle,

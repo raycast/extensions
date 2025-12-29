@@ -78,7 +78,11 @@ function calculateSmartScore(project: Project, now: number): number {
     else if (hoursAgo < TIME_THRESHOLDS.MONTH) score += SMART_SCORE.WITHIN_MONTH;
     else score += SMART_SCORE.OLDER;
   }
-  score += (project.createdAt / now) * SMART_SCORE.RECENCY_WEIGHT;
+  // Bonus for recently created projects (within a week)
+  const createdHoursAgo = (now - project.createdAt) / (1000 * 60 * 60);
+  if (createdHoursAgo < TIME_THRESHOLDS.WEEK) {
+    score += SMART_SCORE.RECENCY_WEIGHT;
+  }
   return score;
 }
 

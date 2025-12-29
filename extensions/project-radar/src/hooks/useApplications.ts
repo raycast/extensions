@@ -75,12 +75,13 @@ const SUPPORTED_TERMINALS: { bundleId: string; name: string }[] = [
 
 async function fetchFilteredApps(supportedApps: { bundleId: string; name: string }[]): Promise<AppInfo[]> {
   const installedApps = await getApplications();
-  const installedBundleIds = new Set(installedApps.map((app) => app.bundleId).filter(Boolean));
+  // Use Map for O(1) lookup instead of find() which is O(n)
+  const installedAppsMap = new Map(installedApps.filter((app) => app.bundleId).map((app) => [app.bundleId, app]));
 
   return supportedApps
-    .filter((app) => installedBundleIds.has(app.bundleId))
+    .filter((app) => installedAppsMap.has(app.bundleId))
     .map((app) => {
-      const installedApp = installedApps.find((a) => a.bundleId === app.bundleId);
+      const installedApp = installedAppsMap.get(app.bundleId);
       return {
         name: app.name,
         bundleId: app.bundleId,

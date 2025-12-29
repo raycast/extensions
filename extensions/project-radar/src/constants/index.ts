@@ -144,6 +144,8 @@ export const TERMINAL_APPS: readonly string[] = [
   "com.github.wez.wezterm", // WezTerm
   "net.kovidgoyal.kitty", // Kitty
   "co.zeit.hyper", // Hyper
+  "com.mitchellh.ghostty", // Ghostty
+  "io.alacritty", // Alacritty
   "com.microsoft.VSCode", // VS Code (has integrated terminal)
 ] as const;
 
