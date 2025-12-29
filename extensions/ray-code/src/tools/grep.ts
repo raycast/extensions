@@ -1,5 +1,5 @@
 import { readFile, readdir } from "node:fs/promises";
-import { join, relative, extname } from "node:path";
+import { join, relative, extname, basename } from "node:path";
 import { resolveAndValidatePath, getWorkspaceRoot } from "../utils/workspace";
 
 type Input = {
@@ -139,7 +139,7 @@ export default async function ({ query, path = ".", glob, caseSensitive = false 
   for await (const filePath of walkDir(searchRoot)) {
     // Apply glob filter if specified
     if (glob) {
-      const filename = filePath.split("/").pop() || "";
+      const filename = basename(filePath);
       if (!matchGlob(filename, glob)) continue;
     }
 

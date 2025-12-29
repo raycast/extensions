@@ -31,33 +31,133 @@ type Input = {
 // Commands that don't modify the repository (read-only)
 const READ_ONLY_COMMANDS: GitSubcommand[] = ["status", "diff", "log", "branch", "show", "stash"];
 
-// Dangerous argument patterns that should be blocked
-const DANGEROUS_PATTERNS = [
+// Dangerous flags that should be blocked (normalized form without values)
+const DANGEROUS_FLAGS = new Set([
   "--force",
-  "-f",
+  "--force-with-lease",
   "--hard",
-  "clean -fd",
-  "clean -f",
   "--delete",
-  "-D",
-  "reset --hard",
-  "push --force",
-  "push -f",
-];
+  "-D", // delete branch shorthand
+]);
+
+// Dangerous flag patterns for specific subcommands
+// Maps subcommand -> set of dangerous short flags
+const DANGEROUS_SHORT_FLAGS_BY_COMMAND: Record<string, Set<string>> = {
+  push: new Set(["-f"]), // -f is --force for push
+  clean: new Set(["-f", "-d"]), // -f is force, -d removes directories
+  branch: new Set(["-D"]), // -D is force delete
+};
 
 const MAX_OUTPUT = 10000;
 const DEFAULT_TIMEOUT = 30000;
 
 /**
- * Check if the command arguments contain dangerous patterns
+ * Parse arguments string into individual tokens, respecting quoted strings
  */
-function containsDangerousPattern(args: string): string | null {
-  const argsLower = args.toLowerCase();
-  for (const pattern of DANGEROUS_PATTERNS) {
-    if (argsLower.includes(pattern.toLowerCase())) {
-      return pattern;
+function parseArgs(args: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  let inQuote: string | null = null;
+
+  for (let i = 0; i < args.length; i++) {
+    const char = args[i];
+
+    if (inQuote) {
+      if (char === inQuote) {
+        // End of quoted string - add the content without quotes
+        tokens.push(current);
+        current = "";
+        inQuote = null;
+      } else {
+        current += char;
+      }
+    } else if (char === '"' || char === "'") {
+      // Start of quoted string
+      if (current) {
+        tokens.push(current);
+        current = "";
+      }
+      inQuote = char;
+    } else if (/\s/.test(char)) {
+      // Whitespace outside quotes - end current token
+      if (current) {
+        tokens.push(current);
+        current = "";
+      }
+    } else {
+      current += char;
     }
   }
+
+  // Add any remaining token
+  if (current) {
+    tokens.push(current);
+  }
+
+  return tokens;
+}
+
+/**
+ * Normalize a flag by removing any value (e.g., "--force=true" -> "--force")
+ */
+function normalizeFlag(flag: string): string {
+  const equalsIndex = flag.indexOf("=");
+  if (equalsIndex !== -1) {
+    return flag.slice(0, equalsIndex);
+  }
+  return flag;
+}
+
+/**
+ * Extract individual short flags from combined form (e.g., "-fd" -> ["-f", "-d"])
+ */
+function expandShortFlags(flag: string): string[] {
+  // Only expand if it's a short flag (starts with single dash, not double)
+  if (flag.startsWith("-") && !flag.startsWith("--") && flag.length > 2) {
+    return flag
+      .slice(1)
+      .split("")
+      .map((c) => `-${c}`);
+  }
+  return [flag];
+}
+
+/**
+ * Check if the command arguments contain dangerous patterns
+ */
+function containsDangerousPattern(subcommand: string, args: string): string | null {
+  const tokens = parseArgs(args);
+  const dangerousShortFlags = DANGEROUS_SHORT_FLAGS_BY_COMMAND[subcommand] || new Set();
+
+  for (const token of tokens) {
+    // Skip non-flag arguments
+    if (!token.startsWith("-")) {
+      continue;
+    }
+
+    // Check long flags (normalize to handle --flag=value syntax)
+    if (token.startsWith("--")) {
+      const normalized = normalizeFlag(token).toLowerCase();
+      if (DANGEROUS_FLAGS.has(normalized)) {
+        return normalized;
+      }
+      continue;
+    }
+
+    // Check short flags (expand combined flags like -fd)
+    const expandedFlags = expandShortFlags(token);
+    for (const flag of expandedFlags) {
+      // Check global dangerous flags (case-sensitive for -D)
+      if (DANGEROUS_FLAGS.has(flag)) {
+        return flag;
+      }
+      // Check subcommand-specific dangerous short flags
+      if (dangerousShortFlags.has(flag)) {
+        return `${flag} (in git ${subcommand})`;
+      }
+    }
+  }
+
   return null;
 }
 
@@ -77,7 +177,7 @@ function truncateOutput(output: string, maxLength: number): string {
  */
 export async function confirmation({ subcommand, args = "" }: Input) {
   // Check for dangerous patterns first
-  const dangerousPattern = containsDangerousPattern(args);
+  const dangerousPattern = containsDangerousPattern(subcommand, args);
   if (dangerousPattern) {
     throw new Error(
       `Dangerous git operation detected: "${dangerousPattern}". ` +
@@ -124,7 +224,7 @@ export default async function ({ subcommand, args = "" }: Input) {
   }
 
   // Double-check for dangerous patterns (in case confirmation was bypassed)
-  const dangerousPattern = containsDangerousPattern(args);
+  const dangerousPattern = containsDangerousPattern(subcommand, args);
   if (dangerousPattern) {
     throw new Error(`Dangerous git operation blocked: "${dangerousPattern}"`);
   }
@@ -132,13 +232,13 @@ export default async function ({ subcommand, args = "" }: Input) {
   const workspaceRoot = getWorkspaceRoot();
   const command = `git ${subcommand}${args ? ` ${args}` : ""}`;
 
-  // Use interactive login shell to ensure git is found
-  // Using execFile with argument array prevents shell injection by avoiding shell interpretation
-  const userShell = process.env.SHELL || "/bin/zsh";
+  // Parse args into an array for safe execution
+  // This avoids shell interpretation entirely by passing arguments directly to git
+  const gitArgs = [subcommand, ...parseArgs(args)];
 
   try {
-    // Pass command as a single argument to -c, avoiding shell metacharacter interpretation
-    const { stdout, stderr } = await execFileAsync(userShell, ["-l", "-i", "-c", command], {
+    // Execute git directly without a shell wrapper to prevent shell injection
+    const { stdout, stderr } = await execFileAsync("git", gitArgs, {
       cwd: workspaceRoot,
       timeout: DEFAULT_TIMEOUT,
       maxBuffer: 1024 * 1024 * 5, // 5MB buffer

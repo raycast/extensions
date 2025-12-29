@@ -53,11 +53,11 @@ export default async function ({ command, cwd, timeout = DEFAULT_TIMEOUT }: Inpu
   const workingDir = cwd ? resolveAndValidatePath(cwd) : workspaceRoot;
 
   // Use the user's interactive login shell to execute commands
-  // Using execFile with argument array prevents shell injection by avoiding shell interpretation
+  // Note: Shell interpretation is intentional here to support shell features like pipes,
+  // redirects, and variable expansion. Security is handled via user confirmation prompt.
   const userShell = process.env.SHELL || "/bin/zsh";
 
   try {
-    // Pass command as a single argument to -c, avoiding shell metacharacter interpretation
     const { stdout, stderr } = await execFileAsync(userShell, ["-l", "-i", "-c", command], {
       cwd: workingDir,
       timeout,
