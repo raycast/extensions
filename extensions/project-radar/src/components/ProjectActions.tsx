@@ -1,0 +1,147 @@
+import { ActionPanel, Action, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
+import { ReactNode } from "react";
+import { Project } from "../types";
+import { SHORTCUTS, Icons } from "../constants";
+import { openProjectWithToast, buildOpenTarget } from "../lib/ide";
+import { createProjectDeeplink } from "../utils/deeplink";
+import { getCombinedGitStatus } from "../lib/git";
+import ProjectForm from "./ProjectForm";
+
+// ============================================
+// ProjectActions Component
+// ============================================
+
+interface ProjectActionsProps {
+  project: Project;
+  groups: string[];
+  onRefresh: () => void;
+  onDelete: (project: Project) => Promise<boolean>;
+  onToggleFavorite: (project: Project) => Promise<void>;
+  sortActions?: ReactNode;
+}
+
+export default function ProjectActions({
+  project,
+  groups,
+  onRefresh,
+  onDelete,
+  onToggleFavorite,
+  sortActions,
+}: ProjectActionsProps) {
+  const handleOpen = async () => {
+    await openProjectWithToast(project);
+    onRefresh();
+  };
+
+  const handleDelete = async () => {
+    const confirmed = await confirmAlert({
+      title: "Delete Project",
+      message: `Are you sure you want to delete "${project.alias}"?`,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      await onDelete(project);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    await onToggleFavorite(project);
+  };
+
+  const handleGitStatus = async () => {
+    const gitStatus = getCombinedGitStatus(project.paths);
+
+    if (!gitStatus || !gitStatus.isGitRepo) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Not a Git Repository",
+        message: project.alias,
+      });
+      return;
+    }
+
+    const { branch, ahead, behind, hasChanges } = gitStatus;
+    const parts: string[] = [];
+
+    if (branch) parts.push(`Branch: ${branch}`);
+    if (ahead && ahead > 0) parts.push(`↑ ${ahead} ahead`);
+    if (behind && behind > 0) parts.push(`↓ ${behind} behind`);
+    if (hasChanges) parts.push("● Uncommitted changes");
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: branch || "Git Status",
+      message: parts.slice(1).join(" · ") || "Clean",
+    });
+  };
+
+  const isFavorite = project.isFavorite ?? false;
+
+  return (
+    <ActionPanel>
+      {/* Primary Action */}
+      <ActionPanel.Section>
+        <Action icon={Icons.ArrowSquareOut} title={`Open in ${buildOpenTarget(project)}`} onAction={handleOpen} />
+        <Action
+          icon={Icons.Star}
+          title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+          shortcut={SHORTCUTS.TOGGLE_FAVORITE}
+          onAction={handleToggleFavorite}
+        />
+      </ActionPanel.Section>
+
+      {/* Project Management */}
+      <ActionPanel.Section title="Project">
+        <Action.Push
+          icon={Icons.Pencil}
+          title="Edit"
+          shortcut={SHORTCUTS.EDIT_PROJECT}
+          target={<ProjectForm project={project} groups={groups} onSave={onRefresh} />}
+        />
+        <Action.Push
+          icon={Icons.Plus}
+          title="Add New"
+          shortcut={SHORTCUTS.ADD_PROJECT}
+          target={<ProjectForm groups={groups} onSave={onRefresh} />}
+        />
+      </ActionPanel.Section>
+
+      {/* File & Path */}
+      <ActionPanel.Section title="Path">
+        <Action.ShowInFinder path={project.paths[0]} shortcut={SHORTCUTS.SHOW_IN_FINDER} />
+        <Action.CopyToClipboard title="Copy Path" content={project.paths.join("\n")} shortcut={SHORTCUTS.COPY_PATH} />
+        <Action.CreateQuicklink
+          title="Create Quicklink"
+          shortcut={SHORTCUTS.CREATE_QUICKLINK}
+          quicklink={{
+            name: project.alias,
+            link: createProjectDeeplink(project.id),
+          }}
+        />
+      </ActionPanel.Section>
+
+      {/* Git */}
+      <ActionPanel.Section title="Git">
+        <Action icon={Icons.GitBranch} title="Git Status" shortcut={SHORTCUTS.GIT_STATUS} onAction={handleGitStatus} />
+      </ActionPanel.Section>
+
+      {/* Sort (from parent) */}
+      {sortActions && <ActionPanel.Section title="View">{sortActions}</ActionPanel.Section>}
+
+      {/* Destructive */}
+      <ActionPanel.Section>
+        <Action
+          icon={Icons.Trash}
+          title="Delete"
+          style={Action.Style.Destructive}
+          shortcut={SHORTCUTS.DELETE_PROJECT}
+          onAction={handleDelete}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+}
