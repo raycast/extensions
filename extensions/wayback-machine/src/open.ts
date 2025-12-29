@@ -49,7 +49,12 @@ async function openPage(webpageUrl: string) {
   }
 
   // Open the requested view directly
-  if (defaultView && defaultView !== "snapshot") {
+  if (defaultView) {
+    // For "snapshot" view without checking, open the latest snapshot
+    if (defaultView === "snapshot") {
+      await open(`${WAYBACK_BASE_URL}/web/${webpageUrl}`);
+      return;
+    }
     // URLs view needs special handling: use "web/*" path with trailing wildcard on URL
     if (defaultView === "web/urls") {
       await open(`${WAYBACK_BASE_URL}/web/*/${webpageUrl}*`);
