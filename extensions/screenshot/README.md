@@ -47,8 +47,7 @@ For more information about `screencapture`, see the [official man page](https://
 
 ## Feedback
 
-- **All in One** command shows a HUD notification on success or failure
-- Other commands execute silently and close the Raycast window immediately
+All commands show a HUD notification on success or failure.
 
 ## Contributing
 
