@@ -1,5 +1,5 @@
 import { unlink } from "node:fs/promises";
-import { resolveAndValidatePath } from "../utils/workspace";
+import { resolveAndValidatePath, isAutoEditEnabled } from "../utils/workspace";
 import { existsSync } from "node:fs";
 
 type Input = {
@@ -10,6 +10,10 @@ type Input = {
 };
 
 export async function confirmation({ path }: Input) {
+  if (isAutoEditEnabled()) {
+    return undefined;
+  }
+
   const filePath = resolveAndValidatePath(path);
 
   // Check if file exists
