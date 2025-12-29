@@ -1,5 +1,10 @@
 # Confluence Changelog
 
+## [Improved Search for Whiteboards] - {PR_MERGE_DATE}
+
+- Add `Whiteboards` to global Search results with a distinct icon
+- Add command option to include whiteboard results
+
 ## [Handle Error] - 2025-11-06
 
 - Handle error when fetching favourite spaces to avoid the extension from crashing
