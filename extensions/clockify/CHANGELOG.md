@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Time Entry Management] - 2025-12-27
+## [Time Entry Management] - {PR_MERGE_DATE}
 
 - Add "Stop Timer at" action to stop running timer at a specific past time
 - Add "Add Time Entry" to create completed entries with start and end times
