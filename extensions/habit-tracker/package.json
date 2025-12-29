@@ -1,5 +1,6 @@
 {
     "name": "habit-tracker",
+    "version": "1.1.0",
     "title": "Habit Tracker",
     "description": "A minimal, offline-first habit tracker.",
     "icon": "command-icon.png",

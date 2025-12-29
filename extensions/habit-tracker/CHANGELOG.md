@@ -39,6 +39,10 @@ All notable changes to the Habit Tracker extension will be documented in this fi
 
 ### Changed
 
+- **Enhanced Insights View**: Now shows three sections:
+  - 🔥 Best Current Streaks (top 3)
+  - 🏆 Longest Streaks Ever (top 3 all-time)
+  - ⚠️ Needs Attention (bottom 3 with comparison to best)
 - Insights section title corrected from "Shortest Stream" to "Shortest Streak"
 
 ## [1.0.0] - Initial Release
