@@ -46,16 +46,16 @@ export default function Command() {
                   icon={Icon.PlusSquare}
                   title="Open in New Tab"
                   onAction={async () => {
-                    await closeMainWindow();
                     execFile("wt.exe", ["new-tab", "-p", item.name]);
+                    await closeMainWindow();
                   }}
                 />
                 <Action
                   icon={Icon.PlusTopRightSquare}
                   title="Open in New Window"
                   onAction={async () => {
-                    await closeMainWindow();
                     execFile("wt.exe", ["-p", item.name]);
+                    await closeMainWindow();
                   }}
                 />
                 <Action
@@ -63,15 +63,15 @@ export default function Command() {
                   title="Open as Administrator"
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
                   onAction={async () => {
-                    await closeMainWindow();
-                    execFile("powershell", [
+                   execFile("powershell", [
                       "Start-Process",
                       "wt.exe",
                       "-ArgumentList",
                       `"-p","${item.name}"`,
                       "-Verb",
                       "RunAs",
-                    ]);
+                    ]); 
+                    await closeMainWindow();
                   }}
                 />
                 <ActionPanel.Section>
@@ -105,16 +105,16 @@ export default function Command() {
                       icon={Icon.PlusSquare}
                       title="Open in New Tab"
                       onAction={async () => {
-                        await closeMainWindow();
                         execFile("wt.exe", ["new-tab", "-p", item.name]);
+                        await closeMainWindow();
                       }}
                     />
                     <Action
                       icon={Icon.PlusTopRightSquare}
                       title="Open in New Window"
                       onAction={async () => {
-                        await closeMainWindow();
                         execFile("wt.exe", ["-p", item.name]);
+                        await closeMainWindow();
                       }}
                     />
                     <Action
@@ -122,7 +122,6 @@ export default function Command() {
                       title="Open as Administrator"
                       shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
                       onAction={async () => {
-                        await closeMainWindow();
                         execFile("powershell", [
                           "Start-Process",
                           "wt.exe",
@@ -134,6 +133,7 @@ export default function Command() {
                           "-Verb",
                           "RunAs",
                         ]);
+                        await closeMainWindow();
                       }}
                     />
                     <ActionPanel.Section>
