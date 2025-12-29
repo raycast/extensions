@@ -7,10 +7,6 @@ const BATCH_SIZE = 100;
 type IconEntry = { name: string; displayName: string; svg: string; reactComponent: string };
 type DefaultAction = "svg" | "react" | "usage" | "name";
 
-interface Preferences {
-  defaultAction: DefaultAction;
-}
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [displayCount, setDisplayCount] = useState(BATCH_SIZE);
@@ -65,7 +61,7 @@ export default function Command() {
 }
 
 function IconItem({ icon }: { icon: IconEntry }) {
-  const { defaultAction } = getPreferenceValues<Preferences>();
+  const { defaultAction } = getPreferenceValues<Preferences.BrowseHugeicons>();
 
   const content = {
     source: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(icon.svg)}`,
