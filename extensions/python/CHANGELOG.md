@@ -1,5 +1,11 @@
 # Python Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+- Removed `node-fetch` dependency, now uses global fetch
+
 ## [Fix Search] - 2025-04-04
 
 * Package search works again. https://github.com/raycast/extensions/issues/16494
