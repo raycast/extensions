@@ -115,7 +115,7 @@ export function JobRuns({ client, job, mode, limit }: JobRunsProps) {
 function statusIcon(status: "running" | "success" | "failed" | "unknown") {
   switch (status) {
     case "running":
-      return { source: Icon.PlayCircle, tintColor: Color.Blue };
+      return { source: Icon.Play, tintColor: Color.Blue };
     case "success":
       return { source: Icon.CheckCircle, tintColor: Color.Green };
     case "failed":
