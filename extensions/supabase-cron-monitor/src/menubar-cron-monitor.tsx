@@ -57,7 +57,12 @@ export default function MenubarCronMonitor() {
       })
     );
 
-    const recentRuns = await fetchRecentRuns(client, parsePositiveInt(preferences.runHistoryLimit, 5), mode);
+    const recentRunsRaw = await fetchRecentRuns(client, parsePositiveInt(preferences.runHistoryLimit, 5), mode);
+    const jobNameMap = new Map<number, string>(jobs.map((job) => [job.jobid, job.jobname]));
+    const recentRuns = recentRunsRaw.map((run) => ({
+      ...run,
+      jobname: run.jobname ?? jobNameMap.get(run.jobid),
+    }));
     return { jobs: enriched, recentRuns, mode, lastUpdatedAt: new Date() };
   });
 
