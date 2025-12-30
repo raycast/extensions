@@ -10,10 +10,11 @@ import {
   confirmAlert,
   Alert,
   Clipboard,
+  trash,
 } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
-import { readdir, stat, unlink } from "fs/promises";
+import { readdir, stat } from "fs/promises";
 
 interface Preferences {
   screenshotsPath: string;
@@ -103,7 +104,7 @@ export default function Command() {
 
     if (confirmed) {
       try {
-        await unlink(filePath);
+        await trash(filePath);
         await showToast({ style: Toast.Style.Success, title: "File deleted" });
         await loadScreenshots();
       } catch {
