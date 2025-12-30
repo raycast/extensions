@@ -1,0 +1,70 @@
+default_stages: [pre-commit]
+minimum_prek_version: "0.2.23"
+
+repos:
+  # prek builtin hooks - no network/env needed, instant execution
+  - repo: builtin
+    hooks:
+      - id: trailing-whitespace
+        priority: 0
+      - id: end-of-file-fixer
+        priority: 0
+      - id: check-yaml
+        priority: 0
+      - id: check-json
+        priority: 0
+        exclude: ^tsconfig\.json$
+      - id: check-added-large-files
+        priority: 0
+        args: ['--maxkb=2000']
+        exclude: ^metadata/
+      - id: check-merge-conflict
+        priority: 0
+      - id: check-case-conflict
+        priority: 0
+      - id: detect-private-key
+        priority: 0
+      - id: no-commit-to-branch
+        priority: 0
+        args: ['--branch', 'main']
+
+  - repo: local
+    hooks:
+      - id: ray-lint
+        name: raycast lint
+        entry: npm run lint
+        language: system
+        pass_filenames: false
+        types: [ts, tsx, json]
+        priority: 1
+
+      - id: typecheck
+        name: typecheck
+        entry: npx tsc --noEmit
+        language: system
+        pass_filenames: false
+        types: [ts, tsx]
+        priority: 2
+
+      - id: test
+        name: vitest
+        entry: npm run test -- --run
+        language: system
+        pass_filenames: false
+        types: [ts, tsx]
+        priority: 3
+
+      - id: knip
+        name: knip
+        entry: npx knip
+        language: system
+        pass_filenames: false
+        types: [ts, tsx, json]
+        priority: 4
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.3.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: ["--verbose"]
