@@ -55,7 +55,7 @@ export default async function ({ command, cwd, timeout = DEFAULT_TIMEOUT }: Inpu
   // Use the user's interactive login shell to execute commands
   // Note: Shell interpretation is intentional here to support shell features like pipes,
   // redirects, and variable expansion. Security is handled via user confirmation prompt.
-  const userShell = process.env.SHELL || "/bin/zsh";
+  const userShell = process.env.SHELL || "/bin/sh";
 
   try {
     const { stdout, stderr } = await execFileAsync(userShell, ["-l", "-c", command], {
