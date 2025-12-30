@@ -29,7 +29,11 @@ type Input = {
 };
 
 // Commands that don't modify the repository (read-only)
-const READ_ONLY_COMMANDS: GitSubcommand[] = ["status", "diff", "log", "branch", "show", "stash"];
+const READ_ONLY_COMMANDS: GitSubcommand[] = ["status", "diff", "log", "branch", "show"];
+
+// Stash subcommands that are read-only (list, show)
+// Note: git stash without args, pop, drop, apply, push, etc. all modify the repository
+const READ_ONLY_STASH_SUBCOMMANDS = new Set(["list", "show"]);
 
 // Dangerous flags that should be blocked (normalized form without values)
 const DANGEROUS_FLAGS = new Set([
@@ -162,6 +166,24 @@ function containsDangerousPattern(subcommand: string, args: string): string | nu
 }
 
 /**
+ * Check if a git command is read-only (doesn't modify the repository)
+ */
+function isReadOnlyCommand(subcommand: GitSubcommand, args: string): boolean {
+  if (READ_ONLY_COMMANDS.includes(subcommand)) {
+    return true;
+  }
+
+  // Special handling for stash - only list and show are read-only
+  if (subcommand === "stash") {
+    const tokens = parseArgs(args);
+    const stashSubcommand = tokens[0];
+    return stashSubcommand !== undefined && READ_ONLY_STASH_SUBCOMMANDS.has(stashSubcommand);
+  }
+
+  return false;
+}
+
+/**
  * Truncate output to prevent extremely large responses
  */
 function truncateOutput(output: string, maxLength: number): string {
@@ -186,7 +208,7 @@ export async function confirmation({ subcommand, args = "" }: Input) {
   }
 
   // Read-only commands don't need confirmation
-  if (READ_ONLY_COMMANDS.includes(subcommand)) {
+  if (isReadOnlyCommand(subcommand, args)) {
     return undefined;
   }
 
