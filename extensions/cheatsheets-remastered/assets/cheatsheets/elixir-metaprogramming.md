@@ -1,6 +1,9 @@
 ---
 title: Elixir metaprogramming
 category: Elixir
+tech: elixir-metaprogramming
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Kernel

@@ -1,9 +1,12 @@
 ---
 title: Superagent
 category: JavaScript libraries
-updated: 2018-04-21
+updated: 2018-04-21T00:00:00.000Z
 tags:
   - WIP
+tech: superagent
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Response object

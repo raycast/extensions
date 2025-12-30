@@ -1,6 +1,9 @@
 ---
 title: Git tricks
 category: Git
+tech: git-tricks
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Refs

@@ -1,7 +1,10 @@
 ---
 title: YUM
 category: CLI
-updated: 2024-02-07
+updated: 2024-02-07T00:00:00.000Z
+tech: yum
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Commands

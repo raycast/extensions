@@ -1,6 +1,7 @@
 import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { PullRequestWithAgentSessions } from "../services/copilot";
 import { getIcon } from "../utils";
+import { reauthorize } from "../lib/oauth";
 
 export function PullRequestWithAgentSessionsItem(props: {
   pullRequestWithAgentSessions: PullRequestWithAgentSessions;
@@ -21,15 +22,15 @@ export function PullRequestWithAgentSessionsItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              title="Open Pull Request"
-              icon={Icon.Code}
-              url={props.pullRequestWithAgentSessions.pullRequest.url}
+              title="Open"
+              icon={Icon.List}
+              url={`https://github.com/copilot/tasks/pull/${props.pullRequestWithAgentSessions.pullRequest.globalId}`}
             />
             <Action.OpenInBrowser
-              title="Open Session Logs"
-              icon={Icon.List}
+              title="Open Pull Request"
+              icon={Icon.Code}
               shortcut={Keyboard.Shortcut.Common.Open}
-              url={`${props.pullRequestWithAgentSessions.pullRequest.url}/agent-sessions/${props.pullRequestWithAgentSessions.sessions[0].id}`}
+              url={props.pullRequestWithAgentSessions.pullRequest.url}
             />
           </ActionPanel.Section>
           <Action
@@ -43,6 +44,7 @@ export function PullRequestWithAgentSessionsItem(props: {
               })
             }
           />
+          <Action title="Log out" icon={Icon.Logout} onAction={reauthorize} />
         </ActionPanel>
       }
     />

@@ -1,5 +1,20 @@
+/**
+ * Network Service - Provides efficient access to Google Cloud VPC Network functionality
+ * Uses REST APIs for improved performance (no CLI subprocess overhead)
+ */
+
 import { executeGcloudCommand } from "../../gcloud";
 import { getAllRegions } from "../../utils/regions";
+import {
+  listVpcNetworks,
+  listSubnets as apiListSubnets,
+  listFirewallRules as apiListFirewallRules,
+  listIpAddresses,
+  type VpcNetwork as ApiVpcNetwork,
+  type Subnet as ApiSubnet,
+  type FirewallRule as ApiFirewallRule,
+  type IpAddress as ApiIpAddress,
+} from "../../utils/gcpApi";
 
 const CACHE_TTL = {
   SHORT: 60000,
@@ -126,6 +141,75 @@ export class NetworkService {
     this.projectId = projectId;
   }
 
+  /**
+   * Convert API VPC to internal format
+   */
+  private convertVPC(apiVpc: ApiVpcNetwork): VPC {
+    return {
+      id: apiVpc.id,
+      name: apiVpc.name,
+      description: apiVpc.description,
+      autoCreateSubnetworks: apiVpc.autoCreateSubnetworks,
+      creationTimestamp: apiVpc.creationTimestamp,
+      routingConfig: apiVpc.routingConfig,
+      mtu: apiVpc.mtu,
+    };
+  }
+
+  /**
+   * Convert API Subnet to internal format
+   */
+  private convertSubnet(apiSubnet: ApiSubnet): Subnet {
+    return {
+      id: apiSubnet.id,
+      name: apiSubnet.name,
+      network: apiSubnet.network,
+      region: apiSubnet.region,
+      ipCidrRange: apiSubnet.ipCidrRange,
+      privateIpGoogleAccess: apiSubnet.privateIpGoogleAccess,
+      gatewayAddress: apiSubnet.gatewayAddress,
+      creationTimestamp: apiSubnet.creationTimestamp,
+    };
+  }
+
+  /**
+   * Convert API FirewallRule to internal format
+   */
+  private convertFirewallRule(apiRule: ApiFirewallRule): FirewallRule {
+    return {
+      id: apiRule.id,
+      name: apiRule.name,
+      description: apiRule.description,
+      network: apiRule.network,
+      priority: apiRule.priority,
+      direction: apiRule.direction,
+      sourceRanges: apiRule.sourceRanges,
+      destinationRanges: apiRule.destinationRanges,
+      sourceTags: apiRule.sourceTags,
+      targetTags: apiRule.targetTags,
+      disabled: apiRule.disabled,
+      allowed: apiRule.allowed,
+      denied: apiRule.denied,
+      creationTimestamp: apiRule.creationTimestamp,
+    };
+  }
+
+  /**
+   * Convert API IPAddress to internal format
+   */
+  private convertIPAddress(apiIp: ApiIpAddress): IPAddress {
+    return {
+      id: apiIp.id,
+      name: apiIp.name,
+      address: apiIp.address,
+      addressType: apiIp.addressType,
+      region: apiIp.region,
+      status: apiIp.status,
+      users: apiIp.users,
+      creationTimestamp: apiIp.creationTimestamp,
+    };
+  }
+
   private handleError(error: unknown, context: Record<string, unknown>): never {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Network Service Error:", {
@@ -145,17 +229,9 @@ export class NetworkService {
     }
 
     try {
-      const command = ["compute", "networks", "list", `--project=${this.projectId}`, "--format=json"];
-
-      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
-        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
-      });
-
-      if (!Array.isArray(result)) {
-        throw new Error("Invalid response format from gcloud command");
-      }
-
-      const vpcs = result as VPC[];
+      // Use REST API instead of gcloud CLI
+      const apiVpcs = await listVpcNetworks(this.gcloudPath, this.projectId);
+      const vpcs = apiVpcs.map((v) => this.convertVPC(v));
 
       this.vpcCache.set(cacheKey, { data: vpcs, timestamp: now });
 
@@ -179,15 +255,9 @@ export class NetworkService {
         if (cachedVPC) return cachedVPC;
       }
 
-      const command = ["compute", "networks", "describe", name, `--project=${this.projectId}`, "--format=json"];
-
-      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, { skipCache: true });
-
-      if (!result || typeof result !== "object") {
-        return null;
-      }
-
-      return result as VPC;
+      // Fetch all VPCs and find the one we need
+      const vpcs = await this.getVPCs();
+      return vpcs.find((v) => v.name === name) || null;
     } catch (error: unknown) {
       console.error(`Error fetching VPC ${name}:`, error);
       return null;
@@ -201,6 +271,7 @@ export class NetworkService {
     mtu?: number,
   ): Promise<boolean> {
     try {
+      // Keep using gcloud CLI for write operations
       let command = `compute networks create ${name}`;
 
       if (subnetMode === "auto") {
@@ -244,24 +315,9 @@ export class NetworkService {
     }
 
     try {
-      const command = ["compute", "networks", "subnets", "list"];
-
-      if (region) {
-        command.push(`--regions=${region}`);
-      }
-
-      command.push(`--project=${this.projectId}`);
-      command.push("--format=json");
-
-      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
-        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
-      });
-
-      if (!Array.isArray(result)) {
-        throw new Error("Invalid response format from gcloud command");
-      }
-
-      const subnets = result as Subnet[];
+      // Use REST API instead of gcloud CLI
+      const apiSubnets = await apiListSubnets(this.gcloudPath, this.projectId, region);
+      const subnets = apiSubnets.map((s) => this.convertSubnet(s));
 
       this.subnetCache.set(cacheKey, { data: subnets, timestamp: now });
 
@@ -287,24 +343,14 @@ export class NetworkService {
     }
 
     try {
-      const command = ["compute", "addresses", "list"];
+      // Use REST API instead of gcloud CLI
+      const apiIps = await listIpAddresses(this.gcloudPath, this.projectId);
+      let ips = apiIps.map((ip) => this.convertIPAddress(ip));
 
+      // Filter by region if specified
       if (region) {
-        command.push(`--regions=${region}`);
+        ips = ips.filter((ip) => ip.region?.includes(region));
       }
-
-      command.push(`--project=${this.projectId}`);
-      command.push("--format=json");
-
-      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
-        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
-      });
-
-      if (!Array.isArray(result)) {
-        throw new Error("Invalid response format from gcloud command");
-      }
-
-      const ips = result as IPAddress[];
 
       this.ipCache.set(cacheKey, { data: ips, timestamp: now });
 
@@ -335,6 +381,7 @@ export class NetworkService {
     } = {},
   ): Promise<boolean> {
     try {
+      // Keep using gcloud CLI for write operations
       let command = `compute addresses create ${name}`;
 
       command += ` --region=${region}`;
@@ -397,17 +444,9 @@ export class NetworkService {
     }
 
     try {
-      const command = ["compute", "firewall-rules", "list", `--project=${this.projectId}`, "--format=json"];
-
-      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
-        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
-      });
-
-      if (!Array.isArray(result)) {
-        throw new Error("Invalid response format from gcloud command");
-      }
-
-      const rules = result as FirewallRule[];
+      // Use REST API instead of gcloud CLI
+      const apiRules = await apiListFirewallRules(this.gcloudPath, this.projectId);
+      const rules = apiRules.map((r) => this.convertFirewallRule(r));
 
       this.firewallCache.set(cacheKey, { data: rules, timestamp: now });
 
@@ -449,6 +488,7 @@ export class NetworkService {
     },
   ): Promise<boolean> {
     try {
+      // Keep using gcloud CLI for write operations
       const command = ["compute", "firewall-rules", "create", name];
 
       command.push(`--network=${network}`);
@@ -547,6 +587,7 @@ export class NetworkService {
     secondaryRanges?: { rangeName: string; ipCidrRange: string }[],
   ): Promise<boolean> {
     try {
+      // Keep using gcloud CLI for write operations
       const command = ["compute", "networks", "subnets", "create", name];
 
       command.push(`--network=${network}`);
@@ -600,18 +641,9 @@ export class NetworkService {
     this.clearSubnetCache();
 
     try {
-      const command = ["compute", "networks", "subnets", "list", `--project=${this.projectId}`, "--format=json"];
-
-      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
-        skipCache: true,
-        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
-      });
-
-      if (!Array.isArray(result)) {
-        throw new Error("Invalid response format from gcloud command");
-      }
-
-      const subnets = result as Subnet[];
+      // Use REST API for refresh
+      const apiSubnets = await apiListSubnets(this.gcloudPath, this.projectId);
+      const subnets = apiSubnets.map((s) => this.convertSubnet(s));
 
       this.subnetCache.set("subnets:all", { data: subnets, timestamp: Date.now() });
     } catch (error: unknown) {

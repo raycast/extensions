@@ -1,7 +1,10 @@
 ---
 title: ExUnit
 category: Elixir
-updated: 2018-11-19
+updated: 2018-11-19T00:00:00.000Z
+tech: exunit
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Test cases

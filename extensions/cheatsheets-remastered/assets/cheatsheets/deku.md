@@ -1,8 +1,12 @@
 ---
 title: Deku v2
 category: JavaScript libraries
-intro: |
-  Quick reference for [Deku](https://www.npmjs.com/package/deku), a minimal virtual DOM library.
+intro: >
+  Quick reference for [Deku](https://www.npmjs.com/package/deku), a minimal
+  virtual DOM library.
+tech: deku
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Components

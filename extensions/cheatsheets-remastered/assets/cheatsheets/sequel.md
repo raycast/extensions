@@ -1,6 +1,9 @@
 ---
 title: Sequel
 category: Ruby libraries
+tech: sequel
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

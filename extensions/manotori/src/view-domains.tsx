@@ -1,6 +1,6 @@
 import { getFavicon, useFetch } from "@raycast/utils";
 import { API_HEADERS, API_URL } from "./config";
-import { Domain, DomainDetails, DomainEvent, SuccessResult, TRANSFER_LOCK } from "./types";
+import { Domain, DomainDetails, DomainEvent, TRANSFER_LOCK } from "./types";
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { parseResponse } from "./utils";
 
@@ -14,14 +14,9 @@ function getStatusColor(status: string) {
 }
 
 export default function ViewDomains() {
-  const { isLoading, data } = useFetch(API_URL + "domain", {
+  const { isLoading, data } = useFetch<Domain[], Domain[]>(API_URL + "domain", {
     headers: API_HEADERS,
     parseResponse,
-    mapResult(result: SuccessResult<Domain[]>) {
-      return {
-        data: result.data,
-      };
-    },
     initialData: [],
   });
 
@@ -57,14 +52,9 @@ export default function ViewDomains() {
 }
 
 function ViewDomainDetails({ domain }: { domain: string }) {
-  const { isLoading, data } = useFetch(API_URL + "domain/" + domain, {
+  const { isLoading, data } = useFetch<DomainDetails, DomainDetails>(API_URL + "domain/" + domain, {
     headers: API_HEADERS,
     parseResponse,
-    mapResult(result: SuccessResult<DomainDetails>) {
-      return {
-        data: result.data,
-      };
-    },
   });
 
   const markdown = !data
@@ -118,14 +108,9 @@ function ViewDomainDetails({ domain }: { domain: string }) {
 }
 
 function ViewDomainEvents({ domain }: { domain: string }) {
-  const { isLoading, data } = useFetch(API_URL + "domain/log/" + domain, {
+  const { isLoading, data } = useFetch<DomainEvent[], DomainEvent[]>(API_URL + "domain/log/" + domain, {
     headers: API_HEADERS,
     parseResponse,
-    mapResult(result: SuccessResult<DomainEvent[]>) {
-      return {
-        data: result.data,
-      };
-    },
     initialData: [],
   });
 

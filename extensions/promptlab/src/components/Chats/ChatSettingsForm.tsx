@@ -276,7 +276,7 @@ export default function ChatSettingsForm(props: {
             }}
           />
           <Action
-            title="Add Files/Folders Context"
+            title="Add Files/folders Context"
             icon={Icon.NewDocument}
             onAction={() => {
               setContextFields([...contextFields, { type: "file", source: "", data: "" }]);

@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/screenshot.png" alt="surge-outbound-switcher">
+  <img src="metadata/surge-outbound-switcher-1.png" alt="surge-outbound-switcher">
 </div>
 &nbsp;
 

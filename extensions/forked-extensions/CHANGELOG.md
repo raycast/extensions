@@ -1,5 +1,69 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - 2025-12-17
+
+- Add support for opening an extension folder with a default application
+
+## [Bugfix] - 2025-11-17
+
+- Fix init repository when user path has spaces
+
+## [Improvements] - 2025-09-29
+
+- Add support for checking if commits are ahead
+- Add support for checking if the current branch is not "main"
+
+## [Bugfix] - 2025-09-17
+
+- Fix the incorrect clipboard content when copying the extension path
+- Fix the incorrect type of package.json structure
+
+## [Maintenance] - 2025-09-15
+
+- Fix the infinite rerender of the "Sync Remote" action
+- Add the missing JSDoc to some new utilities
+- Add authorization header to the GitHub raw content request
+- Bump all dependencies to the latest
+
+## [Improvements] - 2025-09-15
+
+- Add `isMac` and `isWindows` helpers to utils
+
+## [Bugfix] - 2025-09-15
+
+- Fix the rerender logic of "Sync Fork" actions
+- Polish some code delightfully
+- Update link style in readme for better visual
+
+## [Improvements] - 2025-09-11
+
+- Add support for migrating existing full-checkout repositories to sparse-checkout
+- Simplify the description for avoid the content overflow on Windows
+- Use a promise to handle the confirmAlert's async actions
+- Improve fetch speed with "blob:none" filter
+- Update the Hint section to FAQ and add some useful information
+- Mark all component props as readonly for better type safety
+- Update cheatsheet
+
+## [Improvements] - 2025-09-09
+
+- Run local Git commands before requesting GitHub API to improve performance
+- Use the resolved repository path in all Git commands for better accuracy
+- Simplify the file path before copying for Create Extension action
+- Fix a redundant "$" sign in Diagnostics' file URL
+- Update some outdated comments
+
+## [Improvements] - 2025-09-09
+
+- Add support for creating extensions (macOS only due to Windows dose not support it yet)
+- Change the default repository path to "~/Documents/forked-extensions" for better compatibility
+- Add a cheatsheet for users to learn about the extension's Git commands
+- Polish Diagnostics action UI
+- Drop unused "assets/extension-icons" folder
+- Change "repo" permission scope to "public_repo"
+- Replace "got" dependency with "ky"
+- Cleanup unused dependencies
+
 ## [Improvements] - 2025-09-02
 
 - Rename the "Sync Fork" action to "Sync Remote"

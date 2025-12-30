@@ -37,7 +37,7 @@ export default function CometProfileDropDown({ onProfileSelected }: Props) {
           });
         }
       }
-    } catch (error) {
+    } catch {
       // Fallback to directory names if Local State reading fails
     }
 

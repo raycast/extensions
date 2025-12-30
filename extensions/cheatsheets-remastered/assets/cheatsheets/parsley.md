@@ -1,11 +1,11 @@
 ---
 title: Parsley.js
-updated: 2018-12-06
+updated: 2018-12-06T00:00:00.000Z
 weight: -1
 category: JavaScript libraries
 keywords:
-  - "data-parsley-validate"
-  - "$('#form').parsley()"
+  - data-parsley-validate
+  - $('#form').parsley()
   - errorClass
   - successClass
   - classHandler
@@ -14,6 +14,9 @@ keywords:
   - errorTemplate
 intro: |
   [Parsley](http://parsleyjs.org/doc/) provides frontend form validation.
+tech: parsley
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Parsley

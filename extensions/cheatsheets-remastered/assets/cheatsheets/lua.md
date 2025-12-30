@@ -1,5 +1,8 @@
 ---
 title: Lua
+tech: lua
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Basic examples

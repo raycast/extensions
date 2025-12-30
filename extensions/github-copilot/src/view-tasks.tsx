@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Color } from "@raycast/api";
-import { provider } from "./lib/oauth";
+import { provider, reauthorize } from "./lib/oauth";
 import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { usePullRequestsWithAgentSessions } from "./hooks/usePullRequestsWithAgentSessions";
 import { PullRequestWithAgentSessionsItem } from "./components";
@@ -36,6 +36,7 @@ function Command() {
               }
             }}
           />
+          <Action title="Log out" icon={Icon.Logout} onAction={reauthorize} />
         </ActionPanel>
       }
     >

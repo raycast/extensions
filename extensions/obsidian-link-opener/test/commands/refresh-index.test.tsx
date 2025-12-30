@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 import { render, screen, waitFor, act } from "@testing-library/react";
-import RefreshIndexCommand from "../../src/commands/refresh-index";
+import RefreshIndexCommand from "../../src/refresh-index";
 import * as fileScanner from "../../src/services/fileScanner";
 import * as raycast from "@raycast/api";
 import mockFs from "mock-fs";
@@ -17,6 +17,7 @@ vi.mock("@raycast/api", () => ({
   },
   Icon: {
     ArrowClockwise: "arrow-clockwise",
+    Link: "link",
   },
   Action: ({ title, onAction }) => React.createElement('button', { onClick: onAction }, title),
   ActionPanel: ({ children }) => React.createElement('div', null, children),
@@ -28,6 +29,10 @@ vi.mock("@raycast/api", () => ({
   getPreferenceValues: vi.fn().mockReturnValue({
     vaultPath: "/test/vault",
   }),
+  launchCommand: vi.fn().mockResolvedValue(undefined),
+  LaunchType: {
+    UserInitiated: "userInitiated",
+  },
 }));
 
 // Mock dependencies
@@ -116,7 +121,7 @@ describe("RefreshIndexCommand", () => {
     await waitFor(() => {
       expect(screen.getByTestId("loading")).toHaveTextContent("true");
       expect(screen.getByTestId("markdown")).toHaveTextContent(
-        "# Scanning Vault..."
+        "# ⏳ Refreshing Index"
       );
     }, { timeout: 1000 });
   });
@@ -126,6 +131,7 @@ describe("RefreshIndexCommand", () => {
 
     await waitFor(() => {
       expect(fileScanner.scanVaultForUrls).toHaveBeenCalledTimes(1);
+      expect(fileScanner.scanVaultForUrls).toHaveBeenCalledWith(true); // forceRefresh = true
     }, { timeout: 2000 });
   });
 
@@ -135,13 +141,19 @@ describe("RefreshIndexCommand", () => {
     await waitFor(() => {
       expect(screen.getByTestId("loading")).toHaveTextContent("false");
       expect(screen.getByTestId("markdown")).toHaveTextContent(
-        "# Scan Complete"
+        "✅ Cache Refreshed"
       );
       expect(screen.getByTestId("markdown")).toHaveTextContent(
-        "Notes with URLs: 2"
+        "Notes with URLs"
       );
       expect(screen.getByTestId("markdown")).toHaveTextContent(
-        "Total URLs found: 2"
+        "Total URLs found"
+      );
+      expect(screen.getByTestId("markdown")).toHaveTextContent(
+        "Directories scanned"
+      );
+      expect(screen.getByTestId("markdown")).toHaveTextContent(
+        "The cache has been cleared and rebuilt from scratch."
       );
     }, { timeout: 2000 });
   });
@@ -150,11 +162,13 @@ describe("RefreshIndexCommand", () => {
     render(<TestRefreshIndexCommand />);
 
     await waitFor(() => {
-      expect(raycast.showToast).toHaveBeenCalledWith({
-        style: "success",
-        title: "Scan complete",
-        message: "Found 2 URLs in 2 notes",
-      });
+      expect(raycast.showToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          style: "success",
+          title: "Cache refreshed",
+          message: expect.stringMatching(/Found 2 URLs in 2 notes/),
+        })
+      );
     }, { timeout: 2000 });
   });
 
@@ -165,7 +179,7 @@ describe("RefreshIndexCommand", () => {
     render(<TestRefreshIndexCommand />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("markdown")).toHaveTextContent("# Error");
+      expect(screen.getByTestId("markdown")).toHaveTextContent("❌ Error");
       expect(screen.getByTestId("markdown")).toHaveTextContent(
         "Vault path not configured"
       );

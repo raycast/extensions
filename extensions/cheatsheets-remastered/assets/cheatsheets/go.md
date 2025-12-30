@@ -1,10 +1,16 @@
 ---
 title: Go
-prism_languages: [go, bash]
+prism_languages:
+  - go
+  - bash
 weight: -3
-tags: [Featured]
+tags:
+  - Featured
 category: C-like
-updated: 2020-06-21
+updated: 2020-06-21T00:00:00.000Z
+tech: golang
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Getting started

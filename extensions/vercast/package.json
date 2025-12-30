@@ -14,7 +14,8 @@
     "samuelkraft",
     "xmok",
     "ridemountainpig",
-    "sebdanielsson"
+    "sebdanielsson",
+    "1weiho"
   ],
   "commands": [
     {
@@ -28,6 +29,23 @@
       "title": "Search Deployments",
       "description": "Explore your Vercel deployments",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar-deployments",
+      "title": "Menu Bar Deployments",
+      "description": "View recent deployments in the menu bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxDeployments",
+          "title": "Max Deployments",
+          "description": "The maximum number of deployments to show",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "10"
+        }
+      ]
     },
     {
       "name": "search-components",

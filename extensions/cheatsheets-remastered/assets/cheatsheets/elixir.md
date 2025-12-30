@@ -1,9 +1,13 @@
 ---
 title: Elixir
 category: Elixir
-tags: [New]
-updated: 2018-07-04
+tags:
+  - New
+updated: 2018-07-04T00:00:00.000Z
 weight: -10
+tech: elixir
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Getting started

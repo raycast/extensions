@@ -1,7 +1,11 @@
 ---
 title: Haml
 category: Markup
-prism_languages: [haml]
+prism_languages:
+  - haml
+tech: haml
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Doctype

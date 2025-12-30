@@ -1,10 +1,15 @@
 ---
 title: Kotlin
-updated: 2018-12-06
+updated: 2018-12-06T00:00:00.000Z
 category: Java & JVM
-prism_languages: [kotlin]
-intro: |
-    [Kotlin](http://kotlinlang.org/) is a statically typed programming language for modern multiplatform applications.
+prism_languages:
+  - kotlin
+intro: >
+  [Kotlin](http://kotlinlang.org/) is a statically typed programming language
+  for modern multiplatform applications.
+tech: kotlin
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Variables

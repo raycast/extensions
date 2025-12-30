@@ -1,6 +1,9 @@
 ---
 title: Frequency separation retouching
 category: Others
+tech: frequency-separation-retouching
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Frequency separation retouching in Photoshop

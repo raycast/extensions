@@ -8,7 +8,7 @@ import { AnswerView } from "./lib/ui/AnswerView/main";
 const pref = getPreferenceValues<Preferences>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
-export default function Command(): JSX.Element {
+export default function Command() {
   const c = CommandAnswer.IMAGE_DESCRIBE;
   const p = "Describe the content on the following images. {image}\n";
   return (

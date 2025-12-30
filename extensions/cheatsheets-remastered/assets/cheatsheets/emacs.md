@@ -1,6 +1,9 @@
 ---
 title: Emacs
 category: CLI
+tech: emacs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Movements

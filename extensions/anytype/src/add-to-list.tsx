@@ -22,14 +22,14 @@ export default function Command() {
 }
 
 export function AddToList() {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [listSearchText, setListSearchText] = useState("");
   const [objectSearchText, setObjectSearchText] = useState("");
 
   const { spaces, spacesError, isLoadingSpaces } = useSpaces();
   const { handleSubmit, itemProps, values } = useForm<AddToListValues>({
     onSubmit: async (values) => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         await showToast(Toast.Style.Animated, "Adding object to list...");
         const request: AddObjectsToListRequest = { objects: [values.objectId] };
@@ -43,7 +43,7 @@ export function AddToList() {
       } catch (error) {
         await showFailureToast(error, { title: "Failed to add object to list" });
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     },
     validation: {
@@ -87,7 +87,7 @@ export function AddToList() {
 
   return (
     <Form
-      isLoading={loading || isLoadingSpaces || isLoadingObjects || isLoadingLists || isLoadingListItems}
+      isLoading={isLoading || isLoadingSpaces || isLoadingObjects || isLoadingLists || isLoadingListItems}
       enableDrafts={false}
       actions={
         <ActionPanel>
@@ -97,10 +97,10 @@ export function AddToList() {
     >
       <Form.Dropdown
         {...itemProps.spaceId}
-        title="Space"
+        title="Channel"
         storeValue={true}
-        placeholder="Search spaces..."
-        info="The space containing the list"
+        placeholder="Search channels..."
+        info="The channel containing the list"
       >
         {spaces.map((space) => (
           <Form.Dropdown.Item key={space.id} value={space.id} title={space.name} icon={space.icon} />

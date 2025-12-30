@@ -1,6 +1,9 @@
 ---
 title: Python
 category: Python
+tech: python
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Tuples (immutable)

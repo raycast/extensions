@@ -1,8 +1,11 @@
-import { encode } from "@msgpack/msgpack";
 import { getAccessToken } from "@raycast/utils";
 import { getOctokit } from "../lib/oauth";
 import { handleGitHubError } from "../lib/github-client";
-import { AI, environment } from "@raycast/api";
+import { AI, environment, getPreferenceValues } from "@raycast/api";
+import { parseUsageData } from "../tools/parse-copilot-usage";
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
 
 // The state of an agent session returned from Copilot API
 enum AgentSessionState {
@@ -26,6 +29,7 @@ type AgentSession = {
   owner_id: number;
   repo_id: number;
   resource_type: "pull";
+  resource_global_id: string;
   resource_id: number;
   last_updated_at: string;
   created_at: string;
@@ -41,6 +45,7 @@ type AgentSession = {
 
 // A pull request returned from the GitHub GraphQL API
 type PullRequest = {
+  globalId: string;
   title: string;
   state: "OPEN" | "CLOSED" | "MERGED";
   url: string;
@@ -64,22 +69,94 @@ type ListAgentSessionsResponse = {
   sessions: AgentSession[];
 };
 
-type CreateTaskResponse = {
-  pull_request: {
-    html_url: string;
+type CreateJobResponse = {
+  job_id: string;
+  session_id: string;
+  actor: {
+    id: number;
+    login: string;
   };
+  created_at: string;
+  updated_at: string;
 };
 
-// Generates a global ID for a pull request based on its ID and repository ID.
-// This implementation is NOT safe or guaranteed to work - but it does at the
-// moment and allows us to overcome the fact that Copilot API only returns
-// integer pull request IDs.
-const unsafelyGetGlobalIdForPullRequest = (pullRequestId: number, repoId: number): string => {
-  const encoded: Uint8Array = encode([0, repoId, pullRequestId]);
-  return "PR_" + Buffer.from(encoded).toString("base64");
+type GetJobResponse =
+  | {
+      status: "pending";
+      error?: {
+        message: string;
+        response_status_code: string;
+      };
+    }
+  | {
+      status: "queued";
+      pull_request: {
+        id: number;
+        number: number;
+      };
+      session_id: string;
+    };
+
+interface GetSessionResponse {
+  resource_global_id: string;
+}
+
+type QuotaSnapshot = {
+  entitlement: number;
+  overage_count: number;
+  overage_permitted: boolean;
+  percent_remaining: number;
+  quota_id: string;
+  quota_remaining: number;
+  remaining: number;
+  unlimited: boolean;
+  timestamp_utc: string;
 };
 
-export async function createTask(repository: string, prompt: string, branch: string) {
+type CopilotInternalUserResponse = {
+  access_type_sku: string;
+  analytics_tracking_id: string;
+  assigned_date: string;
+  can_signup_for_limited: boolean;
+  chat_enabled: boolean;
+  copilot_plan: string;
+  organization_login_list: string[];
+  organization_list: Array<{
+    login: string;
+    name: string;
+  }>;
+  quota_reset_date: string;
+  quota_snapshots: {
+    chat?: QuotaSnapshot;
+    completions?: QuotaSnapshot;
+    premium_interactions?: QuotaSnapshot;
+  };
+  quota_reset_date_utc: string;
+};
+
+type CopilotUsage = {
+  inlineSuggestions: {
+    percentageUsed: number;
+    limit: number | null;
+  };
+  chatMessages: {
+    percentageUsed: number;
+    limit: number | null;
+  };
+  premiumRequests: {
+    percentageUsed: number;
+    limit: number | null;
+  };
+  allowanceResetAt: string;
+};
+
+export async function createTask(
+  repository: string,
+  prompt: string,
+  branch: string,
+  model: string | null,
+  customAgent: string | null,
+): Promise<{ pullRequestUrl: string; sessionUrl: string }> {
   const { token } = getAccessToken();
 
   let generatedTitle: string | null = null;
@@ -100,54 +177,139 @@ export async function createTask(repository: string, prompt: string, branch: str
     }
   }
 
-  const response = await fetch(`https://api.githubcopilot.com/agents/swe/jobs/${repository}`, {
+  const body = {
+    problem_statement: prompt,
+    event_type: "raycast",
+    pull_request: {
+      title: generatedTitle ?? prompt,
+      base_ref: branch,
+      head_ref: null,
+    },
+    model,
+    ...(customAgent ? { custom_agent: customAgent } : {}),
+  };
+
+  const createJobResponse = await fetch(`https://api.githubcopilot.com/agents/swe/v1/jobs/${repository}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      problem_statement: prompt,
-      event_type: "raycast",
-      pull_request: {
-        title: generatedTitle ?? prompt,
-        base_ref: branch,
-        head_ref: null,
-      },
-    }),
+    body: JSON.stringify(body),
   });
 
-  if (!response.ok) {
-    if (response.status === 403) {
+  if (!createJobResponse.ok) {
+    if (createJobResponse.status === 403) {
       throw new Error(
         "Failed to create task. Please check if Copilot coding agent is enabled for your user at https://github.com/settings/copilot/features.",
       );
     } else {
-      throw new Error(`Failed to create task: ${response.statusText}`);
+      const errorText = await createJobResponse.text();
+      throw new Error(`Failed to create task (${createJobResponse.statusText}): ${errorText}`);
     }
   }
 
-  return (await response.json()) as CreateTaskResponse;
+  const createJobResult = (await createJobResponse.json()) as CreateJobResponse;
+  return pollJobUntilPullRequestReady({ repository, jobId: createJobResult.job_id });
 }
 
-export const fetchSessions = async (): Promise<
-  {
-    sessions: AgentSession[];
-    key: string;
-    pullRequest: {
-      id: number;
-      title: string;
-      state: "OPEN" | "CLOSED" | "MERGED";
-      url: string;
-      repository: {
-        name: string;
-        owner: {
-          login: string;
-        };
-      };
+const pollJobUntilPullRequestReady = async ({
+  repository,
+  jobId,
+}: {
+  repository: string;
+  jobId: string;
+}): Promise<{ pullRequestUrl: string; sessionUrl: string }> => {
+  const { token } = getAccessToken();
+
+  const getJobResponse = await fetch(`https://api.githubcopilot.com/agents/swe/v1/jobs/${repository}/${jobId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!getJobResponse.ok) {
+    throw new Error(`Failed to get job status: ${getJobResponse.statusText}`);
+  }
+
+  const getJobResult = (await getJobResponse.json()) as GetJobResponse;
+
+  if (getJobResult.status !== "pending") {
+    const pullRequestUrl = `https://github.com/${repository}/pull/${getJobResult.pull_request.number}`;
+
+    const getSessionResponse = await fetch(`https://api.githubcopilot.com/agents/sessions/${getJobResult.session_id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Copilot-Integration-Id": "copilot-raycast",
+      },
+    });
+
+    if (!getSessionResponse.ok) {
+      throw new Error(`Failed to get session information: ${getSessionResponse.statusText}`);
+    }
+
+    const getSessionResult = (await getSessionResponse.json()) as GetSessionResponse;
+
+    const sessionUrl = `https://github.com/copilot/tasks/pull/${getSessionResult.resource_global_id}`;
+
+    return {
+      pullRequestUrl,
+      sessionUrl,
     };
-  }[]
-> => {
+  } else if (getJobResult.error) {
+    if (getJobResult.error.response_status_code === "422") {
+      throw new Error(
+        "Failed to create task. Copilot is unable to work in your repository due to rules or branch protections. You can resolve this error by excluding branches starting with `copilot/` from policies configured.",
+      );
+    } else {
+      throw new Error(`Failed to create task: ${getJobResponse.statusText}`);
+    }
+  } else {
+    await sleep(1_000);
+    return pollJobUntilPullRequestReady({ repository, jobId });
+  }
+};
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Get the GitHub Copilot authentication token from apps.json (auto-generated by Copilot IDE extensions)
+ * File location defaults to ~/.config/github-copilot/apps.json
+ * @throws Error if the file doesn't exist, is invalid JSON, or contains no valid token
+ */
+const getCopilotAppToken = async (): Promise<string> => {
+  const prefs = getPreferenceValues<{ copilotAppsJsonPath?: string }>();
+  const appsJsonPath = prefs.copilotAppsJsonPath?.trim()
+    ? prefs.copilotAppsJsonPath.trim()
+    : join(homedir(), ".config", "github-copilot", "apps.json");
+
+  if (!existsSync(appsJsonPath)) {
+    throw new Error(
+      "GitHub Copilot configuration not found. Please sign in to Copilot using an IDE extension (VS Code, JetBrains, etc.) first.",
+    );
+  }
+
+  const appsJsonContent = readFileSync(appsJsonPath, "utf-8");
+  const appsJson = JSON.parse(appsJsonContent) as Record<string, Record<string, unknown>>;
+
+  // Get the first available oauth_token from the apps.json
+  // Structure: { "github.com:appId": { user: string, oauth_token: string, githubAppId: string }, ... }
+  for (const appKey in appsJson) {
+    const appData = appsJson[appKey];
+    if (appData && typeof appData === "object" && "oauth_token" in appData) {
+      const token = appData.oauth_token;
+      if (typeof token === "string" && token.length > 0) {
+        return token;
+      }
+    }
+  }
+
+  throw new Error(
+    "No valid authentication token found. Please sign in to GitHub Copilot using an IDE extension first.",
+  );
+};
+
+export const fetchSessions = async (): Promise<PullRequestWithAgentSessions[]> => {
   const { token } = getAccessToken();
 
   const listSessionsResponse = await fetch("https://api.githubcopilot.com/agents/sessions", {
@@ -166,23 +328,18 @@ export const fetchSessions = async (): Promise<
 
   const { sessions: retrievedSessions } = (await listSessionsResponse.json()) as ListAgentSessionsResponse;
 
-  const pullRequestIdAndRepoIdPairs = retrievedSessions
-    .filter((session) => session.resource_type === "pull")
-    .map((session) => ({
-      pullRequestId: session.resource_id,
-      repoId: session.repo_id,
-    }));
-
-  const uniquePullRequestIdAndRepoIdPairs = Array.from(
-    new Map(pullRequestIdAndRepoIdPairs.map((pair) => [`${pair.pullRequestId}-${pair.repoId}`, pair])).values(),
+  const pullRequestGlobalIds = Array.from(
+    new Set(
+      retrievedSessions
+        .filter((session) => session.resource_type === "pull")
+        .map((session) => session.resource_global_id),
+    ),
   );
 
   const octokit = getOctokit();
 
   const pullRequestResults = await Promise.allSettled(
-    uniquePullRequestIdAndRepoIdPairs.map(async ({ pullRequestId, repoId }) => {
-      const globalId = unsafelyGetGlobalIdForPullRequest(pullRequestId, repoId);
-
+    pullRequestGlobalIds.map(async (globalId) => {
       try {
         const data = await octokit.graphql<{ node: PullRequest }>(`
           query {
@@ -202,7 +359,7 @@ export const fetchSessions = async (): Promise<
           }
         `);
         return {
-          id: pullRequestId,
+          globalId,
           title: data.node.title,
           state: data.node.state,
           url: data.node.url,
@@ -219,10 +376,10 @@ export const fetchSessions = async (): Promise<
     .filter((result) => result.status === "fulfilled")
     .map((result) => result.value);
 
-  const sessionsByResourceId = retrievedSessions.reduce((acc: Record<number, AgentSession[]>, session) => {
+  const sessionsByGlobalId = retrievedSessions.reduce((acc: Record<string, AgentSession[]>, session) => {
     if (session.resource_type !== "pull") return acc;
 
-    const key = session.resource_id;
+    const key = session.resource_global_id;
 
     if (acc[key]) {
       acc[key] = acc[key].concat(session);
@@ -233,13 +390,13 @@ export const fetchSessions = async (): Promise<
     return acc;
   }, {});
 
-  const transformedPullRequestsWithAgentSessions = Object.entries(sessionsByResourceId)
-    .map(([resourceId, retrievedSessions]) => {
+  const transformedPullRequestsWithAgentSessions = Object.entries(sessionsByGlobalId)
+    .map(([globalId, retrievedSessions]) => {
       const sortedSessions = retrievedSessions.sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
       const lastUpdatedSession = sortedSessions[0];
-      const pullRequest = pullRequests.find((pullRequest) => pullRequest.id.toString() === resourceId);
+      const pullRequest = pullRequests.find((pullRequest) => pullRequest.globalId.toString() === globalId);
 
       // If pull request couldn't be resolved, skip this session group silently
       if (!pullRequest) {
@@ -258,6 +415,31 @@ export const fetchSessions = async (): Promise<
   return transformedPullRequestsWithAgentSessions;
 };
 
+export const fetchCopilotUsage = async (): Promise<CopilotUsage> => {
+  const token = await getCopilotAppToken();
+
+  const response = await fetch("https://api.github.com/copilot_internal/user", {
+    headers: { authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("Authentication failed. Please verify your GitHub Copilot setup.");
+    }
+    throw new Error(`Failed to fetch Copilot usage: ${response.status} ${response.statusText}`);
+  }
+
+  const data = JSON.parse(await response.text()) as CopilotInternalUserResponse;
+  return parseUsageData(data);
+};
+
 // Export types for use in other files
-export type { AgentSession, PullRequest, PullRequestWithAgentSessions, CreateTaskResponse };
+export type {
+  AgentSession,
+  PullRequest,
+  PullRequestWithAgentSessions,
+  CopilotUsage,
+  CopilotInternalUserResponse,
+  QuotaSnapshot,
+};
 export { AgentSessionState };

@@ -1,15 +1,19 @@
 ---
 title: Visual Studio Code
 category: Apps
-updated: 2018-02-01
+updated: 2018-02-01T00:00:00.000Z
 weight: -5
 keywords:
-  - "⌘P: Show files"
-  - "⌘B: Toggle sidebar"
-  - "⌘J: Toggle panel"
-  - "F5: Debug"
-intro: |
-  [Visual Studio Code](https://code.visualstudio.com/), or VSCode, is an open-source code editor. This guide targets VSCode v1.19.
+  - '⌘P: Show files'
+  - '⌘B: Toggle sidebar'
+  - '⌘J: Toggle panel'
+  - 'F5: Debug'
+intro: >
+  [Visual Studio Code](https://code.visualstudio.com/), or VSCode, is an
+  open-source code editor. This guide targets VSCode v1.19.
+tech: vscode
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Shortcuts

@@ -10,7 +10,11 @@
     "Kimcha",
     "ridemountainpig",
     "nagauta",
-    "dead_hikikomori"
+    "dead_hikikomori",
+    "clins1994",
+    "0xdhrv",
+    "YourMCGeek",
+    "dhaydl"
   ],
   "categories": [
     "Productivity",
@@ -55,6 +59,25 @@
               "value": "createTime"
             }
           ]
+        },
+        {
+          "type": "dropdown",
+          "name": "downloadsLayout",
+          "label": "Downloads Layout",
+          "title": "Downloads Layout",
+          "description": "The layout for displaying the downloads.",
+          "required": false,
+          "default": "list",
+          "data": [
+            {
+              "title": "List",
+              "value": "list"
+            },
+            {
+              "title": "Grid",
+              "value": "grid"
+            }
+          ]
         }
       ]
     },
@@ -95,15 +118,14 @@
       "name": "downloadsFolder",
       "title": "Downloads Folder",
       "description": "The folder where your downloads are stored",
-      "default": "~/Downloads",
-      "required": true
+      "required": false
     },
     {
       "type": "dropdown",
       "name": "lastestDownloadOrder",
-      "label": "Lastest Download Order",
-      "title": "Lastest Download Order",
-      "description": "The order of the lastest download",
+      "label": "Latest Download Order",
+      "title": "Latest Download Order",
+      "description": "The order of the latest download",
       "required": false,
       "default": "modifiedTime",
       "data": [
@@ -145,20 +167,196 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-latest-download",
+      "title": "Get Latest Download",
+      "description": "Gets the last download from the configured Downloads folder"
+    },
+    {
+      "name": "copy-latest-download",
+      "title": "Copy Latest Download",
+      "description": "Copies the last downloaded file or folder"
+    },
+    {
+      "name": "delete-latest-download",
+      "title": "Delete Latest Download",
+      "description": "Delete the last downloaded file or folder"
+    },
+    {
+      "name": "open-latest-download",
+      "title": "Open Latest Download",
+      "description": "Opens the last downloaded file or folder"
+    },
+    {
+      "name": "paste-latest-download",
+      "title": "Paste Latest Download",
+      "description": "Pastes the last downloaded file or folder to the foremost active app"
+    },
+    {
+      "name": "show-latest-download",
+      "title": "Show Latest Download",
+      "description": "Show the last downloaded file or folder in Finder"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input" : "@downloads-manager get my latest download",
+        "mocks" : {
+          "get-latest-download" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+
+              },
+              "name" : "get-latest-download"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@downloads-manager copy my latest download",
+        "mocks" : {
+          "copy-latest-download" : "Copied latest download to clipboard",
+          "get-latest-download" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+
+              },
+              "name" : "get-latest-download"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "latestDownloadPath" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+              },
+              "name" : "copy-latest-download"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@downloads-manager delete my latest download",
+        "mocks" : {
+          "delete-latest-download" : "Deleted lastest download",
+          "get-latest-download" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+
+              },
+              "name" : "get-latest-download"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "latestDownloadPath" : "/Users/davidhaydl/Downloads/CleanShot 2025-12-14 at 19.27.09@2x.png"
+              },
+              "name" : "delete-latest-download"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@downloads-manager open my latest download",
+        "mocks" : {
+          "get-latest-download" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md",
+          "open-latest-download" : "Opened latest download"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+
+              },
+              "name" : "get-latest-download"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "latestDownloadPath" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
+              },
+              "name" : "open-latest-download"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@downloads-manager paste my latest download",
+        "mocks" : {
+          "paste-latest-download": "Success",
+          "get-latest-download" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+
+              },
+              "name" : "get-latest-download"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "latestDownloadPath" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
+              },
+              "name" : "paste-latest-download"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@downloads-manager show my latest download",
+        "mocks" : {
+          "get-latest-download" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md",
+          "show-latest-download" : "Showed the latest download"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+
+              },
+              "name" : "get-latest-download"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "latestDownloadPath" : "/Users/davidhaydl/Downloads/TechnikNews Weihnachtsgewinnspiel 2025- Sonos Ray und Sennheiser HD 550.md"
+              },
+              "name" : "show-latest-download"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1",
-    "untildify": "^4.0.0"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "untildify": "^6.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "react-devtools": "^6.1.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.2",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "react": "^19.2.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -166,5 +364,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -16,12 +16,12 @@ function transitFolder(): string {
   const build = getBuildNamePreference();
   const ts = path.join(
     os.homedir(),
-    `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`
+    `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`,
   );
   return ts;
 }
 
-function CreateCommandQuickLinkAction(props: { command: CommandMetadata }): JSX.Element {
+function CreateCommandQuickLinkAction(props: { command: CommandMetadata }) {
   const c = props.command;
   const title = c.category ? `${c.category}: ${c.title}` : c.title;
   return (
@@ -47,8 +47,8 @@ async function getCommandFromVSCode() {
         },
       },
       null,
-      2
-    )
+      2,
+    ),
   );
   if (await fileExists(responseFilename)) {
     await afs.rm(responseFilename);
@@ -60,7 +60,7 @@ async function getCommandFromVSCode() {
   throw new Error("Could not get VSCode commands");
 }
 
-function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
+function CommandListItem(props: { command: CommandMetadata }) {
   const c = props.command;
   const title = (c: CommandMetadata) => {
     if (c.category) {
@@ -89,7 +89,7 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
           <ActionPanel.Section>
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-              title="Copy Command Id"
+              title="Copy Command ID"
               content={c.command}
             />
           </ActionPanel.Section>
@@ -99,10 +99,10 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
   );
 }
 
-function InstallRaycastForVSCodeAction(): JSX.Element {
+function InstallRaycastForVSCodeAction() {
   return (
     <Action.OpenInBrowser
-      title="Install Raycast for Vscode"
+      title="Install Raycast for VS Code"
       url={`${getBuildScheme()}:extension/tonka3000.raycast`}
       onOpen={() => {
         popToRoot();
@@ -112,7 +112,7 @@ function InstallRaycastForVSCodeAction(): JSX.Element {
   );
 }
 
-export default function CommandPaletteCommand(): JSX.Element {
+export default function CommandPaletteCommand() {
   const { isLoading, commands, error, refresh } = useCommands();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

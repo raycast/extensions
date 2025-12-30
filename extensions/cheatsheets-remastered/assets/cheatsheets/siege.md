@@ -1,8 +1,12 @@
 ---
 title: Siege
 category: Others
-intro: |
-  [Siege](https://www.joedog.org/siege-home/) is an HTTP and HTTPS load testing tool.
+intro: >
+  [Siege](https://www.joedog.org/siege-home/) is an HTTP and HTTPS load testing
+  tool.
+tech: siege
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Basic usage

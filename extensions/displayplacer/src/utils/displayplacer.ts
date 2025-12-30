@@ -16,7 +16,7 @@ export function listScreenInfo() {
         }
         return data;
       },
-      { currentCommand: null }
+      { currentCommand: null },
     );
 
   console.log(result);

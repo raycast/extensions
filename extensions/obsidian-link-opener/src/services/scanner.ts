@@ -4,10 +4,7 @@ import { ObsidianNote } from "../types";
  * Service for scanning Obsidian vault directories and finding markdown files
  */
 export class ObsidianScanner {
-  constructor(
-    private vaultPath: string,
-    private excludeFolders: string[] = []
-  ) {}
+  constructor(private vaultPath: string) {}
 
   /**
    * Scans the vault for markdown files and returns them as ObsidianNote objects

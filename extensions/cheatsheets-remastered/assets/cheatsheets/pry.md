@@ -1,6 +1,9 @@
 ---
 title: Pry
 category: Ruby libraries
+tech: pry
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

@@ -1,10 +1,14 @@
 ---
 title: Camp
 category: JavaScript libraries
-updated: 2017-09-21
+updated: 2017-09-21T00:00:00.000Z
 weight: -1
-intro: |
-  [Camp](https://github.com/espadrine/sc/) is a Node.js web server framework. This guide targets Camp v17.x.
+intro: >
+  [Camp](https://github.com/espadrine/sc/) is a Node.js web server framework.
+  This guide targets Camp v17.x.
+tech: camp
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Getting started

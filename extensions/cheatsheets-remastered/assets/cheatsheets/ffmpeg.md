@@ -1,6 +1,9 @@
 ---
 title: ffmpeg
 category: CLI
+tech: ffmpeg
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Common switches

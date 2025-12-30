@@ -1,5 +1,5 @@
-import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
+import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 import { getRecommendations } from "./getRecommendations";
 
@@ -25,8 +25,7 @@ export async function startRadio({ trackIds = [], artistIds = [] }: StartRadioPr
           error?.toLocaleLowerCase().includes("restricted device") ||
           error?.toLocaleLowerCase().includes("premium required")
         ) {
-          const script = buildScriptEnsuringSpotifyIsRunning(`play track "${tracks[0].uri}"`);
-          await runAppleScriptSilently(script);
+          await runSpotifyScript(SpotifyScriptType.PlayTrack, true, tracks[0].uri as string);
         }
       }
     }

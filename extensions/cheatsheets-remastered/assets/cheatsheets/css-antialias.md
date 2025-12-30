@@ -1,9 +1,12 @@
 ---
 title: CSS antialiasing
 category: CSS
-updated: 2017-10-13
+updated: 2017-10-13T00:00:00.000Z
 intro: |
   Here's a 4-line snippet on how to get beautiful, antialiased text with CSS.
+tech: css-antialias
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Antialias

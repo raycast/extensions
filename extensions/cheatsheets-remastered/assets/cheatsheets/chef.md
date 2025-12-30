@@ -1,6 +1,9 @@
 ---
 title: Chef
 category: Devops
+tech: chef
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Install

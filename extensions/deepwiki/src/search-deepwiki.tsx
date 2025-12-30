@@ -78,7 +78,7 @@ export default function Command(): React.ReactElement {
       // Map API results to our RepoResult interface
       const parsedResults: RepoResult[] = apiResults.map((item) => {
         const orgRepo = item.repo_name // Directly use repo_name
-        // Extract owner and repo for the Deepwiki URL (assuming owner/repo format)
+        // Extract owner and repo for the DeepWiki URL (assuming owner/repo format)
         const [owner, repo] = orgRepo.split("/")
         const stars = item.stargazers_count !== undefined ? String(item.stargazers_count) : ""
         return {
@@ -86,7 +86,7 @@ export default function Command(): React.ReactElement {
           orgRepo: orgRepo,
           description: item.description || "No description available",
           stars: stars,
-          // Construct Deepwiki URL using extracted owner/repo
+          // Construct DeepWiki URL using extracted owner/repo
           deepWikiUrl: owner && repo ? `https://deepwiki.com/${owner}/${repo}` : `https://deepwiki.com/${orgRepo}`, // Fallback just in case
           githubUrl: `https://github.com/${orgRepo}`,
         }
@@ -129,7 +129,7 @@ export default function Command(): React.ReactElement {
       {results.length === 0 && !isLoading && searchText ? (
         <List.EmptyView
           title="No Repositories Found"
-          description={`Could not find any matching repositories on Deepwiki for "${searchText}".`}
+          description={`Could not find any matching repositories on DeepWiki for "${searchText}".`}
         />
       ) : (
         results.map((repo: RepoResult) => (
@@ -140,7 +140,7 @@ export default function Command(): React.ReactElement {
             accessories={repo.stars ? [{ text: repo.stars, icon: Icon.Star }] : []}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Deepwiki" url={repo.deepWikiUrl} />
+                <Action.OpenInBrowser title="Open in DeepWiki" url={repo.deepWikiUrl} />
                 <Action.OpenInBrowser title="Open in GitHub" url={repo.githubUrl} />
                 <Action
                   title="Crawl and Copy Docs"
@@ -161,7 +161,7 @@ export default function Command(): React.ReactElement {
                   }}
                 />
                 <Action
-                  title="Open Deepwiki Page Command"
+                  title="Open DeepWiki Page Command"
                   icon={Icon.Terminal}
                   onAction={async () => {
                     try {
@@ -177,7 +177,7 @@ export default function Command(): React.ReactElement {
                     }
                   }}
                 />
-                <Action.CopyToClipboard title="Copy Deepwiki URL" content={repo.deepWikiUrl} />
+                <Action.CopyToClipboard title="Copy DeepWiki URL" content={repo.deepWikiUrl} />
                 <Action.CopyToClipboard title="Copy GitHub URL" content={repo.githubUrl} />
                 <Action.CopyToClipboard title="Copy Org/repo" content={repo.orgRepo} />
               </ActionPanel>

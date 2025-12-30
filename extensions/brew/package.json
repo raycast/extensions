@@ -16,7 +16,8 @@
     "j3lte",
     "alexandercato",
     "ViGeng",
-    "ridemountainpig"
+    "ridemountainpig",
+    "chrismessina"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -47,7 +48,7 @@
       "title": "Upgrade",
       "subtitle": "Brew",
       "description": "Upgrade brew formulae & casks",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "clean-up",
@@ -66,6 +67,14 @@
           "description": "Include --prune=all when cleaning files & packages from cache.\nThis option bypasses the 120 days threshold."
         }
       ]
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "subtitle": "Brew",
+      "description": "Clear the cached Formulae, Casks, and installed packages files",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -132,36 +141,61 @@
       "type": "checkbox",
       "required": false,
       "title": "Uninstall",
-      "label": "Remove all files associated with a cask.",
+      "label": "Remove all files associated with a cask",
       "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask.\nWARNING: This may remove files shared with other applications."
     },
     {
-      "name": "quarantine",
-      "type": "checkbox",
+      "default": false,
+      "description": "Homebrew 5.0 enables parallel downloads by default. Enable this option to disable concurrent downloads if you experience issues.",
+      "label": "Disable concurrent downloads",
+      "name": "disableDownloadConcurrency",
       "required": false,
-      "default": true,
-      "title": "Quarantine",
-      "label": "Enable quarantine of downloads",
-      "description": "Enable or disable quarantine of files downloaded by brew"
+      "title": "Homebrew 5.0 Options",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Use Homebrew's internal JSON API for faster search. Formula descriptions load on-demand when viewing details.",
+      "label": "Use internal API for faster search (experimental)",
+      "name": "useInternalApi",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Close the Raycast window after performing actions like install, uninstall, or upgrade.",
+      "label": "Close immediately after action",
+      "name": "closeAfterAction",
+      "required": false,
+      "title": "Window Behavior",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show detailed logs in the console for debugging.",
+      "label": "Enable extra diagnostics in the console",
+      "name": "verboseLogging",
+      "required": false,
+      "title": "Debug Logging",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.18.1",
+    "@chrismessina/raycast-logger": "^1.0.0",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
     "@types/stream-json": "^1.7.8",
-    "node-fetch": "^3.3.2",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.9.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.10.2",
-    "@types/node-fetch": "^2.6.12",
-    "@types/react": "^18.3.18",
-    "eslint": "^8.57.1",
-    "prettier": "^3.4.2",
-    "react": "^19.0.0",
-    "typescript": "^5.7.2"
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "react": "^19.0.10",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

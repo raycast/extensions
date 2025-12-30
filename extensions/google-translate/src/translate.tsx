@@ -1,13 +1,59 @@
 import React, { ReactElement, useState } from "react";
-import { List, showToast, Toast, Action, Icon, ActionPanel } from "@raycast/api";
+import { List, showToast, Toast, Action, Icon, ActionPanel, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useDebouncedValue, usePreferences, useSelectedLanguagesSet, useTextState } from "./hooks";
+import {
+  useAllLanguageSets,
+  useDebouncedValue,
+  usePreferences,
+  usePreferencesLanguageSet,
+  useSelectedLanguagesSet,
+  useTextState,
+} from "./hooks";
 import { supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate, simpleTranslate, playTTS } from "./simple-translate";
 import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "./actions";
 import { LanguageCodeSet } from "./types";
 
+const QuickLanguageSetShifterActions = () => {
+  const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
+  const preferencesLanguageSet = usePreferencesLanguageSet();
+  const [languages] = useAllLanguageSets();
+  const allLanguages = React.useMemo(() => [preferencesLanguageSet, ...languages], [preferencesLanguageSet, languages]);
+  const selectedLanguageSetIndex = React.useMemo(
+    () => allLanguages.findIndex((langSet) => JSON.stringify(langSet) === JSON.stringify(selectedLanguageSet)),
+    [allLanguages, selectedLanguageSet],
+  );
+
+  return (
+    <ActionPanel.Section title="Language Set">
+      <Action
+        title="Go to Previous Language Set"
+        icon={Icon.ArrowUp}
+        shortcut={Keyboard.Shortcut.Common.MoveUp}
+        onAction={() => {
+          if (selectedLanguageSetIndex <= 0) {
+            setSelectedLanguageSet(allLanguages[allLanguages.length - 1]);
+          } else {
+            setSelectedLanguageSet(allLanguages[selectedLanguageSetIndex - 1]);
+          }
+        }}
+      />
+      <Action
+        title="Go to Next Language Set"
+        icon={Icon.ArrowDown}
+        shortcut={Keyboard.Shortcut.Common.MoveDown}
+        onAction={() => {
+          if (selectedLanguageSetIndex >= allLanguages.length - 1) {
+            setSelectedLanguageSet(allLanguages[0]);
+          } else {
+            setSelectedLanguageSet(allLanguages[selectedLanguageSetIndex + 1]);
+          }
+        }}
+      />
+    </ActionPanel.Section>
+  );
+};
 const DoubleWayTranslateItem: React.FC<{
   value: string;
   selectedLanguageSet: LanguageCodeSet;
@@ -48,11 +94,12 @@ const DoubleWayTranslateItem: React.FC<{
                     <Action
                       title="Play Text-To-Speech"
                       icon={Icon.Play}
-                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                       onAction={() => playTTS(r.translatedText, r.langTo)}
                     />
                     <OpenOnGoogleTranslateWebsiteAction translationText={value} translation={r} />
                   </ActionPanel.Section>
+                  <QuickLanguageSetShifterActions />
                 </ActionPanel>
               }
             />
@@ -68,6 +115,7 @@ const DoubleWayTranslateItem: React.FC<{
                       <ToggleFullTextAction onAction={() => toggleShowingDetail()} />
                       <OpenOnGoogleTranslateWebsiteAction translationText={value} translation={r} />
                     </ActionPanel.Section>
+                    <QuickLanguageSetShifterActions />
                   </ActionPanel>
                 }
               />
@@ -117,12 +165,13 @@ const TranslateItem: React.FC<{
               <Action
                 title="Play Text-To-Speech"
                 icon={Icon.Play}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                 onAction={() => playTTS(result.translatedText, langToCode)}
               />
             )}
             {result && <OpenOnGoogleTranslateWebsiteAction translationText={value} translation={result} />}
           </ActionPanel.Section>
+          <QuickLanguageSetShifterActions />
         </ActionPanel>
       }
     />
@@ -143,6 +192,11 @@ export default function Translate(): ReactElement {
       onSearchTextChange={setText}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={<LanguageManagerListDropdown />}
+      actions={
+        <ActionPanel>
+          <QuickLanguageSetShifterActions />
+        </ActionPanel>
+      }
     >
       {selectedLanguageSet.langTo.length === 1 ? (
         <DoubleWayTranslateItem

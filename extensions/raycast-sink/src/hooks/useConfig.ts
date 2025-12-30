@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getPreferenceValues } from "@raycast/api";
-import { Config, Preferences } from "../types";
+import { Config } from "../types";
 
 export function useConfig() {
   const [config, setConfig] = useState<Config | null>(null);
@@ -9,12 +9,7 @@ export function useConfig() {
   const loadConfig = useCallback(() => {
     try {
       const preferences = getPreferenceValues<Preferences>();
-      const newConfig: Config = {
-        host: preferences.host,
-        token: preferences.token,
-        language: preferences.language || "en",
-        showWebsitePreview: preferences.showWebsitePreview || "true",
-      };
+      const newConfig: Config = preferences;
       setConfig(newConfig);
     } catch (error) {
       console.error("Config validation failed:", error);
@@ -27,12 +22,5 @@ export function useConfig() {
     loadConfig();
   }, [loadConfig]);
 
-  const getConfigValue = useCallback(
-    (key: keyof Config) => {
-      return config ? config[key] : null;
-    },
-    [config],
-  );
-
-  return { config, isLoading, reloadConfig: loadConfig, getConfigValue };
+  return { config, isLoading };
 }

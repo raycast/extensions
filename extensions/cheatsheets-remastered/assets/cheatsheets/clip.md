@@ -1,9 +1,12 @@
 ---
 title: Command Line Interface Pages
 category: CLI
-updated: 2023-02-23
+updated: 2023-02-23T00:00:00.000Z
 keywords:
   - CLI
+tech: clip
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Page layout

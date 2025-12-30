@@ -1,6 +1,9 @@
 ---
 title: Parsimmon
 category: JavaScript libraries
+tech: parsimmon
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Basic usage

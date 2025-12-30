@@ -29,6 +29,10 @@ export class NoteGrouper {
           url: note.url,
           source: note.urlSource,
         });
+        // Ensure aliases are preserved (in case the first note didn't have them)
+        if (!existingNote.aliases && note.aliases) {
+          existingNote.aliases = note.aliases;
+        }
       } else {
         // Create new grouped note
         noteMap.set(note.path, {
@@ -38,6 +42,7 @@ export class NoteGrouper {
           vault: note.vault,
           frontmatter: note.frontmatter,
           lastModified: note.lastModified,
+          aliases: note.aliases,
           urls: [
             {
               url: note.url,
@@ -140,6 +145,7 @@ export class NoteGrouper {
           vault: groupedNote.vault,
           frontmatter: groupedNote.frontmatter,
           lastModified: groupedNote.lastModified,
+          aliases: groupedNote.aliases,
           url: urlInfo.url,
           urlSource: urlInfo.source,
         });

@@ -1,4 +1,14 @@
-import { getPreferenceValues, showToast, Toast, Form, ActionPanel, Action, getSelectedFinderItems } from "@raycast/api";
+import {
+  getPreferenceValues,
+  showToast,
+  Toast,
+  Form,
+  ActionPanel,
+  Action,
+  getSelectedFinderItems,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { AddTorrentOptions, QBittorrent, Preferences as QbittorrentPreferences } from "@ctrl/qbittorrent";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { readFile } from "node:fs/promises";
@@ -9,7 +19,7 @@ interface Values extends AddTorrentOptions {
 }
 
 export default function AddTorrents() {
-  const { address, username, password } = getPreferenceValues<Preferences.AddTorrents>();
+  const { address, username, password, redirectAfterAdding } = getPreferenceValues();
   const qbit = useMemo(() => {
     return new QBittorrent({
       baseUrl: address,
@@ -100,6 +110,21 @@ export default function AddTorrents() {
     });
     torrentFilesRef.current?.reset();
     torrentURLsRef.current?.reset();
+
+    if (redirectAfterAdding) {
+      try {
+        await launchCommand({
+          name: "torrents",
+          type: LaunchType.UserInitiated,
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to open torrents",
+          message: error instanceof Error ? error.message : "Unknown error occurred",
+        });
+      }
+    }
   };
 
   return (

@@ -1,5 +1,8 @@
 ---
 title: Linux
+tech: linux
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Read/Write/Execute a file

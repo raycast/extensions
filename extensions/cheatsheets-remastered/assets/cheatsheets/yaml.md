@@ -1,7 +1,11 @@
 ---
 title: Yaml
 category: Markup
-prism_languages: [yaml]
+prism_languages:
+  - yaml
+tech: yaml
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Dictionaries and lists

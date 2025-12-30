@@ -1,7 +1,10 @@
 ---
-title: "Phoenix: Routing"
+title: 'Phoenix: Routing'
 category: Elixir
 weight: -1
+tech: phoenix-routing
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Showing routes

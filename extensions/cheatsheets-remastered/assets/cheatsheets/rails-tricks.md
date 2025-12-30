@@ -1,8 +1,12 @@
 ---
 title: Rails tricks
 category: Rails
-tags: [Archived]
+tags:
+  - Archived
 archived: This sheet may describe practices that might be outdated.
+tech: rails-tricks
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Sass source maps

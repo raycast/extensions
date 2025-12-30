@@ -1,5 +1,13 @@
 # Sesh Changelog
 
+## [Make PATH configurable] - 2025-10-09
+- Add a user-setting for the PATH variable
+
+## Improve list - 2025-09-25
+
+- Add support for tmuxinator list items
+- Flatten the results so the list is in the same results as what sesh responds with (which honors people's configuration of source ordering)
+
 ## [Add nix-darwin support] - 2024-12-04
 
 - Add [nix-darwin](https://github.com/LnL7/nix-darwin) support by adding `/run/current-system/sw/bin/` to the PATH

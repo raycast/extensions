@@ -1,7 +1,10 @@
 ---
 title: Jshint
 category: JavaScript libraries
-updated: 2017-09-12
+updated: 2017-09-12T00:00:00.000Z
+tech: jshint
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Relaxing

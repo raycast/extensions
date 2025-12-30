@@ -1,15 +1,19 @@
 ---
 title: Enzyme
 category: React
-updated: 2020-02-12
-tags: [Featured]
+updated: 2020-02-12T00:00:00.000Z
+tags:
+  - Featured
 weight: -1
 keywords:
   - shallow()
   - mount()
   - wrap.setProps()
-  - "wrap.find().simulate('click')"
-  - "wrap.contains(<div/>)"
+  - wrap.find().simulate('click')
+  - wrap.contains(<div/>)
+tech: enzyme
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Getting started

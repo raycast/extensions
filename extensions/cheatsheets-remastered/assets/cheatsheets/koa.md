@@ -1,6 +1,9 @@
 ---
 title: Koa
 category: JavaScript libraries
+tech: koa
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

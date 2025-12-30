@@ -1,10 +1,14 @@
 ---
 title: Vimdiff
 category: Vim
-updated: 2018-12-06
+updated: 2018-12-06T00:00:00.000Z
 weight: -10
-intro: |
-  [Vim](https://www.vim.org/) is a very efficient text editor. This reference was made for Vim 8.0.
+intro: >
+  [Vim](https://www.vim.org/) is a very efficient text editor. This reference
+  was made for Vim 8.0.
+tech: vim-diff
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Getting started

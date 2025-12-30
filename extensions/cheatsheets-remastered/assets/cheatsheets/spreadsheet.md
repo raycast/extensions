@@ -1,6 +1,10 @@
 ---
 title: Spreadsheet functions
-tags: [WIP]
+tags:
+  - WIP
+tech: spreadsheet
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### If

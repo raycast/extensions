@@ -1,6 +1,9 @@
 ---
 title: fs
 category: Node.js
+tech: nodejs-fs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Reading

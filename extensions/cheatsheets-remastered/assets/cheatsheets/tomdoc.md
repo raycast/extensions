@@ -1,6 +1,9 @@
 ---
 title: Tomdoc
 category: Markup
+tech: tomdoc
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Tomdoc

@@ -4,6 +4,7 @@ import { groupBy } from "lodash";
 import { Device, Voice, say, getAudioDevices } from "mac-say";
 import { systemDefault } from "./constants.js";
 import {
+  getAdvancedMessage,
   getRates,
   getSortedVoices,
   getSpeechPlist,
@@ -18,7 +19,8 @@ export default function ConfigureSay() {
   const [voices, setVoices] = useState<Voice[]>([]);
   const [audioDevices, setAudioDevices] = useState<Device[]>([]);
   const [speechPlist, setSpeechPlist] = useState<SpeechPlist>();
-  const { voice, rate, device, setVoice, setRate, setAudioDevice } = useSaySettings();
+  const { voice, rate, device, keepSilentOnError, setVoice, setRate, setAudioDevice, setKeepSilentOnError } =
+    useSaySettings();
 
   const loadData = async () => {
     const [audioDevices, voices, plist] = await Promise.all([
@@ -130,10 +132,14 @@ export default function ConfigureSay() {
           ))}
         </Form.Dropdown.Section>
       </Form.Dropdown>
-      <Form.Description
-        title="Advanced"
-        text="This configuration page does not alter you system settings. For more advanced configurations please go to System Settings -> Accessibility -> Spoken Content."
+      <Form.Checkbox
+        id="keepSilentOnError"
+        title="Keep Silent On Error"
+        label="Enable"
+        value={keepSilentOnError}
+        onChange={setKeepSilentOnError}
       />
+      <Form.Description title="Advanced" text={getAdvancedMessage()} />
       <Form.Description
         title="Recommendation"
         text="Siri is the closest to a real human voice. You can pick Siri voices in System Settings for the best experience."

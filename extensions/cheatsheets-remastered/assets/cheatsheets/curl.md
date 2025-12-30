@@ -1,7 +1,10 @@
 ---
 title: Curl
 category: CLI
-updated: 2020-03-09
+updated: 2020-03-09T00:00:00.000Z
+tech: curl
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Options

@@ -1,6 +1,9 @@
 ---
 title: Ractive.js
 category: JavaScript libraries
+tech: ractive
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 {% raw %}

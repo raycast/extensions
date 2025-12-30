@@ -9,7 +9,8 @@
     "williamwelsh",
     "Olivier-OG",
     "ridemountainpig",
-    "siddharth-2382"
+    "siddharth-2382",
+    "1weiho"
   ],
   "categories": [
     "Documentation",
@@ -47,6 +48,13 @@
       "subtitle": "shadcn/ui",
       "description": "Search shadcn/ui examples",
       "mode": "view"
+    },
+    {
+      "name": "search-registries",
+      "title": "Search Registries",
+      "subtitle": "shadcn/ui",
+      "description": "Search shadcn/ui registries",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -73,5 +81,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

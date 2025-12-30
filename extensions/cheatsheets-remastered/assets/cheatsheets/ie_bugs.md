@@ -1,9 +1,12 @@
 ---
 title: Legacy IE bugs
 category: HTML
-updated: 2018-03-06
+updated: 2018-03-06T00:00:00.000Z
 intro: |
   A bunch of bugs to take care of if you're going to target legacy IE browsers.
+tech: ie_bugs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### IE8: 'change' event

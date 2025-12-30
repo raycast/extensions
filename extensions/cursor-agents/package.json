@@ -16,6 +16,10 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "launch-agent",
@@ -88,7 +92,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.101.0",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.17.0",
     "date-fns": "^4.1.0",
     "image-size": "^2.0.2"

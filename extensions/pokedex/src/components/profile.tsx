@@ -75,6 +75,17 @@ export default function PokeProfile(props: { id: number }) {
       pokemon_v2_pokemonspeciesflavortexts,
     } = pokemon_v2_pokemonspecy;
 
+    // get descriptions from latest generation
+    const generations = pokemon_v2_pokemonspeciesflavortexts.map(
+      (f) => f.pokemon_v2_version.pokemon_v2_versiongroup.generation_id,
+    );
+    const latest = generations.sort().reverse()[0];
+
+    const flavors = pokemon_v2_pokemonspeciesflavortexts.filter(
+      (f) =>
+        f.pokemon_v2_version.pokemon_v2_versiongroup.generation_id === latest,
+    );
+
     const ev: string[] = [];
 
     const data = [
@@ -90,12 +101,7 @@ export default function PokeProfile(props: { id: number }) {
         h3: nameByLang[language].genus,
       },
       {
-        p: pokemon_v2_pokemonspeciesflavortexts.length
-          ? pokemon_v2_pokemonspeciesflavortexts
-              .reverse()[0]
-              .flavor_text.split("\n")
-              .join(" ")
-          : "",
+        p: flavors[0]?.flavor_text.split("\n").join(" "),
       },
       {
         img: {

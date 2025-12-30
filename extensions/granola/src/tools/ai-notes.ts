@@ -1,10 +1,10 @@
-import getCache from "../utils/getCache";
 import { convertDocumentToMarkdown } from "../utils/convertJsonNodes";
 import { showFailureToast } from "@raycast/utils";
 import { Document, DocumentStructure, PanelsByDocId } from "../utils/types";
 import { getTranscript } from "../utils/fetchData";
 import { getPanelId } from "../utils/getPanelId";
 import { getFolderInfoForAI, getFoldersWithCache } from "../utils/folderHelpers";
+import { getDocumentsList } from "../utils/fetchData";
 
 type Input = {
   /**
@@ -32,6 +32,9 @@ type Input = {
   /**
    * Optional specific note ID to fetch transcript for
    * Use when a user refers to a specific note they want to examine in detail
+   * CRITICAL: For task extraction queries like "what are the tasks from my latest meeting?",
+   * you MUST use this parameter with the ID obtained from list-meetings tool.
+   * Pattern: First call list-meetings with date:"latest" limit:1, then use the returned ID here.
    */
   noteId?: string;
   /**
@@ -53,6 +56,13 @@ type Input = {
    * Use "enhanced" when user asks for "AI notes", "enhanced", "processed notes"
    */
   contentType?: "enhanced" | "original" | "auto";
+  /**
+   * Whether to exclude content from the response
+   * Set to true when you only need metadata (title, date, ID) without the actual note content
+   * This is useful to prevent message size limits when dealing with multiple notes
+   * Default: false
+   */
+  excludeContent?: boolean;
 };
 
 type Note = {
@@ -142,12 +152,24 @@ function resolveEnhancedContent(panels: PanelsByDocId | undefined, documentId: s
  * Returns a list of notes from Granola that match the provided filters,
  * or folder information when listFolders is true.
  *
- * This tool supports two primary functions:
+ * This tool supports three primary functions:
  * 1. Note retrieval and filtering with optional transcript inclusion
  * 2. Folder listing and organization features
+ * 3. Metadata-only queries (with excludeContent=true) to avoid message size limits
  *
  * For note queries, it can filter by title, content, date, or folder.
  * For folder queries, it returns folder metadata including note counts.
+ *
+ * CRITICAL PATTERN for task extraction queries (e.g., "what are the tasks from my latest meeting?"):
+ * 1. First call list-meetings with { "date": "latest", "limit": 1 } to get the meeting ID
+ * 2. Then call THIS tool with { "noteId": "<id-from-step-1>", "includeTranscript": false }
+ * DO NOT use contentFilter or excludeContent for task extraction - use noteId instead.
+ *
+ * IMPORTANT: When dealing with queries that might return many notes (e.g., "all meetings",
+ * "tasks from meetings"), consider using:
+ * - The list-meetings tool for just metadata
+ * - This tool with excludeContent=true for filtered results without content
+ * - This tool with specific noteId to get full content for individual notes
  */
 export default async function tool(input: Input): Promise<Note[] | FolderInfo[]> {
   // Handle folder listing request using shared folder service
@@ -160,8 +182,9 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
     }
   }
 
-  const cache = getCache();
-  const documents = Object.values(cache?.state?.documents) as Document[];
+  const documents = (await getDocumentsList()) as Document[];
+  // Load panels for enhanced content access
+  const cache = await import("../utils/getCache").then((mod) => mod.default());
   const panels = cache?.state?.documentPanels;
   const notes: Note[] = [];
 
@@ -211,38 +234,42 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
 
     // Content resolution strategy based on user preference
     let content = "";
-    const requestedContentType = input.contentType || "auto";
 
-    if (requestedContentType === "original") {
-      // User explicitly wants their original notes
-      if (document.notes_markdown) {
-        content = document.notes_markdown;
-      }
-    } else if (requestedContentType === "enhanced") {
-      // User explicitly wants AI-enhanced notes
-      content = resolveEnhancedContent(panels, document.id);
+    // Skip content resolution if excludeContent is true
+    if (!input.excludeContent) {
+      const requestedContentType = input.contentType || "auto";
 
-      // If no enhanced content, try document.notes (structured notes)
-      if (!content && document.notes?.content) {
-        content = convertDocumentToMarkdown(document.notes as unknown as DocumentStructure);
-      }
-    } else {
-      // Auto mode: Try enhanced first, then fall back to original
-      content = resolveEnhancedContent(panels, document.id);
+      if (requestedContentType === "original") {
+        // User explicitly wants their original notes
+        if (document.notes_markdown) {
+          content = document.notes_markdown;
+        }
+      } else if (requestedContentType === "enhanced") {
+        // User explicitly wants AI-enhanced notes
+        content = resolveEnhancedContent(panels, document.id);
 
-      // If no panel content, try document.notes (structured notes)
-      if (!content && document.notes?.content) {
-        content = convertDocumentToMarkdown(document.notes as unknown as DocumentStructure);
+        // If no enhanced content, try document.notes (structured notes)
+        if (!content && document.notes?.content) {
+          content = convertDocumentToMarkdown(document.notes as unknown as DocumentStructure);
+        }
+      } else {
+        // Auto mode: Try enhanced first, then fall back to original
+        content = resolveEnhancedContent(panels, document.id);
+
+        // If no panel content, try document.notes (structured notes)
+        if (!content && document.notes?.content) {
+          content = convertDocumentToMarkdown(document.notes as unknown as DocumentStructure);
+        }
+
+        // Final fallback to user's original markdown notes
+        if (!content && document.notes_markdown) {
+          content = document.notes_markdown;
+        }
       }
 
-      // Final fallback to user's original markdown notes
-      if (!content && document.notes_markdown) {
-        content = document.notes_markdown;
-      }
+      // Skip if we still have no content and content is required
+      if (!content) continue;
     }
-
-    // Skip if we still have no content
-    if (!content) continue;
 
     const note: Note = {
       title: document.title,
@@ -290,36 +317,57 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
 
     // Apply date filter if provided and not empty
     if (input.date && input.date.trim() !== "") {
+      const inputLower = input.date.toLowerCase();
+      const isLatestQuery =
+        inputLower.includes("latest") ||
+        inputLower.includes("most recent") ||
+        inputLower === "recent" ||
+        inputLower === "newest";
+
+      if (isLatestQuery) {
+        // Treat "latest" style date filters as chronological lookups without additional filtering
+        return true;
+      }
+
       try {
         const noteDate = new Date(note.date);
         const noteDateStr = noteDate.toISOString().split("T")[0];
 
-        let targetDate: Date | null = null;
-        const inputLower = input.date.toLowerCase();
+        if (Number.isNaN(noteDate.getTime())) {
+          return true;
+        }
 
         if (inputLower === "today") {
-          targetDate = new Date();
-          return noteDateStr === targetDate.toISOString().split("T")[0];
-        } else if (inputLower === "yesterday") {
-          targetDate = new Date();
-          targetDate.setDate(targetDate.getDate() - 1);
-          return noteDateStr === targetDate.toISOString().split("T")[0];
-        } else if (inputLower === "last week") {
+          const today = new Date();
+          return noteDateStr === today.toISOString().split("T")[0];
+        }
+
+        if (inputLower === "yesterday") {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          return noteDateStr === yesterday.toISOString().split("T")[0];
+        }
+
+        if (inputLower === "last week" || inputLower.includes("week")) {
           const weekAgo = new Date();
           weekAgo.setDate(weekAgo.getDate() - 7);
           return noteDate >= weekAgo;
-        } else if (inputLower === "last month") {
+        }
+
+        if (inputLower === "last month" || inputLower.includes("month")) {
           const monthAgo = new Date();
           monthAgo.setMonth(monthAgo.getMonth() - 1);
           return noteDate >= monthAgo;
-        } else {
-          // Try parsing as ISO date
-          targetDate = new Date(input.date);
-          return noteDateStr === targetDate.toISOString().split("T")[0];
         }
-      } catch (e) {
-        showFailureToast(`Invalid date format or query: note.date=${note.date} or input.date=${input.date}`);
-        return false;
+
+        const targetDate = new Date(input.date);
+        if (Number.isNaN(targetDate.getTime())) {
+          return true;
+        }
+
+        return noteDateStr === targetDate.toISOString().split("T")[0];
+      } catch (error) {
+        return true;
       }
     }
 
