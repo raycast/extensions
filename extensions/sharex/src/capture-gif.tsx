@@ -4,10 +4,6 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-interface Preferences {
-  sharexPath: string;
-}
-
 export default async function Command() {
   await closeMainWindow();
 
