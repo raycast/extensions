@@ -3,21 +3,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { readClipboardImageFile, getContentType } from "./lib/clipboard";
 import { uploadToS3 } from "./lib/s3";
-import { buildPublicUrl, formatUrl, UrlFormat } from "./lib/format";
+import { buildPublicUrl, formatUrl } from "./lib/format";
 import { prettyBytes } from "./lib/bytes";
-
-interface Preferences {
-  s3Endpoint: string;
-  s3Region: string;
-  s3Bucket: string;
-  s3AccessKeyId: string;
-  s3SecretAccessKey: string;
-  s3KeyPrefix: string;
-  s3PathStyle: "path" | "virtual";
-  useCustomPublicUrl: boolean;
-  publicUrlBase?: string;
-  urlFormat: UrlFormat;
-}
 
 type State =
   | { status: "initial" }
