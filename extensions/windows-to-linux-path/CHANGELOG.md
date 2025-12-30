@@ -1,5 +1,5 @@
 # Windows To Linux Path
 
-## [Added Windows To Linux Path] - {PR_MERGE_DATE}
+## [v1.0.0 Added Windows To Linux Path] - {PR_MERGE_DATE}
 
 Initial version

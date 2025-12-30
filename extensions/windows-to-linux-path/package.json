@@ -16,7 +16,7 @@
           "name": "path",
           "type": "text",
           "required": true,
-          "placeholder": "C:/..."
+          "placeholder": "C:\\..."
         }
       ]
     }
