@@ -29,18 +29,17 @@ export function escapeAppleScriptString(str: string): string {
 
 /**
  * Builds a safe shell command for cd + optional command execution.
- * All arguments are properly escaped to prevent injection.
+ * Path is escaped to prevent injection. Command is passed through as-is
+ * because it's user-configured trusted input that may contain arguments
+ * (e.g., "claude --help", "npm run dev").
  */
 export function buildSafeShellCommand(path: string, command?: string): string {
   const safePath = escapeShellArg(path);
 
   if (command) {
-    // For commands, we need to be careful:
-    // - If it's a simple command like "claude" or "nvim", escape it
-    // - The command is user-provided and trusted (they configured it themselves)
-    // But we still escape to prevent accidental issues with special chars
-    const safeCommand = escapeShellArg(command);
-    return `cd ${safePath} && ${safeCommand}`;
+    // Command is user-configured and trusted - don't escape it
+    // as it may contain arguments (e.g., "claude --help", "npm run dev")
+    return `cd ${safePath} && ${command}`;
   }
 
   return `cd ${safePath}`;

@@ -14,10 +14,10 @@ export class GhosttyExecutor implements TerminalExecutor {
 
       let cmd: string;
       if (command) {
-        // Escape command individually to prevent shell injection
-        const safeCommand = escapeShellArg(command);
-        // Then escape the entire shell script for the outer shell
-        const shellScript = escapeShellArg(`${safeCommand}; exec $SHELL`);
+        // Command is user-configured and trusted - don't escape it
+        // as it may contain arguments (e.g., "claude --help", "npm run dev")
+        // Only escape the entire shell script for the outer exec() shell
+        const shellScript = escapeShellArg(`${command}; exec $SHELL`);
         cmd = `open -na Ghostty.app --args --working-directory=${safePath} -e sh -c ${shellScript}`;
       } else {
         cmd = `open -na Ghostty.app --args --working-directory=${safePath}`;
