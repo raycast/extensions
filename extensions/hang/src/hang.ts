@@ -208,11 +208,18 @@ async function createGoogleMeetMeeting(): Promise<string> {
 async function getZoomAccessToken(accountId: string, clientId: string, clientSecret: string): Promise<string> {
   // Check cache first (cache key includes credentials hash to invalidate on change)
   const cacheKey = `zoom_token_${accountId}_${clientId}`;
-  const cached = await LocalStorage.getItem<{ token: string; expiresAt: number }>(cacheKey);
+  const cachedJson = await LocalStorage.getItem<string>(cacheKey);
 
   // Use cached token if it exists and hasn't expired (with 5 minute buffer)
-  if (cached && cached.expiresAt > Date.now() + 5 * 60 * 1000) {
-    return cached.token;
+  if (cachedJson) {
+    try {
+      const cached = JSON.parse(cachedJson) as { token: string; expiresAt: number };
+      if (cached.expiresAt > Date.now() + 5 * 60 * 1000) {
+        return cached.token;
+      }
+    } catch {
+      // If parsing fails, ignore cache and continue
+    }
   }
 
   // Trim all credentials to remove any whitespace
@@ -284,10 +291,13 @@ async function getZoomAccessToken(accountId: string, clientId: string, clientSec
   // Cache the token (Server-to-Server tokens typically expire in 1 hour, but we'll cache for 50 minutes to be safe)
   const expiresIn = tokenData.expires_in || 3600; // Default to 1 hour
   const expiresAt = Date.now() + (expiresIn - 600) * 1000; // Cache for expires_in - 10 minutes
-  await LocalStorage.setItem(cacheKey, {
-    token: tokenData.access_token,
-    expiresAt,
-  });
+  await LocalStorage.setItem(
+    cacheKey,
+    JSON.stringify({
+      token: tokenData.access_token,
+      expiresAt,
+    }),
+  );
 
   return tokenData.access_token;
 }
