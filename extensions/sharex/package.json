@@ -7,8 +7,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "sharex-library",
-      "title": "ShareX Library",
+      "name": "browse-library",
+      "title": "Browse Library",
       "description": "Access your screenshot library",
       "mode": "view"
     },
