@@ -10,11 +10,26 @@ import {
   Toast,
 } from "@raycast/api";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { DEFAULT_SETUP_MESSAGE, isMissingSetupError, toErrorMessage } from "./errors";
+import {
+  DEFAULT_SETUP_MESSAGE,
+  isMissingSetupError,
+  toErrorMessage,
+} from "./errors";
 import { setupSql } from "./setupSql";
-import { createSupabaseClient, fetchCronJobs, fetchRecentRuns, getSqlEditorUrl } from "./supabase";
+import {
+  createSupabaseClient,
+  fetchCronJobs,
+  fetchRecentRuns,
+  getSqlEditorUrl,
+} from "./supabase";
 import { ExtensionPreferences, FetchMode, JobRunDetail } from "./types";
-import { formatDateTime, formatDuration, jobRunHadErrors, normalizeStatus, statusLabel } from "./utils";
+import {
+  formatDateTime,
+  formatDuration,
+  jobRunHadErrors,
+  normalizeStatus,
+  statusLabel,
+} from "./utils";
 
 type RunState = {
   isLoading: boolean;
@@ -34,37 +49,63 @@ export default function CronRuns() {
     mode: "view",
   });
 
-  const runHistoryLimit = useMemo(() => parsePositiveInt(preferences.runHistoryLimit, 25), [preferences]);
-  const client = useMemo(() => createSupabaseClient(preferences), [preferences.supabaseUrl, preferences.serviceRoleKey]);
-  const sqlEditorUrl = useMemo(() => getSqlEditorUrl(preferences.supabaseUrl), [preferences.supabaseUrl]);
+  const runHistoryLimit = useMemo(
+    () => parsePositiveInt(preferences.runHistoryLimit, 25),
+    [preferences],
+  );
+  const client = useMemo(
+    () => createSupabaseClient(preferences),
+    [preferences.supabaseUrl, preferences.serviceRoleKey],
+  );
+  const sqlEditorUrl = useMemo(
+    () => getSqlEditorUrl(preferences.supabaseUrl),
+    [preferences.supabaseUrl],
+  );
 
   const loadRuns = useCallback(
     async (showErrors: boolean) => {
       setState((current) => ({ ...current, isLoading: true }));
       try {
         const { jobs, mode } = await fetchCronJobs(client);
-        const jobNameMap = new Map<number, string>(jobs.map((job) => [job.jobid, job.jobname]));
+        const jobNameMap = new Map<number, string>(
+          jobs.map((job) => [job.jobid, job.jobname]),
+        );
         const runs = await fetchRecentRuns(client, runHistoryLimit, mode);
         const enriched = runs.map((run) => ({
           ...run,
-          jobname: run.jobname ?? jobNameMap.get(run.jobid) ?? `Job ${run.jobid}`,
+          jobname:
+            run.jobname ?? jobNameMap.get(run.jobid) ?? `Job ${run.jobid}`,
         }));
-        setState({ isLoading: false, runs: enriched, error: undefined, missingSetup: false, mode });
+        setState({
+          isLoading: false,
+          runs: enriched,
+          error: undefined,
+          missingSetup: false,
+          mode,
+        });
       } catch (error) {
         const message = toErrorMessage(error, DEFAULT_SETUP_MESSAGE);
         const missingSetup = isMissingSetupError(error);
-        setState({ isLoading: false, runs: [], error: message, missingSetup, mode: "view" });
+        setState({
+          isLoading: false,
+          runs: [],
+          error: message,
+          missingSetup,
+          mode: "view",
+        });
 
         if (showErrors) {
           await showToast({
             style: Toast.Style.Failure,
-            title: missingSetup ? "Setup required" : "Failed to load run history",
+            title: missingSetup
+              ? "Setup required"
+              : "Failed to load run history",
             message,
           });
         }
       }
     },
-    [client, runHistoryLimit]
+    [client, runHistoryLimit],
   );
 
   useEffect(() => {
@@ -89,8 +130,13 @@ export default function CronRuns() {
         description={emptyDescription}
         actions={
           <ActionPanel>
-            {sqlEditorUrl ? <Action.OpenInBrowser title="Open Supabase SQL Editor" url={sqlEditorUrl} /> : null}
-            <Action.CopyToClipboard title="Copy Setup SQL" content={setupSql} />
+            {sqlEditorUrl ? (
+              <Action.OpenInBrowser
+                title="Open Supabase Sql Editor"
+                url={sqlEditorUrl}
+              />
+            ) : null}
+            <Action.CopyToClipboard title="Copy Setup Sql" content={setupSql} />
             <Action
               title="Open Extension Preferences"
               icon={Icon.Gear}
@@ -102,11 +148,13 @@ export default function CronRuns() {
 
       {state.runs.map((run) => {
         const normalizedStatus = normalizeStatus(run.status);
-        const status = normalizedStatus.includes("running") || normalizedStatus.includes("start")
-          ? "running"
-          : jobRunHadErrors(run)
-            ? "failed"
-            : "success";
+        const status =
+          normalizedStatus.includes("running") ||
+          normalizedStatus.includes("start")
+            ? "running"
+            : jobRunHadErrors(run)
+              ? "failed"
+              : "success";
         const duration = formatDuration(run.start_time, run.end_time);
 
         return (
@@ -126,22 +174,52 @@ export default function CronRuns() {
                       text={statusLabel(status)}
                       icon={statusIcon(status)}
                     />
-                    <List.Item.Detail.Metadata.Label title="Start" text={formatDateTime(run.start_time)} />
-                    <List.Item.Detail.Metadata.Label title="Duration" text={duration} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Start"
+                      text={formatDateTime(run.start_time)}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Duration"
+                      text={duration}
+                    />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Database" text={run.database} />
-                    <List.Item.Detail.Metadata.Label title="User" text={run.username} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Database"
+                      text={run.database}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="User"
+                      text={run.username}
+                    />
                   </List.Item.Detail.Metadata>
                 }
               />
             }
             actions={
               <ActionPanel>
-                <Action title="Refresh" icon={Icon.Repeat} onAction={() => void loadRuns(true)} />
-                <Action.CopyToClipboard title="Copy Return Message" content={run.return_message ?? ""} />
-                <Action.CopyToClipboard title="Copy Command" content={run.command ?? ""} />
-                {sqlEditorUrl ? <Action.OpenInBrowser title="Open Supabase SQL Editor" url={sqlEditorUrl} /> : null}
-                <Action.CopyToClipboard title="Copy Setup SQL" content={setupSql} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.Repeat}
+                  onAction={() => void loadRuns(true)}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Return Message"
+                  content={run.return_message ?? ""}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Command"
+                  content={run.command ?? ""}
+                />
+                {sqlEditorUrl ? (
+                  <Action.OpenInBrowser
+                    title="Open Supabase Sql Editor"
+                    url={sqlEditorUrl}
+                  />
+                ) : null}
+                <Action.CopyToClipboard
+                  title="Copy Setup Sql"
+                  content={setupSql}
+                />
                 <Action
                   title="Open Extension Preferences"
                   icon={Icon.Gear}
@@ -165,13 +243,16 @@ function parsePositiveInt(value: string | undefined, fallback: number): number {
 function statusIcon(status: "running" | "success" | "failed" | "unknown") {
   switch (status) {
     case "running":
-      return { source: Icon.Play, tintColor: Color.Blue };
+      return { source: Icon.PlayCircle, tintColor: Color.Blue };
     case "success":
       return { source: Icon.CheckCircle, tintColor: Color.Green };
     case "failed":
       return { source: Icon.XmarkCircle, tintColor: Color.Red };
     default:
-      return { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText };
+      return {
+        source: Icon.QuestionMarkCircle,
+        tintColor: Color.SecondaryText,
+      };
   }
 }
 

@@ -11,11 +11,25 @@ import {
 } from "@raycast/api";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { JobRuns } from "./job-runs";
-import { DEFAULT_SETUP_MESSAGE, isMissingSetupError, toErrorMessage } from "./errors";
+import {
+  DEFAULT_SETUP_MESSAGE,
+  isMissingSetupError,
+  toErrorMessage,
+} from "./errors";
 import { setupSql } from "./setupSql";
-import { createSupabaseClient, fetchCronJobs, fetchLastRun, getSqlEditorUrl } from "./supabase";
+import {
+  createSupabaseClient,
+  fetchCronJobs,
+  fetchLastRun,
+  getSqlEditorUrl,
+} from "./supabase";
 import { CronJobWithRun, ExtensionPreferences, FetchMode } from "./types";
-import { computeJobStatus, formatDateTime, formatDuration, statusLabel } from "./utils";
+import {
+  computeJobStatus,
+  formatDateTime,
+  formatDuration,
+  statusLabel,
+} from "./utils";
 
 type ViewState = {
   isLoading: boolean;
@@ -35,10 +49,22 @@ export default function CronJobs() {
     mode: "view",
   });
 
-  const autoRefreshMinutes = useMemo(() => parsePositiveInt(preferences.autoRefreshMinutes, 60), [preferences]);
-  const runHistoryLimit = useMemo(() => parsePositiveInt(preferences.runHistoryLimit, 5), [preferences]);
-  const client = useMemo(() => createSupabaseClient(preferences), [preferences.supabaseUrl, preferences.serviceRoleKey]);
-  const sqlEditorUrl = useMemo(() => getSqlEditorUrl(preferences.supabaseUrl), [preferences.supabaseUrl]);
+  const autoRefreshMinutes = useMemo(
+    () => parsePositiveInt(preferences.autoRefreshMinutes, 60),
+    [preferences],
+  );
+  const runHistoryLimit = useMemo(
+    () => parsePositiveInt(preferences.runHistoryLimit, 5),
+    [preferences],
+  );
+  const client = useMemo(
+    () => createSupabaseClient(preferences),
+    [preferences.supabaseUrl, preferences.serviceRoleKey],
+  );
+  const sqlEditorUrl = useMemo(
+    () => getSqlEditorUrl(preferences.supabaseUrl),
+    [preferences.supabaseUrl],
+  );
 
   const loadJobs = useCallback(
     async (showErrors: boolean) => {
@@ -51,9 +77,13 @@ export default function CronJobs() {
               const lastRun = await fetchLastRun(client, job.jobname, mode);
               return { ...job, lastRun };
             } catch (error) {
-              return { ...job, lastRun: null, lastRunFetchError: toErrorMessage(error) };
+              return {
+                ...job,
+                lastRun: null,
+                lastRunFetchError: toErrorMessage(error),
+              };
             }
-          })
+          }),
         );
 
         setState({
@@ -83,7 +113,7 @@ export default function CronJobs() {
         }
       }
     },
-    [client]
+    [client],
   );
 
   useEffect(() => {
@@ -92,9 +122,12 @@ export default function CronJobs() {
 
   useEffect(() => {
     if (autoRefreshMinutes <= 0) return;
-    const interval = setInterval(() => {
-      void loadJobs(false);
-    }, autoRefreshMinutes * 60 * 1000);
+    const interval = setInterval(
+      () => {
+        void loadJobs(false);
+      },
+      autoRefreshMinutes * 60 * 1000,
+    );
 
     return () => clearInterval(interval);
   }, [autoRefreshMinutes, loadJobs]);
@@ -117,8 +150,13 @@ export default function CronJobs() {
         description={emptyDescription}
         actions={
           <ActionPanel>
-            {sqlEditorUrl ? <Action.OpenInBrowser title="Open Supabase SQL Editor" url={sqlEditorUrl} /> : null}
-            <Action.CopyToClipboard title="Copy Setup SQL" content={setupSql} />
+            {sqlEditorUrl ? (
+              <Action.OpenInBrowser
+                title="Open Supabase Sql Editor"
+                url={sqlEditorUrl}
+              />
+            ) : null}
+            <Action.CopyToClipboard title="Copy Setup Sql" content={setupSql} />
             <Action
               title="Open Extension Preferences"
               icon={Icon.Gear}
@@ -144,15 +182,25 @@ export default function CronJobs() {
             icon={statusIcon(status)}
             accessories={[
               { text: lastRunText, icon: Icon.Clock },
-              { text: job.active ? "Active" : "Paused", icon: job.active ? Icon.Play : Icon.Pause },
+              {
+                text: job.active ? "Active" : "Paused",
+                icon: job.active ? Icon.Play : Icon.Pause,
+              },
             ]}
             detail={
               <List.Item.Detail
                 markdown={jobDetailMarkdown(job)}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Status" text={statusLabel(status)} icon={statusIcon(status)} />
-                    <List.Item.Detail.Metadata.Label title="Schedule" text={job.schedule} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Status"
+                      text={statusLabel(status)}
+                      icon={statusIcon(status)}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Schedule"
+                      text={job.schedule}
+                    />
                     <List.Item.Detail.Metadata.TagList title="Active">
                       <List.Item.Detail.Metadata.TagList.Item
                         text={job.active ? "Yes" : "No"}
@@ -161,16 +209,28 @@ export default function CronJobs() {
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Separator />
                     {job.database ? (
-                      <List.Item.Detail.Metadata.Label title="Database" text={job.database} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Database"
+                        text={job.database}
+                      />
                     ) : null}
                     {job.username ? (
-                      <List.Item.Detail.Metadata.Label title="User" text={job.username} />
+                      <List.Item.Detail.Metadata.Label
+                        title="User"
+                        text={job.username}
+                      />
                     ) : null}
                     {job.nodename ? (
-                      <List.Item.Detail.Metadata.Label title="Node" text={job.nodename} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Node"
+                        text={job.nodename}
+                      />
                     ) : null}
                     {typeof job.nodeport === "number" ? (
-                      <List.Item.Detail.Metadata.Label title="Node Port" text={String(job.nodeport)} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Node Port"
+                        text={String(job.nodeport)}
+                      />
                     ) : null}
                     <List.Item.Detail.Metadata.Separator />
                     {job.lastRun ? (
@@ -181,12 +241,18 @@ export default function CronJobs() {
                         />
                         <List.Item.Detail.Metadata.Label
                           title="Duration"
-                          text={formatDuration(job.lastRun.start_time, job.lastRun.end_time)}
+                          text={formatDuration(
+                            job.lastRun.start_time,
+                            job.lastRun.end_time,
+                          )}
                         />
                       </>
                     ) : null}
                     {job.lastRunFetchError ? (
-                      <List.Item.Detail.Metadata.Label title="Run Error" text={job.lastRunFetchError} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Run Error"
+                        text={job.lastRunFetchError}
+                      />
                     ) : null}
                   </List.Item.Detail.Metadata>
                 }
@@ -194,15 +260,37 @@ export default function CronJobs() {
             }
             actions={
               <ActionPanel>
-                <Action title="Refresh" icon={Icon.Repeat} onAction={() => void loadJobs(true)} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.Repeat}
+                  onAction={() => void loadJobs(true)}
+                />
                 <Action.Push
                   title="View Run History"
                   icon={Icon.List}
-                  target={<JobRuns client={client} job={job} mode={state.mode} limit={runHistoryLimit} />}
+                  target={
+                    <JobRuns
+                      client={client}
+                      job={job}
+                      mode={state.mode}
+                      limit={runHistoryLimit}
+                    />
+                  }
                 />
-                {sqlEditorUrl ? <Action.OpenInBrowser title="Open Supabase SQL Editor" url={sqlEditorUrl} /> : null}
-                <Action.CopyToClipboard title="Copy Setup SQL" content={setupSql} />
-                <Action.CopyToClipboard title="Copy Job Command" content={job.command ?? ""} />
+                {sqlEditorUrl ? (
+                  <Action.OpenInBrowser
+                    title="Open Supabase Sql Editor"
+                    url={sqlEditorUrl}
+                  />
+                ) : null}
+                <Action.CopyToClipboard
+                  title="Copy Setup Sql"
+                  content={setupSql}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Job Command"
+                  content={job.command ?? ""}
+                />
                 <Action
                   title="Open Extension Preferences"
                   icon={Icon.Gear}
@@ -226,13 +314,16 @@ function parsePositiveInt(value: string | undefined, fallback: number): number {
 function statusIcon(status: "running" | "success" | "failed" | "unknown") {
   switch (status) {
     case "running":
-      return { source: Icon.Play, tintColor: Color.Blue };
+      return { source: Icon.PlayCircle, tintColor: Color.Blue };
     case "success":
       return { source: Icon.CheckCircle, tintColor: Color.Green };
     case "failed":
       return { source: Icon.XmarkCircle, tintColor: Color.Red };
     default:
-      return { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText };
+      return {
+        source: Icon.QuestionMarkCircle,
+        tintColor: Color.SecondaryText,
+      };
   }
 }
 

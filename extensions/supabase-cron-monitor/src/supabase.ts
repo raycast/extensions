@@ -1,8 +1,20 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { MissingSetupError, SupabaseErrorLike, isMissingSetupErrorLike, toErrorMessage } from "./errors";
-import { CronJob, ExtensionPreferences, FetchMode, JobRunDetail } from "./types";
+import {
+  MissingSetupError,
+  SupabaseErrorLike,
+  isMissingSetupErrorLike,
+  toErrorMessage,
+} from "./errors";
+import {
+  CronJob,
+  ExtensionPreferences,
+  FetchMode,
+  JobRunDetail,
+} from "./types";
 
-export function createSupabaseClient(preferences: ExtensionPreferences): SupabaseClient {
+export function createSupabaseClient(
+  preferences: ExtensionPreferences,
+): SupabaseClient {
   return createClient(preferences.supabaseUrl, preferences.serviceRoleKey, {
     auth: {
       persistSession: false,
@@ -17,8 +29,13 @@ export function createSupabaseClient(preferences: ExtensionPreferences): Supabas
   });
 }
 
-export async function fetchCronJobs(client: SupabaseClient): Promise<{ jobs: CronJob[]; mode: FetchMode }> {
-  const { data, error } = await client.from("cron_job").select("*").order("jobname", { ascending: true });
+export async function fetchCronJobs(
+  client: SupabaseClient,
+): Promise<{ jobs: CronJob[]; mode: FetchMode }> {
+  const { data, error } = await client
+    .from("cron_job")
+    .select("*")
+    .order("jobname", { ascending: true });
   if (!error && data) {
     return { jobs: data as CronJob[], mode: "view" };
   }
@@ -29,7 +46,9 @@ export async function fetchCronJobs(client: SupabaseClient): Promise<{ jobs: Cro
       return { jobs: fallback.data as CronJob[], mode: "rpc" };
     }
 
-    throw new MissingSetupError(toErrorMessage(fallback.error, toErrorMessage(error)));
+    throw new MissingSetupError(
+      toErrorMessage(fallback.error, toErrorMessage(error)),
+    );
   }
 
   throw new Error(toErrorMessage(error));
@@ -38,7 +57,7 @@ export async function fetchCronJobs(client: SupabaseClient): Promise<{ jobs: Cro
 export async function fetchLastRun(
   client: SupabaseClient,
   jobName: string,
-  mode: FetchMode
+  mode: FetchMode,
 ): Promise<JobRunDetail | null> {
   if (mode === "rpc") {
     return fetchLastRunViaRpc(client, jobName);
@@ -66,7 +85,7 @@ export async function fetchJobRuns(
   client: SupabaseClient,
   jobName: string,
   limit: number,
-  mode: FetchMode
+  mode: FetchMode,
 ): Promise<JobRunDetail[]> {
   if (mode === "rpc") {
     return fetchJobRunsViaRpc(client, jobName, limit);
@@ -93,7 +112,7 @@ export async function fetchJobRuns(
 export async function fetchRecentRuns(
   client: SupabaseClient,
   limit: number,
-  mode: FetchMode
+  mode: FetchMode,
 ): Promise<JobRunDetail[]> {
   if (mode === "rpc") {
     return fetchRecentRunsViaRpc(client, limit);
@@ -127,19 +146,13 @@ export function getSqlEditorUrl(supabaseUrl: string): string | null {
   }
 }
 
-export function getDashboardUrl(supabaseUrl: string): string | null {
-  try {
-    const url = new URL(supabaseUrl);
-    const match = url.hostname.match(/^([^.]+)\.supabase\.co$/);
-    if (!match) return null;
-    return `https://supabase.com/dashboard/project/${match[1]}`;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchLastRunViaRpc(client: SupabaseClient, jobName: string): Promise<JobRunDetail | null> {
-  const { data, error } = await client.rpc("get_last_job_run", { p_jobname: jobName });
+async function fetchLastRunViaRpc(
+  client: SupabaseClient,
+  jobName: string,
+): Promise<JobRunDetail | null> {
+  const { data, error } = await client.rpc("get_last_job_run", {
+    p_jobname: jobName,
+  });
   if (!error && data) {
     return (data as JobRunDetail[] | null)?.[0] ?? null;
   }
@@ -154,9 +167,12 @@ async function fetchLastRunViaRpc(client: SupabaseClient, jobName: string): Prom
 async function fetchJobRunsViaRpc(
   client: SupabaseClient,
   jobName: string,
-  limit: number
+  limit: number,
 ): Promise<JobRunDetail[]> {
-  const { data, error } = await client.rpc("get_cron_job_runs", { p_jobname: jobName, p_limit: limit });
+  const { data, error } = await client.rpc("get_cron_job_runs", {
+    p_jobname: jobName,
+    p_limit: limit,
+  });
   if (!error && data) {
     return data as JobRunDetail[];
   }
@@ -168,8 +184,14 @@ async function fetchJobRunsViaRpc(
   throw new Error(toErrorMessage(error));
 }
 
-async function fetchRecentRunsViaRpc(client: SupabaseClient, limit: number): Promise<JobRunDetail[]> {
-  const { data, error } = await client.rpc("get_cron_job_runs", { p_jobname: null, p_limit: limit });
+async function fetchRecentRunsViaRpc(
+  client: SupabaseClient,
+  limit: number,
+): Promise<JobRunDetail[]> {
+  const { data, error } = await client.rpc("get_cron_job_runs", {
+    p_jobname: null,
+    p_limit: limit,
+  });
   if (!error && data) {
     return data as JobRunDetail[];
   }

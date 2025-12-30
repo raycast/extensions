@@ -15,15 +15,20 @@ export type SupabaseErrorLike = {
   code?: string;
 };
 
-export function isMissingSetupError(error: unknown): error is MissingSetupError {
+export function isMissingSetupError(
+  error: unknown,
+): error is MissingSetupError {
   return error instanceof MissingSetupError;
 }
 
-export function isMissingSetupErrorLike(error: SupabaseErrorLike | null | undefined): boolean {
+export function isMissingSetupErrorLike(
+  error: SupabaseErrorLike | null | undefined,
+): boolean {
   if (!error) return false;
   if (error.code === "42P01" || error.code === "42883") return true;
 
-  const haystack = `${error.message ?? ""} ${error.details ?? ""} ${error.hint ?? ""}`.toLowerCase();
+  const haystack =
+    `${error.message ?? ""} ${error.details ?? ""} ${error.hint ?? ""}`.toLowerCase();
   return (
     haystack.includes("cron_job") ||
     haystack.includes("cron_job_run_details") ||
@@ -34,7 +39,10 @@ export function isMissingSetupErrorLike(error: SupabaseErrorLike | null | undefi
   );
 }
 
-export function toErrorMessage(error: unknown, fallback = "Unknown error"): string {
+export function toErrorMessage(
+  error: unknown,
+  fallback = "Unknown error",
+): string {
   if (!error) return fallback;
   if (error instanceof Error && error.message) return error.message;
 

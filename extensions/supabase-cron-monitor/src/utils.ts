@@ -13,13 +13,18 @@ export function jobRunHadErrors(run: JobRunDetail): boolean {
   return true;
 }
 
-export function computeJobStatus(job: CronJob & { lastRun?: JobRunDetail | null }): JobStatus {
+export function computeJobStatus(
+  job: CronJob & { lastRun?: JobRunDetail | null },
+): JobStatus {
   if (job.lastRun) {
     const normalized = normalizeStatus(job.lastRun.status);
-    if (normalized.includes("running") || normalized.includes("start")) return "running";
+    if (normalized.includes("running") || normalized.includes("start"))
+      return "running";
     if (jobRunHadErrors(job.lastRun)) return "failed";
-    if (normalized.includes("success") || normalized.includes("succeeded")) return "success";
-    if (normalized.includes("failed") || normalized.includes("error")) return "failed";
+    if (normalized.includes("success") || normalized.includes("succeeded"))
+      return "success";
+    if (normalized.includes("failed") || normalized.includes("error"))
+      return "failed";
   }
 
   return "unknown";
@@ -49,13 +54,20 @@ export function formatDateTime(value?: string | null): string {
   }).format(parsed);
 }
 
-export function formatDuration(start?: string | null, end?: string | null): string {
+export function formatDuration(
+  start?: string | null,
+  end?: string | null,
+): string {
   if (!start || !end) return "-";
   const startDate = new Date(start);
   const endDate = new Date(end);
-  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return "-";
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()))
+    return "-";
 
-  const totalSeconds = Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / 1000));
+  const totalSeconds = Math.max(
+    0,
+    Math.round((endDate.getTime() - startDate.getTime()) / 1000),
+  );
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
