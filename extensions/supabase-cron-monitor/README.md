@@ -20,6 +20,7 @@ Monitor Supabase `pg_cron` jobs and run history directly in Raycast.
 ## Commands
 - **Cron Jobs** (`cron-jobs`): list jobs, view details, and open per-job run history.
 - **Cron Runs** (`cron-runs`): browse recent runs across all jobs.
+- **Menubar Supabase Cron Monitor** (`menubar-cron-monitor`): live cron health and actions in the menu bar.
 
 ## Helpful Actions
 - Open Supabase SQL editor

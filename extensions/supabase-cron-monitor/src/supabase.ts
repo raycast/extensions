@@ -127,6 +127,17 @@ export function getSqlEditorUrl(supabaseUrl: string): string | null {
   }
 }
 
+export function getDashboardUrl(supabaseUrl: string): string | null {
+  try {
+    const url = new URL(supabaseUrl);
+    const match = url.hostname.match(/^([^.]+)\.supabase\.co$/);
+    if (!match) return null;
+    return `https://supabase.com/dashboard/project/${match[1]}`;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchLastRunViaRpc(client: SupabaseClient, jobName: string): Promise<JobRunDetail | null> {
   const { data, error } = await client.rpc("get_last_job_run", { p_jobname: jobName });
   if (!error && data) {
