@@ -106,16 +106,18 @@ export default function PokeMoves(props: { id?: number }) {
                               />
                             }
                           />
-                          <Action.Push
-                            title="Learnset"
-                            icon={Icon.List}
-                            target={
-                              <MoveLearnset
-                                name={move.pokemon_v2_movenames[0].name}
-                                moves={move.pokemon_v2_pokemonmoves}
-                              />
-                            }
-                          />
+                          {move.pokemon_v2_movenames.length > 0 && (
+                            <Action.Push
+                              title="Learnset"
+                              icon={Icon.List}
+                              target={
+                                <MoveLearnset
+                                  name={move.pokemon_v2_movenames[0].name}
+                                  moves={move.pokemon_v2_pokemonmoves}
+                                />
+                              }
+                            />
+                          )}
                         </ActionPanel.Section>
                       </ActionPanel>
                     )
