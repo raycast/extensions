@@ -68,8 +68,8 @@
     "@supabase/supabase-js": "^2.47.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "@types/react": "^18.2.0",
-    "typescript": "^5.5.0"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "typescript": "^5.8.2"
   }
 }
