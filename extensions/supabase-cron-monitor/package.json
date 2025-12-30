@@ -1,0 +1,75 @@
+{
+  "name": "supabase-cron-monitor",
+  "title": "Supabase Cron Monitor",
+  "description": "Monitor Supabase pg_cron jobs and run history.",
+  "version": "1.0.0",
+  "author": "adrianmarten",
+  "license": "MIT",
+  "icon": "icon.png",
+  "platforms": ["macOS"],
+  "categories": ["Developer Tools", "Productivity"],
+  "keywords": ["supabase", "cron", "pg_cron", "monitoring", "scheduler", "database", "jobs"],
+  "commands": [
+    {
+      "name": "cron-jobs",
+      "title": "Cron Jobs",
+      "description": "List Supabase pg_cron jobs and last runs",
+      "mode": "view"
+    },
+    {
+      "name": "cron-runs",
+      "title": "Cron Runs",
+      "description": "Browse recent pg_cron run history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "supabaseUrl",
+      "title": "Supabase URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://your-project.supabase.co",
+      "description": "Project URL from Supabase settings."
+    },
+    {
+      "name": "serviceRoleKey",
+      "title": "Service Role Key",
+      "type": "password",
+      "required": true,
+      "description": "Keep this secret; Raycast stores password preferences securely."
+    },
+    {
+      "name": "autoRefreshMinutes",
+      "title": "Auto Refresh (minutes)",
+      "type": "textfield",
+      "required": false,
+      "default": "60",
+      "placeholder": "60",
+      "description": "Refresh interval in minutes."
+    },
+    {
+      "name": "runHistoryLimit",
+      "title": "Run History Limit",
+      "type": "textfield",
+      "required": false,
+      "default": "5",
+      "placeholder": "5",
+      "description": "Number of runs to show in history views."
+    }
+  ],
+  "scripts": {
+    "build": "npx ray build",
+    "dev": "npx ray develop",
+    "lint": "npx ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.73.0",
+    "@supabase/supabase-js": "^2.47.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "typescript": "^5.5.0"
+  }
+}
