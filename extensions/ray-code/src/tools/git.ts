@@ -177,7 +177,10 @@ function isReadOnlyCommand(subcommand: GitSubcommand, args: string): boolean {
   if (subcommand === "stash") {
     const tokens = parseArgs(args);
     const stashSubcommand = tokens[0];
-    return stashSubcommand !== undefined && READ_ONLY_STASH_SUBCOMMANDS.has(stashSubcommand);
+    if (stashSubcommand === undefined) {
+      return false; // git stash without args creates a new stash (write operation)
+    }
+    return READ_ONLY_STASH_SUBCOMMANDS.has(stashSubcommand);
   }
 
   return false;
