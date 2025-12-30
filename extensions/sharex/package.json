@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sharex",
+  "title": "ShareX",
+  "description": "Browse and create ShareX screenshots, videos, and GIFs from Raycast",
+  "icon": "ShareX_Logo.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sharex-library",
+      "title": "ShareX Library",
+      "description": "Access your screenshot library",
+      "mode": "view"
+    },
+    {
+      "name": "capture-screenshot",
+      "title": "Capture Screenshot",
+      "description": "Capture screenshot via ShareX",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-video",
+      "title": "Capture Video",
+      "description": "Capture screen as video via ShareX",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-gif",
+      "title": "Capture GIF",
+      "description": "Capture screen as GIF via ShareX",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "the_revolution",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "preferences": [
+    {
+      "name": "screenshotsPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Screenshots Path",
+      "description": "Path to ShareX screenshots folder",
+      "placeholder": "Leave empty for default path"
+    },
+    {
+      "name": "sharexPath",
+      "type": "textfield",
+      "required": false,
+      "title": "ShareX Executable Path",
+      "description": "Path to ShareX.exe",
+      "default": "C:\\Program Files\\ShareX\\ShareX.exe",
+      "placeholder": "C:\\Program Files\\ShareX\\ShareX.exe"
+    },
+    {
+      "name": "folderLimit",
+      "type": "textfield",
+      "required": false,
+      "title": "Folder Limit",
+      "description": "Number of recently created folders to show",
+      "default": "5",
+      "placeholder": "5"
+    }
+  ]
+}
