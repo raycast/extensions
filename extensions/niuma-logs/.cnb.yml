@@ -1,0 +1,49 @@
+main:
+  push:
+    bvt:
+      name: bvt
+      docker:
+        image: node:22-alpine
+      stages:
+        - name: install
+          script: npm install 
+        - name: build
+          script: npm run build
+        
+$:
+  tag_push:
+    release:
+      name: release
+      docker:
+        image: node:22-alpine
+      stages:
+        - name: install
+          script: npm install 
+
+        - name: build
+          script: npm run build -- -e dist -o ./niuma-logs
+
+        - name: zip
+          script: |
+            apk update
+            apk add zip
+            zip -r niuma-logs.zip niuma-logs
+
+        - name: changelog
+          image: cnbcool/changelog
+          exports:
+            latestChangeLog: LATEST_CHANGE_LOG
+        
+        - name: create release
+          type: git:release
+          options:
+            title: ${CNB_BRANCH}
+            description: ${LATEST_CHANGE_LOG}
+            latest: true
+
+        - name: release upload attachments
+          image: cnbcool/attachments:latest
+          settings:
+            attachments:
+              - ./niuma-logs.zip
+        
