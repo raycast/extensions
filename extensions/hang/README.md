@@ -18,26 +18,12 @@ Quickly create a meeting invite out of thin air.
 
 ## Setup
 
-### Google Meet
-Works out of the box! No setup required for most users.
-
-For advanced setup with your own OAuth credentials, see [GOOGLE_MEET_SETUP.md](./GOOGLE_MEET_SETUP.md).
-
-### Zoom
-See [ZOOM_SETUP.md](./ZOOM_SETUP.md) for detailed setup instructions.
-
-You'll need:
-- Zoom Account ID
-- Zoom Client ID  
-- Zoom Client Secret
-
-Get these from your [Zoom App Credentials](https://marketplace.zoom.us/develop/create).
+Works out of the box! No setup required. The extension uses a secure backend that handles OAuth for both Google Meet and Zoom.
 
 ## Preferences
 
 - **Meeting Platform** - Choose Google Meet or Zoom (default: Google Meet)
 - **Auto-open Link** - Automatically open links in browser after creating (default: off)
-- **Zoom Credentials** - Required for Zoom integration (see ZOOM_SETUP.md)
 
 ## Usage
 

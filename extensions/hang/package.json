@@ -42,54 +42,6 @@
       ]
     },
     {
-      "name": "googleClientId",
-      "type": "textfield",
-      "required": false,
-      "title": "Google OAuth Client ID (Optional)",
-      "description": "Override the default Client ID. Most users don't need to set this - the extension uses a shared Client ID. Only set this if you want to use your own OAuth app.",
-      "placeholder": "Leave empty to use default"
-    },
-    {
-      "name": "googleClientSecret",
-      "type": "password",
-      "required": false,
-      "title": "Google OAuth Client Secret (Optional)",
-      "description": "Override the default Client Secret. Most users don't need to set this - the extension uses a shared Client Secret. Only set this if you want to use your own OAuth app.",
-      "placeholder": "Leave empty to use default"
-    },
-    {
-      "name": "zoomAccessToken",
-      "type": "password",
-      "required": false,
-      "title": "Zoom Access Token (Optional)",
-      "description": "Pre-generated Zoom access token. If provided, this will be used directly. Otherwise, the extension will generate tokens using Account ID, Client ID, and Client Secret. You can also set ZOOM_ACCESS_TOKEN in a .env file for development.",
-      "placeholder": "Enter your Zoom Access Token (optional)"
-    },
-    {
-      "name": "zoomAccountId",
-      "type": "textfield",
-      "required": false,
-      "title": "Zoom Account ID (Optional)",
-      "description": "Your Zoom Account ID from your Server-to-Server OAuth app. Required if not using Access Token. Get this from https://marketplace.zoom.us/develop/create (App Credentials tab). You can also set ZOOM_ACCOUNT_ID in a .env file for development.",
-      "placeholder": "Enter your Zoom Account ID"
-    },
-    {
-      "name": "zoomClientId",
-      "type": "textfield",
-      "required": false,
-      "title": "Zoom Client ID (Optional)",
-      "description": "Your Zoom Client ID from your Server-to-Server OAuth app. Required if not using Access Token. Get this from https://marketplace.zoom.us/develop/create (App Credentials tab). You can also set ZOOM_CLIENT_ID in a .env file for development.",
-      "placeholder": "Enter your Zoom Client ID"
-    },
-    {
-      "name": "zoomClientSecret",
-      "type": "password",
-      "required": false,
-      "title": "Zoom Client Secret (Optional)",
-      "description": "Your Zoom Client Secret from your Server-to-Server OAuth app. Required if not using Access Token. Get this from https://marketplace.zoom.us/develop/create (App Credentials tab). You can also set ZOOM_CLIENT_SECRET in a .env file for development.",
-      "placeholder": "Enter your Zoom Client Secret"
-    },
-    {
       "name": "autoOpenLink",
       "type": "checkbox",
       "required": false,
