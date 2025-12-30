@@ -9,7 +9,7 @@
 - Fix controlled/uncontrolled search bar warnings by ensuring consistent state initialization.
 - Fix TypeScript compilation errors by updating JSX.Element types and GaxiosResponse type annotations.
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance]
 
 - Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
 
