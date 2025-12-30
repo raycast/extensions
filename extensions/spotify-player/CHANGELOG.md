@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [feat: Add Keyboard Shortcuts & Fix Build] - 2025-12-30
+
+- Added keyboard shortcuts for common actions:
+  - Start Radio: `opt + R`
+  - Add to Playlist (Submenu): `opt + A`
+
 ## [Chore: Contributor has become inactive] - 2025-09-01
 
 ## [Fix Add Playing Song to Playlist Command Using Cached Data] - 2025-08-28
