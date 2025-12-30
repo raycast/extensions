@@ -13,7 +13,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { usePromise, useInterval } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import React, { useEffect, useMemo } from "react";
 import { createSupabaseClient, fetchCronJobs, fetchLastRun, fetchRecentRuns, getDashboardUrl, getSqlEditorUrl } from "./supabase";
 import { setupSql } from "./setupSql";
@@ -66,9 +66,13 @@ export default function MenubarCronMonitor() {
     return { jobs: enriched, recentRuns, mode, lastUpdatedAt: new Date() };
   });
 
-  useInterval(() => {
-    revalidate();
-  }, refreshMinutes * 60 * 1000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      revalidate();
+    }, refreshMinutes * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [refreshMinutes, revalidate]);
 
   useEffect(() => {
     if (!data) return;
