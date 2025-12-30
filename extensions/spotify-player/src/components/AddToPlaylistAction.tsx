@@ -13,7 +13,7 @@ export function AddToPlaylistAction({ playlists, meData, uri }: AddToPlaylistAct
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   return (
-    <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist">
+    <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist" shortcut={{ modifiers: ["opt"], key: "a" }}>
       {playlists
         ?.filter((playlist) => playlist.owner?.id === meData?.id)
         .map((playlist) => {

@@ -15,6 +15,7 @@ export function StartRadioAction({ trackId, artistId, onRadioStarted }: StartRad
     <Action
       icon={Icon.Music}
       title="Start Radio"
+      shortcut={{ modifiers: ["opt"], key: "r" }}
       onAction={async () => {
         if (closeWindowOnAction) {
           try {
