@@ -1,4 +1,4 @@
-import * as z from "@zod/mini";
+import * as z from "zod/mini";
 
 export const CourseSummarySchema = z.object({
   moduleCode: z.string(),
@@ -25,24 +25,20 @@ export const SemesterDataSchema = z.object({
   timetable: z.optional(z.array(TimetableSchema)),
 });
 
-export const PrereqSchema = z.union([
-  z.string(),
-  z.interface({
-    get and() {
-      return z.array(PrereqSchema);
-    },
-  }),
-  z.interface({
-    get or() {
-      return z.array(PrereqSchema);
-    },
-  }),
-  z.interface({
-    get nOf() {
-      return z.tuple([z.number(), z.array(PrereqSchema)]);
-    },
-  }),
-]);
+export const PrereqSchema = z.lazy(() => {
+  return z.union([
+    z.string(),
+    z.object({
+      and: z.array(PrereqSchema),
+    }),
+    z.object({
+      or: z.array(PrereqSchema),
+    }),
+    z.object({
+      nOf: z.tuple([z.number(), z.array(PrereqSchema)]),
+    }),
+  ]);
+});
 
 export const CourseDetailsSchema = z.object({
   acadYear: z.string(),
@@ -69,3 +65,11 @@ export type Prereq = z.infer<typeof PrereqSchema>;
 export type Timetable = z.infer<typeof TimetableSchema>;
 export type SemesterData = z.infer<typeof SemesterDataSchema>;
 export type CourseDetails = z.infer<typeof CourseDetailsSchema>;
+
+export const API_BASE_URL = "https://api.nusmods.com/v2";
+export const WEBSITE_BASE_URL = "https://nusmods.com";
+
+export const getModuleWebUrl = (moduleCode: string) => `${WEBSITE_BASE_URL}/courses/${moduleCode}`;
+export const getModuleListApiUrl = (acadYear: string) => `${API_BASE_URL}/${acadYear}/moduleList.json`;
+export const getModuleDetailApiUrl = (acadYear: string, moduleCode: string) =>
+  `${API_BASE_URL}/${acadYear}/modules/${moduleCode}.json`;

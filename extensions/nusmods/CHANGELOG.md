@@ -1,5 +1,9 @@
 # NUSMods Changelog
 
+## [Reviews & Comments] - {PR_MERGE_DATE}
+
+- Added feature to view reviews and comments for NUS courses via Disqus API.
+
 ## [Better Prereq Rendering] - 2025-08-04
 
 - Improved rendering logic for module prerequisites
