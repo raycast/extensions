@@ -74,7 +74,10 @@ export function getMeetingsSections(meetings?: Meeting[]) {
     return [];
   }
 
-  const [recurringMeetingsWithNoFixedTime, otherMeetings] = partition(meetings, (meeting: Meeting) => meeting.type === 3);
+  const [recurringMeetingsWithNoFixedTime, otherMeetings] = partition(
+    meetings,
+    (meeting: Meeting) => meeting.type === 3,
+  );
   const scheduledMeetings = otherMeetings as ScheduledMeeting[];
 
   const sections = Object.values(
