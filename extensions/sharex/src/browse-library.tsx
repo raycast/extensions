@@ -169,7 +169,11 @@ export default function Command() {
             <Grid.Item
               key={screenshot.path}
               id={screenshot.path}
-              content={{ source: screenshot.path }}
+              content={
+                screenshot.path.toLowerCase().endsWith(".mp4")
+                  ? { source: Icon.PlayFilled }
+                  : { source: screenshot.path }
+              }
               title={screenshot.name}
               actions={
                 <ActionPanel>
