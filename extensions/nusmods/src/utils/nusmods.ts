@@ -25,6 +25,9 @@ export const SemesterDataSchema = z.object({
   timetable: z.optional(z.array(TimetableSchema)),
 });
 
+type PrereqT = string | { and: PrereqT[] } | { or: PrereqT[] } | { nOf: [number, PrereqT[]] };
+
+// @ts-expect-error Zod lazy unable to infer type, resorts to `any`
 export const PrereqSchema = z.lazy(() => {
   return z.union([
     z.string(),
@@ -61,7 +64,7 @@ export const CourseDetailsSchema = z.object({
 
 export type CourseSummary = z.infer<typeof CourseSummarySchema>;
 export type CourseSummaryList = z.infer<typeof CourseSummaryListSchema>;
-export type Prereq = z.infer<typeof PrereqSchema>;
+export type Prereq = PrereqT;
 export type Timetable = z.infer<typeof TimetableSchema>;
 export type SemesterData = z.infer<typeof SemesterDataSchema>;
 export type CourseDetails = z.infer<typeof CourseDetailsSchema>;

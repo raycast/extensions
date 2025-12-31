@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
+// @ts-expect-error No declaration file for turndown
 import TurndownService from "turndown";
 import * as z from "zod/mini";
 import {
