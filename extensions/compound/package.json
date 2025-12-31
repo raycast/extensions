@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "compound",
+  "title": "Compound",
+  "description": "複利・積立複利を一瞬で計算。投資や貯蓄の意思決定に必要な情報を即座に表示します。",
+  "icon": "extension-icon.png",
+  "author": "atsushi_kawamura",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compound-calculator",
+      "title": "Compound Calculator",
+      "description": "Calculate compound interest with form input",
+      "mode": "view"
+    },
+    {
+      "name": "compound-quick",
+      "title": "Compound Quick",
+      "description": "Calculate compound interest instantly with arguments",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "e.g., 100000 5% 10y or p=100000 r=5 y=10",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language / 言語",
+      "description": "Select your preferred language / 表示言語を選択してください",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "日本語",
+          "value": "ja"
+        }
+      ]
+    },
+    {
+      "name": "defaultCurrency",
+      "title": "Default Currency",
+      "description": "Currency to use for display",
+      "type": "dropdown",
+      "required": false,
+      "default": "USD",
+      "data": [
+        {
+          "title": "USD",
+          "value": "USD"
+        },
+        {
+          "title": "EUR",
+          "value": "EUR"
+        },
+        {
+          "title": "JPY",
+          "value": "JPY"
+        }
+      ]
+    },
+    {
+      "name": "defaultTaxRate",
+      "title": "Default Tax Rate (%)",
+      "description": "Tax rate for after-tax calculation (varies by country)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultCompoundFreq",
+      "title": "Default Compound Frequency",
+      "description": "Compound frequency for principal only",
+      "type": "dropdown",
+      "required": false,
+      "default": "yearly",
+      "data": [
+        {
+          "title": "Yearly",
+          "value": "yearly"
+        },
+        {
+          "title": "Monthly",
+          "value": "monthly"
+        },
+        {
+          "title": "Daily",
+          "value": "daily"
+        }
+      ]
+    },
+    {
+      "name": "defaultRounding",
+      "title": "Rounding Method",
+      "description": "Rounding method for amount display",
+      "type": "dropdown",
+      "required": false,
+      "default": "floor",
+      "data": [
+        {
+          "title": "Floor",
+          "value": "floor"
+        },
+        {
+          "title": "Round",
+          "value": "round"
+        },
+        {
+          "title": "Ceiling",
+          "value": "ceil"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.16"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "packageManager": "pnpm@10.17.0+sha512.fce8a3dd29a4ed2ec566fb53efbb04d8c44a0f05bc6f24a73046910fb9c3ce7afa35a0980500668fa3573345bd644644fa98338fa168235c80f4aa17aa17fbef"
+}
