@@ -62,6 +62,36 @@
       ]
     },
     {
+      "name": "usageLimitsRefreshInterval",
+      "type": "dropdown",
+      "required": false,
+      "title": "Usage Limits Refresh Interval",
+      "description": "How often to refresh usage limits data",
+      "default": "60",
+      "data": [
+        {
+          "title": "30 seconds",
+          "value": "30"
+        },
+        {
+          "title": "1 minute (Recommended)",
+          "value": "60"
+        },
+        {
+          "title": "2 minutes",
+          "value": "120"
+        },
+        {
+          "title": "5 minutes",
+          "value": "300"
+        },
+        {
+          "title": "10 minutes",
+          "value": "600"
+        }
+      ]
+    },
+    {
       "name": "customNpxPath",
       "type": "textfield",
       "required": false,
