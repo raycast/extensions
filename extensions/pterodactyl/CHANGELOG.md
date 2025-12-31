@@ -1,6 +1,6 @@
 # Pterodactyl Changelog
 
-## [Initial Release] - 2025-12-31
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Features
 - **Server List**: View all servers with real-time status (Running, Offline, etc.).
