@@ -7,7 +7,6 @@ import {
   Color,
   Icon,
   confirmAlert,
-  confirmAlert,
   Alert,
   getPreferenceValues,
 } from "@raycast/api";
