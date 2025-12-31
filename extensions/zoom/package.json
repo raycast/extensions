@@ -312,6 +312,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.0",
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "eslint": "^9.39.2",
