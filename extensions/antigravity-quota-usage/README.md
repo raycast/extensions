@@ -2,7 +2,6 @@
 
 A Raycast extension to check and sync your Antigravity AI agent quota usage status directly from your local environment.
 
-![Antigravity Quota Usage](https://raw.githubusercontent.com/raycast/raycast-extensions/main/extensions/antigravity-quota-usage/metadata/screenshot-1.png)
 
 ## Features
 
