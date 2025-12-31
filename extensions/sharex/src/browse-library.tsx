@@ -67,7 +67,7 @@ export default function Command() {
       for (const { path: folderPath, name: folderName } of targetFolders) {
         const files = await readdir(folderPath);
         for (const file of files) {
-          if (/\.(png|jpg|gif|bmp|tif|mp4)$/i.test(file)) {
+          if (/\.(png|jpe?g|gif|bmp|tiff?|mp4|webm|avi|webp|apng)$/i.test(file)) {
             const filePath = join(folderPath, file);
             const fileStat = await stat(filePath);
             allScreenshots.push({
@@ -173,9 +173,11 @@ export default function Command() {
               key={screenshot.path}
               id={screenshot.path}
               content={
-                screenshot.path.toLowerCase().endsWith(".mp4")
+                /\.(mp4|avi|webm)$/i.test(screenshot.path)
                   ? { source: Icon.PlayFilled }
-                  : { source: screenshot.path }
+                  : /\.tiff?$/i.test(screenshot.path)
+                    ? { source: Icon.Image }
+                    : { source: screenshot.path }
               }
               title={screenshot.name}
               actions={
