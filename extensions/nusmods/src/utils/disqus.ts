@@ -59,7 +59,7 @@ const ThreadSchema = z.object({
 
 export const ThreadDetailsResponseSchema = z.object({
   code: z.number(),
-  response: z.union([ThreadSchema, z.string()]),
+  response: ThreadSchema,
 });
 
 export const ThreadDetailsResultResponseSchema = z.union([ErrorResponseSchema, ThreadDetailsResponseSchema]);

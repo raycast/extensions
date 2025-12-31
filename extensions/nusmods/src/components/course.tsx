@@ -9,7 +9,7 @@ import {
   getModuleDetailApiUrl,
   getModuleWebUrl,
 } from "../utils/nusmods";
-import { PostList } from "./post";
+import { ReviewList } from "./review";
 
 const CourseDetail: React.FC<{
   moduleCode: string;
@@ -32,7 +32,7 @@ const CourseDetail: React.FC<{
             <Action.Push
               title="View Reviews & Comments"
               icon={Icon.SpeechBubble}
-              target={<PostList courseDetail={data} />}
+              target={<ReviewList courseDetail={data} />}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
             <Action.CopyToClipboard

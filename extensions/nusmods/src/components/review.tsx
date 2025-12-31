@@ -16,7 +16,7 @@ import { CourseDetails, getModuleWebUrl } from "../utils/nusmods";
 
 const td = new TurndownService();
 
-export const PostList: React.FC<{
+export const ReviewList: React.FC<{
   courseDetail: CourseDetails;
   apiKey?: string;
 }> = (props) => {
