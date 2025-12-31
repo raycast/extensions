@@ -10,7 +10,8 @@
   "author": "nyatinte",
   "contributors": [
     "bohdan_zhuravel",
-    "zzyfisher"
+    "zzyfisher",
+    "garrick_zhang"
   ],
   "license": "MIT",
   "commands": [
@@ -53,6 +54,10 @@
         {
           "title": "Model Breakdown",
           "value": "model"
+        },
+        {
+          "title": "Usage Limits",
+          "value": "usage-limits"
         }
       ]
     },
@@ -93,6 +98,11 @@
       "name": "get-session-usage",
       "title": "Get Session Usage",
       "description": "Get detailed session-by-session Claude Code usage statistics"
+    },
+    {
+      "name": "get-usage-limits",
+      "title": "Get Usage Limits",
+      "description": "Get Claude API usage limits showing 5-hour and 7-day utilization percentages and reset times"
     }
   ],
   "ai": {
