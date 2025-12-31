@@ -62,7 +62,7 @@
       "required": false,
       "title": "Custom npx Path",
       "description": "Override the default npx path if needed (optional)",
-      "placeholder": "e.g., /usr/local/bin/npx"
+      "placeholder": "e.g., /usr/local/bin/npx or ~/.local/bin/npx"
     },
     {
       "name": "useDirectCcusageCommand",
