@@ -2,40 +2,30 @@ import { Form, ActionPanel, Action, showToast, Toast, closeMainWindow, open, get
 import * as fs from "fs";
 import * as path from "path";
 
-interface Preferences {
-  vaultPath: string;
-  targetHeading?: string;
-  recordMode?: "callout" | "plain";
-}
-
 interface DailyNotesConfig {
   folder?: string;
   format?: string;
 }
 
-const DAILY_NOTES_CONFIG_FILES = [".obsidian/daily-notes.json", ".obsiidan/daily-notes.json"];
+const DAILY_NOTES_CONFIG_FILE = ".obsidian/daily-notes.json";
 
 interface FormValues {
   content: string;
 }
 
 function readDailyNotesConfig(vaultRoot: string): DailyNotesConfig | null {
-  for (const relativePath of DAILY_NOTES_CONFIG_FILES) {
-    const fullPath = path.join(vaultRoot, relativePath);
-    if (!fs.existsSync(fullPath)) {
-      continue;
-    }
-
-    try {
-      const raw = fs.readFileSync(fullPath, "utf8");
-      return JSON.parse(raw) as DailyNotesConfig;
-    } catch (error) {
-      console.error("Failed to read daily-notes.json", error);
-      return null;
-    }
+  const fullPath = path.join(vaultRoot, DAILY_NOTES_CONFIG_FILE);
+  if (!fs.existsSync(fullPath)) {
+    return null;
   }
 
-  return null;
+  try {
+    const raw = fs.readFileSync(fullPath, "utf8");
+    return JSON.parse(raw) as DailyNotesConfig;
+  } catch (error) {
+    console.error("Failed to read daily-notes.json", error);
+    return null;
+  }
 }
 
 function formatDatePattern(pattern: string, date: Date): string {
@@ -79,9 +69,9 @@ export default function Command() {
       return;
     }
 
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences.ObsidianLog2Dialy>();
     const vaultRoot = preferences.vaultPath.trim().replace(/[\\/]+$/, "");
-    const targetHeading = preferences.targetHeading?.trim() || "## Temp Notes";
+    const targetHeading = (preferences.targetHeading || "").trim() || "## Temp Notes";
     const recordMode: "callout" | "plain" = preferences.recordMode === "plain" ? "plain" : "callout";
 
     const dailyNotesConfig = readDailyNotesConfig(vaultRoot);
