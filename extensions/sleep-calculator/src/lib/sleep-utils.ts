@@ -190,7 +190,7 @@ export function parseTimeInput(
     }
 
     // Normalize separators and am/pm variations
-    let normalized = trimmed
+    const normalized = trimmed
         .replace(/\s+/g, " ")                    // collapse spaces
         .replace(/[;.]/g, ":")                   // semicolon/dot -> colon
         .replace(/o'?clock/gi, "")               // remove o'clock
