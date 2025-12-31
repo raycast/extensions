@@ -13,9 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Live Search**: Real-time filtering of data views as you type
 - **Time Range Selection**: Choose from 7 preset time ranges (15m, 30m, 1h, 24h, 7d, Today, This week)
 - **Column Configuration**: Select which fields to display in Kibana Discover
-- **Search Query Input**: Set Kuery queries for filtered views (⌘Q shortcut)
+- **Search Query Input**: Set Kuery queries for filtered views (⌘Q shortcut, session only)
 - **Custom Fields Per Instance**: Configure available fields for each Kibana instance
-- **Smart Persistence**: Remembers your field selections, time ranges, and queries per data view
+- **Smart Persistence**: Remembers your field selections and time ranges per data view
 - **Detail View Toggle**: Switch between compact and detailed list views
 - **Dynamic Icons**: Crown icon for production data views, Gear icon for others
 - **Copy Actions**: Copy data view ID, name, or full Discover URL
@@ -35,8 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Commands
 
-- **Search Data Views**: Browse and search cached data views
-- **Refresh Data Views**: Fetch latest data views from Kibana instances
+- **Search data-views**: Browse and search cached data views
+- **Refresh data-views**: Fetch latest data views from Kibana instances
 
 ### Technical
 

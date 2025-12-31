@@ -6,174 +6,34 @@ import {
   showToast,
   Toast,
   LocalStorage,
-  Form,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { readFileSync, existsSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
-
-interface DataView {
-  number: number;
-  name: string;
-  title: string;
-  id: string;
-}
-
-interface InstanceCache {
-  instance: {
-    name: string;
-    url: string;
-    commonFields?: string[];
-  };
-  dataViews: DataView[];
-}
-
-interface AllInstancesCache {
-  [instanceName: string]: InstanceCache;
-}
-
-interface FieldSelection {
-  [dataViewId: string]: string[];
-}
-
-interface TimeRangeSelection {
-  [dataViewId: string]: string;
-}
-
-interface QuerySelection {
-  [dataViewId: string]: string;
-}
-
-interface TimeRange {
-  label: string;
-  from: string;
-  to: string;
-}
-
-const CACHE_PATH = join(
-  homedir(),
-  "Library/Application Support/com.raycast.macos/Extensions/kibana-discover/cache.json",
-);
-
-// Time range options
-const TIME_RANGES: TimeRange[] = [
-  { label: "Last 15 minutes", from: "now-15m", to: "now" },
-  { label: "Last 30 minutes", from: "now-30m", to: "now" },
-  { label: "Last 1 hour", from: "now-1h", to: "now" },
-  { label: "Last 24 hours", from: "now-24h", to: "now" },
-  { label: "Last 7 days", from: "now-7d", to: "now" },
-  { label: "Today", from: "now/d", to: "now/d" },
-  { label: "This week", from: "now/w", to: "now/w" },
-];
-
-const DEFAULT_TIME_RANGE = "Last 15 minutes";
-
-// Common log fields that users might want to select
-const COMMON_FIELDS = [
-  "TraceId",
-  "message",
-  "MachineName",
-  "level",
-  "logger",
-  "thread",
-  "host.name",
-  "service.name",
-  "error.message",
-  "http.request.method",
-  "http.response.status_code",
-  "user.name",
-  "source",
-  "tags",
-];
-
-const DEFAULT_FIELDS = ["TraceId", "message"];
-
-function buildDiscoverURL(
-  baseUrl: string,
-  dataViewId: string,
-  columns: string[],
-  timeRange: TimeRange,
-  query: string = "",
-): string {
-  // Build columns parameter - just join with commas, no quotes needed in columns array
-  const columnsParam = columns.length > 0 ? columns.join(",") : "_source";
-
-  // URL encode the query for Kibana
-  const encodedQuery = encodeURIComponent(query);
-
-  // Build the URL exactly matching Kibana's format
-  return `${baseUrl}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:${timeRange.from},to:${timeRange.to}))&_a=(columns:!(${columnsParam}),filters:!(),hideChart:!f,index:'${dataViewId}',interval:auto,query:(language:kuery,query:'${encodedQuery}'),sort:!(!('@timestamp',desc)))`;
-}
-
-function loadAllInstancesCaches(cachePath: string): AllInstancesCache {
-  try {
-    if (!existsSync(cachePath)) {
-      return {};
-    }
-    const content = readFileSync(cachePath, "utf8");
-    const parsed = JSON.parse(content);
-
-    // Support both old single-instance format and new multi-instance format
-    if (parsed.instance && parsed.dataViews) {
-      // Old format - convert to new format
-      return {
-        [parsed.instance.name]: parsed,
-      };
-    }
-
-    // New format - already multi-instance
-    return parsed as AllInstancesCache;
-  } catch (error) {
-    console.error("Error loading cache:", error);
-    return {};
-  }
-}
-
-function getDataViewIcon(dataViewName: string): Icon {
-  const lowerName = dataViewName.toLowerCase();
-  if (lowerName.includes("production") || lowerName.includes("prod")) {
-    return Icon.Crown;
-  }
-  return Icon.Gear;
-}
-
-function SetQueryForm(props: {
-  dataViewId: string;
-  dataViewName: string;
-  currentQuery: string;
-  onSubmit: (query: string) => void;
-}) {
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Set Search Query"
-            onSubmit={(values: { query: string }) => {
-              props.onSubmit(values.query);
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text={`Set search query for: ${props.dataViewName}`} />
-      <Form.TextArea
-        id="query"
-        title="Kuery Query"
-        placeholder="e.g., fedac3b17afd4b2b9a80e3aa3007b848 and nxtalsedi6688"
-        defaultValue={props.currentQuery}
-      />
-      <Form.Description text="Use Kibana Query Language (KQL) syntax. Leave empty to show all documents." />
-    </Form>
-  );
-}
+import type {
+  DataViewFormatted,
+  AllInstancesCache,
+  FieldSelection,
+  TimeRangeSelection,
+  QuerySelection,
+  TimeRange,
+  Preferences,
+} from "./types";
+import { loadAllInstancesCaches, CACHE_PATH } from "./tools/cache";
+import { buildDiscoverURL } from "./tools/url-builder";
+import {
+  TIME_RANGES,
+  DEFAULT_TIME_RANGE,
+  COMMON_FIELDS,
+  DEFAULT_FIELDS,
+} from "./tools/constants";
+import { getDataViewIcon } from "./tools/helpers";
+import { SetQueryForm, EmptyView } from "./components";
 
 export default function Command() {
   const [allInstancesCaches, setAllInstancesCaches] =
     useState<AllInstancesCache>({});
   const [selectedInstance, setSelectedInstance] = useState<string>("");
-  const [dataViews, setDataViews] = useState<DataView[]>([]);
+  const [dataViews, setDataViews] = useState<DataViewFormatted[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [instanceUrl, setInstanceUrl] = useState("");
   const [instanceName, setInstanceName] = useState("");
@@ -193,7 +53,7 @@ export default function Command() {
         showToast({
           style: Toast.Style.Failure,
           title: "No data views cached",
-          message: "Please run 'Refresh Data Views' command first",
+          message: "Please run 'Refresh data-views' command first",
         });
         setIsLoading(false);
         return;
@@ -201,11 +61,19 @@ export default function Command() {
 
       setAllInstancesCaches(caches);
 
-      // Set first instance as default
-      const firstInstanceName = Object.keys(caches)[0];
-      setSelectedInstance(firstInstanceName);
+      // Get preferences and determine default instance
+      const preferences = getPreferenceValues<Preferences>();
+      const instanceNames = Object.keys(caches);
 
-      const firstCache = caches[firstInstanceName];
+      // Use defaultInstance preference if set and exists, otherwise use first instance
+      let defaultInstanceName = instanceNames[0];
+      if (preferences.defaultInstance && caches[preferences.defaultInstance]) {
+        defaultInstanceName = preferences.defaultInstance;
+      }
+
+      setSelectedInstance(defaultInstanceName);
+
+      const firstCache = caches[defaultInstanceName];
       setDataViews(firstCache.dataViews);
       setInstanceUrl(firstCache.instance.url);
       setInstanceName(firstCache.instance.name);
@@ -248,16 +116,7 @@ export default function Command() {
         }
       }
 
-      // Load saved query selections
-      const savedQueries =
-        await LocalStorage.getItem<string>("query-selections");
-      if (savedQueries) {
-        try {
-          setQuerySelections(JSON.parse(savedQueries));
-        } catch (error) {
-          console.error("Error parsing query selections:", error);
-        }
-      }
+      // Note: Query selections are NOT persisted - they reset each session
 
       setIsLoading(false);
     }
@@ -302,12 +161,11 @@ export default function Command() {
     return querySelections[dataViewId] || "";
   };
 
-  const setQuery = async (dataViewId: string, query: string) => {
-    setQuerySelections((prev) => {
-      const newSelections = { ...prev, [dataViewId]: query };
-      LocalStorage.setItem("query-selections", JSON.stringify(newSelections));
-      return newSelections;
-    });
+  const setQuery = (dataViewId: string, query: string) => {
+    setQuerySelections((prev) => ({
+      ...prev,
+      [dataViewId]: query,
+    }));
   };
 
   const toggleDetailView = () => {
@@ -330,7 +188,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search data views by name..."
+      searchBarPlaceholder="Search data-views by name..."
       isShowingDetail={showingDetail}
       throttle
       searchBarAccessory={
@@ -446,7 +304,7 @@ export default function Command() {
                         }}
                       />
                     }
-                    shortcut={{ modifiers: ["cmd"], key: "q" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
                   />
                   <Action
                     title="Toggle Detail View"
@@ -509,13 +367,7 @@ export default function Command() {
         );
       })}
 
-      {!isLoading && dataViews.length === 0 && (
-        <List.EmptyView
-          icon={Icon.Warning}
-          title="No Data Views Found"
-          description="Run 'Refresh Data Views' command to fetch data views"
-        />
-      )}
+      {!isLoading && dataViews.length === 0 && <EmptyView />}
     </List>
   );
 }

@@ -16,9 +16,9 @@ A powerful Raycast extension for searching and opening Kibana data views with mu
 ### Advanced Features
 - ⏱️ **Time Range Selection** - Choose from 7 preset time ranges (15m, 1h, 24h, 7d, etc.)
 - 📊 **Column Configuration** - Select which fields to display in Kibana Discover
-- 🔎 **Search Query Input** - Set Kuery queries for filtered views
+- 🔎 **Search Query Input** - Set Kuery queries for filtered views (session only)
 - 🎯 **Custom Fields Per Instance** - Configure available fields for each Kibana instance
-- 💾 **Smart Persistence** - Remembers your selections per data view
+- 💾 **Smart Persistence** - Remembers field and time range selections per data view
 - 📱 **Detail View** - Toggle between compact and detailed list views
 
 ## Installation
@@ -68,8 +68,8 @@ The extension supports multiple Kibana instances. Configure them using a JSON ar
 ```json
 [
   {
-    "name": "Production - Micro Log",
-    "url": "https://micro-log-lcg.568winex.com",
+    "name": "Production - Environment",
+    "url": "https://production-kibana.example.com",
     "username": "elastic",
     "password": "elastic",
     "commonFields": ["TraceId", "message", "MachineName", "level", "logger"]
@@ -114,12 +114,12 @@ See `MULTI-INSTANCE-EXAMPLE.json` in the project root for a complete example.
 
 ## Usage
 
-### 1. Refresh Data Views
+### 1. Refresh data-views
 
 Before searching, fetch data views from your Kibana instance(s):
 
 ```
-⌘Space → "Refresh Data Views"
+⌘Space → "Refresh data-views"
 ```
 
 **For single instance:**
@@ -143,10 +143,10 @@ Before searching, fetch data views from your Kibana instance(s):
 - You want to refresh the list
 - You switch environments or add new instances
 
-### 2. Search Data Views
+### 2. Search data-views
 
 ```
-⌘Space → "Search Data Views" or "Kibana"
+⌘Space → "Search data-views" or "Kibana"
 ```
 
 ### Instance Selection
@@ -213,7 +213,7 @@ Press `⌘Q` on any data view to set a Kuery query:
    - `level: "ERROR" and service.name: "api"`
    - `host.name: "server-01"`
 4. Leave empty to clear the query
-5. Query is saved per data view
+5. Query is active for current session only (not persisted between sessions)
 
 The query will be included in the Discover URL when you open it.
 
@@ -239,7 +239,7 @@ Toggle on/off using the "Toggle Detail View" action.
 │                    Raycast Extension                        │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Search Data Views (search-data-views.tsx)                 │
+│  Search data-views (search-data-views.tsx)                 │
 │  ┌───────────────────────────────────────────────────────┐ │
 │  │ - Load cache from disk                                │ │
 │  │ - Display data views in list                          │ │
@@ -250,7 +250,7 @@ Toggle on/off using the "Toggle Detail View" action.
 │  │ - Open in browser                                     │ │
 │  └───────────────────────────────────────────────────────┘ │
 │                                                             │
-│  Refresh Data Views (refresh-data-views.tsx)               │
+│  Refresh data-views (refresh-data-views.tsx)               │
 │  ┌───────────────────────────────────────────────────────┐ │
 │  │ - Read preferences (instances config)                 │ │
 │  │ - Fetch data views from Kibana API                    │ │
@@ -328,10 +328,10 @@ kibana-discover/
 **Format:**
 ```json
 {
-  "Production - Micro Log": {
+  "Production - Environment": {
     "instance": {
-      "name": "Production - Micro Log",
-      "url": "https://micro-log-lcg.568winex.com",
+      "name": "Production - Environment",
+      "url": "https://production-kibana.example.com",
       "commonFields": ["TraceId", "message", "MachineName", "level", "logger"]
     },
     "dataViews": [
@@ -417,7 +417,7 @@ cat ~/Library/Application\ Support/com.raycast.macos/Extensions/kibana-discover/
 rm ~/Library/Application\ Support/com.raycast.macos/Extensions/kibana-discover/cache.json
 ```
 
-Then run "Refresh Data Views" to rebuild.
+Then run "Refresh data-views" to rebuild.
 
 **Method 2: Delete Specific Instance**
 
@@ -471,7 +471,7 @@ cp ~/Desktop/kibana-discover-cache-backup.json \
 
 **Solution:** Run the refresh command:
 ```
-⌘Space → "Refresh Data Views"
+⌘Space → "Refresh data-views"
 ```
 
 ### "No Kibana instances configured"
@@ -658,8 +658,8 @@ If you're migrating from the older script-based approach:
 | Old | New |
 |-----|-----|
 | `.kibana-config.env` file | JSON in Raycast preferences |
-| `list-kibana-dataviews.sh` | "Refresh Data Views" command |
-| `open-kibana-discover.sh` | "Search Data Views" command |
+| `list-kibana-dataviews.sh` | "Refresh data-views" command |
+| `open-kibana-discover.sh` | "Search data-views" command |
 | `~/.data-views-cache.json` | `~/Library/Application Support/.../cache.json` |
 | Manual fzf selection | Native Raycast UI |
 | Single instance | Multi-instance support |
@@ -673,7 +673,7 @@ A: Yes! Each instance can use either Basic Auth (username/password) or API Key i
 A: Use the dropdown in the top-right corner of the search view.
 
 **Q: Will my selections persist across Raycast restarts?**
-A: Yes, all selections (fields, time ranges, queries) are saved to LocalStorage.
+A: Yes, field selections and time ranges are saved to LocalStorage. Search queries are temporary and reset each session.
 
 **Q: Can I share my configuration with teammates?**
 A: Yes, export your instances JSON and share it (remove sensitive credentials first!).

@@ -12,14 +12,14 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-data-views",
-      "title": "Search Data Views",
+      "name": "search",
+      "title": "Search Data-Views",
       "description": "Search and open Kibana data views with live filtering",
       "mode": "view"
     },
     {
-      "name": "refresh-data-views",
-      "title": "Refresh Data Views",
+      "name": "index",
+      "title": "Refresh Data-Views",
       "description": "Fetch latest data views from Kibana and update cache",
       "mode": "view"
     }
@@ -32,6 +32,14 @@
       "title": "Kibana Instances (JSON)",
       "description": "JSON array of Kibana instances. Optional: add 'commonFields' array to customize available fields per instance.",
       "placeholder": "[{\"name\":\"Production\",\"url\":\"https://kibana.example.com\",\"username\":\"elastic\",\"password\":\"pass\",\"commonFields\":[\"TraceId\",\"message\",\"level\"]}]"
+    },
+    {
+      "name": "defaultInstance",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Instance",
+      "description": "Name of the default instance to select. If not set or name doesn't match, the first instance will be used.",
+      "placeholder": "Production"
     }
   ],
   "dependencies": {
