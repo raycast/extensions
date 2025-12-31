@@ -261,6 +261,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         return;
       }
 
+      // Optimistic UI update: immediately show instance as STARTING
+      setInstances((prevInstances) =>
+        prevInstances.map((inst) => (inst.id === instance.id ? { ...inst, status: "STARTING" } : inst)),
+      );
+
       const startingToast = await showToast({
         style: Toast.Style.Animated,
         title: `Starting instance ${name}...`,
@@ -313,6 +318,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       if (!confirmationResponse) {
         return;
       }
+
+      // Optimistic UI update: immediately show instance as STOPPING
+      setInstances((prevInstances) =>
+        prevInstances.map((inst) => (inst.id === instance.id ? { ...inst, status: "STOPPING" } : inst)),
+      );
 
       const stoppingToast = await showToast({
         style: Toast.Style.Animated,

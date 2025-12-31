@@ -101,6 +101,10 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
       cursor: filter.cursor,
       calendarInvitees: filter.calendarInvitees,
       calendarInviteesDomains: filter.calendarInviteesDomains,
+      // Include summaries and transcripts for full-text search
+      includeSummary: true,
+      includeTranscript: true,
+      includeActionItems: true,
     });
 
     const items: Meeting[] = [];
@@ -114,6 +118,7 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
       break; // Only get first page
     }
 
+    logger.log(`[API] ✅ SDK returned ${items.length} meetings`);
     return { items, nextCursor };
   } catch (error) {
     // Fallback to direct HTTP for network/connection errors

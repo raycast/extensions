@@ -1,9 +1,8 @@
 import fs from "fs";
 import { ComponentType, createContext, useContext } from "react";
-import { Application, Detail, getApplications, LocalStorage } from "@raycast/api";
+import { Application, Detail, LocalStorage } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { zedBuild } from "../lib/preferences";
-import { getZedBundleId, getZedDbPath } from "../lib/zed";
+import { getZedApp, getZedDbPath } from "../lib/zed";
 import { getZedWorkspaceDbVersion } from "../lib/db";
 
 interface ZedContextType {
@@ -22,12 +21,10 @@ function useZed() {
 
   const { data, isLoading } = usePromise(async () => {
     const defaultDbVersion = await LocalStorage.getItem<number>(defaultDbVersionKey);
-    const [applications, workspaceDbVersion] = await Promise.all([
-      getApplications(),
+    const [app, workspaceDbVersion] = await Promise.all([
+      getZedApp(),
       getZedWorkspaceDbVersion(dbPath, defaultDbVersion),
     ]);
-    const zedBundleId = getZedBundleId(zedBuild);
-    const app = applications.find((a) => a.bundleId === zedBundleId);
 
     if (workspaceDbVersion.supported) {
       await LocalStorage.setItem(defaultDbVersionKey, workspaceDbVersion.version);

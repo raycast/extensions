@@ -1,5 +1,12 @@
 # Google Cloud CLI Changelog
 
+## [1.0.1] - 2025-12-28
+- Added optimistic UI updates for VM start/stop actions
+- Fixed Streamer Mode not hiding "Copy Latest Value" action in Secrets list
+- Fixed Streamer Mode toggle not updating secret value display in real-time
+- Allow copying secrets even when Streamer Mode is enabled (display remains masked)
+- Redesigned Secret detail view to match design patterns (metadata sidebar, tables)
+
 ## [1.0.0] - 2025-12-15
 - Added Streamer Mode - hide sensitive data (emails, IPs, secrets) with Cmd+Shift+H
 - Added Windows compatibility

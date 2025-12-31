@@ -4,8 +4,10 @@
 
 2. Locate the SQLite3 database file for Zed Editor, e.g.:
 
-   `/Users/<username>/Library/Application Support/Zed/db/0-stable/db.sqlite` - Zed Stable
-   `/Users/<username>/Library/Application Support/Zed/db/0-preview/db.sqlite` - Zed Preview
+   `/Users/<username>/Library/Application Support/Zed/db/0-stable/db.sqlite` - Zed Stable MacOS
+   `/Users/<username>/Library/Application Support/Zed/db/0-preview/db.sqlite` - Zed Preview MacOS
+   `C:\Users\<username>\AppData\Local\Zed\db\0-stable\db.sqlite` - Zed Stable Windows
+   `C:\Users\<username>\AppData\Local\Zed\db\0-preview\db.sqlite` - Zed Preview Windows
 
 3. Check the latest applied migration for `WorkspaceDb`:
 

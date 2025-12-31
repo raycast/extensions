@@ -15,7 +15,7 @@ describe("executeApiCommand", () => {
   let mockApi: jest.Mocked<MusicAssistantApi>;
 
   beforeEach(() => {
-    mockGetPreferenceValues.mockReturnValue({ host: "http://localhost:8095" });
+    mockGetPreferenceValues.mockReturnValue({ host: "http://localhost:8095", token: "token-123" });
 
     mockApi = {
       subscribe_multi: jest.fn(),
@@ -37,7 +37,7 @@ describe("executeApiCommand", () => {
 
     const result = await executeApiCommand(mockCommand);
 
-    expect(mockApi.initialize).toHaveBeenCalledWith("http://localhost:8095");
+    expect(mockApi.initialize).toHaveBeenCalledWith("http://localhost:8095", "token-123");
     expect(mockApi.subscribe_multi).toHaveBeenCalledWith([EventType.CONNECTED, EventType.Error], expect.any(Function));
     expect(mockCommand).toHaveBeenCalledWith(mockApi);
     expect(mockApi.close).toHaveBeenCalled();
@@ -56,7 +56,7 @@ describe("executeApiCommand", () => {
 
     await expect(executeApiCommand(mockCommand)).rejects.toBe(errorData);
 
-    expect(mockApi.initialize).toHaveBeenCalledWith("http://localhost:8095");
+    expect(mockApi.initialize).toHaveBeenCalledWith("http://localhost:8095", "token-123");
     expect(mockCommand).not.toHaveBeenCalled();
     expect(mockApi.close).toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe("executeApiCommand", () => {
 
     await expect(executeApiCommand(mockCommand)).rejects.toBe(initError);
 
-    expect(mockApi.initialize).toHaveBeenCalledWith("http://localhost:8095");
+    expect(mockApi.initialize).toHaveBeenCalledWith("http://localhost:8095", "token-123");
     expect(mockCommand).not.toHaveBeenCalled();
   });
 });

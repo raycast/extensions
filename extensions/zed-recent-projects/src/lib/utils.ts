@@ -11,3 +11,6 @@ export function exists(p: string) {
     return false;
   }
 }
+
+export const isWindows = process.platform === "win32";
+export const isMac = process.platform === "darwin";

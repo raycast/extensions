@@ -26,3 +26,10 @@ Works with:
 | Parameter | Description                                                                                                    |
 | --------- | -------------------------------------------------------------------------------------------------------------- |
 | `host`    | Local Music Assistant IP address and port (use the direct IP; mDNS is not reliable in the Raycast environment) |
+| `token`   | Long-lived Music Assistant access token (Settings > Users > Tokens). Required for the authenticated API.       |
+
+How to create a token:
+
+1. Open Music Assistant in your browser.
+2. Go to Settings > Users > Tokens.
+3. Generate a new long-lived token and paste it into the Raycast preference.

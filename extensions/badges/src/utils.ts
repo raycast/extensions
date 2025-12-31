@@ -1,7 +1,10 @@
+import process from "node:process";
 import { readFile } from "node:fs/promises";
 import { Color, LaunchType, environment, open } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
 import { commandConfig } from "./constants.js";
+
+export const isWindows = process.platform === "win32";
 
 export const getCommandConfig = () => commandConfig[environment.commandName];
 
@@ -15,7 +18,7 @@ export const encodeBadgeContentParameters = (params: string[]) =>
   params.map((p) => encodeURIComponent(p.replace(/-/g, "--").replace(/_/g, "__"))).join("-");
 
 export const getTagColor = (active: boolean, activeColor?: Color.ColorLike) =>
-  active ? (activeColor ?? Color.Green) : Color.SecondaryText;
+  active ? (activeColor ?? Color.Blue) : Color.SecondaryText;
 
 export const pickColor = async ({ field }: { field: string }) =>
   crossLaunchCommand(

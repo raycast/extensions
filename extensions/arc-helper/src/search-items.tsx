@@ -1,7 +1,34 @@
-import { ActionPanel, Action, List, Detail, Icon, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, Color, Cache, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { API, Item, PaginatedResponse, getRarityColor } from "./api";
+import { getBlueprintStore, toggleBlueprintObtained, BlueprintStore } from "./storage";
+
+// Clear stale cache on first load (v2 - server-side search)
+const cache = new Cache();
+const CACHE_VERSION = "v2";
+if (cache.get("version") !== CACHE_VERSION) {
+  cache.clear();
+  cache.set("version", CACHE_VERSION);
+}
+
+const ITEM_TYPES = [
+  "Advanced Material",
+  "Blueprint",
+  "Consumable",
+  "Gadget",
+  "Key",
+  "Misc",
+  "Modification",
+  "Nature",
+  "Quick Use",
+  "Recyclable",
+  "Refined Material",
+  "Throwable",
+  "Topside Material",
+  "Trinket",
+  "Weapon",
+];
 
 function ItemDetail({ item }: { item: Item }) {
   const stats = item.stat_block || {};
@@ -83,34 +110,43 @@ function formatStatName(key: string): string {
 export default function SearchItems() {
   const [searchText, setSearchText] = useState("");
   const [itemType, setItemType] = useState<string>("all");
+  const [blueprintStore, setBlueprintStore] = useState<BlueprintStore>({});
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const { isLoading, data, pagination } = useFetch((options) => `${API.items}?page=${options.page + 1}`, {
-    mapResult(result: PaginatedResponse<Item>) {
-      return {
-        data: result.data,
-        hasMore: result.pagination.hasNextPage,
-      };
-    },
-    keepPreviousData: true,
-    initialData: [],
-  });
+  // Load blueprint store
+  useEffect(() => {
+    getBlueprintStore().then(setBlueprintStore);
+  }, [refreshKey]);
 
-  const items = data || [];
-
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      const matchesSearch =
-        searchText === "" ||
-        item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchText.toLowerCase());
-      const matchesType = itemType === "all" || item.item_type === itemType;
-      return matchesSearch && matchesType;
+  const handleToggleBlueprintObtained = useCallback(async (id: string, name: string) => {
+    const newStatus = await toggleBlueprintObtained(id);
+    setRefreshKey((k) => k + 1);
+    await showToast({
+      style: Toast.Style.Success,
+      title: newStatus ? "Marked as Obtained" : "Marked as Needed",
+      message: name,
     });
-  }, [items, searchText, itemType]);
+  }, []);
 
-  const itemTypes = useMemo(() => {
-    return [...new Set(items.map((item) => item.item_type))].sort();
-  }, [items]);
+  const { isLoading, data, pagination } = useFetch(
+    (options) => {
+      const params = new URLSearchParams();
+      params.set("page", String(options.page + 1));
+      if (searchText) params.set("search", searchText);
+      if (itemType !== "all") params.set("item_type", itemType);
+      return `${API.items}?${params.toString()}`;
+    },
+    {
+      mapResult(result: PaginatedResponse<Item>) {
+        return {
+          data: result.data,
+          hasMore: result.pagination?.hasNextPage ?? false,
+        };
+      },
+      keepPreviousData: true,
+      initialData: [],
+    },
+  );
 
   return (
     <List
@@ -118,42 +154,65 @@ export default function SearchItems() {
       searchBarPlaceholder="Search items..."
       filtering={false}
       onSearchTextChange={setSearchText}
+      throttle
       pagination={pagination}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Type" value={itemType} onChange={setItemType}>
           <List.Dropdown.Item title="All Types" value="all" />
           <List.Dropdown.Section title="Item Types">
-            {itemTypes.map((type) => (
+            {ITEM_TYPES.map((type) => (
               <List.Dropdown.Item key={type} title={type} value={type} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
-      {filteredItems.map((item) => (
-        <List.Item
-          key={item.id}
-          icon={{ source: item.icon, fallback: Icon.Box }}
-          title={item.name}
-          subtitle={item.item_type}
-          accessories={[
-            {
-              tag: {
-                value: item.rarity,
-                color: getRarityColor(item.rarity) as Color,
+      {data.map((item) => {
+        const isBlueprint = item.item_type === "Blueprint";
+        const blueprintStatus = isBlueprint ? blueprintStore[item.id] : null;
+        const isObtained = blueprintStatus?.obtained || false;
+
+        return (
+          <List.Item
+            key={item.id}
+            icon={{ source: item.icon, fallback: Icon.Box }}
+            title={item.name}
+            subtitle={item.item_type}
+            accessories={[
+              ...(isBlueprint
+                ? [
+                    {
+                      icon: isObtained ? Icon.CheckCircle : Icon.Circle,
+                      tooltip: isObtained ? "Obtained" : "Needed",
+                    },
+                  ]
+                : []),
+              {
+                tag: {
+                  value: item.rarity,
+                  color: getRarityColor(item.rarity) as Color,
+                },
               },
-            },
-            { text: `${item.value}` },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push title="View Details" icon={Icon.Eye} target={<ItemDetail item={item} />} />
-              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
-              <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
-            </ActionPanel>
-          }
-        />
-      ))}
+              { text: `${item.value}` },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push title="View Details" icon={Icon.Eye} target={<ItemDetail item={item} />} />
+                {isBlueprint && (
+                  <Action
+                    title={isObtained ? "Mark as Needed" : "Mark as Obtained"}
+                    icon={isObtained ? Icon.Circle : Icon.CheckCircle}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    onAction={() => handleToggleBlueprintObtained(item.id, item.name)}
+                  />
+                )}
+                <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+                <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

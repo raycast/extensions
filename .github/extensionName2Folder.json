@@ -251,6 +251,7 @@
   "crackedpoly/ccf-what": "ccf-what",
   "ViGeng/ccfddl": "ccfddl",
   "nyatinte/ccusage": "ccusage",
+  "xmok/cdnjs": "cdnjs",
   "enesozturk/center": "center",
   "EvanZhouDev/cerebras": "cerebras",
   "gamerslouis/certificate-viewer": "certificate-viewer",
@@ -685,6 +686,7 @@
   "matheuschein/fisher": "fisher",
   "tin5451/fix-language": "fix-language",
   "eggsy/fix-link-embeds": "fix-link-embeds",
+  "xmok/fizzy": "fizzy",
   "bgnfu7re/flaticon": "flaticon",
   "VladYevt/flibusta-search": "flibusta-search",
   "DannySeidel/flight-miles-calculator": "flight-miles-calculator",
@@ -953,6 +955,7 @@
   "danyelkeddah/inertiajs-documentation": "inertiajs-documentation",
   "teziovsky/infakt": "infakt",
   "xmok/infisical": "infisical",
+  "xmok/infomaniak": "infomaniak",
   "Visual-Studio-Coder/ingredients-lister": "ingredients-lister",
   "unpopular/initium": "initium",
   "yaeda/inkdrop": "inkdrop",
@@ -2488,5 +2491,6 @@
   "reckoning-dev/zotero": "zotero",
   "theherk/zoxide-git-projects": "zoxide-git-projects",
   "espenbye/zsh-aliases": "zsh-aliases",
-  "TurboCoder13/zshrc-manager": "zshrc-manager"
+  "TurboCoder13/zshrc-manager": "zshrc-manager",
+  "xmok/zyntra": "zyntra"
 }
