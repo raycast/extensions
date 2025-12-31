@@ -1,6 +1,7 @@
 import { open, closeMainWindow, Clipboard, popToRoot, showToast, Toast, showHUD } from "@raycast/api";
 import { createInstantMeeting } from "./api/meetings";
 import { zoom } from "./components/withZoomAuth";
+import { getZoomUrlForPlatform } from "./helpers/meetings";
 
 export default async function Command() {
   const token = await zoom.authorize();
@@ -10,14 +11,15 @@ export default async function Command() {
 
     const meeting = await createInstantMeeting(token);
 
-    await open(meeting.join_url);
+    const zoomUrl = getZoomUrlForPlatform(meeting.join_url);
+    await open(zoomUrl);
 
     await Clipboard.copy(meeting.join_url);
     await showHUD("Copied Join URL to clipboard");
 
     await closeMainWindow();
     await popToRoot();
-  } catch (error) {
+  } catch {
     await showToast({ style: Toast.Style.Failure, title: "Failed to create meeting" });
   }
 }
