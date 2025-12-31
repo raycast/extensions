@@ -19,6 +19,8 @@ import { readdir, stat } from "fs/promises";
 interface Preferences {
   screenshotsPath: string;
   folderLimit: string;
+  gridColumns: string;
+  aspectRatio: string;
 }
 
 interface Screenshot {
@@ -31,6 +33,7 @@ interface Screenshot {
 const ITEMS_PER_PAGE = 100;
 
 export default function Command() {
+  const prefs = getPreferenceValues<Preferences>();
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(true);
@@ -151,8 +154,8 @@ export default function Command() {
 
   return (
     <Grid
-      columns={5}
-      aspectRatio="4/3"
+      columns={parseInt(prefs.gridColumns) || 5}
+      aspectRatio={prefs.aspectRatio as "16/9" | "4/3" | "3/2" | "1" | undefined}
       isLoading={isLoading}
       onSelectionChange={(id) => {
         if (hasMore && id && displayedItems > 0) {
