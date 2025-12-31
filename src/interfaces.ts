@@ -8,7 +8,6 @@ export interface DockerContainer {
 }
 
 export type ProjectId = string;
-
 export interface Service {
   name: string;
   appName: string;
@@ -19,27 +18,27 @@ export interface Application extends Service {
   applicationId: string;
   applicationStatus: "idle";
 }
-export interface Mariadb extends Service {
+interface Mariadb extends Service {
   mariadbId: string;
   applicationStatus: "idle";
 }
-export interface Mongo extends Service {
+interface Mongo extends Service {
   mongoId: string;
   applicationStatus: "idle";
 }
-export interface Mysql extends Service {
+interface Mysql extends Service {
   mysqlId: string;
   applicationStatus: "idle";
 }
-export interface Postgres extends Service {
+interface Postgres extends Service {
   postgresId: string;
   applicationStatus: "idle";
 }
-export interface Redis extends Service {
+interface Redis extends Service {
   redisId: string;
   applicationStatus: "idle";
 }
-export interface Compose extends Service {
+interface Compose extends Service {
   composeId: string;
   composeStatus: "idle" | "done";
 }

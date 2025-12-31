@@ -5,6 +5,9 @@
   "description": "Deploy Anywhere with Total Freedom and Ease.",
   "icon": "extension-icon.png",
   "author": "xmok",
+  "contributors": [
+    "zeekrey"
+  ],
   "license": "MIT",
   "commands": [
     {
