@@ -4,13 +4,15 @@
   "title": "Sleep Calculator",
   "description": "Calculate optimal sleep and wake times based on 90-minute sleep cycles",
   "icon": "extension-icon.png",
-  "author": "luinbytes",
-  "categories": ["Productivity"],
+  "author": "nazzy_wazzy_lu",
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "wake-up-at",
-      "title": "Wake Up At",
+      "title": "Wake up at",
       "description": "Calculate when to go to bed based on your desired wake time",
       "mode": "view",
       "arguments": [
@@ -35,10 +37,13 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "18.2.45",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "@types/react": "18.2.45"
   },
   "scripts": {
     "build": "ray build -e dist",

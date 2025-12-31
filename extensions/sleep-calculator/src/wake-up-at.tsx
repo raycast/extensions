@@ -15,7 +15,7 @@ interface Arguments {
 }
 
 // Sleep quality configuration based on cycles
-function getSleepQuality(cycles: number): { label: string; color: Color; icon: Icon.IconLike } {
+function getSleepQuality(cycles: number): { label: string; color: Color; icon: Icon } {
     if (cycles >= 6) return { label: "Optimal", color: Color.Green, icon: Icon.Star };
     if (cycles === 5) return { label: "Great", color: Color.Blue, icon: Icon.Star };
     if (cycles === 4) return { label: "Good", color: Color.Yellow, icon: Icon.Circle };
