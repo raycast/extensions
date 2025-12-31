@@ -19,12 +19,6 @@ export default function ProjectInteractionMenu({
     <ActionPanel title={`Options for ${itemData?.title}`} key={"general"}>
       {/* Section 1: General Actions */}
       <ActionPanel.Section>
-        {/* 
-          The lint error happens because Action.Push expects its `target` prop to be a valid ReactNode.
-          If DetailsView (which is passed in detailsTarget via SearchView.tsx) does not accept or propagate children, 
-          React types may complain if children is required. DetailsView should accept and (optionally) render children, or 
-          use React.PropsWithChildren. 
-        */}
         {detailsTarget && <Action.Push title={"View Details"} icon={Icon.Info} target={<>{detailsTarget}</>} />}
         <Action.OpenInBrowser url={`${MODRINTH_BASE_URL}${projectType}/${itemData?.slug}`} />
         {setSortingType && (
