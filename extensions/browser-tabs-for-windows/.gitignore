@@ -28,10 +28,14 @@ helper/obj/
 
 # assets 目录 - 只保留最终需要的文件
 # 排除不需要的编译产物
-assets/*.deps.json
-assets/*.runtimeconfig.json
+# assets 目录 - 只保留最终需要的文件
+# 排除不需要的 debug 符号
 assets/*.pdb
-assets/*.dll
+
+# 必须包含 helper 的所有依赖文件 (dll, json config)
+!assets/*.dll
+!assets/*.deps.json
+!assets/*.runtimeconfig.json
 
 # 保留这些文件:
 # - browser-tabs-helper.exe (编译后的可执行文件)
