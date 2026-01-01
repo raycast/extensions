@@ -8,7 +8,7 @@ import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationNa
 function PasteUsernameAction() {
   const selectedItem = useSelectedVaultItem();
   const getUpdatedVaultItem = useGetUpdatedVaultItem();
-  const actionTitle = useActionTitle();
+  const currentApplication = useFrontmostApplicationName();
 
   if (!selectedItem.login?.username) return null;
 
@@ -24,7 +24,7 @@ function PasteUsernameAction() {
 
   return (
     <ActionWithReprompt
-      title={actionTitle}
+      title={currentApplication ? `Paste Username into ${currentApplication}` : "Paste Username"}
       icon={Icon.Window}
       onAction={pasteUsername}
       repromptDescription={`Pasting the username of <${selectedItem.name}>`}
@@ -34,11 +34,6 @@ function PasteUsernameAction() {
       }}
     />
   );
-}
-
-function useActionTitle() {
-  const currentApplication = useFrontmostApplicationName();
-  return currentApplication ? `Paste Username into ${currentApplication}` : "Paste Username";
 }
 
 export default PasteUsernameAction;
