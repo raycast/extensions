@@ -33,6 +33,20 @@
       "title": "Create Task",
       "description": "Quickly create a new task",
       "mode": "view"
+    },
+    {
+      "name": "open-list",
+      "title": "Open List",
+      "description": "Open a task list in Google Tasks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "listName",
+          "type": "text",
+          "required": false,
+          "placeholder": "List name"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -49,7 +63,7 @@
       "type": "textfield",
       "required": false,
       "title": "Default Task List Name",
-      "description": "Default task list for creating new tasks.",
+      "description": "Default task list for creating new tasks and opening lists without specifying a name.",
       "placeholder": "My Task List"
     }
   ],
