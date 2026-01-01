@@ -1,6 +1,6 @@
 # Urban Dictionary Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-01-01
 
 - Added Windows support
 
