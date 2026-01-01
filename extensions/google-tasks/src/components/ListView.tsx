@@ -174,7 +174,7 @@ export default function ListView(props: { listId: string }) {
           <List.Dropdown.Item title="Completed" value={Filter.Completed} />
         </List.Dropdown>
       }
-      enableFiltering
+      filtering={true}
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, searchText: newValue }));
       }}
