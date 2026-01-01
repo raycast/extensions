@@ -588,9 +588,11 @@ class Program
     /// <summary>
     /// 获取所有浏览器窗口
     /// </summary>
+    /// <summary>
+    /// 获取所有浏览器窗口
+    /// </summary>
     static List<(IntPtr hwnd, int processId)> GetAllBrowserWindows()
     {
-        var browserWindows = new ConcurrentBag<(IntPtr, int)>();
         var windowHandles = new List<(IntPtr hwnd, uint pid)>();
 
         NativeMethods.EnumWindows((hwnd, lParam) =>
@@ -600,7 +602,10 @@ class Program
             return true;
         }, IntPtr.Zero);
 
-        Parallel.ForEach(windowHandles, window =>
+        var browserWindows = new List<(IntPtr, int)>();
+        
+        // 顺序处理以保持 Z-Order (和 deterministic index)
+        foreach (var window in windowHandles)
         {
             try
             {
@@ -615,13 +620,13 @@ class Program
                     }
                 }
             }
-            catch (ArgumentException)
+            catch
             {
-                // 进程可能已退出
+                // ignore
             }
-        });
+        }
 
-        return browserWindows.ToList();
+        return browserWindows;
     }
 
     /// <summary>
@@ -631,13 +636,32 @@ class Program
     {
         try
         {
-            // 恢复最小化窗口
+            // 1. 如果窗口最小化，先还原
             if (tab.Hwnd != IntPtr.Zero && IsWindowMinimized(tab.Hwnd))
             {
                 NativeMethods.ShowWindow(tab.Hwnd, NativeMethods.SW_RESTORE);
+                System.Threading.Thread.Sleep(50); // 给一点时间还原
             }
 
-            // 激活标签页
+            // 2. 尝试将窗口置于前台 (多次尝试)
+            if (tab.Hwnd != IntPtr.Zero)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    NativeMethods.SetForegroundWindow(tab.Hwnd);
+                    if (NativeMethods.GetForegroundWindow() == tab.Hwnd) break;
+                    System.Threading.Thread.Sleep(10 + i * 10);
+                }
+            }
+
+            // 3. 激活标签页 (UIA)
+            // 有时候焦点不在标签栏，可能需要先 Focus
+            try 
+            {
+                tab.AutomationElement.SetFocus();
+            } 
+            catch { /* ignore */ }
+
             if (tab.AutomationElement.TryGetCurrentPattern(SelectionItemPattern.Pattern, out var pattern))
             {
                 ((SelectionItemPattern)pattern).Select();
@@ -645,12 +669,6 @@ class Program
             else if (tab.AutomationElement.TryGetCurrentPattern(InvokePattern.Pattern, out var invokePattern))
             {
                 ((InvokePattern)invokePattern).Invoke();
-            }
-
-            // 将窗口置于前台
-            if (tab.Hwnd != IntPtr.Zero)
-            {
-                NativeMethods.SetForegroundWindow(tab.Hwnd);
             }
         }
         catch (Exception ex)
@@ -762,6 +780,9 @@ static class NativeMethods
 
     [DllImport("user32.dll")]
     public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
 
     [StructLayout(LayoutKind.Sequential)]
     public struct WINDOWPLACEMENT
