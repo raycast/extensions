@@ -43,6 +43,14 @@
       "title": "OAuth Client ID",
       "description": "Your OAuth client ID.",
       "placeholder": "See https://console.developers.google.com/apis/credentials"
+    },
+    {
+      "name": "defaultListName",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Task List Name",
+      "description": "Default task list for creating new tasks.",
+      "placeholder": "My Task List"
     }
   ],
   "dependencies": {

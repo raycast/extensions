@@ -1,4 +1,4 @@
-import { Detail, Toast, showToast, Form, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { Detail, Toast, showToast, Form, ActionPanel, Action, useNavigation, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as google from "../api/oauth";
 import { fetchLists } from "../api/endpoints";
@@ -17,10 +17,10 @@ export default function CreateTaskForm(props: {
   title?: string;
   onCreate: (listId: string, task: TaskForm) => void;
 }) {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [lists, setLists] = useState<{ id: string; title: string }[]>([]);
   const { pop } = useNavigation();
-  const { handleSubmit, itemProps } = useForm<CreateTaskFormValues>({
+  const { handleSubmit, itemProps, setValue } = useForm<CreateTaskFormValues>({
     onSubmit(values) {
       props.onCreate(values.listId, {
         title: values.title,
@@ -46,6 +46,13 @@ export default function CreateTaskForm(props: {
         await google.authorize();
         const fetchedLists = await fetchLists();
         setLists(fetchedLists);
+        const preferences = getPreferenceValues();
+        if (preferences.defaultListName && !props.listId) {
+          const defaultList = fetchedLists.find((list) => list.title === preferences.defaultListName);
+          if (defaultList) {
+            setValue("listId", defaultList.id);
+          }
+        }
         setIsLoading(false);
       } catch (error) {
         console.error(error);
@@ -53,7 +60,7 @@ export default function CreateTaskForm(props: {
         showToast({ style: Toast.Style.Failure, title: String(error) });
       }
     })();
-  }, [google]);
+  }, [google, props.listId, setValue]);
 
   if (isLoading) {
     return <Detail isLoading={isLoading} />;
