@@ -1,6 +1,6 @@
 # NUSMods Changelog
 
-## [Reviews & Comments] - {PR_MERGE_DATE}
+## [Reviews & Comments] - 2026-01-01
 
 - Added feature to view reviews and comments for NUS courses via Disqus API.
 
