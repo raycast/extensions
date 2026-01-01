@@ -114,7 +114,7 @@ export default function Command(props: LaunchProps) {
               <Action
                 icon={Icon.RotateClockwise}
                 title="刷新"
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={{ modifiers: ["ctrl"], key: "r" }}
                 onAction={handleRefresh}
               />
             </ActionPanel>
@@ -145,6 +145,10 @@ export default function Command(props: LaunchProps) {
                       ? `分组: ${tab.tabGroup}`
                       : tab.windowTitle || undefined,
                   },
+                  {
+                    icon: Icon.XMarkCircle,
+                    tooltip: "关闭标签页 (Ctrl+Return)",
+                  }
                 ]}
                 // 添加关键字
                 keywords={[
@@ -152,7 +156,13 @@ export default function Command(props: LaunchProps) {
                   tab.windowTitle || "",
                 ]}
                 icon={tab.browserIcon}
-                actions={<ActionTab tab={tab} onTabClosed={handleRefresh} />}
+                actions={
+                  <ActionTab
+                    tab={tab}
+                    onTabClosed={handleRefresh}
+                    onRefresh={handleRefresh}
+                  />
+                }
               />
             ))}
           </List.Section>

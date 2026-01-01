@@ -266,6 +266,23 @@ class Program
                 );
                 var tabs = mainWindow.FindAll(TreeScope.Descendants, tabCondition);
                 Console.WriteLine($"    找到 Tab/EdgeTab 元素: {tabs.Count} 个");
+                
+                if (tabs.Count > 0)
+                {
+                    var firstTab = tabs[0];
+                    Console.WriteLine("    [Debug] Inspecting first tab children:");
+                    var children = firstTab.FindAll(TreeScope.Descendants, Condition.TrueCondition);
+                    foreach (AutomationElement child in children)
+                    {
+                        try 
+                        {
+                            var name = child.GetCurrentPropertyValue(AutomationElement.NameProperty) as string;
+                            var type = (ControlType)child.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty);
+                            Console.WriteLine($"      - Type: {type.ProgrammaticName}, Name: '{name}'");
+                        }
+                        catch {}
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -593,35 +610,46 @@ class Program
     /// </summary>
     static List<(IntPtr hwnd, int processId)> GetAllBrowserWindows()
     {
+        // 1. 预先获取所有相关浏览器的 PID，避免在 EnumWindows 循环中频繁调用 Process.GetProcessById
+        var targetPids = new HashSet<int>();
+        var targetProcesses = new Dictionary<int, Process>(); // 缓存 Process 对象供后续使用
+
+        var processNames = ChromiumProcessNames.Concat(FirefoxProcessNames);
+        foreach (var name in processNames)
+        {
+            foreach (var p in Process.GetProcessesByName(name))
+            {
+                targetPids.Add(p.Id);
+                targetProcesses[p.Id] = p;
+            }
+        }
+
         var windowHandles = new List<(IntPtr hwnd, uint pid)>();
 
         NativeMethods.EnumWindows((hwnd, lParam) =>
         {
             NativeMethods.GetWindowThreadProcessId(hwnd, out uint pid);
-            windowHandles.Add((hwnd, pid));
+            if (targetPids.Contains((int)pid))
+            {
+                windowHandles.Add((hwnd, pid));
+            }
             return true;
         }, IntPtr.Zero);
 
         // Fix: Sort by HWND to ensure stable order regardless of Z-order/Focus
-        // This prevents tab indices from shifting when the user activates a window
         windowHandles.Sort((a, b) => a.hwnd.ToInt64().CompareTo(b.hwnd.ToInt64()));
 
         var browserWindows = new List<(IntPtr, int)>();
         
-        // 顺序处理以保持 Z-Order (和 deterministic index)
         foreach (var window in windowHandles)
         {
             try
             {
-                var process = Process.GetProcessById((int)window.pid);
-                if (ChromiumProcessNames.Contains(process.ProcessName) || 
-                    FirefoxProcessNames.Contains(process.ProcessName))
+                // 只检查是否有标题 (过滤掉不可见的辅助窗口)
+                int length = NativeMethods.GetWindowTextLength(window.hwnd);
+                if (length > 0)
                 {
-                    int length = NativeMethods.GetWindowTextLength(window.hwnd);
-                    if (length > 0)
-                    {
-                        browserWindows.Add((window.hwnd, (int)window.pid));
-                    }
+                    browserWindows.Add((window.hwnd, (int)window.pid));
                 }
             }
             catch
@@ -688,6 +716,38 @@ class Program
     {
         try
         {
+            // 1. 尝试直接点击标签页内的“关闭”按钮 (后台关闭，不需激活窗口)
+            var closeButtonCondition = new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button);
+            var buttons = tab.AutomationElement.FindAll(TreeScope.Descendants, closeButtonCondition);
+            
+            foreach (AutomationElement button in buttons)
+            {
+                var name = button.GetCurrentPropertyValue(AutomationElement.NameProperty) as string;
+                // 常见关闭按钮名称 (英文/中文)
+                // Chrome/Edge 通常是 "Close tab" 或 "关闭标签页"
+                if (!string.IsNullOrEmpty(name) && 
+                    (name.Contains("Close", StringComparison.OrdinalIgnoreCase) || 
+                     name.Contains("关闭", StringComparison.OrdinalIgnoreCase)))
+                {
+                    if (button.TryGetCurrentPattern(InvokePattern.Pattern, out var invokePattern))
+                    {
+                        ((InvokePattern)invokePattern).Invoke();
+                        return; // 成功后台关闭
+                    }
+                }
+            }
+            
+            // 尝试找 LegacyIAccessiblePattern (某些旧版或特殊浏览器)
+            // ... (省略，暂不复杂化)
+
+            // 如果后台关闭失败...
+            // 用户希望能保持 Raycast 打开，但是 SendKeys 必须要有焦点。
+            // 这是一个权衡：为了关闭成功，必须抢焦点；为了不抢焦点，就只能后台关闭。
+            // 既然到了这里说明后台关闭失效，我们只能尝试激活窗口来关闭，否则用户会觉得“没反应”。
+            // 或者我们可以尝试不 SetForegroundWindow 直接 SendKeys? 不行，SendKeys 发送到活动窗口。
+            
+            // 2. 如果找不到关闭按钮，回退到：激活 -> Ctrl+W
+            // 注意：这会导致 Raycast 失去焦点从而自动隐藏 (Raycast 默认行为)
             // 先激活标签页
             if (tab.AutomationElement.TryGetCurrentPattern(SelectionItemPattern.Pattern, out var pattern))
             {
@@ -695,6 +755,12 @@ class Program
             }
 
             // 使用 Ctrl+W 关闭标签页
+            // 需要确保窗口在前台
+            if (tab.Hwnd != IntPtr.Zero)
+            {
+                 NativeMethods.SetForegroundWindow(tab.Hwnd);
+            }
+
             System.Threading.Thread.Sleep(100);
             System.Windows.Forms.SendKeys.SendWait("^w");
         }
