@@ -602,6 +602,10 @@ class Program
             return true;
         }, IntPtr.Zero);
 
+        // Fix: Sort by HWND to ensure stable order regardless of Z-order/Focus
+        // This prevents tab indices from shifting when the user activates a window
+        windowHandles.Sort((a, b) => a.hwnd.ToInt64().CompareTo(b.hwnd.ToInt64()));
+
         var browserWindows = new List<(IntPtr, int)>();
         
         // 顺序处理以保持 Z-Order (和 deterministic index)
