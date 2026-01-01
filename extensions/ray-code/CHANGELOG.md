@@ -1,6 +1,6 @@
 # Ray Code Changelog
 
-## [Auto Edit, Run Command and Git Tools] - {PR_MERGE_DATE}
+## [Auto Edit, Run Command and Git Tools] - 2026-01-01
 
 ### Added
 - **run-command**: Execute shell commands in the workspace
