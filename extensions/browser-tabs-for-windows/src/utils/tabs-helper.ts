@@ -46,22 +46,18 @@ export interface Bookmark {
 }
 
 /**
- * 浏览器名称到图标的映射
- */
-const BROWSER_ICONS: Record<string, string> = {
-  chrome: "chrome-icon.png",
-  msedge: "edge-icon.png",
-  brave: "brave-icon.png",
-  vivaldi: "vivaldi-icon.png",
-  opera: "opera-icon.png",
-  firefox: "firefox-icon.png",
-};
-
-/**
  * 获取浏览器图标
  */
 function getBrowserIcon(browser: string): string {
-  return BROWSER_ICONS[browser.toLowerCase()] || "extension-icon.png";
+  const browserName = browser.toLowerCase();
+  switch (browserName) {
+    case "chrome":
+      return "chrome-icon.png";
+    case "msedge":
+      return "edge-icon.png";
+    default:
+      return "extension-icon.png";
+  }
 }
 
 /**

@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - 2026-01-01
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of Browser Tabs for Windows.
 - Features:
