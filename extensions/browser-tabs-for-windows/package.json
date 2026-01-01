@@ -1,0 +1,48 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "browser-tabs-windows",
+    "title": "Browser Tabs",
+    "description": "搜索、切换和关闭浏览器标签页。支持 Chrome、Edge、Brave、Vivaldi、Firefox 等。",
+    "icon": "extension-icon.png",
+    "author": "jdoe",
+    "license": "MIT",
+    "categories": [
+        "Productivity",
+        "Applications"
+    ],
+    "commands": [
+        {
+            "name": "index",
+            "title": "Search Browser Tabs",
+            "description": "Search and manage active browser tabs efficiently.",
+            "mode": "view"
+        },
+        {
+            "name": "search-bookmarks",
+            "title": "Search Bookmarks",
+            "description": "Search and open your browser bookmarks instantly.",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.100.3",
+        "@raycast/utils": "^2.1.0",
+        "fuse.js": "^7.1.0",
+        "pinyin-pro": "^3.27.0"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.0.4",
+        "@types/node": "^22.10.0",
+        "@types/react": "^19.0.0",
+        "eslint": "^9.0.0",
+        "prettier": "^3.4.0",
+        "typescript": "^5.7.0"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

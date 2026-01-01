@@ -1,0 +1,45 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Raycast build output
+dist/
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# C# / .NET (helper 目录的源码编译输出)
+helper/bin/
+helper/obj/
+*.user
+*.suo
+
+# assets 目录 - 只保留最终需要的文件
+# 排除不需要的编译产物
+assets/*.deps.json
+assets/*.runtimeconfig.json
+assets/*.pdb
+assets/*.dll
+
+# 保留这些文件:
+# - browser-tabs-helper.exe (编译后的可执行文件)
+# - *-icon.png (图标文件)
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
