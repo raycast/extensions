@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "adguard-dns",
+  "title": "AdGuard DNS",
+  "description": "Troubleshoot service issues by analyzing AdGuard DNS query logs and unblocking domains",
+  "icon": "extension-icon.png",
+  "author": "kevintraver",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "index",
+      "title": "AdGuard DNS",
+      "description": "View extension information and usage instructions",
+      "mode": "view"
+    },
+    {
+      "name": "get-query-log",
+      "title": "Blocked DNS Requests",
+      "description": "View and unblock domains from recent DNS query logs with root domain prioritization",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-query-log",
+      "title": "Blocked DNS Requests",
+      "description": "Fetch DNS query logs and show blocked domains grouped by root domain.",
+      "mode": "no-view"
+    },
+    {
+      "name": "unblock-domain",
+      "title": "Unblock Domain",
+      "description": "Unblock one or more domains by adding them to the DNS server's whitelist.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "adguardApiToken",
+      "type": "password",
+      "required": true,
+      "title": "AdGuard API Token",
+      "description": "Your AdGuard DNS access token",
+      "placeholder": "Enter your access token"
+    },
+    {
+      "name": "adguardRefreshToken",
+      "type": "password",
+      "required": true,
+      "title": "AdGuard Refresh Token",
+      "description": "Your AdGuard DNS refresh token",
+      "placeholder": "Enter your refresh token"
+    },
+    {
+      "name": "adguardDnsServerId",
+      "type": "textfield",
+      "required": true,
+      "title": "DNS Server ID",
+      "description": "Your AdGuard DNS server ID",
+      "placeholder": "Enter your DNS server ID"
+    }
+  ],
+  "ai": {
+    "instructions": "You are a DNS troubleshooting assistant. When a user reports an issue:\n\n1. IMMEDIATELY call get-query-log tool - do NOT ask diagnostic questions first\n2. Present the blocked domains grouped by root domain\n3. Offer TWO options:\n   a) Quick: User can say \"unblock all\" or list specific domains to unblock\n   b) Visual: Suggest they open 'Blocked DNS Requests' command (Cmd+K) for native list UI\n4. If user chooses to unblock via chat, call unblock-domain tool\n\nIMPORTANT: \n- Call get-query-log IMMEDIATELY without asking questions\n- Always offer both the quick text option and the visual list option\n- Let the user choose their preferred method",
+    "suggestedPrompts": [
+      "Netflix isn't working",
+      "My banking app won't load",
+      "Show me what's been blocked in the last hour",
+      "Why isn't YouTube loading?"
+    ]
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^20.19.21",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  }
+}
