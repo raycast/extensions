@@ -148,7 +148,7 @@ export default function Command(props: LaunchProps) {
                   {
                     icon: Icon.XMarkCircle,
                     tooltip: "关闭标签页 (Ctrl+Return)",
-                  }
+                  },
                 ]}
                 // 添加关键字
                 keywords={[
