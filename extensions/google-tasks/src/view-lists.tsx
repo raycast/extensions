@@ -1,17 +1,16 @@
-import { List, Detail, Toast, showToast, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, Toast, showToast, ActionPanel, Action, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import ListView from "./components/ListView";
-import * as google from "./api/oauth";
 import { fetchLists } from "./api/endpoints";
+import { GoogleAuthProvider } from "./contexts/GoogleAuthProvider";
 
-export default function Command() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+function ViewListsCommand() {
+  const [isLoading, setIsLoading] = useState(true);
   const [lists, setLists] = useState<{ id: string; title: string }[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        await google.authorize();
         const fetchedLists = await fetchLists();
         setLists(fetchedLists);
         setIsLoading(false);
@@ -21,11 +20,7 @@ export default function Command() {
         showToast({ style: Toast.Style.Failure, title: String(error) });
       }
     })();
-  }, [google]);
-
-  if (isLoading) {
-    return <Detail isLoading={isLoading} />;
-  }
+  }, []);
 
   return (
     <List isLoading={isLoading}>
@@ -44,5 +39,13 @@ export default function Command() {
         );
       })}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <GoogleAuthProvider>
+      <ViewListsCommand />
+    </GoogleAuthProvider>
   );
 }

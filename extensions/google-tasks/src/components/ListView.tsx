@@ -1,6 +1,5 @@
 import { List, Toast, showToast } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import * as google from "../api/oauth";
 import { createTask, deleteTask, editTask, fetchList, toggleTask } from "../api/endpoints";
 import { Filter, Task, TaskForm } from "../types";
 import TaskItem from "./TaskItem";
@@ -26,7 +25,6 @@ export default function ListView(props: { listId: string }) {
     (async () => {
       try {
         setState((previous) => ({ ...previous, isLoading: true }));
-        await google.authorize();
         const showCompleted = state.filter === Filter.All || state.filter === Filter.Completed;
         const fetchedList = await fetchList(props.listId, showCompleted);
         setState((previous) => ({
@@ -40,7 +38,7 @@ export default function ListView(props: { listId: string }) {
         showToast({ style: Toast.Style.Failure, title: String(error) });
       }
     })();
-  }, [google, state.filter]);
+  }, [state.filter, props.listId]);
 
   const handleCreate = useCallback(
     (listId: string, taskToCreate: TaskForm) => {

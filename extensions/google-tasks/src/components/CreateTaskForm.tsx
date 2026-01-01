@@ -1,6 +1,5 @@
 import { Detail, Toast, showToast, Form, ActionPanel, Action, useNavigation, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import * as google from "../api/oauth";
 import { fetchLists } from "../api/endpoints";
 import { TaskForm } from "../types";
 import { useForm, FormValidation } from "@raycast/utils";
@@ -43,7 +42,6 @@ export default function CreateTaskForm(props: {
   useEffect(() => {
     (async () => {
       try {
-        await google.authorize();
         const fetchedLists = await fetchLists();
         setLists(fetchedLists);
         const preferences = getPreferenceValues();
@@ -60,7 +58,7 @@ export default function CreateTaskForm(props: {
         showToast({ style: Toast.Style.Failure, title: String(error) });
       }
     })();
-  }, [google, props.listId, setValue]);
+  }, [props.listId, setValue]);
 
   if (isLoading) {
     return <Detail isLoading={isLoading} />;

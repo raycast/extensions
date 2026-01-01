@@ -1,26 +1,10 @@
-import { Detail, Toast, showToast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Toast, showToast } from "@raycast/api";
 import CreateTaskForm from "./components/CreateTaskForm";
-import * as google from "./api/oauth";
 import { createTask } from "./api/endpoints";
 import { TaskForm } from "./types";
+import { GoogleAuthProvider } from "./contexts/GoogleAuthProvider";
 
-export default function Command() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        await google.authorize();
-        setIsLoading(false);
-      } catch (error) {
-        console.error(error);
-        setIsLoading(false);
-        showToast({ style: Toast.Style.Failure, title: String(error) });
-      }
-    })();
-  }, []);
-
+function CreateTaskCommand() {
   const handleCreate = async (listId: string, task: TaskForm) => {
     try {
       await createTask(listId, task);
@@ -30,9 +14,13 @@ export default function Command() {
     }
   };
 
-  if (isLoading) {
-    return <Detail isLoading={isLoading} />;
-  }
-
   return <CreateTaskForm onCreate={handleCreate} />;
+}
+
+export default function Command() {
+  return (
+    <GoogleAuthProvider>
+      <CreateTaskCommand />
+    </GoogleAuthProvider>
+  );
 }
