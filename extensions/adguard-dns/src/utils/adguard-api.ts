@@ -6,12 +6,6 @@ const STORAGE_KEY_REFRESH_TOKEN = "adguard_refresh_token";
 const STORAGE_KEY_DEVICE_CACHE = "adguard_device_cache";
 const DEVICE_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-interface Preferences {
-  adguardApiToken: string;
-  adguardRefreshToken: string;
-  adguardDnsServerId: string;
-}
-
 // In-memory token storage (persists for extension lifetime)
 let currentAccessToken: string | null = null;
 let currentRefreshToken: string | null = null;
@@ -64,8 +58,8 @@ interface TokenResponse {
 /**
  * Get preferences values
  */
-function getPrefs(): Preferences {
-  return getPreferenceValues<Preferences>();
+function getPrefs() {
+  return getPreferenceValues();
 }
 
 /**
@@ -80,12 +74,12 @@ async function initializeToken(): Promise<string> {
     } else {
       // Fall back to preferences for initial setup
       const prefs = getPrefs();
-      currentAccessToken = prefs.adguardApiToken;
+      currentAccessToken = prefs.adguardApiToken as string;
       // Save to LocalStorage for future use
       await LocalStorage.setItem(STORAGE_KEY_ACCESS_TOKEN, currentAccessToken);
     }
   }
-  return currentAccessToken;
+  return currentAccessToken as string;
 }
 
 /**
