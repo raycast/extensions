@@ -1,5 +1,12 @@
 # Google Tasks Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add "Open List" command to quickly open a specific task list
+- Add default task list preference for both creating tasks and opening lists
+- Centralize authentication with GoogleAuthProvider
+- Fix deprecated `enableFiltering` API usage
+
 ## [Update] - 2025-12-07
 
 - Add "Create Task" command for quick task creation
