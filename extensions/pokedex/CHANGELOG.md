@@ -1,6 +1,6 @@
 # Pokédex Changelog
 
-## [Move Stability] - 2025-12-30
+## [Move Stability] - {PR_MERGE_DATE}
 
 - Fixed Move command crashing when Pokémon moves are missing in the learnset.
 
