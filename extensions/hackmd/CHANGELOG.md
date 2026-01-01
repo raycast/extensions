@@ -1,6 +1,6 @@
 # HackMD Changelog
 
-## [Add custom pin action and workspace grouping] - {PR_MERGE_DATE}
+## [Add custom pin action and workspace grouping] - 2026-01-01
 
 - Add custom Pin/Unpin action for notes (`cmd + shift + p`)
 - Consolidated "Pinned" section at the top of note lists
