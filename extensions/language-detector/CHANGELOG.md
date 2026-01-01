@@ -1,6 +1,6 @@
 # Language Detector Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-01-01
 
 - Add multi-platform badge
 - Add affiliate parameter to Raycast website links
