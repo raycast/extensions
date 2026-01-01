@@ -4,10 +4,6 @@ import ListView from "./components/ListView";
 import { useList } from "./hooks/useList";
 import { GoogleAuthProvider } from "./contexts/GoogleAuthProvider";
 
-interface Preferences {
-  defaultListName: string;
-}
-
 function OpenListCommand(props: LaunchProps<{ arguments: Arguments.OpenList }>) {
   const preferences = getPreferenceValues<Preferences>();
   const targetListName = useMemo(
