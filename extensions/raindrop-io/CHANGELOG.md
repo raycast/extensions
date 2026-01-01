@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Quick Add Bookmark] - {PR_MERGE_DATE}
+## [Quick Add Bookmark] - 2026-01-01
 
 - Added Quick Add Bookmark command for saving URLs instantly without opening a form
 - Automatically fetches page title from URL
