@@ -38,7 +38,7 @@ export default function Command() {
           }
         } catch (error) {
           if (!cancelled && !abortController.signal.aborted) {
-            showFailureToast({ title: "Failed to load folder IDs", message: String(error) });
+            showFailureToast(error, { title: "Failed to load folder IDs" });
           }
         }
       };

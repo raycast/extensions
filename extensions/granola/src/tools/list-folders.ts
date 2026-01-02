@@ -20,7 +20,7 @@ export default async function tool(input: Input = {}): Promise<Output> {
   try {
     return await getFolderInfoForAI();
   } catch (error) {
-    showFailureToast({ title: "Failed to fetch folders", message: String(error) });
+    showFailureToast(error, { title: "Failed to fetch folders" });
     return [];
   }
 }

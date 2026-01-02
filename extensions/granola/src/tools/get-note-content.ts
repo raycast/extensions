@@ -139,7 +139,7 @@ export default async function tool(input: Input): Promise<Output> {
       folderNames,
     };
   } catch (error) {
-    showFailureToast({ title: "Failed to fetch note", message: String(error) });
+    showFailureToast(error, { title: "Failed to fetch note" });
     return {
       title: "Error loading note",
       date: new Date().toISOString(),
