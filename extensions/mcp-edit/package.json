@@ -1,0 +1,413 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mcp-edit",
+  "title": "MCP Edit",
+  "description": "Quickly edit MCP configuration files",
+  "icon": "icon.png",
+  "author": "kevintraver",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-mcp-configurations",
+      "title": "Edit MCP Configurations",
+      "subtitle": "MCP",
+      "description": "Browse and open predefined MCP client configuration files",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultEditor",
+          "type": "dropdown",
+          "required": true,
+          "title": "Default Editor",
+          "description": "Select the default editor to use when opening MCP configuration files",
+          "data": [
+            {
+              "title": "Cursor",
+              "value": "cursor"
+            },
+            {
+              "title": "VS Code",
+              "value": "vscode"
+            },
+            {
+              "title": "Zed",
+              "value": "zed"
+            },
+            {
+              "title": "Sublime Text",
+              "value": "sublime"
+            }
+          ]
+        },
+        {
+          "name": "showCursorAction",
+          "type": "checkbox",
+          "required": false,
+          "title": "Open in Cursor",
+          "label": "Enabled",
+          "description": "Show the Cursor editor action in the list",
+          "default": true
+        },
+        {
+          "name": "showVsCodeAction",
+          "type": "checkbox",
+          "required": false,
+          "title": "Open in VS Code",
+          "label": "Enabled",
+          "description": "Show the VS Code editor action in the list",
+          "default": true
+        },
+        {
+          "name": "showZedAction",
+          "type": "checkbox",
+          "required": false,
+          "title": "Open in Zed",
+          "label": "Enabled",
+          "description": "Show the Zed editor action in the list",
+          "default": true
+        },
+        {
+          "name": "showSublimeAction",
+          "type": "checkbox",
+          "required": false,
+          "title": "Open in Sublime Text",
+          "label": "Enabled",
+          "description": "Show the Sublime Text editor action in the list",
+          "default": true
+        },
+        {
+          "name": "showAmp",
+          "type": "checkbox",
+          "required": false,
+          "title": "Amp Code",
+          "label": "Enabled",
+          "description": "Configure which MCP clients appear in the list and their configuration file paths",
+          "default": true
+        },
+        {
+          "name": "ampPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Amp Config Path",
+          "label": "Amp Config Path",
+          "description": "Absolute path to the Amp MCP configuration file",
+          "default": "~/.config/amp/settings.json"
+        },
+        {
+          "name": "showClaudeCode",
+          "type": "checkbox",
+          "required": false,
+          "title": "Claude Code",
+          "label": "Enabled",
+          "description": "Include Claude Code in the MCP list",
+          "default": true
+        },
+        {
+          "name": "claudeCodePath",
+          "type": "textfield",
+          "required": false,
+          "title": "Claude Code Config Path",
+          "label": "Claude Code Config Path",
+          "description": "Absolute path to the Claude Code MCP configuration file",
+          "default": "~/.claude.json"
+        },
+        {
+          "name": "showClaudeDesktopApp",
+          "type": "checkbox",
+          "required": false,
+          "title": "Claude Desktop",
+          "label": "Enabled",
+          "description": "Include Claude Desktop in the MCP list",
+          "default": true
+        },
+        {
+          "name": "claudeDesktopAppPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Claude Desktop Config Path",
+          "label": "Claude Desktop Config Path",
+          "description": "Absolute path to the Claude Desktop MCP configuration file",
+          "default": "~/Library/Application Support/Claude/claude_desktop_config.json"
+        },
+        {
+          "name": "showCline",
+          "type": "checkbox",
+          "required": false,
+          "title": "Cline",
+          "label": "Enabled",
+          "description": "Include Cline in the MCP list",
+          "default": true
+        },
+        {
+          "name": "clinePath",
+          "type": "textfield",
+          "required": false,
+          "title": "Cline Config Path",
+          "label": "Cline Config Path",
+          "description": "Absolute path to the Cline MCP configuration file",
+          "default": "~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json"
+        },
+        {
+          "name": "showCodex",
+          "type": "checkbox",
+          "required": false,
+          "title": "Codex",
+          "label": "Enabled",
+          "description": "Include Codex in the MCP list",
+          "default": true
+        },
+        {
+          "name": "codexPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Codex Config Path",
+          "label": "Codex Config Path",
+          "description": "Absolute path to the Codex MCP configuration file",
+          "default": "~/.codex/config.toml"
+        },
+        {
+          "name": "showCopilotCli",
+          "type": "checkbox",
+          "required": false,
+          "title": "Copilot CLI",
+          "label": "Enabled",
+          "description": "Include Copilot CLI in the MCP list",
+          "default": true
+        },
+        {
+          "name": "copilotCliPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Copilot CLI Config Path",
+          "label": "Copilot CLI Config Path",
+          "description": "Absolute path to the Copilot CLI MCP configuration file",
+          "default": "~/Library/Application Support/Code - Insiders/User/mcp.json"
+        },
+        {
+          "name": "showCopilotVscode",
+          "type": "checkbox",
+          "required": false,
+          "title": "Copilot / VS Code",
+          "label": "Enabled",
+          "description": "Include Copilot / VS Code in the MCP list",
+          "default": true
+        },
+        {
+          "name": "copilotVscodePath",
+          "type": "textfield",
+          "required": false,
+          "title": "Copilot / VS Code Config Path",
+          "label": "Copilot / VS Code Config Path",
+          "description": "Absolute path to the Copilot / VS Code MCP configuration file",
+          "default": "~/Library/Application Support/Code/User/mcp.json"
+        },
+        {
+          "name": "showCursor",
+          "type": "checkbox",
+          "required": false,
+          "title": "Cursor",
+          "label": "Enabled",
+          "description": "Include Cursor in the MCP list",
+          "default": true
+        },
+        {
+          "name": "cursorPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Cursor Config Path",
+          "label": "Cursor Config Path",
+          "description": "Absolute path to the Cursor MCP configuration file",
+          "default": "~/.cursor/mcp.json"
+        },
+        {
+          "name": "showCursorCli",
+          "type": "checkbox",
+          "required": false,
+          "title": "Cursor CLI",
+          "label": "Enabled",
+          "description": "Include Cursor CLI in the MCP list",
+          "default": true
+        },
+        {
+          "name": "cursorCliPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Cursor CLI Config Path",
+          "label": "Cursor CLI Config Path",
+          "description": "Absolute path to the Cursor CLI MCP configuration file",
+          "default": "~/.cursor/mcp.json"
+        },
+        {
+          "name": "showFactoryCli",
+          "type": "checkbox",
+          "required": false,
+          "title": "Factory CLI",
+          "label": "Enabled",
+          "description": "Include Factory CLI in the MCP list",
+          "default": true
+        },
+        {
+          "name": "factoryCliPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Factory CLI Config Path",
+          "label": "Factory CLI Config Path",
+          "description": "Absolute path to the Factory CLI MCP configuration file",
+          "default": ""
+        },
+        {
+          "name": "showGeminiCli",
+          "type": "checkbox",
+          "required": false,
+          "title": "Gemini CLI",
+          "label": "Enabled",
+          "description": "Include Gemini CLI in the MCP list",
+          "default": true
+        },
+        {
+          "name": "geminiCliPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Gemini CLI Config Path",
+          "label": "Gemini CLI Config Path",
+          "description": "Absolute path to the Gemini CLI MCP configuration file",
+          "default": ""
+        },
+        {
+          "name": "showJetbrains",
+          "type": "checkbox",
+          "required": false,
+          "title": "JetBrains AI Assistant",
+          "label": "Enabled",
+          "description": "Include JetBrains AI Assistant in the MCP list",
+          "default": true
+        },
+        {
+          "name": "jetbrainsPath",
+          "type": "textfield",
+          "required": false,
+          "title": "JetBrains AI Assistant Config Path",
+          "label": "JetBrains AI Assistant Config Path",
+          "description": "Absolute path to the JetBrains AI Assistant MCP configuration file",
+          "default": "~/Library/Application Support/JetBrains/IntelliJIdea2025.2/options/llm.mcpServers.xml"
+        },
+        {
+          "name": "showOpencode",
+          "type": "checkbox",
+          "required": false,
+          "title": "OpenCode",
+          "label": "Enabled",
+          "description": "Include OpenCode in the MCP list",
+          "default": true
+        },
+        {
+          "name": "opencodePath",
+          "type": "textfield",
+          "required": false,
+          "title": "OpenCode Config Path",
+          "label": "OpenCode Config Path",
+          "description": "Absolute path to the OpenCode MCP configuration file",
+          "default": "~/.config/opencode/opencode.json"
+        },
+        {
+          "name": "showKiro",
+          "type": "checkbox",
+          "required": false,
+          "title": "Kiro",
+          "label": "Enabled",
+          "description": "Include Kiro in the MCP list",
+          "default": true
+        },
+        {
+          "name": "kiroPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Kiro Config Path",
+          "label": "Kiro Config Path",
+          "description": "Absolute path to the Kiro MCP configuration file",
+          "default": ""
+        },
+        {
+          "name": "showQoder",
+          "type": "checkbox",
+          "required": false,
+          "title": "Qoder",
+          "label": "Enabled",
+          "description": "Include Qoder in the MCP list",
+          "default": true
+        },
+        {
+          "name": "qoderPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Qoder Config Path",
+          "label": "Qoder Config Path",
+          "description": "Absolute path to the Qoder MCP configuration file",
+          "default": ""
+        },
+        {
+          "name": "showVisualStudio",
+          "type": "checkbox",
+          "required": false,
+          "title": "Visual Studio",
+          "label": "Enabled",
+          "description": "Include Visual Studio in the MCP list",
+          "default": true
+        },
+        {
+          "name": "visualStudioPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Visual Studio Config Path",
+          "label": "Visual Studio Config Path",
+          "description": "Absolute path to the Visual Studio MCP configuration file",
+          "default": "~/.mcp.json"
+        },
+        {
+          "name": "showWindsurf",
+          "type": "checkbox",
+          "required": false,
+          "title": "Windsurf",
+          "label": "Enabled",
+          "description": "Include Windsurf in the MCP list",
+          "default": true
+        },
+        {
+          "name": "windsurfPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Windsurf Config Path",
+          "label": "Windsurf Config Path",
+          "description": "Absolute path to the Windsurf MCP configuration file",
+          "default": "~/.codeium/windsurf/mcp_config.json"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
