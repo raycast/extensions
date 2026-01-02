@@ -1,15 +1,9 @@
-import { List, Icon, Color, Action } from "@raycast/api";
+import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { useClaudeUsageLimits } from "../hooks/useClaudeUsageLimits";
 import { formatTimeRemaining, formatRelativeTime, getUtilizationColor } from "../utils/usage-limits-formatter";
 import { ErrorMetadata } from "./ErrorMetadata";
-import { StandardActions, type ExternalLink } from "./common/StandardActions";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { ReactNode } from "react";
-
-const externalLinks: ExternalLink[] = [
-  { title: "View Claude API Documentation", url: "https://docs.anthropic.com/", icon: Icon.Book },
-  { title: "Claude Code Authentication", url: "https://github.com/anthropics/claude-code", icon: Icon.Key },
-];
 
 export function UsageLimits() {
   const { data, isLoading, error, isStale, lastFetched, revalidate } = useClaudeUsageLimits();
@@ -114,10 +108,9 @@ export function UsageLimits() {
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={
-        <StandardActions
-          externalLinks={externalLinks}
-          customActions={<Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />}
-        />
+        <ActionPanel>
+          <Action title="Refresh Usage Limit" icon={Icon.ArrowClockwise} onAction={revalidate} />
+        </ActionPanel>
       }
     />
   );

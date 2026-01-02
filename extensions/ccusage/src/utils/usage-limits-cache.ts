@@ -43,7 +43,9 @@ const fetchUsageLimits = async (): Promise<void> => {
     const token = await getClaudeAccessToken();
 
     if (!token) {
-      const err = new Error("Claude Code credentials not found in keychain");
+      const err = new Error(
+        "Claude Code credentials not found in keychain. Please login to Claude Code to refresh your access token.",
+      );
       cacheState = {
         ...cacheState,
         error: err,
