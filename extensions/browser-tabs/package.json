@@ -5,6 +5,9 @@
   "description": "Search and open tabs in Chrome, Safari, Edge, Arc, Brave, Vivaldi, Opera and Orion, etc.",
   "icon": "browser-tabs-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "commands": [
     {
