@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 import { usePeople } from "./utils/usePeople";
 import { Person, Document, Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
-import getCache from "./utils/getCache";
+import { getDocumentsByIds } from "./utils/fetchData";
 import { NoteListItem } from "./components/NoteComponents";
 import { hasWorkEmailDomain } from "./utils/emailDomainUtils";
 import { useFavicon } from "./utils/toolHelpers";
@@ -70,10 +70,8 @@ export default function Command() {
 
 // Custom hook to fetch favicon for a person (only if no avatar exists)
 function usePersonFavicon(person: Person) {
-  // Don't fetch favicon if person already has an avatar
   const shouldFetch = !person.avatar;
 
-  // Get domain from person's email
   const domain = person.email ? person.email.split("@")[1] : null;
 
   return useFavicon(domain, Icon.PersonCircle, shouldFetch);
@@ -84,6 +82,8 @@ function usePersonMeetings(person: Person) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchMeetings = async () => {
       setIsLoading(true);
 
@@ -91,22 +91,17 @@ function usePersonMeetings(person: Person) {
         const meetingIds = person.meetingIds || [];
 
         if (meetingIds.length === 0) {
-          setMeetings([]);
-          setIsLoading(false);
+          if (!cancelled) {
+            setMeetings([]);
+            setIsLoading(false);
+          }
           return;
         }
 
-        const cacheData = await getCache();
-        const meetingsList: Document[] = [];
-
-        if (cacheData?.state?.documents) {
-          Object.values(cacheData.state.documents).forEach((doc: unknown) => {
-            const document = doc as Document;
-            if (meetingIds.includes(document.id)) {
-              meetingsList.push(document);
-            }
-          });
-        }
+        const documents = await getDocumentsByIds(meetingIds);
+        if (cancelled) return;
+        const meetingIdsSet = new Set(meetingIds);
+        const meetingsList = documents.filter((document) => meetingIdsSet.has(document.id));
 
         meetingsList.sort((a, b) => {
           const dateA = new Date(a.created_at || 0);
@@ -114,15 +109,24 @@ function usePersonMeetings(person: Person) {
           return dateB.getTime() - dateA.getTime();
         });
 
-        setMeetings(meetingsList);
+        if (!cancelled) {
+          setMeetings(meetingsList);
+        }
       } catch (error) {
-        setMeetings([]);
+        if (!cancelled) {
+          setMeetings([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchMeetings();
+    return () => {
+      cancelled = true;
+    };
   }, [person.meetingIds]);
 
   return { meetings, isLoading };
@@ -130,9 +134,7 @@ function usePersonMeetings(person: Person) {
 
 function PersonMeetingsList({ person }: { person: Person }) {
   const { meetings, isLoading } = usePersonMeetings(person);
-  // Get fresh panels data with cache TTL
-  const cacheData = getCache();
-  const panels = cacheData?.state?.documentPanels;
+  // Panels are loaded on-demand in NoteListItem when details are viewed
 
   if (isLoading) {
     return <List isLoading={true} />;
@@ -150,7 +152,7 @@ function PersonMeetingsList({ person }: { person: Person }) {
           description={`No meetings found with ${person.name}.`}
         />
       ) : (
-        meetings.map((meeting) => <NoteListItem key={meeting.id} doc={meeting as Doc} panels={panels} />)
+        meetings.map((meeting) => <NoteListItem key={meeting.id} doc={meeting as Doc} />)
       )}
     </List>
   );

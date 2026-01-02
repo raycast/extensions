@@ -28,13 +28,13 @@ export interface DocumentStructure {
 
 export interface NoteData {
   isLoading: boolean;
-  data: GetDocumentsResponse | undefined;
+  data: GetDocumentsResponse<Doc> | undefined;
   revalidate: () => void;
 }
 
 // Main response interface
-export interface GetDocumentsResponse {
-  docs?: Document[];
+export interface GetDocumentsResponse<TDoc = Document> {
+  docs?: TDoc[];
   deleted?: string[];
 }
 
@@ -77,10 +77,13 @@ export interface Document {
   notification_config: null;
 }
 
+// Lightweight Doc type - excludes large fields (notes_markdown, people) loaded on-demand
 export type Doc = Pick<
   Document,
-  "id" | "title" | "created_at" | "creation_source" | "public" | "notes_markdown" | "sharing_link_visibility" | "people"
->;
+  "id" | "title" | "created_at" | "creation_source" | "public" | "sharing_link_visibility"
+> & {
+  notes_markdown?: string; // Optional - loaded on-demand when viewing "My Notes" or exporting
+};
 
 // Notes structure
 export interface Notes {
@@ -130,7 +133,7 @@ export interface PanelsByDocId {
 
 export interface NoteActionsProps {
   doc: Doc;
-  panels: PanelsByDocId;
+  panels: PanelsByDocId | null;
   children?: ReactNode;
 }
 
@@ -327,6 +330,7 @@ export interface RecipesApiResponse {
   defaultRecipes?: DefaultRecipe[];
   sharedRecipes?: Recipe[];
   publicRecipes?: Recipe[];
+  unlistedRecipes?: Recipe[];
 }
 
 export interface RecipesListResult {
@@ -334,4 +338,5 @@ export interface RecipesListResult {
   userRecipes: Recipe[];
   defaultRecipes?: DefaultRecipe[];
   sharedRecipes?: Recipe[];
+  unlistedRecipes?: Recipe[];
 }

@@ -29,8 +29,15 @@ type Output = {
  * Use this when the user specifically asks for transcript content, conversation details, or what was said in a meeting.
  */
 export default async function tool(input: Input): Promise<Output> {
+  if (!input.noteId) {
+    return {
+      transcript: "",
+      title: "Error: No note ID provided. Use list-meetings first to get a meeting ID.",
+      date: new Date().toISOString(),
+    };
+  }
+
   try {
-    // Use shared helper for consistent document lookup
     const document = await findDocumentById(input.noteId);
 
     const transcript = await getTranscript(input.noteId);

@@ -1,6 +1,5 @@
-import { Document } from "../utils/types";
 import { getFoldersWithCache } from "../utils/folderHelpers";
-import { getDocumentsList } from "../utils/fetchData";
+import { getDocumentsListStripped } from "../utils/fetchData";
 
 type Input = {
   /**
@@ -63,14 +62,16 @@ type Meeting = {
  *
  * CRITICAL: For task extraction queries like "what are the tasks from my latest meeting?":
  * 1. Call THIS tool with { "date": "latest", "limit": 1 } to get the meeting ID
- * 2. Then call ai-notes with { "noteId": "<id-from-step-1>", "includeTranscript": false }
- * DO NOT skip step 2 - you MUST call ai-notes with the specific noteId to get content.
+ * 2. Then call get-note-content with { "noteId": "<id-from-step-1>" }
+ * DO NOT skip step 2 - you MUST call get-note-content with the specific noteId to get content.
+ * Note: get-note-content does NOT include transcripts. Use get-transcript tool separately if transcripts are needed.
  *
- * After getting the meeting list, use the ai-notes tool with specific noteId
+ * After getting the meeting list, use the get-note-content tool with specific noteId
  * to retrieve full content for individual meetings.
  */
 export default async function tool(input: Input): Promise<Meeting[]> {
-  const documents = (await getDocumentsList()) as Document[];
+  // OPTIMIZATION: Use stripped documents (no notes_markdown or people) for metadata queries
+  const documents = await getDocumentsListStripped();
 
   if (!documents || documents.length === 0) {
     return [];

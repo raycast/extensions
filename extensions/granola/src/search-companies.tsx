@@ -1,39 +1,56 @@
 import { List, Action, ActionPanel, Icon, Color } from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
 import { usePeople } from "./utils/usePeople";
-import { Company, Document, Doc, PanelsByDocId } from "./utils/types";
+import { Company, Document, Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
-import getCache from "./utils/getCache";
+import { getDocumentsByIds } from "./utils/fetchData";
 import { NoteListItem } from "./components/NoteComponents";
 import { hasWorkEmailDomain as hasWorkEmailDomainForPerson } from "./utils/emailDomainUtils";
 import { useFavicon } from "./utils/toolHelpers";
 
 type CompanySortOption = "name" | "people-count" | "meeting-count" | "last-meeting";
 
+const formatDate = (value?: string): string => {
+  if (!value) return "Unknown date";
+  const dateValue = new Date(value);
+  if (Number.isNaN(dateValue.getTime())) return "Unknown date";
+  return dateValue.toLocaleDateString();
+};
+
 export default function Command() {
   const { companies, isLoading, hasError } = usePeople();
   const [sortBy, setSortBy] = useState<CompanySortOption>("meeting-count");
 
+  // Optimized: filter and sort in-place to reduce allocations
   const sortedCompanies = useMemo(() => {
-    const filteredCompanies = companies.filter(hasWorkEmailDomain);
-    const companiesCopy = [...filteredCompanies];
+    // Filter first using for loop
+    const filteredCompanies: Company[] = [];
+    for (let i = 0; i < companies.length; i++) {
+      if (hasWorkEmailDomain(companies[i])) {
+        filteredCompanies.push(companies[i]);
+      }
+    }
 
+    // Sort in-place
     switch (sortBy) {
       case "name":
-        return companiesCopy.sort((a, b) => a.name.localeCompare(b.name));
+        filteredCompanies.sort((a, b) => a.name.localeCompare(b.name));
+        break;
       case "people-count":
-        return companiesCopy.sort((a, b) => b.people.length - a.people.length);
+        filteredCompanies.sort((a, b) => b.people.length - a.people.length);
+        break;
       case "meeting-count":
-        return companiesCopy.sort((a, b) => (b.totalMeetings || 0) - (a.totalMeetings || 0));
+        filteredCompanies.sort((a, b) => (b.totalMeetings || 0) - (a.totalMeetings || 0));
+        break;
       case "last-meeting":
-        return companiesCopy.sort((a, b) => {
+        filteredCompanies.sort((a, b) => {
           const dateA = a.lastMeetingDate || "";
           const dateB = b.lastMeetingDate || "";
           return dateB.localeCompare(dateA); // Most recent first
         });
-      default:
-        return companiesCopy;
+        break;
     }
+    return filteredCompanies;
   }, [companies, sortBy]);
 
   if (isLoading) {
@@ -98,6 +115,8 @@ function useCompanyMeetings(company: Company) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchMeetings = async () => {
       setIsLoading(true);
 
@@ -110,22 +129,16 @@ function useCompanyMeetings(company: Company) {
         });
 
         if (meetingIds.size === 0) {
-          setMeetings([]);
-          setIsLoading(false);
+          if (!cancelled) {
+            setMeetings([]);
+            setIsLoading(false);
+          }
           return;
         }
 
-        const cacheData = await getCache();
-        const meetingsList: Document[] = [];
-
-        if (cacheData?.state?.documents) {
-          Object.values(cacheData.state.documents).forEach((doc: unknown) => {
-            const document = doc as Document;
-            if (meetingIds.has(document.id)) {
-              meetingsList.push(document);
-            }
-          });
-        }
+        const documents = await getDocumentsByIds(Array.from(meetingIds));
+        if (cancelled) return;
+        const meetingsList = documents.filter((document) => meetingIds.has(document.id));
 
         meetingsList.sort((a, b) => {
           const dateA = new Date(a.created_at || 0);
@@ -133,15 +146,24 @@ function useCompanyMeetings(company: Company) {
           return dateB.getTime() - dateA.getTime();
         });
 
-        setMeetings(meetingsList);
+        if (!cancelled) {
+          setMeetings(meetingsList);
+        }
       } catch (error) {
-        setMeetings([]);
+        if (!cancelled) {
+          setMeetings([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchMeetings();
+    return () => {
+      cancelled = true;
+    };
   }, [company]);
 
   return { meetings, isLoading };
@@ -150,14 +172,7 @@ function useCompanyMeetings(company: Company) {
 function CompanyMeetingsList({ company }: { company: Company }) {
   const { meetings, isLoading: meetingsLoading } = useCompanyMeetings(company);
 
-  // Get fresh panels data with cache TTL
-  let panels: PanelsByDocId = {};
-  try {
-    const cacheData = getCache();
-    panels = cacheData?.state?.documentPanels || {};
-  } catch (error) {
-    panels = {};
-  }
+  // Panels are loaded on-demand in NoteListItem when details are viewed
 
   if (meetingsLoading) {
     return <List isLoading={true} />;
@@ -175,7 +190,7 @@ function CompanyMeetingsList({ company }: { company: Company }) {
           description={`No meetings found for ${company.name}.`}
         />
       ) : (
-        meetings.map((meeting) => <NoteListItem key={meeting.id} doc={meeting as Doc} panels={panels} />)
+        meetings.map((meeting) => <NoteListItem key={meeting.id} doc={meeting as Doc} />)
       )}
     </List>
   );
@@ -194,13 +209,10 @@ function CompanyListItem({ company }: { company: Company }) {
     }
   }
 
-  // If the company name is a domain (no subtitle yet means it's a domain-based company)
-  // then use the domain as both title and subtitle
   const displayTitle = company.name;
   const isDomainCompany = company.name.includes(".") && !company.name.includes(" ");
 
   if (isDomainCompany && !subtitle) {
-    // This is a domain-based company, use domain as subtitle too
     subtitle = company.name;
   }
 
@@ -208,24 +220,8 @@ function CompanyListItem({ company }: { company: Company }) {
 
   // Add last meeting date first (to match Granola app order)
   if (company.lastMeetingDate) {
-    const date = new Date(company.lastMeetingDate);
-    const now = new Date();
-    const daysDiff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-    let formattedDate: string;
-    if (daysDiff === 0) {
-      formattedDate = "Today";
-    } else if (daysDiff === 1) {
-      formattedDate = "Yesterday";
-    } else if (daysDiff < 7) {
-      formattedDate = date.toLocaleDateString("en-US", { weekday: "long" });
-    } else {
-      formattedDate = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    }
-
     accessories.push({
-      text: formattedDate,
-      tooltip: `Last meeting: ${date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`,
+      text: formatDate(company.lastMeetingDate),
     });
   }
 
