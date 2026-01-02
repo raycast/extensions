@@ -71,22 +71,43 @@ export async function detectTokenAndPort(): Promise<ProcessInfo[]> {
 }
 
 async function getListeningPorts(pid: number): Promise<number[]> {
-  const paths = ["/usr/sbin/lsof", "/usr/bin/lsof", "lsof"];
-  for (const lsofPath of paths) {
-    const cmd = `${lsofPath} -nP -iTCP -sTCP:LISTEN -a -p ${pid} | grep LISTEN | awk '{print $9}' | cut -d: -f2`;
+  if (isWindows) {
+    const cmd = `netstat -ano | findstr "LISTENING" | findstr "${pid}"`;
     try {
-      const { stdout } = await execAsync(cmd);
-      const ports = stdout
-        .split("\n")
-        .map((p) => parseInt(p.trim()))
-        .filter((p) => !isNaN(p));
-      if (ports.length > 0) return ports;
+      const { stdout } = await execAsync(cmd, { timeout: 8000 });
+      const ports: number[] = [];
+      const lines = stdout.split("\n").filter(Boolean);
+      for (const line of lines) {
+        const match = line.match(/:(\d+)\s+/);
+        if (match) {
+          const port = parseInt(match[1]);
+          if (!isNaN(port) && !ports.includes(port)) {
+            ports.push(port);
+          }
+        }
+      }
+      return ports;
     } catch {
-      // Try next path
+      return [];
     }
+  } else {
+    const paths = ["/usr/sbin/lsof", "/usr/bin/lsof", "lsof"];
+    for (const lsofPath of paths) {
+      const cmd = `${lsofPath} -nP -iTCP -sTCP:LISTEN -a -p ${pid} | grep LISTEN | awk '{print $9}' | cut -d: -f2`;
+      try {
+        const { stdout } = await execAsync(cmd);
+        const ports = stdout
+          .split("\n")
+          .map((p) => parseInt(p.trim()))
+          .filter((p) => !isNaN(p));
+        if (ports.length > 0) return ports;
+      } catch {
+        // Try next path
+      }
+    }
+    console.error(`All lsof attempts failed for pid ${pid}`);
+    return [];
   }
-  console.error(`All lsof attempts failed for pid ${pid}`);
-  return [];
 }
 
 function transmit(
