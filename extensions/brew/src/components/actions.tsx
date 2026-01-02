@@ -102,7 +102,7 @@ export function FormulaShowAllInstalled(props: { onAction: (result: boolean) => 
       icon={excludeDependencies ? Icon.Eye : Icon.EyeDisabled}
       shortcut={{ modifiers: ["cmd"], key: "d" }}
       onAction={() => {
-        const result = excludeDeps(() => setExcludeDependencies((prev) => !prev));
+        const result = toggleExcludeDeps(excludeDependencies, setExcludeDependencies);
         props.onAction(result);
       }}
     />
@@ -229,13 +229,12 @@ async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
   }
 }
 
-function excludeDeps(fn: () => void) {
-  try {
-    showToast(Toast.Style.Success, "Show only installed dependency");
-    fn();
-    return true;
-  } catch (err) {
-    showBrewFailureToast("Show only installed dependency failed", ensureError(err));
-    return false;
-  }
+function toggleExcludeDeps(exclude: boolean, setExclude: (val: boolean) => void) {
+  const newState = !exclude;
+
+  setExclude(newState);
+
+  showToast(Toast.Style.Success, newState ? "Dependencies hidden" : "Dependencies shown");
+
+  return true;
 }
