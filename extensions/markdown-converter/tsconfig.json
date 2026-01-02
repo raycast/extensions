@@ -13,9 +13,9 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": false,
     "skipLibCheck": true,
-    "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "types": ["node"]
   },
