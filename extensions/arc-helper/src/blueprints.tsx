@@ -217,14 +217,20 @@ export default function Blueprints() {
                   <Action
                     title="Add Duplicate"
                     icon={Icon.PlusCircle}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "d" },
+                      windows: { modifiers: ["ctrl"], key: "d" },
+                    }}
                     onAction={() => handleAddDuplicate(item.id, item.name)}
                   />
                   {duplicates > 0 && (
                     <Action
                       title="Remove Duplicate"
                       icon={Icon.MinusCircle}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                        windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                      }}
                       onAction={() => handleRemoveDuplicate(item.id, item.name)}
                     />
                   )}

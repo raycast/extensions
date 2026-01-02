@@ -12,6 +12,7 @@ A Raycast extension for [Arc Raiders](https://www.arcraiders.com/) that lets you
 | **Event Timers** | View active/upcoming events sorted by time, filterable by map |
 | **Traders** | Browse trader inventories with prices |
 | **Open Map** | Quick access to interactive maps (Dam, Spaceport, Buried City, Blue Gate, Stella Montis) |
+| **My Blueprints** | Track your blueprint collection progress (mark obtained/needed, track duplicates) |
 
 ## API
 

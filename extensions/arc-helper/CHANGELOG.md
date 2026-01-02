@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0] - {PR_MERGE_DATE}
+
+### Added
+
+- **Windows Support** - Extension now works on both macOS and Windows
+  - All keyboard shortcuts work cross-platform (Cmd on macOS, Ctrl on Windows)
+
 ## [1.3.0] - 2025-12-25
 
 ### Added

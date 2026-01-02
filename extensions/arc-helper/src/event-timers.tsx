@@ -233,7 +233,10 @@ export default function EventTimers() {
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={() => revalidate()}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "r" },
+              windows: { modifiers: ["ctrl"], key: "r" },
+            }}
           />
         </ActionPanel>
       }
@@ -254,7 +257,10 @@ export default function EventTimers() {
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={() => revalidate()}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
                   />
                 </ActionPanel>
               }
@@ -287,7 +293,10 @@ export default function EventTimers() {
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={() => revalidate()}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
                   />
                 </ActionPanel>
               }
@@ -312,7 +321,10 @@ export default function EventTimers() {
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={() => revalidate()}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
                   />
                 </ActionPanel>
               }

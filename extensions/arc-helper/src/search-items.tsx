@@ -202,7 +202,10 @@ export default function SearchItems() {
                   <Action
                     title={isObtained ? "Mark as Needed" : "Mark as Obtained"}
                     icon={isObtained ? Icon.Circle : Icon.CheckCircle}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "o" },
+                      windows: { modifiers: ["ctrl"], key: "o" },
+                    }}
                     onAction={() => handleToggleBlueprintObtained(item.id, item.name)}
                   />
                 )}
