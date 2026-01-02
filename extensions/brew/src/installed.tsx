@@ -3,25 +3,20 @@
  */
 
 import { useState } from "react";
-import { Cask, Formula, uiLogger } from "./utils";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
+import { FormulaList } from "./components/list";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { isInstalled } from "./hooks/useBrewSearch";
-import { FormulaList } from "./components/list";
-import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
-import { ErrorBoundary } from "./components/ErrorBoundary";
+import { uiLogger } from "./utils";
+import { useDependenciesFilter } from "./utils/dependencies";
+import { showInstalledPackages } from "./utils/installed";
 
 function InstalledContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
   const { isLoading, data: installed, revalidate } = useBrewInstalled();
-
-  let formulae: Formula[] = [];
-  if (filter != InstallableFilterType.casks && installed?.formulae instanceof Map) {
-    formulae = Array.from(installed.formulae.values());
-  }
-  let casks: Cask[] = [];
-  if (filter != InstallableFilterType.formulae && installed?.casks instanceof Map) {
-    casks = Array.from(installed.casks.values());
-  }
+  const { excludeDependencies } = useDependenciesFilter();
+  const { formulae, casks } = showInstalledPackages(installed, filter, excludeDependencies);
 
   // Log rendering statistics
   if (installed && !isLoading) {
