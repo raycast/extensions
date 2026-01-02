@@ -59,7 +59,6 @@ function parseProcessLines(stdout: string): ProcessInfo[] {
   return results;
 }
 
-
 const isWindows = process.platform === "win32";
 
 export async function detectTokenAndPort(): Promise<ProcessInfo[]> {
