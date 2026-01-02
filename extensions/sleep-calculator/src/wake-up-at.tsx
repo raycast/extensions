@@ -19,10 +19,6 @@ import {
   CYCLE_LENGTH,
 } from "./lib/sleep-utils";
 
-interface Arguments {
-  wakeTime: string;
-}
-
 // Sleep quality configuration based on cycles
 function getSleepQuality(cycles: number): {
   label: string;
