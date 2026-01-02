@@ -1,13 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-  LaunchProps,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 import {
   bedtimesForWake,
@@ -25,20 +16,15 @@ function getSleepQuality(cycles: number): {
   color: Color;
   icon: Icon;
 } {
-  if (cycles >= 6)
-    return { label: "Optimal", color: Color.Green, icon: Icon.Star };
-  if (cycles === 5)
-    return { label: "Great", color: Color.Blue, icon: Icon.Star };
-  if (cycles === 4)
-    return { label: "Good", color: Color.Yellow, icon: Icon.Circle };
-  if (cycles === 3)
-    return { label: "Light", color: Color.Orange, icon: Icon.Circle };
-  if (cycles === 2)
-    return { label: "Nap", color: Color.Red, icon: Icon.Circle };
+  if (cycles >= 6) return { label: "Optimal", color: Color.Green, icon: Icon.Star };
+  if (cycles === 5) return { label: "Great", color: Color.Blue, icon: Icon.Star };
+  if (cycles === 4) return { label: "Good", color: Color.Yellow, icon: Icon.Circle };
+  if (cycles === 3) return { label: "Light", color: Color.Orange, icon: Icon.Circle };
+  if (cycles === 2) return { label: "Nap", color: Color.Red, icon: Icon.Circle };
   return { label: "Minimal", color: Color.Red, icon: Icon.ExclamationMark };
 }
 
-export default function WakeUpAt(props: LaunchProps<{ arguments: Arguments }>) {
+export default function WakeUpAt(props: LaunchProps<{ arguments: Arguments.WakeUpAt }>) {
   const initialTime = props.arguments.wakeTime;
   const [searchText, setSearchText] = useState("");
   const [showMoreUsed, setShowMoreUsed] = useState(false);
@@ -69,11 +55,7 @@ export default function WakeUpAt(props: LaunchProps<{ arguments: Arguments }>) {
     }
 
     return (
-      <List
-        searchBarPlaceholder="Enter wake time (e.g., 7:30 AM)..."
-        onSearchTextChange={handleSearchChange}
-        throttle
-      >
+      <List searchBarPlaceholder="Enter wake time (e.g., 7:30 AM)..." onSearchTextChange={handleSearchChange} throttle>
         <List.EmptyView
           icon={Icon.Clock}
           title="Enter a Wake Time"
@@ -88,29 +70,15 @@ export default function WakeUpAt(props: LaunchProps<{ arguments: Arguments }>) {
   const extendedCycles = showMoreUsed ? [2, 1] : [];
   const cycles = [...baseCycles, ...extendedCycles];
 
-  const bedtimes = bedtimesForWake(
-    parsed.hour,
-    parsed.minute,
-    parsed.ampm,
-    FALL_ASLEEP_BUFFER,
-    CYCLE_LENGTH,
-    cycles
-  );
+  const bedtimes = bedtimesForWake(parsed.hour, parsed.minute, parsed.ampm, FALL_ASLEEP_BUFFER, CYCLE_LENGTH, cycles);
   const wakeTimeFormatted = `${parsed.hour}:${parsed.minute.toString().padStart(2, "0")} ${parsed.ampm}`;
 
   // Sort by cycles descending (most sleep first)
   const sortedBedtimes = [...bedtimes].sort((a, b) => b.cycles - a.cycles);
 
   return (
-    <List
-      searchBarPlaceholder="Change wake time..."
-      onSearchTextChange={handleSearchChange}
-      throttle
-    >
-      <List.Section
-        title={`Wake up at ${wakeTimeFormatted}`}
-        subtitle={`+${FALL_ASLEEP_BUFFER} min to fall asleep`}
-      >
+    <List searchBarPlaceholder="Change wake time..." onSearchTextChange={handleSearchChange} throttle>
+      <List.Section title={`Wake up at ${wakeTimeFormatted}`} subtitle={`+${FALL_ASLEEP_BUFFER} min to fall asleep`}>
         {sortedBedtimes.map((bedtime, index) => (
           <BedtimeItem key={index} bedtime={bedtime} />
         ))}
@@ -125,11 +93,7 @@ export default function WakeUpAt(props: LaunchProps<{ arguments: Arguments }>) {
             accessories={[{ tag: "+2 more" }]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Show More Bedtimes"
-                  icon={Icon.Plus}
-                  onAction={handleShowMore}
-                />
+                <Action title="Show More Bedtimes" icon={Icon.Plus} onAction={handleShowMore} />
               </ActionPanel>
             }
           />
