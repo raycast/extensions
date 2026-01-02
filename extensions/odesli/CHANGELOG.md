@@ -1,5 +1,10 @@
 # Odesli Changelog
 
+## [Fixes] - 2026-01-02
+
+- Fixes https://github.com/raycast/extensions/issues/23711
+- Minor refactors
+
 ## [Add argument support to the command] - 2025-12-02
 
 - Updated the command to accept an optional URL argument.
@@ -15,6 +20,6 @@
 
 ### Documentation
 
- - Added supported services to README.md
+- Added supported services to README.md
 
 ## [Initial Version] - 2023-10-30

@@ -1,6 +1,7 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
 import { ConversionResult, SongInfo } from "./types";
 import { addToHistory } from "./storage";
+import { ODESLI_API_ENDPOINT } from "./constants";
 
 // Clipboard and selection helper
 export const getTextFromSelectionOrClipboard = async () => {
@@ -51,7 +52,7 @@ export const formatDate = (timestamp: number): string => {
 
 // Odesli API conversion
 export const convertToOdesliLink = async (text: string): Promise<ConversionResult> => {
-  const response = await fetch(`https://api.song.link/v1-alpha.1/links?url=${encodeURIComponent(text)}`);
+  const response = await fetch(`${ODESLI_API_ENDPOINT}/links?url=${encodeURIComponent(text)}`);
 
   if (!response.ok && response.status === 404) {
     throw new SongNotFoundError();

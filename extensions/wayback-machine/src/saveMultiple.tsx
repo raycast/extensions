@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { savePage, urlsToArray } from "./lib";
+import { savePage, extractUrls } from "./lib";
 
 type Values = {
   urls: string;
@@ -9,8 +9,8 @@ type Values = {
 export default function Command() {
   const { handleSubmit, itemProps } = useForm<Values>({
     onSubmit(values) {
-      const urls = urlsToArray(values.urls);
-      urls.forEach(async (url) => {
+      const urls = extractUrls(values.urls, 0);
+      urls.forEach(async (url: string) => {
         await savePage(url);
       });
 
@@ -19,14 +19,12 @@ export default function Command() {
     },
     validation: {
       urls: (value) => {
-        console.log(value);
-        if (value) {
-          const urls = urlsToArray(value);
-          if (urls.length !== value.split("\n").length) {
-            return "Invalid URLs found";
-          }
-        } else {
+        if (!value) {
           return "This field is required!";
+        }
+        const urls = extractUrls(value, 0);
+        if (urls.length === 0) {
+          return "No valid URLs found in the provided text";
         }
       },
     },

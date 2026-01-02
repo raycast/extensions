@@ -1,5 +1,10 @@
 # Mail Changelog
 
+## [Add AI Tools] - {PR_MERGE_DATE}
+
+- Add new AI tool `list-account-emails` to list all available email addresses from the user's mail accounts
+- Enhance `send-email` tool to allow changing the sender email address via the `from` parameter
+
 ## [Improvement] - 2025-09-19
 
 - Reduce distraction by removing the background HUD for intermittent "Failed to refresh messages" in `Refresh Mail`; now logs to console instead.

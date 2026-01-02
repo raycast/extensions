@@ -28,6 +28,15 @@
       "description": "Specify the root directory for all file-based operations.",
       "type": "directory",
       "required": true
+    },
+    {
+      "name": "autoEdit",
+      "title": "Auto Edit",
+      "description": "When enabled, file operations (create, edit, delete) will be executed without confirmation prompts.",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Skip confirmation for file operations"
     }
   ],
   "dependencies": {
@@ -64,7 +73,7 @@
     {
       "name": "grep",
       "title": "Grep",
-      "description": "Grep a file from the workspace"
+      "description": "Search for text across the workspace (supports glob patterns and recursive search)"
     },
     {
       "name": "search-files",
@@ -85,6 +94,16 @@
       "name": "create-file",
       "title": "Create File",
       "description": "Create a new file in the workspace"
+    },
+    {
+      "name": "run-command",
+      "title": "Run Command",
+      "description": "Execute a shell command in the workspace"
+    },
+    {
+      "name": "git",
+      "title": "Git",
+      "description": "Execute git commands"
     }
   ]
 }

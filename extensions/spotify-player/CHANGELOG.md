@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Show Error View in Queue] - 2026-01-01
+
+- Add "queue" to README and mark as premium-only
+- When an error occurs in queue, show the error view
+- When an error occurs in devices, show the error view
+
 ## [Generate Playlist Improvements] - 2025-12-05
 
 - Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation  

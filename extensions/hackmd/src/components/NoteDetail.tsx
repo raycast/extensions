@@ -1,14 +1,17 @@
-import { ActionPanel, Detail, useNavigation } from "@raycast/api";
+import { ActionPanel, Color, Detail, Icon, useNavigation } from "@raycast/api";
 import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import api from "../lib/api";
 import NoteActions from "./NoteActions";
 import { PermissionTitleMap } from "../lib/constants";
 import { getNoteUrl } from "../helpers/noteHelper";
+import { usePinnedNotes } from "../hooks/usePinnedNotes";
 
 export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?: () => void }) {
   const { data, isLoading, mutate: mutateSingle } = useCachedPromise((noteId) => api.getNote(noteId), [noteId]);
   const { pop } = useNavigation();
+  const { isPinned } = usePinnedNotes();
+  const pinned = data ? isPinned(data) : false;
 
   const noteUrl = useMemo(() => (data && getNoteUrl(data)) || "", [data]);
 
@@ -35,6 +38,12 @@ export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?
       }
       metadata={
         <Detail.Metadata>
+          {pinned && <Detail.Metadata.Label title="Pinned" icon={{ source: Icon.Pin, tintColor: Color.Red }} />}
+          <Detail.Metadata.Label
+            title="Workspace"
+            text={data?.teamPath ? `Team: ${data.teamPath}` : "Personal"}
+            icon={data?.teamPath ? Icon.TwoPeople : Icon.Person}
+          />
           {data?.tags?.length && data?.tags?.length > 0 ? (
             <Detail.Metadata.TagList title="Tags">
               {data?.tags.map((tag) => (
