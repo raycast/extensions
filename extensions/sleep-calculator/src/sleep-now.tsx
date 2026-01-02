@@ -1,12 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import {
   wakeTimesForSleep,
@@ -25,16 +17,11 @@ function getSleepQuality(cycles: number): {
   color: Color;
   icon: Icon;
 } {
-  if (cycles >= 6)
-    return { label: "Optimal", color: Color.Green, icon: Icon.Star };
-  if (cycles === 5)
-    return { label: "Great", color: Color.Blue, icon: Icon.Star };
-  if (cycles === 4)
-    return { label: "Good", color: Color.Yellow, icon: Icon.Circle };
-  if (cycles === 3)
-    return { label: "Light", color: Color.Orange, icon: Icon.Circle };
-  if (cycles === 2)
-    return { label: "Nap", color: Color.Red, icon: Icon.Circle };
+  if (cycles >= 6) return { label: "Optimal", color: Color.Green, icon: Icon.Star };
+  if (cycles === 5) return { label: "Great", color: Color.Blue, icon: Icon.Star };
+  if (cycles === 4) return { label: "Good", color: Color.Yellow, icon: Icon.Circle };
+  if (cycles === 3) return { label: "Light", color: Color.Orange, icon: Icon.Circle };
+  if (cycles === 2) return { label: "Nap", color: Color.Red, icon: Icon.Circle };
   return { label: "Minimal", color: Color.Red, icon: Icon.ExclamationMark };
 }
 
@@ -83,9 +70,7 @@ export default function SleepNow() {
 
   // Calculate fall asleep time
   const fallAsleepMinutes =
-    ((sleepTime.hour % 12) + (sleepTime.ampm === "PM" ? 12 : 0)) * 60 +
-    sleepTime.minute +
-    FALL_ASLEEP_BUFFER;
+    ((sleepTime.hour % 12) + (sleepTime.ampm === "PM" ? 12 : 0)) * 60 + sleepTime.minute + FALL_ASLEEP_BUFFER;
   const fallAsleepHour24 = Math.floor(fallAsleepMinutes / 60) % 24;
   const fallAsleepMinute = fallAsleepMinutes % 60;
   const fallAsleepAmpm = fallAsleepHour24 >= 12 ? "PM" : "AM";
@@ -101,15 +86,8 @@ export default function SleepNow() {
     : `Going to bed now (${sleepTimeFormatted})`;
 
   return (
-    <List
-      searchBarPlaceholder="Enter bedtime or leave blank for now..."
-      onSearchTextChange={setSearchText}
-      throttle
-    >
-      <List.Section
-        title={sectionTitle}
-        subtitle={`Asleep by ~${fallAsleepFormatted}`}
-      >
+    <List searchBarPlaceholder="Enter bedtime or leave blank for now..." onSearchTextChange={setSearchText} throttle>
+      <List.Section title={sectionTitle} subtitle={`Asleep by ~${fallAsleepFormatted}`}>
         {sortedWakeTimes.map((wakeTime, index) => (
           <WakeTimeItem key={index} wakeTime={wakeTime} />
         ))}
@@ -124,11 +102,7 @@ export default function SleepNow() {
             accessories={[{ tag: "+2 more" }]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Show More Wake Times"
-                  icon={Icon.Plus}
-                  onAction={handleShowMore}
-                />
+                <Action title="Show More Wake Times" icon={Icon.Plus} onAction={handleShowMore} />
               </ActionPanel>
             }
           />

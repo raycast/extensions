@@ -201,20 +201,13 @@ const MINUTE_WORDS: Record<string, number> = {
  * - Descriptive: "7 in the morning", "7 in the evening"
  * - Space separated: "7 30", "7 30 am"
  */
-export function parseTimeInput(
-  input: string
-): { hour: number; minute: number; ampm: Meridiem } | null {
+export function parseTimeInput(input: string): { hour: number; minute: number; ampm: Meridiem } | null {
   let trimmed = input.trim().toLowerCase();
 
   if (!trimmed) return null;
 
   // === SPECIAL KEYWORDS ===
-  if (
-    trimmed === "noon" ||
-    trimmed === "12p" ||
-    trimmed === "12 p" ||
-    trimmed === "midday"
-  ) {
+  if (trimmed === "noon" || trimmed === "12p" || trimmed === "12 p" || trimmed === "midday") {
     return { hour: 12, minute: 0, ampm: "PM" };
   }
   if (trimmed === "midnight" || trimmed === "12a" || trimmed === "12 a") {
@@ -224,10 +217,7 @@ export function parseTimeInput(
   // === PRE-PROCESSING ===
   // Replace written numbers with digits
   for (const [word, num] of Object.entries(WORD_TO_NUMBER)) {
-    trimmed = trimmed.replace(
-      new RegExp(`\\b${word}\\b`, "gi"),
-      num.toString()
-    );
+    trimmed = trimmed.replace(new RegExp(`\\b${word}\\b`, "gi"), num.toString());
   }
 
   // Normalize separators and am/pm variations
@@ -248,9 +238,7 @@ export function parseTimeInput(
     .trim();
 
   // === HALF PAST / QUARTER TO/PAST ===
-  const halfPastMatch = normalized.match(
-    /^half\s*(?:past)?\s*(\d{1,2})\s*(am|pm|a|p)?$/
-  );
+  const halfPastMatch = normalized.match(/^half\s*(?:past)?\s*(\d{1,2})\s*(am|pm|a|p)?$/);
   if (halfPastMatch) {
     const hour = parseInt(halfPastMatch[1], 10);
     const ampmChar = halfPastMatch[2];
@@ -266,9 +254,7 @@ export function parseTimeInput(
     }
   }
 
-  const quarterPastMatch = normalized.match(
-    /^quarter\s*past\s*(\d{1,2})\s*(am|pm|a|p)?$/
-  );
+  const quarterPastMatch = normalized.match(/^quarter\s*past\s*(\d{1,2})\s*(am|pm|a|p)?$/);
   if (quarterPastMatch) {
     const hour = parseInt(quarterPastMatch[1], 10);
     const ampmChar = quarterPastMatch[2];
@@ -284,9 +270,7 @@ export function parseTimeInput(
     }
   }
 
-  const quarterToMatch = normalized.match(
-    /^quarter\s*(?:to|til|till|before)\s*(\d{1,2})\s*(am|pm|a|p)?$/
-  );
+  const quarterToMatch = normalized.match(/^quarter\s*(?:to|til|till|before)\s*(\d{1,2})\s*(am|pm|a|p)?$/);
   if (quarterToMatch) {
     let hour = parseInt(quarterToMatch[1], 10);
     const ampmChar = quarterToMatch[2];
@@ -305,9 +289,7 @@ export function parseTimeInput(
   }
 
   // === SPACE-SEPARATED TIME (e.g., "7 30", "7 30 am") ===
-  const spaceSepMatch = normalized.match(
-    /^(\d{1,2})\s+(\d{2})\s*(am|pm|a|p)?$/
-  );
+  const spaceSepMatch = normalized.match(/^(\d{1,2})\s+(\d{2})\s*(am|pm|a|p)?$/);
   if (spaceSepMatch) {
     const hour = parseInt(spaceSepMatch[1], 10);
     const minute = parseInt(spaceSepMatch[2], 10);
