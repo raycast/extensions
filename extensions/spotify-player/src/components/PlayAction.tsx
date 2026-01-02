@@ -14,7 +14,7 @@ type PlayActionProps = {
 };
 
 export function PlayAction({ id, type, playingContext, onPlay, tracksToQueue }: PlayActionProps) {
-  const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
+  const { closeWindowOnAction } = getPreferenceValues<ExtensionPreferences>();
 
   const handlePlayAction = async () => {
     try {

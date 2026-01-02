@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Show Error View in Queue] - 2026-01-01
+
+- Add "queue" to README and mark as premium-only
+- When an error occurs in queue, show the error view
+- When an error occurs in devices, show the error view
 
 ## [Add Missing Keyboard Shortcuts] - 2025-12-30
 

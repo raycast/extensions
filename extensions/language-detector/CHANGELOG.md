@@ -1,5 +1,11 @@
 # Language Detector Changelog
 
+## [Maintenance] - 2026-01-01
+
+- Add multi-platform badge
+- Add affiliate parameter to Raycast website links
+- Bump all dependencies to the latest
+
 ## [Maintenance] - 2025-08-27
 
 - Bump latest `raycast-language-detector` to support internet slangs

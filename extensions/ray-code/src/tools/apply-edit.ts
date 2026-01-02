@@ -1,5 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { resolveAndValidatePath } from "../utils/workspace";
+import { resolveAndValidatePath, isAutoEditEnabled } from "../utils/workspace";
 
 type Input = {
   /**
@@ -21,6 +21,10 @@ type Input = {
 };
 
 export async function confirmation({ path, oldText, newText, replaceAll = false }: Input) {
+  if (isAutoEditEnabled()) {
+    return undefined;
+  }
+
   const filePath = resolveAndValidatePath(path);
   const content = await readFile(filePath, "utf8");
 

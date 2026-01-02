@@ -149,7 +149,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "axios": "^1.13.2",
     "json2md": "^2.0.3",
@@ -168,7 +168,7 @@
     "@types/lodash.shuffle": "^4.2.9",
     "@types/lodash.uniqby": "^4.7.9",
     "@types/react": "^19.2.7",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3"
   },

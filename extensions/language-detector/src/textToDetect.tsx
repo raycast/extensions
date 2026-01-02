@@ -81,7 +81,11 @@ export default function TextToDetect({ launchContext = {} }: LaunchProps<{ launc
       actions={
         <ActionPanel>
           {!canAccessAi && selectedDetector === Detector.AI ? (
-            <Action.OpenInBrowser icon={Icon.StarCircle} title="Try Raycast Pro" url="https://raycast.com/pro" />
+            <Action.OpenInBrowser
+              icon={Icon.StarCircle}
+              title="Try Raycast Pro"
+              url="https://raycast.com/pro?via=litomore"
+            />
           ) : (
             <Action.SubmitForm icon={Icon.Stars} title="Detect Language" onSubmit={handleSubmit} />
           )}

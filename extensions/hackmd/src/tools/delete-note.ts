@@ -1,4 +1,4 @@
-import { Action, Tool } from "@raycast/api";
+import { Action, type Tool } from "@raycast/api";
 import api from "../lib/api";
 
 type DeleteNoteArgs = {
