@@ -1,6 +1,6 @@
 # Odesli Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-01-02
 
 - Fixes https://github.com/raycast/extensions/issues/23711
 - Minor refactors
