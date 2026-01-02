@@ -235,7 +235,7 @@ export default function EventTimers() {
             onAction={() => revalidate()}
             shortcut={{
               macOS: { modifiers: ["cmd"], key: "r" },
-              windows: { modifiers: ["ctrl"], key: "r" },
+              Windows: { modifiers: ["ctrl"], key: "r" },
             }}
           />
         </ActionPanel>
@@ -259,7 +259,7 @@ export default function EventTimers() {
                     onAction={() => revalidate()}
                     shortcut={{
                       macOS: { modifiers: ["cmd"], key: "r" },
-                      windows: { modifiers: ["ctrl"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
                     }}
                   />
                 </ActionPanel>
@@ -295,7 +295,7 @@ export default function EventTimers() {
                     onAction={() => revalidate()}
                     shortcut={{
                       macOS: { modifiers: ["cmd"], key: "r" },
-                      windows: { modifiers: ["ctrl"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
                     }}
                   />
                 </ActionPanel>
@@ -323,7 +323,7 @@ export default function EventTimers() {
                     onAction={() => revalidate()}
                     shortcut={{
                       macOS: { modifiers: ["cmd"], key: "r" },
-                      windows: { modifiers: ["ctrl"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
                     }}
                   />
                 </ActionPanel>

@@ -204,7 +204,7 @@ export default function SearchItems() {
                     icon={isObtained ? Icon.Circle : Icon.CheckCircle}
                     shortcut={{
                       macOS: { modifiers: ["cmd"], key: "o" },
-                      windows: { modifiers: ["ctrl"], key: "o" },
+                      Windows: { modifiers: ["ctrl"], key: "o" },
                     }}
                     onAction={() => handleToggleBlueprintObtained(item.id, item.name)}
                   />

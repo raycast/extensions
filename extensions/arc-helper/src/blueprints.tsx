@@ -219,7 +219,7 @@ export default function Blueprints() {
                     icon={Icon.PlusCircle}
                     shortcut={{
                       macOS: { modifiers: ["cmd"], key: "d" },
-                      windows: { modifiers: ["ctrl"], key: "d" },
+                      Windows: { modifiers: ["ctrl"], key: "d" },
                     }}
                     onAction={() => handleAddDuplicate(item.id, item.name)}
                   />
@@ -229,7 +229,7 @@ export default function Blueprints() {
                       icon={Icon.MinusCircle}
                       shortcut={{
                         macOS: { modifiers: ["cmd", "shift"], key: "d" },
-                        windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "d" },
                       }}
                       onAction={() => handleRemoveDuplicate(item.id, item.name)}
                     />
