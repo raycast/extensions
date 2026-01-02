@@ -59,7 +59,8 @@
     "@raycast/utils": "^1.17.0",
     "clipboardy": "^5.0.0",
     "linkedom": "^0.18.12",
-    "node-clipboard": "^1.2.0"
+    "node-clipboard": "^1.2.0",
+    "turndown": "^7.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
