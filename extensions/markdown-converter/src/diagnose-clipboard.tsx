@@ -1,1 +1,1 @@
-export { default } from "../../src/platforms/raycast/diagnose-clipboard.js";
+export { default } from "../lib/platforms/raycast/diagnose-clipboard.js";

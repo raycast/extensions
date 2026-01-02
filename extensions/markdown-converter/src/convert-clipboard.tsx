@@ -1,1 +1,1 @@
-export { default } from "../../src/platforms/raycast/convert-clipboard.js";
+export { default } from "../lib/platforms/raycast/convert-clipboard.js";
