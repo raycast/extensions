@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail, Icon, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { API, TradersResponse, TraderItem, getRarityColor } from "./api";
@@ -61,6 +61,13 @@ export default function Traders() {
 
   const { isLoading, data } = useFetch<TradersResponse>(API.traders, {
     keepPreviousData: true,
+    onError() {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load traders",
+        message: "Server temporarily unavailable. Please try again.",
+      });
+    },
   });
 
   const tradersData = data?.data || {};

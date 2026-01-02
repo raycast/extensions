@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { API, Arc, PaginatedResponse } from "./api";
@@ -41,6 +41,13 @@ export default function SearchArcs() {
 
   const { isLoading, data } = useFetch<PaginatedResponse<Arc>>(API.arcs, {
     keepPreviousData: true,
+    onError() {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load ARCs",
+        message: "Server temporarily unavailable. Please try again.",
+      });
+    },
   });
 
   const arcs = data?.data || [];

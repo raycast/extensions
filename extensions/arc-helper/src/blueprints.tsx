@@ -106,6 +106,13 @@ export default function Blueprints() {
       },
       keepPreviousData: true,
       initialData: [],
+      onError() {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load blueprints",
+          message: "Server temporarily unavailable. Please try again.",
+        });
+      },
     },
   );
 

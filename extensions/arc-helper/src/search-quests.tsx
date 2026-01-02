@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { API, Quest, PaginatedResponse } from "./api";
@@ -92,6 +92,13 @@ export default function SearchQuests() {
     },
     keepPreviousData: true,
     initialData: [],
+    onError() {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load quests",
+        message: "Server temporarily unavailable. Please try again.",
+      });
+    },
   });
 
   const quests = data || [];
