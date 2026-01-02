@@ -2,10 +2,6 @@ import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Clipb
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
-interface Preferences {
-  apiKey: string;
-}
-
 interface TorrentFile {
   id: number;
   name: string;
@@ -103,7 +99,7 @@ function TorrentListItem({ torrent, apiKey }: { torrent: Torrent; apiKey: string
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const [searchText, setSearchText] = useState("");
 
   const { data, isLoading, error } = useFetch<TorBoxResponse>(
