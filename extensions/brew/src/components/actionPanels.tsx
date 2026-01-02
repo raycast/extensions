@@ -167,9 +167,9 @@ export function FormulaActionPanel(props: {
             />
           )}
           {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
-          <Actions.FormulaShowAllInstalled onAction={props.onAction} />
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
+          <Actions.FormulaShowAllInstalled onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser title="Open Formula" url={`https://formulae.brew.sh/formula/${formula.name}`} />
