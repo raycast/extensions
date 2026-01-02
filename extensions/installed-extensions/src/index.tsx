@@ -1,28 +1,27 @@
 import {
   Action,
   ActionPanel,
+  Application,
   Color,
   Icon,
   List,
-  getPreferenceValues,
-  Clipboard,
-  showHUD,
-  openExtensionPreferences,
   getDefaultApplication,
-  Application,
+  getPreferenceValues,
+  open,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { ExtensionMetadata, Option } from "./types";
 import { extensionTypes } from "./constants";
-import { formatItem, formatOutput } from "./utils";
+import { formatItem, formatOutput, isWindows } from "./utils";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
 
 async function getPackageJsonFiles() {
   try {
-    const extensionsDir = path.join(os.homedir(), ".config", "raycast", "extensions");
+    const extensionsDir = path.join(os.homedir(), ".config", isWindows ? "raycast-x" : "raycast", "extensions");
     const extensions = await fs.readdir(extensionsDir);
     const packageJsonFiles = await Promise.all(
       extensions.map(async (extension) => {
@@ -30,7 +29,7 @@ async function getPackageJsonFiles() {
         try {
           await fs.access(packageJsonPath, fs.constants.F_OK);
           return packageJsonPath;
-        } catch (e) {
+        } catch {
           return null;
         }
       }),
@@ -82,20 +81,21 @@ export default function IndexCommand() {
         const access: string | undefined = json?.access;
         const name: string = json.name;
         const link = `https://raycast.com/${owner ?? author}/${name}`;
-        const cleanedPath = file.replace("/package.json", "");
+        const cleanedPath = path.dirname(file);
 
         return {
           path: cleanedPath,
           name,
-          author: author,
+          author,
           icon: json.icon,
           commandCount: json.commands.length,
           owner,
           access,
           title: json.title,
+          handle: `${owner ?? author}/${name}`,
           link,
           created: stats.ctime,
-          isLocalExtension: !cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
+          isLocalExtension: !/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi.test(cleanedPath),
         };
       }),
     );
@@ -184,36 +184,33 @@ export default function IndexCommand() {
             return (
               <List.Item
                 key={index}
-                icon={`${item.path}/assets/${item.icon}`}
+                icon={path.join(item.path, "assets", item.icon)}
                 title={item.title}
                 keywords={[item.author]}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title="Extension">
-                      <Action.OpenInBrowser url={item.link} />
                       <Action
+                        icon={Icon.Play}
+                        title="Launch Extension"
                         onAction={() => {
-                          Clipboard.copy(formatItem(item, preferences.format));
-                          showHUD("Copied to Clipboard");
+                          open(`raycast://extensions/${item.handle}`);
                         }}
+                      />
+                      <Action.OpenInBrowser url={item.link} />
+                      <Action.CopyToClipboard
                         title="Copy Item to Clipboard"
-                        icon={Icon.Clipboard}
+                        content={formatItem(item, preferences.format)}
                         shortcut={{ modifiers: ["cmd"], key: "." }}
                       />
-                      <Action
-                        onAction={() => {
-                          Clipboard.copy(
-                            formatOutput(
-                              installedExtensions,
-                              preferences.format,
-                              preferences.separator,
-                              preferences.prepend,
-                            ),
-                          );
-                          showHUD("Copied to Clipboard");
-                        }}
+                      <Action.CopyToClipboard
                         title="Copy Extension List to Clipboard"
-                        icon={Icon.Clipboard}
+                        content={formatOutput(
+                          installedExtensions,
+                          preferences.format,
+                          preferences.separator,
+                          preferences.prepend,
+                        )}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                       />
                     </ActionPanel.Section>

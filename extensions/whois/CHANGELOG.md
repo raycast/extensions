@@ -1,5 +1,14 @@
 # Whois Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Improved error handling (fix: [#22388](https://github.com/raycast/extensions/issues/22388))
+
+## [Windows Support] - 2025-08-27
+
+- Added support for Windows
+- Updated dependencies
+
 ## [Refactoring] - 2024-07-26
 
 - Updated dependencies, removed axios

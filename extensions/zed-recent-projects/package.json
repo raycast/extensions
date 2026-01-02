@@ -10,10 +10,16 @@
     "jylamont",
     "pernielsentikaer",
     "tm.wrnr",
-    "true-real-michael"
+    "true-real-michael",
+    "xmorse",
+    "ivens_joris"
   ],
   "categories": [
     "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -55,6 +61,10 @@
         {
           "value": "Zed Preview",
           "title": "Zed Preview"
+        },
+        {
+          "value": "Zed Dev",
+          "title": "Zed Dev"
         }
       ]
     },
@@ -69,8 +79,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
@@ -79,16 +89,17 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.6"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
+    "create-fixtures": "./scripts/create-fixtures.sh",
+    "create-fixtures:ts": "node --experimental-transform-types scripts/create-fixtures.ts",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest"
+  }
 }

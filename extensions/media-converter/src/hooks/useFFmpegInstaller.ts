@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { installFFmpegBinary } from "../utils/ffmpeg";
+import { showFailureToast } from "@raycast/utils";
 
 export function useFFmpegInstaller() {
   const [isInstalling, setIsInstalling] = useState(false);
@@ -31,10 +32,9 @@ export function useFFmpegInstaller() {
     } catch (error) {
       await toast.hide();
       console.error("Auto-install error:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
+        error: String(error),
         title: "Failed to install FFmpeg",
-        message: `Error: ${String(error)}`,
       });
 
       return false;

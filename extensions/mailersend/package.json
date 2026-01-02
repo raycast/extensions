@@ -19,6 +19,13 @@
   ],
   "commands": [
     {
+      "name": "api-quota",
+      "title": "API Quota",
+      "subtitle": "MailerSend",
+      "description": "View API Quota",
+      "mode": "no-view"
+    },
+    {
       "name": "domains",
       "title": "Domains",
       "subtitle": "MailerSend",
@@ -33,12 +40,23 @@
       "mode": "view"
     },
     {
+      "name": "tokens",
+      "title": "Tokens",
+      "subtitle": "MailerSend",
+      "description": "View API Tokens",
+      "mode": "view"
+    },
+    {
       "name": "users",
       "title": "Users",
       "subtitle": "MailerSend",
       "description": "View Users in Team",
       "mode": "view"
     }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "dependencies": {
     "@raycast/api": "^1.100.3",

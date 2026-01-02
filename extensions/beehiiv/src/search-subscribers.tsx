@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, getPreferenceValues, Icon, Cache, showToast,
 import { useEffect, useState, useRef } from "react";
 import fetch from "node-fetch";
 
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues();
 
 interface Subscription {
   id: string;

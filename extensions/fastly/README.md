@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="./assets/icon.png" width="150" height="150" />
+</p>
+
 # Fastly
 
 This extension allows to search your [Fastly](https://www.fastly.com) services and domains, invite team members, create CDN services, get quick access to resources, and more.

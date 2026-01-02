@@ -39,7 +39,9 @@ export function PersistentNotificationsMenubarSection(props: {
   }
   return (
     <MenuBarExtra.Section title="Notifications">
-      {notifications?.map((n) => <PersistentNotificationMenuItem key={n.notification_id} notification={n} />)}
+      {notifications?.map((n) => (
+        <PersistentNotificationMenuItem key={n.notification_id} notification={n} />
+      ))}
     </MenuBarExtra.Section>
   );
 }

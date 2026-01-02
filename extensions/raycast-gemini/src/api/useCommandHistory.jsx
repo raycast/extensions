@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import showFailureToast from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 /**
@@ -58,7 +58,7 @@ export function useCommandHistory() {
         (entry) =>
           entry.prompt === prompt &&
           // Only consider entries from the last 5 minutes as potential duplicates
-          entry.timestamp > second
+          entry.timestamp > second,
       );
 
       if (isDuplicate) {

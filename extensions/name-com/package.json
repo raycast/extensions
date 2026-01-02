@@ -40,7 +40,7 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "description": "Use Production Environment or Development Environment"
+      "description": "Use Production Environment and Production Token"
     }
   ],
   "commands": [
@@ -59,9 +59,121 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "check-account-balance",
+      "title": "Check Account Balance",
+      "description": "Check Account Balance"
+    },
+    {
+      "name": "list-domains",
+      "title": "List Domains",
+      "description": "List Domains"
+    },
+    {
+      "name": "list-dns-records",
+      "title": "List DNS Records",
+      "description": "List Domain DNS Records"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input" : "@name-com what's my account balance?",
+        "mocks" : {
+          "check-account-balance" : "100000"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "name" : "check-account-balance"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@name-com what domains are in my account",
+        "mocks": {
+          "list-domains": {
+            "domains": [
+              {
+                "autorenewEnabled": true,
+                "createDate": "2025-04-28T22:05:59Z",
+                "domainName": "raycast.network",
+                "expireDate": "2026-04-28T22:05:59Z",
+                "locked": true,
+                "nameservers": [
+                  "ns1vwx.name.com",
+                  "ns2knz.name.com",
+                  "ns3ghw.name.com",
+                  "ns4bfy.name.com"
+                ],
+                "privacyEnabled": false,
+                "renewalPrice": 41.49
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-domains"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@name-com show dns records for raycast",
+        "mocks": {
+          "list-domains": [
+            {
+              "domainName": "raycast.network"
+            }
+          ],
+          "list-dns-records": [
+            {
+              "answer": "txt",
+              "domainName": "raycast.network",
+              "fqdn": "raycast.network.",
+              "host": "",
+              "id": 5060248,
+              "ttl": 300,
+              "type": "TXT"
+            },
+            {
+              "answer": "2",
+              "domainName": "raycast.network",
+              "fqdn": "t.raycast.network.",
+              "host": "t",
+              "id": 5060249,
+              "ttl": 300,
+              "type": "TXT"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-domains"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "domainName": {
+                  "includes": "raycast"
+                }
+              },
+              "name": "list-dns-records"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.95.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

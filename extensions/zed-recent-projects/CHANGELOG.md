@@ -1,5 +1,41 @@
 #  Zed Recent Projects Changelog
 
+## [Windows Support] - 2025-12-28
+
+- Added Windows support.
+
+## [Update] - 2025-11-03
+
+Update to @raycast/api 1.103, fix types, and add tests to Zed db schema v30.
+
+## [Fixes] - 2025-10-15
+
+- Fix projects loading if user has custom configuration in ~/.sqliterc.
+
+## [Fixes] - 2025-09-16
+
+- Fix broken pinned entries cache.
+
+## [Refactor] - 2025-09-13
+
+- Internal refactoring and cleanup. Added tests.
+
+## [Fixes] - 2025-09-09
+
+- Handle Zed sqlite schema version 28+
+
+## [Fixes] - 2025-09-08
+
+- Use latest Zed sqlite schema
+
+## [Fixes] - 2025-07-16
+
+- Fix missing local projects
+
+## [Fixes] - 2025-07-07
+
+- Add `Zed Dev` app build option
+
 ## [Fixes] - 2025-04-03
 
 - Show Git branch label based on extension preferences

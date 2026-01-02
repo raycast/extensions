@@ -44,7 +44,7 @@ const getInitialValue = () => {
     } else {
       return storedItems;
     }
-  } catch (error) {
+  } catch {
     fs.mkdirSync(environment.supportPath, { recursive: true });
     return _.cloneDeep(DEFAULT_SECTIONS);
   }
@@ -57,7 +57,7 @@ export const todoAtom = atom(
     // @ts-expect-error Jotai is confused
     set(todo, newTodo);
     fs.writeFileSync(TODO_FILE, JSON.stringify(newTodo));
-  }
+  },
 );
 
 export const searchModeAtom = atom(false);

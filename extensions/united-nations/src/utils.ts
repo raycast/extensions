@@ -1,3 +1,4 @@
+import process from "node:process";
 import { useEffect } from "react";
 import { LaunchType, confirmAlert, getPreferenceValues, open } from "@raycast/api";
 import { getVoices, killRunningSay, say } from "mac-say";
@@ -7,6 +8,8 @@ import { useCachedState } from "@raycast/utils";
 import { recommendVoices } from "./constants.js";
 import { i18n } from "./i18n.js";
 import { LanguageCode, RssItem } from "./types.js";
+
+export const isWindows = process.platform === "win32";
 
 export const textToSpeech = async (text: string, voice?: string) => {
   await killRunningSay();
@@ -42,7 +45,7 @@ export const useVoice = (languageCode: LanguageCode) => {
   const { detechSystemVoiceSettings } = getPreferenceValues<Preferences>();
   const [voice, setVoice] = useCachedState<string>(`${languageCode}-voice`, "");
   const loadVoices = async () => {
-    if (!detechSystemVoiceSettings) {
+    if (isWindows || !detechSystemVoiceSettings) {
       setVoice("");
       return;
     }

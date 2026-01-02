@@ -13,7 +13,7 @@ export function getFFmpegPath() {
       /opt/homebrew/bin
       /usr/local/Cellar
   )
-  
+
   for location in "\${locations[@]}"
   do
       if [ -f "$location/ffmpeg" ]
@@ -22,7 +22,7 @@ export function getFFmpegPath() {
           exit 0
       fi
   done
-  
+
   echo ""
 `)
     .toString()
@@ -51,7 +51,7 @@ export function getFFprobePath() {
       /opt/homebrew/bin
       /usr/local/Cellar
   )
-  
+
   for location in "\${locations[@]}"
   do
       if [ -f "$location/ffprobe" ]
@@ -60,7 +60,7 @@ export function getFFprobePath() {
           exit 0
       fi
   done
-  
+
   echo ""
 `)
       .toString()
@@ -83,7 +83,7 @@ export function executeFFmpegCommandAsync({
 }: {
   command: string;
   onContent?: (content: string) => void;
-}) {
+}): Promise<number | null> {
   return new Promise((resolve) => {
     const child = spawn(`${getFFmpegPath()} ${command}`, { shell: true });
     if (onContent) {
@@ -109,7 +109,7 @@ export function executeFFprobeCommandAsync({
 }: {
   command: string;
   onContent: (content: string) => void;
-}) {
+}): Promise<number | null> {
   return new Promise((resolve) => {
     const child = spawn(`${getFFprobePath()} ${command}`, { shell: true });
     child.stdout.on("data", (data) => {

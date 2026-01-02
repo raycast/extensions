@@ -1,6 +1,10 @@
 # Sportssync Changelog
 
-## [Updated Game Actions with New Views] - 2025-06-04
+## [New Boxscore Actions] - 2025-10-09
+
+- Added new box score views across most leagues to display team and play info during live games. Credits to icomey8 ❤️
+
+## [Updated Game Actions with New Views] - 2025-06-03
 
 - Created a new team details view with information about the team record, venue and more
 - Created a roster view for all standings commands (except for f1). View all players and the head coach for the team, with details about experience, height, weight, and jersey numbers.

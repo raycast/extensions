@@ -1,13 +1,15 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ErrorResult, PaginatedResult } from "./interfaces";
+import { ErrorResult, PaginatedResult, Result } from "./interfaces";
 
 const { token } = getPreferenceValues<Preferences>();
-const API_URL = "https://api.mailersend.com/v1/";
-const API_HEADERS = {
+export const API_URL = "https://api.mailersend.com/v1/";
+export const API_HEADERS = {
+  Accept: "application/json",
+  "Content-Type": "application/json",
   Authorization: `Bearer ${token}`,
 };
-const parseResponse = async (response: Response) => {
+export const parseResponse = async (response: Response) => {
   const result = await response.json();
   if (!response.ok) {
     const errorResult = result as ErrorResult;
@@ -20,7 +22,7 @@ export const useMailerSend = <T>(endpoint: string) =>
   useFetch(API_URL + endpoint, {
     headers: API_HEADERS,
     parseResponse,
-    mapResult(result: { data: T }) {
+    mapResult(result: Result<T>) {
       return {
         data: result.data,
       };

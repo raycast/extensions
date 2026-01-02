@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Add new features] - 2025-07-30
+
+- Distinguish Mullvad exit nodes from other exit nodes and show location
+
 ## [Add new features] - 2025-05-04
 
 - Add `toggle connection` command

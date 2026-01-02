@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "squeeze",
+  "title": "Squeeze",
+  "description": "A simple utility for whitespace and line break removal.",
+  "icon": "extension-icon.png",
+  "author": "daniel_ac",
+  "license": "MIT",
+  "access": "public",
+  "commands": [
+    {
+      "name": "advanced-squeeze",
+      "title": "Advanced Squeeze",
+      "description": "Fine-tune how to remove whitespace and line breaks.",
+      "mode": "view"
+    },
+    {
+      "name": "natural-speech",
+      "title": "Natural Speech",
+      "subtitle": "Clipboard",
+      "description": "Take the contents of the clipboard as the input. Then, trailing and leading whitespace is removed and natural speech is applied:\n\n· Stitch back together hyphenated words at the end of the line and swap line breaks for spaces.\n\n· Swap multiple spaces separating two words for a single space.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "preserveParagraphs",
+          "type": "checkbox",
+          "label": "Preserve Paragraphs",
+          "title": "Behavior",
+          "default": false,
+          "required": false,
+          "description": "If enabled, multiple line breaks are preserved as paragraphs."
+        }
+      ]
+    },
+    {
+      "name": "brute-squeeze",
+      "title": "Brute Squeeze",
+      "subtitle": "Clipboard",
+      "description": "Remove all whitespace and line breaks from clipboard text. No exceptions.",
+      "mode": "no-view"
+    },
+    {
+      "name": "trim-leading-whitespace",
+      "title": "Trim Leading Whitespace",
+      "subtitle": "Clipboard",
+      "description": "Trim leading whitespace (spaces, tabs) from each paragraph in clipboard text, preserving paragraphs.",
+      "mode": "no-view"
+    },
+    {
+      "name": "trim-trailing-whitespace",
+      "title": "Trim Trailing Whitespace",
+      "subtitle": "Clipboard",
+      "description": "Trim trailing whitespace (spaces, tabs) from each paragraph in clipboard text, preserving paragraphs.",
+      "mode": "no-view"
+    },
+    {
+      "name": "trim-both-whitespace",
+      "title": "Trim Leading & Trailing Whitespace",
+      "subtitle": "Clipboard",
+      "description": "Trim leading and trailing whitespace (spaces, tabs) from each paragraph in clipboard text, preserving paragraphs.",
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-line-breaks",
+      "title": "Remove Line Breaks",
+      "subtitle": "Clipboard",
+      "description": "Remove line breaks from clipboard text, optionally preserving paragraphs.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "preserveParagraphs",
+          "type": "checkbox",
+          "label": "Preserve Paragraphs",
+          "title": "Behavior",
+          "default": true,
+          "required": false,
+          "description": "If enabled, multiple line breaks are preserved as paragraphs."
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

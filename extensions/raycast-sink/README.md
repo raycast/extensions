@@ -1,6 +1,10 @@
+<p align="center">
+    <img src="./assets/sink.png" width="150" height="150" />
+</p>
+
 # 🚀 Raycast Sink
 
-A Raycast extension for effortlessly managing short links using [Sink](https://github.com/ccbikai/sink), a simple, speedy, and secure link shortener powered by Cloudflare.
+A Raycast extension for effortlessly managing short links using [Sink](https://github.com/ccbikai/sink), a simple, speedy, and secure link shortener powered by [Cloudflare](https://cloudflare.com).
 
 ![Raycast](https://shields.io/badge/Raycast-black?logo=raycast&style=style=fla)
 ![React](https://shields.io/badge/react-black?logo=react&style=style=fla)

@@ -4,7 +4,7 @@
 
 # Obsidian for Raycast
 
-This is a raycast extension with commands for the note taking and knowledge management app [Obsidian]( https://obsidian.md/). To use it, install the extension from the [Raycast Store](https://www.raycast.com/KevinBatdorf/obsidian), open Raycast Search and type one of the following commands.
+This is a raycast extension with commands for the note taking and knowledge management app [Obsidian](https://obsidian.md/). To use it, install the extension from the [Raycast Store](https://www.raycast.com/KevinBatdorf/obsidian), open Raycast Search and type one of the following commands.
 
 ## Overview
 
@@ -210,10 +210,6 @@ Clicking it will reveal a list of your vaults. You can view your bookmarked note
 
 - exclude folders, files and paths so they don't show up in the search
 - select image size (small, medium, large)
-
-## Previous Developer / Maintainer
-
-This extension was originally developed by [Marc Julian Schwarz](https://marc-julian.de/). As of 15th May 2023, Marc Julian is no longer maintaining this extension due to time constraints related to his university studies. This extension will now be further developed and maintained by [Kevin Batdorf](https://github.com/KevinBatdorf/). "Thank you for taking over this extension and keeping it alive for the community." -Marc Julian
 
 ## Blog posts:
 

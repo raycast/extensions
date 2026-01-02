@@ -1,5 +1,75 @@
 # Spotify Player Changelog
 
+## [Show Error View in Queue] - 2026-01-01
+
+- Add "queue" to README and mark as premium-only
+- When an error occurs in queue, show the error view
+- When an error occurs in devices, show the error view
+
+## [Generate Playlist Improvements] - 2025-12-05
+
+- Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation  
+- Strengthened prompt to enforce a **hard minimum of 20 songs** and a **maximum of 75 songs**  
+- Added strict validation requiring the returned JSON to include a correctly structured `playlist` array  
+- Improved cultural and thematic vibe inference when no artists are explicitly listed  
+- Tightened rules for subgenre consistency, smooth energy progression, and removal of generic or low-intent tracks  
+
+## [Enhancements] - 2025-11-27
+
+- Fixed detecting if Spotify is installed on Windows
+- Fixed error message rendering when adding song to queue
+- Added delay after skipping to next/previous track to ensure the track has actually changed before proceeding
+
+## [Add Windows support] - 2025-11-14
+
+- Added Windows to platforms
+- Added check for not running menu bar commands on Windows
+- Changed all shortcuts to support both macOS and Windows
+
+## [Improvement] - 2025-10-30
+
+- Increase the number of songs you can view in a Playlist when using the `Show All Songs` command. You can view at least 500 songs and this fixes issues with old public playlists that are accessible via Raycast.
+
+## [Chore: Contributor has become inactive] - 2025-09-01
+
+## [Fix Add Playing Song to Playlist Command Using Cached Data] - 2025-08-28
+
+- Fixed race condition in Add Playing Song to Playlist command to properly wait for currently playing data to load
+- Improved error handling with proper loading state checks to prevent using stale cached data
+- Enhanced user feedback with loading indicators and error messages
+
+## [Include option to prevent duplicate songs in Add to Playlist command] - 2025-08-25
+
+- Introduced an option allowing users to choose whether to allow duplicate songs to be added to their playlists
+
+## [Fix reading values from possibly undefined objects] - 2025-08-22
+
+- Remove unneeded `.tool-versions`
+- Fix reading values from possibly undefined objects
+- Bump dependencies to the latest & fix linting issues
+
+## [Show the Artist name when liking a song] - 2025-08-04
+
+- Added the artist name into the message in the HUD when liking a new song
+- Added the artist name into the message in the HUD attempting to like an already liked song
+
+## [Add toggle to filter song name in menu bar] - 2025-07-08
+
+- Added new toggle for removing extra info like remix titles or versions from the song name in the menubar
+
+## [Fix Search Feature] - 2025-07-03
+
+- Fixed an issue with the search functionality.
+
+## [Fix Noises and Additional data in Find Lyrics Function] - 2025-07-02
+
+- Fixed Noises in retrieved lyrics in Find Lyrics Function,now clean lyrics is extracted without any additional noise or data like contributors count and numbers
+
+## [Add Option to View the Lyrics of the Song playing] - 2025-06-30
+
+- Add new command 'Find Lyrics'.
+- Add an option that allows users to See the current song’s Lyrics, artist and title.
+
 ## [Add Option to Copy the Current Song’s Artist and Title] - 2025-05-26
 
 - Add new command 'Copy Artist And Title'.

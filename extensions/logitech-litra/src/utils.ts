@@ -1,8 +1,7 @@
 import fs from "fs";
 import { promisify } from "util";
 import { exec as defaultExec } from "child_process";
-import gte from "semver/functions/gte";
-import parse from "semver/functions/parse";
+import { gte, parse } from "semver";
 import { Device } from "./types";
 const exec = promisify(defaultExec);
 
@@ -17,8 +16,8 @@ const joinWordsWithCommasThenOr = (words: string[]): string => {
   }
 };
 
-const MINIMUM_SUPPORTED_LITRA_VERSION = "0.2.0";
-const SUPPORTED_MAJOR_LITRA_VERSIONS = [0, 1, 2];
+const MINIMUM_SUPPORTED_LITRA_VERSION = "2.4.0";
+const SUPPORTED_MAJOR_LITRA_VERSIONS = [2];
 const ALLOWED_MAJOR_VERSIONS_STRING = joinWordsWithCommasThenOr(
   SUPPORTED_MAJOR_LITRA_VERSIONS.map((majorVersion) => `v${majorVersion}.x`),
 );
@@ -68,32 +67,28 @@ export const getDevices = async (binaryPath: string): Promise<Device[]> => {
   return JSON.parse(stdout) as Device[];
 };
 
-export const isOn = async (serialNumber: string, binaryPath: string): Promise<boolean> => {
+export const isOn = async (devicePath: string, binaryPath: string): Promise<boolean> => {
   const devices = await getDevices(binaryPath);
-  const device = devices.find((device) => device.serial_number === serialNumber) as Device;
+  const device = devices.find((device) => device.device_path === devicePath) as Device;
   return device.is_on;
 };
 
-export const toggle = async (serialNumber: string, binaryPath: string): Promise<void> => {
-  await runLitraCommand(binaryPath, "toggle", `--serial-number ${serialNumber}`);
+export const toggle = async (devicePath: string, binaryPath: string): Promise<void> => {
+  await runLitraCommand(binaryPath, "toggle", `--device-path ${devicePath}`);
 };
 
 export const setTemperatureInKelvin = async (
-  serialNumber: string,
+  devicePath: string,
   temperatureInKelvin: number,
   binaryPath: string,
 ): Promise<void> => {
-  await runLitraCommand(binaryPath, "temperature", `--value ${temperatureInKelvin} --serial-number ${serialNumber}`);
+  await runLitraCommand(binaryPath, "temperature", `--value ${temperatureInKelvin} --device-path ${devicePath}`);
 };
 
 export const setBrightnessPercentage = async (
-  serialNumber: string,
+  devicePath: string,
   brightnessPercentage: number,
   binaryPath: string,
 ): Promise<void> => {
-  await runLitraCommand(
-    binaryPath,
-    "brightness",
-    `--percentage ${brightnessPercentage} --serial-number ${serialNumber}`,
-  );
+  await runLitraCommand(binaryPath, "brightness", `--percentage ${brightnessPercentage} --device-path ${devicePath}`);
 };

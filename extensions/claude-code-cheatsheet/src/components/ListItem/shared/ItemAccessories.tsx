@@ -11,7 +11,8 @@ export function createItemAccessories(item: Command | ThinkingKeyword): List.Ite
     // Command type
     const hasWarning = item.warning === true;
     const isDeprecated = item.deprecated === true;
-    const badgeType = isDeprecated ? "deprecated" : hasWarning ? "warning" : undefined;
+    const isNew = item.isNew === true;
+    const badgeType = isDeprecated ? "deprecated" : hasWarning ? "warning" : isNew ? "new" : undefined;
     if (badgeType) {
       badge = getBadgeProps({ type: badgeType });
     }

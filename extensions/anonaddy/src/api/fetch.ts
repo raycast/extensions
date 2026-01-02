@@ -1,27 +1,32 @@
-import APIError from "./APIError";
-import preferences from "../preferences";
+import { getPreferenceValues } from "@raycast/api";
+import AddyError from "./error";
 
 type Init = { body?: Record<string, unknown> | null | undefined } & Omit<RequestInit, "body">;
 
-const fetch = async (path: string, init: Init = {}): Promise<Response> => {
+async function fetch<R = void>(path: string, init: Init = {}): Promise<R> {
   const url = new URL(path, "https://app.addy.io/api/v1/");
+  const { apiKey } = getPreferenceValues<ExtensionPreferences>();
 
   const response = await global.fetch(url.toString(), {
     ...init,
     body: JSON.stringify(init.body),
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${preferences.apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       "X-Requested-With": "XMLHttpRequest",
     },
   });
 
   if (!response.ok) {
-    throw new APIError(response);
+    throw new AddyError(response);
   }
 
-  return response;
-};
+  try {
+    return (await response.json()) as R;
+  } catch {
+    return undefined as R;
+  }
+}
 
 export default fetch;

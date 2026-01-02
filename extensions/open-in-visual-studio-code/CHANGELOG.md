@@ -1,5 +1,14 @@
 # Open in Visual Studio Code Changelog
 
+## [Fix: Localized File Explorer Support] - 2025-12-19
+
+- Fixed compatibility with localized File Explorer names by using frontmost application detection
+
+## [Feature: Windows Support] - 2025-11-19
+
+- Added Windows support with a PowerShell script.
+- Updated dependencies.
+
 ## [Update] - 2024-08-08
 
 - Allows you to open with Cursor

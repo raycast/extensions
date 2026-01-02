@@ -1,5 +1,29 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.0.3] - 2025-11-07
+
+### Added
+
+- Direct ccusage command execution option for network environments with npx connectivity issues
+- Node.js version sorting in PATH resolution to prioritize latest versions
+- Enhanced PATH resolution for improved npx binary discovery across Node.js installations
+
+### Changed
+
+- Simplified project dependencies by removing usehooks-ts package
+- Improved CLI execution flexibility with configurable command options
+
+### Fixed
+
+- Enhanced compatibility with various Node.js version managers (nvm, fnm, volta)
+
+## [v2.0.2] - 2025-07-07
+
+### Fixed
+
+- <https://github.com/raycast/extensions/issues/20056>
+- Fixed an issue where an unexpected node execution environment was selected depending on the user's environment when the `customNpx` preference was set, causing commands to not run properly.
+
 ## [v2.0.1] - 2025-06-25
 
 ### Fixed

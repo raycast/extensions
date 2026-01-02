@@ -26,7 +26,7 @@ export default function Command() {
         if (items.length === 1 && items[0].path && items[0].path.endsWith("/")) {
           setValue("folders", [items[0].path]);
         }
-      } catch (error) {
+      } catch {
         return;
       } finally {
         setIsLoading(false);

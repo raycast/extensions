@@ -42,6 +42,7 @@ View all your tasks in a searchable list. Tasks are displayed with their attribu
 - Task source file
 
 You can mark tasks as done or edit them directly from this view.
+> You can toggle the checkbox in `Command Preferences` to see the description in Details panel (useful if you like to use long descriptions and want to see them)
 
 ### Add Task
 

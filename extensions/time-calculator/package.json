@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "time-calculator",
+  "title": "Time Addition Calculator",
+  "author": "marc.cinema",
+  "description": "Calculate total hours from multiple time entries supporting both HH:MM and decimal formats",
+  "icon": "icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "time",
+    "hours",
+    "calculator",
+    "timesheet",
+    "tracking",
+    "decimal",
+    "convert"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calculate-time",
+      "title": "Calculate Time",
+      "subtitle": "Time Calculator",
+      "description": "Calculate total hours from multiple time entries",
+      "mode": "view",
+      "keywords": [
+        "hours",
+        "time",
+        "calculate",
+        "add",
+        "sum",
+        "total"
+      ]
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "1.75.0",
+    "@raycast/utils": "1.12.0"
+  }
+}

@@ -45,7 +45,7 @@ export default function Projects() {
           body: JSON.stringify({ projectId: project.projectId }),
         });
         if (!response.ok) {
-          const err: ErrorResult = await response.json();
+          const err = (await response.json()) as ErrorResult;
           throw new Error(err.message);
         }
         toast.style = Toast.Style.Success;
@@ -60,7 +60,7 @@ export default function Projects() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List navigationTitle="Projects" isLoading={isLoading}>
       {!isLoading && !projects.length ? (
         <List.EmptyView
           icon="folder-input.svg"
@@ -116,7 +116,7 @@ function CreateService() {
           body: JSON.stringify(values),
         });
         if (!response.ok) {
-          const err: ErrorResult = await response.json();
+          const err = (await response.json()) as ErrorResult;
           throw new Error(err.message);
         }
         toast.style = Toast.Style.Success;
@@ -134,6 +134,7 @@ function CreateService() {
   });
   return (
     <Form
+      navigationTitle="Projects"
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Plus} title="Create" onSubmit={handleSubmit} />

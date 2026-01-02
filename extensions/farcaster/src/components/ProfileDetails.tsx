@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Clipboard } from '@raycast/api';
+import { ActionPanel, List, Action, Clipboard } from "@raycast/api";
 import {
   getUserIcon,
   linkify,
@@ -7,17 +7,17 @@ import {
   truncateSolAddress,
   getEthAddressUrl,
   getSolanaAddressUrl,
-} from '../utils/helpers';
-import { CastAuthor } from '../utils/types';
-import ProfileCastList from './ProfileCastList';
+} from "../utils/helpers";
+import { CastAuthor } from "../utils/types";
+import ProfileCastList from "./ProfileCastList";
 
 export function ProfileDetails({ user }: { user: CastAuthor }) {
-  const markdown = linkify(user?.profile?.bio?.text || '');
+  const markdown = linkify(user?.profile?.bio?.text || "");
 
   return (
     <List.Item
       title={user.display_name}
-      accessories={[{ text: '@' + user.username }]}
+      accessories={[{ text: "@" + user.username }]}
       icon={getUserIcon(user)}
       detail={<List.Item.Detail markdown={markdown} metadata={<UserMetaData user={user} />} />}
       actions={
@@ -40,13 +40,13 @@ function UserMetaData({ user }: { user: CastAuthor }) {
       <List.Item.Detail.Metadata.Label title="Username" text={user.username} />
       {isPowerUser && (
         <List.Item.Detail.Metadata.TagList title="Status">
-          <List.Item.Detail.Metadata.TagList.Item text="Power User" color={'#8A63D2'} />
+          <List.Item.Detail.Metadata.TagList.Item text="Power User" color={"#8A63D2"} />
         </List.Item.Detail.Metadata.TagList>
       )}
       <List.Item.Detail.Metadata.TagList title="FID">
         <List.Item.Detail.Metadata.TagList.Item
           text={user.fid.toString()}
-          color={'#FFF'}
+          color={"#FFF"}
           onAction={() => Clipboard.copy(user.fid)}
         />
       </List.Item.Detail.Metadata.TagList>

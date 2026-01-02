@@ -11,3 +11,5 @@ compiled_raycast_swift
 
 # misc
 .DS_Store
+CLAUDE.md
+.claude/settings.local.json

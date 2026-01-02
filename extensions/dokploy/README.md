@@ -4,7 +4,7 @@
 
 # Dokploy
 
-This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhere with Total Freedom and Ease_. With this extension, for each instance you can:
+This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhere with Total Freedom and Ease_. With this extension, for each **instance** you can:
 
 - View Projects
     - View Services
@@ -13,11 +13,14 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Delete Service
     - View Docker (Containers)
         - View Docker Config
+    - View S3 Destinations
+        - Delete S3 Destination
     - View Users
 
 ## 🚀 Getting Started
 
 1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/dokploy) OR `install` via Raycast Store
+<a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
 2. **Configure**:
 
@@ -28,6 +31,12 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
     - Name: This can be anything you want
     - Instance URL: The URL of your Dokploy instance with port
     - API Key: `Follow` instruction from [Dokploy API | Dokploy](https://docs.dokploy.com/docs/api#authentication)
+
+## 🧪 Tested On
+
+Extension tested on following versions:
+
+1. Version **v0.24.4**
 
 ---
 

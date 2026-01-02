@@ -16,7 +16,8 @@
     "ridemountainpig",
     "ViGeng",
     "dante",
-    "5z99tsb75z"
+    "5z99tsb75z",
+    "xilopaint"
   ],
   "categories": [
     "Applications",
@@ -172,6 +173,11 @@
       "name": "list-addresses",
       "title": "List Addresses",
       "description": "List addresses in Apple Mail."
+    },
+    {
+      "name": "list-account-emails",
+      "title": "List Account Emails",
+      "description": "List all available email addresses from the user's mail accounts."
     },
     {
       "name": "send-email",

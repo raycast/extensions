@@ -12,12 +12,13 @@ export default function Users() {
   });
 
   return (
-    <List isLoading={isLoading}>
+    <List navigationTitle="Users" isLoading={isLoading}>
       {users.map((user) => (
         <List.Item
           key={user.userId}
           icon={Icon.Person}
-          title={user.user.email}
+          title={user.user.name}
+          subtitle={user.user.email}
           accessories={[
             { tag: user.role },
             {

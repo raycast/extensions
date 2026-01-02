@@ -47,7 +47,7 @@ function ECRImage({ repository }: { repository: Repository }) {
                   />
                   <Action.CopyToClipboard
                     title="Copy Full Image URI"
-                    content={`${repository.repositoryUri}:${image.imageTag}` || ""}
+                    content={`${repository.repositoryUri}:${image.imageTag}`}
                     shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
                   />
                   <Action.CopyToClipboard

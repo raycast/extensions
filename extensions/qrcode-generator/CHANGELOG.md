@@ -1,5 +1,23 @@
 # QR Code Generator Changelog
 
+## [Improve UX] - 2025-12-27
+
+- Persist the selected format in the dropdown
+- Allow users to return to QR editing in inline mode
+
+## [Maintenance] - 2025-12-12
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
+## [Enhancement] - 2025-10-03
+
+- Added a new action to copy QR code to clipboard
+
+## [Better Visibility in Raycast UI] - 2025-08-25
+
+- Added [Generate QR Code from Selection] Command
+
 ## [Better Visibility in Raycast UI] - 2025-06-18
 
 - Added internal argument to generate QR codes with a white background for visibility

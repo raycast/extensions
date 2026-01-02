@@ -5,6 +5,9 @@
   "description": "Create presets to launch multiple macOS applications and/or urls from within Raycast",
   "icon": "xecutor.png",
   "author": "GastroGeek",
+  "contributors": [
+    "ClaPalo"
+  ],
   "license": "MIT",
   "categories": [
     "Applications",
@@ -22,10 +25,25 @@
       "title": "Manage Presets",
       "description": "Create presets to launch multiple macOS applications and/or urls from within Raycast",
       "mode": "view"
+    },
+    {
+      "name": "launch_preset",
+      "title": "Launch Preset",
+      "description": "Launch a preset",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "preset_name",
+          "type": "text",
+          "placeholder": "Preset",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^2.0.1",
     "lodash.xorby": "^4.7.0",
     "url-parse": "^1.5.10",
     "uuid": "^9.0.0"

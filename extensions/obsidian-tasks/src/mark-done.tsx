@@ -2,7 +2,6 @@ import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Task } from "./types";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
 import { useTasks } from "./hooks/useTasks";
 import { TaskItem } from "./components/TaskItem";
 

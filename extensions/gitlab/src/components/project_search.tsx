@@ -1,11 +1,16 @@
-import { List } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
 import { getErrorMessage, showErrorToast } from "../utils";
 import { ProjectListEmptyView, ProjectListItem, ProjectScope } from "./project";
 
-export function ProjectSearchList(): JSX.Element {
+function activeProjects(): boolean {
+  const prefs = getPreferenceValues();
+  return (prefs.active as boolean) || false;
+}
+
+export function ProjectSearchList() {
   const [searchText, setSearchText] = useState<string>();
   const [scope, setScope] = useState<string>(ProjectScope.membership);
   const { projects, error, isLoading } = useSearch(searchText, scope);
@@ -39,7 +44,7 @@ export function ProjectSearchList(): JSX.Element {
 
 export function useSearch(
   query: string | undefined,
-  scope: string
+  scope: string,
 ): {
   projects?: Project[];
   error?: string;
@@ -48,6 +53,7 @@ export function useSearch(
   const [projects, setProjects] = useState<Project[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const active = activeProjects();
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -64,7 +70,7 @@ export function useSearch(
 
       try {
         const membership = scope === ProjectScope.membership ? "true" : "false";
-        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership });
+        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership, active });
 
         if (!didUnmount) {
           setProjects(glProjects);
@@ -85,7 +91,7 @@ export function useSearch(
     return () => {
       didUnmount = true;
     };
-  }, [query, scope]);
+  }, [query, scope, active]);
 
   return { projects, error, isLoading };
 }

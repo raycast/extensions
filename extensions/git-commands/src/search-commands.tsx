@@ -115,6 +115,8 @@ export default function Command() {
             <ActionPanel.Section>
               <Action.CopyToClipboard title="Copy Alias" content={name} onCopy={() => addRecent(alias)} />
               <Action.Paste title="Paste Alias" content={name} onPaste={() => addRecent(alias)} />
+              <Action.CopyToClipboard title="Copy Command" content={command} onCopy={() => addRecent(alias)} />
+              <Action.Paste title="Paste Command" content={command} onPaste={() => addRecent(alias)} />
             </ActionPanel.Section>
 
             <>

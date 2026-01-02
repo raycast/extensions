@@ -18,6 +18,7 @@ import CreateVMForm from "./components/CreateVMForm";
 import InstanceListItem from "./components/InstanceListItem";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { showFailureToast } from "@raycast/utils";
+import { LogsView } from "../logs-service";
 
 interface ComputeInstancesViewProps {
   projectId: string;
@@ -130,7 +131,6 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     if (!hasTransitionalInstances) return;
 
     const refreshTimer = setInterval(() => {
-      //console.log("Auto-refreshing instances in transitional state...");
       fetchInstances(service);
     }, 30000);
     return () => clearInterval(refreshTimer);
@@ -261,6 +261,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         return;
       }
 
+      // Optimistic UI update: immediately show instance as STARTING
+      setInstances((prevInstances) =>
+        prevInstances.map((inst) => (inst.id === instance.id ? { ...inst, status: "STARTING" } : inst)),
+      );
+
       const startingToast = await showToast({
         style: Toast.Style.Animated,
         title: `Starting instance ${name}...`,
@@ -313,6 +318,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       if (!confirmationResponse) {
         return;
       }
+
+      // Optimistic UI update: immediately show instance as STOPPING
+      setInstances((prevInstances) =>
+        prevInstances.map((inst) => (inst.id === instance.id ? { ...inst, status: "STOPPING" } : inst)),
+      );
 
       const stoppingToast = await showToast({
         style: Toast.Style.Animated,
@@ -439,6 +449,13 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
             title="Refresh Instances"
             icon={{ source: Icon.RotateClockwise }}
             onAction={() => service && fetchInstances(service)}
+          />
+          <Action
+            title="View Logs"
+            icon={Icon.Terminal}
+            onAction={() =>
+              push(<LogsView projectId={projectId} gcloudPath={gcloudPath} initialResourceType="gce_instance" />)
+            }
           />
           {selectedZone && (
             <Action

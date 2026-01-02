@@ -152,3 +152,4 @@ dist
 .pnp.*
 
 metadata/excluded/
+media/*.gif

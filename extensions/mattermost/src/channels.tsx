@@ -13,7 +13,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { getAvatarIcon, runAppleScript, showFailureToast, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { DateTime } from "luxon";
 import { MattermostClient } from "./shared/MattermostClient";
 import { Channel, UserProfile } from "./shared/MattermostTypes";
@@ -21,7 +21,7 @@ import { withAuthorization } from "./shared/withAuthorization";
 
 async function getCachedState(): Promise<State | undefined> {
   return LocalStorage.getItem<string>("channels-state").then((cachedStateJson) =>
-    cachedStateJson ? (JSON.parse(cachedStateJson) as State) : undefined
+    cachedStateJson ? (JSON.parse(cachedStateJson) as State) : undefined,
   );
 }
 
@@ -72,19 +72,20 @@ function ChannelsFinderList(): JSX.Element {
     if (preference.deepLinkType === "application") {
       try {
         await runAppleScript('launch application "Mattermost"');
-      } catch (error) {
+      } catch {
         await showFailureToast("Is Mattermost installed?", { title: "Error launching Mattermost" });
       }
     }
     const cachedState = await getCachedState();
-    cachedState && setState(cachedState);
+    if (cachedState) setState(cachedState);
 
-    await showToast(Toast.Style.Animated, "Fetch teams...");
+    const toast = await showToast(Toast.Style.Animated, "Fetch teams...");
 
     const [profile, teams] = await Promise.all([MattermostClient.getMe(), MattermostClient.getTeams()]);
     const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
 
-    await showToast(Toast.Style.Success, `Found ${teamsUI.length} teams`);
+    toast.style = Toast.Style.Success;
+    toast.title = `Found ${teamsUI.length} teams`;
     setCachedState({ profile: profile, teams: teamsUI });
     setState({ profile: profile, teams: teamsUI });
   });
@@ -164,7 +165,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       directChatsMap.set(profileId, chat);
     });
 
-    const directChatProfiles = directChatsMap.keys.length
+    const directChatProfiles = directChatsMap.size
       ? await MattermostClient.getProfilesByIds(Array.from(directChatsMap.keys()))
       : [];
     directChatProfiles.forEach((profile) => {
@@ -227,7 +228,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       setCachedState(cachedState);
     }
 
-    const profilesStatuses = directChatsMap.keys.length
+    const profilesStatuses = directChatsMap.size
       ? await MattermostClient.getProfilesStatus(Array.from(directChatsMap.keys()))
       : [];
     profilesStatuses.forEach((status) => {
@@ -280,7 +281,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
     try {
       await open(fullDeeplink);
       await closeMainWindow();
-    } catch (error) {
+    } catch {
       await showFailureToast("Is Mattermost Running?", { title: "Error opening in Mattermost" });
     }
   }

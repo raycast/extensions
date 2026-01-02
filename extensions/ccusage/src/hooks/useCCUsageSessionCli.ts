@@ -1,16 +1,19 @@
 import { useExec } from "@raycast/utils";
 import { SessionUsageCommandResponseSchema } from "../types/usage-types";
-import { preferences } from "../preferences";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { preferences } from "../preferences";
 
 /**
  * Hook for executing `ccusage session --json` command
  */
 export const useCCUsageSessionCli = () => {
-  const npxCommand = preferences.customNpxPath || "npx";
+  const useDirectCommand = preferences.useDirectCcusageCommand;
 
-  const result = useExec(npxCommand, ["ccusage@latest", "session", "--json"], {
+  const command = useDirectCommand ? "ccusage" : "npx";
+  const args = useDirectCommand ? ["session", "--json"] : ["ccusage@latest", "session", "--json"];
+
+  const result = useExec(command, args, {
     ...getExecOptions(),
     parseOutput: ({ stdout }) => {
       if (!stdout) {

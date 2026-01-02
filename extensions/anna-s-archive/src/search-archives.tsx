@@ -1,18 +1,23 @@
-import { useMemo, useState } from "react";
-
-import { List, getPreferenceValues } from "@raycast/api";
-
-import ArchiveListItem from "@/components/ArchiveListItem";
-import { EmptyView } from "@/components/EmptyView";
+import { useCallback, useMemo, useState } from "react";
+import { ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useArchive } from "@/hooks/use-archive";
+import { useMirrorDomain } from "@/hooks/use-mirror-domain";
 import { isEmpty } from "@/utils";
-
-const mirror = getPreferenceValues<Preferences>().mirror ?? "https://annas-archive.org";
+import { TestMirrors } from "@/screens/TestMirrors";
+import { ArchiveListItem } from "@/components/ArchiveListItem";
+import { TestMirrorsAction } from "@/components/TestMirrorsAction";
 
 const Command = () => {
+  const { push } = useNavigation();
   const [search, setSearch] = useState("");
 
-  const { data, error, isLoading } = useArchive(mirror, search);
+  const usedMirror = useMirrorDomain();
+
+  const onErrorPrimaryAction = useCallback(() => {
+    push(<TestMirrors />);
+  }, [push]);
+
+  const { data, error, isLoading } = useArchive(usedMirror.url, onErrorPrimaryAction, search);
 
   const listData = useMemo(() => {
     if (!data || search.length === 0) {
@@ -23,12 +28,12 @@ const Command = () => {
 
   const emptyViewTitle = useMemo(() => {
     if (isLoading) {
-      return "Loading...";
+      return { title: "Loading..." };
     }
     if (listData.length === 0 && !isEmpty(search)) {
-      return "No Results";
+      return { title: "No Results", description: "Try a different search term" };
     }
-    return "Search on Anna's Archive";
+    return { title: "Search on Anna's Archive" };
   }, [listData, isLoading, search]);
 
   return (
@@ -40,9 +45,19 @@ const Command = () => {
       filtering={false}
       isShowingDetail={listData.length > 0}
     >
-      {listData.length === 0 ? <EmptyView title={emptyViewTitle} /> : undefined}
-      {error ? <List.Item title="Error" subtitle={error.message} /> : undefined}
-      {!error ? listData.map((item) => <ArchiveListItem key={item.id} item={item} />) : undefined}
+      {(!error && !isLoading && listData.length === 0) || error ? (
+        <List.EmptyView
+          title={error ? "Error" : emptyViewTitle.title}
+          description={error ? error.message : emptyViewTitle.description}
+          icon={{ source: Icon.Book }}
+          actions={
+            <ActionPanel>
+              <TestMirrorsAction />
+            </ActionPanel>
+          }
+        />
+      ) : undefined}
+      {!error && listData.map((item) => <ArchiveListItem key={item.id} item={item} />)}
     </List>
   );
 };

@@ -20,4 +20,5 @@ export interface Preferences {
   gitClientApp: Application;
   vscodeApp: Application;
   hideProjectsWithoutTag: boolean;
+  hideProjectsNotEnabled: boolean;
 }

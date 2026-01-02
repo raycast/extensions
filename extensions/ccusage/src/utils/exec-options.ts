@@ -1,10 +1,19 @@
 import { getEnhancedNodePaths } from "./node-path-resolver";
+import { dirname } from "path";
+import { preferences } from "../preferences";
 
 export const getExecOptions = () => {
   const env: Record<string, string> = {
     ...process.env,
     PATH: getEnhancedNodePaths(),
   };
+
+  // Prepend custom npx directory to PATH for proper binary resolution
+  const customNpxPath = preferences.customNpxPath?.trim();
+  if (customNpxPath) {
+    const customDir = dirname(customNpxPath);
+    env.PATH = `${customDir}:${env.PATH}`;
+  }
 
   // Add HOME-dependent paths only if HOME is available
   if (process.env.HOME) {

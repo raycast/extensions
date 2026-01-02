@@ -1,24 +1,24 @@
-import { Image } from '@raycast/api';
-import { getAvatarIcon } from '@raycast/utils';
-import { Cast, CastAuthor } from './types';
-import Linkify from 'linkify-it';
-import tlds from 'tlds';
-import { preferences } from './preferences';
+import { Image, getPreferenceValues } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
+import { Cast, CastAuthor } from "./types";
+import Linkify from "linkify-it";
+import tlds from "tlds";
 
-const isEtherscan = preferences.walletAddressClient === 'etherscan';
+const preferences = getPreferenceValues<Preferences>();
+const isEtherscan = preferences.walletAddressClient === "etherscan";
 
-export function getUserIcon(user: Pick<CastAuthor, 'username' | 'pfp_url'>) {
+export function getUserIcon(user: Pick<CastAuthor, "username" | "pfp_url">) {
   return {
     source: user.pfp_url ? encodeURI(user.pfp_url) : getAvatarIcon(user.username.toUpperCase()),
     mask: Image.Mask.RoundedRectangle,
-    fallback: 'ghost.png',
+    fallback: "ghost.png",
   };
 }
 
 export function truncateSolAddress(address: string) {
   const regex = /^[1-9A-HJ-NP-Za-km-z]{6}[1-9A-HJ-NP-Za-km-z]*[1-9A-HJ-NP-Za-km-z]{6}$/;
   if (!regex.test(address)) return address;
-  return `${address.substr(0, 6)}…${address.substr(-6)}`;
+  return `${address.slice(0, 6)}…${address.slice(-6)}`;
 }
 
 export function truncateEthAddress(address: string) {
@@ -30,38 +30,11 @@ export function truncateEthAddress(address: string) {
 }
 
 export function getCastUrl(cast: Cast) {
-  let baseUrl;
-  switch (preferences.farcasterClient) {
-    case 'supercast':
-      baseUrl = `https://www.supercast.xyz/c/${cast.hash}`;
-      break;
-    case 'nook':
-      baseUrl = `https://nook.social/casts/${cast.hash}`;
-      break;
-    case 'warpcast':
-    default:
-      baseUrl = `https://warpcast.com/${cast.author.username}/${cast.hash.substring(0, 8)}`;
-      break;
-  }
-
-  return baseUrl;
+  return `https://farcaster.xyz/${cast.author.username}/${cast.hash.substring(0, 8)}`;
 }
 
 export function getProfileUrl(author: CastAuthor) {
-  let baseUrl;
-  switch (preferences.farcasterClient) {
-    case 'supercast':
-      baseUrl = `https://www.supercast.xyz/${author.username}`;
-      break;
-    case 'nook':
-      baseUrl = `https://nook.social/users/${author.username}`;
-      break;
-    case 'warpcast':
-    default:
-      baseUrl = `https://warpcast.com/${author.username}`;
-      break;
-  }
-  return baseUrl;
+  return `https://farcaster.xyz/${author.username}`;
 }
 
 export function getEthAddressUrl(walletAddress: string) {
@@ -85,4 +58,4 @@ export function linkify(text: string): string {
   }, text);
 }
 
-export const headers = { accept: 'application/json', api_key: preferences.apiKey };
+export const headers = { accept: "application/json", api_key: preferences.apiKey };

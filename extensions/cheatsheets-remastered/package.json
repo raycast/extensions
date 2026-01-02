@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.1.0",
+  "name": "cheatsheets-remastered",
+  "title": "Cheatsheets Remastered",
+  "description": "A remastered Cheatsheets extension with enhanced functionality, custom sheet creation, and an improved browsing experience.",
+  "icon": "logo.png",
+  "author": "smcnab1",
+  "contributors": [],
+  "categories": [
+    "Documentation",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "show-cheatsheets",
+      "title": "Show Cheatsheets",
+      "subtitle": "Cheatsheets Remastered",
+      "description": "List all cheatsheets",
+      "mode": "view"
+    },
+    {
+      "name": "create-custom-cheatsheet",
+      "title": "Create Custom Cheatsheet",
+      "subtitle": "Cheatsheets Remastered",
+      "description": "Create a new custom cheatsheet",
+      "mode": "view"
+    },
+    {
+      "name": "manage-custom-cheatsheets",
+      "title": "Manage Custom Cheatsheets",
+      "subtitle": "Cheatsheets Remastered",
+      "description": "View, edit, and manage your custom cheatsheets",
+      "mode": "view"
+    },
+    {
+      "name": "manage-repos",
+      "title": "Repo Manager",
+      "subtitle": "Cheatsheets Remastered",
+      "description": "Manage user-specified repositories (list, add, remove) with GitHub OAuth",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "githubToken",
+      "type": "password",
+      "required": false,
+      "title": "GitHub Token (optional)",
+      "description": "Optional: Improves rate limits for online content search (local search doesn't require it)"
+    },
+    {
+      "name": "defaultSort",
+      "type": "dropdown",
+      "required": true,
+      "title": "Default Sort Order",
+      "description": "How to sort cheatsheets by default",
+      "default": "frecency",
+      "data": [
+        {
+          "title": "Frecency (Smart)",
+          "value": "frecency"
+        },
+        {
+          "title": "Last Viewed",
+          "value": "lastViewed"
+        },
+        {
+          "title": "Most Viewed",
+          "value": "mostViewed"
+        },
+        {
+          "title": "Alphabetical",
+          "value": "alpha"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "gray-matter": "^4.0.3",
+    "prettier": "^3.5.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

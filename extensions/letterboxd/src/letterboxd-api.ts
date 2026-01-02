@@ -61,24 +61,14 @@ export function getFullURL(path: string) {
   return `${LETTERBOXD_URL_BASE}${path}`;
 }
 
-export const enum POSTER_SIZE {
-  THUMBNAIL = "std/70x105/",
-  HERO = "hero/230x345/",
-}
-
-export async function fetchPosterUrl(
-  letterboxdId: string,
-  posterSize: POSTER_SIZE,
-): Promise<string> {
-  const posterUrl = `${LETTERBOXD_URL_BASE}/ajax/poster/film/${letterboxdId}/${posterSize}`;
+export async function fetchPosterUrl(letterboxdId: string): Promise<string> {
+  const posterUrl = `${LETTERBOXD_URL_BASE}/film/${letterboxdId}/poster/std/230`;
   const posterResponse = await fetchWithRetry(posterUrl);
-  const { poster } = parse(posterResponse, {
-    poster: {
-      selector: "img",
-      value: "src",
-    },
-  });
-  return poster ?? "";
+  const posterData = JSON.parse(posterResponse);
+  if (posterData.url2x) {
+    return posterData.url2x;
+  }
+  return posterData.url ?? "";
 }
 
 export const fetchMoviesByTitle = async (
@@ -96,7 +86,7 @@ export const fetchMoviesByTitle = async (
     // 2. parse the html returned in that request for img src
     const posterUrls: string[] = await Promise.all(
       movies.map((movie) => {
-        return fetchPosterUrl(movie.letterboxdId, POSTER_SIZE.THUMBNAIL);
+        return fetchPosterUrl(movie.letterboxdId);
       }),
     );
     movies.forEach((movie, index) => {
@@ -239,7 +229,7 @@ async function fetchMovieStats(letterboxdId: string): Promise<MovieStatistics> {
 async function fetchRatingHistogram(
   letterboxdId: string,
 ): Promise<MovieRatingHistogram> {
-  const ratingUrl = `${LETTERBOXD_URL_BASE}/csi/film/${letterboxdId}/rating-histogram/`;
+  const ratingUrl = `${LETTERBOXD_URL_BASE}/csi/film/${letterboxdId}/ratings-summary/`;
   const ratingResponse = await fetchWithRetry(ratingUrl);
   return parse(ratingResponse, {
     histogram: [
@@ -324,7 +314,7 @@ export async function fetchMovieDetails(
       letterboxdId,
     );
 
-    const posterUrlPromise = fetchPosterUrl(letterboxdId, POSTER_SIZE.HERO);
+    const posterUrlPromise = fetchPosterUrl(letterboxdId);
     const ratingHistogramPromise = fetchRatingHistogram(letterboxdId);
     const statsPromise = fetchMovieStats(letterboxdId);
 
@@ -365,7 +355,7 @@ function extractEntitiesFromMovieDetailsPage(
     releases,
   } = parse(html, {
     title: {
-      selector: "#featured-film-header h1",
+      selector: "h1.headline-1.primaryname .name",
     },
     description: {
       selector: ".review.body-text",
@@ -399,21 +389,21 @@ function extractEntitiesFromMovieDetailsPage(
     ],
     reviews: [
       {
-        selector: "li.film-detail",
+        selector: ".film-reviews .listitem article.production-viewing",
         value: {
           reviewerName: {
             selector: "a.avatar img",
             value: "alt",
           },
           reviewBody: {
-            selector: ".body-text",
+            selector: ".js-review-body",
           },
           reviewUrl: {
-            selector: "p.attribution a",
+            selector: ".attribution-detail .context",
             value: "href",
           },
           rating: {
-            selector: "p.attribution .rating",
+            selector: ".rating",
             value: (el: Element) => {
               const $ = load(el);
               const rating = $(el).text().trim();
@@ -421,7 +411,7 @@ function extractEntitiesFromMovieDetailsPage(
             },
           },
           commentCount: {
-            selector: "p.attribution .comment-count",
+            selector: ".icon-comment .label",
             value: (el: Element) => {
               const $ = load(el);
               const commentCount = $(el).text().trim();

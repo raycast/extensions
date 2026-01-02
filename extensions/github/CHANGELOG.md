@@ -1,5 +1,63 @@
 # GitHub Changelog
 
+## [Fix "Clone and Open" action when repository doesn't exist] - 2025-12-17
+
+* Fix the clone command to append the target directory only when it exists
+* Always show the "Clone with Options" action instead of conditionally
+
+## [Moved Contributor] - 2025-12-10
+
+## [Fix filter visited repositories] - 2025-12-09
+
+- Add validation to filter history for only repositories that exist in current data
+- Refactor repository filtering to handle undefined searchText and searchFilter explicitly
+
+## [Use distinct status icons for PR states] - 2025-12-08
+
+- My Pull Requests Menu Bar: Added dedicated icons for merged, closed, draft, and merge queue PR states
+
+## [Add option to filter draft pull requests] - 2025-12-07
+
+- My Pull Requests: Added "Drafts" preference to show or hide draft pull requests
+- My Pull Requests Menu Bar: Added "Drafts" preference to show or hide draft pull requests
+
+## [Fix Create Pull Request branch selection] - 2025-11-27
+
+- Create Pull Request: Fixed issue where the default branch wasn't appearing in the "From" dropdown options
+- Create Pull Request: Fixed validation errors when searching for branches while a branch is already selected
+- Create Pull Request: Prevented selecting the same branch for both "From" and "Into" fields
+
+## [Show organization projects when creating issues] - 2025-12-07
+
+- Include organization-level Projects in the Create Issue project picker
+
+## [Add Download Repository command and copy markdown URL actions] - 2025-11-19
+
+- Search Repositories: Added "Download Repository" action to download a repository as a zip file
+- Added "Copy Markdown URL" actions to copy an issue's markdown URL
+
+## [Checkout PR project action] - 2025-10-24
+
+- My Pull Requests: Added "Check Out PR" action to clone repository and switch to PR branch locally
+
+## [Unified handle notification icon retrieval error] - 2025-10-02
+
+- Notifications Command and Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
+## [Fix clone with options action] - 2025-09-08
+
+- Fix the clone action by adding the quote to the command to prevent issues with spaces in the path
+
+## [Add My Starred Repositories command] - 2025-08-25
+
+- Add new "My Starred Repositories" command to view starred repositories
+- Displays starred repositories with support for sorting and visiting history
+- Integrated with existing repository list components for consistent experience
+
+## [Issue type specification] - 2025-08-22
+
+- Adds the ability to specify the issue type when creating a new issue.
+
 ## [Fix repository filtering] - 2025-06-26
 
 - Correct the repository filtering for exclude mode

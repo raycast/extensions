@@ -1,5 +1,7 @@
 import * as changeCase from "change-case";
 import {
+  CaseFunction,
+  capitalCase,
   lowerCase,
   lowerFirst,
   kebabUpperCase,
@@ -8,15 +10,16 @@ import {
   titleCase,
   spongeCase,
   swapCase,
+  sentenceCase,
 } from "./customCases";
 import { getPreferenceValues } from "@raycast/api";
 
-export type CaseFunction = (input: string, options?: changeCase.Options) => string;
+export type { CaseFunction };
 export type CaseFunctions = Record<string, CaseFunction>;
 
 export const functions: CaseFunctions = {
   "Camel Case": changeCase.camelCase,
-  "Capital Case": changeCase.capitalCase,
+  "Capital Case": capitalCase,
   "Constant Case": changeCase.constantCase,
   "Dot Case": changeCase.dotCase,
   "Header Case": changeCase.trainCase,
@@ -29,7 +32,7 @@ export const functions: CaseFunctions = {
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
   "Random Case": spongeCase,
-  "Sentence Case": changeCase.sentenceCase,
+  "Sentence Case": sentenceCase,
   "Snake Case": changeCase.snakeCase,
   "Swap Case": swapCase,
   "Title Case": titleCase,

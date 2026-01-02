@@ -1,6 +1,6 @@
 import { popToRoot } from "@raycast/api";
 import { spawnSync } from "child_process";
-import { shellEnv } from "shell-env";
+import { shellEnvSync } from "shell-env";
 
 interface Window {
   "app-name": string;
@@ -17,12 +17,12 @@ export interface Windows extends Array<Window> {}
 
 let cachedEnv: Record<string, string> | null = null;
 
-export async function env() {
+export function env() {
   if (cachedEnv) {
     return cachedEnv;
   }
 
-  const env = await shellEnv();
+  const env = shellEnvSync();
 
   cachedEnv = env;
   return cachedEnv;
@@ -30,7 +30,7 @@ export async function env() {
 
 async function getAppPath(bundleId: string) {
   const appPath = spawnSync("mdfind", [`kMDItemCFBundleIdentifier="${bundleId}"`], {
-    env: await env(),
+    env: env(),
     encoding: "utf8",
     timeout: 15000,
   });
@@ -48,7 +48,7 @@ export async function getWindows(workspace: string) {
   ];
 
   const aerospaceArr = spawnSync("aerospace", args, {
-    env: await env(),
+    env: env(),
     encoding: "utf8",
     timeout: 15000,
   });
@@ -70,9 +70,9 @@ export async function getWindows(workspace: string) {
   return windows;
 }
 
-export async function focusWindow(windowId: string) {
+export function focusWindow(windowId: string) {
   spawnSync("aerospace", ["focus", "--window-id", `${windowId}`], {
-    env: await env(),
+    env: env(),
     encoding: "utf8",
     timeout: 15000,
   });

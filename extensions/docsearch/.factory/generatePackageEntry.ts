@@ -14,7 +14,7 @@ function generateCommand() {
       "icon": item.icon.replace('../assets', ''),
       "title": DocID[idNum].replace(/_/g, ' '),
       "subtitle": "DocSearch",
-      "description": `Search ${DocID[idNum]} documentation`,
+      "description": `Search ${DocID[idNum].replace(/_/g, ' ')} documentation`,
       "arguments": [
         {
           "name": "search",

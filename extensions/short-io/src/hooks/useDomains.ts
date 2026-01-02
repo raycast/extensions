@@ -1,8 +1,8 @@
 import { useCachedPromise } from "@raycast/utils";
 import { Domain } from "../types/types";
 import { DOMAINS_API } from "../utils/constants";
-import axios from "axios";
 import { apiKey } from "../types/preferences";
+import axios from "axios";
 
 export const useDomains = () => {
   return useCachedPromise(() => {

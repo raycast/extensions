@@ -1,5 +1,21 @@
 # Visual Studio Code Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added Windows support
+
+## [Update] - 2025-11-25
+
+- Added support for Antigravity.
+
+## [Enhancements] - 2025-11-19
+
+- Improved `Search Recent Projects` for remote workspaces by fuzzy matching remote authorities.
+
+## [Update] - 2025-08-04
+
+- Added support for Kiro.
+
 ## [Update] - 2025-03-05
 
 - Added support for Trae CN.

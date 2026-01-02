@@ -86,7 +86,7 @@ export default function Command() {
       searchBarAccessory={<ChromeProfileDropDown />}
     >
       <List.Section key={"new-tab"} title={"New Tab"}>
-        <List.Item title={actionTitle} icon={icon} actions={actions} />
+        <List.Item title={actionTitle} icon={icon} actions={<>{actions}</>} />
       </List.Section>
       <List.Section key={"open-tabs"} title={"Open Tabs - All"}>
         {dataTab?.map((tab) => (
