@@ -59,9 +59,14 @@ function parseProcessLines(stdout: string): ProcessInfo[] {
   return results;
 }
 
+
+const isWindows = process.platform === "win32";
+
 export async function detectTokenAndPort(): Promise<ProcessInfo[]> {
-  const cmd = `ps -ww -eo pid,ppid,args | grep -E 'language_server|antigravity' | grep -v grep || true`;
   try {
+    const cmd = isWindows
+      ? 'powershell -Command "Get-WmiObject Win32_Process | Where-Object { $_.CommandLine -match \'language_server|antigravity\' } | Select-Object ProcessId, ParentProcessId, CommandLine | ForEach-Object { Write-Output (\\"$($_.ProcessId) $($_.ParentProcessId) $($_.CommandLine)\\") }"'
+      : `ps -ww -eo pid,ppid,args | grep -E 'language_server|antigravity' | grep -v grep || true`;
     const { stdout } = await execAsync(cmd, { timeout: 8000 });
     return parseProcessLines(stdout);
   } catch (e) {
