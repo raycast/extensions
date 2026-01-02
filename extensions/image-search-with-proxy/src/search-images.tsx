@@ -145,7 +145,7 @@ export default function SearchImagesCommand() {
         setImages(results);
       } catch (error) {
         console.error("Error searching images:", error);
-        await showFailureToast(error, { title: "Failed to search images by: " + query + " " + error.message });
+        await showFailureToast(error, { title: "Failed to search images by: " + query });
         setImages([]);
       } finally {
         setIsLoading(false);
