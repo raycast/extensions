@@ -3,16 +3,12 @@ import { useState, useEffect } from "react";
 import { raycastConverter } from "./raycast-converter.js";
 import { ImageHandlingMode } from "../../core/converter.js";
 
-interface Preferences {
-  imageHandling: ImageHandlingMode;
-}
-
 export default function ConvertClipboard() {
   const [markdown, setMarkdown] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<{ imageHandling: ImageHandlingMode }>();
 
   useEffect(() => {
     convertClipboard();
