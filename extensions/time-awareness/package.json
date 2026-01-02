@@ -1,70 +1,70 @@
 {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "time-awareness",
-  "title": "Time Awareness",
-  "description": "Track your activity sessions and intervals",
-  "icon": "extension-icon.png",
-  "author": "alexi.build",
-  "platforms": [
-    "macOS"
-  ],
-  "license": "MIT",
-  "commands": [
-    {
-      "name": "time-awareness-menu-bar",
-      "title": "Time Awareness Menu Bar",
-      "description": "Track activity time and get notifications when reached the end of the interval",
-      "mode": "menu-bar",
-      "interval": "10s"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "activeInterval",
-      "title": "Active Interval",
-      "label": "Active Interval (minutes)",
-      "description": "Trigger notification after this many minutes of being active",
-      "type": "textfield",
-      "default": "25",
-      "required": false
-    },
-    {
-      "name": "idleThreshold",
-      "title": "Idle Threshold",
-      "label": "Idle Threshold (seconds, minimum 10)",
-      "description": "Reset active counter after being idle for this long",
-      "type": "textfield",
-      "default": "180",
-      "required": false
-    },
-    {
-      "name": "enableConfetti",
-      "title": "Confetti Celebration",
-      "label": "Enable Confetti",
-      "description": "Show confetti celebration when an interval is completed",
-      "type": "checkbox",
-      "default": true,
-      "required": false
-    }
-  ],
-  "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^1.17.0"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
-  },
-  "scripts": {
-    "build": "ray build",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  }
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "time-awareness",
+	"title": "Time Awareness",
+	"description": "Track your activity sessions and intervals",
+	"icon": "extension-icon.png",
+	"author": "alexi.build",
+	"platforms": [
+		"macOS"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "time-awareness-menu-bar",
+			"title": "Time Awareness Menu Bar",
+			"description": "Track activity time and get notifications when reached the end of the interval",
+			"mode": "menu-bar",
+			"interval": "10s"
+		}
+	],
+	"preferences": [
+		{
+			"name": "activeInterval",
+			"title": "Active Interval",
+			"label": "Active Interval (Minutes)",
+			"description": "Trigger notification after this many minutes of being active",
+			"type": "textfield",
+			"default": "25",
+			"required": false
+		},
+		{
+			"name": "idleThreshold",
+			"title": "Idle Threshold",
+			"label": "Idle Threshold (Seconds, Minimum 10)",
+			"description": "Reset active counter after being idle for this long",
+			"type": "textfield",
+			"default": "180",
+			"required": false
+		},
+		{
+			"name": "enableConfetti",
+			"title": "Confetti Celebration",
+			"label": "Enable Confetti",
+			"description": "Show confetti celebration when an interval is completed",
+			"type": "checkbox",
+			"default": true,
+			"required": false
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.104.1",
+		"@raycast/utils": "^1.17.0"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.0.4",
+		"@types/node": "22.13.10",
+		"@types/react": "19.0.10",
+		"eslint": "^9.22.0",
+		"prettier": "^3.5.3",
+		"typescript": "^5.8.2"
+	},
+	"scripts": {
+		"build": "ray build",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+		"publish": "npx @raycast/api@latest publish"
+	}
 }
