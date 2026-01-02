@@ -1,11 +1,10 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "Node",
     "jsx": "react-jsx",
-  "rootDir": "..",
+    "rootDir": ".",
     "outDir": "dist",
     "declaration": true,
     "moduleDetection": "force",
@@ -14,16 +13,18 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": false,
     "skipLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "types": ["node"]
   },
   "include": [
     "src/**/*",
-    "../src/core/**/*",
-    "../src/platforms/raycast/**/*"
+    "lib/**/*"
   ],
   "exclude": [
     "node_modules",
-    "../src/platforms/chrome/**/*"
+    "dist"
   ]
 }
