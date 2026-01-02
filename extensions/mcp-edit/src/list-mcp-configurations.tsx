@@ -219,14 +219,9 @@ function ensureConfiguredPath(client: MCPClientWithPath): string {
   return expandPath(client.filePath);
 }
 
-interface Preferences {
+type Preferences = {
   [key: string]: boolean | string | undefined;
-  showCursorAction?: boolean;
-  showVsCodeAction?: boolean;
-  showZedAction?: boolean;
-  showSublimeAction?: boolean;
-  defaultEditor?: string;
-}
+};
 
 function getDefaultAction(client: MCPClientWithPath, preferences: Preferences) {
   const defaultEditor = String(preferences.defaultEditor || "cursor").toLowerCase();
@@ -314,15 +309,15 @@ export default function Command() {
                   )}
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Open in Editor">
-                  {preferences.showCursorAction !== false && (
+                  {preferences.showCursorAction !== false && preferences.defaultEditor !== "cursor" && (
                     <Action
                       title="Open in Cursor"
                       icon={Icon.AppWindow}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                       onAction={() => openInCursor(client)}
                     />
                   )}
-                  {preferences.showVsCodeAction !== false && (
+                  {preferences.showVsCodeAction !== false && preferences.defaultEditor !== "vscode" && (
                     <Action
                       title="Open in VS Code"
                       icon={Icon.AppWindow}
@@ -330,7 +325,7 @@ export default function Command() {
                       onAction={() => openInVSCode(client)}
                     />
                   )}
-                  {preferences.showZedAction !== false && (
+                  {preferences.showZedAction !== false && preferences.defaultEditor !== "zed" && (
                     <Action
                       title="Open in Zed"
                       icon={Icon.AppWindow}
@@ -338,7 +333,7 @@ export default function Command() {
                       onAction={() => openInZed(client)}
                     />
                   )}
-                  {preferences.showSublimeAction !== false && (
+                  {preferences.showSublimeAction !== false && preferences.defaultEditor !== "sublime" && (
                     <Action
                       title="Open in Sublime Text"
                       icon={Icon.AppWindow}
