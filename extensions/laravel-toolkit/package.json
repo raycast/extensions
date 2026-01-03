@@ -178,8 +178,7 @@
   },
   "author": "jasper_huppertz",
   "platforms": [
-    "Windows",
-    "macOS"
+    "Windows"
   ],
   "categories": [
     "Documentation",

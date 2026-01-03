@@ -18,10 +18,6 @@ import { getCustomPackages, CustomPackage } from "./utils/custom-packages";
 
 const execAsync = promisify(exec);
 
-interface Preferences {
-  projectDirectory?: string;
-}
-
 // ============================================================================
 // Configuration
 // ============================================================================
@@ -165,7 +161,7 @@ function groupPackages(packages: StackablePackage[]): Record<string, StackablePa
 // ============================================================================
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.CreateProject>();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBaseKit, setSelectedBaseKit] = useState("none");
   const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
@@ -467,7 +463,7 @@ export default function Command() {
       <Form.TextField
         id="directory"
         title="Parent Directory"
-        defaultValue={preferences.projectDirectory || "~/Projects"}
+        defaultValue={preferences?.projectDirectory || "~/Projects"}
       />
 
       <Form.Separator />
