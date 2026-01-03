@@ -3,11 +3,11 @@ import child_process from "child_process";
 import os from "os";
 import path from "path";
 import { showToast, Toast, getPreferenceValues, environment } from "@raycast/api";
-import { runPowerShellScript } from "@raycast/utils";
 
 import { Volume, Preferences } from "./types";
 
 const exec = util.promisify(child_process.exec);
+const execFile = util.promisify(child_process.execFile);
 
 /**
  * List all currently-mounted volumes
@@ -67,14 +67,13 @@ function getVolumesFromLsCommandMac(raw: string): Volume[] {
 async function listVolumesWindows(): Promise<Volume[]> {
   let volumes: Volume[] = [];
   try {
-    const script = `
-      Get-Volume | Where-Object {$_.DriveType -eq 'Removable' -and $_.DriveLetter -ne $null} | 
-      Select-Object DriveLetter, FileSystemLabel | 
-      ConvertTo-Json
-    `;
+    // Use wmic to list removable drives (DriveType=2)
+    const { stdout } = await exec('wmic logicaldisk where "drivetype=2" get deviceid,volumename /format:csv', {
+      timeout: 10000,
+      windowsHide: true, // Prevents console handle from interfering with event loop
+    });
 
-    const result = await runPowerShellScript(script, { timeout: 10000 });
-    volumes = getVolumesFromPowerShellWindows(result);
+    volumes = getVolumesFromWmicWindows(stdout);
   } catch (e: any) {
     console.log(e.message);
     showToast({ style: Toast.Style.Failure, title: "Error listing volumes", message: e.message });
@@ -83,30 +82,37 @@ async function listVolumesWindows(): Promise<Volume[]> {
   return volumes;
 }
 
-function getVolumesFromPowerShellWindows(raw: string): Volume[] {
+function getVolumesFromWmicWindows(raw: string): Volume[] {
   const prefs = getPreferenceValues<Preferences>();
   const volumesToIgnore = prefs?.ignoredVolumes?.split(",").map((v) => v.trim());
 
   try {
-    // Handle empty results (no removable drives)
-    if (!raw || raw.trim() === "") {
-      return [];
-    }
+    // Parse CSV output from wmic
+    // Format is: Node,DeviceID,VolumeName
+    const lines = raw
+      .trim()
+      .split("\r\r\n")
+      .slice(1) // Skip header line (Node,DeviceID,VolumeName)
+      .filter((line) => line.trim() !== "");
 
-    // Parse PowerShell JSON output
-    const rawData = JSON.parse(raw);
-    // PowerShell returns single object if only one result, array if multiple
-    const volumeData = Array.isArray(rawData) ? rawData : [rawData];
+    let volumes: Volume[] = lines
+      .map((line) => {
+        const parts = line.split(",");
+        if (parts.length < 2) return null;
 
-    let volumes: Volume[] = volumeData
-      .filter((v: any) => v.DriveLetter) // Ensure drive letter exists
-      .map((v: any) => {
-        const driveLetter = v.DriveLetter;
-        const label = v.FileSystemLabel;
-        // Format as "E: (USB Drive)" or just "E:" if no label
-        const name = label ? `${driveLetter}: (${label})` : `${driveLetter}:`;
+        const driveLetter = parts[1]?.trim(); // DeviceID (e.g., "E:")
+        const rawLabel = parts[2]?.trim() || ""; // VolumeName
+
+        if (!driveLetter) return null;
+
+        // Handle empty labels (some USBs have no name)
+        const label = rawLabel && rawLabel.length > 0 ? rawLabel : "Removable Drive";
+
+        // Format as "E: (Backup Stick)" or "E: (Removable Drive)"
+        const name = `${driveLetter} (${label})`;
         return { name };
-      });
+      })
+      .filter((v): v is Volume => v !== null);
 
     // Apply ignored volumes filter
     if (volumesToIgnore != null && volumesToIgnore.length > 0) {
@@ -115,7 +121,7 @@ function getVolumesFromPowerShellWindows(raw: string): Volume[] {
 
     return volumes;
   } catch (e: any) {
-    console.log("Error parsing PowerShell output:", e.message);
+    console.log("Error parsing wmic output:", e.message);
     return [];
   }
 }
@@ -152,18 +158,19 @@ async function ejectVolumeMac(volume: Volume): Promise<void> {
 }
 
 async function ejectVolumeWindows(volume: Volume): Promise<void> {
-  // Extract drive letter from volume name (e.g., "E: (USB Drive)" -> "E")
-  const driveLetter = volume.name.split(":")[0];
+  // Extract drive letter from volume name (e.g., "Backup Stick (E:)" -> "E")
+  // The format is now "Label (Drive:)" so we need to extract from the parentheses
+  const match = volume.name.match(/\(([A-Z]):?\)/i);
+  const driveLetter = match ? match[1] : volume.name.split(":")[0];
 
-  // Path to RemoveDrive.exe in the assets folder using Raycast environment
-  const removeDrivePath = path.join(environment.assetsPath, "RemoveDrive.exe");
+  // Path to PowerShell script in the assets folder using Raycast environment
+  const scriptPath = path.join(environment.assetsPath, "eject.ps1");
 
-  // Use RemoveDrive.exe to safely eject the drive
-  // -b: show "Safe To Remove Hardware" balloon tip
-  // -na: no about info
-  const command = `"${removeDrivePath}" ${driveLetter}: -b -na`;
-
-  const options = { timeout: 10000 };
-
-  await exec(command, options);
+  // Use execFile for security - prevents command injection by passing arguments as array
+  // This is safer than exec() which uses shell string interpolation
+  await execFile(
+    "powershell",
+    ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", scriptPath, "-DriveLetter", driveLetter],
+    { timeout: 10000, windowsHide: true }, // Prevents console handle from interfering with event loop
+  );
 }
