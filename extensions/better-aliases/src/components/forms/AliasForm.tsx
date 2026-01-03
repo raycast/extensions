@@ -51,9 +51,9 @@ export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasF
       alias: (value) => {
         if (!value?.trim()) return "Alias is required";
       },
-      value: (value, formValues) => {
+      value: (value) => {
         if (!value?.trim()) return "Value is required";
-        if (formValues?.snippetOnly) {
+        if (values?.snippetOnly) {
           const validation = validateSnippet(value, separator);
           if (!validation.isValid) return validation.error;
         }
