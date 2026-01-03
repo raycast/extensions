@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-navigator",
+  "title": "Developer Decision Navigator",
+  "description": "Always know what to work on. Never miss what matters.",
+  "icon": "target.png",
+  "author": "andrejspirov",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "decision-guide",
+      "title": "Get Decision Guide",
+      "description": "Get an intelligent priority guide for your work",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "githubToken",
+      "title": "GitHub Token",
+      "description": "Personal access token for GitHub API",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "linearToken",
+      "title": "Linear Token",
+      "description": "API key from Linear settings",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "slackToken",
+      "title": "Slack Bot Token",
+      "description": "Bot token from Slack app",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@types/node": "^25.0.3",
+    "axios": "^1.13.2",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.7.4",
+    "tsx": "^4.21.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test:github": "tsx test-github.ts",
+    "test:github:mock": "tsx test-github-mock.ts",
+    "test:linear": "tsx test-linear.ts",
+    "test:slack": "tsx test-slack.ts"
+  }
+}
