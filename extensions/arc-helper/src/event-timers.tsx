@@ -2,6 +2,7 @@ import { ActionPanel, Action, List, Detail, Icon, Color, showToast, Toast } from
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
 import { API, EventTimer, EventTimerRaw } from "./api";
+import { getCached, setCache, CacheKeys } from "./cache";
 
 interface EventTimersResponse {
   data: EventTimerRaw[];
@@ -178,6 +179,8 @@ export default function EventTimers() {
   const [mapFilter, setMapFilter] = useState<string>("all");
   const [tick, setTick] = useState(0);
 
+  const cachedEventTimers = getCached<EventTimerRaw[]>(CacheKeys.eventTimers);
+
   const { isLoading, data, revalidate } = useFetch<EventTimersResponse>(API.eventTimers, {
     keepPreviousData: true,
     onError() {
@@ -189,13 +192,20 @@ export default function EventTimers() {
     },
   });
 
+  // Update cache when data changes
+  useEffect(() => {
+    if (data?.data && data.data.length > 0) {
+      setCache(CacheKeys.eventTimers, data.data);
+    }
+  }, [data]);
+
   // Auto-refresh every 60 seconds to update event statuses
   useEffect(() => {
     const interval = setInterval(() => setTick((n) => n + 1), 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const rawEvents = data?.data || [];
+  const rawEvents = data?.data || cachedEventTimers || [];
   const events = useMemo(() => transformRawEvents(rawEvents), [rawEvents]);
   const maps = [...new Set(rawEvents.map((e) => e.map))].sort();
 
