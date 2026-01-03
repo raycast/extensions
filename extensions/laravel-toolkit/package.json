@@ -1,0 +1,188 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-toolkit",
+  "title": "Laravel Toolkit",
+  "description": "The ultimate Laravel toolkit for Raycast. Manage projects, search docs, run Artisan commands, and scaffold apps with custom presets.",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "laravel-docs",
+      "title": "Search Laravel Docs",
+      "description": "Search and browse Laravel documentation with favorites, recent pages, and version switching",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "artisan-commands",
+      "title": "Artisan Commands",
+      "description": "Browse and copy all Laravel Artisan commands organized by category",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "snippets",
+      "title": "Laravel Snippets",
+      "description": "Copy common Laravel code snippets for routes, models, migrations, and more",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Laravel Project",
+      "description": "Create a new Laravel project with starter kit and database options",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "run-artisan",
+      "title": "Run Artisan Command",
+      "description": "Execute Artisan commands in your Laravel project directory",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Laravel Projects",
+      "description": "View, manage, and run commands in your Laravel projects",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "manage-custom-packages",
+      "title": "Manage Custom Packages",
+      "description": "Add, edit, and remove custom package presets",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "manage-tools",
+      "title": "Manage Development Tools",
+      "description": "Update, downgrade, and manage PHP, Composer, NPM, and custom tools",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "route-explorer",
+      "title": "Route Explorer",
+      "description": "Visualize and search Laravel routes",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "log-viewer",
+      "title": "Log Viewer",
+      "description": "View and manage Laravel application logs",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "model-factory",
+      "title": "Generate Model Factory",
+      "description": "Create a new model factory for an existing model",
+      "mode": "view",
+      "subtitle": "Laravel"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "laravelVersion",
+      "type": "dropdown",
+      "required": false,
+      "title": "Laravel Version",
+      "description": "Choose which Laravel version's documentation to browse. Defaults to the latest stable release.",
+      "default": "12.x",
+      "data": [
+        { "title": "Laravel Master (Beta)", "value": "master" },
+        { "title": "Laravel 12.x (Latest)", "value": "12.x" },
+        { "title": "Laravel 11.x (LTS)", "value": "11.x" },
+        { "title": "Laravel 10.x", "value": "10.x" },
+        { "title": "Laravel 9.x", "value": "9.x" },
+        { "title": "Laravel 8.x", "value": "8.x" },
+        { "title": "Laravel 7.x", "value": "7.x" },
+        { "title": "Laravel 6.x", "value": "6.x" },
+        { "title": "Laravel 5.8", "value": "5.8" },
+        { "title": "Laravel 5.7", "value": "5.7" },
+        { "title": "Laravel 5.6", "value": "5.6" },
+        { "title": "Laravel 5.5", "value": "5.5" },
+        { "title": "Laravel 5.4", "value": "5.4" },
+        { "title": "Laravel 5.3", "value": "5.3" },
+        { "title": "Laravel 5.2", "value": "5.2" },
+        { "title": "Laravel 5.1", "value": "5.1" },
+        { "title": "Laravel 5.0", "value": "5.0" }
+      ]
+    },
+    {
+      "name": "openInNewTab",
+      "type": "checkbox",
+      "required": false,
+      "title": "Browser Behavior",
+      "label": "Always open in new tab",
+      "description": "When enabled, documentation opens in a new browser tab. When disabled, copies URL to clipboard.",
+      "default": true
+    },
+    {
+      "name": "snippetPrimaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Snippets: Primary Action",
+      "description": "Choose the default action when pressing Enter on a snippet",
+      "default": "paste",
+      "data": [
+        { "title": "Paste Snippet", "value": "paste" },
+        { "title": "Copy to Clipboard", "value": "copy" }
+      ]
+    },
+    {
+      "name": "snippetSecondaryModifier",
+      "type": "dropdown",
+      "required": false,
+      "title": "Snippets: Secondary Action Modifier",
+      "description": "Modifier key combination for the secondary snippet action",
+      "default": "cmd+shift",
+      "data": [
+        { "title": "⌘ + ⇧ (Cmd + Shift)", "value": "cmd+shift" },
+        { "title": "⌘ (Cmd)", "value": "cmd" },
+        { "title": "⌃ (Ctrl)", "value": "ctrl" },
+        { "title": "⌥ (Opt/Alt)", "value": "opt" },
+        { "title": "⇧ (Shift)", "value": "shift" }
+      ]
+    },
+    {
+      "name": "editorApplication",
+      "type": "appPicker",
+      "required": false,
+      "title": "Code Editor",
+      "description": "Select your preferred code editor for opening projects (leave empty for system default)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "jasper_huppertz",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ]
+}
