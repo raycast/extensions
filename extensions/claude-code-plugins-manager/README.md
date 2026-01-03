@@ -1,209 +1,72 @@
-# Claude Plugin Manager
+<div align="center">
+  <img src="assets/icon.png" alt="Claude Plugin Manager" width="120" height="120">
 
-A Raycast Extension for browsing, installing, and managing Claude Code plugins.
+  # Claude Code Plugins Manager
 
-## Features
+  **A Raycast Extension for browsing, installing, and managing Claude Code plugins**
 
-### 🔍 Browse Claude Plugins
-- Search and browse all available plugins across all marketplaces
-- Filter by marketplace
-- View plugin details including components (commands, skills, agents, hooks, MCP servers)
-- Quick installation with scope selection (user/project/local)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
+  [![Raycast](https://img.shields.io/badge/Raycast-Extension-red.svg)](https://raycast.com)
+  [![Made for Claude Code](https://img.shields.io/badge/Made%20for-Claude%20Code-blueviolet.svg)](https://code.claude.com)
 
-### 🏪 Manage Marketplaces
-- View all configured plugin marketplaces
-- Add new marketplaces (GitHub repos, local directories, Git URLs, remote URLs)
-- Update marketplace data
-- Remove marketplaces
+  [Installation](#-installation) • [Features](#-features) • [Usage](#-usage)
 
-### 🔧 Developer Tools
-- Validate plugin manifests
-- Quick access to plugin source code
-- Copy plugin IDs and install commands
+</div>
 
-## Requirements
+---
 
-- [Claude Code CLI](https://code.claude.com) must be installed
-- macOS (for Raycast compatibility)
-- Node.js 20+ (for development)
+## ✨ Features
 
-## Installation
+- **Browse & Install** - Search and install plugins from all marketplaces with scope selection
+- **Manage Marketplaces** - Add, update, or remove plugin sources (GitHub, local, Git, remote)
+- **Plugin Details** - View components (commands, skills, agents, hooks, MCP servers)
+- **Quick Actions** - Copy plugin IDs, access source code, and more
 
-### From Raycast Store (Coming Soon)
+## 📸 Screenshots
 
-1. Open Raycast
-2. Search for "Claude Plugin Manager"
-3. Click Install
+| Browse Plugins | Plugin Actions |
+|:---:|:---:|
+| ![Browse](metadata/screenshot-1.png) | ![Actions](metadata/screenshot-2.png) |
 
-### Manual Installation (Development)
+| Manage Marketplaces | Add Marketplace |
+|:---:|:---:|
+| ![Marketplaces](metadata/screenshot-3.png) | ![Add](metadata/screenshot-4.png) |
 
-1. Clone this repository:
-   ```bash
-   git clone <repository-url>
-   cd claude-code-plugins
-   ```
+## 📋 Requirements
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+- macOS with [Raycast](https://raycast.com) installed
+- [Claude Code CLI](https://code.claude.com)
 
-3. Start development mode:
-   ```bash
-   npm run dev
-   ```
+## 🚀 Installation
 
-## Usage
+Search for **"Claude Code Plugins Manager"** in [Raycast Store](https://raycast.com/store) (coming soon).
 
-### Browse and Install Plugins
+## 💡 Usage
 
-1. Open Raycast (⌘ + Space)
-2. Type "Browse Claude Plugins"
-3. Search for plugins
-4. Select a plugin to view details
-5. Choose installation scope (user/project/local)
-6. Install the plugin
+Open Raycast (`⌘ + Space`) and search for:
 
-### Manage Marketplaces
+- **Browse Claude Code Plugins** - Search and install plugins
+- **Manage Claude Code Plugin Marketplaces** - Configure plugin sources
 
-1. Open Raycast
-2. Type "Manage Plugin Marketplaces"
-3. Add, update, or remove marketplace sources
+Supported marketplace types: GitHub repo (`owner/repo`), local directory, Git URL, or remote URL.
 
-Supported marketplace types:
-- **GitHub Repository**: `owner/repo`
-- **Local Directory**: `/path/to/marketplace`
-- **Git URL**: `https://github.com/owner/repo.git`
-- **Remote URL**: `https://example.com/marketplace.json`
+## 🤝 Contributing
 
-### Validate Plugin (Dev Tool)
+Contributions are welcome! Feel free to submit issues or pull requests.
 
-1. Open Raycast
-2. Type "Validate Plugin"
-3. Select a plugin directory
-4. View validation results
-
-## Commands
-
-This extension provides 3 commands:
-
-1. **Browse Claude Plugins** - Main plugin browsing interface
-2. **Manage Plugin Marketplaces** - Configure marketplace sources
-3. **Validate Plugin** - Developer tool for plugin validation
-
-## Architecture
-
-### Data Layer
-- Direct JSON file parsing from `~/.claude/plugins/` for fast reads
-- CLI commands for all write operations (install, uninstall, etc.)
-- 5-minute cache using Raycast Cache API
-
-### Tech Stack
-- TypeScript
-- React
-- Raycast API
-- Node.js (for CLI execution)
-
-### Project Structure
-
-```
-src/
-├── index.tsx                  # Browse Plugins command
-├── marketplaces.tsx           # Manage Marketplaces command
-├── plugin-details.tsx         # Plugin detail view
-├── add-marketplace.tsx        # Add marketplace form
-├── validate-plugin.tsx        # Validate plugin command
-├── lib/
-│   ├── types.ts              # TypeScript type definitions
-│   ├── claude-cli.ts         # CLI wrapper functions
-│   └── cache-manager.ts      # Caching layer
-├── hooks/
-│   ├── usePlugins.ts         # Plugin data hook
-│   └── useMarketplaces.ts    # Marketplace data hook
-└── components/
-    └── ErrorView.tsx         # Error display component
-```
-
-## Development
-
-### Setup
-
-```bash
-# Install dependencies
-npm install
-
-# Start development mode (hot reload)
-npm run dev
-
-# Build for production
-npm run build
-
-# Lint code
-npm run lint
-
-# Fix lint issues
-npm run fix-lint
-```
-
-### Testing
-
-The extension will appear in Raycast during development mode. Test all commands:
-
-- [ ] Browse and search plugins
-- [ ] Install plugin with different scopes
-- [ ] Add marketplace (GitHub, directory, Git, URL)
-- [ ] Update/remove marketplace
-- [ ] View plugin details
-- [ ] Validate plugin
-
-## Troubleshooting
-
-### Claude CLI Not Found
-
-If you get "Claude CLI is not installed" error:
-
-```bash
-# Install Claude Code CLI
-npm install -g @anthropic-ai/claude-code
-
-# Verify installation
-which claude
-claude --version
-```
-
-### No Plugins Found
-
-If no plugins are showing:
-
-```bash
-# Update marketplaces
-claude plugin marketplace update
-
-# Check marketplace configuration
-cat ~/.claude/plugins/known_marketplaces.json
-```
-
-### Cache Issues
-
-If data seems stale, the extension uses a 5-minute cache. You can:
-- Wait 5 minutes for automatic refresh
-- Restart Raycast to clear the cache
-- Use the refetch actions in the UI
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
+## 📄 License
 
 MIT
 
-## Credits
-
-Created for the Claude Code ecosystem.
-
-## Links
+## 🔗 Resources
 
 - [Claude Code Documentation](https://code.claude.com/docs)
 - [Raycast Developer Docs](https://developers.raycast.com)
 - [Claude Code Plugins Guide](https://code.claude.com/docs/en/discover-plugins)
+
+---
+
+<div align="center">
+  Made with ❤️ for the Claude Code community
+</div>
