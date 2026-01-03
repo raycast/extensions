@@ -58,9 +58,10 @@ export function createAliasStore(configKey: keyof Preferences, defaultFilename: 
     },
     delete: (alias: string) => {
       const config = manager.load();
-      if (!config[alias]) throw new Error(`"${alias}" does not exist`);
-      delete config[alias];
-      manager.save(config);
+      if (config[alias]) {
+        delete config[alias];
+        manager.save(config);
+      }
     },
     update: (alias: string, item: BetterAliasItem) => {
       const config = manager.load();
