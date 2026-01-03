@@ -2,8 +2,7 @@
 
 ## [Windows Support] {PR_MERGE_DATE}
 
-- Added windows support with RemoveDrive
-  - [RemoveDrive website](https://www.uwe-sieber.de/drivetools_e.html)
+- Added windows support with a C# helper (compiles at runtime) and PowerShell
 
 ## [Bug Fix] 2023-11-10
 
