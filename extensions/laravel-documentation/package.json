@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laravel-documentation",
   "title": "Laravel Documentation",
-  "description": "The ultimate Laravel developer toolkit for Raycast. Search 68+ documentation pages, browse 70+ Artisan commands, copy 30+ code snippets, create new projects, and run artisan commands. Supports 17 Laravel versions from Master to 5.0. Features favorites, recent pages, and Laracasts integration.",
+  "description": "The ultimate Laravel toolkit for Raycast. Browse 68 documentation pages across 10 categories, search 56 Artisan commands, copy 32 code snippets, create new projects with starter kits, and run Artisan commands directly. Supports Laravel versions from Master to 5.0 with favorites, recent pages, and Laracasts integration.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

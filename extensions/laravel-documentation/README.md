@@ -8,37 +8,52 @@ The ultimate Laravel developer toolkit for Raycast. Quickly access documentation
 
 ### 📚 Search Laravel Docs
 
-Instantly search and browse the official Laravel documentation with powerful features:
+Instantly search and browse the official Laravel documentation:
 
-- **68+ documentation pages** organized by category (Getting Started, The Basics, Security, Database, and more)
+- **68 documentation pages** organized into 10 categories:
+  - Prologue (Release Notes, Upgrade Guide, Contribution Guide)
+  - Getting Started (Installation, Configuration, Directory Structure, Frontend, Starter Kits, Deployment)
+  - Architecture Concepts (Request Lifecycle, Service Container, Service Providers, Facades)
+  - The Basics (Routing, Middleware, CSRF, Controllers, Requests, Responses, Views, Blade, Vite, URLs, Session, Validation, Errors, Logging)
+  - Digging Deeper (Artisan, Broadcasting, Cache, Collections, Events, Filesystem, Helpers, HTTP Client, Localization, Mail, Notifications, Packages, Processes, Queues, Rate Limiting, Strings, Scheduling)
+  - Security (Authentication, Authorization, Email Verification, Encryption, Hashing, Password Reset)
+  - Database (Getting Started, Query Builder, Pagination, Migrations, Seeding, Redis, MongoDB)
+  - Eloquent ORM (Getting Started, Relationships, Collections, Mutators/Casts, API Resources, Serialization, Factories)
+  - Testing (Getting Started, HTTP Tests, Console Tests, Browser Tests, Database Testing, Mocking)
+  - Packages (Breeze, Cashier, Dusk, Envoy, Fortify, Folio, Homestead, Horizon, Livewire, Mix, Octane, Passport, Pennant, Pint, Precognition, Prompts, Pulse, Reverb, Sail, Sanctum, Scout, Socialite, Telescope, Valet)
 - **17 Laravel versions** supported (Master through 5.0)
 - **Favorites system** to bookmark your most-used pages
-- **Recent pages** tracking for quick access to recently viewed docs
+- **Recent pages** tracking for quick access
 - **Laracasts integration** with direct links to video tutorials
 
 ### ⚡ Artisan Commands Reference
 
-Browse all 70+ Laravel Artisan commands organized by category:
+Browse **56 Laravel Artisan commands** organized into 9 categories:
 
-- Make commands (Controllers, Models, Migrations, etc.)
-- Database commands (Migrate, Seed, Rollback)
-- Cache commands (Clear, Optimize)
-- Queue commands (Work, Listen, Restart)
-- Route commands (List, Cache, Clear)
-- And many more!
+- **Make** (26 commands) - Controllers, Models, Migrations, Seeders, Factories, Middleware, Requests, Resources, Commands, Events, Listeners, Jobs, Mail, Notifications, Policies, Providers, Tests, Components, Livewire, Casts, Channels, Exceptions, Observers, Rules, Scopes
+- **Database** (7 commands) - migrate, migrate:fresh, migrate:rollback, migrate:reset, migrate:status, db:seed, db:wipe
+- **Cache** (10 commands) - cache:clear, config:cache/clear, route:cache/clear, view:cache/clear, event:cache, optimize, optimize:clear
+- **Development** (5 commands) - serve, tinker, route:list, env, about
+- **Queue** (6 commands) - work, listen, restart, failed, retry, flush
+- **Schedule** (3 commands) - run, list, work
+- **Auth** (2 commands) - key:generate, storage:link
+- **Packages** (2 commands) - vendor:publish, package:discover
 
-Copy any command to your clipboard with a single keystroke.
+Copy any command with usage examples to your clipboard instantly.
 
 ### 📝 Laravel Snippets
 
-Access 30+ ready-to-use code snippets for common Laravel patterns:
+Access **32 ready-to-use code snippets** across 9 categories:
 
-- **Routes** - Basic routes, resource routes, API routes, route groups
-- **Models** - Eloquent relationships, scopes, accessors, mutators
-- **Controllers** - Resource controllers, API controllers, invokable controllers
-- **Migrations** - Table creation, columns, indexes, foreign keys
-- **Validation** - Form requests, inline validation, custom rules
-- **Blade** - Layouts, components, directives, conditionals
+- **Routes** (6 snippets) - Basic routes, controller routes, resource routes, API routes, route groups, route parameters
+- **Controllers** (3 snippets) - Controller methods, store with validation, API responses
+- **Models** (6 snippets) - Fillable attributes, HasMany, BelongsTo, BelongsToMany relationships, scopes, accessors
+- **Migrations** (3 snippets) - Create tables, add columns, drop columns
+- **Blade** (4 snippets) - Layouts, components, conditionals, loops
+- **Validation** (2 snippets) - Form request rules, custom messages
+- **Middleware** (1 snippet) - Handle method
+- **Testing** (2 snippets) - Feature tests, authenticated tests
+- **Queries** (3 snippets) - Eloquent queries, eager loading, pagination
 
 ### 🚀 Create Laravel Project
 
@@ -51,13 +66,13 @@ Create new Laravel projects directly from Raycast:
 
 ### 🔧 Run Artisan Commands
 
-Execute Artisan commands in your Laravel project without opening a terminal:
+Execute common Artisan commands in your Laravel project:
 
-- **Common** - Serve, Tinker, Route List
-- **Database** - Migrate, Fresh, Seed, Rollback
-- **Cache** - Clear All, Cache Config/Routes/Views
-- **Queue** - Work, Listen, Restart
-- **Testing** - Run Tests, Parallel Testing
+- **Common** (3 commands) - Serve, Tinker, Route List
+- **Database** (5 commands) - Migrate, Fresh, Fresh + Seed, Seed, Rollback
+- **Cache** (5 commands) - Clear All, Cache Config, Cache Routes, Cache Views, Clear Cache
+- **Queue** (3 commands) - Work, Listen, Restart
+- **Testing** (2 commands) - Run Tests, Run Tests (Parallel)
 
 ## Installation
 
@@ -86,22 +101,22 @@ Open Raycast preferences (`⌘ + ,`) and configure:
 
 ## Usage
 
-### Keyboard Shortcuts
+### Commands
 
-| Command                  | Description                      |
-| ------------------------ | -------------------------------- |
-| `Search Laravel Docs`    | Search and browse documentation  |
-| `Artisan Commands`       | Browse all Artisan commands      |
-| `Laravel Snippets`       | Copy code snippets               |
-| `Create Laravel Project` | Start a new Laravel project      |
-| `Run Artisan Command`    | Execute commands in your project |
+| Command                  | Description                              |
+| ------------------------ | ---------------------------------------- |
+| `Search Laravel Docs`    | Search and browse 68 documentation pages |
+| `Artisan Commands`       | Browse and copy 56 Artisan commands      |
+| `Laravel Snippets`       | Copy 32 code snippets                    |
+| `Create Laravel Project` | Start a new Laravel project with wizard  |
+| `Run Artisan Command`    | Execute commands in your project         |
 
 ### Quick Actions
 
 - **⌘ + ⏎** - Primary action (Open/Run/Copy)
 - **⌘ + ⇧ + C** - Copy to clipboard
-- **⌘ + ⇧ + F** - Add to favorites
-- **⌘ + ⇧ + L** - Open on Laracasts
+- **⌘ + F** - Add/remove from favorites
+- **Open on Laracasts** - Search related video tutorials
 
 ## Supported Laravel Versions
 
