@@ -78,6 +78,12 @@ export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasF
             : "Edit the alias or snippet details below."
         }
       />
+      <Form.Checkbox
+        title="Snippet Mode"
+        label="Snippet Only (text insertion mode)"
+        info="When enabled, this will only insert text and won't open URLs or apps"
+        {...itemProps.snippetOnly}
+      />
       <Form.TextArea
         title={isSnippetMode ? "Body" : "Value"}
         placeholder={
@@ -92,7 +98,7 @@ export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasF
       />
       <Form.TextField
         title="Alias"
-        placeholder={isSnippetMode ? "Enter snippet alias (e.g., ',hey')" : "Enter alias name (e.g., 'gh')"}
+        placeholder={isSnippetMode ? "Enter snippet alias (e.g., 'hey')" : "Enter alias name (e.g., 'gh')"}
         info="The shorthand you'll type to trigger this alias or snippet"
         {...itemProps.alias}
       />
@@ -101,12 +107,6 @@ export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasF
         placeholder="Enter display name"
         info="Optional friendly name shown in search results"
         {...itemProps.label}
-      />
-      <Form.Checkbox
-        title="Snippet Mode"
-        label="Snippet Only (text insertion mode)"
-        info="When enabled, this will only insert text and won't open URLs or apps"
-        {...itemProps.snippetOnly}
       />
     </Form>
   );
