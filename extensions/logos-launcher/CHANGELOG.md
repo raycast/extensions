@@ -1,6 +1,6 @@
 # Logos Search Changelog
 
-## [Unreleased] - 2026-01-03
+## [Unreleased] - {PR_MERGE_DATE}
 
 ### Added
 - **Logos Bible Search** command with smart search (concepts, synonyms) and precise search (exact match) toggle.

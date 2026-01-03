@@ -1,13 +1,5 @@
 import { LaunchProps, Toast, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
 
-type Preferences = {
-  defaultPreciseSearch?: boolean;
-};
-
-type CommandArguments = {
-  query?: string;
-};
-
 const SEARCH_URL = "https://ref.ly/logos4/Search";
 const KIND = "BibleSearch";
 
@@ -20,8 +12,8 @@ const KIND = "BibleSearch";
  * Smart search uses syntax=v2 which enables Logos' intelligent matching.
  * Precise search wraps the query in quotes for exact matching.
  */
-export default async function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
-  const preferences = getPreferenceValues<Preferences>();
+export default async function Command(props: LaunchProps<{ arguments: Arguments.SearchBible }>) {
+  const preferences = getPreferenceValues<Preferences.SearchBible>();
   const query = props.arguments.query?.trim();
 
   if (!query) {
