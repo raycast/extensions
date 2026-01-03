@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-documentation",
+  "title": "Laravel Documentation",
+  "description": "The ultimate Laravel developer toolkit for Raycast. Search 68+ documentation pages, browse 70+ Artisan commands, copy 30+ code snippets, create new projects, and run artisan commands. Supports 17 Laravel versions from Master to 5.0. Features favorites, recent pages, and Laracasts integration.",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "laravel-docs",
+      "title": "Search Laravel Docs",
+      "description": "Search and browse Laravel documentation with favorites, recent pages, and version switching",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "artisan-commands",
+      "title": "Artisan Commands",
+      "description": "Browse and copy all Laravel Artisan commands organized by category",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "snippets",
+      "title": "Laravel Snippets",
+      "description": "Copy common Laravel code snippets for routes, models, migrations, and more",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Laravel Project",
+      "description": "Create a new Laravel project with starter kit and database options",
+      "mode": "view",
+      "subtitle": "Laravel"
+    },
+    {
+      "name": "run-artisan",
+      "title": "Run Artisan Command",
+      "description": "Execute Artisan commands in your Laravel project directory",
+      "mode": "view",
+      "subtitle": "Laravel"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "laravelVersion",
+      "type": "dropdown",
+      "required": false,
+      "title": "Laravel Version",
+      "description": "Choose which Laravel version's documentation to browse. Defaults to the latest stable release.",
+      "default": "12.x",
+      "data": [
+        { "title": "Laravel Master (Beta)", "value": "master" },
+        { "title": "Laravel 12.x (Latest)", "value": "12.x" },
+        { "title": "Laravel 11.x (LTS)", "value": "11.x" },
+        { "title": "Laravel 10.x", "value": "10.x" },
+        { "title": "Laravel 9.x", "value": "9.x" },
+        { "title": "Laravel 8.x", "value": "8.x" },
+        { "title": "Laravel 7.x", "value": "7.x" },
+        { "title": "Laravel 6.x", "value": "6.x" },
+        { "title": "Laravel 5.8", "value": "5.8" },
+        { "title": "Laravel 5.7", "value": "5.7" },
+        { "title": "Laravel 5.6", "value": "5.6" },
+        { "title": "Laravel 5.5", "value": "5.5" },
+        { "title": "Laravel 5.4", "value": "5.4" },
+        { "title": "Laravel 5.3", "value": "5.3" },
+        { "title": "Laravel 5.2", "value": "5.2" },
+        { "title": "Laravel 5.1", "value": "5.1" },
+        { "title": "Laravel 5.0", "value": "5.0" }
+      ]
+    },
+    {
+      "name": "openInNewTab",
+      "type": "checkbox",
+      "required": false,
+      "title": "Browser Behavior",
+      "label": "Always open in new tab",
+      "description": "When enabled, documentation opens in a new browser tab. When disabled, copies URL to clipboard.",
+      "default": true
+    },
+    {
+      "name": "projectDirectory",
+      "type": "textfield",
+      "required": false,
+      "title": "Laravel Project Directory",
+      "description": "Path to your Laravel project for running Artisan commands (e.g., ~/Projects/my-app)",
+      "placeholder": "~/Projects/my-laravel-app"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "jasper_huppertz",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ]
+}
