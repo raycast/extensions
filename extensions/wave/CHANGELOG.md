@@ -1,5 +1,9 @@
 # Wave Changelog
 
+## [Create Draft Invoice] - {PR_MERGE_DATE}
+
+- Add new draft invoice
+
 ## [Enhance Invoice] - 2025-08-20
 
 - Enhance `Invoice` to show amounts due and paid
