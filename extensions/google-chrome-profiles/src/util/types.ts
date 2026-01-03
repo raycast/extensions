@@ -81,6 +81,5 @@ export type GoogleChromeBookmarkFile = {
 };
 
 export interface Preferences {
-  newBlankTabURL: string;
   newTabURL: string;
 }
