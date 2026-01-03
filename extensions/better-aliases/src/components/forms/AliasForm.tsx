@@ -78,12 +78,6 @@ export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasF
             : "Edit the alias or snippet details below."
         }
       />
-      <Form.TextField
-        title="Alias"
-        placeholder={isSnippetMode ? "Enter snippet alias (e.g., ',hey')" : "Enter alias name (e.g., 'gh')"}
-        info="The shorthand you'll type to trigger this alias or snippet"
-        {...itemProps.alias}
-      />
       <Form.TextArea
         title={isSnippetMode ? "Body" : "Value"}
         placeholder={
@@ -95,6 +89,12 @@ export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasF
             : "What should happen when this alias is triggered"
         }
         {...itemProps.value}
+      />
+      <Form.TextField
+        title="Alias"
+        placeholder={isSnippetMode ? "Enter snippet alias (e.g., ',hey')" : "Enter alias name (e.g., 'gh')"}
+        info="The shorthand you'll type to trigger this alias or snippet"
+        {...itemProps.alias}
       />
       <Form.TextField
         title="Label (optional)"
