@@ -398,29 +398,12 @@ ${statusBadge} ${scopeBadge}
                 {!plugin.installStatus?.installed ? (
                   <ActionPanel.Section title="Installation">
                     <Action
-                      title="Install (user Scope)"
+                      title="Install Plugin"
                       icon={Icon.Download}
                       onAction={() =>
                         handleInstall(plugin.name, plugin.marketplace, "user")
                       }
-                    />
-                    <Action
-                      title="Install (project Scope)"
-                      icon={Icon.Download}
-                      onAction={() =>
-                        handleInstall(
-                          plugin.name,
-                          plugin.marketplace,
-                          "project",
-                        )
-                      }
-                    />
-                    <Action
-                      title="Install (local Scope)"
-                      icon={Icon.Download}
-                      onAction={() =>
-                        handleInstall(plugin.name, plugin.marketplace, "local")
-                      }
+                      shortcut={{ modifiers: ["cmd"], key: "i" }}
                     />
                   </ActionPanel.Section>
                 ) : (

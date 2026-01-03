@@ -48,7 +48,7 @@ function findClaudePath(): string | null {
         encoding: "utf-8",
         stdio: "pipe",
       });
-      return claudePath;
+      return claudePath.trim();
     } catch {
       // Continue to next path
       continue;
@@ -305,7 +305,7 @@ export async function getAllAvailablePlugins(): Promise<Plugin[]> {
 
       // Process each plugin from the manifest
       for (const entry of manifest.plugins) {
-        const pluginId = `${entry.name}@${marketplace.name}`;
+        const pluginId = `${entry.name.trim()}@${marketplace.name.trim()}`;
         const installed = installedPlugins.find((p) => p.pluginId === pluginId);
 
         // Try to resolve local plugin path for additional metadata
@@ -367,7 +367,7 @@ export async function installPlugin(
 
   try {
     const output = execSync(
-      `"${claudePath}" plugin install "${pluginName}" --scope ${scope}`,
+      `"${claudePath.trim()}" plugin install "${pluginName.trim()}" --scope ${scope}`,
       {
         encoding: "utf-8",
         stdio: "pipe",
@@ -394,7 +394,7 @@ export async function uninstallPlugin(
 
   try {
     const output = execSync(
-      `"${claudePath}" plugin uninstall "${pluginName}" --scope ${scope}`,
+      `"${claudePath.trim()}" plugin uninstall "${pluginName.trim()}" --scope ${scope}`,
       {
         encoding: "utf-8",
         stdio: "pipe",
@@ -421,7 +421,7 @@ export async function enablePlugin(
 
   try {
     const output = execSync(
-      `"${claudePath}" plugin enable "${pluginName}" --scope ${scope}`,
+      `"${claudePath.trim()}" plugin enable "${pluginName.trim()}" --scope ${scope}`,
       {
         encoding: "utf-8",
         stdio: "pipe",
@@ -448,7 +448,7 @@ export async function disablePlugin(
 
   try {
     const output = execSync(
-      `"${claudePath}" plugin disable "${pluginName}" --scope ${scope}`,
+      `"${claudePath.trim()}" plugin disable "${pluginName.trim()}" --scope ${scope}`,
       {
         encoding: "utf-8",
         stdio: "pipe",
@@ -475,7 +475,7 @@ export async function updatePlugin(
 
   try {
     const output = execSync(
-      `"${claudePath}" plugin update "${pluginName}" --scope ${scope}`,
+      `"${claudePath.trim()}" plugin update "${pluginName.trim()}" --scope ${scope}`,
       {
         encoding: "utf-8",
         stdio: "pipe",
@@ -499,7 +499,7 @@ export async function addMarketplace(source: string): Promise<CLIResult> {
 
   try {
     const output = execSync(
-      `"${claudePath}" plugin marketplace add "${source}"`,
+      `"${claudePath.trim()}" plugin marketplace add "${source.trim()}"`,
       {
         encoding: "utf-8",
         stdio: "pipe",
@@ -523,7 +523,7 @@ export async function removeMarketplace(name: string): Promise<CLIResult> {
 
   try {
     const output = execSync(
-      `"${claudePath}" plugin marketplace remove "${name}"`,
+      `"${claudePath.trim()}" plugin marketplace remove "${name.trim()}"`,
       {
         encoding: "utf-8",
         stdio: "pipe",
@@ -547,8 +547,8 @@ export async function updateMarketplace(name?: string): Promise<CLIResult> {
 
   try {
     const cmd = name
-      ? `"${claudePath}" plugin marketplace update "${name}"`
-      : `"${claudePath}" plugin marketplace update`;
+      ? `"${claudePath.trim()}" plugin marketplace update "${name.trim()}"`
+      : `"${claudePath.trim()}" plugin marketplace update`;
     const output = execSync(cmd, { encoding: "utf-8", stdio: "pipe" });
     return { success: true, output };
   } catch (error: unknown) {

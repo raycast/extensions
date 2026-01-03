@@ -8,7 +8,6 @@ This is a Raycast Extension that provides a plugin manager for Claude Code. It a
 
 ## Development Commands
 
-### Setup and Development
 ```bash
 # Install dependencies
 npm install
@@ -37,70 +36,50 @@ When running `npm run dev`, the extension loads into Raycast with hot reload. Te
 
 ## Architecture
 
-### Data Access Pattern
+### Hybrid Data Access Pattern
 
-**Critical Design Decision**: This extension uses a hybrid data access pattern:
+**Critical Design Decision**: This extension uses different strategies for reads vs writes:
 
-1. **READ operations**: Direct JSON file parsing from `~/.claude/plugins/` for performance
-   - `installed_plugins.json` - All installed plugins and their metadata
-   - `known_marketplaces.json` - Configured plugin marketplaces
-   - **`<marketplace>/.claude-plugin/marketplace.json` - Single source of truth for available plugins** ⭐
-   - Optional: Individual plugin manifests at `<marketplace>/(plugins|external_plugins)/<name>/.claude-plugin/plugin.json` for detailed metadata (components, hooks)
+**READ operations**: Direct JSON file parsing from `~/.claude/plugins/`
+- `installed_plugins.json` - Currently installed plugins
+- `known_marketplaces.json` - Configured marketplaces
+- `<marketplace>/.claude-plugin/marketplace.json` - **Single source of truth for available plugins**
+- Individual plugin manifests at `<marketplace>/(plugins|external_plugins)/<name>/.claude-plugin/plugin.json` for detailed metadata
 
-2. **WRITE operations**: Always use CLI commands (via `claude-cli.ts`) for safety
-   - Install, uninstall, enable, disable plugins
-   - Add, remove, update marketplaces
-   - This ensures proper validation and file locking
+**WRITE operations**: Always use CLI commands via `claude-cli.ts`
+- Install, uninstall, enable, disable plugins
+- Add, remove, update marketplaces
+- This ensures proper validation and file locking
 
-**Why this pattern?** Direct JSON parsing is 10x faster than spawning CLI processes for reads, but CLI commands ensure data integrity for writes.
+**Why?** Direct JSON parsing is 10x faster than spawning CLI processes for reads, but CLI commands ensure data integrity for writes.
 
-**Plugin Discovery**: The extension reads `marketplace.json` as the authoritative source for all available plugins. This file defines:
+**Claude CLI Detection**: The extension searches multiple common installation paths (pipx, Homebrew Intel/Apple Silicon, npm global) and caches the result.
+
+### Plugin Discovery
+
+**Important**: The extension reads `marketplace.json` as the authoritative source for all available plugins. This file defines:
 - All plugins in the marketplace (including LSP servers, MCP integrations, external plugins)
 - Plugin metadata (name, description, author, version, category)
 - Plugin source location (local path or external URL)
-- No directory scanning - if a plugin isn't in `marketplace.json`, it won't be shown
+
+**No directory scanning** - if a plugin isn't in `marketplace.json`, it won't be shown.
 
 ### Caching Layer
 
-Uses Raycast Cache API with 5-minute TTL (`cache-manager.ts`):
+Uses Raycast Cache API with 5-minute TTL (see `cache-manager.ts`):
 - `all-plugins` - All available plugins across marketplaces
 - `marketplaces` - List of configured marketplaces
 - `installed-plugins` - Currently installed plugins
 
-Cache invalidation happens automatically on write operations (install, uninstall, etc.).
-
-### Component Structure
-
-```
-src/
-├── index.tsx                  # Browse Plugins - main search/browse interface
-├── marketplaces.tsx           # Manage Marketplaces - add/remove sources
-├── plugin-details.tsx         # Detail view with install actions
-├── add-marketplace.tsx        # Form for adding marketplace sources
-├── validate-plugin.tsx        # Dev tool for plugin.json validation
-├── lib/
-│   ├── types.ts              # All TypeScript interfaces
-│   ├── claude-cli.ts         # CLI command wrappers
-│   └── cache-manager.ts      # Caching with TTL
-├── hooks/
-│   ├── usePlugins.ts         # Fetches all available plugins
-│   └── useMarketplaces.ts    # Fetches marketplace list
-└── components/
-    └── ErrorView.tsx         # Standardized error display
-```
+Cache invalidation happens automatically on write operations.
 
 ### React Hooks Pattern
 
-All data fetching uses custom hooks that:
+All data fetching uses custom hooks in `hooks/` that:
 1. Manage loading/error states
 2. Use the cache layer automatically
 3. Provide `refetch()` to force cache invalidation
 4. Return consistent `{ data, isLoading, error, refetch }` interface
-
-Example usage:
-```tsx
-const { plugins, isLoading, error, refetch } = usePlugins();
-```
 
 ### Plugin ID Format
 
@@ -108,62 +87,34 @@ Plugin IDs follow the format: `plugin-name@marketplace-name`
 
 Example: `plugin-dev@claude-code-plugins`
 
-This format is used throughout for:
-- Installation commands
-- InstalledPluginsData keys
-- Plugin identification across marketplaces
+This format is used throughout for installation commands and plugin identification.
 
-## File Locations
+### Installation Scope Limitation
 
-### User Data (macOS)
-- `~/.claude/plugins/installed_plugins.json` - Installed plugin registry
-- `~/.claude/plugins/known_marketplaces.json` - Marketplace configuration
-- `~/.claude/plugins/marketplaces/<name>/` - Cached marketplace data
+**Critical Design Decision**: This extension **only supports `user` scope** for plugin installations.
 
-### Plugin Manifest Structure
-Each plugin must have a `.claude-plugin/plugin.json` manifest with:
-```json
-{
-  "name": "plugin-name",
-  "version": "1.0.0",
-  "description": "Plugin description",
-  "author": { "name": "Author Name" }
-}
+**Why?** Claude CLI supports three scopes (user, project, local), but Raycast runs as a global macOS application without a working directory context:
+- ❌ No concept of "current directory"
+- ❌ No knowledge of which project the user wants to install for
+- ❌ Cannot determine Git repository boundaries
+
+Therefore, only global `user` scope makes sense for a Raycast extension. Users who need project-specific or local plugins should use the Claude CLI directly:
+
+```bash
+cd /path/to/your/project
+claude plugin install plugin-name@marketplace --scope project
 ```
 
-## TypeScript Types
+## Key Files
 
-All types are defined in `src/lib/types.ts`:
+- `src/lib/types.ts` - All TypeScript type definitions
+- `src/lib/claude-cli.ts` - CLI command wrappers (handles writes + Claude path detection)
+- `src/lib/cache-manager.ts` - Caching with TTL
+- `src/hooks/usePlugins.ts` - Fetches all available plugins
+- `src/hooks/useMarketplaces.ts` - Fetches marketplace list
+- `src/components/ErrorView.tsx` - Standardized error display
 
-- `Plugin` - Plugin data from marketplace (includes install status)
-- `InstalledPlugin` - Installed plugin metadata
-- `Marketplace` - Marketplace configuration
-- `PluginManifest` - Schema for plugin.json files
-- `InstalledPluginsData` - Format of installed_plugins.json
-- `MarketplacesData` - Format of known_marketplaces.json
-
-When working with plugin data, always check if `installStatus` exists to determine if a plugin is installed.
-
-## Raycast Extension Requirements
-
-### Extension Manifest (package.json)
-- Must include `$schema: "https://www.raycast.com/schemas/extension.json"`
-- Commands define the Raycast UI entry points (not CLI commands)
-- Each command needs: `name`, `title`, `description`, `mode` (view/no-view)
-
-### TypeScript Configuration
-- Target: ES2020
-- Module: CommonJS (required by Raycast)
-- JSX: React
-- Strict mode: false (Raycast convention)
-- Must include `raycast-env.d.ts` for type definitions
-
-### Icons
-- Main extension icon: `icon.png` (512x512px minimum)
-- Custom icons stored in `assets/` directory
-- Reference from README: `assets/ICON_README.md`
-
-## Common Development Tasks
+## Adding New Features
 
 ### Adding a New Command View
 1. Create new `.tsx` file in `src/`
@@ -172,11 +123,9 @@ When working with plugin data, always check if `installStatus` exists to determi
 4. Follow existing hook patterns for data fetching
 
 ### Modifying Data Access
-- READ: Update parser in relevant hook or `claude-cli.ts`
-- WRITE: Add/modify function in `claude-cli.ts` using CLI commands
+- **READ**: Update parser in relevant hook or `claude-cli.ts`
+- **WRITE**: Add/modify function in `claude-cli.ts` using CLI commands
 - Always invalidate relevant cache keys after writes
 
 ### Error Handling
-- Use custom error types from `types.ts` (ClaudeNotInstalledError, PluginNotFoundError, etc.)
-- Display errors using `ErrorView` component for consistency
-- Hooks automatically catch and expose errors via error state
+Use custom error types from `types.ts` (ClaudeNotInstalledError, PluginNotFoundError, MarketplaceError). Display errors using `ErrorView` component for consistency.
