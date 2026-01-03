@@ -1,6 +1,21 @@
 # Logos Launcher
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Raycast Extension](https://img.shields.io/badge/Raycast-Extension-red)](https://www.raycast.com/)
+
+
 Raycast extension with commands that open verses, run searches, and browse resources in Logos Bible Software.
+
+## Table of Contents
+
+- [Commands](#commands)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Sponsorship](#sponsorship)
+- [License](#license)
+
+---
 
 ## Commands
 
@@ -24,10 +39,17 @@ Raycast extension with commands that open verses, run searches, and browse resou
 - Opens the Logos All Search UI via `https://ref.ly/logos4/Search` with `kind=AllSearch` and `syntax=v2`.
 - Accepts any text query and launches the search directly in Logos.
 
+### Logos Bible Search
+
+- Opens the Logos Bible Search UI via `https://ref.ly/logos4/Search` with `kind=BibleSearch`.
+- Supports **smart search** (default): matches concepts, synonyms, and related terms.
+- Supports **precise search**: toggle for exact phrase matching.
+- Configure the default search mode in preferences.
+
 ### Bible Word Study
 
-- Streams suggestions straight from Logos’ `AutoComplete.db`, so typing a couple of letters surfaces the same lemmas, transliterations, and English senses you see inside Logos.
-- Selecting a row fires Logos’ `bws …` command with the canonical reference (plus multiple `logos4:` and `ref.ly` fallbacks) to reliably launch the Bible Word Study guide.
+- Streams suggestions straight from Logos' `AutoComplete.db`, so typing a couple of letters surfaces the same lemmas, transliterations, and English senses you see inside Logos.
+- Selecting a row fires Logos' `bws …` command with the canonical reference (plus multiple `logos4:` and `ref.ly` fallbacks) to reliably launch the Bible Word Study guide.
 - Includes quick actions to copy the command, the underlying word sense identifier, or reveal the AutoComplete database when you need to troubleshoot.
 
 ### Search Factbook
@@ -60,6 +82,8 @@ Raycast extension with commands that open verses, run searches, and browse resou
 - Surfaces a curated catalog of Logos tools, builders, and interactives (Atlas, Text Comparison, Study Assistant, Sermon Builder, Copy Bible Verses, Advanced Timeline, Systematic Theologies, Psalms Explorer, etc.) with instant filtering.
 - Includes synonyms, command phrases, and interactive IDs so Raycast's autocomplete matches whatever you remember typing in Logos' command box.
 - Opening a tool cycles through ref.ly, `logos4:` and `logos4-command://` URIs to reliably launch the target view, plus quick actions let you copy the command text or URI for reuse.
+
+---
 
 ## Configuration
 
@@ -118,8 +142,67 @@ Raycast extension with commands that open verses, run searches, and browse resou
 - Verses currently use `ref.ly` links for reliability.
 - Library resources try `logosres:{id}` first and fall back to `logos4:Open?resource={id}` if needed.
 
+---
+
 ## Troubleshooting
 
 - Launch Logos once so the catalog database exists before running the Search Library command.
 - If macOS blocks disk access, grant Raycast (or the Raycast Extension development environment) **Full Disk Access** and rerun indexing.
 - When deep links fail to open Logos, copy the URL from the toast/clipboard and test it in a browser to verify the handler.
+
+---
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
+- Development setup instructions
+- Code style guidelines
+- Testing requirements  
+- Pull request process
+
+### Quick Start for Contributors
+
+```bash
+# Clone and install
+git clone https://github.com/michael_marvive/logos-search.git
+cd logos-search
+npm install
+
+# Start development
+npm run dev
+
+# Run tests
+npm test
+
+# Check code style
+npm run lint
+```
+
+---
+
+## Sponsorship
+
+If you find Logos Launcher useful, consider supporting its development:
+
+- ⭐ Star this repository
+- 💖 [Sponsor on GitHub](https://github.com/sponsors/Marvive)
+
+Your support helps maintain and improve this extension!
+
+---
+
+## Branch Protection
+
+The `main` branch has the following protections enabled:
+
+- Require pull request reviews before merging
+- Require status checks to pass before merging
+- Require linear history
+- Do not allow force pushes
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
