@@ -1,11 +1,6 @@
 import { ActionPanel, List, Action, getPreferenceValues, LocalStorage, Icon, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
-interface Preferences {
-  laravelVersion: string;
-  openInNewTab: boolean;
-}
-
 interface DocItem {
   title: string;
   path: string;
@@ -201,7 +196,7 @@ const MAX_FAVORITES = 20;
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [version, setVersion] = useState(preferences.laravelVersion || "12.x");
+  const [version, setVersion] = useState<string>(preferences.laravelVersion || "12.x");
   const openInNewTab = preferences.openInNewTab !== false;
   const [favorites, setFavorites] = useState<string[]>([]);
   const [recent, setRecent] = useState<string[]>([]);

@@ -1,6 +1,6 @@
 # Laravel Documentation Changelog
 
-## [Initial Release] - 2026-01-03
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added Search Laravel Docs command with 68 documentation pages across 10 categories
 - Added support for 17 Laravel versions (Master through 5.0)

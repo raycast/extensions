@@ -5,10 +5,6 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-interface Preferences {
-  projectDirectory?: string;
-}
-
 interface QuickCommand {
   name: string;
   command: string;
