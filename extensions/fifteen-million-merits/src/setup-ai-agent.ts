@@ -1,4 +1,4 @@
-import { type LaunchProps, showToast, Toast } from "@raycast/api";
+import { type LaunchProps, LaunchType, launchCommand, showToast, Toast } from "@raycast/api";
 import * as fs from "fs";
 import { homedir } from "os";
 import * as path from "path";
@@ -161,6 +161,15 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     await updateCounterAndFocus(0);
+
+    try {
+      await launchCommand({
+        name: "show-ai-agent-sessions-counter",
+        type: LaunchType.UserInitiated,
+      });
+    } catch (launchError) {
+      console.error("Failed to auto-activate menu bar command", launchError);
+    }
 
     await showToast({
       style: Toast.Style.Success,

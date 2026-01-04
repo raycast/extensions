@@ -1,4 +1,5 @@
-import { getPreferenceValues, LaunchType, LocalStorage, launchCommand, open, showHUD } from "@raycast/api";
+import { getPreferenceValues, LaunchType, LocalStorage, launchCommand, showHUD } from "@raycast/api";
+import { execSync } from "child_process";
 
 export const STORAGE_KEY = "fifteen-million-merits";
 
@@ -18,7 +19,11 @@ export async function refreshMenuBar() {
       type: LaunchType.Background,
     });
   } catch (error) {
-    console.error("Failed to refresh menu bar:", error);
+    if (error instanceof Error && error.message.includes("must be activated")) {
+      console.log("Menu bar command not yet activated by user. Skipping background refresh.");
+    } else {
+      console.error("Failed to refresh menu bar:", error);
+    }
   }
 }
 
@@ -28,11 +33,11 @@ export async function handleFocusMode(newCount: number): Promise<void> {
   if (newCount === 0) {
     const encodedGoal = encodeURIComponent(focusGoal);
     const focusUrl = `raycast://focus/start?goal=${encodedGoal}&categories=${focusCategories}`;
-    await open(focusUrl);
+    execSync(`open -g "${focusUrl}"`);
     await showHUD(`No active AI Agent sessions. Activating Focus: ${focusGoal}`);
   } else {
     const completeUrl = `raycast://focus/complete`;
-    await open(completeUrl);
+    execSync(`open -g "${completeUrl}"`);
     await showHUD(`${newCount} AI Agent sessions active. Deactivating Focus.`);
   }
 }
