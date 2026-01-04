@@ -429,7 +429,7 @@ ${
           <ActionPanel>
             <Action.OpenInBrowser title="Open in Browser" url={url} />
             <Action.CopyToClipboard title="Copy URL" content={url} />
-            <Action.CopyToClipboard title="Copy Ioc" content={ioc} />
+            <Action.CopyToClipboard title="Copy IOC" content={ioc} />
           </ActionPanel>
         }
       />
