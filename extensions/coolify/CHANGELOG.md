@@ -1,5 +1,11 @@
 # Coolify Changelog
 
+## [Resources Enhancements] - {PR_MERGE_DATE}
+
+- In `Resources`:
+    - view status tooltip
+    - handle when status is "exited" instead of "exited:..."
+
 ## [Delete Project + Better Error Message] - 2025-11-11
 
 - Better Error Messages are shown
