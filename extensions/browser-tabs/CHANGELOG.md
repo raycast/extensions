@@ -1,6 +1,6 @@
 # Browser Tabs Changelog
 
-## [Add Dia Browser Support] - {PR_MERGE_DATE}
+## [Add Dia Browser Support] - 2026-01-04
 
 - Add Dia Browser support
 
