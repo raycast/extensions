@@ -1,6 +1,6 @@
 # PulseMCP Changelog
 
-## [v0.1 API Migration] - {PR_MERGE_DATE}
+## [v0.1 API Migration] - 2026-01-04
 
 ### API & Data
 - Migrated to official PulseMCP v0.1 API with authentication
