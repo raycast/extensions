@@ -10,7 +10,7 @@ import {
   Grid,
   Icon,
   showToast,
-  Preferences,
+  PreferenceValues,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { buildSvgUrl, useFetchIcons } from "../hooks/useFetchIcons";
@@ -28,7 +28,7 @@ const STYLE_OPTIONS: { value: MaterialStyle; label: string }[] = [
 ];
 
 export function IconGrid() {
-  const { primaryAction, pascalCaseName } = getPreferenceValues<Preferences>();
+  const { primaryAction, pascalCaseName } = getPreferenceValues<PreferenceValues>();
   const [style, setStyle] = useState<MaterialStyle>("filled");
   const [isChangingStyle, setIsChangingStyle] = useState(false);
   const { data: allIcons, isLoading: isLoadingIcons } = useFetchIcons();
