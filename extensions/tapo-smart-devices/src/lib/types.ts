@@ -1,4 +1,4 @@
-import { TapoDeviceKey } from "tp-link-tapo-connect";
+import { TapoDevice, TapoDeviceKey } from "tp-link-tapo-connect";
 
 export enum DeviceTypeEnum {
   Bulb = "bulb",
@@ -12,23 +12,15 @@ export enum DeviceStatusEnum {
   NotAvailable = "not_available",
 }
 
-export interface Preferences {
-  email: string;
-  password: string;
-}
-
-export interface Device {
-  id: string;
+export type Device = TapoDevice & {
   type: DeviceTypeEnum;
   macAddress: string;
   name: string;
-  alias: string;
-  status: DeviceStatusEnum;
+  availabilityStatus: DeviceStatusEnum;
   isTurnedOn: boolean | null;
-  ipAddress: string | null;
   deviceKey: TapoDeviceKey | null;
-}
+};
 
-export interface AvailableDevice extends Device {
-  ipAddress: string;
-}
+export type AvailableDevice = Device & {
+  ip: string;
+};

@@ -1,20 +1,9 @@
 import find from "local-devices";
-import util from "util";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import {
-  cloudLogin,
-  listDevices,
-  loginDeviceByIp,
-  getDeviceInfo,
-  turnOn,
-  turnOff,
-  TapoDevice,
-  TapoDeviceKey,
-  loginDevice,
-} from "tp-link-tapo-connect";
+import { cloudLogin, loginDeviceByIp, TapoDevice } from "tp-link-tapo-connect";
 
-import { AvailableDevice, Device, DeviceStatusEnum, DeviceTypeEnum, Preferences } from "./types";
-import { normaliseMacAddress } from "./utils";
+import { AvailableDevice, DeviceStatusEnum, DeviceTypeEnum, Device } from "./types";
+import { isWindows, normaliseMacAddress } from "./utils";
 
 const tapoDeviceTypeToDeviceType = (tapoDeviceType: string): DeviceTypeEnum => {
   switch (tapoDeviceType) {
@@ -30,14 +19,14 @@ const tapoDeviceTypeToDeviceType = (tapoDeviceType: string): DeviceTypeEnum => {
 };
 
 const tapoDeviceToDevice = (tapoDevice: TapoDevice): Device => ({
-  id: tapoDevice.deviceId,
+  ...tapoDevice,
   type: tapoDeviceTypeToDeviceType(tapoDevice.deviceType),
   macAddress: tapoDevice.deviceMac,
   name: `Tapo ${tapoDevice.deviceName}`,
   alias: tapoDevice.alias,
-  status: DeviceStatusEnum.Loading,
+  availabilityStatus: DeviceStatusEnum.Loading,
   isTurnedOn: null,
-  ipAddress: null,
+  ip: undefined,
   deviceKey: null,
 });
 
@@ -45,79 +34,83 @@ const isSupportedDevice = (device: Device): boolean =>
   device.type === DeviceTypeEnum.Plug || device.type === DeviceTypeEnum.Bulb;
 
 export const getDevices = async (): Promise<Device[]> => {
-  const { email, password } = await getPreferenceValues<Preferences>();
+  const { email, password } = getPreferenceValues<ExtensionPreferences>();
 
-  const cloudToken = await cloudLogin(email, password);
-  const tapoDevices = await listDevices(cloudToken);
+  const cloudAPI = await cloudLogin(email, password);
+  const tapoDevices = await cloudAPI.listDevices();
 
   return tapoDevices.map(tapoDeviceToDevice).filter(isSupportedDevice);
 };
 
-export const turnDeviceOn = async (device: Device): Promise<void> => {
-  const { email, password } = await getPreferenceValues<Preferences>();
+export const turnDeviceOn = async (device: AvailableDevice): Promise<void> => {
+  const { email, password } = getPreferenceValues<Preferences>();
 
   const toast = await showToast({ title: `Turning ${device.alias} on...`, style: Toast.Style.Animated });
 
   // We will only call this function with available, logged-in devices, so we can
   // assume that they key is there.
-  await turnOn(device.deviceKey as TapoDeviceKey);
+  const tapoClient = await loginDeviceByIp(email, password, device.ip);
+  await tapoClient.turnOn();
 
-  toast.hide();
-  await showToast({ title: `Turned ${device.alias} on.`, style: Toast.Style.Success });
+  toast.style = Toast.Style.Success;
+  toast.title = `Turned ${device.alias} on.`;
 };
 
-export const turnDeviceOff = async (device: Device): Promise<void> => {
-  const { email, password } = await getPreferenceValues<Preferences>();
+export const turnDeviceOff = async (device: AvailableDevice): Promise<void> => {
+  const { email, password } = getPreferenceValues<Preferences>();
 
   const toast = await showToast({ title: `Turning ${device.alias} off...`, style: Toast.Style.Animated });
 
   // We will only call this function with available, logged-in devices, so we can
   // assume that they key is there.
-  await turnOff(device.deviceKey as TapoDeviceKey);
+  const tapoClient = await loginDeviceByIp(email, password, device.ip);
+  await tapoClient.turnOff();
 
-  toast.hide();
-  await showToast({ title: `Turned ${device.alias} off.`, style: Toast.Style.Success });
+  toast.style = Toast.Style.Success;
+  toast.title = `Turned ${device.alias} off.`;
 };
 
 export const locateDevicesOnLocalNetwork = async (devices: Device[]): Promise<Device[]> => {
-  const localDevices = await find(null, true, "/usr/sbin/arp");
+  const arpPath = isWindows ? "C:\\Windows\\System32\\arp.exe" : "/usr/sbin/arp";
+  const localDevices = await find({ address: null, skipNameResolution: true, arpPath });
 
   return devices.map((device) => {
     const localDevice = localDevices.find(
-      (localDevice) => normaliseMacAddress(localDevice.mac) === normaliseMacAddress(device.macAddress)
+      (localDevice) => normaliseMacAddress(localDevice.mac) === normaliseMacAddress(device.macAddress),
     );
 
     if (localDevice) {
-      const ipAddress = localDevice.ip;
+      const ip = localDevice.ip;
 
-      return { ...device, ipAddress, status: DeviceStatusEnum.Available };
+      return { ...device, ip, availabilityStatus: DeviceStatusEnum.Available };
     } else {
-      return { ...device, status: DeviceStatusEnum.NotAvailable };
+      return { ...device, availabilityStatus: DeviceStatusEnum.NotAvailable };
     }
   });
 };
 
-export const queryDevicesOnLocalNetwork = async (devices: Device[]): Promise<Device[]> => {
-  const { email, password } = await getPreferenceValues<Preferences>();
+export const queryDevicesOnLocalNetwork = async (devices: Device[]) => {
+  const { email, password } = getPreferenceValues<Preferences>();
 
   return Promise.all(
     devices.map(async (device) => {
-      if (device.ipAddress) {
-        const deviceKey = await loginDeviceByIp(email, password, device.ipAddress);
-        const deviceInfo = await getDeviceInfo(deviceKey);
+      if (device.ip) {
+        const tapoClient = await loginDeviceByIp(email, password, device.ip);
+        const deviceInfo = await tapoClient.getDeviceInfo();
         const isTurnedOn = deviceInfo.device_on;
 
-        return { ...device, deviceKey, isTurnedOn };
+        return { ...device, ...tapoClient, isTurnedOn };
       } else {
         // We haven't been able to locate this device on the local network, so we won't
         // be able to query its state.
         return device;
       }
-    })
+    }),
   );
 };
 
-export const isAvailableDevice = (device: Device): boolean => device.status === DeviceStatusEnum.Available;
+export const isAvailableDevice = (device: Device): device is AvailableDevice =>
+  device.availabilityStatus === DeviceStatusEnum.Available;
 
 export const getDeviceIcon = (device: Device): string => {
   switch (device.type) {
