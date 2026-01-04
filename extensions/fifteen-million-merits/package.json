@@ -11,6 +11,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "show-ai-agent-sessions-counter",
+      "title": "Show AI Agent Sessions Counter",
+      "description": "Displays the current number of active AI Agent sessions and focus state.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
       "name": "setup-ai-agent",
       "title": "Setup AI Agent Hooks",
       "description": "Configures Claude and Cursor to trigger counter when sessions start or end.",
@@ -45,13 +52,6 @@
           ]
         }
       ]
-    },
-    {
-      "name": "show-ai-agent-sessions-counter",
-      "title": "Show AI Agent Sessions Counter",
-      "description": "Displays the current number of active AI Agent sessions and focus state.",
-      "mode": "menu-bar",
-      "interval": "10s"
     },
     {
       "name": "increment-counter",
