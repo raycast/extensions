@@ -3,7 +3,7 @@
 ## [Unreleased] - 2026-01-04
 
 ### Added
-- **Logos Bible Search** command with smart search (concepts, synonyms) and precise search (exact match) toggle.
+- **Logos Bible Search** command bug fix: Added a toggle for smart search (concepts, synonyms) and precise search (exact match) to ensure the selected search type is correctly triggered in Logos.
 - Comprehensive test suite with Vitest (37 unit tests).
 - GitHub issue templates for bug reports and feature requests.
 - CONTRIBUTING.md with development guidelines.
