@@ -2,6 +2,7 @@ import { type LaunchProps, showToast, Toast } from "@raycast/api";
 import * as fs from "fs";
 import { homedir } from "os";
 import * as path from "path";
+import { updateCounterAndFocus } from "./lib/storage";
 import type { ClaudeSettings, CursorHooks, OpencodeConfig } from "./types";
 
 function readJsonFile<T>(filePath: string, defaultValue: T): T {
@@ -158,6 +159,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       await setupCodexAlias(startCommand, endCommand);
       agents.push("Codex CLI");
     }
+
+    await updateCounterAndFocus(0);
 
     await showToast({
       style: Toast.Style.Success,
