@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/readme-cover.jpg" width="100%" alt="Jules for Raycast Cover">
+  <img src="assets/readme-cover.jpg" width="100%" alt="Google Jules Cover">
 </p>
 
-# Jules for Raycast
+# Google Jules
 
 Bring the power of the Google Jules coding agent directly to your fingertips with this Raycast extension. Seamlessly start new sessions and manage your coding tasks without leaving your keyboard.
 
