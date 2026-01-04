@@ -151,7 +151,7 @@ function PackageForm({ pkg, onSuccess }: { pkg?: CustomPackage; onSuccess: () =>
       />
       <Form.Dropdown id="type" title="Type" defaultValue={pkg?.type || "composer"}>
         <Form.Dropdown.Item value="composer" title="Composer (PHP)" icon={Icon.Globe} />
-        <Form.Dropdown.Item value="npm" title="Sort of NPM (Node)" icon={Icon.Code} />
+        <Form.Dropdown.Item value="npm" title="NPM (Node)" icon={Icon.Code} />
       </Form.Dropdown>
       <Form.TextArea
         id="description"

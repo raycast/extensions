@@ -52,7 +52,7 @@ export default function Command() {
   }
 
   async function openExternalTerminal(projectPath: string) {
-    const command = `start powershell -NoExit -Command "Set-Location '${projectPath}'"`;
+    const command = `start powershell -NoExit -Command "Set-Location '${projectPath.replace(/'/g, "''")}'"`;
     exec(command, (error) => {
       if (error) {
         showToast({

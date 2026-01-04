@@ -91,16 +91,6 @@ export async function getProjectDetails(projectPath: string): Promise<ProjectDet
       details.database = `${dbConnection} (${dbDatabase})`;
       details.debugMode = appDebug.trim().toLowerCase() === "true";
     }
-
-    // 4. Read composer.json for extra metadata if needed
-    const composerPath = path.join(projectPath, "composer.json");
-    if (fs.existsSync(composerPath)) {
-      try {
-        details.composer = JSON.parse(fs.readFileSync(composerPath, "utf-8"));
-      } catch {
-        // ignore
-      }
-    }
   } catch (error) {
     console.error("Failed to get project details", error);
   }

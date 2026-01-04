@@ -12,7 +12,9 @@ export async function openInEditor(path: string): Promise<void> {
     try {
       if (editorApplication.path) {
         // Manual launch for specific path
-        exec(`"${editorApplication.path}" "${path}"`, (error) => {
+        const safeEditor = editorApplication.path.replace(/"/g, '\\"');
+        const safePath = path.replace(/"/g, '\\"');
+        exec(`"${safeEditor}" "${safePath}"`, (error) => {
           if (error) {
             console.error("Failed to open with editor:", error);
             showToast({

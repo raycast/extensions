@@ -11,16 +11,11 @@ interface Snippet {
   category: string;
 }
 
-interface Preferences {
-  snippetPrimaryAction: "paste" | "copy";
-  snippetSecondaryModifier: "cmd+shift" | "cmd" | "ctrl" | "opt" | "shift";
-}
-
 // ============================================================================
 // Preferences Helper
 // ============================================================================
 
-function getSecondaryShortcut(modifier: Preferences["snippetSecondaryModifier"]): Keyboard.Shortcut {
+function getSecondaryShortcut(modifier: Preferences.Snippets["snippetSecondaryModifier"]): Keyboard.Shortcut {
   const modifierMap: Record<string, Keyboard.KeyModifier[]> = {
     "cmd+shift": ["cmd", "shift"],
     cmd: ["cmd"],
@@ -36,7 +31,7 @@ function getSecondaryShortcut(modifier: Preferences["snippetSecondaryModifier"])
 // ============================================================================
 
 function SnippetActions({ code }: { code: string }) {
-  const { snippetPrimaryAction, snippetSecondaryModifier } = getPreferenceValues<Preferences>();
+  const { snippetPrimaryAction, snippetSecondaryModifier } = getPreferenceValues<Preferences.Snippets>();
   const secondaryShortcut = getSecondaryShortcut(snippetSecondaryModifier);
 
   const isPasteFirst = snippetPrimaryAction === "paste";

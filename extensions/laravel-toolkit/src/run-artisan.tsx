@@ -79,7 +79,7 @@ export default function Command() {
         title: `Running: php artisan ${command}`,
       });
 
-      const { stdout } = await execAsync(`cd "${currentProject.path}" && php artisan ${command}`);
+      const { stdout } = await execAsync(`cd "${currentProject.path.replace(/"/g, '\\"')}" && php artisan ${command}`);
 
       toast.style = Toast.Style.Success;
       toast.title = "Command completed";

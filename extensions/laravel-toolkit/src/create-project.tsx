@@ -225,7 +225,17 @@ export default function Command() {
       return;
     }
 
+    if (!/^[a-zA-Z0-9_-]+$/.test(values.projectName)) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid Project Name",
+        message: "Only letters, numbers, dashes, and underscores are allowed.",
+      });
+      return;
+    }
+
     setIsLoading(true);
+    const sanitizedDirectory = values.directory.replace(/"/g, '\\"');
     const projectPath = `${values.directory}/${values.projectName}`;
 
     try {
@@ -236,7 +246,7 @@ export default function Command() {
       });
 
       // Step 1: Create base Laravel project with auth kit
-      let command = `cd "${values.directory}" && laravel new ${values.projectName}`;
+      let command = `cd "${sanitizedDirectory}" && laravel new ${values.projectName}`;
 
       if (values.database && values.database !== "sqlite") {
         command += ` --database=${values.database}`;
@@ -276,10 +286,10 @@ export default function Command() {
 
             // Detect if npm or composer
             if (pkg.type === "npm") {
-              await execAsync(`cd "${projectPath}" && npm install ${pkg.package}`);
+              await execAsync(`cd "${projectPath.replace(/"/g, '\\"')}" && npm install ${pkg.package}`);
             } else {
               // Default to composer
-              await execAsync(`cd "${projectPath}" && composer require ${pkg.package}`);
+              await execAsync(`cd "${projectPath.replace(/"/g, '\\"')}" && composer require ${pkg.package}`);
             }
 
             if (pkg.setup) {
@@ -298,10 +308,11 @@ export default function Command() {
           if (tool) {
             toast.message = `Installing ${tool.title}...`;
             const devFlag = tool.dev ? " --dev" : "";
-            await execAsync(`cd "${projectPath}" && composer require ${tool.package}${devFlag}`);
+            const safePath = projectPath.replace(/"/g, '\\"');
+            await execAsync(`cd "${safePath}" && composer require ${tool.package}${devFlag}`);
 
             if (tool.setup) {
-              await execAsync(`cd "${projectPath}" && ${tool.setup}`);
+              await execAsync(`cd "${safePath}" && ${tool.setup}`);
             }
           }
         }
@@ -310,8 +321,9 @@ export default function Command() {
       // Step 4: Initialize Sail if selected
       if (values.sail) {
         toast.message = "Step 4: Setting up Laravel Sail...";
-        await execAsync(`cd "${projectPath}" && composer require laravel/sail --dev`);
-        await execAsync(`cd "${projectPath}" && php artisan sail:install --with=mysql,redis,mailpit`);
+        const safePath = projectPath.replace(/"/g, '\\"');
+        await execAsync(`cd "${safePath}" && composer require laravel/sail --dev`);
+        await execAsync(`cd "${safePath}" && php artisan sail:install --with=mysql,redis,mailpit`);
       }
 
       toast.style = Toast.Style.Success;
