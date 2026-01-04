@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "switch-windows-dark-mode",
   "title": "Switch Windows Dark Mode",
-  "description": "Provides ability to switch Windows Dark / Light mode insantly with a single command.",
+  "description": "Provides ability to switch Windows Dark / Light mode instantly with a single command.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
