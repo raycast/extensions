@@ -6,7 +6,7 @@
     "lib": ["ES2022"],
     "module": "CommonJS",
     "jsx": "react-jsx",
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
