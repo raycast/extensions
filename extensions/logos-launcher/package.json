@@ -132,6 +132,35 @@
       ]
     },
     {
+      "name": "search-bible",
+      "title": "Logos Bible Search",
+      "subtitle": "Search the Bible in Logos",
+      "description": "Search the Bible using Logos smart search (concepts, synonyms) or precise search (exact match).",
+      "mode": "no-view",
+      "keywords": [
+        "bible search",
+        "scripture search",
+        "verse search"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "grace AND mercy"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultPreciseSearch",
+          "type": "checkbox",
+          "title": "Use Precise Search by Default",
+          "label": "Use precise (exact match) search instead of smart search",
+          "description": "When enabled, searches match exact phrases. When disabled (default), searches use Logos smart matching with concepts and synonyms.",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "word-study",
       "title": "Bible Word Study",
       "subtitle": "Open Bible Word Study",
@@ -271,15 +300,20 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/sql.js": "^1.4.9",
+    "@vitest/coverage-v8": "^4.0.16",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.16"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

@@ -1,6 +1,19 @@
 # Logos Search Changelog
 
-## [Unreleased] - 2025-11-18
+## [Unreleased] - 2026-01-04
+
+### Added
+- **Logos Bible Search** command with smart search (concepts, synonyms) and precise search (exact match) toggle.
+- Comprehensive test suite with Vitest (37 unit tests).
+- GitHub issue templates for bug reports and feature requests.
+- CONTRIBUTING.md with development guidelines.
+- FUNDING.yml for GitHub Sponsors.
+
+### Changed
+- Refactored codebase to extract shared utilities (`encodeForRefLy`, `LOGOS_BUNDLE_ID`) reducing code duplication.
+- Enhanced README with badges, table of contents, and new sections.
+
+## [1.1.0] - 2025-11-18
 
 - Added a Logos Tools Launcher command that autocompletes Logos tools (Atlas, Text Comparison, Study Assistant, Sermon Builder, Copy Bible Verses, Advanced Timeline, Systematic Theologies, interactives, etc.) and opens them with multiple URI fallbacks.
 - Added a Reading Plans command that lists every Logos plan and opens today's assignment via its deep link.

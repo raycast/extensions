@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { type FC, memo, useCallback, useMemo } from "react";
+import type { FC } from "react";
 import { useSelection } from "../hooks/use-selection";
 import type { DiskUsageSend } from "../machines/disk-usage-machine";
 import selectionStore from "../stores/selection-store";
@@ -13,20 +13,20 @@ const FileRow: FC<{
   maxSize: number;
   send: DiskUsageSend;
   isDeleting: boolean;
-}> = memo(({ node, maxSize, send, isDeleting }) => {
+}> = ({ node, maxSize, send, isDeleting }) => {
   const selection = useSelection();
   const isSelected = selection.has(node.path);
   const isDeletingThis = isDeleting && isSelected;
 
-  const isFolderWithContent = useMemo(() => hasStoredSnapshot(node.path), [node.path]);
+  const isFolderWithContent = hasStoredSnapshot(node.path);
 
-  const handleToggle = useCallback(() => selection.toggle(node.path), [node.path]);
-  const handleClear = useCallback(() => selection.clear(), []);
-  const handleTrash = useCallback(() => {
+  const handleToggle = () => selection.toggle(node.path);
+  const handleClear = () => selection.clear();
+  const handleTrash = () => {
     const paths = selectionStore.size > 0 ? selectionStore.getAll() : [node.path];
     send({ type: "DELETE_ITEMS", paths });
-  }, [node.path, send]);
-  const handleRefresh = useCallback(() => send({ type: "REFRESH" }), [send]);
+  };
+  const handleRefresh = () => send({ type: "REFRESH" });
 
   return (
     <List.Item
@@ -74,7 +74,7 @@ const FileRow: FC<{
       }
     />
   );
-});
+};
 
 FileRow.displayName = "FileRow";
 

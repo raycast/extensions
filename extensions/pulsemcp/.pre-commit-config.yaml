@@ -1,10 +1,50 @@
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-      - id: check-merge-conflict
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
+default_stages: [pre-commit]
+minimum_prek_version: "0.2.23"
 
-# Run `npm run lint && npm run build` manually before committing
-# The ray CLI has PTY issues with prek hooks
+repos:
+  # prek builtin hooks - no network/env needed, instant execution
+  - repo: builtin
+    hooks:
+      - id: trailing-whitespace
+        priority: 0
+      - id: end-of-file-fixer
+        priority: 0
+      - id: check-yaml
+        priority: 0
+      - id: check-json
+        priority: 0
+        exclude: ^tsconfig\.json$
+      - id: check-added-large-files
+        priority: 0
+      - id: check-merge-conflict
+        priority: 0
+      - id: check-case-conflict
+        priority: 0
+      - id: detect-private-key
+        priority: 0
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.40.0
+    hooks:
+      - id: typos
+        priority: 1
+
+  - repo: local
+    hooks:
+      - id: test
+        name: Run Tests
+        entry: npm run test
+        language: system
+        pass_filenames: false
+        types: [ts, tsx]
+        priority: 2
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.3.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: ["--verbose"]
+
+# Note: `npm run lint` and `npm run build` use ray CLI which has PTY issues with prek hooks
+# Run those manually before committing if needed
