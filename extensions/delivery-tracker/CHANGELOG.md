@@ -1,6 +1,6 @@
 # Delivery Tracker Changelog
 
-## [Cleanup and Fix Regression] – {PR _MERGE_DATE}
+## [Cleanup and Fix Regression] – {PR_MERGE_DATE}
 
 - Added back the sorting by delivery date feature.
 - Updated a previous changelog entry to remove an AI hallucinated feature.
