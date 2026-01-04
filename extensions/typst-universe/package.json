@@ -1,13 +1,27 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "typst",
+  "name": "typst-universe",
+  "title": "Typst Universe",
   "description": "Search for Typst Universe",
+  "type": "module",
+  "license": "MIT",
+  "icon": "icon.png",
+  "author": "cscnk52",
   "categories": [
     "Developer Tools"
   ],
-  "license": "MIT",
-  "author": "cscnk52",
-  "type": "module",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-typst-universe",
+      "title": "Search Typst Universe",
+      "description": "Search for Typst universe",
+      "mode": "view"
+    }
+  ],
   "scripts": {
     "dev": "ray develop",
     "lint": "ray lint",
@@ -28,19 +42,5 @@
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3"
-  },
-  "icon": "icon.png",
-  "commands": [
-    {
-      "name": "search-typst-universe",
-      "title": "Search Typst Universe",
-      "description": "Search Typst universes",
-      "mode": "view"
-    }
-  ],
-  "platforms": [
-    "Windows",
-    "macOS"
-  ],
-  "title": "Typst"
+  }
 }

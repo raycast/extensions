@@ -1,5 +1,5 @@
-# Typst changelog
+# Typst Universe changelog
 
-## [Add Typst] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
-- Initial version of Typst
+- Initial version of Typst Universe

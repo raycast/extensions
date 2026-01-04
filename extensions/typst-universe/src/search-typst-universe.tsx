@@ -1,7 +1,7 @@
 import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
-import { gt } from "semver";
+import gt from "semver/functions/gt.js";
 
 interface TypstPackageResponse {
   name: string;
@@ -23,7 +23,7 @@ interface TypstPackageResponse {
 const TYPST_PACKAGE_BASE: string = "https://packages.typst.org/preview";
 
 export default function SearchTypstPackage() {
-  const { data, isLoading } = useFetch<TypstPackageResponse[]>(
+  const { data = [], isLoading } = useFetch<TypstPackageResponse[]>(
     `${TYPST_PACKAGE_BASE}/index.json`,
     {
       keepPreviousData: true,
@@ -33,7 +33,7 @@ export default function SearchTypstPackage() {
   const packages = useMemo(() => {
     const map = new Map<string, TypstPackageResponse>();
 
-    data!.forEach((pkg) => {
+    data.forEach((pkg) => {
       const prev = map.get(pkg.name);
       if (!prev || gt(pkg.version, prev.version)) {
         map.set(pkg.name, {
@@ -61,6 +61,7 @@ export default function SearchTypstPackage() {
           actions={
             <ActionPanel>
               <Action.Push
+                icon={Icon.AppWindowSidebarRight}
                 title="Show Details"
                 target={<TypstPackageDetail {...pkg} />}
               />
@@ -75,7 +76,9 @@ export default function SearchTypstPackage() {
 function TypstPackageDetail(pkg: TypstPackageResponse) {
   const { data, isLoading } = useFetch<string>(
     `${TYPST_PACKAGE_BASE}/readmes/${pkg.name}-${pkg.version}.md`,
-    { keepPreviousData: true },
+    {
+      keepPreviousData: true,
+    },
   );
 
   return (
@@ -85,8 +88,8 @@ function TypstPackageDetail(pkg: TypstPackageResponse) {
       navigationTitle={pkg.name}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="author" text={pkg.authors[0]} />
-          <Detail.Metadata.Label title="version" text={pkg.version} />
+          <Detail.Metadata.Label title="Author" text={pkg.authors[0]} />
+          <Detail.Metadata.Label title="Version" text={pkg.version} />
           <Detail.Metadata.Link
             title="Repository"
             text="Open Repo"
