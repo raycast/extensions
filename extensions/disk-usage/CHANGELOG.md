@@ -1,6 +1,6 @@
 # Disk Usage Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-01-04
 
 - Optimized scanning speed using streams and lightweight objects on the heap.
 - Fixed [Error: Scan failed with code null](https://www.raycast.com/extension-issues/easymikey/disk-usage/7157549154)
