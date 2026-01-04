@@ -42,9 +42,8 @@ Raycast extension with commands that open verses, run searches, and browse resou
 ### Logos Bible Search
 
 - Opens the Logos Bible Search UI via `https://ref.ly/logos4/Search` with `kind=BibleSearch`.
-- Supports **smart search** (default): matches concepts, synonyms, and related terms.
-- Supports **precise search**: toggle for exact phrase matching.
-- Configure the default search mode in preferences.
+- Uses your last-chosen search mode in Logos (**Smart** or **Precise**).
+- Smart search matches concepts and synonyms, while Precise search matches exact phrases.
 
 ### Bible Word Study
 
