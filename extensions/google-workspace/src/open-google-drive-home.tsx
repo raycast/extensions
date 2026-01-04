@@ -1,6 +1,6 @@
+import { open } from "@raycast/api";
 import { getUserEmail } from "./api/googleAuth";
 import { withGoogleAuth } from "./components/withGoogleAuth";
-import { open } from "@raycast/api";
 
 async function Command() {
   const email = await getUserEmail();

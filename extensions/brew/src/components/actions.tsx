@@ -1,16 +1,22 @@
 import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import {
   brewName,
-  brewInstall,
+  brewInstallWithProgress,
   brewUninstall,
   brewPinFormula,
   brewUnpinFormula,
-  brewUpgrade,
+  brewUpgradeSingleWithProgress,
   brewUpgradeAll,
-} from "../brew";
-import { preferences } from "../preferences";
-import { showActionToast, showFailureToast } from "../utils";
-import { Cask, Formula, OutdatedFormula, Nameable } from "../brew";
+  preferences,
+  showActionToast,
+  showBrewFailureToast,
+  ensureError,
+  Cask,
+  Formula,
+  OutdatedFormula,
+  Nameable,
+  BrewProgress,
+} from "../utils";
 
 export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
   // TD: Support installing other versions?
@@ -89,49 +95,81 @@ export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; on
 /// Utilties
 
 async function install(formula: Cask | Formula): Promise<boolean> {
-  const abort = showActionToast({ title: `Installing ${brewName(formula)}`, cancelable: true });
+  const name = brewName(formula);
+  const handle = showActionToast({ title: `Installing ${name}`, message: "", cancelable: true });
   try {
-    await brewInstall(formula, abort);
-    showToast(Toast.Style.Success, `Installed ${brewName(formula)}`);
+    // Use progress-enabled install to show download progress
+    await brewInstallWithProgress(
+      formula,
+      (progress: BrewProgress) => {
+        handle.updateMessage(progress.message);
+      },
+      handle.abort?.signal,
+    );
+    // Use HUD for success - persists even if Raycast is closed
+    await handle.showSuccessHUD(`Installed ${name}`);
     return true;
   } catch (err) {
-    showFailureToast("Install failed", err as Error);
+    const error = ensureError(err);
+    // Show HUD for failure if user might have closed Raycast
+    await handle.showFailureHUD(`Failed to install ${name}`);
+    // Also show detailed toast if Raycast is still open
+    showBrewFailureToast("Install failed", error);
     return false;
   }
 }
 
 async function uninstall(formula: Cask | Nameable): Promise<boolean> {
-  const abort = showActionToast({ title: `Uninstalling ${brewName(formula)}`, cancelable: true });
+  const name = brewName(formula);
+  const handle = showActionToast({ title: `Uninstalling ${name}`, message: "", cancelable: true });
   try {
-    await brewUninstall(formula, abort);
-    showToast(Toast.Style.Success, `Uninstalled ${brewName(formula)}`);
+    await brewUninstall(formula, handle.abort?.signal);
+    await handle.showSuccessHUD(`Uninstalled ${name}`);
     return true;
   } catch (err) {
-    showFailureToast("Uninstall failed", err as Error);
+    const error = ensureError(err);
+    await handle.showFailureHUD(`Failed to uninstall ${name}`);
+    showBrewFailureToast("Uninstall failed", error);
     return false;
   }
 }
 
 async function upgrade(formula: Cask | Nameable): Promise<boolean> {
-  const abort = showActionToast({ title: `Upgrading ${brewName(formula)}`, cancelable: true });
+  const name = brewName(formula);
+  const handle = showActionToast({ title: `Upgrading ${name}`, message: "", cancelable: true });
   try {
-    await brewUpgrade(formula, abort);
-    showToast(Toast.Style.Success, `Upgraded ${brewName(formula)}`);
+    // Use progress-enabled upgrade to show download progress
+    await brewUpgradeSingleWithProgress(
+      formula,
+      (progress: BrewProgress) => {
+        handle.updateMessage(progress.message);
+      },
+      handle.abort?.signal,
+    );
+    await handle.showSuccessHUD(`Upgraded ${name}`);
     return true;
   } catch (err) {
-    showFailureToast("Upgrade formula failed", err as Error);
+    const error = ensureError(err);
+    await handle.showFailureHUD(`Failed to upgrade ${name}`);
+    showBrewFailureToast("Upgrade failed", error);
     return false;
   }
 }
 
 async function upgradeAll(): Promise<boolean> {
-  const abort = showActionToast({ title: "Upgrading all formula", cancelable: true });
+  const handle = showActionToast({
+    title: "Upgrading all packages",
+    message: "This may take a while...",
+    cancelable: true,
+  });
   try {
-    await brewUpgradeAll(preferences.greedyUpgrades, abort);
-    showToast(Toast.Style.Success, "Upgrade formula succeeded");
+    await brewUpgradeAll(preferences.greedyUpgrades, handle.abort?.signal);
+    await handle.showSuccessHUD("All packages upgraded");
     return true;
   } catch (err) {
-    showFailureToast("Upgrade formula failed", err as Error);
+    const error = ensureError(err);
+    await handle.showFailureHUD("Failed to upgrade packages");
+    showBrewFailureToast("Upgrade failed", error);
     return false;
   }
 }
@@ -144,7 +182,7 @@ async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
     showToast(Toast.Style.Success, `Pinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Pin formula failed", err as Error);
+    showBrewFailureToast("Pin formula failed", ensureError(err));
     return false;
   }
 }
@@ -157,7 +195,7 @@ async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
     showToast(Toast.Style.Success, `Unpinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Unpin formula failed", err as Error);
+    showBrewFailureToast("Unpin formula failed", ensureError(err));
     return false;
   }
 }

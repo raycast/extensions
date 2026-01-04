@@ -4,8 +4,9 @@ import fs from "fs";
 import { homedir } from "os";
 import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
-import { isSameEntry } from "./utils";
+import { isSameEntry, isWin } from "./utils";
 import { execFilePromise } from "./utils/exec";
+import { getBuildNamePreference } from "./lib/vscode";
 
 export type RemoveMethods = {
   removeEntry: (entry: EntryLike) => Promise<void>;
@@ -20,7 +21,7 @@ export function useRecentEntries() {
       data: [],
       isLoading: false,
       error: true,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       removeEntry: (entry: EntryLike) => Promise.resolve(),
       removeAllEntries: () => Promise.resolve(),
     };
@@ -28,7 +29,7 @@ export function useRecentEntries() {
 
   const { data, isLoading, revalidate } = useSQL<RecentEntries>(
     path,
-    "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'"
+    "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'",
   );
 
   const entries = data && data.length ? data[0].entries : undefined;
@@ -71,7 +72,7 @@ export function useRecentEntries() {
         showToast(
           Toast.Style.Success,
           "All entries removed",
-          `Restart ${build} to sync the list in ${build} (optional)`
+          `Restart ${build} to sync the list in ${build} (optional)`,
         );
       }
     } catch (error) {
@@ -83,6 +84,10 @@ export function useRecentEntries() {
 }
 
 function getPath() {
+  const build = getBuildNamePreference();
+  if (isWin) {
+    return `${homedir()}\\AppData\\Roaming\\${build}\\User\\globalStorage\\state.vscdb`;
+  }
   return `${homedir()}/Library/Application Support/${build}/User/globalStorage/state.vscdb`;
 }
 

@@ -1,10 +1,21 @@
 /**
  * Secret Manager Service - Provides efficient access to Google Cloud Secret Manager functionality
- * Optimized for performance and security
+ * Uses REST APIs for improved performance (no CLI subprocess overhead)
  */
 
-import { executeGcloudCommand } from "../../gcloud";
 import { showFailureToast } from "@raycast/utils";
+import {
+  listSecrets as apiListSecrets,
+  getSecret as apiGetSecret,
+  listSecretVersions as apiListVersions,
+  accessSecretVersion as apiAccessVersion,
+  createSecret as apiCreateSecret,
+  deleteSecret as apiDeleteSecret,
+  gcpPost,
+  SECRETS_API,
+  type Secret as ApiSecret,
+  type SecretVersion as ApiSecretVersion,
+} from "../../utils/gcpApi";
 
 // Interfaces
 export interface Secret {
@@ -70,6 +81,7 @@ export interface SecretMetadata {
 
 /**
  * Secret Manager Service class - provides optimized access to Secret Manager functionality
+ * Now uses REST APIs instead of gcloud CLI for better performance
  */
 export class SecretManagerService {
   private gcloudPath: string;
@@ -80,6 +92,30 @@ export class SecretManagerService {
   constructor(gcloudPath: string, projectId: string) {
     this.gcloudPath = gcloudPath;
     this.projectId = projectId;
+  }
+
+  /**
+   * Convert API secret to internal format
+   */
+  private convertSecret(apiSecret: ApiSecret): Secret {
+    return {
+      name: apiSecret.name,
+      createTime: apiSecret.createTime,
+      labels: apiSecret.labels,
+      replication: apiSecret.replication as Secret["replication"],
+    };
+  }
+
+  /**
+   * Convert API secret version to internal format
+   */
+  private convertVersion(apiVersion: ApiSecretVersion): SecretVersion {
+    return {
+      name: apiVersion.name,
+      createTime: apiVersion.createTime,
+      destroyTime: apiVersion.destroyTime,
+      state: apiVersion.state,
+    };
   }
 
   /**
@@ -96,9 +132,9 @@ export class SecretManagerService {
     }
 
     try {
-      const result = (await executeGcloudCommand(this.gcloudPath, "secrets list", this.projectId)) as Secret[];
-
-      const secrets: Secret[] = Array.isArray(result) ? result : [];
+      // Use REST API instead of gcloud CLI
+      const apiSecrets = await apiListSecrets(this.gcloudPath, this.projectId);
+      const secrets = apiSecrets.map((s) => this.convertSecret(s));
 
       // Cache the results
       this.secretsCache.set(cacheKey, { data: secrets, timestamp: Date.now() });
@@ -119,13 +155,9 @@ export class SecretManagerService {
    */
   async describeSecret(secretId: string): Promise<Secret | null> {
     try {
-      const result = (await executeGcloudCommand(
-        this.gcloudPath,
-        `secrets describe ${secretId}`,
-        this.projectId,
-      )) as Secret;
-
-      return result || null;
+      // Use REST API instead of gcloud CLI
+      const apiSecret = await apiGetSecret(this.gcloudPath, this.projectId, secretId);
+      return this.convertSecret(apiSecret);
     } catch (error) {
       console.error("Failed to describe secret:", error);
       showFailureToast({
@@ -141,13 +173,9 @@ export class SecretManagerService {
    */
   async listVersions(secretId: string): Promise<SecretVersion[]> {
     try {
-      const result = (await executeGcloudCommand(
-        this.gcloudPath,
-        `secrets versions list ${secretId}`,
-        this.projectId,
-      )) as SecretVersion[];
-
-      return Array.isArray(result) ? result : [];
+      // Use REST API instead of gcloud CLI
+      const apiVersions = await apiListVersions(this.gcloudPath, this.projectId, secretId);
+      return apiVersions.map((v) => this.convertVersion(v));
     } catch (error) {
       console.error("Failed to list secret versions:", error);
       showFailureToast({
@@ -164,8 +192,8 @@ export class SecretManagerService {
    */
   async createSecret(secretId: string, data: string): Promise<boolean> {
     try {
-      // First create the secret
-      await this.executeGcloudCommandWithInput(`secrets create ${secretId}`, data);
+      // Use REST API instead of gcloud CLI
+      await apiCreateSecret(this.gcloudPath, this.projectId, secretId, data);
 
       // Clear cache
       this.clearCache();
@@ -187,7 +215,13 @@ export class SecretManagerService {
    */
   async addVersion(secretId: string, data: string): Promise<boolean> {
     try {
-      await this.executeGcloudCommandWithInput(`secrets versions add ${secretId}`, data);
+      // Use REST API to add version
+      const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}:addVersion`;
+      await gcpPost(this.gcloudPath, url, {
+        payload: {
+          data: Buffer.from(data).toString("base64"),
+        },
+      });
 
       return true;
     } catch (error) {
@@ -206,9 +240,8 @@ export class SecretManagerService {
    */
   async accessVersion(secretId: string, version: string = "latest"): Promise<string | null> {
     try {
-      const command = `secrets versions access ${version} --secret ${secretId}`;
-      const result = await this.executeGcloudCommandWithOutput(command);
-      return result;
+      // Use REST API instead of gcloud CLI
+      return await apiAccessVersion(this.gcloudPath, this.projectId, secretId, version);
     } catch (error) {
       console.error("Failed to access secret version");
       showFailureToast({
@@ -224,7 +257,8 @@ export class SecretManagerService {
    */
   async deleteSecret(secretId: string): Promise<boolean> {
     try {
-      await executeGcloudCommand(this.gcloudPath, `secrets delete ${secretId} --quiet`, this.projectId);
+      // Use REST API instead of gcloud CLI
+      await apiDeleteSecret(this.gcloudPath, this.projectId, secretId);
 
       // Clear cache
       this.clearCache();
@@ -245,11 +279,9 @@ export class SecretManagerService {
    */
   async destroyVersion(secretId: string, version: string): Promise<boolean> {
     try {
-      await executeGcloudCommand(
-        this.gcloudPath,
-        `secrets versions destroy ${version} --secret ${secretId} --quiet`,
-        this.projectId,
-      );
+      // Use REST API
+      const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}/versions/${version}:destroy`;
+      await gcpPost(this.gcloudPath, url, {});
 
       return true;
     } catch (error) {
@@ -267,11 +299,9 @@ export class SecretManagerService {
    */
   async disableVersion(secretId: string, version: string): Promise<boolean> {
     try {
-      await executeGcloudCommand(
-        this.gcloudPath,
-        `secrets versions disable ${version} --secret ${secretId}`,
-        this.projectId,
-      );
+      // Use REST API
+      const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}/versions/${version}:disable`;
+      await gcpPost(this.gcloudPath, url, {});
 
       return true;
     } catch (error) {
@@ -289,11 +319,9 @@ export class SecretManagerService {
    */
   async enableVersion(secretId: string, version: string): Promise<boolean> {
     try {
-      await executeGcloudCommand(
-        this.gcloudPath,
-        `secrets versions enable ${version} --secret ${secretId}`,
-        this.projectId,
-      );
+      // Use REST API
+      const url = `${SECRETS_API}/projects/${this.projectId}/secrets/${secretId}/versions/${version}:enable`;
+      await gcpPost(this.gcloudPath, url, {});
 
       return true;
     } catch (error) {
@@ -311,85 +339,6 @@ export class SecretManagerService {
    */
   clearCache() {
     this.secretsCache.clear();
-  }
-
-  /**
-   * Execute gcloud command with input via stdin
-   * SECURITY: Never log the input parameter
-   */
-  private async executeGcloudCommandWithInput(command: string, input: string): Promise<void> {
-    const { spawn } = await import("child_process");
-
-    return new Promise((resolve, reject) => {
-      const args = command.split(" ").concat(["--project", this.projectId, "--data-file=-"]);
-      const child = spawn(this.gcloudPath, args, { stdio: ["pipe", "pipe", "pipe"] });
-
-      let stderr = "";
-
-      child.stdout.on("data", () => {
-        // Output not needed for creation operations
-      });
-
-      child.stderr.on("data", (data) => {
-        stderr += data;
-      });
-
-      child.on("close", (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          if (stderr.includes("already exists")) {
-            reject(new Error("A secret with this name already exists"));
-          } else {
-            reject(new Error(stderr || `Command failed with exit code ${code}`));
-          }
-        }
-      });
-
-      child.on("error", (error) => {
-        reject(error);
-      });
-
-      // Write input to stdin
-      child.stdin.write(input);
-      child.stdin.end();
-    });
-  }
-
-  /**
-   * Execute gcloud command and return raw output (for secret values)
-   * SECURITY: This method returns sensitive data - handle with care
-   */
-  private async executeGcloudCommandWithOutput(command: string): Promise<string | null> {
-    const { spawn } = await import("child_process");
-
-    return new Promise((resolve, reject) => {
-      const args = command.split(" ").concat(["--project", this.projectId]);
-      const child = spawn(this.gcloudPath, args, { stdio: ["pipe", "pipe", "pipe"] });
-
-      let stdout = "";
-      let stderr = "";
-
-      child.stdout.on("data", (data) => {
-        stdout += data;
-      });
-
-      child.stderr.on("data", (data) => {
-        stderr += data;
-      });
-
-      child.on("close", (code) => {
-        if (code === 0) {
-          resolve(stdout || null);
-        } else {
-          reject(new Error(stderr || `Command failed with exit code ${code}`));
-        }
-      });
-
-      child.on("error", (error) => {
-        reject(error);
-      });
-    });
   }
 
   /**

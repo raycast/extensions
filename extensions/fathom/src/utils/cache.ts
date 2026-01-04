@@ -272,22 +272,42 @@ export async function clearAllCache(): Promise<void> {
  */
 export function searchCachedMeetings(cachedMeetings: CachedMeetingData[], query: string): CachedMeetingData[] {
   if (!query || query.trim() === "") {
+    logger.log("[searchCachedMeetings] Empty query, returning all meetings");
     return cachedMeetings;
   }
 
   const searchTerms = query.toLowerCase().split(/\s+/);
+  logger.log(`[searchCachedMeetings] Searching for: "${query}" (terms: ${searchTerms.join(", ")})`);
+  logger.log(`[searchCachedMeetings] Total meetings to search: ${cachedMeetings.length}`);
 
-  return cachedMeetings.filter((cached) => {
-    const meeting = cached.meeting as { title?: string; meetingTitle?: string };
-    const searchableText = [
-      meeting.title || "",
-      meeting.meetingTitle || "",
-      cached.summary || "",
-      cached.transcript || "",
-    ]
-      .join(" ")
-      .toLowerCase();
+  // Log cache content stats
+  const withSummary = cachedMeetings.filter((c) => c.summary && c.summary.length > 0).length;
+  const withTranscript = cachedMeetings.filter((c) => c.transcript && c.transcript.length > 0).length;
+  logger.log(`[searchCachedMeetings] Cache stats: ${withSummary} with summaries, ${withTranscript} with transcripts`);
 
-    return searchTerms.every((term) => searchableText.includes(term));
+  const results = cachedMeetings.filter((cached) => {
+    const meeting = cached.meeting as { title?: string; meetingTitle?: string; recordingId?: string };
+    const title = meeting.title || "";
+    const meetingTitle = meeting.meetingTitle || "";
+    const summary = cached.summary || "";
+    const transcript = cached.transcript || "";
+
+    const searchableText = [title, meetingTitle, summary, transcript].join(" ").toLowerCase();
+
+    const matches = searchTerms.every((term) => searchableText.includes(term));
+
+    // Log detailed match info for first few meetings
+    if (cachedMeetings.indexOf(cached) < 3) {
+      logger.log(
+        `[searchCachedMeetings] Meeting "${title}" (${meeting.recordingId}): ` +
+          `title=${title.length}ch, summary=${summary.length}ch, transcript=${transcript.length}ch, matches=${matches}`,
+      );
+    }
+
+    return matches;
   });
+
+  logger.log(`[searchCachedMeetings] Found ${results.length} matching meetings`);
+
+  return results;
 }

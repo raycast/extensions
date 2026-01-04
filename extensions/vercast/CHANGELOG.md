@@ -1,5 +1,9 @@
 # Vercast Changelog
 
+## [2.12] - 2025-12-12
+
+- Added Recent Deployments Menu Bar
+
 ## [2.11] - 2025-08-27
 
 - Bump deps to latest

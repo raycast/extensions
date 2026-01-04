@@ -1,15 +1,21 @@
-import { executeGcloudCommand } from "../../gcloud";
+/**
+ * IAM Service - Provides efficient access to Google Cloud IAM functionality
+ * Uses REST APIs for improved performance (no CLI subprocess overhead)
+ */
+
 import { showFailureToast } from "@raycast/utils";
 import { getRoleInfo as getGCPRoleInfo, formatRoleName as formatGCPRoleName } from "../../utils/iamRoles";
-
-interface GCPServiceAccount {
-  name: string;
-  email: string;
-  displayName?: string;
-  description?: string;
-  disabled: boolean;
-  oauth2ClientId?: string;
-}
+import {
+  getProjectIamPolicy,
+  listServiceAccounts as apiListServiceAccounts,
+  listIamRoles as apiListIamRoles,
+  getBucketIamPolicy,
+  gcpPost,
+  CRM_API,
+  type IamPolicy as ApiIamPolicy,
+  type ServiceAccount as ApiServiceAccount,
+  type IamRole as ApiIamRole,
+} from "../../utils/gcpApi";
 
 interface GCPRole {
   name: string;
@@ -82,6 +88,21 @@ export class IAMService {
     this.projectId = projectId;
   }
 
+  /**
+   * Convert API policy to internal format
+   */
+  private convertPolicy(apiPolicy: ApiIamPolicy): IAMPolicy {
+    return {
+      version: apiPolicy.version,
+      etag: apiPolicy.etag,
+      bindings: (apiPolicy.bindings || []).map((b) => ({
+        role: b.role,
+        members: b.members,
+        condition: b.condition as IAMCondition,
+      })),
+    };
+  }
+
   async getIAMPolicy(resourceType?: string, resourceName?: string): Promise<IAMPolicy> {
     const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
 
@@ -92,37 +113,30 @@ export class IAMService {
       return cachedPolicy.policy;
     }
 
-    let command = "";
-
-    if (resourceType === "storage" && resourceName) {
-      command = `storage buckets get-iam-policy gs://${resourceName} --project=${this.projectId}`;
-    } else if (resourceType === "compute" && resourceName) {
-      command = `compute instances get-iam-policy ${resourceName} --project=${this.projectId}`;
-    } else {
-      command = `projects get-iam-policy ${this.projectId}`;
-    }
-
     try {
-      const result = await executeGcloudCommand(this.gcloudPath, command);
+      let apiPolicy: ApiIamPolicy;
 
-      if (!Array.isArray(result) || result.length === 0) {
-        showFailureToast({
-          title: "IAM Policy Error",
-          message: "No IAM policy found or empty result",
-        });
-        throw new Error("No IAM policy found or empty result");
+      if (resourceType === "storage" && resourceName) {
+        // Use REST API for bucket IAM
+        const bucketPolicy = await getBucketIamPolicy(this.gcloudPath, resourceName);
+        apiPolicy = {
+          version: 1,
+          etag: bucketPolicy.etag || "",
+          bindings: bucketPolicy.bindings,
+        };
+      } else {
+        // Use REST API for project IAM policy
+        apiPolicy = await getProjectIamPolicy(this.gcloudPath, this.projectId);
       }
 
-      const policy = Array.isArray(result) ? result[0] : result;
-
-      if (!policy.bindings || !Array.isArray(policy.bindings)) {
-        showFailureToast({
-          title: "Invalid IAM Policy",
-          message: "Invalid policy format: no bindings found",
-        });
-        throw new Error("Invalid IAM policy format: no bindings found");
+      if (!apiPolicy.bindings || !Array.isArray(apiPolicy.bindings)) {
+        // Return empty policy if no bindings
+        const emptyPolicy: IAMPolicy = { version: 1, etag: "", bindings: [] };
+        this.policyCache.set(cacheKey, { policy: emptyPolicy, timestamp: now });
+        return emptyPolicy;
       }
 
+      const policy = this.convertPolicy(apiPolicy);
       this.policyCache.set(cacheKey, { policy, timestamp: now });
 
       return policy;
@@ -211,28 +225,45 @@ export class IAMService {
       throw new Error(`Invalid member ID format for ${memberType}`);
     }
 
-    let command = "";
-
-    if (resourceType === "storage" && resourceName) {
-      command = `storage buckets add-iam-policy-binding gs://${resourceName} --member=${memberType}:${memberId} --role=${role} --project=${this.projectId}`;
-    } else if (resourceType === "compute" && resourceName) {
-      command = `compute instances add-iam-policy-binding ${resourceName} --member=${memberType}:${memberId} --role=${role} --project=${this.projectId}`;
-    } else {
-      command = `projects add-iam-policy-binding ${this.projectId} --member=${memberType}:${memberId} --role=${role}`;
-    }
-
     try {
-      await executeGcloudCommand(this.gcloudPath, command);
+      // Get current policy
+      const policy = await this.getIAMPolicy(resourceType, resourceName);
+
+      // Add member to binding
+      const member = `${memberType}:${memberId}`;
+      let bindingFound = false;
+
+      for (const binding of policy.bindings) {
+        if (binding.role === role) {
+          if (!binding.members.includes(member)) {
+            binding.members.push(member);
+          }
+          bindingFound = true;
+          break;
+        }
+      }
+
+      if (!bindingFound) {
+        policy.bindings.push({ role, members: [member] });
+      }
+
+      // Set updated policy via REST API
+      const url = `${CRM_API}/projects/${this.projectId}:setIamPolicy`;
+      await gcpPost(this.gcloudPath, url, { policy });
 
       const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
       this.policyCache.delete(cacheKey);
     } catch (error: unknown) {
       console.error("Error adding member:", error);
-      showFailureToast({
-        title: "Failed to Add Member",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const isPermissionDenied =
+        errorMessage.toLowerCase().includes("permission denied") || errorMessage.includes("403");
+
+      throw new Error(
+        isPermissionDenied
+          ? "Permission denied: Policy update access denied. You need 'resourcemanager.projects.setIamPolicy' permission (typically Project Owner role)."
+          : errorMessage,
+      );
     }
   }
 
@@ -251,51 +282,54 @@ export class IAMService {
       throw new Error(`Invalid member ID format for ${memberType}`);
     }
 
-    let command = "";
-
-    if (resourceType === "storage" && resourceName) {
-      command = `storage buckets remove-iam-policy-binding gs://${resourceName} --member=${memberType}:${memberId} --role=${role} --project=${this.projectId}`;
-    } else if (resourceType === "compute" && resourceName) {
-      command = `compute instances remove-iam-policy-binding ${resourceName} --member=${memberType}:${memberId} --role=${role} --project=${this.projectId}`;
-    } else {
-      command = `projects remove-iam-policy-binding ${this.projectId} --member=${memberType}:${memberId} --role=${role}`;
-    }
-
     try {
-      await executeGcloudCommand(this.gcloudPath, command);
+      // Get current policy
+      const policy = await this.getIAMPolicy(resourceType, resourceName);
+
+      // Remove member from binding
+      const member = `${memberType}:${memberId}`;
+
+      for (const binding of policy.bindings) {
+        if (binding.role === role) {
+          binding.members = binding.members.filter((m) => m !== member);
+          break;
+        }
+      }
+
+      // Remove empty bindings
+      policy.bindings = policy.bindings.filter((b) => b.members.length > 0);
+
+      // Set updated policy via REST API
+      const url = `${CRM_API}/projects/${this.projectId}:setIamPolicy`;
+      await gcpPost(this.gcloudPath, url, { policy });
 
       const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
       this.policyCache.delete(cacheKey);
     } catch (error: unknown) {
       console.error("Error removing member:", error);
-      showFailureToast({
-        title: "Failed to Remove Member",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const isPermissionDenied =
+        errorMessage.toLowerCase().includes("permission denied") || errorMessage.includes("403");
+
+      throw new Error(
+        isPermissionDenied
+          ? "Permission denied: Policy update access denied. You need 'resourcemanager.projects.setIamPolicy' permission (typically Project Owner role)."
+          : errorMessage,
+      );
     }
   }
 
   async getServiceAccounts(): Promise<IAMServiceAccount[]> {
     try {
-      const command = `iam service-accounts list --project=${this.projectId}`;
-      const result = await executeGcloudCommand(this.gcloudPath, command);
+      // Use REST API instead of gcloud CLI
+      const serviceAccounts = await apiListServiceAccounts(this.gcloudPath, this.projectId);
 
-      if (!Array.isArray(result)) {
-        showFailureToast({
-          title: "Invalid Response",
-          message: "Expected array of service accounts",
-        });
-        throw new Error("Invalid response format: expected array of service accounts");
-      }
-
-      return result.map((sa: GCPServiceAccount) => ({
+      return serviceAccounts.map((sa: ApiServiceAccount) => ({
         name: sa.name,
         email: sa.email,
         displayName: sa.displayName || sa.email.split("@")[0],
         description: sa.description,
         disabled: sa.disabled || false,
-        oauth2ClientId: sa.oauth2ClientId,
       }));
     } catch (error: unknown) {
       console.error("Error getting service accounts:", error);
@@ -309,14 +343,10 @@ export class IAMService {
 
   async getCustomRoles(): Promise<IAMCustomRole[]> {
     try {
-      const command = `iam roles list --project=${this.projectId}`;
-      const result = await executeGcloudCommand(this.gcloudPath, command);
+      // Use REST API instead of gcloud CLI
+      const roles = await apiListIamRoles(this.gcloudPath);
 
-      if (!Array.isArray(result)) {
-        return [];
-      }
-
-      return result.map((role: GCPRole) => ({
+      return roles.map((role: ApiIamRole) => ({
         name: role.name,
         title: role.title || this.formatRoleName(role.name),
         description: role.description || "",
@@ -395,28 +425,9 @@ export class IAMService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async createGroup(groupId: string, displayName?: string, description?: string): Promise<Record<string, unknown>> {
-    try {
-      let command = `identity groups create ${groupId}`;
-
-      if (displayName) {
-        command += ` --display-name="${displayName}"`;
-      }
-
-      if (description) {
-        command += ` --description="${description}"`;
-      }
-
-      const result = (await executeGcloudCommand(this.gcloudPath, command)) as Array<Record<string, unknown>>;
-      return result[0] || {};
-    } catch (error: unknown) {
-      console.error("Error creating group:", error);
-      showFailureToast({
-        title: "Failed to Create Group",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
-    }
+    throw new Error("Group creation requires Cloud Identity API - not implemented");
   }
 
   async getRoleSuggestions(query: string): Promise<IAMRole[]> {
@@ -425,9 +436,10 @@ export class IAMService {
         return [];
       }
 
-      const allRoles = (await executeGcloudCommand(this.gcloudPath, "iam roles list")) as GCPRole[];
+      // Use REST API to list roles
+      const allRoles = await apiListIamRoles(this.gcloudPath);
 
-      const filteredRoles = allRoles.filter((role) => {
+      const filteredRoles = allRoles.filter((role: GCPRole) => {
         const roleId = role.name.split("/").pop() || "";
         return (
           roleId.toLowerCase().includes(query.toLowerCase()) ||
@@ -436,7 +448,7 @@ export class IAMService {
         );
       });
 
-      return filteredRoles.map((role) => ({
+      return filteredRoles.map((role: GCPRole) => ({
         role: role.name,
         title: role.title || role.name,
         description: role.description || "",

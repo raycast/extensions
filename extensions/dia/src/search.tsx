@@ -1,15 +1,16 @@
 import { List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
+import { BookmarkListItem } from "./components/BookmarkListItem";
 import { HistoryListItem } from "./components/HistoryListItem";
 import { SuggestionListItem } from "./components/SuggestionListItem";
 import { TabListItem } from "./components/TabListItem";
 import withVersionCheck from "./components/VersionCheck";
-import { useSearchHistory, useTabs } from "./dia";
+import { useSearchHistory, useTabs, useBookmarks } from "./dia";
 import { useGoogleSuggestions } from "./google";
 import { filterHistory, filterTabs } from "./utils";
 
-type ViewMode = "all" | "pinned-tabs" | "open-tabs" | "history" | "suggestions";
+type ViewMode = "all" | "pinned-tabs" | "open-tabs" | "bookmarks" | "history" | "suggestions";
 
 function Command() {
   const [searchText, setSearchText] = useState<string>("");
@@ -17,6 +18,7 @@ function Command() {
 
   const { isLoading: isLoadingTabs, data: tabs, revalidate: revalidateTabs } = useTabs();
   const { isLoading: isLoadingHistory, data: history, permissionView } = useSearchHistory(searchText);
+  const { isLoading: isLoadingBookmarks, data: bookmarks } = useBookmarks(searchText);
   const { isLoading: isLoadingGoogleSuggestions, data: googleSuggestions } = useGoogleSuggestions(searchText);
 
   if (permissionView) {
@@ -30,8 +32,8 @@ function Command() {
 
   return (
     <List
-      isLoading={isLoadingTabs || isLoadingHistory || isLoadingGoogleSuggestions}
-      searchBarPlaceholder="Search your open tabs and browsing history..."
+      isLoading={isLoadingTabs || isLoadingHistory || isLoadingBookmarks || isLoadingGoogleSuggestions}
+      searchBarPlaceholder="Search tabs, bookmarks and browsing history..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
@@ -46,6 +48,7 @@ function Command() {
           <List.Dropdown.Section>
             <List.Dropdown.Item title="Pinned Tabs" value="pinned-tabs" />
             <List.Dropdown.Item title="Open Tabs" value="open-tabs" />
+            <List.Dropdown.Item title="Bookmarks" value="bookmarks" />
             <List.Dropdown.Item title="History" value="history" />
             <List.Dropdown.Item title="Suggestions" value="suggestions" />
           </List.Dropdown.Section>
@@ -79,6 +82,24 @@ function Command() {
                 onTabAction={revalidateTabs}
               />
             ))}
+        </List.Section>
+      )}
+
+      {shouldShow("bookmarks") && !isLoadingTabs && searchText && (
+        <List.Section title="Bookmarks">
+          {bookmarks?.map((bookmark) => (
+            <BookmarkListItem
+              key={`bookmark-${bookmark.id}`}
+              item={{
+                id: bookmark.id,
+                name: bookmark.name,
+                type: "url" as const,
+                url: bookmark.url,
+                path: bookmark.path.split(" › "),
+                idPath: [],
+              }}
+            />
+          ))}
         </List.Section>
       )}
 

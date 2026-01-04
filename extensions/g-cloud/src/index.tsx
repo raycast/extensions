@@ -9,476 +9,291 @@ import {
   Form,
   useNavigation,
   Color,
-  Cache,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
-import ProjectView from "./ProjectView";
-import { StorageBucketView, StorageStatsView } from "./services/storage";
-import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
-import { CacheManager, Project } from "./utils/CacheManager";
-import CachedProjectView from "./views/CachedProjectView";
-import { authenticateWithBrowser } from "./gcloud";
-import { showFailureToast } from "@raycast/utils";
+import { ProjectDropdown } from "./components/ProjectDropdown";
+import { CacheManager, RecentResource, ResourceType, ServiceCounts } from "./utils/CacheManager";
+import { authenticateWithBrowser, fetchResourceCounts } from "./gcloud";
+import { detectGcloudPath, getInstallInstructions, getPlatform } from "./utils/gcloudDetect";
+import DoctorView from "./components/DoctorView";
+
+// Service views
+import { StorageBucketView } from "./services/storage";
+import { ComputeInstancesView } from "./services/compute";
+import IAMView from "./services/iam/IAMView";
+import NetworkView from "./services/network/NetworkView";
+import SecretListView from "./services/secrets/SecretListView";
+import { CloudRunView } from "./services/cloudrun";
+import { LogsView } from "./services/logs-service";
+import { StreamerModeAction } from "./components/StreamerModeAction";
 
 const execPromise = promisify(exec);
-const GCLOUD_PATH = getPreferenceValues<ExtensionPreferences>().gcloudPath;
 
-const navigationCache = new Cache({ namespace: "navigation-state" });
-
-interface StatePreferences {
-  projectId?: string;
+interface ExtensionPreferences {
+  gcloudPath: string;
 }
 
-export default function Command() {
+// Get configured path (may be empty for auto-detection)
+const CONFIGURED_GCLOUD_PATH = getPreferenceValues<ExtensionPreferences>().gcloudPath;
+
+type ViewMode = "hub" | "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "logs";
+
+interface ServiceInfo {
+  id: ResourceType;
+  name: string;
+  description: string;
+  icon: Icon;
+  color: Color;
+}
+
+const SERVICES: ServiceInfo[] = [
+  { id: "compute", name: "Compute Engine", description: "Virtual machines", icon: Icon.Desktop, color: Color.Blue },
+  {
+    id: "storage",
+    name: "Cloud Storage",
+    description: "Object storage buckets",
+    icon: Icon.Folder,
+    color: Color.Green,
+  },
+  { id: "cloudrun", name: "Cloud Run", description: "Serverless containers", icon: Icon.Globe, color: Color.Blue },
+  {
+    id: "iam",
+    name: "IAM & Admin",
+    description: "Identity and access management",
+    icon: Icon.Key,
+    color: Color.Yellow,
+  },
+  { id: "network", name: "VPC Network", description: "Virtual private cloud", icon: Icon.Network, color: Color.Purple },
+  { id: "secrets", name: "Secret Manager", description: "Secrets and credentials", icon: Icon.Lock, color: Color.Red },
+  { id: "logs", name: "Logging", description: "View logs from all services", icon: Icon.List, color: Color.Orange },
+];
+
+interface GoogleCloudHubProps {
+  initialService?: ViewMode;
+}
+
+export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps = {}) {
+  const [viewMode, setViewMode] = useState<ViewMode>(initialService || "hub");
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [preferences, setPreferences] = useState<StatePreferences>({});
-  const [showCachedProjectView, setShowCachedProjectView] = useState(false);
-  const [shouldNavigateToProject, setShouldNavigateToProject] = useState<string | null>(null);
+  const [gcloudPath, setGcloudPath] = useState<string>(CONFIGURED_GCLOUD_PATH || "gcloud");
+
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [recentResources, setRecentResources] = useState<RecentResource[]>([]);
+  const [serviceCounts, setServiceCounts] = useState<ServiceCounts | null>(null);
+  const [isLoadingCounts, setIsLoadingCounts] = useState(false);
+
   const { push, pop } = useNavigation();
 
-  useEffect(() => {
-    if (shouldNavigateToProject) {
-      push(<ProjectView projectId={shouldNavigateToProject} gcloudPath={GCLOUD_PATH} />);
-      setShouldNavigateToProject(null);
-    }
-  }, [shouldNavigateToProject, push]);
-
+  // Check gcloud installation and auth on mount
   useEffect(() => {
     checkGcloudInstallation();
   }, []);
 
+  // Load recent resources
+  useEffect(() => {
+    const recent = CacheManager.getRecentResources();
+    setRecentResources(recent);
+  }, []);
+
+  // Load service counts when project changes
+  useEffect(() => {
+    if (selectedProject && isAuthenticated) {
+      loadServiceCounts(selectedProject);
+    }
+  }, [selectedProject, isAuthenticated]);
+
   async function checkGcloudInstallation() {
     try {
-      await execPromise(`${GCLOUD_PATH} --version`);
-      initializeFromCache();
-    } catch (error) {
-      setIsLoading(false);
-      setError("Google Cloud SDK not found. Please install it using Homebrew: brew install google-cloud-sdk");
-      showFailureToast({
-        title: "Google Cloud SDK not found",
-        message: "Please install it using Homebrew",
-      });
-    }
-  }
+      // If path is configured, use it; otherwise auto-detect
+      let pathToUse = CONFIGURED_GCLOUD_PATH;
 
-  async function initializeFromCache() {
-    const showProjectsList = navigationCache.get("showProjectsList");
-    if (showProjectsList === "true") {
-      navigationCache.remove("showProjectsList");
-
-      checkAuthStatus();
-      return;
-    }
-
-    const cachedAuth = CacheManager.getAuthStatus();
-
-    if (cachedAuth && cachedAuth.isAuthenticated) {
-      setIsAuthenticated(true);
-
-      const cachedProjects = CacheManager.getProjectsList();
-
-      if (cachedProjects) {
-        setProjects(cachedProjects.projects);
-
-        const cachedProject = CacheManager.getSelectedProject();
-
-        if (cachedProject) {
-          setPreferences({ projectId: cachedProject.projectId });
-
-          setShowCachedProjectView(true);
-          setIsLoading(false);
-
-          setTimeout(() => {
-            checkAuthStatus(true);
-          }, 1000);
-
-          return;
+      if (!pathToUse) {
+        // Auto-detect gcloud path
+        const detectedPath = await detectGcloudPath();
+        if (detectedPath) {
+          pathToUse = detectedPath;
+          setGcloudPath(detectedPath);
         }
       }
-    }
 
-    checkAuthStatus();
+      if (!pathToUse) {
+        // Could not find gcloud - show platform-specific instructions
+        const instructions = getInstallInstructions();
+        const platform = getPlatform();
+        const message =
+          platform === "macos"
+            ? `Install via: ${instructions.command}`
+            : platform === "windows"
+              ? "Download from cloud.google.com/sdk/docs/install"
+              : `Install via: ${instructions.command}`;
+
+        setIsLoading(false);
+        setError(`Google Cloud SDK not found. ${message}`);
+        return;
+      }
+
+      // Quote path if it contains spaces
+      const quotedPath = pathToUse.includes(" ") ? `"${pathToUse}"` : pathToUse;
+      await execPromise(`${quotedPath} --version`);
+      setGcloudPath(pathToUse);
+      checkAuthStatus(pathToUse);
+    } catch {
+      const instructions = getInstallInstructions();
+      setIsLoading(false);
+      setError(
+        `Google Cloud SDK not found or invalid. ${instructions.command ? `Install via: ${instructions.command}` : "Visit cloud.google.com/sdk/docs/install"}`,
+      );
+    }
   }
 
-  async function checkAuthStatus(silent = false) {
-    if (!silent) {
-      setIsLoading(true);
-    }
-
-    let loadingToast;
-    if (!silent) {
-      loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Checking authentication status...",
-      });
-    }
+  async function checkAuthStatus(pathToUse: string) {
+    setIsLoading(true);
+    const quotedPath = pathToUse.includes(" ") ? `"${pathToUse}"` : pathToUse;
 
     try {
       const { stdout } = await execPromise(
-        `${GCLOUD_PATH} auth list --format="value(account)" --filter="status=ACTIVE"`,
+        `${quotedPath} auth list --format="value(account)" --filter="status=ACTIVE"`,
       );
 
       if (stdout.trim()) {
         setIsAuthenticated(true);
+        CacheManager.saveAuthStatus(true, stdout.trim());
 
-        if (!isAuthenticated) {
-          CacheManager.saveAuthStatus(true, stdout.trim());
+        // Load cached project
+        const cachedProject = CacheManager.getSelectedProject();
+        if (cachedProject) {
+          setSelectedProject(cachedProject.projectId);
         }
 
-        if (!silent && loadingToast) {
-          loadingToast.hide();
-          showToast({
-            style: Toast.Style.Success,
-            title: "Authenticated",
-            message: stdout.trim(),
-          });
-        }
-
-        fetchProjects(silent);
+        setIsLoading(false);
       } else {
         setIsAuthenticated(false);
         setIsLoading(false);
-
-        if (isAuthenticated) {
-          CacheManager.clearAuthCache();
-        }
-
-        if (!silent && loadingToast) {
-          loadingToast.hide();
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Not authenticated",
-            message: "Please authenticate with Google Cloud",
-          });
-        }
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes("not logged in") || errorMessage.includes("no active account")) {
-        setIsAuthenticated(false);
-
-        if (isAuthenticated) {
-          CacheManager.clearAuthCache();
-        }
-      }
-
+    } catch (err) {
+      setIsAuthenticated(false);
       setIsLoading(false);
-
-      if (!silent) {
-        setError(`Authentication check failed: ${errorMessage}`);
-        if (loadingToast) {
-          loadingToast.hide();
-        }
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Authentication check failed",
-          message: errorMessage,
-        });
-      }
     }
   }
 
-  async function fetchProjects(silent = false) {
-    if (!silent) {
-      setIsLoading(true);
-    }
-
-    let loadingToast;
-    if (!silent) {
-      loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading projects...",
-      });
-    }
-
-    try {
-      const { stdout } = await execPromise(`${GCLOUD_PATH} projects list --format=json`);
-
-      const projectsData = JSON.parse(stdout);
-
-      if (projectsData && projectsData.length > 0) {
-        interface RawProject {
-          projectId: string;
-          name: string;
-          projectNumber: string;
-          createTime?: string;
-        }
-
-        const formattedProjects = projectsData.map((project: RawProject) => ({
-          id: project.projectId,
-          name: project.name,
-          projectNumber: project.projectNumber,
-          createTime: project.createTime || new Date().toISOString(),
-        }));
-
-        setProjects(formattedProjects);
-
-        CacheManager.saveProjectsList(formattedProjects);
-
-        const cachedProject = CacheManager.getSelectedProject();
-
-        if (cachedProject) {
-          setPreferences({ projectId: cachedProject.projectId });
-        }
-
-        if (!silent && loadingToast) {
-          loadingToast.hide();
-          showToast({
-            style: Toast.Style.Success,
-            title: "Projects loaded",
-            message: `Found ${formattedProjects.length} projects`,
-          });
-        }
-      } else {
-        setProjects([]);
-
-        CacheManager.clearProjectsListCache();
-
-        if (!silent && loadingToast) {
-          loadingToast.hide();
-          showToast({
-            style: Toast.Style.Failure,
-            title: "No projects found",
-            message: "Create a project in Google Cloud Console",
-          });
-        }
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("Error fetching projects:", errorMessage);
-      setError(`Failed to fetch projects: ${errorMessage}`);
-      setIsLoading(false);
-
-      if (!silent && loadingToast) {
-        loadingToast.hide();
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch projects",
-          message: errorMessage,
-        });
-      }
-    }
-  }
-
-  async function authenticate() {
-    try {
-      push(
-        <AuthenticationView
-          gcloudPath={GCLOUD_PATH}
-          onAuthenticated={() => {
-            setIsAuthenticated(true);
-
-            fetchProjects(false);
-
-            CacheManager.saveAuthStatus(true, "");
-          }}
-        />,
-      );
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("Error logging in:", errorMessage);
-      setError(`Failed to log in: ${errorMessage}`);
-      setIsLoading(false);
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to log in",
-        message: errorMessage,
-      });
-    }
-  }
-
-  async function selectProject(projectId: string) {
-    if (!projectId || typeof projectId !== "string") {
-      console.error("Invalid project ID provided to selectProject:", projectId);
-      showFailureToast({
-        title: "Invalid project ID",
-        message: "Cannot select project with invalid ID",
-      });
-      setIsLoading(false);
+  async function loadServiceCounts(projectId: string) {
+    // Check cache first
+    const cached = CacheManager.getServiceCounts(projectId);
+    if (cached) {
+      setServiceCounts(cached);
       return;
     }
 
-    const selectingToast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Selecting project...",
-      message: projectId,
-    });
-
+    setIsLoadingCounts(true);
     try {
-      await execPromise(`${GCLOUD_PATH} config set project ${projectId}`);
-
-      CacheManager.saveSelectedProject(projectId);
-      setPreferences({ projectId });
-
-      selectingToast.hide();
-      showToast({
-        style: Toast.Style.Success,
-        title: "Project selected",
-        message: projectId,
-      });
-
-      CacheManager.getRecentlyUsedProjectsWithDetails(GCLOUD_PATH).catch((error) => {
-        console.error("Error updating cached projects:", error);
-      });
-
-      setShouldNavigateToProject(projectId);
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("Error selecting project:", errorMessage);
-      setError(`Failed to select project: ${errorMessage}`);
-      setIsLoading(false);
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to select project",
-        message: errorMessage,
-      });
+      const counts = await fetchResourceCounts(gcloudPath, projectId);
+      const countsWithTimestamp: ServiceCounts = { ...counts, timestamp: Date.now() };
+      CacheManager.saveServiceCounts(projectId, counts);
+      setServiceCounts(countsWithTimestamp);
+    } catch (err) {
+      console.error("Failed to load service counts:", err);
+      // Don't show error toast - counts are non-critical
+    } finally {
+      setIsLoadingCounts(false);
     }
   }
 
-  function viewProject(projectId: string) {
+  const handleProjectChange = useCallback((projectId: string) => {
+    setSelectedProject(projectId);
     CacheManager.saveSelectedProject(projectId);
+    setServiceCounts(null); // Clear counts to trigger reload
+  }, []);
 
-    setShouldNavigateToProject(projectId);
-  }
-
-  function viewStorageBuckets(projectId: string) {
-    push(<StorageBucketView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
-  }
-
-  function viewStorageStats(projectId: string) {
-    push(<StorageStatsView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
-  }
-
-  function viewComputeInstances(projectId: string) {
-    push(<ComputeInstancesView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
-  }
-
-  function viewComputeDisks(projectId: string) {
-    push(<ComputeDisksView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
-  }
-
-  function clearCache() {
-    CacheManager.clearAllCaches();
-    navigationCache.clear();
-  }
-
-  interface AuthenticationViewProps {
-    gcloudPath: string;
-    onAuthenticated: () => void;
-  }
-
-  function AuthenticationView({ gcloudPath, onAuthenticated }: AuthenticationViewProps) {
-    const [error, setError] = useState<string | null>(null);
-    const [isAuthenticating, setIsAuthenticating] = useState(false);
-
-    async function startAuthentication() {
-      setIsAuthenticating(true);
-      setError(null);
-      try {
-        await authenticateWithBrowser(gcloudPath);
-
-        onAuthenticated();
-
-        setTimeout(() => pop(), 500);
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        setError(`Failed to authenticate: ${errorMessage}`);
-      } finally {
-        setIsAuthenticating(false);
+  const handleServiceSelect = useCallback(
+    (serviceId: ResourceType) => {
+      if (!selectedProject) {
+        showToast({ style: Toast.Style.Failure, title: "No project selected" });
+        return;
       }
-    }
+      setViewMode(serviceId);
+    },
+    [selectedProject],
+  );
 
-    useEffect(() => {
-      startAuthentication();
-    }, []);
+  const handleRecentResourceSelect = useCallback((resource: RecentResource) => {
+    // Navigate to the service view for this resource type
+    setSelectedProject(resource.projectId);
+    CacheManager.saveSelectedProject(resource.projectId);
+    setViewMode(resource.type);
+  }, []);
 
-    return (
-      <Form
-        isLoading={isAuthenticating}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Authenticate with Browser"
-              icon={Icon.Globe}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
-              onAction={startAuthentication}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.Description
-          title="Google Cloud Authentication"
-          text={
-            isAuthenticating
-              ? "Authentication in progress..."
-              : error || "Click the button below to authenticate with your Google account in the browser"
-          }
-        />
-      </Form>
+  function authenticate() {
+    push(
+      <AuthenticationView
+        gcloudPath={gcloudPath}
+        onAuthenticated={() => {
+          setIsAuthenticated(true);
+          CacheManager.saveAuthStatus(true, "");
+          pop();
+        }}
+      />,
     );
   }
 
   async function loginWithDifferentAccount() {
-    CacheManager.clearAuthCache();
-
-    const revokingToast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Logging out current account...",
-      message: "Revoking current credentials",
-    });
-
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Logging out..." });
+    const quotedPath = gcloudPath.includes(" ") ? `"${gcloudPath}"` : gcloudPath;
     try {
-      await execPromise(`${GCLOUD_PATH} auth revoke --all --quiet`);
-      revokingToast.hide();
-
-      push(
-        <AuthenticationView
-          gcloudPath={GCLOUD_PATH}
-          onAuthenticated={() => {
-            setIsAuthenticated(true);
-
-            CacheManager.clearProjectCache();
-
-            setShowCachedProjectView(false);
-
-            fetchProjects(false);
-
-            CacheManager.saveAuthStatus(true, "");
-          }}
-        />,
-      );
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`Account switch error: ${errorMessage}`);
-      revokingToast?.hide();
-      setError(`Authentication switch failed: ${errorMessage}`);
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Authentication failed",
-        message: errorMessage,
-      });
+      await execPromise(`${quotedPath} auth revoke --all --quiet`);
+      CacheManager.clearAuthCache();
+      CacheManager.clearProjectCache();
+      setIsAuthenticated(false);
+      setSelectedProject(null);
+      toast.style = Toast.Style.Success;
+      toast.title = "Logged out";
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Logout failed";
     }
   }
 
+  function openDoctor() {
+    push(<DoctorView configuredPath={CONFIGURED_GCLOUD_PATH} />);
+  }
+
+  function refreshAll() {
+    if (selectedProject) {
+      CacheManager.clearServiceCounts(selectedProject);
+      loadServiceCounts(selectedProject);
+    }
+    const recent = CacheManager.getRecentResources();
+    setRecentResources(recent);
+  }
+
+  // Error state - show Doctor prominently
   if (error) {
     return (
-      <List isLoading={false}>
+      <List>
+        <List.Section title="Setup Required">
+          <List.Item
+            title="Doctor"
+            subtitle="Diagnose and fix gcloud SDK configuration"
+            icon={{ source: Icon.Heartbeat, tintColor: Color.Orange }}
+            actions={
+              <ActionPanel>
+                <Action title="Open Doctor" icon={Icon.Heartbeat} onAction={openDoctor} />
+                <Action title="Try Again" icon={Icon.RotateClockwise} onAction={checkGcloudInstallation} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
         <List.EmptyView
-          title={error}
-          description="An error occurred"
+          title="Error"
+          description={error}
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
           actions={
             <ActionPanel>
+              <Action title="Open Doctor" icon={Icon.Heartbeat} onAction={openDoctor} />
               <Action title="Try Again" icon={Icon.RotateClockwise} onAction={checkGcloudInstallation} />
-              <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
             </ActionPanel>
           }
         />
@@ -486,17 +301,17 @@ export default function Command() {
     );
   }
 
-  if (!isAuthenticated) {
+  // Not authenticated
+  if (!isAuthenticated && !isLoading) {
     return (
-      <List isLoading={isLoading}>
+      <List>
         <List.EmptyView
-          title="Not authenticated with Google Cloud"
-          description="Please authenticate to continue"
+          title="Not authenticated"
+          description="Please authenticate with Google Cloud"
           icon={{ source: Icon.Person, tintColor: Color.Blue }}
           actions={
             <ActionPanel>
               <Action title="Authenticate" icon={Icon.Key} onAction={authenticate} />
-              <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
             </ActionPanel>
           }
         />
@@ -504,160 +319,252 @@ export default function Command() {
     );
   }
 
-  if (showCachedProjectView) {
-    return <CachedProjectView gcloudPath={GCLOUD_PATH} onLoginWithDifferentAccount={loginWithDifferentAccount} />;
+  // Service views
+  if (viewMode !== "hub" && selectedProject) {
+    switch (viewMode) {
+      case "compute":
+        return <ComputeInstancesView projectId={selectedProject} gcloudPath={gcloudPath} />;
+      case "storage":
+        return <StorageBucketView projectId={selectedProject} gcloudPath={gcloudPath} />;
+      case "cloudrun":
+        return <CloudRunView projectId={selectedProject} gcloudPath={gcloudPath} />;
+      case "iam":
+        return <IAMView projectId={selectedProject} gcloudPath={gcloudPath} />;
+      case "network":
+        return <NetworkView projectId={selectedProject} gcloudPath={gcloudPath} />;
+      case "secrets":
+        return <SecretListView projectId={selectedProject} gcloudPath={gcloudPath} />;
+      case "logs":
+        return <LogsView projectId={selectedProject} gcloudPath={gcloudPath} />;
+    }
   }
 
+  // Main Hub View
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search projects..."
-      navigationTitle="Select Project"
-      isShowingDetail
+      searchBarPlaceholder="Search services and resources..."
+      navigationTitle="Google Cloud"
+      searchBarAccessory={
+        <ProjectDropdown gcloudPath={gcloudPath} value={selectedProject} onChange={handleProjectChange} />
+      }
       actions={
         <ActionPanel>
           <Action
             title="Refresh"
-            icon={Icon.ArrowClockwise}
+            icon={Icon.RotateClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => fetchProjects(false)}
+            onAction={refreshAll}
           />
-          <Action
-            title="Clear Cache"
-            icon={Icon.Trash}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            onAction={clearCache}
-          />
-          <Action
-            title="Login with Different Account"
-            icon={Icon.Person}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-            onAction={loginWithDifferentAccount}
-          />
+          <Action title="Switch Account" icon={Icon.Person} onAction={loginWithDifferentAccount} />
+          <StreamerModeAction />
         </ActionPanel>
       }
     >
-      {projects.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No projects found"
-          description="Create a project in Google Cloud Console"
-          icon={{ source: Icon.Document, tintColor: Color.Blue }}
-        />
-      ) : (
-        <>
-          <List.Section title="Account Actions">
+      {/* Quick Access Section */}
+      {recentResources.length > 0 && (
+        <List.Section title="Quick Access" subtitle={`${recentResources.length} recent`}>
+          {recentResources.map((resource) => (
             <List.Item
-              icon={{ source: Icon.Person, tintColor: Color.Orange }}
-              title="Login with Different Account"
-              subtitle="Switch to another Google Cloud account"
+              key={`${resource.type}-${resource.id}-${resource.projectId}`}
+              title={resource.name}
+              subtitle={getServiceName(resource.type)}
+              icon={getServiceIcon(resource.type)}
+              accessories={[{ tag: resource.projectId }, { text: formatTimeAgo(resource.accessedAt) }]}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Switch Account"
-                    icon={Icon.Switch}
-                    shortcut={{ modifiers: ["cmd"], key: "l" }}
-                    onAction={loginWithDifferentAccount}
+                  <Action title="Open" icon={Icon.ArrowRight} onAction={() => handleRecentResourceSelect(resource)} />
+                  {resource.consoleUrl && (
+                    <Action.OpenInBrowser
+                      title="Open in Console"
+                      url={resource.consoleUrl}
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    />
+                  )}
+                  <Action.CopyToClipboard
+                    title="Copy Name"
+                    content={resource.name}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
+                  <StreamerModeAction />
                 </ActionPanel>
               }
             />
-          </List.Section>
-          <List.Section title="Google Cloud Projects" subtitle={`${projects.length} projects`}>
-            {projects.map((project) => (
-              <List.Item
-                key={project.id}
-                title={project.name}
-                icon={{
-                  source: preferences.projectId === project.id ? Icon.CheckCircle : Icon.Circle,
-                  tintColor: preferences.projectId === project.id ? Color.Green : Color.SecondaryText,
-                }}
-                accessories={[
-                  { text: project.id },
-                  {
-                    text: preferences.projectId === project.id ? "Current Project" : "",
-                    icon: preferences.projectId === project.id ? Icon.Star : undefined,
-                  },
-                ]}
-                detail={
-                  <List.Item.Detail
-                    markdown={`# ${project.name}\n\n**Project ID:** ${project.id}\n\n**Project Number:** ${project.projectNumber}\n\n**Created:** ${new Date(project.createTime || Date.now()).toLocaleString()}`}
-                    metadata={
-                      <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label title="Project Name" text={project.name} />
-                        <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Label title="Project ID" text={project.id} />
-                        <List.Item.Detail.Metadata.Label title="Project Number" text={project.projectNumber} />
-                        <List.Item.Detail.Metadata.Label
-                          title="Created"
-                          text={new Date(project.createTime || Date.now()).toLocaleString()}
-                        />
-                        {preferences.projectId === project.id && (
-                          <>
-                            <List.Item.Detail.Metadata.Separator />
-                            <List.Item.Detail.Metadata.Label
-                              title="Status"
-                              text="Current Project"
-                              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-                            />
-                          </>
-                        )}
-                      </List.Item.Detail.Metadata>
-                    }
-                  />
-                }
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section title="Project Actions">
-                      <Action
-                        title="Open Project"
-                        icon={Icon.Forward}
-                        shortcut={{ modifiers: ["cmd"], key: "o" }}
-                        onAction={() => viewProject(project.id)}
-                      />
-                      <Action
-                        title="Set as Current Project"
-                        icon={Icon.Check}
-                        shortcut={{ modifiers: ["cmd"], key: "s" }}
-                        onAction={() => selectProject(project.id)}
-                      />
-                    </ActionPanel.Section>
-                    <ActionPanel.Section title="Services">
-                      <Action
-                        title="View Storage Buckets"
-                        icon={Icon.Folder}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                        onAction={() => viewStorageBuckets(project.id)}
-                      />
-                      <Action
-                        title="View Storage Statistics"
-                        icon={Icon.BarChart}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
-                        onAction={() => viewStorageStats(project.id)}
-                      />
-                      <Action
-                        title="View Compute Instances"
-                        icon={Icon.Desktop}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-                        onAction={() => viewComputeInstances(project.id)}
-                      />
-                      <Action
-                        title="View Compute Disks"
-                        icon={Icon.HardDrive}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                        onAction={() => viewComputeDisks(project.id)}
-                      />
-                    </ActionPanel.Section>
-                    <ActionPanel.Section title="Utilities">
-                      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => fetchProjects(false)} />
-                      <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        </>
+          ))}
+        </List.Section>
       )}
+
+      {/* Services Section */}
+      <List.Section title="Services" subtitle={selectedProject ? `Project: ${selectedProject}` : "Select a project"}>
+        {SERVICES.map((service) => {
+          // logs service doesn't have a count (it's a query service)
+          const count =
+            service.id !== "logs" ? serviceCounts?.[service.id as keyof Omit<ServiceCounts, "timestamp">] : undefined;
+          return (
+            <List.Item
+              key={service.id}
+              title={service.name}
+              subtitle={service.description}
+              icon={{ source: service.icon, tintColor: service.color }}
+              accessories={[
+                isLoadingCounts && service.id !== "logs"
+                  ? { icon: Icon.CircleProgress }
+                  : count !== undefined
+                    ? { text: `${count}`, tooltip: `${count} resources` }
+                    : {},
+              ].filter((a) => Object.keys(a).length > 0)}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title={`Open ${service.name}`}
+                    icon={Icon.ArrowRight}
+                    onAction={() => handleServiceSelect(service.id)}
+                  />
+                  <Action
+                    title="Refresh Counts"
+                    icon={Icon.RotateClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={refreshAll}
+                  />
+                  <StreamerModeAction />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+
+      {/* Settings Section */}
+      <List.Section title="Settings">
+        <List.Item
+          title="Refresh All"
+          subtitle="Reload service counts"
+          icon={{ source: Icon.RotateClockwise, tintColor: Color.Blue }}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" icon={Icon.RotateClockwise} onAction={refreshAll} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Switch Account"
+          subtitle="Log in with a different Google account"
+          icon={{ source: Icon.Person, tintColor: Color.Orange }}
+          actions={
+            <ActionPanel>
+              <Action title="Switch Account" icon={Icon.Person} onAction={loginWithDifferentAccount} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Clear Cache"
+          subtitle="Clear all cached data"
+          icon={{ source: Icon.Trash, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Clear Cache"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={() => {
+                  CacheManager.clearAllCaches();
+                  CacheManager.clearRecentResources();
+                  setRecentResources([]);
+                  setServiceCounts(null);
+                  showToast({ style: Toast.Style.Success, title: "Cache cleared" });
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Doctor"
+          subtitle="Diagnose gcloud SDK configuration"
+          icon={{ source: Icon.Heartbeat, tintColor: Color.Green }}
+          actions={
+            <ActionPanel>
+              <Action title="Open Doctor" icon={Icon.Heartbeat} onAction={openDoctor} />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
     </List>
   );
+}
+
+// Helper components and functions
+
+interface AuthenticationViewProps {
+  gcloudPath: string;
+  onAuthenticated: () => void;
+}
+
+function AuthenticationView({ gcloudPath, onAuthenticated }: AuthenticationViewProps) {
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const { pop } = useNavigation();
+
+  async function startAuthentication() {
+    setIsAuthenticating(true);
+    setAuthError(null);
+    try {
+      await authenticateWithBrowser(gcloudPath);
+      onAuthenticated();
+      pop();
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : "Authentication failed");
+    } finally {
+      setIsAuthenticating(false);
+    }
+  }
+
+  useEffect(() => {
+    startAuthentication();
+  }, []);
+
+  return (
+    <Form
+      isLoading={isAuthenticating}
+      actions={
+        <ActionPanel>
+          <Action title="Authenticate with Browser" icon={Icon.Globe} onAction={startAuthentication} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description
+        title="Google Cloud Authentication"
+        text={
+          isAuthenticating
+            ? "Authentication in progress... Please complete in browser."
+            : authError || "Click to authenticate with your Google account"
+        }
+      />
+    </Form>
+  );
+}
+
+function getServiceIcon(type: ResourceType): { source: Icon; tintColor: Color } {
+  const service = SERVICES.find((s) => s.id === type);
+  return service
+    ? { source: service.icon, tintColor: service.color }
+    : { source: Icon.Circle, tintColor: Color.SecondaryText };
+}
+
+function getServiceName(type: ResourceType): string {
+  const service = SERVICES.find((s) => s.id === type);
+  return service?.name || type;
+}
+
+function formatTimeAgo(timestamp: number): string {
+  const now = Date.now();
+  const diffMs = now - timestamp;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return new Date(timestamp).toLocaleDateString();
 }

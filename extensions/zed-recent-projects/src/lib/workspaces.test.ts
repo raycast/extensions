@@ -105,4 +105,68 @@ describe("parseZedWorkspace", () => {
       }),
     ).toBe(null);
   });
+
+  it("parse WSL workspace with user and distro", () => {
+    expect(
+      parseZedWorkspace({
+        id: 1,
+        type: "remote",
+        timestamp: 1757750879526,
+        host: "localhost",
+        user: "wsluser",
+        port: null,
+        paths: "/home/wsluser/project",
+        kind: "wsl",
+        distro: "Ubuntu",
+      }),
+    ).toMatchSnapshot();
+  });
+
+  it("parse WSL workspace with port", () => {
+    expect(
+      parseZedWorkspace({
+        id: 2,
+        type: "remote",
+        timestamp: 1757750879527,
+        host: "localhost",
+        user: "wsluser",
+        port: 2222,
+        paths: "/home/wsluser/project",
+        kind: "wsl",
+        distro: "Debian",
+      }),
+    ).toMatchSnapshot();
+  });
+
+  it("skips WSL workspace without distro", () => {
+    expect(
+      parseZedWorkspace({
+        id: 1,
+        type: "remote",
+        timestamp: 1757750879526,
+        host: "localhost",
+        user: "wsluser",
+        port: null,
+        paths: "/home/wsluser/project",
+        kind: "wsl",
+        distro: null,
+      }),
+    ).toMatchSnapshot();
+  });
+
+  it("skips WSL workspace without user", () => {
+    expect(
+      parseZedWorkspace({
+        id: 1,
+        type: "remote",
+        timestamp: 1757750879526,
+        host: "localhost",
+        user: null,
+        port: null,
+        paths: "/home/wsluser/project",
+        kind: "wsl",
+        distro: "Ubuntu",
+      }),
+    ).toMatchSnapshot();
+  });
 });

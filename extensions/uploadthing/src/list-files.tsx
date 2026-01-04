@@ -10,6 +10,7 @@ import {
   confirmAlert,
   Alert,
   getPreferenceValues,
+  Keyboard,
 } from "@raycast/api";
 import { useFiles } from "./lib/hooks";
 import { filesize } from "filesize";
@@ -25,11 +26,11 @@ const getUrl = async (key: string) => {
 };
 
 const deleteFile = async (key: string) => {
-  await utapi.deleteFiles(key);
+  return await utapi.deleteFiles(key);
 };
 
 export default () => {
-  const { isLoading, files, pagination, revalidate } = useFiles();
+  const { isLoading, files, pagination, mutate } = useFiles();
   const [filter, setFilter] = useState("");
   const { defaultAction } = getPreferenceValues<Preferences.ListFiles>();
 
@@ -115,16 +116,28 @@ export default () => {
                           "Deleting File",
                           file.name,
                         );
-                        await deleteFile(file.key);
-                        revalidate();
-                        await toast.hide();
-                        showToast(
-                          Toast.Style.Success,
-                          "File Deleted",
-                          file.name,
-                        );
+                        try {
+                          await mutate(
+                            deleteFile(file.key).then((r) => {
+                              if (!r.deletedCount)
+                                throw new Error("Something went wrong");
+                            }),
+                            {
+                              optimisticUpdate(data) {
+                                return data.filter((f) => f.id !== file.id);
+                              },
+                              shouldRevalidateAfter: false,
+                            },
+                          );
+                          toast.style = Toast.Style.Success;
+                          toast.title = "Deleted File";
+                        } catch {
+                          toast.style = Toast.Style.Failure;
+                          toast.title = "Deletion Failed";
+                        }
                       }
                     }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

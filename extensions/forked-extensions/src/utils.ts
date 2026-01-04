@@ -4,8 +4,13 @@ import { Cache, getPreferenceValues } from "@raycast/api";
 import { upstreamRepository } from "./constants.js";
 import { CommitDiff, ForkedExtension } from "./types.js";
 
-export const { gitExecutableFilePath, gitRemoteType, githubPersonalAccessToken, repositoryConfigurationPath } =
-  getPreferenceValues<ExtensionPreferences>();
+export const {
+  gitExecutableFilePath,
+  gitRemoteType,
+  githubPersonalAccessToken,
+  repositoryConfigurationPath,
+  openWith,
+} = getPreferenceValues<ExtensionPreferences>();
 
 /**
  * A cache instance to store data temporarily.

@@ -1,5 +1,10 @@
 # Google Gemini Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- 🪟 Add support for Windows platform.
+- ⬆️ Bump all dependencies to the latest.
+
 ## [Update Models] - 2025-08-04
 
 - ⬆️ Update Gemini 2.5 series models from preview to production ready versions.

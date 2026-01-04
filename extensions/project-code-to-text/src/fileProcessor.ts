@@ -437,7 +437,23 @@ export async function generateProjectCodeString(
   if (processOnlySelectedFiles && selectedFilePaths && selectedFilePaths.length > 0) {
     // Process selected files and directories
     progressCallback("Processing selected files and directories...");
-    projectStructure = await processMixedSelection(config, onProgress);
+    try {
+      projectStructure = await processMixedSelection(config, onProgress);
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      if (errorMessage.includes("limit exceeded")) {
+        throw new Error(
+          `Project too large: ${errorMessage}. Consider selecting fewer files/directories or using .gitignore.`,
+        );
+      }
+      // Check for memory-related errors
+      if (errorMessage.includes("heap") || errorMessage.includes("memory")) {
+        throw new Error(
+          `Memory limit exceeded. The selected files/directories are too large to process. Please select fewer items or use .gitignore.`,
+        );
+      }
+      throw error;
+    }
   } else {
     // Process entire directory structure
     progressCallback("Loading ignore rules...");
@@ -485,7 +501,13 @@ export async function generateProjectCodeString(
       const errorMessage = (error as Error).message;
       if (errorMessage.includes("limit exceeded")) {
         throw new Error(
-          `Project too large: ${errorMessage}. Consider using .gitignore or processing a smaller directory.`,
+          `Project too large: ${errorMessage}. Consider using .gitignore, selecting specific files/directories, or processing a smaller directory.`,
+        );
+      }
+      // Check for memory-related errors
+      if (errorMessage.includes("heap") || errorMessage.includes("memory")) {
+        throw new Error(
+          `Memory limit exceeded. The project is too large to process. Please select specific files/directories or use .gitignore to exclude large files.`,
         );
       }
       throw error;
@@ -494,39 +516,49 @@ export async function generateProjectCodeString(
 
   progressCallback("Formatting output...");
 
-  let output = "";
+  // Use array-based string building for better memory efficiency
+  const outputParts: string[] = [];
 
   if (includeAiInstructions) {
-    output += "<ai_instruction>\n" + AI_INSTRUCTION_CONTENT + "</ai_instruction>\n\n";
+    outputParts.push("<ai_instruction>\n" + AI_INSTRUCTION_CONTENT + "</ai_instruction>\n\n");
   }
 
-  output += "<metadata>\n";
-  output += `  Date created: ${new Date().toISOString()}\n`;
-  output += `  Project root: ${projectRoot}\n`;
-  output += `  Processing mode: ${processOnlySelectedFiles ? "Selected files only" : "Entire directory"}\n`;
+  // Build metadata section
+  const metadataLines: string[] = [];
+  metadataLines.push("  Date created: " + new Date().toISOString());
+  metadataLines.push("  Project root: " + projectRoot);
+  metadataLines.push("  Processing mode: " + (processOnlySelectedFiles ? "Selected files only" : "Entire directory"));
   if (processOnlySelectedFiles && selectedFilePaths) {
-    output += `  Selected files: ${selectedFilePaths.length}\n`;
+    metadataLines.push("  Selected files: " + selectedFilePaths.length);
   }
-  output += `  Max file size for content: ${bytesToMB(maxFileSizeBytes).toFixed(2)} MB\n`;
-  output += `  .gitignore used: ${gitignoreUsed ? "Yes" : "No"}\n`;
-  output += `  AI instructions included: ${includeAiInstructions ? "Yes" : "No"}\n`;
-  output += "</metadata>\n\n";
+  metadataLines.push("  Max file size for content: " + bytesToMB(maxFileSizeBytes).toFixed(2) + " MB");
+  metadataLines.push("  .gitignore used: " + (gitignoreUsed ? "Yes" : "No"));
+  metadataLines.push("  AI instructions included: " + (includeAiInstructions ? "Yes" : "No"));
+  // Token count will be added later after calculation
 
-  output += "<project_structure>\n";
-  output += formatProjectStructure(projectStructure);
-  output += "</project_structure>\n\n";
+  outputParts.push("<metadata>\n" + metadataLines.join("\n") + "\n");
 
-  output += "<file_contents>";
+  // Format project structure
+  outputParts.push("<project_structure>\n");
+  outputParts.push(formatProjectStructure(projectStructure));
+  outputParts.push("</project_structure>\n\n");
+
+  // Format file contents in batches to reduce memory pressure
+  outputParts.push("<file_contents>");
+  progressCallback("Formatting file contents...");
   const fileContents = formatFileContents(projectStructure);
-  output += fileContents;
+  outputParts.push(fileContents);
   if (projectStructure.length > 0 && fileContents.trim() !== "") {
-    output += "\n"; // Ensure a newline after the last </file> if content exists
+    outputParts.push("\n");
   }
-  output += "</file_contents>\n";
+  outputParts.push("</file_contents>\n");
 
   if (includeAiInstructions) {
-    output += "\n<ai_analysis_guide>\n" + AI_ANALYSIS_GUIDE_CONTENT + "</ai_analysis_guide>\n";
+    outputParts.push("\n<ai_analysis_guide>\n" + AI_ANALYSIS_GUIDE_CONTENT + "</ai_analysis_guide>\n");
   }
+
+  // Join all parts
+  let output = outputParts.join("");
 
   // Calculate estimated tokens and add to metadata
   const estimatedTokens = estimateTokens(output);
@@ -535,7 +567,16 @@ export async function generateProjectCodeString(
   if (metadataEndIndex !== -1) {
     const beforeMetadataEnd = output.substring(0, metadataEndIndex);
     const afterMetadataEnd = output.substring(metadataEndIndex);
-    output = beforeMetadataEnd + `  Estimated tokens: ~${estimatedTokens}\n` + afterMetadataEnd;
+    output = beforeMetadataEnd + "  Estimated tokens: ~" + estimatedTokens + "\n" + afterMetadataEnd;
+  }
+
+  // Try to trigger garbage collection if available (Node.js with --expose-gc flag)
+  if (global.gc && typeof global.gc === "function") {
+    try {
+      global.gc();
+    } catch {
+      // GC not available or failed, ignore
+    }
   }
 
   progressCallback("Generation complete!");

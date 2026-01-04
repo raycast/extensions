@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Clipboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { NetworkService, IPAddress, NetworkServiceError } from "./NetworkService";
+import { useStreamerMode } from "../../utils/useStreamerMode";
+import { maskIPIfEnabled } from "../../utils/maskSensitiveData";
+import { StreamerModeAction } from "../../components/StreamerModeAction";
 
 interface IPAddressViewProps {
   projectId: string;
@@ -16,6 +19,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
   const [selectedRegion, setSelectedRegion] = useState<string | undefined>(undefined);
   const [regions, setRegions] = useState<string[]>([]);
   const { push } = useNavigation();
+  const { isEnabled: isStreamerMode } = useStreamerMode();
 
   useEffect(() => {
     const networkService = new NetworkService(gcloudPath, projectId);
@@ -261,7 +265,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
           <List.Item
             key={ip.id || ip.name}
             title={ip.name}
-            subtitle={ip.address}
+            subtitle={maskIPIfEnabled(ip.address, isStreamerMode)}
             accessories={[
               {
                 text: formatAddressType(ip.addressType),
@@ -285,7 +289,10 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="IP Address Details" />
                     <List.Item.Detail.Metadata.Label title="Name" text={ip.name} />
-                    <List.Item.Detail.Metadata.Label title="IP Address" text={ip.address} />
+                    <List.Item.Detail.Metadata.Label
+                      title="IP Address"
+                      text={maskIPIfEnabled(ip.address, isStreamerMode)}
+                    />
                     <List.Item.Detail.Metadata.Label title="Description" text={ip.description || "No description"} />
                     <List.Item.Detail.Metadata.Label title="ID" text={ip.id} />
                     <List.Item.Detail.Metadata.Separator />
@@ -361,6 +368,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                     );
                   }}
                 />
+                <StreamerModeAction />
               </ActionPanel>
             }
           />

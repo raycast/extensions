@@ -8,6 +8,7 @@ export async function getTemplates(
   options: {
     offset: number;
     limit: number;
+    name?: string;
   },
 ): Promise<{
   templates: SpaceObject[];

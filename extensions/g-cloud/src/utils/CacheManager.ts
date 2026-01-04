@@ -13,13 +13,38 @@ export const CACHE_KEYS = {
   PROJECTS_LIST: "projects-list",
   PROJECTS_LIST_TIMESTAMP: "projects-list-timestamp",
   RECENTLY_USED_PROJECTS: "recently-used-projects",
+  RECENT_RESOURCES: "recent-resources",
+  SERVICE_COUNTS: "service-counts",
 };
 
 export const CACHE_TTL = {
   AUTH: 72 * 60 * 60 * 1000,
   PROJECT: 72 * 60 * 60 * 1000,
   PROJECTS_LIST: 6 * 60 * 60 * 1000,
+  SERVICE_COUNTS: 5 * 60 * 1000, // 5 minutes
 };
+
+export type ResourceType = "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "logs";
+
+export interface RecentResource {
+  id: string;
+  type: ResourceType;
+  name: string;
+  projectId: string;
+  accessedAt: number;
+  consoleUrl?: string;
+  metadata?: Record<string, string>;
+}
+
+export interface ServiceCounts {
+  compute: number;
+  storage: number;
+  iam: number;
+  network: number;
+  secrets: number;
+  cloudrun: number;
+  timestamp: number;
+}
 
 const PREFS_FILE_PATH = join(homedir(), ".raycast-gcloud-prefs.json");
 
@@ -411,5 +436,79 @@ export class CacheManager {
         CacheManager.saveRecentlyUsedProjects(recentlyUsed);
       }
     }
+  }
+
+  // Recent Resources Methods
+  static saveRecentResource(resource: RecentResource): void {
+    const resources = CacheManager.getRecentResources();
+
+    // Remove if already exists (will re-add at front)
+    const filtered = resources.filter(
+      (r) => !(r.id === resource.id && r.type === resource.type && r.projectId === resource.projectId),
+    );
+
+    // Add to front with current timestamp
+    const updated: RecentResource[] = [{ ...resource, accessedAt: Date.now() }, ...filtered].slice(0, 10); // Keep max 10
+
+    cache.set(CACHE_KEYS.RECENT_RESOURCES, JSON.stringify(updated));
+  }
+
+  static getRecentResources(limit = 10): RecentResource[] {
+    const resourcesStr = cache.get(CACHE_KEYS.RECENT_RESOURCES);
+    if (!resourcesStr) {
+      return [];
+    }
+
+    try {
+      const resources: RecentResource[] = JSON.parse(resourcesStr);
+      return resources.slice(0, limit);
+    } catch (error) {
+      console.error("Failed to parse recent resources:", error);
+      return [];
+    }
+  }
+
+  static clearRecentResources(): void {
+    cache.remove(CACHE_KEYS.RECENT_RESOURCES);
+  }
+
+  // Service Counts Methods
+  static saveServiceCounts(projectId: string, counts: Omit<ServiceCounts, "timestamp">): void {
+    const key = `${CACHE_KEYS.SERVICE_COUNTS}-${projectId}`;
+    const data: ServiceCounts = {
+      ...counts,
+      timestamp: Date.now(),
+    };
+    cache.set(key, JSON.stringify(data));
+  }
+
+  static getServiceCounts(projectId: string): ServiceCounts | null {
+    const key = `${CACHE_KEYS.SERVICE_COUNTS}-${projectId}`;
+    const countsStr = cache.get(key);
+
+    if (!countsStr) {
+      return null;
+    }
+
+    try {
+      const counts: ServiceCounts = JSON.parse(countsStr);
+
+      // Check TTL
+      if (Date.now() - counts.timestamp > CACHE_TTL.SERVICE_COUNTS) {
+        return null;
+      }
+
+      return counts;
+    } catch (error) {
+      console.error("Failed to parse service counts:", error);
+      return null;
+    }
+  }
+
+  static clearServiceCounts(projectId?: string): void {
+    if (projectId) {
+      cache.remove(`${CACHE_KEYS.SERVICE_COUNTS}-${projectId}`);
+    }
+    // Note: Can't clear all service counts without knowing all project IDs
   }
 }
