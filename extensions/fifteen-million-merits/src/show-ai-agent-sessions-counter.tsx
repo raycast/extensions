@@ -1,4 +1,4 @@
-import { Color, Icon, MenuBarExtra } from "@raycast/api";
+import { Alert, Color, confirmAlert, Icon, MenuBarExtra } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
   getCount,
@@ -72,6 +72,19 @@ export default function Command() {
   };
 
   const handleResetMerits = async () => {
+    if (
+      !(await confirmAlert({
+        title: "Reset Lifetime Merits?",
+        message: "This action cannot be undone.",
+        primaryAction: {
+          title: "Reset",
+          style: Alert.ActionStyle.Destructive,
+        },
+      }))
+    ) {
+      return;
+    }
+
     await mutateSessions(
       (async () => {
         await resetMerits();
@@ -117,16 +130,16 @@ export default function Command() {
         onAction={handleToggleExtension}
       />
       <MenuBarExtra.Item
-        title="Reset Merits"
-        icon={Icon.Trash}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-        onAction={handleResetMerits}
-      />
-      <MenuBarExtra.Item
         title="Reset Session Count"
         icon={Icon.RotateAntiClockwise}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={handleReset}
+      />
+      <MenuBarExtra.Item
+        title="Reset Merits"
+        icon={Icon.Trash}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+        onAction={handleResetMerits}
       />
     </MenuBarExtra>
   );
