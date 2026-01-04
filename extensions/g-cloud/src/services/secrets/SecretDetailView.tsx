@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   ActionPanel,
   Action,
@@ -10,14 +10,12 @@ import {
   confirmAlert,
   Alert,
   useNavigation,
-  Clipboard,
   Detail,
 } from "@raycast/api";
 import { SecretManagerService, Secret, SecretVersion } from "./SecretManagerService";
 import AddVersionForm from "./components/AddVersionForm";
+import SecretValueView from "./components/SecretValueView";
 import { showFailureToast } from "@raycast/utils";
-import { useStreamerMode } from "../../utils/useStreamerMode";
-import { maskSecretIfEnabled } from "../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
 
 interface SecretDetailViewProps {
@@ -33,7 +31,6 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
   const [service, setService] = useState<SecretManagerService | null>(null);
   const [viewMode, setViewMode] = useState<"overview" | "versions">("overview");
   const { push, pop } = useNavigation();
-  const { isEnabled: isStreamerMode } = useStreamerMode();
 
   useEffect(() => {
     const secretService = new SecretManagerService(gcloudPath, projectId);
@@ -126,55 +123,7 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
         (await loadingToast).hide();
 
         if (value) {
-          // Show value in a detail view with auto-hide (masked if streamer mode)
-          const displayValue = maskSecretIfEnabled(value, isStreamerMode);
-          const markdown = isStreamerMode
-            ? `# Secret Value\n\n\`\`\`\n${displayValue}\n\`\`\`\n\n> 🔒 **Streamer Mode**: Secret value is hidden. Disable Streamer Mode to view.`
-            : `# Secret Value\n\n\`\`\`\n${displayValue}\n\`\`\`\n\n> ⚠️ **Security Notice**: This value will be automatically cleared from your clipboard in 30 seconds.`;
-
-          push(
-            <Detail
-              markdown={markdown}
-              navigationTitle={`Secret Value - ${secretId}`}
-              actions={
-                <ActionPanel>
-                  {!isStreamerMode && (
-                    <Action
-                      title="Copy to Clipboard"
-                      icon={Icon.Clipboard}
-                      onAction={async () => {
-                        await Clipboard.copy(value);
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Value copied",
-                          message: "Secret value has been copied to clipboard",
-                        });
-
-                        // Auto-clear clipboard after 30 seconds
-                        setTimeout(async () => {
-                          try {
-                            const currentClipboard = await Clipboard.readText();
-                            if (currentClipboard === value) {
-                              await Clipboard.copy("");
-                              showToast({
-                                style: Toast.Style.Success,
-                                title: "Clipboard cleared",
-                                message: "Secret value has been automatically cleared for security",
-                              });
-                            }
-                          } catch (error) {
-                            // Silently fail if clipboard access is denied
-                          }
-                        }, 30000);
-                      }}
-                    />
-                  )}
-                  <StreamerModeAction />
-                  <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
-                </ActionPanel>
-              }
-            />,
-          );
+          push(<SecretValueView secretId={secretId} version={version} value={value} onBack={pop} />);
         }
       } catch (error) {
         (await loadingToast).hide();
@@ -245,82 +194,157 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
     }
   };
 
+  // Memoize expiration status
+  const expirationInfo = useMemo(() => {
+    if (!secret?.expireTime) return null;
+    const expireDate = new Date(secret.expireTime);
+    const now = new Date();
+    const isExpired = expireDate < now;
+    const daysUntilExpiry = Math.ceil((expireDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return { isExpired, daysUntilExpiry, expireDate };
+  }, [secret?.expireTime]);
+
+  // Memoize replication info
+  const replicationInfo = useMemo(() => {
+    if (!secret?.replication) return "Unknown";
+    if (secret.replication.automatic) return "Automatic";
+    if (secret.replication.userManaged?.replicas) {
+      return secret.replication.userManaged.replicas.map((r) => r.location).join(", ");
+    }
+    return "Unknown";
+  }, [secret?.replication]);
+
+  // Memoize labels section
+  const labelsSection = useMemo(() => {
+    if (!secret?.labels || Object.keys(secret.labels).length === 0) return null;
+    return (
+      <>
+        <Detail.Metadata.Separator />
+        <Detail.Metadata.Label title="Labels" icon={Icon.Tag} />
+        {Object.entries(secret.labels).map(([key, value]) => (
+          <Detail.Metadata.Label key={key} title={key} text={value} />
+        ))}
+      </>
+    );
+  }, [secret?.labels]);
+
+  // Memoize markdown content
+  const markdown = useMemo(() => {
+    if (!secret) return "# Error\n\nFailed to load secret details.";
+
+    let md = `# ${secretId}\n\n`;
+    md += `#### Created ${SecretManagerService.formatRelativeTime(secret.createTime)}\n\n`;
+
+    // Versions table
+    if (versions.length > 0) {
+      md += `### Version History\n\n`;
+      md += "| Version | State | Created |\n";
+      md += "|---------|-------|--------|\n";
+      versions.slice(0, 5).forEach((version) => {
+        const versionId = SecretManagerService.extractVersionId(version.name);
+        const stateIcon =
+          version.state === "ENABLED" ? "Active" : version.state === "DISABLED" ? "Disabled" : "Destroyed";
+        md += `| ${versionId} | \`${stateIcon}\` | ${SecretManagerService.formatRelativeTime(version.createTime)} |\n`;
+      });
+      if (versions.length > 5) {
+        md += `\n*...and ${versions.length - 5} more versions*\n`;
+      }
+      md += "\n";
+    }
+
+    // Rotation info
+    if (secret.rotation) {
+      md += `### Rotation\n\n`;
+      md += `| Setting | Value |\n`;
+      md += `|---------|-------|\n`;
+      md += `| Period | \`${secret.rotation.rotationPeriod}\` |\n`;
+      if (secret.rotation.nextRotationTime) {
+        md += `| Next Rotation | ${SecretManagerService.formatRelativeTime(secret.rotation.nextRotationTime)} |\n`;
+      }
+      md += "\n";
+    }
+
+    // Pub/Sub Topics
+    if (secret.topics && secret.topics.length > 0) {
+      md += `### Pub/Sub Topics\n\n`;
+      secret.topics.forEach((topic) => {
+        const topicName = topic.name.split("/").pop() || topic.name;
+        md += `- \`${topicName}\`\n`;
+      });
+      md += "\n";
+    }
+
+    md += `---\n\n`;
+    md += `**Tip:** Press Enter to view the latest secret value\n`;
+
+    return md;
+  }, [secret, secretId, versions]);
+
   const renderOverview = () => {
     if (!secret) {
       return <Detail markdown="# Error\n\nFailed to load secret details." navigationTitle={secretId} />;
     }
 
-    const metadata: string[] = [];
-
-    // Basic information
-    metadata.push(`**Name:** ${secretId}`);
-    metadata.push(`**Created:** ${SecretManagerService.formatRelativeTime(secret.createTime)}`);
-    metadata.push(`**Versions:** ${versions.length}`);
-
-    // Expiration
-    if (secret.expireTime) {
-      const expireDate = new Date(secret.expireTime);
-      const now = new Date();
-      const isExpired = expireDate < now;
-      metadata.push(
-        `**${isExpired ? "Expired" : "Expires"}:** ${SecretManagerService.formatRelativeTime(secret.expireTime)}`,
-      );
-    }
-
-    // TTL
-    if (secret.ttl) {
-      metadata.push(`**TTL:** ${secret.ttl}`);
-    }
-
-    // Rotation
-    if (secret.rotation) {
-      metadata.push(`**Rotation Period:** ${secret.rotation.rotationPeriod}`);
-      if (secret.rotation.nextRotationTime) {
-        metadata.push(
-          `**Next Rotation:** ${SecretManagerService.formatRelativeTime(secret.rotation.nextRotationTime)}`,
-        );
-      }
-    }
-
-    // Replication
-    if (secret.replication) {
-      if (secret.replication.automatic) {
-        metadata.push(`**Replication:** Automatic`);
-      } else if (secret.replication.userManaged?.replicas) {
-        const locations = secret.replication.userManaged.replicas.map((r) => r.location).join(", ");
-        metadata.push(`**Replication:** User-managed (${locations})`);
-      }
-    }
-
-    // Labels
-    if (secret.labels && Object.keys(secret.labels).length > 0) {
-      metadata.push(`**Labels:**`);
-      Object.entries(secret.labels).forEach(([key, value]) => {
-        metadata.push(`  - ${key}: ${value}`);
-      });
-    }
-
-    // Topics
-    if (secret.topics && secret.topics.length > 0) {
-      metadata.push(`**Pub/Sub Topics:**`);
-      secret.topics.forEach((topic) => {
-        metadata.push(`  - ${topic.name}`);
-      });
-    }
-
-    const markdown = `# ${secretId}\n\n${metadata.join("\n")}\n\n---\n\n**Latest Versions:**\n\n${versions
-      .slice(0, 5)
-      .map((version) => {
-        const versionId = SecretManagerService.extractVersionId(version.name);
-        const stateIcon = version.state === "ENABLED" ? "🟢" : version.state === "DISABLED" ? "🟡" : "🔴";
-        return `${stateIcon} **Version ${versionId}** - ${version.state} (${SecretManagerService.formatRelativeTime(version.createTime)})`;
-      })
-      .join("\n")}`;
-
     return (
       <Detail
         markdown={markdown}
-        navigationTitle={secretId}
+        navigationTitle={`Secret: ${secretId}`}
+        metadata={
+          <Detail.Metadata>
+            {/* Status */}
+            <Detail.Metadata.TagList title="Status">
+              {expirationInfo?.isExpired ? (
+                <Detail.Metadata.TagList.Item text="Expired" color={Color.Red} />
+              ) : (
+                <Detail.Metadata.TagList.Item text="Active" color={Color.Green} />
+              )}
+            </Detail.Metadata.TagList>
+
+            <Detail.Metadata.Separator />
+
+            {/* Basic Information */}
+            <Detail.Metadata.Label title="Versions" text={`${versions.length}`} icon={Icon.List} />
+            <Detail.Metadata.Label
+              title="Created"
+              text={new Date(secret.createTime).toLocaleDateString()}
+              icon={Icon.Calendar}
+            />
+            <Detail.Metadata.Label title="Replication" text={replicationInfo} icon={Icon.Globe} />
+
+            {/* Expiration Info */}
+            {expirationInfo && (
+              <>
+                <Detail.Metadata.Separator />
+                <Detail.Metadata.Label
+                  title={expirationInfo.isExpired ? "Expired" : "Expires"}
+                  text={SecretManagerService.formatRelativeTime(secret.expireTime!)}
+                  icon={expirationInfo.isExpired ? { source: Icon.Clock, tintColor: Color.Red } : Icon.Clock}
+                />
+              </>
+            )}
+
+            {/* TTL */}
+            {secret.ttl && <Detail.Metadata.Label title="TTL" text={secret.ttl} icon={Icon.Stopwatch} />}
+
+            {/* Rotation */}
+            {secret.rotation && (
+              <>
+                <Detail.Metadata.Separator />
+                <Detail.Metadata.Label title="Rotation" icon={Icon.ArrowClockwise} />
+                <Detail.Metadata.Label title="Period" text={secret.rotation.rotationPeriod} />
+                {secret.rotation.nextRotationTime && (
+                  <Detail.Metadata.Label
+                    title="Next Rotation"
+                    text={SecretManagerService.formatRelativeTime(secret.rotation.nextRotationTime)}
+                  />
+                )}
+              </>
+            )}
+
+            {/* Labels */}
+            {labelsSection}
+          </Detail.Metadata>
+        }
         actions={
           <ActionPanel>
             <ActionPanel.Section title="Secret Actions">

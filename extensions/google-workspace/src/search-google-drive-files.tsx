@@ -1,8 +1,8 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
-import { getFiles, QueryTypes, ScopeTypes } from "./api/getFiles";
+import { File, getFileParentsById, getFiles, QueryTypes, ScopeTypes } from "./api/getFiles";
 import FileListItem from "./components/FileListItem";
 
 import { getUserEmail } from "./api/googleAuth";
@@ -19,15 +19,29 @@ function SearchGoogleDriveFiles() {
   const [query, setQuery] = useState("");
   const [queryType, setQueryType] = useCachedState<QueryTypes>("query type", QueryTypes.fileName);
   const [scopeType, setScopeType] = useCachedState<ScopeTypes>("scope type", ScopeTypes.allDrives);
+  const [parentId, setParentId] = useState<string | undefined>(undefined);
 
   const email = getUserEmail();
 
   const { data, isLoading } = useCachedPromise(
-    async (queryType: QueryTypes, scopeType: ScopeTypes, query: string) =>
-      await getFiles({ queryType, queryText: query, scope: scopeType }),
-    [queryType, scopeType, query],
+    async (queryType: QueryTypes, scopeType: ScopeTypes, query: string, parentId?: string) =>
+      await getFiles({ queryType, queryText: query, scope: scopeType, parentId }),
+    [queryType, scopeType, query, parentId],
     { failureToastOptions: { title: "Failed to retrieve files" } },
   );
+
+  const enterDirectory = (file: File) => {
+    if (file.mimeType === "application/vnd.google-apps.folder") {
+      setParentId(file.id);
+      setQuery(""); // clear search when entering folder
+    }
+  };
+
+  const goToParent = async () => {
+    if (!parentId) return;
+    const parents = await getFileParentsById(parentId);
+    setParentId(parents.length > 0 ? parents[0] : undefined);
+  };
 
   return (
     <List
@@ -60,11 +74,19 @@ function SearchGoogleDriveFiles() {
       throttle
     >
       <List.EmptyView
-        title="No files found"
-        description="Try adjusting your search or filter"
+        title={parentId ? "No files in this folder" : "No files found"}
+        description={parentId ? undefined : "Try adjusting your search or filter"}
+        icon={{ source: "google-drive.svg", tintColor: Color.SecondaryText }}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open Google Drive" icon="google-drive.png" url="https://drive.google.com" />
+            {parentId && (
+              <Action
+                title="Go to Parent Directory"
+                icon={Icon.ArrowLeft}
+                onAction={goToParent}
+                shortcut={{ modifiers: ["shift"], key: "tab" }}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -72,7 +94,14 @@ function SearchGoogleDriveFiles() {
       {data?.files && data.files.length > 0 && (
         <List.Section title={getSectionTitle(queryType)} subtitle={`${data.files.length}`}>
           {data.files.map((file) => (
-            <FileListItem file={file} key={file.id} email={email} />
+            <FileListItem
+              file={file}
+              key={file.id}
+              email={email}
+              onEnterDirectory={(file) => enterDirectory(file)}
+              goToParent={goToParent}
+              currentParentId={parentId}
+            />
           ))}
         </List.Section>
       )}

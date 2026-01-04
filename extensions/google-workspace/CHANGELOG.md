@@ -1,5 +1,12 @@
 # Google Workspace Changelog
 
+## [Folder Navigation Enhancements] - 2025-12-25
+
+### Added
+
+- 📂 **Improved folder navigation** — Navigate folder hierarchies with the new "Enter Directory" and "Go to Parent Directory" actions (accessible via `Tab` and `Shift + Tab` keyboard shortcuts).
+- 🔍 **Enhanced empty state** — The empty view now displays the Google Drive icon for better visual feedback.
+
 ## [Improvements and Fixes] - 2025-12-18
 
 ### Changed

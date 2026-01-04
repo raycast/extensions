@@ -203,13 +203,45 @@ describe("obsidian", () => {
       expect(url).toBe("obsidian://open?path=%2Fpath%2Fto%2Fnote.md");
     });
 
+    it("should generate OpenWorkspace URL", () => {
+      const url = getObsidianTarget({
+        type: ObsidianTargetType.OpenWorkspace,
+        vault: mockVault,
+        workspace: "Writing Workspace",
+      });
+
+      expect(url).toBe("obsidian://adv-uri?vault=Test%20Vault&workspace=Writing%20Workspace");
+    });
+
+    it("should generate OpenWorkspace URL with special characters", () => {
+      const url = getObsidianTarget({
+        type: ObsidianTargetType.OpenWorkspace,
+        vault: { name: "My Vault", key: "key", path: "path" },
+        workspace: "Work & Play (2024)",
+      });
+
+      expect(url).toContain("vault=My%20Vault");
+      expect(url).toContain("workspace=Work%20%26%20Play%20(2024)");
+    });
+
+    it("should generate OpenWorkspace URL with vault name containing special characters", () => {
+      const url = getObsidianTarget({
+        type: ObsidianTargetType.OpenWorkspace,
+        vault: { name: "Test Vault #1", key: "key", path: "path" },
+        workspace: "Main",
+      });
+
+      expect(url).toContain("vault=Test%20Vault%20%231");
+      expect(url).toContain("workspace=Main");
+    });
+
     it("should generate DailyNote URL", () => {
       const url = getObsidianTarget({
         type: ObsidianTargetType.DailyNote,
         vault: mockVault,
       });
 
-      expect(url).toBe("obsidian://advanced-uri?daily=true&vault=Test%20Vault");
+      expect(url).toBe("obsidian://adv-uri?daily=true&vault=Test%20Vault");
     });
 
     it("should generate DailyNoteAppend URL with append mode", () => {
@@ -219,7 +251,7 @@ describe("obsidian", () => {
         text: "New task",
       });
 
-      expect(url).toContain("obsidian://advanced-uri?daily=true");
+      expect(url).toContain("obsidian://adv-uri?daily=true");
       expect(url).toContain("&mode=append");
       expect(url).toContain("&data=New%20task");
       expect(url).toContain("&vault=Test%20Vault");
@@ -289,7 +321,7 @@ describe("obsidian", () => {
         path: "tasks.md",
       });
 
-      expect(url).toContain("obsidian://advanced-uri?mode=append&filepath=tasks.md");
+      expect(url).toContain("obsidian://adv-uri?mode=append&filepath=tasks.md");
       expect(url).toContain("&data=-");
       expect(url).toContain("&vault=Test%20Vault");
     });

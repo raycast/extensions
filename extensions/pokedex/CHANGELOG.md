@@ -1,5 +1,9 @@
 # Pokédex Changelog
 
+## [Move Stability] - 2026-01-01
+
+- Fixed Move command crashing when Pokémon moves are missing in the learnset.
+
 ## [Windows Support] - 2025-12-04
 
 - Added Windows support; migrate ESLint to flat config and TS to ES2023.

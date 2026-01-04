@@ -10,7 +10,7 @@ interface EventTimersResponse {
 function parseTimeToMs(timeStr: string, baseDate: Date): number {
   const [hours, minutes] = timeStr.split(":").map(Number);
   const date = new Date(baseDate);
-  date.setHours(hours, minutes, 0, 0);
+  date.setUTCHours(hours, minutes, 0, 0);
   return date.getTime();
 }
 
