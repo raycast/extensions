@@ -18,7 +18,7 @@
       "mode": "view"
     },
     {
-      "name": "generate-aa",
+      "name": "generate-ascii-art",
       "title": "Generate ASCII Art",
       "description": "Generate ASCII art from text using figlet fonts",
       "mode": "view"
