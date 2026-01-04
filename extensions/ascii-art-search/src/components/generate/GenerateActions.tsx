@@ -43,8 +43,7 @@ export function GenerateActions({
           shortcut={SHORTCUTS.save}
         />
       </ActionPanel.Section>
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {children as any}
+      <>{children}</>
     </ActionPanel>
   );
 }
