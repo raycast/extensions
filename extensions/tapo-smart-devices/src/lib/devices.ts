@@ -34,7 +34,7 @@ const isSupportedDevice = (device: Device): boolean =>
   device.type === DeviceTypeEnum.Plug || device.type === DeviceTypeEnum.Bulb;
 
 export const getDevices = async (): Promise<Device[]> => {
-  const { email, password } = getPreferenceValues<ExtensionPreferences>();
+  const { email, password } = getPreferenceValues<Preferences>();
 
   const cloudAPI = await cloudLogin(email, password);
   const tapoDevices = await cloudAPI.listDevices();
