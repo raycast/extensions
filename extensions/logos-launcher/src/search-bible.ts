@@ -1,18 +1,26 @@
-import { LaunchProps, Toast, open, showHUD, showToast } from "@raycast/api";
+import { LaunchProps, Toast, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
 
 const SEARCH_URL = "https://ref.ly/logos4/Search";
 const KIND = "BibleSearch";
 
+interface Preferences {
+  useSmartSearch: boolean;
+}
+
+type CommandArguments = {
+  query?: string;
+};
+
 /**
  * Logos Bible Search command.
  *
- * Opens a Bible search in Logos. The search mode (Smart or Precise) is
- * determined by your last-chosen setting in the Logos application.
+ * Opens a Bible search in Logos.
  *
  * - Smart search: morphologically-aware, matches concepts and synonyms
  * - Precise search: exact phrase matching
  */
-export default async function Command(props: LaunchProps<{ arguments: Arguments.SearchBible }>) {
+export default async function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
+  const preferences = getPreferenceValues<Preferences>();
   const query = props.arguments.query?.trim();
 
   if (!query) {
@@ -30,13 +38,14 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     kind: KIND,
     q: query,
     syntax: "v2",
+    engine: preferences.useSmartSearch ? "Semantic" : "Lexical",
   });
 
   const url = `${SEARCH_URL}?${params.toString()}`;
 
   try {
     await open(url);
-    await showHUD("Running Bible Search in Logos");
+    await showHUD(`Running ${preferences.useSmartSearch ? "Smart" : "Precise"} Bible Search in Logos`);
   } catch {
     await showToast({
       style: Toast.Style.Failure,
