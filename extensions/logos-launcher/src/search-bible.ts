@@ -1,4 +1,4 @@
-import { LaunchProps, Toast, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
+import { LaunchProps, Toast, open, showHUD, showToast } from "@raycast/api";
 
 const SEARCH_URL = "https://ref.ly/logos4/Search";
 const KIND = "BibleSearch";
@@ -6,14 +6,13 @@ const KIND = "BibleSearch";
 /**
  * Logos Bible Search command.
  *
- * Opens either a smart search (morphologically-aware, matches concepts and synonyms)
- * or a precise search (exact phrase match) depending on preferences.
+ * Opens a Bible search in Logos. The search mode (Smart or Precise) is
+ * determined by your last-chosen setting in the Logos application.
  *
- * Smart search uses syntax=v2 which enables Logos' intelligent matching.
- * Precise search wraps the query in quotes for exact matching.
+ * - Smart search: morphologically-aware, matches concepts and synonyms
+ * - Precise search: exact phrase matching
  */
 export default async function Command(props: LaunchProps<{ arguments: Arguments.SearchBible }>) {
-  const preferences = getPreferenceValues<Preferences.SearchBible>();
   const query = props.arguments.query?.trim();
 
   if (!query) {
@@ -25,19 +24,11 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     return;
   }
 
-  // Determine search mode
-  const isPrecise = preferences.defaultPreciseSearch ?? false;
-
-  // Build the search query
-  // For precise search, wrap in quotes for exact matching
-  // For smart search, use the query as-is with v2 syntax
-  const searchQuery = isPrecise ? `"${query}"` : query;
-
   // Build the URL with appropriate parameters
-  // syntax=v2 enables Logos' smart morphological matching
+  // syntax=v2 enables Logos' intelligent search capabilities
   const params = new URLSearchParams({
     kind: KIND,
-    q: searchQuery,
+    q: query,
     syntax: "v2",
   });
 
@@ -45,8 +36,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
   try {
     await open(url);
-    const searchType = isPrecise ? "Precise" : "Smart";
-    await showHUD(`Running ${searchType} Bible Search in Logos`);
+    await showHUD("Running Bible Search in Logos");
   } catch {
     await showToast({
       style: Toast.Style.Failure,

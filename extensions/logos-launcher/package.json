@@ -135,7 +135,7 @@
       "name": "search-bible",
       "title": "Logos Bible Search",
       "subtitle": "Search the Bible in Logos",
-      "description": "Search the Bible using Logos smart search (concepts, synonyms) or precise search (exact match).",
+      "description": "Search the Bible in Logos. Uses your last-chosen search mode in Logos (Smart or Precise).",
       "mode": "no-view",
       "keywords": [
         "bible search",
@@ -147,16 +147,6 @@
           "name": "query",
           "type": "text",
           "placeholder": "grace AND mercy"
-        }
-      ],
-      "preferences": [
-        {
-          "name": "defaultPreciseSearch",
-          "type": "checkbox",
-          "title": "Use Precise Search by Default",
-          "label": "Use precise (exact match) search instead of smart search",
-          "description": "When enabled, searches match exact phrases. When disabled (default), searches use Logos smart matching with concepts and synonyms.",
-          "required": false
         }
       ]
     },
