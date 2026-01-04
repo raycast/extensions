@@ -11,7 +11,14 @@ import {
   minimizeAllExcept,
   ScreenInfo,
 } from "./lib/windows";
-import { getPinnedWindows, getPermaPinnedWindows, pinWindow, permaPinWindow, unpinWindow } from "./lib/storage";
+import {
+  getPinnedWindows,
+  getPermaPinnedWindows,
+  getCachedPermaPinnedWindows,
+  pinWindow,
+  permaPinWindow,
+  unpinWindow,
+} from "./lib/storage";
 import { LAYOUT_PRESETS } from "./lib/layouts";
 
 interface WindowWithMeta extends WindowInfo {
@@ -27,10 +34,11 @@ export default function Command() {
   const refreshWindows = useCallback(async (isSilent = false) => {
     if (!isSilent) setIsLoading(true);
     try {
-      const [windowList, pinnedList, permaPinnedList, screenList] = await Promise.all([
+      const [windowList, pinnedList, permaPinnedList, cachedPermaPinnedList, screenList] = await Promise.all([
         Promise.resolve(listWindows()),
         getPinnedWindows(),
         getPermaPinnedWindows(),
+        getCachedPermaPinnedWindows(),
         Promise.resolve(getAllScreens()),
       ]);
 
@@ -53,7 +61,29 @@ export default function Command() {
           return { ...w, isPinned, isPermaPinned };
         });
 
-      setWindows(enhanced);
+      // Add cached perma-pinned windows that aren't currently open
+      const openWindowKeys = new Set(windowList.map((w) => `${w.processName}:${w.title}`.toLowerCase()));
+      const cachedWindows: WindowWithMeta[] = cachedPermaPinnedList
+        .filter((cached) => {
+          const key = `${cached.processName}:${cached.title}`.toLowerCase();
+          return !openWindowKeys.has(key);
+        })
+        .map((cached) => {
+          const isPermaPinned = permaPinnedList.some(
+            (p) => p.processName === cached.processName && (!p.titlePattern || cached.title.includes(p.titlePattern)),
+          );
+          return {
+            handle: 0,
+            title: cached.title,
+            processName: cached.processName,
+            processPath: cached.processPath,
+            iconPath: cached.iconPath,
+            isPinned: false,
+            isPermaPinned,
+          };
+        });
+
+      setWindows([...enhanced, ...cachedWindows]);
       setScreens(screenList);
     } catch (error) {
       if (!isSilent) {
@@ -81,6 +111,14 @@ export default function Command() {
 
   const handleSwitch = async (window: WindowWithMeta) => {
     try {
+      if (window.handle === 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Window not available",
+          message: "This window is currently closed. Please open it first.",
+        });
+        return;
+      }
       switchToWindow(window.handle);
       await showHUD(`Switched to ${window.title}`);
     } catch (error) {
@@ -94,8 +132,20 @@ export default function Command() {
 
   const handleMinimize = async (window: WindowWithMeta) => {
     try {
+      if (window.handle === 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Window not available",
+          message: "This window is currently closed. Please open it first.",
+        });
+        return;
+      }
       minimizeWindow(window.handle);
-      showToast({ style: Toast.Style.Success, title: `Minimized ${getAppDisplayName(window.processName)}` });
+      const toast = await showToast({
+        style: Toast.Style.Success,
+        title: `Minimized ${getAppDisplayName(window.processName)}`,
+      });
+      setTimeout(() => toast.hide(), 2000);
       refreshWindows();
     } catch (error) {
       showToast({
@@ -108,8 +158,20 @@ export default function Command() {
 
   const handleClose = async (window: WindowWithMeta) => {
     try {
+      if (window.handle === 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Window not available",
+          message: "This window is already closed.",
+        });
+        return;
+      }
       closeWindow(window.handle);
-      showToast({ style: Toast.Style.Success, title: `Closed ${getAppDisplayName(window.processName)}` });
+      const toast = await showToast({
+        style: Toast.Style.Success,
+        title: `Closed ${getAppDisplayName(window.processName)}`,
+      });
+      setTimeout(() => toast.hide(), 2000);
       setTimeout(() => refreshWindows(), 300);
     } catch (error) {
       showToast({
@@ -124,10 +186,18 @@ export default function Command() {
     try {
       if (window.isPinned) {
         await unpinWindow(window.processName, window.title);
-        showToast({ style: Toast.Style.Success, title: `Unpinned ${getAppDisplayName(window.processName)}` });
+        const toast = await showToast({
+          style: Toast.Style.Success,
+          title: `Unpinned ${getAppDisplayName(window.processName)}`,
+        });
+        setTimeout(() => toast.hide(), 2000);
       } else {
         await pinWindow(window.processName, window.title);
-        showToast({ style: Toast.Style.Success, title: `Pinned ${getAppDisplayName(window.processName)}` });
+        const toast = await showToast({
+          style: Toast.Style.Success,
+          title: `Pinned ${getAppDisplayName(window.processName)}`,
+        });
+        setTimeout(() => toast.hide(), 2000);
       }
       refreshWindows();
     } catch (error) {
@@ -143,10 +213,24 @@ export default function Command() {
     try {
       if (window.isPermaPinned) {
         await unpinWindow(window.processName, window.title);
-        showToast({ style: Toast.Style.Success, title: `Removed permanent pin` });
+        const toast = await showToast({
+          style: Toast.Style.Success,
+          title: `Removed permanent pin`,
+        });
+        setTimeout(() => toast.hide(), 2000);
       } else {
-        await permaPinWindow(window.processName, window.title);
-        showToast({ style: Toast.Style.Success, title: `Permanently pinned ${getAppDisplayName(window.processName)}` });
+        await permaPinWindow(window.processName, window.title, {
+          processName: window.processName,
+          title: window.title,
+          processPath: window.processPath,
+          iconPath: window.iconPath,
+          cachedAt: Date.now(),
+        });
+        const toast = await showToast({
+          style: Toast.Style.Success,
+          title: `Permanently pinned ${getAppDisplayName(window.processName)}`,
+        });
+        setTimeout(() => toast.hide(), 2000);
       }
       refreshWindows();
     } catch (error) {
@@ -160,10 +244,22 @@ export default function Command() {
 
   const handleLayout = async (window: WindowWithMeta, layoutIndex: number, screen: ScreenInfo) => {
     try {
+      if (window.handle === 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Window not available",
+          message: "This window is currently closed. Please open it first.",
+        });
+        return;
+      }
       const layout = LAYOUT_PRESETS[layoutIndex];
       const pos = layout.apply(screen.width, screen.height, screen.x, screen.y);
       moveWindow(window.handle, pos.x, pos.y, pos.width, pos.height);
-      showToast({ style: Toast.Style.Success, title: `Applied ${layout.name} to ${screen.name}` });
+      const toast = await showToast({
+        style: Toast.Style.Success,
+        title: `Applied ${layout.name} to ${screen.name}`,
+      });
+      setTimeout(() => toast.hide(), 2000);
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -175,6 +271,14 @@ export default function Command() {
 
   const handleFocusMode = async (window: WindowWithMeta) => {
     try {
+      if (window.handle === 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Window not available",
+          message: "This window is currently closed. Please open it first.",
+        });
+        return;
+      }
       minimizeAllExcept(window.handle);
       switchToWindow(window.handle);
       await showHUD(`Focus mode: ${getAppDisplayName(window.processName)}`);
@@ -258,6 +362,9 @@ export default function Command() {
   // Get accessories for a window
   const getAccessories = (window: WindowWithMeta): List.Item.Accessory[] => {
     const accessories: List.Item.Accessory[] = [];
+    if (window.handle === 0) {
+      accessories.push({ text: "Closed", tooltip: "Window is currently closed" });
+    }
     if (window.isPermaPinned) {
       accessories.push({ icon: { source: Icon.Star, tintColor: Color.Orange }, tooltip: "Permanently Pinned" });
     } else if (window.isPinned) {
