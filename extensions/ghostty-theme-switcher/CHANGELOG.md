@@ -1,6 +1,6 @@
 # Ghostty Theme Switcher Changelog
 
-## 1.0.0
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add Ghostty Theme command to switch themes
 - Apply theme to Ghostty

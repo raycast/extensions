@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Grid, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, Action, Grid, showToast, Toast, Icon, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { readdir, readFile, writeFile } from "fs/promises";
 import { existsSync } from "fs";
@@ -8,7 +8,40 @@ import { exec } from "child_process";
 import { ThemeColors, Theme } from "./types";
 import { generatePreviewSvg } from "./generate-preview-svg";
 
-const THEMES_PATH = "/Applications/Ghostty.app/Contents/Resources/ghostty/themes";
+interface Preferences {
+  customThemesPath?: string;
+}
+
+const DEFAULT_THEMES_PATH = "/Applications/Ghostty.app/Contents/Resources/ghostty/themes";
+const ALTERNATE_THEMES_PATHS = [
+  join(homedir(), "Applications", "Ghostty.app", "Contents", "Resources", "ghostty", "themes"),
+  join(homedir(), ".local", "share", "ghostty", "themes"),
+];
+
+function getThemesPath(): string {
+  const preferences = getPreferenceValues<Preferences>();
+
+  // First check custom path from preferences
+  if (preferences.customThemesPath && existsSync(preferences.customThemesPath)) {
+    return preferences.customThemesPath;
+  }
+
+  // Then check default path
+  if (existsSync(DEFAULT_THEMES_PATH)) {
+    return DEFAULT_THEMES_PATH;
+  }
+
+  // Finally check alternate paths
+  for (const path of ALTERNATE_THEMES_PATHS) {
+    if (existsSync(path)) {
+      return path;
+    }
+  }
+
+  // Fallback to default path even if it doesn't exist
+  return DEFAULT_THEMES_PATH;
+}
+
 const CONFIG_PATH = join(homedir(), ".config", "ghostty", "config");
 
 function parseThemeFile(content: string): ThemeColors {
@@ -57,12 +90,13 @@ function parseThemeFile(content: string): ThemeColors {
 }
 
 async function loadThemes(): Promise<Theme[]> {
-  const files = await readdir(THEMES_PATH);
+  const themesPath = getThemesPath();
+  const files = await readdir(themesPath);
   const themes: Theme[] = [];
 
   for (const file of files) {
     try {
-      const content = await readFile(join(THEMES_PATH, file), "utf-8");
+      const content = await readFile(join(themesPath, file), "utf-8");
       const colors = parseThemeFile(content);
       themes.push({ name: file, colors });
     } catch {
@@ -73,7 +107,22 @@ async function loadThemes(): Promise<Theme[]> {
   return themes.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function isGhosttyRunning(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const script = `tell application "System Events" to (name of processes) contains "Ghostty"`;
+    exec(`osascript -e '${script}'`, (error, stdout) => {
+      resolve(!error && stdout.trim() === "true");
+    });
+  });
+}
+
 async function reloadGhosttyConfig(): Promise<void> {
+  const isRunning = await isGhosttyRunning();
+  if (!isRunning) {
+    // Ghostty is not running, skip reload silently
+    return;
+  }
+
   return new Promise((resolve, reject) => {
     const script = `
 tell application "System Events"

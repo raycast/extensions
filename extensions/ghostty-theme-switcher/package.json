@@ -20,6 +20,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "customThemesPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Themes Path",
+      "description": "Custom path to Ghostty themes directory. Leave empty to use default locations.",
+      "placeholder": "/path/to/ghostty/themes"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^1.17.0"
