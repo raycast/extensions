@@ -1,6 +1,6 @@
 # Tailwind CSS Changelog
 
-## [Update keyboard shortcuts] - {PR_MERGE_DATE}
+## [Update keyboard shortcuts] - 2026-01-05
 
 - Update `Shortcut`s to be cross-platform
 - Update `metadata` images to show updated UI
