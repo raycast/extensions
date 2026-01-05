@@ -1,6 +1,7 @@
 import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import getAccessToken from "./getAccessToken";
+import { toError, toErrorMessage } from "./errorUtils";
 import {
   GetDocumentsResponse,
   TranscriptSegment,
@@ -44,7 +45,7 @@ export function fetchGranolaData(route: string) {
         if (mounted) setAccessToken(token);
       })
       .catch((err) => {
-        if (mounted) setError(new Error(`Failed to get access token, ${err}`));
+        if (mounted) setError(new Error(`Failed to get access token, ${toErrorMessage(err)}`));
       });
     return () => {
       mounted = false;
@@ -66,6 +67,25 @@ export function fetchGranolaData(route: string) {
     // Only apply to get-documents route which contains large fields
     ...(route === "get-documents" && {
       parseResponse: async (response: Response) => {
+        if (!response.ok) {
+          let errorText = "";
+          try {
+            errorText = await response.text();
+          } catch {
+            // Ignore read errors and fall back to status text
+          }
+          if (errorText) {
+            try {
+              const errorJson = JSON.parse(errorText) as { message?: string; error?: string };
+              errorText = errorJson.message || errorJson.error || errorText;
+            } catch {
+              // Use raw text if parsing fails
+            }
+          }
+          const statusText = response.statusText || "Request failed";
+          const detail = errorText ? errorText : statusText;
+          throw new Error(`API request failed with status ${response.status}: ${detail}`);
+        }
         const json = (await response.json()) as GetDocumentsResponse<Document>;
         // Strip large fields immediately before caching
         if (json.docs && Array.isArray(json.docs)) {
@@ -158,8 +178,9 @@ export async function getTranscript(docId: string): Promise<string> {
     });
     return formattedTranscript.trim();
   } catch (error) {
-    showFailureToast({ title: "Failed to Fetch Transcript", message: String(error) });
-    throw error;
+    const normalizedError = toError(error);
+    showFailureToast(normalizedError, { title: "Failed to Fetch Transcript" });
+    throw normalizedError;
   }
 }
 
@@ -197,8 +218,9 @@ export async function getFolders(signal?: AbortSignal): Promise<FoldersResponse>
     const result = (await response.json()) as FoldersResponse;
     return result;
   } catch (error) {
-    showFailureToast({ title: "Failed to Fetch Folders", message: String(error) });
-    throw error;
+    const normalizedError = toError(error);
+    showFailureToast(normalizedError, { title: "Failed to Fetch Folders" });
+    throw normalizedError;
   }
 }
 
@@ -231,8 +253,9 @@ export async function getDocumentsList(): Promise<Document[]> {
     const result = (await response.json()) as GetDocumentsResponse;
     return Array.isArray(result?.docs) ? (result.docs as Document[]) : [];
   } catch (error) {
-    showFailureToast({ title: "Failed to Fetch Documents", message: String(error) });
-    throw error;
+    const normalizedError = toError(error);
+    showFailureToast(normalizedError, { title: "Failed to Fetch Documents" });
+    throw normalizedError;
   }
 }
 
@@ -283,8 +306,9 @@ export async function getDocumentsByIds(documentIds: string[], batchSize: number
           }
         }
       } catch (error) {
-        showFailureToast({ title: "Failed to Fetch Documents", message: String(error) });
-        throw error;
+      const normalizedError = toError(error);
+      showFailureToast(normalizedError, { title: "Failed to Fetch Documents" });
+      throw normalizedError;
       }
     }
   }
@@ -351,7 +375,8 @@ export async function getRecipesFromApi(): Promise<RecipesListResult> {
 
     return { featureEnabled: true, userRecipes, defaultRecipes, sharedRecipes, unlistedRecipes };
   } catch (error) {
-    showFailureToast({ title: "Failed to Fetch Recipes", message: String(error) });
-    throw error;
+    const normalizedError = toError(error);
+    showFailureToast(normalizedError, { title: "Failed to Fetch Recipes" });
+    throw normalizedError;
   }
 }

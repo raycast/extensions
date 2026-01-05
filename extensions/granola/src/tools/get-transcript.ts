@@ -1,6 +1,7 @@
 import { getTranscript } from "../utils/fetchData";
 import { findDocumentById } from "../utils/toolHelpers";
 import { showFailureToast } from "@raycast/utils";
+import { toError } from "../utils/errorUtils";
 
 type Input = {
   /**
@@ -62,7 +63,7 @@ export default async function tool(input: Input): Promise<Output> {
       date: formattedDate,
     };
   } catch (error) {
-    showFailureToast({ title: "Failed to fetch transcript", message: String(error) });
+    showFailureToast(toError(error), { title: "Failed to fetch transcript" });
     // Return a fallback response instead of throwing to avoid duplicate error handling
     return {
       transcript: "",

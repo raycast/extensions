@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { getDocumentNotesMarkdown } from "./granolaApi";
+import { toError } from "./errorUtils";
 
 /**
  * Hook for lazy-loading notes_markdown from API
@@ -36,8 +37,8 @@ export function useDocumentNotesMarkdown(documentId: string | null | undefined):
       setNotesMarkdown(fetchedMarkdown);
     } catch (err) {
       if (requestIdRef.current !== requestId) return;
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
+      const normalizedError = toError(err);
+      setError(normalizedError);
       setNotesMarkdown(null);
     } finally {
       if (requestIdRef.current === requestId) {

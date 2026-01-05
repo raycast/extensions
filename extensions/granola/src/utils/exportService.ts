@@ -10,6 +10,7 @@ import {
   getDocumentFolderOrganization,
   calculateETA,
 } from "./exportHelpers";
+import { toErrorMessage } from "./errorUtils";
 
 export interface ExportResult {
   noteId: string;
@@ -118,7 +119,7 @@ export class ExportService {
               };
             }
           } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
+            const errorMessage = toErrorMessage(error);
             const resultIndex = results.findIndex((r) => r.noteId === item.id);
             if (resultIndex !== -1) {
               results[resultIndex] = {
@@ -173,7 +174,7 @@ export class ExportService {
       cleanupTempDirectory(tempDir);
       toast.style = Toast.Style.Failure;
       toast.title = "Export failed";
-      toast.message = String(error);
+      toast.message = toErrorMessage(error);
       throw error;
     }
   }

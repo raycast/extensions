@@ -8,6 +8,7 @@ import { Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
 import { sortNotesByDate, NoteListItem } from "./components/NoteComponents";
 import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "./utils/iconMapper";
+import { toError } from "./utils/errorUtils";
 
 export default function Command() {
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
@@ -38,7 +39,7 @@ export default function Command() {
           }
         } catch (error) {
           if (!cancelled && !abortController.signal.aborted) {
-            showFailureToast(error, { title: "Failed to load folder IDs" });
+            showFailureToast(toError(error), { title: "Failed to load folder IDs" });
           }
         }
       };

@@ -5,6 +5,7 @@ import { getPanelId } from "../utils/getPanelId";
 import { getFoldersWithCache } from "../utils/folderHelpers";
 import { findDocumentById } from "../utils/toolHelpers";
 import { getDocumentPanels } from "../utils/granolaApi";
+import { toError } from "../utils/errorUtils";
 
 type Input = {
   /**
@@ -139,7 +140,7 @@ export default async function tool(input: Input): Promise<Output> {
       folderNames,
     };
   } catch (error) {
-    showFailureToast(error, { title: "Failed to fetch note" });
+    showFailureToast(toError(error), { title: "Failed to fetch note" });
     return {
       title: "Error loading note",
       date: new Date().toISOString(),

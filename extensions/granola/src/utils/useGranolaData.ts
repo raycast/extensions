@@ -1,5 +1,6 @@
 import { fetchGranolaData } from "./fetchData";
 import { NoteData } from "./types";
+import { toError } from "./errorUtils";
 
 /**
  * Type guard to validate if the fetched data matches NoteData shape
@@ -95,7 +96,7 @@ export function useGranolaData(): GranolaDataState {
       noteData: null,
       isLoading: false,
       hasError: true,
-      error: error instanceof Error ? error : new Error(String(error)),
+      error: toError(error),
     };
   }
 }

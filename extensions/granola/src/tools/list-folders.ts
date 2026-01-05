@@ -1,5 +1,6 @@
 import { showFailureToast } from "@raycast/utils";
 import { getFolderInfoForAI } from "../utils/folderHelpers";
+import { toError } from "../utils/errorUtils";
 
 interface Input {}
 
@@ -20,7 +21,7 @@ export default async function tool(input: Input = {}): Promise<Output> {
   try {
     return await getFolderInfoForAI();
   } catch (error) {
-    showFailureToast(error, { title: "Failed to fetch folders" });
+    showFailureToast(toError(error), { title: "Failed to fetch folders" });
     return [];
   }
 }

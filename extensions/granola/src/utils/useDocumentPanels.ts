@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PanelsByDocId } from "./types";
 import { getDocumentPanels } from "./granolaApi";
+import { toError } from "./errorUtils";
 
 /**
  * Hook for lazy-loading document panels from API
@@ -46,8 +47,7 @@ export function useDocumentPanels(documentId: string | null | undefined): {
       }
     } catch (err) {
       if (!signal.aborted) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
+        setError(toError(err));
         setPanels(null);
       }
     } finally {

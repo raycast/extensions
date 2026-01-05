@@ -1,6 +1,7 @@
 import { showFailureToast } from "@raycast/utils";
 import { getRecipesFromApi } from "../utils/fetchData";
 import { RecipesListResult, Recipe, DefaultRecipe } from "../utils/types";
+import { toError } from "../utils/errorUtils";
 
 type ListInput = {
   action?: "list" | "get" | "search";
@@ -71,7 +72,7 @@ export default async function tool(input: ListInput = {}): Promise<Recipe[] | Re
 
     return [];
   } catch (error) {
-    showFailureToast(error, { title: "Failed to load recipes" });
+    showFailureToast(toError(error), { title: "Failed to load recipes" });
     return [];
   }
 }

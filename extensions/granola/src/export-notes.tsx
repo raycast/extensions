@@ -23,6 +23,7 @@ import { PanelsByDocId, Doc } from "./utils/types";
 import convertHtmlToMarkdown from "./utils/convertHtmltoMarkdown";
 import Unresponsive from "./templates/unresponsive";
 import { sortNotesByDate } from "./components/NoteComponents";
+import { toErrorMessage } from "./utils/errorUtils";
 
 interface BulkNotionResult {
   noteId: string;
@@ -405,7 +406,7 @@ ${enhancedNotes}
                 noteId: note.id,
                 title: note.title || untitledNoteTitle,
                 status: "error",
-                error: error instanceof Error ? error.message : String(error),
+                error: toErrorMessage(error),
               });
             }
           }
@@ -439,7 +440,7 @@ ${enhancedNotes}
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Export failed";
-      toast.message = error instanceof Error ? error.message : String(error);
+      toast.message = toErrorMessage(error);
     }
   };
 
@@ -554,8 +555,8 @@ ${enhancedNotes}
         } catch (error) {
           if (!isOperationActive()) return { success: false, noteId: note.id };
           // Extract detailed error information
-          let errorMessage = "Unknown error";
-          let errorDetails = String(error);
+          let errorMessage = toErrorMessage(error);
+          let errorDetails = errorMessage;
 
           if (error instanceof Error) {
             errorMessage = error.message;

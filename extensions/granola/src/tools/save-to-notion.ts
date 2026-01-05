@@ -2,6 +2,7 @@ import { saveToNotion } from "../utils/granolaApi";
 import { findDocumentsByIds } from "../utils/toolHelpers";
 import { getDynamicBatchSize } from "../utils/exportHelpers";
 import { showFailureToast } from "@raycast/utils";
+import { toError, toErrorMessage } from "../utils/errorUtils";
 
 type Input = {
   /**
@@ -72,7 +73,7 @@ export default async function tool(input: Input): Promise<Output> {
             noteId,
             title,
             status: "error" as const,
-            error: String(error),
+            error: toErrorMessage(error),
           };
         }
       });
@@ -88,7 +89,8 @@ export default async function tool(input: Input): Promise<Output> {
 
     return { results };
   } catch (error) {
-    showFailureToast({ title: "Failed to save to Notion", message: String(error) });
-    throw error;
+    const normalizedError = toError(error);
+    showFailureToast(normalizedError, { title: "Failed to save to Notion" });
+    throw normalizedError;
   }
 }

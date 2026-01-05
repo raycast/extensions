@@ -1,4 +1,5 @@
 import { showFailureToast } from "@raycast/utils";
+import { toError } from "./errorUtils";
 import getAccessToken from "./getAccessToken";
 import getUserInfo from "./getUserInfo";
 import { parseEventTime } from "./documentMatching";
@@ -712,12 +713,9 @@ export async function createNoteFromTranscript(
   } catch (error) {
     // Don't show error toast if operation was cancelled
     if (!signal?.aborted) {
-      showFailureToast({
-        title: "Failed to create note",
-        message: String(error),
-      });
+      showFailureToast(toError(error), { title: "Failed to create note" });
     }
-    throw error;
+    throw toError(error);
   }
 }
 

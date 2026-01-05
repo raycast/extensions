@@ -10,6 +10,7 @@ import { Doc, NoteActionsProps, PanelsByDocId, Folder } from "../utils/types";
 import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "../utils/iconMapper";
 import { useDocumentPanels } from "../utils/useDocumentPanels";
 import { useDocumentNotesMarkdown } from "../utils/useDocumentNotesMarkdown";
+import { toError, toErrorMessage } from "../utils/errorUtils";
 
 /**
  * Sorts notes by date (newest first)
@@ -74,7 +75,7 @@ export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to save to Notion",
-        message: String(error),
+        message: toErrorMessage(error),
       });
     }
   };
@@ -118,7 +119,7 @@ export function FullTranscriptDetail({ docId, title }: { docId: string; title: s
         const fetchedTranscript = await getTranscript(docId);
         setTranscript(fetchedTranscript);
       } catch (error) {
-        showFailureToast({ title: "Failed to load transcript", message: String(error) });
+        showFailureToast(toError(error), { title: "Failed to load transcript" });
         setTranscript("Failed to load transcript."); // Show error in detail view
       } finally {
         setIsLoading(false);

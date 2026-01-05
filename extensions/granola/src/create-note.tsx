@@ -1,5 +1,6 @@
 import { showToast, Toast, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { toError } from "./utils/errorUtils";
 
 export default async function Command() {
   try {
@@ -15,6 +16,6 @@ export default async function Command() {
       title: "Opened new note in Granola",
     });
   } catch (error) {
-    await showFailureToast({ title: "Failed to open Granola", message: String(error) });
+    await showFailureToast(toError(error), { title: "Failed to open Granola" });
   }
 }

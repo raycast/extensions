@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { createNoteFromTranscript, CreateNoteProgress, CreateNoteResult } from "./utils/granolaApi";
 import { processTranscriptInput, isYouTubeURL } from "./utils/youtubeTranscript";
 import convertHtmlToMarkdown from "./utils/convertHtmltoMarkdown";
+import { toErrorMessage } from "./utils/errorUtils";
 
 interface TranscriptFormValues {
   input: string;
@@ -52,7 +53,7 @@ export default function Command() {
           transcriptData = await processTranscriptInput(values.input, signal);
         } catch (error) {
           if (signal.aborted) return;
-          throw new Error(`Failed to process input: ${error}`);
+          throw new Error(`Failed to process input: ${toErrorMessage(error)}`);
         }
 
         if (signal.aborted) return;
@@ -80,7 +81,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to create note",
-          message: String(error),
+          message: toErrorMessage(error),
         });
       } finally {
         if (!signal.aborted) {
@@ -221,7 +222,7 @@ ${summaryContent}`;
                   await showToast({
                     style: Toast.Style.Failure,
                     title: "Failed to paste from clipboard",
-                    message: String(error),
+                    message: toErrorMessage(error),
                   });
                 }
               }}
