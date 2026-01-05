@@ -1,23 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Application,
-  Color,
-  getPreferenceValues,
-  Icon,
-  List,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { fetchApiRoutes } from "./next-lens-client";
 import { ApiRoute, HTTP_METHODS } from "./types";
-
-interface Preferences {
-  ideApp: Application;
-}
 
 // Map HTTP methods to colors for better visual distinction
 const METHOD_COLORS: Record<string, Color> = {
@@ -32,7 +17,7 @@ const METHOD_COLORS: Record<string, Color> = {
 
 export default function ListApiRoutes() {
   const [selectedMethod, setSelectedMethod] = useState<string>("all");
-  const { ideApp } = getPreferenceValues<Preferences>();
+  const { ideApp } = getPreferenceValues();
 
   const { data, isLoading, error, revalidate } = useCachedPromise(fetchApiRoutes, [], {
     keepPreviousData: true,

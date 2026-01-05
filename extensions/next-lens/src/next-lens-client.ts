@@ -6,12 +6,8 @@ const DEFAULT_PORT = 9453;
 // Flag to avoid showing toast multiple times for invalid port
 let hasShownInvalidPortToast = false;
 
-interface Preferences {
-  nextLensPort?: string;
-}
-
 function getBaseUrl(): string {
-  const { nextLensPort } = getPreferenceValues<Preferences>();
+  const { nextLensPort } = getPreferenceValues();
 
   // If not set or empty, use default
   if (!nextLensPort || nextLensPort.trim() === "") {

@@ -1,22 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Application,
-  Color,
-  getPreferenceValues,
-  Icon,
-  List,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchPageRoutes } from "./next-lens-client";
 import { PageRoute, LoadingStatus, ErrorStatus } from "./types";
-
-interface Preferences {
-  ideApp: Application;
-}
 
 // Map status to colors for visual distinction
 const STATUS_COLORS: Record<LoadingStatus | ErrorStatus, Color> = {
@@ -26,7 +11,7 @@ const STATUS_COLORS: Record<LoadingStatus | ErrorStatus, Color> = {
 };
 
 export default function ListPageRoutes() {
-  const { ideApp } = getPreferenceValues<Preferences>();
+  const { ideApp } = getPreferenceValues();
 
   const { data, isLoading, error, revalidate } = useCachedPromise(fetchPageRoutes, [], {
     keepPreviousData: true,
