@@ -5,53 +5,14 @@ import { Company, Document, Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
 import { getDocumentsByIds } from "./utils/fetchData";
 import { NoteListItem } from "./components/NoteComponents";
-import { hasWorkEmailDomain as hasWorkEmailDomainForPerson } from "./utils/emailDomainUtils";
 import { useFavicon } from "./utils/toolHelpers";
-
-type CompanySortOption = "name" | "people-count" | "meeting-count" | "last-meeting";
-
-const formatDate = (value?: string): string => {
-  if (!value) return "Unknown date";
-  const dateValue = new Date(value);
-  if (Number.isNaN(dateValue.getTime())) return "Unknown date";
-  return dateValue.toLocaleDateString();
-};
+import { formatCompanyMeetingDate, sortCompanies, type CompanySortOption } from "./utils/searchUtils";
 
 export default function Command() {
   const { companies, isLoading, hasError } = usePeople();
   const [sortBy, setSortBy] = useState<CompanySortOption>("meeting-count");
 
-  // Optimized: filter and sort in-place to reduce allocations
-  const sortedCompanies = useMemo(() => {
-    // Filter first using for loop
-    const filteredCompanies: Company[] = [];
-    for (let i = 0; i < companies.length; i++) {
-      if (hasWorkEmailDomain(companies[i])) {
-        filteredCompanies.push(companies[i]);
-      }
-    }
-
-    // Sort in-place
-    switch (sortBy) {
-      case "name":
-        filteredCompanies.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "people-count":
-        filteredCompanies.sort((a, b) => b.people.length - a.people.length);
-        break;
-      case "meeting-count":
-        filteredCompanies.sort((a, b) => (b.totalMeetings || 0) - (a.totalMeetings || 0));
-        break;
-      case "last-meeting":
-        filteredCompanies.sort((a, b) => {
-          const dateA = a.lastMeetingDate || "";
-          const dateB = b.lastMeetingDate || "";
-          return dateB.localeCompare(dateA); // Most recent first
-        });
-        break;
-    }
-    return filteredCompanies;
-  }, [companies, sortBy]);
+  const sortedCompanies = useMemo(() => sortCompanies(companies, sortBy), [companies, sortBy]);
 
   if (isLoading) {
     return <List isLoading={true} />;
@@ -79,15 +40,6 @@ export default function Command() {
       ))}
     </List>
   );
-}
-
-function hasWorkEmailDomain(company: Company): boolean {
-  // If company name is a domain (domain-based company), consider it work-related
-  if (company.name.includes(".") && !company.name.includes(" ")) {
-    return true;
-  }
-
-  return company.people.some(hasWorkEmailDomainForPerson);
 }
 
 // Custom hook to fetch favicon for a company (companies don't have cached avatars, so always try favicon for work domains)
@@ -221,7 +173,7 @@ function CompanyListItem({ company }: { company: Company }) {
   // Add last meeting date first (to match Granola app order)
   if (company.lastMeetingDate) {
     accessories.push({
-      text: formatDate(company.lastMeetingDate),
+      text: formatCompanyMeetingDate(company.lastMeetingDate),
     });
   }
 

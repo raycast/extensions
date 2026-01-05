@@ -5,40 +5,16 @@ import { Person, Document, Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
 import { getDocumentsByIds } from "./utils/fetchData";
 import { NoteListItem } from "./components/NoteComponents";
-import { hasWorkEmailDomain } from "./utils/emailDomainUtils";
 import { useFavicon } from "./utils/toolHelpers";
+import { formatLastMeetingLabel, sortPeople, type PeopleSortOption } from "./utils/searchUtils";
 
-type SortOption = "name" | "last-meeting" | "meeting-count" | "company";
+type SortOption = PeopleSortOption;
 
 export default function Command() {
   const { people, isLoading, hasError } = usePeople();
   const [sortBy, setSortBy] = useState<SortOption>("last-meeting");
 
-  const sortedPeople = useMemo(() => {
-    const filteredPeople = people.filter(hasWorkEmailDomain);
-    const peopleCopy = [...filteredPeople];
-
-    switch (sortBy) {
-      case "name":
-        return peopleCopy.sort((a, b) => a.name.localeCompare(b.name));
-      case "last-meeting":
-        return peopleCopy.sort((a, b) => {
-          const dateA = a.lastMeetingDate || "";
-          const dateB = b.lastMeetingDate || "";
-          return dateB.localeCompare(dateA); // Most recent first
-        });
-      case "meeting-count":
-        return peopleCopy.sort((a, b) => (b.meetingCount || 0) - (a.meetingCount || 0));
-      case "company":
-        return peopleCopy.sort((a, b) => {
-          const companyA = a.company_name || "zzz"; // Put empty companies at the end
-          const companyB = b.company_name || "zzz";
-          return companyA.localeCompare(companyB);
-        });
-      default:
-        return peopleCopy;
-    }
-  }, [people, sortBy]);
+  const sortedPeople = useMemo(() => sortPeople(people, sortBy), [people, sortBy]);
 
   if (isLoading) {
     return <List isLoading={true} />;
@@ -169,26 +145,12 @@ function PersonListItem({ person }: { person: Person }) {
     });
   }
 
-  if (person.lastMeetingDate) {
-    const date = new Date(person.lastMeetingDate);
-    const now = new Date();
-    const daysDiff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-    let formattedDate: string;
-    if (daysDiff === 0) {
-      formattedDate = "Today";
-    } else if (daysDiff === 1) {
-      formattedDate = "Yesterday";
-    } else if (daysDiff < 7) {
-      formattedDate = date.toLocaleDateString("en-US", { weekday: "long" });
-    } else {
-      formattedDate = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    }
-
+  const meetingLabel = formatLastMeetingLabel(person.lastMeetingDate);
+  if (meetingLabel) {
     accessories.push({
-      text: formattedDate,
+      text: meetingLabel.text,
       icon: Icon.Clock,
-      tooltip: `Last meeting: ${date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`,
+      tooltip: meetingLabel.tooltip,
     });
   }
 

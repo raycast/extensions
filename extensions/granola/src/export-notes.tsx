@@ -27,6 +27,7 @@ import Unresponsive from "./templates/unresponsive";
 import { sortNotesByDate } from "./components/NoteComponents";
 import { toErrorMessage } from "./utils/errorUtils";
 import { getNotionBatchSize } from "./utils/notionBatching";
+import { getFolderNoteResults } from "./utils/searchUtils";
 
 interface BulkNotionResult {
   noteId: string;
@@ -150,81 +151,8 @@ function BulkExportList({ notes, untitledNoteTitle }: { notes: Doc[]; untitledNo
   // Combine all folder-related computations into a single useMemo (like search-notes.tsx)
   // This reduces memory overhead by computing only what's needed and reusing data structures
   const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
-    if (notes.length === 0) {
-      return {
-        filteredNotes: [],
-        notesNotInFolders: [],
-        folderNoteCounts: {} as Record<string, number>,
-      };
-    }
-
-    // Create noteIds Set only once
-    const noteIds = new Set<string>();
-    for (let i = 0; i < notes.length; i++) {
-      noteIds.add(notes[i].id);
-    }
-
-    // Use folders with IDs if available, otherwise use folders without IDs
     const foldersToProcess = activeFolders.length > 0 ? activeFolders : folders;
-
-    const notesInFolders = new Set<string>();
-    const counts: Record<string, number> = {};
-
-    // Process folders efficiently
-    for (let i = 0; i < foldersToProcess.length; i++) {
-      const folder = foldersToProcess[i];
-      // Only process if folder has document_ids loaded (memory optimization)
-      if (folder.document_ids && folder.document_ids.length > 0) {
-        let count = 0;
-        const docIds = folder.document_ids;
-        for (let j = 0; j < docIds.length; j++) {
-          const id = docIds[j];
-          if (noteIds.has(id)) {
-            count++;
-            notesInFolders.add(id);
-          }
-        }
-        counts[folder.id] = count;
-      } else {
-        counts[folder.id] = 0;
-      }
-    }
-
-    // Compute orphan notes efficiently
-    const orphanNotes: Doc[] = [];
-    for (let i = 0; i < notes.length; i++) {
-      if (!notesInFolders.has(notes[i].id)) {
-        orphanNotes.push(notes[i]);
-      }
-    }
-
-    // Compute filtered notes based on selection (create Set on-demand only when needed)
-    let filtered: Doc[];
-    if (selectedFolder === "all") {
-      filtered = notes; // Reuse existing array
-    } else if (selectedFolder === "orphans") {
-      filtered = orphanNotes; // Reuse computed array
-    } else {
-      const folder = foldersToProcess.find((f) => f.id === selectedFolder);
-      if (!folder || !folder.document_ids) {
-        filtered = [];
-      } else {
-        // Filter efficiently - create Set only for the selected folder
-        filtered = [];
-        const folderDocIds = new Set(folder.document_ids);
-        for (let i = 0; i < notes.length; i++) {
-          if (folderDocIds.has(notes[i].id)) {
-            filtered.push(notes[i]);
-          }
-        }
-      }
-    }
-
-    return {
-      filteredNotes: filtered,
-      notesNotInFolders: orphanNotes,
-      folderNoteCounts: counts,
-    };
+    return getFolderNoteResults(notes, foldersToProcess, selectedFolder);
   }, [notes, folders, activeFolders, selectedFolder]);
 
   // Compute filteredNoteIds on-demand instead of memoizing (only used in a few places)

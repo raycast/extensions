@@ -9,6 +9,7 @@ import Unresponsive from "./templates/unresponsive";
 import { sortNotesByDate, NoteListItem } from "./components/NoteComponents";
 import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "./utils/iconMapper";
 import { toError } from "./utils/errorUtils";
+import { getFolderNoteResults } from "./utils/searchUtils";
 
 export default function Command() {
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
@@ -59,81 +60,8 @@ export default function Command() {
   // Optimized memoization: compute only what's needed, reuse arrays where possible
   const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
     const allNotes = noteData?.data?.docs || [];
-    if (allNotes.length === 0) {
-      return {
-        filteredNotes: [],
-        notesNotInFolders: [],
-        folderNoteCounts: {} as Record<string, number>,
-      };
-    }
-
-    // Create noteIds Set only once
-    const noteIds = new Set<string>();
-    for (let i = 0; i < allNotes.length; i++) {
-      noteIds.add(allNotes[i].id);
-    }
-
-    const notesInFolders = new Set<string>();
-    const counts: Record<string, number> = {};
-
-    // Use folders with IDs if available, otherwise use folders without IDs
     const foldersToProcess = activeFolders.length > 0 ? activeFolders : folders;
-
-    // Process folders efficiently
-    for (let i = 0; i < foldersToProcess.length; i++) {
-      const folder = foldersToProcess[i];
-      // Compute counts from document_ids array (from API) by intersecting with currently loaded documents
-      // Only process if folder has document_ids loaded (memory optimization)
-      if (folder.document_ids && folder.document_ids.length > 0) {
-        let count = 0;
-        for (let j = 0; j < folder.document_ids.length; j++) {
-          const id = folder.document_ids[j];
-          if (noteIds.has(id)) {
-            count++;
-            notesInFolders.add(id);
-          }
-        }
-        counts[folder.id] = count;
-      } else {
-        counts[folder.id] = 0;
-      }
-    }
-
-    // Compute orphan notes efficiently
-    const orphanNotes: Doc[] = [];
-    for (let i = 0; i < allNotes.length; i++) {
-      if (!notesInFolders.has(allNotes[i].id)) {
-        orphanNotes.push(allNotes[i]);
-      }
-    }
-
-    // Compute filtered notes based on selection
-    let filtered: Doc[];
-    if (selectedFolder === "all") {
-      filtered = allNotes; // Reuse existing array
-    } else if (selectedFolder === "orphans") {
-      filtered = orphanNotes; // Reuse computed array
-    } else {
-      const folder = foldersToProcess.find((f) => f.id === selectedFolder);
-      if (!folder || !folder.document_ids) {
-        filtered = [];
-      } else {
-        // Filter efficiently
-        filtered = [];
-        const folderDocIds = new Set(folder.document_ids);
-        for (let i = 0; i < allNotes.length; i++) {
-          if (folderDocIds.has(allNotes[i].id)) {
-            filtered.push(allNotes[i]);
-          }
-        }
-      }
-    }
-
-    return {
-      filteredNotes: filtered,
-      notesNotInFolders: orphanNotes,
-      folderNoteCounts: counts,
-    };
+    return getFolderNoteResults(allNotes, foldersToProcess, selectedFolder);
   }, [noteData?.data?.docs, folders, activeFolders, selectedFolder]);
 
   if (isLoading) {
