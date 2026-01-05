@@ -1,16 +1,14 @@
 # Emacs Opener for Raycast
 
-Seamlessly launch GNU Emacs from Raycast with automatic path detection for common installation methods (Scoop, Chocolatey, and standard installs).
+Seamlessly launch GNU Emacs from Raycast. This extension automatically detects common Emacs installations on macOS.
 
 ## Features
 
-- 🚀 **Instant Launch**: Opens Emacs immediately without wait times.
+- 🚀 **Instant Launch**: Opens Emacs immediately.
 - 🔍 **Auto-Detection**: Smartly finds your Emacs installation in:
-  - Scoop: `~/scoop/apps/emacs/current/bin/runemacs.exe`
-  - Chocolatey: `C:\ProgramData\chocolatey\bin\runemacs.exe`
-  - Standard Tools: `C:\tools\emacs\bin\runemacs.exe`
-  - System PATH
-- ⚡ **Background Process**: Spawns Emacs as a detached process so you can keep working.
+  - **macOS**: `/Applications`, Homebrew, or PATH.
+  - **Windows**: Scoop, Chocolatey, `C:\tools\emacs`, or PATH.
+- ⚡ **Background Process**: Spawns Emacs as a detached process so you can close the terminal/launcher usage.
 
 ## Usage
 
@@ -19,6 +17,16 @@ Seamlessly launch GNU Emacs from Raycast with automatic path detection for commo
 3. Hit Enter.
 
 ## Installation
+
+This extension requires a working installation of Emacs.
+
+### Recommended Installations
+
+- **Homebrew Cask**: `brew install --cask emacs`
+- **Emacs for Mac OS X**: Download from [emacsformacosx.com](https://emacsformacosx.com/)
+- **Homebrew Formula**: `brew install emacs`
+
+## Contributing
 
 ```bash
 npm install

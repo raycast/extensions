@@ -4,8 +4,16 @@
   "title": "Emacs",
   "description": "Seamlessly launch GNU Emacs from Raycast.",
   "icon": "emacs_512.png",
-  "author": "Kerim",
+  "author": "kerim_ataballyyew",
+  "categories": [
+    "Developer Tools",
+    "Applications"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "emacs",

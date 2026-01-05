@@ -5,25 +5,24 @@ import os from "os";
 import path from "path";
 
 function getEmacsPath(): string {
-  const homeDir = os.homedir();
-
-  // Potential paths for Emacs
-  const paths = [
-    // Scoop
-    path.join(homeDir, "scoop", "apps", "emacs", "current", "bin", "runemacs.exe"),
-    // Chocolatey / Default install
-    "C:\\ProgramData\\chocolatey\\bin\\runemacs.exe",
-    "C:\\tools\\emacs\\bin\\runemacs.exe",
-  ];
-
-  for (const p of paths) {
-    if (fs.existsSync(p)) {
-      return p;
+  if (process.platform === "win32") {
+    const homeDir = os.homedir();
+    const paths = [
+      path.join(homeDir, "scoop", "apps", "emacs", "current", "bin", "runemacs.exe"),
+      "C:\\ProgramData\\chocolatey\\bin\\runemacs.exe",
+      "C:\\tools\\emacs\\bin\\runemacs.exe",
+    ];
+    for (const p of paths) {
+      if (fs.existsSync(p)) return p;
     }
+    return "runemacs.exe";
+  } else {
+    const paths = ["/Applications/Emacs.app/Contents/MacOS/Emacs", "/opt/homebrew/bin/emacs", "/usr/local/bin/emacs"];
+    for (const p of paths) {
+      if (fs.existsSync(p)) return p;
+    }
+    return "emacs";
   }
-
-  // Fallback to expecting it in PATH
-  return "runemacs.exe";
 }
 
 export default async function Command() {
