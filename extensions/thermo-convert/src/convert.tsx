@@ -2,10 +2,6 @@ import { List, ActionPanel, Action, Icon, Color, getPreferenceValues } from "@ra
 import { useState } from "react";
 import { parseInput, convertTemperature, TEMPERATURE_UNITS, TemperatureUnit } from "./utils/convert";
 
-interface Preferences {
-  defaultUnit: TemperatureUnit;
-}
-
 const UNIT_ICONS: Record<TemperatureUnit, string> = {
   celsius: "🌡️",
   fahrenheit: "🇺🇸",
@@ -29,7 +25,7 @@ function getTemperatureContext(celsius: number): string {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Convert>();
   const [searchText, setSearchText] = useState("");
   const [fromUnit, setFromUnit] = useState<TemperatureUnit>(preferences.defaultUnit || "celsius");
 
