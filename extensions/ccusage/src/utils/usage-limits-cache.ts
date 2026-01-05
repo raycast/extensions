@@ -95,11 +95,22 @@ const fetchUsageLimits = async (): Promise<void> => {
 const startFetching = (): void => {
   if (fetchInterval) return;
 
-  fetchUsageLimits();
-
   const preferences = getPreferenceValues<Preferences>();
   const intervalSeconds = parseInt(preferences.usageLimitsRefreshInterval || "60", 10);
   const intervalMs = intervalSeconds * 1000;
+
+  const shouldFetchImmediately = (): boolean => {
+    if (!cacheState.data || !cacheState.lastFetched) {
+      return true;
+    }
+
+    const timeSinceLastFetch = Date.now() - cacheState.lastFetched.getTime();
+    return timeSinceLastFetch >= intervalMs;
+  };
+
+  if (shouldFetchImmediately()) {
+    fetchUsageLimits();
+  }
 
   fetchInterval = setInterval(fetchUsageLimits, intervalMs);
 };
