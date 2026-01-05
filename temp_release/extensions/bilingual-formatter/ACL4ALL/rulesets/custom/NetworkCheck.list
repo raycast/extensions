@@ -1,0 +1,60 @@
+# NAME: Network Check & Diagnostics
+# AUTHOR: whjstc
+# REPO: https://github.com/whjstc/ACL4ALL
+# UPDATED: 2025-12-08 12:00:00
+# DESC: Pure diagnostics tools (IP/Speed/Leak). Safe to switch nodes freely.
+
+# > Connectivity Check (Non-Google)
+DOMAIN-SUFFIX,vultr.com
+DOMAIN-SUFFIX,test-ipv6.com
+
+
+# > Speed Test
+DOMAIN,speed.cloudflare.com
+DOMAIN-SUFFIX,fast.com
+DOMAIN-SUFFIX,speedcheck.org
+DOMAIN-SUFFIX,speedtest.net
+
+# > IP Address Check
+DOMAIN-SUFFIX,ip.sb
+DOMAIN-SUFFIX,ip-api.com
+DOMAIN-SUFFIX,ipcheck.im
+DOMAIN-SUFFIX,ifconfig.me
+DOMAIN-SUFFIX,ping0.cc
+DOMAIN-SUFFIX,ippure.com
+DOMAIN-SUFFIX,ipify.org
+DOMAIN-SUFFIX,whatismyip.com.tw
+DOMAIN-SUFFIX,whatismyip.com
+DOMAIN-SUFFIX,whoisip.me
+DOMAIN-SUFFIX,ipaddress.me
+DOMAIN-SUFFIX,jsonp-ip.com
+
+# > Privacy & Leak Test
+DOMAIN-SUFFIX,dnscheck.tools
+DOMAIN-SUFFIX,whoer.net
+DOMAIN-SUFFIX,whoer.com
+DOMAIN-SUFFIX,browserleaks.com
+DOMAIN-SUFFIX,browserleaks.org
+DOMAIN-SUFFIX,browserleaks.net
+DOMAIN-SUFFIX,browserscan.net
+DOMAIN-SUFFIX,dnsleaktest.org
+DOMAIN-SUFFIX,dnsleaktest.com
+DOMAIN-SUFFIX,ipleak.net
+DOMAIN-SUFFIX,ip-score.com
+DOMAIN-SUFFIX,incolumitas.com
+DOMAIN-SUFFIX,ip2proxy.com
+DOMAIN-SUFFIX,vpnapi.io
+DOMAIN-SUFFIX,skk.moe
+
+# > Other Tools
+DOMAIN-SUFFIX,surfshark.com
+DOMAIN-SUFFIX,surfsharkdns.com
+DOMAIN-SUFFIX,1-b.net
+DOMAIN-SUFFIX,workers.dev
+DOMAIN-SUFFIX,sspanel.net
+DOMAIN-SUFFIX,null-addr.com
+DOMAIN-SUFFIX,null-addr.net
+DOMAIN-SUFFIX,null-addr.org
+DOMAIN-SUFFIX,null-addr.biz
+DOMAIN-SUFFIX,null-addr.info
+DOMAIN-SUFFIX,addr.tools

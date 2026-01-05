@@ -1,0 +1,8 @@
+# 内容：KKTV
+# 数量：6条
+USER-AGENT,KKTV*
+USER-AGENT,com.kktv.ios.kktv*
+DOMAIN,kktv-theater.kk.stream
+DOMAIN,theater-kktv.cdn.hinet.net
+DOMAIN-SUFFIX,kktv.com.tw
+DOMAIN-SUFFIX,kktv.me

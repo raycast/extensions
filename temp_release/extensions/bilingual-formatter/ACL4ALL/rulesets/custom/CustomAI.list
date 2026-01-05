@@ -1,0 +1,8 @@
+# NAME: Custom AI Services
+# AUTHOR: whjstc
+# REPO: https://github.com/whjstc/ACL4ALL
+# UPDATED: 2025-12-16 11:33:00
+# DESC: Custom AI service domains to supplement remote rulesets
+
+# > AI Services
+DOMAIN-SUFFIX,genspark.ai

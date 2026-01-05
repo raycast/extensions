@@ -1,0 +1,24 @@
+#!name=VVebo Ultimate Fix
+#!desc=修复 VVebo 用户主页时间线 & 净化粉丝列表
+#!author=bin64 & suiyuran (Modified by User)
+#!category=Weibo
+#!system=ios
+
+[Script]
+# > 1. 捕获 UID (users/show)
+VVebo_UID_1 = type=http-request, pattern=^https:\/\/api\.weibo\.cn\/2\/users\/show\?, requires-body=0, script-path=https://raw.githubusercontent.com/whjstc/ACL4ALL/main/Shadowrocket/scripts/vvebo-combined.js
+
+# > 2. 捕获 UID 备用 (unread_count)
+VVebo_UID_2 = type=http-request, pattern=^https:\/\/api\.weibo\.cn\/2\/remind\/unread_count\?, requires-body=0, script-path=https://raw.githubusercontent.com/whjstc/ACL4ALL/main/Shadowrocket/scripts/vvebo-combined.js
+
+# > 3. 重定向时间线请求
+VVebo_Redirect = type=http-request, pattern=^https:\/\/api\.weibo\.cn\/2\/statuses\/user_timeline\?, requires-body=0, script-path=https://raw.githubusercontent.com/whjstc/ACL4ALL/main/Shadowrocket/scripts/vvebo-combined.js
+
+# > 4. 重构时间线数据 (Response)
+VVebo_Timeline = type=http-response, pattern=^https:\/\/api\.weibo\.cn\/2\/profile\/statuses\/tab\?, requires-body=1, script-path=https://raw.githubusercontent.com/whjstc/ACL4ALL/main/Shadowrocket/scripts/vvebo-combined.js
+
+# > 5. 净化粉丝列表 (Response)
+VVebo_Fans = type=http-response, pattern=^https:\/\/api\.weibo\.cn\/2\/cardlist\?, requires-body=1, script-path=https://raw.githubusercontent.com/whjstc/ACL4ALL/main/Shadowrocket/scripts/vvebo-combined.js
+
+[MITM]
+hostname = %APPEND% api.weibo.cn

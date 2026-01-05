@@ -1,0 +1,10 @@
+payload:
+  # 内容：Twitch
+  # 数量：7条
+  - DOMAIN-KEYWORD,ttvnw
+  - DOMAIN-SUFFIX,ext-twitch.tv
+  - DOMAIN-SUFFIX,jtvnw.net
+  - DOMAIN-SUFFIX,ttvnw.net
+  - DOMAIN-SUFFIX,twitch-ext.rootonline.de
+  - DOMAIN-SUFFIX,twitch.tv
+  - DOMAIN-SUFFIX,twitchcdn.net

@@ -1,0 +1,4 @@
+规则列表格式：AutoProxy
+规则列表网址（新）：https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
+规则列表网址（旧）：https://autoproxy-gfwlist.googlecode.com/svn/trunk/gfwlist.txt
+

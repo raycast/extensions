@@ -1,0 +1,6 @@
+{
+  "extends": "@raycast/eslint-config/jest",
+  "env": {
+    "jest/globals": true
+  }
+}

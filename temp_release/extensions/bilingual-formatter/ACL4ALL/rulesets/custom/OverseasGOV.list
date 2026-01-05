@@ -1,0 +1,34 @@
+# NAME: Overseas GOV & EDU
+# AUTHOR: whjstc
+# REPO: https://github.com/whjstc/ACL4ALL
+# UPDATED: 2025-12-09 12:00:00
+# DESC: Overseas government and education websites.
+
+# > US Government (顶级域名 .gov 仅归属美国，不会匹配 .gov.cn)
+DOMAIN-SUFFIX,gov
+DOMAIN-SUFFIX,mil
+
+# > US & International Education (顶级域名 .edu 不会匹配 .edu.cn)
+DOMAIN-SUFFIX,edu
+
+# > UK
+DOMAIN-SUFFIX,gov.uk
+DOMAIN-SUFFIX,mod.uk
+DOMAIN-SUFFIX,nhs.uk
+DOMAIN-SUFFIX,ac.uk
+
+# > EU
+DOMAIN-SUFFIX,europa.eu
+
+# > JP
+DOMAIN-SUFFIX,go.jp
+DOMAIN-SUFFIX,ac.jp
+
+# > CA
+DOMAIN-SUFFIX,gc.ca
+DOMAIN-SUFFIX,canada.ca
+DOMAIN-SUFFIX,ac.ca
+
+# > AU
+DOMAIN-SUFFIX,gov.au
+DOMAIN-SUFFIX,edu.au

@@ -1,0 +1,228 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "dns_proxy",
+        "address": "https://1.1.1.1/dns-query",
+        "address_resolver": "dns_resolver",
+        "strategy": "prefer_ipv4",
+        "detour": "proxy"
+      },
+      {
+        "tag": "dns_direct",
+        "address": "https://223.5.5.5/dns-query",
+        "address_resolver": "dns_resolver",
+        "strategy": "prefer_ipv4",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns_resolver",
+        "address": "223.5.5.5",
+        "strategy": "prefer_ipv4",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns_block",
+        "address": "rcode://success"
+      }
+    ],
+    "rules": [
+      {
+        "outbound": "any",
+        "server": "dns_resolver"
+      },
+      {
+        "clash_mode": "Direct",
+        "server": "dns_direct"
+      },
+      {
+        "clash_mode": "Global",
+        "server": "dns_proxy"
+      },
+      {
+        "rule_set": "geosite-cn",
+        "server": "dns_direct"
+      },
+      {
+        "rule_set": "geosite-geolocation-!cn",
+        "server": "dns_proxy"
+      }
+    ],
+    "final": "dns_proxy",
+    "strategy": "prefer_ipv4",
+    "disable_cache": false,
+    "disable_expire": false
+  },
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "0.0.0.0",
+      "listen_port": 7890,
+      "sniff": true,
+      "sniff_override_destination": false,
+      "set_system_proxy": true
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "selector",
+      "tag": "proxy",
+      "outbounds": [
+        "auto",
+        "🇭🇰 香港节点",
+        "🇺🇸 美国节点",
+        "direct"
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "urltest",
+      "tag": "auto",
+      "outbounds": [
+        "示例-香港节点",
+        "示例-美国节点"
+      ],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m",
+      "tolerance": 50
+    },
+    {
+      "type": "selector",
+      "tag": "🇭🇰 香港节点",
+      "outbounds": [
+        "示例-香港节点"
+      ],
+      "default": "示例-香港节点"
+    },
+    {
+      "type": "selector",
+      "tag": "🇺🇸 美国节点",
+      "outbounds": [
+        "示例-美国节点"
+      ],
+      "default": "示例-美国节点"
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "示例-香港节点",
+      "server": "server.example.com",
+      "server_port": 8388,
+      "method": "aes-256-gcm",
+      "password": "your-password"
+    },
+    {
+      "type": "vmess",
+      "tag": "示例-美国节点",
+      "server": "server.example.com",
+      "server_port": 443,
+      "uuid": "your-uuid-here",
+      "security": "auto",
+      "alter_id": 0,
+      "tls": {
+        "enabled": true,
+        "server_name": "server.example.com"
+      },
+      "transport": {
+        "type": "ws",
+        "path": "/path",
+        "headers": {
+          "Host": "server.example.com"
+        }
+      }
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "block",
+      "tag": "block"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    }
+  ],
+  "route": {
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "geosite-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
+        "download_detour": "direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-geolocation-!cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs",
+        "download_detour": "direct"
+      },
+      {
+        "type": "remote",
+        "tag": "geoip-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
+        "download_detour": "direct"
+      }
+    ],
+    "rules": [
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      },
+      {
+        "network": "udp",
+        "port": 443,
+        "outbound": "block"
+      },
+      {
+        "clash_mode": "Direct",
+        "outbound": "direct"
+      },
+      {
+        "clash_mode": "Global",
+        "outbound": "proxy"
+      },
+      {
+        "domain": [
+          "clash.razord.top",
+          "yacd.haishan.me"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "geosite-cn",
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "geoip-cn",
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "geosite-geolocation-!cn",
+        "outbound": "proxy"
+      }
+    ],
+    "final": "proxy",
+    "auto_detect_interface": true
+  },
+  "experimental": {
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "external_ui": "ui",
+      "secret": "",
+      "default_mode": "rule"
+    }
+  }
+}

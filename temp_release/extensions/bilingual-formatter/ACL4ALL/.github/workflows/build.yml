@@ -1,0 +1,32 @@
+name: Auto Convert INI to JSON
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'subconverter/*.ini'
+  workflow_dispatch:  # 支持手动触发
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Convert Script
+        run: node scripts/convert.js
+
+      - name: Commit and Push
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: auto-convert INI to JSON [skip ci]"
+          file_pattern: "dist/*.json"

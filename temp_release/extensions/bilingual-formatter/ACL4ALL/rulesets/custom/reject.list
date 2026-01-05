@@ -1,0 +1,47 @@
+# 自定义广告拦截规则
+# 格式: DOMAIN-SUFFIX,域名
+# 更新日期: 2025-12-08
+
+# 常见广告域名
+DOMAIN-SUFFIX,doubleclick.net
+DOMAIN-SUFFIX,googleads.g.doubleclick.net
+DOMAIN-SUFFIX,adservice.google.com
+DOMAIN-SUFFIX,pagead2.googlesyndication.com
+
+# 国内广告平台
+DOMAIN-SUFFIX,tanx.com
+DOMAIN-SUFFIX,mmstat.com
+DOMAIN-SUFFIX,atm.youku.com
+
+# 应用内广告
+DOMAIN-KEYWORD,adview
+DOMAIN-KEYWORD,admaster
+DOMAIN-KEYWORD,adsage
+DOMAIN-KEYWORD,adsmogo
+DOMAIN-KEYWORD,adsrvmedia
+DOMAIN-KEYWORD,adwords
+DOMAIN-KEYWORD,adservice
+DOMAIN-KEYWORD,domob
+DOMAIN-KEYWORD,duomeng
+DOMAIN-KEYWORD,dwtrack
+DOMAIN-KEYWORD,guanggao
+DOMAIN-KEYWORD,lianmeng
+DOMAIN-KEYWORD,mobaders
+DOMAIN-KEYWORD,omgmta
+DOMAIN-KEYWORD,openx
+DOMAIN-KEYWORD,partnerad
+DOMAIN-KEYWORD,pingfore
+DOMAIN-KEYWORD,supersonicads
+DOMAIN-KEYWORD,uedas
+DOMAIN-KEYWORD,usage
+DOMAIN-KEYWORD,wlmonitor
+DOMAIN-KEYWORD,zjtoolbar
+
+# 隐私追踪
+DOMAIN-SUFFIX,adjust.com
+DOMAIN-SUFFIX,appsflyer.com
+DOMAIN-SUFFIX,branch.io
+
+# 自定义拦截域名（在下方添加你的规则）
+# DOMAIN-SUFFIX,example-ad.com
+# DOMAIN-KEYWORD,ad-keyword

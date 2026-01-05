@@ -1,0 +1,22 @@
+payload:
+  # 内容：远程桌面软件
+  # 数量：9条
+
+  #Windows-Oray
+  # PROCESS-NAME,devcon.exe
+  # PROCESS-NAME,DriverInstaller.exe
+  # PROCESS-NAME,CrashReport.exe
+  # PROCESS-NAME,SunloginClient.exe
+
+  #Windows-ToDesk
+  # PROCESS-NAME,ToDesk_Setup.exe
+  # PROCESS-NAME,ToDesk_Session.exe
+  # PROCESS-NAME,ToDesk_Service.exe
+  # PROCESS-NAME,ToDesk.exe
+
+  #Windows-System
+  # PROCESS-NAME,mstsc.exe
+
+  #MacOS
+
+  #Linux
