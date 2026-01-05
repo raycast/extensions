@@ -1,6 +1,6 @@
 # Google Cloud CLI Changelog
 
-## [1.0.2] - {PR_MERGE_DATE}
+## [1.0.2] - 2026-01-05
 - Added Cloud Functions v2 service with Gen 2 support
 - Added function invocation from Raycast with live response
 - Added function creation form with streaming deployment logs
