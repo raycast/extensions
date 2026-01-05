@@ -1,12 +1,12 @@
 # Changelog
 
-## [Pin System Fixes] - {PR_MERGE_DATE}
+## [Pin System Fixes] - 2026-01-05
 
 ### Fixed
 
 - **Pins**: Fixed bug where pinned windows would not always appear in the list or could be removed incorrectly. Improved reliability when pinning and unpinning windows, including handling for closed applications and ensuring perma-pinned windows are consistently displayed.
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-01-05
 
 ### Added
 
