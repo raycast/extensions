@@ -10,7 +10,7 @@
     "Productivity",
     "Developer Tools"
   ],
-  "icon": "icon.png",
+  "icon": "assets/icon.png",
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
