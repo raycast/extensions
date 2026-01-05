@@ -14,7 +14,6 @@ import {
   formatDuration,
 } from "../../bamboo/api";
 import { useNavigation } from "@raycast/api";
-import { Preferences } from "../../preferences";
 
 type DayEntry = {
   id: string; // Unique ID for form management

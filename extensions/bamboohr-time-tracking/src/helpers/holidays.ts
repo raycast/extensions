@@ -1,4 +1,3 @@
-import { Preferences } from "../preferences";
 import { createClient } from "./client";
 
 export interface DayOffInfo {

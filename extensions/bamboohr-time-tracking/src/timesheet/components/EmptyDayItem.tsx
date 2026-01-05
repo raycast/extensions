@@ -1,7 +1,6 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { Project, TimesheetEntryInput } from "../../bamboo/api";
 import { EditForm } from "./EditForm";
-import { Preferences } from "../../preferences";
 
 type EmptyDayItemProps = {
   dayDate: string;

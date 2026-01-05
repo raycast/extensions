@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Project } from "../../bamboo/api";
-import { Preferences } from "../../preferences";
 import { createClient } from "../../helpers";
 
 type ProjectsState = {

@@ -9,7 +9,6 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ClockStatus, formatDuration } from "./bamboo/api";
-import { Preferences } from "./preferences";
 import { createClient, formatEntryLine } from "./helpers";
 
 export default function Command() {

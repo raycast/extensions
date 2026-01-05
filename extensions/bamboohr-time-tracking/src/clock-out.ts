@@ -1,5 +1,4 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Preferences } from "./preferences";
 import { BambooHRClient, formatDuration } from "./bamboo/api";
 import { timeFormatter } from "./helpers";
 

@@ -10,7 +10,6 @@ import {
   hasWarningsForEntry,
   formatTimeRange,
 } from "../../helpers";
-import { Preferences } from "../../preferences";
 import { EditForm } from "./EditForm";
 
 type TimeEntryItemProps = {

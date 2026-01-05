@@ -2,7 +2,6 @@ import { Alert, confirmAlert, Toast, showToast } from "@raycast/api";
 import { useCallback } from "react";
 import { NormalizedTimeEntry, TimesheetEntryInput } from "../../bamboo/api";
 import { createClient, formatTimeRange } from "../../helpers";
-import { Preferences } from "../../preferences";
 
 export type SplitValues = {
   firstStart: Date | null;

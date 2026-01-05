@@ -1,5 +1,4 @@
 import { NormalizedTimeEntry } from "../bamboo/api";
-import { Preferences } from "../preferences";
 
 export function hasWarningsForEntry(
   entry: NormalizedTimeEntry,

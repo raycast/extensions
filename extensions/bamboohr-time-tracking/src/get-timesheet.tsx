@@ -7,7 +7,6 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { NormalizedTimeEntry, formatDate, formatDuration } from "./bamboo/api";
-import { Preferences } from "./preferences";
 import {
   formatDateLabel,
   entryDurationMs,
