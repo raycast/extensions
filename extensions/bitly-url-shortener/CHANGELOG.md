@@ -1,6 +1,6 @@
 # Bitly Changelog
 
-## [List Links] - {PR_MERGE_DATE}
+## [List Links] - 2026-01-05
 
 - List Links in a Bitly group
 - Modernize extension to use latest Raycast configuration
