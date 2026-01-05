@@ -3,14 +3,6 @@ import { LaunchProps, Toast, getPreferenceValues, open, showHUD, showToast } fro
 const SEARCH_URL = "https://ref.ly/logos4/Search";
 const KIND = "BibleSearch";
 
-interface Preferences {
-  useSmartSearch: boolean;
-}
-
-type CommandArguments = {
-  query?: string;
-};
-
 /**
  * Logos Bible Search command.
  *
@@ -19,8 +11,8 @@ type CommandArguments = {
  * - Smart search: morphologically-aware, matches concepts and synonyms
  * - Precise search: exact phrase matching
  */
-export default async function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
-  const preferences = getPreferenceValues<Preferences>();
+export default async function Command(props: LaunchProps<{ arguments: Arguments.SearchBible }>) {
+  const preferences = getPreferenceValues<Preferences.SearchBible>();
   const query = props.arguments.query?.trim();
 
   if (!query) {
