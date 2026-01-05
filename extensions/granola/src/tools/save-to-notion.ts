@@ -80,7 +80,6 @@ export default async function tool(input: Input): Promise<Output> {
 
       const batchResults = await Promise.all(batchPromises);
       results.push(...batchResults);
-
     }
 
     return { results };

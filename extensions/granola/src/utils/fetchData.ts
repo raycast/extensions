@@ -314,13 +314,13 @@ export async function getDocumentsByIds(documentIds: string[], batchSize: number
             }
           }
         }
-    } catch (error) {
-      if (isAbortError(error)) {
-        throw error;
-      }
-      const normalizedError = toError(error);
-      showFailureToast(normalizedError, { title: "Failed to Fetch Documents" });
-      throw normalizedError;
+      } catch (error) {
+        if (isAbortError(error)) {
+          throw error;
+        }
+        const normalizedError = toError(error);
+        showFailureToast(normalizedError, { title: "Failed to Fetch Documents" });
+        throw normalizedError;
       }
     }
   }

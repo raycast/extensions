@@ -29,7 +29,12 @@ export const toErrorMessage = (error: unknown): string => {
     return error;
   }
 
-  if (typeof error === "number" || typeof error === "boolean" || typeof error === "bigint" || typeof error === "symbol") {
+  if (
+    typeof error === "number" ||
+    typeof error === "boolean" ||
+    typeof error === "bigint" ||
+    typeof error === "symbol"
+  ) {
     return String(error);
   }
 
