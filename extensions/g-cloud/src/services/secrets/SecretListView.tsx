@@ -17,6 +17,8 @@ import SecretDetailView from "./SecretDetailView";
 import CreateSecretForm from "./components/CreateSecretForm";
 import { showFailureToast } from "@raycast/utils";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
+import { useStreamerMode } from "../../utils/useStreamerMode";
+import { StreamerModeAction } from "../../components/StreamerModeAction";
 
 interface SecretListViewProps {
   projectId: string;
@@ -31,6 +33,7 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
   const [searchText, setSearchText] = useState<string>("");
   const [service, setService] = useState<SecretManagerService | null>(null);
   const { push } = useNavigation();
+  const { isEnabled: isStreamerMode } = useStreamerMode();
 
   useEffect(() => {
     const secretService = new SecretManagerService(gcloudPath, projectId);
@@ -317,11 +320,13 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
                 <ActionPanel>
                   <ActionPanel.Section title="Secret Actions">
                     <Action title="View Details" icon={Icon.Eye} onAction={() => handleViewDetails(secret)} />
-                    <Action
-                      title="Copy Latest Value"
-                      icon={Icon.Clipboard}
-                      onAction={() => handleQuickCopyValue(secret)}
-                    />
+                    {!isStreamerMode && (
+                      <Action
+                        title="Copy Latest Value"
+                        icon={Icon.Clipboard}
+                        onAction={() => handleQuickCopyValue(secret)}
+                      />
+                    )}
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Management">
                     <Action
@@ -344,6 +349,9 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteSecret(secret)}
                     />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Privacy">
+                    <StreamerModeAction />
                   </ActionPanel.Section>
                 </ActionPanel>
               }

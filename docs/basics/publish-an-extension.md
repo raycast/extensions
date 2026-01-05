@@ -16,7 +16,7 @@ Open your terminal, navigate to your extension directory, and run `npm run build
 
 ### Publish your extension
 
-To share your extension with others, navigate to your extension directory, and run `npm run publish` to publish your extension. 
+To share your extension with others, navigate to your extension directory, and run `npm run publish` to publish your extension.
 
 {% hint style="info" %}
 

@@ -9,22 +9,24 @@ function Queue() {
   const { queueData, queueError, queueIsLoading, queueRevalidate } = useQueue();
 
   if (queueError) {
-    <List isLoading={queueIsLoading}>
-      <List.EmptyView
-        title="Unable to load devices"
-        description={getErrorMessage(queueError)}
-        actions={
-          <ActionPanel>
-            <Action
-              icon={Icon.Repeat}
-              title="Refresh"
-              onAction={async () => queueRevalidate()}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>;
+    return (
+      <List isLoading={queueIsLoading}>
+        <List.EmptyView
+          title="Unable to load queue"
+          description={getErrorMessage(queueError)}
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.Repeat}
+                title="Refresh"
+                onAction={async () => queueRevalidate()}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
   if (!queueData || queueData.length == 0) {

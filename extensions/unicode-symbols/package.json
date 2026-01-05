@@ -9,7 +9,8 @@
     "FezVrasta",
     "pernielsentikaer",
     "j3lte",
-    "xilopaint"
+    "xilopaint",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -107,8 +108,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
     "fuse.js": "^6.6.2"
   },
   "devDependencies": {

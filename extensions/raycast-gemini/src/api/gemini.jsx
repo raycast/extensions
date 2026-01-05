@@ -108,7 +108,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           message: e.message, // Display the error message in the toast notification
         });
         setMarkdown(
-          "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub."
+          "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub.",
         );
       }
     }
@@ -129,7 +129,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
             return;
           }
           getResponse(`${context}\n${selected}`);
-        } catch (e) {
+        } catch {
           await showToast({
             style: Toast.Style.Failure,
             title: "Could not get the selected text. Continue without it.",
@@ -213,7 +213,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
               try {
                 const selectedText = await getSelectedText();
                 setTextarea((text) => text + selectedText);
-              } catch (error) {
+              } catch {
                 await showToast({
                   title: "Could not get the selected text",
                   style: Toast.Style.Failure,

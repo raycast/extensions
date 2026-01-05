@@ -1,12 +1,18 @@
+/**
+ * Installed view for displaying installed brew packages.
+ */
+
 import { useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
-import { brewFetchInstalled, Cask, Formula } from "./brew";
+import { Cask, Formula, uiLogger } from "./utils";
+import { useBrewInstalled } from "./hooks/useBrewInstalled";
+import { isInstalled } from "./hooks/useBrewSearch";
 import { FormulaList } from "./components/list";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
-export default function Main() {
+function InstalledContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
-  const { isLoading, data: installed, revalidate } = useCachedPromise(() => brewFetchInstalled(true));
+  const { isLoading, data: installed, revalidate } = useBrewInstalled();
 
   let formulae: Formula[] = [];
   if (filter != InstallableFilterType.casks && installed?.formulae instanceof Map) {
@@ -17,25 +23,41 @@ export default function Main() {
     casks = Array.from(installed.casks.values());
   }
 
-  const isInstalled = (name: string) => {
-    if (!installed) {
-      return false;
-    }
-    return (
-      (installed.formulae instanceof Map && installed.formulae.get(name) != undefined) ||
-      (installed.casks instanceof Map && installed.casks.get(name) != undefined)
-    );
-  };
+  // Log rendering statistics
+  if (installed && !isLoading) {
+    uiLogger.log("Installed view rendered", {
+      filter,
+      formulaeDisplayed: formulae.length,
+      casksDisplayed: casks.length,
+      totalDisplayed: formulae.length + casks.length,
+      totalAvailable: (installed.formulae?.size ?? 0) + (installed.casks?.size ?? 0),
+    });
+  }
+
+  // Determine search bar placeholder based on loading state
+  const searchBarPlaceholder = isLoading ? "Loading installed packages…" : placeholder(filter);
 
   return (
     <FormulaList
       formulae={formulae}
       casks={casks}
-      searchBarPlaceholder={placeholder(filter)}
+      searchBarPlaceholder={searchBarPlaceholder}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
-      isInstalled={isInstalled}
-      onAction={() => revalidate()}
+      dataFetched={installed !== undefined}
+      isInstalled={(name) => isInstalled(name, installed)}
+      onAction={() => {
+        uiLogger.log("Revalidating installed packages");
+        revalidate();
+      }}
     />
+  );
+}
+
+export default function Main() {
+  return (
+    <ErrorBoundary>
+      <InstalledContent />
+    </ErrorBoundary>
   );
 }

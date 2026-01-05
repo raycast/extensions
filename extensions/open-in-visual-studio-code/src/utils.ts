@@ -23,27 +23,60 @@ export const getSelectedFinderWindow = async (): Promise<string> => {
   }
 };
 
-export const getActiveExplorerWindow = async (): Promise<string> => {
-  const powerShellscript = `
+export const getSelectedFileExplorerItems = async () => {
+  const script = `
+function Get-SelectedExplorerItemsInternal {
+    [CmdletBinding()]
+    Param()
     $shell = New-Object -ComObject Shell.Application
-    $windows = $shell.Windows()
-    
-    foreach ($window in $windows) {
-      if ($window.Name -eq "File Explorer") {
-        $path = $window.Document.Folder.Self.Path
-        if ($path) {
-          Write-Output $path
-          exit 0
+    $selectedPaths = @()
+    foreach ($window in $shell.Windows()) {
+        try {
+            if ($window.Document -and $window.Document.Folder -and $window.Document.SelectedItems) {
+                $items = $window.Document.SelectedItems()
+                if ($items.Count -gt 0) {
+                    foreach ($item in $items) {
+                        $selectedPaths += $item.Path
+                    }
+                    return $selectedPaths
+                }
+            }
         }
-      }
+        catch { }
     }
-    exit 1
+    return $selectedPaths
+}
+Get-SelectedExplorerItemsInternal | ForEach-Object { Write-Output $_ }
   `;
 
-  try {
-    const result = await runPowerShellScript(powerShellscript);
-    return result.trim();
-  } catch {
-    throw new Error("Could not get the selected File Manager window");
-  }
+  const rawOutput = await runPowerShellScript(script);
+  const paths = rawOutput
+    .split(/\r?\n/)
+    .filter((line) => line.trim() !== "")
+    .flatMap((path) => ({ path: path }));
+  return paths;
+};
+
+export const getCurrentExplorerPath = async () => {
+  const script = `
+        function Get-CurrentExplorerPathInternal {
+            $shell = New-Object -ComObject Shell.Application
+            $foundPath = ""
+            foreach ($window in $shell.Windows()) {
+                try {
+                    if ($window.Document -and $window.Document.Folder -and $window.Document.Folder.Self.Path) {
+                        $path = $window.Document.Folder.Self.Path
+                        $foundPath = $path
+                        break
+                    }
+                }
+                catch { }
+            }
+            return $foundPath
+        }
+        Get-CurrentExplorerPathInternal
+    `;
+  const path = (await runPowerShellScript(script)).trim();
+
+  return path;
 };

@@ -3,7 +3,7 @@ import { getUserEmail } from "./api/googleAuth";
 import { withGoogleAuth } from "./components/withGoogleAuth";
 
 async function Command() {
-  const email = await getUserEmail();
+  const email = getUserEmail();
 
   const searchParams = new URLSearchParams();
   if (email) {

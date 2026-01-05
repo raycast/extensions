@@ -101,7 +101,7 @@ export default function Command() {
 
 ### Dropdown
 
-Some extensions may benefit from giving users a second filtering dimension. A media file management extension may allow users to view only videos or only images, an image-searching extension may allow switching search engines, etc.
+Some extensions may benefit from giving users a second filtering dimension. A media file management extension may allow users to view only videos or only images, an image-searching extension may allow switching ssearch engines, etc.
 
 This is where the `searchBarAccessory` [prop](#props) is useful. Pass it a [Grid.Dropdown](#grid.dropdown) component, and it will be displayed on the right-side of the search bar. Invoke it either by using the global shortcut `⌘` `P` or by clicking on it.
 
@@ -650,33 +650,6 @@ export default function Command() {
 An interface describing an accessory view in a `Grid.Item`.
 
 ![Grid.Item accessories illustration](../../.gitbook/assets/grid-item-accessories.webp)
-
-#### Properties
-
-| Property | Description | Type |
-| :--- | :--- | :--- |
-| icon | An optional Image.ImageLike that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>null</code> |
-| tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> or <code>null</code> |
-
-#### Example
-
-```typescript
-import { Icon, Grid } from "@raycast/api";
-
-export default function Command() {
-  return (
-    <Grid>
-      <Grid.Item
-        title="Daredevil"
-        accessory={{
-          icon: Icon.FilmStrip,
-          tooltip: "TV Show"
-        }}
-      />
-    </Grid>
-  );
-}
-```
 
 ### Grid.Inset
 
