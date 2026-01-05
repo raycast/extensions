@@ -1,6 +1,6 @@
 # Terminal Finder Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-01-05
 
 - A new quick command to jump from X to Y
 - Added README.md
