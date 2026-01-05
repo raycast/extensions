@@ -1,6 +1,6 @@
 # Changelog
 
-## [Pin System Fixes] - 4 Jan 2026
+## [Pin System Fixes] - {PR_MERGE_DATE}
 
 ### Fixed
 
