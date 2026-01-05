@@ -1,4 +1,5 @@
 import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { useBrewDependencies } from "../hooks/useBrewDependencies";
 import {
   type BrewProgress,
   brewInstallWithProgress,
@@ -17,7 +18,6 @@ import {
   showActionToast,
   showBrewFailureToast,
 } from "../utils";
-import { useDependenciesFilter } from "../utils/dependencies";
 
 export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
   // TD: Support installing other versions?
@@ -94,7 +94,7 @@ export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; on
 }
 
 export function FormulaShowAllInstalled(props: { onAction: (result: boolean) => void }) {
-  const { excludeDependencies, setExcludeDependencies } = useDependenciesFilter();
+  const [excludeDependencies, setExcludeDependencies] = useBrewDependencies();
 
   return (
     <Action
@@ -230,11 +230,7 @@ async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
 }
 
 function toggleExcludeDeps(exclude: boolean, setExclude: (val: boolean) => void) {
-  const newState = !exclude;
-
-  setExclude(newState);
-
-  showToast(Toast.Style.Success, newState ? "Dependencies hidden" : "Dependencies shown");
+  setExclude(!exclude);
 
   return true;
 }

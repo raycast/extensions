@@ -6,16 +6,16 @@ import { useState } from "react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
+import { useBrewDependencies } from "./hooks/useBrewDependencies";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { isInstalled } from "./hooks/useBrewSearch";
 import { uiLogger } from "./utils";
-import { useDependenciesFilter } from "./utils/dependencies";
 import { showInstalledPackages } from "./utils/installed";
 
 function InstalledContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
   const { isLoading, data: installed, revalidate } = useBrewInstalled();
-  const { excludeDependencies } = useDependenciesFilter();
+  const [excludeDependencies] = useBrewDependencies();
   const { formulae, casks } = showInstalledPackages(installed, filter, excludeDependencies);
 
   // Log rendering statistics
