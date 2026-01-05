@@ -13,12 +13,12 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { IAMService, IAMPrincipal, IAMRole } from "./IAMService";
-import { showFailureToast } from "@raycast/utils";
 import { predefinedRoles } from "../../utils/iamRoles";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 import { useStreamerMode } from "../../utils/useStreamerMode";
 import { maskEmailIfEnabled } from "../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
+import { ApiErrorView } from "../../components/ApiErrorView";
 
 interface IAMViewProps {
   projectId: string;
@@ -109,7 +109,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
         loadingToast.hide();
       }
 
-      showFailureToast(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch IAM policy",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -211,7 +215,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                 } catch (error) {
                   console.error("Error adding member:", error);
                   loadingToast.hide();
-                  showFailureToast(error);
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to fetch IAM policy",
+                    message: error instanceof Error ? error.message : "Unknown error",
+                  });
                 } finally {
                   setIsLoading(false);
                 }
@@ -319,7 +327,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                 } catch (error) {
                   console.error("Error creating group:", error);
                   loadingToast.hide();
-                  showFailureToast(error);
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to fetch IAM policy",
+                    message: error instanceof Error ? error.message : "Unknown error",
+                  });
                 } finally {
                   setIsLoading(false);
                 }
@@ -388,7 +400,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       } catch (error) {
         console.error("Error removing member:", error);
         loadingToast.hide();
-        showFailureToast(error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch IAM policy",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -541,7 +557,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                 } catch (error) {
                   console.error("Error adding role:", error);
                   loadingToast.hide();
-                  showFailureToast(error);
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to fetch IAM policy",
+                    message: error instanceof Error ? error.message : "Unknown error",
+                  });
                 } finally {
                   setIsLoading(false);
                 }
@@ -633,16 +653,7 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Error Loading IAM Data"
-          description={error}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="iam" onRetry={fetchIAMPolicy} />
       </List>
     );
   }

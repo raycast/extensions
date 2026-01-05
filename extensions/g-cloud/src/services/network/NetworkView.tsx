@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, List, Icon, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { ActionPanel, Action, List, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import VPCView from "./VPCView";
 import IPAddressView from "./IPAddressView";
 import FirewallRulesView from "./FirewallRulesView";
@@ -27,8 +26,10 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Error validating network access:", error);
-          showFailureToast(error, {
+          showToast({
+            style: Toast.Style.Failure,
             title: "Network Service Error",
+            message: error instanceof Error ? error.message : "Unknown error",
           });
         }
       } finally {

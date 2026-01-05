@@ -18,10 +18,10 @@ import IAMMembersView from "./IAMMembersView";
 import { IAMMembersByPrincipalView } from "../iam";
 import StorageStatsView from "./StorageStatsView";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
-import { showFailureToast } from "@raycast/utils";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { listStorageBuckets, createStorageBucket, deleteStorageBucket } from "../../utils/gcpApi";
 import { LogsView } from "../logs-service";
+import { ApiErrorView } from "../../components/ApiErrorView";
 
 interface StorageBucketViewProps {
   projectId: string;
@@ -92,10 +92,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       });
     } catch (error: unknown) {
       setError(`Failed to list buckets: ${error instanceof Error ? error.message : String(error)}`);
-      showFailureToast("Failed to list buckets", {
-        title: "Failed to list buckets",
-        message: error instanceof Error ? error.message : String(error),
-      });
     } finally {
       setIsLoading(false);
     }
@@ -115,9 +111,10 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       fetchBuckets();
     } catch (error: unknown) {
       console.error("Error creating bucket:", error);
-      showFailureToast("Failed to create bucket", {
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to create bucket",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -154,9 +151,10 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       } catch (error: unknown) {
         console.error("Error deleting bucket:", error);
         deletingToast.hide();
-        showFailureToast("Failed to delete bucket", {
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to delete bucket",
-          message: error instanceof Error ? error.message : String(error),
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
         setIsLoading(false);
@@ -299,16 +297,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Error Loading Buckets"
-          description={error}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchBuckets} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="storage" onRetry={fetchBuckets} />
       </List>
     );
   }

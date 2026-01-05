@@ -1,8 +1,8 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Detail, useNavigation } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import { showFailureToast } from "@raycast/utils";
 import { listLogEntries, LogEntry, LogSeverity, LOG_RESOURCE_TYPES } from "../../utils/gcpApi";
 import { initializeQuickLink } from "../../utils/QuickLinks";
+import { ApiErrorView } from "../../components/ApiErrorView";
 
 interface LogsViewProps {
   projectId: string;
@@ -52,9 +52,6 @@ export default function LogsView({ projectId, gcloudPath, initialResourceType }:
     } catch (err) {
       console.error("Error fetching logs:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch logs");
-      showFailureToast("Failed to load logs", {
-        message: err instanceof Error ? err.message : "Unknown error",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -228,16 +225,7 @@ ${JSON.stringify(entry.textPayload || entry.jsonPayload || entry.protoPayload ||
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Error Loading Logs"
-          description={error}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchLogs} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="logging" onRetry={fetchLogs} />
       </List>
     );
   }

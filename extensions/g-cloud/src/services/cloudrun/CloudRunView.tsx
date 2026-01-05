@@ -13,7 +13,6 @@ import {
   Alert,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { showFailureToast } from "@raycast/utils";
 import {
   listCloudRunServices,
   listCloudRunRevisions,
@@ -26,6 +25,7 @@ import {
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { LogsView } from "../logs-service";
+import { ApiErrorView } from "../../components/ApiErrorView";
 
 const CLOUD_RUN_REGIONS = [
   { value: "us-central1", title: "Iowa (us-central1)" },
@@ -95,9 +95,6 @@ export default function CloudRunView({ projectId, gcloudPath }: CloudRunViewProp
     } catch (err) {
       console.error("Error fetching Cloud Run services:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch services");
-      showFailureToast("Failed to load Cloud Run services", {
-        message: err instanceof Error ? err.message : "Unknown error",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -246,16 +243,7 @@ ${
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Error Loading Cloud Run Services"
-          description={error}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchServices} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="run" onRetry={fetchServices} />
       </List>
     );
   }
@@ -421,9 +409,6 @@ function RevisionsView({ projectId, gcloudPath, location, serviceName }: Revisio
     } catch (err) {
       console.error("Error fetching revisions:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch revisions");
-      showFailureToast("Failed to load revisions", {
-        message: err instanceof Error ? err.message : "Unknown error",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -448,16 +433,7 @@ function RevisionsView({ projectId, gcloudPath, location, serviceName }: Revisio
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Error Loading Revisions"
-          description={error}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchRevisions} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="run" onRetry={fetchRevisions} />
       </List>
     );
   }
@@ -524,12 +500,20 @@ function CreateServiceForm({ projectId, gcloudPath, onCreated }: CreateServiceFo
 
   async function handleSubmit(values: CreateServiceFormValues) {
     if (!values.serviceName.trim()) {
-      showFailureToast("Service name is required");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Service name is required",
+      });
       return;
     }
 
     if (!values.image.trim()) {
-      showFailureToast("Container image is required");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Container image is required",
+      });
       return;
     }
 
