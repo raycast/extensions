@@ -1,6 +1,6 @@
 # Vim Bro Changelog
 
-## [Add your favorite commands and filter] - {PR_MERGE_DATE}
+## [Add your favorite commands and filter] - 2026-01-05
 
 - Filter by favorite commands
 - Modernize to use latest Raycast API
