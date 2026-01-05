@@ -1,5 +1,35 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`parseZedWorkspace > parse WSL workspace with port 1`] = `
+{
+  "host": "localhost",
+  "id": 2,
+  "lastOpened": 1757750879527,
+  "path": "home/wsluser/project",
+  "type": "remote",
+  "uri": "ssh://wsluser@localhost:2222/home/wsluser/project",
+  "wsl": {
+    "distro": "Debian",
+    "user": "wsluser",
+  },
+}
+`;
+
+exports[`parseZedWorkspace > parse WSL workspace with user and distro 1`] = `
+{
+  "host": "localhost",
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "path": "home/wsluser/project",
+  "type": "remote",
+  "uri": "ssh://wsluser@localhost/home/wsluser/project",
+  "wsl": {
+    "distro": "Ubuntu",
+    "user": "wsluser",
+  },
+}
+`;
+
 exports[`parseZedWorkspace > parse local workspace with single path 1`] = `
 {
   "id": 1,
@@ -51,6 +81,28 @@ exports[`parseZedWorkspace > parse remote workspace with single path, with user,
   "path": "home/user/project",
   "type": "remote",
   "uri": "ssh://testuser@example.com/home/user/project",
+}
+`;
+
+exports[`parseZedWorkspace > skips WSL workspace without distro 1`] = `
+{
+  "host": "localhost",
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "path": "home/wsluser/project",
+  "type": "remote",
+  "uri": "ssh://wsluser@localhost/home/wsluser/project",
+}
+`;
+
+exports[`parseZedWorkspace > skips WSL workspace without user 1`] = `
+{
+  "host": "localhost",
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "path": "home/wsluser/project",
+  "type": "remote",
+  "uri": "ssh://localhost/home/wsluser/project",
 }
 `;
 

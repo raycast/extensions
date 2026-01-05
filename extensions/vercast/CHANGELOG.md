@@ -1,5 +1,9 @@
 # Vercast Changelog
 
+## [2.13] - 2026-01-05
+
+- Added `Open Latest Deployment` command to open the latest deployment target or the Vercel dashboard
+
 ## [2.12] - 2025-12-12
 
 - Added Recent Deployments Menu Bar
