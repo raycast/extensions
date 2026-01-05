@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { copyActivePlainLink } from "./utils/copy-active-plain-link";
+import { copyActiveLink } from "./utils/copy-active-link";
 import { ensureBrowserExtensionAccess } from "./utils/ensure-browser-extension-access";
 
 export default async function main() {
@@ -8,7 +8,11 @@ export default async function main() {
     return;
   }
 
-  const { urgentPrefix } =
-    await getPreferenceValues<Preferences.CopyFormattedUrgentLink>();
-  await copyActivePlainLink({ prefix: urgentPrefix });
+  const { githubNonUrgentPrefix, plainNonUrgentPrefix } =
+    getPreferenceValues<Preferences.CopyFormattedLink>();
+
+  await copyActiveLink({
+    githubPrefix: githubNonUrgentPrefix,
+    plainPrefix: plainNonUrgentPrefix,
+  });
 }

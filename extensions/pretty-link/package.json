@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "pretty-pr-link",
-  "title": "Pretty PR Link",
-  "description": "Quickly copy the link of a GitHub Pull Request in a formatted way so you can share with your team and ask for reviews.",
+  "name": "pretty-link",
+  "title": "Pretty Link",
+  "description": "Quickly copy formatted links from GitHub Pull Requests and Plain threads to share with your team.",
   "icon": "extension-icon.png",
   "author": "jopcmelo",
   "platforms": [
@@ -17,32 +17,50 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "nonUrgentPrefix",
-      "title": "Non Urgent Prefix",
+      "name": "githubNonUrgentPrefix",
+      "title": "GitHub Non-Urgent Prefix",
       "type": "textfield",
       "required": false,
       "default": "📝",
-      "description": "The prefix to use when copying a non urgent pull request link"
+      "description": "The prefix to use when copying a non-urgent GitHub Pull Request link"
     },
     {
-      "name": "urgentPrefix",
-      "title": "Urgent Prefix",
+      "name": "githubUrgentPrefix",
+      "title": "GitHub Urgent Prefix",
       "type": "textfield",
       "required": false,
       "default": "🚨",
-      "description": "The prefix to use when copying a urgent pull request link"
+      "description": "The prefix to use when copying an urgent GitHub Pull Request link"
+    },
+    {
+      "name": "plainNonUrgentPrefix",
+      "title": "Plain Non-Urgent Prefix",
+      "type": "textfield",
+      "required": false,
+      "default": "📝",
+      "description": "The prefix to use when copying a non-urgent Plain thread link"
+    },
+    {
+      "name": "plainUrgentPrefix",
+      "title": "Plain Urgent Prefix",
+      "type": "textfield",
+      "required": false,
+      "default": "🚨",
+      "description": "The prefix to use when copying an urgent Plain thread link"
     }
   ],
   "commands": [
     {
       "name": "copy-formatted-link",
       "title": "Copy Formatted Link",
+      "subtitle": "Pretty Plain Link",
       "description": "Copy the formatted link without urgency indicator",
       "mode": "no-view"
     },
     {
       "name": "copy-formatted-urgent-link",
       "title": "Copy Formatted Urgent Link",
+      "subtitle": "Pretty Plain Link",
       "description": "Copy the formatted link with urgency indicator",
       "mode": "no-view"
     }

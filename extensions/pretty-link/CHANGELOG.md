@@ -1,4 +1,10 @@
-# Pretty PR Link Changelog
+# Pretty Link Changelog
+
+## [Plain Support] - {PR_MERGE_DATE}
+
+- Added support for Plain thread links
+- Separate prefix preferences for GitHub and Plain
+- Auto-detection of link type based on active tab
 
 ## [Initial Version] - 2025-11-25
 
