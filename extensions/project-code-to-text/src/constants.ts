@@ -391,4 +391,3 @@ export function formatProjectStructure(entries: readonly ProjectEntry[], level =
   }
   return structure;
 }
-
