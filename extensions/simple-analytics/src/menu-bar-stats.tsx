@@ -19,7 +19,7 @@ import {
   setActiveWebsiteId,
 } from "./lib/storage";
 import { formatNumber, formatDuration, getTimeRangeLabel, truncatePath } from "./lib/format";
-import { Preferences, TimeRange, Website, StatsResponse } from "./lib/types";
+import { TimeRange, Website, StatsResponse } from "./lib/types";
 
 const Icons = {
   chartBar: { source: "chart-bar.svg" },

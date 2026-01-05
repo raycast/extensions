@@ -33,11 +33,6 @@ export interface StatsResponse {
   histogram?: HistogramEntry[];
 }
 
-export interface Preferences {
-  displayMode: "visitors" | "pageviews" | "both";
-  defaultTimeRange: "today" | "7d" | "30d";
-}
-
 export type TimeRange = "today" | "7d" | "30d";
 
 export interface StatsState {
