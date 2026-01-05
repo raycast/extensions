@@ -89,7 +89,10 @@ function PageRouteItem({ route, onOpenInIDE }: { route: PageRoute; onOpenInIDE: 
                 title="Open Loading UI in IDE"
                 icon={Icon.Clock}
                 onAction={() => onOpenInIDE(route.loadingPath!)}
-                shortcut={{ modifiers: ["cmd"], key: "l" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "l" },
+                  Windows: { modifiers: ["ctrl"], key: "l" },
+                }}
               />
             )}
             {hasErrorFile && (
@@ -97,7 +100,10 @@ function PageRouteItem({ route, onOpenInIDE }: { route: PageRoute; onOpenInIDE: 
                 title="Open Error UI in IDE"
                 icon={Icon.ExclamationMark}
                 onAction={() => onOpenInIDE(route.errorPath!)}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "e" },
+                  Windows: { modifiers: ["ctrl"], key: "e" },
+                }}
               />
             )}
           </ActionPanel.Section>
@@ -105,12 +111,18 @@ function PageRouteItem({ route, onOpenInIDE }: { route: PageRoute; onOpenInIDE: 
             <Action.CopyToClipboard
               title="Copy Path"
               content={route.path}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "c" },
+                Windows: { modifiers: ["ctrl"], key: "c" },
+              }}
             />
             <Action.CopyToClipboard
               title="Copy File Path"
               content={route.file}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

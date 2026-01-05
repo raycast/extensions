@@ -113,11 +113,21 @@ function ApiRouteItem({ route, onOpenInIDE }: { route: ApiRoute; onOpenInIDE: (f
       actions={
         <ActionPanel>
           <Action title="Open in IDE" icon={Icon.Code} onAction={() => onOpenInIDE(route.file)} />
-          <Action.CopyToClipboard title="Copy Path" content={route.path} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard
+            title="Copy Path"
+            content={route.path}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "c" },
+              Windows: { modifiers: ["ctrl"], key: "c" },
+            }}
+          />
           <Action.CopyToClipboard
             title="Copy File Path"
             content={route.file}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "c" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+            }}
           />
         </ActionPanel>
       }
