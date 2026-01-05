@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-analytics",
+  "title": "Simple Analytics",
+  "description": "View your Simple Analytics website statistics in the menu bar",
+  "icon": "icon.png",
+  "author": "ayush1337",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar-stats",
+      "title": "Website Stats",
+      "description": "Display website statistics in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "manage-websites",
+      "title": "Manage Websites",
+      "description": "Add, edit, or remove websites to track",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "displayMode",
+      "title": "Menu Bar Display",
+      "description": "What statistics to show in the menu bar",
+      "type": "dropdown",
+      "required": true,
+      "default": "both",
+      "data": [
+        {
+          "title": "Visitors Only",
+          "value": "visitors"
+        },
+        {
+          "title": "Pageviews Only",
+          "value": "pageviews"
+        },
+        {
+          "title": "Both",
+          "value": "both"
+        }
+      ]
+    },
+    {
+      "name": "defaultTimeRange",
+      "title": "Default Time Range",
+      "description": "Default time range for statistics",
+      "type": "dropdown",
+      "required": true,
+      "default": "today",
+      "data": [
+        {
+          "title": "Last 24 Hours",
+          "value": "today"
+        },
+        {
+          "title": "Last 7 Days",
+          "value": "7d"
+        },
+        {
+          "title": "Last 30 Days",
+          "value": "30d"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.2",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "format": "prettier --write .",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
