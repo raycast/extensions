@@ -196,7 +196,7 @@ const pendingExtractions = new Set<string>();
 /**
  * Fast icon lookup - only returns cached icons, never blocks for extraction.
  */
-export function getCachedIcon(processPath: string, processName: string): string | null {
+export function getCachedIcon(processName: string): string | null {
   const cacheKey = processName.toLowerCase();
 
   // Check in-memory cache
@@ -339,7 +339,7 @@ export function refreshWindowListCache(): WindowInfo[] {
       if (isNaN(handle) || !title) continue;
 
       // Use cached icons only for fast loading
-      const iconPath = getCachedIcon(processPath, processName);
+      const iconPath = getCachedIcon(processName);
       const windowInfo: WindowInfo = {
         handle,
         title,
