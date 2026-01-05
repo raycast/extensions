@@ -11,3 +11,7 @@ export const sortProfiles = (profiles: ChromiumProfile[]) => {
     return 0;
   });
 };
+
+export const titleToPreferenceKey = (title: string): string => {
+  return `show${title.replace(/\s+/g, "")}`;
+};

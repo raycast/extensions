@@ -4,7 +4,7 @@ import ini from "ini";
 import { join } from "path";
 
 import browsers from "./supported-browsers.json";
-import { sortProfiles } from "./utils";
+import { sortProfiles, titleToPreferenceKey } from "./utils";
 
 type FirefoxProfiles = {
   name: string;
@@ -20,11 +20,18 @@ type FirefoxProfile = {
   icon: string;
 };
 
-export const getFirefoxProfiles = () => {
+export const getFirefoxProfiles = (enabledBrowsers: Record<string, boolean>) => {
   const profiles: FirefoxProfiles[] = [];
 
   browsers.firefox
-    .filter((browser) => fs.existsSync(browser.app))
+    .filter((browser) => {
+      const preferenceKey = titleToPreferenceKey(browser.title);
+      if (!enabledBrowsers[preferenceKey]) {
+        return false;
+      }
+
+      return fs.existsSync(browser.app);
+    })
     .forEach((browser) => {
       const path = join(os.homedir(), browser.path, "profiles.ini");
       const exists = fs.existsSync(path);

@@ -1,12 +1,13 @@
-import { ActionPanel, List, Icon, Action, closeMainWindow } from "@raycast/api";
+import { ActionPanel, List, Icon, Action, closeMainWindow, getPreferenceValues } from "@raycast/api";
 
 import { getFirefoxProfiles } from "./lib/firefox";
 import { getChromiumProfiles } from "./lib/chromium";
 import { launchBrowser } from "./lib/browsers";
 
 export default function Command() {
-  const chromiumProfiles = getChromiumProfiles();
-  const firefoxProfiles = getFirefoxProfiles();
+  const preferences = getPreferenceValues();
+  const chromiumProfiles = getChromiumProfiles(preferences);
+  const firefoxProfiles = getFirefoxProfiles(preferences);
 
   const browsers = [...chromiumProfiles, ...firefoxProfiles];
 

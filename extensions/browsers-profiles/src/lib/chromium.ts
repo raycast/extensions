@@ -2,7 +2,7 @@ import fs from "fs";
 import os from "os";
 
 import browsers from "./supported-browsers.json";
-import { sortProfiles } from "./utils";
+import { sortProfiles, titleToPreferenceKey } from "./utils";
 
 type ChromiumProfiles = {
   name: string;
@@ -18,10 +18,14 @@ export type ChromiumProfile = {
   icon: string;
 };
 
-export const getChromiumProfiles = () => {
+export const getChromiumProfiles = (enabledBrowsers: Record<string, boolean>) => {
   const profiles: ChromiumProfiles[] = [];
 
   browsers.chromium.forEach((browser) => {
+    const preferenceKey = titleToPreferenceKey(browser.title);
+    if (!enabledBrowsers[preferenceKey]) {
+      return;
+    }
     const path = `${os.homedir()}${browser.path}`;
     const exists = fs.existsSync(path);
 
@@ -40,7 +44,7 @@ export const getChromiumProfiles = () => {
     try {
       const localStateFile = fs.readFileSync(localStatePath, "utf-8");
       localState = JSON.parse(localStateFile);
-    } catch (error) {
+    } catch {
       return null;
     }
 
@@ -64,7 +68,7 @@ export const getChromiumProfiles = () => {
         path: profileDir,
         name: profileName,
         icon: browser.icon,
-      })
+      }),
     );
 
     sortProfiles(browserProfiles);
