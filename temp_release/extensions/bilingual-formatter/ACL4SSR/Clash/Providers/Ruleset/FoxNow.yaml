@@ -1,7 +1,0 @@
-payload:
-  # 内容：FoxNow
-  # 数量：4条
-  # USER-AGENT,FOX%20NOW*
-  - DOMAIN-SUFFIX,fox.com
-  - DOMAIN-SUFFIX,foxdcg.com
-  - DOMAIN-SUFFIX,uplynk.com

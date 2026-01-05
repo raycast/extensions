@@ -1,7 +1,0 @@
-payload:
-  # 内容：Reddit Services
-  # 数量：3条
-
-  - DOMAIN-SUFFIX,redditmedia.com
-  - DOMAIN-SUFFIX,redd.it
-  - DOMAIN-SUFFIX,reddit.com
