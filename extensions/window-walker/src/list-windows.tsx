@@ -61,13 +61,10 @@ export default function Command() {
           return { ...w, isPinned, isPermaPinned };
         });
 
-      // Add cached perma-pinned windows that aren't currently open
-      const openWindowKeys = new Set(windowList.map((w) => `${w.processName}:${w.title}`.toLowerCase()));
+      // Add cached perma-pinned windows that aren't currently open (dedupe by process name)
+      const openProcessNames = new Set(windowList.map((w) => w.processName.toLowerCase()));
       const cachedWindows: WindowWithMeta[] = cachedPermaPinnedList
-        .filter((cached) => {
-          const key = `${cached.processName}:${cached.title}`.toLowerCase();
-          return !openWindowKeys.has(key);
-        })
+        .filter((cached) => !openProcessNames.has(cached.processName.toLowerCase()))
         .map((cached) => {
           const isPermaPinned = permaPinnedList.some(
             (p) => p.processName === cached.processName && (!p.titlePattern || cached.title.includes(p.titlePattern)),
@@ -101,10 +98,10 @@ export default function Command() {
   useEffect(() => {
     refreshWindows();
 
-    // Set up auto-refresh every 10 seconds
+    // Auto-refresh every 1 second
     const interval = setInterval(() => {
       refreshWindows(true);
-    }, 10000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [refreshWindows]);
@@ -185,14 +182,14 @@ export default function Command() {
   const handlePin = async (window: WindowWithMeta) => {
     try {
       if (window.isPinned) {
-        await unpinWindow(window.processName, window.title);
+        await unpinWindow(window.processName);
         const toast = await showToast({
           style: Toast.Style.Success,
           title: `Unpinned ${getAppDisplayName(window.processName)}`,
         });
         setTimeout(() => toast.hide(), 2000);
       } else {
-        await pinWindow(window.processName, window.title);
+        await pinWindow(window.processName);
         const toast = await showToast({
           style: Toast.Style.Success,
           title: `Pinned ${getAppDisplayName(window.processName)}`,
@@ -212,14 +209,14 @@ export default function Command() {
   const handlePermaPin = async (window: WindowWithMeta) => {
     try {
       if (window.isPermaPinned) {
-        await unpinWindow(window.processName, window.title);
+        await unpinWindow(window.processName);
         const toast = await showToast({
           style: Toast.Style.Success,
           title: `Removed permanent pin`,
         });
         setTimeout(() => toast.hide(), 2000);
       } else {
-        await permaPinWindow(window.processName, window.title, {
+        await permaPinWindow(window.processName, undefined, {
           processName: window.processName,
           title: window.title,
           processPath: window.processPath,

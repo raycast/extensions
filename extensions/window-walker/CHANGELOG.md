@@ -1,12 +1,23 @@
 # Changelog
 
-## [Pin System Fixes] - 2026-01-05
+## [Performance & Pin Fixes] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Pins**: Pins now work by application name only, so pinning apps like Discord keeps it pinned regardless of which channel you're viewing.
+
+### Improved
+
+- **Refresh Rate**: Window list now auto-refreshes every 1 second (was 10 seconds).
+- **Icon Caching**: Icons are cached on disk and load in background, with automatic cleanup after 7 days.
+
+## [Pin System Fixes] - {PR_MERGE_DATE}
 
 ### Fixed
 
 - **Pins**: Fixed bug where pinned windows would not always appear in the list or could be removed incorrectly. Improved reliability when pinning and unpinning windows, including handling for closed applications and ensuring perma-pinned windows are consistently displayed.
 
-## [Initial Release] - 2026-01-05
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 
