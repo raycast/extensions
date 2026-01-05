@@ -10,7 +10,20 @@ import { Doc, NoteActionsProps, PanelsByDocId, Folder } from "../utils/types";
 import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "../utils/iconMapper";
 import { useDocumentPanels } from "../utils/useDocumentPanels";
 import { useDocumentNotesMarkdown } from "../utils/useDocumentNotesMarkdown";
-import { toError, toErrorMessage } from "../utils/errorUtils";
+import { isAbortError, toError, toErrorMessage } from "../utils/errorUtils";
+
+const NOTION_SAVE_TIMEOUT_MS = 120000;
+
+const isTrustedNotionUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:") return false;
+    const host = url.hostname.toLowerCase();
+    return host === "www.notion.so" || host === "notion.so" || host === "notion.site" || host.endsWith(".notion.site");
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Sorts notes by date (newest first)
@@ -42,13 +55,18 @@ export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
   }
 
   const handleSaveToNotion = async () => {
-    try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Saving to Notion...",
-      });
+    const controller = new AbortController();
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Saving to Notion...",
+    });
 
-      const result = await saveToNotion(doc.id);
+    const timeoutTimer = setTimeout(() => {
+      controller.abort();
+    }, NOTION_SAVE_TIMEOUT_MS);
+
+    try {
+      const result = await saveToNotion(doc.id, controller.signal);
 
       await showToast({
         style: Toast.Style.Success,
@@ -56,27 +74,39 @@ export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
         primaryAction: {
           title: "Open in Notion",
           onAction: async () => {
-            // Open the Notion page URL with security validation
-            if (result.page_url && result.page_url.startsWith("https://www.notion.so/")) {
-              try {
-                await open(result.page_url);
-              } catch (error) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Failed to open Notion page",
-                  message: "Unable to open the URL",
-                });
-              }
+            const pageUrl = result.page_url;
+            if (!pageUrl || !isTrustedNotionUrl(pageUrl)) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Invalid Notion URL",
+                message: "The returned URL is missing or not a Notion domain.",
+              });
+              return;
+            }
+
+            try {
+              await open(pageUrl);
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to open Notion page",
+                message: "Unable to open the URL",
+              });
             }
           },
         },
       });
     } catch (error) {
+      const message = isAbortError(error)
+        ? "Save to Notion timed out. It may still finish in the background."
+        : toErrorMessage(error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to save to Notion",
-        message: toErrorMessage(error),
+        message,
       });
+    } finally {
+      clearTimeout(timeoutTimer);
     }
   };
 

@@ -180,6 +180,24 @@ async function createHeaders(extraHeaders: Record<string, string> = {}): Promise
 /**
  * Centralized error handling for API responses
  */
+function parseRetryAfterMs(value: string | null): number | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const seconds = Number(trimmed);
+  if (!Number.isNaN(seconds)) {
+    return Math.max(0, seconds * 1000);
+  }
+
+  const dateMs = Date.parse(trimmed);
+  if (!Number.isNaN(dateMs)) {
+    return Math.max(0, dateMs - Date.now());
+  }
+
+  return null;
+}
+
 async function handleApiError(response: Response, operationName: string): Promise<never> {
   let errorMessage = `${operationName} failed: ${response.statusText}`;
 
@@ -204,7 +222,18 @@ async function handleApiError(response: Response, operationName: string): Promis
     // If reading the body fails, fall back to status text
   }
 
-  throw new Error(errorMessage);
+  const error = new Error(errorMessage) as Error & { status?: number; statusText?: string; retryAfterMs?: number };
+  error.status = response.status;
+  error.statusText = response.statusText;
+
+  if (response.status === 429) {
+    const retryAfterMs = parseRetryAfterMs(response.headers.get("Retry-After"));
+    if (retryAfterMs !== null) {
+      error.retryAfterMs = retryAfterMs;
+    }
+  }
+
+  throw error;
 }
 
 /**
@@ -763,6 +792,14 @@ export interface NotionSaveResult {
   page_url: string;
 }
 
+export interface NotionSaveRetryOptions {
+  signal?: AbortSignal;
+  maxRetries?: number;
+  baseDelayMs?: number;
+  maxDelayMs?: number;
+  onRetry?: (attempt: number, delayMs: number) => void;
+}
+
 export interface DocumentMetadataRequest {
   document_id: string;
 }
@@ -820,7 +857,7 @@ export interface DocumentMetadataResponse {
   sharing_link_visibility: string;
 }
 
-export async function saveToNotion(documentId: string): Promise<NotionSaveResult> {
+export async function saveToNotion(documentId: string, signal?: AbortSignal): Promise<NotionSaveResult> {
   const headers = await createHeaders();
 
   const response = await fetch(`${API_CONFIG.API_URL}/save-to-notion`, {
@@ -829,6 +866,7 @@ export async function saveToNotion(documentId: string): Promise<NotionSaveResult
     body: JSON.stringify({
       document_id: documentId,
     }),
+    signal,
   });
 
   if (!response.ok) {
@@ -842,6 +880,85 @@ export async function saveToNotion(documentId: string): Promise<NotionSaveResult
   }
 
   return result;
+}
+
+const isRateLimitError = (
+  error: unknown,
+): error is Error & { status?: number; message?: string; retryAfterMs?: number } => {
+  if (!error || typeof error !== "object") return false;
+  const err = error as { status?: number; message?: string };
+  if (err.status === 429) return true;
+  const message = typeof err.message === "string" ? err.message.toLowerCase() : "";
+  return (
+    message.includes("rate limit") ||
+    message.includes("rate_limit") ||
+    message.includes("ratelimit") ||
+    message.includes("too many requests")
+  );
+};
+
+const delay = (ms: number, signal?: AbortSignal): Promise<void> => {
+  if (!signal) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      cleanup();
+      const abortError = new Error("The operation was aborted.");
+      (abortError as Error & { name?: string }).name = "AbortError";
+      reject(abortError);
+    };
+    const cleanup = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", onAbort);
+    };
+
+    if (signal.aborted) {
+      onAbort();
+      return;
+    }
+
+    signal.addEventListener("abort", onAbort);
+  });
+};
+
+export async function saveToNotionWithRetry(
+  documentId: string,
+  options: NotionSaveRetryOptions = {},
+): Promise<NotionSaveResult> {
+  const { signal, maxRetries = 2, baseDelayMs = 1000, maxDelayMs = 10000, onRetry } = options;
+  let attempt = 0;
+
+  // Retry only on rate limits; other errors surface immediately.
+  for (;;) {
+    try {
+      return await saveToNotion(documentId, signal);
+    } catch (error) {
+      if (!isRateLimitError(error)) {
+        throw error;
+      }
+      if (attempt >= maxRetries) {
+        throw error;
+      }
+
+      const retryAfterMs =
+        typeof error.retryAfterMs === "number" && !Number.isNaN(error.retryAfterMs) ? error.retryAfterMs : null;
+      const delayMs =
+        retryAfterMs && retryAfterMs > 0 ? retryAfterMs : Math.min(maxDelayMs, baseDelayMs * Math.pow(2, attempt));
+
+      attempt += 1;
+      if (onRetry) {
+        onRetry(attempt, delayMs);
+      }
+
+      await delay(delayMs, signal);
+    }
+  }
 }
 
 /**

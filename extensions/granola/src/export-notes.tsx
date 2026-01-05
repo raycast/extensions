@@ -9,6 +9,8 @@ import {
   createTempDirectory,
   writeExportFile,
   getDocumentFolderOrganization,
+  calculateETA,
+  formatProgressMessage,
   createZipArchive,
   cleanupTempDirectory,
   showExportSuccessToast,
@@ -24,6 +26,7 @@ import convertHtmlToMarkdown from "./utils/convertHtmltoMarkdown";
 import Unresponsive from "./templates/unresponsive";
 import { sortNotesByDate } from "./components/NoteComponents";
 import { toErrorMessage } from "./utils/errorUtils";
+import { getNotionBatchSize } from "./utils/notionBatching";
 
 interface BulkNotionResult {
   noteId: string;
@@ -73,7 +76,6 @@ function BulkExportList({ notes, untitledNoteTitle }: { notes: Doc[]; untitledNo
 
   // Track timeout IDs to prevent memory leaks
   const notionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const batchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const notionOperationIdRef = useRef(0);
   const isMountedRef = useRef(true);
 
@@ -115,10 +117,6 @@ function BulkExportList({ notes, untitledNoteTitle }: { notes: Doc[]; untitledNo
       if (notionTimeoutRef.current) {
         clearTimeout(notionTimeoutRef.current);
         notionTimeoutRef.current = null;
-      }
-      if (batchTimeoutRef.current) {
-        clearTimeout(batchTimeoutRef.current);
-        batchTimeoutRef.current = null;
       }
     };
   }, []);
@@ -473,26 +471,12 @@ ${enhancedNotes}
 
     const noteIdsSetForLookup = new Set(noteIds);
 
-    // Conservative batch sizing for Notion API stability
-    const getNotionBatchSize = (totalNotes: number): number => {
-      if (totalNotes <= 5) return 1; // Very small: sequential
-      if (totalNotes <= 20) return 3; // Small: 3 per batch
-      if (totalNotes <= 50) return 5; // Medium: 5 per batch
-      return 7; // Large: 7 per batch (conservative for API stability)
-    };
-
     const batchSize = getNotionBatchSize(noteIds.length);
-    const estimatedBatches = Math.ceil(noteIds.length / batchSize);
-    const estimatedTimeSeconds = estimatedBatches * 2.5; // ~2.5s per batch (800ms delay + API time + safety margin)
-    const timeDisplay =
-      estimatedTimeSeconds > 60
-        ? `~${Math.ceil(estimatedTimeSeconds / 60)} minutes`
-        : `~${Math.ceil(estimatedTimeSeconds)} seconds`;
-
+    const initialEta = calculateETA(noteIds.length, batchSize);
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Saving to Notion",
-      message: `${noteIds.length} notes in batches of ${batchSize} (${timeDisplay})`,
+      message: `${noteIds.length} notes in batches of ${batchSize} (~${initialEta})`,
     });
 
     const selectedNotes = notes.filter((note) => noteIdsSetForLookup.has(note.id));
@@ -510,10 +494,6 @@ ${enhancedNotes}
     if (notionTimeoutRef.current) {
       clearTimeout(notionTimeoutRef.current);
       notionTimeoutRef.current = null;
-    }
-    if (batchTimeoutRef.current) {
-      clearTimeout(batchTimeoutRef.current);
-      batchTimeoutRef.current = null;
     }
 
     notionOperationIdRef.current += 1;
@@ -534,8 +514,15 @@ ${enhancedNotes}
       const batchPromises = batch.map(async (note) => {
         if (!isOperationActive()) return { success: false, noteId: note.id };
         try {
-          const { saveToNotion } = await import("./utils/granolaApi");
-          const result = await saveToNotion(note.id);
+          const { saveToNotionWithRetry } = await import("./utils/granolaApi");
+          const result = await saveToNotionWithRetry(note.id, {
+            maxRetries: 2,
+            onRetry: (attempt, delayMs) => {
+              if (isOperationActive()) {
+                toast.message = `Rate limited, retrying in ${Math.ceil(delayMs / 1000)}s (attempt ${attempt})`;
+              }
+            },
+          });
 
           // Only update state if component is still mounted
           if (isOperationActive()) {
@@ -560,11 +547,19 @@ ${enhancedNotes}
 
           if (error instanceof Error) {
             errorMessage = error.message;
+            const lowerMessage = error.message.toLowerCase();
+            const status = (error as { status?: number }).status;
             if (error.message.includes("Internal Server Error")) {
               errorDetails = `HTTP 500 - This specific note may have invalid data or the Granola API is temporarily unavailable. Note ID: ${note.id}`;
-            } else if (error.message.includes("rate limit")) {
+            } else if (
+              status === 429 ||
+              lowerMessage.includes("rate limit") ||
+              lowerMessage.includes("rate_limit") ||
+              lowerMessage.includes("ratelimit") ||
+              lowerMessage.includes("too many requests")
+            ) {
               errorDetails = `Rate limited - too many requests. Note ID: ${note.id}`;
-            } else if (error.message.includes("unauthorized")) {
+            } else if (lowerMessage.includes("unauthorized")) {
               errorDetails = `Authentication failed - check Granola app connection. Note ID: ${note.id}`;
             }
           }
@@ -595,29 +590,11 @@ ${enhancedNotes}
 
       processedCount += batch.length;
 
-      // Update progress with dynamic ETA after the batch completes
-      const remainingNotes = selectedNotes.length - processedCount;
-      const remainingBatches = Math.ceil(remainingNotes / BATCH_SIZE);
-      const etaSeconds = remainingBatches * 2.5; // 2.5s per batch estimate
-      const etaDisplay = etaSeconds > 60 ? `${Math.ceil(etaSeconds / 60)}m` : `${Math.ceil(etaSeconds)}s`;
-
-      // Update toast with accurate count
+      // Update toast with accurate count and ETA
       if (isOperationActive()) {
-        toast.message = `${processedCount}/${selectedNotes.length} • ~${etaDisplay}`;
-      }
-
-      // Conservative delay between batches
-      if (i + BATCH_SIZE < selectedNotes.length) {
-        // Clear any existing timeout before creating a new one
-        if (batchTimeoutRef.current) {
-          clearTimeout(batchTimeoutRef.current);
-        }
-        await new Promise<void>((resolve) => {
-          batchTimeoutRef.current = setTimeout(() => {
-            batchTimeoutRef.current = null;
-            resolve();
-          }, 800);
-        });
+        const remainingItems = selectedNotes.length - processedCount;
+        const eta = remainingItems > 0 ? calculateETA(remainingItems, BATCH_SIZE) : undefined;
+        toast.message = formatProgressMessage(processedCount, selectedNotes.length, eta);
       }
     }
 

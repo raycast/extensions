@@ -90,6 +90,16 @@
       "description": "List and search Granola recipes"
     }
   ],
+  "preferences": [
+    {
+      "name": "notionMaxBatchSize",
+      "type": "textfield",
+      "required": false,
+      "title": "Notion Max Batch Size",
+      "description": "Maximum number of notes to save to Notion in parallel per batch.",
+      "default": "20"
+    }
+  ],
   "dependencies": {
     "@danielxceron/youtube-transcript": "^1.2.3",
     "@raycast/api": "^1.93.1",

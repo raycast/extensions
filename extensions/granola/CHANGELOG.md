@@ -9,6 +9,7 @@
 - Added batch Save to Notion from Export Notes with a live results list, per-note errors, and quick open/copy actions.
 - Removed the hard 500-item cap for exports/Notion; batching now scales with selection size.
 - ZIP creation now uses balanced compression and clearer "Exported to Downloads" toasts.
+- Added configurable "Notion Max Batch Size" preference to control parallel Notion saves.
 
 ### 🧭 Browsing & Details
 - Search Notes, People, and Companies now load panel content and "My Notes" on demand for note details (fixing cases where only raw AI notes showed).
