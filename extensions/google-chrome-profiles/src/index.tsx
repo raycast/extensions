@@ -64,8 +64,7 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function Command(_props: LaunchProps) {
+export default function Command() {
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
   const [error, setError] = useState<Error>();
 
@@ -95,7 +94,7 @@ export default function Command(_props: LaunchProps) {
 
   const infoCache = localState?.profile.info_cache;
   const profiles = infoCache && Object.keys(infoCache).map(extractProfileFromInfoCache(infoCache));
-  console.log(JSON.stringify(profiles, null, 2));
+
   return (
     <List isLoading={!profiles && !error} searchBarPlaceholder="Search Profile">
       {profiles &&

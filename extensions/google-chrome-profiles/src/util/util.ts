@@ -157,7 +157,28 @@ export const openGoogleChrome = async (
         : ""
     }
     
-    ${url ? `tell application "Google Chrome" to open location "${url}"` : ""}
+    ${
+      url
+        ? `
+    tell application "Google Chrome"
+      set targetURL to "${url}"
+      set tabCount to count of tabs of front window
+      set foundTab to false
+      repeat with t from 1 to tabCount
+        if URL of tab t of front window is targetURL then
+          set active tab index of front window to t
+          set foundTab to true
+          exit repeat
+        end if
+      end repeat
+      
+      if foundTab is false then
+        open location targetURL
+      end if
+    end tell
+    `
+        : ""
+    }
   `;
 
   try {
