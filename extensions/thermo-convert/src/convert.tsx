@@ -6,7 +6,6 @@ interface Preferences {
   defaultUnit: TemperatureUnit;
 }
 
-// Icon mapping for each temperature unit
 const UNIT_ICONS: Record<TemperatureUnit, string> = {
   celsius: "🌡️",
   fahrenheit: "🇺🇸",
@@ -15,7 +14,6 @@ const UNIT_ICONS: Record<TemperatureUnit, string> = {
   reaumur: "📜",
 };
 
-// Get contextual description for temperature ranges
 function getTemperatureContext(celsius: number): string {
   if (celsius < -273.15) return "Below absolute zero (impossible)";
   if (celsius === -273.15) return "Absolute zero";
@@ -40,7 +38,6 @@ export default function Command() {
 
   const currentUnit = TEMPERATURE_UNITS[fromUnit];
 
-  // Calculate celsius value for context
   let celsiusValue: number | null = null;
   if (value !== null) {
     const celsiusResult = results.find((r) => r.unit === "Celsius");
@@ -72,7 +69,6 @@ export default function Command() {
             subtitle={celsiusValue !== null ? getTemperatureContext(celsiusValue) : undefined}
           >
             {results.map((result) => {
-              // Determine icon color based on temperature scale
               const getIconColor = () => {
                 if (result.unit === "Kelvin" && result.value < 273.15) return Color.Blue;
                 if (result.unit === "Celsius" && result.value < 0) return Color.Blue;
