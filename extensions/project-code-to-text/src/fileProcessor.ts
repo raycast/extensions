@@ -275,15 +275,17 @@ async function processDirectoryRecursiveStreaming(
         if (safetyLimits) {
           // Check limits before incrementing to prevent exceeding
           if (safetyLimits.filesProcessed >= safetyLimits.maxFiles) {
-            throw new Error(`File count limit exceeded (${safetyLimits.maxFiles} files). Consider using .gitignore or selecting fewer files.`);
+            throw new Error(
+              `File count limit exceeded (${safetyLimits.maxFiles} files). Consider using .gitignore or selecting fewer files.`,
+            );
           }
           const projectedTotalSize = safetyLimits.totalSize + (stats.size || 0);
           if (projectedTotalSize >= safetyLimits.maxTotalSizeBytes) {
             throw new Error(
               `Total size limit exceeded (${bytesToMB(safetyLimits.maxTotalSizeBytes)} MB). ` +
-              `Current: ${bytesToMB(safetyLimits.totalSize).toFixed(2)} MB, ` +
-              `File: ${bytesToMB(stats.size || 0).toFixed(2)} MB. ` +
-              `Consider using .gitignore to exclude large files or selecting fewer files.`,
+                `Current: ${bytesToMB(safetyLimits.totalSize).toFixed(2)} MB, ` +
+                `File: ${bytesToMB(stats.size || 0).toFixed(2)} MB. ` +
+                `Consider using .gitignore to exclude large files or selecting fewer files.`,
             );
           }
 
@@ -292,12 +294,7 @@ async function processDirectoryRecursiveStreaming(
         }
 
         // Format and output file content immediately
-        const formattedContent = await formatFileContentStreaming(
-          entryPath,
-          relativePath,
-          stats,
-          maxFileSizeBytes,
-        );
+        const formattedContent = await formatFileContentStreaming(entryPath, relativePath, stats, maxFileSizeBytes);
         onFileContent(formattedContent);
 
         // Store only metadata, not content
@@ -314,114 +311,6 @@ async function processDirectoryRecursiveStreaming(
     }
   } catch (error) {
     console.error(`Error processing directory ${currentPath}:`, (error as Error).message);
-  }
-  return entries;
-}
-
-/**
- * Recursively processes a directory, collecting information about its files and subdirectories,
- * respecting ignore rules.
- * @deprecated Use processDirectoryRecursiveStreaming for better memory efficiency.
- * @param options Configuration for directory processing.
- * @returns A promise that resolves to an array of ProjectEntry objects.
- */
-async function processDirectoryRecursive(options: ProcessDirectoryOptions): Promise<ProjectEntry[]> {
-  const { projectRoot, currentPath, ignoreFilter, maxFileSizeBytes, onProgress, safetyLimits } = options;
-  const entries: ProjectEntry[] = [];
-  let filesCollectedInThisCall = 0; // To correctly update progress for onProgress
-
-  // Check safety limits
-  if (safetyLimits) {
-    const timeElapsed = Date.now() - safetyLimits.startTime;
-    if (timeElapsed > safetyLimits.maxScanTimeMs) {
-      throw new Error(`Scan time limit exceeded (${safetyLimits.maxScanTimeMs / 1000}s)`);
-    }
-    if (safetyLimits.filesProcessed >= safetyLimits.maxFiles) {
-      throw new Error(`File count limit exceeded (${safetyLimits.maxFiles} files)`);
-    }
-    if (safetyLimits.totalSize >= safetyLimits.maxTotalSizeBytes) {
-      throw new Error(`Total size limit exceeded (${bytesToMB(safetyLimits.maxTotalSizeBytes)} MB)`);
-    }
-  }
-
-  try {
-    const dirContents = await fs.readdir(currentPath, { withFileTypes: true });
-
-    // Sort entries alphabetically, directories first, then files
-    dirContents.sort((a, b) => {
-      if (a.isDirectory() && !b.isDirectory()) return -1;
-      if (!a.isDirectory() && b.isDirectory()) return 1;
-      return a.name.localeCompare(b.name);
-    });
-
-    for (const dirent of dirContents) {
-      const entryPath = path.join(currentPath, dirent.name);
-      // Path relative to projectRoot, using forward slashes for 'ignore' compatibility
-      let relativePathForIgnore = path.relative(projectRoot, entryPath).replace(/\\/g, "/");
-      if (relativePathForIgnore === "") relativePathForIgnore = "."; // Represents the root itself
-
-      // Check if the entry should be ignored
-      // Append '/' for directories to match patterns like 'build/'
-      const pathToCheck = dirent.isDirectory() ? `${relativePathForIgnore}/` : relativePathForIgnore;
-      if (ignoreFilter.ignores(pathToCheck)) {
-        continue;
-      }
-
-      const stats = await fs.stat(entryPath); // Get stats after ensuring it's not ignored
-      const relativePath = path.relative(projectRoot, entryPath); // For display and metadata
-
-      if (onProgress) {
-        const progressInfo = {
-          scannedPath: relativePath,
-          filesCollected: filesCollectedInThisCall,
-          totalSize: safetyLimits?.totalSize,
-          timeElapsed: safetyLimits ? Date.now() - safetyLimits.startTime : undefined,
-        };
-        onProgress(progressInfo);
-      }
-
-      if (dirent.isDirectory()) {
-        const children = await processDirectoryRecursive({
-          projectRoot,
-          currentPath: entryPath,
-          ignoreFilter,
-          maxFileSizeBytes,
-          onProgress,
-          safetyLimits,
-        });
-        // Include directory if it has non-ignored children or if it's explicitly un-ignored by a '!' rule.
-        if (children.length > 0 || !ignoreFilter.ignores(pathToCheck)) {
-          entries.push({
-            name: dirent.name,
-            type: "directory",
-            path: relativePath,
-            children: children,
-            size: stats.size,
-          });
-        }
-      } else if (dirent.isFile()) {
-        // Update safety counters
-        if (safetyLimits) {
-          safetyLimits.filesProcessed++;
-          safetyLimits.totalSize += stats.size || 0;
-        }
-
-        const fileLanguage = getFileLanguage(entryPath);
-        const fileContent = await readFileContent(entryPath, stats, maxFileSizeBytes);
-        entries.push({
-          name: dirent.name,
-          type: "file",
-          path: relativePath,
-          size: stats.size,
-          language: fileLanguage,
-          content: fileContent,
-        });
-        filesCollectedInThisCall++;
-      }
-    }
-  } catch (error) {
-    console.error(`Error processing directory ${currentPath}:`, (error as Error).message);
-    // Could potentially return a ProjectEntry indicating error for this path if needed by UI
   }
   return entries;
 }
@@ -486,26 +375,21 @@ async function processMixedSelectionStreaming(
         if (safetyLimits.filesProcessed >= safetyLimits.maxFiles) {
           throw new Error(
             `File count limit exceeded (${safetyLimits.maxFiles} files). ` +
-            `Consider using .gitignore to exclude files or selecting fewer files/directories.`,
+              `Consider using .gitignore to exclude files or selecting fewer files/directories.`,
           );
         }
         const projectedTotalSize = safetyLimits.totalSize + (stats.size || 0);
         if (projectedTotalSize >= safetyLimits.maxTotalSizeBytes) {
           throw new Error(
             `Total size limit exceeded (${bytesToMB(safetyLimits.maxTotalSizeBytes)} MB). ` +
-            `Current: ${bytesToMB(safetyLimits.totalSize).toFixed(2)} MB, ` +
-            `File: ${bytesToMB(stats.size || 0).toFixed(2)} MB. ` +
-            `Consider using .gitignore to exclude large files or selecting fewer files.`,
+              `Current: ${bytesToMB(safetyLimits.totalSize).toFixed(2)} MB, ` +
+              `File: ${bytesToMB(stats.size || 0).toFixed(2)} MB. ` +
+              `Consider using .gitignore to exclude large files or selecting fewer files.`,
           );
         }
 
         // Format and output file content immediately
-        const formattedContent = await formatFileContentStreaming(
-          entryPath,
-          relativePath,
-          stats,
-          maxFileSizeBytes,
-        );
+        const formattedContent = await formatFileContentStreaming(entryPath, relativePath, stats, maxFileSizeBytes);
         onFileContent(formattedContent);
 
         // Store only metadata, not content
