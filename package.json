@@ -5,7 +5,7 @@
   "description": "自动纠正中英混合排版的文字（包含 Markdown 代码）",
   "version": "1.0.0",
   "license": "MIT",
-  "author": "wuhanjian",
+  "author": "hanjian_wu",
   "categories": [
     "Productivity",
     "Developer Tools"
