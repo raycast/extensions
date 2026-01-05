@@ -22,6 +22,7 @@
 - Updated `list-meetings` guidance to fetch IDs before content or transcript requests and to use stripped document payloads.
 - Recipes tool now supports unlisted recipes with normalized slug matching.
 - `get-transcript` now validates missing note IDs with a clear error response.
+- Expanded AI eval coverage and guidance for folders, recipes, and Notion exports.
 
 ### 🔧 Bug Fixes & Performance
 - Fixed `create-note-from-transcript` streaming chunks with improved delimiter and validation.

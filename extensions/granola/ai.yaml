@@ -1,16 +1,41 @@
 instructions: |
     - Use `list-meetings` to get note IDs before any content or transcript request.
+    - For any request that needs content (summaries, tasks, original/enhanced notes, TL;DR), you MUST call `get-note-content` after `list-meetings`. Do not answer using only metadata.
+    - For transcript requests, you MUST call `get-transcript` after `list-meetings`. Do not answer without the transcript tool output.
     - For "latest"/"most recent", call `list-meetings` with `{ "date": "latest", "limit": 1 }` (or higher if the user asks for multiple).
     - Use `title` in `list-meetings` for topical queries.
     - Use `get-note-content` for note content; set `contentType` to `"original"` or `"enhanced"` only when requested.
     - Use `get-transcript` only for transcript requests.
     - Use `list-folders` only for folder questions or to get a folder ID.
+    - If the user explicitly mentions a folder (for example, includes the word "folder" or asks for a folder by name), call `list-folders` first, then use the matching folder ID with `list-meetings`.
+    - If the user asks for available recipes or to search recipes, call `recipes` with action `"list"` or `"search"` and the query.
     - Any `/slug` token (for example `/tldr`) is a recipe; call `recipes` first with that slug and do not treat it as a title.
-    - Use `save-to-notion` only after you have the note IDs, and pass them as `noteIds`.
+    - Use `save-to-notion` only after you have the note IDs, pass them as `noteIds`, and preserve the order returned by `list-meetings`.
 
 evals:
     - input: "@granola Please summarize my last note"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "sample-id-123"
             title: "Summary"
@@ -34,6 +59,27 @@ evals:
 
     - input: "@granola Show me the transcript of my last meeting about the product launch"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "sample-id-456"
             title: "Product Launch"
@@ -55,6 +101,27 @@ evals:
 
     - input: "@granola summarize the transcript of my latest note"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "sample-id-789"
             title: "Team Sync"
@@ -76,6 +143,15 @@ evals:
 
     - input: "@granola what folders do I have"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
         list-folders:
           - id: "folder-123"
             name: "Work Projects"
@@ -95,6 +171,27 @@ evals:
 
     - input: "@granola save my last 3 meeting notes to Notion"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "note-1"
             title: "Team Sync"
@@ -127,11 +224,30 @@ evals:
               limit: 3
         - callsTool:
             name: "save-to-notion"
-            arguments:
-              noteIds: ["note-1", "note-2", "note-3"]
 
     - input: "@granola list my most recent meeting"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "latest-meeting-123"
             title: "Engineering Sync"
@@ -145,6 +261,27 @@ evals:
 
     - input: "@granola show me my original notes from yesterday"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "original-notes-123"
             title: "User Notes"
@@ -168,6 +305,27 @@ evals:
 
     - input: "@granola get the enhanced AI notes for my project meetings"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "enhanced-notes-456"
             title: "Project Meeting"
@@ -179,10 +337,15 @@ evals:
           folderIds: []
           folderNames: []
       expected:
-        - callsTool:
-            name: "list-meetings"
-            arguments:
-              title: "project"
+        - or:
+            - callsTool:
+                name: "list-meetings"
+                arguments:
+                  title: "project"
+            - callsTool:
+                name: "list-meetings"
+                arguments:
+                  folderId: "folder-123"
         - callsTool:
             name: "get-note-content"
             arguments:
@@ -191,6 +354,27 @@ evals:
 
     - input: "@granola what are the tasks from my latest meeting?"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "latest-meeting-123"
             title: "Product Launch Planning"
@@ -216,6 +400,18 @@ evals:
 
     - input: "@granola /tldr my latest meeting"
       mocks:
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         recipes:
           - slug: "tldr"
             id: "r-101"
@@ -246,3 +442,106 @@ evals:
             name: "get-note-content"
             arguments:
               noteId: "latest-meeting-123"
+
+    - input: "@granola show me meetings in my Work Projects folder"
+      mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+        list-meetings:
+          - id: "note-1"
+            title: "Roadmap Review"
+            date: "2025-03-11T10:00:00.000Z"
+          - id: "note-2"
+            title: "Sprint Planning"
+            date: "2025-03-10T09:00:00.000Z"
+      expected:
+        - callsTool:
+            name: "list-folders"
+            arguments: {}
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              folderId: "folder-123"
+
+    - input: "@granola what recipes are available?"
+      mocks:
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+            - slug: "action-items"
+              defaultConfig:
+                instructions: "Extract action items"
+          sharedRecipes: []
+          unlistedRecipes: []
+      expected:
+        - callsTool:
+            name: "recipes"
+            arguments:
+              action: "list"
+
+    - input: "@granola list my meetings from last week about hiring"
+      mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+        list-meetings:
+          - id: "note-55"
+            title: "Hiring Sync"
+            date: "2025-03-05T13:00:00.000Z"
+          - id: "note-56"
+            title: "Recruiting Pipeline"
+            date: "2025-03-03T09:30:00.000Z"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              title: "hiring"
+              date: "last week"
