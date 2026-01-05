@@ -1,6 +1,6 @@
 # Brave Changelog
 
-## [Bookmark Folder Search] - {PR_MERGE_DATE}
+## [Bookmark Folder Search] - 2026-01-05
 
 - Added support for searching bookmark folders.
 - Added an action to open all bookmarks in a folder simultaneously.
