@@ -202,17 +202,27 @@ async function processDirectoryRecursiveStreaming(
   const entries: ProjectEntry[] = [];
   let filesCollectedInThisCall = 0;
 
-  // Check safety limits
+  // Check safety limits with improved error messages
   if (safetyLimits) {
     const timeElapsed = Date.now() - safetyLimits.startTime;
     if (timeElapsed > safetyLimits.maxScanTimeMs) {
-      throw new Error(`Scan time limit exceeded (${safetyLimits.maxScanTimeMs / 1000}s)`);
+      throw new Error(
+        `Scan time limit exceeded (${safetyLimits.maxScanTimeMs / 1000}s). ` +
+          `Consider using .gitignore to exclude unnecessary files or selecting specific directories.`,
+      );
     }
     if (safetyLimits.filesProcessed >= safetyLimits.maxFiles) {
-      throw new Error(`File count limit exceeded (${safetyLimits.maxFiles} files)`);
+      throw new Error(
+        `File count limit exceeded (${safetyLimits.maxFiles} files). ` +
+          `Consider using .gitignore to exclude files (e.g., node_modules, build, dist) or selecting fewer files/directories.`,
+      );
     }
     if (safetyLimits.totalSize >= safetyLimits.maxTotalSizeBytes) {
-      throw new Error(`Total size limit exceeded (${bytesToMB(safetyLimits.maxTotalSizeBytes)} MB)`);
+      throw new Error(
+        `Total size limit exceeded (${bytesToMB(safetyLimits.maxTotalSizeBytes)} MB). ` +
+          `Current: ${bytesToMB(safetyLimits.totalSize).toFixed(2)} MB. ` +
+          `Consider using .gitignore to exclude large files (e.g., *.log, *.min.js, vendor) or selecting fewer files.`,
+      );
     }
   }
 
