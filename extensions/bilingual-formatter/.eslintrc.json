@@ -1,0 +1,8 @@
+{
+  "extends": "@raycast/eslint-config",
+  "ignorePatterns": [
+    "node_modules/",
+    "build/",
+    "dist/"
+  ]
+}
