@@ -1,7 +1,7 @@
 import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import getAccessToken from "./getAccessToken";
-import { toError, toErrorMessage } from "./errorUtils";
+import { isAbortError, toError, toErrorMessage } from "./errorUtils";
 import {
   GetDocumentsResponse,
   TranscriptSegment,
@@ -178,6 +178,9 @@ export async function getTranscript(docId: string): Promise<string> {
     });
     return formattedTranscript.trim();
   } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
     const normalizedError = toError(error);
     showFailureToast(normalizedError, { title: "Failed to Fetch Transcript" });
     throw normalizedError;
@@ -218,6 +221,9 @@ export async function getFolders(signal?: AbortSignal): Promise<FoldersResponse>
     const result = (await response.json()) as FoldersResponse;
     return result;
   } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
     const normalizedError = toError(error);
     showFailureToast(normalizedError, { title: "Failed to Fetch Folders" });
     throw normalizedError;
@@ -253,6 +259,9 @@ export async function getDocumentsList(): Promise<Document[]> {
     const result = (await response.json()) as GetDocumentsResponse;
     return Array.isArray(result?.docs) ? (result.docs as Document[]) : [];
   } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
     const normalizedError = toError(error);
     showFailureToast(normalizedError, { title: "Failed to Fetch Documents" });
     throw normalizedError;
@@ -305,7 +314,10 @@ export async function getDocumentsByIds(documentIds: string[], batchSize: number
             }
           }
         }
-      } catch (error) {
+    } catch (error) {
+      if (isAbortError(error)) {
+        throw error;
+      }
       const normalizedError = toError(error);
       showFailureToast(normalizedError, { title: "Failed to Fetch Documents" });
       throw normalizedError;
@@ -375,6 +387,9 @@ export async function getRecipesFromApi(): Promise<RecipesListResult> {
 
     return { featureEnabled: true, userRecipes, defaultRecipes, sharedRecipes, unlistedRecipes };
   } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
     const normalizedError = toError(error);
     showFailureToast(normalizedError, { title: "Failed to Fetch Recipes" });
     throw normalizedError;

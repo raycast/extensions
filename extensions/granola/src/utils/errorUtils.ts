@@ -56,6 +56,14 @@ export const toErrorMessage = (error: unknown): string => {
   return "Unknown error";
 };
 
+export const isAbortError = (error: unknown): boolean => {
+  if (!error || typeof error !== "object") return false;
+  const err = error as { name?: string; code?: string; message?: string };
+  if (err.name === "AbortError" || err.code === "ABORT_ERR") return true;
+  const message = typeof err.message === "string" ? err.message.toLowerCase() : "";
+  return message.includes("aborted") || message.includes("abort");
+};
+
 export const toError = (error: unknown, fallbackMessage = "Unknown error"): Error => {
   if (error instanceof Error) return error;
   const message = toErrorMessage(error);
