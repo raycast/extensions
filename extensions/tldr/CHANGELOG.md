@@ -1,6 +1,6 @@
 # TLDR
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-01-05
 
 - Fixes https://github.com/raycast/extensions/issues/23848
 
