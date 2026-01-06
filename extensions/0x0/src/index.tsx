@@ -12,7 +12,7 @@ interface UploadFormValues {
 
 export default function Command() {
   const [uploading, setUploading] = useState(false);
-  const { handleSubmit, itemProps, reset } = useForm<UploadFormValues>({
+  const { handleSubmit, itemProps } = useForm<UploadFormValues>({
     async onSubmit(values) {
       const uploadToast = await showToast(Toast.Style.Animated, "Uploading", "Please wait...");
       setUploading(true);
@@ -25,16 +25,26 @@ export default function Command() {
           filename: path.basename(filePath),
         });
 
+        const headers = formData.getHeaders();
+        // Set a proper User-Agent as recommended by 0x0.st documentation
+        headers["User-Agent"] = "0x0-raycast/1.0";
+
         const response = await fetch(url, {
           method: "POST",
-          headers: formData.getHeaders(),
+          headers: headers,
           body: formData,
         });
+
         if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP error! Status: ${response.status}${errorText ? ` - ${errorText}` : ""}`);
         }
 
         const result = (await response.text()).trim();
+        if (!result) {
+          throw new Error("Empty response from server");
+        }
+
         uploadToast.style = Toast.Style.Success;
         uploadToast.title = "Upload successful";
         uploadToast.message = "Link copied to clipboard";
@@ -47,9 +57,11 @@ export default function Command() {
           },
         };
         setUploading(false);
-        reset();
       } catch (error) {
         setUploading(false);
+        uploadToast.style = Toast.Style.Failure;
+        uploadToast.title = "Upload failed";
+        uploadToast.message = error instanceof Error ? error.message : "Unknown error occurred";
       }
     },
     validation: {
