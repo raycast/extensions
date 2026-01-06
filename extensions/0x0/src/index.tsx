@@ -1,7 +1,6 @@
 import { Form, ActionPanel, Action, Toast, showToast, open, Clipboard, Icon } from "@raycast/api";
 import fs from "fs";
 import { useState } from "react";
-import fetch from "node-fetch";
 import FormData from "form-data";
 import path from "path";
 import { FormValidation, useForm } from "@raycast/utils";
