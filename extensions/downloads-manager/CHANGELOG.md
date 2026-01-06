@@ -2,8 +2,8 @@
 
 ## [Add optional quantity argument to Paste and Delete commands] - {PR_MERGE_DATE}
 
-- Added optional dropdown argument 'quantity' with values 1~10 for Paste Latest Download command
-- Added optional dropdown argument 'quantity' with values 1~10 for Delete Latest Download command
+- Added optional text input argument 'quantity' for Paste Latest Download command (accepts any positive integer)
+- Added optional text input argument 'quantity' for Delete Latest Download command (accepts any positive integer)
 
 ## [Fixes] - 2025-12-10
 

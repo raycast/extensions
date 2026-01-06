@@ -1,4 +1,4 @@
-import { getLatestDownloads, hasAccessToDownloadsFolder, deleteFileOrFolder } from "./utils";
+import { getLatestDownloads, hasAccessToDownloadsFolder, deleteFileOrFolder, parseQuantity } from "./utils";
 import { popToRoot, showHUD, LaunchProps, confirmAlert, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
@@ -8,7 +8,14 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Del
     return;
   }
 
-  const quantity = props.arguments.quantity ? parseInt(props.arguments.quantity, 10) || 1 : 1;
+  const quantity = parseQuantity(props.arguments.quantity);
+
+  if (quantity === null) {
+    await showHUD("Invalid quantity: must be a positive integer");
+    await popToRoot();
+    return;
+  }
+
   const downloads = getLatestDownloads(quantity);
 
   if (downloads.length === 0) {

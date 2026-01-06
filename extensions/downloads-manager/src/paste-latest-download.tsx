@@ -1,6 +1,6 @@
-import { popToRoot, showHUD, Clipboard, closeMainWindow, LaunchProps } from "@raycast/api";
+import { popToRoot, showHUD, Clipboard, closeMainWindow, LaunchProps, Toast, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { getLatestDownloads, hasAccessToDownloadsFolder } from "./utils";
+import { getLatestDownloads, hasAccessToDownloadsFolder, parseQuantity } from "./utils";
 
 export default async function main(props: LaunchProps<{ arguments: Arguments.PasteLatestDownload }>) {
   if (!hasAccessToDownloadsFolder()) {
@@ -10,7 +10,17 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Pas
 
   let downloads;
   try {
-    const quantity = props.arguments.quantity ? parseInt(props.arguments.quantity, 10) || 1 : 1;
+    const quantity = parseQuantity(props.arguments.quantity);
+
+    if (quantity === null) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid quantity",
+        message: "Quantity must be a positive integer",
+      });
+      return;
+    }
+
     downloads = getLatestDownloads(quantity);
   } catch (error) {
     await showFailureToast(error, { title: "Could not get latest downloads" });

@@ -96,6 +96,28 @@ export function getLatestDownloads(quantity: number) {
   return downloads.slice(0, quantity);
 }
 
+/**
+ * Validates and parses a quantity input string to a positive integer.
+ * @param quantityInput - The input string to validate (can be undefined)
+ * @returns The parsed positive integer, or null if invalid
+ */
+export function parseQuantity(quantityInput: string | undefined): number | null {
+  const trimmedInput = quantityInput?.trim() || "1";
+
+  // Validate that input is a positive integer
+  if (!/^\d+$/.test(trimmedInput)) {
+    return null;
+  }
+
+  const quantity = parseInt(trimmedInput, 10);
+
+  if (isNaN(quantity) || quantity < 1) {
+    return null;
+  }
+
+  return quantity;
+}
+
 export function hasAccessToDownloadsFolder() {
   try {
     accessSync(downloadsFolder, constants.R_OK);
