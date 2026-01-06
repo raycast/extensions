@@ -1,0 +1,215 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grammar-checker",
+  "title": "Grammar Checker",
+  "description": "Analyze text for grammar, spelling, and style issues using LLMs.",
+  "icon": "icon.png",
+  "author": "atakan",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-grammar",
+      "title": "Check Grammar",
+      "description": "Check text for grammar and style issues via a form.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-check",
+      "title": "Quick Check Selected Text",
+      "description": "Check the currently selected text for grammar issues.",
+      "mode": "view"
+    },
+    {
+      "name": "view-history",
+      "title": "View History",
+      "description": "View past grammar checks.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "AI Provider",
+      "type": "dropdown",
+      "description": "Select the AI provider to use.",
+      "required": true,
+      "default": "openai",
+      "data": [
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Anthropic",
+          "value": "anthropic"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "OpenRouter",
+          "value": "openrouter"
+        },
+        {
+          "title": "Ollama",
+          "value": "ollama"
+        },
+        {
+          "title": "Groq",
+          "value": "groq"
+        }
+      ]
+    },
+    {
+      "name": "checkStyle",
+      "title": "Check Style",
+      "type": "dropdown",
+      "description": "Select the style of checking.",
+      "required": true,
+      "default": "professional",
+      "data": [
+        {
+          "title": "Casual",
+          "value": "casual"
+        },
+        {
+          "title": "Professional",
+          "value": "professional"
+        },
+        {
+          "title": "Academic",
+          "value": "academic"
+        },
+        {
+          "title": "Creative",
+          "value": "creative"
+        }
+      ]
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "type": "password",
+      "description": "API Key for OpenAI",
+      "required": false
+    },
+    {
+      "name": "openaiModel",
+      "title": "OpenAI Model",
+      "type": "textfield",
+      "description": "Model for OpenAI (e.g., gpt-4o, gpt-4o-mini)",
+      "required": false,
+      "default": "gpt-4o-mini"
+    },
+    {
+      "name": "anthropicApiKey",
+      "title": "Anthropic API Key",
+      "type": "password",
+      "description": "API Key for Anthropic",
+      "required": false
+    },
+    {
+      "name": "anthropicModel",
+      "title": "Anthropic Model",
+      "type": "textfield",
+      "description": "Model for Anthropic (e.g., claude-3-5-sonnet-latest)",
+      "required": false,
+      "default": "claude-3-5-sonnet-latest"
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "type": "password",
+      "description": "API Key for Google Gemini",
+      "required": false
+    },
+    {
+      "name": "geminiModel",
+      "title": "Gemini Model",
+      "type": "textfield",
+      "description": "Model for Gemini (e.g., gemini-1.5-flash, gemini-2.0-flash-exp)",
+      "required": false,
+      "default": "gemini-2.0-flash-exp"
+    },
+    {
+      "name": "openRouterApiKey",
+      "title": "OpenRouter API Key",
+      "type": "password",
+      "description": "API Key for OpenRouter",
+      "required": false
+    },
+    {
+      "name": "openRouterModel",
+      "title": "OpenRouter Model",
+      "type": "textfield",
+      "description": "Model for OpenRouter (e.g., openai/gpt-4o)",
+      "required": false,
+      "default": "openai/gpt-4o-mini"
+    },
+    {
+      "name": "groqApiKey",
+      "title": "Groq API Key",
+      "type": "password",
+      "description": "API Key for Groq",
+      "required": false
+    },
+    {
+      "name": "groqModel",
+      "title": "Groq Model",
+      "type": "textfield",
+      "description": "Model for Groq (e.g., llama-3.3-70b-versatile)",
+      "required": false,
+      "default": "llama-3.3-70b-versatile"
+    },
+    {
+      "name": "ollamaBaseUrl",
+      "title": "Ollama Base URL",
+      "type": "textfield",
+      "description": "Base URL for Ollama (default: http://localhost:11434)",
+      "required": false,
+      "default": "http://localhost:11434"
+    },
+    {
+      "name": "ollamaModel",
+      "title": "Ollama Model",
+      "type": "textfield",
+      "description": "Model for Ollama (e.g., llama3, mistral)",
+      "required": false,
+      "default": "llama3"
+    },
+    {
+      "name": "autoUseClipboard",
+      "label": "Auto-fill from Clipboard",
+      "title": "Auto-fill",
+      "type": "checkbox",
+      "description": "Automatically fill form commands with clipboard content.",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\\"prepublishOnly\\\" script and run \\\"npm publish\\\" again.\\nIf you wanted to publish it to the Raycast Store instead, use \\\"npm run publish\\\" instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
