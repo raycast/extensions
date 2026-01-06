@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Minor Fixes] - {PR_MERGE_DATE}
+## [Minor Fixes] - 2026-01-06
 
 - Fixed error toast "Menu Bar Player must be activated" when using Next/Previous in Now Playing without the Menu Bar Player command enabled
 
