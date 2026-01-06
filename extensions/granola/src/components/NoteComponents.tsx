@@ -40,6 +40,10 @@ const formatDate = (value?: string): string => {
   return date.toLocaleDateString();
 };
 
+const openInGranola = async (documentId: string) => {
+  await open(`granola://open-document?document_id=${documentId}`);
+};
+
 /**
  * Component that provides standard actions for a note
  * Panels are optional - if not provided, sharing actions will be disabled
@@ -113,6 +117,12 @@ export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
   return (
     <>
       {children}
+      <Action
+        title="Open in Granola"
+        icon={Icon.Window}
+        onAction={() => openInGranola(doc.id)}
+        shortcut={{ modifiers: ["cmd"], key: "o" }}
+      />
       <Action
         title="Save to Notion"
         icon={Icon.Document}
