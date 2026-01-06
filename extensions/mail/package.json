@@ -175,6 +175,11 @@
       "description": "List addresses in Apple Mail."
     },
     {
+      "name": "list-account-emails",
+      "title": "List Account Emails",
+      "description": "List all available email addresses from the user's mail accounts."
+    },
+    {
       "name": "send-email",
       "title": "Send Email",
       "description": "Send an email with Apple Mail."

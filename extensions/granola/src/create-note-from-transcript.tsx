@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Form, showToast, Toast, Detail, Clipboard, Icon } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createNoteFromTranscript, CreateNoteProgress, CreateNoteResult } from "./utils/granolaApi";
 import { processTranscriptInput, isYouTubeURL } from "./utils/youtubeTranscript";
 import convertHtmlToMarkdown from "./utils/convertHtmltoMarkdown";
+import { toErrorMessage } from "./utils/errorUtils";
 
 interface TranscriptFormValues {
   input: string;
@@ -13,10 +14,27 @@ export default function Command() {
   const [isCreating, setIsCreating] = useState(false);
   const [progress, setProgress] = useState<CreateNoteProgress | null>(null);
   const [result, setResult] = useState<CreateNoteResult | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, []);
 
   const { handleSubmit, itemProps } = useForm<TranscriptFormValues>({
     async onSubmit(values) {
       if (isCreating) return;
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
 
       setIsCreating(true);
       setResult(null);
@@ -30,13 +48,15 @@ export default function Command() {
           title: isYouTube ? "Fetching YouTube transcript..." : "Creating note from transcript...",
         });
 
-        // Process the input (either fetch from YouTube or use as manual transcript)
         let transcriptData;
         try {
-          transcriptData = await processTranscriptInput(values.input);
+          transcriptData = await processTranscriptInput(values.input, signal);
         } catch (error) {
-          throw new Error(`Failed to process input: ${error}`);
+          if (signal.aborted) return;
+          throw new Error(`Failed to process input: ${toErrorMessage(error)}`);
         }
+
+        if (signal.aborted) return;
 
         if (isYouTube) {
           await showToast({
@@ -45,8 +65,9 @@ export default function Command() {
           });
         }
 
-        // Create the note with the processed transcript
-        const result = await createNoteFromTranscript(transcriptData.transcript, setProgress);
+        const result = await createNoteFromTranscript(transcriptData.transcript, setProgress, signal);
+
+        if (signal.aborted) return;
 
         setResult(result);
 
@@ -55,14 +76,19 @@ export default function Command() {
           title: isYouTube ? "Note created from YouTube video!" : "Note created successfully!",
         });
       } catch (error) {
+        if (signal.aborted) return;
+
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to create note",
-          message: String(error),
+          message: toErrorMessage(error),
         });
       } finally {
-        setIsCreating(false);
-        setProgress(null);
+        if (!signal.aborted) {
+          setIsCreating(false);
+          setProgress(null);
+        }
+        abortControllerRef.current = null;
       }
     },
     validation: {
@@ -150,6 +176,10 @@ ${summaryContent}`;
               <Action
                 title="Cancel"
                 onAction={() => {
+                  if (abortControllerRef.current) {
+                    abortControllerRef.current.abort();
+                    abortControllerRef.current = null;
+                  }
                   setIsCreating(false);
                   setProgress(null);
                 }}
@@ -192,7 +222,7 @@ ${summaryContent}`;
                   await showToast({
                     style: Toast.Style.Failure,
                     title: "Failed to paste from clipboard",
-                    message: String(error),
+                    message: toErrorMessage(error),
                   });
                 }
               }}

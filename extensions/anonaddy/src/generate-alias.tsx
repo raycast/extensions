@@ -1,7 +1,17 @@
-import { Cache, Clipboard, Toast, showHUD, showToast, captureException } from "@raycast/api";
+import {
+  Cache,
+  Clipboard,
+  PopToRootType,
+  Toast,
+  captureException,
+  closeMainWindow,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 
 import { alias, domains } from "./api";
 import * as context from "./context";
+import { formatAPIError } from "./error-handler";
 
 import type { Options } from "./api";
 import type { LaunchProps } from "@raycast/api";
@@ -38,24 +48,26 @@ const GenerateAlias = async ({ launchContext: options }: LaunchProps) => {
       domain: defaults.defaultAliasDomain,
       format: defaults.defaultAliasFormat,
       ...options,
-    } as alias.CreateOptions);
+    });
 
     if (response.id) {
       toast.style = Toast.Style.Success;
       toast.title = "Alias generated successfully";
 
       await Clipboard.copy(response.email);
-      await showHUD("✅ Alias copied to clipboard");
+      await closeMainWindow();
+      await showHUD("Alias copied to clipboard", { popToRootType: PopToRootType.Immediate });
     } else {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to generate Alias";
+      throw new Error(`Unknown error`);
     }
   } catch (error) {
     captureException(error);
 
+    const formattedError = formatAPIError(error, "Error generating alias");
+
     toast.style = Toast.Style.Failure;
-    toast.title = "Invalid Credentials";
-    toast.message = "Please check your credentials in the extension preferences.";
+    toast.title = formattedError.title;
+    toast.message = formattedError.message;
   }
 };
 

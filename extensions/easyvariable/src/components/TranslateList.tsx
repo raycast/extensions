@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
-import { useState, useCallback } from "react";
+import { useState, useCallback, type ReactElement } from "react";
 import { googleTranslate } from "../utils/translators/google";
 import { openaiTranslate } from "../utils/translators/openai";
 import { deepseekTranslate } from "../utils/translators/deepseek";
@@ -95,7 +95,7 @@ export function TranslateList({ queryText }: TranslateListProps) {
   );
 
   const renderItems = () => {
-    const items: JSX.Element[] = [];
+    const items: ReactElement[] = [];
     const services = {
       google: "Google",
       openai: "OpenAI",

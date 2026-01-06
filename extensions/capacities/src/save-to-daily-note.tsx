@@ -1,22 +1,15 @@
-import { ActionPanel, Action, Form, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, showToast, Toast, closeMainWindow, showHUD } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
 import { useEffect, useRef } from "react";
-import { API_HEADERS, API_URL, fetchErrorHandler, useCapacitiesStore } from "./helpers/storage";
-import ErrorView from "./components/ErrorView";
+import { API_HEADERS, API_URL, handleAPIError, handleUnexpectedError, useCapacitiesStore } from "./helpers/storage";
 
 interface SaveToDailyNoteBody {
   spaceId: string;
   mdText: string;
-  noTimeStamp: boolean;
 }
 
 export default function Command() {
-  useEffect(() => {
-    checkCapacitiesApp();
-  }, []);
-
-  const { store, triggerLoading, isLoading: storeIsLoading, error } = useCapacitiesStore();
+  const { store, triggerLoading, isLoading: storeIsLoading } = useCapacitiesStore();
 
   useEffect(() => {
     triggerLoading();
@@ -26,12 +19,13 @@ export default function Command() {
 
   const { handleSubmit, itemProps, setValue } = useForm<SaveToDailyNoteBody>({
     async onSubmit(values) {
-      const toast = await showToast(Toast.Style.Animated, "Saving");
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Saving",
+      });
       const body = {
         spaceId: store?.spaces.length === 1 ? store.spaces[0].id : values.spaceId,
         mdText: values.mdText,
-        origin: "commandPalette",
-        noTimeStamp: values.noTimeStamp,
       };
 
       try {
@@ -40,14 +34,24 @@ export default function Command() {
           headers: API_HEADERS,
           body: JSON.stringify(body),
         });
-        if (!response.ok) throw new Error(fetchErrorHandler(response.status));
+        if (!response.ok) {
+          handleAPIError(response);
+          return;
+        }
         setValue("mdText", "");
-        toast.style = Toast.Style.Success;
-        toast.title = "Saved";
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed";
-        toast.message = `${error}`;
+        showToast({
+          style: Toast.Style.Success,
+          title: "Saved",
+        });
+
+        showHUD("Notes saved to daily note");
+        closeMainWindow();
+      } catch (e) {
+        if (e instanceof Error) {
+          handleUnexpectedError(e);
+        } else {
+          console.log(e);
+        }
       }
     },
     validation: {
@@ -56,9 +60,7 @@ export default function Command() {
     },
   });
 
-  return error ? (
-    <ErrorView error={error} />
-  ) : (
+  return (
     <Form
       isLoading={storeIsLoading}
       actions={
@@ -67,7 +69,6 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Note" placeholder="Daily Note" {...itemProps.mdText} />
       {store && store.spaces.length > 1 && (
         <>
           <Form.Dropdown
@@ -78,16 +79,13 @@ export default function Command() {
             ref={spacesDropdown}
           >
             {store.spaces &&
-              store.spaces.map((space) => <Form.Dropdown.Item key={space.id} value={space.id} title={space.title} />)}
+              store.spaces.map((space) => (
+                <Form.Dropdown.Item key={space.id} value={space.id} title={space.title} icon={Icon.Desktop} />
+              ))}
           </Form.Dropdown>
         </>
       )}
-      <Form.Checkbox
-        label="No Timestamp"
-        info="If checked, no time stamp will be added to the note"
-        storeValue
-        {...itemProps.noTimeStamp}
-      />
+      <Form.TextArea title="Note" placeholder="Daily Note" {...itemProps.mdText} />
     </Form>
   );
 }

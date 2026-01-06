@@ -5,7 +5,7 @@ export function getErrorMessage(error: unknown) {
       if (parsedError.errorMessages && Array.isArray(parsedError.errorMessages)) {
         return parsedError.errorMessages[0];
       }
-    } catch (e) {
+    } catch {
       return error.message;
     }
   }

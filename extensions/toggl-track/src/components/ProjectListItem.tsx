@@ -78,7 +78,7 @@ export default function ProjectListItem({
                   }
                 />
                 <ActionPanel.Submenu
-                  title="Delete Project..."
+                  title="Delete Project…"
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   shortcut={Shortcut.Remove}
                 >

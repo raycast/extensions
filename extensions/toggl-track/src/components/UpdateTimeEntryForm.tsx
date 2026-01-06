@@ -60,7 +60,7 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
       await showToast(Toast.Style.Success, "Updated time entry");
       navigation.pop();
       revalidateTimeEntries();
-    } catch (e) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to update time entry");
     }
   }
@@ -201,7 +201,7 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
             <Form.Dropdown
               id="task"
               title="Task"
-              value={filteredTasks.length > 0 ? selectedTask?.id.toString() ?? "-1" : undefined}
+              value={filteredTasks.length > 0 ? (selectedTask?.id.toString() ?? "-1") : undefined}
               onChange={onTaskChange}
               onSearchTextChange={setTaskSearch}
               onBlur={() => setTaskSearch("")}

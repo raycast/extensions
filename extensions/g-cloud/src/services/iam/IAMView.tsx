@@ -13,9 +13,12 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { IAMService, IAMPrincipal, IAMRole } from "./IAMService";
-import { showFailureToast } from "@raycast/utils";
 import { predefinedRoles } from "../../utils/iamRoles";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
+import { useStreamerMode } from "../../utils/useStreamerMode";
+import { maskEmailIfEnabled } from "../../utils/maskSensitiveData";
+import { StreamerModeAction } from "../../components/StreamerModeAction";
+import { ApiErrorView } from "../../components/ApiErrorView";
 
 interface IAMViewProps {
   projectId: string;
@@ -32,6 +35,7 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { push, pop } = useNavigation();
+  const { isEnabled: isStreamerMode } = useStreamerMode();
 
   const iamService = useMemo(() => new IAMService(gcloudPath, projectId), [gcloudPath, projectId]);
 
@@ -105,7 +109,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
         loadingToast.hide();
       }
 
-      showFailureToast(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch IAM policy",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -207,7 +215,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                 } catch (error) {
                   console.error("Error adding member:", error);
                   loadingToast.hide();
-                  showFailureToast(error);
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to fetch IAM policy",
+                    message: error instanceof Error ? error.message : "Unknown error",
+                  });
                 } finally {
                   setIsLoading(false);
                 }
@@ -315,7 +327,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                 } catch (error) {
                   console.error("Error creating group:", error);
                   loadingToast.hide();
-                  showFailureToast(error);
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to fetch IAM policy",
+                    message: error instanceof Error ? error.message : "Unknown error",
+                  });
                 } finally {
                   setIsLoading(false);
                 }
@@ -384,7 +400,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       } catch (error) {
         console.error("Error removing member:", error);
         loadingToast.hide();
-        showFailureToast(error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch IAM policy",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -427,7 +447,8 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
   }
 
   function showPrincipalDetails(principal: IAMPrincipal) {
-    let markdown = `# ${principal.displayName}: ${principal.id}\n\n`;
+    const maskedId = maskEmailIfEnabled(principal.id, isStreamerMode);
+    let markdown = `# ${principal.displayName}: ${maskedId}\n\n`;
 
     markdown += `## Roles\n\n`;
 
@@ -451,12 +472,12 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
 
     push(
       <Detail
-        navigationTitle={`${principal.displayName}: ${principal.id}`}
+        navigationTitle={`${principal.displayName}: ${maskedId}`}
         markdown={markdown}
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.Label title="Type" text={principal.displayName} />
-            <Detail.Metadata.Label title="ID" text={principal.id} />
+            <Detail.Metadata.Label title="ID" text={maskedId} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Roles" text={`${principal.roles.length}`} />
             {principal.roles.map((role, index) => (
@@ -536,7 +557,11 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                 } catch (error) {
                   console.error("Error adding role:", error);
                   loadingToast.hide();
-                  showFailureToast(error);
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to fetch IAM policy",
+                    message: error instanceof Error ? error.message : "Unknown error",
+                  });
                 } finally {
                   setIsLoading(false);
                 }
@@ -628,16 +653,7 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Error Loading IAM Data"
-          description={error}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="iam" onRetry={fetchIAMPolicy} />
       </List>
     );
   }
@@ -683,6 +699,7 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
           {selectedService && (
             <Action title="Clear Service Filter" icon={Icon.XmarkCircle} onAction={() => setSelectedService(null)} />
           )}
+          <StreamerModeAction />
         </ActionPanel>
       }
       filtering={false}
@@ -710,14 +727,17 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
                 {typePrincipals.map((principal) => (
                   <List.Item
                     key={`${principal.type}-${principal.id}`}
-                    title={principal.id || principal.type}
+                    title={maskEmailIfEnabled(principal.id, isStreamerMode) || principal.type}
                     icon={getMemberIcon(principal.type)}
                     detail={
                       <List.Item.Detail
                         metadata={
                           <List.Item.Detail.Metadata>
                             <List.Item.Detail.Metadata.Label title="Type" text={principal.displayName} />
-                            <List.Item.Detail.Metadata.Label title="ID" text={principal.id} />
+                            <List.Item.Detail.Metadata.Label
+                              title="ID"
+                              text={maskEmailIfEnabled(principal.id, isStreamerMode)}
+                            />
                             <List.Item.Detail.Metadata.Separator />
                             <List.Item.Detail.Metadata.Label title="Roles" text={`${principal.roles.length}`} />
                             {principal.roles.map((role, index) => (
@@ -746,6 +766,7 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
                             onAction={() => removeMember(principal, role)}
                           />
                         ))}
+                        <StreamerModeAction />
                       </ActionPanel>
                     }
                   />

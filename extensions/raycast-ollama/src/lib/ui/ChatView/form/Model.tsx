@@ -38,7 +38,7 @@ interface FormData {
   mcp_server: string[];
 }
 
-export function FormModel(props: props): JSX.Element {
+export function FormModel(props: props) {
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, [], {
     onData: (data) => {
       if (props.Chat === undefined) return;

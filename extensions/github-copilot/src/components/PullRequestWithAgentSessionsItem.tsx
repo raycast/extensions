@@ -22,15 +22,15 @@ export function PullRequestWithAgentSessionsItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              title="Open Pull Request"
-              icon={Icon.Code}
-              url={props.pullRequestWithAgentSessions.pullRequest.url}
+              title="Open"
+              icon={Icon.List}
+              url={`https://github.com/copilot/tasks/pull/${props.pullRequestWithAgentSessions.pullRequest.globalId}`}
             />
             <Action.OpenInBrowser
-              title="Open Session Logs"
-              icon={Icon.List}
+              title="Open Pull Request"
+              icon={Icon.Code}
               shortcut={Keyboard.Shortcut.Common.Open}
-              url={`${props.pullRequestWithAgentSessions.pullRequest.url}/agent-sessions/${props.pullRequestWithAgentSessions.sessions[0].id}`}
+              url={props.pullRequestWithAgentSessions.pullRequest.url}
             />
           </ActionPanel.Section>
           <Action

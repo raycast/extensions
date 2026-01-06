@@ -1,5 +1,19 @@
 # Nuxt Extension Changelog
 
+## [2.2.0] - 2025-12-13
+
+✨ New Features
+
+- **Added**: Custom Templates Registry for Quick Create
+  - Configure a custom templates directory in preferences
+  - Add your own `.vue` and `.ts` templates for components, pages, API routes, layouts, and composables
+  - Multiple templates per file type (e.g., `ColorMode.vue`, `Button.vue` for components)
+  - Custom templates take priority over defaults with automatic fallback
+  - Selecting a custom template auto-fills the file name for faster workflow
+  - Expected folder structure: `components/`, `pages/`, `api/`, `layouts/`, `composables/`
+- **Added**: Added new components: editor, editorDragHandle, editorEmojiMenu, editorMentionMenu, editorSuggestionMenu, editorToolbar, empty, scrollArea
+- **Added**: Added new action to copy the markdown link of a component (search-components) and page (search-nuxt-docs)
+
 ## [2.1.1] - 2025-10-15
 
 - **Fixed**: Added Windows support

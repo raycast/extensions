@@ -81,25 +81,30 @@ async function getMacOSCommands(osCommandSet: CommandSet): Promise<{ command: st
   try {
     const osVersion = execSync("sw_vers -productVersion").toString().trim();
 
-    const versionPatterns: Record<string, string[]> = {
-      "^1[1-5]": ["dscacheutil", "mDNSResponder"],
-      "^10\\.([7-9]|1[1-4])|^10\\.10\\.[4-5]": ["mDNSResponder"],
-      "^10\\.10\\.[0-3]": ["mdnsflushcache"],
-      "^10\\.6": ["dscacheutil"],
-    };
+    const [major] = osVersion.split(".").map(Number);
 
-    let matched = false;
-    let runCommands: string[] = [];
+    let runCommands: string[];
 
-    for (const [pattern, cmds] of Object.entries(versionPatterns)) {
-      if (new RegExp(pattern).test(osVersion)) {
-        runCommands = cmds;
-        matched = true;
-        break;
-      }
+    if (Number.isNaN(major)) {
+      throw new Error(`Unparsable macOS version: ${osVersion}`);
     }
 
-    if (!matched) {
+    // macOS 11+ (Big Sur → future)
+    if (major >= 11) {
+      runCommands = ["dscacheutil", "mDNSResponder"];
+    }
+    // macOS 10.4 - 10.15.7
+    else if (major === 10) {
+      const minor = Number(osVersion.split(".")[1]);
+
+      if (minor >= 10) {
+        runCommands = ["mDNSResponder"];
+      } else if (minor === 6) {
+        runCommands = ["dscacheutil"];
+      } else {
+        runCommands = ["mdnsflushcache"];
+      }
+    } else {
       const confirmed = await confirmAlert({
         title: `⚠️ OS Version ${osVersion} Not Tested`,
         message: "Attempt to flush DNS cache anyway?",

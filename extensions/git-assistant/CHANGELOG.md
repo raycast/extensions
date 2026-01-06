@@ -1,5 +1,8 @@
 # Git Assistant Changelog
 
+## [Clone Repository Tool] - 2025-12-07
+- Added `clone-repository` tool.
+
 ## [Git Tools Enhancements] - 2025-11-24
 - Added checkout and branch management tools (`checkout-branch`, `create-branch`, `get-current-branch`, `get-git-branches`).
 - Introduced diff and change inspection tools for staged, unstaged, and target comparisons with improved output trimming.
