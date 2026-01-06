@@ -1,6 +1,6 @@
 # Word4you Changelog
 
-## [Bump default model version] - {PR_MERGE_DATE}
+## [Bump default model version] - 2026-01-06
 
 - Bump default model version to use more recent LLM models as default for better performance
 - Bump to use CLI version of 1.2.1
