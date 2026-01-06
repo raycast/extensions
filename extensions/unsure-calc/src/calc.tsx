@@ -47,8 +47,6 @@ export {
   DEFAULT_BAR,
 };
 
-
-
 interface CommandProps {
   arguments?: {
     expression?: string;
@@ -140,13 +138,7 @@ export default function Command(props: CommandProps) {
           ? `\n**Histogram (higher values at top)**\n\n\`\`\`\n${histogramLines.join("\n")}\n\`\`\``
           : "";
 
-        const md = [
-          "# UnSure Calculator",
-          `Expression: \`${expression}\``,
-          "",
-          tableRows.join("\n"),
-          histogramBlock,
-        ]
+        const md = ["# UnSure Calculator", `Expression: \`${expression}\``, "", tableRows.join("\n"), histogramBlock]
           .filter(Boolean)
           .join("\n");
 

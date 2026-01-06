@@ -90,13 +90,9 @@ function shuntingYard(tokens) {
     NEG: "R",
   };
   for (const token of tokens) {
-    if (token === '-') {
-      if (
-        prevToken == null ||
-        prevToken === '(' ||
-        (typeof prevToken !== 'number' && prevToken !== ')')
-      ) {
-        operatorStack.push('NEG');
+    if (token === "-") {
+      if (prevToken == null || prevToken === "(" || (typeof prevToken !== "number" && prevToken !== ")")) {
+        operatorStack.push("NEG");
         prevToken = token;
         continue;
       }
@@ -111,8 +107,7 @@ function shuntingYard(tokens) {
       while (operatorStack.length > 0 && operatorStack[operatorStack.length - 1] !== "(") {
         outputQueue.push(operatorStack.pop());
       }
-      if (operatorStack.length === 0)
-        throw new Error("Mismatched parentheses: Found ')' without matching '('");
+      if (operatorStack.length === 0) throw new Error("Mismatched parentheses: Found ')' without matching '('");
       operatorStack.pop();
     } else if (precedence[token]) {
       const op1 = token;
@@ -186,7 +181,7 @@ function evalRpn(rpnQueue, sampleCount = DEFAULT_SAMPLES) {
   });
 
   for (const token of rpnQueue) {
-    if (token === 'NEG') {
+    if (token === "NEG") {
       if (stack.length < 1) throw new Error("Not enough operands for unary minus");
       const a = stack.pop();
       const nmin = Math.min(-a.max, -a.min);
@@ -195,7 +190,7 @@ function evalRpn(rpnQueue, sampleCount = DEFAULT_SAMPLES) {
         mean: -a.mean,
         min: nmin,
         max: nmax,
-        samples: a.samples ? a.samples.map(x => -x) : null,
+        samples: a.samples ? a.samples.map((x) => -x) : null,
       });
       continue;
     }
@@ -253,8 +248,10 @@ function evalRpn(rpnQueue, sampleCount = DEFAULT_SAMPLES) {
           break;
       }
 
-      const aMin = uvA.min, aMax = uvA.max;
-      const bMin = uvB.min, bMax = uvB.max;
+      const aMin = uvA.min,
+        aMax = uvA.max;
+      const bMin = uvB.min,
+        bMax = uvB.max;
 
       switch (token) {
         case "+":
@@ -265,16 +262,18 @@ function evalRpn(rpnQueue, sampleCount = DEFAULT_SAMPLES) {
           newMin = aMin - bMax;
           newMax = aMax - bMin;
           break;
-        case "*":
+        case "*": {
           const prods = [aMin * bMin, aMin * bMax, aMax * bMin, aMax * bMax];
           newMin = Math.min(...prods);
           newMax = Math.max(...prods);
           break;
-        case "^":
+        }
+        case "^": {
           const powers = [aMin ** bMin, aMin ** bMax, aMax ** bMin, aMax ** bMax];
           newMin = Math.min(...powers);
           newMax = Math.max(...powers);
           break;
+        }
         case "/":
           if (bMin <= 0 && bMax >= 0) {
             if (bMin === 0 && bMax === 0) {
@@ -443,6 +442,7 @@ const core = {
 if (typeof module !== "undefined" && module.exports) {
   module.exports = core;
 }
-if (typeof window !== "undefined") {
-  window.UnsureCalcCore = core;
+const browserWindow = typeof globalThis !== "undefined" ? globalThis.window : undefined;
+if (browserWindow) {
+  browserWindow.UnsureCalcCore = core;
 }
