@@ -1,0 +1,35 @@
+{
+  "name": "mask-credentials",
+  "title": "Mask Credentials",
+  "description": "Mask auth tokens and credentials from curl commands for safe sharing",
+  "icon": "extension-icon.png",
+  "author": "mihirgupta0900",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mask-credentials",
+      "title": "Mask Credentials",
+      "description": "Mask auth tokens in clipboard and copy sanitized version",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
