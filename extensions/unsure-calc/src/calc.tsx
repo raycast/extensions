@@ -47,6 +47,12 @@ export {
   DEFAULT_BAR,
 };
 
+const parseIntPreference = (value: string | undefined, fallback: number, min = 1) => {
+  const parsed = Number.parseInt(value ?? "", 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, parsed);
+};
+
 interface CommandProps {
   arguments?: {
     expression?: string;
@@ -63,8 +69,12 @@ Use '~' to enter ranges. Examples:
 You will see exact bounds plus a simulated 5%-95% range and histogram.`;
 
 export default function Command(props: CommandProps) {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.Calc>();
   const initialExpression = props.arguments?.expression ?? "";
+  const sampleCount = parseIntPreference(prefs.samples, DEFAULT_SAMPLES);
+  const histogramBins = parseIntPreference(prefs.histogramBins, DEFAULT_BINS);
+  const histogramWidth = parseIntPreference(prefs.histogramWidth, DEFAULT_WIDTH);
+  const barChar = (prefs.barChar ?? DEFAULT_BAR).slice(0, 1) || DEFAULT_BAR;
   const [expression, setExpression] = useState(initialExpression);
   const [markdown, setMarkdown] = useState(introMarkdown);
   const [isLoading, setIsLoading] = useState(false);
@@ -86,7 +96,7 @@ export default function Command(props: CommandProps) {
 
       setIsLoading(true);
       try {
-        const result = evaluateExpression(expression, prefs.samples);
+        const result = evaluateExpression(expression, sampleCount);
         if (!result) {
           setMarkdown(`Nothing to compute for \`${expression}\`.`);
           setSubtitle(undefined);
@@ -103,9 +113,9 @@ export default function Command(props: CommandProps) {
         const quantiles = result.samples ? getQuantiles(result.samples) : null;
         const histogramLines = result.samples
           ? generateTextHistogram(result.samples, {
-              bins: prefs.histogramBins,
-              width: prefs.histogramWidth,
-              barChar: prefs.barChar,
+              bins: histogramBins,
+              width: histogramWidth,
+              barChar,
             })
           : [];
 
@@ -166,7 +176,7 @@ export default function Command(props: CommandProps) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [expression, prefs.samples, prefs.histogramBins, prefs.histogramWidth, prefs.barChar]);
+  }, [expression, sampleCount, histogramBins, histogramWidth, barChar]);
 
   return (
     <List
