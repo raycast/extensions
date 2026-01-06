@@ -21,18 +21,21 @@ If you run into any issues, please verify the following:
 - **Create Note from Transcript** - Create a new note from text transcripts or YouTube videos with AI-powered summaries
 
 ## AI Tools
-- **AI Notes** - Use Raycast AI on top of Granola and other AI extensions
 - **List Meetings** - Get meeting metadata (title, date, folders)
-- **Recipes** - Get recipes from Granola
+- **Get Note Content** - Retrieve note content (original, enhanced, or auto-selected)
 - **Get Transcript** - Retrieve the full transcript for any specific note
-- **Save to Notion** - Export one or more notes to Notion
+- **List Folders** - Get folder metadata and note counts
+- **Recipes** - Search and use Granola recipes within Raycast AI
+- **Save to Notion** - Export one or more notes to Notion with batch processing
 
 ## Features
+- **Open in Granola** - Open any note directly in the Granola app with ⌘O
 - **YouTube Integration** - Extract transcripts directly from YouTube URLs
-- **Folder Organization** - Browse and filter notes by folders with visual icons
-- **Batch Operations** - Process multiple notes simultaneously
+- **Folder Organization** - Browse and filter notes by folders with visual icons and note counts
+- **Batch Operations** - Process multiple notes simultaneously with streaming exports
 - **Cross-platform Support** - Works on both macOS and Windows
 - **Notion Export** - Save notes and transcripts to Notion with one click
+- **ZIP Exports** - Export multiple notes as organized ZIP files grouped by folder
 
 ## Developer Notes / Privacy
 *How does this extension work?*

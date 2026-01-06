@@ -6,7 +6,8 @@
   "icon": "extension_icon.png",
   "author": "rasmusbe",
   "contributors": [
-    "tombonez"
+    "tombonez",
+    "maathis"
   ],
   "categories": [
     "Developer Tools",
@@ -22,15 +23,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.1"
+    "@raycast/api": "^1.104.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

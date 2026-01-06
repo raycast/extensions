@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 import { togglApiToken } from "@/helpers/preferences";
 
 const base64encode = (str: string) => {

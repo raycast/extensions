@@ -7,7 +7,8 @@
   "author": "yedongze",
   "contributors": [
     "Ianvs",
-    "anirudh_gupta"
+    "anirudh_gupta",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -15,49 +16,56 @@
       "name": "clipboardToITerm",
       "title": "Clipboard → iTerm",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Clipboard directory in iTerm",
       "mode": "no-view"
     },
     {
       "name": "clipboardToTerminal",
       "title": "Clipboard → Terminal",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Clipboard directory in Terminal",
       "mode": "no-view"
     },
     {
       "name": "clipboardToWarp",
       "title": "Clipboard → Warp",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Clipboard directory in Warp",
       "mode": "no-view"
     },
     {
       "name": "clipboardToWez",
       "title": "Clipboard → WezTerm",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Clipboard directory in WezTerm",
       "mode": "no-view"
     },
     {
       "name": "clipboardToGhostty",
       "title": "Clipboard → Ghostty",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Clipboard directory in Ghostty",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboardToKitty",
+      "title": "Clipboard → Kitty",
+      "subtitle": "Open Path",
+      "description": "Open current Clipboard directory in Kitty",
       "mode": "no-view"
     },
     {
       "name": "finderToITerm",
       "title": "Finder → iTerm",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Finder directory in iTerm",
       "mode": "no-view"
     },
     {
       "name": "finderToGhostty",
       "title": "Finder → Ghostty",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Finder directory in Ghostty",
       "mode": "no-view"
     },
     {
@@ -71,68 +79,170 @@
       "name": "finderToWarp",
       "title": "Finder → Warp",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Finder directory in Warp",
       "mode": "no-view"
     },
     {
       "name": "finderToWez",
       "title": "Finder → WezTerm",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Finder directory in WezTerm",
+      "mode": "no-view"
+    },
+    {
+      "name": "finderToKitty",
+      "title": "Finder → Kitty",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Kitty",
       "mode": "no-view"
     },
     {
       "name": "iTermToFinder",
       "title": "iTerm → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current iTerm directory in Finder",
       "mode": "no-view"
     },
     {
       "name": "terminalToFinder",
       "title": "Terminal → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Terminal directory in Finder",
       "mode": "no-view"
     },
     {
       "name": "warpToFinder",
       "title": "Warp → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Warp directory in Finder",
       "mode": "no-view"
     },
     {
       "name": "wezToFinder",
       "title": "WezTerm → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current WezTerm directory in Finder",
       "mode": "no-view"
     },
     {
       "name": "ghosttyToFinder",
       "title": "Ghostty → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Ghostty directory in Finder",
       "mode": "no-view"
+    },
+    {
+      "name": "kittyToFinder",
+      "title": "Kitty → Finder",
+      "subtitle": "Open Path",
+      "description": "Open current Kitty directory in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "index",
+      "title": "X → Y",
+      "subtitle": "Open Path",
+      "description": "Open current X in Y",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "from",
+          "placeholder": "FROM",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Clipboard",
+              "value": "Clipboard"
+            },
+            {
+              "title": "Finder",
+              "value": "Finder"
+            },
+            {
+              "title": "Ghostty",
+              "value": "Ghostty"
+            },
+            {
+              "title": "iTerm",
+              "value": "iTerm"
+            },
+            {
+              "title": "Kitty",
+              "value": "Kitty"
+            },
+            {
+              "title": "Terminal",
+              "value": "Terminal"
+            },
+            {
+              "title": "Warp",
+              "value": "Warp"
+            },
+            {
+              "title": "WezTerm",
+              "value": "WezTerm"
+            }
+          ]
+        },
+        {
+          "name": "to",
+          "placeholder": "TO",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Finder",
+              "value": "Finder"
+            },
+            {
+              "title": "Ghostty",
+              "value": "Ghostty"
+            },
+            {
+              "title": "iTerm",
+              "value": "iTerm"
+            },
+            {
+              "title": "Kitty",
+              "value": "Kitty"
+            },
+            {
+              "title": "Terminal",
+              "value": "Terminal"
+            },
+            {
+              "title": "Warp",
+              "value": "Warp"
+            },
+            {
+              "title": "WezTerm",
+              "value": "WezTerm"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.5"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3",
-    "prettier": "^3.1.1"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

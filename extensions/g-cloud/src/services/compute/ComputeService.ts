@@ -3,7 +3,6 @@
  * Uses REST APIs for improved performance (no CLI subprocess overhead)
  */
 
-import { showFailureToast } from "@raycast/utils";
 import {
   listComputeInstances,
   getComputeInstance,
@@ -279,16 +278,8 @@ export class ComputeService {
     }
 
     // If not found in cache, fetch directly using REST API
-    try {
-      const apiInstance = await getComputeInstance(this.gcloudPath, this.projectId, zone, name);
-      return this.convertInstance(apiInstance);
-    } catch (error: unknown) {
-      showFailureToast({
-        title: "Failed to Fetch Instance",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      return null;
-    }
+    const apiInstance = await getComputeInstance(this.gcloudPath, this.projectId, zone, name);
+    return this.convertInstance(apiInstance);
   }
 
   /**
@@ -309,16 +300,8 @@ export class ComputeService {
     }
 
     // Fetch all disks in zone and find the one we need
-    try {
-      const disks = await this.getDisks(zone);
-      return disks.find((d) => d.name === name) || null;
-    } catch (error: unknown) {
-      showFailureToast({
-        title: "Failed to Fetch Disk",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      return null;
-    }
+    const disks = await this.getDisks(zone);
+    return disks.find((d) => d.name === name) || null;
   }
 
   /**
@@ -434,18 +417,9 @@ export class ComputeService {
    * @param zone Zone of the instance
    * @returns Promise indicating success
    */
-  async startInstance(name: string, zone: string): Promise<boolean> {
-    try {
-      await startComputeInstance(this.gcloudPath, this.projectId, zone, name);
-      this.clearCache("instances");
-      return true;
-    } catch (error: unknown) {
-      showFailureToast({
-        title: "Failed to Start Instance",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      return false;
-    }
+  async startInstance(name: string, zone: string): Promise<void> {
+    await startComputeInstance(this.gcloudPath, this.projectId, zone, name);
+    this.clearCache("instances");
   }
 
   /**
@@ -454,24 +428,19 @@ export class ComputeService {
    * @param zone Zone of the instance
    * @returns Promise indicating success and VM status information
    */
-  async stopInstance(name: string, zone: string): Promise<{ success: boolean; isTimedOut?: boolean }> {
+  async stopInstance(name: string, zone: string): Promise<{ isTimedOut?: boolean }> {
     try {
       await stopComputeInstance(this.gcloudPath, this.projectId, zone, name);
       this.clearCache("instances");
-      return { success: true };
+      return {};
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       // REST API might return before operation completes
       if (errorMessage.includes("timed out") || errorMessage.includes("RUNNING")) {
         this.clearCache("instances");
-        return { success: true, isTimedOut: true };
+        return { isTimedOut: true };
       }
-
-      showFailureToast({
-        title: "Failed to Stop Instance",
-        message: errorMessage,
-      });
-      return { success: false };
+      throw error;
     }
   }
 

@@ -49,8 +49,10 @@ function inlineTagsForNotes(notes: NoteWithContent[]) {
     const cleanedContent = note.content.replaceAll(CODE_BLOCK_REGEX, "");
     const tags = [...cleanedContent.matchAll(INLINE_TAGS_REGEX)];
     for (const tag of tags) {
-      if (!foundTags.includes(tag[1])) {
-        foundTags.push(tag[1]);
+      // Remove the # prefix from inline tags
+      const tagWithoutHash = tag[1].startsWith("#") ? tag[1].slice(1) : tag[1];
+      if (!foundTags.includes(tagWithoutHash)) {
+        foundTags.push(tagWithoutHash);
       }
     }
   }

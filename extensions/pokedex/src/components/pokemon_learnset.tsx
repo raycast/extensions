@@ -7,6 +7,10 @@ import PokeMoves from "../move";
 import { PokemonV2Move } from "../types";
 import MoveMetadata from "./metadata/move";
 
+const getMoveName = (move: PokemonV2Move) => {
+  return move.pokemon_v2_movenames[0]?.name || move.name;
+};
+
 export default function PokemonLearnset(props: {
   name: string;
   moves: PokemonV2Move[];
@@ -104,10 +108,7 @@ export default function PokemonLearnset(props: {
           case "Egg":
           case "Evolution":
           case "Tutor":
-            sortedMoves = orderBy(
-              moves,
-              (m) => m.pokemon_v2_move.pokemon_v2_movenames[0].name,
-            );
+            sortedMoves = orderBy(moves, (m) => getMoveName(m.pokemon_v2_move));
             break;
           case "Level up":
             sortedMoves = orderBy(moves, (m) => m.level);
@@ -136,11 +137,13 @@ export default function PokemonLearnset(props: {
                   break;
               }
 
+              const moveName = getMoveName(move.pokemon_v2_move);
+
               return (
                 <List.Item
                   key={`${move.pokemon_v2_versiongroup.name}-${move.move_learn_method_id}-${move.level}-${move.move_id}`}
-                  title={move.pokemon_v2_move.pokemon_v2_movenames[0].name}
-                  keywords={[move.pokemon_v2_move.pokemon_v2_movenames[0].name]}
+                  title={moveName}
+                  keywords={[moveName]}
                   icon={`moves/${move.pokemon_v2_move.pokemon_v2_movedamageclass.pokemon_v2_movedamageclassnames[0].name}.svg`}
                   accessories={[{ text }]}
                   detail={
@@ -150,8 +153,7 @@ export default function PokemonLearnset(props: {
                           ?.pokemon_v2_moveeffecteffecttexts.length
                           ? json2md([
                               {
-                                h1: move.pokemon_v2_move.pokemon_v2_movenames[0]
-                                  .name,
+                                h1: moveName,
                               },
                               {
                                 p: move.pokemon_v2_move.pokemon_v2_moveeffect.pokemon_v2_moveeffecteffecttexts[0].short_effect.replace(

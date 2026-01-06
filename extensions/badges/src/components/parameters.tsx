@@ -4,7 +4,7 @@ import { Color as Colour, Detail, Icon, useNavigation } from "@raycast/api";
 import { badgeSizes, badgeStyles, dynamicBadgeTypes } from "../constants.js";
 import { Input } from "./input.js";
 import { Badge, FieldName, OnBadgeChange, ParameterProps } from "../types.js";
-import { ellipsis, getSvgFromFile, getTagColor, pickColor, pickLogo } from "../utils.js";
+import { ellipsis, getSvgFromFile, getTagColor, isWindows, pickColor, pickLogo } from "../utils.js";
 
 export const EditButton = ({
   fieldName,
@@ -40,7 +40,7 @@ export const EditButton = ({
 export const BaseInput = ({ fieldName, badge, onChange }: ParameterProps & { fieldName: FieldName }) => {
   return (
     <Detail.Metadata.TagList title={fieldName}>
-      <Detail.Metadata.TagList.Item text={ellipsis(badge[fieldName])} color={Colour.Green} />
+      <Detail.Metadata.TagList.Item text={ellipsis(badge[fieldName])} color={Colour.Blue} />
       <EditButton fieldName={fieldName} badge={badge} onChange={onChange} />
     </Detail.Metadata.TagList>
   );
@@ -115,14 +115,16 @@ export const Color = ({ badge, onChange }: ParameterProps) => {
           }}
         />
       )}
-      <Detail.Metadata.TagList.Item
-        icon={Icon.EyeDropper}
-        text="pick"
-        color={Colour.SecondaryText}
-        onAction={async () => {
-          await pickColor({ field: "color" });
-        }}
-      />
+      {isWindows ? null : (
+        <Detail.Metadata.TagList.Item
+          icon={Icon.EyeDropper}
+          text="pick"
+          color={Colour.SecondaryText}
+          onAction={async () => {
+            await pickColor({ field: "color" });
+          }}
+        />
+      )}
       <EditButton fieldName="color" badge={badge} onChange={onChange} />
     </Detail.Metadata.TagList>
   );
@@ -148,14 +150,16 @@ export const LabelColor = ({ badge, onChange }: ParameterProps) => {
             />
           )}
           <Detail.Metadata.TagList.Item text={badge.labelColor} color={badge.labelColor} />
-          <Detail.Metadata.TagList.Item
-            icon={Icon.EyeDropper}
-            text="pick"
-            color={Colour.SecondaryText}
-            onAction={async () => {
-              await pickColor({ field: "labelColor" });
-            }}
-          />
+          {isWindows ? null : (
+            <Detail.Metadata.TagList.Item
+              icon={Icon.EyeDropper}
+              text="pick"
+              color={Colour.SecondaryText}
+              onAction={async () => {
+                await pickColor({ field: "labelColor" });
+              }}
+            />
+          )}
           <EditButton fieldName="labelColor" badge={badge} onChange={onChange} />
         </Detail.Metadata.TagList>
       )}
@@ -189,11 +193,11 @@ export const Logo = ({ badge, onChange }: ParameterProps) => {
             }
           />
         )}
-        <Detail.Metadata.TagList.Item text={$icon?.slug ?? "none"} color={$icon?.hex ?? Colour.Green} />
+        <Detail.Metadata.TagList.Item text={$icon?.slug ?? "none"} color={$icon?.hex ?? Colour.Blue} />
         {$icon && (
           <Detail.Metadata.TagList.Item
             text="base64"
-            color={isBase64Logo ? Colour.Green : Colour.SecondaryText}
+            color={isBase64Logo ? Colour.Blue : Colour.SecondaryText}
             onAction={async () => {
               if (isBase64Logo) {
                 onChange({ ...badge, logo: $icon.slug });
@@ -225,14 +229,16 @@ export const Logo = ({ badge, onChange }: ParameterProps) => {
             {badge.logoColor !== undefined && logoColor !== $icon.hex && (
               <Detail.Metadata.TagList.Item text={ellipsis(logoColor)} color={logoColor} />
             )}
-            <Detail.Metadata.TagList.Item
-              icon={Icon.EyeDropper}
-              text="pick"
-              color={Colour.SecondaryText}
-              onAction={async () => {
-                await pickColor({ field: "logoColor" });
-              }}
-            />
+            {isWindows ? null : (
+              <Detail.Metadata.TagList.Item
+                icon={Icon.EyeDropper}
+                text="pick"
+                color={Colour.SecondaryText}
+                onAction={async () => {
+                  await pickColor({ field: "logoColor" });
+                }}
+              />
+            )}
             <EditButton fieldName="logoColor" badge={badge} onChange={onChange} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="logoSize">

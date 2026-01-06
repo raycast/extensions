@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add a toggle to filter installed packages, allowing users to hide dependencies and show only those explicitly "installed on request".
+
 ## [Homebrew 5.0 Support] - 2025-12-16
 
 - Added compatibility with Homebrew 5.0
