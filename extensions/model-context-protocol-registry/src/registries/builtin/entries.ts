@@ -3,6 +3,26 @@ import type { RegistryEntry } from "./types";
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "atono",
+    title: "Atono",
+    description:
+      "AI-powered project management for product teams. Connect your AI assistant to Atono's workflow platform to create and update stories, track bugs, manage team assignments, and document fixes—all through natural language commands.",
+    icon: {
+      source: {
+        light: "https://atono-test.directus.app/assets/feaa7f21-4bbe-4164-b725-ff2729725cbf",
+        dark: "https://atono-test.directus.app/assets/869c76cd-bb5f-459c-88d1-2315a7b8a545",
+      },
+    },
+    homepage: "https://docs.atono.io/docs/mcp-server-for-atono/",
+    configuration: {
+      command: "docker",
+      args: ["run", "-i", "--rm", "-e", "X_API_KEY", "atonoai/atono-mcp-server"],
+      env: {
+        X_API_KEY: "<YOUR_API_KEY_HERE>",
+      },
+    },
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:

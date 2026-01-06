@@ -1,5 +1,13 @@
 # Terminal Finder Changelog
 
+## [Enhancements] - 2026-01-05
+
+- A new quick command to jump from X to Y
+- Added README.md
+- Added support for Kitty
+- Updated `command` `description`s to be more precise
+- Added error handling in existing `runAppleScript`
+
 ## [Update] - 2024-12-29
 
 - Added support for Ghostty

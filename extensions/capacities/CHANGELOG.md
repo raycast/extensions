@@ -1,5 +1,12 @@
 # Capacities Changelog
 
+## [Version 2.0.0] - 2025-12-16
+
+- Offline support: The Raycast extension now communicates with the Capacities desktop app via a communication token. This means you can use the extension even if you're offline.
+- Create Task: You can now create tasks in Capacities from Raycast.
+- Search Details: The search results now show the details of the content in a more readable format.
+- Better Open Behavior: "Open in App" as default action for opening content in Capacities, "Open in Browser" as fallback action.
+
 ## [Maintenance + Windows Support] - 2025-11-07
 
 - add Windows Support (no App actions) (ref: [Issue #21353](https://github.com/raycast/extensions/issues/21353), [Issue #22647](https://github.com/raycast/extensions/issues/22647))

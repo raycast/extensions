@@ -94,7 +94,12 @@ type GetJobResponse =
         id: number;
         number: number;
       };
+      session_id: string;
     };
+
+interface GetSessionResponse {
+  resource_global_id: string;
+}
 
 type QuotaSnapshot = {
   entitlement: number;
@@ -149,7 +154,9 @@ export async function createTask(
   repository: string,
   prompt: string,
   branch: string,
-): Promise<{ pullRequestUrl: string }> {
+  model: string | null,
+  customAgent: string | null,
+): Promise<{ pullRequestUrl: string; sessionUrl: string }> {
   const { token } = getAccessToken();
 
   let generatedTitle: string | null = null;
@@ -170,21 +177,25 @@ export async function createTask(
     }
   }
 
+  const body = {
+    problem_statement: prompt,
+    event_type: "raycast",
+    pull_request: {
+      title: generatedTitle ?? prompt,
+      base_ref: branch,
+      head_ref: null,
+    },
+    model,
+    ...(customAgent ? { custom_agent: customAgent } : {}),
+  };
+
   const createJobResponse = await fetch(`https://api.githubcopilot.com/agents/swe/v1/jobs/${repository}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      problem_statement: prompt,
-      event_type: "raycast",
-      pull_request: {
-        title: generatedTitle ?? prompt,
-        base_ref: branch,
-        head_ref: null,
-      },
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!createJobResponse.ok) {
@@ -193,21 +204,22 @@ export async function createTask(
         "Failed to create task. Please check if Copilot coding agent is enabled for your user at https://github.com/settings/copilot/features.",
       );
     } else {
-      throw new Error(`Failed to create task: ${createJobResponse.statusText}`);
+      const errorText = await createJobResponse.text();
+      throw new Error(`Failed to create task (${createJobResponse.statusText}): ${errorText}`);
     }
   }
 
   const createJobResult = (await createJobResponse.json()) as CreateJobResponse;
-  return { pullRequestUrl: await pollJobUntilPullRequestUrlReady({ repository, jobId: createJobResult.job_id }) };
+  return pollJobUntilPullRequestReady({ repository, jobId: createJobResult.job_id });
 }
 
-const pollJobUntilPullRequestUrlReady = async ({
+const pollJobUntilPullRequestReady = async ({
   repository,
   jobId,
 }: {
   repository: string;
   jobId: string;
-}): Promise<string> => {
+}): Promise<{ pullRequestUrl: string; sessionUrl: string }> => {
   const { token } = getAccessToken();
 
   const getJobResponse = await fetch(`https://api.githubcopilot.com/agents/swe/v1/jobs/${repository}/${jobId}`, {
@@ -224,7 +236,26 @@ const pollJobUntilPullRequestUrlReady = async ({
 
   if (getJobResult.status !== "pending") {
     const pullRequestUrl = `https://github.com/${repository}/pull/${getJobResult.pull_request.number}`;
-    return pullRequestUrl;
+
+    const getSessionResponse = await fetch(`https://api.githubcopilot.com/agents/sessions/${getJobResult.session_id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Copilot-Integration-Id": "copilot-raycast",
+      },
+    });
+
+    if (!getSessionResponse.ok) {
+      throw new Error(`Failed to get session information: ${getSessionResponse.statusText}`);
+    }
+
+    const getSessionResult = (await getSessionResponse.json()) as GetSessionResponse;
+
+    const sessionUrl = `https://github.com/copilot/tasks/pull/${getSessionResult.resource_global_id}`;
+
+    return {
+      pullRequestUrl,
+      sessionUrl,
+    };
   } else if (getJobResult.error) {
     if (getJobResult.error.response_status_code === "422") {
       throw new Error(
@@ -235,7 +266,7 @@ const pollJobUntilPullRequestUrlReady = async ({
     }
   } else {
     await sleep(1_000);
-    return pollJobUntilPullRequestUrlReady({ repository, jobId });
+    return pollJobUntilPullRequestReady({ repository, jobId });
   }
 };
 

@@ -5,6 +5,7 @@
   "description": "Monitor and manage open ports on your system with the ability to kill processes using specific ports.",
   "icon": "extension.png",
   "license": "MIT",
+  "type": "module",
   "commands": [
     {
       "name": "index",
@@ -12,6 +13,21 @@
       "description": "Lists all open TCP/UDP ports on your system, allows you to view details, and terminate the process occupying each port with a single action. Helps free up ports quickly when developing apps or debugging software.",
       "mode": "view",
       "subtitle": "List, monitor, and kill processes by port"
+    },
+    {
+      "name": "kill-port",
+      "title": "Kill Port",
+      "description": "Terminate the process using a specific port number. Simply enter the port number and the process will be terminated instantly.",
+      "mode": "no-view",
+      "subtitle": "Terminate process by port number",
+      "arguments": [
+        {
+          "name": "portNumber",
+          "type": "text",
+          "placeholder": "Port number (e.g., 3000)",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {

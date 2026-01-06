@@ -4,12 +4,10 @@ import { Application, AtomicShortcut } from "../model/internal/internal-models";
 import { Modifiers } from "../model/internal/modifiers";
 
 describe("Parses shortcut correctly", () => {
-  const parser = new ShortcutsParser(
-    new Map([
-      ["e", "10"],
-      ["+", "24"],
-    ])
-  );
+  const parser = new ShortcutsParser({
+    e: "10",
+    "+": "24",
+  });
 
   it("Parses app shortcut", () => {
     expect(parser.parseInputShortcuts([generateInputAppWithShortcut()])).toEqual([generateExpectedAppWithShortcut()]);
@@ -99,6 +97,11 @@ describe("Parses shortcut correctly", () => {
     "ctrl+opt+cmd+e",
     "shift+opt+cmd+e",
     "ctrl+shift+opt+cmd+e ctrl+opt+cmd+e shift+opt+e ctrl+shift+e opt+cmd+e ctrl+cmd+e ctrl+shift+opt+e ctrl+shift+cmd+e ctrl+opt+cmd+e shift+opt+cmd+e",
+    "alt+e",
+    "ctrl+alt+e",
+    "shift+alt+e",
+    "alt+cmd+e",
+    "ctrl+shift+alt+cmd+e",
   ])("Parses apps with different modifiers %p", (shortcut: string) => {
     expect(parser.parseInputShortcuts([generateInputAppWithShortcut({ shortcut })])).toHaveLength(1); // todo: pass all of them at once
   });

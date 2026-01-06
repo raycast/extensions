@@ -20,7 +20,7 @@
   "dependencies": {
     "@raycast/api": "^1.46.0",
     "axios": "^1.8.4",
-    "cloudinary": "^1.37.3",
+    "cloudinary": "^2.8.0",
     "tempy": "^3.0.0"
   },
   "devDependencies": {

@@ -11,13 +11,15 @@
     "pernielsentikaer",
     "tm.wrnr",
     "true-real-michael",
-    "xmorse"
+    "xmorse",
+    "ivens_joris"
   ],
   "categories": [
     "Developer Tools"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -93,6 +95,7 @@
   "scripts": {
     "build": "ray build",
     "create-fixtures": "./scripts/create-fixtures.sh",
+    "create-fixtures:ts": "node --experimental-transform-types scripts/create-fixtures.ts",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

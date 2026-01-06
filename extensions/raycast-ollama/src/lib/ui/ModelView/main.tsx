@@ -13,7 +13,7 @@ import { GetOllamaServers } from "../../settings/settings";
  * Return JSX element for managing Ollama models.
  * @returns {JSX.Element} Raycast Model View.
  */
-export function ModelView(): JSX.Element {
+export function ModelView() {
   const abort = React.useRef(new AbortController());
   const {
     value: SelectedServer,
@@ -33,7 +33,7 @@ export function ModelView(): JSX.Element {
   ] = React.useState([] as Types.UiModelDownload[]);
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
 
-  function SearchBarAccessory(): JSX.Element {
+  function SearchBarAccessory() {
     return (
       <List.Dropdown
         tooltip="Available Server"
@@ -50,7 +50,7 @@ export function ModelView(): JSX.Element {
    * @param model
    * @returns List.Item.Detail
    */
-  function ModelDetail(prop: { model: Types.UiModel }): JSX.Element {
+  function ModelDetail(prop: { model: Types.UiModel }) {
     return (
       <List.Item.Detail
         metadata={
@@ -115,7 +115,7 @@ export function ModelView(): JSX.Element {
    * @param model
    * @returns ActionPanel
    */
-  function ModelAction(prop: { model: Types.UiModel }): JSX.Element {
+  function ModelAction(prop: { model: Types.UiModel }) {
     return (
       <ActionPanel>
         <ActionPanel.Section title="Ollama Model">

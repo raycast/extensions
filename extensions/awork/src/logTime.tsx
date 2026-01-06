@@ -21,15 +21,15 @@ interface FormValues {
   taskId: string;
   typeOfWorkId: string;
   date: Date | null;
-  startTime: string;
+  startTime?: string;
   duration: string;
   isBillable: boolean;
 }
 
-const logTime = async (token: string, values: FormValues, tasks: task[] | string) => {
+export const logTime = async (token: string, values: FormValues, tasks: task[] | string) => {
   values.date = values.date ? values.date : new Date();
   if (!Array.isArray(tasks)) {
-    return;
+    return false;
   }
   const task = tasks.filter((value) => value.id === values.taskId)[0];
   const body = JSON.stringify({
@@ -61,13 +61,15 @@ const logTime = async (token: string, values: FormValues, tasks: task[] | string
     });
     if (!response.ok) {
       showFailureToast("Couldn't log time");
+      return false;
     } else {
       await showHUD("Successfully logged time");
+      return true;
     }
   } catch (error) {
     showFailureToast(error as Error);
     console.error(error);
-    return;
+    return false;
   }
 };
 

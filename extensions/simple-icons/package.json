@@ -124,11 +124,21 @@
       "required": false,
       "type": "checkbox",
       "default": true
+    },
+    {
+      "name": "shuffleOnStart",
+      "title": "Shuffle on Start",
+      "label": "Enabled",
+      "description": "Shuffle icons when the extension starts",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^2.2.2",
+    "array-shuffle": "^4.0.0",
     "date-fns": "^4.1.0",
     "fast-fuzzy": "^1.12.0",
     "got": "^14.6.5",
