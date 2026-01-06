@@ -13,46 +13,30 @@ export function SearchListItem({ searchResult }: SearchListItemProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Package Attr Name" content={searchResult.attrName} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            {searchResult.homepage[0] ? (
-              <>
-                <Action.OpenInBrowser
-                  title="Open Package Homepage"
-                  url={searchResult.homepage[0]}
-                  shortcut={Keyboard.Shortcut.Common.Open}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Package Homepage URL"
-                  content={searchResult.homepage[0]}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "h" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "h" },
-                  }}
-                />
-              </>
-            ) : null}
-            {searchResult.source && (
-              <>
-                <Action.OpenInBrowser
-                  title="Open Package Source Code"
-                  url={searchResult.source!}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "o" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "o" },
-                  }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Package Source URL"
-                  content={searchResult.source!}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-                  }}
-                />
-              </>
-            )}
+            <ActionPanel.Submenu icon={Icon.Globe} title="Open…" shortcut={Keyboard.Shortcut.Common.Open}>
+              {searchResult.source && (
+                <Action.OpenInBrowser title="Open Package Source Code" url={searchResult.source} />
+              )}
+              {searchResult.homepage[0] && (
+                <Action.OpenInBrowser title="Open Package Homepage" url={searchResult.homepage[0]} />
+              )}
+            </ActionPanel.Submenu>
+
+            <ActionPanel.Submenu icon={Icon.Clipboard} title="Copy…" shortcut={Keyboard.Shortcut.Common.Copy}>
+              <Action.CopyToClipboard title="Copy Package Attr Name" content={searchResult.attrName} />
+              {searchResult.source && (
+                <Action.CopyToClipboard title="Copy Package Source URL" content={searchResult.source} />
+              )}
+              {searchResult.homepage[0] && (
+                <Action.CopyToClipboard title="Copy Package Homepage URL" content={searchResult.homepage[0]} />
+              )}
+            </ActionPanel.Submenu>
+
+            <Action.CopyToClipboard
+              title="Copy Package Attr Name"
+              content={searchResult.attrName}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

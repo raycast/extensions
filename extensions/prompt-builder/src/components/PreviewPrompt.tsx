@@ -15,7 +15,10 @@ const PreviewPrompt = ({ prompt }: PreviewPromptProps) => {
           <Action
             icon={Icon.Pencil}
             title="Edit Prompt"
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "e" },
+              windows: { modifiers: ["ctrl"], key: "e" },
+            }}
             onAction={() => push(<PromptForm />)}
           />
         </ActionPanel>

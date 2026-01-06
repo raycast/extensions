@@ -28,8 +28,14 @@
           "required": false,
           "defaultValue": "en",
           "data": [
-            { "title": "English", "value": "en" },
-            { "title": "Spanish", "value": "es" }
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "Spanish",
+              "value": "es"
+            }
           ]
         }
       ]
@@ -45,7 +51,7 @@
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -59,4 +65,3 @@
     "Windows"
   ]
 }
-

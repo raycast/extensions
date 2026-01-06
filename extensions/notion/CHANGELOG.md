@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Use Clipboard in Create + Update Shortcuts] - 2025-12-01
+
+- New `Preference` allowing to use Clipboard for auto-filling **Name (Title)** or **Content** (ref: [Issue #23086](https://github.com/raycast/extensions/issues/23086))
+- Update most `shortcut` to be cross-platform
+
 ## [Fix opening a page in the App on Windows] - 2025-08-27
 
 - Fix opening a page in the App on Windows

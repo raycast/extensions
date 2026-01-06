@@ -12,7 +12,8 @@
     "heytommy",
     "MatteoGauthier",
     "seewhy",
-    "ridemountainpig"
+    "ridemountainpig",
+    "dangkhoipro"
   ],
   "license": "MIT",
   "commands": [
@@ -79,18 +80,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.0",
-    "@raycast/utils": "^1.17.0",
-    "qrcode": "^1.5.0"
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "2.0.4",
-    "@types/node": "22.13.10",
-    "@types/qrcode": "^1.5.1",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "25.0.1",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -100,6 +101,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

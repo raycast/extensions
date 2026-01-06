@@ -4,6 +4,11 @@
 
 - Added support for Dia browser.
 
+## [Quick Add Bookmark] - 2026-01-01
+
+- Added Quick Add Bookmark command for saving URLs instantly without opening a form
+- Automatically fetches page title from URL
+
 ## [AI Assistant] - 2025-11-17
 
 - Added Raycast AI tooling so you can mention `@raindrop-io` in Raycast AI to search, inspect, and summarize bookmarks.

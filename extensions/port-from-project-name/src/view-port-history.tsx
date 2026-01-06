@@ -4,6 +4,7 @@ import {
   Alert,
   Color,
   confirmAlert,
+  Form,
   Icon,
   Keyboard,
   launchCommand,
@@ -11,14 +12,116 @@ import {
   List,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
+import { useState } from "react";
 
 type HistoryEntry = {
   port: number;
   createdAt: string;
   updatedAt: string;
+  isEdited?: boolean;
 };
+
+function EditPortForm({
+  projectName,
+  currentPort,
+  history,
+  setHistory,
+}: {
+  projectName: string;
+  currentPort: number;
+  history: Record<string, HistoryEntry>;
+  setHistory: (value: Record<string, HistoryEntry>) => Promise<void>;
+}) {
+  const { pop } = useNavigation();
+  const [portValue, setPortValue] = useState(String(currentPort));
+  const [error, setError] = useState<string | undefined>();
+
+  function validatePort(value: string): string | undefined {
+    if (!value || value.trim() === "") {
+      return "Port is required";
+    }
+
+    const num = parseInt(value, 10);
+    if (isNaN(num)) {
+      return "Port must be a number";
+    }
+
+    if (num < 1000 || num > 9999) {
+      return "Must be 1000-9999";
+    }
+
+    // Check if port is already used by another project
+    for (const [name, entry] of Object.entries(history)) {
+      if (name !== projectName && entry.port === num) {
+        return `Port ${num} is already in use`;
+      }
+    }
+
+    return undefined;
+  }
+
+  async function handleSubmit(values: { port: string }) {
+    const validationError = validatePort(values.port);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    const newPort = parseInt(values.port, 10);
+    const now = new Date().toISOString();
+    const existing = history[projectName];
+
+    const next: Record<string, HistoryEntry> = {
+      ...history,
+      [projectName]: {
+        port: newPort,
+        createdAt: existing?.createdAt ?? now,
+        updatedAt: now,
+        isEdited: true,
+      },
+    };
+
+    await setHistory(next);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Port Updated",
+      message: `${projectName}: ${newPort}`,
+    });
+    pop();
+  }
+
+  return (
+    <Form
+      navigationTitle={`Edit Port for ${projectName}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save Port" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="port"
+        title="Port"
+        placeholder="Enter port (1000-9999)"
+        value={portValue}
+        error={error}
+        onChange={(value) => {
+          setPortValue(value);
+          if (error) {
+            setError(validatePort(value));
+          }
+        }}
+        onBlur={(event) => {
+          setError(validatePort(event.target.value ?? ""));
+        }}
+      />
+      <Form.Description text={`Current port: ${currentPort}`} />
+    </Form>
+  );
+}
 
 export default function Command() {
   const {
@@ -64,6 +167,7 @@ export default function Command() {
           <ActionPanel>
             <Action
               title="Generate Port"
+              icon={Icon.Plus}
               onAction={async () => {
                 try {
                   await launchCommand({ name: "generate-port", type: LaunchType.UserInitiated });
@@ -72,7 +176,12 @@ export default function Command() {
                 }
               }}
             />
-            <Action title="Clear History" onAction={handleClearAll} style={Action.Style.Destructive} />
+            <Action
+              title="Clear History"
+              icon={Icon.XMarkCircle}
+              onAction={handleClearAll}
+              style={Action.Style.Destructive}
+            />
           </ActionPanel>
         }
       >
@@ -97,6 +206,19 @@ export default function Command() {
               <Action.CopyToClipboard title="Copy Port" content={String(item.port)} />
               <Action.CopyToClipboard title="Copy Project Name" content={item.projectName} />
               <Action.CopyToClipboard title="Copy Project:Port" content={`${item.projectName}:${item.port}`} />
+              <Action.Push
+                title="Edit Port"
+                icon={Icon.Pencil}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+                target={
+                  <EditPortForm
+                    projectName={item.projectName}
+                    currentPort={item.port}
+                    history={history ?? {}}
+                    setHistory={setHistory}
+                  />
+                }
+              />
               <ActionPanel.Section>
                 <Action
                   title="Delete Entry"

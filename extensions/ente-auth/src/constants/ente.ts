@@ -9,7 +9,8 @@ export const DEFAULT_EXPORT_DIR_PATH = (): string => {
 		return cachedExportDirPath;
 	}
 
-	const exportPath = getPreferenceValues().exportPath || path.join(os.homedir(), "Documents", "ente");
+	const exportPath =
+		getPreferenceValues<Preferences>().exportPath || path.join(os.homedir(), "Documents", "ente");
 
 	cachedExportDirPath = exportPath.startsWith("~/") ? exportPath.replace("~", os.homedir()) : exportPath;
 

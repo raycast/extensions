@@ -5,12 +5,12 @@ import {
   Action,
   showToast,
   Toast,
-  popToRoot,
   showInFinder,
   Detail,
   Icon,
   getSelectedFinderItems,
   LaunchProps, // Keep LaunchProps
+  Clipboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import path from "path";
@@ -35,9 +35,10 @@ type CommandLaunchProps = LaunchProps;
  */
 interface AppState {
   isLoading: boolean;
-  currentStep: "selectDirectory" | "configureGeneration";
-  finderSelectedPath: string | null; // Path initially detected from Finder, if any.
-  pickerSelectedPath: string | null; // Path selected by the user via FilePicker.
+  currentStep: "selectDirectory" | "configureGeneration" | "showResults";
+  finderSelectedPath: string | null; // Path initially detected from Finder, if any (deprecated, use finderSelectedPaths).
+  finderSelectedPaths: string[]; // All paths initially detected from Finder, if any.
+  pickerSelectedPaths: string[]; // Paths selected by the user via FilePicker.
   projectDirectory: string | null; // The confirmed project directory to process.
   finderSelectionInfo: FinderSelectionInfo | null; // Information about Finder selection for scope choice
   processOnlySelectedFiles: boolean; // Whether to process only selected files or entire directory
@@ -47,10 +48,20 @@ interface AppState {
   maxFileSizeMbString: string;
   additionalIgnorePatterns: string;
   includeAiInstructions: boolean;
+  outputToClipboard: boolean; // Whether to also copy output to clipboard
   progress: { message: string; details?: string } | null; // Progress message for long operations.
+  estimatedStats: { size: number; tokens: number } | null; // Pre-calculated statistics for preview
+  isCalculatingStats: boolean; // Whether statistics are being calculated in background
+  generationResult: {
+    filePath: string;
+    fileName: string;
+    tokens: number;
+    size: number;
+    copiedToClipboard: boolean;
+  } | null; // Result of generation for results screen
   formErrors: Partial<
     Record<
-      "projectDirectoryField" | "outputFileName" | "maxFileSizeMbString" | "general" | "additionalIgnorePatterns",
+      "projectDirectoryField" | "outputFileName" | "maxFileSizeMbString" | "additionalIgnorePatterns" | "general",
       string
     >
   >;
@@ -70,11 +81,22 @@ const sanitizeFileName = (name: string): string => {
     .replace(/[^a-zA-Z0-9._-]/g, "");
 };
 
+/**
+ * Estimates the number of tokens in a text string using a simple heuristic.
+ * Uses the approximation: 1 token ≈ 4 characters for English code.
+ * @param content The text content to estimate tokens for.
+ * @returns The estimated number of tokens.
+ */
+const estimateTokens = (content: string): number => {
+  return Math.ceil(content.length / 4);
+};
+
 const INITIAL_STATE: AppState = {
   isLoading: false, // Don't start with loading state to prevent flicker
   currentStep: "selectDirectory",
   finderSelectedPath: null,
-  pickerSelectedPath: null,
+  finderSelectedPaths: [],
+  pickerSelectedPaths: [],
   projectDirectory: null,
   finderSelectionInfo: null,
   processOnlySelectedFiles: false,
@@ -84,7 +106,11 @@ const INITIAL_STATE: AppState = {
   maxFileSizeMbString: (DEFAULT_MAX_FILE_SIZE_BYTES / 1024 / 1024).toString(),
   additionalIgnorePatterns: "",
   includeAiInstructions: true, // AI instructions are included by default.
+  outputToClipboard: false, // Don't copy to clipboard by default
   progress: null,
+  estimatedStats: null,
+  isCalculatingStats: false,
+  generationResult: null,
   formErrors: {},
 };
 
@@ -183,17 +209,20 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
 
           const selectionInfo = await analyzeFinderSelection(finderItems);
           if (selectionInfo) {
+            // Save all selected paths from Finder
+            const allSelectedPaths = finderItems.map((item) => item.path);
             // Verify the suggested directory is actually a directory
             const stats = await fs.stat(selectionInfo.suggestedDirectory);
             if (stats.isDirectory()) {
               setState((prev) => ({
                 ...prev,
-                finderSelectedPath: selectionInfo.suggestedDirectory,
+                finderSelectedPath: selectionInfo.suggestedDirectory, // Keep for backward compatibility
+                finderSelectedPaths: allSelectedPaths, // Save all paths
                 finderSelectionInfo: selectionInfo,
-                pickerSelectedPath: null,
+                pickerSelectedPaths: [], // Will be populated from finderSelectedPaths in filePickerValue
                 formErrors: {},
               }));
-              console.log("Analyzed Finder selection:", selectionInfo);
+              console.log("Analyzed Finder selection:", selectionInfo, "All paths:", allSelectedPaths);
               // Update processing mode after state is set
               setTimeout(() => updateProcessingMode(), 0);
               return; // Successfully found and set Finder path.
@@ -220,69 +249,200 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
   }, []); // Empty dependency array ensures this runs only once on mount.
 
   /**
+   * Effect to pre-calculate statistics when entering configureGeneration step.
+   * This runs in the background to estimate file size and token count.
+   */
+  useEffect(() => {
+    async function calculatePreviewStats() {
+      if (state.currentStep !== "configureGeneration" || !state.projectDirectory) {
+        return;
+      }
+
+      if (state.isCalculatingStats || state.estimatedStats) {
+        return; // Already calculating or already calculated
+      }
+
+      setState((prev) => ({ ...prev, isCalculatingStats: true }));
+
+      try {
+        // Create a temporary config for preview
+        const previewConfig: FileProcessorConfig = {
+          projectDirectory: state.projectDirectory,
+          maxFileSizeBytes: parseFloat(state.maxFileSizeMbString || "1") * 1024 * 1024,
+          includeAiInstructions: state.includeAiInstructions,
+          processOnlySelectedFiles: state.processOnlySelectedFiles,
+          selectedFilePaths: state.selectedFilePaths,
+        };
+
+        // Generate preview (this will process files but we only need the string length)
+        const previewString = await generateProjectCodeString(previewConfig, (update) => {
+          // Update progress silently
+          console.log("Preview calculation:", update.message);
+        });
+
+        const estimatedTokens = estimateTokens(previewString);
+        const estimatedSize = previewString.length;
+
+        setState((prev) => ({
+          ...prev,
+          estimatedStats: { size: estimatedSize, tokens: estimatedTokens },
+          isCalculatingStats: false,
+        }));
+      } catch (error) {
+        console.error("Error calculating preview stats:", error);
+        setState((prev) => ({ ...prev, isCalculatingStats: false }));
+      }
+    }
+
+    calculatePreviewStats();
+  }, [
+    state.currentStep,
+    state.projectDirectory,
+    state.processOnlySelectedFiles,
+    state.selectedFilePaths,
+    state.includeAiInstructions,
+    state.maxFileSizeMbString,
+  ]);
+
+  /**
+   * Finds the common parent directory for an array of paths.
+   * @param paths Array of file or directory paths.
+   * @returns The common parent directory path.
+   */
+  const findCommonParent = useCallback((paths: string[]): string => {
+    if (paths.length === 0) return "";
+    if (paths.length === 1) {
+      // For a single path, return its parent directory
+      return path.dirname(paths[0]);
+    }
+
+    // Split all paths into segments
+    const splitPaths = paths.map((p) => {
+      const resolved = path.resolve(p);
+      return resolved.split(path.sep).filter((segment) => segment !== "");
+    });
+
+    // Find the minimum length to avoid out-of-bounds
+    const minLength = Math.min(...splitPaths.map((p) => p.length));
+    if (minLength === 0) {
+      // If any path is root, return root
+      return path.parse(paths[0]).root || path.sep;
+    }
+
+    const commonSegments: string[] = [];
+
+    // Compare segments from the beginning
+    for (let i = 0; i < minLength; i++) {
+      const segment = splitPaths[0][i];
+      if (splitPaths.every((p) => p[i] === segment)) {
+        commonSegments.push(segment);
+      } else {
+        break;
+      }
+    }
+
+    // If no common segments found (different drives on Windows), return root of first path
+    if (commonSegments.length === 0) {
+      const root = path.parse(paths[0]).root;
+      return root || path.sep;
+    }
+
+    // Reconstruct the path
+    const root = path.parse(paths[0]).root;
+    const result = root ? root + commonSegments.join(path.sep) : path.sep + commonSegments.join(path.sep);
+    return result;
+  }, []);
+
+  /**
    * Validates the selected project directory and proceeds to the configuration step.
    * Called when the first form (directory selection) is submitted.
    * @param values The form values, containing the selected project directory.
    */
-  const validateAndProceedToConfigure = useCallback(async (values: { projectDirectoryField: string[] }) => {
-    setState((prev) => ({ ...prev, isLoading: true, formErrors: {} }));
-    const dirPathArray = values.projectDirectoryField;
+  const validateAndProceedToConfigure = useCallback(
+    async (values: { projectDirectoryField: string[] }) => {
+      setState((prev) => ({ ...prev, isLoading: true, formErrors: {} }));
+      const selectedPaths = values.projectDirectoryField;
 
-    if (!dirPathArray || dirPathArray.length === 0 || !dirPathArray[0]) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        formErrors: { ...prev.formErrors, projectDirectoryField: "Please select a project directory." },
-      }));
-      await showToast({ style: Toast.Style.Failure, title: "Input Error", message: "No directory selected." });
-      return;
-    }
-    const dirPath = dirPathArray[0];
-
-    try {
-      const stats = await fs.stat(dirPath);
-      if (!stats.isDirectory()) {
+      if (!selectedPaths || selectedPaths.length === 0) {
         setState((prev) => ({
           ...prev,
           isLoading: false,
-          formErrors: { ...prev.formErrors, projectDirectoryField: "The selected path is not a directory." },
+          formErrors: { ...prev.formErrors, projectDirectoryField: "Please select at least one file or directory." },
         }));
         await showToast({
           style: Toast.Style.Failure,
-          title: "Invalid Path",
-          message: "Please select a valid directory.",
+          title: "Input Error",
+          message: "No files or directories selected.",
         });
         return;
       }
 
-      const dirName = path.basename(dirPath);
+      try {
+        // Check all paths exist and determine their types
+        const pathStats = await Promise.all(
+          selectedPaths.map(async (p) => {
+            const stats = await fs.stat(p);
+            return { path: p, isDirectory: stats.isDirectory(), isFile: stats.isFile() };
+          }),
+        );
 
-      // Always go to configuration step now
-      const nextStep = "configureGeneration";
+        // Determine derived root and processing mode
+        let derivedRoot: string;
+        let isMultiSelection = false;
 
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        projectDirectory: dirPath,
-        outputFileName: sanitizeFileName(`${dirName}_project_code.txt`),
-        currentStep: nextStep,
-        formErrors: {},
-      }));
-    } catch (e) {
-      const typedError = e as Error;
-      const errorMessage = typedError.message?.substring(0, 100) || "Unknown error";
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        formErrors: { ...prev.formErrors, projectDirectoryField: `Could not access path: ${errorMessage}` },
-      }));
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Access Error",
-        message: `Could not access path: ${errorMessage}`,
-      });
-    }
-  }, []);
+        if (selectedPaths.length === 1) {
+          const singlePath = pathStats[0];
+          if (singlePath.isDirectory) {
+            derivedRoot = singlePath.path;
+            // Single directory: process entire directory
+            isMultiSelection = false;
+          } else {
+            // Single file: use parent directory as root, process only this file
+            derivedRoot = path.dirname(singlePath.path);
+            isMultiSelection = true;
+          }
+        } else {
+          // Multiple paths: find common parent
+          derivedRoot = findCommonParent(selectedPaths);
+          isMultiSelection = true;
+        }
+
+        // Generate output filename based on root directory name
+        const rootName = path.basename(derivedRoot) || "project";
+        const dirName =
+          selectedPaths.length === 1 && pathStats[0].isDirectory ? path.basename(selectedPaths[0]) : rootName;
+
+        const nextStep = "configureGeneration";
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          projectDirectory: derivedRoot,
+          selectedFilePaths: selectedPaths, // Store all selected paths
+          processOnlySelectedFiles: isMultiSelection,
+          outputFileName: sanitizeFileName(`${dirName}_project_code.txt`),
+          currentStep: nextStep,
+          estimatedStats: null, // Reset stats to trigger recalculation
+          isCalculatingStats: false,
+          formErrors: {},
+        }));
+      } catch (e) {
+        const typedError = e as Error;
+        const errorMessage = typedError.message?.substring(0, 100) || "Unknown error";
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          formErrors: { ...prev.formErrors, projectDirectoryField: `Could not access path: ${errorMessage}` },
+        }));
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Access Error",
+          message: `Could not access path: ${errorMessage}`,
+        });
+      }
+    },
+    [findCommonParent],
+  );
 
   /**
    * Updates the processing mode based on user selection.
@@ -376,8 +536,32 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       });
       return;
     }
-    const parentDirectory = path.dirname(state.projectDirectory);
-    const outputFilePath = path.join(parentDirectory, finalOutputFileName);
+
+    // Determine output directory:
+    // - If processing multiple selected items: save in the common parent (projectDirectory)
+    // - If processing entire directory: save in parent directory (one level up)
+    const outputDirectory = state.processOnlySelectedFiles
+      ? state.projectDirectory // Common parent for multiple selections
+      : path.dirname(state.projectDirectory); // Parent directory for single directory
+    const outputFilePath = path.join(outputDirectory, finalOutputFileName);
+
+    // Validate that selectedFilePaths is set when processOnlySelectedFiles is true
+    if (state.processOnlySelectedFiles && (!state.selectedFilePaths || state.selectedFilePaths.length === 0)) {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        formErrors: {
+          ...prev.formErrors,
+          general: "No files or directories selected for processing.",
+        },
+      }));
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Configuration Error",
+        message: "No files or directories selected for processing.",
+      });
+      return;
+    }
 
     const processorConfig: FileProcessorConfig = {
       projectDirectory: state.projectDirectory,
@@ -398,46 +582,77 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
 
       await fs.writeFile(outputFilePath, projectCodeString, "utf-8");
 
+      // Copy to clipboard if requested
+      if (state.outputToClipboard) {
+        await Clipboard.copy(projectCodeString);
+      }
+
+      // Calculate estimated tokens for UI display
+      const estimatedTokens = estimateTokens(projectCodeString);
+      const fileSize = projectCodeString.length;
+
+      // Save generation result and move to results screen
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        progress: null,
+        generationResult: {
+          filePath: outputFilePath,
+          fileName: finalOutputFileName,
+          tokens: estimatedTokens,
+          size: fileSize,
+          copiedToClipboard: state.outputToClipboard,
+        },
+        currentStep: "showResults",
+      }));
+
       toast.style = Toast.Style.Success;
       toast.title = "Success!";
-      toast.message = `File "${finalOutputFileName}" generated in ${parentDirectory}.`;
-      toast.primaryAction = {
-        title: "Show in Finder",
-        shortcut: { modifiers: ["cmd", "shift"], key: "f" },
-        onAction: () => showInFinder(outputFilePath),
-      };
-      toast.secondaryAction = {
-        title: "Copy Path to Clipboard",
-        shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-        onAction: async () => {
-          await Action.CopyToClipboard({ content: outputFilePath });
-          await showToast(Toast.Style.Success, "Path Copied!");
-        },
-      };
-      popToRoot({ clearSearchBar: true });
+      toast.message = `File "${finalOutputFileName}" generated (~${estimatedTokens.toLocaleString()} tokens)`;
     } catch (e) {
       // Removed ':any'
       const typedError = e as Error;
-      const errorMessage = typedError.message?.substring(0, 150) || "Unknown generation error";
+      const errorMessage = typedError.message || "Unknown generation error";
+      const fullErrorMessage = `Generation failed: ${errorMessage}`;
       console.error("Generation Error:", e);
+      console.error("Error details:", {
+        projectDirectory: state.projectDirectory,
+        processOnlySelectedFiles: state.processOnlySelectedFiles,
+        selectedFilePaths: state.selectedFilePaths,
+        selectedFilePathsLength: state.selectedFilePaths?.length,
+      });
       setState((prev) => ({
         ...prev,
-        formErrors: { ...prev.formErrors, general: `Generation failed: ${errorMessage}` },
+        isLoading: false,
+        progress: null,
+        formErrors: { ...prev.formErrors, general: fullErrorMessage },
       }));
       if (toast) {
         toast.style = Toast.Style.Failure;
         toast.title = "Generation Failed";
-        toast.message = errorMessage.substring(0, 100) + (errorMessage.length > 100 ? "..." : "");
+        toast.message = errorMessage.substring(0, 150) + (errorMessage.length > 150 ? "..." : "");
       }
+      // Show additional error toast for visibility
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Generation Failed",
+        message: errorMessage.substring(0, 100) + (errorMessage.length > 100 ? "..." : ""),
+      });
     } finally {
-      setState((prev) => ({ ...prev, isLoading: false, progress: null }));
+      // Only set loading to false if not already set in catch block
+      setState((prev) => {
+        if (prev.isLoading) {
+          return { ...prev, isLoading: false, progress: null };
+        }
+        return prev;
+      });
     }
   }, [
     state.projectDirectory,
     state.outputFileName,
     state.maxFileSizeMbString,
-    state.additionalIgnorePatterns,
     state.includeAiInstructions,
+    state.outputToClipboard,
   ]);
 
   // Render loading state while checking Finder selection or during generation.
@@ -456,11 +671,15 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
 
   // Render directory selection form if no directory is confirmed yet.
   if (state.currentStep === "selectDirectory") {
-    const filePickerValue = state.pickerSelectedPath
-      ? [state.pickerSelectedPath]
-      : state.finderSelectedPath
-        ? [state.finderSelectedPath]
-        : [];
+    // Use pickerSelectedPaths if user has made changes, otherwise use finderSelectedPaths
+    const filePickerValue =
+      state.pickerSelectedPaths.length > 0
+        ? state.pickerSelectedPaths
+        : state.finderSelectedPaths.length > 0
+          ? state.finderSelectedPaths
+          : state.finderSelectedPath
+            ? [state.finderSelectedPath] // Fallback for backward compatibility
+            : [];
     return (
       <Form
         isLoading={state.isLoading} //isLoading for the form submission action.
@@ -474,7 +693,7 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           </ActionPanel>
         }
       >
-        <Form.Description text="Select the project directory for code generation." />
+        <Form.Description text="Select one or multiple files and directories for code generation." />
 
         {/* Show selected files if any */}
         {state.finderSelectionInfo?.hasFiles && state.finderSelectionInfo.fileNames.length > 0 && (
@@ -545,18 +764,20 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
 
         <Form.FilePicker
           id="projectDirectoryField" // This ID connects the field to the form submission values.
-          title="Project Directory"
-          info="Choose the root directory of the project."
-          allowMultipleSelection={false}
-          canChooseDirectories
-          canChooseFiles={false}
+          title="Files or Directories"
+          info="Select one or multiple files and directories. Directories will be processed recursively."
+          allowMultipleSelection={true}
+          canChooseDirectories={true}
+          canChooseFiles={true}
           value={filePickerValue} // Controlled component based on derived state.
           error={state.formErrors.projectDirectoryField}
           onChange={(newValue) => {
-            const newPath = newValue.length > 0 ? newValue[0] : null;
             setState((prev) => ({
               ...prev,
-              pickerSelectedPath: newPath, // Update picker path on user interaction.
+              pickerSelectedPaths: newValue || [], // Update picker paths on user interaction.
+              // Clear finder selection when user manually changes selection
+              finderSelectedPaths: newValue && newValue.length > 0 ? [] : prev.finderSelectedPaths,
+              finderSelectedPath: newValue && newValue.length > 0 ? null : prev.finderSelectedPath,
               formErrors: { ...prev.formErrors, projectDirectoryField: undefined }, // Clear error on change.
             }));
           }}
@@ -588,7 +809,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
                   currentStep: "selectDirectory",
                   projectDirectory: null,
                   finderSelectionInfo: null,
-                  pickerSelectedPath: null,
+                  finderSelectedPaths: [],
+                  pickerSelectedPaths: [],
                   formErrors: {},
                 }));
               }}
@@ -599,9 +821,16 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       >
         <Form.Description text={`Selected Project: ${state.projectDirectory}`} />
         {state.processOnlySelectedFiles && (
-          <Form.Description text={`Processing Mode: Selected files only (${state.selectedFilePaths.length} files)`} />
+          <Form.Description text={`Processing Mode: Selected files only (${state.selectedFilePaths.length} items)`} />
         )}
         {!state.processOnlySelectedFiles && <Form.Description text="Processing Mode: Entire directory" />}
+        {state.isCalculatingStats && <Form.Description text="Calculating preview statistics..." />}
+        {state.estimatedStats && !state.isCalculatingStats && (
+          <>
+            <Form.Description text={`Estimated size: ${(state.estimatedStats.size / 1024 / 1024).toFixed(2)} MB`} />
+            <Form.Description text={`Estimated tokens: ~${state.estimatedStats.tokens.toLocaleString()}`} />
+          </>
+        )}
         <Form.Separator />
         <Form.TextField
           id="outputFileName"
@@ -610,7 +839,7 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           value={state.outputFileName}
           error={state.formErrors.outputFileName}
           onChange={(newValue) => {
-            setState((prev) => ({ ...prev, outputFileName: newValue }));
+            setState((prev) => ({ ...prev, outputFileName: newValue, estimatedStats: null }));
             if (state.formErrors.outputFileName)
               setState((prev) => ({ ...prev, formErrors: { ...prev.formErrors, outputFileName: undefined } }));
           }}
@@ -623,7 +852,7 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           value={state.maxFileSizeMbString}
           error={state.formErrors.maxFileSizeMbString}
           onChange={(newValue) => {
-            setState((prev) => ({ ...prev, maxFileSizeMbString: newValue }));
+            setState((prev) => ({ ...prev, maxFileSizeMbString: newValue, estimatedStats: null }));
             if (state.formErrors.maxFileSizeMbString)
               setState((prev) => ({ ...prev, formErrors: { ...prev.formErrors, maxFileSizeMbString: undefined } }));
           }}
@@ -652,8 +881,17 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           id="includeAiInstructions"
           label="Include AI Instructions"
           value={state.includeAiInstructions}
-          onChange={(newValue) => setState((prev) => ({ ...prev, includeAiInstructions: newValue }))}
+          onChange={(newValue) =>
+            setState((prev) => ({ ...prev, includeAiInstructions: newValue, estimatedStats: null }))
+          }
           info="Includes special <ai_instruction> and <ai_analysis_guide> tags in the output, which can help AI models better process the code."
+        />
+        <Form.Checkbox
+          id="outputToClipboard"
+          label="Also copy to clipboard"
+          value={state.outputToClipboard}
+          onChange={(newValue) => setState((prev) => ({ ...prev, outputToClipboard: newValue }))}
+          info="Copy the generated content to clipboard in addition to saving the file"
         />
         {state.formErrors.general && (
           <>
@@ -662,6 +900,71 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           </>
         )}
       </Form>
+    );
+  }
+
+  // Render results screen after successful generation
+  if (state.currentStep === "showResults" && state.generationResult) {
+    const result = state.generationResult;
+    const sizeMB = (result.size / 1024 / 1024).toFixed(2);
+    const sizeKB = (result.size / 1024).toFixed(2);
+
+    const markdown = `# Generation Complete! ✅
+
+## File Information
+
+**File Name:** \`${result.fileName}\`
+
+**Location:** \`${result.filePath}\`
+
+**Size:** ${sizeMB} MB (${sizeKB} KB)
+
+**Estimated Tokens:** ~${result.tokens.toLocaleString()}
+
+**Copied to Clipboard:** ${result.copiedToClipboard ? "Yes ✅" : "No"}
+
+---
+
+## Actions
+
+Use the actions below to open the file or copy its path.`;
+
+    return (
+      <Detail
+        markdown={markdown}
+        actions={
+          <ActionPanel>
+            <Action title="Show in Finder" icon={Icon.Finder} onAction={() => showInFinder(result.filePath)} />
+            <Action
+              title="Copy Path to Clipboard"
+              icon={Icon.Clipboard}
+              onAction={async () => {
+                await Clipboard.copy(result.filePath);
+                await showToast(Toast.Style.Success, "Path Copied!");
+              }}
+            />
+            <Action
+              title="Generate Another"
+              icon={Icon.ArrowLeft}
+              onAction={() => {
+                setState((prev) => ({
+                  ...prev,
+                  currentStep: "selectDirectory",
+                  projectDirectory: null,
+                  finderSelectionInfo: null,
+                  finderSelectedPaths: [],
+                  pickerSelectedPaths: [],
+                  selectedFilePaths: [],
+                  processOnlySelectedFiles: false,
+                  generationResult: null,
+                  estimatedStats: null,
+                  formErrors: {},
+                }));
+              }}
+            />
+          </ActionPanel>
+        }
+      />
     );
   }
 

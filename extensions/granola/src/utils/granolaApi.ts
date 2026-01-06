@@ -1,7 +1,10 @@
 import { showFailureToast } from "@raycast/utils";
+import { toError } from "./errorUtils";
 import getAccessToken from "./getAccessToken";
 import getUserInfo from "./getUserInfo";
 import { parseEventTime } from "./documentMatching";
+import { convertDocumentToMarkdown } from "./convertJsonNodes";
+import { PanelsByDocId, PanelsByPanelId, DocumentStructure, Document } from "./types";
 import crypto from "crypto";
 
 interface UserInfo {
@@ -177,6 +180,24 @@ async function createHeaders(extraHeaders: Record<string, string> = {}): Promise
 /**
  * Centralized error handling for API responses
  */
+function parseRetryAfterMs(value: string | null): number | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const seconds = Number(trimmed);
+  if (!Number.isNaN(seconds)) {
+    return Math.max(0, seconds * 1000);
+  }
+
+  const dateMs = Date.parse(trimmed);
+  if (!Number.isNaN(dateMs)) {
+    return Math.max(0, dateMs - Date.now());
+  }
+
+  return null;
+}
+
 async function handleApiError(response: Response, operationName: string): Promise<never> {
   let errorMessage = `${operationName} failed: ${response.statusText}`;
 
@@ -201,7 +222,18 @@ async function handleApiError(response: Response, operationName: string): Promis
     // If reading the body fails, fall back to status text
   }
 
-  throw new Error(errorMessage);
+  const error = new Error(errorMessage) as Error & { status?: number; statusText?: string; retryAfterMs?: number };
+  error.status = response.status;
+  error.statusText = response.statusText;
+
+  if (response.status === 429) {
+    const retryAfterMs = parseRetryAfterMs(response.headers.get("Retry-After"));
+    if (retryAfterMs !== null) {
+      error.retryAfterMs = retryAfterMs;
+    }
+  }
+
+  throw error;
 }
 
 /**
@@ -224,8 +256,10 @@ function isCompleteJson(str: string): boolean {
  * Safely parses streaming chunks with improved delimiter and validation
  */
 function parseStreamingChunks(chunk: string): string[] {
-  // Use a more robust delimiter that's unlikely to appear in content
-  const chunks = chunk.split(API_CONFIG.CHUNK_DELIMITER);
+  const delimiter = chunk.includes("-----CHUNK_BOUNDARY-----")
+    ? "-----CHUNK_BOUNDARY-----"
+    : API_CONFIG.CHUNK_DELIMITER;
+  const chunks = chunk.split(delimiter);
   const validChunks: string[] = [];
 
   for (const chunkPart of chunks) {
@@ -459,6 +493,7 @@ async function finalizeDocumentWithTitle(documentId: string, title: string): Pro
       updated_at: getISOTimestamp(),
       meeting_end_count: 1,
       title,
+      show_private_notes: false,
     }),
   });
 
@@ -474,6 +509,7 @@ async function generateAISummaryWithStreaming(
   transcript: string,
   title: string,
   onContentUpdate?: (content: string) => void,
+  signal?: AbortSignal,
 ): Promise<string> {
   const headers = await createHeaders();
 
@@ -487,6 +523,7 @@ async function generateAISummaryWithStreaming(
         calendar_event_title: title,
       },
     }),
+    signal,
   });
 
   if (!response.ok) {
@@ -501,28 +538,47 @@ async function generateAISummaryWithStreaming(
   let summaryContent = "";
   let done = false;
 
-  while (!done) {
-    const { value, done: readerDone } = await reader.read();
-    done = readerDone;
+  try {
+    while (!done) {
+      // Check if cancelled before reading
+      if (signal?.aborted) {
+        reader.cancel();
+        throw new Error("Operation cancelled");
+      }
 
-    if (value) {
-      const chunk = new TextDecoder().decode(value);
-      const validChunks = parseStreamingChunks(chunk);
+      const { value, done: readerDone } = await reader.read();
+      done = readerDone;
 
-      for (const chunkPart of validChunks) {
-        try {
-          const data = JSON.parse(chunkPart);
-          const deltaContent = data.choices?.[0]?.delta?.content || "";
-          if (deltaContent) {
-            summaryContent += deltaContent;
-            // Stream the content to the UI
-            const cleanedContent = cleanupContent(summaryContent, "display");
-            onContentUpdate?.(cleanedContent);
+      // Check again after read
+      if (signal?.aborted) {
+        reader.cancel();
+        throw new Error("Operation cancelled");
+      }
+
+      if (value) {
+        const chunk = new TextDecoder().decode(value);
+        const validChunks = parseStreamingChunks(chunk);
+
+        for (const chunkPart of validChunks) {
+          try {
+            const data = JSON.parse(chunkPart);
+            const deltaContent = data.choices?.[0]?.delta?.content || "";
+            if (deltaContent) {
+              summaryContent += deltaContent;
+              // Stream the content to the UI
+              const cleanedContent = cleanupContent(summaryContent, "display");
+              onContentUpdate?.(cleanedContent);
+            }
+          } catch (e) {
+            // Skip invalid JSON chunks
           }
-        } catch (e) {
-          // Skip invalid JSON chunks
         }
       }
+    }
+  } finally {
+    // Ensure reader is cancelled if operation was aborted
+    if (signal?.aborted) {
+      reader.cancel();
     }
   }
 
@@ -618,42 +674,58 @@ async function updateLastViewedTimestamp(panelId: string): Promise<void> {
 export async function createNoteFromTranscript(
   transcript: string,
   onProgress?: (progress: CreateNoteProgress) => void,
+  signal?: AbortSignal,
 ): Promise<CreateNoteResult> {
   const userInfo = await getUserInfo();
 
   try {
     // Step 1: Create a new document
+    if (signal?.aborted) throw new Error("Operation cancelled");
     onProgress?.({ step: "setup" });
     const documentId = crypto.randomUUID();
     await createDocument(documentId, userInfo);
 
     // Step 1b: Update document for transcription
+    if (signal?.aborted) throw new Error("Operation cancelled");
     await updateDocumentForTranscription(documentId);
 
     // Step 2: Insert transcript chunks
+    if (signal?.aborted) throw new Error("Operation cancelled");
     onProgress?.({ step: "processing" });
     await insertTranscriptChunks(transcript, documentId);
 
     // Step 3: Generate title
+    if (signal?.aborted) throw new Error("Operation cancelled");
     onProgress?.({ step: "generating-title" });
     const title = await generateTitle(transcript, documentId, userInfo);
 
     // Step 4: Finalize document with title
+    if (signal?.aborted) throw new Error("Operation cancelled");
     await finalizeDocumentWithTitle(documentId, title);
 
     // Step 5: Generate AI summary with streaming
+    if (signal?.aborted) throw new Error("Operation cancelled");
     onProgress?.({ step: "streaming-summary", title, streamingContent: "" });
-    const summaryContent = await generateAISummaryWithStreaming(transcript, title, (content) => {
-      onProgress?.({ step: "streaming-summary", title, streamingContent: content });
-    });
+    const summaryContent = await generateAISummaryWithStreaming(
+      transcript,
+      title,
+      (content) => {
+        if (!signal?.aborted) {
+          onProgress?.({ step: "streaming-summary", title, streamingContent: content });
+        }
+      },
+      signal,
+    );
 
     // Step 6: Create and update summary panel
+    if (signal?.aborted) throw new Error("Operation cancelled");
     onProgress?.({ step: "finalizing", title });
     const panelId = generateUUID();
     await createSummaryPanel(documentId, panelId);
     await updateSummaryPanel(documentId, panelId, summaryContent);
 
     // Step 7: Update last_viewed_at timestamp
+    if (signal?.aborted) throw new Error("Operation cancelled");
     await updateLastViewedTimestamp(panelId);
 
     onProgress?.({ step: "complete", title });
@@ -668,11 +740,11 @@ export async function createNoteFromTranscript(
       summaryContent: summaryContent + linkHtml,
     };
   } catch (error) {
-    showFailureToast({
-      title: "Failed to create note",
-      message: String(error),
-    });
-    throw error;
+    // Don't show error toast if operation was cancelled
+    if (!signal?.aborted) {
+      showFailureToast(toError(error), { title: "Failed to create note" });
+    }
+    throw toError(error);
   }
 }
 
@@ -718,6 +790,14 @@ function getISOTimestampOffset(timestamp: number): string {
 export interface NotionSaveResult {
   status: string;
   page_url: string;
+}
+
+export interface NotionSaveRetryOptions {
+  signal?: AbortSignal;
+  maxRetries?: number;
+  baseDelayMs?: number;
+  maxDelayMs?: number;
+  onRetry?: (attempt: number, delayMs: number) => void;
 }
 
 export interface DocumentMetadataRequest {
@@ -777,7 +857,7 @@ export interface DocumentMetadataResponse {
   sharing_link_visibility: string;
 }
 
-export async function saveToNotion(documentId: string): Promise<NotionSaveResult> {
+export async function saveToNotion(documentId: string, signal?: AbortSignal): Promise<NotionSaveResult> {
   const headers = await createHeaders();
 
   const response = await fetch(`${API_CONFIG.API_URL}/save-to-notion`, {
@@ -786,6 +866,7 @@ export async function saveToNotion(documentId: string): Promise<NotionSaveResult
     body: JSON.stringify({
       document_id: documentId,
     }),
+    signal,
   });
 
   if (!response.ok) {
@@ -799,6 +880,85 @@ export async function saveToNotion(documentId: string): Promise<NotionSaveResult
   }
 
   return result;
+}
+
+const isRateLimitError = (
+  error: unknown,
+): error is Error & { status?: number; message?: string; retryAfterMs?: number } => {
+  if (!error || typeof error !== "object") return false;
+  const err = error as { status?: number; message?: string };
+  if (err.status === 429) return true;
+  const message = typeof err.message === "string" ? err.message.toLowerCase() : "";
+  return (
+    message.includes("rate limit") ||
+    message.includes("rate_limit") ||
+    message.includes("ratelimit") ||
+    message.includes("too many requests")
+  );
+};
+
+const delay = (ms: number, signal?: AbortSignal): Promise<void> => {
+  if (!signal) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      cleanup();
+      const abortError = new Error("The operation was aborted.");
+      (abortError as Error & { name?: string }).name = "AbortError";
+      reject(abortError);
+    };
+    const cleanup = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", onAbort);
+    };
+
+    if (signal.aborted) {
+      onAbort();
+      return;
+    }
+
+    signal.addEventListener("abort", onAbort);
+  });
+};
+
+export async function saveToNotionWithRetry(
+  documentId: string,
+  options: NotionSaveRetryOptions = {},
+): Promise<NotionSaveResult> {
+  const { signal, maxRetries = 2, baseDelayMs = 1000, maxDelayMs = 10000, onRetry } = options;
+  let attempt = 0;
+
+  // Retry only on rate limits; other errors surface immediately.
+  for (;;) {
+    try {
+      return await saveToNotion(documentId, signal);
+    } catch (error) {
+      if (!isRateLimitError(error)) {
+        throw error;
+      }
+      if (attempt >= maxRetries) {
+        throw error;
+      }
+
+      const retryAfterMs =
+        typeof error.retryAfterMs === "number" && !Number.isNaN(error.retryAfterMs) ? error.retryAfterMs : null;
+      const delayMs =
+        retryAfterMs && retryAfterMs > 0 ? retryAfterMs : Math.min(maxDelayMs, baseDelayMs * Math.pow(2, attempt));
+
+      attempt += 1;
+      if (onRetry) {
+        onRetry(attempt, delayMs);
+      }
+
+      await delay(delayMs, signal);
+    }
+  }
 }
 
 /**
@@ -831,6 +991,165 @@ export async function getDocumentMetadata(documentId: string): Promise<DocumentM
 }
 
 /**
+ * Get notes_markdown for a specific document (loaded on-demand)
+ * Uses get-documents-batch endpoint for efficient single-document fetch
+ * @param documentId - The ID of the document to get notes_markdown for
+ * @returns A promise that resolves with the notes_markdown string
+ */
+export async function getDocumentNotesMarkdown(documentId: string): Promise<string> {
+  const headers = await createHeaders();
+
+  const sanitizeNotesString = (value?: string): string => {
+    if (!value) return "";
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (trimmed.toLowerCase() === "undefined") return "";
+    return value;
+  };
+
+  const extractNotesMarkdown = (doc?: Document): string => {
+    if (!doc) return "";
+
+    const notesMarkdown = sanitizeNotesString(doc.notes_markdown);
+    if (notesMarkdown) {
+      return notesMarkdown;
+    }
+
+    // Some documents may only have the structured notes tree populated
+    if (doc.notes && Array.isArray(doc.notes.content) && doc.notes.content.length > 0) {
+      const markdown = sanitizeNotesString(convertDocumentToMarkdown(doc.notes as unknown as DocumentStructure));
+      if (markdown) {
+        return markdown;
+      }
+    }
+
+    const notesPlain = sanitizeNotesString(doc.notes_plain);
+    if (notesPlain) {
+      return notesPlain;
+    }
+
+    return "";
+  };
+
+  // Try get-documents-batch first (more efficient for single document)
+  try {
+    const batchResponse = await fetch(`${API_CONFIG.API_URL}/get-documents-batch`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        document_ids: [documentId],
+      }),
+    });
+
+    if (batchResponse.ok) {
+      const batchResult = (await batchResponse.json()) as { docs?: Document[] };
+      const doc = batchResult.docs?.[0];
+      const markdown = extractNotesMarkdown(doc);
+      if (markdown) return markdown;
+    }
+  } catch {
+    // Fall through to alternative method
+  }
+
+  // Fallback: Return empty string instead of fetching all documents
+  // Fetching all documents is too expensive and can cause memory issues
+  return "";
+}
+
+/**
+ * Batch fetch notes_markdown for multiple documents at once
+ * Much more efficient than calling getDocumentNotesMarkdown for each document
+ * @param documentIds - Array of document IDs to fetch notes for
+ * @param batchSize - Number of documents per API request (default: 20)
+ * @returns A promise that resolves with a map of documentId -> notes_markdown
+ */
+export async function getDocumentNotesMarkdownBatch(
+  documentIds: string[],
+  batchSize: number = 20,
+): Promise<Record<string, string>> {
+  const headers = await createHeaders();
+  const results: Record<string, string> = {};
+
+  const sanitizeNotesString = (value?: string): string => {
+    if (!value) return "";
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (trimmed.toLowerCase() === "undefined") return "";
+    return value;
+  };
+
+  const extractNotesMarkdown = (doc?: Document): string => {
+    if (!doc) return "";
+
+    const notesMarkdown = sanitizeNotesString(doc.notes_markdown);
+    if (notesMarkdown) {
+      return notesMarkdown;
+    }
+
+    if (doc.notes && Array.isArray(doc.notes.content) && doc.notes.content.length > 0) {
+      const markdown = sanitizeNotesString(convertDocumentToMarkdown(doc.notes as unknown as DocumentStructure));
+      if (markdown) {
+        return markdown;
+      }
+    }
+
+    const notesPlain = sanitizeNotesString(doc.notes_plain);
+    if (notesPlain) {
+      return notesPlain;
+    }
+
+    return "";
+  };
+
+  // Process in batches
+  for (let i = 0; i < documentIds.length; i += batchSize) {
+    const batch = documentIds.slice(i, i + batchSize);
+
+    try {
+      const batchResponse = await fetch(`${API_CONFIG.API_URL}/get-documents-batch`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          document_ids: batch,
+        }),
+      });
+
+      if (batchResponse.ok) {
+        const batchResult = (await batchResponse.json()) as { docs?: Document[] };
+        if (batchResult.docs) {
+          for (const doc of batchResult.docs) {
+            if (doc.id) {
+              results[doc.id] = extractNotesMarkdown(doc);
+            }
+          }
+        }
+      }
+    } catch {
+      // On error, set empty strings for this batch
+      for (const docId of batch) {
+        if (!(docId in results)) {
+          results[docId] = "";
+        }
+      }
+    }
+
+    // Minimal delay between batches
+    if (i + batchSize < documentIds.length) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  }
+
+  // Ensure all requested IDs have a result
+  for (const docId of documentIds) {
+    if (!(docId in results)) {
+      results[docId] = "";
+    }
+  }
+
+  return results;
+}
+
+/**
  * Get all documents accessible to the user
  */
 export async function getDocumentSet(): Promise<DocumentSetResponse> {
@@ -847,6 +1166,122 @@ export async function getDocumentSet(): Promise<DocumentSetResponse> {
   }
 
   return (await response.json()) as DocumentSetResponse;
+}
+
+/**
+ * Get document panels for a specific document
+ * @param documentId - The ID of the document to get panels for
+ * @returns A promise that resolves with the panels data
+ */
+export async function getDocumentPanels(documentId: string, signal?: AbortSignal): Promise<PanelsByDocId | null> {
+  const headers = await createHeaders();
+
+  const response = await fetch(`${API_CONFIG.API_URL}/get-document-panels`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      document_id: documentId,
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    await handleApiError(response, "Get document panels");
+  }
+
+  const result = (await response.json()) as unknown;
+
+  // Handle different response formats
+  // API might return: { panels: {...} } or { document_panels: {...} } or directly the panels object
+  if (result && typeof result === "object") {
+    const resultObj = result as Record<string, unknown>;
+
+    // Check for nested panels structure
+    if (resultObj.panels && typeof resultObj.panels === "object") {
+      return { [documentId]: resultObj.panels as PanelsByPanelId } as PanelsByDocId;
+    }
+    if (resultObj.document_panels && typeof resultObj.document_panels === "object") {
+      return { [documentId]: resultObj.document_panels as PanelsByPanelId } as PanelsByDocId;
+    }
+
+    // If result is directly panels structure, wrap it
+    if (Array.isArray(resultObj) || Object.keys(resultObj).length > 0) {
+      // Convert array of panels to PanelsByDocId format
+      if (Array.isArray(resultObj)) {
+        const panelsByPanelId: PanelsByPanelId = {};
+        for (const panel of resultObj) {
+          if (panel && typeof panel === "object" && "id" in panel) {
+            const panelId = (panel as { id: string }).id;
+            panelsByPanelId[panelId] = {
+              original_content: (panel as { original_content?: string }).original_content || "",
+              content: (panel as { content?: unknown }).content as DocumentStructure | undefined,
+            };
+          }
+        }
+        return { [documentId]: panelsByPanelId } as PanelsByDocId;
+      }
+
+      // Assume it's already in PanelsByPanelId format
+      return { [documentId]: resultObj as PanelsByPanelId } as PanelsByDocId;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Batch fetch document panels for multiple documents in parallel
+ * Processes requests in batches to avoid overwhelming the API
+ * @param documentIds - Array of document IDs to fetch panels for
+ * @param batchSize - Number of parallel requests per batch (default: 10)
+ * @param onProgress - Optional callback for progress updates
+ * @returns A promise that resolves with all panels data
+ */
+export async function getDocumentPanelsBatch(
+  documentIds: string[],
+  batchSize: number = 15,
+  onProgress?: (processed: number, total: number) => void,
+): Promise<PanelsByDocId> {
+  const allPanels: PanelsByDocId = {};
+  let processedCount = 0;
+
+  // Process in batches to avoid overwhelming the API
+  for (let i = 0; i < documentIds.length; i += batchSize) {
+    const batch = documentIds.slice(i, i + batchSize);
+
+    // Fetch all panels in the batch in parallel
+    const batchPromises = batch.map(async (documentId) => {
+      try {
+        const panels = await getDocumentPanels(documentId);
+        return { documentId, panels };
+      } catch (error) {
+        // If a panel fetch fails, log but continue with other documents
+        console.warn(`Failed to fetch panels for document ${documentId}:`, error);
+        return { documentId, panels: null };
+      }
+    });
+
+    const batchResults = await Promise.all(batchPromises);
+
+    // Merge results into allPanels
+    for (const { documentId, panels } of batchResults) {
+      if (panels && panels[documentId]) {
+        allPanels[documentId] = panels[documentId];
+      }
+    }
+
+    processedCount += batch.length;
+    if (onProgress) {
+      onProgress(processedCount, documentIds.length);
+    }
+
+    // Minimal delay between batches
+    if (i + batchSize < documentIds.length) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  }
+
+  return allPanels;
 }
 
 /**

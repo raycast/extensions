@@ -5,6 +5,7 @@ import { getTranscript } from "../utils/fetchData";
 import { getPanelId } from "../utils/getPanelId";
 import { getFolderInfoForAI, getFoldersWithCache } from "../utils/folderHelpers";
 import { getDocumentsList } from "../utils/fetchData";
+import { toError } from "../utils/errorUtils";
 
 type Input = {
   /**
@@ -177,7 +178,7 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
     try {
       return await getFolderInfoForAI();
     } catch (error) {
-      showFailureToast({ title: "Failed to fetch folders", message: String(error) });
+      showFailureToast(toError(error), { title: "Failed to fetch folders" });
       return [];
     }
   }
@@ -202,7 +203,7 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
         folderDocumentIds = folder.document_ids;
       }
     } catch (error) {
-      showFailureToast({ title: "Failed to fetch folder", message: String(error) });
+      showFailureToast(toError(error), { title: "Failed to fetch folder" });
     }
   }
 

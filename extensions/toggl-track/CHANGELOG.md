@@ -1,5 +1,10 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2026-01-05
+
+- Fixed `Toast` causing error when MenuBar refreshed (ref: [Issue #23821](https://github.com/raycast/extensions/issues/23821))
+- Modernized extension to use latest Raycast API
+
 ## [Enhancements] - 2025-11-24
 
 - Add Windows support

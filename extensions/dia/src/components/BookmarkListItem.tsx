@@ -1,10 +1,20 @@
-import { Action, ActionPanel, closeMainWindow, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { openNewTab } from "../dia";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getSafeFavicon } from "../utils";
 import { BookmarkItem } from "../bookmarks/types";
 
-export function BookmarkListItem({ item, onNavigate }: { item: BookmarkItem; onNavigate: (idPath: string[]) => void }) {
+export function BookmarkListItem({
+  item,
+  onNavigate,
+}: {
+  item: BookmarkItem;
+  onNavigate?: (idPath: string[]) => void;
+}) {
   if (item.type === "folder") {
+    // If no navigation handler, don't render folders
+    if (!onNavigate) {
+      return null;
+    }
+
     const childCount = item.children?.length || 0;
     return (
       <List.Item
@@ -33,22 +43,7 @@ export function BookmarkListItem({ item, onNavigate }: { item: BookmarkItem; onN
         icon={getSafeFavicon(item.url)}
         actions={
           <ActionPanel title={item.name}>
-            <Action
-              title="Open in Dia"
-              icon={Icon.Globe}
-              onAction={async () => {
-                if (!item.url) {
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "No URL found",
-                  });
-                  return;
-                }
-
-                await openNewTab(item.url);
-                await closeMainWindow();
-              }}
-            />
+            <Action.Open icon={Icon.Globe} title="Open Tab" target={item.url} application="company.thebrowser.dia" />
             <Action.OpenInBrowser url={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             <Action.CopyToClipboard title="Copy URL" content={item.url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
             <Action.CopyToClipboard

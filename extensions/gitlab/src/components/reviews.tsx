@@ -31,7 +31,7 @@ export function ReviewList() {
     <List
       searchBarPlaceholder="Filter Reviews by name..."
       isLoading={isLoading}
-      searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
+      searchBarAccessory={<MyProjectsDropdown onChange={setProject} storeValue={true} />}
       isShowingDetail={getListDetailsPreference()}
     >
       {mrs?.map((mr) => (

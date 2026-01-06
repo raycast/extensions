@@ -1,5 +1,5 @@
 import { Icon, List } from "@raycast/api";
-import { SortBy } from "@/types";
+import type { SortBy } from "@/types";
 
 type SortingDropDownProps = {
   setSortBy: (sortBy: SortBy) => void;

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Atono MCP Server] - 2025-12-08
+
+Add official Atono MCP Server to registry to manage projects
+
 ## [Update Nuxt MCP Server URL] - 2025-11-17
 
 ## [Update Nuxt UI MCP Server URL] - 2025-09-23

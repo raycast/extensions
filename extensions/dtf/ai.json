@@ -1,0 +1,166 @@
+{
+  "instructions": "You are helping users browse DTF.ru, a Russian gaming and entertainment portal covering games, movies, TV shows, anime, and tech news. When asked about news, popular content, or searching for posts, use the appropriate tools. When summarizing multiple posts, group them by topic and highlight the most discussed ones (by comments and views). Include links to posts when relevant.",
+  "evals": [
+    {
+      "input": "@dtf What are the main news today?",
+      "expected": [
+        { "callsTool": "get-news" },
+        { "meetsCriteria": "Returns a summary of today's news from DTF" }
+      ]
+    },
+    {
+      "input": "@dtf What are the latest news?",
+      "expected": [
+        { "callsTool": "get-news" },
+        { "meetsCriteria": "Returns news from DTF" }
+      ]
+    },
+    {
+      "input": "@dtf What's popular this week?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-popular-posts",
+            "arguments": { "period": "week" }
+          }
+        },
+        { "meetsCriteria": "Returns popular posts from the past week" }
+      ]
+    },
+    {
+      "input": "@dtf Hottest posts this month",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-popular-posts",
+            "arguments": { "period": "month" }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dtf What's trending right now?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-popular-posts",
+            "arguments": { "period": "day" }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dtf Find posts about Baldur's Gate 3",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-posts",
+            "arguments": {
+              "query": { "includes": "Baldur" }
+            }
+          }
+        },
+        { "meetsCriteria": "Returns posts about Baldur's Gate 3" }
+      ]
+    },
+    {
+      "input": "@dtf What are people saying about PlayStation 5?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-posts",
+            "arguments": {
+              "query": { "includes": "PlayStation" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dtf What categories are available?",
+      "expected": [
+        { "callsTool": "get-topics" },
+        { "meetsCriteria": "Returns list of available topics on DTF" }
+      ]
+    },
+    {
+      "input": "@dtf Show me latest posts about games",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-topic-posts",
+            "arguments": {
+              "topic": { "includes": "game" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dtf What's new in movies category?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-topic-posts",
+            "arguments": {
+              "topic": { "includes": "movie" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dtf Give me a news digest for today",
+      "expected": [
+        { "callsTool": "get-news" },
+        { "meetsCriteria": "Provides a digest/summary of today's news grouped by topic" }
+      ]
+    },
+    {
+      "input": "@dtf Top 5 most discussed posts today",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-popular-posts",
+            "arguments": { "period": "day", "count": 5 }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dtf What's fresh on DTF?",
+      "expected": [
+        { "callsTool": "get-fresh-posts" },
+        { "meetsCriteria": "Returns fresh/new posts from DTF" }
+      ]
+    },
+    {
+      "input": "@dtf Show me new posts with good ratings",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-fresh-posts",
+            "arguments": { "filter": "from5" }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dtf Latest user submissions",
+      "expected": [
+        { "callsTool": "get-fresh-posts" }
+      ]
+    },
+    {
+      "input": "@dtf Fresh posts with +10 rating",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-fresh-posts",
+            "arguments": { "filter": "from10" }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,26 +1,57 @@
 import { Action, ActionPanel, Detail, LaunchProps } from "@raycast/api";
 import crypto from "crypto";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useLocalStorage } from "@raycast/utils";
+
+type HistoryEntry = {
+  port: number;
+  createdAt: string;
+  updatedAt: string;
+  isEdited?: boolean;
+};
+
+function getEditedPorts(history: Record<string, HistoryEntry>, excludeProject: string): Set<number> {
+  const editedPorts = new Set<number>();
+  for (const [name, entry] of Object.entries(history)) {
+    if (name !== excludeProject && entry.isEdited) {
+      editedPorts.add(entry.port);
+    }
+  }
+  return editedPorts;
+}
+
+function shiftPort(basePort: number, editedPorts: Set<number>): number {
+  let port = basePort;
+  let attempts = 0;
+  const maxAttempts = 9000; // Full range of possible ports
+
+  while (editedPorts.has(port) && attempts < maxAttempts) {
+    port = port >= 9999 ? 1000 : port + 1;
+    attempts++;
+  }
+
+  return port;
+}
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.GeneratePort }>) {
   const { projectName } = props.arguments;
 
   const hash = crypto.createHash("md5").update(projectName).digest("hex");
   const intVal = parseInt(hash.substring(0, 8), 16);
-  const port = 1000 + (intVal % 9000);
-
-  type HistoryEntry = {
-    port: number;
-    createdAt: string;
-    updatedAt: string;
-  };
+  const basePort = 1000 + (intVal % 9000);
 
   const {
     value: history,
     setValue: setHistory,
     isLoading: isHistoryLoading,
   } = useLocalStorage<Record<string, HistoryEntry>>("port-history-v1", {});
+
+  // Calculate final port, shifting if it collides with an edited port
+  const port = useMemo(() => {
+    if (isHistoryLoading || !history) return basePort;
+    const editedPorts = getEditedPorts(history, projectName);
+    return shiftPort(basePort, editedPorts);
+  }, [basePort, history, isHistoryLoading, projectName]);
 
   const wroteRef = useRef(false);
 
@@ -32,7 +63,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
     const existing = currentHistory[projectName];
     const createdAt = existing?.createdAt ?? now;
 
-    const shouldWrite = !existing || existing.port !== port || existing.updatedAt !== now;
+    // Don't overwrite if the user has manually edited this port
+    if (existing?.isEdited) return;
+
+    const shouldWrite = !existing || existing.port !== port;
     if (!shouldWrite) return;
 
     const next: Record<string, HistoryEntry> = {

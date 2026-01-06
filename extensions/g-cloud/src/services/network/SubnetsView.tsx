@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { NetworkService, Subnet, VPC } from "./NetworkService";
 import { getAllRegions, getRegionByName } from "../../utils/regions";
 
@@ -348,25 +347,41 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
     secondaryRanges?: string;
   }) {
     if (!values.name) {
-      showFailureToast("Please enter a subnet name");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Please enter a subnet name",
+      });
       return;
     }
 
     if (!values.ipRange) {
-      showFailureToast("IP Range is required");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "IP Range is required",
+      });
       return;
     }
 
     const ipRangeValidation = isValidCIDR(values.ipRange);
     if (!ipRangeValidation.valid) {
-      showFailureToast(ipRangeValidation.error || "Invalid IP range format");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: ipRangeValidation.error || "Invalid IP range format",
+      });
       return;
     }
 
     if (values.secondaryRanges) {
       const validation = validateSecondaryRanges(values.secondaryRanges);
       if (!validation.valid) {
-        showFailureToast(validation.error || "Invalid secondary range format");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Validation Error",
+          message: validation.error || "Invalid secondary range format",
+        });
         return;
       }
     }
@@ -398,7 +413,11 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
 
       if (!success) {
         loadingToast.hide();
-        showFailureToast("Failed to create subnet");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to create subnet",
+          message: "Subnet creation failed",
+        });
         return;
       }
 
@@ -416,7 +435,11 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
     } catch (error: unknown) {
       console.error("Error creating subnet:", error);
       loadingToast.hide();
-      showFailureToast(error instanceof Error ? error.message : "Failed to create subnet");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create subnet",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }
