@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "poke",
+  "title": "Poke",
+  "description": "Send messages to Poke",
+  "icon": "extension-icon.png",
+  "author": "dpshade22",
+  "categories": ["Productivity", "Communication"],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "send-message",
+      "title": "Send Message to Poke",
+      "description": "Send a message to your Poke assistant",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Poke API Key",
+      "description": "Your Poke API key from https://poke.com/settings/advanced",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
