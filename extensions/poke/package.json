@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "poke",
+  "title": "Poke",
+  "description": "Send messages to Poke programmatically",
+  "icon": "icon.png",
+  "author": "aaron",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "commands": [
+    {
+      "name": "send-message",
+      "title": "Send Message to Poke",
+      "description": "Send a message to Poke",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Get your API key from https://poke.com/settings/advanced. Open Poke settings → Advanced → Copy your API key.",
+      "placeholder": "Enter your Poke API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\n\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
+

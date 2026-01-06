@@ -1,0 +1,20 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Green background -->
+  <rect width="512" height="512" fill="#4CAF50" rx="100"/>
+  
+  <!-- Simple palm tree using basic shapes -->
+  <!-- Trunk -->
+  <rect x="236" y="300" width="40" height="160" fill="#8D6E63" rx="8"/>
+  
+  <!-- Fronds as filled shapes -->
+  <!-- Top center -->
+  <ellipse cx="256" cy="200" rx="60" ry="100" fill="#66BB6A" transform="rotate(-10 256 200)"/>
+  <!-- Top left -->
+  <ellipse cx="200" cy="220" rx="50" ry="90" fill="#66BB6A" transform="rotate(-45 200 220)"/>
+  <!-- Top right -->
+  <ellipse cx="312" cy="220" rx="50" ry="90" fill="#66BB6A" transform="rotate(45 312 220)"/>
+  <!-- Left -->
+  <ellipse cx="180" cy="250" rx="45" ry="80" fill="#4CAF50" transform="rotate(-60 180 250)"/>
+  <!-- Right -->
+  <ellipse cx="332" cy="250" rx="45" ry="80" fill="#4CAF50" transform="rotate(60 332 250)"/>
+</svg>
