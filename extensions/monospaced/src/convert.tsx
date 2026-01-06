@@ -1,9 +1,5 @@
 import { Clipboard, showHUD, LaunchProps } from "@raycast/api";
 
-interface Arguments {
-  text: string;
-}
-
 // Mathematical Monospace Unicode ranges
 const UPPERCASE_START = 0x1d670; // 𝙰
 const LOWERCASE_START = 0x1d68a; // 𝚊
@@ -28,12 +24,10 @@ function toMonospace(text: string): string {
     } else if (code >= 48 && code <= 57) {
       // Digits 0-9
       result += String.fromCodePoint(DIGIT_START + (code - 48));
-    } else if (code >= 33 && code <= 126 && code !== 32) {
+    } else if (code >= 33 && code <= 126) {
       // ASCII symbols and punctuation (except space)
       // Map to fullwidth equivalents (U+FF01 to U+FF5E)
-      result += String.fromCodePoint(
-        FULLWIDTH_START + (code - ASCII_SYMBOL_START),
-      );
+      result += String.fromCodePoint(FULLWIDTH_START + (code - ASCII_SYMBOL_START));
     } else {
       // Space and other characters pass through unchanged
       result += char;
@@ -43,9 +37,7 @@ function toMonospace(text: string): string {
   return result;
 }
 
-export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
-) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.Convert }>) {
   const { text } = props.arguments;
 
   if (!text.trim()) {
