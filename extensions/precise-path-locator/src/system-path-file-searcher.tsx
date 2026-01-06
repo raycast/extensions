@@ -38,13 +38,19 @@ export default function Command() {
 
   // 2. GLOBAL SEARCH LOGIC
   const showGlobalSearch = !navRoot;
-  const searchCommand = showGlobalSearch ? `mdfind -name "${searchText}" | head -n 40` : "";
 
-  const { data: searchResults, isLoading: isSearching } = useExec(searchCommand, [], {
-    execute: showGlobalSearch && !!searchText,
-    shell: true,
-    parseOutput: (output) => parseMdfindOutput(output),
-  });
+  // FIX: Vulnerability & Shell usage
+  // We passed arguments as an array to prevent command injection.
+  // We removed 'shell: true'.
+  // We removed '| head -n 40' from the command and handle slicing in the parse function.
+  const { data: searchResults, isLoading: isSearching } = useExec(
+    "mdfind",
+    ["-name", searchText],
+    {
+      execute: showGlobalSearch && !!searchText,
+      parseOutput: (output) => parseMdfindOutput(output),
+    },
+  );
 
   // --- STRICT FILTER ---
   const filteredSearchResults = searchResults?.filter((file) =>
@@ -85,7 +91,7 @@ export default function Command() {
                 stats = fs.statSync(fullPath);
               } catch {
                 return null;
-              } // Corregido: eliminado (e)
+              }
 
               return {
                 name: dirent.name,
@@ -215,7 +221,11 @@ function formatBytes(bytes: number, decimals = 2) {
 // Helper to parse mdfind output
 function parseMdfindOutput(output: ExecOutput): FileResult[] {
   const lines = output.stdout.split("\n").filter((line: string) => line.trim() !== "");
-  const parsed = lines
+  
+  // FIX: Since we removed '| head -n 40' from the command, we do the slicing here.
+  const limitedLines = lines.slice(0, 40);
+
+  const parsed = limitedLines
     .map((filePath: string) => {
       const cleanPath = filePath.trim();
       let stats;
@@ -227,7 +237,7 @@ function parseMdfindOutput(output: ExecOutput): FileResult[] {
         }
       } catch {
         return null;
-      } // Corregido: eliminado (e)
+      }
 
       return {
         path: cleanPath,
