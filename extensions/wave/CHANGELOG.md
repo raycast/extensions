@@ -1,8 +1,9 @@
 # Wave Changelog
 
-## [Create Draft Invoice] - {PR_MERGE_DATE}
+## [Create Draft Invoice + Show Discounts] - {PR_MERGE_DATE}
 
 - Add new draft invoice
+- Show discounts in `Invoice`
 
 ## [Enhance Invoice] - 2025-08-20
 

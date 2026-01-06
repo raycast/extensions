@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useGetBusinesses, useGetBusinessInvoices } from "./lib/wave";
 import { Business, InvoiceStatus } from "./lib/types";
-import { getInvoiceStatusColor } from "./lib/utils";
+import { calculateInvoiceItemAmount, getInvoiceStatusColor } from "./lib/utils";
 import { useCachedState, withAccessToken } from "@raycast/utils";
 import { HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
 import { provider } from "./lib/oauth";
@@ -111,7 +111,11 @@ function BusinessInvoices({ business }: { business: Business }) {
             const markdown = `# ${title}
 | ${invoice.itemTitle} | ${invoice.unitTitle} | ${invoice.priceTitle} | ${invoice.amountTitle} |
 |----------------------|----------------------|-----------------------|------------------------|
-${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.price} | ${item.subtotal.currency.symbol}${item.subtotal.value}`).join(`\n`)}
+${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.unitPrice} | ${item.subtotal.currency.symbol}${calculateInvoiceItemAmount(item)}`).join(`\n`)}
+
+|  |  | Subtotal | ${invoice.subtotal.currency.symbol}${invoice.subtotal.value} |
+|--|--|-------|--------------------------------------------------------|
+${invoice.discounts.length ? `| | | ${invoice.discounts[0].name} | (${invoice.discountTotal.currency.symbol}${invoice.discountTotal.value}) |` : ""}
 
 |  |  | Total | ${invoice.total.currency.symbol}${invoice.total.value} |
 |--|--|-------|--------------------------------------------------------|
