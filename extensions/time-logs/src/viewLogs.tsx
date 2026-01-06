@@ -1,4 +1,3 @@
-// viewEntries.tsx
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   List,
@@ -11,8 +10,8 @@ import {
   useNavigation,
   Color,
   getPreferenceValues,
-  Alert,
   confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { TimeEntry, Project } from "./models";
 import {
@@ -22,7 +21,6 @@ import {
   stopActiveTimer,
   getActiveTimer,
   getProjects,
-  saveProject,
 } from "./storage";
 import {
   formatDuration,
@@ -32,7 +30,8 @@ import {
   calculateMonthlyHoursSummary,
   generateId,
 } from "./utils";
-import { getProgressIcon, useLocalStorage, showFailureToast } from "@raycast/utils";
+import { getProgressIcon, showFailureToast, useLocalStorage } from "@raycast/utils";
+import { ProjectForm } from "./components/ProjectForm";
 
 // Preferences interface
 interface Preferences {
@@ -85,93 +84,6 @@ function getNaturalDateLabel(date: Date): string {
   return "";
 }
 
-// Project Form (simplified version of the one in trackProjects.tsx)
-function ProjectForm({ project, onSave }: { project?: Project; onSave: () => Promise<void> }) {
-  const [nameError, setNameError] = useState<string | undefined>();
-  const [projectName, setProjectName] = useState<string>(project?.name || "");
-  const [selectedColor, setSelectedColor] = useState<string>(project?.color || Color.Blue);
-  const { pop } = useNavigation();
-
-  const predefinedColors = [
-    { label: "Red", value: Color.Red },
-    { label: "Orange", value: Color.Orange },
-    { label: "Yellow", value: Color.Yellow },
-    { label: "Green", value: Color.Green },
-    { label: "Blue", value: Color.Blue },
-    { label: "Purple", value: Color.Purple },
-    { label: "Magenta", value: Color.Magenta },
-  ];
-
-  async function handleSubmit() {
-    // Validation
-    if (!projectName || projectName.trim() === "") {
-      setNameError("Project name is required");
-      return;
-    }
-
-    try {
-      const newProject: Project = {
-        id: project?.id || generateId(),
-        name: projectName.trim(),
-        color: selectedColor,
-        createdAt: project?.createdAt || new Date().toISOString(),
-      };
-
-      await saveProject(newProject);
-
-      showToast({
-        style: Toast.Style.Success,
-        title: project ? "Project Updated" : "Project Created",
-      });
-
-      await onSave();
-      pop();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to save project",
-        message: String(error),
-      });
-    }
-  }
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action title="Save Project" icon={Icon.Check} onAction={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Enter project name"
-        value={projectName}
-        onChange={(value) => {
-          setProjectName(value);
-          if (value && value.trim() !== "") {
-            setNameError(undefined);
-          }
-        }}
-        error={nameError}
-        autoFocus={true}
-      />
-
-      <Form.Dropdown id="color" title="Color" value={selectedColor} onChange={setSelectedColor} storeValue={true}>
-        {predefinedColors.map((color) => (
-          <Form.Dropdown.Item
-            key={color.value}
-            value={color.value}
-            title={color.label}
-            icon={{ source: Icon.Dot, tintColor: color.value }}
-          />
-        ))}
-      </Form.Dropdown>
-    </Form>
-  );
-}
-
 // Add Time Log Form
 function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
   // Get the rounding interval from preferences
@@ -183,7 +95,6 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>("none");
   const [dropdownValue, setDropdownValue] = useState<string | undefined>("none");
   const [description, setDescription] = useState<string>("");
-  const [descriptionError, setDescriptionError] = useState<string | undefined>();
   const [startDateTime, setStartDateTime] = useState<Date>(new Date());
   const [endDateTime, setEndDateTime] = useState<Date>(
     new Date(new Date().getTime() + roundingIntervalNum * 60 * 1000),
@@ -305,15 +216,6 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
     }
   }
 
-  // Handle description changes
-  const handleDescriptionChange = (value: string) => {
-    setDescription(value);
-    // Clear error when description is not empty
-    if (value && value.trim() !== "") {
-      setDescriptionError(undefined);
-    }
-  };
-
   // Submit the form
   async function handleSubmit() {
     try {
@@ -396,8 +298,7 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
         title="Task"
         placeholder="What did you work on?"
         value={description}
-        onChange={handleDescriptionChange}
-        error={descriptionError}
+        onChange={setDescription}
       />
 
       <Form.Dropdown
@@ -410,14 +311,14 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
         <Form.Dropdown.Item
           value="none"
           title="Unassigned"
-          icon={{ source: Icon.Dot, tintColor: Color.SecondaryText }}
+          icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
         />
         {projects.map((project) => (
           <Form.Dropdown.Item
             key={project.id}
             value={project.id}
             title={project.name}
-            icon={{ source: Icon.Dot, tintColor: project.color || Color.PrimaryText }}
+            icon={{ source: Icon.Circle, tintColor: project.color || Color.PrimaryText }}
           />
         ))}
         <Form.Dropdown.Section title="Actions">
@@ -465,7 +366,6 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
 
   // Form state
   const [description, setDescription] = useState(entry.description || "");
-  const [descriptionError, setDescriptionError] = useState<string | undefined>();
   const [startDateTime, setStartDateTime] = useState(new Date(entry.startTime));
   const [endDateTime, setEndDateTime] = useState(
     entry.endTime
@@ -628,15 +528,6 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
     }
   }
 
-  // Handle description changes
-  const handleDescriptionChange = (value: string) => {
-    setDescription(value);
-    // Clear error when description is not empty
-    if (value && value.trim() !== "") {
-      setDescriptionError(undefined);
-    }
-  };
-
   // Submit handler
   async function handleSubmit() {
     try {
@@ -646,12 +537,6 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
           title: "Invalid Start Time",
           message: "Enter a valid start date and time",
         });
-        return;
-      }
-
-      // Validate input
-      if (!description || description.trim() === "") {
-        setDescriptionError("Task description is required");
         return;
       }
 
@@ -728,8 +613,7 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
         title="Task"
         placeholder="What did you work on?"
         value={description}
-        onChange={handleDescriptionChange}
-        error={descriptionError}
+        onChange={setDescription}
       />
 
       {/* Only show the dropdown when projects are loaded */}
@@ -738,14 +622,14 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
           <Form.Dropdown.Item
             value="none"
             title="Unassigned"
-            icon={{ source: Icon.Dot, tintColor: Color.SecondaryText }}
+            icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
           />
           {projects.map((project) => (
             <Form.Dropdown.Item
               key={project.id}
               value={project.id}
               title={project.name}
-              icon={{ source: Icon.Dot, tintColor: project.color || Color.PrimaryText }}
+              icon={{ source: Icon.Circle, tintColor: project.color || Color.PrimaryText }}
             />
           ))}
           <Form.Dropdown.Section title="Actions">
@@ -837,10 +721,12 @@ export default function ViewLogs() {
   const [monthsToDisplay, setMonthsToDisplay] = useState<number>(3);
   const [activeTimerDuration, setActiveTimerDuration] = useState<string>("00:00");
 
-  const { value: viewMode, setValue: setViewMode } = useLocalStorage<"detailed" | "monthly">(
-    "time-tracker-view-mode",
-    "detailed",
-  );
+  // Use local storage for view mode preference
+  const {
+    value: viewMode,
+    setValue: setViewMode,
+    isLoading: isViewModeLoading,
+  } = useLocalStorage<"detailed" | "monthly">("time-tracker-view-mode", "detailed");
 
   const { push } = useNavigation();
 
@@ -1166,12 +1052,12 @@ export default function ViewLogs() {
   }
 
   function getLogIcon(log: TimeEntry): Icon | { source: Icon; tintColor: string } {
-    if (!log.projectId) return { source: Icon.Dot, tintColor: Color.SecondaryText };
+    if (!log.projectId) return { source: Icon.Circle, tintColor: Color.PrimaryText };
 
     const project = projects[log.projectId];
     if (!project) return Icon.Clock;
 
-    return { source: Icon.Dot, tintColor: project.color };
+    return { source: Icon.Circle, tintColor: project.color };
   }
 
   // Toggle view mode function to be used in action panels
@@ -1209,7 +1095,7 @@ export default function ViewLogs() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isViewModeLoading}
       searchBarPlaceholder="Search time logs..."
       navigationTitle="Time Logs"
       searchText={searchText}
@@ -1222,7 +1108,7 @@ export default function ViewLogs() {
               key={project.id}
               title={project.name}
               value={project.id}
-              icon={{ source: Icon.Dot, tintColor: project.color }}
+              icon={{ source: Icon.Circle, tintColor: project.color }}
             />
           ))}
         </List.Dropdown>
@@ -1319,7 +1205,7 @@ export default function ViewLogs() {
                   icon={
                     isCurrentMonth(monthDate)
                       ? getProgressIcon(progress, "#000000")
-                      : { source: Icon.Dot, tintColor: Color.PrimaryText }
+                      : { source: Icon.Circle, tintColor: Color.PrimaryText }
                   }
                   accessories={[{ text: monthDuration }]}
                   actions={
@@ -1367,14 +1253,14 @@ export default function ViewLogs() {
                         <ActionPanel>
                           <ActionPanel.Section title={getLogTitle(log)}>
                             <Action
-                              title="Resume"
-                              icon={Icon.Play}
-                              onAction={() => startTimer(log.description || "", log.projectId)}
-                            />
-                            <Action
                               title="Edit Time Log"
                               icon={Icon.Pencil}
                               onAction={() => push(<EditTimeLogForm entry={log} onSave={loadData} />)}
+                            />
+                            <Action
+                              title="Resume"
+                              icon={Icon.Play}
+                              onAction={() => startTimer(log.description || "", log.projectId)}
                             />
                             <Action
                               title="Delete Time Log"
@@ -1451,7 +1337,7 @@ export default function ViewLogs() {
                   icon={
                     isCurrentMonth(monthDate)
                       ? getProgressIcon(progress, "#000000")
-                      : { source: Icon.Dot, tintColor: Color.PrimaryText }
+                      : { source: Icon.Circle, tintColor: Color.PrimaryText }
                   }
                   accessories={[{ text: monthDuration }]}
                   actions={
@@ -1634,7 +1520,8 @@ export default function ViewLogs() {
 
       {/* Empty State */}
       {Object.keys(viewMode === "detailed" ? groupedLogs : groupedByMonthAndProject || {}).length === 0 &&
-        !activeTimer && (
+        !activeTimer &&
+        !isLoading && (
           <List.EmptyView
             title="No Time Logs"
             description="Start tracking your time or add a time log manually"

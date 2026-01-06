@@ -1,5 +1,10 @@
 # Time Logs Changelog
 
+## [1.1.0] - {PR_MERGE_DATE}
+
+### Features
+- Updated start timer flow to include larger descriptions and a dropdown for the project selector
+
 ## [1.0.0] - 2025-04-04
 
 ### Features

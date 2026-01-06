@@ -89,7 +89,9 @@ export default function Command() {
   const title = isLoading
     ? "Loading..."
     : activeTimer
-      ? `${projectName} — ${activeTimer.description || "No Description"} · ${elapsedTime}`
+      ? activeTimer.description
+        ? `${projectName} — ${activeTimer.description} · ${elapsedTime}`
+        : `${projectName} · ${elapsedTime}`
       : "";
 
   // Don't render anything if there's no active timer

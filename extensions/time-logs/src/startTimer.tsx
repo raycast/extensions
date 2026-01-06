@@ -1,111 +1,82 @@
-// commands/trackTime.tsx
-import { useEffect } from "react";
-import { showToast, Toast, popToRoot, launchCommand, LaunchType } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { useState, useEffect } from "react";
+import {
+  showToast,
+  Toast,
+  popToRoot,
+  launchCommand,
+  LaunchType,
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Color,
+  useNavigation,
+} from "@raycast/api";
 import { TimeEntry, Project } from "./models";
-import { saveTimeEntry, stopActiveTimer, getProjects, saveProject } from "./storage";
+import { saveTimeEntry, stopActiveTimer, getProjects } from "./storage";
 import { generateId } from "./utils";
+import { ProjectForm } from "./components/ProjectForm";
+import { showFailureToast } from "@raycast/utils";
 
-// Define the command arguments
-export interface TrackTimeArguments {
-  project?: string;
-  description: string; // Required field
-}
+export default function TrackTime() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("none");
+  const [description, setDescription] = useState<string>("");
+  const { push } = useNavigation();
 
-// Define a random color function for new projects
-function getRandomColor(): string {
-  const colors = [
-    "#FF5733",
-    "#33FF57",
-    "#3357FF",
-    "#FF33A8",
-    "#33A8FF",
-    "#FF5733",
-    "#FFC300",
-    "#33FFC3",
-    "#C333FF",
-    "#FF3333",
-    "#33FF33",
-    "#3333FF",
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-
-export default function TrackTime(props: { arguments: TrackTimeArguments }) {
-  // Extract arguments - handle possibly undefined arguments more gracefully
-  const { project: projectInput, description } = props.arguments || { project: undefined, description: undefined };
-
-  // When component loads, start timer with the provided arguments
   useEffect(() => {
-    startTimerWithArguments(projectInput, description);
-  }, [projectInput, description]);
+    loadProjects();
+  }, []);
 
-  // Start a timer with the provided project input and description
-  async function startTimerWithArguments(projectInput?: string, description?: string) {
+  async function loadProjects() {
+    setIsLoading(true);
     try {
-      // Find project by input (index, partial name, or ID)
-      let projectId: string | undefined;
-      let projectText = "";
+      const loadedProjects = await getProjects();
+      setProjects(loadedProjects);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load projects",
+        message: String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-      if (projectInput && projectInput.trim() !== "") {
-        const projects = await getProjects();
-        let matchingProject: Project | undefined;
+  // Handle project creation and selection
+  const handleProjectCreated = async () => {
+    try {
+      setIsLoading(true);
+      const allProjects = await getProjects();
+      setProjects(allProjects);
 
-        // Check if input is a number (index in the list)
-        const projectIndex = parseInt(projectInput);
-        if (!isNaN(projectIndex) && projectIndex > 0 && projectIndex <= projects.length) {
-          // Convert from 1-based indexing to 0-based
-          matchingProject = projects[projectIndex - 1];
-        } else {
-          // Try to match by name or ID
-          matchingProject = projects.find(
-            (p) =>
-              p.id === projectInput ||
-              p.name.toLowerCase() === projectInput.toLowerCase() ||
-              p.name.toLowerCase().includes(projectInput.toLowerCase()),
-          );
-        }
-
-        if (matchingProject) {
-          projectId = matchingProject.id;
-          projectText = matchingProject.name;
-        } else {
-          // If a project list is requested, show all available projects
-          if (projectInput.toLowerCase() === "list" || projectInput === "?") {
-            let projectList = "Available projects:\n";
-            projects.forEach((p, index) => {
-              projectList += `${index + 1}. ${p.name}\n`;
-            });
-
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Projects:",
-              message: projectList,
-            });
-            popToRoot();
-            return;
-          }
-
-          // Auto-create a new project with the provided name
-          const newProject: Project = {
-            id: generateId(),
-            name: projectInput.trim(),
-            color: getRandomColor(),
-            createdAt: new Date().toISOString(),
-          };
-
-          await saveProject(newProject);
-          projectId = newProject.id;
-          projectText = newProject.name;
-
-          // Inform the user that a new project was created
-          await showToast({
-            style: Toast.Style.Success,
-            title: "New Project Created",
-            message: `Created new project "${projectInput}"`,
-          });
-        }
+      if (allProjects.length > 0) {
+        const latestProject = allProjects[allProjects.length - 1];
+        setSelectedProjectId(latestProject.id);
       }
+    } catch {
+      // Handle error silently
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle project selection change
+  const handleProjectChange = (value: string) => {
+    if (value === "create_new") {
+      push(<ProjectForm onSave={handleProjectCreated} />);
+    } else {
+      setSelectedProjectId(value);
+    }
+  };
+
+  async function handleSubmit() {
+    try {
+      // Determine project ID - "none" means unassigned (undefined)
+      const projectId = selectedProjectId === "none" ? undefined : selectedProjectId;
+      const selectedProject = projectId ? projects.find((p) => p.id === projectId) : undefined;
 
       // Stop any active timer first
       await stopActiveTimer();
@@ -113,7 +84,7 @@ export default function TrackTime(props: { arguments: TrackTimeArguments }) {
       // Create new timer
       const newEntry: TimeEntry = {
         id: generateId(),
-        description: description ? description.trim() : "",
+        description: description.trim() || null,
         startTime: new Date(),
         endTime: null,
         isActive: true,
@@ -123,17 +94,20 @@ export default function TrackTime(props: { arguments: TrackTimeArguments }) {
 
       await saveTimeEntry(newEntry);
 
-      // Refresh the menu bar timer first (this will show "Menu Bar item refreshed")
+      // Refresh the menu bar timer (if enabled)
       try {
         await launchCommand({ name: "menuBarTimer", type: LaunchType.UserInitiated });
-      } catch (error) {
-        console.error("Failed to refresh menu bar timer:", error);
+      } catch {
+        // Silently ignore if menu bar timer is disabled
+        console.error("Menu bar timer command is disabled or not available");
       }
 
-      // Use Toast notification instead of HUD, with everything in the title
+      // Show success toast
+      const descriptionText = description.trim() || "Timer";
+      const projectName = selectedProject ? selectedProject.name : "Unassigned";
       await showToast({
         style: Toast.Style.Success,
-        title: `${projectText ? projectText + " — " : ""}${description ? description : ""} timer started`,
+        title: `${projectName} — ${descriptionText} timer started`,
       });
 
       // Close Raycast
@@ -141,10 +115,50 @@ export default function TrackTime(props: { arguments: TrackTimeArguments }) {
     } catch (error) {
       console.error("Error starting timer:", error);
       showFailureToast(error, { title: "Failed to start timer" });
-      popToRoot();
     }
   }
 
-  // No UI is rendered - everything happens in the useEffect
-  return null;
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action title="Start Timer" icon={Icon.Play} onAction={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown
+        id="project"
+        title="Project"
+        value={selectedProjectId}
+        onChange={handleProjectChange}
+        autoFocus={true}
+      >
+        <Form.Dropdown.Item
+          value="none"
+          title="Unassigned"
+          icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
+        />
+        {projects.map((project) => (
+          <Form.Dropdown.Item
+            key={project.id}
+            value={project.id}
+            title={project.name}
+            icon={{ source: Icon.Circle, tintColor: project.color }}
+          />
+        ))}
+        <Form.Dropdown.Section title="Actions">
+          <Form.Dropdown.Item value="create_new" title="Create New Project..." icon={Icon.Plus} />
+        </Form.Dropdown.Section>
+      </Form.Dropdown>
+
+      <Form.TextArea
+        id="description"
+        title="Task Description"
+        placeholder="Enter task description (optional)"
+        value={description}
+        onChange={setDescription}
+      />
+    </Form>
+  );
 }

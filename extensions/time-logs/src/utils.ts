@@ -1,5 +1,3 @@
-// utils.ts
-
 import { TimeEntry, Project } from "./models";
 import { parse } from "date-fns";
 import { randomUUID } from "crypto";

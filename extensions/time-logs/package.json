@@ -6,6 +6,9 @@
   "description": "Track, manage, and export time logs on tasks and projects.",
   "icon": "extension-icon.png",
   "author": "madebydamien",
+  "contributors": [
+    "thom1606"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -16,21 +19,7 @@
       "title": "Start Timer",
       "subtitle": "Time Logs",
       "description": "Start a new Time Log for project and task",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "project",
-          "placeholder": "Project",
-          "type": "text",
-          "required": false
-        },
-        {
-          "name": "description",
-          "placeholder": "Task",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "stopTimer",

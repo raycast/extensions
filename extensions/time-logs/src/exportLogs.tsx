@@ -348,7 +348,7 @@ export default function ExportLogs() {
             key={project.id}
             value={project.id}
             title={project.name}
-            icon={{ source: Icon.Dot, tintColor: project.color }}
+            icon={{ source: Icon.Circle, tintColor: project.color }}
           />
         ))}
       </Form.Dropdown>

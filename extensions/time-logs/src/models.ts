@@ -1,4 +1,3 @@
-// models.ts
 export interface TimeEntry {
   id: string;
   description: string | null;
