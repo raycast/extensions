@@ -1,90 +1,96 @@
 import { getPreferenceValues } from "@raycast/api";
+import { getProvider, ProviderType, DEFAULT_MODELS } from "./providers";
+import { EnhancementStyle, STYLE_PROMPTS } from "./styles";
 
 interface Preferences {
-  openrouterApiKey: string;
+  provider: ProviderType;
   model: string;
+  enhancementStyle: EnhancementStyle;
+  customSystemPrompt: string;
+  // Provider API keys
+  openrouterApiKey: string;
+  geminiApiKey: string;
+  openaiApiKey: string;
+  anthropicApiKey: string;
+  groqApiKey: string;
+  // Ollama doesn't need an API key
   autoUseClipboard: boolean;
 }
 
-interface OpenRouterResponse {
-  choices: Array<{
-    message: {
-      content: string;
-    };
-  }>;
-  error?: {
-    message: string;
-  };
+function getApiKeyForProvider(
+  preferences: Preferences,
+  providerType: ProviderType,
+): string {
+  switch (providerType) {
+    case "openrouter":
+      return preferences.openrouterApiKey || "";
+    case "gemini":
+      return preferences.geminiApiKey || "";
+    case "openai":
+      return preferences.openaiApiKey || "";
+    case "anthropic":
+      return preferences.anthropicApiKey || "";
+    case "groq":
+      return preferences.groqApiKey || "";
+    case "ollama":
+      return ""; // Ollama doesn't need an API key
+    default:
+      return "";
+  }
 }
 
-const SYSTEM_PROMPT = `You are a prompt refinement tool. Your job is to take the user's rough prompt and rewrite it to be clearer and more effective for use with AI assistants.
+export interface EnhanceResult {
+  enhancedPrompt: string;
+  provider: string;
+  model: string;
+  style: string;
+}
 
-RULES:
-1. KEEP the original intent and topic - do not change what the user is asking for
-2. Make it clearer, more specific, and better structured
-3. Add helpful context or constraints that align with the original request
-4. Output ONLY the improved prompt - no explanations, no meta-text
-5. NEVER ask questions or request clarification
-6. Match the language of the input (if Turkish, respond in Turkish)
+export interface EnhanceOptions {
+  styleOverride?: EnhancementStyle;
+  providerOverride?: ProviderType;
+  modelOverride?: string;
+}
 
-Your goal: Take a vague or poorly-written prompt and make it BETTER while keeping the same purpose.
-
-Example:
-Input: "write code for website"
-Output: "Write clean, well-structured code for a modern responsive website. Include:
-- HTML5 semantic structure
-- CSS3 with flexbox/grid layout
-- JavaScript for interactivity
-- Mobile-first responsive design
-Please provide commented code with clear organization."
-
-Now improve the following prompt:`;
-
-export async function enhancePrompt(prompt: string): Promise<string> {
+export async function enhancePrompt(
+  prompt: string,
+  options?: EnhanceOptions,
+): Promise<EnhanceResult> {
   const preferences = getPreferenceValues<Preferences>();
-  const apiKey = preferences.openrouterApiKey;
-  const model = preferences.model || "qwen/qwen3-coder:free";
 
-  const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "HTTP-Referer": "https://raycast.com",
-        "X-Title": "Raycast Prompt Enhancer",
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPT,
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      }),
-    },
+  // Use overrides if provided, otherwise fall back to preferences
+  const providerType =
+    options?.providerOverride || preferences.provider || "openrouter";
+  const provider = getProvider(providerType);
+  const model =
+    options?.modelOverride || preferences.model || DEFAULT_MODELS[providerType];
+  const apiKey = getApiKeyForProvider(preferences, providerType);
+  const style =
+    options?.styleOverride || preferences.enhancementStyle || "balanced";
+
+  if (!apiKey && providerType !== "ollama") {
+    throw new Error(
+      `No API key configured for ${provider.name}. Please set it in extension preferences.`,
+    );
+  }
+
+  // Build system prompt with optional custom instructions
+  let systemPrompt = STYLE_PROMPTS[style];
+  if (preferences.customSystemPrompt && preferences.customSystemPrompt.trim()) {
+    systemPrompt += `\n\nAdditional instructions from user:\n${preferences.customSystemPrompt.trim()}`;
+  }
+
+  const enhancedPrompt = await provider.sendMessage(
+    prompt,
+    systemPrompt,
+    model,
+    apiKey,
   );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API request failed: ${response.status} - ${errorText}`);
-  }
-
-  const data = (await response.json()) as OpenRouterResponse;
-
-  if (data.error) {
-    throw new Error(data.error.message);
-  }
-
-  if (!data.choices || data.choices.length === 0) {
-    throw new Error("No response from the model");
-  }
-
-  return data.choices[0].message.content.trim();
+  return {
+    enhancedPrompt,
+    provider: provider.name,
+    model,
+    style,
+  };
 }

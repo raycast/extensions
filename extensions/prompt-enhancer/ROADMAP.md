@@ -1,46 +1,56 @@
 # Roadmap
 
-Future feature ideas for Prompt Enhancer.
+## ✅ Implemented Features
 
-## Planned Features
+### 1. Multi-Provider Support
+- OpenRouter, Google Gemini, OpenAI, Anthropic Claude, Ollama (Local), Groq
+- Provider selection dropdown in preferences
+- Per-provider API key fields
 
-### 1. History of Enhanced Prompts
-- Save last 10-20 enhanced prompts locally using Raycast's LocalStorage
-- Add "View History" command to browse and reuse past enhancements
-- One-click copy from history
+### 2. History of Enhanced Prompts
+- Saves last 20 enhanced prompts using LocalStorage
+- "View History" command to browse and reuse past enhancements
+- Copy enhanced or original prompts from history
+- Delete individual items or clear all
 
-### 2. Multiple Enhancement Styles
-- **Concise** - Shorter, focused prompts
-- **Detailed** - Comprehensive, thorough prompts
-- **Creative** - More imaginative/artistic framing
-- Implement as dropdown in form or action menu
+### 3. Enhancement Styles
+- Balanced, Concise, Detailed, Creative, Technical
+- Each style has a custom system prompt optimized for its purpose
+- Selectable via preferences dropdown
 
-### 3. Compare View
-- Show original vs enhanced side-by-side in Detail view
-- Allow user to tweak before copying
-- Edit and re-enhance option
+### 4. Compare View
+- Side-by-side view of original vs enhanced prompt
+- Copy, paste, or edit and retry options
+- Shows provider, model, and style used
 
-### 4. Custom System Prompt
-- User-defined enhancement instructions via preferences
-- "Always include X", "Focus on Y" style customizations
-- Template support
+### 5. Custom System Prompt
+- User-defined additional instructions via preferences
+- Appended to the selected style's base prompt
 
-### 5. Paste Enhanced Prompt
-- Action to paste directly into active app (using `Clipboard.paste()`)
-- Optional auto-close after paste
-
-### 6. Token/Cost Estimation
-- Show approximate token count for prompts
-- Useful for pay-per-use models
-- Display in form footer
+### 6. Paste Enhanced Prompt
+- Direct paste to active application with ⇧⌘+Return
+- No need to manually paste after copying
 
 ### 7. Favorite Models Quick-Switch
-- Dropdown in form to switch models on-the-fly
-- Save frequently used models
-- Model presets with different temperatures
+- Action menu submenu with 6 preset favorite models
+- One-click switching between GPT-4o, Claude, Gemini, Llama, etc.
+- Uses provider override for on-the-fly model switching
+
+### 8. Prompt Templates
+- "Use Template" command with 8 pre-defined templates
+- Code Review, Explain Code, Refactor, Write Tests
+- Documentation, Debug Help, Brainstorm Ideas, Summarize
+- Templates use {input} placeholder for user content
+
+---
+
+## ✅ Compliance & Best Practices
+- Removed unnecessary node-fetch dependency (using native fetch)
+- CHANGELOG uses {PR_MERGE_DATE} placeholder
+- Proper error handling throughout
 
 ---
 
 ## Contributing
 
-Feel free to pick up any of these features! Open an issue first to discuss implementation.
+Feel free to suggest new features! Open an issue to discuss implementation.

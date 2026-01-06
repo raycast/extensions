@@ -6,11 +6,14 @@ import {
   Toast,
   Clipboard,
   getPreferenceValues,
-  popToRoot,
   Icon,
+  useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { enhancePrompt } from "./api";
+import CompareView from "./compare-view";
+import { DEFAULT_FAVORITE_MODELS, FavoriteModel } from "./favorite-models";
+import { ProviderType } from "./providers";
 
 interface Preferences {
   autoUseClipboard: boolean;
@@ -20,6 +23,7 @@ export default function EnhancePromptCommand() {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const preferences = getPreferenceValues<Preferences>();
+  const { push } = useNavigation();
 
   useEffect(() => {
     async function loadClipboard() {
@@ -29,7 +33,7 @@ export default function EnhancePromptCommand() {
           if (clipboardText && clipboardText.trim()) {
             setPrompt(clipboardText.trim());
           }
-        } catch (error) {
+        } catch {
           // Silently ignore clipboard read errors
         }
       }
@@ -37,7 +41,7 @@ export default function EnhancePromptCommand() {
     loadClipboard();
   }, []);
 
-  async function handleSubmit() {
+  async function handleSubmit(favoriteModel?: FavoriteModel) {
     if (!prompt.trim()) {
       await showToast({
         style: Toast.Style.Failure,
@@ -50,22 +54,31 @@ export default function EnhancePromptCommand() {
     setIsLoading(true);
 
     try {
+      const modelName = favoriteModel ? favoriteModel.name : "default settings";
       await showToast({
         style: Toast.Style.Animated,
-        title: "Enhancing prompt...",
+        title: `Enhancing with ${modelName}...`,
       });
 
-      const enhancedPrompt = await enhancePrompt(prompt.trim());
+      const options = favoriteModel
+        ? {
+            providerOverride: favoriteModel.provider as ProviderType,
+            modelOverride: favoriteModel.model,
+          }
+        : undefined;
 
-      await Clipboard.copy(enhancedPrompt);
+      const result = await enhancePrompt(prompt.trim(), options);
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Prompt enhanced!",
-        message: "Copied to clipboard",
-      });
-
-      await popToRoot();
+      // Navigate to compare view
+      push(
+        <CompareView
+          originalPrompt={prompt.trim()}
+          enhancedPrompt={result.enhancedPrompt}
+          provider={result.provider}
+          model={result.model}
+          style={result.style}
+        />,
+      );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -94,7 +107,7 @@ export default function EnhancePromptCommand() {
           title: "Clipboard is empty",
         });
       }
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to read clipboard",
@@ -107,17 +120,32 @@ export default function EnhancePromptCommand() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action
-            title="Enhance Prompt"
-            icon={Icon.Wand}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-            onAction={handleSubmit}
-          />
-          <Action
-            title="Use Clipboard"
-            shortcut={{ modifiers: ["cmd"], key: "v" }}
-            onAction={handleUseClipboard}
-          />
+          <ActionPanel.Section>
+            <Action
+              title="Enhance Prompt"
+              icon={Icon.Wand}
+              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              onAction={() => handleSubmit()}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Quick Switch Model">
+            {DEFAULT_FAVORITE_MODELS.map((model) => (
+              <Action
+                key={model.id}
+                title={`Use ${model.name}`}
+                icon={Icon.ComputerChip}
+                onAction={() => handleSubmit(model)}
+              />
+            ))}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Use Clipboard"
+              icon={Icon.Clipboard}
+              shortcut={{ modifiers: ["cmd"], key: "v" }}
+              onAction={handleUseClipboard}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -131,7 +159,7 @@ export default function EnhancePromptCommand() {
       />
       <Form.Description
         title="How it works"
-        text="Enter a rough prompt, then press ⌘+Return to enhance it. The improved prompt will be automatically copied to your clipboard."
+        text="Enter a rough prompt, press ⌘+Return to enhance. Use the action menu to switch models on-the-fly."
       />
     </Form>
   );

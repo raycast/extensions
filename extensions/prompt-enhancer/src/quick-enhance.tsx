@@ -6,6 +6,7 @@ import {
   showHUD,
 } from "@raycast/api";
 import { enhancePrompt } from "./api";
+import { addToHistory } from "./history";
 
 export default async function QuickEnhanceCommand() {
   try {
@@ -41,9 +42,18 @@ export default async function QuickEnhanceCommand() {
       title: "Enhancing prompt...",
     });
 
-    const enhancedPrompt = await enhancePrompt(text.trim());
+    const result = await enhancePrompt(text.trim());
 
-    await Clipboard.copy(enhancedPrompt);
+    // Save to history
+    await addToHistory({
+      originalPrompt: text.trim(),
+      enhancedPrompt: result.enhancedPrompt,
+      provider: result.provider,
+      model: result.model,
+      style: result.style,
+    });
+
+    await Clipboard.copy(result.enhancedPrompt);
 
     await showHUD("✨ Enhanced prompt copied!");
   } catch (error) {

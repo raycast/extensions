@@ -1,11 +1,14 @@
 # Changelog
 
-## [Initial Release] - 2026-01-06
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 - **Enhance Prompt** command - Form view to type/paste prompts and enhance them with AI
 - **Quick Enhance Selected** command - Instantly enhance selected text with a hotkey
-- OpenRouter API integration for LLM access
-- Automatic clipboard integration (copy enhanced prompt)
-- Configurable model selection (default: qwen/qwen3-coder:free)
-- Auto-fill from clipboard option
+- **View History** command - Browse and reuse previously enhanced prompts
+- **Use Template** command - Enhance prompts using pre-defined templates
+- Multi-provider support: OpenRouter, Gemini, OpenAI, Anthropic, Ollama, Groq
+- Enhancement styles: Balanced, Concise, Detailed, Creative, Technical
+- Compare view showing original vs enhanced side-by-side
+- Custom system prompt support
+- Automatic clipboard integration
