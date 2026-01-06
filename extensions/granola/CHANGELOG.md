@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## 1.7.0 - {PR_MERGE_DATE}
+## 2.0.0 - {PR_MERGE_DATE}
 
 ### 🚀 Exports & Notion
 - Export Notes now streams small batches to disk, writes files immediately, and batches enhanced notes/My Notes retrieval to reduce memory usage and timeouts during large exports.
