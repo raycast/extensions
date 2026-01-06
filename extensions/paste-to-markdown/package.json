@@ -178,15 +178,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "turndown": "^7.2.0"
+    "@joplin/turndown-plugin-gfm": "^1.0.64",
+    "@raycast/api": "^1.104.1",
+    "turndown": "^7.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/turndown": "^5.0.5",
-    "eslint": "^9.29.0",
-    "prettier": "^3.6.0",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.3",
+    "@types/turndown": "^5.0.6",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
