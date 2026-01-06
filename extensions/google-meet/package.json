@@ -7,7 +7,8 @@
   "author": "vitoorgomes",
   "contributors": [
     "hughlaw",
-    "iwex"
+    "iwex",
+    "nexxai"
   ],
   "license": "MIT",
   "commands": [
@@ -33,6 +34,14 @@
       "name": "preferredBrowser",
       "type": "appPicker",
       "required": false
+    },
+    {
+      "title": "Set timeout (ms) before copying link",
+      "description": "This allows to override the configuration from the default timeout to a specific one in milliseconds when creating the meet",
+      "name": "timeout",
+      "type": "textfield",
+      "required": false,
+      "default": "500"
     }
   ],
   "dependencies": {
@@ -54,7 +63,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

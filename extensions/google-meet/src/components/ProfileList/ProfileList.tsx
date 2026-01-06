@@ -1,15 +1,19 @@
-import { ActionPanel, Action, showHUD, Clipboard, showToast, Toast, List } from "@raycast/api";
+import { ActionPanel, Action, showHUD, Clipboard, showToast, Toast, List, getPreferenceValues } from "@raycast/api";
 import { FC, useCallback } from "react";
 import { getMeetTab, openMeetTabSelectedProfile } from "../../helpers";
 import { useCacheHelpers } from "../../hooks";
 
 export const ProfileList: FC = () => {
   const { profiles, onRemoveItem } = useCacheHelpers();
+  const { timeout: prefTimeout } = getPreferenceValues<{ timeout: string }>();
+
+  const regexp = /^[0-9]+$/;
+  const timeout = regexp.test(prefTimeout) ? parseInt(prefTimeout) : 500;
 
   const onSelect = useCallback(async (email: string) => {
     try {
       await openMeetTabSelectedProfile(email);
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, timeout));
       const meetTab = await getMeetTab();
 
       await Clipboard.copy(meetTab.split("?")[0]);

@@ -30,7 +30,7 @@ async function getOpenTabs(): Promise<string> {
     return await runAppleScript(getOpenedUrlForArc());
   }
 
-  if (browserName === "Firefox" || browserName === "Firefox Developer Edition") {
+  if (browserName === "Firefox" || browserName === "Firefox Developer Edition" || browserName === "Zen") {
     return await runAppleScript(getOpenedUrlForFirefox(browserName));
   }
 

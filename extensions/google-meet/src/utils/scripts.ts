@@ -79,6 +79,7 @@ const supportedBrowsers = [
   "Sogou Explorer",
   "Vivaldi",
   "Yandex",
+  "Zen",
 ] as const;
 
 // Easy way to access the focused window when the meet link opens
