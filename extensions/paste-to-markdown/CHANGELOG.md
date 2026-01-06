@@ -1,6 +1,6 @@
 # Paste to Markdown Changelog
 
-## [Add Table and GFM Support] - {PR_MERGE_DATE}
+## [Add Table and GFM Support] - 2026-01-06
 
 ### Added
 
