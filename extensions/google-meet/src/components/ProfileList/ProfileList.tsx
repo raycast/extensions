@@ -5,26 +5,29 @@ import { useCacheHelpers } from "../../hooks";
 
 export const ProfileList: FC = () => {
   const { profiles, onRemoveItem } = useCacheHelpers();
-  const { timeout: prefTimeout } = getPreferenceValues<{ timeout: string }>();
+  const { timeout: prefTimeout } = getPreferenceValues();
 
   const regexp = /^[0-9]+$/;
   const timeout = regexp.test(prefTimeout) ? parseInt(prefTimeout) : 500;
 
-  const onSelect = useCallback(async (email: string) => {
-    try {
-      await openMeetTabSelectedProfile(email);
-      await new Promise((r) => setTimeout(r, timeout));
-      const meetTab = await getMeetTab();
+  const onSelect = useCallback(
+    async (email: string) => {
+      try {
+        await openMeetTabSelectedProfile(email);
+        await new Promise((r) => setTimeout(r, timeout));
+        const meetTab = await getMeetTab();
 
-      await Clipboard.copy(meetTab.split("?")[0]);
-      await showHUD("Copied meet link to clipboard");
-    } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't copy to clipboard",
-      });
-    }
-  }, []);
+        await Clipboard.copy(meetTab.split("?")[0]);
+        await showHUD("Copied meet link to clipboard");
+      } catch (err) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't copy to clipboard",
+        });
+      }
+    },
+    [timeout]
+  );
 
   const onRemove = useCallback(
     (email: string) => {

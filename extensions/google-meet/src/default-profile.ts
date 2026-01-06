@@ -3,7 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { getMeetTab, openMeetTabDefaultProfile } from "./helpers";
 
 export default async function main() {
-  const { timeout: prefTimeout } = getPreferenceValues<{ timeout: string }>();
+  const { timeout: prefTimeout } = getPreferenceValues();
 
   const regexp = /^[0-9]+$/;
   const timeout = regexp.test(prefTimeout) ? parseInt(prefTimeout) : 500;
