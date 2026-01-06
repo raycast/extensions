@@ -1,5 +1,5 @@
 # Typst Universe changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-01-06
 
 - Initial version of Typst Universe
