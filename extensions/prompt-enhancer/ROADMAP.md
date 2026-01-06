@@ -2,55 +2,32 @@
 
 ## ✅ Implemented Features
 
-### 1. Multi-Provider Support
-- OpenRouter, Google Gemini, OpenAI, Anthropic Claude, Ollama (Local), Groq
-- Provider selection dropdown in preferences
-- Per-provider API key fields
+### Multi-Provider Support
+OpenRouter, Google Gemini, OpenAI, Anthropic Claude, Ollama (Local), Groq
 
-### 2. History of Enhanced Prompts
-- Saves last 20 enhanced prompts using LocalStorage
-- "View History" command to browse and reuse past enhancements
-- Copy enhanced or original prompts from history
-- Delete individual items or clear all
+### History
+Saves last 20 enhanced prompts with View History command
 
-### 3. Enhancement Styles
-- Balanced, Concise, Detailed, Creative, Technical
-- Each style has a custom system prompt optimized for its purpose
-- Selectable via preferences dropdown
+### Enhancement Styles
+Balanced, Concise, Detailed, Creative, Technical
 
-### 4. Compare View
-- Side-by-side view of original vs enhanced prompt
-- Copy, paste, or edit and retry options
-- Shows provider, model, and style used
+### Compare View
+Side-by-side original vs enhanced with copy/paste/edit actions
 
-### 5. Custom System Prompt
-- User-defined additional instructions via preferences
-- Appended to the selected style's base prompt
+### Custom System Prompt
+User-defined additional instructions via preferences
 
-### 6. Paste Enhanced Prompt
-- Direct paste to active application with ⇧⌘+Return
-- No need to manually paste after copying
+### Paste Enhanced
+Direct paste to active app with ⇧⌘+Return
 
-### 7. Favorite Models Quick-Switch
-- Action menu submenu with 6 preset favorite models
-- One-click switching between GPT-4o, Claude, Gemini, Llama, etc.
-- Uses provider override for on-the-fly model switching
+### Model Quick-Switch
+Action menu with 6 preset favorite models
 
-### 8. Prompt Templates
-- "Use Template" command with 8 pre-defined templates
-- Code Review, Explain Code, Refactor, Write Tests
-- Documentation, Debug Help, Brainstorm Ideas, Summarize
-- Templates use {input} placeholder for user content
-
----
-
-## ✅ Compliance & Best Practices
-- Removed unnecessary node-fetch dependency (using native fetch)
-- CHANGELOG uses {PR_MERGE_DATE} placeholder
-- Proper error handling throughout
+### Prompt Templates
+Pre-defined templates + custom template creation
 
 ---
 
 ## Contributing
 
-Feel free to suggest new features! Open an issue to discuss implementation.
+Feel free to suggest new features via GitHub issues!
