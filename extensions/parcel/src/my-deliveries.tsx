@@ -11,10 +11,10 @@ import {
   open,
 } from "@raycast/api";
 import { isValid, parse } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { useEffect, useState } from "react";
 import { Delivery, FilterMode, STATUS_DESCRIPTIONS, getStatusIcon } from "./api";
 import { useDeliveries } from "./hooks/useDeliveries";
+import { useCarriers } from "./hooks/useCarriers";
 
 /**
  * Placeholder value returned by some carriers when the date is unknown.
@@ -39,6 +39,18 @@ const DATE_FORMATS = [
 export default function Command() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.ACTIVE);
   const { deliveries, isLoading, error } = useDeliveries(filterMode);
+  const { carriers } = useCarriers();
+
+  /**
+   * Get the carrier name from the carrier code.
+   *
+   * @param carrierCode The carrier code to look up
+   * @returns The carrier name, or the uppercase carrier code if not found
+   */
+  const getCarrierName = (carrierCode: string): string => {
+    const carrier = carriers.find((c) => c.code === carrierCode);
+    return carrier?.name || carrierCode.toUpperCase();
+  };
 
   /**
    * Calculate the number of days until the expected delivery date.
@@ -64,7 +76,7 @@ export default function Command() {
    */
   const parseDate = (dateString: string): Date | null => {
     for (const fmt of DATE_FORMATS) {
-      const date = parse(dateString, fmt, new Date(), { locale: ptBR });
+      const date = parse(dateString, fmt, new Date());
       if (isValid(date)) return date;
     }
     return null;
@@ -207,7 +219,8 @@ export default function Command() {
    * @returns JSX element for metadata panel
    */
   const generateDetailMetadata = (delivery: Delivery, daysUntil: number | null) => {
-    const packageName = delivery.description || `From ${delivery.carrier_code.toUpperCase()}`;
+    const carrierName = getCarrierName(delivery.carrier_code);
+    const packageName = delivery.description || `From ${carrierName}`;
     const deliveryDate = delivery.date_expected
       ? `${formatExpectedDelivery(delivery)} ${daysUntil !== null ? (daysUntil < 0 ? `(${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? "s" : ""} ago)` : daysUntil === 0 ? "(Today)" : `(in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})`) : ""}`
       : "Not available";
@@ -217,7 +230,7 @@ export default function Command() {
         <List.Item.Detail.Metadata.Label title="Package" text={packageName} />
         <List.Item.Detail.Metadata.Label title="Expected Delivery Date" text={deliveryDate} />
         <List.Item.Detail.Metadata.Label title="Status" text={STATUS_DESCRIPTIONS[delivery.status_code]} />
-        <List.Item.Detail.Metadata.Label title="Carrier" text={delivery.carrier_code} />
+        <List.Item.Detail.Metadata.Label title="Carrier" text={carrierName} />
         <List.Item.Detail.Metadata.Label title="Tracking Number" text={delivery.tracking_number} />
         {delivery.extra_information && (
           <List.Item.Detail.Metadata.Label title="Additional Info" text={delivery.extra_information} />
@@ -310,11 +323,12 @@ export default function Command() {
       ) : (
         deliveries.map((delivery) => {
           const daysUntil = getDaysUntilDelivery(delivery);
+          const carrierName = getCarrierName(delivery.carrier_code);
 
           return (
             <List.Item
               key={`${delivery.tracking_number}-${delivery.extra_information || ""}`}
-              title={delivery.description || `Package from ${delivery.carrier_code.toUpperCase()}`}
+              title={delivery.description || `Package from ${carrierName}`}
               accessories={
                 [
                   {
