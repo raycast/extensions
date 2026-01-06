@@ -1,5 +1,9 @@
 # Fancy Text Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Added a new action to decorate the generated fancy text
+
 ## [Improvement] - 2025-01-26
 
 - Merged the `Fancy Selected Text` command into the `Fancy Text` command
