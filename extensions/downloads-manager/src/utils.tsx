@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Cache,
-  confirmAlert,
-  Detail,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  trash,
-} from "@raycast/api";
+import { Action, ActionPanel, Cache, Detail, getPreferenceValues, showToast, Toast, trash } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { accessSync, constants, readdirSync, statSync } from "fs";
 import { rm } from "fs/promises";
@@ -139,13 +129,13 @@ export function getLatestDownloads(quantity: number) {
     return [];
   }
 
-  if (lastestDownloadOrder === "addTime") {
+  if (latestDownloadOrder === "addTime") {
     downloads.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime());
-  } else if (lastestDownloadOrder === "createTime") {
+  } else if (latestDownloadOrder === "createTime") {
     downloads.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  } else if (lastestDownloadOrder === "modifiedTime") {
+  } else if (latestDownloadOrder === "modifiedTime") {
     downloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
-  } else if (lastestDownloadOrder === "birthTime") {
+  } else if (latestDownloadOrder === "birthTime") {
     downloads.sort((a, b) => b.birthAt.getTime() - a.birthAt.getTime());
   }
 
