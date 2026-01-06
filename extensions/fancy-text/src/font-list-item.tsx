@@ -11,7 +11,7 @@ interface FontListItemProps {
 }
 
 const FontListItem = ({ font, searchText, defaultText, isPinned, togglePin }: FontListItemProps) => {
-  const { defaultAction, decorationText, defaultDecorationStyle } = getPreferenceValues<ExtensionPreferences>();
+  const { defaultAction, decorationText, defaultDecorationStyle } = getPreferenceValues<Preferences>();
   const convertedText = font.convert(searchText || defaultText);
   const decoratedText = applyTextDecoration(convertedText, decorationText);
 
