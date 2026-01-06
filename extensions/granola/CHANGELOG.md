@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [2.0.1] - {PR_MERGE_DATE}
+## [2.0.1] - 2026-01-06
 
 ### ✨ Enhancements
 - Added "Open in Granola" action (⌘O) to open notes directly in the Granola app using deeplinks
