@@ -1,6 +1,6 @@
 # Tapo Smart Devices Changelog
 
-## [v2.0.0] - {PR_MERGE_DATE}
+## [v2.0.0] - 2026-01-06
 
 ### Added
 
