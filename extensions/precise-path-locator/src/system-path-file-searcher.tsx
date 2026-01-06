@@ -43,14 +43,10 @@ export default function Command() {
   // We passed arguments as an array to prevent command injection.
   // We removed 'shell: true'.
   // We removed '| head -n 40' from the command and handle slicing in the parse function.
-  const { data: searchResults, isLoading: isSearching } = useExec(
-    "mdfind",
-    ["-name", searchText],
-    {
-      execute: showGlobalSearch && !!searchText,
-      parseOutput: (output) => parseMdfindOutput(output),
-    },
-  );
+  const { data: searchResults, isLoading: isSearching } = useExec("mdfind", ["-name", searchText], {
+    execute: showGlobalSearch && !!searchText,
+    parseOutput: (output) => parseMdfindOutput(output),
+  });
 
   // --- STRICT FILTER ---
   const filteredSearchResults = searchResults?.filter((file) =>
@@ -221,7 +217,7 @@ function formatBytes(bytes: number, decimals = 2) {
 // Helper to parse mdfind output
 function parseMdfindOutput(output: ExecOutput): FileResult[] {
   const lines = output.stdout.split("\n").filter((line: string) => line.trim() !== "");
-  
+
   // FIX: Since we removed '| head -n 40' from the command, we do the slicing here.
   const limitedLines = lines.slice(0, 40);
 
