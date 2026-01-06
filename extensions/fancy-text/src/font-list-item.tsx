@@ -34,15 +34,19 @@ const FontListItem = ({ font, searchText, defaultText, isPinned, togglePin }: Fo
           <ActionPanel.Section>
             {defaultAction === "copy" ? copyAction : pasteAction}
             {defaultAction === "copy" ? pasteAction : copyAction}
-            {isSurroundedDefault ? (
+            {decorationText && decorationText.trim() !== "" && (
               <>
-                <Action.CopyToClipboard title="Copy Clean Fancy Text" content={cleanText} />
-                <Action.Paste title="Paste Clean Fancy Text" content={cleanText} />
-              </>
-            ) : (
-              <>
-                <Action.CopyToClipboard title="Copy Surrounded Fancy Text" content={surroundedText} />
-                <Action.Paste title="Paste Surrounded Fancy Text" content={surroundedText} />
+                {isSurroundedDefault ? (
+                  <>
+                    <Action.CopyToClipboard title="Copy Clean Fancy Text" content={cleanText} />
+                    <Action.Paste title="Paste Clean Fancy Text" content={cleanText} />
+                  </>
+                ) : (
+                  <>
+                    <Action.CopyToClipboard title="Copy Surrounded Fancy Text" content={surroundedText} />
+                    <Action.Paste title="Paste Surrounded Fancy Text" content={surroundedText} />
+                  </>
+                )}
               </>
             )}
             <Action
