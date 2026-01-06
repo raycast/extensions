@@ -1,28 +1,22 @@
 import { Icon, MenuBarExtra, open, showHUD, launchCommand, LaunchType } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { SAPSystem } from "./types";
 import { createAndOpenSAPCFile, getSAPSystems } from "./utils";
 
 export default function Command() {
-  const [systems, setSystems] = useState<SAPSystem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: systems = [], isLoading } = useCachedPromise(getSAPSystems);
 
-  useEffect(() => {
-    async function loadSystems() {
-      const loadedSystems = await getSAPSystems();
-      setSystems(loadedSystems);
-      setIsLoading(false);
-    }
-    loadSystems();
-  }, []);
+  function formatError(error: unknown): string {
+    return error instanceof Error ? error.message : "Unknown error";
+  }
 
   async function handleConnect(system: SAPSystem) {
     try {
       const filePath = await createAndOpenSAPCFile(system);
       await open(filePath);
-      await showHUD(`🔗 Connecting to ${system.systemId} (Client ${system.client})`);
+      await showHUD(`Connecting to ${system.systemId} (Client ${system.client})`);
     } catch (error) {
-      await showHUD(`❌ Failed to connect to ${system.systemId}: ${error}`);
+      await showHUD(`Failed to connect to ${system.systemId}: ${formatError(error)}`);
     }
   }
 
@@ -30,7 +24,7 @@ export default function Command() {
     try {
       await launchCommand({ name: "index", type: LaunchType.UserInitiated });
     } catch (error) {
-      await showHUD(`❌ Failed to open main view: ${error}`);
+      await showHUD(`Failed to open main view: ${formatError(error)}`);
     }
   }
 
@@ -38,7 +32,7 @@ export default function Command() {
     try {
       await launchCommand({ name: "add-system", type: LaunchType.UserInitiated });
     } catch (error) {
-      await showHUD(`❌ Failed to open add system view: ${error}`);
+      await showHUD(`Failed to open add system view: ${formatError(error)}`);
     }
   }
 

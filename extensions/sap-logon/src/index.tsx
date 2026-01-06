@@ -11,26 +11,37 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useEffect, useMemo, useState } from "react";
+import { AddSystemForm } from "./add-system";
 import { SAPSystem } from "./types";
-import { createAndOpenSAPCFile, deleteSAPSystem, getSAPSystems } from "./utils";
+import { cleanupSAPCFiles, createAndOpenSAPCFile, deleteSAPSystem, getSAPSystems } from "./utils";
 import EditSystemForm from "./edit-system";
 
 export default function Command() {
-  const [systems, setSystems] = useState<SAPSystem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
 
-  async function loadSystems() {
-    setIsLoading(true);
-    const loadedSystems = await getSAPSystems();
-    setSystems(loadedSystems);
-    setIsLoading(false);
-  }
+  const { data: systems = [], isLoading, revalidate } = useCachedPromise(getSAPSystems);
 
+  // Cleanup any leftover SAPC files on startup
   useEffect(() => {
-    loadSystems();
+    cleanupSAPCFiles();
   }, []);
+
+  // Sort systems alphabetically and filter by search text
+  const filteredSystems = useMemo(() => {
+    const sorted = [...systems].sort((a, b) => a.systemId.localeCompare(b.systemId));
+    if (!searchText) return sorted;
+    const search = searchText.toLowerCase();
+    return sorted.filter(
+      (s) =>
+        s.systemId.toLowerCase().includes(search) ||
+        s.client.includes(search) ||
+        s.applicationServer.toLowerCase().includes(search) ||
+        s.username.toLowerCase().includes(search),
+    );
+  }, [systems, searchText]);
 
   async function handleConnect(system: SAPSystem) {
     try {
@@ -69,7 +80,7 @@ export default function Command() {
 
     if (confirmed) {
       await deleteSAPSystem(system.id);
-      await loadSystems();
+      revalidate();
       await showToast({
         style: Toast.Style.Success,
         title: "System Deleted",
@@ -79,19 +90,33 @@ export default function Command() {
   }
 
   function handleEdit(system: SAPSystem) {
-    push(<EditSystemForm system={system} onSave={loadSystems} />);
+    push(<EditSystemForm system={system} onSave={revalidate} />);
+  }
+
+  function handleAddSystem() {
+    push(<AddSystemForm onSave={revalidate} />);
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search SAP systems...">
-      {systems.length === 0 && !isLoading ? (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search SAP systems..."
+      onSearchTextChange={setSearchText}
+      throttle
+    >
+      {filteredSystems.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Box}
-          title="No SAP Systems Configured"
-          description="Add your first SAP system using the 'Add SAP System' command"
+          title={searchText ? "No Matching Systems" : "No SAP Systems Configured"}
+          description={searchText ? "Try a different search term" : "Press ⏎ to add your first SAP system"}
+          actions={
+            <ActionPanel>
+              <Action title="Add New System" icon={Icon.Plus} onAction={handleAddSystem} />
+            </ActionPanel>
+          }
         />
       ) : (
-        systems.map((system) => (
+        filteredSystems.map((system) => (
           <List.Item
             key={system.id}
             icon={{ source: Icon.Globe, tintColor: Color.Blue }}
@@ -113,6 +138,12 @@ export default function Command() {
                     icon={Icon.Pencil}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
                     onAction={() => handleEdit(system)}
+                  />
+                  <Action
+                    title="Add New System"
+                    icon={Icon.Plus}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    onAction={handleAddSystem}
                   />
                   <Action
                     title="Delete System"

@@ -1,14 +1,16 @@
 import { LocalStorage, environment } from "@raycast/api";
 import { SAPSystem } from "./types";
-import * as fs from "fs";
+import * as fs from "fs/promises";
 import * as path from "path";
 import * as crypto from "crypto";
 
 const SYSTEMS_KEY = "sap-systems";
 const ENCRYPTION_KEY_STORAGE = "sap-encryption-key";
+const SAPC_FILE_CLEANUP_DELAY_MS = 5000;
 
 let cachedEncryptionKey: Buffer | null = null;
 let keyInitPromise: Promise<Buffer> | null = null;
+let storageMutex: Promise<void> = Promise.resolve();
 
 async function getOrCreateEncryptionKey(): Promise<Buffer> {
   if (cachedEncryptionKey) {
@@ -54,14 +56,17 @@ export async function encryptPassword(password: string): Promise<string> {
 export async function decryptPassword(encryptedPassword: string): Promise<string> {
   try {
     if (!encryptedPassword || !encryptedPassword.includes(":")) {
+      console.warn("decryptPassword: Invalid encrypted password format (missing separator)");
       return "";
     }
     const parts = encryptedPassword.split(":");
     if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      console.warn("decryptPassword: Invalid encrypted password format (invalid parts)");
       return "";
     }
     const [ivHex, encrypted] = parts;
     if (!/^[0-9a-fA-F]{32}$/.test(ivHex)) {
+      console.warn("decryptPassword: Invalid IV format");
       return "";
     }
     const iv = Buffer.from(ivHex, "hex");
@@ -70,7 +75,8 @@ export async function decryptPassword(encryptedPassword: string): Promise<string
     let decrypted = decipher.update(encrypted, "hex", "utf8");
     decrypted += decipher.final("utf8");
     return decrypted;
-  } catch {
+  } catch (error) {
+    console.error("decryptPassword: Decryption failed", error instanceof Error ? error.message : error);
     return "";
   }
 }
@@ -122,26 +128,57 @@ export async function deletePassword(systemId: string): Promise<void> {
   await LocalStorage.removeItem(`password-${systemId}`);
 }
 
+async function withStorageLock<T>(fn: () => Promise<T>): Promise<T> {
+  const previousMutex = storageMutex;
+  let resolve: () => void;
+  storageMutex = new Promise<void>((r) => {
+    resolve = r;
+  });
+  await previousMutex;
+  try {
+    return await fn();
+  } finally {
+    resolve!();
+  }
+}
+
 export async function addSAPSystem(
   system: Omit<SAPSystem, "id" | "createdAt" | "updatedAt">,
   password: string,
 ): Promise<SAPSystem> {
-  const systems = await getSAPSystems();
-  const id = crypto.randomUUID();
-  const now = new Date().toISOString();
+  return withStorageLock(async () => {
+    const systems = await getSAPSystems();
 
-  const newSystem: SAPSystem = {
-    ...system,
-    id,
-    createdAt: now,
-    updatedAt: now,
-  };
+    // Check for duplicate system (same server, instance, client, and username)
+    const duplicate = systems.find(
+      (s) =>
+        s.applicationServer.toLowerCase() === system.applicationServer.toLowerCase() &&
+        s.instanceNumber === system.instanceNumber &&
+        s.client === system.client &&
+        s.username.toLowerCase() === system.username.toLowerCase(),
+    );
+    if (duplicate) {
+      throw new Error(
+        `A system with server "${system.applicationServer}", instance ${system.instanceNumber}, client ${system.client}, and user "${system.username}" already exists`,
+      );
+    }
 
-  systems.push(newSystem);
-  await saveSAPSystems(systems);
-  await savePassword(id, password);
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
 
-  return newSystem;
+    const newSystem: SAPSystem = {
+      ...system,
+      id,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    systems.push(newSystem);
+    await saveSAPSystems(systems);
+    await savePassword(id, password);
+
+    return newSystem;
+  });
 }
 
 export async function updateSAPSystem(
@@ -149,28 +186,32 @@ export async function updateSAPSystem(
   updates: Partial<Omit<SAPSystem, "id" | "createdAt">>,
   password?: string,
 ): Promise<void> {
-  const systems = await getSAPSystems();
-  const index = systems.findIndex((s) => s.id === id);
+  return withStorageLock(async () => {
+    const systems = await getSAPSystems();
+    const index = systems.findIndex((s) => s.id === id);
 
-  if (index !== -1) {
-    systems[index] = {
-      ...systems[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    await saveSAPSystems(systems);
+    if (index !== -1) {
+      systems[index] = {
+        ...systems[index],
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      await saveSAPSystems(systems);
 
-    if (password !== undefined) {
-      await savePassword(id, password);
+      if (password !== undefined) {
+        await savePassword(id, password);
+      }
     }
-  }
+  });
 }
 
 export async function deleteSAPSystem(id: string): Promise<void> {
-  const systems = await getSAPSystems();
-  const filtered = systems.filter((s) => s.id !== id);
-  await saveSAPSystems(filtered);
-  await deletePassword(id);
+  return withStorageLock(async () => {
+    const systems = await getSAPSystems();
+    const filtered = systems.filter((s) => s.id !== id);
+    await saveSAPSystems(filtered);
+    await deletePassword(id);
+  });
 }
 
 // Sanitize filename to prevent path traversal attacks
@@ -180,7 +221,14 @@ function sanitizeFilename(name: string): string {
 
 // Encode value for SAP connection string (avoid breaking on special chars)
 function encodeSAPValue(value: string): string {
-  return value.replace(/&/g, "%26").replace(/=/g, "%3D");
+  // Encode all characters that could break the SAP connection string parsing
+  return value
+    .replace(/%/g, "%25") // Must be first to avoid double-encoding
+    .replace(/&/g, "%26")
+    .replace(/=/g, "%3D")
+    .replace(/\+/g, "%2B")
+    .replace(/#/g, "%23")
+    .replace(/\s/g, "%20");
 }
 
 export async function createAndOpenSAPCFile(system: SAPSystem): Promise<string> {
@@ -192,8 +240,10 @@ export async function createAndOpenSAPCFile(system: SAPSystem): Promise<string> 
 
   // Use Raycast's support path for temp files (more appropriate than os.tmpdir)
   const tempDir = path.join(environment.supportPath, "sapc-files");
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
+  try {
+    await fs.access(tempDir);
+  } catch {
+    await fs.mkdir(tempDir, { recursive: true });
   }
 
   // Sanitize filename to prevent path injection
@@ -203,36 +253,32 @@ export async function createAndOpenSAPCFile(system: SAPSystem): Promise<string> 
   const filePath = path.join(tempDir, fileName);
 
   // Write file with restrictive permissions (owner read/write only)
-  fs.writeFileSync(filePath, connectionString, { encoding: "utf8", mode: 0o600 });
+  await fs.writeFile(filePath, connectionString, { encoding: "utf8", mode: 0o600 });
 
-  // Schedule cleanup after 5 seconds to remove sensitive data from disk
-  setTimeout(() => {
+  // Schedule cleanup to remove sensitive data from disk
+  setTimeout(async () => {
     try {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      await fs.access(filePath);
+      await fs.unlink(filePath);
     } catch {
-      // Ignore cleanup errors
+      // Ignore cleanup errors - file may already be deleted
     }
-  }, 5000);
+  }, SAPC_FILE_CLEANUP_DELAY_MS);
 
   return filePath;
 }
 
 // Clean up SAPC files to remove sensitive data from disk
-export function cleanupSAPCFiles(): void {
+export async function cleanupSAPCFiles(): Promise<void> {
   try {
     const tempDir = path.join(environment.supportPath, "sapc-files");
-    if (fs.existsSync(tempDir)) {
-      const files = fs.readdirSync(tempDir);
-      for (const file of files) {
-        if (file.endsWith(".sapc")) {
-          fs.unlinkSync(path.join(tempDir, file));
-        }
-      }
-    }
+    await fs.access(tempDir);
+    const files = await fs.readdir(tempDir);
+    await Promise.all(
+      files.filter((file) => file.endsWith(".sapc")).map((file) => fs.unlink(path.join(tempDir, file)).catch(() => {})),
+    );
   } catch {
-    // Ignore cleanup errors
+    // Ignore cleanup errors - directory may not exist
   }
 }
 

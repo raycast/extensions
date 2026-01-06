@@ -1,23 +1,21 @@
 import { LaunchProps, showToast, Toast, open, showHUD } from "@raycast/api";
 import { createAndOpenSAPCFile, getSAPSystems } from "./utils";
 
-interface ConnectArguments {
-  systemId: string;
-}
-
-export default async function Command(props: LaunchProps<{ arguments: ConnectArguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.Connect }>) {
   const { systemId } = props.arguments;
 
   try {
     const systems = await getSAPSystems();
 
-    // Find system by ID (case-insensitive) or partial match
-    const system = systems.find(
-      (s) =>
-        s.systemId.toLowerCase() === systemId.toLowerCase() ||
-        s.systemId.toLowerCase().includes(systemId.toLowerCase()) ||
-        `${s.systemId}-${s.client}`.toLowerCase() === systemId.toLowerCase(),
-    );
+    // Find system by ID (case-insensitive) with priority matching:
+    // 1. Exact match on systemId
+    // 2. Exact match on systemId-client combo
+    // 3. Starts with match (for partial typing)
+    const searchLower = systemId.toLowerCase();
+    const system =
+      systems.find((s) => s.systemId.toLowerCase() === searchLower) ||
+      systems.find((s) => `${s.systemId}-${s.client}`.toLowerCase() === searchLower) ||
+      systems.find((s) => s.systemId.toLowerCase().startsWith(searchLower));
 
     if (!system) {
       await showToast({
