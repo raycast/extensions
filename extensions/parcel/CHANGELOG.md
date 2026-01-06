@@ -1,5 +1,10 @@
 # Parcel Changelog
 
+## [Internationalization and Carrier Name Display] - {PR_MERGE_DATE}
+
+- Removed hardcoded locale value introduced in a previous change - dates now display correctly for all international users
+- Carrier names are now displayed throughout the interface instead of codes (e.g., "FedEx" instead of "fedex") for better readability
+
 ## [Add Delivery Overhaul] - 2025-11-06
 
 - Add Delivery now works on both Mac and Windows without requiring the Parcel Mac app to be installed by using Parcel's Add Delivery API
