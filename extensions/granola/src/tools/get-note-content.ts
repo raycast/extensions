@@ -6,6 +6,7 @@ import { getFoldersWithCache } from "../utils/folderHelpers";
 import { findDocumentById } from "../utils/toolHelpers";
 import { getDocumentPanels } from "../utils/granolaApi";
 import { toError } from "../utils/errorUtils";
+import { getMeetingDuration } from "../utils/fetchData";
 
 type Input = {
   /**
@@ -42,6 +43,10 @@ type Output = {
    * Folder names that this note belongs to
    */
   folderNames: string[];
+  /**
+   * Meeting duration (e.g., "45 minutes", "1 hour 23 minutes"), or null if unavailable
+   */
+  duration: string | null;
 };
 
 /**
@@ -82,6 +87,7 @@ export default async function tool(input: Input): Promise<Output> {
       content: "",
       folderIds: [],
       folderNames: [],
+      duration: null,
     };
   }
 
@@ -132,12 +138,15 @@ export default async function tool(input: Input): Promise<Output> {
       formattedDate = new Date().toISOString();
     }
 
+    const duration = await getMeetingDuration(input.noteId);
+
     return {
       title: document.title || "Untitled Note",
       date: formattedDate,
       content,
       folderIds,
       folderNames,
+      duration,
     };
   } catch (error) {
     showFailureToast(toError(error), { title: "Failed to fetch note" });
@@ -147,6 +156,7 @@ export default async function tool(input: Input): Promise<Output> {
       content: "",
       folderIds: [],
       folderNames: [],
+      duration: null,
     };
   }
 }

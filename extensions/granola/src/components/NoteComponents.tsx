@@ -10,6 +10,7 @@ import { Doc, NoteActionsProps, PanelsByDocId, Folder } from "../utils/types";
 import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "../utils/iconMapper";
 import { useDocumentPanels } from "../utils/useDocumentPanels";
 import { useDocumentNotesMarkdown } from "../utils/useDocumentNotesMarkdown";
+import { useTranscriptDuration } from "../utils/useTranscriptDuration";
 import { isAbortError, toError, toErrorMessage } from "../utils/errorUtils";
 
 const NOTION_SAVE_TIMEOUT_MS = 120000;
@@ -201,11 +202,16 @@ function MyNotesDetailView({
   panels: PanelsByDocId | null;
 }) {
   const { notesMarkdown, isLoading } = useDocumentNotesMarkdown(doc.id);
+  const { duration } = useTranscriptDuration(doc.id);
+
+  const createdAt = `Created at: ${new Date(doc.created_at).toLocaleString()}`;
+  const durationLine = duration ? `\n\nDuration: ${duration}` : "";
+  const metadata = `${createdAt}${durationLine}`;
 
   const markdown =
     notesMarkdown && notesMarkdown.trim()
-      ? `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${notesMarkdown}`
-      : `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo My Notes available for this note.`;
+      ? `# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\n${notesMarkdown}`
+      : `# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\nNo My Notes available for this note.`;
 
   return (
     <Detail
@@ -230,6 +236,7 @@ function MyNotesDetailView({
  */
 function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitle: string }) {
   const { panels, isLoading: panelsLoading } = useDocumentPanels(doc.id);
+  const { duration } = useTranscriptDuration(doc.id);
 
   const panelId = panels ? getPanelId(panels, doc.id) : undefined;
   const panelData = panels && panels[doc.id] && panelId ? panels[doc.id][panelId] : null;
@@ -243,6 +250,10 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
   if (content) {
     content = convertHtmlToMarkdown(content);
   }
+
+  const createdAt = `Created at: ${new Date(doc.created_at).toLocaleString()}`;
+  const durationLine = duration ? `\n\nDuration: ${duration}` : "";
+  const metadata = `${createdAt}${durationLine}`;
 
   // Special handling for iOS-created notes that haven't synced yet
   if (!content.trim() && doc.creation_source === "iOS") {
@@ -274,7 +285,7 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
     return (
       <Detail
         isLoading={panelsLoading}
-        markdown={`# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`}
+        markdown={`# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\nNo content available for this note.`}
         actions={
           <ActionPanel>
             <Action.Push
@@ -297,7 +308,7 @@ function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitl
   return (
     <Detail
       isLoading={panelsLoading}
-      markdown={`# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${content}`}
+      markdown={`# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\n${content}`}
       actions={
         <ActionPanel>
           <Action.Push

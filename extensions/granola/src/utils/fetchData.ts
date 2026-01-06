@@ -134,7 +134,11 @@ export function fetchGranolaData(route: string) {
 
 const TRANSCRIPT_NOT_FOUND_MESSAGE = "Transcript not available for this note.";
 
-export async function getTranscript(docId: string): Promise<string> {
+/**
+ * Fetches raw transcript segments with timestamps for a document.
+ * Use this when you need access to timing information (start/end timestamps).
+ */
+export async function getTranscriptSegments(docId: string): Promise<TranscriptSegment[]> {
   const url = `https://api.granola.ai/v1/get-document-transcript`;
   try {
     const token = await getAccessToken();
@@ -161,8 +165,22 @@ export async function getTranscript(docId: string): Promise<string> {
     }
 
     const transcriptSegments = (await response.json()) as TranscriptSegment[];
+    return transcriptSegments || [];
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+    const normalizedError = toError(error);
+    showFailureToast(normalizedError, { title: "Failed to Fetch Transcript Segments" });
+    throw normalizedError;
+  }
+}
 
-    if (!transcriptSegments || transcriptSegments.length === 0) {
+export async function getTranscript(docId: string): Promise<string> {
+  try {
+    const transcriptSegments = await getTranscriptSegments(docId);
+
+    if (transcriptSegments.length === 0) {
       return TRANSCRIPT_NOT_FOUND_MESSAGE;
     }
 
@@ -184,6 +202,51 @@ export async function getTranscript(docId: string): Promise<string> {
     const normalizedError = toError(error);
     showFailureToast(normalizedError, { title: "Failed to Fetch Transcript" });
     throw normalizedError;
+  }
+}
+
+export function formatDurationVerbose(durationMs: number): string {
+  if (durationMs <= 0) return "";
+
+  const totalMinutes = Math.floor(durationMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours === 0) {
+    return minutes === 1 ? "1 minute" : `${minutes} minutes`;
+  }
+
+  const hourPart = hours === 1 ? "1 hour" : `${hours} hours`;
+  if (minutes === 0) {
+    return hourPart;
+  }
+
+  const minutePart = minutes === 1 ? "1 minute" : `${minutes} minutes`;
+  return `${hourPart} ${minutePart}`;
+}
+
+export function calculateDurationFromSegments(segments: TranscriptSegment[]): number | null {
+  if (segments.length === 0) return null;
+
+  const timestamps = segments
+    .flatMap((seg) => [seg.start_timestamp, seg.end_timestamp])
+    .filter((ts): ts is string => !!ts)
+    .map((ts) => new Date(ts).getTime())
+    .filter((t) => !isNaN(t));
+
+  if (timestamps.length < 2) return null;
+
+  const durationMs = Math.max(...timestamps) - Math.min(...timestamps);
+  return durationMs > 0 ? durationMs : null;
+}
+
+export async function getMeetingDuration(docId: string): Promise<string | null> {
+  try {
+    const segments = await getTranscriptSegments(docId);
+    const durationMs = calculateDurationFromSegments(segments);
+    return durationMs ? formatDurationVerbose(durationMs) : null;
+  } catch {
+    return null;
   }
 }
 
