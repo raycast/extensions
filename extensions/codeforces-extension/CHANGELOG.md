@@ -5,7 +5,7 @@
 - Updated Codeforces API documentation
 - Added support for filtering problems by difficulty
 - Added pagination for problem lists
-- Improved error handling for problem fetching
+- Removed problem view due to Codeforces limitations
 
 ## [Update] - 2025-01-28
 

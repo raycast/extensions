@@ -4,7 +4,6 @@
 
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
-import fetch from "node-fetch";
 import { CODEFORCES_API_BASE } from "../constants";
 import type { ApiResponse } from "../types/codeforces";
 
@@ -43,6 +42,7 @@ async function fetchCodeforces<T>(methodPath: string, params?: QueryParams): Pro
   const url = `${CODEFORCES_API_BASE}${methodPath}${query}`;
 
   const response = await fetch(url, {
+    // Assign User-Agent to hopefully minimize bot detection issues
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
@@ -69,9 +69,11 @@ async function fetchCodeforces<T>(methodPath: string, params?: QueryParams): Pro
  * It handles API-level errors and network errors, showing a failure toast.
  */
 export function useCodeforces<T>(methodPath: string, params?: QueryParams) {
+  // Normalize params to reduce unnecessary re-fetches or cache misses
+  const stableKey = params ? JSON.stringify(Object.entries(params).sort()) : "";
   const { isLoading, data, error, revalidate } = useCachedPromise(
     (path, p) => fetchCodeforces<T>(path, p),
-    [methodPath, JSON.stringify(params)], // use stringify for stable dependency
+    [methodPath, stableKey],
     {
       keepPreviousData: true,
     },

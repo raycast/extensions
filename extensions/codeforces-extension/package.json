@@ -54,9 +54,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.2",
-    "cheerio": "^1.1.2",
-    "node-fetch": "^3.3.2"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
