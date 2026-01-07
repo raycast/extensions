@@ -24,7 +24,7 @@ windows:
   - tabs:
       - title: Claude Code
         layout:
-          cwd: ${directory}
+          cwd: "${directory.replace(/"/g, '\\"')}"
           commands:
             - exec: claude
 `;
