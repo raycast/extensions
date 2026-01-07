@@ -3,14 +3,20 @@ import { List, Icon } from "@raycast/api";
 export type SortOption = "name-asc" | "name-desc" | "created-desc" | "created-asc" | "modified-desc" | "modified-asc";
 
 interface FilterSortDropdownProps {
-  selectedPlatforms: string[];
-  dropdownSelection: string;
+  selectedPlatforms?: string[];
+  dropdownSelection?: string;
   onChange: (value: string) => void;
 }
 
-export function FilterSortDropdown({ selectedPlatforms, dropdownSelection, onChange }: FilterSortDropdownProps) {
+export function FilterSortDropdown({ selectedPlatforms = [], dropdownSelection, onChange }: FilterSortDropdownProps) {
   return (
-    <List.Dropdown tooltip="Filter & Sort" value={dropdownSelection} onChange={onChange}>
+    <List.Dropdown
+      tooltip="Filter & Sort"
+      defaultValue="sort-created-desc"
+      value={dropdownSelection}
+      onChange={onChange}
+      storeValue
+    >
       <List.Dropdown.Section title="Filter by Platform">
         <List.Dropdown.Item
           title="All Platforms"

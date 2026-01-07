@@ -12,9 +12,10 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("created-desc");
-  const [dropdownSelection, setDropdownSelection] = useState<string>("sort-created-desc");
-  const [needsSync, setNeedsSync] = useState(false);
 
+  const [dropdownSelection, setDropdownSelection] = useState<string | undefined>();
+
+  const [needsSync, setNeedsSync] = useState(false);
   const { isSyncing, handleSync } = useSync();
 
   // Check if initial sync is needed

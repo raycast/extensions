@@ -157,6 +157,23 @@ export interface DatabaseFilters {
 }
 
 /**
+ * Get a single key by ID from the database
+ */
+export async function getKeyById(keyId: number): Promise<ProcessedTranslationKey | null> {
+  const index = loadIndex();
+  const keyIndex = index.keys.find((k) => k.i === keyId);
+
+  if (!keyIndex) {
+    return null;
+  }
+
+  const chunk = loadChunk(keyIndex.c);
+  const fullKey = chunk.find((k) => k.keyId === keyId);
+
+  return fullKey || null;
+}
+
+/**
  * Query all keys with optional filtering using the index
  */
 export async function getAllKeys(filters: DatabaseFilters = {}): Promise<ProcessedTranslationKey[]> {

@@ -10,7 +10,7 @@ import type {
   KeyParamsWithPagination,
   Translation as LokaliseTranslation,
 } from "@lokalise/node-api";
-import { getAllKeys, hasKeys, addSingleKey, SortOption, type DatabaseFilters } from "./database";
+import { getAllKeys, hasKeys, addSingleKey, SortOption, getKeyById, type DatabaseFilters } from "./database";
 import * as syncService from "./sync-service";
 import { getLanguageName } from "../data/languages";
 import type { Platform } from "../types";
@@ -59,6 +59,7 @@ export interface ProcessedTranslationKey {
   context?: string;
   createdAt?: string; // ISO date string
   modifiedAt?: string; // ISO date string
+  filenames?: Record<string, string | null>; // Platform-specific filenames
   translations: Array<{
     languageIso: string;
     languageName: string;
@@ -392,6 +393,7 @@ export class Client {
       context: key.context,
       createdAt: key.created_at,
       modifiedAt: key.modified_at,
+      filenames: key.filenames,
       translations: processTranslations(key.translations, getLanguageName),
       screenshots: processScreenshots(key.screenshots),
     };
@@ -418,6 +420,13 @@ export class Client {
     };
 
     return await getAllKeys(filters);
+  }
+
+  /**
+   * Get a single key from the database by ID
+   */
+  async getKeyFromDatabase(keyId: number): Promise<ProcessedTranslationKey | null> {
+    return await getKeyById(keyId);
   }
 
   /**

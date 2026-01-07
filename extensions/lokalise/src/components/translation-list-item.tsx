@@ -1,5 +1,6 @@
-import { List, ActionPanel, Action, Icon, openExtensionPreferences } from "@raycast/api";
 import type { ReactElement } from "react";
+import { List, ActionPanel, Action, Icon, openExtensionPreferences } from "@raycast/api";
+import { DuplicateTranslationForm } from "./duplicate-translation-form";
 
 interface KeyData {
   keyId: number;
@@ -8,6 +9,7 @@ interface KeyData {
   mainTranslation?: string;
   platforms: string[];
   isPlural: boolean;
+  description?: string;
 }
 
 interface TranslationListItemProps {
@@ -43,6 +45,12 @@ export function TranslationListItem({ keyData, target, onSync }: TranslationList
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
             )}
+            <Action.Push
+              title="Duplicate Key"
+              icon={Icon.Duplicate}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              target={<DuplicateTranslationForm keyId={keyData.keyId} />}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
