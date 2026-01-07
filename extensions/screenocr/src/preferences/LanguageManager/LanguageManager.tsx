@@ -67,19 +67,20 @@ export const LanguagesManagerList = () => {
       isDefault: true,
     } as Language;
 
-    if (typeof selectedLanguages !== "undefined") {
-      const data = JSON.parse(
-        selectedLanguages as unknown as string,
-      ) as Language[];
-
-      setSelectedLanguages((draft) => {
-        draft.push(...data, primaryLanguage);
-      });
-    } else {
+    if (typeof selectedLanguages === "undefined") {
       setSelectedLanguages((draft) => {
         draft.push(primaryLanguage);
       });
+      return;
     }
+
+    const data = JSON.parse(
+      selectedLanguages as unknown as string,
+    ) as Language[];
+
+    setSelectedLanguages((draft) => {
+      draft.push(...data, primaryLanguage);
+    });
   };
 
   const selectLanguage = (language: Language) => {

@@ -4,6 +4,8 @@
 
 - Added [cross-extension support](https://github.com/LitoMore/raycast-cross-extension-conventions) to enable OCR results to be used by other extensions
 - Added documentation to include [cross-extension usage](docs/cross-extension-usage.md)
+- Refactored code to use early returns for improved readability
+- Modernized error handling using `@raycast/utils` while respecting user preferences
 - Updated dependencies
 
 ## [Improvements] - 2025-11-13
