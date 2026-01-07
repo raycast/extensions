@@ -1,37 +1,25 @@
-import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Detail, ActionPanel, Action, showToast, Toast, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-interface NoResponse {
-  reason?: string;
-  error?: string;
+interface NaasResponse {
+  reason: string;
 }
 
 export default function Command() {
-  // Using the confirmed working API URL
-  const { isLoading, data, revalidate } = useFetch<NoResponse>(
-    "https://naas.isalman.dev/no",
-    {
-      keepPreviousData: true,
-      onError: (error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Rejection Failed",
-          message: error.message,
-        });
-      },
-    },
-  );
+  // Stable live endpoint
+  const { isLoading, data, revalidate, error } = useFetch<NaasResponse>("https://naas.isalman.dev/no", {
+    keepPreviousData: true,
+  });
 
-  // Display logic: Success Reason > API Error > Fallback
-  const displayText =
-    data?.reason ||
-    data?.error ||
-    (isLoading ? "Loading..." : "Something went wrong.");
+  if (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not fetch 'No' reason",
+      message: error.message,
+    });
+  }
 
-  // Format the UI with a bit of style
-  const markdown = `# No.
-  
-> ${displayText}`;
+  const markdown = isLoading ? "Fetching a great reason to say no..." : `## ${data?.reason || "No."}`;
 
   return (
     <Detail
@@ -39,15 +27,13 @@ export default function Command() {
       markdown={markdown}
       actions={
         <ActionPanel>
+          <Action.CopyToClipboard title="Copy Reason" content={data?.reason || ""} />
           <Action
             title="Get Another No"
+            icon={Icon.ArrowClockwise}
             onAction={() => revalidate()}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            icon={{ source: "arrow-clockwise.png" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
-          {data?.reason && (
-            <Action.CopyToClipboard content={data.reason} title="Copy Reason" />
-          )}
         </ActionPanel>
       }
     />
