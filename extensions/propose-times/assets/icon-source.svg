@@ -1,0 +1,58 @@
+<svg width="512" height="512" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="clock-cutout">
+      <rect x="0" y="0" width="24" height="24" fill="white" />
+      <circle cx="17.5" cy="17.5" r="5.5" fill="black" />
+    </mask>
+  </defs>
+
+  <path
+    d="M19 4H5C3.89543 4 3 4.89543 3 6V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V6C21 4.89543 20.1046 4 19 4Z"
+    stroke="#5A55D6"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    mask="url(#clock-cutout)"
+  />
+
+  <path
+    d="M16 2V6"
+    stroke="#5A55D6"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M8 2V6"
+    stroke="#5A55D6"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <path
+    d="M3 10H21"
+    stroke="#5A55D6"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    mask="url(#clock-cutout)"
+  />
+
+  <g>
+    <circle
+      cx="17.5"
+      cy="17.5"
+      r="4.5"
+      stroke="#5A55D6"
+      stroke-width="2"
+    />
+    <path
+      d="M17.5 15.5V17.5H19.5"
+      stroke="#5A55D6"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+</svg>
