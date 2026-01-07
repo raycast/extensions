@@ -16,43 +16,27 @@ export const TEMPERATURE_UNITS = {
   reaumur: { name: "Réaumur", symbol: "°Ré" },
 };
 
-function fahrenheitToCelsius(f: number): number {
-  return ((f - 32) * 5) / 9;
-}
+const fahrenheitToCelsius = (f: number): number => ((f - 32) * 5) / 9;
 
-function kelvinToCelsius(k: number): number {
-  return k - 273.15;
-}
+const kelvinToCelsius = (k: number): number => k - 273.15;
 
-function rankineToCelsius(r: number): number {
-  return ((r - 491.67) * 5) / 9;
-}
+const rankineToCelsius = (r: number): number => ((r - 491.67) * 5) / 9;
 
-function reaumurToCelsius(re: number): number {
-  return (re * 5) / 4;
-}
+const reaumurToCelsius = (re: number): number => (re * 5) / 4;
 
-function celsiusToFahrenheit(c: number): number {
-  return (c * 9) / 5 + 32;
-}
+const celsiusToFahrenheit = (c: number): number => (c * 9) / 5 + 32;
 
-function celsiusToKelvin(c: number): number {
-  return c + 273.15;
-}
+const celsiusToKelvin = (c: number): number => c + 273.15;
 
-function celsiusToRankine(c: number): number {
-  return ((c + 273.15) * 9) / 5;
-}
+const celsiusToRankine = (c: number): number => ((c + 273.15) * 9) / 5;
 
-function celsiusToReaumur(c: number): number {
-  return (c * 4) / 5;
-}
+const celsiusToReaumur = (c: number): number => (c * 4) / 5;
 
-function assertNever(x: never): never {
+const assertNever = (x: never): never => {
   throw new Error(`Unhandled case: ${x}`);
-}
+};
 
-export function toCelsius(value: number, fromUnit: TemperatureUnit): number {
+export const toCelsius = (value: number, fromUnit: TemperatureUnit): number => {
   switch (fromUnit) {
     case "celsius":
       return value;
@@ -67,9 +51,9 @@ export function toCelsius(value: number, fromUnit: TemperatureUnit): number {
     default:
       return assertNever(fromUnit);
   }
-}
+};
 
-function fromCelsius(celsius: number, toUnit: TemperatureUnit): number {
+const fromCelsius = (celsius: number, toUnit: TemperatureUnit): number => {
   switch (toUnit) {
     case "celsius":
       return celsius;
@@ -84,9 +68,9 @@ function fromCelsius(celsius: number, toUnit: TemperatureUnit): number {
     default:
       return assertNever(toUnit);
   }
-}
+};
 
-export function parseInput(input: string): number | null {
+export const parseInput = (input: string): number | null => {
   if (!input || input.trim() === "") {
     return null;
   }
@@ -98,9 +82,9 @@ export function parseInput(input: string): number | null {
   }
 
   return value;
-}
+};
 
-export function convertTemperature(value: number, fromUnit: TemperatureUnit): TemperatureResult[] {
+export const convertTemperature = (value: number, fromUnit: TemperatureUnit): TemperatureResult[] => {
   const celsius = toCelsius(value, fromUnit);
   const targetUnits = (Object.keys(TEMPERATURE_UNITS) as TemperatureUnit[]).filter((unit) => unit !== fromUnit);
 
@@ -115,4 +99,4 @@ export function convertTemperature(value: number, fromUnit: TemperatureUnit): Te
       formatted: `${convertedValue.toFixed(2)} ${unitInfo.symbol}`,
     };
   });
-}
+};

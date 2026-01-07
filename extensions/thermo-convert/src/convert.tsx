@@ -10,7 +10,7 @@ const UNIT_ICONS: Record<TemperatureUnit, string> = {
   reaumur: "📜",
 };
 
-function getTemperatureContext(celsius: number): string {
+const getTemperatureContext = (celsius: number): string => {
   if (celsius < -273.15) return "Below absolute zero (impossible)";
   if (celsius === -273.15) return "Absolute zero";
   if (celsius < -100) return "Extremely cold";
@@ -22,16 +22,16 @@ function getTemperatureContext(celsius: number): string {
   if (celsius < 100) return "Hot";
   if (celsius === 100) return "Water boiling point";
   return "Very hot";
-}
+};
 
-function getTemperatureColor(unit: string, value: number): Color {
+const getTemperatureColor = (unit: string, value: number): Color => {
   if (unit === "Kelvin" && value < 273.15) return Color.Blue;
   if (unit === "Celsius" && value < 0) return Color.Blue;
   if (unit === "Fahrenheit" && value < 32) return Color.Blue;
   if (unit === "Celsius" && value > 30) return Color.Orange;
   if (unit === "Fahrenheit" && value > 86) return Color.Orange;
   return Color.SecondaryText;
-}
+};
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences.Convert>();
