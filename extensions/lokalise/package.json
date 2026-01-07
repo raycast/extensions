@@ -27,6 +27,104 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "extract-keys-from-image",
+      "title": "Extract Keys from Image",
+      "description": "Extract translation keys from a design screenshot, Figma export, or UI mockup. Analyzes the image using AI to identify all translatable text and suggests appropriate key names. Use this when the user provides a screenshot or image of a design.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "imageUrl": {
+            "type": "string",
+            "description": "URL or path to the image file (screenshot, Figma export, UI mockup)"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["web", "ios", "android", "other"],
+            "description": "Target platform for the extracted keys (defaults to 'web')"
+          },
+          "context": {
+            "type": "string",
+            "description": "Optional context about the image (e.g., 'login screen', 'settings page', 'onboarding flow')"
+          }
+        },
+        "required": ["imageUrl"]
+      }
+    },
+    {
+      "name": "search-translation-keys",
+      "title": "Search Translation Keys",
+      "description": "Search for existing translation keys in Lokalise. Returns matching keys with their translations and metadata.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find translation keys"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["web", "ios", "android", "other"],
+            "description": "Optional platform filter"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "add-translation-key",
+      "title": "Add Translation Key",
+      "description": "Add a new translation key to Lokalise. This will create the key with the provided details. Always confirm with the user before adding keys.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "keyName": {
+            "type": "string",
+            "description": "The translation key name (e.g., 'common.button.save')"
+          },
+          "translationValue": {
+            "type": "string",
+            "description": "The default translation text"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description to help translators understand the context"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["web", "ios", "android", "other"],
+            "description": "Target platform for this key"
+          }
+        },
+        "required": ["keyName", "translationValue", "platform"]
+      }
+    },
+    {
+      "name": "get-translation-key-details",
+      "title": "Get Translation Key Details",
+      "description": "Get detailed information about a specific translation key including all translations and screenshots.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "keyName": {
+            "type": "string",
+            "description": "The translation key name to look up"
+          }
+        },
+        "required": ["keyName"]
+      }
+    },
+    {
+      "name": "list-files",
+      "title": "List Files",
+      "description": "List all available files in the Lokalise project. Use this to get the list of files that can be assigned to translation keys.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
   "preferences": [
     {
       "name": "apiToken",

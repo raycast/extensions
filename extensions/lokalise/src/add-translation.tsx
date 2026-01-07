@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { client } from "./api/client";
+import type { Platform } from "./types";
 
 interface TranslationFormValues {
   keyName: string;
@@ -9,7 +10,7 @@ interface TranslationFormValues {
   description: string;
   screenshots: string[];
   isPlural: boolean;
-  platform: string;
+  platform: Platform;
   assignedFile: string;
 }
 

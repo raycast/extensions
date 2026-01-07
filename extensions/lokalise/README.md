@@ -6,11 +6,13 @@ A Raycast extension to quickly add translation keys to your Lokalise project.
 
 - **Add Translation**: Add new translation keys directly from Raycast
 - **View Translations**: Browse and search all translation keys in your Lokalise project
+- **AI Tools for Raycast AI**: Let Raycast AI search, add, and manage translation keys with natural language
 - Support for multiple platforms (Web, iOS, Android, Other)
 - Plural form support
 - Search and filter translations
 - Copy translations to clipboard
 - View detailed information about each translation key
+- User confirmation for AI-suggested keys to prevent mistakes
 
 ## Setup
 
@@ -53,6 +55,46 @@ A Raycast extension to quickly add translation keys to your Lokalise project.
    - **⌘C**: Copy translation to clipboard
    - **View Details**: See all translations and metadata for a key
    - **⌘R**: Refresh the list
+
+### Using Raycast AI with Lokalise
+
+This extension provides AI tools that allow Raycast AI to interact with your Lokalise project using natural language. You can ask Raycast AI to:
+
+**Extract Keys from Screenshots/Designs:**
+```
+"Extract translation keys from this Figma screenshot" [attach image]
+"What text needs to be translated in this design?" [attach image]
+"Analyze this UI mockup and suggest translation keys" [attach image]
+```
+
+**Search for Translation Keys:**
+```
+"Find all translation keys related to login"
+"Search for keys containing 'button' on the iOS platform"
+"Show me translation keys for error messages"
+```
+
+**Add New Translation Keys:**
+```
+"Add a translation key 'common.button.submit' with value 'Submit' for web"
+"Create a new key 'home.title.welcome' with text 'Welcome to our app' for iOS"
+```
+
+**Get Key Details:**
+```
+"Show me details for the key 'common.button.save'"
+"What translations exist for 'home.title.welcome'?"
+```
+
+**Workflow Example:**
+1. Take a screenshot of your Figma design
+2. Open Raycast AI and attach the screenshot
+3. Say: "Extract translation keys from this design for iOS"
+4. AI will analyze the image and list all translatable text with suggested key names
+5. Review the suggestions and say: "Add the first three keys to Lokalise"
+6. Confirm each key addition when prompted
+
+**Important:** When AI suggests adding keys, you'll always see a confirmation dialog before any keys are added to Lokalise. This prevents accidental or incorrect additions.
 
 ## API Reference
 

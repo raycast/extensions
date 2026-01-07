@@ -8,11 +8,12 @@ import type {
   File,
   Key,
   KeyParamsWithPagination,
-  Translation,
+  Translation as LokaliseTranslation,
 } from "@lokalise/node-api";
 import { getAllKeys, hasKeys, addSingleKey, SortOption, type DatabaseFilters } from "./database";
-import { getLanguageName } from "../data/languages";
 import * as syncService from "./sync-service";
+import { getLanguageName } from "../data/languages";
+import type { Platform } from "../types";
 
 export interface TranslationFile {
   fileId: number;
@@ -25,7 +26,7 @@ export interface CreateTranslationKeyParams {
   description?: string;
   screenshotPaths?: string[];
   isPlural?: boolean;
-  platform: string; // Accept string from form, convert internally
+  platform: Platform | string;
   assignedFile?: string;
 }
 
@@ -110,7 +111,7 @@ function getFileName(filePath: string): string {
   return filePath.split("/").pop() || "Screenshot";
 }
 
-function isTranslation(obj: unknown): obj is Translation {
+function isTranslation(obj: unknown): obj is LokaliseTranslation {
   if (typeof obj !== "object" || obj === null) {
     return false;
   }
