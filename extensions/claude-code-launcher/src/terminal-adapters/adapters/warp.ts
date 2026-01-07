@@ -18,7 +18,7 @@ export class WarpAdapter implements TerminalAdapter {
     const configName = `claude-code-${randomUUID()}`;
     const configPath = join(this.launchConfigDir, `${configName}.yaml`);
 
-    const yamlContent = `---
+    const yamlContent = `
 name: ${configName}
 windows:
   - tabs:
