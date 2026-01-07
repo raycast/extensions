@@ -3,14 +3,16 @@ import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 import { exec, execFileSync } from "child_process";
 
-interface Todo {
+interface InstallationStep {
   id: string;
   title: string;
   subtitle?: string;
   isCompleted: boolean;
 }
 
-function defaultItems(): Todo[] {
+type Todo = InstallationStep;
+
+function defaultItems(): InstallationStep[] {
   return [
     { id: "1", title: "Install Homebrew", isCompleted: false },
     { id: "2", title: "Install LibreOffice", isCompleted: false },
