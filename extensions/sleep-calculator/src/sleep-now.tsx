@@ -11,19 +11,7 @@ import {
   CYCLE_LENGTH,
 } from "./lib/sleep-utils";
 
-// Sleep quality configuration based on cycles
-function getSleepQuality(cycles: number): {
-  label: string;
-  color: Color;
-  icon: Icon;
-} {
-  if (cycles >= 6) return { label: "Optimal", color: Color.Green, icon: Icon.Star };
-  if (cycles === 5) return { label: "Great", color: Color.Blue, icon: Icon.Star };
-  if (cycles === 4) return { label: "Good", color: Color.Yellow, icon: Icon.Circle };
-  if (cycles === 3) return { label: "Light", color: Color.Orange, icon: Icon.Circle };
-  if (cycles === 2) return { label: "Nap", color: Color.Red, icon: Icon.Circle };
-  return { label: "Minimal", color: Color.Red, icon: Icon.ExclamationMark };
-}
+// Move this function to src/lib/sleep-utils.ts and import it here
 
 export default function SleepNow() {
   const [searchText, setSearchText] = useState("");
