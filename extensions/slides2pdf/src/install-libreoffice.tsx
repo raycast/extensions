@@ -60,7 +60,7 @@ async function goToBrew() {
 }
 
 export default function Command() {
-  const [items, setItems] = useCachedState<Todo[]>("todos", defaultItems());
+  const [items, setItems] = useCachedState<Todo[]>("installationChecklist", defaultItems());
 
   // initial checks
   useEffect(() => {
