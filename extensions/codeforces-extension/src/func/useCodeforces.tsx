@@ -63,17 +63,29 @@ async function fetchCodeforces<T>(methodPath: string, params?: QueryParams): Pro
 }
 
 /**
+ * Normalize params by creating a new object with sorted keys.
+ * This ensures stable cache keys even when object key order changes.
+ */
+function normalizeParams(params?: QueryParams): QueryParams | undefined {
+  if (!params) return undefined;
+  const sortedEntries = Object.entries(params).sort(([a], [b]) => a.localeCompare(b));
+  return Object.fromEntries(sortedEntries) as QueryParams;
+}
+
+/**
  * A generic, non-paginated hook for fetching data from the Codeforces API.
  *
  * It uses `@raycast/utils/useCachedPromise` for caching and revalidation.
  * It handles API-level errors and network errors, showing a failure toast.
  */
 export function useCodeforces<T>(methodPath: string, params?: QueryParams) {
-  // Normalize params to reduce unnecessary re-fetches or cache misses
-  const stableKey = params ? JSON.stringify(Object.entries(params).sort()) : "";
+  // Normalize params to reduce unnecessary re-fetches or cache misses.
+  // Sorting keys ensures stable cache keys even when object key order changes.
+  const normalizedParams = normalizeParams(params);
+
   const { isLoading, data, error, revalidate } = useCachedPromise(
     (path, p) => fetchCodeforces<T>(path, p),
-    [methodPath, stableKey],
+    [methodPath, normalizedParams],
     {
       keepPreviousData: true,
     },

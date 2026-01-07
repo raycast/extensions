@@ -1,14 +1,15 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useCodeforces } from "./func/useCodeforces";
 import type { Problem, Problemset } from "./types/codeforces";
 import { getColorHexCode } from "./func/HexCode";
 
+const PAGE_SIZE = 50;
+
 export default function Command() {
   const [query, setQuery] = useState<string>("");
   const [difficulty, setDifficulty] = useState<string>("all");
-  const [itemsToShow, setItemsToShow] = useState(50);
-  const pageSize = 50;
+  const [page, setPage] = useState(0);
 
   // Fetch the full problemset (typed). The hook handles query building and typing.
   const { isLoading, result } = useCodeforces<Problemset>("problemset.problems");
@@ -40,16 +41,34 @@ export default function Command() {
       });
     }
 
+    // 3. Sort by difficulty (rating), with unrated problems at the end
+    list = [...list].sort((a, b) => {
+      const ratingA = a.rating ?? Infinity;
+      const ratingB = b.rating ?? Infinity;
+      return ratingA - ratingB;
+    });
+
     return list;
   }, [problems, query, difficulty]);
 
   const itemsToRender = useMemo(() => {
-    return filtered.slice(0, itemsToShow);
-  }, [filtered, itemsToShow]);
+    return filtered.slice(0, (page + 1) * PAGE_SIZE);
+  }, [filtered, page]);
 
-  async function onSearchChange(text: string) {
+  const hasMore = filtered.length > itemsToRender.length;
+
+  const onLoadMore = useCallback(() => {
+    setPage((prev) => prev + 1);
+  }, []);
+
+  function onSearchTextChange(text: string) {
     setQuery(text);
-    setItemsToShow(pageSize); // Reset visible items on new search
+    setPage(0); // Reset to first page on new search
+  }
+
+  function onDifficultyChange(value: string) {
+    setDifficulty(value);
+    setPage(0); // Reset to first page on filter change
   }
 
   const ratings = [
@@ -68,14 +87,7 @@ export default function Command() {
   ];
 
   const searchBarAccessory = (
-    <List.Dropdown
-      tooltip="Filter by Difficulty"
-      onChange={(value) => {
-        setDifficulty(value);
-        setItemsToShow(pageSize); // Reset visible items on filter change
-      }}
-      storeValue
-    >
+    <List.Dropdown tooltip="Filter by Difficulty" onChange={onDifficultyChange} storeValue>
       <List.Dropdown.Item title="All Ratings" value="all" />
       {ratings.map((r) => {
         const [min, max] = r.split("-");
@@ -88,15 +100,18 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading && problems.length === 0}
-      onSearchTextChange={onSearchChange}
+      onSearchTextChange={onSearchTextChange}
       searchBarPlaceholder="Search problems (e.g., 4A, Watermelon)"
       searchBarAccessory={searchBarAccessory}
+      pagination={{
+        onLoadMore,
+        hasMore,
+        pageSize: PAGE_SIZE,
+      }}
       throttle
     >
-      {itemsToRender.map((problem, index) => {
+      {itemsToRender.map((problem) => {
         const id = `${problem.contestId ?? ""}${problem.index}`;
-        const isLastItem = index === itemsToRender.length - 1;
-        const hasMore = filtered.length > itemsToRender.length;
 
         return (
           <List.Item
@@ -121,15 +136,6 @@ export default function Command() {
                     url={`https://codeforces.com/problemset/problem/${problem.contestId}/${problem.index}`}
                   />
                 </ActionPanel.Section>
-                {isLastItem && hasMore && (
-                  <ActionPanel.Section>
-                    <Action
-                      title="Load More Problems"
-                      icon={Icon.Plus}
-                      onAction={() => setItemsToShow((current) => current + pageSize)}
-                    />
-                  </ActionPanel.Section>
-                )}
               </ActionPanel>
             }
           />
