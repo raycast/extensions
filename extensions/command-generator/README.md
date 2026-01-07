@@ -1,7 +1,7 @@
 # Command Generator
 A Raycast extension that generates CLI commands and code snippets from natural language. Inspired by Cursor's Cmd+K.
 
-![Screenshot of Command Generator in Raycast](metadata/command-generator-1.png)
+![Screenshot of Command Generator in Raycast](screenshots/command-generator-1.png)
 
 Output:
 ```
@@ -26,7 +26,7 @@ Open Raycast Settings > Extensions > Command Generator:
 - **Google AI API Key**: Required for Gemini (https://aistudio.google.com/apikey)
 - **Anthropic API Key**: Required for Haiku (https://console.anthropic.com/settings/keys)
 
-![Screenshot of Command Generator settings panel](metadata/command-generator-2.png)
+![Screenshot of Command Generator settings panel](screenshots/command-generator-2.png)
 
 ## Usage
 1. Run "Generate Command" from Raycast (alias for quick access)
@@ -35,7 +35,7 @@ Open Raycast Settings > Extensions > Command Generator:
 4. Press **Cmd+Shift+C** to copy instead of paste
 
 ### History
-![Screenshot of Command Generator filter history feature](metadata/command-generator-3.png)
+![Screenshot of Command Generator filter history feature](screenshots/command-generator-3.png)
 
 - When search is empty, history is shown
 - Type to filter history
@@ -50,7 +50,7 @@ The extension automatically captures:
 Context is only included when relevant to avoid confusing the model.
 
 ### Examples
-![Screenshot of Command Generator in Raycast](metadata/command-generator-4.png)
+![Screenshot of Command Generator in Raycast](screenshots/command-generator-4.png)
 ```
 ffmpeg -i input.mp4 -ss 00:00:00 -to 00:00:10 -c copy output.mp4
 ```
