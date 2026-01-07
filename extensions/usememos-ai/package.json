@@ -1,0 +1,122 @@
+{
+  "name": "usememos-ai",
+  "title": "Usememos AI",
+  "description": "Manage your memos with AI-powered search and organization",
+  "icon": "memos-icon.png",
+  "author": "Pushpavel",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-memos",
+      "title": "List Memos",
+      "description": "Browse and manage your memos",
+      "mode": "view"
+    },
+    {
+      "name": "create-memo",
+      "title": "Create Memo",
+      "description": "Create a new memo",
+      "mode": "view"
+    },
+    {
+      "name": "search-memos",
+      "title": "Search Memos",
+      "description": "Search through your memos",
+      "mode": "view"
+    },
+    {
+      "name": "quick-ai",
+      "title": "Quick AI",
+      "description": "AI assistant for your memos",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Ask AI anything...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ai-conversations",
+      "title": "AI Conversations",
+      "description": "View previous AI conversations",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instanceUrl",
+      "title": "Usememos Instance URL",
+      "description": "URL of your Usememos instance (e.g., https://memos.example.com)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://memos.example.com"
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Personal access token from your Usememos account settings",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "openaiApiUrl",
+      "title": "OpenAI API URL",
+      "description": "OpenAI-compatible API endpoint",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.openai.com/v1",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "API key for your OpenAI-compatible service",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "openaiModel",
+      "title": "AI Model",
+      "description": "Model to use for AI features",
+      "type": "textfield",
+      "required": false,
+      "default": "gpt-4o",
+      "placeholder": "gpt-4o"
+    },
+    {
+      "name": "syncServiceUrl",
+      "title": "Sync Service URL",
+      "description": "URL of the semantic search sync service (optional)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "http://localhost:3001"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "22.14.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
