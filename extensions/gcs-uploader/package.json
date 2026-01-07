@@ -35,8 +35,7 @@
       "type": "textfield",
       "required": true,
       "title": "GCS Bucket Name",
-      "description": "Name of your Google Cloud Storage bucket (without gs:// prefix)",
-      "default": "prod-omniagent"
+      "description": "Name of your Google Cloud Storage bucket (without gs:// prefix)"
     },
     {
       "name": "authMethod",
@@ -61,8 +60,7 @@
       "type": "textfield",
       "required": false,
       "title": "CDN Base URL",
-      "description": "Optional: CDN URL to use instead of storage.googleapis.com (e.g., https://cdn.example.com)",
-      "default": "https://7b50d2de0634f64.cmccloud.com.vn"
+      "description": "Optional: CDN URL to use instead of storage.googleapis.com (e.g., https://cdn.example.com)"
     },
     {
       "name": "fixedSize",
@@ -84,8 +82,7 @@
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "execa": "^5.1.1",
-    "mime-types": "^2.1.35",
-    "node-fetch": "^3.3.2"
+    "mime-types": "^2.1.35"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

@@ -1,24 +1,8 @@
-import {
-  getPreferenceValues,
-  Clipboard,
-  Alert,
-  confirmAlert,
-} from "@raycast/api";
+import { getPreferenceValues, Clipboard } from "@raycast/api";
 import execa from "execa";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
-import fetch from "node-fetch";
-
-interface Preferences {
-  storageProvider: string;
-  bucketName: string;
-  authMethod: "gcloud" | "static";
-  cdnBaseUrl?: string;
-  fixedSize?: string;
-  staticToken?: string;
-}
-
 export async function getAccessToken(): Promise<string> {
   const preferences = getPreferenceValues<Preferences>();
 
@@ -108,16 +92,4 @@ export async function getFileFromClipboard(): Promise<string | null> {
     console.error("Error reading files from clipboard:", err);
   }
   return null;
-}
-
-export async function confirmUpload(source: string): Promise<boolean> {
-  const fileName = path.basename(source);
-  return await confirmAlert({
-    title: "Confirm Upload",
-    message: `Do you want to upload "${fileName}" to GCS?`,
-    primaryAction: {
-      title: "Upload",
-      style: Alert.ActionStyle.Default,
-    },
-  });
 }

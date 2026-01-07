@@ -20,10 +20,6 @@ interface FormValues {
   files: string[];
 }
 
-interface Preferences {
-  bucketName: string;
-}
-
 type ViewState = "loading" | "preview" | "picker" | "uploading" | "result";
 
 export default function Command() {
