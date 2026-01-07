@@ -2,7 +2,10 @@
 
 A Raycast extension that pulls your SavvyCal or Cal.com availability and generates a message with specific times—in the recipient's timezone, with one-click booking.
 
-<img width="1598" height="566" alt="image" src="https://github.com/user-attachments/assets/4fa773cb-257c-4a6a-b9f4-de24e125916c" />
+**Smart scheduling:** Times are batched around your existing meetings (not scattered randomly throughout the day), and your scheduling preferences (buffer times, working hours, etc.) are automatically respected.
+
+<img width="1598" height="566" alt="Frame 2" src="https://github.com/user-attachments/assets/b7689fc3-6647-4035-beaa-4c3bcbda189e" />
+
 
 **Works with [SavvyCal-Booker](https://github.com/skinnyandbald/savvycal-booker)** for true one-click booking (optional).
 
@@ -20,6 +23,8 @@ Proposing specific times is more respectful. The recipient can click one time an
 2. Pick date range, duration, recipient's timezone
 3. Hit Enter → message copied to clipboard
 4. Paste into email or Slack
+
+The extension doesn't just grab random open slots. It intelligently batches times around your existing calendar—so if you have a 10am call, it suggests 9:30 or 11:00 instead of scattering meetings throughout your day. And because it integrates directly with Cal.com and SavvyCal, it automatically respects the scheduling preferences you've set up there.
 
 ## What It Generates
 

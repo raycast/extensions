@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { format, addDays } from "date-fns";
 import { formatInTimeZone, utcToZonedTime } from "date-fns-tz";
 import { getProvider } from "./providers";
+import { selectSmartSlots } from "./slotSelection";
 import type { ProviderType, ProviderConfig, TimeSlot, LinkInfo } from "./types";
 
 interface Preferences {
@@ -27,6 +28,8 @@ interface Preferences {
   // Common
   defaultTimezone: string;
   defaultDaysAhead: string;
+  maxDaysToShow: string;
+  maxSlotsPerDay: string;
   bookerUrl?: string;
 }
 
@@ -96,6 +99,8 @@ function generateMessage(
   config: ProviderConfig,
   linkInfo: LinkInfo,
   duration: number,
+  maxDays: number,
+  maxSlotsPerDay: number,
   bookerUrl?: string,
 ): string {
   const provider = getProvider(providerType);
@@ -106,18 +111,18 @@ function generateMessage(
     `Would any of these times work for a ${duration} min meeting (${tzAbbr})?`,
   ];
 
-  const sortedDays = Array.from(groupedSlots.keys()).sort();
+  // Limit to configured number of days with availability
+  const sortedDays = Array.from(groupedSlots.keys()).sort().slice(0, maxDays);
 
   for (const dayKey of sortedDays) {
     const daySlots = groupedSlots.get(dayKey)!;
     const zonedDate = utcToZonedTime(new Date(daySlots[0].start_at), timezone);
     const dayLabel = format(zonedDate, "EEE, MMM d");
 
-    // Sort slots by time and show up to 4 per day
-    const sortedSlots = [...daySlots].sort(
-      (a, b) => new Date(a.start_at).getTime() - new Date(b.start_at).getTime(),
-    );
-    const displaySlots = sortedSlots.slice(0, 4);
+    // Select slots using smart selection:
+    // - Prioritizes slots adjacent to meetings (inferred from gaps)
+    // - Ensures at least one slot from a different time bucket for diversity
+    const displaySlots = selectSmartSlots(daySlots, timezone, maxSlotsPerDay);
 
     const slotStrings = displaySlots.map((slot) => {
       const timeStr = formatSlotTime(slot, timezone);
@@ -140,7 +145,7 @@ function generateMessage(
 
   lines.push("");
   lines.push(
-    `Feel free to use this booking page if that's easier (also contains more availabilities):`,
+    `Feel free to use this booking page (contains more availabilities):`,
   );
   lines.push(provider.getFallbackUrl(config));
 
@@ -224,6 +229,12 @@ export default function Command() {
       }
 
       const duration = parseInt(selectedDuration);
+      const parsedMaxDays = parseInt(preferences.maxDaysToShow);
+      const maxDays =
+        !isNaN(parsedMaxDays) && parsedMaxDays > 0 ? parsedMaxDays : 3;
+      const parsedMaxSlots = parseInt(preferences.maxSlotsPerDay);
+      const maxSlotsPerDay =
+        !isNaN(parsedMaxSlots) && parsedMaxSlots > 0 ? parsedMaxSlots : 3;
 
       const htmlMessage = generateMessage(
         result.slots,
@@ -233,6 +244,8 @@ export default function Command() {
         config,
         result.linkInfo,
         duration,
+        maxDays,
+        maxSlotsPerDay,
         preferences.bookerUrl,
       );
 
@@ -245,6 +258,8 @@ export default function Command() {
         config,
         result.linkInfo,
         duration,
+        maxDays,
+        maxSlotsPerDay,
         preferences.bookerUrl,
       );
 

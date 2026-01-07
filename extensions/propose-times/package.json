@@ -127,6 +127,22 @@
       "default": "10"
     },
     {
+      "name": "maxDaysToShow",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Days to Show",
+      "description": "Maximum number of days to include in the message",
+      "default": "3"
+    },
+    {
+      "name": "maxSlotsPerDay",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Slots Per Day",
+      "description": "Maximum number of time slots to show per day",
+      "default": "3"
+    },
+    {
       "name": "bookerUrl",
       "type": "textfield",
       "required": false,
