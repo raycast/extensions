@@ -56,7 +56,7 @@
     },
     {
       "name": "openAfterConvertBatch",
-      "type": "checkbox",
+      "title": "Open When Multiple Files Converted",
       "title": "Open when multiple files converted",
       "label": "Open after batch convert",
       "description": "Open all generated PDFs after converting multiple selected files (after all conversions finish).",
