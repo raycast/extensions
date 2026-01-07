@@ -13,7 +13,7 @@ export function ConfigurationRequired({ onOpenPreferences }: ConfigurationRequir
         description="Please set your API token and project ID in extension preferences"
         actions={
           <ActionPanel>
-            <Action title="Open Preferences" onAction={onOpenPreferences} />
+            <Action title="Open Preferences" icon={Icon.Gear} onAction={onOpenPreferences} />
           </ActionPanel>
         }
       />
