@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Improvement] - 2026-01-06
+## [Improvement] - {PR_MERGE_DATE}
 
 - Add LaunchContext support for programmatic integration
 - Enable external tools to trigger app switcher without UI prompts
