@@ -1,4 +1,4 @@
-import { getLokaliseClient, getProjectId } from "../lib/lokalise";
+import { getLokaliseClient, getProjectId } from "./lokalise";
 import { readFileSync } from "fs";
 import type {
   CreateKeyData,
@@ -12,6 +12,7 @@ import type {
 } from "@lokalise/node-api";
 import { getAllKeys, hasKeys, addSingleKey, SortOption, type DatabaseFilters } from "./database";
 import { getLanguageName } from "../data/languages";
+import * as syncService from "./sync-service";
 
 export interface TranslationFile {
   fileId: number;
@@ -423,6 +424,49 @@ export class Client {
    */
   async hasDatabaseKeys(): Promise<boolean> {
     return await hasKeys();
+  }
+
+  /**
+   * Sync all keys from Lokalise to the local database
+   * Fetches keys in batches and stores them in a transaction
+   */
+  async syncFromLokalise(
+    onProgress?: (current: number, total: number) => void,
+  ): Promise<{ success: boolean; error?: Error; keysCount: number }> {
+    return await syncService.syncFromLokalise(onProgress);
+  }
+
+  /**
+   * Check if an initial sync is needed (database is empty)
+   */
+  async needsInitialSync(): Promise<boolean> {
+    return await syncService.needsInitialSync();
+  }
+
+  /**
+   * Get the current sync status
+   */
+  getSyncStatus(): {
+    status: "idle" | "syncing" | "error";
+    error?: Error;
+    progress?: { current: number; total: number };
+  } {
+    return syncService.getSyncStatus();
+  }
+
+  /**
+   * Start background sync with a specified interval
+   * @param intervalMinutes - Interval in minutes between syncs
+   */
+  startBackgroundSync(intervalMinutes?: number): void {
+    syncService.startBackgroundSync(intervalMinutes);
+  }
+
+  /**
+   * Stop background sync
+   */
+  stopBackgroundSync(): void {
+    syncService.stopBackgroundSync();
   }
 }
 

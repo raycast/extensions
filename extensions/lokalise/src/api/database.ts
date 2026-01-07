@@ -1,6 +1,7 @@
 import { environment } from "@raycast/api";
 import { join } from "path";
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from "fs";
+import Fuse from "fuse.js";
 import type { ProcessedTranslationKey } from "./client";
 
 // Database file locations in Raycast's support directory
@@ -169,16 +170,21 @@ export async function getAllKeys(filters: DatabaseFilters = {}): Promise<Process
     });
   }
 
-  // Filter by search query on key name and default translation (lightweight)
+  // Filter by search query using Fuse.js on the index
   if (filters.searchQuery && filters.searchQuery.trim()) {
-    const searchLower = filters.searchQuery.trim().toLowerCase();
-
-    matchingIndices = matchingIndices.filter((keyIndex) => {
-      // Search in key name and default translation
-      const matchesKeyName = keyIndex.n.toLowerCase().includes(searchLower);
-      const matchesTranslation = keyIndex.dt && keyIndex.dt.toLowerCase().includes(searchLower);
-      return matchesKeyName || matchesTranslation;
+    const fuse = new Fuse(matchingIndices, {
+      keys: [
+        { name: "n", weight: 2 }, // keyName
+        { name: "dt", weight: 1.5 }, // defaultTranslation
+      ],
+      threshold: 0.3,
+      ignoreLocation: true,
+      includeScore: true,
+      minMatchCharLength: 2,
     });
+
+    const results = fuse.search(filters.searchQuery.trim());
+    matchingIndices = results.map((result) => result.item);
   }
 
   // Sort the index before limiting
@@ -231,29 +237,32 @@ export async function getAllKeys(filters: DatabaseFilters = {}): Promise<Process
       const fullKey = chunk.find((k) => k.keyId === keyIndex.i);
 
       if (fullKey) {
-        // If searchInTranslations is enabled and there's a search query, do secondary filtering
-        if (filters.searchInTranslations && filters.searchQuery) {
-          const searchLower = filters.searchQuery.trim().toLowerCase();
-
-          // Check if it matches in any searchable field
-          const matchesInKey =
-            fullKey.keyName.toLowerCase().includes(searchLower) ||
-            (fullKey.description && fullKey.description.toLowerCase().includes(searchLower)) ||
-            (fullKey.context && fullKey.context.toLowerCase().includes(searchLower)) ||
-            fullKey.tags.some((tag) => tag.toLowerCase().includes(searchLower)) ||
-            fullKey.defaultTranslation.toLowerCase().includes(searchLower) ||
-            fullKey.translations.some((trans) => trans.text.toLowerCase().includes(searchLower));
-
-          if (matchesInKey) {
-            results.push(fullKey);
-          }
-        } else {
-          results.push(fullKey);
-        }
+        results.push(fullKey);
       }
     }
 
     // Chunk is automatically garbage collected after this iteration
+  }
+
+  // If searchInTranslations is enabled, apply additional fuzzy search on fields not in the index
+  if (filters.searchInTranslations && filters.searchQuery && filters.searchQuery.trim()) {
+    const fuse = new Fuse(results, {
+      keys: [
+        { name: "keyName", weight: 2 },
+        { name: "defaultTranslation", weight: 1.5 },
+        { name: "description", weight: 1 },
+        { name: "context", weight: 1 },
+        { name: "tags", weight: 0.5 },
+        { name: "translations.text", weight: 1 },
+      ],
+      threshold: 0.3,
+      ignoreLocation: true,
+      includeScore: true,
+      minMatchCharLength: 2,
+    });
+
+    const fuzzyResults = fuse.search(filters.searchQuery.trim());
+    return fuzzyResults.map((result) => result.item);
   }
 
   return results;

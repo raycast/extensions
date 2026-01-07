@@ -14,7 +14,6 @@ interface TranslationFormValues {
 }
 
 export default function Command() {
-  // Refs for fields we want to reset after submission
   const keyNameRef = useRef<Form.TextField>(null);
   const isPluralRef = useRef<Form.Checkbox>(null);
   const translationValueRef = useRef<Form.TextArea>(null);
