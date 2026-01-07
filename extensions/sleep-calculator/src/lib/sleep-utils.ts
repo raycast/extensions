@@ -2,6 +2,7 @@
  * Sleep calculation utilities based on 90-minute sleep cycles.
  */
 
+import { Color, Icon } from "@raycast/api";
 import * as chrono from "chrono-node";
 
 export type Minutes = number; // 0..1439 (minutes since midnight)
@@ -175,4 +176,20 @@ export function getCurrentTime(): Time12h {
   if (hour12 === 0) hour12 = 12;
 
   return { hour: hour12, minute, ampm };
+}
+
+/**
+ * Get sleep quality based on number of cycles.
+ */
+export function getSleepQuality(cycles: number): {
+  label: string;
+  color: Color;
+  icon: Icon;
+} {
+  if (cycles >= 6) return { label: "Optimal", color: Color.Green, icon: Icon.Star };
+  if (cycles === 5) return { label: "Great", color: Color.Blue, icon: Icon.Star };
+  if (cycles === 4) return { label: "Good", color: Color.Yellow, icon: Icon.Circle };
+  if (cycles === 3) return { label: "Light", color: Color.Orange, icon: Icon.Circle };
+  if (cycles === 2) return { label: "Nap", color: Color.Red, icon: Icon.Circle };
+  return { label: "Minimal", color: Color.Red, icon: Icon.ExclamationMark };
 }
