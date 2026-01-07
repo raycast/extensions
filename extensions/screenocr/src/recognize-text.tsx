@@ -1,10 +1,7 @@
 import { Clipboard, closeMainWindow, LaunchProps } from "@raycast/api";
-import { LaunchOptions, callbackLaunchCommand } from "raycast-cross-extension";
+import { callbackLaunchCommand } from "raycast-cross-extension";
 import { recognizeText, showSuccessToast, showFailureToast } from "./utils";
-
-type LaunchContext = {
-  callbackLaunchOptions?: LaunchOptions;
-};
+import { OCRResult, LaunchContext } from "./types";
 
 export default async function command({
   launchContext,
@@ -23,14 +20,16 @@ export default async function command({
         await callbackLaunchCommand(callbackOptions, {
           text: null,
           error: "No text detected",
-        });
+        } satisfies OCRResult);
       }
 
       return;
     }
 
     if (callbackOptions) {
-      await callbackLaunchCommand(callbackOptions, { text: recognizedText });
+      await callbackLaunchCommand(callbackOptions, {
+        text: recognizedText,
+      } satisfies OCRResult);
       return;
     }
 
@@ -44,7 +43,7 @@ export default async function command({
       await callbackLaunchCommand(callbackOptions, {
         text: null,
         error: e instanceof Error ? e.message : "Failed detecting text",
-      });
+      } satisfies OCRResult);
     }
   }
 }
