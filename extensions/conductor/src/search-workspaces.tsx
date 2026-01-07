@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
-import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import { useMemo, useState } from "react";
+import { usePathExists } from "./utils/path-exists";
 
 const DB_PATH = path.join(homedir(), "Library", "Application Support", "com.conductor.app", "conductor.db");
 const WORKSPACES_ROOT = path.join(homedir(), "conductor", "workspaces");
@@ -11,12 +11,20 @@ const WORKSPACES_ROOT = path.join(homedir(), "conductor", "workspaces");
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const query = useMemo(() => buildQuery(searchText), [searchText]);
-  const { data, isLoading, permissionView } = useSQL<WorkspaceRow>(DB_PATH, query, {
+  const { data, isLoading, permissionView, error } = useSQL<WorkspaceRow>(DB_PATH, query, {
     permissionPriming: "Allow Raycast to read Conductor's workspace database.",
   });
 
   if (permissionView) {
     return permissionView;
+  }
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView icon={Icon.Warning} title="Unable to load workspaces" description={error.message} />
+      </List>
+    );
   }
 
   const workspaces = useMemo(() => (data ?? []).map(enrichWorkspace), [data]);
@@ -29,11 +37,7 @@ export default function Command() {
         ))}
       </List.Section>
       {!isLoading && workspaces.length === 0 ? (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="No workspaces found"
-          description="Try another search query."
-        />
+        <List.EmptyView icon={Icon.Folder} title="No workspaces found" description="Try another search query." />
       ) : null}
     </List>
   );
@@ -44,6 +48,7 @@ function WorkspaceListItem({ workspace }: { workspace: Workspace }) {
   const subtitleParts = [workspace.repo, workspace.directoryName].filter(Boolean) as string[];
   const subtitle = subtitleParts.length > 0 ? subtitleParts.join(" - ") : undefined;
   const accessories: List.Item.Accessory[] = [];
+  const workspacePathExists = usePathExists(workspace.workspacePath);
 
   if (workspace.state) {
     accessories.push({
@@ -71,7 +76,7 @@ function WorkspaceListItem({ workspace }: { workspace: Workspace }) {
       title={title}
       subtitle={subtitle}
       accessories={accessories}
-      icon={getWorkspaceIcon(workspace)}
+      icon={getWorkspaceIcon(workspace, workspacePathExists)}
       keywords={keywords}
       actions={<WorkspaceActions workspace={workspace} />}
     />
@@ -84,15 +89,25 @@ function WorkspaceActions({ workspace }: { workspace: Workspace }) {
   if (workspace.workspacePath) {
     return (
       <ActionPanel>
-        <Action.Open title="Open in Conductor" target={workspace.workspacePath} application="Conductor" />
-        <Action.Open title="Open Workspace Folder" target={workspace.workspacePath} />
-        <Action.ShowInFinder path={workspace.workspacePath} />
-        <Action.CopyToClipboard title="Copy Workspace Path" content={workspace.workspacePath} />
+        <Action.Open
+          title="Open in Conductor"
+          target={workspace.workspacePath}
+          application="Conductor"
+          icon={Icon.AppWindow}
+        />
+        <Action.Open title="Open Workspace Folder" target={workspace.workspacePath} icon={Icon.Folder} />
+        <Action.ShowInFinder path={workspace.workspacePath} icon={Icon.Finder} />
+        <Action.CopyToClipboard title="Copy Workspace Path" content={workspace.workspacePath} icon={Icon.Clipboard} />
         {openTargetPath ? (
           <ActionPanel.Section title="Open in Editor">
-            <Action.Open title="Open in Zed" target={openTargetPath} application="Zed" />
-            <Action.Open title="Open in Cursor" target={openTargetPath} application="Cursor" />
-            <Action.Open title="Open in VS Code" target={openTargetPath} application="Visual Studio Code" />
+            <Action.Open title="Open in Zed" target={openTargetPath} application="Zed" icon={Icon.CodeBlock} />
+            <Action.Open title="Open in Cursor" target={openTargetPath} application="Cursor" icon={Icon.CodeBlock} />
+            <Action.Open
+              title="Open in VS Code"
+              target={openTargetPath}
+              application="Visual Studio Code"
+              icon={Icon.CodeBlock}
+            />
           </ActionPanel.Section>
         ) : null}
       </ActionPanel>
@@ -102,14 +117,24 @@ function WorkspaceActions({ workspace }: { workspace: Workspace }) {
   if (workspace.repoPath) {
     return (
       <ActionPanel>
-        <Action.Open title="Open Repo in Conductor" target={workspace.repoPath} application="Conductor" />
-        <Action.Open title="Open Repo Folder" target={workspace.repoPath} />
-        <Action.ShowInFinder path={workspace.repoPath} />
-        <Action.CopyToClipboard title="Copy Repo Path" content={workspace.repoPath} />
+        <Action.Open
+          title="Open Repo in Conductor"
+          target={workspace.repoPath}
+          application="Conductor"
+          icon={Icon.AppWindow}
+        />
+        <Action.Open title="Open Repo Folder" target={workspace.repoPath} icon={Icon.Folder} />
+        <Action.ShowInFinder path={workspace.repoPath} icon={Icon.Finder} />
+        <Action.CopyToClipboard title="Copy Repo Path" content={workspace.repoPath} icon={Icon.Clipboard} />
         <ActionPanel.Section title="Open in Editor">
-          <Action.Open title="Open in Zed" target={workspace.repoPath} application="Zed" />
-          <Action.Open title="Open in Cursor" target={workspace.repoPath} application="Cursor" />
-          <Action.Open title="Open in VS Code" target={workspace.repoPath} application="Visual Studio Code" />
+          <Action.Open title="Open in Zed" target={workspace.repoPath} application="Zed" icon={Icon.CodeBlock} />
+          <Action.Open title="Open in Cursor" target={workspace.repoPath} application="Cursor" icon={Icon.CodeBlock} />
+          <Action.Open
+            title="Open in VS Code"
+            target={workspace.repoPath}
+            application="Visual Studio Code"
+            icon={Icon.CodeBlock}
+          />
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -117,7 +142,7 @@ function WorkspaceActions({ workspace }: { workspace: Workspace }) {
 
   return (
     <ActionPanel>
-      <Action.CopyToClipboard title="Copy Workspace ID" content={workspace.id} />
+      <Action.CopyToClipboard title="Copy Workspace ID" content={workspace.id} icon={Icon.Clipboard} />
     </ActionPanel>
   );
 }
@@ -167,7 +192,6 @@ function enrichWorkspace(row: WorkspaceRow): Workspace {
   const repo = row.repo ?? undefined;
   const directoryName = row.directory_name ?? undefined;
   const workspacePath = repo && directoryName ? path.join(WORKSPACES_ROOT, repo, directoryName) : undefined;
-  const hasWorkspacePath = workspacePath ? existsSync(workspacePath) : false;
   const sessionStatus = row.session_status ?? undefined;
   const isCompacting = row.session_is_compacting === 1;
   const isWorking = Boolean(sessionStatus && sessionStatus !== "idle" && sessionStatus !== "error") || isCompacting;
@@ -185,7 +209,6 @@ function enrichWorkspace(row: WorkspaceRow): Workspace {
     sessionUpdatedAt: row.session_updated_at ? new Date(row.session_updated_at) : undefined,
     isWorking,
     workspacePath,
-    hasWorkspacePath,
   };
 }
 
@@ -216,13 +239,32 @@ type Workspace = {
   sessionUpdatedAt?: Date;
   isWorking: boolean;
   workspacePath?: string;
-  hasWorkspacePath: boolean;
 };
 
-function getWorkspaceIcon(workspace: Workspace) {
+function getWorkspaceIcon(workspace: Workspace, workspacePathExists?: boolean) {
   if (workspace.isWorking) {
     return { source: Icon.CircleProgress, tintColor: Color.Blue };
   }
 
-  return workspace.hasWorkspacePath ? Icon.Folder : Icon.Warning;
+  if (workspace.state === "archived") {
+    return { source: Icon.Box, tintColor: Color.SecondaryText };
+  }
+
+  if (workspace.workspacePath) {
+    if (workspacePathExists === false) {
+      return { source: Icon.Warning, tintColor: Color.Red };
+    }
+
+    if (workspacePathExists === true) {
+      return { source: Icon.Folder, tintColor: Color.Blue };
+    }
+
+    return { source: Icon.Folder, tintColor: Color.SecondaryText };
+  }
+
+  if (workspace.repoPath) {
+    return { source: Icon.Folder, tintColor: Color.SecondaryText };
+  }
+
+  return { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
 }
