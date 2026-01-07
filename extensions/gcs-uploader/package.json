@@ -80,18 +80,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
+    "@raycast/api": "^1.104.1",
     "execa": "^5.1.1",
-    "mime-types": "^2.1.35"
+    "mime-types": "^2.1.35",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/mime-types": "^2.1.1",
-    "@types/node": "^20.19.27",
-    "@types/react": "^19.0.0",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
     "eslint": "^8.53.0",
     "prettier": "^3.3.3",
-    "react": "^19.0.0",
+    "react": "^19.2.3",
     "typescript": "^5.2.2"
   },
   "scripts": {
