@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Improved Query String Creation] - {PR_MERGE_DATE}
+
+- Replaced the `⁠qs` package with `⁠query-string` to automatically exclude empty strings and null values
+
 ## [Timeout increasing in AppleScript] - 2025-10-30
 
 - Increased timeout to 60 seconds in AppleScript

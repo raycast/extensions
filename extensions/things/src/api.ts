@@ -3,7 +3,7 @@ import { promisify } from 'util';
 
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
 import { runAppleScript } from '@raycast/utils';
-import qs from 'qs';
+import queryString, { StringifyOptions } from 'query-string';
 import {
   Area,
   CommandListName,
@@ -343,17 +343,25 @@ export async function silentlyOpenThingsURL(url: string) {
   await asyncExec(`open -g "${url}"`);
 }
 
+const stringifyConfig = {
+  skipNull: true,
+  skipEmptyString: true,
+} as StringifyOptions;
+
 export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
   const { authToken } = getPreferenceValues<Preferences>();
 
   if (!authToken) throw new Error('unauthorized');
 
   await silentlyOpenThingsURL(
-    `things:///update?${qs.stringify({
-      'auth-token': authToken,
-      id,
-      ...todoParams,
-    })}`,
+    `things:///update?${queryString.stringify(
+      {
+        'auth-token': authToken,
+        id,
+        ...todoParams,
+      },
+      stringifyConfig,
+    )}`,
   );
 }
 
@@ -363,20 +371,23 @@ export async function updateProject(id: string, projectParams: UpdateProjectPara
   if (!authToken) throw new Error('unauthorized');
 
   await silentlyOpenThingsURL(
-    `things:///update-project?${qs.stringify({
-      'auth-token': authToken,
-      id,
-      ...projectParams,
-    })}`,
+    `things:///update-project?${queryString.stringify(
+      {
+        'auth-token': authToken,
+        id,
+        ...projectParams,
+      },
+      stringifyConfig,
+    )}`,
   );
 }
 
 export async function addTodo(todoParams: AddTodoParams) {
-  await silentlyOpenThingsURL(`things:///add?${qs.stringify(todoParams)}`);
+  await silentlyOpenThingsURL(`things:///add?${queryString.stringify(todoParams, stringifyConfig)}`);
 }
 
 export async function addProject(projectParams: AddProjectParams) {
-  await silentlyOpenThingsURL(`things:///add-project?${qs.stringify(projectParams)}`);
+  await silentlyOpenThingsURL(`things:///add-project?${queryString.stringify(projectParams, stringifyConfig)}`);
 }
 
 export function handleError(error: unknown, title?: string) {
