@@ -3,11 +3,5 @@
 # dependencies
 /node_modules
 
-# swift build artifacts
-/swift/.build
-/swift/.raycast-swift-build
-/swift/Package.resolved
-/assets/compiled_raycast_swift/
-
 # misc
 .DS_Store
