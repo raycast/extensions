@@ -182,7 +182,7 @@ export const fetchDocPage = async (url: string): Promise<string> => {
     // Try top docblock
     const docblock = $(".docblock").first();
     if (docblock.length > 0) {
-      return convertCheerioToMarkdown($, docblock);
+      return convertCheerioToMarkdown($, docblock, url);
     } else {
       return "*No documentation summary found.*";
     }
@@ -195,6 +195,7 @@ export const fetchDocPage = async (url: string): Promise<string> => {
 function convertCheerioToMarkdown(
   $: cheerio.Root,
   element: cheerio.Cheerio,
+  baseUrl: string,
 ): string {
   let markdown = "";
 
@@ -208,7 +209,8 @@ function convertCheerioToMarkdown(
       // Avoid excessive newlines from whitespace text nodes
       markdown += text;
     } else if (tagName === "p") {
-      markdown += "\n" + convertCheerioToMarkdown($, $(el)).trim() + "\n\n";
+      markdown +=
+        "\n" + convertCheerioToMarkdown($, $(el), baseUrl).trim() + "\n\n";
     } else if (tagName === "h1") {
       markdown += "# " + $(el).text() + "\n\n";
     } else if (tagName === "h2") {
@@ -224,18 +226,30 @@ function convertCheerioToMarkdown(
       markdown += "`" + $(el).text() + "`";
     } else if (tagName === "a") {
       const href = $(el).attr("href");
-      const text = convertCheerioToMarkdown($, $(el));
-      markdown += `[${text}](${href})`;
+      const text = convertCheerioToMarkdown($, $(el), baseUrl);
+      if (href) {
+        try {
+          // Resolve relative URLs to absolute ones
+          const absoluteUrl = new URL(href, baseUrl).toString();
+          markdown += `[${text}](${absoluteUrl})`;
+        } catch {
+          // Fallback to original text if URL parsing fails
+          markdown += text;
+        }
+      } else {
+        markdown += text;
+      }
     } else if (tagName === "ul") {
-      markdown += convertCheerioToMarkdown($, $(el)) + "\n";
+      markdown += convertCheerioToMarkdown($, $(el), baseUrl) + "\n";
     } else if (tagName === "li") {
-      markdown += "- " + convertCheerioToMarkdown($, $(el)).trim() + "\n";
+      markdown +=
+        "- " + convertCheerioToMarkdown($, $(el), baseUrl).trim() + "\n";
     } else if (tagName === "div" && $(el).hasClass("example-wrap")) {
-      markdown += convertCheerioToMarkdown($, $(el));
+      markdown += convertCheerioToMarkdown($, $(el), baseUrl);
     } else if (tagName === "div" || tagName === "span") {
-      markdown += convertCheerioToMarkdown($, $(el));
+      markdown += convertCheerioToMarkdown($, $(el), baseUrl);
     } else {
-      markdown += convertCheerioToMarkdown($, $(el));
+      markdown += convertCheerioToMarkdown($, $(el), baseUrl);
     }
   });
 
