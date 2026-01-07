@@ -1,106 +1,301 @@
-import { getPreferenceValues, List, ActionPanel, Action } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { MemoListProps, MemoWithSummary } from "./lib/types";
-import { getSummaryStream } from "./lib/utils";
-import { useRef, useState, useEffect, useCallback } from "react";
+import {
+  List,
+  Detail,
+  ActionPanel,
+  Action,
+  Icon,
+  Color,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
+import { useState, useEffect, useCallback } from "react";
+import { getUsememosClient, Memo } from "./api/usememos";
 
-function getMemoItemsStream(memosServerUrl: string, memosServerToken: string) {
-  const { isLoading: isLoadingMemosData, data: memosData } = useFetch<MemoListProps>(
-    `${memosServerUrl}/api/v1/memos?pageSize=30`,
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${memosServerToken}`,
-      },
-    }
-  );
-  const memos = memosData?.memos || [];
-  const [memoItems, setMemoItems] = useState<{
-    [key: string]: MemoWithSummary;
-  }>({});
+export default function ListMemos() {
+  const [memos, setMemos] = useState<Memo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const updateCount = useRef(0);
+  const [filter, setFilter] = useState<"all" | "pinned" | "archived">("all");
+  const [searchText, setSearchText] = useState("");
 
-  const items: { [key: string]: MemoWithSummary } = {};
-  const getMemoItems = useCallback(async () => {
-    await Promise.all(
-      memos.map(async (memo) => {
-        items[memo.uid] = { ...memo, summary: "" };
-        const stream = await getSummaryStream(memo);
-        for await (const summary of stream) {
-          items[memo.uid] = { ...items[memo.uid], summary };
-          setMemoItems({ ...items });
-        }
-      })
-    );
-    setIsLoading(false);
-  }, [memos]);
-  useEffect(() => {
-    if (updateCount.current < 2) {
-      updateCount.current += 1;
-    } else {
-      getMemoItems();
-    }
-  }, [isLoadingMemosData]);
-  return { isLoading, memoItems: Object.values(memoItems) };
-}
+  const fetchMemos = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const client = getUsememosClient();
 
-function MemoListItem({ memo }: { memo: MemoWithSummary }) {
-  const { memosServerUrl } = getPreferenceValues<Preferences.ListMemos>();
-  return (
-    <List.Item
-      title={memo.summary}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={`${memosServerUrl}/m/${memo.uid}`} />
-        </ActionPanel>
+      // Don't pass filter for 'all' - just fetch all memos
+      const options: { pageSize: number; filter?: string } = { pageSize: 100 };
+
+      // Only add filter for specific cases if the API supports it
+      // For now, we'll filter client-side to avoid API compatibility issues
+
+      const result = await client.listMemos(options);
+      let fetchedMemos = result.memos || [];
+
+      // Client-side filtering
+      if (filter === "pinned") {
+        fetchedMemos = fetchedMemos.filter(
+          (m) => m.pinned && m.rowStatus !== "ARCHIVED",
+        );
+      } else if (filter === "archived") {
+        fetchedMemos = fetchedMemos.filter((m) => m.rowStatus === "ARCHIVED");
+      } else {
+        fetchedMemos = fetchedMemos.filter((m) => m.rowStatus !== "ARCHIVED");
       }
-      detail={
-        <List.Item.Detail
-          markdown={memo.content}
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="Summary" text={memo.summary} />
-              <List.Item.Detail.Metadata.Label title="Tags" text={memo.tags.join(", ")} />
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Created At" text={`${memo.createTime}`} />
-              <List.Item.Detail.Metadata.Label title="Updated At" text={`${memo.updateTime}`} />
-            </List.Item.Detail.Metadata>
+
+      setMemos(fetchedMemos);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch memos",
+        message: String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filter]);
+
+  useEffect(() => {
+    fetchMemos();
+  }, [fetchMemos]);
+
+  const filteredMemos = memos.filter((memo) =>
+    searchText
+      ? memo.content.toLowerCase().includes(searchText.toLowerCase())
+      : true,
+  );
+
+  const handlePin = async (memo: Memo) => {
+    try {
+      const client = getUsememosClient();
+      if (memo.pinned) {
+        await client.unpinMemo(memo.name);
+        showToast({ style: Toast.Style.Success, title: "Memo unpinned" });
+      } else {
+        await client.pinMemo(memo.name);
+        showToast({ style: Toast.Style.Success, title: "Memo pinned" });
+      }
+      fetchMemos();
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to update memo",
+        message: String(error),
+      });
+    }
+  };
+
+  const handleArchive = async (memo: Memo) => {
+    try {
+      const client = getUsememosClient();
+      if (memo.rowStatus === "ARCHIVED") {
+        await client.unarchiveMemo(memo.name);
+        showToast({ style: Toast.Style.Success, title: "Memo restored" });
+      } else {
+        await client.archiveMemo(memo.name);
+        showToast({ style: Toast.Style.Success, title: "Memo archived" });
+      }
+      fetchMemos();
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to update memo",
+        message: String(error),
+      });
+    }
+  };
+
+  const handleDelete = async (memo: Memo) => {
+    const confirmed = await confirmAlert({
+      title: "Delete Memo",
+      message: "Are you sure you want to delete this memo?",
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      try {
+        const client = getUsememosClient();
+        await client.deleteMemo(memo.name);
+        showToast({ style: Toast.Style.Success, title: "Memo deleted" });
+        fetchMemos();
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to delete memo",
+          message: String(error),
+        });
+      }
+    }
+  };
+
+  const getPreviewText = (content: string): string => {
+    const lines = content.split("\n").filter((line) => line.trim());
+    return lines[0]?.slice(0, 100) || "Empty memo";
+  };
+
+  const getAccessoryItems = (memo: Memo) => {
+    const items: List.Item.Accessory[] = [];
+
+    if (memo.pinned) {
+      items.push({ icon: { source: Icon.Pin, tintColor: Color.Yellow } });
+    }
+
+    if (memo.visibility !== "PRIVATE") {
+      items.push({
+        icon: {
+          source: memo.visibility === "PUBLIC" ? Icon.Globe : Icon.Building,
+          tintColor: Color.Blue,
+        },
+        tooltip: memo.visibility,
+      });
+    }
+
+    items.push({
+      date: new Date(memo.updateTime),
+      tooltip: `Updated: ${new Date(memo.updateTime).toLocaleString()}`,
+    });
+
+    return items;
+  };
+
+  return (
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Filter memos..."
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter"
+          value={filter}
+          onChange={(value) => setFilter(value as typeof filter)}
+        >
+          <List.Dropdown.Item title="All Memos" value="all" />
+          <List.Dropdown.Item title="Pinned" value="pinned" />
+          <List.Dropdown.Item title="Archived" value="archived" />
+        </List.Dropdown>
+      }
+    >
+      {filteredMemos.length === 0 && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.Document}
+          title="No memos found"
+          description={
+            filter === "all" ? "Create your first memo!" : `No ${filter} memos`
           }
         />
-      }
-    />
+      ) : (
+        filteredMemos.map((memo) => (
+          <List.Item
+            key={memo.name}
+            icon={
+              memo.rowStatus === "ARCHIVED"
+                ? { source: Icon.Tray, tintColor: Color.SecondaryText }
+                : Icon.Document
+            }
+            title={getPreviewText(memo.content)}
+            subtitle={memo.tags?.map((t) => `#${t}`).join(" ")}
+            accessories={getAccessoryItems(memo)}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="View Memo"
+                    icon={Icon.Eye}
+                    target={<MemoDetail memo={memo} />}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Content"
+                    content={memo.content}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in Browser"
+                    url={getUsememosClient().getWebUrl(memo)}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title={memo.pinned ? "Unpin" : "Pin"}
+                    icon={Icon.Pin}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    onAction={() => handlePin(memo)}
+                  />
+                  <Action
+                    title={
+                      memo.rowStatus === "ARCHIVED" ? "Restore" : "Archive"
+                    }
+                    icon={Icon.Tray}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    onAction={() => handleArchive(memo)}
+                  />
+                  <Action
+                    title="Delete"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    onAction={() => handleDelete(memo)}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={fetchMemos}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
+    </List>
   );
 }
 
-export default function listMemos() {
-  const { memosServerUrl, memosServerToken } = getPreferenceValues<Preferences.ListMemos>();
-
-  const { isLoading: isLoadingMemoItems, memoItems } = getMemoItemsStream(memosServerUrl, memosServerToken);
+function MemoDetail({ memo }: { memo: Memo }) {
   return (
-    <List isLoading={isLoadingMemoItems} isShowingDetail={true} throttle>
-      <List.Section title="Pinned">
-        {memoItems
-          .filter((memo) => memo.pinned && memo.rowStatus === "ACTIVE")
-          .map((memo) => (
-            <MemoListItem key={memo.uid} memo={memo} />
-          ))}
-      </List.Section>
-      <List.Section title="Common">
-        {memoItems
-          .filter((memo) => !memo.pinned && memo.rowStatus === "ACTIVE")
-          .map((memo) => (
-            <MemoListItem key={memo.uid} memo={memo} />
-          ))}
-      </List.Section>
-      <List.Section title="Archived">
-        {memoItems
-          .filter((memo) => memo.rowStatus === "ARCHIVED")
-          .map((memo) => (
-            <MemoListItem key={memo.uid} memo={memo} />
-          ))}
-      </List.Section>
-    </List>
+    <Detail
+      markdown={memo.content}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label
+            title="Created"
+            text={new Date(memo.createTime).toLocaleString()}
+          />
+          <Detail.Metadata.Label
+            title="Updated"
+            text={new Date(memo.updateTime).toLocaleString()}
+          />
+          <Detail.Metadata.Label title="Visibility" text={memo.visibility} />
+          {memo.tags && memo.tags.length > 0 && (
+            <Detail.Metadata.TagList title="Tags">
+              {memo.tags.map((tag) => (
+                <Detail.Metadata.TagList.Item
+                  key={tag}
+                  text={`#${tag}`}
+                  color={Color.Blue}
+                />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Content" content={memo.content} />
+          <Action.OpenInBrowser
+            title="Open in Browser"
+            url={getUsememosClient().getWebUrl(memo)}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }

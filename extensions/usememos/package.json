@@ -1,102 +1,122 @@
 {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "usememos",
   "title": "Usememos",
-  "description": "Usememos is an extension for usememos/memos",
-  "icon": "icon.png",
-  "author": "zrr1999",
-  "contributors": [],
+  "description": "Manage your memos with AI-powered search and organization",
+  "icon": "memos-icon.png",
+  "author": "Pushpavel",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "list-memos",
       "title": "List Memos",
-      "description": "List all memos",
+      "description": "Browse and manage your memos",
       "mode": "view"
     },
     {
-      "name": "open-memos",
-      "title": "Open Memos Web",
-      "description": "Jump to a memos web page",
-      "mode": "no-view"
+      "name": "create-memo",
+      "title": "Create Memo",
+      "description": "Create a new memo",
+      "mode": "view"
+    },
+    {
+      "name": "search-memos",
+      "title": "Search Memos",
+      "description": "Search through your memos",
+      "mode": "view"
+    },
+    {
+      "name": "quick-ai",
+      "title": "Quick AI",
+      "description": "AI assistant for your memos",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Ask AI anything...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ai-conversations",
+      "title": "AI Conversations",
+      "description": "View previous AI conversations",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "openAiApiKey",
+      "name": "instanceUrl",
+      "title": "Usememos Instance URL",
+      "description": "URL of your Usememos instance (e.g., https://memos.example.com)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://memos.example.com"
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Personal access token from your Usememos account settings",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "openaiApiUrl",
+      "title": "OpenAI API URL",
+      "description": "OpenAI-compatible API endpoint",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.openai.com/v1",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "name": "openaiApiKey",
       "title": "OpenAI API Key",
-      "description": "API Key is used to authenticate with OpenAI API",
+      "description": "API key for your OpenAI-compatible service",
       "type": "password",
       "required": false
     },
     {
-      "name": "model",
-      "title": "Model",
-      "description": "Model is used to specify the model to use",
+      "name": "openaiModel",
+      "title": "AI Model",
+      "description": "Model to use for AI features",
       "type": "textfield",
-      "required": true,
-      "default": "gpt-4o-mini"
+      "required": false,
+      "default": "gpt-4o",
+      "placeholder": "gpt-4o"
     },
     {
-      "name": "openAiBasePath",
-      "title": "OpenAI Base Path (Optional)",
-      "description": "Base Path is used to override base path with OpenAI API",
+      "name": "syncServiceUrl",
+      "title": "Sync Service URL",
+      "description": "URL of the semantic search sync service (optional)",
       "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "language",
-      "title": "Language",
-      "description": "LLM will use this language to generate content",
-      "type": "dropdown",
-      "required": true,
-      "data": [
-        {
-          "title": "English",
-          "value": "en-US"
-        },
-        {
-          "title": "Chinese",
-          "value": "zh-CN"
-        }
-      ],
-      "default": "zh-CN"
-    },
-    {
-      "name": "memosServerUrl",
-      "type": "textfield",
-      "title": "Memos Server URL",
-      "description": "URL is used to connect to the memos server",
-      "required": true
-    },
-    {
-      "name": "memosServerToken",
-      "type": "password",
-      "title": "Memos Server Token",
-      "description": "Token is used to authenticate with the memos server",
-      "required": true
+      "required": false,
+      "placeholder": "http://localhost:3001"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.0",
-    "@raycast/utils": "^1.17.0",
-    "openai": "4.58.0"
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^18.8.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "22.14.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
     "typescript": "^5.5.4"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
