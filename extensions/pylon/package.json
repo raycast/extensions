@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pylon",
+  "title": "Pylon Tasks",
+  "description": "Create and manage tasks in Pylon with a Linear-like keyboard-first experience",
+  "icon": "extension-icon.png",
+  "author": "xxxoooxoxo",
+  "platforms": ["macOS", "Windows"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Pylon",
+      "description": "Quick task creation with fuzzy account search",
+      "mode": "view"
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "subtitle": "Pylon",
+      "description": "View tasks assigned to you",
+      "mode": "view"
+    },
+    {
+      "name": "search-by-account",
+      "title": "Search by Account",
+      "subtitle": "Pylon",
+      "description": "Find tasks for a specific customer account",
+      "mode": "view"
+    },
+    {
+      "name": "all-tasks",
+      "title": "All Tasks",
+      "subtitle": "Pylon",
+      "description": "Browse all tasks with filters",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Pylon API bearer token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultAssignee",
+      "title": "Default Assignee",
+      "description": "Pre-select assignee when creating tasks (use 'me' for yourself)",
+      "type": "textfield",
+      "required": false,
+      "default": "me"
+    },
+    {
+      "name": "defaultAccountId",
+      "title": "Default Account ID",
+      "description": "Account ID to pre-select when creating tasks",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultProjectId",
+      "title": "Default Project ID",
+      "description": "Project ID to pre-select when creating tasks",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}
