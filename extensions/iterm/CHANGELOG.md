@@ -1,6 +1,6 @@
 # iTerm Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2026-01-07
 
 - Added `Open iTerm Profile` command to open specific iTerm profiles in new window or tab
 
