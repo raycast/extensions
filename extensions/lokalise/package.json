@@ -3,7 +3,7 @@
   "name": "lokalise",
   "title": "Lokalise",
   "description": "Add and view translations in Lokalise",
-  "icon": "extension-icon.png",
+  "icon": "lokalise.png",
   "author": "ikupenov",
   "platforms": [
     "macOS",
