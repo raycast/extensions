@@ -75,39 +75,28 @@ If you see a version number (like `v20.10.0`), you're good. If you see "command 
 
 ### Step-by-Step Installation
 
-**Step 1: Download the code**
-
 **Option A: Download ZIP (easiest)**
 
 1. Go to [github.com/skinnyandbald/propose-times](https://github.com/skinnyandbald/propose-times)
-2. Click the green **"Code"** button
-3. Click **"Download ZIP"**
-4. Unzip the downloaded file (double-click it)
-5. Rename the folder from `propose-times-main` to `propose-times` (optional but cleaner)
+2. Click the green **"Code"** button → **"Download ZIP"**
+3. Unzip the downloaded file (double-click it)
+4. Open **Terminal** and run:
+   ```bash
+   cd ~/Downloads/propose-times-main
+   npm install && npm run dev
+   ```
+5. The extension now appears in Raycast — search for "Propose Times"
+6. Press `Ctrl + C` in Terminal to stop the dev server (extension stays installed)
 
 **Option B: Use git (if you have it)**
 
-Open Terminal and run:
 ```bash
 git clone https://github.com/skinnyandbald/propose-times.git
-```
-
-**Step 2: Install and register with Raycast**
-
-Open Terminal, navigate to the folder, and run:
-
-```bash
-cd ~/Downloads/propose-times
-```
-(adjust the path if you put it somewhere else—`git clone` puts it in your home folder)
-
-```bash
+cd propose-times
 npm install && npm run dev
 ```
 
-This installs dependencies and **automatically registers** the extension with Raycast. You'll see "Propose Times" appear in Raycast immediately.
-
-Once it's registered, you can press `Ctrl + C` to stop the dev server—the extension stays installed.
+The extension now appears in Raycast — search for "Propose Times". Press `Ctrl + C` to stop the dev server (extension stays installed).
 
 ### Quick Access (Optional but Recommended)
 
@@ -167,10 +156,13 @@ Choose your calendar provider in extension preferences:
 
 #### Common Settings
 
-| Setting | What it is |
-|---------|------------|
-| **Default Timezone** | Recipient's default timezone |
-| **Booker URL** | (Optional) Your SavvyCal-Booker deployment URL for one-click booking |
+| Setting | What it is | Default |
+|---------|------------|---------|
+| **Default Timezone** | Recipient's default timezone | Eastern |
+| **Default Days Ahead** | How many days to search for availability | 10 |
+| **Max Days to Show** | Maximum days to include in the message | 3 |
+| **Max Slots Per Day** | Maximum time slots shown per day | 3 |
+| **Booker URL** | (Optional) Your deployment URL for one-click booking | — |
 
 ## One-Click Booking (Optional)
 
