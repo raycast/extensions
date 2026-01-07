@@ -38,10 +38,9 @@ export default function MenuBarCommand() {
   const totalInTransit = grouped.arrivingToday.length + grouped.inTransit.length;
 
   const menuBarTitle = totalInTransit > 0 ? `${totalInTransit}` : undefined;
-  const menuBarIcon = totalInTransit > 0 ? { source: "extension-icon-64x64.png" } : "extension-icon-64x64.png";
 
   return (
-    <MenuBarExtra icon={menuBarIcon} title={menuBarTitle} isLoading={isLoading} tooltip="Delivery Tracker">
+    <MenuBarExtra icon="extension-icon-64x64.png" title={menuBarTitle} isLoading={isLoading} tooltip="Delivery Tracker">
       {activeDeliveries.length === 0 ? (
         <MenuBarExtra.Item
           title="No Active Deliveries"

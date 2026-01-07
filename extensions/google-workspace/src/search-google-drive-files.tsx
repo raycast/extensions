@@ -3,9 +3,8 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
 import { File, getFileParentsById, getFiles, QueryTypes, ScopeTypes } from "./api/getFiles";
-import FileListItem from "./components/FileListItem";
-
 import { getUserEmail } from "./api/googleAuth";
+import FileListItem from "./components/FileListItem";
 import { withGoogleAuth } from "./components/withGoogleAuth";
 
 function getSectionTitle(queryType: QueryTypes): string {
@@ -15,7 +14,7 @@ function getSectionTitle(queryType: QueryTypes): string {
   return "Recently Used";
 }
 
-function SearchGoogleDriveFiles() {
+function SearchGoogleDrive() {
   const [query, setQuery] = useState("");
   const [queryType, setQueryType] = useCachedState<QueryTypes>("query type", QueryTypes.fileName);
   const [scopeType, setScopeType] = useCachedState<ScopeTypes>("scope type", ScopeTypes.allDrives);
@@ -75,7 +74,7 @@ function SearchGoogleDriveFiles() {
     >
       <List.EmptyView
         title={parentId ? "No files in this folder" : "No files found"}
-        description={parentId ? undefined : "Try adjusting your search or filter"}
+        description={parentId ? undefined : "Try another search or filter"}
         icon={{ source: "google-drive.svg", tintColor: Color.SecondaryText }}
         actions={
           <ActionPanel>
@@ -109,4 +108,4 @@ function SearchGoogleDriveFiles() {
   );
 }
 
-export default withGoogleAuth(SearchGoogleDriveFiles);
+export default withGoogleAuth(SearchGoogleDrive);

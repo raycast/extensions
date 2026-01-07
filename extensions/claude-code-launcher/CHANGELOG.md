@@ -1,5 +1,10 @@
 # Claude Code Launcher
 
+## [1.0.1] - {PR_MERGE_DATE}
+
+### Added
+- Support for Warp terminal
+
 ## [Unreleased]
 
 ### Added

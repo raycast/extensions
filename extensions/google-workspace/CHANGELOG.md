@@ -1,5 +1,12 @@
 # Google Workspace Changelog
 
+## [Hierarchical Navigation] - 2026-01-05
+
+### Changed
+
+- 📂 **Hierarchical Drive navigation** — The extension now loads only files from the root directory by default (navigate through folders to see their contents).
+- 🔍 **Global search** — Searching for a term now automatically searches across the entire Drive, while browsing without a search term stays within the current directory.
+
 ## [Folder Navigation Enhancements] - 2025-12-25
 
 ### Added
@@ -11,49 +18,49 @@
 
 ### Changed
 
-- 📂 **File location now shows folder path** - the "Where" metadata field now displays only the parent folder path, making it easier to understand file organization
-- 📑 **Expanded file type recognition** - improved support for more file types
+- 📂 **File location now shows folder path** - the "Where" metadata field now displays only the parent folder path, making it easier to understand file organization.
+- 📑 **Expanded file type recognition** - improved support for more file types.
 
 ## [Thumbnail Previews] - 2025-12-17
 
 ### Changed
 
-- 🖼️ **File previews now show real content** instead of generic icons - see thumbnails of documents, images, videos, and PDFs directly in the list
+- 🖼️ **File previews now show real content** instead of generic icons - see thumbnails of documents, images, videos, and PDFs directly in the list.
 
 ## [Enhanced File Details and Improved Search] - 2025-12-15
 
 ### Added
 
-- 📊 **Detailed file information** now displayed for every file
+- 📊 **Detailed file information** now displayed for every file:
   - File details: Name, Type, Size, Created, Modified, Last Opened, Shared with Me dates
   - Photo details: Dimensions, Camera model, Date taken, GPS location (tap to view in Maps)
   - Video details: Dimensions and Duration
   - Permissions: Owner, Last Modified By, Sharing status with Copy Protection indicator
-- 🎨 **File icon preview** shown alongside file details
-- 📅 **Smarter date display** showing "Today" and "Yesterday" for recent files
-- ⬇️ **Download files directly** with live progress updates showing percentage and size
-- ⭐ **New starred file filters**: quickly filter by "Starred in My Drive" or "Starred in All Drives"
-- 🏷️ **Clear section titles** that adapt based on your filter: "Recently Used" for file name and starred filters, "Results" for content searches
+- 🎨 **File icon preview** shown alongside file details.
+- 📅 **Smarter date display** showing "Today" and "Yesterday" for recent files.
+- ⬇️ **Download files directly** with live progress updates showing percentage and size.
+- ⭐ **New starred file filters**: quickly filter by "Starred in My Drive" or "Starred in All Drives".
+- 🏷️ **Clear section titles** that adapt based on your filter: "Recently Used" for file name and starred filters, "Results" for content searches.
 
 ### Changed
 
-- 🔄 **Clearer filter dropdown** with more descriptive labels
-- 📝 **Actions reordered** for easier access to commonly used options
-- 📂 **Folder reveal action renamed** from "Open File Location in Browser" to "Reveal in Google Drive" for clarity
-- 🔍 **Search placeholder updated** to "Search in Drive" to match Google Drive's interface
+- 🔄 **Clearer filter dropdown** with more descriptive labels.
+- 📝 **Actions reordered** for easier access to commonly used options.
+- 📂 **Folder reveal action renamed** from "Open File Location in Browser" to "Reveal in Google Drive" for clarity.
+- 🔍 **Search placeholder updated** to "Search in Drive" to match Google Drive's interface.
 
 ### Removed
 
-- 🗑️ **Separate "Starred Google Drive Files" command** - you can now use starred filters in the main search instead
+- 🗑️ **Separate "Starred Google Drive Files" command** - you can now use starred filters in the main search instead.
 
 ### Fixed
 
-- 🐛 **File downloads now work reliably** for all file types and sizes
+- 🐛 **File downloads now work reliably** for all file types and sizes.
 
 ## [Add list home and open home quicklink] - 2025-03-07
 
-- 🔗 Quickly open the Google drive home page in browser
-- 🔧 Minor fix action conflicts
+- 🔗 Quickly open the Google drive home page in browser.
+- 🔧 Minor fix action conflicts.
 
 ## [✨ AI Enhancements] - 2025-02-21
 
@@ -79,12 +86,12 @@
 
 ## [Use OAuth utils] - 2024-02-12
 
-- Use new OAuth utils
+- Use new OAuth utils.
 
 ## [Add menu bar shortcuts] - 2023-11-16
 
 - Create new Google documents from the menu bar.
-- Add an alternate to the menu bar command to open starred files in Raycast instead of Google Drive
+- Add an alternate to the menu bar command to open starred files in Raycast instead of Google Drive.
 
 ## [Fix opening link from Search Google Drive Files command]
 
@@ -104,7 +111,7 @@ Added support to search not only on My Drive but also on Shared Drives.
 
 ## [Open source the Extension] - 2022-08-04
 
-Google Workspace added to the public repository
+Google Workspace added to the public repository.
 
 ## [Select browser to open Google related links] - 2022-02-23
 

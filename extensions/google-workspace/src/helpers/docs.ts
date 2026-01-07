@@ -4,7 +4,7 @@ import { getUserEmail } from "../api/googleAuth";
 export type Prefix = "document" | "forms" | "spreadsheets" | "presentation";
 
 export async function createDocFromUrl(prefix: Prefix, title?: string) {
-  const email = await getUserEmail();
+  const email = getUserEmail();
 
   const baseUrl = `https://docs.google.com/${prefix}/create`;
 

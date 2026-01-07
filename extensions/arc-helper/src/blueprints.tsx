@@ -1,16 +1,9 @@
-import { ActionPanel, Action, List, Detail, Icon, Color, Cache, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import { API, Item, PaginatedResponse, getRarityColor } from "./api";
 import { getBlueprintStore, toggleBlueprintObtained, adjustBlueprintDuplicates, BlueprintStore } from "./storage";
-
-// Clear stale cache on first load (v1 - server-side search)
-const cache = new Cache({ namespace: "blueprints" });
-const CACHE_VERSION = "v1";
-if (cache.get("version") !== CACHE_VERSION) {
-  cache.clear();
-  cache.set("version", CACHE_VERSION);
-}
+import { setCache, CacheKeys } from "./cache";
 
 type FilterMode = "all" | "needed" | "obtained";
 
@@ -99,6 +92,9 @@ export default function Blueprints() {
     },
     {
       mapResult(result: PaginatedResponse<Item>) {
+        const page = result.pagination?.page ?? 1;
+        // Cache each page result (shares cache with search-items when filtering by Blueprint)
+        setCache(CacheKeys.items(page, searchText || undefined, "Blueprint"), result.data);
         return {
           data: result.data,
           hasMore: result.pagination?.hasNextPage ?? false,
@@ -106,6 +102,13 @@ export default function Blueprints() {
       },
       keepPreviousData: true,
       initialData: [],
+      onError() {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load blueprints",
+          message: "Server temporarily unavailable. Please try again.",
+        });
+      },
     },
   );
 
@@ -217,14 +220,20 @@ export default function Blueprints() {
                   <Action
                     title="Add Duplicate"
                     icon={Icon.PlusCircle}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "d" },
+                      Windows: { modifiers: ["ctrl"], key: "d" },
+                    }}
                     onAction={() => handleAddDuplicate(item.id, item.name)}
                   />
                   {duplicates > 0 && (
                     <Action
                       title="Remove Duplicate"
                       icon={Icon.MinusCircle}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                      }}
                       onAction={() => handleRemoveDuplicate(item.id, item.name)}
                     />
                   )}

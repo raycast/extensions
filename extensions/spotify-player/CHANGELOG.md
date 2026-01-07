@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Minor Fixes] - 2026-01-06
+
+- Fixed error toast "Menu Bar Player must be activated" when using Next/Previous in Now Playing without the Menu Bar Player command enabled
+
 ## [Show Error View in Queue] - 2026-01-01
 
 - Add "queue" to README and mark as premium-only

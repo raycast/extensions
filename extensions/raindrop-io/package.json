@@ -18,7 +18,8 @@
     "ridemountainpig",
     "GLaDO8",
     "xmok",
-    "luiscarlospando"
+    "luiscarlospando",
+    "janrokita"
   ],
   "pastContributors": [
     "sh-cho"
@@ -393,6 +394,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

@@ -1,8 +1,8 @@
 # Pokédex Changelog
 
-## [Move Stability] - 2026-01-01
+## [Move Stability] - 2026-01-04
 
-- Fixed Move command crashing when Pokémon moves are missing in the learnset.
+- Fixed extension crash occurring when Pokémon move names are missing in localized languages.
 
 ## [Windows Support] - 2025-12-04
 

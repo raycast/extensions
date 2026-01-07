@@ -1,7 +1,8 @@
-import { ActionPanel, Action, List, Detail, Icon, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
 import { API, EventTimer, EventTimerRaw } from "./api";
+import { getCached, setCache, CacheKeys } from "./cache";
 
 interface EventTimersResponse {
   data: EventTimerRaw[];
@@ -178,9 +179,25 @@ export default function EventTimers() {
   const [mapFilter, setMapFilter] = useState<string>("all");
   const [tick, setTick] = useState(0);
 
+  const cachedEventTimers = getCached<EventTimerRaw[]>(CacheKeys.eventTimers);
+
   const { isLoading, data, revalidate } = useFetch<EventTimersResponse>(API.eventTimers, {
     keepPreviousData: true,
+    onError() {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load events",
+        message: "Server temporarily unavailable. Please try again.",
+      });
+    },
   });
+
+  // Update cache when data changes
+  useEffect(() => {
+    if (data?.data && data.data.length > 0) {
+      setCache(CacheKeys.eventTimers, data.data);
+    }
+  }, [data]);
 
   // Auto-refresh every 60 seconds to update event statuses
   useEffect(() => {
@@ -188,7 +205,7 @@ export default function EventTimers() {
     return () => clearInterval(interval);
   }, []);
 
-  const rawEvents = data?.data || [];
+  const rawEvents = data?.data || cachedEventTimers || [];
   const events = useMemo(() => transformRawEvents(rawEvents), [rawEvents]);
   const maps = [...new Set(rawEvents.map((e) => e.map))].sort();
 
@@ -233,7 +250,10 @@ export default function EventTimers() {
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={() => revalidate()}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "r" },
+              Windows: { modifiers: ["ctrl"], key: "r" },
+            }}
           />
         </ActionPanel>
       }
@@ -254,7 +274,10 @@ export default function EventTimers() {
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={() => revalidate()}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
                   />
                 </ActionPanel>
               }
@@ -287,7 +310,10 @@ export default function EventTimers() {
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={() => revalidate()}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
                   />
                 </ActionPanel>
               }
@@ -312,7 +338,10 @@ export default function EventTimers() {
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={() => revalidate()}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
                   />
                 </ActionPanel>
               }

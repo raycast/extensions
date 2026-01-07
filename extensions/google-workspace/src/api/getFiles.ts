@@ -111,8 +111,17 @@ function getSearchParams({ scope, useAIParams = false, ...params }: StandardGetF
   // Build the query string
   if ("queryType" in params) {
     const escapedText = params.queryText?.replace(/[\\']/g, "\\$&") ?? "";
+    const hasSearchText = escapedText.length > 0;
 
-    const parentClause = "parentId" in params && params.parentId ? `'${params.parentId}' in parents` : null;
+    // When navigating (has parentId), always filter by parent
+    // When searching (has query text), search everywhere
+    // When neither, show only root files
+    const parentClause =
+      "parentId" in params && params.parentId
+        ? `'${params.parentId}' in parents`
+        : !hasSearchText && params.queryType !== QueryTypes.starred
+          ? "'root' in parents"
+          : null;
 
     // Default query
     let q = "trashed = false";
