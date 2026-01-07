@@ -1,5 +1,11 @@
 # ScreenOCR Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Added [cross-extension support](https://github.com/LitoMore/raycast-cross-extension-conventions) to enable OCR results to be used by other extensions
+- Added documentation to include [cross-extension usage](docs/cross-extension-usage.md)
+- Updated dependencies
+
 ## [Improvements] - 2025-11-13
 
 - Added option to hide toast messages
