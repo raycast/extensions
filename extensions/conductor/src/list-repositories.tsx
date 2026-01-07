@@ -48,10 +48,13 @@ function RepoListItem({ repo }: { repo: RepoRow }) {
 
   const keywords = [repo.name, repo.root_path, repo.remote_url, repo.remote].filter(Boolean) as string[];
 
+  const title = repo.name ?? repo.root_path ?? repo.id;
+  const subtitle = repo.root_path ?? undefined;
+
   return (
     <List.Item
-      title={repo.name || repo.root_path}
-      subtitle={repo.root_path}
+      title={title}
+      subtitle={subtitle}
       accessories={accessories}
       keywords={keywords}
       icon={Icon.Folder}
