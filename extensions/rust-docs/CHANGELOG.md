@@ -1,6 +1,6 @@
 # Rust Documentation Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-07
 
 Initial release of the Rust Documentation extension.
 
