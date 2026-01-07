@@ -53,7 +53,8 @@ function findLibreOfficePath(): string | null {
 }
 
 async function goToBrew() {
-  exec("open https://brew.sh");
+  import { open } from "@raycast/api";
+  open("https://brew.sh");
 }
 
 export default function Command() {
