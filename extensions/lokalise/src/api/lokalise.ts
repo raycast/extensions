@@ -1,11 +1,6 @@
 import { LokaliseApi } from "@lokalise/node-api";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiToken: string;
-  projectId: string;
-}
-
 let lokaliseClient: LokaliseApi | null = null;
 
 export function getLokaliseClient(): LokaliseApi {
