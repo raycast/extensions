@@ -13,11 +13,6 @@ import {
   type PrayerTime,
 } from "./utils";
 
-type Preferences = {
-  city?: string;
-  calculationMethod?: string;
-};
-
 export default function Command() {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([]);
   const [isLoading, setIsLoading] = useState(true);

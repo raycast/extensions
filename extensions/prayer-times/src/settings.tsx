@@ -80,7 +80,7 @@ const MAJOR_CITIES = [
   "Baku",
 ];
 
-type Preferences = {
+type FormValues = {
   city?: string;
   customCity?: string;
   calculationMethod?: string;
@@ -102,7 +102,7 @@ export default function Settings() {
     setCity(newCity);
   };
 
-  const handleSubmit = async (values: Preferences) => {
+  const handleSubmit = async (values: FormValues) => {
     try {
       const finalCity = values.customCity || values.city || "";
       cache.set("city", finalCity);
