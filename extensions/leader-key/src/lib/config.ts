@@ -21,5 +21,10 @@ export function getLeaderKeyConfig(): LeaderKeyConfig | null {
   }
 
   const content = readFileSync(configPath, "utf8");
-  return JSON.parse(content) as LeaderKeyConfig;
+
+  try {
+    return JSON.parse(content) as LeaderKeyConfig;
+  } catch {
+    throw new Error(`Invalid Leader Key config JSON at: ${configPath}`);
+  }
 }
