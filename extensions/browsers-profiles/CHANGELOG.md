@@ -3,7 +3,6 @@
 ## [Add support for selecting browsers] - {PR_MERGE_DATE}
 
 - Add preferences to show/hide selected browsers from the profile list
-- Migrate extension to latest Raycast API, use Raycast ESLint config
 
 ## [Fix Chromium invalid profile names] - 2025-11-27
 

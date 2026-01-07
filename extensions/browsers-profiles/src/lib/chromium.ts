@@ -68,7 +68,7 @@ export const getChromiumProfiles = (enabledBrowsers: Record<string, boolean>) =>
         path: profileDir,
         name: profileName,
         icon: browser.icon,
-      }),
+      })
     );
 
     sortProfiles(browserProfiles);
