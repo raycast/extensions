@@ -2,7 +2,7 @@
 set timeout -1
 set password [lindex $argv 0]
 
-spawn /bin/bash -lc {curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | /bin/bash}
+spawn /bin/bash -lc {tmpfile=$(mktemp) && curl -fsSL -o "$tmpfile" https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh && /bin/bash "$tmpfile" && rm -f "$tmpfile"}
 expect {
   -re "(P|p)assword:|password for .*:" {
     send -- "$password\r"
