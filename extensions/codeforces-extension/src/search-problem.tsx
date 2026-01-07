@@ -1,6 +1,5 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { useState, useMemo } from "react";
-import { ProblemDetail } from "./components/ProblemDetail";
 import { useCodeforces } from "./func/useCodeforces";
 import type { Problem, Problemset } from "./types/codeforces";
 import { getColorHexCode } from "./func/HexCode";
@@ -117,17 +116,6 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.Push
-                    title="View Problem"
-                    icon={Icon.Eye}
-                    target={
-                      <ProblemDetail
-                        contestId={problem.contestId ?? 0}
-                        index={problem.index}
-                        problemName={problem.name}
-                      />
-                    }
-                  />
                   <Action.OpenInBrowser
                     title="Open on Codeforces"
                     url={`https://codeforces.com/problemset/problem/${problem.contestId}/${problem.index}`}
