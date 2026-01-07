@@ -1,10 +1,4 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
-
-interface Preferences {
-  nocodbApiToken?: string;
-  nocodbTableId?: string;
-}
 
 const NOCODB_BASE_URL = "https://nocodb.naai.studio/api/v2/tables";
 

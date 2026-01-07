@@ -6,12 +6,6 @@ import {
 } from "@raycast/api";
 import { getTodayDate, getDailyStats } from "./utils/storage";
 
-interface Preferences {
-  dailyGoal: string;
-  reminderInterval: string;
-  enableNotifications: boolean;
-}
-
 const LAST_REMINDER_KEY = "lastReminderTime";
 const SNOOZE_UNTIL_KEY = "snoozeUntil";
 

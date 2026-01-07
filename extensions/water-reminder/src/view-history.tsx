@@ -18,10 +18,6 @@ import {
   getAvailableDates,
 } from "./utils/storage";
 
-interface Preferences {
-  dailyGoal: string;
-}
-
 interface DayData {
   date: string;
   stats: DailyStats;

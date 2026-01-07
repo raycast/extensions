@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020"],
+    "lib": [
+      "ES2020"
+    ],
     "module": "commonjs",
     "jsx": "react",
     "strict": true,
@@ -13,5 +15,8 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*",
+    "raycast-env.d.ts"
+  ]
 }

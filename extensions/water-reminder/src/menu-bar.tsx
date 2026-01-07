@@ -19,16 +19,6 @@ import { addNocoDBLog } from "./utils/nocodb";
 const CONFETTI_SHOWN_KEY = "confettiShownDate";
 const SNOOZE_UNTIL_KEY = "snoozeUntil";
 
-interface Preferences {
-  dailyGoal: string;
-  defaultAmount: string;
-  webhookUrl: string;
-  enableConfetti: boolean;
-  enableMenuBar: boolean;
-  habitifyApiKey: string;
-  habitifyHabitId: string;
-}
-
 export default function MenuBarCommand() {
   const preferences = getPreferenceValues<Preferences>();
 

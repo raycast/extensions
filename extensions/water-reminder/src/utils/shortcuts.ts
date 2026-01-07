@@ -24,14 +24,15 @@ export async function triggerAppleShortcut(
   }
 
   try {
-    // Create JSON input for the shortcut
     const jsonInput = JSON.stringify(data);
-
     // Use the 'shortcuts' command line tool to run the shortcut
-    // Pass data as input via stdin
-    const command = `echo '${jsonInput}' | shortcuts run "${shortcutName}"`;
-
-    await execAsync(command);
+    // Pass data as input via stdin to avoid shell injection
+    const { exec } = await import("child_process");
+    const child = exec(`shortcuts run "${shortcutName.replace(/"/g, '\\"')}"`);
+    if (child.stdin) {
+      child.stdin.write(jsonInput);
+      child.stdin.end();
+    }
     console.log(`Successfully triggered shortcut: ${shortcutName}`);
   } catch (error) {
     console.error("Failed to trigger Apple Shortcut:", error);

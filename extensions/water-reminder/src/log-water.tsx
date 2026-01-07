@@ -17,17 +17,6 @@ import { addNocoDBLog } from "./utils/nocodb";
 
 const CONFETTI_SHOWN_KEY = "confettiShownDate";
 
-interface Preferences {
-  dailyGoal: string;
-  defaultAmount: string;
-  webhookUrl: string;
-  enableConfetti: boolean;
-  habitifyApiKey: string;
-  habitifyHabitId: string;
-  nocodbApiToken: string;
-  nocodbTableId: string;
-}
-
 interface FormValues {
   amount: string;
   note: string;
