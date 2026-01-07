@@ -22,14 +22,12 @@
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
-    "cheerio": "^1.1.2",
-    "node-fetch": "^2.7.0"
+    "cheerio": "^1.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/cheerio": "^0.22.35",
     "@types/node": "^25.0.3",
-    "@types/node-fetch": "^2.6.13",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.2",
