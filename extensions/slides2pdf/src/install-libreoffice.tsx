@@ -60,7 +60,7 @@ async function goToBrew() {
 export default function Command() {
   const [items, setItems] = useCachedState<Todo[]>("todos", defaultItems());
 
-  // inital checks
+  // initial checks
   useEffect(() => {
     (async () => {
       const brewPath = await findBrew();
