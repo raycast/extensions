@@ -48,7 +48,7 @@
     {
       "name": "openAfterConvertSingle",
       "type": "checkbox",
-      "title": "Open when single file converted",
+      "title": "Open When Single File Converted",
       "label": "Open after single convert",
       "description": "Open the generated PDF immediately when converting a single selected file.",
       "required": false,
