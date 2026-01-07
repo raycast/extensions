@@ -34,7 +34,7 @@ Would any of these times work for a 25 min meeting (ET)?
 • Tue, Jan 7: 9:30am, 11:00am, 3:00pm
 • Wed, Jan 8: 10:00am, 1:00pm, 3:30pm
 
-Feel free to use this booking page if that's easier (also contains more availabilities):
+Feel free to use this booking page (contains more availabilities):
 https://savvycal.com/you/chat
 ```
 
@@ -44,8 +44,8 @@ Each time is a link. Click → booking form → done.
 
 ### Required
 
-**Raycast** — A Mac app that lets you quickly launch commands with a keyboard shortcut. Think of it like Spotlight, but way more powerful.
-- 🖥️ **Mac only** (sorry, no Windows/Linux)
+**Raycast** — A desktop app that lets you quickly launch commands with a keyboard shortcut. Think of it like Spotlight, but way more powerful.
+- 🖥️ **Mac & Windows**
 - 💰 **Free** — The free version has everything you need. Pro is $8/month but not required.
 - 🔗 [Download Raycast](https://raycast.com)
 
@@ -65,7 +65,7 @@ This extension isn't in the Raycast Store (yet), so you'll install it as a "Deve
 
 ### Prerequisites
 
-You'll need **Node.js** installed on your Mac. To check if you have it:
+You'll need **Node.js** installed on your computer. To check if you have it:
 
 1. Open **Terminal** (press `⌘ + Space`, type "Terminal", hit Enter)
 2. Type `node --version` and press Enter
