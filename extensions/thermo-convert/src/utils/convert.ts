@@ -1,5 +1,6 @@
 export interface TemperatureResult {
-  unit: string;
+  key: TemperatureUnit;
+  name: string;
   symbol: string;
   value: number;
   formatted: string;
@@ -47,7 +48,11 @@ function celsiusToReaumur(c: number): number {
   return (c * 4) / 5;
 }
 
-function toCelsius(value: number, fromUnit: TemperatureUnit): number {
+function assertNever(x: never): never {
+  throw new Error(`Unhandled case: ${x}`);
+}
+
+export function toCelsius(value: number, fromUnit: TemperatureUnit): number {
   switch (fromUnit) {
     case "celsius":
       return value;
@@ -59,6 +64,8 @@ function toCelsius(value: number, fromUnit: TemperatureUnit): number {
       return rankineToCelsius(value);
     case "reaumur":
       return reaumurToCelsius(value);
+    default:
+      return assertNever(fromUnit);
   }
 }
 
@@ -74,6 +81,8 @@ function fromCelsius(celsius: number, toUnit: TemperatureUnit): number {
       return celsiusToRankine(celsius);
     case "reaumur":
       return celsiusToReaumur(celsius);
+    default:
+      return assertNever(toUnit);
   }
 }
 
@@ -99,7 +108,8 @@ export function convertTemperature(value: number, fromUnit: TemperatureUnit): Te
     const convertedValue = fromCelsius(celsius, unit);
     const unitInfo = TEMPERATURE_UNITS[unit];
     return {
-      unit: unitInfo.name,
+      key: unit,
+      name: unitInfo.name,
       symbol: unitInfo.symbol,
       value: convertedValue,
       formatted: `${convertedValue.toFixed(2)} ${unitInfo.symbol}`,

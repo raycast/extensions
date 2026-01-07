@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, Color, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
-import { parseInput, convertTemperature, TEMPERATURE_UNITS, TemperatureUnit } from "./utils/convert";
+import { parseInput, convertTemperature, TEMPERATURE_UNITS, TemperatureUnit, toCelsius } from "./utils/convert";
 
 const UNIT_ICONS: Record<TemperatureUnit, string> = {
   celsius: "🌡️",
@@ -24,6 +24,15 @@ function getTemperatureContext(celsius: number): string {
   return "Very hot";
 }
 
+function getTemperatureColor(unit: string, value: number): Color {
+  if (unit === "Kelvin" && value < 273.15) return Color.Blue;
+  if (unit === "Celsius" && value < 0) return Color.Blue;
+  if (unit === "Fahrenheit" && value < 32) return Color.Blue;
+  if (unit === "Celsius" && value > 30) return Color.Orange;
+  if (unit === "Fahrenheit" && value > 86) return Color.Orange;
+  return Color.SecondaryText;
+}
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences.Convert>();
   const [searchText, setSearchText] = useState("");
@@ -33,13 +42,7 @@ export default function Command() {
   const results = value !== null ? convertTemperature(value, fromUnit) : [];
 
   const currentUnit = TEMPERATURE_UNITS[fromUnit];
-
-  let celsiusValue: number | null = null;
-  if (value !== null) {
-    const celsiusResult = results.find((r) => r.unit === "Celsius");
-    celsiusValue = celsiusResult?.value ?? value;
-    if (fromUnit === "celsius") celsiusValue = value;
-  }
+  const celsiusValue = value !== null ? toCelsius(value, fromUnit) : null;
 
   return (
     <List
@@ -65,21 +68,12 @@ export default function Command() {
             subtitle={celsiusValue !== null ? getTemperatureContext(celsiusValue) : undefined}
           >
             {results.map((result) => {
-              const getIconColor = () => {
-                if (result.unit === "Kelvin" && result.value < 273.15) return Color.Blue;
-                if (result.unit === "Celsius" && result.value < 0) return Color.Blue;
-                if (result.unit === "Fahrenheit" && result.value < 32) return Color.Blue;
-                if (result.unit === "Celsius" && result.value > 30) return Color.Orange;
-                if (result.unit === "Fahrenheit" && result.value > 86) return Color.Orange;
-                return Color.SecondaryText;
-              };
-
               return (
                 <List.Item
-                  key={result.unit}
-                  icon={{ source: Icon.Temperature, tintColor: getIconColor() }}
+                  key={result.key}
+                  icon={{ source: Icon.Temperature, tintColor: getTemperatureColor(result.name, result.value) }}
                   title={result.formatted}
-                  subtitle={result.unit}
+                  subtitle={result.name}
                   accessories={[
                     { text: result.symbol, tooltip: `Symbol: ${result.symbol}` },
                     { text: `${result.value.toFixed(4)}`, tooltip: "Precise value" },
@@ -108,16 +102,11 @@ export default function Command() {
                       </ActionPanel.Section>
                       <ActionPanel.Section title="Convert">
                         <Action
-                          title={`Set Source to ${result.unit}`}
+                          title={`Set Source to ${result.name}`}
                           icon={Icon.Switch}
                           shortcut={{ modifiers: ["cmd"], key: "s" }}
                           onAction={() => {
-                            const newUnit = Object.keys(TEMPERATURE_UNITS).find(
-                              (k) => TEMPERATURE_UNITS[k as TemperatureUnit].name === result.unit,
-                            ) as TemperatureUnit;
-                            if (newUnit) {
-                              setFromUnit(newUnit);
-                            }
+                            setFromUnit(result.key);
                           }}
                         />
                       </ActionPanel.Section>
