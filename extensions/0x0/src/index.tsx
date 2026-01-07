@@ -1,8 +1,7 @@
 import { Form, ActionPanel, Action, Toast, showToast, open, Clipboard, Icon } from "@raycast/api";
-import fs from "fs";
+import fs from "node:fs";
 import { useState } from "react";
-import FormData from "form-data";
-import path from "path";
+import path from "node:path";
 import { FormValidation, useForm } from "@raycast/utils";
 
 interface UploadFormValues {
@@ -20,17 +19,15 @@ export default function Command() {
         const formData = new FormData();
         const filePath = values.file[0];
         const fileBuffer = fs.readFileSync(filePath);
-        formData.append("file", fileBuffer, {
-          filename: path.basename(filePath),
-        });
-
-        const headers = formData.getHeaders();
-        // Set a proper User-Agent as recommended by 0x0.st documentation
-        headers["User-Agent"] = "0x0-raycast/1.0";
+        const fileName = path.basename(filePath);
+        const blob = new Blob([fileBuffer]);
+        formData.append("file", blob, fileName);
 
         const response = await fetch(url, {
           method: "POST",
-          headers: headers,
+          headers: {
+            "User-Agent": "0x0-raycast/1.0",
+          },
           body: formData,
         });
 
