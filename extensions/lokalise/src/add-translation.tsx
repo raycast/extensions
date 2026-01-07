@@ -136,7 +136,7 @@ export default function Command() {
         ref={descriptionRef}
         id="description"
         title="Description"
-        placeholder="Enter a description for this translation key (optional)"
+        placeholder="Enter a description for this translation key"
         info="Optional description to help translators understand the context"
       />
       <Form.FilePicker
