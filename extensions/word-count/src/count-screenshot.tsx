@@ -1,12 +1,16 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow, showHUD, LaunchProps, LaunchType, open } from "@raycast/api";
+import { crossLaunchCommand } from "raycast-cross-extension";
 import { count } from "./lib/count";
-import { readFromScreenshot } from "./utils";
 
-export default async function Command() {
-  await closeMainWindow();
+type LaunchContext = {
+  text?: string;
+  error?: string;
+};
 
-  try {
-    const text = await readFromScreenshot();
+export default async function Command({ launchContext }: LaunchProps<{ launchContext?: LaunchContext }>) {
+  // Callback from ScreenOCR with OCR result
+  if (launchContext?.text !== undefined) {
+    const text = launchContext.text.trim();
 
     if (!text) {
       await showHUD("❌ Nothing to count!");
@@ -14,11 +18,9 @@ export default async function Command() {
     }
 
     const result = count(text, true);
-
     const number = (value: number) => value.toLocaleString();
-    const plural = (count: number, singular: string, plural: string) => (count === 1 ? singular : plural);
+    const plural = (n: number, s: string, p: string) => (n === 1 ? s : p);
 
-    // Default stats: Characters, Words, Sentences, Paragraphs
     const stats = [
       `${number(result.characters)} ${plural(result.characters, "char", "chars")}`,
       `${number(result.words)} ${plural(result.words, "word", "words")}`,
@@ -26,11 +28,28 @@ export default async function Command() {
       `${number(result.paragraphs)} ${plural(result.paragraphs, "paragraph", "paragraphs")}`,
     ];
 
-    const hudMessage = `📊 ${stats.join(" · ")}`;
+    await showHUD(`📊 ${stats.join(" · ")}`);
+    return;
+  }
 
-    await showHUD(hudMessage);
-  } catch (error) {
-    console.error("Screenshot count error:", error);
-    await showHUD("❌ Nothing to count!");
+  // Error from ScreenOCR
+  if (launchContext?.error) {
+    await showHUD("❌ OCR failed!");
+    return;
+  }
+
+  // Initial invocation: launch ScreenOCR
+  await closeMainWindow();
+
+  try {
+    await crossLaunchCommand({
+      name: "recognize-text",
+      type: LaunchType.UserInitiated,
+      extensionName: "screenocr",
+      ownerOrAuthorName: "huzef44",
+    });
+  } catch {
+    await showHUD("❌ Please install ScreenOCR extension");
+    await open("raycast://extensions/huzef44/screenocr");
   }
 }

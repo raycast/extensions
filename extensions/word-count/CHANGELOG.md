@@ -3,11 +3,9 @@
 ## [New Feature] - {PR_MERGE_DATE}
 
 - **Added screenshot-based word counting** - Capture any text on screen and get instant counts using OCR
-  - New "Count from Screenshot" command with hotkey support
-  - Uses Apple Vision framework for accurate text recognition
+  - New "Count from Screenshot" command (macOS only)
+  - Uses [ScreenOCR](https://www.raycast.com/huzef44/screenocr) extension via cross-extension integration
   - Displays results in HUD notification
-  - Optional camera shutter sound preference
-  - Requires Xcode for building
 - Updated dependencies to the latest Raycast stack
 - Updated ESLint tooling to v9 using the provided guide
 

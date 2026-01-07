@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "word-count",
   "title": "Word Count",
-  "description": "Count the number of characters, words, sentences, and paragraphs in some text.",
+  "description": "Count characters, words, sentences, and paragraphs in text.",
   "icon": "word-count.png",
   "access": "public",
   "author": "itsmingjie",
@@ -17,12 +17,19 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "crossExtensions": [
+    "huzef44/screenocr"
+  ],
   "commands": [
     {
       "name": "count",
       "title": "Count",
       "subtitle": "Word Count",
-      "description": "Count the number of characters, words, sentences, and paragraphs in some text.",
+      "description": "CCount characters, words, sentences, and paragraphs in text.",
       "mode": "view",
       "keywords": [
         "word",
@@ -37,6 +44,9 @@
       "subtitle": "Word Count",
       "description": "Capture a screenshot and count words, characters, sentences, and paragraphs using OCR.",
       "mode": "no-view",
+      "platforms": [
+        "macOS"
+      ],
       "keywords": [
         "screenshot",
         "ocr",
@@ -49,8 +59,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
+    "raycast-cross-extension": "^0.2.3",
     "react": "^19.2.0"
   },
   "devDependencies": {
@@ -74,9 +85,5 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "test": "jest"
-  },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ]
+  }
 }
