@@ -19,31 +19,37 @@ export function TranslationDetail({ keyId }: TranslationDetailProps) {
   if (!keyToDisplay) {
     return <Detail isLoading={isLoading} />;
   }
-  const screenshotMarkdown =
+
+  const keyInfoMarkdown = `## ${keyToDisplay.keyName}\n\n${
+    keyToDisplay.defaultTranslation ? `${keyToDisplay.defaultTranslation}\n\n` : ""
+  }`;
+
+  const screenshotsMarkdown =
     keyToDisplay.screenshots.length > 0
-      ? `${keyToDisplay.screenshots.map((s) => `![${s.title}](${s.url})`).join("\n\n")}`
+      ? `---\n\n${keyToDisplay.screenshots.map((s) => `![${s.title}](${s.url})`).join("\n\n")}`
       : "";
+
+  const markdown = `${keyInfoMarkdown}${screenshotsMarkdown}`;
 
   return (
     <Detail
       isLoading={isLoading}
-      markdown={screenshotMarkdown}
+      markdown={markdown}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Key Name" text={keyToDisplay.keyName} />
           {keyToDisplay.defaultTranslation && (
             <Detail.Metadata.Label title="Default Translation" text={keyToDisplay.defaultTranslation} />
           )}
+          {keyToDisplay.description && <Detail.Metadata.Label title="Description" text={keyToDisplay.description} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Platforms" text={keyToDisplay.platforms.join(", ") || "N/A"} />
           <Detail.Metadata.Label title="Is Plural" text={keyToDisplay.isPlural ? "Yes" : "No"} />
           <Detail.Metadata.Label title="Tags" text={keyToDisplay.tags.join(", ") || "None"} />
-          {keyToDisplay.description && <Detail.Metadata.Label title="Description" text={keyToDisplay.description} />}
           {keyToDisplay.context && <Detail.Metadata.Label title="Context" text={keyToDisplay.context} />}
           {keyToDisplay.translations.length > 0 && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.Label title="Translations" />
               {keyToDisplay.translations.map((trans, index) => (
                 <Detail.Metadata.Label key={index} title={trans.languageName} text={trans.text} />
               ))}
