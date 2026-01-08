@@ -4,7 +4,14 @@ import * as os from "os";
 import path from "path";
 import { useEffect, useState } from "react";
 import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
-import { fileExists, getErrorMessage, isWin, openURIinVSCode, raycastForVSCodeURI, waitForFileExists } from "./utils";
+import {
+  fileExists,
+  getErrorMessage,
+  isWin,
+  openURIinVSCode,
+  raycastForVSCodeURI,
+  waitForFileExists,
+} from "./lib/utils";
 
 interface CommandMetadata {
   command: string;
@@ -15,15 +22,14 @@ interface CommandMetadata {
 function transitFolder(): string {
   const build = getBuildNamePreference();
 
-  let ts: string;
+  let ts = path.join(os.homedir(), `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`);
 
   if (isWin) {
     ts = path.join(os.homedir(), `AppData/Roaming/${build}/User/globalStorage/tonka3000.raycast/transit`);
-  } else {
-    ts = path.join(os.homedir(), `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`);
   }
   return ts;
 }
+
 function CreateCommandQuickLinkAction(props: { command: CommandMetadata }) {
   const c = props.command;
   const title = c.category ? `${c.category}: ${c.title}` : c.title;

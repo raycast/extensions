@@ -1,9 +1,9 @@
-import { Toast, closeMainWindow, showToast } from "@raycast/api";
+import { Toast, closeMainWindow, open, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { build } from "./preferences";
-import { VSCodeBuild } from "./types";
-import { getVSCodeCLI } from "./lib/vscode";
-import { isMac, isWin } from "./utils";
+import { build } from "./lib/preferences";
+import { VSCodeBuild } from "./lib/types";
+import { isMac, isWin } from "./lib/utils";
+import { getEditorApplication } from "./utils/editor";
 
 /**
  * The index of the `New Window` menu item in the `File` menu.
@@ -60,11 +60,6 @@ const makeNewWindowMacOs = async () => {
   `);
 };
 
-const makeNewWindowWindows = async () => {
-  const cli = getVSCodeCLI();
-  return cli.newWindow();
-};
-
 export default async function command() {
   try {
     await closeMainWindow();
@@ -72,7 +67,8 @@ export default async function command() {
       await makeNewWindowMacOs();
     }
     if (isWin) {
-      await makeNewWindowWindows();
+      const editorApp = await getEditorApplication(build);
+      open("", editorApp);
     }
   } catch (error) {
     await showToast({

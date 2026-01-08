@@ -1,10 +1,10 @@
 import { closeMainWindow, getFrontmostApplication, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { bundleIdentifier } from "./preferences";
+import { build } from "./lib/preferences";
 import { getCurrentFinderPath } from "./utils/apple-scripts";
-import { isMac, isWin, runExec } from "./utils";
+import { isMac, isWin } from "./lib/utils";
 import { getCurrentExplorerPath } from "./utils/win-scripts";
-import { getVSCodeCLIFilename } from "./lib/vscode";
+import { getEditorApplication } from "./utils/editor";
 
 // Function to get selected Path Finder items
 const getSelectedPathFinderItems = async () => {
@@ -25,6 +25,7 @@ const getSelectedPathFinderItems = async () => {
 export default async function main() {
   try {
     let selectedItems: { path: string }[] = [];
+    const editor = await getEditorApplication(build);
 
     if (isMac) {
       const currentApp = await getFrontmostApplication();
@@ -42,32 +43,25 @@ export default async function main() {
       }
 
       for (const item of selectedItems) {
-        await open(item.path, bundleIdentifier);
+        await open(item.path, editor);
       }
     }
 
     if (isWin) {
-      const cliFilename = getVSCodeCLIFilename();
       selectedItems = await getSelectedFinderItems();
 
       if (selectedItems.length === 0) {
         const currentPath = await getCurrentExplorerPath();
 
         if (currentPath.length === 0) {
-          throw new Error("Not a valid directory or no selection in active application.");
+          throw new Error("Not a valid directory.");
         }
 
         selectedItems = [{ path: currentPath }];
       }
 
       for (const item of selectedItems) {
-        runExec([cliFilename, item.path], (error) => {
-          if (error) {
-            console.error(`Error opening file: ${error}`);
-            showToast(Toast.Style.Failure, `Failed to open file: ${error}`);
-            return;
-          }
-        });
+        open(item.path, editor);
       }
     }
 

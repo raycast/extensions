@@ -5,8 +5,8 @@ import { homedir } from "os";
 import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
 import { isSameEntry, isWin } from "./utils";
-import { execFilePromise } from "./utils/exec";
-import { getBuildNamePreference } from "./lib/vscode";
+import { execFilePromise } from "../utils/exec";
+import { getBuildNamePreference } from "./vscode";
 
 export type RemoveMethods = {
   removeEntry: (entry: EntryLike) => Promise<void>;

@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { isDeepStrictEqual } from "util";
-import { getBuildScheme } from "./lib/vscode";
+import { getBuildScheme } from "./vscode";
 import {
   EntryLike,
   EntryType,
@@ -13,7 +13,6 @@ import {
   RemoteWorkspaceEntry,
   WorkspaceEntry,
 } from "./types";
-import { exec } from "child_process";
 
 // Type Guards
 
@@ -164,39 +163,3 @@ export function isValidHexColor(color: string): boolean {
 
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
-
-export function runExec(commands: string[], onFinish: (error: string | null) => void) {
-  const cmd = commands.map((c) => `"${c}"`).join(" ");
-  const cleanedEnv = cleanEnv(process.env);
-  exec(cmd, { env: cleanedEnv }, (error, stdout, stderr) => {
-    if (stdout || stderr) {
-      console.log("fix me");
-    }
-    if (error) {
-      onFinish(error.message);
-    } else {
-      onFinish(null);
-    }
-  });
-}
-
-export function cleanEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  const cleanEnv = { ...env };
-  delete cleanEnv.LC_ALL;
-  delete cleanEnv.LANG;
-  delete cleanEnv.LANGUAGE;
-  delete cleanEnv.ORIGINAL_PATH;
-  delete cleanEnv.NODE_ENV;
-  delete cleanEnv.SUPPORT_PATH;
-  delete cleanEnv.RAYCAST_SESSION;
-  delete cleanEnv.RAYCAST_VERSION;
-  delete cleanEnv.ASSETS_PATH;
-  delete cleanEnv.COMMAND_NAME;
-  delete cleanEnv.EXTENSION_NAME;
-  delete cleanEnv.FAVICON_PROVIDER;
-  delete cleanEnv.PROMPT;
-  delete cleanEnv.NODE_PATH;
-  delete cleanEnv.TZ;
-  cleanEnv.PATH = "";
-  return cleanEnv;
-}

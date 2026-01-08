@@ -1,8 +1,8 @@
 import { Action, Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getBuildNamePreference, getBuildScheme, getVSCodeCLI } from "./lib/vscode";
+import { getBuildNamePreference, getBuildScheme, getVSCodeCLI } from "./vscode";
 import { getErrorMessage } from "./utils";
-import { getEditorApplication } from "./utils/editor";
+import { getEditorApplication } from "../utils/editor";
 
 export function InstallExtensionByIDAction(props: { extensionID: string; afterInstall?: () => void }) {
   const handle = async () => {
