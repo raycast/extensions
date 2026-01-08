@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Fix: Windows Support] - {PR_MERGE_DATE}
+## [Fix: Windows Support] - 2026-01-08
 
 - Resolved `setLocale` warnings in bash by clearing environment variables.
 - "Commands" command now supports Windows.
