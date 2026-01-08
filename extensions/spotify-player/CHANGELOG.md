@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Fix Queue Fallback for Generate Playlist] - {PR_MERGE_DATE}
+
+- Added "Play Playlist" option to immediately start playing a generated playlist without saving it to your library
+- Fixed "Add Songs to Queue" in Generate Playlist failing when no active player exists
+- When there's no active Spotify session, the first track now plays directly to initialize playback, then remaining tracks are added to the queue
+
 ## [Fix] - 2026-01-14
 
 - Fixed error toast when Menu Bar Player command is disabled (handles "No enabled command" error)
@@ -20,11 +26,11 @@
 
 ## [Generate Playlist Improvements] - 2025-12-05
 
-- Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation  
-- Strengthened prompt to enforce a **hard minimum of 20 songs** and a **maximum of 75 songs**  
-- Added strict validation requiring the returned JSON to include a correctly structured `playlist` array  
-- Improved cultural and thematic vibe inference when no artists are explicitly listed  
-- Tightened rules for subgenre consistency, smooth energy progression, and removal of generic or low-intent tracks  
+- Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation
+- Strengthened prompt to enforce a **hard minimum of 20 songs** and a **maximum of 75 songs**
+- Added strict validation requiring the returned JSON to include a correctly structured `playlist` array
+- Improved cultural and thematic vibe inference when no artists are explicitly listed
+- Tightened rules for subgenre consistency, smooth energy progression, and removal of generic or low-intent tracks
 
 ## [Enhancements] - 2025-11-27
 

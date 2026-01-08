@@ -94,26 +94,90 @@ If you have listed fewer than 20 songs you must keep adding valid songs until th
     }
   }
 
+  async function playPlaylist() {
+    if (!playlist) return;
+    if (!tracks || tracks.length === 0) return;
+
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Starting playlist" });
+
+      // Find the first valid track to play
+      const firstTrack = tracks.find((track) => track && track.id);
+      if (!firstTrack) {
+        throw new Error("No valid tracks found");
+      }
+
+      // Play the first track
+      await play({ id: firstTrack.id, type: "track" });
+
+      // Wait for playback to initialize before adding remaining tracks to queue
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Add remaining tracks to queue
+      for (let i = 1; i < tracks.length; i++) {
+        const track = tracks[i];
+        if (!track || !track.uri) continue;
+        await addToQueue({ uri: track.uri });
+      }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Playing playlist",
+        message: `Now playing "${playlist.name}"`,
+      });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not play playlist" });
+    }
+  }
+
   async function addSongsToQueue() {
     if (!playlist) return;
+    if (!tracks || tracks.length === 0) return;
 
     try {
       await showToast({ style: Toast.Style.Animated, title: "Adding songs to queue" });
+
+      let startedPlayback = false;
+
       // Using Promise.all could improve performance here, but it would disrupt the order of songs in the queue.
-      for (const track of tracks ?? []) {
+      for (let i = 0; i < tracks.length; i++) {
+        const track = tracks[i];
         if (!track || !track.uri) continue;
-        await addToQueue({ uri: track?.uri });
+
+        try {
+          await addToQueue({ uri: track.uri });
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+
+          // If no active device/player, play the first track directly to initialize playback
+          if (
+            !startedPlayback &&
+            (errorMessage.includes("no active device") ||
+              errorMessage.includes("no device found") ||
+              errorMessage.includes("player command failed"))
+          ) {
+            await play({ id: track.id, type: "track" });
+            startedPlayback = true;
+            // Wait for playback to initialize before adding more tracks to queue
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          } else {
+            throw err;
+          }
+        }
       }
+
       await showToast({
         style: Toast.Style.Success,
-        title: "Added songs to queue",
-        primaryAction: {
-          title: "Play Next Song in Queue",
-          onAction: async () => {
-            await skipToNext();
-            await play();
-          },
-        },
+        title: startedPlayback ? "Started playing and added songs to queue" : "Added songs to queue",
+        primaryAction: !startedPlayback
+          ? {
+              title: "Play Next Song in Queue",
+              onAction: async () => {
+                await skipToNext();
+                await play();
+              },
+            }
+          : undefined,
       });
     } catch (error) {
       await showFailureToast(error, { title: "Could not add songs to queue" });
@@ -131,6 +195,16 @@ If you have listed fewer than 20 songs you must keep adding valid songs until th
       >
         {tracks && tracks.length > 0 ? (
           <>
+            <List.Item
+              icon={Icon.Play}
+              title="Play Playlist"
+              actions={
+                <ActionPanel>
+                  <Action title="Play Playlist" onAction={playPlaylist} />
+                </ActionPanel>
+              }
+            />
+
             <List.Item
               icon={Icon.Stars}
               title="Add Playlist to Spotify"
