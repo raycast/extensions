@@ -40,7 +40,7 @@ Your callback command will receive a `launchContext` with:
 
 ```typescript
 type OCRResult = {
-  text: string | null; // The recognized text, or null if no text was detected
+  text?: string; // The recognized text, or null if no text was detected
   error?: string;      // Error message if OCR failed
 };
 ```
