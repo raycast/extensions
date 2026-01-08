@@ -340,14 +340,18 @@ export default function CommandSyncZoteroToCraft() {
             item,
             bibtexCacheRef.current,
           );
+          // Skip Status field for existing items to preserve user's manual choice
           const properties = buildCraftProperties(item, schemaIndex, {
             citationKey: citationKeyOverride || undefined,
+            skipStatus: !!existingId,
           });
           const tagsProp = getTagsProperty();
+          // Only allow new select options for Tags field, not for Status or other fields
+          // This prevents creating duplicate options without colors when syncing
           const allowNewSelectOptions =
             tagNames.length > 0 &&
-            (!tagsProp ||
-              ["select", "multiselect"].includes(tagsProp.type.toLowerCase()));
+            tagsProp &&
+            ["select", "multiselect"].includes(tagsProp.type.toLowerCase());
           await applyReadingDate(
             properties,
             schemaIndex,

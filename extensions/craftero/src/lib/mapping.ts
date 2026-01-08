@@ -242,7 +242,7 @@ function buildLinkObject(value: string): { blockId: string; title: string } {
 export function buildCraftProperties(
   item: ZoteroItem,
   schemaIndex: Map<string, CraftCollectionSchemaProperty>,
-  overrides?: { citationKey?: string },
+  overrides?: { citationKey?: string; skipStatus?: boolean },
 ): Record<string, unknown> {
   const creators = ZoteroClient.formatAuthors(item.data.creators);
   const year = ZoteroClient.extractYear(item.data.date);
@@ -309,9 +309,12 @@ export function buildCraftProperties(
     tagNames,
   );
 
-  const statusProp = findSchemaProperty(schemaIndex, FIELD_SYNONYMS.status);
-  const statusValue = chooseStatusOption(statusProp);
-  setPropertyValue(properties, statusProp, statusValue);
+  // Only set Status for new items, not updates (preserve user's manual Status choice)
+  if (!overrides?.skipStatus) {
+    const statusProp = findSchemaProperty(schemaIndex, FIELD_SYNONYMS.status);
+    const statusValue = chooseStatusOption(statusProp);
+    setPropertyValue(properties, statusProp, statusValue);
+  }
 
   return properties;
 }

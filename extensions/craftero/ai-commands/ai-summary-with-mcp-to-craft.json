@@ -1,0 +1,10 @@
+[
+  {
+    "creativity" : "low",
+    "highlightEdits" : false,
+    "icon" : "stars",
+    "model" : "gpt-5.1",
+    "prompt" : "@zotero{id=9edb2ca32f7b57662acbc112a80cc59d} @craft{id=d64fc815b787209309dca16ff96371f3} {argument name=\"PaperInfo\"}\n\nPlease help me summarize this paper and write the summary to Craft.\n\n**Task Steps:**\n1. Parse the data above to extract:\n   - Zotero Item Key\n   - Zotero URI\n\n2. Use @zotero{id=9edb2ca32f7b57662acbc112a80cc59d} tool `zotero-zotero_get_item_fulltext` to fetch the full text\n   - If unavailable, use `zotero-zotero_get_item_metadata` with `include_abstract: true`\n\n3. Read the paper and write a comprehensive summary in the same language as the paper:\n   - **Background & Research Question**: What problem does this paper address?\n   - **Data & Methods**: What data and methods are used? Key contributions and innovation?\n   - **Results & Conclusions**: Main findings? Practical implications?\n\n4. Write the summary to Craft:\n   - **Skip verification step** - directly write to the collection item\n   - Use `craft-collections_list` (no arguments) to list collections\n   - Pick the collection whose schema includes property key `zotero_uri`\n   - Call `craft-collectionItems_get` with:\n     - collectionBlockId: <Picked Collection ID>\n     - maxDepth: 0\n   - Find the collection item whose properties.zotero_uri equals <Zotero URI>\n   - Use that item's id as the pageId\n   - Call `craft-markdown_add` with:\n     - position: { position: \"end\", pageId: <Matched Item ID> }\n     - markdown: `## AI Summary\\n\\n<summary text>`\n\n**Important:**\n- Do NOT include paper metadata (title, authors, year, journal) in summary\n- Do NOT use craft-blocks_get for verification - it may fail for collection items\n- If collection lookup or craft-markdown_add fails, reply \"Not added\"\n\n**Reply:** \"Added\" if successful, \"Not added\" if failed. No details needed.",
+    "title" : "AI Summary with MCP to Craft"
+  }
+]
