@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Circleback MCP Server] - 2025-12-29
+## [Add Circleback MCP Server] - {PR_MERGE_DATE}
 
 Add official Circleback MCP Server to registry.
 
