@@ -18,7 +18,7 @@ interface WindowsTerminalSettings {
 
 const PROFILES = JSON.parse(
   fs.readFileSync(
-    `C:\\Users\\${os.userInfo().username}\\AppData\\LocalPackages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`,
+    `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`,
     "utf8",
   ),
 ) as WindowsTerminalSettings;
@@ -66,7 +66,7 @@ function Actions(props: { name: string }) {
           // file for Windows Terminal. we do not need this.
           // eslint-disable-next-line
           title="Open settings.json"
-          target={`C:\\Users\\${os.userInfo().username}\\AppData\\LocalPackages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`}
+          target={`C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -126,7 +126,8 @@ export default function Command() {
           {PROFILES.profiles.list
             .filter(
               (item) =>
-                (item.hidden !== true && item.source === "Microsoft.WSL") || item.source === "Windows.Terminal.Wsl",
+                (item.hidden !== true && item.source === "Microsoft.WSL") ||
+                (item.hidden !== true && item.source === "Windows.Terminal.Wsl"),
             )
             .map((item) => (
               <List.Item
