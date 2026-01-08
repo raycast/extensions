@@ -1,5 +1,4 @@
-import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
-import { rmSync } from "fs";
+import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast, trash } from "@raycast/api";
 import { TryDirectory } from "../types";
 import { formatRelativeTime, touchDirectory } from "../lib/utils";
 import { CreateForm } from "./CreateForm";
@@ -23,7 +22,7 @@ export function TryListItem({ directory, onRefresh }: TryListItemProps) {
 
     if (confirmed) {
       try {
-        rmSync(directory.path, { recursive: true, force: true });
+        await trash(directory.path);
         showToast({
           style: Toast.Style.Success,
           title: "Deleted",
