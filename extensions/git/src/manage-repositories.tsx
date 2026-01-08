@@ -18,7 +18,7 @@ import { useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
 import { RepositoryDirectoryActions } from "./components/actions/RepositoryDirectoryActions";
 import OpenRepository from "./open-repository";
-import { Repository, RepositoryCloningState, RepositoryCloningProcess } from "./types";
+import { Repository, RepositoryCloningState, RepositoryCloningProcess, Remote } from "./types";
 import { useRepositoriesView } from "./hooks/useRepositoriesView";
 import { useGitRemotes } from "./hooks/useGitRemotes";
 import { RemoteHostIcon } from "./components/icons/RemoteHostIcons";
@@ -28,6 +28,7 @@ import { useInterval } from "./hooks/useInterval";
 import { promises as fs } from "fs";
 import { basename } from "path";
 import { prettyPath } from "./utils/path-utils";
+import { RemoteWebPageAction } from "./components/actions/RemoteActions";
 
 export default function ManageRepositories() {
   const {
@@ -182,6 +183,9 @@ function RepositoryListItem({
               icon={Icon.Book}
               onPush={onOpen}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <RepositoryAttachedLinksAction remotes={remotes} />
             <Action.CreateQuicklink
               title="Create Quicklink"
               quicklink={{
@@ -190,7 +194,6 @@ function RepositoryListItem({
                 )}`,
                 name: `Show ${repo.name} in Git`,
               }}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
             />
             <Action
               title="Remove from List"
@@ -478,5 +481,22 @@ function RepositoriesOrderActionsSection() {
         />
       </ActionPanel.Submenu>
     </ActionPanel.Section>
+  );
+}
+
+/**
+ * Action for opening the attached links of a branch.
+ */
+function RepositoryAttachedLinksAction({ remotes }: { remotes: Record<string, Remote> }) {
+  return (
+    <ActionPanel.Submenu title="Open Link to" icon={Icon.Link} shortcut={{ modifiers: ["cmd"], key: "l" }}>
+      {Object.values(remotes).map((remote) => (
+        <RemoteWebPageAction.Base
+          key={`remote-web-page-other-${remote.name}`}
+          remote={remote}
+          showTitle={Object.values(remotes).length > 1}
+        />
+      ))}
+    </ActionPanel.Submenu>
   );
 }
