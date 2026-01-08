@@ -1,6 +1,6 @@
 # 0x0 Changelog
 
-## [v1.2] - {PR_MERGE_DATE}
+## [v1.2] - 2026-01-08
 
 - Updates the extension to use the latest Raycast API and dependencies.
 
