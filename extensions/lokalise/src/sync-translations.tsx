@@ -1,14 +1,13 @@
-import { environment, updateCommandMetadata, LaunchType } from "@raycast/api";
+import { environment, LaunchType, showToast, Toast } from "@raycast/api";
 import { syncFromLokalise, needsInitialSync } from "./api/sync-service";
 
 export default async function Command() {
   const isBackground = environment.launchType === LaunchType.Background;
 
-  console.log(`Background sync started (launchType: ${environment.launchType})`);
-
   if (!isBackground) {
-    await updateCommandMetadata({
-      subtitle: "Syncing translations...",
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Syncing translations...",
     });
   }
 
@@ -16,35 +15,38 @@ export default async function Command() {
     const needsSync = await needsInitialSync();
 
     if (needsSync) {
-      console.log("Skipping background sync - initial sync required");
       return;
     }
 
-    const startTime = Date.now();
-    const result = await syncFromLokalise((current, total) => {
-      console.log(`Syncing: ${current} of ~${total} keys`);
+    const progressToast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Syncing translations...",
     });
 
-    const duration = Math.round((Date.now() - startTime) / 1000);
+    const result = await syncFromLokalise(async (current) => {
+      progressToast.message = `~${current} keys synced`;
+    });
 
     if (result.success) {
-      await updateCommandMetadata({
-        subtitle: `${result.keysCount} keys synced`,
+      progressToast.hide();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Sync Complete",
+        message: `${result.keysCount} keys synced`,
       });
-
-      console.log(`Background sync completed successfully: ${result.keysCount} keys in ${duration}s`);
     } else {
-      await updateCommandMetadata({
-        subtitle: "Sync failed",
+      progressToast.hide();
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Sync Failed",
+        message: result.error?.message || "Unknown error",
       });
-
-      console.error(`Background sync failed:`, result.error);
     }
   } catch (error) {
-    await updateCommandMetadata({
-      subtitle: "Sync failed",
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Sync Failed",
+      message: error instanceof Error ? error.message : "Unknown error",
     });
-
-    console.error("Background sync failed:", error);
   }
 }
