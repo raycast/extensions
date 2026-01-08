@@ -1,0 +1,1564 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API protocol for working with HEROSMS",
+    "description": "Do you use software for registrations? HeroSMS is compatible with former hero-sms.com partners\n\n1. Choose any software that includes hero-sms.com among its SMS reception services.\n2. Select hero-sms.com as the service for receiving SMS.\n3. Use host https://hero-sms.com in your software settings.\n4. Enter the API key from your HeroSMS account (request it on our website).\n\nIf you face any difficulties, contact our tech support, please. We will deal with everything.",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "/stubs/handler_api.php",
+      "description": "hero-sms.com API-compatible server"
+    }
+  ],
+  "paths": {
+    "?action=getBalance": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Request account balance",
+        "description": "Returns the current balance in the format `ACCESS_BALANCE:<amount>`",
+        "operationId": "getBalance",
+        "responses": {
+          "200": {
+            "description": "Balance request result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "successfulBalanceExample": {
+                    "$ref": "#/components/examples/successfulBalanceExample"
+                  },
+                  "sqlServerErrorExample": {
+                    "$ref": "#/components/examples/sqlServerErrorExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getNumber": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Request a number",
+        "description": "Requests a phone number for the specified service and country. Returns a string like `ACCESS_NUMBER:<activation_id>:<number>`",
+        "operationId": "getNumber",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSARequiredService"
+          },
+          {
+            "$ref": "#/components/parameters/qpSARequiredCountry"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalOperator"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalMaxPrice"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalRef"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Number request result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "successfulNumberExample": {
+                    "$ref": "#/components/examples/successfulNumberExample"
+                  },
+                  "numbersNotFoundExample": {
+                    "$ref": "#/components/examples/numbersNotFoundExample"
+                  },
+                  "badActionExample": {
+                    "$ref": "#/components/examples/badActionExample"
+                  },
+                  "badServiceExample": {
+                    "$ref": "#/components/examples/badServiceExample"
+                  },
+                  "bannedExample": {
+                    "$ref": "#/components/examples/bannedExample"
+                  },
+                  "wrongMaxPriceExample": {
+                    "$ref": "#/components/examples/wrongMaxPriceExample"
+                  },
+                  "channelsLimitExample": {
+                    "$ref": "#/components/examples/channelsLimitExample"
+                  },
+                  "sqlServerErrorExample": {
+                    "$ref": "#/components/examples/sqlServerErrorExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getNumberV2": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Request number V2",
+        "description": "Similar to getNumber, but returns more activation information (JSON object)",
+        "operationId": "getNumberV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSARequiredService"
+          },
+          {
+            "$ref": "#/components/parameters/qpSARequiredCountry"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalOperator"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalMaxPrice"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalRef"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of number request (V2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "successfulNumberv2Example": {
+                    "$ref": "#/components/examples/successfulNumberv2Example"
+                  },
+                  "numbersNotFoundExample": {
+                    "$ref": "#/components/examples/numbersNotFoundExample"
+                  },
+                  "badActionExample": {
+                    "$ref": "#/components/examples/badActionExample"
+                  },
+                  "badServiceExample": {
+                    "$ref": "#/components/examples/badServiceExample"
+                  },
+                  "bannedExample": {
+                    "$ref": "#/components/examples/bannedExample"
+                  },
+                  "orderAlreadyExists": {
+                    "summary": "Order has been created",
+                    "value": "ORDER_ALREADY_EXISTS"
+                  },
+                  "wrongMaxPriceExample": {
+                    "$ref": "#/components/examples/wrongMaxPriceExample"
+                  },
+                  "channelsLimitExample": {
+                    "$ref": "#/components/examples/channelsLimitExample"
+                  },
+                  "sqlServerErrorExample": {
+                    "$ref": "#/components/examples/sqlServerErrorExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=setStatus": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Change activation status",
+        "description": "Activation lifecycle management.\nPossible statuses:\n- 1 — SMS sent (inform about readiness to receive code)\n- 3 — request resending of SMS\n- 6 — complete activation (code received and confirmed)\n- 8 — cancel activation (return money)",
+        "operationId": "setStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSARequiredActivationID"
+          },
+          {
+            "$ref": "#/components/parameters/qpSARequiredActivationStatus"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of status change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "successfulAccessReadyExample": {
+                    "$ref": "#/components/examples/successfulAccessReadyExample"
+                  },
+                  "successfulRetryGetExample": {
+                    "$ref": "#/components/examples/successfulRetryGetExample"
+                  },
+                  "successfulAccessActivationExample": {
+                    "$ref": "#/components/examples/successfulAccessActivationExample"
+                  },
+                  "successfulAccessCancelExample": {
+                    "$ref": "#/components/examples/successfulAccessCancelExample"
+                  },
+                  "earlyCancelDeniedExample": {
+                    "$ref": "#/components/examples/earlyCancelDeniedExample"
+                  },
+                  "noActivationExample": {
+                    "$ref": "#/components/examples/noActivationExample"
+                  },
+                  "badStatusExample": {
+                    "$ref": "#/components/examples/badStatusExample"
+                  },
+                  "wrongActivationIdExample": {
+                    "$ref": "#/components/examples/wrongActivationIdExample"
+                  },
+                  "badActionExample": {
+                    "$ref": "#/components/examples/badActionExample"
+                  },
+                  "badServiceExample": {
+                    "$ref": "#/components/examples/badServiceExample"
+                  },
+                  "sqlServerErrorExample": {
+                    "$ref": "#/components/examples/sqlServerErrorExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getStatus": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Get the activation status",
+        "description": "Returns the current activation status in text form (STATUS_WAIT_CODE, STATUS_OK, etc.) + code if available",
+        "operationId": "getStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSARequiredActivationID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current activation status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "successfulWaitCodeExample": {
+                    "$ref": "#/components/examples/successfulWaitCodeExample"
+                  },
+                  "successfulWaitRetryExample": {
+                    "$ref": "#/components/examples/successfulWaitRetryExample"
+                  },
+                  "successfulWaitResendExample": {
+                    "$ref": "#/components/examples/successfulWaitResendExample"
+                  },
+                  "successfulCancelExample": {
+                    "$ref": "#/components/examples/successfulCancelExample"
+                  },
+                  "successfulOKExample": {
+                    "$ref": "#/components/examples/successfulOKExample"
+                  },
+                  "noActivationExample": {
+                    "$ref": "#/components/examples/noActivationExample"
+                  },
+                  "badActionExample": {
+                    "$ref": "#/components/examples/badActionExample"
+                  },
+                  "sqlServerErrorExample": {
+                    "$ref": "#/components/examples/sqlServerErrorExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getStatusV2": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Get V2 activation status",
+        "description": "Returns the activation status in a structured form (JSON)",
+        "operationId": "getStatusV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSARequiredActivationID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current activation status (V2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationStatusV2"
+                },
+                "examples": {
+                  "correctActivationStatusExample": {
+                    "$ref": "#/components/examples/successfulActivationV2Example"
+                  },
+                  "successfulCancelExample": {
+                    "summary": "Activation canceled",
+                    "value": "STATUS_CANCEL"
+                  },
+                  "noActivationExample": {
+                    "summary": "Activation ID doesn't exist",
+                    "value": "NO_ACTIVATION"
+                  },
+                  "badActionExample": {
+                    "$ref": "#/components/examples/badActionExample"
+                  },
+                  "sqlServerErrorExample": {
+                    "$ref": "#/components/examples/sqlServerErrorExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getActiveActivations": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Get a list of active activations",
+        "description": "Returns a list of active activations",
+        "operationId": "getActiveActivations",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Offset (default 0)",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Recording limit (max. 100)",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of receiving active activations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveActivations"
+                },
+                "examples": {
+                  "activationsSuccessfulExample": {
+                    "$ref": "#/components/examples/activationsSuccessfulExample"
+                  },
+                  "activationsNotFoundExample": {
+                    "$ref": "#/components/examples/activationsNotFoundExample"
+                  },
+                  "sqlServerErrorExample": {
+                    "$ref": "#/components/examples/sqlServerErrorExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getHistory": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Get the activation history",
+        "description": "Returns activation history",
+        "operationId": "getHistory",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Start of period (Unix Timestamp)",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "description": "End of period (Unix Timestamp)",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Offset (default 0)",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Recording limit (max. 100)",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of receiving activation history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationsHistory"
+                },
+                "examples": {
+                  "successfulActivationsHistoryExample": {
+                    "$ref": "#/components/examples/successfulActivationsHistoryExample"
+                  },
+                  "badActionExample": {
+                    "$ref": "#/components/examples/badActionExample"
+                  },
+                  "sqlServerErrorExample": {
+                    "$ref": "#/components/examples/sqlServerErrorExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getCountries": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Request list of countries",
+        "description": "Returns a list of countries",
+        "operationId": "getCountries",
+        "responses": {
+          "200": {
+            "description": "Result of request for list of countries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Country"
+                },
+                "examples": {
+                  "successGetCountriesExample": {
+                    "$ref": "#/components/examples/successGetCountriesExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getServicesList": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Request a list of services",
+        "description": "Returns a list of services",
+        "operationId": "getServicesList",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSAOptionalCountry"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalLang"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of request for list of services",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                },
+                "examples": {
+                  "successGetServicesListExample": {
+                    "$ref": "#/components/examples/successGetServicesListExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getOperators": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Request available operators",
+        "description": "Returns a list of operators",
+        "operationId": "getOperators",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSAOptionalCountry"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of request for a list of operators",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operators"
+                },
+                "examples": {
+                  "successfulGetOperatorsExample": {
+                    "$ref": "#/components/examples/successfulGetOperatorsExample"
+                  },
+                  "operatorsNotFoundExample": {
+                    "$ref": "#/components/examples/operatorsNotFoundExample"
+                  },
+                  "sqlServerErrorExample": {
+                    "$ref": "#/components/examples/sqlServerErrorExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getPrices": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Get current prices",
+        "description": "Returns prices and number of available rooms by country and service",
+        "operationId": "getPrices",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSAOptionalService"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalCountry"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of obtaining current prices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricesByCountry"
+                },
+                "examples": {
+                  "successGetPrices": {
+                    "$ref": "#/components/examples/successGetPrices"
+                  },
+                  "incorrectServiceExample": {
+                    "$ref": "#/components/examples/incorrectServiceExample"
+                  },
+                  "incorrectCountryExample": {
+                    "$ref": "#/components/examples/incorrectCountryExample"
+                  },
+                  "badActionExample": {
+                    "$ref": "#/components/examples/badActionExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getTopCountriesByService": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Get top countries by service",
+        "description": "Returns the top countries by service with the number of available numbers. If the service is not specified - top for all services",
+        "operationId": "getTopCountriesByService",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSAOptionalService"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalFreePrice"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The result of obtaining the top countries by service",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopCountriesByService"
+                },
+                "examples": {
+                  "topCountriesAllServicesExample": {
+                    "$ref": "#/components/examples/topCountriesAllServicesExample"
+                  },
+                  "topCountriesOneServiceExample": {
+                    "$ref": "#/components/examples/topCountriesOneServiceExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "?action=getTopCountriesByServiceRank": {
+      "get": {
+        "tags": ["hero-sms.com"],
+        "summary": "Get top countries by service based on user rank",
+        "description": "Returns the top countries by service taking into account the user's rank",
+        "operationId": "getTopCountriesByServiceRank",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/qpSAOptionalService"
+          },
+          {
+            "$ref": "#/components/parameters/qpSAOptionalFreePrice"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The result of obtaining the top countries by service",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopCountriesByService"
+                },
+                "examples": {
+                  "topCountriesAllServicesExample": {
+                    "$ref": "#/components/examples/topCountriesAllServicesExample"
+                  },
+                  "topCountriesOneServiceExample": {
+                    "$ref": "#/components/examples/topCountriesOneServiceExample"
+                  },
+                  "missingKeyExample": {
+                    "$ref": "#/components/examples/missingKeyExample"
+                  },
+                  "incorrectKeyExample": {
+                    "$ref": "#/components/examples/incorrectKeyExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActivationStatusV2": {
+        "properties": {
+          "verificationType": {
+            "type": "integer",
+            "example": 2
+          },
+          "sms": {
+            "properties": {
+              "dateTime": {
+                "type": "string",
+                "format": "date-time",
+                "example": "0000-00-00 00:00:00"
+              },
+              "code": {
+                "type": "string",
+                "example": "code"
+              },
+              "text": {
+                "type": "string",
+                "example": "sms text"
+              }
+            },
+            "type": "object"
+          },
+          "call": {
+            "properties": {
+              "from": {
+                "type": "string",
+                "example": "phone"
+              },
+              "text": {
+                "type": "string",
+                "example": "voice text"
+              },
+              "code": {
+                "type": "string",
+                "example": "12345"
+              },
+              "dateTime": {
+                "type": "string",
+                "format": "date-time",
+                "example": "0000-00-00 00:00:00"
+              },
+              "url": {
+                "type": "string",
+                "example": "voice file url"
+              },
+              "parsingCount": {
+                "type": "integer",
+                "example": 1
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ActiveActivation": {
+        "properties": {
+          "activationId": {
+            "type": "string",
+            "example": "635468021"
+          },
+          "serviceCode": {
+            "type": "string",
+            "example": "vk"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "79********1"
+          },
+          "activationCost": {
+            "type": "number",
+            "example": 12.5
+          },
+          "activationStatus": {
+            "type": "string",
+            "example": "4"
+          },
+          "smsCode": {
+            "type": "string",
+            "example": "[Код sms]",
+            "nullable": true
+          },
+          "smsText": {
+            "type": "string",
+            "example": "[Ваш код для регистрации CODE]",
+            "nullable": true
+          },
+          "activationTime": {
+            "type": "string",
+            "example": "2022-06-01 16:59:16"
+          },
+          "discount": {
+            "type": "string",
+            "example": "0.00"
+          },
+          "repeated": {
+            "type": "string",
+            "example": "0"
+          },
+          "countryCode": {
+            "type": "string",
+            "example": "2"
+          },
+          "countryName": {
+            "type": "string",
+            "example": "Kazakhstan"
+          },
+          "canGetAnotherSms": {
+            "type": "string",
+            "example": "1"
+          },
+          "currency": {
+            "type": "string",
+            "example": "840"
+          }
+        },
+        "type": "object"
+      },
+      "ActiveActivations": {
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "activeActivations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActiveActivation"
+            }
+          }
+        },
+        "type": "object"
+      },
+      "ActivationsHistory": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "example": "635468024"
+            },
+            "date": {
+              "type": "string",
+              "format": "date-time",
+              "example": "0000-00-00 00:00:00"
+            },
+            "phone": {
+              "type": "string",
+              "example": "7*********0"
+            },
+            "sms": {
+              "type": "string",
+              "example": "Your code is ****"
+            },
+            "cost": {
+              "type": "number",
+              "example": 0
+            },
+            "status": {
+              "type": "string",
+              "example": "4"
+            },
+            "currency": {
+              "type": "integer",
+              "example": 840
+            }
+          },
+          "type": "object"
+        }
+      },
+      "TopCountriesOneService": {
+        "properties": {
+          "physicalTotalCount": {
+            "type": "integer",
+            "example": 9405
+          },
+          "physicalCountForDefaultPrice": {
+            "type": "integer",
+            "example": 4066
+          },
+          "physicalPriceMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "example": 0.018
+            }
+          },
+          "retail_price": {
+            "type": "number",
+            "example": 0.2
+          },
+          "country": {
+            "type": "integer",
+            "example": 6
+          },
+          "price": {
+            "type": "number",
+            "example": 0.045
+          },
+          "count": {
+            "type": "integer",
+            "example": 4528
+          }
+        },
+        "type": "object"
+      },
+      "TopCountriesAllServices": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/TopCountriesOneService"
+        }
+      },
+      "TopCountriesByService": {
+        "type": "object",
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/TopCountriesAllServices"
+            },
+            {
+              "$ref": "#/components/schemas/TopCountriesOneService"
+            }
+          ]
+        }
+      },
+      "PricesByCountry": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": {
+            "properties": {
+              "cost": {
+                "type": "number",
+                "example": 0.5
+              },
+              "count": {
+                "type": "integer",
+                "example": 10
+              },
+              "physicalCount": {
+                "type": "integer",
+                "example": 10
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "Country": {
+        "properties": {
+          "id": {
+            "description": "Country ID",
+            "type": "integer",
+            "example": 0
+          },
+          "rus": {
+            "description": "Country name in Russian",
+            "type": "string",
+            "example": "Казахстан"
+          },
+          "eng": {
+            "description": "Country name in English",
+            "type": "string",
+            "example": "Kazakhstan"
+          },
+          "chn": {
+            "description": "Country name in Chinese",
+            "type": "string",
+            "example": "Kazakhstan"
+          },
+          "visible": {
+            "description": "1 - available, 0 - unavailable",
+            "type": "integer",
+            "enum": [0, 1],
+            "example": 1
+          },
+          "retry": {
+            "description": "1 - available, 0 - unavailable",
+            "type": "integer",
+            "enum": [0, 1],
+            "example": 1
+          }
+        },
+        "type": "object"
+      },
+      "Service": {
+        "properties": {
+          "code": {
+            "description": "Service ID",
+            "type": "string",
+            "example": "aoo"
+          },
+          "name": {
+            "description": "Service name",
+            "type": "string",
+            "example": "Pegasus Airlines"
+          }
+        },
+        "type": "object"
+      },
+      "Operators": {
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "countryOperators": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "type": "object"
+      }
+    },
+    "parameters": {
+      "qpSARequiredService": {
+        "name": "service",
+        "in": "query",
+        "description": "Service ID",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "tg"
+      },
+      "qpSAOptionalService": {
+        "name": "service",
+        "in": "query",
+        "description": "Service ID",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "example": "tg"
+      },
+      "qpSARequiredCountry": {
+        "name": "country",
+        "in": "query",
+        "description": "Country ID",
+        "required": true,
+        "schema": {
+          "type": "number"
+        },
+        "example": 2
+      },
+      "qpSAOptionalCountry": {
+        "name": "country",
+        "in": "query",
+        "description": "Country ID",
+        "required": false,
+        "schema": {
+          "type": "number"
+        },
+        "example": 2
+      },
+      "qpSAOptionalFreePrice": {
+        "name": "freePrice",
+        "in": "query",
+        "description": "Use FreePrice ",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        },
+        "example": true
+      },
+      "qpSAOptionalLang": {
+        "name": "lang",
+        "in": "query",
+        "description": "Language ID",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": "en",
+          "enum": ["ru", "en", "cn", "es", "pt", "fr"]
+        },
+        "example": "en"
+      },
+      "qpSAOptionalOperator": {
+        "name": "operator",
+        "in": "query",
+        "description": "List of desired telecom operators (separated by commas without spaces).\nSupported only for Ukraine (country=1) and Kazakhstan (country=2).\nAvailable values:\n- Ukraine: `kyivstar`, `vodafone`, `lifecell`\n- Kazakhstan: `beeline`, `tele2`, `activ`, `altel`",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "example": "tele2,beeline"
+      },
+      "qpSAOptionalMaxPrice": {
+        "name": "maxPrice",
+        "in": "query",
+        "description": "Maximum price",
+        "required": false,
+        "schema": {
+          "type": "number"
+        },
+        "example": 2
+      },
+      "qpSAOptionalRef": {
+        "name": "ref",
+        "in": "query",
+        "description": "Referral identifier",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "example": "123456789"
+      },
+      "qpSARequiredActivationID": {
+        "name": "id",
+        "in": "query",
+        "description": "Activation ID",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "example": 123456789
+      },
+      "qpSARequiredActivationStatus": {
+        "name": "status",
+        "in": "query",
+        "description": "Activation status",
+        "required": true,
+        "schema": {
+          "default": 1,
+          "oneOf": [
+            {
+              "description": "SMS sent",
+              "type": "number",
+              "enum": [1]
+            },
+            {
+              "description": "Request code",
+              "type": "number",
+              "enum": [3]
+            },
+            {
+              "description": "Complete activation",
+              "type": "number",
+              "enum": [6]
+            },
+            {
+              "description": "Cancel activation",
+              "type": "number",
+              "enum": [8]
+            }
+          ]
+        },
+        "example": 1
+      }
+    },
+    "examples": {
+      "badActionExample": {
+        "summary": "Incorrect action specified",
+        "value": "BAD_ACTION"
+      },
+      "sqlServerErrorExample": {
+        "summary": "Server error",
+        "value": "ERROR_SQL"
+      },
+      "bannedExample": {
+        "summary": "The user is blocked until the specified date",
+        "value": "BANNED:'YYYY-m-d H-i-s'"
+      },
+      "channelsLimitExample": {
+        "summary": "Account blocked",
+        "value": "CHANNELS_LIMIT"
+      },
+      "missingKeyExample": {
+        "summary": "There is no API key",
+        "value": "NO_KEY"
+      },
+      "incorrectKeyExample": {
+        "summary": "Incorrect API key",
+        "value": "BAD_KEY"
+      },
+      "badStatusExample": {
+        "summary": "Incorrect status",
+        "value": "BAD_STATUS"
+      },
+      "numbersNotFoundExample": {
+        "summary": "Numbers not found",
+        "value": "NO_NUMBERS"
+      },
+      "badServiceExample": {
+        "summary": "Incorrect service specified",
+        "value": "BAD_SERVICE"
+      },
+      "wrongMaxPriceExample": {
+        "summary": "The specified maximum value is less than acceptable. The answer indicates the minimum price",
+        "value": "WRONG_MAX_PRICE:0.025"
+      },
+      "wrongActivationIdExample": {
+        "summary": "Activation ID is incorrect",
+        "value": "WRONG_ACTIVATION_ID"
+      },
+      "successfulAccessReadyExample": {
+        "summary": "Number availability confirmed",
+        "value": "ACCESS_READY"
+      },
+      "successfulRetryGetExample": {
+        "summary": "Waiting for a new SMS",
+        "value": "ACCESS_RETRY_GET"
+      },
+      "successfulAccessActivationExample": {
+        "summary": "Service is successfully activated",
+        "value": "ACCESS_ACTIVATION"
+      },
+      "successfulAccessCancelExample": {
+        "summary": "Activation canceled",
+        "value": "ACCESS_CANCEL"
+      },
+      "earlyCancelDeniedExample": {
+        "summary": "You can't cancel a number within the first 2 minutes",
+        "value": "EARLY_CANCEL_DENIED"
+      },
+      "noActivationExample": {
+        "summary": "Activation ID doesn't exist",
+        "value": "NO_ACTIVATION"
+      },
+      "successfulWaitCodeExample": {
+        "summary": "Waiting for an SMS",
+        "value": "STATUS_WAIT_CODE"
+      },
+      "successfulWaitRetryExample": {
+        "summary": "Waiting for the code clarification",
+        "value": "STATUS_WAIT_RETRY:Код"
+      },
+      "successfulWaitResendExample": {
+        "summary": "Waiting for SMS to be resent",
+        "value": "STATUS_WAIT_RESEND"
+      },
+      "successfulCancelExample": {
+        "summary": "Activation canceled",
+        "value": "STATUS_CANCEL"
+      },
+      "successfulOKExample": {
+        "summary": "Code received",
+        "value": "STATUS_OK:Код"
+      },
+      "incorrectServiceExample": {
+        "summary": "Address entered incorrectly",
+        "value": {
+          "status": "false",
+          "msg": "service is incorrect"
+        }
+      },
+      "incorrectCountryExample": {
+        "summary": "Country entered incorrectly",
+        "value": {
+          "status": "false",
+          "msg": "country is incorrect"
+        }
+      },
+      "successfulBalanceExample": {
+        "summary": "Balance received successfully",
+        "value": "ACCESS_NUMBER:123456789:7*********0"
+      },
+      "successfulNumberExample": {
+        "summary": "Number received successfully",
+        "value": "ACCESS_NUMBER:123456789:7*********0"
+      },
+      "successfulNumberv2Example": {
+        "summary": "Number received successfully",
+        "value": {
+          "activationId": 635468024,
+          "phoneNumber": "79584******",
+          "activationCost": 12.5,
+          "currency": 840,
+          "countryCode": "2",
+          "canGetAnotherSms": "1",
+          "activationTime": "2022-06-01 17:30:57",
+          "activationOperator": "mtt"
+        }
+      },
+      "activationsNotFoundExample": {
+        "summary": "Activations not found",
+        "value": {
+          "status": "error",
+          "error": "NO_ACTIVATIONS"
+        }
+      },
+      "successfulActivationV2Example": {
+        "summary": "Activation status received successfully",
+        "value": {
+          "verificationType": 2,
+          "sms": {
+            "dateTime": "0000-00-00 00:00:00",
+            "code": "code",
+            "text": "sms text"
+          },
+          "call": {
+            "from": "phone",
+            "text": "voice text",
+            "code": "12345",
+            "dateTime": "0000-00-00 00:00:00",
+            "url": "voice file url",
+            "parsingCount": 1
+          }
+        }
+      },
+      "activationsSuccessfulExample": {
+        "summary": "Activation list received successfully",
+        "value": {
+          "status": "success",
+          "activeActivations": [
+            {
+              "activationId": "635468021",
+              "serviceCode": "vk",
+              "phoneNumber": "79********1",
+              "activationCost": 12.5,
+              "activationStatus": "4",
+              "smsCode": "[CODE]",
+              "smsText": "[Ваш код для регистрации CODE]",
+              "activationTime": "2022-06-01 16:59:16",
+              "discount": "0.00",
+              "repeated": "0",
+              "countryCode": "2",
+              "countryName": "Kazakhstan",
+              "canGetAnotherSms": "1",
+              "currency": 840
+            }
+          ]
+        }
+      },
+      "successfulActivationsHistoryExample": {
+        "summary": "Activation history successfully received",
+        "value": [
+          {
+            "id": "635468024",
+            "date": "0000-00-00 00:00:00",
+            "phone": "7*********0",
+            "sms": "Your code is ****",
+            "cost": 0,
+            "status": "4",
+            "currency": 840
+          }
+        ]
+      },
+      "successGetPrices": {
+        "summary": "Current prices successfully received",
+        "value": [
+          {
+            "baa": {
+              "cost": 0.08,
+              "count": 25370,
+              "physicalCount": 14528
+            }
+          }
+        ]
+      },
+      "topCountriesAllServicesExample": {
+        "summary": "Top countries by service without specifying parameters successfully obtained",
+        "value": [
+          {
+            "ig": [
+              {
+                "physicalTotalCount": 7933,
+                "physicalCountForDefaultPrice": 5198,
+                "physicalPriceMap": {
+                  "0.04": 24,
+                  "0.0415": 439,
+                  "0.0419": 3229
+                },
+                "retail_price": 0.2,
+                "country": 6,
+                "price": 0.045,
+                "count": 5477
+              }
+            ]
+          }
+        ]
+      },
+      "topCountriesOneServiceExample": {
+        "summary": "Top countries by service indicating the \"service\" parameter was successfully received",
+        "value": [
+          {
+            "physicalTotalCount": 7933,
+            "physicalCountForDefaultPrice": 5198,
+            "physicalPriceMap": {
+              "0.04": 24,
+              "0.0415": 439,
+              "0.0419": 3229
+            },
+            "retail_price": 0.2,
+            "country": 6,
+            "price": 0.045,
+            "count": 5477
+          }
+        ]
+      },
+      "successGetCountriesExample": {
+        "summary": "List of countries",
+        "value": [
+          {
+            "id": 2,
+            "rus": "Казахстан",
+            "eng": "Kazakhstan",
+            "chn": "俄罗斯",
+            "visible": 1,
+            "retry": 1
+          }
+        ]
+      },
+      "successGetServicesListExample": {
+        "summary": "List of services",
+        "value": {
+          "status": "success",
+          "services": [
+            {
+              "code": "aoo",
+              "name": "Pegasus Airlines"
+            }
+          ]
+        }
+      },
+      "successfulGetOperatorsExample": {
+        "summary": "List of operators",
+        "value": {
+          "status": "success",
+          "countryOperators": {
+            "175": ["optus", "vodafone", "telstra", "lebara"]
+          }
+        }
+      },
+      "operatorsNotFoundExample": {
+        "summary": "Operators not found",
+        "value": "OPERATORS_NOT_FOUND"
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "query"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "hero-sms.com",
+      "description": "API compatible with hero-sms.com"
+    }
+  ]
+}
