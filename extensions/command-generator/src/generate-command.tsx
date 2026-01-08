@@ -17,12 +17,6 @@ import Anthropic from "@anthropic-ai/sdk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { execSync } from "child_process";
 
-interface Preferences {
-  model: "claude-haiku" | "gemini-flash-lite";
-  anthropicApiKey?: string;
-  googleApiKey?: string;
-}
-
 const HISTORY_KEY = "command-history";
 const MAX_HISTORY = 20;
 
