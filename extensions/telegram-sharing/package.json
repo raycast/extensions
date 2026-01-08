@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "share-url",
-      "title": "Share Page to Telegram",
+      "title": "Share URL to Telegram",
       "subtitle": "Share the current browser page via Telegram",
       "description": "Share the current browser page via Telegram",
       "mode": "no-view"
