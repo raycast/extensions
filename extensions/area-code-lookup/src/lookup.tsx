@@ -3,10 +3,6 @@ import { findAreaCode, AreaCodeEntry } from "./data/areaCodes";
 import { findCountryCode, CountryCodeEntry } from "./data/countryCodes";
 import { formatTimeInZone } from "./utils/timezone";
 
-interface Arguments {
-  areaCode: string;
-}
-
 type LookupResult =
   | { type: "area"; data: AreaCodeEntry }
   | { type: "country"; data: CountryCodeEntry }
@@ -128,7 +124,7 @@ Country code **+${result.code}**`;
 }
 
 export default function LookupAreaCode(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.Lookup }>,
 ) {
   const { areaCode } = props.arguments;
   const result = detectAndLookup(areaCode);
