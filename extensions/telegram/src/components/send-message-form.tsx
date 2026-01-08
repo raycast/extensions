@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import * as fs from "fs";
-import { sendSavedMessage } from "./services/telegram-client";
-import { getConfig, ensureAuthenticated } from "./utils/auth";
+import { sendMessage, Chat } from "../services/telegram-client";
+import { getConfig, ensureAuthenticated } from "../utils/auth";
 
-export default function SendSavedMessage() {
+interface SendMessageFormProps {
+  chat: Chat;
+  onSuccess?: () => void;
+}
+
+export function SendMessageForm({ chat, onSuccess }: SendMessageFormProps) {
   const [message, setMessage] = useState("");
   const [filePaths, setFilePaths] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,21 +48,30 @@ export default function SendSavedMessage() {
 
       // Send message with first file (Telegram API limitation - one file per message)
       const filePath = filePaths.length > 0 ? filePaths[0] : undefined;
-      await sendSavedMessage(config, message, filePath);
+      await sendMessage(config, chat.id, message, filePath);
 
       // If there are more files, send them in separate messages
       if (filePaths.length > 1) {
         for (let i = 1; i < filePaths.length; i++) {
-          await sendSavedMessage(config, "", filePaths[i]);
+          await sendMessage(config, chat.id, "", filePaths[i]);
         }
       }
 
       await showToast({
         style: Toast.Style.Success,
         title: "Message Sent",
-        message: "Message sent to Saved Messages",
+        message: `Message sent to ${chat.title}`,
       });
-      await popToRoot();
+
+      // Reset form
+      setMessage("");
+      setFilePaths([]);
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        await popToRoot();
+      }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -72,6 +86,7 @@ export default function SendSavedMessage() {
   return (
     <Form
       isLoading={isLoading}
+      navigationTitle={`Send Message to ${chat.title}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.ArrowRight} title="Send Message" onSubmit={handleSubmit} />
@@ -90,11 +105,15 @@ export default function SendSavedMessage() {
       <Form.FilePicker
         id="files"
         title="Attachments"
-        info="You can attach photos, videos, or documents. Multiple files will be sent as separate messages."
         allowMultipleSelection={true}
         canChooseDirectories={false}
         value={filePaths}
         onChange={setFilePaths}
+      />
+
+      <Form.Description
+        title="Note"
+        text="You can attach photos, videos, or documents. Multiple files will be sent as separate messages."
       />
     </Form>
   );

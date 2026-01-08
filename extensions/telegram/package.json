@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "telegram",
   "title": "Telegram",
-  "description": "View and send messages to your Telegram Saved Messages",
+  "description": "Browse chats, view messages, and send messages to your Telegram contacts and groups",
   "icon": "telegram.png",
   "author": "ikupenov",
   "platforms": [
@@ -46,6 +46,18 @@
       "name": "authenticate",
       "title": "Authenticate with Telegram",
       "description": "Log in to your Telegram account",
+      "mode": "view"
+    },
+    {
+      "name": "browse-chats",
+      "title": "Browse Chats",
+      "description": "Browse all your Telegram chats and groups",
+      "mode": "view"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "description": "Send a message to any Telegram chat or group",
       "mode": "view"
     },
     {
