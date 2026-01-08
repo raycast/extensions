@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Improved Query String Creation] - {PR_MERGE_DATE}
+## [Improved Query String Creation] - 2026-01-08
 
 - Replaced the `⁠qs` package with `⁠query-string` to automatically exclude empty strings and null values when generating Things URLs
 
