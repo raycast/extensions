@@ -5,6 +5,7 @@ export interface Root {
   urls: Record<string, Url>;
   templates: Record<string, Template>;
   templateGroups?: Record<string, TemplateGroup>;
+  globalPlaceholders?: Record<string, string>;
 }
 
 export interface Templateable {
@@ -53,7 +54,6 @@ export interface DisplayUrl {
   key: string;
   title: string;
   url: string;
-  subtitle: string;
   keywords: string[];
   icon?: string | Image.ImageLike;
   tags: string[];
@@ -62,4 +62,5 @@ export interface DisplayUrl {
 
 export interface Preferences {
   jsonFilePath: string;
+  showAllGroupUrls?: boolean;
 }

@@ -23,6 +23,15 @@
       "title": "JSON File Path",
       "required": true,
       "description": "Path to the JSON file containing your URLs and groups."
+    },
+    {
+      "name": "showAllGroupUrls",
+      "type": "checkbox",
+      "title": "Show All Group URLs",
+      "label": "Display all group URLs on the main search page",
+      "description": "When enabled, displays all URLs from all groups directly on the main search page (flattened view). Groups themselves are hidden, and you can search/access all URLs without navigating into groups first.",
+      "required": false,
+      "default": false
     }
   ],
   "categories": [

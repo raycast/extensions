@@ -24,7 +24,6 @@ export function URLList({ group, rootData, isLoading = false }: URLListProps) {
       key: `other-${key}`,
       title: title,
       url: otherUrl.url,
-      subtitle: otherUrl.url,
       keywords: combineKeywords(
         getEnhancedKeywords(key),
         getEnhancedKeywords(title),
@@ -49,7 +48,6 @@ export function URLList({ group, rootData, isLoading = false }: URLListProps) {
       linkedUrls.push({
         key: `linked-${linkedUrlKey}`,
         title: title,
-        subtitle: linkedUrl.url,
         url: linkedUrl.url,
         keywords: combineKeywords(
           getEnhancedKeywords(linkedUrlKey),
