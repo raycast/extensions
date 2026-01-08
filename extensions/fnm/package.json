@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fnm",
+  "title": "FNM - Fast Node Manager",
+  "description": "Manage Node.js versions with fnm (Fast Node Manager)",
+  "icon": "icon.png",
+  "author": "gefangshuai",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "fnmPath",
+      "type": "textfield",
+      "required": false,
+      "title": "FNM 路径",
+      "description": "自定义 fnm 可执行文件的路径(如果自动检测失败)",
+      "placeholder": "/opt/homebrew/bin/fnm 或 /usr/local/bin/fnm"
+    },
+    {
+      "name": "customPaths",
+      "type": "textfield",
+      "required": false,
+      "title": "额外的 PATH 路径",
+      "description": "额外的搜索路径,用冒号分隔",
+      "placeholder": "/custom/path/bin:/another/path/bin"
+    }
+  ],
+  "commands": [
+    {
+      "name": "list-versions",
+      "title": "List Node.js Versions",
+      "description": "List all installed Node.js versions",
+      "mode": "view"
+    },
+    {
+      "name": "install-version",
+      "title": "Install Node.js Version",
+      "description": "Install a new Node.js version",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "version",
+          "placeholder": "Version (e.g., 18.17.0 or lts)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "use-version",
+      "title": "Use Node.js Version",
+      "description": "Switch to a specific Node.js version",
+      "mode": "view"
+    },
+    {
+      "name": "uninstall-version",
+      "title": "Uninstall Node.js Version",
+      "description": "Uninstall a Node.js version",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "sharp": "^0.34.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

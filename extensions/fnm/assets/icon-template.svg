@@ -1,0 +1,13 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="#68A063"/>
+  
+  <!-- Node.js inspired hexagon -->
+  <path d="M256 120L356 180V300L256 360L156 300V180L256 120Z" fill="#3C873A" stroke="#FFFFFF" stroke-width="8"/>
+  
+  <!-- Lightning bolt for "fast" -->
+  <path d="M280 200L240 260H270L230 320L280 260H250L280 200Z" fill="#FFD700" stroke="#FFFFFF" stroke-width="4"/>
+  
+  <!-- Text "fnm" -->
+  <text x="256" y="440" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#FFFFFF" text-anchor="middle">fnm</text>
+</svg>
