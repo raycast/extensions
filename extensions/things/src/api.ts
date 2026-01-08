@@ -3,7 +3,7 @@ import { promisify } from 'util';
 
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
 import { runAppleScript } from '@raycast/utils';
-import queryString, { StringifyOptions } from 'query-string';
+import queryString from 'query-string';
 import {
   Area,
   CommandListName,
@@ -343,10 +343,13 @@ export async function silentlyOpenThingsURL(url: string) {
   await asyncExec(`open -g "${url}"`);
 }
 
-const stringifyConfig = {
-  skipNull: true,
-  skipEmptyString: true,
-} as StringifyOptions;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function generateQueryString(params: Record<string, any>): string {
+  return queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+}
 
 export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
   const { authToken } = getPreferenceValues<Preferences>();
@@ -354,14 +357,11 @@ export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
   if (!authToken) throw new Error('unauthorized');
 
   await silentlyOpenThingsURL(
-    `things:///update?${queryString.stringify(
-      {
-        'auth-token': authToken,
-        id,
-        ...todoParams,
-      },
-      stringifyConfig,
-    )}`,
+    `things:///update?${generateQueryString({
+      'auth-token': authToken,
+      id,
+      ...todoParams,
+    })}`,
   );
 }
 
@@ -371,23 +371,20 @@ export async function updateProject(id: string, projectParams: UpdateProjectPara
   if (!authToken) throw new Error('unauthorized');
 
   await silentlyOpenThingsURL(
-    `things:///update-project?${queryString.stringify(
-      {
-        'auth-token': authToken,
-        id,
-        ...projectParams,
-      },
-      stringifyConfig,
-    )}`,
+    `things:///update-project?${generateQueryString({
+      'auth-token': authToken,
+      id,
+      ...projectParams,
+    })}`,
   );
 }
 
 export async function addTodo(todoParams: AddTodoParams) {
-  await silentlyOpenThingsURL(`things:///add?${queryString.stringify(todoParams, stringifyConfig)}`);
+  await silentlyOpenThingsURL(`things:///add?${generateQueryString(todoParams)}`);
 }
 
 export async function addProject(projectParams: AddProjectParams) {
-  await silentlyOpenThingsURL(`things:///add-project?${queryString.stringify(projectParams, stringifyConfig)}`);
+  await silentlyOpenThingsURL(`things:///add-project?${generateQueryString(projectParams)}`);
 }
 
 export function handleError(error: unknown, title?: string) {
