@@ -2,7 +2,7 @@
 
 ## [Improved Query String Creation] - {PR_MERGE_DATE}
 
-- Replaced the `⁠qs` package with `⁠query-string` to automatically exclude empty strings and null values
+- Replaced the `⁠qs` package with `⁠query-string` to automatically exclude empty strings and null values when generating Things URLs
 
 ## [Timeout increasing in AppleScript] - 2025-10-30
 
