@@ -28,10 +28,6 @@ await crossLaunchCommand(
     extensionName: "screenocr",
     ownerOrAuthorName: "huzef44",
   },
-  {
-    // Your callback command will receive the result
-    name: "your-callback-command",
-  }
 ).catch(() => {
   // Redirect to Store if ScreenOCR is not installed
   open("raycast://extensions/huzef44/screenocr");
