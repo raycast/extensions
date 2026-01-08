@@ -1,5 +1,17 @@
 # Granola Changelog
 
+## [2.0.2] - {PR_MERGE_DATE}
+
+### ✨ Enhancements
+
+- Show meeting duration in note details and My Notes views when transcript timing is available.
+- Include meeting duration in `get-note-content` and `get-transcript` 
+- Replace "Open in Granola Web" with a direct "Open in Granola" action in **Create Note from Transcript**, using the Granola app deeplink.
+
+### 🧹 Cleanup
+
+- Refresh extension store metadata, README, and screenshots to better describe current Granola capabilities and setup.
+
 ## [2.0.1] - 2026-01-06
 
 ### ✨ Enhancements
