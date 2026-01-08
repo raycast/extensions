@@ -1,6 +1,6 @@
 # Google Workspace Changelog
 
-## [Add Preferred Browser Preference] - {PR_MERGE_DATE}
+## [Add Preferred Browser Preference] - 2026-01-08
 
 - Allow users to specify which browser they want to use.
 
