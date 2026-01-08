@@ -108,7 +108,6 @@ export default function CreateInvoice({ businessId, onCreate }: { businessId: st
       </Form.TagPicker>
       <Form.Separator />
 
-      <Form.Separator />
       <Form.TextArea
         title="Notes / Terms"
         placeholder="Enter notes or terms of service that are visible to your customer"
