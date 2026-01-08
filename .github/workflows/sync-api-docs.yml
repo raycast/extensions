@@ -16,7 +16,8 @@ jobs:
         with:
           fetch-depth: 2
           sparse-checkout: |
-            docs
+            docs/
+            scripts/
 
       - name: Setup Node
         uses: actions/setup-node@v4
