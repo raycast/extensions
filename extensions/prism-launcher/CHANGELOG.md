@@ -3,7 +3,6 @@
 ## [Fix] - {PR_MERGE_DATE}
 
 - Removed workaround and moved to using app picker
-- Added extra env variables APPDATA and LOCALAPPDATA for essential mod
 
 ## [Fix] - 2025-12-01
 
