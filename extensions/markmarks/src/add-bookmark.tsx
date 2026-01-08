@@ -31,13 +31,11 @@ export default function AddBookmark() {
   useEffect(() => {
     async function init() {
       try {
-        // Load existing groups
         const content = readBookmarksFile(bookmarksFile);
         const parsed = parseBookmarks(content);
         const allGroups = getGroupNames(parsed.groups);
         setGroups(allGroups);
 
-        // Try to get the active tab from the frontmost browser
         const result = await getActiveTabFromFrontmostBrowser();
 
         if (result) {
@@ -90,7 +88,6 @@ export default function AddBookmark() {
     }
 
     try {
-      // If creating a new group, create it first
       if (isCreatingNewGroup) {
         createGroup(bookmarksFile, targetGroup);
       }

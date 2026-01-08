@@ -100,33 +100,3 @@ export async function getActiveTabFromFrontmostBrowser(): Promise<{
 
   return { tab, browser: frontmostApp };
 }
-
-/**
- * Get the active tab from a specific browser
- */
-export async function getActiveTabFromBrowser(browser: SupportedBrowser): Promise<ActiveTab> {
-  switch (browser) {
-    case "Safari":
-      return getSafariTab();
-    case "Google Chrome":
-      return getChromeTab();
-    case "Arc":
-      return getArcTab();
-  }
-}
-
-/**
- * Get list of running supported browsers
- */
-export async function getRunningSupportedBrowsers(): Promise<SupportedBrowser[]> {
-  const script = `
-    tell application "System Events"
-      set runningApps to name of every application process
-    end tell
-    return runningApps as text
-  `;
-  const result = await runAppleScript(script);
-  const runningApps = result.split(", ");
-
-  return SUPPORTED_BROWSERS.filter((browser) => runningApps.includes(browser));
-}
