@@ -13,13 +13,10 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { getFavicon } from "@raycast/utils";
 import { parseBookmarks, getAllBookmarks, getGroupNames } from "./lib/bookmarks-parser";
 import { readBookmarksFile, deleteBookmark, editBookmark, moveBookmark } from "./lib/bookmarks-writer";
 import { Bookmark } from "./lib/types";
-
-interface Preferences {
-  bookmarksFile: string;
-}
 
 interface BookmarkWithGroup extends Bookmark {
   groupName: string;
@@ -144,6 +141,7 @@ export default function ListBookmarks() {
             key={`${bookmark.line}-${bookmark.url}`}
             title={bookmark.title}
             subtitle={bookmark.description}
+            icon={getFavicon(bookmark.url, { fallback: Icon.Bookmark })}
             accessories={[{ text: new URL(bookmark.url).hostname }]}
             actions={
               <ActionPanel>

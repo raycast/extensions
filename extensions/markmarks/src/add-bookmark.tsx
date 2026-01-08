@@ -14,10 +14,6 @@ import { parseBookmarks, getGroupNames } from "./lib/bookmarks-parser";
 import { readBookmarksFile, addBookmark, createGroup } from "./lib/bookmarks-writer";
 import { getActiveTabFromFrontmostBrowser } from "./lib/browser";
 
-interface Preferences {
-  bookmarksFile: string;
-}
-
 export default function AddBookmark() {
   const { bookmarksFile } = getPreferenceValues<Preferences>();
   const [title, setTitle] = useState("");

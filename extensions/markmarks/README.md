@@ -4,7 +4,7 @@ A Raycast extension that uses a markdown file as the persistence layer for your 
 
 ## Features
 
-- **Bookmarks** - Browse all your bookmarks organized by groups
+- **Bookmarks** - Browse all your bookmarks organized by groups with website favicons
 - **New Bookmark** - Save the active tab from Safari, Chrome, or Arc
 - **Edit & Delete** - Modify or remove bookmarks directly from Raycast
 - **Move Between Groups** - Reorganize bookmarks by moving them to different groups
