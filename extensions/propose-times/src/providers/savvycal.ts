@@ -6,6 +6,7 @@ import type {
   LinkInfo,
   FetchSlotsResult,
 } from "../types";
+import { encodeAlternativeSlots } from "../utils";
 
 interface SchedulingLink {
   id: string;
@@ -132,6 +133,7 @@ export const savvycalProvider: CalendarProvider = {
     timezone: string,
     bookerUrl: string | undefined,
     duration: number,
+    alternativeSlots?: TimeSlot[],
   ): string {
     const { savvycalUsername, savvycalLink } = config;
     const slotDate = new Date(slot.start_at);
@@ -145,6 +147,10 @@ export const savvycalProvider: CalendarProvider = {
         tz: timezone,
         provider: "savvycal",
       });
+
+      // Encode alternative slots for the booking dropdown
+      encodeAlternativeSlots(params, alternativeSlots);
+
       return `${bookerUrl}/book?${params.toString()}`;
     }
 

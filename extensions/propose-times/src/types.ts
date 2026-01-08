@@ -43,6 +43,7 @@ export interface CalendarProvider {
     timezone: string,
     bookerUrl: string | undefined,
     duration: number,
+    alternativeSlots?: TimeSlot[],
   ): string;
   getFallbackUrl(config: ProviderConfig): string;
 }

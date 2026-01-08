@@ -119,7 +119,7 @@ function generateMessage(
     const zonedDate = utcToZonedTime(new Date(daySlots[0].start_at), timezone);
     const dayLabel = format(zonedDate, "EEE, MMM d");
 
-    // Select slots using smart selection:
+    // Select slots to DISPLAY in the message
     // - Prioritizes slots adjacent to meetings (inferred from gaps)
     // - Ensures at least one slot from a different time bucket for diversity
     const displaySlots = selectSmartSlots(daySlots, timezone, maxSlotsPerDay);
@@ -127,6 +127,8 @@ function generateMessage(
     const slotStrings = displaySlots.map((slot) => {
       const timeStr = formatSlotTime(slot, timezone);
       if (clickableSlots) {
+        // Pass all displayed slots for this day to enable dropdown in booker
+        // This lets recipient choose any of the suggested times, not just the clicked one
         const link = provider.generateBookingUrl(
           config,
           linkInfo,
@@ -134,6 +136,7 @@ function generateMessage(
           timezone,
           bookerUrl,
           duration,
+          displaySlots,
         );
         return `<a href="${link}">${timeStr}</a>`;
       }
