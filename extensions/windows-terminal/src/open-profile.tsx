@@ -17,7 +17,10 @@ interface WindowsTerminalSettings {
 }
 
 const PROFILES = JSON.parse(
-  fs.readFileSync(`C:\\Users\\${os.userInfo().username}\\AppData\\LocalPackages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`, "utf8"),
+  fs.readFileSync(
+    `C:\\Users\\${os.userInfo().username}\\AppData\\LocalPackages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`,
+    "utf8",
+  ),
 ) as WindowsTerminalSettings;
 
 function Actions(props: { name: string }) {
