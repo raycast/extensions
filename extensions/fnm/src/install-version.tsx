@@ -11,7 +11,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { checkFnmInstalled, getRemoteVersions, installVersion, getFnmPath } from "./utils/fnm";
+import { checkFnmInstalled, getRemoteVersions, installVersion, getFnmPath, RemoteVersion } from "./utils/fnm";
 
 interface InstallFormProps {
   onInstall: (version: string) => void;
@@ -45,7 +45,7 @@ function InstallForm({ onInstall, prefilledVersion }: InstallFormProps) {
 }
 
 export default function InstallVersion(props: { arguments?: { version?: string } }) {
-  const [versions, setVersions] = useState<string[]>([]);
+  const [versions, setVersions] = useState<RemoteVersion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fnmInstalled, setFnmInstalled] = useState(true);
   const { push } = useNavigation();
