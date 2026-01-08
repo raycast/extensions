@@ -11,6 +11,12 @@ All processing is done locally on device via Apple's VisionKit ML API.
 
 ![screenshot](https://raw.githubusercontent.com/neo773/ScreenOCR/main/metadata/screenocr-2.png)
 
+## API
+
+This extension follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link].
+
+See [API.md](https://github.com/raycast/extensions/blob/main/extensions/screenocr/docs/API.md) to learn how to call ScreenOCR from your extension.
+
 ---
 
 If you find ScreenOCR helpful, feel free to buy me a coffee 
