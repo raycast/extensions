@@ -124,7 +124,7 @@ Country code **+${result.code}**`;
 }
 
 export default function LookupAreaCode(
-  props: LaunchProps<{ arguments: Arguments.Lookup }>,
+  props: LaunchProps<{ arguments: { areaCode: string } }>,
 ) {
   const { areaCode } = props.arguments;
   const result = detectAndLookup(areaCode);
