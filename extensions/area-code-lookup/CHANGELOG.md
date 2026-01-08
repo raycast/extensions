@@ -1,6 +1,6 @@
 # Area & Country Codes Changelog
 
-## [Initial Version] - 2025-01-08
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release
 - Lookup US and Canada area codes with state/province and timezone
