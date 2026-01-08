@@ -5,6 +5,7 @@
   "icon": "extension-icon.png",
   "author": "dare",
   "license": "MIT",
+  "categories": ["Other"],
   "commands": [
     {
       "name": "lookup",
