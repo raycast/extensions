@@ -269,6 +269,13 @@
       "mode": "view"
     },
     {
+      "name": "openWorkspaceCommand",
+      "title": "Open Workspace",
+      "subtitle": "Obsidian",
+      "description": "Open a workspace in Obsidian.",
+      "mode": "view"
+    },
+    {
       "name": "dailyNoteAppendCommand",
       "title": "Append to Daily Note",
       "subtitle": "Obsidian",
@@ -633,8 +640,8 @@
     {
       "name": "createNote",
       "title": "Create Note",
-      "description": "Create a new note in an Obsidian vault or create/open today's daily note",
-      "instructions": "Use this tool to create new notes or work with daily notes. For regular notes: supports tags, custom paths within vaults, and templates. For daily notes: set useDailyNote to true (requires Advanced URI plugin in Obsidian). Does not open Obsidian for regular notes unless specified. If you need to know available vaults, use getVaults first."
+      "description": "Create a new note in an Obsidian vault.",
+      "instructions": "Use this tool to create new notes. For regular notes: supports tags, custom paths within vaults, and templates. If you need to know available vaults, use getVaults first."
     },
     {
       "name": "openNote",

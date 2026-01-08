@@ -26,6 +26,7 @@ import IAMView from "./services/iam/IAMView";
 import NetworkView from "./services/network/NetworkView";
 import SecretListView from "./services/secrets/SecretListView";
 import { CloudRunView } from "./services/cloudrun";
+import { CloudFunctionsView } from "./services/cloudfunctions";
 import { LogsView } from "./services/logs-service";
 import { StreamerModeAction } from "./components/StreamerModeAction";
 
@@ -38,7 +39,7 @@ interface ExtensionPreferences {
 // Get configured path (may be empty for auto-detection)
 const CONFIGURED_GCLOUD_PATH = getPreferenceValues<ExtensionPreferences>().gcloudPath;
 
-type ViewMode = "hub" | "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "logs";
+type ViewMode = "hub" | "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "logs";
 
 interface ServiceInfo {
   id: ResourceType;
@@ -58,6 +59,13 @@ const SERVICES: ServiceInfo[] = [
     color: Color.Green,
   },
   { id: "cloudrun", name: "Cloud Run", description: "Serverless containers", icon: Icon.Globe, color: Color.Blue },
+  {
+    id: "cloudfunctions",
+    name: "Cloud Functions",
+    description: "Serverless functions",
+    icon: Icon.Code,
+    color: Color.Orange,
+  },
   {
     id: "iam",
     name: "IAM & Admin",
@@ -328,6 +336,8 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
         return <StorageBucketView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "cloudrun":
         return <CloudRunView projectId={selectedProject} gcloudPath={gcloudPath} />;
+      case "cloudfunctions":
+        return <CloudFunctionsView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "iam":
         return <IAMView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "network":

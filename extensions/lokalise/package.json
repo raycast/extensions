@@ -1,0 +1,168 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lokalise",
+  "title": "Lokalise",
+  "description": "Manage Lokalise translations directly from Raycast. Add new translation keys, search and browse existing translations, and copy values to clipboard—all without leaving your workflow.",
+  "icon": "lokalise.png",
+  "author": "ikupenov",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-translation",
+      "title": "Add Translation",
+      "description": "Add a new translation key to Lokalise",
+      "mode": "view"
+    },
+    {
+      "name": "view-translations",
+      "title": "View Translations",
+      "description": "View and search translation keys from Lokalise",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "extract-keys-from-image",
+      "title": "Extract Keys from Image",
+      "description": "Extract translation keys from a design screenshot, Figma export, or UI mockup. Analyzes the image using AI to identify all translatable text and suggests appropriate key names. Use this when the user provides a screenshot or image of a design.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "imageUrl": {
+            "type": "string",
+            "description": "URL or path to the image file (screenshot, Figma export, UI mockup)"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["web", "ios", "android", "other"],
+            "description": "Target platform for the extracted keys (defaults to 'web')"
+          },
+          "context": {
+            "type": "string",
+            "description": "Optional context about the image (e.g., 'login screen', 'settings page', 'onboarding flow')"
+          }
+        },
+        "required": ["imageUrl"]
+      }
+    },
+    {
+      "name": "search-translation-keys",
+      "title": "Search Translation Keys",
+      "description": "Search for existing translation keys in Lokalise. Returns matching keys with their translations and metadata.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find translation keys"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["web", "ios", "android", "other"],
+            "description": "Optional platform filter"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "add-translation-key",
+      "title": "Add Translation Key",
+      "description": "Add a new translation key to Lokalise. This will create the key with the provided details. Always confirm with the user before adding keys.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "keyName": {
+            "type": "string",
+            "description": "The translation key name (e.g., 'common.button.save')"
+          },
+          "translationValue": {
+            "type": "string",
+            "description": "The default translation text"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description to help translators understand the context"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["web", "ios", "android", "other"],
+            "description": "Target platform for this key"
+          }
+        },
+        "required": ["keyName", "translationValue", "platform"]
+      }
+    },
+    {
+      "name": "get-translation-key-details",
+      "title": "Get Translation Key Details",
+      "description": "Get detailed information about a specific translation key including all translations and screenshots.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "keyName": {
+            "type": "string",
+            "description": "The translation key name to look up"
+          }
+        },
+        "required": ["keyName"]
+      }
+    },
+    {
+      "name": "list-files",
+      "title": "List Files",
+      "description": "List all available files in the Lokalise project. Use this to get the list of files that can be assigned to translation keys.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Lokalise API token (found in your Lokalise profile settings)",
+      "placeholder": "Enter your API token"
+    },
+    {
+      "name": "projectId",
+      "type": "textfield",
+      "required": true,
+      "title": "Project ID",
+      "description": "Your Lokalise project ID (found in project settings)",
+      "placeholder": "Enter your project ID"
+    }
+  ],
+  "dependencies": {
+    "@lokalise/node-api": "^15.6.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "fuse.js": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

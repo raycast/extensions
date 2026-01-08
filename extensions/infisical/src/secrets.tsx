@@ -11,6 +11,7 @@ import {
   Color,
   Alert,
   Keyboard,
+  showInFinder,
 } from "@raycast/api";
 import { usePromise, useForm, FormValidation, useCachedState, MutatePromise } from "@raycast/utils";
 import { useState } from "react";
@@ -18,6 +19,9 @@ import { infisical } from "./infisical";
 import { Workspace } from "./types";
 import { Secret } from "@infisical/sdk";
 import { OpenInInfisical } from "./components";
+import os from "os";
+import path from "path";
+import { writeFile } from "fs/promises";
 
 async function confirmAndDelete(
   secret: Secret,
@@ -52,6 +56,35 @@ async function confirmAndDelete(
     );
     toast.style = Toast.Style.Success;
     toast.title = "Deleted";
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed";
+    toast.message = `${error}`;
+  }
+}
+
+function combineSecretsAsEnv(secrets: Secret[]) {
+  return secrets.map((secret) => `${secret.secretKey}=${secret.secretValue}`).join("\n");
+}
+async function saveAsEnv(secrets: Secret[], projectName: string, environment: string) {
+  const toast = await showToast(Toast.Style.Animated, "Saving");
+  const env = combineSecretsAsEnv(secrets);
+  try {
+    const file = path.join(
+      os.homedir(),
+      "Downloads",
+      `${projectName.replaceAll(" ", "-")}-${Date.now()}.env${environment === "production" ? "" : `.${environment}`}`,
+    );
+    await writeFile(file, env);
+    toast.style = Toast.Style.Success;
+    toast.title = "Saved";
+    toast.message = file;
+    toast.primaryAction = {
+      title: "Show in Finder",
+      async onAction() {
+        await showInFinder(file);
+      },
+    };
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed";
@@ -157,6 +190,19 @@ export default function Secrets({ project }: { project: Workspace }) {
                   }
                   onPop={mutate}
                   shortcut={Keyboard.Shortcut.Common.Edit}
+                />
+                <Action
+                  icon={Icon.SaveDocument}
+                  // eslint-disable-next-line @raycast/prefer-title-case
+                  title="Save All as .env"
+                  onAction={() => saveAsEnv(secrets, project.name, environment)}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
+                />
+                <Action.CopyToClipboard
+                  // eslint-disable-next-line @raycast/prefer-title-case
+                  title="Copy All as .env"
+                  content={combineSecretsAsEnv(secrets)}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action
                   icon={Icon.Trash}

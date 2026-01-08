@@ -1,21 +1,22 @@
 import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { useBrewDependencies } from "../hooks/useBrewDependencies";
 import {
-  brewName,
+  type BrewProgress,
   brewInstallWithProgress,
-  brewUninstall,
+  brewName,
   brewPinFormula,
+  brewUninstall,
   brewUnpinFormula,
-  brewUpgradeSingleWithProgress,
   brewUpgradeAll,
+  brewUpgradeSingleWithProgress,
+  type Cask,
+  ensureError,
+  type Formula,
+  type Nameable,
+  type OutdatedFormula,
   preferences,
   showActionToast,
   showBrewFailureToast,
-  ensureError,
-  Cask,
-  Formula,
-  OutdatedFormula,
-  Nameable,
-  BrewProgress,
 } from "../utils";
 
 export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
@@ -92,11 +93,31 @@ export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; on
   );
 }
 
+export function FormulaShowAllInstalled(props: { onAction: (result: boolean) => void }) {
+  const [excludeDependencies, setExcludeDependencies] = useBrewDependencies();
+
+  return (
+    <Action
+      title={excludeDependencies ? "Show Dependencies" : "Hide Dependencies"}
+      icon={excludeDependencies ? Icon.Eye : Icon.EyeDisabled}
+      shortcut={{ modifiers: ["cmd"], key: "d" }}
+      onAction={() => {
+        const result = toggleExcludeDeps(excludeDependencies, setExcludeDependencies);
+        props.onAction(result);
+      }}
+    />
+  );
+}
+
 /// Utilties
 
 async function install(formula: Cask | Formula): Promise<boolean> {
   const name = brewName(formula);
-  const handle = showActionToast({ title: `Installing ${name}`, message: "", cancelable: true });
+  const handle = showActionToast({
+    title: `Installing ${name}`,
+    message: "",
+    cancelable: true,
+  });
   try {
     // Use progress-enabled install to show download progress
     await brewInstallWithProgress(
@@ -121,7 +142,11 @@ async function install(formula: Cask | Formula): Promise<boolean> {
 
 async function uninstall(formula: Cask | Nameable): Promise<boolean> {
   const name = brewName(formula);
-  const handle = showActionToast({ title: `Uninstalling ${name}`, message: "", cancelable: true });
+  const handle = showActionToast({
+    title: `Uninstalling ${name}`,
+    message: "",
+    cancelable: true,
+  });
   try {
     await brewUninstall(formula, handle.abort?.signal);
     await handle.showSuccessHUD(`Uninstalled ${name}`);
@@ -136,7 +161,11 @@ async function uninstall(formula: Cask | Nameable): Promise<boolean> {
 
 async function upgrade(formula: Cask | Nameable): Promise<boolean> {
   const name = brewName(formula);
-  const handle = showActionToast({ title: `Upgrading ${name}`, message: "", cancelable: true });
+  const handle = showActionToast({
+    title: `Upgrading ${name}`,
+    message: "",
+    cancelable: true,
+  });
   try {
     // Use progress-enabled upgrade to show download progress
     await brewUpgradeSingleWithProgress(
@@ -198,4 +227,10 @@ async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
     showBrewFailureToast("Unpin formula failed", ensureError(err));
     return false;
   }
+}
+
+function toggleExcludeDeps(exclude: boolean, setExclude: (val: boolean) => void) {
+  setExclude(!exclude);
+
+  return true;
 }

@@ -15,7 +15,6 @@ import {
 import { useState, useEffect } from "react";
 import { executeGcloudCommand } from "../../gcloud";
 import { getRoleInfo, formatRoleName } from "../../utils/iamRoles";
-import { showFailureToast } from "@raycast/utils";
 
 interface IAMMembersViewProps {
   projectId: string;
@@ -78,7 +77,11 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       if (!Array.isArray(result) || result.length === 0) {
         setError("No IAM policy found or empty result");
         setIsLoading(false);
-        showFailureToast("No IAM policy found");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "No IAM policy found",
+          message: "No IAM policy found or empty result",
+        });
         return;
       }
 
@@ -87,7 +90,8 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       if (!policy.bindings || !Array.isArray(policy.bindings)) {
         setError("Invalid IAM policy format: no bindings found");
         setIsLoading(false);
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Invalid IAM policy format",
           message: "No bindings found",
         });
@@ -126,7 +130,6 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     } catch (error: unknown) {
       console.error("Error fetching IAM policy:", error);
       setError(`Failed to fetch IAM policy: ${error instanceof Error ? error.message : String(error)}`);
-      showFailureToast(error);
     } finally {
       setDebugInfo(debugText);
       setIsLoading(false);
@@ -195,7 +198,8 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     try {
       if (!validateMemberId(values.memberType, values.memberId)) {
         addingToast.hide();
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Invalid member ID format",
           message: `The format for ${values.memberType} is incorrect. Please check and try again.`,
         });
@@ -226,20 +230,30 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       if (error instanceof Error) {
         const message = error.message;
         if (message.includes("does not exist")) {
-          showFailureToast({
+          showToast({
+            style: Toast.Style.Failure,
             title: "User not found",
             message: `The user ${values.memberId} does not exist. Please check the email address and try again.`,
           });
         } else if (message.includes("Permission denied") || message.includes("403")) {
-          showFailureToast({
+          showToast({
+            style: Toast.Style.Failure,
             title: "Permission denied",
             message: "You don't have permission to modify IAM policies for this resource.",
           });
         } else {
-          showFailureToast(error);
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to add member",
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
         }
       } else {
-        showFailureToast("Failed to add member");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to add member",
+          message: "Failed to add member",
+        });
       }
     }
   }
@@ -303,7 +317,11 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         fetchIAMPolicy();
       } catch (error: unknown) {
         removingToast.hide();
-        showFailureToast(error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to remove member",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
   }

@@ -2,25 +2,21 @@ import { Clipboard, showToast, showHUD, Toast, LaunchProps } from "@raycast/api"
 import { convertToOdesliLink, getTextFromSelectionOrClipboard, SongNotFoundError } from "./utils";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  // Get text from argument or clipboard/selection
   let text: string | undefined;
-  let fromClipboard = true;
-
-  // Check if URL argument is provided
   const urlArg = props.arguments.url?.trim();
+
   if (urlArg && urlArg.length > 0) {
     text = urlArg;
-    fromClipboard = false; // Paste behavior for URL arguments
   } else {
-    // Fall back to selection or clipboard
     const result = await getTextFromSelectionOrClipboard();
-    text = result.text;
-    fromClipboard = result.fromClipboard;
+    text = result.text?.trim();
   }
 
   if (!text) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Unable to convert link.",
+      title: "No Link Found",
       message: "Please select a link or copy it to clipboard.",
     });
     return;
@@ -37,27 +33,22 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       hudMessage = result.title;
     }
 
-    if (fromClipboard) {
-      await Clipboard.copy(result.url);
-      await showHUD(`✓ ${hudMessage}`);
-    } else {
-      await Clipboard.paste(result.url);
-      await showHUD(`✓ ${hudMessage}`);
-    }
+    await Clipboard.copy(result.url);
+    await showHUD(`✓ ${hudMessage}`);
   } catch (error) {
     if (error instanceof SongNotFoundError) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Unable to convert link.",
-        message: "Song not found.",
+        title: "Invalid Music Link",
+        message: "The provided link is not a valid song or album link. Please check the URL and try again.",
       });
       return;
     }
 
     await showToast({
       style: Toast.Style.Failure,
-      title: "Unable to convert link.",
-      message: "Unknown error.",
+      title: "Conversion Failed",
+      message: "Unable to convert the link. Please check your internet connection and try again.",
     });
   }
 }
