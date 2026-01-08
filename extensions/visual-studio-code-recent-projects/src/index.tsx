@@ -207,8 +207,7 @@ function LocalItem(
         }
       }
 
-      if (isWin) open(path, editorApp);
-      else open(props.uri, editorApp);
+      open(isWin ? path : props.uri, editorApp);
     };
   };
 

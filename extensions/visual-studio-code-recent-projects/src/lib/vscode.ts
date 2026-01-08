@@ -107,14 +107,6 @@ function cliPaths(): Record<string, string> {
 }
 
 export function getVSCodeCLIFilename(): string {
-  if (isWin) {
-    const cliPathsWindows = cliPaths();
-    const name = cliPathsWindows[getBuildNamePreference()];
-    if (!name || name.length <= 0) {
-      return cliPathsWindows.Code;
-    }
-    return name;
-  }
   const cliPathsMac = cliPaths();
   const name = cliPathsMac[getBuildNamePreference()];
   if (!name || name.length <= 0) {
