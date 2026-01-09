@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Menu bar command] - {PR_MERGE_DATE}
+## [Menu bar command] - 2026-01-09
 
 - Hide the menu bar command when there are no open pull requests
 
