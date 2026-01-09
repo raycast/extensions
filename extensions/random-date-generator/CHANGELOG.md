@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-01-09
 
 - Initial release
 - Generate random dates within a custom date range
