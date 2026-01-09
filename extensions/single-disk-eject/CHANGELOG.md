@@ -1,6 +1,6 @@
 # Single Disk Eject Changelog
 
-## [Windows Support] {PR_MERGE_DATE}
+## [Windows Support] 2026-01-09
 
 - Added windows support with a C# helper (compiles at runtime) and PowerShell
 
