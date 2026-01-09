@@ -126,7 +126,6 @@ export function ActionForm({ action, onSave }: ActionFormProps) {
       <Form.Dropdown id="mode" title="Mode" value={mode} onChange={(val) => setMode(val as CustomAction["mode"])}>
         <Form.Dropdown.Item value="append" title="Append" />
         <Form.Dropdown.Item value="prepend" title="Prepend" />
-        {/* Overwrite might be dangerous to offer just yet, keeping it safe with append/prepend for now, but enabling logic if needed */}
       </Form.Dropdown>
 
       <Form.TextField

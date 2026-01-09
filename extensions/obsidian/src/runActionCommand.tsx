@@ -61,12 +61,6 @@ function ActionInput({ action }: ComponentProps) {
 
     let finalContent = "";
     if (action.type === "template") {
-      // In template mode, the content IS the final text (user edited the resolved template)
-      // But we run applyTemplates one last time just in case they typed new variables manually?
-      // User requested: "variables shown equally". If they typed {time} manually, maybe they want it.
-      // But main variables were resolved on load. Let's do a pass.
-      // But wait, applyTemplates expects a template string.
-      // If I pass 'content' as template, it works.
       finalContent = await applyTemplates("", content);
     } else {
       // Default "capture" mode: Wrap content in template
