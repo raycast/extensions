@@ -12,7 +12,6 @@ import {
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import {
-  Preferences,
   DnsResolveResponse,
   DnsReverseResponse,
   ShodanDomainInfo,

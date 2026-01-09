@@ -5,7 +5,6 @@ import {
   ApiInfo,
   DnsResolveResponse,
   DnsReverseResponse,
-  Preferences,
   ShodanAlert,
   ShodanDomainInfo,
   ShodanExploitResponse,
