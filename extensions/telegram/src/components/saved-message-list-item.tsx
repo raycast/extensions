@@ -1,18 +1,23 @@
 import { List, ActionPanel, Action, Icon, Image } from "@raycast/api";
 import { SavedMessage } from "../services/telegram-client";
 import { getMediaTypeIcon, getMediaDisplayTitle } from "../utils/media";
-import { MessageDetail } from "./message-detail";
-import { MessageListItemDetail } from "./message-list-item-detail";
+import { SavedMessageDetail } from "./saved-message-detail";
+import { SavedMessageListItemDetail } from "./saved-message-list-item-detail";
 import { ToggleDetailAction, RefreshAction } from "./actions";
 
-interface MessageListItemProps {
+interface SavedMessageListItemProps {
   message: SavedMessage;
   isShowingDetail: boolean;
   onRefresh: () => void;
   onToggleDetail: () => void;
 }
 
-export function MessageListItem({ message, onRefresh, isShowingDetail, onToggleDetail }: MessageListItemProps) {
+export function SavedMessageListItem({
+  message,
+  isShowingDetail,
+  onRefresh,
+  onToggleDetail,
+}: SavedMessageListItemProps) {
   let displayTitle = message.text;
   if (!displayTitle && message.media) {
     displayTitle = getMediaDisplayTitle(message.media.type);
@@ -35,11 +40,11 @@ export function MessageListItem({ message, onRefresh, isShowingDetail, onToggleD
           date: message.date,
         },
       ]}
-      detail={isShowingDetail ? <MessageListItemDetail message={message} /> : undefined}
+      detail={isShowingDetail ? <SavedMessageListItemDetail message={message} /> : undefined}
       actions={
         <ActionPanel>
           {!isShowingDetail && (
-            <Action.Push icon={Icon.Eye} title="View Message" target={<MessageDetail message={message} />} />
+            <Action.Push icon={Icon.Eye} title="View Message" target={<SavedMessageDetail message={message} />} />
           )}
           <Action.CopyToClipboard content={message.text} title="Copy Message" />
           <ToggleDetailAction isShowingDetail={isShowingDetail} onToggle={onToggleDetail} />

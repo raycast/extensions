@@ -7,12 +7,12 @@ interface MediaInfo {
 }
 
 interface BuildMarkdownOptions {
-  media?: MediaInfo;
-  text?: string;
   prefix?: string;
+  text?: string;
+  media?: MediaInfo;
 }
 
-export function buildMarkdownWithMedia({ media, text, prefix = "" }: BuildMarkdownOptions): string {
+export function buildMarkdownWithMedia({ prefix = "", text, media }: BuildMarkdownOptions): string {
   let markdown = prefix;
 
   if (media?.filePath && ["photo", "image"].includes(media.type)) {

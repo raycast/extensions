@@ -2,14 +2,14 @@ import { Detail, ActionPanel, Action } from "@raycast/api";
 import { SavedMessage } from "../services/telegram-client";
 import { buildMarkdownWithMedia } from "../utils/markdown";
 
-interface MessageDetailProps {
+interface SavedMessageDetailProps {
   message: SavedMessage;
 }
 
-export function MessageDetail({ message }: MessageDetailProps) {
+export function SavedMessageDetail({ message }: SavedMessageDetailProps) {
   const markdown = buildMarkdownWithMedia({
-    media: message.media,
     text: message.text,
+    media: message.media,
   });
 
   return (

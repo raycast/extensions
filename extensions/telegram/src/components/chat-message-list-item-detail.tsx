@@ -8,13 +8,10 @@ interface ChatMessageListItemDetailProps {
 }
 
 export function ChatMessageListItemDetail({ message }: ChatMessageListItemDetailProps) {
-  // Add sender info as prefix when available
-  const prefix = message.senderName ? `**${message.senderName}**\n\n` : "";
-
   const markdown = buildMarkdownWithMedia({
-    media: message.media,
+    prefix: message.senderName ? `**${message.senderName}**\n\n` : undefined,
     text: message.text,
-    prefix,
+    media: message.media,
   });
 
   return <List.Item.Detail markdown={markdown} />;
