@@ -12,22 +12,18 @@ export default async function ReadMessages(args: Arguments) {
     const { chatId, limit = 20 } = args;
 
     if (!chatId) {
-      return { success: false, error: "chatId is required" };
+      throw new Error("Chat ID is required");
     }
 
     const authenticated = await ensureAuthenticated();
     if (!authenticated) {
-      return {
-        success: false,
-        error: "Not authenticated with Telegram. Please run 'Authenticate with Telegram' command first.",
-      };
+      throw new Error("Not authenticated with Telegram. Please run the 'Authenticate with Telegram' command first.");
     }
 
     const config = getConfig();
     const messages = await getChatMessages({ config, chatId, limit, skipMediaDownload: true });
 
     return {
-      success: true,
       messages: messages.map((msg) => ({
         id: msg.id,
         text: msg.text,

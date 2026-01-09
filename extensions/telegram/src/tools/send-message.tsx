@@ -17,34 +17,24 @@ export default async function SendMessage(args: Arguments) {
     const { chatId, message, useClipboardFile } = args;
 
     if (!chatId) {
-      return { success: false, error: "chatId is required" };
+      throw new Error("Chat ID is required");
     }
 
     if (!message || !message.trim()) {
-      return { success: false, error: "Message cannot be empty" };
+      throw new Error("Message cannot be empty");
     }
 
     const authenticated = await ensureAuthenticated();
     if (!authenticated) {
-      return {
-        success: false,
-        error: "Not authenticated with Telegram. Please run 'Authenticate with Telegram' command first.",
-      };
+      throw new Error("Not authenticated with Telegram. Please run the 'Authenticate with Telegram' command first.");
     }
 
     let filePath: string | undefined;
     if (useClipboardFile) {
-      try {
-        filePath = await getFileFromClipboard();
+      filePath = await getFileFromClipboard();
 
-        if (!fs.existsSync(filePath)) {
-          return { success: false, error: `File not found: ${filePath}` };
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Failed to read file from clipboard",
-        };
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`File not found: ${filePath}`);
       }
     }
 
@@ -52,7 +42,6 @@ export default async function SendMessage(args: Arguments) {
     await sendMessage({ config, chatId, message, filePaths: filePath });
 
     return {
-      success: true,
       message: "Message sent successfully",
     };
   } catch (error) {

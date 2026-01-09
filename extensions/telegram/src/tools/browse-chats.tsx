@@ -6,17 +6,13 @@ export default async function BrowseChats() {
   try {
     const authenticated = await ensureAuthenticated();
     if (!authenticated) {
-      return {
-        success: false,
-        error: "Not authenticated with Telegram. Please run 'Authenticate with Telegram' command first.",
-      };
+      throw new Error("Not authenticated with Telegram. Please run the 'Authenticate with Telegram' command first.");
     }
 
     const config = getConfig();
     const chats = await getChats({ config, limit: 50, skipPhotoDownload: true });
 
     return {
-      success: true,
       chats: chats.map((chat) => ({
         id: chat.id,
         title: chat.title,

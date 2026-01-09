@@ -39,6 +39,15 @@
       "title": "Phone Number",
       "description": "Your phone number with country code (e.g., +1234567890)",
       "placeholder": "+1234567890"
+    },
+    {
+      "name": "openRouterApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenRouter API Key",
+      "description": "For message analysis with vision capabilities. Get it from https://openrouter.ai/keys",
+      "placeholder": "sk-or-v1-...",
+      "link": "https://openrouter.ai/keys"
     }
   ],
   "commands": [
@@ -99,7 +108,9 @@
             "description": "Number of messages to fetch (default: 20, max: 100)"
           }
         },
-        "required": ["chatId"]
+        "required": [
+          "chatId"
+        ]
       }
     },
     {
@@ -122,13 +133,44 @@
             "description": "Set to true to attach the file currently in the clipboard. The user must copy a file to the clipboard (⌘C) before calling this tool."
           }
         },
-        "required": ["chatId", "message"]
+        "required": [
+          "chatId",
+          "message"
+        ]
+      }
+    },
+    {
+      "name": "analyze-messages",
+      "title": "Analyze Telegram Messages",
+      "description": "Analyze messages and their attachments (including photos) from a Telegram chat. Can find specific information in messages, analyze images, or answer questions about message content. Use browse-chats tool first to get the chatId.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "description": "The chat ID to analyze messages from (get this from browse-chats tool)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Your question or analysis request. Examples: 'What receipts did I send?', 'Summarize the conversation', 'Find the address mentioned in messages'"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of recent messages to analyze (default: 20, max: 100). More messages = more context but slower analysis."
+          }
+        },
+        "required": [
+          "chatId",
+          "query"
+        ]
       }
     }
   ],
   "dependencies": {
+    "@openrouter/ai-sdk-provider": "^1.5.4",
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^1.17.0",
+    "ai": "^5.0.118",
     "dedent": "^1.7.1",
     "telegram": "^2.26.22"
   },
