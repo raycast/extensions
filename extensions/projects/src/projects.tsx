@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { useState, ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { SearchProjectActionPanel } from "./action-panel";
 import { ListType, Preferences, SourceRepo } from "./types";
 import { tildifyPath, useRepoCache } from "./projects-service";
@@ -25,9 +25,11 @@ export default function Main(): ReactElement {
             id={`${listType}:${repo.id}`}
             title={repo.name}
             icon={repo.icon}
-            accessoryTitle={tildifyPath(repo.fullPath)}
             keywords={[repo.name]}
-            accessoryIcon={listType == "pinned" ? Icon.Pin : ""}
+            accessories={[
+              { text: tildifyPath(repo.fullPath), tooltip: repo.fullPath },
+              ...(listType == "pinned" ? [{ icon: Icon.Pin, tooltip: "Pinned" }] : []),
+            ]}
             actions={<SearchProjectActionPanel repo={repo} preferences={preferences} listType={listType} />}
           />
         ))}

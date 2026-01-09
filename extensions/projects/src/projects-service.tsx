@@ -77,7 +77,7 @@ export function useRepoCache(query: string | undefined): {
     let filteredRepos: SourceRepo[] = repos;
     if (dir) {
       filteredRepos = filteredRepos.filter((repo) =>
-        repo.fullPath.toLocaleLowerCase().includes(dir.trim().toLowerCase())
+        repo.fullPath.toLocaleLowerCase().includes(dir.trim().toLowerCase()),
       );
     }
 

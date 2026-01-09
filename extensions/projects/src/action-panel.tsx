@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 import { CacheType, ListType, Preferences, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
 import { getOpenWith } from "./common-utils";
@@ -8,12 +8,12 @@ interface SearchProjectActionPanelProps {
   repo: SourceRepo;
   preferences: Preferences;
   listType: ListType;
-  recent?: boolean;
 }
 
-export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): ReactElement {
+export function SearchProjectActionPanel(props: Readonly<SearchProjectActionPanelProps>): ReactElement {
   const recentlyAccessedCache = new ApplicationCache(CacheType.RECENT_PROJECTS);
   const pinnedCache = new ApplicationCache(CacheType.PINNED_PROJECTS);
+  const openWith = getOpenWith(props.repo.openWithKey, props.preferences);
 
   function addToRecentlyAccessedCache(repo: SourceRepo): void {
     recentlyAccessedCache.addToCache(repo);
@@ -36,12 +36,12 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
     <ActionPanel>
       <ActionPanel.Section>
         <Action.Open
-          title={`Open in ${getOpenWith(props.repo.openWithKey, props.preferences).name}`}
+          title={`Open in ${openWith.name}`}
           icon={{
-            fileIcon: getOpenWith(props.repo.openWithKey, props.preferences).path,
+            fileIcon: openWith.path,
           }}
           target={props.repo.fullPath}
-          application={getOpenWith(props.repo.openWithKey, props.preferences).bundleId}
+          application={openWith.bundleId}
           onOpen={() => addToRecentlyAccessedCache(props.repo)}
         />
 
@@ -52,6 +52,17 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
           application={props.preferences.openDefaultWith.bundleId}
           shortcut={{ modifiers: ["opt"], key: "return" }}
           onOpen={() => addToRecentlyAccessedCache(props.repo)}
+        />
+
+        <Action.CreateQuicklink
+          title="Create Project Quicklink"
+          icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+          quicklink={{
+            name: props.repo.name,
+            link: props.repo.fullPath,
+            application: openWith.bundleId,
+          }}
         />
 
         {props.preferences.openWith2 && (

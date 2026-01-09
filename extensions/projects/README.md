@@ -38,6 +38,16 @@ Quickly access your local projects and open them in your favorite editor or any 
 
 ### 5. Open Terminal at project folder.
 
+### 6. Create Quicklinks for fast opening
+
+Use the **Create Quicklink** action on a project to create a Raycast Quicklink with:
+
+- the quicklink name set to the project name
+- the quicklink link set to the project path
+- the quicklink application set to the same editor configured for that project type
+
+After creating it, you can open the project by typing the project name in Raycast.
+
 ### 6. Include/exclude project from scanning.
 
 To exclude particular project type, set '-' as choice of application in extension preferences.

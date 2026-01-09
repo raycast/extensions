@@ -14,7 +14,7 @@ export async function buildAllProjectsCache(paths: string[], preferences: Prefer
   let foundRepos: SourceRepo[] = [];
 
   const enabledProjectTypesConfig: ProjectTypeConfig[] = (applicationConfig.projectTypes as ProjectTypeConfig[]).filter(
-    (project) => isProjectTypeEnabled(project.openWithKey, preferences)
+    (project) => isProjectTypeEnabled(project.openWithKey, preferences),
   );
 
   await Promise.allSettled(
@@ -27,7 +27,7 @@ export async function buildAllProjectsCache(paths: string[], preferences: Prefer
 
       // Execute command
       const { stdout, stderr } = await execp(
-        `mdfind -onlyin ${path} '${spotlightSearchParameters.join(" || ")}' | grep -v "node_modules\\|META-INF"`
+        `mdfind -onlyin ${path} '${spotlightSearchParameters.join(" || ")}' | grep -v "node_modules\\|META-INF"`,
       );
 
       if (stderr) {
@@ -38,7 +38,7 @@ export async function buildAllProjectsCache(paths: string[], preferences: Prefer
       const repoPaths = stdout.split("\n").filter((e) => e);
       const repos = parseRepoPaths(repoPaths, enabledProjectTypesConfig);
       foundRepos = foundRepos.concat(repos);
-    })
+    }),
   );
 
   foundRepos.sort((a, b) => {
