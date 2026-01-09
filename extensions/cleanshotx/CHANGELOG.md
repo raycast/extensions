@@ -1,5 +1,9 @@
 # Cleanshot X Changelog
 
+## [Update app icon] - {PR_MERGE_DATE}
+
+- Update icon for extension
+
 ## [Add new command] - 2024-06-19
 
 - Add new command to capture area and send to Raycast AI Chat
