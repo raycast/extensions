@@ -59,7 +59,6 @@ export function AddTranslationForm({ draftValues }: AddTranslationFormProps) {
         return;
       }
 
-      console.log(`Downloading ${draftValues.screenshotUrls.length} screenshots...`);
       setIsDownloadingScreenshots(true);
 
       try {
@@ -88,11 +87,15 @@ export function AddTranslationForm({ draftValues }: AddTranslationFormProps) {
             writeFileSync(filepath, buffer);
             downloadedPaths.push(filepath);
           } catch (error) {
-            console.error(`Failed to download screenshot ${i + 1}:`, error);
+            console.error("Failed to download screenshots:", error);
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Screenshot Download Failed",
+              message: `Failed to download screenshot ${i + 1}: ${error instanceof Error ? error.message : "Unknown error"}`,
+            });
           }
         }
 
-        console.log(`Downloaded ${downloadedPaths.length} screenshots:`, downloadedPaths);
         setDownloadedScreenshots(downloadedPaths);
       } catch (error) {
         console.error("Failed to download screenshots:", error);

@@ -49,7 +49,7 @@ Return ONLY the JSON array, no additional text or markdown formatting.`;
 
     const response = await AI.ask(prompt, {
       creativity: "low", // Use low creativity for more consistent, structured output
-      model: AI.Model["OpenAI_GPT4o"],
+      model: AI.Model["OpenAI_GPT-4o"],
     });
 
     // Parse the AI response

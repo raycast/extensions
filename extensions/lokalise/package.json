@@ -25,6 +25,13 @@
       "title": "View Translations",
       "description": "View and search translation keys from Lokalise",
       "mode": "view"
+    },
+    {
+      "name": "sync-translations",
+      "title": "Sync Translations",
+      "description": "Sync translations from Lokalise",
+      "mode": "no-view",
+      "interval": "1d"
     }
   ],
   "tools": [
@@ -41,7 +48,12 @@
           },
           "platform": {
             "type": "string",
-            "enum": ["web", "ios", "android", "other"],
+            "enum": [
+              "web",
+              "ios",
+              "android",
+              "other"
+            ],
             "description": "Target platform for the extracted keys (defaults to 'web')"
           },
           "context": {
@@ -49,7 +61,9 @@
             "description": "Optional context about the image (e.g., 'login screen', 'settings page', 'onboarding flow')"
           }
         },
-        "required": ["imageUrl"]
+        "required": [
+          "imageUrl"
+        ]
       }
     },
     {
@@ -65,11 +79,18 @@
           },
           "platform": {
             "type": "string",
-            "enum": ["web", "ios", "android", "other"],
+            "enum": [
+              "web",
+              "ios",
+              "android",
+              "other"
+            ],
             "description": "Optional platform filter"
           }
         },
-        "required": ["query"]
+        "required": [
+          "query"
+        ]
       }
     },
     {
@@ -93,11 +114,20 @@
           },
           "platform": {
             "type": "string",
-            "enum": ["web", "ios", "android", "other"],
+            "enum": [
+              "web",
+              "ios",
+              "android",
+              "other"
+            ],
             "description": "Target platform for this key"
           }
         },
-        "required": ["keyName", "translationValue", "platform"]
+        "required": [
+          "keyName",
+          "translationValue",
+          "platform"
+        ]
       }
     },
     {
@@ -112,7 +142,9 @@
             "description": "The translation key name to look up"
           }
         },
-        "required": ["keyName"]
+        "required": [
+          "keyName"
+        ]
       }
     },
     {
