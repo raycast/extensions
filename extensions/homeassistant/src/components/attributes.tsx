@@ -18,7 +18,7 @@ function ListDetail(props: { state: State; k: string }) {
 function ListAttributeItem(props: { attributeKey: string; value: string | undefined; tooltip?: string; state: State }) {
   const k = props.attributeKey;
   const v = props.value || "?";
-  const state = props.state || "";
+  const state = props.state;
 
   return (
     <List.Item
