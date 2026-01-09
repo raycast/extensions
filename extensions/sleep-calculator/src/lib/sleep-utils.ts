@@ -28,13 +28,11 @@ export const RECOMMENDED_CYCLES = [5, 6];
 
 /**
  * Convert 12-hour time to minutes since midnight.
+ * Returns null for invalid input instead of throwing.
  */
-export function toMinutes(h: number, m: number, ampm: Meridiem): Minutes {
-  if (h < 1 || h > 12) {
-    throw new Error(`Invalid hour: ${h}. Expected 1–12.`);
-  }
-  if (m < 0 || m > 59) {
-    throw new Error(`Invalid minute: ${m}. Expected 0–59.`);
+export function toMinutes(h: number, m: number, ampm: Meridiem): Minutes | null {
+  if (h < 1 || h > 12 || m < 0 || m > 59) {
+    return null;
   }
 
   let hh = h % 12;
@@ -71,6 +69,7 @@ export function bedtimesForWake(
   cycles = DEFAULT_CYCLES
 ): SleepTime[] {
   const wake = toMinutes(wakeH, wakeM, wakeAMPM);
+  if (wake === null) return [];
 
   return cycles.map((n) => {
     const sleepDuration = n * cycleLen;
@@ -98,6 +97,7 @@ export function wakeTimesForSleep(
   cycles = DEFAULT_CYCLES
 ): SleepTime[] {
   const sleep = toMinutes(sleepH, sleepM, sleepAMPM);
+  if (sleep === null) return [];
 
   return cycles.map((n) => {
     const sleepDuration = n * cycleLen;
@@ -151,11 +151,13 @@ export function parseTimeInput(input: string): { hour: number; minute: number; a
   }
 
   // Use chrono-node for all other parsing
-  const result = chrono.parseDate(trimmed);
-  if (!result) return null;
+  const results = chrono.parse(trimmed);
+  if (results.length === 0) return null;
 
-  const hour24 = result.getHours();
-  const minute = result.getMinutes();
+  const date = results[0].start.date();
+  const hour24 = date.getHours();
+  const minute = date.getMinutes();
+
   const ampm: Meridiem = hour24 >= 12 ? "PM" : "AM";
   let hour12 = hour24 % 12;
   if (hour12 === 0) hour12 = 12;
