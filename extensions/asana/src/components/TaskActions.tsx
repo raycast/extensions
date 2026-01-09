@@ -21,6 +21,7 @@ import {
 } from "../api/tasks";
 import ParentTaskPicker from "./ParentTaskPicker";
 import CreateSubtaskForm from "./CreateSubtaskForm";
+import RenameTaskForm from "./RenameTaskForm";
 import { format } from "date-fns";
 import { partition } from "lodash";
 
@@ -241,6 +242,13 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
         )}
 
         {task.parent && <Action title="Convert to Task" icon={Icon.ArrowUp} onAction={convertToTask} />}
+
+        <Action.Push
+          title="Rename Task"
+          icon={Icon.Pencil}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          target={<RenameTaskForm task={task} mutateList={mutateList} mutateDetail={mutateDetail} />}
+        />
 
         <UsersSubmenu workspace={workspace} task={task} mutate={mutate} />
         <DueOnSubMenu task={task} mutate={mutate} />
