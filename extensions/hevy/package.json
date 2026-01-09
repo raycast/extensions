@@ -29,12 +29,14 @@
     {
       "name": "search-workouts",
       "title": "Search Workouts",
+      "subtitle": "Hevy",
       "description": "View your workouts on a list",
       "mode": "view"
     },
     {
       "name": "search-routines",
       "title": "Search Routines",
+      "subtitle": "Hevy",
       "description": "View your routines on a list",
       "mode": "view"
     }
