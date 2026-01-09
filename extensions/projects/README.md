@@ -48,7 +48,7 @@ Use the **Create Quicklink** action on a project to create a Raycast Quicklink w
 
 After creating it, you can open the project by typing the project name in Raycast.
 
-### 6. Include/exclude project from scanning.
+### 7. Include/exclude project from scanning.
 
 To exclude particular project type, set '-' as choice of application in extension preferences.
 ![Exclude Project types](./screenshots/screenshot-1.png)
