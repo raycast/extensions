@@ -7,17 +7,10 @@ interface ExtractKeysFromImageArgs {
   context?: string;
 }
 
-/**
- * AI Tool: Extract translation keys from a design screenshot or image
- * This tool processes images (Figma screenshots, UI mockups, etc.) and extracts
- * all translatable text, suggesting appropriate translation key names.
- */
 export default async function ExtractKeysFromImage(args: ExtractKeysFromImageArgs) {
   try {
     const { platform = "web", context } = args;
 
-    // Note: imageUrl is provided by Raycast AI but not used directly in the prompt
-    // The image is attached to the AI conversation context automatically
     const prompt = `You are a localization expert analyzing a design file or screenshot to extract translation keys.
 
 Platform: ${platform}
@@ -52,17 +45,14 @@ Return ONLY the JSON array, no additional text or markdown formatting.`;
       model: AI.Model["OpenAI_GPT-4o"],
     });
 
-    // Parse the AI response
     let keys: ExtractedKey[];
     try {
-      // Try to extract JSON from the response
       const jsonMatch = response.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
         throw new Error("No JSON array found in AI response");
       }
       keys = JSON.parse(jsonMatch[0]);
 
-      // Validate keys
       if (!Array.isArray(keys) || keys.length === 0) {
         return {
           success: true,
@@ -71,7 +61,6 @@ Return ONLY the JSON array, no additional text or markdown formatting.`;
         };
       }
 
-      // Filter out invalid keys
       keys = keys.filter((key) => {
         return (
           key.keyName &&
@@ -83,7 +72,6 @@ Return ONLY the JSON array, no additional text or markdown formatting.`;
         );
       });
 
-      // Remove duplicates by key name
       const uniqueKeys = new Map<string, ExtractedKey>();
       keys.forEach((key) => {
         if (!uniqueKeys.has(key.keyName)) {

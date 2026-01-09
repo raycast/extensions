@@ -1,6 +1,8 @@
 import type { ReactElement } from "react";
 import { List, ActionPanel, Action, Icon, openExtensionPreferences } from "@raycast/api";
 import { DuplicateTranslationForm } from "./duplicate-translation-form";
+import { TranslationListItemDetail } from "./translation-list-item-detail";
+import { ToggleDetailAction } from "./actions/toggle-detail-action";
 
 interface KeyData {
   keyId: number;
@@ -15,29 +17,52 @@ interface KeyData {
 interface TranslationListItemProps {
   keyData: KeyData;
   target: ReactElement;
+  showingDetail: boolean;
+  onToggleDetail: () => void;
   onSync: () => void;
 }
 
-export function TranslationListItem({ keyData, target, onSync }: TranslationListItemProps) {
+export function TranslationListItem({
+  keyData,
+  target,
+  showingDetail,
+  onToggleDetail,
+  onSync,
+}: TranslationListItemProps) {
   return (
     <List.Item
       key={keyData.keyId}
       id={keyData.keyId.toString()}
       title={keyData.keyName}
-      subtitle={keyData.defaultTranslation || undefined}
-      accessories={[
-        { text: keyData.isPlural ? "Plural" : "", icon: keyData.isPlural ? Icon.Document : undefined },
-        { text: keyData.platforms.join(", ") || "" },
-      ]}
+      subtitle={!showingDetail ? keyData.defaultTranslation || undefined : undefined}
+      accessories={
+        !showingDetail
+          ? [
+              { text: keyData.isPlural ? "Plural" : "", icon: keyData.isPlural ? Icon.Document : undefined },
+              { text: keyData.platforms.join(", ") || "" },
+            ]
+          : undefined
+      }
+      detail={showingDetail ? <TranslationListItemDetail keyId={keyData.keyId} /> : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Push title="View Details" icon={Icon.Eye} target={target} />
-            <Action.CopyToClipboard
-              title="Copy Key Name"
-              content={keyData.keyName}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-            />
+            {!showingDetail ? (
+              <>
+                <Action.Push title="View Details" icon={Icon.Eye} target={target} />
+                <ToggleDetailAction isShowingDetail={showingDetail} onToggle={onToggleDetail} />
+              </>
+            ) : (
+              <>
+                <Action.CopyToClipboard
+                  title="Copy Key Name"
+                  content={keyData.keyName}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+                />
+                <ToggleDetailAction isShowingDetail={showingDetail} onToggle={onToggleDetail} />
+                <Action.Push title="View Details" icon={Icon.Eye} target={target} />
+              </>
+            )}
             {keyData.mainTranslation && (
               <Action.CopyToClipboard
                 title="Copy Translation"
