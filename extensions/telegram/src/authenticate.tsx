@@ -1,15 +1,45 @@
 import { useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import dedent from "dedent";
 import { handleAuthFlow } from "./utils/auth";
 
+interface AuthCodeFormValues {
+  code: string;
+}
+
 export default function Authenticate() {
-  const [code, setCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [needsCode, setNeedsCode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { handleSubmit, itemProps } = useForm<AuthCodeFormValues>({
+    onSubmit: async (values) => {
+      setIsSubmitting(true);
+      try {
+        const result = await handleAuthFlow(values.code);
+        if (result.success) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Successfully authenticated with Telegram",
+          });
+          await popToRoot();
+        }
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Authentication Failed",
+          message: error instanceof Error ? error.message : "Unknown error occurred",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    validation: {
+      code: FormValidation.Required,
+    },
+  });
 
   const handleInitialAuth = async () => {
-    setIsLoading(true);
     try {
       const result = await handleAuthFlow();
       if (result.needsCode) {
@@ -27,46 +57,12 @@ export default function Authenticate() {
         title: "Authentication Failed",
         message: error instanceof Error ? error.message : "Unknown error occurred",
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCodeSubmit = async () => {
-    if (!code.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Empty Code",
-        message: "Please enter the verification code",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await handleAuthFlow(code);
-      if (result.success) {
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Successfully authenticated with Telegram",
-        });
-        await popToRoot();
-      }
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Authentication Failed",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   if (!needsCode) {
     return (
       <Form
-        isLoading={isLoading}
         actions={
           <ActionPanel>
             <Action icon={Icon.ArrowRight} title="Send Verification Code" onAction={handleInitialAuth} />
@@ -100,20 +96,18 @@ export default function Authenticate() {
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.ArrowRight} title="Verify Code" onSubmit={handleCodeSubmit} />
+          <Action.SubmitForm icon={Icon.ArrowRight} title="Verify Code" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
-        id="code"
         title="Verification Code"
         info="Enter the verification code sent to your Telegram app"
         placeholder="12345"
-        value={code}
-        onChange={setCode}
+        {...itemProps.code}
       />
     </Form>
   );

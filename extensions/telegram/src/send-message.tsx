@@ -1,15 +1,12 @@
 import { useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, showToast, Toast, popToRoot } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import * as fs from "fs";
-import { getChats, sendMessage } from "./services/telegram-client";
+import { getChats } from "./services/telegram-client";
 import { getConfig, ensureAuthenticated } from "./utils/auth";
+import { useSendMessage } from "./hooks/use-send-message";
 
 export default function SendMessage() {
-  const [message, setMessage] = useState("");
-  const [selectedChatId, setSelectedChatId] = useState("");
-  const [filePaths, setFilePaths] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedChatId, setSelectedChatId] = useState<string>("");
 
   const { data: chats, isLoading: isLoadingChats } = useCachedPromise(
     async () => {
@@ -27,74 +24,33 @@ export default function SendMessage() {
     },
   );
 
-  const handleSubmit = async () => {
-    if (!selectedChatId) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No Chat Selected",
-        message: "Please select a chat to send the message to",
-      });
-      return;
-    }
-
-    if (!message.trim() && filePaths.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Empty Message",
-        message: "Please enter a message or attach a file",
-      });
-      return;
-    }
-
-    for (const filePath of filePaths) {
-      if (!fs.existsSync(filePath)) {
+  const { handleSubmit, itemProps, isSubmitting } = useSendMessage({
+    chatId: selectedChatId,
+    onBeforeSubmit: async () => {
+      if (!selectedChatId) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "File Not Found",
-          message: `The file ${filePath} does not exist`,
+          title: "No Chat Selected",
+          message: "Please select a chat",
         });
-        return;
+        return false;
       }
-    }
-
-    setIsLoading(true);
-    const authenticated = await ensureAuthenticated();
-    if (!authenticated) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const config = getConfig();
-
-      await sendMessage({
-        config,
-        chatId: selectedChatId,
-        message,
-        filePaths,
-      });
-
-      const selectedChat = chats.find((chat) => chat.id === selectedChatId);
+      return true;
+    },
+    onSuccess: async ({ chatId }) => {
+      const selectedChat = chats.find((chat) => chat.id === chatId);
       await showToast({
         style: Toast.Style.Success,
         title: "Message Sent",
         message: `Message sent to ${selectedChat?.title || "chat"}`,
       });
       await popToRoot();
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Send Message",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
   return (
     <Form
-      isLoading={isLoading || isLoadingChats}
+      isLoading={isLoadingChats || isSubmitting}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.ArrowRight} title="Send Message" onSubmit={handleSubmit} />
@@ -131,23 +87,14 @@ export default function SendMessage() {
           ))}
       </Form.Dropdown>
 
-      <Form.TextArea
-        id="message"
-        title="Message"
-        placeholder="Enter your message..."
-        value={message}
-        onChange={setMessage}
-        enableMarkdown
-      />
+      <Form.TextArea title="Message" placeholder="Enter your message..." enableMarkdown {...itemProps.message} />
 
       <Form.FilePicker
-        id="files"
         title="Attachments"
         info="You can attach photos, videos, or documents. Multiple files will be sent as separate messages."
         allowMultipleSelection={true}
         canChooseDirectories={false}
-        value={filePaths}
-        onChange={setFilePaths}
+        {...itemProps.files}
       />
     </Form>
   );
