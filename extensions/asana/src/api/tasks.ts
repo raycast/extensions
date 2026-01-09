@@ -45,6 +45,11 @@ type Tag = {
   name: string;
 };
 
+type Parent = {
+  gid: string;
+  name: string;
+};
+
 export type Task = {
   gid: string;
   id: string;
@@ -60,10 +65,11 @@ export type Task = {
   custom_fields: CustomField[];
   memberships: Membership[];
   tags: Tag[];
+  parent: Parent | null;
 };
 
 const taskFields =
-  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name";
+  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name,parent.name";
 
 export async function getMyTasks(workspace: string, showCompletedTasks: boolean) {
   const {
@@ -144,4 +150,17 @@ export async function deleteTask(taskId: string) {
   await request<{ data: Task }>(`/tasks/${taskId}`, {
     method: "DELETE",
   });
+}
+
+const subtaskFields =
+  "gid,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name,parent.name";
+
+export async function getSubtasks(taskId: string) {
+  const { data } = await request<{ data: Task[] }>(`/tasks/${taskId}/subtasks`, {
+    params: {
+      opt_fields: subtaskFields,
+    },
+  });
+
+  return data.data;
 }
