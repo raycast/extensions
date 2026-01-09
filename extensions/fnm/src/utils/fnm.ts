@@ -258,6 +258,7 @@ export async function uninstallVersion(version: string): Promise<{ success: bool
 export interface RemoteVersion {
   version: string;
   isLts: boolean;
+  ltsName?: string;
 }
 
 /**
@@ -271,12 +272,17 @@ export async function getRemoteVersions(): Promise<RemoteVersion[]> {
     const versions: RemoteVersion[] = [];
 
     for (const line of lines) {
-      const isLts = line.toLowerCase().includes("lts");
+      // fnm 输出格式: "v22.11.0 (Jod)" 其中括号内是 LTS 代号
+      const ltsMatch = line.match(/\(([^)]+)\)/);
+      const isLts = ltsMatch !== null;
+      const ltsName = ltsMatch ? ltsMatch[1] : undefined;
+
       const versionMatch = line.match(/v?(\d+\.\d+\.\d+)/);
       if (versionMatch) {
         versions.push({
           version: versionMatch[1],
           isLts,
+          ltsName,
         });
       }
     }

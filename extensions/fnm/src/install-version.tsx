@@ -167,9 +167,10 @@ export default function InstallVersion(props: { arguments?: { version?: string }
         {versions.map((version) => (
           <List.Item
             key={version.version}
-            icon={Icon.Circle}
+            icon={version.isLts ? { source: Icon.Star, tintColor: Color.Orange } : Icon.Circle}
             title={version.version}
-            accessories={[...(version.isLts ? [{ tag: { value: "lts", color: Color.Orange } }] : [])]}
+            subtitle={version.ltsName ? `LTS: ${version.ltsName}` : undefined}
+            accessories={[...(version.isLts ? [{ tag: { value: "LTS", color: Color.Orange } }] : [])]}
             actions={
               <ActionPanel>
                 <Action
