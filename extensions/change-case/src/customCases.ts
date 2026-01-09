@@ -9,7 +9,6 @@ const ALPHABETIC_REGEX = /\p{L}/u;
 
 const isAlphabetic = (char: string) => ALPHABETIC_REGEX.test(char);
 
-// Alternating Case: AlTeRnAtInG cAsE (alternating case pattern)
 export const alternatingCase = (input: string) => {
   let alphabeticCount = 0;
   return input
