@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-01-09
 
 - Removed workaround and moved to using app picker
 
