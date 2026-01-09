@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-01-09
 - Added history chart to sensors inspired by the Home Assistant when viewing attributes of entity
 
 ## [Fix] - 2025-11-14
