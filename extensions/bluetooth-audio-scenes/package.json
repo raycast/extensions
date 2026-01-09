@@ -1,0 +1,52 @@
+{
+  "name": "bluetooth-audio-scenes",
+  "title": "AudioScenes",
+  "description": "Connect Bluetooth devices and set them as macOS audio output with scenes.",
+  "icon": "extension-icon.png",
+  "author": "vladzima",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Fun",
+    "Media"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "devices",
+      "title": "Connect and Play",
+      "subtitle": "AudioScenes",
+      "description": "Connect Bluetooth device and set audio output.",
+      "mode": "view"
+    },
+    {
+      "name": "scenes",
+      "title": "Scene Presets",
+      "subtitle": "AudioScenes",
+      "description": "Create and run presets for quick switching.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.2",
+    "typescript": "^5.0.0",
+    "ultracite": "^7.0.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
