@@ -60,9 +60,7 @@ export interface Chat {
   id: string;
   title: string;
   type: ChatType;
-  lastMessage?: string;
-  lastMessageDate?: Date;
-  lastMessageMedia?: MessageMedia;
+  lastMessage?: ChatMessage;
   unreadCount: number;
   photo?: string;
   isPinned: boolean;
@@ -399,6 +397,7 @@ async function processChatMessage(
   client: TelegramClient,
   msg: Api.Message,
   skipMediaDownload: boolean,
+  chatEntity?: Api.User | Api.Chat | Api.Channel,
 ): Promise<ChatMessage> {
   const media = parseMessageMedia(msg);
 
@@ -411,29 +410,43 @@ async function processChatMessage(
   let senderName: string | undefined;
   let senderPhoto: string | undefined;
 
-  if (msg.fromId) {
-    if (msg.fromId instanceof Api.PeerUser) {
-      senderId = msg.fromId.userId.toString();
-      try {
-        const user = await client.getEntity(msg.fromId.userId);
-        if (user instanceof Api.User) {
-          senderName = user.firstName || "";
-          if (user.lastName) senderName += ` ${user.lastName}`;
+  // Try to get sender info from fromId
+  if (msg.fromId && msg.fromId instanceof Api.PeerUser) {
+    senderId = msg.fromId.userId.toString();
+    try {
+      const user = await client.getEntity(msg.fromId.userId);
+      if (user instanceof Api.User) {
+        senderName = user.firstName || "";
+        if (user.lastName) senderName += ` ${user.lastName}`;
 
-          if (user.deleted) {
-            senderName = "Deleted Account";
-          } else if (!senderName.trim()) {
-            senderName = "Unknown User";
-          }
-
-          if (!skipMediaDownload && user.photo && "photoId" in user.photo) {
-            senderPhoto = await downloadProfilePhoto(client, user, user.id.toString(), "profile");
-          }
+        if (user.deleted) {
+          senderName = "Deleted Account";
+        } else if (!senderName.trim()) {
+          senderName = "Unknown User";
         }
-      } catch (error) {
-        console.error("Failed to get sender info:", error);
-        senderName = "Unknown User";
+
+        if (!skipMediaDownload && user.photo && "photoId" in user.photo) {
+          senderPhoto = await downloadProfilePhoto(client, user, user.id.toString(), "profile");
+        }
       }
+    } catch (error) {
+      console.error("Failed to get sender info:", error);
+      senderName = "Unknown User";
+    }
+  } else if (!msg.fromId && chatEntity instanceof Api.User) {
+    // For private chats, if there's no fromId, assume it's from the chat partner
+    senderId = chatEntity.id.toString();
+    senderName = chatEntity.firstName || "";
+    if (chatEntity.lastName) senderName += ` ${chatEntity.lastName}`;
+
+    if (chatEntity.deleted) {
+      senderName = "Deleted Account";
+    } else if (!senderName.trim()) {
+      senderName = "Unknown User";
+    }
+
+    if (!skipMediaDownload && chatEntity.photo && "photoId" in chatEntity.photo) {
+      senderPhoto = await downloadProfilePhoto(client, chatEntity, chatEntity.id.toString(), "profile");
     }
   }
 
@@ -492,8 +505,13 @@ export async function getChatMessages(options: GetMessagesOptions): Promise<Chat
 
   const filteredMessages = messages.filter((msg) => msg.message || msg.media);
 
+  // Get the chat entity to know who the chat partner is
+  const entity = await client.getEntity(chatId);
+  const chatEntity =
+    entity instanceof Api.User || entity instanceof Api.Chat || entity instanceof Api.Channel ? entity : undefined;
+
   const processedMessages = await Promise.all(
-    filteredMessages.map((msg) => processChatMessage(client, msg, skipMediaDownload)),
+    filteredMessages.map((msg) => processChatMessage(client, msg, skipMediaDownload, chatEntity)),
   );
 
   return processedMessages;
@@ -545,22 +563,14 @@ export async function getChats(options: GetChatsOptions): Promise<Chat[]> {
         }
       }
 
-      const lastMessage = dialog.message?.message || "";
-      const lastMessageDate = dialog.message?.date ? new Date(dialog.message.date * 1000) : undefined;
+      let lastMessage: ChatMessage | undefined;
 
-      let lastMessageMedia: MessageMedia | undefined;
       if (dialog.message) {
-        lastMessageMedia = parseMessageMedia(dialog.message);
-        if (
-          !skipPhotoDownload &&
-          lastMessageMedia &&
-          ["photo", "image", "video", "gif"].includes(lastMessageMedia.type)
-        ) {
-          const filePath = await downloadMedia(client, dialog.message, lastMessageMedia.mimeType);
-          if (filePath && lastMessageMedia) {
-            lastMessageMedia.filePath = filePath;
-          }
-        }
+        const chatEntityForMessage =
+          entity instanceof Api.User || entity instanceof Api.Chat || entity instanceof Api.Channel
+            ? entity
+            : undefined;
+        lastMessage = await processChatMessage(client, dialog.message, skipPhotoDownload, chatEntityForMessage);
       }
 
       return {
@@ -568,8 +578,6 @@ export async function getChats(options: GetChatsOptions): Promise<Chat[]> {
         title,
         type,
         lastMessage,
-        lastMessageDate,
-        lastMessageMedia,
         unreadCount: dialog.unreadCount,
         photo,
         isPinned: dialog.pinned || false,

@@ -15,10 +15,10 @@ function groupChats(chats: Chat[]): Map<string, Chat[]> {
   const unpinnedChats = chats.filter((chat) => !chat.isPinned);
 
   const sortByDate = (a: Chat, b: Chat) => {
-    if (!a.lastMessageDate && !b.lastMessageDate) return 0;
-    if (!a.lastMessageDate) return 1;
-    if (!b.lastMessageDate) return -1;
-    return b.lastMessageDate.getTime() - a.lastMessageDate.getTime();
+    if (!a.lastMessage?.date && !b.lastMessage?.date) return 0;
+    if (!a.lastMessage?.date) return 1;
+    if (!b.lastMessage?.date) return -1;
+    return b.lastMessage.date.getTime() - a.lastMessage.date.getTime();
   };
 
   pinnedChats.sort(sortByDate);

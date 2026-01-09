@@ -7,9 +7,9 @@ interface ChatMessageListItemDetailProps {
   chat: Chat;
 }
 
-export function ChatMessageListItemDetail({ message, chat }: ChatMessageListItemDetailProps) {
-  // Add sender info for group chats as prefix
-  const prefix = chat.type === "group" && message.senderName ? `**${message.senderName}**\n\n` : "";
+export function ChatMessageListItemDetail({ message }: ChatMessageListItemDetailProps) {
+  // Add sender info as prefix when available
+  const prefix = message.senderName ? `**${message.senderName}**\n\n` : "";
 
   const markdown = buildMarkdownWithMedia({
     media: message.media,

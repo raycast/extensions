@@ -30,7 +30,7 @@ export function ChatMessageListItem({
 
   if (message.media?.filePath && (message.media.type === "photo" || message.media.type === "image")) {
     icon = { source: message.media.filePath };
-  } else if (chat.type === "group" && message.senderName) {
+  } else if (message.senderName) {
     icon = getAvatarIcon({
       photo: message.senderPhoto,
       name: message.senderName,
@@ -48,7 +48,7 @@ export function ChatMessageListItem({
     });
   }
 
-  if (chat.type === "group" && message.senderName) {
+  if (message.senderName) {
     accessories.push({
       text: message.senderName,
     });

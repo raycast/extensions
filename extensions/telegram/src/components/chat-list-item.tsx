@@ -29,9 +29,9 @@ export function ChatListItem({ chat, onRefresh, isShowingDetail, onToggleDetail 
     });
   }
 
-  if (chat.lastMessageDate) {
+  if (chat.lastMessage?.date) {
     accessories.push({
-      date: chat.lastMessageDate,
+      date: chat.lastMessage.date,
     });
   }
 
@@ -40,7 +40,7 @@ export function ChatListItem({ chat, onRefresh, isShowingDetail, onToggleDetail 
       key={chat.id}
       icon={icon}
       title={displayTitle}
-      subtitle={!isShowingDetail ? chat.lastMessage : undefined}
+      subtitle={!isShowingDetail ? chat.lastMessage?.text : undefined}
       accessories={accessories}
       detail={isShowingDetail ? <ChatListItemDetail chat={chat} /> : undefined}
       actions={
