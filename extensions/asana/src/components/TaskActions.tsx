@@ -3,9 +3,11 @@ import { Icon, ActionPanel, Action, confirmAlert, Color, showToast, Toast, useNa
 import { getAvatarIcon, MutatePromise } from "@raycast/utils";
 import { User } from "../api/users";
 import { Project, addProject, removeProject, Section, addTaskToSection } from "../api/projects";
+import { Tag, addTag, removeTag } from "../api/tags";
 import { useUsers } from "../hooks/useUsers";
 import { useProjects } from "../hooks/useProjects";
 import { useSections } from "../hooks/useSections";
+import { useTags } from "../hooks/useTags";
 import { asanaToRaycastColor } from "../helpers/colors";
 import { getErrorMessage } from "../helpers/errors";
 import { Task, updateTask, deleteTask as apiDeleteTask, CustomField, EnumValue } from "../api/tasks";
@@ -168,6 +170,7 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
         <DueOnSubMenu task={task} mutate={mutate} />
         <ProjectsSubmenu workspace={workspace} task={task} mutate={mutate} />
         <SectionsSubmenu task={task} mutate={mutate} />
+        <TagsSubmenu workspace={workspace} task={task} mutate={mutate} />
 
         {task.custom_fields &&
           task.custom_fields.length > 0 &&
@@ -533,6 +536,88 @@ function CustomFieldSubmenu({ task, mutate, field }: CustomFieldSubmenuProps) {
           })}
         </>
       ) : null}
+    </ActionPanel.Submenu>
+  );
+}
+
+type TagsSubmenuProps = {
+  task: Task;
+  workspace?: string;
+  mutate: (params: MutateParams) => void;
+};
+
+function TagsSubmenu({ workspace, task, mutate }: TagsSubmenuProps) {
+  const [load, setLoad] = useState(false);
+  const { data: tags, isLoading } = useTags(workspace, { execute: load });
+
+  const changeTag = async (tag: Tag, action: "add" | "remove") => {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: action === "add" ? "Adding tag" : "Removing tag",
+      });
+
+      const asyncUpdate = action === "add" ? addTag(task.gid, tag.gid) : removeTag(task.gid, tag.gid);
+
+      await mutate({
+        asyncUpdate,
+        optimisticUpdate: (task) => {
+          const newTags = action === "add" ? [...task.tags, tag] : task.tags.filter((t) => t.gid !== tag.gid);
+          return { ...task, tags: newTags };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: action === "add" ? "Added tag" : "Removed tag",
+        message:
+          action === "add" ? `"${tag.name}" added to "${task.name}"` : `"${tag.name}" removed from "${task.name}"`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to change tag",
+        message: getErrorMessage(error),
+      });
+    }
+  };
+
+  const [tagsToAdd, tagsToRemove] = partition(tags || [], (tag) => {
+    return !task.tags.find((t) => t.gid === tag.gid);
+  });
+
+  return (
+    <ActionPanel.Submenu
+      title="Change Tags"
+      icon={Icon.Tag}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      onOpen={() => setLoad(true)}
+    >
+      {isLoading ? (
+        <Action title="Loading…" />
+      ) : (
+        <>
+          {tagsToAdd && tagsToAdd.length > 0 ? (
+            <ActionPanel.Submenu title="Add Tag" icon={Icon.Plus}>
+              {tagsToAdd.map((tag) => (
+                <Action key={tag.gid} title={tag.name} icon={Icon.Tag} onAction={() => changeTag(tag, "add")} />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
+
+          {tagsToRemove && tagsToRemove.length > 0 ? (
+            <ActionPanel.Submenu title="Remove Tag" icon={Icon.Minus}>
+              {tagsToRemove.map((tag) => (
+                <Action key={tag.gid} title={tag.name} icon={Icon.Tag} onAction={() => changeTag(tag, "remove")} />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
+
+          {(!tagsToAdd || tagsToAdd.length === 0) && (!tagsToRemove || tagsToRemove.length === 0) ? (
+            <Action title="No Tags Available" />
+          ) : null}
+        </>
+      )}
     </ActionPanel.Submenu>
   );
 }
