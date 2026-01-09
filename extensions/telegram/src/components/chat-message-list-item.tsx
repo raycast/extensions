@@ -27,15 +27,15 @@ export function ChatMessageListItem({
 
   let icon: Image.ImageLike = Icon.Message;
 
-  // For group chats, show sender avatar
-  if (chat.type === "group" && message.senderName) {
+  if (message.media?.filePath && (message.media.type === "photo" || message.media.type === "image")) {
+    icon = { source: message.media.filePath };
+  } else if (chat.type === "group" && message.senderName) {
     icon = getAvatarIcon({
       photo: message.senderPhoto,
       name: message.senderName,
       type: "private",
     });
   } else if (message.media) {
-    // For non-group messages with media, show media icon
     switch (message.media.type) {
       case "photo":
       case "image":
@@ -75,7 +75,12 @@ export function ChatMessageListItem({
 
   const accessories: List.Item.Accessory[] = [];
 
-  // Add sender name for group chats
+  if (message.media?.filePath && (message.media.type === "photo" || message.media.type === "image")) {
+    accessories.push({
+      icon: { source: message.media.filePath },
+    });
+  }
+
   if (chat.type === "group" && message.senderName) {
     accessories.push({
       text: message.senderName,

@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Image } from "@raycast/api";
 import { SavedMessage } from "../services/telegram-client";
 import { MessageDetail } from "./message-detail";
 import { MessageListItemDetail } from "./message-list-item-detail";
@@ -17,8 +17,10 @@ export function MessageListItem({ message, onRefresh, isShowingDetail, onToggleD
     displayTitle = typeName;
   }
 
-  let icon = Icon.Message;
-  if (message.media) {
+  let icon: Image.ImageLike = Icon.Message;
+  if (message.media?.filePath && (message.media.type === "photo" || message.media.type === "image")) {
+    icon = { source: message.media.filePath };
+  } else if (message.media) {
     switch (message.media.type) {
       case "photo":
       case "image":
