@@ -2,7 +2,7 @@
 
 ## [2.0.5] - {PR_MERGE_DATE}
 
-- Fixed issue on windows with the polyfill (ref: [Issue #24329](https://github.com/raycast/extensions/issues/24329))
+- Fixed issue on windows with the polyfill (ref: [Issue #24092](https://github.com/raycast/extensions/issues/24092))
 
 ## [2.0.4] - 2025-12-09
 
