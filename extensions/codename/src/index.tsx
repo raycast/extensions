@@ -1,4 +1,4 @@
-import { Clipboard, showHUD, getPreferenceValues, showToast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showToast } from "@raycast/api";
 
 const UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const LOWERCASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
