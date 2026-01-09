@@ -1,5 +1,5 @@
 # Remote Desktop Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-09
 
 - Add initial version
