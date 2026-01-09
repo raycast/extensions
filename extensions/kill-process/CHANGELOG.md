@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Windows Fix] - 2025-12-02
+## [Windows Fix] - 2026-1-09
 
  - Fix powershell command on Windows by adding -NoProfile
 
