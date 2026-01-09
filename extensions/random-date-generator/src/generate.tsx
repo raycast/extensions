@@ -1,11 +1,5 @@
 import { useState, useCallback } from "react";
-import { Detail, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
-
-interface Preferences {
-  startDate: string;
-  endDate: string;
-  dateFormat: string;
-}
+import { Detail, ActionPanel, Action, getPreferenceValues, Icon, openExtensionPreferences } from "@raycast/api";
 
 function generateRandomDate(start: Date, end: Date): Date {
   const startTime = start.getTime();
@@ -104,7 +98,17 @@ Start date must be before end date.
           <Action
             title="Generate New Date"
             onAction={regenerate}
+            icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <Action
+            title="Open Extension Preferences"
+            onAction={() => openExtensionPreferences()}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "," },
+              Windows: { modifiers: ["ctrl", "shift"], key: "," },
+            }}
+            icon={Icon.Gear}
           />
         </ActionPanel>
       }
