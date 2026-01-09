@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Improved Query String Creation] - 2026-01-08
+
+- Replaced the `⁠qs` package with `⁠query-string` to automatically exclude empty strings and null values when generating Things URLs
+
 ## [Timeout increasing in AppleScript] - 2025-10-30
 
 - Increased timeout to 60 seconds in AppleScript

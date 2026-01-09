@@ -19,6 +19,12 @@
       "title": "Discover Events",
       "description": "Browse and discover Luma events by location",
       "mode": "view"
+    },
+    {
+      "name": "search-events",
+      "title": "Search Events",
+      "description": "Search for Luma events by keyword",
+      "mode": "view"
     }
   ],
   "dependencies": {

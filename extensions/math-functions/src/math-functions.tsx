@@ -1,8 +1,16 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
-// Generate text icon as SVG data URI
+// Icon cache to prevent regenerating the same SVG icons on every render
+const iconCache = new Map<string, string>();
+
+// Generate text icon as SVG data URI with memoization
 function getTextIcon(text: string): string {
+  // Check cache first
+  if (iconCache.has(text)) {
+    return iconCache.get(text)!;
+  }
+
   // Calculate font size - be more generous to fill the icon better
   let fontSize = 22;
   if (text.length === 1) {
@@ -19,7 +27,11 @@ function getTextIcon(text: string): string {
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#1a1a1a" rx="8"/><text x="20" y="32" text-anchor="middle" dominant-baseline="central" font-family="system-ui, -apple-system" font-size="${fontSize}" fill="#ffffff" font-weight="500">${text}</text></svg>`;
   const base64 = Buffer.from(svg).toString("base64");
-  return `data:image/svg+xml;base64,${base64}`;
+  const result = `data:image/svg+xml;base64,${base64}`;
+
+  // Cache the result
+  iconCache.set(text, result);
+  return result;
 }
 
 // Math utility functions
@@ -365,8 +377,8 @@ function evaluateMathExpression(expression: string, autoComplete = false): numbe
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  // Calculate result for the current expression
-  const getResult = (): { value: string; error?: string; completed?: string } | null => {
+  // Calculate result for the current expression with memoization
+  const result = useMemo((): { value: string; error?: string; completed?: string } | null => {
     if (!searchText || searchText.trim() === "") {
       return null;
     }
@@ -381,12 +393,10 @@ export default function Command() {
         error: error instanceof Error ? error.message : "Invalid expression",
       };
     }
-  };
+  }, [searchText]);
 
-  const result = getResult();
-
-  // Filter function suggestions based on search text
-  const getFilteredFunctions = () => {
+  // Filter function suggestions based on search text with memoization
+  const filteredFunctions = useMemo(() => {
     if (!searchText) {
       return functionDefinitions;
     }
@@ -397,9 +407,7 @@ export default function Command() {
     const partialFunction = match ? match[1].toLowerCase() : searchText.toLowerCase();
 
     return functionDefinitions.filter((func) => func.name.toLowerCase().startsWith(partialFunction));
-  };
-
-  const filteredFunctions = getFilteredFunctions();
+  }, [searchText]);
 
   return (
     <List
