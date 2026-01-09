@@ -1,6 +1,6 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ApiInfo, Preferences } from "../api/types";
+import { ApiInfo } from "../api/types";
 
 export function useApiCredits() {
   const { apiKey } = getPreferenceValues<Preferences>();

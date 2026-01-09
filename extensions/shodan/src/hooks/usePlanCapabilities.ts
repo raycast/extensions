@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ApiInfo, Preferences } from "../api/types";
+import { ApiInfo } from "../api/types";
 
 export interface PlanCapabilities {
   plan: string;

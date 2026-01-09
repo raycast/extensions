@@ -1,6 +1,6 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Preferences, ShodanSearchResponse } from "../api/types";
+import { ShodanSearchResponse } from "../api/types";
 
 interface UseShodanSearchOptions {
   query: string;

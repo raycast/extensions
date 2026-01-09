@@ -208,12 +208,6 @@ export type PresetCategory =
   | "iot"
   | "cloud";
 
-// Preferences type
-export interface Preferences {
-  apiKey: string;
-  defaultResultsPerPage: string;
-}
-
 // DNS types
 export interface DnsResolveResponse {
   [hostname: string]: string;

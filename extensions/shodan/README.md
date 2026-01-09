@@ -2,7 +2,8 @@
 
 Search the [Shodan](https://www.shodan.io/) database for internet-connected devices, view detailed host information, and manage saved queries directly from [Raycast](https://www.raycast.com/).
 
-![Shodan Extension](media/shodan_commandlist.png)
+![Shodan Extension](metadata/shodan-1.png)
+
 <!-- Screenshot placeholder: 2000x1250px recommended -->
 
 ## Features
@@ -19,18 +20,28 @@ Search the [Shodan](https://www.shodan.io/) database for internet-connected devi
 ## Screenshots
 
 ### Search Results
-![Search Results](media/shodan_searchlist.png)
+
+![Search Results](metadata/shodan_searchlist.png)
 
 ### Host Details
-![Host Details](media/shodan_host_details.png)
+
+![Host Details](metadata/shodan_hostdetails.png)
 
 ### Preset Queries
-![Preset Queries](media/shodan_preset_queries.png)
+
+![Preset Queries](metadata/shodan_preset_queries.png)
 
 ### Favorite Queries
-![Favorite Queries](media/shodan_favorite_queries.png)
+
+![Favorite Queries](metadata/shodan_favorite_queries.png)
+
+### DNS Lookup
+
+![DNS Lookup](metadata/shodan_dns.png)
+
 ### Account details
-![Account Details](media/shodan_account.png)
+
+![Account Details](metadata/shodan_account.png)
 
 ## Setup
 
@@ -40,27 +51,16 @@ Search the [Shodan](https://www.shodan.io/) database for internet-connected devi
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| Search Shodan | Execute Shodan search queries and browse results |
-| Host Lookup | Look up detailed information for an IP address |
-| Preset Queries | Browse pre-built Shodan query templates |
-| Favorite Queries | View and run saved Shodan queries |
-| DNS Lookup | Resolve hostnames and perform reverse DNS lookups |
-| Search Exploits | Search the Shodan exploit database |
-| Network Alerts | Manage network monitoring alerts |
-| Account Info | View API credits and account status |
-
-## API Key Requirements
-
-| Feature | API Plan |
-|---------|----------|
-| Search | Free (limited) |
-| Host Lookup | Free (1 query credit per lookup) |
-| DNS Lookup | Free |
-| Preset Queries | Free |
-| Exploit Search | Paid membership required |
-| Network Alerts | Paid membership required |
+| Command          | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| Search Shodan    | Execute Shodan search queries and browse results  |
+| Host Lookup      | Look up detailed information for an IP address    |
+| Preset Queries   | Browse pre-built Shodan query templates           |
+| Favorite Queries | View and run saved Shodan queries                 |
+| DNS Lookup       | Resolve hostnames and perform reverse DNS lookups |
+| Search Exploits  | Search the Shodan exploit database                |
+| Network Alerts   | Manage network monitoring alerts                  |
+| Account Info     | View API credits and account status               |
 
 ## Query Examples
 

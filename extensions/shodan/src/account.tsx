@@ -9,7 +9,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Preferences, ApiInfo, ShodanProfile } from "./api/types";
+import { ApiInfo, ShodanProfile } from "./api/types";
 import {
   formatCredits,
   getCreditColor,

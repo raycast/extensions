@@ -1,6 +1,6 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Preferences, ShodanHost } from "../api/types";
+import { ShodanHost } from "../api/types";
 
 interface UseShodanHostOptions {
   ip: string;

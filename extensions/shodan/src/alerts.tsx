@@ -14,7 +14,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Preferences, ShodanAlert } from "./api/types";
+import { ShodanAlert } from "./api/types";
 import { formatTimestamp } from "./utils/formatters";
 import { shodanClient } from "./api/client";
 import { usePlanCapabilities } from "./hooks/usePlanCapabilities";
