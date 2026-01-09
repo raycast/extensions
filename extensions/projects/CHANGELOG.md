@@ -1,5 +1,12 @@
 # Projects Changelog
 
+## [Support for "Create Quicklink" action + Raycast API update + formatting] - 2026-01-09
+
+- Added support for the "Create Quicklink" action for projects.
+- Migrated deprecated `List.Item` accessory props to the `accessories` API.
+- Added Prettier to the toolchain so `ray lint` checks formatting.
+- Updated dependencies/tooling (Raycast API + TypeScript/React types).
+
 ## [Support for tauri & wails projects] - 2022-05-20
 
 - Better way to exclude project types
