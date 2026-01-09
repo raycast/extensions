@@ -1,6 +1,6 @@
 # ClickUp Changelog
 
-## [New Commands and Major Refactor] - {PR_MERGE_DATE}
+## [New Commands and Major Refactor] - 2026-01-09
 
 ### New Features
 - Add "My Tasks" command to view tasks assigned to you with parent context
