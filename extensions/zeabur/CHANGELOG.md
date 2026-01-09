@@ -1,5 +1,12 @@
 # Zeabur Changelog
 
+## [Feature] - 2025-12-17
+
+- Added the manage servers command to manage the servers on Zeabur.
+- Added deploy template action, service count, and deployment count information to the template list.
+- Added the menu bar deployment command to see your Zeabur deployments at a glance.
+- Updated the menu bar projects command script.
+
 ## [Feature] - 2025-10-10
 
 - Added the menu bar projects command to see your Zeabur projects at a glance.

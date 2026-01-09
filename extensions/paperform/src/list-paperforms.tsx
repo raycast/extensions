@@ -4,6 +4,7 @@ import {
   Detail,
   Icon,
   Image,
+  LaunchProps,
   List,
   Toast,
   getPreferenceValues,
@@ -51,7 +52,30 @@ const FORMS_LIMIT = 100;
 const SUBMISSIONS_LIMIT = 100;
 const PINS_STORAGE_KEY = "paperform_pinned_form_ids";
 
-export default function Command() {
+type LaunchContext = {
+  searchText?: string;
+  submissionsSlug?: string;
+  submissionsTitle?: string;
+};
+
+export default function Command(props: LaunchProps<{ arguments: Record<string, never> }>) {
+  const ctx = useMemo(() => props.launchContext as LaunchContext | undefined, [props.launchContext]);
+  const deeplinkSubmissionsSlug = useMemo(() => {
+    return typeof ctx?.submissionsSlug === "string" && ctx.submissionsSlug.trim().length > 0
+      ? ctx.submissionsSlug.trim()
+      : undefined;
+  }, [ctx]);
+  const deeplinkSubmissionsTitle = useMemo(() => {
+    const t = typeof ctx?.submissionsTitle === "string" ? ctx.submissionsTitle.trim() : "";
+    return t.length > 0 ? t : deeplinkSubmissionsSlug || "Submissions";
+  }, [ctx, deeplinkSubmissionsSlug]);
+
+  const initialSearchText = useMemo(() => {
+    if (deeplinkSubmissionsSlug) return "";
+    const ctx = props.launchContext as LaunchContext | undefined;
+    return typeof ctx?.searchText === "string" ? ctx.searchText : "";
+  }, [deeplinkSubmissionsSlug, props.launchContext]);
+
   const { apiKey, businessApi = false } = getPreferenceValues<Preferences>();
   // Expose API key for AI tools fallback
   useEffect(() => {
@@ -63,7 +87,7 @@ export default function Command() {
       }
     })();
   }, [apiKey]);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(initialSearchText);
   const [serverQuery, setServerQuery] = useState("");
   const [baseForms, setBaseForms] = useState<PaperformForm[]>([]);
   const [serverForms, setServerForms] = useState<PaperformForm[]>([]);
@@ -84,6 +108,7 @@ export default function Command() {
 
   // Base list loader (no search)
   useEffect(() => {
+    if (deeplinkSubmissionsSlug) return;
     let isCancelled = false;
     async function load(offset: number) {
       if (offset === 0) {
@@ -120,10 +145,11 @@ export default function Command() {
     return () => {
       isCancelled = true;
     };
-  }, [apiKey, skip, reloadToken]);
+  }, [apiKey, skip, reloadToken, deeplinkSubmissionsSlug]);
 
   // Server-side search loader (in addition to local filter)
   useEffect(() => {
+    if (deeplinkSubmissionsSlug) return;
     const q = serverQuery.trim();
     if (!q) return; // nothing to search server-side
     let isCancelled = false;
@@ -157,10 +183,11 @@ export default function Command() {
     return () => {
       isCancelled = true;
     };
-  }, [apiKey, serverQuery, searchSkip, reloadToken]);
+  }, [apiKey, serverQuery, searchSkip, reloadToken, deeplinkSubmissionsSlug]);
 
   // Debounce server-side search to reduce API calls (do not clear base list)
   useEffect(() => {
+    if (deeplinkSubmissionsSlug) return;
     const handle = setTimeout(() => {
       const q = searchText;
       setServerQuery(q);
@@ -170,7 +197,7 @@ export default function Command() {
       setTotalFormsSearch(undefined);
     }, 350);
     return () => clearTimeout(handle);
-  }, [searchText]);
+  }, [searchText, deeplinkSubmissionsSlug]);
 
   const combinedForms = useMemo(() => {
     const list = serverQuery.trim() ? [...baseForms, ...serverForms] : baseForms;
@@ -220,6 +247,16 @@ export default function Command() {
     return arr;
   }, [combinedForms, pinnedSet]);
 
+  const displayedForms = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return sorted;
+    return sorted.filter((form) => formMatchesQuery(form, q));
+  }, [sorted, searchText]);
+
+  if (deeplinkSubmissionsSlug) {
+    return <SubmissionsList slug={deeplinkSubmissionsSlug} formTitle={deeplinkSubmissionsTitle} />;
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -228,12 +265,14 @@ export default function Command() {
       searchBarPlaceholder={useMemo(() => {
         const q = serverQuery.trim();
         const total = q ? (totalFormsSearch ?? serverForms.length) : (totalFormsBase ?? baseForms.length);
-        return total > 0 ? `Search ${total} Paperform${total === 1 ? "" : "s"} by title` : "Search Paperforms by title";
+        return total > 0
+          ? `Search ${total} Paperform${total === 1 ? "" : "s"} by title or slug`
+          : "Search Paperforms by title or slug";
       }, [serverQuery, totalFormsSearch, serverForms.length, totalFormsBase, baseForms.length])}
-      filtering
+      filtering={false}
       pagination={pagination}
     >
-      {sorted.map((form) => {
+      {displayedForms.map((form) => {
         const idStr = String(form.id);
         const pinned = pinnedSet.has(idStr);
         return (
@@ -242,6 +281,7 @@ export default function Command() {
             icon={getFormIcon(form)}
             title={form.name || form.title || form.slug || String(form.id)}
             subtitle={form.custom_slug || form.slug || undefined}
+            keywords={buildFormKeywords(form)}
             accessories={buildFormAccessories(form, pinned)}
             actions={
               <FormActions
@@ -258,6 +298,33 @@ export default function Command() {
       })}
     </List>
   );
+}
+
+function buildFormKeywords(form: PaperformForm): string[] {
+  const keywords = new Set<string>();
+  const add = (v?: string | null) => {
+    const s = (v || "").trim();
+    if (s) {
+      keywords.add(s);
+      // Also add a space-variant to help users who type spaces instead of dashes
+      keywords.add(s.replace(/[-_]/g, " "));
+    }
+  };
+  add(form.slug);
+  add(form.custom_slug);
+  return Array.from(keywords);
+}
+
+function formMatchesQuery(form: PaperformForm, q: string): boolean {
+  const pool: Array<string | undefined | null> = [form.name, form.title, form.slug, form.custom_slug, String(form.id)];
+  for (const val of pool) {
+    const s = (val ?? "").toString().toLowerCase();
+    if (!s) continue;
+    if (s.includes(q)) return true;
+    const spaced = s.replace(/[-_]/g, " ");
+    if (spaced.includes(q)) return true;
+  }
+  return false;
 }
 
 function buildFormAccessories(form: PaperformForm, pinned = false): List.Item.Accessory[] {
@@ -347,6 +414,10 @@ function FormActions({
   const editUrl = form.additional_urls?.edit_url || `https://paperform.co/edit/${linkSlug}`;
   const duplicateUrl = form.additional_urls?.duplicate_url;
   const viewUrl = form.url || `https://${linkSlug}.paperform.co`;
+  const raycastDeeplink = buildRaycastDeeplink({
+    submissionsSlug: linkSlug,
+    submissionsTitle: form.name || form.title || form.slug || String(form.id),
+  });
   const { apiKey } = getPreferenceValues<Preferences>();
   const idForApi = String(form.id || linkSlug);
   const remoteDisabled = !!(form as Record<string, unknown>)?.["disabled"];
@@ -446,8 +517,19 @@ function FormActions({
         icon={Icon.ArrowClockwise}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
       />
+      <Action.CopyToClipboard
+        title="Copy Raycast Deeplink"
+        content={raycastDeeplink}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+      />
     </ActionPanel>
   );
+}
+
+function buildRaycastDeeplink(context: LaunchContext): string {
+  // raycast://extensions/<author>/<extension>/<command>?context=<json>
+  const base = "raycast://extensions/parterburn/paperform/list-paperforms";
+  return `${base}?context=${encodeURIComponent(JSON.stringify(context))}`;
 }
 
 function SubmissionsList({ slug, formTitle }: { slug: string; formTitle: string }) {

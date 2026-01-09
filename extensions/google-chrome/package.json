@@ -21,7 +21,8 @@
     "hayden_barnes",
     "pernielsentikaer",
     "j3lte",
-    "0xdhrv"
+    "0xdhrv",
+    "xmok"
   ],
   "pastContributors": [
     "jonasengelmann"
@@ -76,8 +77,7 @@
       "subtitle": "Google Chrome",
       "description": "Create New Incognito Window.",
       "mode": "no-view"
-    }
-    ,
+    },
     {
       "name": "new-guest-window",
       "title": "Create New Guest Window",
@@ -411,7 +411,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "run-applescript": "^7.1.0",
     "sql.js": "^1.13.0"
@@ -427,11 +427,12 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

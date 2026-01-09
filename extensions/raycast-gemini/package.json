@@ -1242,20 +1242,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.9.0",
-    "gemini-ai": "^2.0.1",
-    "jimp": "^0.22.10",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "gemini-ai": "^2.2.1",
+    "jimp": "^1.6.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "react": "^19.2.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -1264,5 +1264,9 @@
     "lint": "ray lint",
     "pull": "ray pull-contributions",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

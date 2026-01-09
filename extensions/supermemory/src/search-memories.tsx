@@ -6,10 +6,18 @@ import {
   Icon,
   showToast,
   Toast,
+  Keyboard,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { useState } from "react";
-import { searchMemories, type SearchResult } from "./api";
-import { usePromise } from "@raycast/utils";
+import {
+  fetchProjects,
+  removeMemory,
+  searchMemories,
+  type SearchResult,
+} from "./api";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { withSupermemory } from "./withSupermemory";
 
 const extractContent = (memory: SearchResult) => {
@@ -49,15 +57,23 @@ const extractUrl = (memory: SearchResult) => {
 export default withSupermemory(Command);
 function Command() {
   const [searchText, setSearchText] = useState("");
+  const [filter, setFilter] = useState("");
 
-  const { isLoading, data: searchResults = [] } = usePromise(
-    async (query: string) => {
+  const { isLoading: isLoadingProjects, data: projects } =
+    useCachedPromise(fetchProjects);
+  const {
+    isLoading,
+    data: searchResults = [],
+    mutate,
+  } = usePromise(
+    async (query: string, containerTag: string) => {
       const q = query.trim();
       if (!q) return [];
 
       const results = await searchMemories({
         q,
         limit: 50,
+        containerTags: containerTag ? [containerTag] : undefined,
       });
       if (!results.length) {
         await showToast({
@@ -68,7 +84,7 @@ function Command() {
       }
       return results;
     },
-    [searchText],
+    [searchText, filter],
   );
 
   const formatDate = (dateString: string) => {
@@ -90,13 +106,53 @@ function Command() {
     return `${content.substring(0, maxLength)}...`;
   };
 
+  const confirmAndRemoveMemory = async (memory: SearchResult) => {
+    const options: Alert.Options = {
+      icon: Icon.Trash,
+      title: "Remove Memory",
+      message: "Are you sure you want to remove this memory?",
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Remove",
+      },
+    };
+
+    if (await confirmAlert(options)) {
+      try {
+        await mutate(removeMemory({ id: memory.documentId }), {
+          optimisticUpdate(data) {
+            return (data || []).filter(
+              (m) => m.documentId !== memory.documentId,
+            );
+          },
+          shouldRevalidateAfter: false,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
   const hasSearched = !isLoading && !searchResults.length;
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingProjects}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search your memories..."
       throttle
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter" onChange={setFilter}>
+          <List.Dropdown.Item icon="extension-icon.png" title="All" value="" />
+          {projects?.map((project) => (
+            <List.Dropdown.Item
+              key={project.id}
+              icon="extension-icon.png"
+              title={project.name}
+              value={project.containerTag}
+            />
+          ))}
+        </List.Dropdown>
+      }
     >
       {hasSearched && !searchText.trim() ? (
         <List.EmptyView
@@ -140,16 +196,26 @@ function Command() {
                   />
                   <Action.CopyToClipboard
                     title="Copy Content"
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "c" },
+                      Windows: { modifiers: ["ctrl"], key: "c" },
+                    }}
                     content={content}
                   />
                   {url && (
                     <Action.OpenInBrowser
                       title="Open URL"
                       url={url}
-                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.Open}
                     />
                   )}
+                  <Action
+                    icon={Icon.Trash}
+                    title="Remove Memory"
+                    onAction={() => confirmAndRemoveMemory(memory)}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    style={Action.Style.Destructive}
+                  />
                 </ActionPanel>
               }
             />
@@ -183,14 +249,17 @@ ${memory.score ? `**Relevance:** ${Math.round(memory.score * 100)}%` : ""}
         <ActionPanel>
           <Action.CopyToClipboard
             title="Copy Content"
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "c" },
+              Windows: { modifiers: ["ctrl"], key: "c" },
+            }}
             content={content}
           />
           {url && (
             <Action.OpenInBrowser
               title="Open URL"
               url={url}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
           )}
         </ActionPanel>

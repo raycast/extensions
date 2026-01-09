@@ -13,7 +13,7 @@ This extension leverages the [Git sparse-checkout](https://git-scm.com/docs/git-
 
 The extension is available on the [Raycast Store](https://www.raycast.com/litomore/forked-extensions).
 
-<p align="center"><a title="Install forked-extensions Raycast Extension" href="https://www.raycast.com/litomore/forked-extensions"><img src="https://www.raycast.com/litomore/forked-extensions/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a></p>
+<p align="center"><a title="Install forked-extensions Raycast Extension" href="https://www.raycast.com/litomore/forked-extensions"><img src="https://www.raycast.com/litomore/forked-extensions/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt="" /></a></p>
 
 ## Hint
 

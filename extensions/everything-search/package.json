@@ -2,18 +2,173 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "everything-search",
   "title": "Everything",
-  "description": "Search multiple Everything ETP/FTP servers from Raycast",
+  "description": "Search files using Everything on Windows.",
   "icon": "extension-icon.png",
-  "platforms": ["Windows"],
   "author": "anastasiy_safari",
+  "contributors": [
+    "laurynas_gailius"
+  ],
+  "pastContributors": [
+    "doug_fernando"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "evy",
-      "title": "Search Files by Mask",
-      "subtitle": "Everything",
-      "description": "Find Files from Everything by Mask",
+      "name": "search-everything",
+      "title": "Search Files",
+      "description": "Search files using Everything",
       "mode": "view",
+      "preferences": [
+        {
+          "name": "esExePath",
+          "title": "Everything CLI Path (es.exe)",
+          "description": "Custom path to es.exe. Leave empty to use system PATH.",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "placeholder": "C:\\Program Files\\Everything\\es.exe"
+        },
+        {
+          "name": "fileExplorerCommand",
+          "title": "Custom File Explorer Command",
+          "description": "Custom command to open directories. Use %s as a placeholder for the path.",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "placeholder": "\"C:\\Program Files\\Explorer\\App.exe\" -arg %s"
+        },
+        {
+          "name": "openFolderAsDefault",
+          "title": "Open Folder as Default Action",
+          "description": "If enabled, the primary action will be to open the file's location instead of opening the file itself.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Open folder instead of file",
+          "default": false
+        },
+        {
+          "name": "defaultSort",
+          "title": "Default Sorting",
+          "description": "Choose default sorting applied to all query results.",
+          "type": "dropdown",
+          "required": false,
+          "default": "-sort name-ascending",
+          "data": [
+            {
+              "title": "Name (A-Z)",
+              "value": "-sort name-ascending"
+            },
+            {
+              "title": "Name (Z-A)",
+              "value": "-sort name-descending"
+            },
+            {
+              "title": "Path (A-Z)",
+              "value": "-sort path-ascending"
+            },
+            {
+              "title": "Path (Z-A)",
+              "value": "-sort path-descending"
+            },
+            {
+              "title": "Size (Smallest First)",
+              "value": "-sort size-ascending"
+            },
+            {
+              "title": "Size (Largest First)",
+              "value": "-sort size-descending"
+            },
+            {
+              "title": "Extension (A-Z)",
+              "value": "-sort extension-ascending"
+            },
+            {
+              "title": "Extension (Z-A)",
+              "value": "-sort extension-descending"
+            },
+            {
+              "title": "Date Created (Oldest First)",
+              "value": "-sort date-created-ascending"
+            },
+            {
+              "title": "Date Created (Newest First)",
+              "value": "-sort date-created-descending"
+            },
+            {
+              "title": "Date Modified (Oldest First)",
+              "value": "-sort date-modified-ascending"
+            },
+            {
+              "title": "Date Modified (Newest First)",
+              "value": "-sort date-modified-descending"
+            },
+            {
+              "title": "Date Accessed (Oldest First)",
+              "value": "-sort date-accessed-ascending"
+            },
+            {
+              "title": "Date Accessed (Newest First)",
+              "value": "-sort date-accessed-descending"
+            },
+            {
+              "title": "Attributes (A-Z)",
+              "value": "-sort attributes-ascending"
+            },
+            {
+              "title": "Attributes (Z-A)",
+              "value": "-sort attributes-descending"
+            },
+            {
+              "title": "File List File Name (A-Z)",
+              "value": "-sort file-list-file-name-ascending"
+            },
+            {
+              "title": "File List File Name (Z-A)",
+              "value": "-sort file-list-file-name-descending"
+            },
+            {
+              "title": "Run Count (Lowest First)",
+              "value": "-sort run-count-ascending"
+            },
+            {
+              "title": "Run Count (Highest First)",
+              "value": "-sort run-count-descending"
+            },
+            {
+              "title": "Date Recently Changed (Oldest First)",
+              "value": "-sort date-recently-changed-ascending"
+            },
+            {
+              "title": "Date Recently Changed (Newest First)",
+              "value": "-sort date-recently-changed-descending"
+            },
+            {
+              "title": "Date Run (Oldest First)",
+              "value": "-sort date-run-ascending"
+            },
+            {
+              "title": "Date Run (Newest First)",
+              "value": "-sort date-run-descending"
+            }
+          ]
+        },
+        {
+          "name": "minCharsToSearch",
+          "title": "Minimum Characters to Trigger Search",
+          "description": "Number of characters required before a search is performed.",
+          "type": "textfield",
+          "required": false,
+          "default": "3"
+        }
+      ]
+    },
+    {
+      "name": "evy",
+      "title": "Search Files on Servers",
+      "subtitle": "Everything",
+      "description": "Find Files from Everything ETP/FTP servers by Mask",
+      "mode": "view",
+      "disabledByDefault": false,
       "arguments": [
         {
           "name": "mask",
@@ -21,39 +176,48 @@
           "type": "text",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "name": "serversJSON",
+          "title": "Everything Servers Configuration",
+          "description": "JSON array of ETP/FTP server configurations",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "[{\"name\":\"...\",\"host\":\"...\",\"port\":21,\"user\":\"...\",\"pass\":\"...\"}]"
+        }
       ]
     }
   ],
+  "preferences": [],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
     "basic-ftp": "^5.0.5"
   },
-  "preferences": [
-    {
-      "name": "serversJSON",
-      "title": "Everything Servers Configuration",
-      "description": "JSON array of ETP/FTP server configurations",
-      "type": "textfield",
-      "required": true,
-      "placeholder": "[{\"name\":\"...\",\"host\":\"...\",\"port\":21,\"user\":\"...\",\"pass\":\"...\"}]"
-    }
-  ],
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^24.0.4",
-    "@types/react": "^19.1.8",
-    "eslint": "^9.29.0",
-    "prettier": "^3.6.1",
-    "typescript": "^5.8.2"
+    "@types/node": "24.6.0",
+    "@types/react": "19.1.16",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
-    "build": "ray build",
     "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "System",
+    "Developer Tools"
+  ]
 }

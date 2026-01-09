@@ -3,7 +3,7 @@
 Conveniently set your default browser via Raycast commands.
 
 ## Command
-- **Choose Default Browser** (view): Lists installed browsers alphabetically, highlights the current default, and lets you set a new one.
+- **Set Default Browser** (view): Lists installed browsers alphabetically, highlights the current default, and lets you set a new one.
 
 ## How it works
 The extension uses a small Swift snippet executed via `swift -` to query macOS Launch Services:

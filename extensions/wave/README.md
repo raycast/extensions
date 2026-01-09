@@ -55,7 +55,8 @@ For users on Free Plan, please follow step 3 i.e. **Use Access Token**
 ## 🗒️ NOTES
 
 - If you enter `Access Token` in `Preferences` this will take precedence over OAuth but you can switch to OAuth by deleting the token from Preferences
-- This extension is using Raycast's own [PKCE proxy](https://oauth.raycast.com/) so security is ensuerd.
+- This extension is using Raycast's own [PKCE proxy](https://oauth.raycast.com/) so security is ensured.
+- When you `create` an invoice via the extension, it will automatically be marked as `DRAFT` and you can then edit it as needed.
 
 ## 🖼️ Media
 

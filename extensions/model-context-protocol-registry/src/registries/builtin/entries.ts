@@ -60,6 +60,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "circleback",
+    title: "Circleback",
+    description:
+      "Circleback's Model Context Protocol (MCP) server provides AI agents access to your Circleback data. It has tools available for searching and accessing meetings, transcripts, calendar events, emails, people, companies, and more.",
+    icon: "circleback.svg",
+    homepage: "https://circleback.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.circleback.ai/api/mcp"],
+    },
+  },
+  {
     name: "context-7",
     title: "Context 7",
     description:

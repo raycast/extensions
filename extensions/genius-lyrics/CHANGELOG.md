@@ -1,5 +1,9 @@
 # Genius Lyrics Changelog
 
+## [Add Metadata Details] - {PR_MERGE_DATE}
+- Add artist, album, release date, producers, and writers metadata about the currently displayed lyrics.
+- Add Windows support.
+
 ## [Improve Lyric Formatting] - 2025-10-01
 
 - Use markdown headers to create separation between verses.

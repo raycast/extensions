@@ -10,7 +10,9 @@
   "contributors": [
     "Daat",
     "thomas",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "loris",
+    "xmok"
   ],
   "platforms": [
     "macOS"
@@ -24,14 +26,14 @@
       "name": "search",
       "title": "Search Dia",
       "subtitle": "Dia",
-      "description": "Search open tabs and browsing history in Dia",
+      "description": "Search tabs, bookmarks and browsing history in Dia",
       "mode": "view"
     },
     {
       "name": "search-tabs",
       "title": "Search Tabs",
       "subtitle": "Dia",
-      "description": "Search open tabs in Dia",
+      "description": "Search tabs in Dia",
       "mode": "view"
     },
     {
@@ -72,7 +74,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "@types/semver": "^7.7.1",
     "dedent": "^1.7.0",
@@ -92,6 +94,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

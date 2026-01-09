@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import { runAppleScript } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 export default async () => {
   let script = `
@@ -30,6 +31,6 @@ export default async () => {
       await showToast(Toast.Style.Success, "Done", result);
     }
   } catch (err) {
-    await showToast(Toast.Style.Failure, "Something went wrong");
+    await showFailureToast(err);
   }
 };

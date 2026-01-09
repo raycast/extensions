@@ -1,15 +1,15 @@
 import { Action, ActionPanel, Form, Icon as RcIcon, Toast, showInFinder, showToast } from "@raycast/api";
 import { useState } from "react";
 import { Icon } from "./types";
-import fetch from "node-fetch";
 import os from "os";
 import path from "path";
 import { createWriteStream } from "node:fs";
 import { pipeline } from "node:stream";
 import { promisify } from "node:util";
+import { showFailureToast } from "@raycast/utils";
 const streamPipeline = promisify(pipeline);
 
-export default function DownloadForm(props: { icon: Icon }): JSX.Element {
+export default function DownloadForm(props: { icon: Icon }) {
   const [platform, setPlatform] = useState("Web");
   const [selectedColor, setSelectedColor] = useState("Black");
   const [size, setSize] = useState("18");
@@ -33,7 +33,7 @@ export default function DownloadForm(props: { icon: Icon }): JSX.Element {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        await streamPipeline(response.body as any, createWriteStream(filePath));
+        await streamPipeline(response.body as unknown as NodeJS.ReadableStream, createWriteStream(filePath));
 
         progressToast.hide();
         await showToast({
@@ -49,7 +49,7 @@ export default function DownloadForm(props: { icon: Icon }): JSX.Element {
       }
     } catch (error) {
       progressToast?.hide();
-      await showToast({ title: "Error", style: Toast.Style.Failure });
+      showFailureToast(error, { title: "Error downloading icon" });
     }
   }
   function getAssetType(format: string): string | undefined {
