@@ -2,7 +2,7 @@ import { useState } from "react";
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getConfig, ensureAuthenticated } from "../utils/auth";
-import { groupMessagesByDate } from "../utils/date";
+import { groupMessagesByDate } from "../utils/message";
 import { getSavedMessages } from "../services/telegram-client";
 import { useDetailToggle } from "../hooks/use-detail-toggle";
 import { SavedMessageListItem } from "./saved-message-list-item";

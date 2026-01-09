@@ -3,7 +3,7 @@ import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getChatMessages, Chat } from "../services/telegram-client";
 import { getConfig, ensureAuthenticated } from "../utils/auth";
-import { groupMessagesByDate } from "../utils/date";
+import { groupMessagesByDate } from "../utils/message";
 import { ChatMessageListItem } from "./chat-message-list-item";
 import { useDetailToggle } from "../hooks/use-detail-toggle";
 

@@ -2,38 +2,12 @@ import { useState } from "react";
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getConfig, ensureAuthenticated } from "./utils/auth";
-import { getChats, Chat } from "./services/telegram-client";
+import { groupChatsByPinned } from "./utils/chat";
+import { getChats } from "./services/telegram-client";
 import { ChatListItem } from "./components/chat-list-item";
 import { useDetailToggle } from "./hooks/use-detail-toggle";
 
 const SHOW_DETAIL_KEY = "browse_chats_show_detail";
-
-function groupChats(chats: Chat[]): Map<string, Chat[]> {
-  const groups = new Map<string, Chat[]>();
-
-  const pinnedChats = chats.filter((chat) => chat.isPinned);
-  const unpinnedChats = chats.filter((chat) => !chat.isPinned);
-
-  const sortByDate = (a: Chat, b: Chat) => {
-    if (!a.lastMessage?.date && !b.lastMessage?.date) return 0;
-    if (!a.lastMessage?.date) return 1;
-    if (!b.lastMessage?.date) return -1;
-    return b.lastMessage.date.getTime() - a.lastMessage.date.getTime();
-  };
-
-  pinnedChats.sort(sortByDate);
-  unpinnedChats.sort(sortByDate);
-
-  if (pinnedChats.length > 0) {
-    groups.set("Pinned", pinnedChats);
-  }
-
-  if (unpinnedChats.length > 0) {
-    groups.set("All Chats", unpinnedChats);
-  }
-
-  return groups;
-}
 
 export default function BrowseChats() {
   const [searchText, setSearchText] = useState("");
@@ -60,7 +34,7 @@ export default function BrowseChats() {
   );
 
   const filteredChats = chats.filter((chat) => chat.title.toLowerCase().includes(searchText.toLowerCase()));
-  const groupedChats = groupChats(filteredChats);
+  const groupedChats = groupChatsByPinned(filteredChats);
 
   return (
     <List
