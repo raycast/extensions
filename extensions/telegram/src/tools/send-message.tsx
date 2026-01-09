@@ -35,6 +35,7 @@ export default async function SendMessage(args: Arguments) {
     if (useClipboardFile) {
       try {
         filePath = await getFileFromClipboard();
+
         if (!fs.existsSync(filePath)) {
           return { success: false, error: `File not found: ${filePath}` };
         }

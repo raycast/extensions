@@ -1,6 +1,9 @@
 import { Clipboard, environment } from "@raycast/api";
 import * as fs from "fs";
 import * as path from "path";
+import * as crypto from "crypto";
+
+const CLIPBOARD_DIR = path.join(environment.supportPath, "clipboard");
 
 function detectFileExtension(buffer: Buffer): string {
   if (buffer[0] === 0xff && buffer[1] === 0xd8) return ".jpg";
@@ -25,10 +28,22 @@ function isTempFile(filePath: string): boolean {
 }
 
 function createFileWithExtension(tempPath: string): string {
+  if (!fs.existsSync(CLIPBOARD_DIR)) {
+    fs.mkdirSync(CLIPBOARD_DIR, { recursive: true });
+  }
+
   const fileBuffer = fs.readFileSync(tempPath);
   const extension = detectFileExtension(fileBuffer);
-  const properPath = path.join(environment.supportPath, `clipboard-${Date.now()}${extension}`);
-  fs.copyFileSync(tempPath, properPath);
+
+  // Create a hash of the file content to ensure same file = same path
+  const hash = crypto.createHash("md5").update(fileBuffer).digest("hex");
+  const properPath = path.join(CLIPBOARD_DIR, `clipboard-${hash}${extension}`);
+
+  // Only create the file if it doesn't already exist
+  if (!fs.existsSync(properPath)) {
+    fs.copyFileSync(tempPath, properPath);
+  }
+
   return properPath;
 }
 
