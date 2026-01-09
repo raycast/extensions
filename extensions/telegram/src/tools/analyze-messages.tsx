@@ -19,7 +19,13 @@ interface Preferences {
 
 export default async function AnalyzeMessages(args: Arguments) {
   try {
-    const { chatId, query, limit = 20 } = args;
+    const { chatId, query } = args;
+    let limit = args.limit ?? 20;
+
+    // Cap limit to prevent excessive token usage, middle-out will handle overflow gracefully
+    if (limit > 50) {
+      limit = 50;
+    }
 
     if (!chatId) {
       throw new Error("Chat ID is required");
@@ -105,7 +111,11 @@ export default async function AnalyzeMessages(args: Arguments) {
     });
 
     const { text } = await generateText({
-      model: openrouter("openai/gpt-4o-mini"),
+      model: openrouter("openai/gpt-4o-mini", {
+        extraBody: {
+          transforms: ["middle-out"],
+        },
+      }),
       messages: [
         {
           role: "user",

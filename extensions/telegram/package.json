@@ -95,7 +95,7 @@
     {
       "name": "read-messages",
       "title": "Read Telegram Messages",
-      "description": "Read messages from a specific Telegram chat. Use this when the user asks what someone said or wants to see recent messages from a conversation.",
+      "description": "PREFERRED TOOL for reading messages. Use this for all message reading tasks including viewing recent messages, finding what someone said, checking conversation history, or answering questions about message content. Fast and efficient. Only use analyze-messages if you need to inspect images/media attachments. IMPORTANT: Be thorough when searching for information - check BOTH private chats and group chats as the same person may be in multiple conversations. Read enough messages (increase limit if needed) to find all relevant information. When extracting specific details like times, dates, or numbers, quote the EXACT text from the message - do not paraphrase or interpret. Verify information across multiple messages if available.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -142,7 +142,7 @@
     {
       "name": "analyze-messages",
       "title": "Analyze Telegram Messages",
-      "description": "Analyze messages and their attachments (including photos) from a Telegram chat. Can find specific information in messages, analyze images, or answer questions about message content. Use browse-chats tool first to get the chatId.",
+      "description": "FALLBACK TOOL - Use ONLY when you need to inspect images, photos, or other media attachments in messages. For text-only message reading, always prefer read-messages tool instead. This tool downloads media and uses AI vision to analyze images (e.g., 'What's in this photo?', 'Read text from this image', 'Analyze this receipt'). Requires OpenRouter API key.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -152,11 +152,11 @@
           },
           "query": {
             "type": "string",
-            "description": "Your question or analysis request. Examples: 'What receipts did I send?', 'Summarize the conversation', 'Find the address mentioned in messages'"
+            "description": "Your question about the images/media. Examples: 'What's in the photos?', 'Read the text from the receipt image', 'Describe the images sent'"
           },
           "limit": {
             "type": "number",
-            "description": "Number of recent messages to analyze (default: 20, max: 100). More messages = more context but slower analysis."
+            "description": "Number of recent messages to analyze (default: 20, recommended max: 50). Higher limits may trigger automatic compression."
           }
         },
         "required": [
