@@ -1,5 +1,6 @@
 import { getChatMessages } from "../services/telegram-client";
 import { getConfig, ensureAuthenticated } from "../utils/auth";
+import { handleTelegramError } from "../utils/errors";
 
 interface Arguments {
   chatId: string;
@@ -42,18 +43,6 @@ export default async function ReadMessages(args: Arguments) {
       })),
     };
   } catch (error) {
-    // Handle Telegram rate limiting
-    if (error instanceof Error && error.message.includes("FloodWaitError")) {
-      const match = error.message.match(/(\d+) seconds/);
-      const seconds = match ? match[1] : "unknown";
-      return {
-        success: false,
-        error: `Rate limited by Telegram. Please wait ${seconds} seconds before trying again.`,
-      };
-    }
-    return {
-      success: false,
-      error: `Failed to read messages: ${error instanceof Error ? error.message : "Unknown error"}`,
-    };
+    return handleTelegramError(error);
   }
 }

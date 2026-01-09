@@ -4,6 +4,7 @@ import { getAvatarIcon } from "../utils/avatar";
 import { ChatMessagesView } from "./chat-messages-view";
 import { ChatListItemDetail } from "./chat-list-item-detail";
 import { SendMessageForm } from "./send-message-form";
+import { ToggleDetailAction, RefreshAction } from "./actions";
 
 interface ChatListItemProps {
   chat: Chat;
@@ -51,18 +52,8 @@ export function ChatListItem({ chat, onRefresh, isShowingDetail, onToggleDetail 
             target={<SendMessageForm chat={chat} onSuccess={onRefresh} />}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
-          <Action
-            icon={isShowingDetail ? Icon.AppWindowSidebarLeft : Icon.AppWindowSidebarRight}
-            title={isShowingDetail ? "Hide Detail" : "Show Detail"}
-            onAction={onToggleDetail}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-          />
-          <Action
-            icon={Icon.ArrowClockwise}
-            title="Refresh"
-            onAction={onRefresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <ToggleDetailAction isShowingDetail={isShowingDetail} onToggle={onToggleDetail} />
+          <RefreshAction onRefresh={onRefresh} />
         </ActionPanel>
       }
     />

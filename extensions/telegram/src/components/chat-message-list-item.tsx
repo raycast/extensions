@@ -1,8 +1,10 @@
 import { List, ActionPanel, Action, Icon, Image } from "@raycast/api";
 import { getAvatarIcon } from "../utils/avatar";
+import { getMediaTypeIcon, getMediaDisplayTitle } from "../utils/media";
 import { ChatMessage, Chat } from "../services/telegram-client";
 import { ChatMessageListItemDetail } from "./chat-message-list-item-detail";
 import { SendMessageForm } from "./send-message-form";
+import { ToggleDetailAction, RefreshAction } from "./actions";
 
 interface ChatMessageListItemProps {
   message: ChatMessage;
@@ -21,8 +23,7 @@ export function ChatMessageListItem({
 }: ChatMessageListItemProps) {
   let displayTitle = message.text;
   if (!displayTitle && message.media) {
-    const typeName = message.media.type.charAt(0).toUpperCase() + message.media.type.slice(1);
-    displayTitle = typeName;
+    displayTitle = getMediaDisplayTitle(message.media.type);
   }
 
   let icon: Image.ImageLike = Icon.Message;
@@ -36,41 +37,7 @@ export function ChatMessageListItem({
       type: "private",
     });
   } else if (message.media) {
-    switch (message.media.type) {
-      case "photo":
-      case "image":
-        icon = Icon.Image;
-        break;
-      case "video":
-      case "gif":
-        icon = Icon.Video;
-        break;
-      case "audio":
-      case "voice":
-        icon = Icon.Music;
-        break;
-      case "file":
-      case "document":
-        icon = Icon.Document;
-        break;
-      case "link":
-        icon = Icon.Link;
-        break;
-      case "location":
-        icon = Icon.Pin;
-        break;
-      case "contact":
-        icon = Icon.Person;
-        break;
-      case "poll":
-        icon = Icon.BarChart;
-        break;
-      case "sticker":
-        icon = Icon.Emoji;
-        break;
-      default:
-        icon = Icon.Paperclip;
-    }
+    icon = getMediaTypeIcon(message.media.type);
   }
 
   const accessories: List.Item.Accessory[] = [];
@@ -107,18 +74,8 @@ export function ChatMessageListItem({
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
           <Action.CopyToClipboard content={message.text} title="Copy Message" />
-          <Action
-            icon={isShowingDetail ? Icon.AppWindowSidebarLeft : Icon.AppWindowSidebarRight}
-            title={isShowingDetail ? "Hide Detail" : "Show Detail"}
-            onAction={onToggleDetail}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-          />
-          <Action
-            icon={Icon.ArrowClockwise}
-            title="Refresh"
-            onAction={onRefresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <ToggleDetailAction isShowingDetail={isShowingDetail} onToggle={onToggleDetail} />
+          <RefreshAction onRefresh={onRefresh} />
         </ActionPanel>
       }
     />

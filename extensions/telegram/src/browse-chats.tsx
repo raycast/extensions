@@ -1,20 +1,19 @@
-import { useState, useEffect } from "react";
-import { List, Icon, LocalStorage } from "@raycast/api";
+import { useState } from "react";
+import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getConfig, ensureAuthenticated } from "./utils/auth";
 import { getChats, Chat } from "./services/telegram-client";
 import { ChatListItem } from "./components/chat-list-item";
+import { useDetailToggle } from "./hooks/use-detail-toggle";
 
 const SHOW_DETAIL_KEY = "browse_chats_show_detail";
 
 function groupChats(chats: Chat[]): Map<string, Chat[]> {
   const groups = new Map<string, Chat[]>();
 
-  // Separate pinned chats
   const pinnedChats = chats.filter((chat) => chat.isPinned);
   const unpinnedChats = chats.filter((chat) => !chat.isPinned);
 
-  // Sort by last message date (most recent first)
   const sortByDate = (a: Chat, b: Chat) => {
     if (!a.lastMessageDate && !b.lastMessageDate) return 0;
     if (!a.lastMessageDate) return 1;
@@ -38,21 +37,7 @@ function groupChats(chats: Chat[]): Map<string, Chat[]> {
 
 export default function BrowseChats() {
   const [searchText, setSearchText] = useState("");
-  const [isShowingDetail, setIsShowingDetail] = useState(false);
-
-  useEffect(() => {
-    LocalStorage.getItem<boolean>(SHOW_DETAIL_KEY).then((value) => {
-      if (value !== undefined) {
-        setIsShowingDetail(value);
-      }
-    });
-  }, []);
-
-  const handleToggleDetail = async () => {
-    const newValue = !isShowingDetail;
-    setIsShowingDetail(newValue);
-    await LocalStorage.setItem(SHOW_DETAIL_KEY, newValue);
-  };
+  const [isShowingDetail, handleToggleDetail] = useDetailToggle(SHOW_DETAIL_KEY);
 
   const {
     data: chats,
@@ -74,7 +59,6 @@ export default function BrowseChats() {
     },
   );
 
-  // Filter chats based on search text
   const filteredChats = chats.filter((chat) => chat.title.toLowerCase().includes(searchText.toLowerCase()));
   const groupedChats = groupChats(filteredChats);
 

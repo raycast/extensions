@@ -1,7 +1,9 @@
 import { List, ActionPanel, Action, Icon, Image } from "@raycast/api";
 import { SavedMessage } from "../services/telegram-client";
+import { getMediaTypeIcon, getMediaDisplayTitle } from "../utils/media";
 import { MessageDetail } from "./message-detail";
 import { MessageListItemDetail } from "./message-list-item-detail";
+import { ToggleDetailAction, RefreshAction } from "./actions";
 
 interface MessageListItemProps {
   message: SavedMessage;
@@ -13,49 +15,14 @@ interface MessageListItemProps {
 export function MessageListItem({ message, onRefresh, isShowingDetail, onToggleDetail }: MessageListItemProps) {
   let displayTitle = message.text;
   if (!displayTitle && message.media) {
-    const typeName = message.media.type.charAt(0).toUpperCase() + message.media.type.slice(1);
-    displayTitle = typeName;
+    displayTitle = getMediaDisplayTitle(message.media.type);
   }
 
   let icon: Image.ImageLike = Icon.Message;
   if (message.media?.filePath && (message.media.type === "photo" || message.media.type === "image")) {
     icon = { source: message.media.filePath };
   } else if (message.media) {
-    switch (message.media.type) {
-      case "photo":
-      case "image":
-        icon = Icon.Image;
-        break;
-      case "video":
-      case "gif":
-        icon = Icon.Video;
-        break;
-      case "audio":
-      case "voice":
-        icon = Icon.Music;
-        break;
-      case "file":
-      case "document":
-        icon = Icon.Document;
-        break;
-      case "link":
-        icon = Icon.Link;
-        break;
-      case "location":
-        icon = Icon.Pin;
-        break;
-      case "contact":
-        icon = Icon.Person;
-        break;
-      case "poll":
-        icon = Icon.BarChart;
-        break;
-      case "sticker":
-        icon = Icon.Emoji;
-        break;
-      default:
-        icon = Icon.Paperclip;
-    }
+    icon = getMediaTypeIcon(message.media.type);
   }
 
   return (
@@ -75,18 +42,8 @@ export function MessageListItem({ message, onRefresh, isShowingDetail, onToggleD
             <Action.Push icon={Icon.Eye} title="View Message" target={<MessageDetail message={message} />} />
           )}
           <Action.CopyToClipboard content={message.text} title="Copy Message" />
-          <Action
-            icon={isShowingDetail ? Icon.AppWindowSidebarLeft : Icon.AppWindowSidebarRight}
-            title={isShowingDetail ? "Hide Detail" : "Show Detail"}
-            onAction={onToggleDetail}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-          />
-          <Action
-            icon={Icon.ArrowClockwise}
-            title="Refresh"
-            onAction={onRefresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <ToggleDetailAction isShowingDetail={isShowingDetail} onToggle={onToggleDetail} />
+          <RefreshAction onRefresh={onRefresh} />
         </ActionPanel>
       }
     />

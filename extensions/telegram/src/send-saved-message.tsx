@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import * as fs from "fs";
-import { sendMessage } from "./services/telegram-client";
 import { getConfig, ensureAuthenticated } from "./utils/auth";
+import { sendMessage } from "./services/telegram-client";
 
 export default function SendSavedMessage() {
   const [message, setMessage] = useState("");
@@ -19,7 +19,6 @@ export default function SendSavedMessage() {
       return;
     }
 
-    // Validate file paths
     for (const filePath of filePaths) {
       if (!fs.existsSync(filePath)) {
         await showToast({
@@ -32,25 +31,21 @@ export default function SendSavedMessage() {
     }
 
     setIsLoading(true);
-    try {
-      const authenticated = await ensureAuthenticated();
-      if (!authenticated) {
-        setIsLoading(false);
-        return;
-      }
+    const authenticated = await ensureAuthenticated();
+    if (!authenticated) {
+      setIsLoading(false);
+      return;
+    }
 
+    try {
       const config = getConfig();
 
-      // Send message with first file (Telegram API limitation - one file per message)
-      const filePath = filePaths.length > 0 ? filePaths[0] : undefined;
-      await sendMessage({ config, chatId: "me", message, filePath });
-
-      // If there are more files, send them in separate messages
-      if (filePaths.length > 1) {
-        for (let i = 1; i < filePaths.length; i++) {
-          await sendMessage({ config, chatId: "me", message: "", filePath: filePaths[i] });
-        }
-      }
+      await sendMessage({
+        config,
+        chatId: "me",
+        message,
+        filePaths,
+      });
 
       await showToast({
         style: Toast.Style.Success,

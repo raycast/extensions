@@ -62,6 +62,7 @@ export interface Chat {
   type: ChatType;
   lastMessage?: string;
   lastMessageDate?: Date;
+  lastMessageMedia?: MessageMedia;
   unreadCount: number;
   photo?: string;
   isPinned: boolean;
@@ -98,7 +99,7 @@ export interface SendMessageOptions {
   config: TelegramConfig;
   chatId: string;
   message: string;
-  filePath?: string;
+  filePaths?: string | string[];
 }
 
 let clientInstance: TelegramClient | null = null;
@@ -379,7 +380,6 @@ async function processSavedMessage(
 ): Promise<SavedMessage> {
   const media = parseMessageMedia(msg);
 
-  // Download media if needed
   if (!skipMediaDownload && media && ["photo", "image", "video", "gif"].includes(media.type)) {
     const filePath = await downloadMedia(client, msg, media.mimeType);
     if (filePath) {
@@ -407,7 +407,6 @@ async function processChatMessage(
     if (filePath && media) media.filePath = filePath;
   }
 
-  // Get sender information
   let senderId: string | undefined;
   let senderName: string | undefined;
   let senderPhoto: string | undefined;
@@ -549,12 +548,28 @@ export async function getChats(options: GetChatsOptions): Promise<Chat[]> {
       const lastMessage = dialog.message?.message || "";
       const lastMessageDate = dialog.message?.date ? new Date(dialog.message.date * 1000) : undefined;
 
+      let lastMessageMedia: MessageMedia | undefined;
+      if (dialog.message) {
+        lastMessageMedia = parseMessageMedia(dialog.message);
+        if (
+          !skipPhotoDownload &&
+          lastMessageMedia &&
+          ["photo", "image", "video", "gif"].includes(lastMessageMedia.type)
+        ) {
+          const filePath = await downloadMedia(client, dialog.message, lastMessageMedia.mimeType);
+          if (filePath && lastMessageMedia) {
+            lastMessageMedia.filePath = filePath;
+          }
+        }
+      }
+
       return {
         id: dialog.id?.toString() || "",
         title,
         type,
         lastMessage,
         lastMessageDate,
+        lastMessageMedia,
         unreadCount: dialog.unreadCount,
         photo,
         isPinned: dialog.pinned || false,
@@ -610,7 +625,7 @@ export async function getChatById(config: TelegramConfig, chatId: string): Promi
 }
 
 export async function sendMessage(options: SendMessageOptions): Promise<void> {
-  const { config, chatId, message, filePath } = options;
+  const { config, chatId, message, filePaths } = options;
 
   const client = await getClient(config);
 
@@ -618,16 +633,26 @@ export async function sendMessage(options: SendMessageOptions): Promise<void> {
     await client.connect();
   }
 
-  const sendOptions: {
-    message: string;
-    file?: string;
-  } = {
-    message,
-  };
+  const files = filePaths ? (Array.isArray(filePaths) ? filePaths : [filePaths]) : [];
 
-  if (filePath) {
-    sendOptions.file = filePath;
+  if (files.length === 0) {
+    await client.sendMessage(chatId, { message });
+    return;
   }
 
-  await client.sendMessage(chatId, sendOptions);
+  // Send message with first file (Telegram API limitation - one file per message)
+  await client.sendMessage(chatId, {
+    message,
+    file: files[0],
+  });
+
+  // If there are more files, send them in separate messages
+  if (files.length > 1) {
+    for (let i = 1; i < files.length; i++) {
+      await client.sendMessage(chatId, {
+        message: "",
+        file: files[i],
+      });
+    }
+  }
 }

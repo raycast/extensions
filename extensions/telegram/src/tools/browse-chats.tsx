@@ -1,5 +1,6 @@
 import { getChats } from "../services/telegram-client";
 import { getConfig, ensureAuthenticated } from "../utils/auth";
+import { handleTelegramError } from "../utils/errors";
 
 export default async function BrowseChats() {
   try {
@@ -27,18 +28,6 @@ export default async function BrowseChats() {
       })),
     };
   } catch (error) {
-    // Handle Telegram rate limiting
-    if (error instanceof Error && error.message.includes("FloodWaitError")) {
-      const match = error.message.match(/(\d+) seconds/);
-      const seconds = match ? match[1] : "unknown";
-      return {
-        success: false,
-        error: `Rate limited by Telegram. Please wait ${seconds} seconds before trying again.`,
-      };
-    }
-    return {
-      success: false,
-      error: `Failed to browse chats: ${error instanceof Error ? error.message : "Unknown error"}`,
-    };
+    return handleTelegramError(error);
   }
 }

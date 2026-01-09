@@ -4,6 +4,7 @@ import * as path from "path";
 import { sendMessage, getChatById } from "../services/telegram-client";
 import { getConfig, ensureAuthenticated } from "../utils/auth";
 import { getFileFromClipboard } from "../utils/clipboard";
+import { handleTelegramError } from "../utils/errors";
 
 interface Arguments {
   chatId: string;
@@ -48,26 +49,14 @@ export default async function SendMessage(args: Arguments) {
     }
 
     const config = getConfig();
-    await sendMessage({ config, chatId, message, filePath });
+    await sendMessage({ config, chatId, message, filePaths: filePath });
 
     return {
       success: true,
       message: "Message sent successfully",
     };
   } catch (error) {
-    // Handle Telegram rate limiting
-    if (error instanceof Error && error.message.includes("FloodWaitError")) {
-      const match = error.message.match(/(\d+) seconds/);
-      const seconds = match ? match[1] : "unknown";
-      return {
-        success: false,
-        error: `Rate limited by Telegram. Please wait ${seconds} seconds before trying again.`,
-      };
-    }
-    return {
-      success: false,
-      error: `Failed to send message: ${error instanceof Error ? error.message : "Unknown error"}`,
-    };
+    return handleTelegramError(error);
   }
 }
 
