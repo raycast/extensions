@@ -24,9 +24,8 @@ repos:
         priority: 0
       - id: detect-private-key
         priority: 0
-      - id: no-commit-to-branch
-        priority: 0
-        args: ['--branch', 'main']
+      # no-commit-to-branch disabled: Raycast's npm run publish workflow
+      # requires committing to main locally before publishing
 
   - repo: local
     hooks:

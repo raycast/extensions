@@ -198,7 +198,10 @@ function ContactListItem({ contact, onRefresh }: { contact: Contact; onRefresh: 
                 title="Copy Phone Number"
                 icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                onAction={() => Clipboard.copy(contact.phoneNumbers[0].value)}
+                onAction={async () => {
+                  await Clipboard.copy(contact.phoneNumbers[0].value);
+                  await showToast({ style: Toast.Style.Success, title: "Copied phone number" });
+                }}
               />
             )}
             {contact.phoneNumbers.length > 1 && (
@@ -212,7 +215,10 @@ function ContactListItem({ contact, onRefresh }: { contact: Contact; onRefresh: 
                     key={`copy-phone-${idx}`}
                     title={`${phone.label || "Phone"}: ${phone.value}`}
                     icon={Icon.Clipboard}
-                    onAction={() => Clipboard.copy(phone.value)}
+                    onAction={async () => {
+                      await Clipboard.copy(phone.value);
+                      await showToast({ style: Toast.Style.Success, title: "Copied phone number" });
+                    }}
                   />
                 ))}
               </ActionPanel.Submenu>
@@ -221,22 +227,28 @@ function ContactListItem({ contact, onRefresh }: { contact: Contact; onRefresh: 
               <Action
                 title="Copy Email"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                onAction={() => Clipboard.copy(contact.emailAddresses[0].value)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                onAction={async () => {
+                  await Clipboard.copy(contact.emailAddresses[0].value);
+                  await showToast({ style: Toast.Style.Success, title: "Copied email" });
+                }}
               />
             )}
             {contact.emailAddresses.length > 1 && (
               <ActionPanel.Submenu
                 title="Copy Email…"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               >
                 {contact.emailAddresses.map((email, idx) => (
                   <Action
                     key={`copy-email-${idx}`}
                     title={`${email.label || "Email"}: ${email.value}`}
                     icon={Icon.Clipboard}
-                    onAction={() => Clipboard.copy(email.value)}
+                    onAction={async () => {
+                      await Clipboard.copy(email.value);
+                      await showToast({ style: Toast.Style.Success, title: "Copied email" });
+                    }}
                   />
                 ))}
               </ActionPanel.Submenu>
