@@ -48,12 +48,12 @@ export function SendMessageForm({ chat, onSuccess }: SendMessageFormProps) {
 
       // Send message with first file (Telegram API limitation - one file per message)
       const filePath = filePaths.length > 0 ? filePaths[0] : undefined;
-      await sendMessage(config, chat.id, message, filePath);
+      await sendMessage({ config, chatId: chat.id, message, filePath });
 
       // If there are more files, send them in separate messages
       if (filePaths.length > 1) {
         for (let i = 1; i < filePaths.length; i++) {
-          await sendMessage(config, chat.id, "", filePaths[i]);
+          await sendMessage({ config, chatId: chat.id, message: "", filePath: filePaths[i] });
         }
       }
 

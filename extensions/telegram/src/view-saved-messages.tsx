@@ -75,7 +75,7 @@ export default function ViewSavedMessages() {
       }
 
       const config = getConfig();
-      return await getSavedMessages(config, 50, query || undefined);
+      return await getSavedMessages({ config, limit: 50, searchQuery: query || undefined });
     },
     [searchText],
     {

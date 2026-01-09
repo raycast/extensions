@@ -79,7 +79,7 @@ export function ChatMessagesView({ chat }: ChatMessagesViewProps) {
       }
 
       const config = getConfig();
-      return await getChatMessages(config, chatId, 50, query || undefined);
+      return await getChatMessages({ config, chatId, limit: 50, searchQuery: query || undefined });
     },
     [chat.id, searchText],
     {

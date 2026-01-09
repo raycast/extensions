@@ -19,7 +19,7 @@ export default function SendMessage() {
       }
 
       const config = getConfig();
-      return await getChats(config, 100);
+      return await getChats({ config, limit: 100 });
     },
     [],
     {
@@ -70,12 +70,12 @@ export default function SendMessage() {
 
       // Send message with first file (Telegram API limitation - one file per message)
       const filePath = filePaths.length > 0 ? filePaths[0] : undefined;
-      await sendMessage(config, selectedChatId, message, filePath);
+      await sendMessage({ config, chatId: selectedChatId, message, filePath });
 
       // If there are more files, send them in separate messages
       if (filePaths.length > 1) {
         for (let i = 1; i < filePaths.length; i++) {
-          await sendMessage(config, selectedChatId, "", filePaths[i]);
+          await sendMessage({ config, chatId: selectedChatId, message: "", filePath: filePaths[i] });
         }
       }
 

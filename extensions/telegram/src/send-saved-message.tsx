@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import * as fs from "fs";
-import { sendSavedMessage } from "./services/telegram-client";
+import { sendMessage } from "./services/telegram-client";
 import { getConfig, ensureAuthenticated } from "./utils/auth";
 
 export default function SendSavedMessage() {
@@ -43,12 +43,12 @@ export default function SendSavedMessage() {
 
       // Send message with first file (Telegram API limitation - one file per message)
       const filePath = filePaths.length > 0 ? filePaths[0] : undefined;
-      await sendSavedMessage(config, message, filePath);
+      await sendMessage({ config, chatId: "me", message, filePath });
 
       // If there are more files, send them in separate messages
       if (filePaths.length > 1) {
         for (let i = 1; i < filePaths.length; i++) {
-          await sendSavedMessage(config, "", filePaths[i]);
+          await sendMessage({ config, chatId: "me", message: "", filePath: filePaths[i] });
         }
       }
 

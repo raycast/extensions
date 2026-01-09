@@ -1,5 +1,6 @@
-import { List, ActionPanel, Action, Icon, Image, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { Chat } from "../services/telegram-client";
+import { getAvatarIcon } from "../utils/avatar";
 import { ChatMessagesView } from "./chat-messages-view";
 import { ChatListItemDetail } from "./chat-list-item-detail";
 import { SendMessageForm } from "./send-message-form";
@@ -13,11 +14,11 @@ interface ChatListItemProps {
 
 export function ChatListItem({ chat, onRefresh, isShowingDetail, onToggleDetail }: ChatListItemProps) {
   const displayTitle = chat.title;
-  const icon = chat.photo
-    ? { source: chat.photo, mask: Image.Mask.Circle }
-    : chat.type === "private"
-      ? Icon.Person
-      : Icon.TwoPeople;
+  const icon = getAvatarIcon({
+    photo: chat.photo,
+    name: chat.title,
+    type: chat.type,
+  });
 
   const accessories: List.Item.Accessory[] = [];
 

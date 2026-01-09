@@ -1,4 +1,5 @@
 import { List, ActionPanel, Action, Icon, Image } from "@raycast/api";
+import { getAvatarIcon } from "../utils/avatar";
 import { ChatMessage, Chat } from "../services/telegram-client";
 import { ChatMessageListItemDetail } from "./chat-message-list-item-detail";
 import { SendMessageForm } from "./send-message-form";
@@ -25,7 +26,16 @@ export function ChatMessageListItem({
   }
 
   let icon: Image.ImageLike = Icon.Message;
-  if (message.media) {
+
+  // For group chats, show sender avatar
+  if (chat.type === "group" && message.senderName) {
+    icon = getAvatarIcon({
+      photo: message.senderPhoto,
+      name: message.senderName,
+      type: "private",
+    });
+  } else if (message.media) {
+    // For non-group messages with media, show media icon
     switch (message.media.type) {
       case "photo":
       case "image":
@@ -61,13 +71,6 @@ export function ChatMessageListItem({
       default:
         icon = Icon.Paperclip;
     }
-  }
-
-  // For group chats, show sender photo/icon
-  if (chat.type === "group" && message.senderPhoto) {
-    icon = { source: message.senderPhoto, mask: Image.Mask.Circle };
-  } else if (chat.type === "group") {
-    icon = Icon.Person;
   }
 
   const accessories: List.Item.Accessory[] = [];

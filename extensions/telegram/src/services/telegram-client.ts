@@ -26,6 +26,8 @@ export type MediaType =
   | "gif"
   | "unknown";
 
+export type ChatType = "private" | "group";
+
 export interface MessageMedia {
   type: MediaType;
   fileName?: string;
@@ -57,7 +59,7 @@ export interface ChatMessage {
 export interface Chat {
   id: string;
   title: string;
-  type: "private" | "group";
+  type: ChatType;
   lastMessage?: string;
   lastMessageDate?: Date;
   unreadCount: number;
@@ -69,6 +71,34 @@ export interface TelegramConfig {
   apiId: number;
   apiHash: string;
   phoneNumber: string;
+}
+
+export interface GetChatsOptions {
+  config: TelegramConfig;
+  limit?: number;
+  skipPhotoDownload?: boolean;
+}
+
+export interface GetMessagesOptions {
+  config: TelegramConfig;
+  chatId: string;
+  limit?: number;
+  searchQuery?: string;
+  skipMediaDownload?: boolean;
+}
+
+export interface GetSavedMessagesOptions {
+  config: TelegramConfig;
+  limit?: number;
+  searchQuery?: string;
+  skipMediaDownload?: boolean;
+}
+
+export interface SendMessageOptions {
+  config: TelegramConfig;
+  chatId: string;
+  message: string;
+  filePath?: string;
 }
 
 let clientInstance: TelegramClient | null = null;
@@ -101,26 +131,26 @@ export async function authenticate(config: TelegramConfig, code?: string): Promi
     await client.connect();
   }
 
-  // Check if already authorized
-  if (await client.checkAuthorization()) {
+  if (await client.isUserAuthorized()) {
     return { needsCode: false };
   }
 
-  // Start auth process
   if (!code) {
-    const result = await client.sendCode(
-      {
-        apiId: config.apiId,
-        apiHash: config.apiHash,
-      },
-      config.phoneNumber,
-    );
-    // Store phone code hash for later use
-    await LocalStorage.setItem(PHONE_CODE_HASH_KEY, result.phoneCodeHash);
+    const phoneCodeHash = await LocalStorage.getItem<string>(PHONE_CODE_HASH_KEY);
+    if (!phoneCodeHash) {
+      const result = await client.sendCode(
+        {
+          apiId: config.apiId,
+          apiHash: config.apiHash,
+        },
+        config.phoneNumber,
+      );
+      await LocalStorage.setItem(PHONE_CODE_HASH_KEY, result.phoneCodeHash);
+      return { needsCode: true };
+    }
     return { needsCode: true };
   }
 
-  // Complete auth with code
   const phoneCodeHash = await LocalStorage.getItem<string>(PHONE_CODE_HASH_KEY);
   if (!phoneCodeHash) {
     throw new Error("Phone code hash not found. Please restart authentication.");
@@ -134,15 +164,62 @@ export async function authenticate(config: TelegramConfig, code?: string): Promi
     }),
   );
 
-  // Save session
-  const sessionString = (client.session as StringSession).save();
-  await LocalStorage.setItem(SESSION_KEY, sessionString);
+  const session = client.session.save() as unknown as string;
+  await LocalStorage.setItem(SESSION_KEY, session);
 
-  // Get and save user ID
   const me = await client.getMe();
   await LocalStorage.setItem(USER_ID_KEY, me.id.toString());
 
+  await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
+
   return { needsCode: false };
+}
+
+function ensureMediaCacheDir(): void {
+  if (!fs.existsSync(MEDIA_CACHE_DIR)) {
+    fs.mkdirSync(MEDIA_CACHE_DIR, { recursive: true });
+  }
+}
+
+function getFileExtensionFromMimeType(mimeType?: string): string {
+  if (!mimeType) return ".jpg";
+
+  const mimeToExt: Record<string, string> = {
+    "image/jpeg": ".jpg",
+    "image/jpg": ".jpg",
+    "image/png": ".png",
+    "image/gif": ".gif",
+    "image/webp": ".webp",
+    "video/mp4": ".mp4",
+    "video/webm": ".webm",
+    "video/quicktime": ".mov",
+  };
+
+  return mimeToExt[mimeType] || "";
+}
+
+function getMediaId(message: Api.Message): string {
+  if (!message.media) {
+    return message.id.toString();
+  }
+
+  const mediaClassName = message.media.className;
+
+  if (mediaClassName === "MessageMediaPhoto") {
+    const photoMedia = message.media as Api.MessageMediaPhoto;
+    if (photoMedia.photo && "id" in photoMedia.photo) {
+      const photo = photoMedia.photo as Api.Photo;
+      return photo.id.toString();
+    }
+  } else if (mediaClassName === "MessageMediaDocument") {
+    const docMedia = message.media as Api.MessageMediaDocument;
+    if (docMedia.document && "id" in docMedia.document) {
+      const doc = docMedia.document as Api.Document;
+      return doc.id.toString();
+    }
+  }
+
+  return message.id.toString();
 }
 
 async function downloadMedia(
@@ -151,32 +228,17 @@ async function downloadMedia(
   mimeType?: string,
 ): Promise<string | undefined> {
   try {
-    // Ensure media cache directory exists
-    if (!fs.existsSync(MEDIA_CACHE_DIR)) {
-      fs.mkdirSync(MEDIA_CACHE_DIR, { recursive: true });
-    }
+    ensureMediaCacheDir();
 
-    // Determine file extension from mime type
-    let extension = "";
-    if (mimeType) {
-      const mimeToExt: Record<string, string> = {
-        "image/jpeg": ".jpg",
-        "image/jpg": ".jpg",
-        "image/png": ".png",
-        "image/gif": ".gif",
-        "image/webp": ".webp",
-        "video/mp4": ".mp4",
-        "video/webm": ".webm",
-        "video/quicktime": ".mov",
-      };
-      extension = mimeToExt[mimeType] || "";
-    }
-
-    // Generate a unique filename based on message ID
-    const fileName = `${message.id}_${Date.now()}${extension}`;
+    const mediaId = getMediaId(message);
+    const extension = getFileExtensionFromMimeType(mimeType);
+    const fileName = `media_${mediaId}${extension}`;
     const filePath = path.join(MEDIA_CACHE_DIR, fileName);
 
-    // Download the media
+    if (fs.existsSync(filePath)) {
+      return filePath;
+    }
+
     const buffer = await client.downloadMedia(message, { outputFile: filePath });
 
     if (buffer) {
@@ -189,24 +251,218 @@ async function downloadMedia(
   return undefined;
 }
 
-export async function getSavedMessages(
-  config: TelegramConfig,
-  limit = 50,
-  searchQuery?: string,
-): Promise<SavedMessage[]> {
+async function downloadProfilePhoto(
+  client: TelegramClient,
+  entity: Api.User | Api.Chat | Api.Channel,
+  entityId: string | number,
+  entityType: "profile" | "chat" | "channel",
+): Promise<string | undefined> {
+  try {
+    ensureMediaCacheDir();
+
+    const photoPath = path.join(MEDIA_CACHE_DIR, `${entityType}_${entityId}.jpg`);
+
+    if (fs.existsSync(photoPath)) {
+      return photoPath;
+    }
+
+    await client.downloadProfilePhoto(entity, { outputFile: photoPath });
+
+    if (fs.existsSync(photoPath)) {
+      return photoPath;
+    }
+  } catch (error) {
+    console.error(`Failed to download ${entityType} photo:`, error);
+  }
+
+  return undefined;
+}
+
+function parseMessageMedia(msg: Api.Message): MessageMedia | undefined {
+  if (!msg.media) return undefined;
+
+  const mediaClassName = msg.media.className;
+
+  if (mediaClassName === "MessageMediaPhoto") {
+    const photo = msg.media as Api.MessageMediaPhoto;
+    const photoObj = photo.photo;
+    if (photoObj && "sizes" in photoObj) {
+      const largestSize = photoObj.sizes[photoObj.sizes.length - 1];
+      return {
+        type: "photo",
+        mimeType: "image/jpeg",
+        width: "w" in largestSize ? largestSize.w : undefined,
+        height: "h" in largestSize ? largestSize.h : undefined,
+      };
+    }
+    return { type: "photo", mimeType: "image/jpeg" };
+  }
+
+  if (mediaClassName === "MessageMediaDocument") {
+    const doc = msg.media as Api.MessageMediaDocument;
+    if (doc.document && "mimeType" in doc.document) {
+      const document = doc.document;
+      const mimeType = document.mimeType;
+
+      const fileNameAttr = document.attributes?.find((attr) => attr.className === "DocumentAttributeFilename") as
+        | Api.DocumentAttributeFilename
+        | undefined;
+      const fileName = fileNameAttr?.fileName;
+
+      const videoAttr = document.attributes?.find((attr) => attr.className === "DocumentAttributeVideo") as
+        | Api.DocumentAttributeVideo
+        | undefined;
+
+      const audioAttr = document.attributes?.find((attr) => attr.className === "DocumentAttributeAudio") as
+        | Api.DocumentAttributeAudio
+        | undefined;
+
+      let type: MediaType = "file";
+      let duration: number | undefined;
+      let width: number | undefined;
+      let height: number | undefined;
+
+      if (mimeType?.startsWith("video/")) {
+        type = "video";
+        if (videoAttr) {
+          duration = videoAttr.duration;
+          width = videoAttr.w;
+          height = videoAttr.h;
+        }
+      } else if (mimeType?.startsWith("audio/")) {
+        type = audioAttr?.voice ? "voice" : "audio";
+        if (audioAttr) {
+          duration = audioAttr.duration;
+        }
+      } else if (mimeType?.startsWith("image/")) {
+        type = mimeType === "image/gif" ? "gif" : "image";
+      } else if (fileName?.endsWith(".webm") || fileName?.endsWith(".tgs")) {
+        type = "sticker";
+      }
+
+      return {
+        type,
+        fileName,
+        fileSize: Number(document.size),
+        mimeType,
+        duration,
+        width,
+        height,
+      };
+    }
+    return { type: "document" };
+  }
+
+  if (mediaClassName === "MessageMediaWebPage") {
+    return { type: "link" };
+  }
+
+  if (mediaClassName === "MessageMediaGeo" || mediaClassName === "MessageMediaVenue") {
+    return { type: "location" };
+  }
+
+  if (mediaClassName === "MessageMediaContact") {
+    return { type: "contact" };
+  }
+
+  if (mediaClassName === "MessageMediaPoll") {
+    return { type: "poll" };
+  }
+
+  return { type: "unknown" };
+}
+
+async function processSavedMessage(
+  client: TelegramClient,
+  msg: Api.Message,
+  skipMediaDownload: boolean,
+): Promise<SavedMessage> {
+  const media = parseMessageMedia(msg);
+
+  // Download media if needed
+  if (!skipMediaDownload && media && ["photo", "image", "video", "gif"].includes(media.type)) {
+    const filePath = await downloadMedia(client, msg, media.mimeType);
+    if (filePath) {
+      media.filePath = filePath;
+    }
+  }
+
+  return {
+    id: msg.id,
+    text: msg.message || "",
+    date: new Date(msg.date * 1000),
+    media,
+  };
+}
+
+async function processChatMessage(
+  client: TelegramClient,
+  msg: Api.Message,
+  skipMediaDownload: boolean,
+): Promise<ChatMessage> {
+  const media = parseMessageMedia(msg);
+
+  if (!skipMediaDownload && media && ["photo", "image", "video", "gif"].includes(media.type)) {
+    const filePath = await downloadMedia(client, msg, media.mimeType);
+    if (filePath && media) media.filePath = filePath;
+  }
+
+  // Get sender information
+  let senderId: string | undefined;
+  let senderName: string | undefined;
+  let senderPhoto: string | undefined;
+
+  if (msg.fromId) {
+    if (msg.fromId instanceof Api.PeerUser) {
+      senderId = msg.fromId.userId.toString();
+      try {
+        const user = await client.getEntity(msg.fromId.userId);
+        if (user instanceof Api.User) {
+          senderName = user.firstName || "";
+          if (user.lastName) senderName += ` ${user.lastName}`;
+
+          if (user.deleted) {
+            senderName = "Deleted Account";
+          } else if (!senderName.trim()) {
+            senderName = "Unknown User";
+          }
+
+          if (!skipMediaDownload && user.photo && "photoId" in user.photo) {
+            senderPhoto = await downloadProfilePhoto(client, user, user.id.toString(), "profile");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to get sender info:", error);
+        senderName = "Unknown User";
+      }
+    }
+  }
+
+  return {
+    id: msg.id,
+    text: msg.message || "",
+    date: new Date(msg.date * 1000),
+    media,
+    senderId,
+    senderName,
+    senderPhoto,
+  };
+}
+
+export async function getSavedMessages(options: GetSavedMessagesOptions): Promise<SavedMessage[]> {
+  const { config, limit = 50, searchQuery, skipMediaDownload = false } = options;
+
   const client = await getClient(config);
 
   if (!client.connected) {
     await client.connect();
   }
 
-  // Get user ID (Saved Messages is a chat with yourself)
   const userId = await LocalStorage.getItem<string>(USER_ID_KEY);
   if (!userId) {
     throw new Error("User ID not found. Please authenticate first.");
   }
 
-  // Get messages from Saved Messages with optional search
   const messages = await client.getMessages("me", {
     limit,
     search: searchQuery || undefined,
@@ -214,265 +470,22 @@ export async function getSavedMessages(
 
   const filteredMessages = messages.filter((msg) => msg.message || msg.media);
 
-  // Process messages and download media
   const processedMessages = await Promise.all(
-    filteredMessages.map(async (msg) => {
-      let media: MessageMedia | undefined;
-
-      if (msg.media) {
-        const mediaClassName = msg.media.className;
-
-        if (mediaClassName === "MessageMediaPhoto") {
-          const photo = msg.media as Api.MessageMediaPhoto;
-          const photoObj = photo.photo;
-          if (photoObj && "sizes" in photoObj) {
-            const largestSize = photoObj.sizes[photoObj.sizes.length - 1];
-            media = {
-              type: "photo",
-              mimeType: "image/jpeg", // Telegram photos are typically JPEG
-              width: "w" in largestSize ? largestSize.w : undefined,
-              height: "h" in largestSize ? largestSize.h : undefined,
-            };
-          } else {
-            media = { type: "photo", mimeType: "image/jpeg" };
-          }
-        } else if (mediaClassName === "MessageMediaDocument") {
-          const doc = msg.media as Api.MessageMediaDocument;
-          if (doc.document && "mimeType" in doc.document) {
-            const document = doc.document;
-            const mimeType = document.mimeType;
-
-            const fileNameAttr = document.attributes?.find((attr) => attr.className === "DocumentAttributeFilename") as
-              | Api.DocumentAttributeFilename
-              | undefined;
-            const fileName = fileNameAttr?.fileName;
-
-            const videoAttr = document.attributes?.find((attr) => attr.className === "DocumentAttributeVideo") as
-              | Api.DocumentAttributeVideo
-              | undefined;
-
-            const audioAttr = document.attributes?.find((attr) => attr.className === "DocumentAttributeAudio") as
-              | Api.DocumentAttributeAudio
-              | undefined;
-
-            let type: MediaType = "file";
-            let duration: number | undefined;
-            let width: number | undefined;
-            let height: number | undefined;
-
-            if (mimeType?.startsWith("video/")) {
-              type = "video";
-              if (videoAttr) {
-                duration = videoAttr.duration;
-                width = videoAttr.w;
-                height = videoAttr.h;
-              }
-            } else if (mimeType?.startsWith("audio/")) {
-              type = audioAttr?.voice ? "voice" : "audio";
-              if (audioAttr) {
-                duration = audioAttr.duration;
-              }
-            } else if (mimeType?.startsWith("image/")) {
-              type = mimeType === "image/gif" ? "gif" : "image";
-            } else if (fileName?.endsWith(".webm") || fileName?.endsWith(".tgs")) {
-              type = "sticker";
-            }
-
-            media = {
-              type,
-              fileName,
-              fileSize: Number(document.size),
-              mimeType,
-              duration,
-              width,
-              height,
-            };
-          } else {
-            media = { type: "document" };
-          }
-        } else if (mediaClassName === "MessageMediaWebPage") {
-          media = { type: "link" };
-        } else if (mediaClassName === "MessageMediaGeo" || mediaClassName === "MessageMediaVenue") {
-          media = { type: "location" };
-        } else if (mediaClassName === "MessageMediaContact") {
-          media = { type: "contact" };
-        } else if (mediaClassName === "MessageMediaPoll") {
-          media = { type: "poll" };
-        } else {
-          media = { type: "unknown" };
-        }
-      }
-
-      // Download media for photos, images, videos, and gifs
-      if (media && ["photo", "image", "video", "gif"].includes(media.type)) {
-        const filePath = await downloadMedia(client, msg, media.mimeType);
-        if (filePath) {
-          media.filePath = filePath;
-        }
-      }
-
-      return {
-        id: msg.id,
-        text: msg.message || "",
-        date: new Date(msg.date * 1000),
-        media,
-      };
-    }),
+    filteredMessages.map((msg) => processSavedMessage(client, msg, skipMediaDownload)),
   );
 
   return processedMessages;
 }
 
-export async function sendSavedMessage(config: TelegramConfig, text: string, filePath?: string): Promise<void> {
+export async function getChatMessages(options: GetMessagesOptions): Promise<ChatMessage[]> {
+  const { config, chatId, limit = 50, searchQuery, skipMediaDownload = false } = options;
+
   const client = await getClient(config);
 
   if (!client.connected) {
     await client.connect();
   }
 
-  // Send message with or without file to "me" (Saved Messages)
-  if (filePath && fs.existsSync(filePath)) {
-    try {
-      await client.sendFile("me", {
-        file: filePath,
-        caption: text,
-      });
-    } catch (error) {
-      console.error("Failed to send file:", error);
-      throw new Error("Failed to send file");
-    }
-  } else {
-    await client.sendMessage("me", { message: text });
-  }
-}
-
-export async function getChats(config: TelegramConfig, limit = 50): Promise<Chat[]> {
-  const client = await getClient(config);
-
-  if (!client.connected) {
-    await client.connect();
-  }
-
-  // Get dialogs (chats)
-  const dialogs = await client.getDialogs({ limit });
-
-  const chats: Chat[] = [];
-
-  for (const dialog of dialogs) {
-    const entity = dialog.entity;
-
-    if (!entity) {
-      continue;
-    }
-
-    // Skip channels (only include private chats and groups)
-    if (entity.className === "Channel" && (entity as Api.Channel).broadcast) {
-      continue;
-    }
-
-    let chatId: string;
-    let title: string;
-    let type: "private" | "group";
-    let photo: string | undefined;
-
-    if (entity.className === "User") {
-      const user = entity as Api.User;
-      chatId = user.id.toString();
-      title = [user.firstName, user.lastName].filter(Boolean).join(" ") || "Unknown User";
-      type = "private";
-
-      // Download user profile photo if available
-      if (user.photo && "photoId" in user.photo) {
-        try {
-          if (!fs.existsSync(MEDIA_CACHE_DIR)) {
-            fs.mkdirSync(MEDIA_CACHE_DIR, { recursive: true });
-          }
-          const photoPath = path.join(MEDIA_CACHE_DIR, `profile_${user.id}.jpg`);
-          await client.downloadProfilePhoto(user, { outputFile: photoPath });
-          if (fs.existsSync(photoPath)) {
-            photo = photoPath;
-          }
-        } catch (error) {
-          console.error("Failed to download profile photo:", error);
-        }
-      }
-    } else if (entity.className === "Chat") {
-      const chat = entity as Api.Chat;
-      chatId = chat.id.toString();
-      title = chat.title || "Unknown Group";
-      type = "group";
-
-      // Download chat photo if available
-      if (chat.photo && "photoId" in chat.photo) {
-        try {
-          if (!fs.existsSync(MEDIA_CACHE_DIR)) {
-            fs.mkdirSync(MEDIA_CACHE_DIR, { recursive: true });
-          }
-          const photoPath = path.join(MEDIA_CACHE_DIR, `chat_${chat.id}.jpg`);
-          await client.downloadProfilePhoto(chat, { outputFile: photoPath });
-          if (fs.existsSync(photoPath)) {
-            photo = photoPath;
-          }
-        } catch (error) {
-          console.error("Failed to download chat photo:", error);
-        }
-      }
-    } else if (entity.className === "Channel") {
-      const channel = entity as Api.Channel;
-      chatId = channel.id.toString();
-      title = channel.title || "Unknown Group";
-      type = "group";
-
-      // Download channel photo if available
-      if (channel.photo && "photoId" in channel.photo) {
-        try {
-          if (!fs.existsSync(MEDIA_CACHE_DIR)) {
-            fs.mkdirSync(MEDIA_CACHE_DIR, { recursive: true });
-          }
-          const photoPath = path.join(MEDIA_CACHE_DIR, `channel_${channel.id}.jpg`);
-          await client.downloadProfilePhoto(channel, { outputFile: photoPath });
-          if (fs.existsSync(photoPath)) {
-            photo = photoPath;
-          }
-        } catch (error) {
-          console.error("Failed to download channel photo:", error);
-        }
-      }
-    } else {
-      continue;
-    }
-
-    const lastMessage = dialog.message?.message || "";
-    const lastMessageDate = dialog.message ? new Date(dialog.message.date * 1000) : undefined;
-
-    chats.push({
-      id: chatId,
-      title,
-      type,
-      lastMessage,
-      lastMessageDate,
-      unreadCount: dialog.unreadCount || 0,
-      photo,
-      isPinned: dialog.pinned || false,
-    });
-  }
-
-  return chats;
-}
-
-export async function getChatMessages(
-  config: TelegramConfig,
-  chatId: string,
-  limit = 50,
-  searchQuery?: string,
-): Promise<ChatMessage[]> {
-  const client = await getClient(config);
-
-  if (!client.connected) {
-    await client.connect();
-  }
-
-  // Get messages from the specified chat
   const messages = await client.getMessages(chatId, {
     limit,
     search: searchQuery || undefined,
@@ -480,196 +493,141 @@ export async function getChatMessages(
 
   const filteredMessages = messages.filter((msg) => msg.message || msg.media);
 
-  // Process messages and download media
   const processedMessages = await Promise.all(
-    filteredMessages.map(async (msg) => {
-      let media: MessageMedia | undefined;
-
-      if (msg.media) {
-        const mediaClassName = msg.media.className;
-
-        if (mediaClassName === "MessageMediaPhoto") {
-          const photo = msg.media as Api.MessageMediaPhoto;
-          const photoObj = photo.photo;
-          if (photoObj && "sizes" in photoObj) {
-            const largestSize = photoObj.sizes[photoObj.sizes.length - 1];
-            media = {
-              type: "photo",
-              mimeType: "image/jpeg",
-              width: "w" in largestSize ? largestSize.w : undefined,
-              height: "h" in largestSize ? largestSize.h : undefined,
-            };
-          } else {
-            media = { type: "photo", mimeType: "image/jpeg" };
-          }
-        } else if (mediaClassName === "MessageMediaDocument") {
-          const doc = msg.media as Api.MessageMediaDocument;
-          if (doc.document && "mimeType" in doc.document) {
-            const document = doc.document;
-            const mimeType = document.mimeType;
-
-            const fileNameAttr = document.attributes?.find((attr) => attr.className === "DocumentAttributeFilename") as
-              | Api.DocumentAttributeFilename
-              | undefined;
-            const fileName = fileNameAttr?.fileName;
-
-            const videoAttr = document.attributes?.find((attr) => attr.className === "DocumentAttributeVideo") as
-              | Api.DocumentAttributeVideo
-              | undefined;
-
-            const audioAttr = document.attributes?.find((attr) => attr.className === "DocumentAttributeAudio") as
-              | Api.DocumentAttributeAudio
-              | undefined;
-
-            let type: MediaType = "file";
-            let duration: number | undefined;
-            let width: number | undefined;
-            let height: number | undefined;
-
-            if (mimeType?.startsWith("video/")) {
-              type = "video";
-              if (videoAttr) {
-                duration = videoAttr.duration;
-                width = videoAttr.w;
-                height = videoAttr.h;
-              }
-            } else if (mimeType?.startsWith("audio/")) {
-              type = audioAttr?.voice ? "voice" : "audio";
-              if (audioAttr) {
-                duration = audioAttr.duration;
-              }
-            } else if (mimeType?.startsWith("image/")) {
-              type = mimeType === "image/gif" ? "gif" : "image";
-            } else if (fileName?.endsWith(".webm") || fileName?.endsWith(".tgs")) {
-              type = "sticker";
-            }
-
-            media = {
-              type,
-              fileName,
-              fileSize: Number(document.size),
-              mimeType,
-              duration,
-              width,
-              height,
-            };
-          } else {
-            media = { type: "document" };
-          }
-        } else if (mediaClassName === "MessageMediaWebPage") {
-          media = { type: "link" };
-        } else if (mediaClassName === "MessageMediaGeo" || mediaClassName === "MessageMediaVenue") {
-          media = { type: "location" };
-        } else if (mediaClassName === "MessageMediaContact") {
-          media = { type: "contact" };
-        } else if (mediaClassName === "MessageMediaPoll") {
-          media = { type: "poll" };
-        } else {
-          media = { type: "unknown" };
-        }
-      }
-
-      // Download media for photos, images, videos, and gifs
-      if (media && ["photo", "image", "video", "gif"].includes(media.type)) {
-        const filePath = await downloadMedia(client, msg, media.mimeType);
-        if (filePath) {
-          media.filePath = filePath;
-        }
-      }
-
-      // Get sender information
-      let senderId: string | undefined;
-      let senderName: string | undefined;
-      let senderPhoto: string | undefined;
-
-      if (msg.fromId) {
-        if (msg.fromId.className === "PeerUser") {
-          const peerUser = msg.fromId as Api.PeerUser;
-          senderId = peerUser.userId.toString();
-
-          try {
-            const sender = await client.getEntity(peerUser.userId);
-            if (sender.className === "User") {
-              const user = sender as Api.User;
-              senderName = [user.firstName, user.lastName].filter(Boolean).join(" ") || "Unknown User";
-
-              // Download sender profile photo if available
-              if (user.photo && "photoId" in user.photo) {
-                try {
-                  if (!fs.existsSync(MEDIA_CACHE_DIR)) {
-                    fs.mkdirSync(MEDIA_CACHE_DIR, { recursive: true });
-                  }
-                  const photoPath = path.join(MEDIA_CACHE_DIR, `profile_${user.id}.jpg`);
-                  await client.downloadProfilePhoto(user, { outputFile: photoPath });
-                  if (fs.existsSync(photoPath)) {
-                    senderPhoto = photoPath;
-                  }
-                } catch (error) {
-                  console.error("Failed to download sender photo:", error);
-                }
-              }
-            }
-          } catch (error) {
-            console.error("Failed to get sender entity:", error);
-          }
-        }
-      }
-
-      return {
-        id: msg.id,
-        text: msg.message || "",
-        date: new Date(msg.date * 1000),
-        media,
-        senderId,
-        senderName,
-        senderPhoto,
-      };
-    }),
+    filteredMessages.map((msg) => processChatMessage(client, msg, skipMediaDownload)),
   );
 
   return processedMessages;
 }
 
-export async function sendMessage(
-  config: TelegramConfig,
-  chatId: string,
-  text: string,
-  filePath?: string,
-): Promise<void> {
+export async function getChats(options: GetChatsOptions): Promise<Chat[]> {
+  const { config, limit = 50, skipPhotoDownload = false } = options;
+
   const client = await getClient(config);
 
   if (!client.connected) {
     await client.connect();
   }
 
-  // Send message with or without file
-  if (filePath && fs.existsSync(filePath)) {
-    try {
-      // Send message with file - the library handles file upload internally
-      await client.sendFile(chatId, {
-        file: filePath,
-        caption: text,
-      });
-    } catch (error) {
-      console.error("Failed to send file:", error);
-      throw new Error("Failed to send file");
+  const dialogs = await client.getDialogs({ limit });
+
+  const chats: Chat[] = await Promise.all(
+    dialogs.map(async (dialog) => {
+      const entity = dialog.entity;
+      let title = "";
+      let type: ChatType = "group";
+      let photo: string | undefined;
+
+      if (entity instanceof Api.User) {
+        title = entity.firstName || "";
+        if (entity.lastName) title += ` ${entity.lastName}`;
+
+        if (entity.deleted) {
+          title = "Deleted Account";
+        } else if (!title.trim()) {
+          title = "Unknown User";
+        }
+
+        type = "private";
+        if (!skipPhotoDownload && entity.photo && "photoId" in entity.photo) {
+          photo = await downloadProfilePhoto(client, entity, entity.id.toString(), "profile");
+        }
+      } else if (entity instanceof Api.Chat) {
+        title = entity.title;
+        type = "group";
+        if (!skipPhotoDownload && entity.photo && "photoId" in entity.photo) {
+          photo = await downloadProfilePhoto(client, entity, entity.id.toString(), "chat");
+        }
+      } else if (entity instanceof Api.Channel) {
+        title = entity.title;
+        type = "group";
+        if (!skipPhotoDownload && entity.photo && "photoId" in entity.photo) {
+          photo = await downloadProfilePhoto(client, entity, entity.id.toString(), "channel");
+        }
+      }
+
+      const lastMessage = dialog.message?.message || "";
+      const lastMessageDate = dialog.message?.date ? new Date(dialog.message.date * 1000) : undefined;
+
+      return {
+        id: dialog.id?.toString() || "",
+        title,
+        type,
+        lastMessage,
+        lastMessageDate,
+        unreadCount: dialog.unreadCount,
+        photo,
+        isPinned: dialog.pinned || false,
+      };
+    }),
+  );
+
+  return chats;
+}
+
+export async function getChatById(config: TelegramConfig, chatId: string): Promise<Chat | null> {
+  const client = await getClient(config);
+
+  if (!client.connected) {
+    await client.connect();
+  }
+
+  try {
+    const entity = await client.getEntity(chatId);
+    let title = "";
+    let type: ChatType = "group";
+
+    if (entity instanceof Api.User) {
+      title = entity.firstName || "";
+      if (entity.lastName) title += ` ${entity.lastName}`;
+
+      if (entity.deleted) {
+        title = "Deleted Account";
+      } else if (!title.trim()) {
+        title = "Unknown User";
+      }
+
+      type = "private";
+    } else if (entity instanceof Api.Chat) {
+      title = entity.title;
+      type = "group";
+    } else if (entity instanceof Api.Channel) {
+      title = entity.title;
+      type = "group";
     }
-  } else {
-    // Send text-only message
-    await client.sendMessage(chatId, { message: text });
+
+    return {
+      id: chatId,
+      title,
+      type,
+      unreadCount: 0,
+      isPinned: false,
+    };
+  } catch (error) {
+    console.error("Failed to get chat by ID:", error);
+    return null;
   }
 }
 
-export async function disconnect(): Promise<void> {
-  if (clientInstance) {
-    await clientInstance.disconnect();
-    clientInstance = null;
-  }
-}
+export async function sendMessage(options: SendMessageOptions): Promise<void> {
+  const { config, chatId, message, filePath } = options;
 
-export async function clearSession(): Promise<void> {
-  await LocalStorage.removeItem(SESSION_KEY);
-  await LocalStorage.removeItem(USER_ID_KEY);
-  await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
-  await disconnect();
+  const client = await getClient(config);
+
+  if (!client.connected) {
+    await client.connect();
+  }
+
+  const sendOptions: {
+    message: string;
+    file?: string;
+  } = {
+    message,
+  };
+
+  if (filePath) {
+    sendOptions.file = filePath;
+  }
+
+  await client.sendMessage(chatId, sendOptions);
 }

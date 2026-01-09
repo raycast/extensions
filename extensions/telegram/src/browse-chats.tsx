@@ -66,7 +66,7 @@ export default function BrowseChats() {
       }
 
       const config = getConfig();
-      return await getChats(config, 100);
+      return await getChats({ config, limit: 100 });
     },
     [],
     {

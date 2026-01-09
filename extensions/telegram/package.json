@@ -73,6 +73,59 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "browse-chats",
+      "title": "Browse Telegram Chats",
+      "description": "Browse available Telegram chats (private and group). Returns a list of chats with their IDs, titles, types, and last message info. Use this when you need to find a chat to send a message to or when the user asks to see their chats.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "read-messages",
+      "title": "Read Telegram Messages",
+      "description": "Read messages from a specific Telegram chat. Use this when the user asks what someone said or wants to see recent messages from a conversation.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "description": "The chat ID to read messages from (get this from browse-chats tool)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of messages to fetch (default: 20, max: 100)"
+          }
+        },
+        "required": ["chatId"]
+      }
+    },
+    {
+      "name": "send-message",
+      "title": "Send Telegram Message",
+      "description": "Send a message to a specific Telegram chat with optional file attachment from clipboard. Always confirm with the user before sending messages. Use browse-chats tool first to get the chatId. If the user wants to send a file, ask them to copy it to the clipboard first (⌘C on the file in Finder), then set useClipboardFile to true.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "description": "The chat ID to send the message to (get this from browse-chats tool)"
+          },
+          "message": {
+            "type": "string",
+            "description": "The message text to send"
+          },
+          "useClipboardFile": {
+            "type": "boolean",
+            "description": "Set to true to attach the file currently in the clipboard. The user must copy a file to the clipboard (⌘C) before calling this tool."
+          }
+        },
+        "required": ["chatId", "message"]
+      }
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^1.17.0",
