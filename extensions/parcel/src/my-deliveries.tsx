@@ -224,14 +224,14 @@ export default function Command() {
     const packageName = delivery.description || `From ${carrierName}`;
     const formattedDate = delivery.date_expected ? formatExpectedDelivery(delivery) : null;
     let deliveryDate: string;
-    
+
     if (!formattedDate) {
       deliveryDate = "Not available";
     } else if (daysUntil !== null) {
       // Avoid redundant labels: if formatted date already says "Today" or "Tomorrow", don't repeat it
       const isToday = formattedDate.startsWith("Today");
       const isTomorrow = formattedDate.startsWith("Tomorrow");
-      
+
       if (isToday && daysUntil === 0) {
         // Already says "Today", no need to add "(Today)"
         deliveryDate = formattedDate;
