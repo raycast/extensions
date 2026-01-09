@@ -1,6 +1,6 @@
 # Music Link Converter Changelog
 
-## [Add AI commands] - {PR_MERGE_DATE}
+## [Add AI commands] - 2026-01-09
 - Bump dependencies
 - Add tools: search-providers, update-providers, convert-music-link
   - search-providers: lists providers

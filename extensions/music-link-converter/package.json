@@ -75,251 +75,254 @@
   "ai": {
     "evals": [
       {
-        "input" : "@music-link-converter What are the available music providers?",
-        "mocks" : {
-          "search-providers" : [
+        "input": "@music-link-converter What are the available music providers?",
+        "mocks": {
+          "search-providers": [
             {
-              "enabled" : true,
-              "key" : "spotify",
-              "label" : "Spotify",
-              "urlPatterns" : [
+              "enabled": true,
+              "key": "spotify",
+              "label": "Spotify",
+              "urlPatterns": [
                 "spotify:",
                 "https://open.spotify.com/"
               ]
             },
             {
-              "enabled" : true,
-              "key" : "appleMusic",
-              "label" : "Apple Music",
-              "urlPatterns" : [
+              "enabled": true,
+              "key": "appleMusic",
+              "label": "Apple Music",
+              "urlPatterns": [
                 "https://music.apple.com/",
                 "https://geo.music.apple.com/"
               ]
             },
             {
-              "enabled" : true,
-              "key" : "youtubeMusic",
-              "label" : "Youtube Music",
-              "urlPatterns" : [
+              "enabled": true,
+              "key": "youtubeMusic",
+              "label": "Youtube Music",
+              "urlPatterns": [
                 "https://music.youtube.com/"
               ]
             },
             {
-              "enabled" : true,
-              "key" : "amazonMusic",
-              "label" : "Amazon Music",
-              "urlPatterns" : [
+              "enabled": true,
+              "key": "amazonMusic",
+              "label": "Amazon Music",
+              "urlPatterns": [
                 "https://music.amazon.com/"
               ]
             },
             {
-              "enabled" : true,
-              "key" : "youtube",
-              "label" : "Youtube",
-              "urlPatterns" : [
+              "enabled": true,
+              "key": "youtube",
+              "label": "Youtube",
+              "urlPatterns": [
                 "https://www.youtube.com/"
               ]
             },
             {
-              "enabled" : true,
-              "key" : "deezer",
-              "label" : "Deezer",
-              "urlPatterns" : [
+              "enabled": true,
+              "key": "deezer",
+              "label": "Deezer",
+              "urlPatterns": [
                 "https://www.deezer.com/"
               ]
             },
             {
-              "enabled" : true,
-              "key" : "soundcloud",
-              "label" : "Soundcloud",
-              "urlPatterns" : [
+              "enabled": true,
+              "key": "soundcloud",
+              "label": "Soundcloud",
+              "urlPatterns": [
                 "https://www.soundcloud.com/"
               ]
             },
             {
-              "enabled" : true,
-              "key" : "tidal",
-              "label" : "Tidal",
-              "urlPatterns" : [
+              "enabled": true,
+              "key": "tidal",
+              "label": "Tidal",
+              "urlPatterns": [
                 "https://listen.tidal.com/",
                 "https://tidal.com/"
               ]
             },
             {
-              "enabled" : true,
-              "key" : "anghami",
-              "label" : "Anghami",
-              "urlPatterns" : [
+              "enabled": true,
+              "key": "anghami",
+              "label": "Anghami",
+              "urlPatterns": [
                 "https://play.anghami.com/"
               ]
             }
           ]
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {},
-              "name" : "search-providers"
+            "callsTool": {
+              "arguments": {},
+              "name": "search-providers"
             }
           }
         ],
         "usedAsExample": true
       },
       {
-        "input" : "@music-link-converter Disable Deezer, Tidal and Anghami providers",
-        "mocks" : {
-          "update-providers" : {
-            "notFound" : [],
-            "success" : true,
-            "updated" : [
+        "input": "@music-link-converter Disable Deezer, Tidal and Anghami providers",
+        "mocks": {
+          "update-providers": {
+            "notFound": [],
+            "success": true,
+            "updated": [
               {
-                "enabled" : false,
-                "key" : "deezer",
-                "label" : "Deezer"
+                "enabled": false,
+                "key": "deezer",
+                "label": "Deezer"
               },
               {
-                "enabled" : false,
-                "key" : "tidal",
-                "label" : "Tidal"
+                "enabled": false,
+                "key": "tidal",
+                "label": "Tidal"
               },
               {
-                "enabled" : false,
-                "key" : "anghami",
-                "label" : "Anghami"
+                "enabled": false,
+                "key": "anghami",
+                "label": "Anghami"
               }
             ]
           }
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-                "action" : "disable",
-                "providers" : {
-                  "eq" : [
+            "callsTool": {
+              "arguments": {
+                "action": "disable",
+                "providers": {
+                  "eq": [
                     "Deezer",
                     "Tidal",
                     "Anghami"
                   ]
                 }
               },
-              "name" : "update-providers"
+              "name": "update-providers"
             }
           }
         ],
         "usedAsExample": true
       },
       {
-        "input" : "@music-link-converter Convert this link https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw",
-        "mocks" : {
-          "convert-music-link" : [
+        "input": "@music-link-converter Convert this link https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw",
+        "mocks": {
+          "convert-music-link": [
             {
-              "label" : "Spotify",
-              "link" : {
-                "country" : "US",
-                "entityUniqueId" : "SPOTIFY_SONG::7BRD7x5pt8Lqa1eGYC4dzj",
-                "nativeAppUriDesktop" : "spotify:track:7BRD7x5pt8Lqa1eGYC4dzj",
-                "url" : "https://open.spotify.com/track/7BRD7x5pt8Lqa1eGYC4dzj"
+              "label": "Spotify",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "SPOTIFY_SONG::7BRD7x5pt8Lqa1eGYC4dzj",
+                "nativeAppUriDesktop": "spotify:track:7BRD7x5pt8Lqa1eGYC4dzj",
+                "url": "https://open.spotify.com/track/7BRD7x5pt8Lqa1eGYC4dzj"
               }
             },
             {
-              "label" : "Apple Music",
-              "link" : {
-                "country" : "US",
-                "entityUniqueId" : "ITUNES_SONG::1739659141",
-                "nativeAppUriDesktop" : "itmss://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_d&itscg=30200&itsct=odsl_m",
-                "nativeAppUriMobile" : "music://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_m&itscg=30200&itsct=odsl_m",
-                "url" : "https://geo.music.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_http&itscg=30200&itsct=odsl_m"
+              "label": "Apple Music",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "ITUNES_SONG::1739659141",
+                "nativeAppUriDesktop": "itmss://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_d&itscg=30200&itsct=odsl_m",
+                "nativeAppUriMobile": "music://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_m&itscg=30200&itsct=odsl_m",
+                "url": "https://geo.music.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_http&itscg=30200&itsct=odsl_m"
               }
             },
             {
-              "label" : "Youtube Music",
-              "link" : {
-                "country" : "US",
-                "entityUniqueId" : "YOUTUBE_VIDEO::zYEKeEOKNi0",
-                "url" : "https://music.youtube.com/watch?v=zYEKeEOKNi0"
+              "label": "Youtube Music",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "YOUTUBE_VIDEO::zYEKeEOKNi0",
+                "url": "https://music.youtube.com/watch?v=zYEKeEOKNi0"
               }
             },
             {
-              "label" : "Amazon Music",
-              "link" : {
-                "country" : "US",
-                "entityUniqueId" : "AMAZON_SONG::B0CZVV137Q",
-                "url" : "https://music.amazon.com/albums/B0CZVW38Y1?trackAsin=B0CZVV137Q"
+              "label": "Amazon Music",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "AMAZON_SONG::B0CZVV137Q",
+                "url": "https://music.amazon.com/albums/B0CZVW38Y1?trackAsin=B0CZVV137Q"
               }
             },
             {
-              "label" : "Youtube",
-              "link" : {
-                "country" : "US",
-                "entityUniqueId" : "YOUTUBE_VIDEO::zYEKeEOKNi0",
-                "url" : "https://www.youtube.com/watch?v=zYEKeEOKNi0"
+              "label": "Youtube",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "YOUTUBE_VIDEO::zYEKeEOKNi0",
+                "url": "https://www.youtube.com/watch?v=zYEKeEOKNi0"
               }
             },
             {
-              "label" : "Soundcloud",
-              "link" : {
-                "country" : "US",
-                "entityUniqueId" : "SOUNDCLOUD_SONG::1822834335",
-                "url" : "https://soundcloud.com/billieeilish/chihiro?utm_medium=api&utm_campaign=social_sharing&utm_source=id_314547"
+              "label": "Soundcloud",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "SOUNDCLOUD_SONG::1822834335",
+                "url": "https://soundcloud.com/billieeilish/chihiro?utm_medium=api&utm_campaign=social_sharing&utm_source=id_314547"
               }
             }
           ]
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-                "url" : "https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw",
-                "providers" : []
+            "callsTool": {
+              "arguments": {
+                "url": "https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw",
+                "providers": []
               },
-              "name" : "convert-music-link"
+              "name": "convert-music-link"
             }
           }
         ]
       },
       {
-        "input" : "@music-link-converter Convert this link to Spotify and Apple Music https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw",
-        "mocks" : {
-          "convert-music-link" : [
+        "input": "@music-link-converter Convert this link to Spotify and Apple Music https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw",
+        "mocks": {
+          "convert-music-link": [
             {
-              "label" : "Spotify",
-              "link" : {
-                "country" : "US",
-                "entityUniqueId" : "SPOTIFY_SONG::7BRD7x5pt8Lqa1eGYC4dzj",
-                "nativeAppUriDesktop" : "spotify:track:7BRD7x5pt8Lqa1eGYC4dzj",
-                "url" : "https://open.spotify.com/track/7BRD7x5pt8Lqa1eGYC4dzj"
+              "label": "Spotify",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "SPOTIFY_SONG::7BRD7x5pt8Lqa1eGYC4dzj",
+                "nativeAppUriDesktop": "spotify:track:7BRD7x5pt8Lqa1eGYC4dzj",
+                "url": "https://open.spotify.com/track/7BRD7x5pt8Lqa1eGYC4dzj"
               }
             },
             {
-              "label" : "Apple Music",
-              "link" : {
-                "country" : "US",
-                "entityUniqueId" : "ITUNES_SONG::1739659141",
-                "nativeAppUriDesktop" : "itmss://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_d&itscg=30200&itsct=odsl_m",
-                "nativeAppUriMobile" : "music://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_m&itscg=30200&itsct=odsl_m",
-                "url" : "https://geo.music.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_http&itscg=30200&itsct=odsl_m"
+              "label": "Apple Music",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "ITUNES_SONG::1739659141",
+                "nativeAppUriDesktop": "itmss://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_d&itscg=30200&itsct=odsl_m",
+                "nativeAppUriMobile": "music://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_m&itscg=30200&itsct=odsl_m",
+                "url": "https://geo.music.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_http&itscg=30200&itsct=odsl_m"
               }
             }
           ]
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-                "providers" : {
-                  "eq" : [
+            "callsTool": {
+              "arguments": {
+                "providers": {
+                  "eq": [
                     "Spotify",
                     "Apple Music"
                   ]
                 },
-                "url" : "https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw"
+                "url": "https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw"
               },
-              "name" : "convert-music-link"
+              "name": "convert-music-link"
             }
           }
         ]
       }
     ]
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
