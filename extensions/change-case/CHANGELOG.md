@@ -2,11 +2,9 @@
 
 ## [Refactor and ESLint Compatibility] - {PR_MERGE_DATE}
 
-- Renamed `spongeCase` to `alternatingCase` for better clarity
+- Added a proper `alternatingCase` transformation alongside the existing `randomCase` option
 - Updated function names and aliases to prioritize "alternating" while maintaining backward compatibility
-- Resolved ESLint configuration compatibility issues
 - Removed duplicate ESLint config files
-- Downgraded to ESLint 8 for Raycast extension compatibility
 
 ## [Enable `fallback text`. support] - 2025-12-16
 
@@ -27,12 +25,6 @@
   - Consolidated `CaseFunction` type definition
   - Added `MAX_RECENT_CASES` constant to replace magic number
 - Fixed markdown formatting issues in CHANGELOG and README
-
-## [Add real spongeCase transformation] - 2025-12-03
-- Added a proper `spongeCase` transformation alongside the existing `randomCase` option
-- The spongeCase creates an alternating case pattern (SpOnGeCaSe) that's deterministic and visually distinctive
-- Previously, spongeCase was aliased to randomCase, but now provides its own unique transformation
-- Added preference to enable/disable the Sponge Case transformation
 
 ## [Add `hide HUD` preference] - 2025-08-18
 
