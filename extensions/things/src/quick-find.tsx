@@ -1,75 +1,69 @@
 import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo } from 'react';
-import { getListTodos, getLists } from './api';
-
-interface ListData {
-  id: string;
-  name: string;
-  type: string;
-}
+import { getQuickFindData } from './api';
 
 interface SearchItem {
   id: string;
   name: string;
-  type: string;
+  type: 'area' | 'project' | 'todo';
   project?: string;
   area?: string;
   status?: string;
 }
 
 export default function Command() {
-  const { data: lists, isLoading: isLoadingLists } = useCachedPromise(getLists);
-  const { data: inboxTodos, isLoading: isLoadingInbox } = useCachedPromise(getListTodos, ['inbox']);
-  const { data: todayTodos, isLoading: isLoadingToday } = useCachedPromise(getListTodos, ['today']);
-  const { data: anytimeTodos, isLoading: isLoadingAnytime } = useCachedPromise(getListTodos, ['anytime']);
-  const { data: somedayTodos, isLoading: isLoadingSomeday } = useCachedPromise(getListTodos, ['someday']);
-  const { data: upcomingTodos, isLoading: isLoadingUpcoming } = useCachedPromise(getListTodos, ['upcoming']);
-
-  const isLoading =
-    isLoadingLists || isLoadingInbox || isLoadingToday || isLoadingAnytime || isLoadingSomeday || isLoadingUpcoming;
+  // Single JXA call to fetch all data - dramatically reduces AppleScript overhead
+  const { data, isLoading } = useCachedPromise(getQuickFindData);
 
   const items = useMemo(() => {
+    if (!data) return [];
+
     const allItems: SearchItem[] = [];
     const seenIds = new Set<string>();
 
-    if (lists) {
-      lists.forEach((list: ListData) => {
-        if (!seenIds.has(list.id)) {
-          seenIds.add(list.id);
-          allItems.push({
-            id: list.id,
-            name: list.name,
-            type: list.type === 'area' ? 'area' : 'project',
-          });
-        }
-      });
+    // Add areas
+    for (const area of data.areas) {
+      if (!seenIds.has(area.id)) {
+        seenIds.add(area.id);
+        allItems.push({
+          id: area.id,
+          name: area.name,
+          type: 'area',
+        });
+      }
     }
 
-    const todos = [
-      ...(inboxTodos || []),
-      ...(todayTodos || []),
-      ...(anytimeTodos || []),
-      ...(somedayTodos || []),
-      ...(upcomingTodos || []),
-    ];
+    // Add projects
+    for (const project of data.projects) {
+      if (!seenIds.has(project.id)) {
+        seenIds.add(project.id);
+        allItems.push({
+          id: project.id,
+          name: project.name,
+          type: 'project',
+          area: project.areaName,
+        });
+      }
+    }
 
-    for (const todo of todos) {
+    // Add todos from all lists (deduplicated)
+    for (const todo of data.todos) {
       if (!seenIds.has(todo.id)) {
         seenIds.add(todo.id);
         allItems.push({
           id: todo.id,
           name: todo.name,
           type: 'todo',
-          project: todo.project?.name,
-          area: todo.area?.name,
+          project: todo.projectName,
+          area: todo.areaName,
           status: todo.status,
         });
       }
     }
 
     return allItems;
-  }, [lists, inboxTodos, todayTodos, anytimeTodos, somedayTodos, upcomingTodos]);
+  }, [data]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search areas, projects, and to-dos...">

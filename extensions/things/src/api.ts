@@ -338,6 +338,67 @@ export const getLists = async (): Promise<List[]> => {
   return [...projectsWithoutAreas, ...organizedAreasAndProjects];
 };
 
+// Optimized single-query fetch for Quick Find
+// Fetches all searchable data in ONE JXA call to minimize AppleScript overhead
+// This is critical for macOS Tahoe where AppleScript automation has significant latency
+export const getQuickFindData = async (): Promise<{
+  areas: Array<{ id: string; name: string }>;
+  projects: Array<{ id: string; name: string; areaName?: string }>;
+  todos: Array<{ id: string; name: string; status: string; projectName?: string; areaName?: string }>;
+}> => {
+  return executeJxa(
+    `
+    const things = Application('${preferences.thingsAppIdentifier}');
+
+    // Fetch areas (lightweight)
+    const areas = things.areas().map(area => ({
+      id: area.id(),
+      name: area.name(),
+    }));
+
+    // Fetch projects (lightweight, no nested todos)
+    const projects = things.projects().map(project => ({
+      id: project.id(),
+      name: project.name(),
+      areaName: project.area() && project.area().name(),
+    }));
+
+    // Fetch todos from all active lists in one pass
+    // Only fetch essential fields to minimize data transfer
+    const listIds = [
+      'TMInboxListSource',
+      'TMTodayListSource',
+      'TMNextListSource',
+      'TMCalendarListSource',
+      'TMSomedayListSource'
+    ];
+
+    const seenIds = {};
+    const todos = [];
+
+    for (const listId of listIds) {
+      const listTodos = things.lists.byId(listId).toDos();
+      for (const todo of listTodos) {
+        const id = todo.id();
+        if (!seenIds[id]) {
+          seenIds[id] = true;
+          todos.push({
+            id: id,
+            name: todo.name(),
+            status: todo.status(),
+            projectName: todo.project() && todo.project().name(),
+            areaName: todo.area() && todo.area().name(),
+          });
+        }
+      }
+    }
+
+    return { areas, projects, todos };
+  `,
+    'Get quick find data',
+  );
+};
+
 export async function silentlyOpenThingsURL(url: string) {
   const asyncExec = promisify(exec);
   await asyncExec(`open -g "${url}"`);
