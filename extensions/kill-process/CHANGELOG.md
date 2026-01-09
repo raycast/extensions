@@ -1,5 +1,9 @@
 # Kill Process Changelog
 
+## [Windows Fix] - 2025-12-02
+
+ - Fix powershell command on Windows by adding -NoProfile
+
 ## [Fixed Force Kill in MacOS] - 2025-12-16
 
 - Fixed force kill for MacOS by encapsulating the kill command within a zsh shell
