@@ -164,3 +164,49 @@ export async function getSubtasks(taskId: string) {
 
   return data.data;
 }
+
+export async function setTaskParent(taskId: string, parentId: string) {
+  const { data } = await request<{ data: Task }>(`/tasks/${taskId}/setParent`, {
+    method: "POST",
+    data: { data: { parent: parentId } },
+  });
+  return data.data;
+}
+
+export async function removeTaskParent(taskId: string) {
+  const { data } = await request<{ data: Task }>(`/tasks/${taskId}/setParent`, {
+    method: "POST",
+    data: { data: { parent: null } },
+  });
+  return data.data;
+}
+
+export async function searchTasks(workspace: string, query?: string) {
+  const { data } = await request<{ data: Pick<Task, "gid" | "name" | "parent">[] }>(
+    `/workspaces/${workspace}/typeahead`,
+    {
+      params: {
+        resource_type: "task",
+        query: query || "",
+        opt_fields: "gid,name,parent",
+      },
+    },
+  );
+  // Only return top-level tasks (not subtasks)
+  return data.data.filter((task) => !task.parent);
+}
+
+export type SubtaskPayload = {
+  name: string;
+  assignee?: string;
+  due_on?: string;
+  html_notes?: string;
+};
+
+export async function createSubtask(parentId: string, payload: SubtaskPayload) {
+  const { data } = await request<{ data: Task }>(`/tasks/${parentId}/subtasks`, {
+    method: "POST",
+    data: { data: payload },
+  });
+  return data.data;
+}

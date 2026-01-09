@@ -10,7 +10,17 @@ import { useSections } from "../hooks/useSections";
 import { useTags } from "../hooks/useTags";
 import { asanaToRaycastColor } from "../helpers/colors";
 import { getErrorMessage } from "../helpers/errors";
-import { Task, updateTask, deleteTask as apiDeleteTask, CustomField, EnumValue } from "../api/tasks";
+import {
+  Task,
+  updateTask,
+  deleteTask as apiDeleteTask,
+  CustomField,
+  EnumValue,
+  removeTaskParent,
+  getSubtasks,
+} from "../api/tasks";
+import ParentTaskPicker from "./ParentTaskPicker";
+import CreateSubtaskForm from "./CreateSubtaskForm";
 import { format } from "date-fns";
 import { partition } from "lodash";
 
@@ -29,7 +39,7 @@ type MutateParams = {
 };
 
 export default function TaskActions({ task, workspace, isDetail, mutateList, mutateDetail }: TaskActionProps) {
-  const { pop } = useNavigation();
+  const { pop, push } = useNavigation();
 
   async function mutate({ asyncUpdate, optimisticUpdate, rollbackUpdate }: MutateParams) {
     await Promise.all([
@@ -149,6 +159,57 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
     }
   }
 
+  async function convertToTask() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Converting to task" });
+
+      const asyncUpdate = removeTaskParent(task.gid);
+
+      await mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, parent: null };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Converted to task",
+        message: `"${task.name}" is now a top-level task`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to convert to task",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function handleConvertToSubtask() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Checking for subtasks" });
+
+      const subtasks = await getSubtasks(task.gid);
+      if (subtasks.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot convert to subtask",
+          message: "This task has subtasks. Remove them first.",
+        });
+        return;
+      }
+
+      push(<ParentTaskPicker task={task} workspace={workspace!} mutateList={mutateList} mutateDetail={mutateDetail} />);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to check subtasks",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   const openTaskInBrowserAction = (
     <Action.OpenInBrowser url={task.permalink_url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
   );
@@ -166,6 +227,21 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
       {!isDetail ? openTaskInBrowserAction : null}
 
       <ActionPanel.Section>
+        {!task.parent && workspace && (
+          <Action.Push
+            title="Add Subtask"
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            target={<CreateSubtaskForm parentTask={task} workspace={workspace} />}
+          />
+        )}
+
+        {!task.parent && workspace && (
+          <Action title="Convert to Subtask" icon={Icon.ArrowDown} onAction={handleConvertToSubtask} />
+        )}
+
+        {task.parent && <Action title="Convert to Task" icon={Icon.ArrowUp} onAction={convertToTask} />}
+
         <UsersSubmenu workspace={workspace} task={task} mutate={mutate} />
         <DueOnSubMenu task={task} mutate={mutate} />
         <ProjectsSubmenu workspace={workspace} task={task} mutate={mutate} />

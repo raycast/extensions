@@ -49,9 +49,7 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
             text={task.completed ? "Completed" : "Incomplete"}
           />
 
-          {task.parent && (
-            <Detail.Metadata.Label title="Parent Task" icon={Icon.Dot} text={task.parent.name} />
-          )}
+          {task.parent && <Detail.Metadata.Label title="Parent Task" icon={Icon.Dot} text={task.parent.name} />}
 
           <Detail.Metadata.Label
             title="Assignee"
