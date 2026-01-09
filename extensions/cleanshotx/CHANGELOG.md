@@ -1,6 +1,6 @@
 # Cleanshot X Changelog
 
-## [Update app icon] - {PR_MERGE_DATE}
+## [Update app icon] - 2026-01-09
 
 - Update icon for extension
 
