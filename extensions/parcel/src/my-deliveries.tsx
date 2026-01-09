@@ -29,6 +29,7 @@ const DATE_FORMATS = [
   "dd.MM.yyyy HH:mm:ss", // European with seconds
   "dd.MM.yyyy HH:mm", // European without seconds
   "MMMM dd, yyyy HH:mm", // American
+  "MM.dd.yyyy HH:mm", // American
   "yyyy-MM-dd HH:mm:ss", // ISO 8601
   "EEEE, d MMMM h:mm a", // Day name, date, 12-hour time (e.g. "Saturday, 31 May 5:26 am")
   "EEEE, d MMMM", // Day name and date (e.g. "Saturday, 31 May")
@@ -221,9 +222,32 @@ export default function Command() {
   const generateDetailMetadata = (delivery: Delivery, daysUntil: number | null) => {
     const carrierName = getCarrierName(delivery.carrier_code);
     const packageName = delivery.description || `From ${carrierName}`;
-    const deliveryDate = delivery.date_expected
-      ? `${formatExpectedDelivery(delivery)} ${daysUntil !== null ? (daysUntil < 0 ? `(${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? "s" : ""} ago)` : daysUntil === 0 ? "(Today)" : `(in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})`) : ""}`
-      : "Not available";
+    const formattedDate = delivery.date_expected ? formatExpectedDelivery(delivery) : null;
+    let deliveryDate: string;
+    
+    if (!formattedDate) {
+      deliveryDate = "Not available";
+    } else if (daysUntil !== null) {
+      // Avoid redundant labels: if formatted date already says "Today" or "Tomorrow", don't repeat it
+      const isToday = formattedDate.startsWith("Today");
+      const isTomorrow = formattedDate.startsWith("Tomorrow");
+      
+      if (isToday && daysUntil === 0) {
+        // Already says "Today", no need to add "(Today)"
+        deliveryDate = formattedDate;
+      } else if (isTomorrow && daysUntil === 1) {
+        // Already says "Tomorrow", no need to add "(in 1 day)"
+        deliveryDate = formattedDate;
+      } else if (daysUntil < 0) {
+        deliveryDate = `${formattedDate} (${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? "s" : ""} ago)`;
+      } else if (daysUntil === 0) {
+        deliveryDate = `${formattedDate} (Today)`;
+      } else {
+        deliveryDate = `${formattedDate} (in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})`;
+      }
+    } else {
+      deliveryDate = formattedDate;
+    }
 
     return (
       <List.Item.Detail.Metadata>
