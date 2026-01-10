@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, showToast, Toast, Detail, Icon, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, Clipboard, Detail, Form, Icon, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 
 interface ConversionData {
@@ -8,203 +8,189 @@ interface ConversionData {
   inches: string;
   px: string;
   dpiValue: number;
-  calculations: string[];
+}
+
+interface ParsedValue {
+  value: number;
+  unit: string;
+  pixels: number;
 }
 
 export default function Command() {
   const [conversionData, setConversionData] = useState<ConversionData | null>(null);
   const [showResult, setShowResult] = useState(false);
+  
+  // États du formulaire
+  const [dimension1, setDimension1] = useState("");
+  const [dimension2, setDimension2] = useState("");
+  const [dpi, setDpi] = useState("300");
 
-  function parseInput(input: string): { value: number; unit: string } | null {
-    if (!input || input.trim() === "") return null;
-    
-    const normalized = input.replace(",", ".").trim();
-    const match = normalized.match(/^(\d+\.?\d*)\s*(px|cm|mm|in)?$/i);
-    
-    if (!match) return null;
-    
+  // --- LOGIQUE DE CONVERSION ---
+
+  function toPixels(val: number, unit: string, dpi: number): number {
+    switch (unit.toLowerCase()) {
+      case "px": return val;
+      case "cm": return (val / 2.54) * dpi;
+      case "mm": return (val / 25.4) * dpi;
+      case "in": return val * dpi;
+      default: return 0;
+    }
+  }
+
+  function fromPixels(px: number, dpi: number) {
     return {
-      value: parseFloat(match[1]),
-      unit: match[2] ? match[2].toLowerCase() : "",
+      px: Math.round(px).toString(),
+      cm: ((px / dpi) * 2.54).toFixed(2),
+      mm: ((px / dpi) * 25.4).toFixed(2),
+      inches: (px / dpi).toFixed(2)
     };
   }
 
-  function convertFromPixels(px: number, dpi: number) {
-    const cm = ((px / dpi) * 2.54).toFixed(2);
-    const mm = ((px / dpi) * 25.4).toFixed(2);
-    const inches = (px / dpi).toFixed(2);
+  /**
+   * Parse une entrée simple "NOMBRE UNITÉ" (ex: "1000px", "20cm")
+   */
+  function parseInput(input: string, dpi: number): ParsedValue | null {
+    if (!input || !input.trim()) return null;
     
-    return { cm, mm, inches };
+    // Nettoyage : remplace virgule par point
+    const clean = input.replace(/,/g, ".").trim();
+
+    // Regex stricte : Début ^, Nombre, Espace optionnel, Unité, Fin $
+    const match = clean.match(/^(\d+(?:\.\d+)?)\s*(px|cm|mm|in)$/i);
+
+    if (!match) return null;
+
+    const val = parseFloat(match[1]);
+    const unit = match[2].toLowerCase();
+
+    // Validation Valeur <= 0
+    if (val <= 0) return null;
+
+    return {
+      value: val,
+      unit: unit,
+      pixels: toPixels(val, unit, dpi)
+    };
   }
 
-  function convertToPixels(value: number, unit: string, dpi: number): number {
-    switch (unit) {
-      case "cm":
-        return Math.round((value / 2.54) * dpi);
-      case "mm":
-        return Math.round((value / 25.4) * dpi);
-      case "in":
-        return Math.round(value * dpi);
-      default:
-        return 0;
-    }
-  }
+  // --- GESTION DU FORMULAIRE ---
 
   async function handleSubmit(values: { dimension1: string; dimension2?: string; dpi: string }) {
-    const dpiValue = parseInt(values.dpi) || 300;
+    // 1. Validation DPI
+    const dpiVal = parseFloat(values.dpi.replace(/,/g, "."));
+    if (isNaN(dpiVal) || dpiVal <= 0) {
+      await showToast({ 
+        style: Toast.Style.Failure, 
+        title: "Invalid DPI", 
+        message: "DPI must be a number greater than 0" 
+      });
+      return;
+    }
+
+    // 2. Parsing Dimension 1
+    const d1 = parseInput(values.dimension1, dpiVal);
     
-    const parsed1 = parseInput(values.dimension1);
-    if (!parsed1) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid format",
-        message: "Use format: number + unit (e.g.: 3000px, 25cm, 8.5in)",
-      });
-      return;
-    }
-
-    let parsed2: { value: number; unit: string } | null = null;
-    if (values.dimension2 && values.dimension2.trim() !== "") {
-      parsed2 = parseInput(values.dimension2);
-      
-      if (!parsed2) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid format",
-          message: "Use format: number + unit (e.g.: 3000px, 25cm, 8.5in)",
+    // Gestion erreurs Dim 1
+    if (!d1) {
+      const val = parseFloat(values.dimension1.replace(/,/g, "."));
+      if (!isNaN(val) && val <= 0) {
+        await showToast({ 
+          style: Toast.Style.Failure, 
+          title: "Invalid Value", 
+          message: "Dimension must be greater than 0" 
         });
-        return;
-      }
-      
-      if (!parsed2.unit && parsed1.unit) {
-        parsed2.unit = parsed1.unit;
-      }
-      
-      if (!parsed1.unit && parsed2.unit) {
-        parsed1.unit = parsed2.unit;
-      }
-      
-      if (parsed1.unit && parsed2.unit && parsed2.unit !== parsed1.unit) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Unit mismatch",
-          message: "Both dimensions must have the same unit",
-        });
-        return;
-      }
-    }
-
-    if (!parsed1.unit) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Missing unit",
-        message: "Please specify a unit (px, cm, mm, in)",
-      });
-      return;
-    }
-
-    // Prepare conversion data
-    let data: ConversionData;
-
-    if (parsed1.unit === "px") {
-      const conv1 = convertFromPixels(parsed1.value, dpiValue);
-      
-      if (parsed2) {
-        const conv2 = convertFromPixels(parsed2.value, dpiValue);
-        data = {
-          mainResult: `${conv1.cm} × ${conv2.cm} cm`,
-          cm: `${conv1.cm} × ${conv2.cm}`,
-          mm: `${conv1.mm} × ${conv2.mm}`,
-          inches: `${conv1.inches} × ${conv2.inches}`,
-          px: `${parsed1.value} × ${parsed2.value}`,
-          dpiValue: dpiValue,
-          calculations: [
-            `① : (${parsed1.value} px ÷ ${dpiValue} dpi) × 2.54 = ${conv1.cm} cm`,
-            `② : (${parsed2.value} px ÷ ${dpiValue} dpi) × 2.54 = ${conv2.cm} cm`,
-          ],
-        };
       } else {
-        data = {
-          mainResult: `${conv1.cm} cm`,
-          cm: conv1.cm,
-          mm: conv1.mm,
-          inches: conv1.inches,
-          px: `${parsed1.value}`,
-          dpiValue: dpiValue,
-          calculations: [
-            `(${parsed1.value} px ÷ ${dpiValue} dpi) × 2.54 = ${conv1.cm} cm`,
-          ],
-        };
+        await showToast({ 
+          style: Toast.Style.Failure, 
+          title: "Invalid Format", 
+          message: "Use format: NUMBER + UNIT (e.g., 1000px, 20cm)" 
+        });
       }
+      return;
+    }
+
+    // 3. Parsing Dimension 2 (Optionnelle)
+    let d2: ParsedValue | null = null;
+    if (values.dimension2 && values.dimension2.trim().length > 0) {
+      d2 = parseInput(values.dimension2, dpiVal);
+
+      if (!d2) {
+        const val = parseFloat(values.dimension2.replace(/,/g, "."));
+        if (!isNaN(val) && val <= 0) {
+          await showToast({ 
+            style: Toast.Style.Failure, 
+            title: "Invalid Value (Dim 2)", 
+            message: "Dimension must be greater than 0" 
+          });
+        } else {
+          await showToast({ 
+            style: Toast.Style.Failure, 
+            title: "Invalid Format (Dim 2)", 
+            message: "Use format: NUMBER + UNIT (e.g., 500px, 10cm)" 
+          });
+        }
+        return;
+      }
+    }
+
+    // 4. Préparation des résultats
+    const res1 = fromPixels(d1.pixels, dpiVal);
+    
+    let mainResult = "";
+    let finalPx = "", finalCm = "", finalMm = "", finalIn = "";
+
+    if (d2) {
+      // Mode 2 Dimensions
+      const res2 = fromPixels(d2.pixels, dpiVal);
+      const targetUnit = d1.unit; 
+
+      if (targetUnit === "px") mainResult = `${res1.px} × ${res2.px} px`;
+      else if (targetUnit === "cm") mainResult = `${res1.cm} × ${res2.cm} cm`;
+      else if (targetUnit === "mm") mainResult = `${res1.mm} × ${res2.mm} mm`;
+      else if (targetUnit === "in") mainResult = `${res1.inches} × ${res2.inches} in`;
+      else mainResult = `${res1.px} × ${res2.px} px`;
+
+      finalPx = `${res1.px} × ${res2.px}`;
+      finalCm = `${res1.cm} × ${res2.cm}`;
+      finalMm = `${res1.mm} × ${res2.mm}`;
+      finalIn = `${res1.inches} × ${res2.inches}`;
+
     } else {
-      const px1 = convertToPixels(parsed1.value, parsed1.unit, dpiValue);
-      const conv1 = convertFromPixels(px1, dpiValue);
-      
-      if (parsed2) {
-        const px2 = convertToPixels(parsed2.value, parsed2.unit, dpiValue);
-        const conv2 = convertFromPixels(px2, dpiValue);
-        
-        const calcs = [];
-        switch (parsed1.unit) {
-          case "cm":
-            calcs.push(`① : (${parsed1.value} cm ÷ 2.54) × ${dpiValue} dpi = ${px1} px`);
-            calcs.push(`② : (${parsed2.value} cm ÷ 2.54) × ${dpiValue} dpi = ${px2} px`);
-            break;
-          case "mm":
-            calcs.push(`① : (${parsed1.value} mm ÷ 25.4) × ${dpiValue} dpi = ${px1} px`);
-            calcs.push(`② : (${parsed2.value} mm ÷ 25.4) × ${dpiValue} dpi = ${px2} px`);
-            break;
-          case "in":
-            calcs.push(`① : ${parsed1.value} in × ${dpiValue} dpi = ${px1} px`);
-            calcs.push(`② : ${parsed2.value} in × ${dpiValue} dpi = ${px2} px`);
-            break;
-        }
-        
-        data = {
-          mainResult: `${px1} × ${px2} px`,
-          cm: `${conv1.cm} × ${conv2.cm}`,
-          mm: `${conv1.mm} × ${conv2.mm}`,
-          inches: `${conv1.inches} × ${conv2.inches}`,
-          px: `${px1} × ${px2}`,
-          dpiValue: dpiValue,
-          calculations: calcs,
-        };
-      } else {
-        let calc = "";
-        switch (parsed1.unit) {
-          case "cm":
-            calc = `(${parsed1.value} cm ÷ 2.54) × ${dpiValue} dpi = ${px1} px`;
-            break;
-          case "mm":
-            calc = `(${parsed1.value} mm ÷ 25.4) × ${dpiValue} dpi = ${px1} px`;
-            break;
-          case "in":
-            calc = `${parsed1.value} in × ${dpiValue} dpi = ${px1} px`;
-            break;
-        }
-        
-        data = {
-          mainResult: `${px1} px`,
-          cm: conv1.cm,
-          mm: conv1.mm,
-          inches: conv1.inches,
-          px: `${px1}`,
-          dpiValue: dpiValue,
-          calculations: [calc],
-        };
-      }
+      // Mode 1 Dimension
+      if (d1.unit === "px") mainResult = `${res1.cm} cm`;
+      else mainResult = `${res1.px} px`;
+
+      finalPx = res1.px;
+      finalCm = res1.cm;
+      finalMm = res1.mm;
+      finalIn = res1.inches;
     }
 
-    setConversionData(data);
+    setConversionData({
+      mainResult,
+      px: finalPx,
+      cm: finalCm,
+      mm: finalMm,
+      inches: finalIn,
+      dpiValue: dpiVal
+    });
     setShowResult(true);
   }
+
+  // --- AFFICHAGE ---
 
   if (showResult && conversionData) {
     const markdown = `# ✅ ${conversionData.mainResult}
 
-## Detailed Calculations
+| Unit | Value |
+|------|-------|
+| **Pixels** | \`${conversionData.px} px\` |
+| **CM** | \`${conversionData.cm} cm\` |
+| **MM** | \`${conversionData.mm} mm\` |
+| **Inches** | \`${conversionData.inches} in\` |
 
-${conversionData.calculations.map(calc => `- ${calc}`).join('\n')}
+---
+*Resolution: ${conversionData.dpiValue} DPI*
 `;
 
     const allValues = `px: ${conversionData.px}\ncm: ${conversionData.cm}\nmm: ${conversionData.mm}\nin: ${conversionData.inches}`;
@@ -216,39 +202,19 @@ ${conversionData.calculations.map(calc => `- ${calc}`).join('\n')}
           <Detail.Metadata>
             <Detail.Metadata.Label title="Result" text={conversionData.mainResult} icon="✅" />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Pixels" text={`${conversionData.px} px`} icon={Icon.Hashtag} />
-            <Detail.Metadata.Label title="Centimeters" text={`${conversionData.cm} cm`} icon={Icon.Ruler} />
-            <Detail.Metadata.Label title="Millimeters" text={`${conversionData.mm} mm`} icon={Icon.Ruler} />
-            <Detail.Metadata.Label title="Inches" text={`${conversionData.inches} in`} icon={Icon.Ruler} />
+            <Detail.Metadata.Label title="Pixels" text={conversionData.px} icon={Icon.Hashtag} />
+            <Detail.Metadata.Label title="Centimeters" text={conversionData.cm} icon={Icon.Ruler} />
+            <Detail.Metadata.Label title="Millimeters" text={conversionData.mm} icon={Icon.Ruler} />
+            <Detail.Metadata.Label title="Inches" text={conversionData.inches} icon={Icon.Ruler} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Resolution" text={`${conversionData.dpiValue} DPI`} icon={Icon.Eye} />
           </Detail.Metadata>
         }
         actions={
           <ActionPanel>
-            <Action
-              title="New Conversion"
-              icon={Icon.ArrowLeft}
-              onAction={() => setShowResult(false)}
-            />
-            <Action
-              title="Copy Result"
-              icon={Icon.Clipboard}
-              onAction={async () => {
-                await Clipboard.copy(conversionData.mainResult);
-                await showToast({ title: "Copied!", style: Toast.Style.Success });
-              }}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
-            <Action
-              title="Copy All Values"
-              icon={Icon.CopyClipboard}
-              onAction={async () => {
-                await Clipboard.copy(allValues);
-                await showToast({ title: "Copied!", style: Toast.Style.Success });
-              }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
+            <Action title="New Conversion" icon={Icon.ArrowLeft} onAction={() => setShowResult(false)} />
+            <Action.CopyToClipboard title="Copy Result" content={conversionData.mainResult} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+            <Action.CopyToClipboard title="Copy All Values" content={allValues} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
           </ActionPanel>
         }
       />
@@ -263,9 +229,27 @@ ${conversionData.calculations.map(calc => `- ${calc}`).join('\n')}
         </ActionPanel>
       }
     >
-      <Form.TextField id="dimension1" title="① Dimension" placeholder="e.g.: 512px, 2.5cm, 8.5in" />
-      <Form.TextField id="dimension2" title="② Dimension" placeholder="optional" />
-      <Form.TextField id="dpi" title="DPI" placeholder="300 (default)" defaultValue="300" />
+      <Form.TextField 
+        id="dimension1" 
+        title="① Dimension" 
+        placeholder="e.g. 1000px, 20cm" 
+        value={dimension1}
+        onChange={setDimension1}
+      />
+      <Form.TextField 
+        id="dimension2" 
+        title="② Dimension" 
+        placeholder="optional (e.g. 500px, 10cm)" 
+        value={dimension2}
+        onChange={setDimension2}
+      />
+      <Form.TextField 
+        id="dpi" 
+        title="DPI" 
+        placeholder="300"
+        value={dpi} 
+        onChange={setDpi} 
+      />
     </Form>
   );
 }
