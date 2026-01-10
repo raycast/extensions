@@ -1,4 +1,8 @@
-# Model Context Protocol Registry Changelog
+# Model Context Protocol Registry
+
+## [Update Anytype MCP Server] - {PR_MERGE_DATE}
+
+Update Anytype MCP Server to use the latest version of the Anytype API.
 
 ## [Add Circleback MCP Server] - {PR_MERGE_DATE}
 
