@@ -11,3 +11,4 @@
 - Copy hotkey links for scene shortcuts via Quicklinks
 - Auto-remember output mappings for Bluetooth devices
 - Lazy dependency checking (blueutil only required for Bluetooth)
+- Robust error handling for Bluetooth device listing and audio output switching

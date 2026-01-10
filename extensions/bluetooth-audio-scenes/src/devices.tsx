@@ -119,13 +119,17 @@ export default function Devices() {
 
     const autoMatched = await findMatchingOutput(device.name);
     if (autoMatched) {
-      await setOutputByName(autoMatched);
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Output: ${autoMatched}`,
-      });
-      revalidate();
-      return;
+      try {
+        await setOutputByName(autoMatched);
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Output: ${autoMatched}`,
+        });
+        revalidate();
+        return;
+      } catch {
+        // Auto-matched output failed - fall through to manual picker
+      }
     }
 
     // Auto-match failed - need user to pick
@@ -141,11 +145,19 @@ export default function Devices() {
         onSelect={async (outputName) => {
           // Save mapping for future
           await setOutputMap({ ...outputMap, [device.address]: outputName });
-          await setOutputByName(outputName);
-          await showToast({
-            style: Toast.Style.Success,
-            title: `Output: ${outputName}`,
-          });
+          try {
+            await setOutputByName(outputName);
+            await showToast({
+              style: Toast.Style.Success,
+              title: `Output: ${outputName}`,
+            });
+          } catch (e) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to set output",
+              message: e instanceof Error ? e.message : String(e),
+            });
+          }
           revalidate();
         }}
       />,

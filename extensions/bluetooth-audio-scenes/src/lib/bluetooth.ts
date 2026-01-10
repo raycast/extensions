@@ -10,8 +10,16 @@ export async function listPairedBluetoothDevices(useSystemProfiler = false): Pro
   const env = useSystemProfiler ? { BLUEUTIL_USE_SYSTEM_PROFILER: "1" } : undefined;
   const out = await cmd("blueutil", ["--paired", "--format", "json"], env);
 
-  const raw = JSON.parse(out);
-  const arr = Array.isArray(raw) ? raw : (raw?.devices ?? raw?.paired ?? []);
+  let raw: unknown;
+  try {
+    raw = JSON.parse(out);
+  } catch {
+    // blueutil returned invalid JSON - return empty list
+    return [];
+  }
+  const arr = Array.isArray(raw)
+    ? raw
+    : ((raw as Record<string, unknown>)?.devices ?? (raw as Record<string, unknown>)?.paired ?? []);
 
   return (arr as Record<string, unknown>[])
     .map((d) => ({

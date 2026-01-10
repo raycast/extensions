@@ -328,11 +328,19 @@ export default function ScenesCommand(props: LaunchProps<{ launchContext?: Launc
             style: Toast.Style.Animated,
             title: "Restoring previous output",
           });
-          await setOutputByName(restore);
-          await showToast({
-            style: Toast.Style.Success,
-            title: `Output: ${restore}`,
-          });
+          try {
+            await setOutputByName(restore);
+            await showToast({
+              style: Toast.Style.Success,
+              title: `Output: ${restore}`,
+            });
+          } catch (e) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to restore output",
+              message: e instanceof Error ? e.message : String(e),
+            });
+          }
           return;
         }
       }
