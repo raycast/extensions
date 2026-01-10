@@ -16,23 +16,32 @@ import { Bookmark, Interaction, LoginPayload, LoginResponse, SyncResponse } from
 
 export const cache = new Cache();
 
+function safeParse<T>(value: string, key: string, fallback: T): T {
+  try {
+    return JSON.parse(value) as T;
+  } catch (error) {
+    cache.remove(key);
+    return fallback;
+  }
+}
+
 export function getToken() {
   return cache.get(TOKEN) ?? null;
 }
 
 export function getCachedBookmarks() {
   const cached = cache.get(BOOKMARKS);
-  return cached ? (JSON.parse(cached) as Bookmark[]) : [];
+  return cached ? safeParse<Bookmark[]>(cached, BOOKMARKS, []) : [];
 }
 
 export function getCachedOrganizations() {
   const cached = cache.get(ORGANIZATIONS);
-  return cached ? (JSON.parse(cached) as SyncResponse["meta"]["organizations"]) : [];
+  return cached ? safeParse<SyncResponse["meta"]["organizations"]>(cached, ORGANIZATIONS, []) : [];
 }
 
 export function getCachedWorkspaces() {
   const cached = cache.get(WORKSPACES);
-  return cached ? (JSON.parse(cached) as SyncResponse["active"]["workspaces"]) : [];
+  return cached ? safeParse<SyncResponse["active"]["workspaces"]>(cached, WORKSPACES, []) : [];
 }
 
 export function getActiveOrganizationId() {
@@ -45,7 +54,7 @@ export function getActiveWorkspaceId() {
 
 export function getInteractionsPayload() {
   const cached = cache.get(INTERACTIONS);
-  const interactions = cached ? (JSON.parse(cached) as Interaction[]) : [];
+  const interactions = cached ? safeParse<Interaction[]>(cached, INTERACTIONS, []) : [];
   return Buffer.from(JSON.stringify(interactions)).toString("base64");
 }
 
@@ -105,7 +114,7 @@ export function recordInteraction(url: string) {
     return;
   }
   const cached = cache.get(INTERACTIONS);
-  const interactions = cached ? (JSON.parse(cached) as Interaction[]) : [];
+  const interactions = cached ? safeParse<Interaction[]>(cached, INTERACTIONS, []) : [];
   const organizationId = getActiveOrganizationId();
   const workspaceId = getActiveWorkspaceId();
   if (!organizationId || !workspaceId) {
