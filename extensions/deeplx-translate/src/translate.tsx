@@ -10,7 +10,6 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState } from "react";
-import fetch from "node-fetch";
 
 interface Preferences {
   apiEndpoint: string;
@@ -53,16 +52,6 @@ export default function Command() {
   const [targetLang, setTargetLang] = useState("ZH");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function detectLanguage(text: string): Promise<string | undefined> {
-    // Simple language detection based on character ranges
-    if (/[\u4e00-\u9fa5]/.test(text)) return "ZH"; // Chinese characters
-    if (/[\u3040-\u309f\u30a0-\u30ff]/.test(text)) return "JA"; // Japanese characters
-    if (/[\uac00-\ud7a3]/.test(text)) return "KO"; // Korean characters
-    if (/[\u0600-\u06ff]/.test(text)) return "AR"; // Arabic characters
-    if (/[а-яА-Я]/.test(text)) return "RU"; // Russian characters
-    return undefined;
-  }
-
   async function handleTranslate() {
     if (!text.trim()) {
       showToast(Toast.Style.Failure, "Please enter text to translate");
@@ -71,9 +60,6 @@ export default function Command() {
 
     setIsLoading(true);
     try {
-      const detectedTargetLang = targetLang === "auto" ? detectLanguage(text) : targetLang;
-      const finalTargetLang = detectedTargetLang || "EN"; // Fallback to English if detection fails
-
       const response = await fetch(preferences.apiEndpoint, {
         method: "POST",
         headers: {
@@ -83,7 +69,7 @@ export default function Command() {
         body: JSON.stringify({
           text: text.trim(),
           source_lang: sourceLang === "auto" ? undefined : sourceLang,
-          target_lang: finalTargetLang,
+          target_lang: targetLang,
         } as TranslationRequest),
       });
 
@@ -154,7 +140,6 @@ export default function Command() {
       </Form.Dropdown>
 
       <Form.Dropdown id="targetLang" title="Target Language" value={targetLang} onChange={setTargetLang}>
-        <Form.Dropdown.Item value="auto" title="Auto Detect" />
         {LANGUAGE_OPTIONS.filter((lang) => lang.value !== "auto").map((lang) => (
           <Form.Dropdown.Item key={lang.value} value={lang.value} title={lang.title} />
         ))}

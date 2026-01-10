@@ -8,7 +8,7 @@
 - Add copy translation results to clipboard
 - Improve API settings instructions
 
-## [Initial Release] - 2026-01-10
+## [Initial Release] - 2025-01-10
 
 - First stable version of DeepLX Translate extension
 - Basic translation functionality
