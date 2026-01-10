@@ -17,10 +17,10 @@ A Raycast extension to manage development server processes and Docker containers
 
 ## Installation
 
-Install from the [Raycast Store](https://raycast.com/yukihashimoto/dev-port-manager) or:
+Install from the [Raycast Store](https://raycast.com/agent-y/dev-port-manager) or:
 
 ```bash
-git clone https://github.com/yukihashimoto/dev-port-manager.git
+git clone https://github.com/agent-Y/dev-port-manager.git
 cd dev-port-manager
 npm install
 npm run dev

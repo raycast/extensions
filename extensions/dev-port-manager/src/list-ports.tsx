@@ -203,7 +203,7 @@ function getIgnoredProcesses(): string[] {
   if (prefs.ignoredProcesses) {
     const custom = prefs.ignoredProcesses
       .split(",")
-      .map((s) => s.trim())
+      .map((s: string) => s.trim())
       .filter(Boolean);
     return [...defaults, ...custom];
   }
@@ -239,6 +239,9 @@ async function getProcesses(): Promise<DevProcess[]> {
       seenPids.add(pid);
 
       try {
+        // Validate PID is numeric before using in command
+        if (!/^\d+$/.test(pid)) continue;
+
         // Get working directory to determine project name
         const { stdout: cwdOutput } = await execAsync(
           `/usr/sbin/lsof -p ${pid} 2>/dev/null | /usr/bin/awk '$4=="cwd" {print $9}'`,
@@ -334,10 +337,17 @@ async function killProcess(proc: DevProcess): Promise<boolean> {
       const dockerHost = getDockerHost();
       const dockerBinary = getDockerBinary();
       if (!dockerHost || !dockerBinary) throw new Error("Docker not available");
+      // Validate container ID format (Docker IDs are hexadecimal)
+      if (!/^[a-f0-9]+$/i.test(proc.id))
+        throw new Error("Invalid container ID");
+      // Escape dockerHost for shell safety
+      const escapedHost = dockerHost.replace(/"/g, '\\"');
       await execAsync(
-        `DOCKER_HOST="${dockerHost}" ${dockerBinary} stop ${proc.id}`,
+        `DOCKER_HOST="${escapedHost}" ${dockerBinary} stop ${proc.id}`,
       );
     } else {
+      // Validate PID is numeric
+      if (!/^\d+$/.test(proc.id)) throw new Error("Invalid PID");
       await execAsync(`kill -9 ${proc.id}`);
     }
     await showToast({
@@ -345,20 +355,23 @@ async function killProcess(proc: DevProcess): Promise<boolean> {
       title: `Stopped ${proc.name}`,
     });
     return true;
-  } catch {
+  } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
       title: `Failed to stop ${proc.name}`,
+      message: error instanceof Error ? error.message : "Unknown error",
     });
     return false;
   }
 }
 
 async function killAllExcept(
+  keepId: string,
   keepName: string,
   processes: DevProcess[],
 ): Promise<void> {
-  const toKill = processes.filter((p) => p.name !== keepName);
+  // Compare by id (PID/container ID) which is unique, not by name
+  const toKill = processes.filter((p) => p.id !== keepId);
 
   if (toKill.length === 0) {
     await showToast({
@@ -404,12 +417,18 @@ function detectWarnings(processes: DevProcess[]): DevProcess[] {
   // Mark conflicting processes
   for (const [portNum, procs] of portMap) {
     if (procs.length > 1) {
-      // Check if it's Docker + ssh forwarding (expected) vs actual conflict
+      // Check if it's Docker + ssh forwarding (expected for Colima)
       const hasDocker = procs.some((p) => p.type === "docker");
       const hasSsh = procs.some((p) => p.command === "ssh");
 
-      if (hasDocker && hasSsh && procs.length === 2) {
-        // Docker + ssh is normal for Colima, no warning needed
+      if (hasDocker && hasSsh) {
+        // Docker + ssh is normal for Colima, don't mark these as conflicts
+        // But still mark any other processes on this port as conflicts
+        for (const proc of procs) {
+          if (proc.type !== "docker" && proc.command !== "ssh") {
+            proc.warning = `Port ${portNum} conflict (${procs.length} processes)`;
+          }
+        }
         continue;
       }
 
@@ -626,7 +645,7 @@ export default function Command() {
                         icon={Icon.Trash}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
                         onAction={async () => {
-                          await killAllExcept(proc.name, processes);
+                          await killAllExcept(proc.id, proc.name, processes);
                           loadProcesses();
                         }}
                       />
