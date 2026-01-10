@@ -31,6 +31,7 @@ const parseEurobuchXML = (xml: string): Book[] => {
 
   while ((match = bookRegex.exec(xml)) !== null) {
     const getAttribute = (name: string): string => {
+      if (!match) return "";
       const regex = new RegExp(`${name}="([^"]*)"`, "i");
       const value = regex.exec(match[1])?.[1] || "";
       return decodeXMLEntities(value);
