@@ -609,7 +609,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "anytype",
     title: "Anytype",
     description:
-      "An MCP server enabling AI assistants to interact with Anytype - your safe haven for digital collaboration - to organize objects, lists, and more through natural language.",
+      "An MCP server enabling AI assistants to interact with Anytype - your safe haven for digital collaboration - to organize channels, pages, lists, and more through natural language.",
     icon: "anytype.png",
     homepage: "https://github.com/anyproto/anytype-mcp",
     configuration: {
