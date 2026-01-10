@@ -27,6 +27,14 @@
       "subtitle": "AudioScenes",
       "description": "Create and run presets for quick switching.",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "subtitle": "AudioScenes",
+      "description": "Quick access to audio scenes from the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m"
     }
   ],
   "dependencies": {

@@ -12,3 +12,4 @@
 - Auto-remember output mappings for Bluetooth devices
 - Lazy dependency checking (blueutil only required for Bluetooth)
 - Robust error handling for Bluetooth device listing and audio output switching
+- Menu bar command for quick access to scenes
