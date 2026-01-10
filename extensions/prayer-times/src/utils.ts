@@ -1,3 +1,6 @@
+import { useState, useEffect } from "react";
+import { Cache, getPreferenceValues } from "@raycast/api";
+
 export type PrayerTime = {
   name: string;
   time: Date;
@@ -33,6 +36,158 @@ export const PRAYER_NAMES = {
 };
 
 export const ATHAN_DURATION = 5 * 60 * 1000;
+
+const cache = new Cache();
+
+// Hook for current time - updates every minute normally, every second in the last minute
+// Set skipUpdates=true for icon-only mode where live updates aren't needed
+export function useCurrentTime(nextPrayerTime?: Date, skipUpdates = false): Date {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    if (skipUpdates) return;
+
+    const tick = () => {
+      const now = new Date();
+      setTime(now);
+
+      // Calculate time until next prayer
+      const diff = nextPrayerTime ? nextPrayerTime.getTime() - now.getTime() : Infinity;
+
+      // Update every second if < 1 minute, otherwise every minute
+      const nextInterval = diff > 0 && diff < 60000 ? 1000 : 60000;
+
+      timeoutId = setTimeout(tick, nextInterval);
+    };
+
+    let timeoutId = setTimeout(tick, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [nextPrayerTime?.getTime(), skipUpdates]);
+
+  return time;
+}
+
+// Get today's date key for caching
+function getTodayDateKey(): string {
+  const today = new Date();
+  return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+}
+
+// Hook for fetching and managing prayer times with smart caching
+// Only fetches from API once per day or when settings change
+export function usePrayerTimes() {
+  const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadPrayerTimes() {
+      setError(null);
+
+      try {
+        const cachedCity = cache.get("city");
+        const cachedMethod = cache.get("calculationMethod");
+        const prefs = getPreferenceValues<Preferences>();
+
+        const city = cachedCity || prefs.city;
+        const methodStr = cachedMethod || prefs.calculationMethod || "2";
+        const method = parseInt(methodStr);
+
+        if (!city) {
+          setError("Please set your city in settings");
+          setIsLoading(false);
+          return;
+        }
+
+        // Check if we have valid cached data for today
+        const todayKey = getTodayDateKey();
+        const cachedDate = cache.get("prayerTimesDate");
+        const cachedCityKey = cache.get("prayerTimesCity");
+        const cachedMethodKey = cache.get("prayerTimesMethod");
+        const cachedTimes = cache.get("lastPrayerTimes");
+
+        // Use cache if it's for today with same settings
+        if (cachedDate === todayKey && cachedCityKey === city && cachedMethodKey === methodStr && cachedTimes) {
+          try {
+            const parsed = JSON.parse(cachedTimes) as Array<{ name: string; time: string }>;
+            const prayers = parsed.map((p) => ({ name: p.name, time: new Date(p.time) }));
+            setPrayerTimes(prayers);
+            setIsLoading(false);
+            return;
+          } catch {
+            // Cache parse failed, fetch fresh
+          }
+        }
+
+        setIsLoading(true);
+        const timings = await fetchPrayerTimesByAddress(city, method);
+
+        if (!timings) {
+          // Try to use stale cached prayer times on failure
+          if (cachedTimes) {
+            try {
+              const parsed = JSON.parse(cachedTimes) as Array<{ name: string; time: string }>;
+              const prayers = parsed.map((p) => ({ name: p.name, time: new Date(p.time) }));
+              setPrayerTimes(prayers);
+              setIsLoading(false);
+              return;
+            } catch {
+              // Cache parse failed, show error
+            }
+          }
+          setError("Failed to fetch prayer times");
+          setIsLoading(false);
+          return;
+        }
+
+        const today = new Date();
+        const prayers: PrayerTime[] = [
+          { name: PRAYER_NAMES.Fajr, time: parsePrayerTime(timings.Fajr, today) },
+          { name: PRAYER_NAMES.Sunrise, time: parsePrayerTime(timings.Sunrise, today) },
+          { name: PRAYER_NAMES.Dhuhr, time: parsePrayerTime(timings.Dhuhr, today) },
+          { name: PRAYER_NAMES.Asr, time: parsePrayerTime(timings.Asr, today) },
+          { name: PRAYER_NAMES.Maghrib, time: parsePrayerTime(timings.Maghrib, today) },
+          { name: PRAYER_NAMES.Isha, time: parsePrayerTime(timings.Isha, today) },
+        ].sort((a, b) => a.time.getTime() - b.time.getTime());
+
+        // Cache with date and settings info
+        cache.set(
+          "lastPrayerTimes",
+          JSON.stringify(prayers.map((p) => ({ name: p.name, time: p.time.toISOString() }))),
+        );
+        cache.set("prayerTimesDate", todayKey);
+        cache.set("prayerTimesCity", city);
+        cache.set("prayerTimesMethod", methodStr);
+
+        setPrayerTimes(prayers);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadPrayerTimes();
+
+    // Check every hour if we need to refresh (e.g., day changed at midnight)
+    const interval = setInterval(
+      () => {
+        const todayKey = getTodayDateKey();
+        const cachedDate = cache.get("prayerTimesDate");
+        if (cachedDate !== todayKey) {
+          loadPrayerTimes();
+        }
+      },
+      60 * 60 * 1000,
+    );
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const nextPrayer = getNextPrayer(prayerTimes);
+
+  return { prayerTimes, nextPrayer, isLoading, error };
+}
 
 export async function fetchPrayerTimesByAddress(address: string, method: number = 2): Promise<PrayerTimesData | null> {
   try {
@@ -126,17 +281,17 @@ export function formatTimeRemaining(targetTime: Date): string {
   if (hours > 0) {
     return `${hours}h ${minutes}m`;
   } else if (minutes > 0) {
-    return `${minutes}m ${seconds}s`;
+    // Only show seconds in the last minute
+    return `${minutes}m`;
   } else {
     return `${seconds}s`;
   }
 }
 
 export function formatTime(date: Date): string {
-  return date.toLocaleTimeString("en-US", {
+  return date.toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
-    hour12: true,
   });
 }
 

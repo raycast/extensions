@@ -89,35 +89,31 @@ type FormValues = {
 };
 
 export default function Settings() {
-  const cachedCity = cache.get("city");
-  const cachedMethod = cache.get("calculationMethod");
-  const cachedDisplayMode = cache.get("displayMode");
-  const cachedShowTextOnly = cache.get("showTextOnly");
-  const [city, setCity] = useState(cachedCity || "");
-  const [calculationMethod, setCalculationMethod] = useState(cachedMethod || "2");
-  const [displayMode, setDisplayMode] = useState(cachedDisplayMode || "countdown");
-  const [showTextOnly, setShowTextOnly] = useState(cachedShowTextOnly || "both");
+  const cachedCity = cache.get("city") || "";
+  const cachedMethod = cache.get("calculationMethod") || "2";
+  const cachedDisplayMode = cache.get("displayMode") || "countdown";
+  const cachedShowTextOnly = cache.get("showTextOnly") || "both";
 
-  const handleCityChange = (newCity: string) => {
-    setCity(newCity);
-  };
+  const isInList = MAJOR_CITIES.some((c) => c.toLowerCase() === cachedCity.toLowerCase());
+  const [selectedCity, setSelectedCity] = useState(isInList ? cachedCity : "");
+  const [customCity, setCustomCity] = useState(isInList ? "" : cachedCity);
+  const [calculationMethod, setCalculationMethod] = useState(cachedMethod);
+  const [displayMode, setDisplayMode] = useState(cachedDisplayMode);
+  const [showTextOnly, setShowTextOnly] = useState(cachedShowTextOnly);
 
   const handleSubmit = async (values: FormValues) => {
     try {
-      const finalCity = values.customCity || values.city || "";
-      cache.set("city", finalCity);
+      const city = values.customCity?.trim() || values.city || "";
+      cache.set("city", city);
       cache.set("calculationMethod", values.calculationMethod || "2");
       cache.set("displayMode", values.displayMode || "countdown");
       cache.set("showTextOnly", values.showTextOnly || "both");
 
-      await launchCommand({ name: "prayer", type: LaunchType.Background });
+      await launchCommand({ name: "menubar", type: LaunchType.Background });
       await popToRoot();
       await closeMainWindow();
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Settings saved",
-      });
+      await showToast({ style: Toast.Style.Success, title: "Settings saved" });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -135,26 +131,21 @@ export default function Settings() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="city"
-        title="City (Select from list)"
-        value={MAJOR_CITIES.find((c) => c.toLowerCase() === city.toLowerCase()) ? city : ""}
-        onChange={handleCityChange}
-        filtering
-        storeValue={false}
-      >
-        <Form.Dropdown.Item value="" title="Select a city..." />
-        {MAJOR_CITIES.map((cityName) => (
-          <Form.Dropdown.Item key={cityName} value={cityName} title={cityName} />
+      <Form.Dropdown id="city" title="City" value={selectedCity} onChange={setSelectedCity} filtering>
+        <Form.Dropdown.Item value="" title="Other (enter below)" />
+        {MAJOR_CITIES.map((city) => (
+          <Form.Dropdown.Item key={city} value={city} title={city} />
         ))}
       </Form.Dropdown>
-      <Form.TextField
-        id="customCity"
-        title="Or Enter Custom City"
-        value={city && !MAJOR_CITIES.find((c) => c.toLowerCase() === city.toLowerCase()) ? city : ""}
-        onChange={handleCityChange}
-        placeholder="Type your city name if not in list above"
-      />
+      {!selectedCity && (
+        <Form.TextField
+          id="customCity"
+          title="Custom City"
+          value={customCity}
+          onChange={setCustomCity}
+          placeholder="Enter your city name"
+        />
+      )}
       <Form.Dropdown
         id="calculationMethod"
         title="Calculation Method"

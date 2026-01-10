@@ -1,86 +1,23 @@
-import { useEffect, useState } from "react";
-import { Icon, MenuBarExtra, getPreferenceValues, launchCommand, LaunchType, Cache } from "@raycast/api";
-
-const cache = new Cache();
+import { Icon, MenuBarExtra, launchCommand, LaunchType, Cache } from "@raycast/api";
 import {
-  fetchPrayerTimesByAddress,
-  parsePrayerTime,
-  getNextPrayer,
+  usePrayerTimes,
+  useCurrentTime,
   isCurrentPrayerTime,
   formatTime,
   formatTimeRemaining,
-  PRAYER_NAMES,
   type PrayerTime,
 } from "./utils";
 
+const cache = new Cache();
+
 export default function Command() {
-  const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [, setUpdateTrigger] = useState(0);
-
-  useEffect(() => {
-    async function loadPrayerTimes() {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const cachedCity = cache.get("city");
-        const cachedMethod = cache.get("calculationMethod");
-        const prefs = getPreferenceValues<Preferences>();
-
-        const city = cachedCity || prefs.city;
-        const methodStr = cachedMethod || prefs.calculationMethod || "2";
-        const method = parseInt(methodStr);
-
-        if (!city) {
-          setError("Please set your city in settings");
-          setIsLoading(false);
-          return;
-        }
-
-        const timings = await fetchPrayerTimesByAddress(city, method);
-
-        if (!timings) {
-          setError("Failed to fetch prayer times");
-          setIsLoading(false);
-          return;
-        }
-
-        const today = new Date();
-        const prayers: PrayerTime[] = [
-          { name: PRAYER_NAMES.Fajr, time: parsePrayerTime(timings.Fajr, today) },
-          { name: PRAYER_NAMES.Sunrise, time: parsePrayerTime(timings.Sunrise, today) },
-          { name: PRAYER_NAMES.Dhuhr, time: parsePrayerTime(timings.Dhuhr, today) },
-          { name: PRAYER_NAMES.Asr, time: parsePrayerTime(timings.Asr, today) },
-          { name: PRAYER_NAMES.Maghrib, time: parsePrayerTime(timings.Maghrib, today) },
-          { name: PRAYER_NAMES.Isha, time: parsePrayerTime(timings.Isha, today) },
-        ].sort((a, b) => a.time.getTime() - b.time.getTime());
-
-        setPrayerTimes(prayers);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadPrayerTimes();
-    const interval = setInterval(loadPrayerTimes, 60 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const checkCache = setInterval(() => {
-      setUpdateTrigger((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(checkCache);
-  }, []);
-
-  const nextPrayer = getNextPrayer(prayerTimes);
-
+  const { prayerTimes, nextPrayer, isLoading, error } = usePrayerTimes();
   const cachedDisplayMode = cache.get("displayMode") || "countdown";
   const cachedShowTextOnly = cache.get("showTextOnly") || "both";
+
+  // Skip live updates in icon-only mode (no text to update) or when showing static time
+  const skipUpdates = cachedShowTextOnly === "icon" || cachedDisplayMode === "next";
+  const currentTime = useCurrentTime(nextPrayer?.time, skipUpdates);
 
   const getMenuBarTitle = () => {
     if (cachedShowTextOnly === "icon") return "";
@@ -138,24 +75,10 @@ export default function Command() {
         <>
           {prayerTimes.map((prayer: PrayerTime) => {
             const isNext = prayer.name === nextPrayer?.name;
-            const now = new Date();
             const timeRemaining = formatTimeRemaining(prayer.time);
             const timeFormatted = formatTime(prayer.time);
-
-            let isCurrent = false;
-            if (nextPrayer && isNext) {
-              const currentIndex = prayerTimes.findIndex((p) => p.name === nextPrayer.name);
-              if (currentIndex > 0) {
-                const previousPrayer = prayerTimes[currentIndex - 1];
-                isCurrent = prayer.name === previousPrayer.name;
-              }
-            }
-
-            if (!isCurrent) {
-              isCurrent = isCurrentPrayerTime(prayer);
-            }
-
-            const isPast = prayer.time < now && !isCurrent;
+            const isCurrent = isCurrentPrayerTime(prayer);
+            const isPast = prayer.time < currentTime && !isCurrent;
 
             let subtitle = timeFormatted;
             if (isCurrent) {

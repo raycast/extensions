@@ -5,12 +5,8 @@
   "description": "Accurate prayer times with countdowns and notifications",
   "icon": "extension-icon.png",
   "author": "Hadi04",
-  "platforms": [
-    "macOS"
-  ],
-  "categories": [
-    "Productivity"
-  ],
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
   "license": "MIT",
   "preferences": [
     {
@@ -29,70 +25,35 @@
       "description": "Islamic calculation method for prayer times",
       "default": "2",
       "data": [
-        {
-          "title": "Muslim World League",
-          "value": "3"
-        },
-        {
-          "title": "Islamic Society of North America",
-          "value": "2"
-        },
-        {
-          "title": "Egyptian General Authority of Survey",
-          "value": "5"
-        },
-        {
-          "title": "Umm Al-Qura University, Makkah",
-          "value": "4"
-        },
-        {
-          "title": "University of Islamic Sciences, Karachi",
-          "value": "1"
-        },
-        {
-          "title": "Institute of Geophysics, University of Tehran",
-          "value": "7"
-        },
-        {
-          "title": "Shia Ithna-Ashari, Leva Institute, Qum",
-          "value": "10"
-        },
-        {
-          "title": "Gulf Region",
-          "value": "8"
-        },
-        {
-          "title": "Kuwait",
-          "value": "9"
-        },
-        {
-          "title": "Qatar",
-          "value": "15"
-        },
-        {
-          "title": "Majlis Ugama Islam Singapura, Singapore",
-          "value": "11"
-        },
-        {
-          "title": "Union Organization islamic de France",
-          "value": "12"
-        },
-        {
-          "title": "Diyanet İşleri Başkanlığı, Turkey",
-          "value": "13"
-        },
-        {
-          "title": "Spiritual Administration of Muslims of Russia",
-          "value": "14"
-        }
+        { "title": "Muslim World League", "value": "3" },
+        { "title": "Islamic Society of North America", "value": "2" },
+        { "title": "Egyptian General Authority of Survey", "value": "5" },
+        { "title": "Umm Al-Qura University, Makkah", "value": "4" },
+        { "title": "University of Islamic Sciences, Karachi", "value": "1" },
+        { "title": "Institute of Geophysics, University of Tehran", "value": "7" },
+        { "title": "Shia Ithna-Ashari, Leva Institute, Qum", "value": "10" },
+        { "title": "Gulf Region", "value": "8" },
+        { "title": "Kuwait", "value": "9" },
+        { "title": "Qatar", "value": "15" },
+        { "title": "Majlis Ugama Islam Singapura, Singapore", "value": "11" },
+        { "title": "Union Organization islamic de France", "value": "12" },
+        { "title": "Diyanet İşleri Başkanlığı, Turkey", "value": "13" },
+        { "title": "Spiritual Administration of Muslims of Russia", "value": "14" }
       ]
     }
   ],
   "commands": [
     {
-      "name": "prayer",
+      "name": "prayer-times",
       "title": "Show Prayer Times",
       "subtitle": "Daily prayer times and countdowns",
+      "description": "View prayer times in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Prayer Times in Menu Bar",
+      "subtitle": "Menu bar prayer times",
       "description": "Display prayer times with countdown in menu bar",
       "mode": "menu-bar"
     },
