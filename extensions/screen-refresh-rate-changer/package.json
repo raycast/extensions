@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screen-refresh-rate-changer",
+  "title": "Screen Refresh Rate Changer",
+  "description": "Change screen refresh rate with one click",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "change-screen-refresh-rate",
+      "title": "Change Screen Refresh Rate",
+      "description": "Change the screen refresh rate to desire hz",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "morocco_brawlstars",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "preferences": [
+    {
+      "name": "autoRevert",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Revert",
+      "label": "Automatically revert to previous refresh rate",
+      "description": "After changing the refresh rate, automatically revert back after the timeout period",
+      "default": false
+    },
+    {
+      "name": "revertTimeout",
+      "type": "dropdown",
+      "required": false,
+      "title": "Revert Timeout",
+      "description": "Time before automatically reverting to previous refresh rate",
+      "default": "10",
+      "data": [
+        { "title": "1 second", "value": "1" },
+        { "title": "5 seconds", "value": "5" },
+        { "title": "10 seconds", "value": "10" },
+        { "title": "15 seconds", "value": "15" },
+        { "title": "30 seconds", "value": "30" },
+        { "title": "60 seconds", "value": "60" }
+      ]
+    },
+    {
+      "name": "debugMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Debug Mode",
+      "label": "Enable debug logging and notifications",
+      "description": "Show detailed debug information during execution",
+      "default": false
+    }
+  ]
+}
