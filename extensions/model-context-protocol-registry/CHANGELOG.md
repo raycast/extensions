@@ -1,4 +1,4 @@
-# Model Context Protocol Registry
+# Model Context Protocol Registry Changelog
 
 ## [Update Anytype MCP Server] - {PR_MERGE_DATE}
 
