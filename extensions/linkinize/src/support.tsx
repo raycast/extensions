@@ -1,4 +1,4 @@
-import { Cache, Toast, getPreferenceValues, openExtensionPreferences, showToast } from "@raycast/api";
+import { Cache, Toast, environment, getPreferenceValues, openExtensionPreferences, showToast } from "@raycast/api";
 import axios, { AxiosError } from "axios";
 import {
   ACTIVE_ORGANIZATION,
@@ -59,12 +59,15 @@ export function applySyncResponse(sync: SyncResponse) {
   cache.remove(INTERACTIONS);
 }
 
-export async function attemptLogin(values: LoginPayload) {
+export async function attemptLogin(values: LoginPayload, options?: { showToast?: boolean }) {
   const response = await axios.post(`${LINKINIZE_DOMAIN}/api/auth/login`, values);
   const data = response.data as LoginResponse;
   cache.set(TOKEN, data.access_token);
   applySyncResponse(data.sync);
-  await showToast({ title: "Linkinize is Ready", message: "Bookmarks synced for your active workspace." });
+  const shouldShowToast = options?.showToast ?? environment.launchType === "userInitiated";
+  if (shouldShowToast) {
+    await showToast({ title: "Linkinize is Ready", message: "Bookmarks synced for your active workspace." });
+  }
   return true;
 }
 
@@ -123,7 +126,7 @@ export async function authenticationCheck() {
     return true;
   }
   try {
-    return await attemptLogin(getPreferenceValues<LoginPayload>());
+    return await attemptLogin(getPreferenceValues<LoginPayload>(), { showToast: false });
   } catch (error) {
     await logout();
     return false;
