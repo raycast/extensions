@@ -17,7 +17,7 @@ interface Book {
 const parseEurobuchXML = (xml: string): Book[] => {
   const books: Book[] = [];
   const bookRegex = /<Book\s+([^>]*?)\s*\/>/g;
-  let match;
+  let match: RegExpExecArray | null;
 
   // Helper to decode XML entities
   const decodeXMLEntities = (str: string): string => {

@@ -43,7 +43,7 @@ const getClientIP = async (): Promise<string> => {
 const parseEurobuchXML = (xml: string): Book[] => {
   const books: Book[] = [];
   const bookRegex = /<Book\s+([^>]*?)\s*\/>/g;
-  let match;
+  let match: RegExpExecArray | null;
 
   // Helper to decode XML entities
   const decodeXMLEntities = (str: string): string => {
@@ -89,13 +89,13 @@ const parseEurobuchXML = (xml: string): Book[] => {
 const convertISBN10to13 = (isbn10: string): string => {
   // Remove hyphens and spaces
   const clean = isbn10.replace(/[-\s]/g, "");
-
+  
   // Check if it's a valid ISBN-10 (9 digits + checksum)
   if (clean.length !== 10) return isbn10;
-
+  
   // Take first 9 digits and prepend 978
   const isbn13base = "978" + clean.substring(0, 9);
-
+  
   // Calculate ISBN-13 checksum
   let sum = 0;
   for (let i = 0; i < 12; i++) {
@@ -103,7 +103,7 @@ const convertISBN10to13 = (isbn10: string): string => {
     sum += i % 2 === 0 ? digit : digit * 3;
   }
   const checksum = (10 - (sum % 10)) % 10;
-
+  
   return isbn13base + checksum;
 };
 
@@ -119,7 +119,7 @@ const searchBooks = async (query: string, prefs: Preferences): Promise<Book[]> =
   // Try to detect and convert ISBN-10 to ISBN-13
   let searchQuery = query;
   const cleanQuery = query.replace(/[-\s]/g, "");
-
+  
   // If it looks like ISBN-10 (10 chars, last might be X)
   if (cleanQuery.length === 10 && /^\d{9}[\dXx]$/.test(cleanQuery)) {
     const isbn13 = convertISBN10to13(cleanQuery);
@@ -175,7 +175,7 @@ export default function Command() {
         // First try to get selected text
         const selected = await getSelectedText();
         const cleaned = selected.trim();
-
+        
         // Check if it looks like an ISBN (10 or 13 digits, possibly with X)
         if (/^\d{10}[\dXx]?$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, ""))) {
           setSearchText(cleaned);
@@ -187,7 +187,7 @@ export default function Command() {
           const clipboardText = await Clipboard.readText();
           if (clipboardText) {
             const cleaned = clipboardText.trim();
-
+            
             // Check if clipboard contains an ISBN
             if (/^\d{10}[\dXx]?$|^\d{13}$/.test(cleaned.replace(/[-\s]/g, ""))) {
               setSearchText(cleaned);
@@ -231,7 +231,7 @@ export default function Command() {
           message: err.message,
         });
       },
-    },
+    }
   );
 
   const priceRange =
@@ -240,8 +240,8 @@ export default function Command() {
           books[books.length - 1].price + books[books.length - 1].shipping
         ).toFixed(2)}`
       : books.length === 1
-        ? `€${(books[0].price + books[0].shipping).toFixed(2)}`
-        : null;
+      ? `€${(books[0].price + books[0].shipping).toFixed(2)}`
+      : null;
 
   return (
     <List
@@ -326,12 +326,12 @@ export default function Command() {
                         <List.Item.Detail.Metadata.Label
                           title="Shipping"
                           text={`€${book.shipping.toFixed(2)}`}
-                          icon={{ source: Icon.Truck, tintColor: Color.Orange }}
+                          icon={{ source: Icon.Box, tintColor: Color.Orange }}
                         />
                         <List.Item.Detail.Metadata.Label
                           title="Total"
                           text={`€${totalFormatted}`}
-                          icon={{ source: Icon.Euro, tintColor: Color.Green }}
+                          icon={{ source: Icon.Coins, tintColor: Color.Green }}
                         />
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Label
@@ -374,7 +374,7 @@ export default function Command() {
                       <Action.CopyToClipboard
                         title="Copy ISBN"
                         content={book.isbn}
-                        icon={Icon.Barcode}
+                        icon={Icon.Hashtag}
                         shortcut={{ modifiers: ["cmd"], key: "i" }}
                       />
                     ) : null}
@@ -383,7 +383,7 @@ export default function Command() {
                       content={`${book.title}\nAuthor: ${book.author || "Unknown"}\nISBN: ${book.isbn || "N/A"}\nCondition: ${
                         book.condition || "N/A"
                       }\nPrice: €${book.price.toFixed(2)}\nShipping: €${book.shipping.toFixed(
-                        2,
+                        2
                       )}\nTotal: €${totalFormatted}\nDealer: ${book.dealer}\nPlatform: ${book.platform}\n\nDirect offer: ${
                         book.link
                       }${book.isbn ? `\nEurobuch overview: https://www.eurobuch.de/buch/isbn/${book.isbn}.html` : ""}`}
