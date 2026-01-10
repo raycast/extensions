@@ -3,6 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - **Auto-trigger aliases**: When you type the alias, the expand alias command will automatically open url, application, or insert snippet.
+- **Batch Opening**: Open all filtered aliases simultaneously with `Opt + Shift + Enter`, or use `Opt + Shift + [1-9]` to open a specific number of items. (They will be opened in reverse order.)
 - **Randomized snippets**: Create text snippets with support for randomized variations. For example, you can create a snippet for "Hello!", "Hi!", "Hey!", and when you type the alias, it will insert a random variation automatically.
 - **Everything is a snippet**: You can use a prefix to trigger snippet mode for any alias. For example, you can type `rw` to open [https://raycastweekly.com/](https://raycastweekly.com/), or type `,rw` To insert the link to the currently open application.
 - **Frecency sorting**: The search command will use frecency sorting to show the most used aliases and snippets first.

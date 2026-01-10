@@ -53,6 +53,7 @@ export default function Command() {
               searchText={searchText}
               onSelect={() => visitItem([alias, aliasItem])}
               onDelete={() => revalidate()}
+              allFilteredItems={sortedEntries}
             />
           );
         })
