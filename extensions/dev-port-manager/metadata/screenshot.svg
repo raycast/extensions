@@ -1,0 +1,89 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background blur effect simulation -->
+  <rect width="1200" height="800" fill="#1a1a2e"/>
+
+  <!-- Raycast Window -->
+  <rect x="150" y="60" width="900" height="680" rx="16" fill="#232336" stroke="#3d3d5c" stroke-width="1"/>
+
+  <!-- Search bar -->
+  <rect x="170" y="80" width="860" height="52" rx="8" fill="#2d2d44"/>
+  <circle cx="200" cy="106" r="12" stroke="#666" stroke-width="2" fill="none"/>
+  <line x1="208" y1="114" x2="216" y2="122" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+  <text x="236" y="112" fill="#888" font-family="SF Pro, system-ui" font-size="18">List Dev Ports</text>
+
+  <!-- Conflicts Section -->
+  <text x="185" y="168" fill="#f97316" font-family="SF Pro, system-ui" font-size="13" font-weight="600">PORT CONFLICTS</text>
+
+  <!-- Conflict item -->
+  <rect x="170" y="180" width="860" height="48" rx="8" fill="#3d2d2d"/>
+  <text x="200" y="210" fill="#fca5a5" font-family="SF Mono, monospace" font-size="15">:3000</text>
+  <text x="280" y="210" fill="#f87171" font-family="SF Pro, system-ui" font-size="15">Port 3000 conflict (2 processes)</text>
+  <rect x="560" y="194" width="65" height="24" rx="4" fill="#0db7ed33"/>
+  <text x="574" y="211" fill="#0db7ed" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Docker</text>
+  <rect x="635" y="194" width="55" height="24" rx="4" fill="#68a06333"/>
+  <text x="648" y="211" fill="#68a063" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Node</text>
+
+  <!-- Project: my-webapp -->
+  <text x="185" y="268" fill="#888" font-family="SF Pro, system-ui" font-size="13" font-weight="600">MY-WEBAPP</text>
+  <rect x="920" y="250" width="100" height="26" rx="6" fill="#4f46e5"/>
+  <text x="937" y="268" fill="white" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Stop All</text>
+
+  <!-- Port items under my-webapp -->
+  <rect x="170" y="280" width="860" height="48" rx="8" fill="#2d2d44"/>
+  <text x="200" y="310" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">└</text>
+  <text x="224" y="310" fill="#e4e4e7" font-family="SF Mono, monospace" font-size="15">:3000</text>
+  <text x="300" y="310" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">node</text>
+  <rect x="380" y="294" width="55" height="24" rx="4" fill="#68a06333"/>
+  <text x="393" y="311" fill="#68a063" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Node</text>
+  <text x="850" y="310" fill="#6b7280" font-family="SF Pro, system-ui" font-size="13">npm run dev</text>
+
+  <rect x="170" y="336" width="860" height="48" rx="8" fill="#2d2d44"/>
+  <text x="200" y="366" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">└</text>
+  <text x="224" y="366" fill="#e4e4e7" font-family="SF Mono, monospace" font-size="15">:5432</text>
+  <text x="300" y="366" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">postgres:15</text>
+  <rect x="420" y="350" width="75" height="24" rx="4" fill="#33679133"/>
+  <text x="430" y="367" fill="#336791" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Database</text>
+  <rect x="505" y="350" width="65" height="24" rx="4" fill="#0db7ed33"/>
+  <text x="519" y="367" fill="#0db7ed" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Docker</text>
+
+  <rect x="170" y="392" width="860" height="48" rx="8" fill="#2d2d44"/>
+  <text x="200" y="422" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">└</text>
+  <text x="224" y="422" fill="#e4e4e7" font-family="SF Mono, monospace" font-size="15">:6379</text>
+  <text x="300" y="422" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">redis:7-alpine</text>
+  <rect x="435" y="406" width="75" height="24" rx="4" fill="#33679133"/>
+  <text x="445" y="423" fill="#336791" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Database</text>
+  <rect x="520" y="406" width="65" height="24" rx="4" fill="#0db7ed33"/>
+  <text x="534" y="423" fill="#0db7ed" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Docker</text>
+
+  <!-- Project: api-server -->
+  <text x="185" y="480" fill="#888" font-family="SF Pro, system-ui" font-size="13" font-weight="600">API-SERVER</text>
+  <rect x="920" y="462" width="100" height="26" rx="6" fill="#4f46e5"/>
+  <text x="937" y="480" fill="white" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Stop All</text>
+
+  <rect x="170" y="492" width="860" height="48" rx="8" fill="#2d2d44"/>
+  <text x="200" y="522" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">└</text>
+  <text x="224" y="522" fill="#e4e4e7" font-family="SF Mono, monospace" font-size="15">:8080</text>
+  <text x="300" y="522" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">node</text>
+  <rect x="380" y="506" width="55" height="24" rx="4" fill="#68a06333"/>
+  <text x="393" y="523" fill="#68a063" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Node</text>
+  <text x="850" y="522" fill="#6b7280" font-family="SF Pro, system-ui" font-size="13">express</text>
+
+  <rect x="170" y="548" width="860" height="48" rx="8" fill="#2d2d44"/>
+  <text x="200" y="578" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">└</text>
+  <text x="224" y="578" fill="#e4e4e7" font-family="SF Mono, monospace" font-size="15">:4040</text>
+  <text x="300" y="578" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">ngrok</text>
+  <rect x="380" y="562" width="60" height="24" rx="4" fill="#f9731633"/>
+  <text x="392" y="579" fill="#f97316" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Tunnel</text>
+  <text x="820" y="578" fill="#6b7280" font-family="SF Pro, system-ui" font-size="13">forwarding</text>
+
+  <!-- Project: worker -->
+  <text x="185" y="636" fill="#888" font-family="SF Pro, system-ui" font-size="13" font-weight="600">CLOUDFLARE-WORKER</text>
+
+  <rect x="170" y="648" width="860" height="48" rx="8" fill="#2d2d44"/>
+  <text x="200" y="678" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">└</text>
+  <text x="224" y="678" fill="#e4e4e7" font-family="SF Mono, monospace" font-size="15">:8787</text>
+  <text x="300" y="678" fill="#a1a1aa" font-family="SF Pro, system-ui" font-size="15">workerd</text>
+  <rect x="390" y="662" width="60" height="24" rx="4" fill="#f3802033"/>
+  <text x="400" y="679" fill="#f38020" font-family="SF Pro, system-ui" font-size="12" font-weight="500">Worker</text>
+  <text x="810" y="678" fill="#6b7280" font-family="SF Pro, system-ui" font-size="13">wrangler dev</text>
+</svg>

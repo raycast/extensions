@@ -1,0 +1,42 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+
+  <!-- Terminal/Server box - bigger -->
+  <rect x="56" y="72" width="400" height="368" rx="28" fill="white" fill-opacity="0.15"/>
+  <rect x="56" y="72" width="400" height="72" rx="28" fill="white" fill-opacity="0.25"/>
+
+  <!-- Window dots - bigger -->
+  <circle cx="108" cy="108" r="16" fill="#ff5f57"/>
+  <circle cx="156" cy="108" r="16" fill="#febc2e"/>
+  <circle cx="204" cy="108" r="16" fill="#28c840"/>
+
+  <!-- Port entries - bigger and bolder -->
+  <!-- Port 3000 -->
+  <rect x="80" y="164" width="352" height="56" rx="12" fill="white" fill-opacity="0.95"/>
+  <circle cx="116" cy="192" r="14" fill="#22c55e"/>
+  <text x="148" y="202" fill="#1e293b" font-family="SF Mono, Monaco, monospace" font-size="32" font-weight="700">:3000</text>
+
+  <!-- Port 5432 -->
+  <rect x="80" y="236" width="352" height="56" rx="12" fill="white" fill-opacity="0.95"/>
+  <circle cx="116" cy="264" r="14" fill="#3b82f6"/>
+  <text x="148" y="274" fill="#1e293b" font-family="SF Mono, Monaco, monospace" font-size="32" font-weight="700">:5432</text>
+
+  <!-- Port 6379 -->
+  <rect x="80" y="308" width="352" height="56" rx="12" fill="white" fill-opacity="0.95"/>
+  <circle cx="116" cy="336" r="14" fill="#ef4444"/>
+  <text x="148" y="346" fill="#1e293b" font-family="SF Mono, Monaco, monospace" font-size="32" font-weight="700">:6379</text>
+
+  <!-- Port 8080 -->
+  <rect x="80" y="380" width="352" height="56" rx="12" fill="white" fill-opacity="0.95"/>
+  <circle cx="116" cy="408" r="14" fill="#f97316"/>
+  <text x="148" y="418" fill="#1e293b" font-family="SF Mono, Monaco, monospace" font-size="32" font-weight="700">:8080</text>
+
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+</svg>
