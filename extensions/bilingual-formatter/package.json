@@ -20,7 +20,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@raycast/api": "^1.76.1"
+    "@raycast/api": "^1.76.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.10",

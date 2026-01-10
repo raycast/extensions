@@ -13,21 +13,21 @@ describe("FormatterService", () => {
   it("should protect markdown code blocks", () => {
     const input = '你好\n```js\nconst x = "hello";\n```\n世界';
     const formatted = service.format(input);
-    
+
     // Check that code content is preserved exactly
     expect(formatted).toContain('const x = "hello";');
     expect(formatted).not.toContain('const x = 「hello」;');
-    
+
     // Check that surrounding text is formatted (if applicable)
     // Note: SpaceCorrector might add spaces around the block if it sees it as "English" (underscore)
   });
 
   it("should protect inline code", () => {
-      const input = "这是一个`inline code`示例";
-      const formatted = service.format(input);
-      expect(formatted).toContain("`inline code`");
-      // Space logic: "这是一个 `inline code` 示例" ?
-      // If placeholder looks like English, it might get spaces.
-      expect(formatted).toBe("这是一个 `inline code` 示例");
+    const input = "这是一个`inline code`示例";
+    const formatted = service.format(input);
+    expect(formatted).toContain("`inline code`");
+    // AST 格式化器会保护代码，但不会自动在代码周围添加空格
+    // 如果需要空格，应该在源文本中手动添加
+    expect(formatted).toBe("这是一个`inline code`示例\n");
   });
 });
