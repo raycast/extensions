@@ -16,6 +16,14 @@
     "Developer Tools",
     "Web"
   ],
+  "keywords": [
+    "tikz",
+    "latex",
+    "diagram",
+    "image",
+    "markdown",
+    "chat"
+  ],
   "license": "MIT",
   "commands": [
     {
