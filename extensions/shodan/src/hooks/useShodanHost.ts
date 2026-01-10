@@ -37,7 +37,6 @@ export function useShodanHost({ ip, enabled = true }: UseShodanHostOptions) {
     [ip],
     {
       execute: enabled && ip.length > 0,
-      keepPreviousData: true,
       onError: (err) => {
         let message = err.message;
 

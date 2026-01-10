@@ -120,7 +120,7 @@ export default function SearchCommand() {
               key={filter.query}
               title={filter.title}
               subtitle={filter.subtitle}
-              icon={{ source: Icon.Sparkles, tintColor: Color.Purple }}
+              icon={{ source: Icon.Stars, tintColor: Color.Purple }}
               accessories={[{ text: filter.query }]}
               actions={
                 <ActionPanel>
@@ -260,12 +260,14 @@ export default function SearchCommand() {
       {!submittedQuery &&
         !showQuickFilters &&
         !showSuggestions &&
-        searchQuery.length === 0 && <EmptyStates.SearchToStart />}
+        searchQuery.length === 0 &&
+        EmptyStates.SearchToStart()}
 
       {/* No results state */}
-      {submittedQuery && results.length === 0 && !isLoading && (
-        <EmptyStates.NoSearchResults query={submittedQuery} />
-      )}
+      {submittedQuery &&
+        results.length === 0 &&
+        !isLoading &&
+        EmptyStates.NoSearchResults(submittedQuery)}
 
       {results.length > 0 && (
         <List.Section

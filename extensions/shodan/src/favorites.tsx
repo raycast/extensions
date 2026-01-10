@@ -21,7 +21,7 @@ import {
 } from "./utils/formatters";
 import { copyAsJSON, copyAsCSV } from "./utils/export";
 import { filterResults } from "./utils/filter";
-import { FavoriteQuery } from "./api/types";
+import { FavoriteQuery, ShodanSearchMatch } from "./api/types";
 
 function FavoriteResultsView({
   favorite,
@@ -86,7 +86,7 @@ function FavoriteResultsView({
               : `${total.toLocaleString()} total matches`
           }
         >
-          {displayResults.map((result, index) => {
+          {displayResults.map((result: ShodanSearchMatch, index: number) => {
             const vulnCount = result.vulns
               ? Object.keys(result.vulns).length
               : 0;

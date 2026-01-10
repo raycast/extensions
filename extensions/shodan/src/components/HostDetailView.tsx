@@ -392,7 +392,7 @@ export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
 
           {hostnames.length > 0 && (
             <Detail.Metadata.TagList title="Hostnames">
-              {hostnames.slice(0, 5).map((hostname) => (
+              {hostnames.slice(0, 5).map((hostname: string) => (
                 <Detail.Metadata.TagList.Item
                   key={hostname}
                   text={hostname}
@@ -409,7 +409,7 @@ export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
           )}
 
           <Detail.Metadata.TagList title={`Ports (${ports.length})`}>
-            {ports.slice(0, 12).map((port) => (
+            {ports.slice(0, 12).map((port: number) => (
               <Detail.Metadata.TagList.Item
                 key={port}
                 text={`${port}`}
@@ -439,7 +439,7 @@ export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
             <>
               <Detail.Metadata.Separator />
               <Detail.Metadata.TagList title="Tags">
-                {tags.map((tag) => (
+                {tags.map((tag: string) => (
                   <Detail.Metadata.TagList.Item
                     key={tag}
                     text={tag}
@@ -506,7 +506,7 @@ export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
 
           {vulnList.length > 0 && (
             <ActionPanel.Section title="Lookup CVE">
-              {vulnList.slice(0, 5).map((vuln) => (
+              {vulnList.slice(0, 5).map((vuln: string) => (
                 <Action.OpenInBrowser
                   key={vuln}
                   title={`${vuln}`}

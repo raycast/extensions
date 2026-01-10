@@ -24,7 +24,6 @@ export function useShodanSearch({
     [query, page],
     {
       execute: enabled && query.length > 0,
-      keepPreviousData: true,
       onError: (err) => {
         let message = err.message;
 
