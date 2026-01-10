@@ -5,6 +5,21 @@ export function exportToJSON(data: unknown): string {
   return JSON.stringify(data, null, 2);
 }
 
+function escapeCSVCell(cell: unknown): string {
+  if (cell === null || cell === undefined) return "";
+
+  const value = String(cell);
+
+  // Escape double quotes by doubling them and remove newlines/carriage returns
+  const escaped = value
+    .replace(/"/g, '""')
+    .replace(/\r?\n/g, " ")
+    .replace(/\r/g, " ");
+
+  // Always wrap in quotes to handle commas, quotes, and other special chars
+  return `"${escaped}"`;
+}
+
 export function exportToCSV(results: ShodanSearchMatch[]): string {
   if (!results.length) return "";
 
@@ -30,23 +45,21 @@ export function exportToCSV(results: ShodanSearchMatch[]): string {
     r.port,
     r.product || "",
     r.version || "",
-    r.org,
-    r.asn,
-    r.isp,
-    r.location.country_name,
-    r.location.city || "",
-    r.location.latitude,
-    r.location.longitude,
-    r.hostnames.join(";"),
+    r.org || "",
+    r.asn || "",
+    r.isp || "",
+    r.location?.country_name || "",
+    r.location?.city || "",
+    r.location?.latitude ?? "",
+    r.location?.longitude ?? "",
+    r.hostnames?.join(";") || "",
     r.vulns ? Object.keys(r.vulns).join(";") : "",
-    r.timestamp,
+    r.timestamp || "",
   ]);
 
   const csvContent = [
-    headers.join(","),
-    ...rows.map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
-    ),
+    headers.map(escapeCSVCell).join(","),
+    ...rows.map((row) => row.map(escapeCSVCell).join(",")),
   ].join("\n");
 
   return csvContent;

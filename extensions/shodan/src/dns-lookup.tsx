@@ -9,6 +9,7 @@ import {
   Toast,
   getPreferenceValues,
   Color,
+  Clipboard,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import {
@@ -331,7 +332,7 @@ export default function DnsLookupCommand() {
                           const all = domainData.subdomains
                             .map((s) => `${s}.${domainData.domain}`)
                             .join("\n");
-                          await navigator.clipboard.writeText(all);
+                          await Clipboard.copy(all);
                           await showToast({
                             style: Toast.Style.Success,
                             title: "Copied All Subdomains",

@@ -1,6 +1,6 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { ShodanSearchResponse } from "../api/types";
+import { showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { shodanClient } from "../api/client";
 
 interface UseShodanSearchOptions {
   query: string;
@@ -13,34 +13,38 @@ export function useShodanSearch({
   page = 1,
   enabled = true,
 }: UseShodanSearchOptions) {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { data, isLoading, error, revalidate, mutate } = usePromise(
+    async (q: string, p: number) => {
+      // Extra safety check to prevent empty queries
+      if (!q || q.trim().length === 0) {
+        return { matches: [], total: 0 };
+      }
+      return await shodanClient.search(q, p);
+    },
+    [query, page],
+    {
+      execute: enabled && query.length > 0,
+      keepPreviousData: true,
+      onError: (err) => {
+        let message = err.message;
 
-  const { data, isLoading, error, revalidate, mutate } =
-    useFetch<ShodanSearchResponse>(
-      `https://api.shodan.io/shodan/host/search?key=${apiKey}&query=${encodeURIComponent(query)}&page=${page}`,
-      {
-        execute: enabled && query.length > 0,
-        keepPreviousData: true,
-        onError: (err) => {
-          let message = err.message;
-          if (message.includes("401")) {
-            message =
-              "Invalid API key. Please check your extension preferences.";
-          } else if (message.includes("429")) {
-            message =
-              "Rate limit exceeded. Please wait before searching again.";
-          } else if (message.includes("402")) {
-            message = "Insufficient credits. Upgrade your Shodan plan.";
-          }
+        // Handle specific error types
+        if (err.name === "AuthenticationError") {
+          message = "Invalid API key. Please check your extension preferences.";
+        } else if (err.name === "RateLimitError") {
+          message = err.message; // Already includes wait time if available
+        } else if (err.name === "InsufficientCreditsError") {
+          message = "Insufficient credits. Upgrade your Shodan plan.";
+        }
 
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Search Failed",
-            message,
-          });
-        },
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Search Failed",
+          message,
+        });
       },
-    );
+    },
+  );
 
   return {
     results: data?.matches ?? [],

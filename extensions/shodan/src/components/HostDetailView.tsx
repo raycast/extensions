@@ -12,6 +12,7 @@ import { ShodanHost, ShodanSearchMatch } from "../api/types";
 import { getPortColor } from "../utils/formatters";
 import { copyHostAsJSON } from "../utils/export";
 import { useShodanHost } from "../hooks/useShodanHost";
+import { formatCVSS, sortVulnsByCVSS } from "../utils/cvss";
 
 interface HostDetailViewProps {
   ip: string;
@@ -189,12 +190,13 @@ function generateFullHostMarkdown(host: ShodanHost): string {
 
   const vulns = host.vulns;
   if (vulns && vulns.length > 0) {
-    md += `## Vulnerabilities (${vulns.length})\n\n`;
-    vulns.slice(0, 20).forEach((cve) => {
-      md += `- \`${cve}\`\n`;
+    md += `## ⚠️ Vulnerabilities (${vulns.length})\n\n`;
+    md += `> **Note:** Detailed CVSS scores require individual CVE lookup. Click CVE links in actions to view details.\n\n`;
+    vulns.slice(0, 25).forEach((cve) => {
+      md += `- \`${cve}\` — [View on NVD](https://nvd.nist.gov/vuln/detail/${cve})\n`;
     });
-    if (vulns.length > 20) {
-      md += `\n*+${vulns.length - 20} more*\n`;
+    if (vulns.length > 25) {
+      md += `\n*+${vulns.length - 25} more vulnerabilities*\n`;
     }
   }
 
@@ -241,16 +243,39 @@ function generatePartialMarkdown(match: ShodanSearchMatch): string {
 
   const vulns = match.vulns;
   if (vulns) {
-    const vulnList = Object.keys(vulns);
-    if (vulnList.length > 0) {
-      md += `---\n\n## Vulnerabilities (${vulnList.length})\n\n`;
-      vulnList.slice(0, 10).forEach((cve) => {
-        const details = vulns[cve];
-        const cvss = details?.cvss;
-        md += `- \`${cve}\`${cvss ? ` — CVSS ${cvss}` : ""}\n`;
+    const sortedVulns = sortVulnsByCVSS(vulns);
+    if (sortedVulns.length > 0) {
+      md += `---\n\n## ⚠️ Vulnerabilities (${sortedVulns.length})\n\n`;
+
+      // Show highest severity first
+      sortedVulns.slice(0, 15).forEach(([cve, cvss]) => {
+        const cvssInfo = formatCVSS(cvss);
+        md += `- \`${cve}\`${cvssInfo ? ` — ${cvssInfo}` : ""}\n`;
       });
-      if (vulnList.length > 10) {
-        md += `\n*+${vulnList.length - 10} more*\n`;
+
+      if (sortedVulns.length > 15) {
+        md += `\n*+${sortedVulns.length - 15} more vulnerabilities*\n`;
+      }
+
+      // Add severity summary
+      const critical = sortedVulns.filter(
+        (vuln) => vuln[1] && vuln[1] >= 9.0,
+      ).length;
+      const high = sortedVulns.filter(
+        (vuln) => vuln[1] && vuln[1] >= 7.0 && vuln[1] < 9.0,
+      ).length;
+      const medium = sortedVulns.filter(
+        (vuln) => vuln[1] && vuln[1] >= 4.0 && vuln[1] < 7.0,
+      ).length;
+
+      if (critical > 0 || high > 0 || medium > 0) {
+        md += `\n> **Severity:** `;
+        const parts = [];
+        if (critical > 0) parts.push(`🔴 ${critical} Critical`);
+        if (high > 0) parts.push(`🟠 ${high} High`);
+        if (medium > 0) parts.push(`🟡 ${medium} Medium`);
+        md += parts.join(" · ");
+        md += `\n`;
       }
     }
   }

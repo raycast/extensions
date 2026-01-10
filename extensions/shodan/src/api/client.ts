@@ -21,19 +21,80 @@ interface RequestOptions {
   body?: Record<string, unknown>;
 }
 
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
 class ShodanClient {
   private cachedCredits: ApiCredits | null = null;
   private lastCreditsCheck = 0;
   private readonly CREDITS_CACHE_TTL = 60000; // 1 minute
+
+  // Cache for search results (10 most recent)
+  private searchCache = new Map<string, CacheEntry<ShodanSearchResponse>>();
+  private readonly SEARCH_CACHE_TTL = 1800000; // 30 minutes (increased to reduce API calls)
+  private readonly MAX_SEARCH_CACHE_SIZE = 15;
+
+  // Cache for host lookups
+  private hostCache = new Map<string, CacheEntry<ShodanHost>>();
+  private readonly HOST_CACHE_TTL = 1800000; // 30 minutes (increased to reduce API calls)
+  private readonly MAX_HOST_CACHE_SIZE = 30;
 
   private get apiKey(): string {
     const preferences = getPreferenceValues<Preferences>();
     return preferences.apiKey;
   }
 
-  private async request<T>(
+  private getCacheKey(
+    endpoint: string,
+    params?: Record<string, string | number>,
+  ): string {
+    const sortedParams = params
+      ? Object.entries(params)
+          .sort()
+          .map(([k, v]) => `${k}=${v}`)
+          .join("&")
+      : "";
+    return `${endpoint}${sortedParams ? "?" + sortedParams : ""}`;
+  }
+
+  private getFromCache<T>(
+    cache: Map<string, CacheEntry<T>>,
+    key: string,
+    ttl: number,
+  ): T | null {
+    const entry = cache.get(key);
+    if (!entry) return null;
+
+    const age = Date.now() - entry.timestamp;
+    if (age > ttl) {
+      cache.delete(key);
+      return null;
+    }
+
+    return entry.data;
+  }
+
+  private setInCache<T>(
+    cache: Map<string, CacheEntry<T>>,
+    key: string,
+    data: T,
+    maxSize: number,
+  ): void {
+    // Remove oldest entry if cache is full
+    if (cache.size >= maxSize) {
+      const oldestKey = cache.keys().next().value;
+      if (oldestKey) cache.delete(oldestKey);
+    }
+
+    cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  private async requestWithRetry<T>(
     endpoint: string,
     options: RequestOptions = {},
+    retries = 1, // Reduced from 2 to 1 retry to avoid rate limiting
   ): Promise<T> {
     const { method = "GET", body } = options;
 
@@ -51,26 +112,102 @@ class ShodanClient {
       fetchOptions.body = JSON.stringify(body);
     }
 
-    const response = await fetch(url.toString(), fetchOptions);
+    let lastError: Error | null = null;
 
-    let data: unknown;
-    const contentType = response.headers.get("content-type");
-    if (contentType?.includes("application/json")) {
-      data = await response.json();
-    } else {
-      const text = await response.text();
+    for (let attempt = 0; attempt <= retries; attempt++) {
       try {
-        data = JSON.parse(text);
-      } catch {
-        data = text;
+        const response = await fetch(url.toString(), fetchOptions);
+
+        let data: unknown;
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          try {
+            data = JSON.parse(text);
+          } catch {
+            data = text;
+          }
+        }
+
+        if (!response.ok) {
+          const error = parseShodanError(response.status, data);
+
+          // NEVER retry on these errors
+          if (
+            error.name === "AuthenticationError" ||
+            error.name === "InsufficientCreditsError" ||
+            error.name === "RateLimitError"
+          ) {
+            // For rate limit errors, try to extract retry-after header
+            if (error.name === "RateLimitError") {
+              const retryAfter = response.headers.get("retry-after");
+              if (retryAfter) {
+                const retryAfterSeconds = parseInt(retryAfter, 10);
+                if (!isNaN(retryAfterSeconds)) {
+                  throw new Error(
+                    `Rate limit exceeded. Please wait ${retryAfterSeconds} seconds before trying again.`,
+                  );
+                }
+              }
+            }
+            throw error;
+          }
+
+          // For other errors, only retry if it's a network/server error (5xx)
+          if (response.status >= 500) {
+            lastError = error;
+            if (attempt < retries) {
+              // Wait before retrying (exponential backoff)
+              await new Promise((resolve) =>
+                setTimeout(resolve, Math.pow(2, attempt) * 1000),
+              );
+              continue;
+            }
+          }
+
+          throw error;
+        }
+
+        return data as T;
+      } catch (error) {
+        lastError = error as Error;
+
+        // Don't retry on these specific errors
+        if (
+          lastError.name === "AuthenticationError" ||
+          lastError.name === "InsufficientCreditsError" ||
+          lastError.name === "RateLimitError" ||
+          lastError.message.includes("Rate limit exceeded")
+        ) {
+          throw lastError;
+        }
+
+        // Only retry on network errors
+        if (
+          attempt < retries &&
+          (lastError.message.includes("fetch") ||
+            lastError.message.includes("network"))
+        ) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.pow(2, attempt) * 1500),
+          );
+        } else {
+          throw lastError;
+        }
       }
     }
 
-    if (!response.ok) {
-      throw parseShodanError(response.status, data);
-    }
+    throw lastError || new Error("Request failed after retries");
+  }
 
-    return data as T;
+  private async request<T>(
+    endpoint: string,
+    options: RequestOptions = {},
+  ): Promise<T> {
+    // Temporarily disable retry to avoid rate limiting issues
+    return this.requestWithRetry<T>(endpoint, options, 0);
   }
 
   // Account & Credits
@@ -109,9 +246,35 @@ class ShodanClient {
   }
 
   // Search
-  async search(query: string, page = 1): Promise<ShodanSearchResponse> {
+  async search(
+    query: string,
+    page = 1,
+    useCache = true,
+  ): Promise<ShodanSearchResponse> {
+    const cacheKey = this.getCacheKey("/shodan/host/search", { query, page });
+
+    // Check cache first
+    if (useCache) {
+      const cached = this.getFromCache(
+        this.searchCache,
+        cacheKey,
+        this.SEARCH_CACHE_TTL,
+      );
+      if (cached) return cached;
+    }
+
     const url = `/shodan/host/search?query=${encodeURIComponent(query)}&page=${page}`;
-    return this.request<ShodanSearchResponse>(url);
+    const result = await this.request<ShodanSearchResponse>(url);
+
+    // Cache the result
+    this.setInCache(
+      this.searchCache,
+      cacheKey,
+      result,
+      this.MAX_SEARCH_CACHE_SIZE,
+    );
+
+    return result;
   }
 
   async searchCount(
@@ -128,13 +291,42 @@ class ShodanClient {
     ip: string,
     history = false,
     minify = false,
+    useCache = true,
   ): Promise<ShodanHost> {
+    const cacheKey = this.getCacheKey(`/shodan/host/${ip}`, {
+      history: history ? 1 : 0,
+      minify: minify ? 1 : 0,
+    });
+
+    // Check cache first (only for non-history requests)
+    if (useCache && !history) {
+      const cached = this.getFromCache(
+        this.hostCache,
+        cacheKey,
+        this.HOST_CACHE_TTL,
+      );
+      if (cached) return cached;
+    }
+
     let url = `/shodan/host/${ip}`;
     const params = new URLSearchParams();
     if (history) params.set("history", "true");
     if (minify) params.set("minify", "true");
     if (params.toString()) url += `?${params.toString()}`;
-    return this.request<ShodanHost>(url);
+
+    const result = await this.request<ShodanHost>(url);
+
+    // Cache the result (only for non-history requests)
+    if (!history) {
+      this.setInCache(
+        this.hostCache,
+        cacheKey,
+        result,
+        this.MAX_HOST_CACHE_SIZE,
+      );
+    }
+
+    return result;
   }
 
   // DNS
