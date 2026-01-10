@@ -123,7 +123,7 @@ const searchBooks = async (query: string, prefs: Preferences): Promise<Book[]> =
   // If it looks like ISBN-10 (10 chars, last might be X)
   if (cleanQuery.length === 10 && /^\d{9}[\dXx]$/.test(cleanQuery)) {
     const isbn13 = convertISBN10to13(cleanQuery);
-    showToast({
+    void showToast({
       style: Toast.Style.Success,
       title: "ISBN-10 converted",
       message: `${cleanQuery} → ${isbn13}`,
