@@ -89,21 +89,45 @@ Example: `plugin-dev@claude-code-plugins`
 
 This format is used throughout for installation commands and plugin identification.
 
-### Installation Scope Limitation
+### Installation Scope Handling
 
-**Critical Design Decision**: This extension **only supports `user` scope** for plugin installations.
+**Critical Design Decision**: This extension uses a hybrid approach for scope management:
 
-**Why?** Claude CLI supports three scopes (user, project, local), but Raycast runs as a global macOS application without a working directory context:
-- ❌ No concept of "current directory"
-- ❌ No knowledge of which project the user wants to install for
-- ❌ Cannot determine Git repository boundaries
+**Display**: Shows ALL plugin installations across all scopes (user, project, local)
+- Reads `installed_plugins.json` to detect all installations
+- Displays each scope separately in the plugin detail view
+- Shows status badges for multiple installations
 
-Therefore, only global `user` scope makes sense for a Raycast extension. Users who need project-specific or local plugins should use the Claude CLI directly:
+**Operations**: Full support with automatic directory switching
 
-```bash
-cd /path/to/your/project
-claude plugin install plugin-name@marketplace --scope project
+| Operation | Behavior | Scopes Supported |
+|-----------|----------|------------------|
+| **Install** | Defaults to `user` scope only | user ✓ |
+| **Update** | Updates ALL detected scopes automatically | user ✓, project ✓, local ✓ |
+| **Uninstall** | Allows selection of which scope to uninstall | user ✓, project ✓, local ✓ |
+| **Enable/Disable** | Per-scope control | user ✓, project ✓, local ✓ |
+
+**✅ How It Works:**
+
+The extension automatically handles `project` and `local` scope operations by:
+1. Reading `projectPath` from `installed_plugins.json` for each installation
+2. Using the `cwd` (current working directory) option in `execSync` to run commands in the correct project directory
+3. This allows Claude CLI to find the appropriate `.claude/settings.json` or `.claude/settings.local.json` files
+
+**Example:**
+When you uninstall a plugin from local scope, the extension:
+```javascript
+// Automatically executes the command in the project directory
+execSync('claude plugin uninstall plugin-name@marketplace --scope local', {
+  cwd: '/path/to/project'  // From installed_plugins.json
+});
 ```
+
+**Why This Design?**
+1. **Full Visibility**: Users can see ALL installations across all scopes
+2. **Seamless Operations**: All scopes are fully manageable through Raycast UI
+3. **Automatic Context**: The extension automatically switches to the correct directory for each operation
+4. **No Manual CLI Required**: Users don't need to drop to terminal for project/local operations
 
 ## Key Files
 

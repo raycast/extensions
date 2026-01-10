@@ -47,11 +47,13 @@ export default function Marketplaces() {
         invalidateCache(CACHE_KEYS.ALL_PLUGINS);
         refetch();
       } else {
+        console.error("Update marketplace failed:", result.error);
         toast.style = Toast.Style.Failure;
         toast.title = "Update failed";
-        toast.message = result.error;
+        toast.message = result.error?.slice(0, 200);
       }
     } catch (err: unknown) {
+      console.error("Update marketplace exception:", err);
       toast.style = Toast.Style.Failure;
       toast.title = "Update failed";
       toast.message = err instanceof Error ? err.message : String(err);
@@ -149,6 +151,7 @@ export default function Marketplaces() {
       {!isLoading && (
         <List.Section title="Actions">
           <List.Item
+            id="add-new-marketplace"
             title="Add New Marketplace"
             icon={Icon.Plus}
             accessories={[{ tag: { value: "Action", color: Color.Blue } }]}

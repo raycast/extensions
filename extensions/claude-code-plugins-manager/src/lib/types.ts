@@ -2,6 +2,14 @@
  * TypeScript type definitions for Claude Plugin Manager
  */
 
+export interface PluginInstallation {
+  scope: "user" | "project" | "local";
+  version: string;
+  installPath: string;
+  enabled?: boolean;
+  projectPath?: string;
+}
+
 export interface Plugin {
   name: string;
   version: string;
@@ -31,6 +39,9 @@ export interface Plugin {
     };
     mcp?: boolean;
   };
+  // Array of all installations across different scopes
+  installations: PluginInstallation[];
+  // Legacy field for backwards compatibility - computed from installations
   installStatus?: {
     installed: boolean;
     scope?: "user" | "project" | "local";
@@ -63,6 +74,7 @@ export interface InstalledPlugin {
   lastUpdated: string;
   isLocal: boolean;
   enabled?: boolean;
+  projectPath?: string; // For project/local scopes
 }
 
 export interface CLIResult {
@@ -122,6 +134,7 @@ export interface InstalledPluginsData {
       lastUpdated: string;
       isLocal: boolean;
       enabled?: boolean;
+      projectPath?: string; // For project/local scopes
     }>;
   };
 }
