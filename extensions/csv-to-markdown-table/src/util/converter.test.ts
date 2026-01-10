@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { convertToMarkdownTable, convertFromMarkdownTable } from "./converter";
 
 describe("convertToMarkdownTable", () => {
-  describe("CSV変換", () => {
-    it("基本的なCSVをMarkdownテーブルに変換する", () => {
+  describe("CSV conversion", () => {
+    it("converts basic CSV to Markdown table", () => {
       const csv = "name,age,city\nJohn,30,Tokyo\nJane,25,Osaka";
       const expected = `| name | age | city |
 | --- | --- | --- |
@@ -12,14 +12,14 @@ describe("convertToMarkdownTable", () => {
       expect(convertToMarkdownTable(csv, ",")).toBe(expected);
     });
 
-    it("ヘッダーのみのCSVを変換する", () => {
+    it("converts CSV with header only", () => {
       const csv = "name,age,city";
       const expected = `| name | age | city |
 | --- | --- | --- |`;
       expect(convertToMarkdownTable(csv, ",")).toBe(expected);
     });
 
-    it("空白行を無視して変換する", () => {
+    it("ignores empty lines during conversion", () => {
       const csv = "name,age\n\nJohn,30\n\nJane,25\n";
       const expected = `| name | age |
 | --- | --- |
@@ -28,7 +28,7 @@ describe("convertToMarkdownTable", () => {
       expect(convertToMarkdownTable(csv, ",")).toBe(expected);
     });
 
-    it("単一列のCSVを変換する", () => {
+    it("converts single column CSV", () => {
       const csv = "name\nJohn\nJane";
       const expected = `| name |
 | --- |
@@ -38,8 +38,8 @@ describe("convertToMarkdownTable", () => {
     });
   });
 
-  describe("TSV変換", () => {
-    it("基本的なTSVをMarkdownテーブルに変換する", () => {
+  describe("TSV conversion", () => {
+    it("converts basic TSV to Markdown table", () => {
       const tsv = "name\tage\tcity\nJohn\t30\tTokyo\nJane\t25\tOsaka";
       const expected = `| name | age | city |
 | --- | --- | --- |
@@ -48,14 +48,14 @@ describe("convertToMarkdownTable", () => {
       expect(convertToMarkdownTable(tsv, "\t")).toBe(expected);
     });
 
-    it("ヘッダーのみのTSVを変換する", () => {
+    it("converts TSV with header only", () => {
       const tsv = "name\tage\tcity";
       const expected = `| name | age | city |
 | --- | --- | --- |`;
       expect(convertToMarkdownTable(tsv, "\t")).toBe(expected);
     });
 
-    it("空白行を無視して変換する", () => {
+    it("ignores empty lines during conversion", () => {
       const tsv = "name\tage\n\nJohn\t30\n\nJane\t25\n";
       const expected = `| name | age |
 | --- | --- |
@@ -65,8 +65,8 @@ describe("convertToMarkdownTable", () => {
     });
   });
 
-  describe("エッジケース", () => {
-    it("空文字列を変換すると空文字列を返す", () => {
+  describe("Edge cases", () => {
+    it("returns empty string when converting empty string", () => {
       expect(convertToMarkdownTable("", ",")).toBe("");
     });
 
@@ -74,7 +74,7 @@ describe("convertToMarkdownTable", () => {
       expect(convertToMarkdownTable("   \n  \n  ", ",")).toBe("");
     });
 
-    it("多数の列を持つデータを変換する", () => {
+    it("converts data with many columns", () => {
       const csv = "a,b,c,d,e,f\n1,2,3,4,5,6";
       const expected = `| a | b | c | d | e | f |
 | --- | --- | --- | --- | --- | --- |
@@ -82,7 +82,7 @@ describe("convertToMarkdownTable", () => {
       expect(convertToMarkdownTable(csv, ",")).toBe(expected);
     });
 
-    it("パイプ文字を含むセルを正しくエスケープする", () => {
+    it("correctly escapes pipe characters in cells", () => {
       const csv = "name,description\nProduct A,Features: A | B | C";
       const expected = `| name | description |
 | --- | --- |
@@ -90,19 +90,19 @@ describe("convertToMarkdownTable", () => {
       expect(convertToMarkdownTable(csv, ",")).toBe(expected);
     });
 
-    it("カンマを含むセルを正しく変換する（CSV）", () => {
+    it("correctly converts cells containing commas (CSV)", () => {
       const csv = "name,value\nItem A,1,000";
       const expected = `| name | value |
 | --- | --- |
 | Item A | 1 |`;
-      // Note: カンマは区切り文字として扱われるため、追加の列になる
-      // これは既存の動作を維持
+      // Note: Commas are treated as delimiters, resulting in additional columns
+      // This maintains existing behavior
       expect(convertToMarkdownTable(csv, ",")).not.toBe(expected);
     });
 
-    it("タブを含むセルを正しく変換する（TSV）", () => {
+    it("correctly converts cells containing tabs (TSV)", () => {
       const tsv = "name\tvalue\nItem\tA\tB";
-      // タブは区切り文字として扱われるため、追加の列になる
+      // Tabs are treated as delimiters, resulting in additional columns
       const result = convertToMarkdownTable(tsv, "\t");
       expect(result).toContain("Item");
       expect(result).toContain("A");
@@ -127,8 +127,8 @@ describe("convertToMarkdownTable", () => {
 });
 
 describe("convertFromMarkdownTable", () => {
-  describe("基本的な変換", () => {
-    it("MarkdownテーブルをCSVに変換する", () => {
+  describe("Basic conversion", () => {
+    it("converts Markdown table to CSV", () => {
       const markdown = `| name | age | city |
 | --- | --- | --- |
 | John | 30 | Tokyo |
@@ -137,7 +137,7 @@ describe("convertFromMarkdownTable", () => {
       expect(convertFromMarkdownTable(markdown, ",")).toBe(expected);
     });
 
-    it("MarkdownテーブルをTSVに変換する", () => {
+    it("converts Markdown table to TSV", () => {
       const markdown = `| name | age | city |
 | --- | --- | --- |
 | John | 30 | Tokyo |
@@ -146,14 +146,14 @@ describe("convertFromMarkdownTable", () => {
       expect(convertFromMarkdownTable(markdown, "\t")).toBe(expected);
     });
 
-    it("ヘッダーのみのMarkdownテーブルを変換する", () => {
+    it("converts Markdown table with header only", () => {
       const markdown = `| name | age | city |
 | --- | --- | --- |`;
       const expected = "name,age,city";
       expect(convertFromMarkdownTable(markdown, ",")).toBe(expected);
     });
 
-    it("セパレーター行を正しく除外する", () => {
+    it("correctly excludes separator rows", () => {
       const markdown = `| name | age |
 | --- | --- |
 | John | 30 |`;
@@ -173,7 +173,7 @@ describe("convertFromMarkdownTable", () => {
       expect(convertFromMarkdownTable(markdown, ",")).toBe(expected);
     });
 
-    it("セルの前後の空白を削除する", () => {
+    it("removes leading and trailing whitespace from cells", () => {
       const markdown = `|  name  |  age  |
 | --- | --- |
 |  John  |  30  |`;
@@ -182,8 +182,8 @@ describe("convertFromMarkdownTable", () => {
     });
   });
 
-  describe("特殊文字のエッジケース", () => {
-    it("エスケープされたパイプ文字を含むセルを正しく処理する", () => {
+  describe("Special character edge cases", () => {
+    it("correctly handles cells with escaped pipe characters", () => {
       const markdown = `| name | description |
 | --- | --- |
 | Product A | Features: A \\| B \\| C |`;
@@ -191,7 +191,7 @@ describe("convertFromMarkdownTable", () => {
       expect(convertFromMarkdownTable(markdown, ",")).toBe(expected);
     });
 
-    it("複数のエスケープされたパイプを含むセルを処理する", () => {
+    it("handles cells with multiple escaped pipes", () => {
       const markdown = `| col1 | col2 |
 | --- | --- |
 | a\\|b\\|c | x\\|y |`;
@@ -199,7 +199,7 @@ describe("convertFromMarkdownTable", () => {
       expect(convertFromMarkdownTable(markdown, ",")).toBe(expected);
     });
 
-    it("カンマを含むセルをCSVに変換する", () => {
+    it("converts cells containing commas to CSV", () => {
       const markdown = `| name | value |
 | --- | --- |
 | Item | 1,000 |`;
@@ -207,7 +207,7 @@ describe("convertFromMarkdownTable", () => {
       expect(convertFromMarkdownTable(markdown, ",")).toBe(expected);
     });
 
-    it("タブ文字を含むセルをTSVに変換する", () => {
+    it("converts cells containing tab characters to TSV", () => {
       const markdown = `| name | value |
 | --- | --- |
 | Item | Data	Here |`;
@@ -224,8 +224,8 @@ describe("convertFromMarkdownTable", () => {
     });
   });
 
-  describe("その他のエッジケース", () => {
-    it("空文字列を変換すると空文字列を返す", () => {
+  describe("Other edge cases", () => {
+    it("returns empty string when converting empty string", () => {
       expect(convertFromMarkdownTable("", ",")).toBe("");
     });
 
@@ -233,7 +233,7 @@ describe("convertFromMarkdownTable", () => {
       expect(convertFromMarkdownTable("   \n  \n  ", ",")).toBe("");
     });
 
-    it("単一列のテーブルを変換する", () => {
+    it("converts single column table", () => {
       const markdown = `| name |
 | --- |
 | John |
@@ -250,7 +250,7 @@ describe("convertFromMarkdownTable", () => {
       expect(convertFromMarkdownTable(markdown, ",")).toBe(expected);
     });
 
-    it("多数の列を持つテーブルを変換する", () => {
+    it("converts table with many columns", () => {
       const markdown = `| a | b | c | d | e | f |
 | --- | --- | --- | --- | --- | --- |
 | 1 | 2 | 3 | 4 | 5 | 6 |`;
@@ -259,29 +259,29 @@ describe("convertFromMarkdownTable", () => {
     });
   });
 
-  describe("双方向変換", () => {
-    it("CSV → Markdown → CSV の変換が正しく動作する", () => {
+  describe("Bidirectional conversion", () => {
+    it("CSV → Markdown → CSV conversion works correctly", () => {
       const originalCsv = "name,age,city\nJohn,30,Tokyo\nJane,25,Osaka";
       const markdown = convertToMarkdownTable(originalCsv, ",");
       const resultCsv = convertFromMarkdownTable(markdown, ",");
       expect(resultCsv).toBe(originalCsv);
     });
 
-    it("TSV → Markdown → TSV の変換が正しく動作する", () => {
+    it("TSV → Markdown → TSV conversion works correctly", () => {
       const originalTsv = "name\tage\tcity\nJohn\t30\tTokyo\nJane\t25\tOsaka";
       const markdown = convertToMarkdownTable(originalTsv, "\t");
       const resultTsv = convertFromMarkdownTable(markdown, "\t");
       expect(resultTsv).toBe(originalTsv);
     });
 
-    it("パイプ文字を含むデータの双方向変換が正しく動作する", () => {
+    it("bidirectional conversion with pipe characters works correctly", () => {
       const originalCsv = "name,description\nProduct A,A | B | C";
       const markdown = convertToMarkdownTable(originalCsv, ",");
       const resultCsv = convertFromMarkdownTable(markdown, ",");
       expect(resultCsv).toBe(originalCsv);
     });
 
-    it("Markdown → CSV → Markdown の変換が正しく動作する", () => {
+    it("Markdown → CSV → Markdown conversion works correctly", () => {
       const originalMarkdown = `| name | age | city |
 | --- | --- | --- |
 | John | 30 | Tokyo |
@@ -291,7 +291,7 @@ describe("convertFromMarkdownTable", () => {
       expect(resultMarkdown).toBe(originalMarkdown);
     });
 
-    it("エスケープされたパイプの双方向変換が正しく動作する", () => {
+    it("bidirectional conversion with escaped pipes works correctly", () => {
       const originalMarkdown = `| name | description |
 | --- | --- |
 | Product A | Features: A \\| B \\| C |`;

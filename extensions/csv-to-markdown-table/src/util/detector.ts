@@ -1,5 +1,5 @@
 /**
- * 文字列がMarkdownテーブル形式かどうかを判定する
+ * Check if the string is in Markdown table format
  */
 export function isMarkdownTable(text: string): boolean {
   if (!text || text.trim() === "") {
@@ -11,7 +11,6 @@ export function isMarkdownTable(text: string): boolean {
     return false;
   }
 
-  // 先頭と末尾に | があるかチェック
   const hasTableFormat = lines.every(
     (line) => line.trim().startsWith("|") && line.trim().endsWith("|"),
   );
@@ -19,7 +18,6 @@ export function isMarkdownTable(text: string): boolean {
     return false;
   }
 
-  // セパレーター行があるかチェック (2行目に --- があるパターン)
   const hasSeparator = lines.some((line) =>
     line.match(/^\|\s*[-:]+\s*(\|\s*[-:]+\s*)*\|$/),
   );
@@ -43,7 +41,6 @@ export function isCsv(text: string): boolean {
   const avgCommas = commaCount.reduce((a, b) => a + b, 0) / lines.length;
   const avgTabs = tabCount.reduce((a, b) => a + b, 0) / lines.length;
 
-  // カンマが一貫して存在し、タブより多い
   const commaConsistent = commaCount.every((c) => c === commaCount[0] && c > 0);
 
   if (commaConsistent) {
@@ -54,7 +51,7 @@ export function isCsv(text: string): boolean {
 }
 
 /**
- * 文字列がTSV形式かどうかを判定する
+ * Check if the string is in TSV format
  */
 export function isTsv(text: string): boolean {
   if (!text || text.trim() === "") {
@@ -72,7 +69,6 @@ export function isTsv(text: string): boolean {
   const avgCommas = commaCount.reduce((a, b) => a + b, 0) / lines.length;
   const avgTabs = tabCount.reduce((a, b) => a + b, 0) / lines.length;
 
-  // タブが一貫して存在し、カンマより多い
   const tabConsistent = tabCount.every((t) => t === tabCount[0] && t > 0);
   if (tabConsistent) {
     return true;
