@@ -12,6 +12,7 @@ Better Aliases is an opinionated aliases and randomized snippets. Raycast in Ray
 - **Frecency sorting**: The search command will use frecency sorting to show the most used aliases and snippets first.
 - **Leader key compatibility**: If you've used [Leader Key](https://github.com/mikker/LeaderKey), the extension will automatically convert your Leader Key configuration to a format that can be used with Better Aliases.
 - **Export to Raycast**: Export all your aliases (including Leader Key ones) as Raycast Snippets or Quicklinks for use in Raycast natively.
+- **Aliases Cheatsheet**: Visualize your aliases in two formats: an interactive **Keyboard Layout View** (locked to brand-dark theme) to see your prefix keys at a glance, and a hierarchical **Tree View** for recursive navigation.
 
 ## Configuration
 

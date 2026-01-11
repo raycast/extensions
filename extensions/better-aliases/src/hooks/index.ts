@@ -2,4 +2,3 @@ export * from "./useAliasesWithFrecency";
 export * from "./useAllItems";
 export * from "./useAutoTriggerAlias";
 export * from "./useFilteredItems";
-export * from "./useSnippetsOnly";

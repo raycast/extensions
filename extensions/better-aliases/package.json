@@ -37,12 +37,6 @@
 			"mode": "view"
 		},
 		{
-			"name": "insert-snippet",
-			"title": "Insert Snippet",
-			"description": "Quickly insert a text snippet",
-			"mode": "view"
-		},
-		{
 			"name": "open-config-folder",
 			"title": "Open Config Folder",
 			"description": "Open the folder containing your Better Aliases configuration files in Finder",
@@ -52,6 +46,12 @@
 			"name": "view-usage-stats",
 			"title": "View Alias Usage Statistics",
 			"description": "View usage counts for all aliases",
+			"mode": "view"
+		},
+		{
+			"name": "view-cheatsheet",
+			"title": "View Keyboard Layout or Cheatsheet",
+			"description": "Visualize aliases in Tree View or Keyboard Layout",
 			"mode": "view"
 		},
 		{
