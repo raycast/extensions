@@ -17,10 +17,10 @@ const QWERTY_ROWS = [
   ["z", "x", "c", "v", "b", "n", "m", ",", ".", "/"],
 ];
 
-const KEY_WIDTH = 50;
-const KEY_HEIGHT = 50;
-const KEY_SPACING = 5;
-const ROW_OFFSET_INCREMENTS = [0, 25, 35, 60];
+const KEY_WIDTH = 40;
+const KEY_HEIGHT = 40;
+const KEY_SPACING = 6;
+const ROW_OFFSET_INCREMENTS = [0, 20, 30, 50];
 
 export function generateKeyboardSvg(node: AliasNode, colors: KeyboardColors): string {
   const keyStates = new Map<string, { state: "none" | "prefix" | "complete" | "both" }>();
@@ -43,11 +43,11 @@ export function generateKeyboardSvg(node: AliasNode, colors: KeyboardColors): st
   }
 
   let svgContent = "";
-  let yOffset = 20;
+  let yOffset = 10;
 
   for (let rowIndex = 0; rowIndex < QWERTY_ROWS.length; rowIndex++) {
     const row = QWERTY_ROWS[rowIndex];
-    const xOffset = 20 + ROW_OFFSET_INCREMENTS[rowIndex];
+    const xOffset = 30 + ROW_OFFSET_INCREMENTS[rowIndex];
 
     for (let keyIndex = 0; keyIndex < row.length; keyIndex++) {
       const key = row[keyIndex];
@@ -72,24 +72,24 @@ export function generateKeyboardSvg(node: AliasNode, colors: KeyboardColors): st
 
       let textFill = colors.keyText;
       if (state === "prefix" || state === "both") {
-        textFill = "#FFFFFF"; // Red background -> White text
+        textFill = "#FFFFFF";
       } else if (state === "complete") {
         textFill = colors.background; // Contrast with action color
       }
 
-      svgContent += `<rect x="${x}" y="${y}" width="${KEY_WIDTH}" height="${KEY_HEIGHT}" rx="6" fill="${fillColor}" stroke="${strokeColor}" stroke-width="1.5"/>`;
-      svgContent += `<text x="${x + KEY_WIDTH / 2}" y="${y + KEY_HEIGHT / 2 + 6}" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="${textFill}" text-anchor="middle">${key.toUpperCase()}</text>`;
+      svgContent += `<rect x="${x}" y="${y}" width="${KEY_WIDTH}" height="${KEY_HEIGHT}" rx="8" fill="${fillColor}" stroke="${strokeColor}" stroke-width="0.5"/>`;
+      svgContent += `<text x="${x + KEY_WIDTH / 2}" y="${y + KEY_HEIGHT / 2}" dominant-baseline="central" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="${textFill}" text-anchor="middle">${key.toUpperCase()}</text>`;
     }
 
-    yOffset += KEY_HEIGHT + KEY_SPACING + 5;
+    yOffset += KEY_HEIGHT + KEY_SPACING;
   }
 
-  const totalWidth = 720;
-  const totalHeight = yOffset + 20;
+  const totalWidth = 650;
+  const totalHeight = yOffset - KEY_SPACING + 10;
 
   const svg = `
 <svg width="${totalWidth}" height="${totalHeight}" viewBox="0 0 ${totalWidth} ${totalHeight}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="100%" height="100%" rx="12" fill="${colors.background}"/>
+  <rect width="100%" height="100%" rx="20" fill="${colors.background}"/>
   ${svgContent}
 </svg>
   `.trim();
