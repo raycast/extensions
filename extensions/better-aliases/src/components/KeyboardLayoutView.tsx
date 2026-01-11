@@ -126,11 +126,12 @@ export function KeyboardLayoutView({ node, onNavigate, onToggleView, onGoBack }:
   const markdown = `
 # Keyboard Layout View
 
-${node.fullAlias ? `**Current Path:** \`${node.fullAlias}\`` : "**Current Path:** Root"}
-
 ![Keyboard Layout](${dataUri})
 
-**Color Guide:**
+${node.fullAlias ? `**Current Path:** \`${node.fullAlias}\`` : "**Current Path:** Root"}
+
+_Press the key to change the path_
+
 - ![](${folderIcon}) **Multiple Actions**: Leads to more keys
 - ![](${actionIcon}) **Action**: Final snippet or command
 - ![](${emptyIcon}) **Empty Key**: No action assigned
