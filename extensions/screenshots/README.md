@@ -2,7 +2,7 @@
 
 Browse and paste macOS screenshots with a paste-first workflow, perfect for Claude Code and other AI tools.
 
-![Screenshots extension](metadata/screenshots-1.png)
+![Screenshots extension](images/screenshots-1.png)
 
 ## Features
 

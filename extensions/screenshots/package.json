@@ -5,9 +5,12 @@
   "title": "Screenshots",
   "description": "Browse and paste screenshots with a paste-first workflow",
   "icon": "screenshots.png",
-  "author": "elliot",
+  "author": "elliotekj",
   "categories": [
     "Productivity"
+  ],
+  "platforms": [
+    "macOS"
   ],
   "license": "MIT",
   "commands": [
