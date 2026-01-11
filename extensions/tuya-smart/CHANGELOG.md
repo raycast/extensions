@@ -1,5 +1,9 @@
 # Tuya Smart Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Added switches in root search
+
 ## [Fix] - {PR_MERGE_DATE}
 
 Fixed an error that caused the extension to crash
