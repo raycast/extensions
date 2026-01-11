@@ -6,6 +6,7 @@ Better Aliases is an opinionated aliases and randomized snippets. Raycast in Ray
 
 - **Auto-trigger aliases**: When you type the alias, the expand alias command will automatically open url, application, or insert snippet.
 - **Batch Opening**: Open all filtered aliases simultaneously with `Opt + Shift + Enter`, or use `Opt + Shift + [1-9]` to open a specific number of items. (They will be opened in reverse order.)
+- **Usage Statistics**: Track how often you use each alias. View your most used aliases, total usage counts, and sort by frequency or name using the **View Alias Usage Statistics** command.
 - **Randomized snippets**: Create text snippets with support for randomized variations. For example, you can create a snippet for "Hello!", "Hi!", "Hey!", and when you type the alias, it will insert a random variation automatically.
 - **Everything is a snippet**: You can use a prefix to trigger snippet mode for any alias. For example, you can type `rw` to open [https://raycastweekly.com/](https://raycastweekly.com/), or type `,rw` To insert the link to the currently open application.
 - **Frecency sorting**: The search command will use frecency sorting to show the most used aliases and snippets first.
@@ -26,6 +27,7 @@ This extension allows for deep customization via Extension Preferences:
 By default, config files are stored in Raycast's extension support directory for better portability and management:
 
 - **Better Aliases**: `{supportPath}/config.json`
+- **Usage Stats**: `{supportPath}/usage-stats.json`
 
 ### Finding Your Config File
 
@@ -42,7 +44,6 @@ Advanced users can override default locations by setting custom paths in Extensi
 
 _Want this feature or want to contribute? Let's chat!_
 
-- [ ] Add local usage statistics
 - [ ] Import of Raycast snippets with alias auto-generation
 - [ ] Import of Raycast quicklinks with alias auto-generation
 - [ ] Export as Raycast snippets
