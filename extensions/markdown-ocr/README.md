@@ -1,6 +1,6 @@
 # Markdown OCR
 
-Extract Markdown from the latest clipboard image using Mistral OCR.
+Turn a screenshot into Markdown text using Mistral’s next-generation OCR.
 
 ## Setup
 
