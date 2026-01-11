@@ -9,3 +9,4 @@
 - **Everything is a snippet**: You can use a prefix to trigger snippet mode for any alias. For example, you can type `rw` to open [https://raycastweekly.com/](https://raycastweekly.com/), or type `,rw` To insert the link to the currently open application.
 - **Frecency sorting**: The search command will use frecency sorting to show the most used aliases and snippets first.
 - **Leader key compatibility**: If you've used [Leader Key](https://github.com/mikker/LeaderKey), the extension will automatically convert your Leader Key configuration to a format that can be used with Better Aliases.
+- **Export to Raycast**: Export all your aliases (including Leader Key ones) as Raycast Snippets or Quicklinks for use in Raycast natively.

@@ -53,6 +53,18 @@
 			"title": "View Alias Usage Statistics",
 			"description": "View usage counts for all aliases",
 			"mode": "view"
+		},
+		{
+			"name": "export-snippets",
+			"title": "Export Better Aliases as Raycast Snippets",
+			"description": "Export Better Aliases as Raycast Snippets in JSON format",
+			"mode": "view"
+		},
+		{
+			"name": "export-quicklinks",
+			"title": "Export Better Aliases as Raycast Quicklinks",
+			"description": "Export Better Aliases as Raycast Quicklinks in JSON format",
+			"mode": "view"
 		}
 	],
 	"preferences": [
