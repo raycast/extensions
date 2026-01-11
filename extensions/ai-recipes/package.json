@@ -43,6 +43,9 @@
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
+  "overrides": {
+    "@types/react": "18.3.3"
+  },
   "scripts": {
     "build": "ray build --skip-types -e dist -o dist",
     "dev": "ray develop",

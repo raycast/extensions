@@ -130,7 +130,7 @@ export function EditRecipeForm({ recipe, onSave }: EditRecipeFormProps) {
         info="Use lower creativity for precise tasks (translation), higher for open-ended tasks (brainstorming)"
       >
         {CREATIVITY_OPTIONS.map((option) => (
-          <Form.Dropdown.Item key={option.value} value={option.value} title={option.label} />
+          <Form.Dropdown.Item key={option.value} value={String(option.value)} title={option.label} />
         ))}
       </Form.Dropdown>
 

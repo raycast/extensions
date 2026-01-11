@@ -82,7 +82,7 @@ export default function Command() {
       blue: Color.Blue,
       purple: Color.Purple,
       magenta: Color.Magenta,
-      brown: Color.Brown,
+      brown: Color.SecondaryText,
     };
     return colorMap[tag.color] || Color.PrimaryText;
   };
