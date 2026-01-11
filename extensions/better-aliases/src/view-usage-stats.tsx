@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getUsageStats } from "./lib/usageStatsManager";
@@ -68,20 +68,13 @@ export default function Command() {
       isLoading={isLoading}
       searchBarPlaceholder={`Search aliases... (${totalUses} uses in selected period)`}
       searchBarAccessory={
-        <>
-          <List.Dropdown tooltip="Time Range" value={timeRange} onChange={(v) => setTimeRange(v as TimeRange)}>
-            <List.Dropdown.Item title="All Time" value="all" />
-            <List.Dropdown.Item title="Last 7 Days" value="7d" />
-            <List.Dropdown.Item title="Last 30 Days" value="30d" />
-            <List.Dropdown.Item title="Last 365 Days" value="365d" />
-            <List.Dropdown.Item title="This Year" value="year" />
-          </List.Dropdown>
-          <List.Dropdown tooltip="Sort Order" value={sortOrder} onChange={(v) => setSortOrder(v as SortOrder)}>
-            <List.Dropdown.Item title="Most Used" value="most-used" />
-            <List.Dropdown.Item title="Least Used" value="least-used" />
-            <List.Dropdown.Item title="Alphabetical" value="alphabetical" />
-          </List.Dropdown>
-        </>
+        <List.Dropdown tooltip="Time Range" value={timeRange} onChange={(v) => setTimeRange(v as TimeRange)}>
+          <List.Dropdown.Item title="All Time" value="all" />
+          <List.Dropdown.Item title="Last 7 Days" value="7d" />
+          <List.Dropdown.Item title="Last 30 Days" value="30d" />
+          <List.Dropdown.Item title="Last 365 Days" value="365d" />
+          <List.Dropdown.Item title="This Year" value="year" />
+        </List.Dropdown>
       }
     >
       {sortedEntries.length === 0 ? (
@@ -98,6 +91,27 @@ export default function Command() {
             subtitle={`${count} ${count === 1 ? "use" : "uses"}`}
             icon={Icon.Terminal}
             accessories={[{ text: `${count}`, icon: Icon.Hashtag }]}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Submenu title="Sort Order" icon={Icon.List}>
+                  <Action
+                    title="Most Used"
+                    icon={sortOrder === "most-used" ? Icon.Checkmark : undefined}
+                    onAction={() => setSortOrder("most-used")}
+                  />
+                  <Action
+                    title="Least Used"
+                    icon={sortOrder === "least-used" ? Icon.Checkmark : undefined}
+                    onAction={() => setSortOrder("least-used")}
+                  />
+                  <Action
+                    title="Alphabetical"
+                    icon={sortOrder === "alphabetical" ? Icon.Checkmark : undefined}
+                    onAction={() => setSortOrder("alphabetical")}
+                  />
+                </ActionPanel.Submenu>
+              </ActionPanel>
+            }
           />
         ))
       )}
