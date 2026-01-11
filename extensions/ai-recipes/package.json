@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-recipes",
+  "title": "AI Recipes",
+  "description": "Create and Manage Reusable AI Recipes With Custom Prompts - Save Once, Use Forever",
+  "icon": "icon.png",
+  "author": "yrzhe",
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "recipes",
+      "title": "Browse Recipes",
+      "subtitle": "AI Recipes",
+      "description": "Browse and use your AI recipes",
+      "mode": "view"
+    },
+    {
+      "name": "create-recipe",
+      "title": "Create Recipe",
+      "subtitle": "AI Recipes",
+      "description": "Create a new AI recipe with custom prompt",
+      "mode": "view"
+    },
+    {
+      "name": "manage-tags",
+      "title": "Manage Tags",
+      "subtitle": "AI Recipes",
+      "description": "Manage recipe tags/categories",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0",
+    "nanoid": "^5.0.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.4",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
