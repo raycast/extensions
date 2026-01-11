@@ -12,6 +12,12 @@
   "categories": [
     "Productivity"
   ],
+  "keywords": [
+    "ocr",
+    "markdown",
+    "screenshot",
+    "mistral"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -19,6 +25,11 @@
       "title": "OCR",
       "subtitle": "Turn a screenshot into Markdown",
       "description": "Capture a screenshot and extract Markdown text with Mistral OCR.",
+      "keywords": [
+        "ocr",
+        "markdown",
+        "screenshot"
+      ],
       "icon": "extension-icon.png",
       "mode": "no-view"
     }
