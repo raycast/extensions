@@ -47,6 +47,12 @@
 			"title": "Open Config Folder",
 			"description": "Open the folder containing your Better Aliases configuration JSON file",
 			"mode": "no-view"
+		},
+		{
+			"name": "view-usage-stats",
+			"title": "View Alias Usage Statistics",
+			"description": "View usage counts for all aliases",
+			"mode": "view"
 		}
 	],
 	"preferences": [

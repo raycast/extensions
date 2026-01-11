@@ -52,6 +52,7 @@ export default function Command() {
               preferences={preferences}
               searchText={searchText}
               onSelect={() => visitItem([alias, aliasItem])}
+              onOpen={() => visitItem([alias, aliasItem])}
               onDelete={() => revalidate()}
               allFilteredItems={sortedEntries}
             />

@@ -1,5 +1,6 @@
 import { open, showToast, Toast } from "@raycast/api";
 import { getOpenTarget } from "../../lib/openAlias";
+import { incrementUsage } from "../../lib/usageStatsManager";
 import type { BetterAliasItem } from "../../types";
 
 /**
@@ -30,7 +31,8 @@ export async function handleOpenItems(
   });
 
   try {
-    for (const [, aliasItem] of [...itemsToOpen].reverse()) {
+    for (const [aliasKey, aliasItem] of [...itemsToOpen].reverse()) {
+      incrementUsage(aliasKey);
       const target = getOpenTarget(aliasItem.value);
       if (target) {
         await open(target);

@@ -32,6 +32,7 @@ export default function Command() {
             preferences={{ ...preferences, showFullAlias: false }}
             searchText={searchText}
             onSelect={() => visitItem([alias, snippetItem])}
+            onOpen={() => visitItem([alias, snippetItem])}
           />
         ))
       )}

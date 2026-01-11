@@ -1,0 +1,58 @@
+import { environment } from "@raycast/api";
+import { join } from "path";
+import { createConfigManager } from "./configManager";
+
+export type UsageStats = Record<string, number>;
+
+const usageStatsManager = createConfigManager<UsageStats>({
+  getConfigPath: () => join(environment.supportPath, "usage-stats.json"),
+  defaultValue: {},
+});
+
+// In-memory cache
+let cachedStats: UsageStats | null = null;
+let writeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const DEBOUNCE_MS = 500;
+
+function getStats(): UsageStats {
+  if (cachedStats === null) {
+    cachedStats = usageStatsManager.load();
+  }
+  return cachedStats;
+}
+
+function scheduleSave(): void {
+  if (writeTimeout) clearTimeout(writeTimeout);
+  writeTimeout = setTimeout(() => {
+    if (cachedStats) {
+      usageStatsManager.save(cachedStats);
+    }
+    writeTimeout = null;
+  }, DEBOUNCE_MS);
+}
+
+export function incrementUsage(aliasKey: string): void {
+  const stats = getStats();
+  stats[aliasKey] = (stats[aliasKey] || 0) + 1;
+  scheduleSave();
+}
+
+export function getUsageStats(): UsageStats {
+  return { ...getStats() }; // Return copy to prevent mutation
+}
+
+export function getUsageCount(aliasKey: string): number {
+  return getStats()[aliasKey] || 0;
+}
+
+// Force immediate flush (call on command exit if needed)
+export function flushUsageStats(): void {
+  if (writeTimeout) {
+    clearTimeout(writeTimeout);
+    writeTimeout = null;
+  }
+  if (cachedStats) {
+    usageStatsManager.save(cachedStats);
+  }
+}
