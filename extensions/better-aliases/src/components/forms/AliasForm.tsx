@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useForm } from "@raycast/utils";
+import { checkAliasExists } from "../../lib/betterAliases";
 import { validateSnippet } from "../../lib/snippetUtils";
 import type { Preferences } from "../../types";
 
@@ -50,6 +51,18 @@ export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasF
     validation: {
       alias: (value) => {
         if (!value?.trim()) return "Alias is required";
+
+        const trimmedAlias = value.trim();
+
+        if (mode === "edit" && trimmedAlias === initialValues?.alias) {
+          return undefined;
+        }
+
+        if (checkAliasExists(trimmedAlias)) {
+          return `Alias "${trimmedAlias}" already exists. Choose a different alias.`;
+        }
+
+        return undefined;
       },
       value: (value) => {
         if (!value?.trim()) return "Value is required";

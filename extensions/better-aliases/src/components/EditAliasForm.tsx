@@ -1,4 +1,4 @@
-import { addBetterAlias, deleteBetterAlias, updateBetterAlias } from "../lib/betterAliases";
+import { addBetterAlias, checkAliasExists, deleteBetterAlias, updateBetterAlias } from "../lib/betterAliases";
 import type { BetterAliasItem } from "../types";
 import { AliasForm } from "./forms/AliasForm";
 
@@ -20,6 +20,10 @@ export function EditAliasForm({ alias, item }: EditAliasFormProps) {
       submitTitle="Save"
       onSubmit={async (values) => {
         if (values.alias !== alias) {
+          if (checkAliasExists(values.alias)) {
+            throw new Error(`Cannot rename: "${values.alias}" already exists`);
+          }
+
           deleteBetterAlias(alias);
           addBetterAlias(values.alias, {
             value: values.value,
