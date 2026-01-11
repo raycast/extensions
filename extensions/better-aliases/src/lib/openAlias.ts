@@ -29,6 +29,7 @@ export function createOpenAction(
   value: string,
   title: string = "Open",
   shortcut?: Keyboard.Shortcut,
+  onOpen?: () => void,
 ): React.ReactElement | null {
   // Handle different types of values
   if (value.includes("://")) {
@@ -37,6 +38,7 @@ export function createOpenAction(
       target: value,
       title: title,
       shortcut: shortcut,
+      onOpen: onOpen,
     });
   } else if (isOpenCommand(value)) {
     // "open" commands - extract and expand the path
@@ -49,6 +51,7 @@ export function createOpenAction(
       path: expandedPath,
       title: "Open with",
       shortcut: shortcut,
+      onOpen: onOpen,
     });
   } else if (isValidFilePath(value)) {
     // Regular paths - expand environment variables (only if valid path)
@@ -57,6 +60,7 @@ export function createOpenAction(
       path: expandedPath,
       title: "Open with",
       shortcut: shortcut,
+      onOpen: onOpen,
     });
   }
 
