@@ -122,7 +122,15 @@ export async function getLastSummaryStyle(url: string): Promise<SummaryStyle | u
  * Get all cached summaries for a URL (all styles)
  */
 export async function getAllCachedSummaries(url: string): Promise<Map<SummaryStyle, string>> {
-  const styles: SummaryStyle[] = ["overview", "opposite-sides", "five-ws", "eli5", "translated", "entities"];
+  const styles: SummaryStyle[] = [
+    "overview",
+    "opposite-sides",
+    "five-ws",
+    "eli5",
+    "translated",
+    "entities",
+    "arc-style",
+  ];
 
   const results = new Map<SummaryStyle, string>();
 

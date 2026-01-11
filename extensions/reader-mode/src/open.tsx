@@ -22,13 +22,9 @@ import { EmptyContentView } from "./views/EmptyContentView";
 import { ArticleDetailView } from "./views/ArticleDetailView";
 import { InactiveTabActions } from "./actions/InactiveTabActions";
 
-type ReaderArguments = {
-  url: string;
-};
-
 const MINIMUM_ARTICLE_LENGTH = 100;
 
-export default function Command(props: LaunchProps<{ arguments: ReaderArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Open }>) {
   const preferences = getPreferenceValues<Preferences.Open>();
   const canAccessAI = environment.canAccess(AI);
   const shouldShowSummary = canAccessAI && preferences.enableAISummary;
