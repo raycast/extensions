@@ -179,7 +179,7 @@ ${legendMarkdown}
                       onNavigate(childNode.fullAlias);
                     }
                   }}
-                  shortcut={{ modifiers: [], key: char as Keyboard.Key }}
+                  shortcut={{ modifiers: [], key: char as Keyboard.KeyEquivalent }}
                 />
               );
             })}

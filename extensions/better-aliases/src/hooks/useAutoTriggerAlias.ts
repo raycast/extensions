@@ -11,6 +11,7 @@ export function useAutoTriggerAlias(
   setSearchText: (text: string) => void,
   visitItem: (entry: [string, BetterAliasItem]) => void,
   preferences: ExpandAliasPreferences,
+  options?: { forceSnippetMode?: boolean },
 ) {
   const shouldAutoTrigger = sortedEntries.length === 1 && searchText.trim();
   const targetEntry = shouldAutoTrigger ? sortedEntries[0] : null;
@@ -20,7 +21,8 @@ export function useAutoTriggerAlias(
 
     const [, aliasItem] = targetEntry;
     const snippetPrefix = preferences.snippetPrefix?.trim();
-    const isSnippetMode = aliasItem.snippetOnly || !!(snippetPrefix && searchText.startsWith(snippetPrefix));
+    const isSnippetMode =
+      options?.forceSnippetMode || aliasItem.snippetOnly || !!(snippetPrefix && searchText.startsWith(snippetPrefix));
 
     if (isSnippetMode) {
       const valueToInsert = getRandomizedValue(aliasItem.value, preferences.randomizedSnippetSeparator);

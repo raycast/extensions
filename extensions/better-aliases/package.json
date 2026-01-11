@@ -55,6 +55,12 @@
 			"mode": "view"
 		},
 		{
+			"name": "insert-snippet",
+			"title": "Insert Snippet",
+			"description": "Search and insert any alias value as text",
+			"mode": "view"
+		},
+		{
 			"name": "export-snippets",
 			"title": "Export Better Aliases as Raycast Snippets",
 			"description": "Export Better Aliases as Raycast Snippets in JSON format",

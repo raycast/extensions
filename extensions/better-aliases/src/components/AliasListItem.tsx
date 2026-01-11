@@ -3,7 +3,7 @@ import { deleteBetterAlias } from "../lib/betterAliases";
 import { formatAlias } from "../lib/formatAlias";
 import { createOpenAction } from "../lib/openAlias";
 import type { BetterAliasItem, Preferences } from "../schemas";
-import { CopyActions, DeleteAction, EditAction, ViewAction } from "./actions";
+import { CopyActions, DeleteAction, EditAction, PasteAction, ViewAction } from "./actions";
 import { handleOpenItems } from "./actions/OpenItems";
 import { EditAliasForm } from "./EditAliasForm";
 
@@ -12,6 +12,7 @@ interface AliasListItemProps {
   item: BetterAliasItem;
   preferences: Preferences;
   searchText: string;
+  primaryActionType?: "open" | "paste";
   onSelect?: () => void;
   onOpen?: () => void;
   onDelete?: () => void;
@@ -23,6 +24,7 @@ export function AliasListItem({
   item,
   preferences,
   searchText,
+  primaryActionType = "open",
   onSelect,
   onOpen,
   onDelete,
@@ -30,6 +32,13 @@ export function AliasListItem({
 }: AliasListItemProps) {
   const displayAlias = formatAlias(alias, !!preferences.showFullAlias, searchText);
   const openAction = createOpenAction(item.value, "Open", Keyboard.Shortcut.Common.Open, onOpen);
+  const pasteAction = (
+    <PasteAction
+      value={item.value}
+      randomizedSnippetSeparator={preferences.randomizedSnippetSeparator}
+      onPaste={onSelect}
+    />
+  );
 
   return (
     <List.Item
@@ -38,6 +47,18 @@ export function AliasListItem({
       accessories={preferences.hideAccessories ? undefined : [{ text: item.value }]}
       actions={
         <ActionPanel>
+          {primaryActionType === "paste" ? (
+            <>
+              {pasteAction}
+              {openAction}
+            </>
+          ) : (
+            <>
+              {openAction}
+              {pasteAction}
+            </>
+          )}
+
           <CopyActions alias={alias} value={item.value} onCopy={onSelect} />
 
           <EditAction alias={alias} item={item} itemType="alias" EditComponent={EditAliasForm} />
