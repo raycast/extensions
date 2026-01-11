@@ -61,12 +61,12 @@ export default function Command() {
     });
   }, [filteredStats, sortOrder]);
 
-  const totalUses = Object.values(filteredStats).reduce((sum, count) => sum + count, 0);
+  const totalExpansions = Object.values(filteredStats).reduce((sum, count) => sum + count, 0);
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Search aliases... (${totalUses} uses in selected period)`}
+      searchBarPlaceholder={`Search aliases... (${sortedEntries.length} aliases, ${totalExpansions} expansion${totalExpansions === 1 ? "" : "s"})`}
       searchBarAccessory={
         <List.Dropdown tooltip="Time Range" value={timeRange} onChange={(v) => setTimeRange(v as TimeRange)}>
           <List.Dropdown.Item title="All Time" value="all" />
@@ -84,13 +84,13 @@ export default function Command() {
           description={timeRange === "all" ? "Start using aliases to see statistics here" : "No usage in this period"}
         />
       ) : (
-        sortedEntries.map(([alias, count]) => (
+        sortedEntries.map(([alias, count], index) => (
           <List.Item
             key={alias}
             title={alias}
-            subtitle={`${count} ${count === 1 ? "use" : "uses"}`}
+            subtitle={`${count} expansion${count === 1 ? "" : "s"}`}
             icon={Icon.Terminal}
-            accessories={[{ text: `${count}`, icon: Icon.Hashtag }]}
+            accessories={[{ text: `${index + 1}`, icon: Icon.Hashtag }]}
             actions={
               <ActionPanel>
                 <ActionPanel.Submenu title="Sort Order" icon={Icon.List}>

@@ -24,7 +24,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Search snippets to insert... (${totalAliases} ${totalAliases === 1 ? "snippet" : "snippets"})`}
+      searchBarPlaceholder={`Insert Snippet... (${totalAliases} ${totalAliases === 1 ? "snippet" : "snippets"})`}
       onSearchTextChange={setSearchText}
       searchText={searchText}
     >
