@@ -15,6 +15,7 @@ A Raycast extension that provides translation functionality using the DeepLX API
 - 🌐 Supports multiple languages (Auto-detect, Chinese, English, Japanese, French, German, etc.)
 - ⚙️ Customizable API endpoint and API key
 - 💾 Translation history and copy to clipboard
+- 🔄 **Smart alternative translations display** - View multiple translation suggestions on one page
 - 🎯 Simple and intuitive interface
 
 ## Installation
@@ -33,8 +34,10 @@ Before using the extension, you need to configure your DeepLX API settings:
 2. Press `⌘ + ,` to open Raycast Settings
 3. Navigate to Extensions → DeepLX Translate
 4. Configure the following settings:
-   - **API Endpoint**: The DeepLX API endpoint URL (default: `https://api.deeplx.org/translate`)
-   - **API Key**: Your API key if required by your DeepLX instance
+
+- **API Endpoint**: The DeepLX API endpoint URL (default: `https://api.deeplx.org/translate`)
+- **API Key**: Your API key if required by your DeepLX instance
+- **Show Alternative Translations**: Toggle to display alternative translation suggestions
 
 ## Usage
 
@@ -52,6 +55,22 @@ Before using the extension, you need to configure your DeepLX API settings:
 - `⌘ + D`: Open API documentation
 - `⌘ + C`: Copy translation result
 - `⌘ + ,`: Open extension settings
+
+### Alternative Translations Feature
+
+The extension now supports displaying alternative translations directly in the detail view:
+
+- **Automatic display**: Alternative translations are shown when available from the API
+- **Clean layout**: Main translation is prominently displayed at the top
+- **Easy comparison**: Multiple alternatives are listed numerically for easy comparison
+- **Configurable**: Can be disabled in settings if not needed
+- **Bilingual support**: Automatically translates to both English and Chinese
+
+When viewing translation results:
+
+1. Press `Enter` on any translation to view details
+2. The main translation appears at the top
+3. Alternative translations are listed below (up to 5 shown, with count display)
 
 ## Supported Languages
 
