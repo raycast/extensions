@@ -5,12 +5,12 @@ import { getStyleLabel } from "../utils/summarizer";
 
 export const SUMMARY_STYLES: { style: SummaryStyle; icon: Icon }[] = [
   { style: "overview", icon: Icon.List },
+  { style: "arc-style", icon: Icon.Stars },
   { style: "opposite-sides", icon: Icon.Switch },
   { style: "five-ws", icon: Icon.QuestionMark },
   { style: "eli5", icon: Icon.SpeechBubble },
   { style: "translated", icon: Icon.Globe },
   { style: "entities", icon: Icon.Person },
-  { style: "arc-style", icon: Icon.Stars },
 ];
 
 interface ArticleActionsProps {
