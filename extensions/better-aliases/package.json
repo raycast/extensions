@@ -45,7 +45,7 @@
 		{
 			"name": "open-config-folder",
 			"title": "Open Config Folder",
-			"description": "Open the folder containing your Better Aliases configuration JSON file",
+			"description": "Open the folder containing your Better Aliases configuration files in Finder",
 			"mode": "no-view"
 		},
 		{

@@ -2,7 +2,8 @@ import { environment } from "@raycast/api";
 import { join } from "path";
 import { createConfigManager } from "./configManager";
 
-export type UsageStats = Record<string, number>;
+export type DailyStats = Record<string, number>; // date (YYYY-MM-DD) -> count
+export type UsageStats = Record<string, DailyStats>; // alias key -> daily stats
 
 const usageStatsManager = createConfigManager<UsageStats>({
   getConfigPath: () => join(environment.supportPath, "usage-stats.json"),
@@ -34,7 +35,13 @@ function scheduleSave(): void {
 
 export function incrementUsage(aliasKey: string): void {
   const stats = getStats();
-  stats[aliasKey] = (stats[aliasKey] || 0) + 1;
+  const today = new Date().toISOString().split("T")[0];
+
+  if (!stats[aliasKey]) {
+    stats[aliasKey] = {};
+  }
+
+  stats[aliasKey][today] = (stats[aliasKey][today] || 0) + 1;
   scheduleSave();
 }
 
@@ -43,7 +50,8 @@ export function getUsageStats(): UsageStats {
 }
 
 export function getUsageCount(aliasKey: string): number {
-  return getStats()[aliasKey] || 0;
+  const aliasStats = getStats()[aliasKey] || {};
+  return Object.values(aliasStats).reduce((sum, count) => sum + count, 0);
 }
 
 // Force immediate flush (call on command exit if needed)
