@@ -12,7 +12,9 @@
   </a>
 </div>
 
-Read the web distraction-free in Raycast.
+_Read the web distraction-free in Raycast._
+
+Read web articles distraction-free with AI summaries. Extracts clean content, removes ads and clutter, offers 7 summary styles (Overview, ELI5, Translated, etc.), bypasses paywalls via archives, and handles blocked pages with browser extension fallback.
 
 ## Quick Start
 
