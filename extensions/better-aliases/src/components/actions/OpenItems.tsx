@@ -1,7 +1,7 @@
 import { open, showToast, Toast } from "@raycast/api";
 import { getOpenTarget } from "../../lib/openAlias";
 import { incrementUsage } from "../../lib/usageStatsManager";
-import type { BetterAliasItem } from "../../types";
+import type { BetterAliasItem } from "../../schemas";
 
 /**
  * Opens filtered items sequentially using the same resolution rules as the single-item "Open" action.

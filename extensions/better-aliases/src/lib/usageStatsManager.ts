@@ -1,13 +1,14 @@
 import { environment } from "@raycast/api";
 import { join } from "path";
+import { usageStatsSchema, type UsageStats, type DailyStats } from "../schemas";
 import { createConfigManager } from "./configManager";
 
-export type DailyStats = Record<string, number>; // date (YYYY-MM-DD) -> count
-export type UsageStats = Record<string, DailyStats>; // alias key -> daily stats
+export type { DailyStats, UsageStats };
 
 const usageStatsManager = createConfigManager<UsageStats>({
   getConfigPath: () => join(environment.supportPath, "usage-stats.json"),
   defaultValue: {},
+  schema: usageStatsSchema,
 });
 
 // In-memory cache

@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { AliasListItem } from "./components/AliasListItem";
 import { type FilterType, useAliasesWithFrecency, useFilteredItems } from "./hooks";
 import { fuzzySearchAliases } from "./lib/fuzzySearch";
-import type { Preferences } from "./types";
+import type { Preferences } from "./schemas";
 
 export default function Command() {
   const { data, isLoading, revalidate } = useFilteredItems();

@@ -1,9 +1,9 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { copyFileSync, existsSync, mkdirSync } from "fs";
 import { dirname, resolve } from "path";
-import type { BetterAliasesConfig, BetterAliasItem, Preferences } from "../types";
+import { betterAliasesConfigSchema, type BetterAliasesConfig, type BetterAliasItem } from "../schemas";
+import type { Preferences } from "../schemas";
 import { createConfigManager } from "./configManager";
-import { isBetterAliasesConfig } from "./typeGuards";
 
 function ensureConfigExists(targetPath: string) {
   if (existsSync(targetPath)) return;
@@ -42,7 +42,7 @@ export function createAliasStore(configKey: keyof Preferences, defaultFilename: 
   const manager = createConfigManager<BetterAliasesConfig>({
     getConfigPath: getPath,
     defaultValue: {},
-    validate: isBetterAliasesConfig,
+    schema: betterAliasesConfigSchema,
   });
 
   return {

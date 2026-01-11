@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { deleteBetterAlias } from "../lib/betterAliases";
 import { formatAlias } from "../lib/formatAlias";
 import { createOpenAction } from "../lib/openAlias";
-import type { BetterAliasItem, Preferences } from "../types";
+import type { BetterAliasItem, Preferences } from "../schemas";
 import { CopyActions, DeleteAction, EditAction, ViewAction } from "./actions";
 import { handleOpenItems } from "./actions/OpenItems";
 import { EditAliasForm } from "./EditAliasForm";

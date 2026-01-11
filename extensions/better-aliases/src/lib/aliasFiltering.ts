@@ -1,4 +1,4 @@
-import type { BetterAliasesConfig, BetterAliasItem } from "../types";
+import type { BetterAliasesConfig, BetterAliasItem } from "../schemas";
 
 export type AliasEntry = [string, BetterAliasItem];
 

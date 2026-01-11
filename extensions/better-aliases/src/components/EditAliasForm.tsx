@@ -1,5 +1,5 @@
 import { addBetterAlias, checkAliasExists, deleteBetterAlias, updateBetterAlias } from "../lib/betterAliases";
-import type { BetterAliasItem } from "../types";
+import type { BetterAliasItem } from "../schemas";
 import { AliasForm } from "./forms/AliasForm";
 
 interface EditAliasFormProps {

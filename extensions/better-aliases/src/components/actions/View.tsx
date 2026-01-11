@@ -1,6 +1,6 @@
 import { Action, Detail, Icon } from "@raycast/api";
 import { KEYBOARD_SHORTCUTS } from "../../lib/constants";
-import type { BetterAliasItem } from "../../types";
+import type { BetterAliasItem } from "../../schemas";
 
 interface ViewDetailProps {
   alias: string;

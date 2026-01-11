@@ -1,5 +1,5 @@
 import Fuse, { type IFuseOptions } from "fuse.js";
-import type { BetterAliasesConfig, BetterAliasItem } from "../types";
+import type { BetterAliasesConfig, BetterAliasItem } from "../schemas";
 import type { AliasEntry } from "./aliasFiltering";
 
 interface SearchableItem {

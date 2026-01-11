@@ -1,6 +1,6 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
 import type { ReactElement } from "react";
-import type { BetterAliasItem } from "../../types";
+import type { BetterAliasItem } from "../../schemas";
 
 interface EditActionProps {
   alias: string;

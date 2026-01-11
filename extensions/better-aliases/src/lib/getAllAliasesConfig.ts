@@ -1,4 +1,4 @@
-import type { BetterAliasesConfig } from "../types";
+import type { BetterAliasesConfig } from "../schemas";
 import { loadBetterAliasesAsync } from "./betterAliases";
 import { getLeaderKeyAliasesAsync } from "./leaderKeyAliases";
 

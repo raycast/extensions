@@ -65,6 +65,18 @@
 			"title": "Export Better Aliases as Raycast Quicklinks",
 			"description": "Export Better Aliases as Raycast Quicklinks in JSON format",
 			"mode": "view"
+		},
+		{
+			"name": "import-leader-key",
+			"title": "Import from Leader Key Config",
+			"description": "Import your Leader Key configuration into Better Aliases",
+			"mode": "view"
+		},
+		{
+			"name": "export-leader-key",
+			"title": "Export to Leader Key Config",
+			"description": "Export your Better Aliases configuration to Leader Key format",
+			"mode": "view"
 		}
 	],
 	"preferences": [
@@ -115,7 +127,8 @@
 	"dependencies": {
 		"@raycast/api": "^1.102.7",
 		"@raycast/utils": "^1.17.0",
-		"fuse.js": "^7.1.0"
+		"fuse.js": "^7.1.0",
+		"zod": "^4.3.5"
 	},
 	"devDependencies": {
 		"@raycast/eslint-config": "^2.0.4",

@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { useEffect } from "react";
 import { getOpenTarget } from "../lib/openAlias";
 import { getRandomizedValue } from "../lib/snippetUtils";
-import type { BetterAliasItem, ExpandAliasPreferences } from "../types";
+import type { BetterAliasItem, ExpandAliasPreferences } from "../schemas";
 
 export function useAutoTriggerAlias(
   sortedEntries: [string, BetterAliasItem][],

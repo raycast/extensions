@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { AliasListItem } from "./components/AliasListItem";
 import { useAliasesWithFrecency, useAllItems, useAutoTriggerAlias } from "./hooks";
 import { filterAliases } from "./lib/aliasFiltering";
-import type { ExpandAliasPreferences } from "./types";
+import type { ExpandAliasPreferences } from "./schemas";
 
 export default function Command() {
   const preferences = getPreferenceValues<ExpandAliasPreferences>();

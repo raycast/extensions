@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import * as fsPromises from "fs/promises";
 import { dirname } from "path";
+import type { ZodSchema, ZodError } from "zod";
 
 export interface ConfigManager<T> {
   load: () => T;
@@ -12,11 +13,33 @@ export interface ConfigManager<T> {
 export interface ConfigManagerOptions<T> {
   getConfigPath: () => string;
   defaultValue: T;
-  validate?: (value: unknown) => value is T;
+  schema?: ZodSchema<T>;
+}
+
+function formatZodError(error: ZodError): string {
+  return error.issues
+    .map((e) => {
+      const path = e.path.length > 0 ? `${e.path.join(".")}: ` : "";
+      return `${path}${e.message}`;
+    })
+    .join("; ");
 }
 
 export function createConfigManager<T>(options: ConfigManagerOptions<T>): ConfigManager<T> {
-  const { getConfigPath, defaultValue, validate } = options;
+  const { getConfigPath, defaultValue, schema } = options;
+
+  function validateData(parsed: unknown, configPath: string): T {
+    // Prefer Zod schema if provided
+    if (schema) {
+      const result = schema.safeParse(parsed);
+      if (!result.success) {
+        throw new Error(`Invalid config at ${configPath}: ${formatZodError(result.error)}`);
+      }
+      return result.data;
+    }
+
+    return parsed as T;
+  }
 
   return {
     getPath: getConfigPath,
@@ -30,12 +53,7 @@ export function createConfigManager<T>(options: ConfigManagerOptions<T>): Config
       try {
         const content = readFileSync(configPath, "utf8");
         const parsed = JSON.parse(content);
-
-        if (validate && !validate(parsed)) {
-          throw new Error(`Invalid config format at ${configPath}`);
-        }
-
-        return parsed as T;
+        return validateData(parsed, configPath);
       } catch (error) {
         if (error instanceof SyntaxError) {
           throw new Error(`Invalid JSON in config file: ${configPath}`);
@@ -53,12 +71,7 @@ export function createConfigManager<T>(options: ConfigManagerOptions<T>): Config
       try {
         const content = await fsPromises.readFile(configPath, "utf8");
         const parsed = JSON.parse(content);
-
-        if (validate && !validate(parsed)) {
-          throw new Error(`Invalid config format at ${configPath}`);
-        }
-
-        return parsed as T;
+        return validateData(parsed, configPath);
       } catch (error) {
         if (error instanceof SyntaxError) {
           throw new Error(`Invalid JSON in config file: ${configPath}`);

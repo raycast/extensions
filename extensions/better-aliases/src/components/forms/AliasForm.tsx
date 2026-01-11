@@ -1,15 +1,9 @@
 import { Action, ActionPanel, Form, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useForm } from "@raycast/utils";
 import { checkAliasExists } from "../../lib/betterAliases";
-import { validateSnippet } from "../../lib/snippetUtils";
-import type { Preferences } from "../../types";
-
-interface AliasFormValues {
-  alias: string;
-  value: string;
-  label?: string;
-  snippetOnly: boolean;
-}
+import { createFormValidation } from "../../lib/zodFormAdapter";
+import { aliasFormSchema, createAliasFormSchemaWithSnippet, type AliasFormValues } from "../../schemas";
+import type { Preferences } from "../../schemas";
 
 interface AliasFormProps {
   initialValues?: Partial<AliasFormValues>;
@@ -21,6 +15,9 @@ interface AliasFormProps {
 export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasFormProps) {
   const preferences = getPreferenceValues<Preferences>();
   const separator = preferences.randomizedSnippetSeparator || ";;";
+
+  // Create base validation from Zod schema
+  const baseValidation = createFormValidation(aliasFormSchema);
 
   const { handleSubmit, itemProps, values } = useForm<AliasFormValues>({
     initialValues: {
@@ -50,14 +47,19 @@ export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasF
     },
     validation: {
       alias: (value) => {
-        if (!value?.trim()) return "Alias is required";
+        // Run Zod validation first
+        const zodError = baseValidation.alias?.(value);
+        if (zodError) return zodError;
 
-        const trimmedAlias = value.trim();
+        const trimmedAlias = value?.trim();
+        if (!trimmedAlias) return undefined;
 
+        // Skip duplicate check in edit mode for the same alias
         if (mode === "edit" && trimmedAlias === initialValues?.alias) {
           return undefined;
         }
 
+        // Business logic: check for duplicate aliases
         if (checkAliasExists(trimmedAlias)) {
           return `Alias "${trimmedAlias}" already exists. Choose a different alias.`;
         }
@@ -65,12 +67,24 @@ export function AliasForm({ initialValues, onSubmit, submitTitle, mode }: AliasF
         return undefined;
       },
       value: (value) => {
-        if (!value?.trim()) return "Value is required";
-        if (values?.snippetOnly) {
-          const validation = validateSnippet(value, separator);
-          if (!validation.isValid) return validation.error;
+        // Run Zod validation first
+        const zodError = baseValidation.value?.(value);
+        if (zodError) return zodError;
+
+        // Snippet-specific validation with separator
+        if (values?.snippetOnly && value) {
+          const schemaWithSnippet = createAliasFormSchemaWithSnippet(separator);
+          const result = schemaWithSnippet.safeParse({ ...values, value });
+          if (!result.success) {
+            const valueError = result.error.issues.find((e) => e.path.includes("value"));
+            if (valueError) return valueError.message;
+          }
         }
+
+        return undefined;
       },
+      label: baseValidation.label,
+      snippetOnly: baseValidation.snippetOnly,
     },
   });
 
