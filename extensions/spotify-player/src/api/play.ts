@@ -10,6 +10,7 @@ type PlayProps = {
   id?: string | undefined;
   type?: ContextTypes | undefined;
   contextUri?: string;
+  uris?: string[];
 };
 
 const uriForType: Record<ContextTypes, string> = {
@@ -21,7 +22,7 @@ const uriForType: Record<ContextTypes, string> = {
   episode: "spotify:episode:",
 };
 
-export async function play({ id, type, contextUri }: PlayProps = {}) {
+export async function play({ id, type, contextUri, uris }: PlayProps = {}) {
   const { spotifyClient } = getSpotifyClient();
   const { devices } = await getMyDevices();
   const isSpotifyInstalled = await checkSpotifyApp();
@@ -33,11 +34,22 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
     const activeDevice = devices?.find((device) => device.is_active);
 
     if (!activeDevice && isSpotifyInstalled) {
-      await launchSpotifyAndPlay({ id, type });
+      await launchSpotifyAndPlay({ id, type, uris });
       return;
     }
 
     const deviceId = activeDevice?.id ?? devices?.[0]?.id ?? undefined;
+
+    // If uris array is provided, play those tracks directly (replaces current playback/queue)
+    if (uris && uris.length > 0) {
+      await spotifyClient.putMePlayerPlay(
+        { uris },
+        {
+          deviceId,
+        },
+      );
+      return;
+    }
 
     if (!type || !id) {
       await spotifyClient.putMePlayerPlay(
@@ -91,7 +103,7 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
         error?.toLocaleLowerCase().includes("premium required"))
     ) {
       // If one of the above errors is thrown, we need to open Spotify and play the track.
-      await launchSpotifyAndPlay({ id, type });
+      await launchSpotifyAndPlay({ id, type, uris });
       return;
     }
 
@@ -99,8 +111,14 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
   }
 }
 
-async function launchSpotifyAndPlay({ id, type }: { id?: string; type?: ContextTypes }) {
+async function launchSpotifyAndPlay({ id, type, uris }: { id?: string; type?: ContextTypes; uris?: string[] }) {
   try {
+    // For uris array, play the first track to launch Spotify
+    if (uris && uris.length > 0) {
+      await runSpotifyScript(SpotifyScriptType.PlayTrack, false, uris[0]);
+      return;
+    }
+
     if (!type || !id) {
       await runSpotifyScript(SpotifyScriptType.Play);
     } else if (type === "track") {

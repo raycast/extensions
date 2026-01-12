@@ -5,6 +5,7 @@
 - Added "Play Playlist" option to immediately start playing a generated playlist without saving it to your library
 - Fixed "Add Songs to Queue" in Generate Playlist failing when no active player exists
 - When there's no active Spotify session, the first track now plays directly to initialize playback, then remaining tracks are added to the queue
+- Added retry logic for play and queue operations to handle cases where Spotify takes time to open
 
 ## [Fix] - 2026-01-14
 
