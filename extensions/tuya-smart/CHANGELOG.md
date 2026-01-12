@@ -1,5 +1,9 @@
 # Tuya Smart Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+Fixed an error that caused the extension to crash
+
 ## [Enhancement] - 2023-02-28
 
 - Added commands to set Status and Work Mode for Light Source devices.

@@ -1,5 +1,9 @@
 # Single Disk Eject Changelog
 
+## [Windows Support] 2026-01-09
+
+- Added windows support with a C# helper (compiles at runtime) and PowerShell
+
 ## [Bug Fix] 2023-11-10
 
 - Fixed bug that incorrectly reported a disk as ejected when it was not.

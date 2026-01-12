@@ -16,7 +16,7 @@
       "subtitle": "Activate controls from the menubar",
       "description": "Activates the menu bar, showing the current song and controls for all players.",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "10s"
     },
     {
       "name": "next-song",
@@ -56,6 +56,13 @@
       "title": "Music Assistant Host",
       "placeholder": "http://192.168.0.166:8095",
       "description": "Enter the local address (IP, mDNS does not work well inside raycast) of your Music Assistant instance. This is usually the same as your Home Assistant URL, but with the port changed to 8095."
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Create a long-lived token in Music Assistant (Settings > Users > Tokens) and paste it here. Required for authentication."
     }
   ],
   "dependencies": {
@@ -88,5 +95,8 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "prepublish": "npm run test && npm run lint && npm run build",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

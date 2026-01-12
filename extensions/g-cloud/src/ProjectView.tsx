@@ -7,7 +7,6 @@ import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
 import { NetworkView, VPCView, IPAddressView, FirewallRulesView } from "./services/network";
 import { executeGcloudCommand, getProjects } from "./gcloud";
 import { CacheManager, Project } from "./utils/CacheManager";
-import { showFailureToast } from "@raycast/utils";
 
 const cache = new Cache({ namespace: "project-details" });
 
@@ -102,7 +101,8 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
           message: `${result.length} projects found`,
         });
       } else {
-        await showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "No projects found",
           message: "You don't have any Google Cloud projects",
         });
@@ -110,11 +110,6 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     } catch (error) {
       console.error("Error fetching projects:", error);
       setError("Failed to fetch projects");
-
-      await showFailureToast({
-        title: "Failed to fetch projects",
-        message: error instanceof Error ? error.message : String(error),
-      });
     } finally {
       setIsLoading(false);
     }
@@ -123,7 +118,8 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
   const selectProject = async (selectedProjectId: string) => {
     if (!selectedProjectId || typeof selectedProjectId !== "string") {
       console.error("Invalid project ID provided to selectProject:", selectedProjectId);
-      await showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid project ID",
         message: "Cannot select project with invalid ID",
       });
@@ -151,10 +147,10 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
       push(<ProjectView projectId={selectedProjectId} gcloudPath={gcloudPath} />);
     } catch (error) {
       console.error("Error selecting project:", error);
-
-      await showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to select project",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setActionInProgress(null);
@@ -215,11 +211,6 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     } catch (error) {
       console.error("Error fetching project details:", error);
       setError("Failed to fetch project details");
-
-      await showFailureToast({
-        title: "Failed to fetch project details",
-        message: error instanceof Error ? error.message : String(error),
-      });
     } finally {
       setIsLoading(false);
     }
@@ -253,9 +244,10 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
       await push(component);
     } catch (error) {
       console.error("Navigation error:", error);
-      await showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       if (activeToast) {
@@ -331,9 +323,10 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         fetchProjects();
       }
     } catch (error) {
-      await showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to clear cache",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setActionInProgress(null);

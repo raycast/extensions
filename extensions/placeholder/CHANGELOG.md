@@ -1,5 +1,12 @@
 # Placeholder Changelog
 
+## [Updates] - 2025-12-16
+
+- Add Windows support
+- Update dependencies
+- Remove applescript, use `Clipboard.copy` to copy file to clipboard
+- Remove 'node-fetch', use `fetch` instead
+
 ## [Refactoring] - 2024-07-23
 
 - Refactoring codebase, updated code style

@@ -1,5 +1,9 @@
 # Rename Images with AI Changelog
 
+## [Updated] - {PR_MERGE_DATE}
+
+- Upgraded the AI model from `gemini-2.0-flash` to `gemini-2.5-flash` because the previous model will be deprecated and to enhance performance
+
 ## [Updated] - 2025-11-24
 
 - Upgraded Google Gemini SDK: migrated from `@google/generative-ai` to `@google/genai`

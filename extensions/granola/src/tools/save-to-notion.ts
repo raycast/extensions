@@ -1,7 +1,8 @@
-import { saveToNotion } from "../utils/granolaApi";
+import { saveToNotionWithRetry } from "../utils/granolaApi";
 import { findDocumentsByIds } from "../utils/toolHelpers";
-import { getDynamicBatchSize } from "../utils/exportHelpers";
+import { getNotionBatchSize } from "../utils/notionBatching";
 import { showFailureToast } from "@raycast/utils";
+import { toError, toErrorMessage } from "../utils/errorUtils";
 
 type Input = {
   /**
@@ -40,8 +41,8 @@ export default async function tool(input: Input): Promise<Output> {
 
     const results = [];
 
-    // Conservative batch processing to prevent API rate limiting
-    const batchSize = getDynamicBatchSize(documentMap.length);
+    // User-configurable batch size to control parallelism
+    const batchSize = getNotionBatchSize(documentMap.length);
 
     for (let i = 0; i < documentMap.length; i += batchSize) {
       const batch = documentMap.slice(i, i + batchSize);
@@ -60,7 +61,7 @@ export default async function tool(input: Input): Promise<Output> {
         }
 
         try {
-          const result = await saveToNotion(noteId);
+          const result = await saveToNotionWithRetry(noteId, { maxRetries: 2 });
           return {
             noteId,
             title,
@@ -72,23 +73,19 @@ export default async function tool(input: Input): Promise<Output> {
             noteId,
             title,
             status: "error" as const,
-            error: String(error),
+            error: toErrorMessage(error),
           };
         }
       });
 
       const batchResults = await Promise.all(batchPromises);
       results.push(...batchResults);
-
-      // Conservative delay between batches to prevent API overwhelm
-      if (i + batchSize < documentMap.length) {
-        await new Promise((resolve) => setTimeout(resolve, 800)); // 800ms between batches for API stability
-      }
     }
 
     return { results };
   } catch (error) {
-    showFailureToast({ title: "Failed to save to Notion", message: String(error) });
-    throw error;
+    const normalizedError = toError(error);
+    showFailureToast(normalizedError, { title: "Failed to save to Notion" });
+    throw normalizedError;
   }
 }

@@ -18,7 +18,7 @@ import { catchError, handleError } from "./errors.js";
 import * as git from "./git.js";
 import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
-import { extensionLink, getActualIconPath, userLink } from "./utils.js";
+import { extensionLink, getActualIconPath, openWith, userLink } from "./utils.js";
 
 function ManageForkedExtensions() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
@@ -106,7 +106,18 @@ function ManageForkedExtensions() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action icon={Icon.Eye} title="Show Details" onAction={() => setIsShowingDetail(!isShowingDetail)} />
-                <Action.OpenWith path={x.folderPath} />
+                {openWith ? (
+                  <Action.Open
+                    application={openWith}
+                    target={x.folderPath}
+                    title={`Open with ${openWith.name}`}
+                    icon={{ fileIcon: openWith.path }}
+                  />
+                ) : null}
+                <Action.OpenWith
+                  path={x.folderPath}
+                  shortcut={openWith ? { key: "enter", modifiers: ["shift"] } : undefined}
+                />
                 <Action.CopyToClipboard
                   title="Copy Extension Path to Clipboard"
                   content={x.folderPath}

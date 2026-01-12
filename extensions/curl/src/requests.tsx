@@ -154,7 +154,8 @@ export default function Requests() {
               <ActionPanel>
                 <ActionPanel.Section title="Actions">
                   <Action.CopyToClipboard
-                    title="Copy Curl"
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="Copy cURL"
                     content={generateCurl({ url: req.key, payload: req.value })}
                   />
                   <Action
@@ -168,7 +169,7 @@ export default function Requests() {
                     icon={Icon.AppWindowList}
                     shortcut={{
                       macOS: { modifiers: ["cmd"], key: "m" },
-                      windows: { modifiers: ["ctrl"], key: "m" },
+                      Windows: { modifiers: ["ctrl"], key: "m" },
                     }}
                   />
                 </ActionPanel.Section>
@@ -179,7 +180,7 @@ export default function Requests() {
                     onAction={() => handleDeleteItem(req.key)}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "delete" },
-                      windows: { modifiers: ["ctrl", "shift"], key: "delete" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "delete" },
                     }}
                     style={Action.Style.Destructive}
                   />
@@ -189,7 +190,7 @@ export default function Requests() {
                     onAction={handleDeleteAll}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "opt"], key: "delete" },
-                      windows: { modifiers: ["ctrl", "alt"], key: "delete" },
+                      Windows: { modifiers: ["ctrl", "alt"], key: "delete" },
                     }}
                     style={Action.Style.Destructive}
                   />

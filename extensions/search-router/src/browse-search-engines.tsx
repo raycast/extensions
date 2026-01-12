@@ -152,6 +152,7 @@ export default function BrowseSearchEngines() {
           subtitle={`!${searchEngine.t}`}
           accessories={[
             { tag: searchEngine.ad || searchEngine.d },
+            { text: searchEngine.urls && searchEngine.urls.length > 1 ? `${searchEngine.urls.length} URLs` : "" },
             { text: searchEngine.isCustom ? "Custom" : "" },
             { text: searchEngine.t === defaultSearchEngine?.t ? "Default" : "" },
             { icon: searchEngine.t === defaultSearchEngine?.t ? Icon.CheckCircle : undefined },
@@ -160,7 +161,19 @@ export default function BrowseSearchEngines() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
-                <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
+                {searchEngine.urls && searchEngine.urls.length > 1 ? (
+                  <>
+                    {searchEngine.urls.map((url, index) => (
+                      <Action.OpenInBrowser
+                        key={index}
+                        title={`Test Search - URL ${index + 1}`}
+                        url={url.replace("{{{s}}}", "test")}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
+                )}
               </ActionPanel.Section>
 
               <ActionPanel.Section>
@@ -168,7 +181,10 @@ export default function BrowseSearchEngines() {
                   title="Add Custom Search Engine"
                   icon={Icon.Plus}
                   onAction={handleAddEngine}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd"], key: "n" },
+                    Windows: { modifiers: ["ctrl"], key: "n" },
+                  }}
                 />
                 {searchEngine.isCustom && (
                   <>
@@ -176,14 +192,20 @@ export default function BrowseSearchEngines() {
                       title="Edit Custom Search Engine"
                       icon={Icon.Pencil}
                       onAction={() => handleEditEngine(searchEngine)}
-                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "e" },
+                        Windows: { modifiers: ["ctrl"], key: "e" },
+                      }}
                     />
                     <Action
                       title="Delete Custom Search Engine"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteEngine(searchEngine.s, searchEngine.t)}
-                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "x" },
+                        Windows: { modifiers: ["ctrl"], key: "x" },
+                      }}
                     />
                   </>
                 )}
@@ -193,12 +215,18 @@ export default function BrowseSearchEngines() {
                 <Action.CopyToClipboard
                   title="Copy Search Engine Shortcut"
                   content={`!${searchEngine.t}`}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                  }}
                 />
                 <Action.CopyToClipboard
                   title="Copy Search Engine Domain"
                   content={searchEngine.ad || searchEngine.d}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                  }}
                 />
               </ActionPanel.Section>
             </ActionPanel>

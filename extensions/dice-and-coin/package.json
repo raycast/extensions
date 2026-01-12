@@ -5,7 +5,9 @@
   "description": "Quickly and easily make random decisions or generate a random number",
   "icon": "dice.png",
   "author": "yonbergman",
+  "contributors": ["xmok"],
   "categories": [
+    "Data",
     "Fun"
   ],
   "license": "MIT",
@@ -23,26 +25,57 @@
       "description": "Throw a six sided die and get a random result",
       "mode": "no-view",
       "icon": "dice.png"
+    },
+    {
+      "name": "throw-custom-dice",
+      "title": "Throw Custom Dice",
+      "description": "Throw an impossible custom sided die and get a random result",
+      "mode": "no-view",
+      "icon": "dice.png",
+      "preferences": [
+        {
+          "name": "min",
+          "title": "Min",
+          "placeholder": "1",
+          "type": "textfield",
+          "required": true,
+          "description": "The minimum number to roll",
+          "default": "1"
+        },
+        {
+          "name": "max",
+          "title": "Max",
+          "placeholder": "6",
+          "type": "textfield",
+          "required": true,
+          "description": "The maximum number to roll",
+          "default": "6"
+        }
+      ],
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2"
+    "@raycast/api": "^1.104.1"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

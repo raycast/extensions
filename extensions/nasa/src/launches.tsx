@@ -1,9 +1,10 @@
 import { List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ENDPOINTS, HEADERS } from "./constants/prefrences";
-import { LaunchesResponse } from "./types/launches";
-import LaunchDetail from "./componenets/launches";
-import ErrorDetail from "./componenets/error";
+
+import { LaunchesResponse } from "@/types";
+import { ENDPOINTS, HEADERS } from "@/constants/preferences";
+import ErrorDetail from "@/components/error";
+import LaunchDetail from "@/components/launches";
 
 export default function LAUNCHES() {
   const { isLoading, data, error } = useFetch(ENDPOINTS.LAUNCHES, {

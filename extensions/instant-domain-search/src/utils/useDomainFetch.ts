@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { randomUUID } from "node:crypto";
 import { ANONYMOUS_USER_ID_KEY, ROOT_URL, POPULAR_TLDs, ALL_TLDs } from "./config";
 import getUserAgent from "./getUserAgent";
+import uniqueByKey from "./uniqueByKey";
 
 export default function useDomainFetch(query: string) {
   const regex = useMemo(() => {
@@ -48,7 +49,11 @@ export default function useDomainFetch(query: string) {
       const json = (await response.json()) as DomainSearchResponse;
       return {
         type: "success" as const,
-        data: json,
+        data: {
+          ...json,
+          suggestions: uniqueByKey(json.suggestions, "domain"),
+          aftermarket_domains: uniqueByKey(json.aftermarket_domains, "domain"),
+        },
       };
     },
   });
