@@ -372,6 +372,8 @@ export function generateOutputFooter(): string {
 
 /**
  * Formats the project structure (file tree) into a string.
+ * Only formats directory structure and file metadata, not file contents.
+ * File contents are handled separately in streaming processing to reduce memory usage.
  * @param entries An array of ProjectEntry objects representing the project structure.
  * @param level The current indentation level.
  * @returns A string representation of the file tree.
@@ -388,28 +390,4 @@ export function formatProjectStructure(entries: readonly ProjectEntry[], level =
     }
   }
   return structure;
-}
-
-/**
- * Formats the content of all files into a string, wrapped in <file> tags.
- * Uses array-based string building for better memory efficiency.
- * @param entries An array of ProjectEntry objects.
- * @returns A string containing all file contents.
- */
-export function formatFileContents(entries: readonly ProjectEntry[]): string {
-  const parts: string[] = [];
-  for (const entry of entries) {
-    if (entry.type === "file") {
-      parts.push(`\n<file path="${entry.path}" size="${formatFileSizeKB(entry.size)}"`);
-      if (entry.language) {
-        parts.push(` language="${entry.language}"`);
-      }
-      parts.push(">\n");
-      parts.push(entry.content || "[Content not available or file was skipped]");
-      parts.push("\n</file>\n");
-    } else if (entry.type === "directory" && entry.children) {
-      parts.push(formatFileContents(entry.children));
-    }
-  }
-  return parts.join("");
 }

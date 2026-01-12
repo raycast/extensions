@@ -211,7 +211,7 @@ const Result = ({ cmd }: { cmd: string }) => {
 
   return (
     <Detail
-      markdown={"```\n$ " + cmd + " \n" + output + "\n```"}
+      markdown={`\`\`\`\n$ ${cmd} \n ${output}\n\`\`\``}
       isLoading={!finished}
       actions={
         <ActionPanel>
@@ -570,7 +570,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
     executedArgumentRef.current = executionKey;
 
     addToRecentlyUsed(commandArgument);
-    showHUD("Ran command in " + getTerminalDisplayName());
+    showHUD(`Ran command in ${getTerminalDisplayName()}`);
     openCommandInPreferredTerminal(commandArgument);
     closeMainWindow();
     popToRoot();
@@ -609,8 +609,8 @@ export default function Command(props: { arguments?: ShellArguments }) {
   return (
     <List
       isLoading={history === undefined}
-      enableFiltering={false}
       onSearchTextChange={setCmd}
+      searchText={cmd}
       navigationTitle="Shell command"
       searchBarPlaceholder="Enter shell-command"
     >
@@ -629,6 +629,16 @@ export default function Command(props: { arguments?: ShellArguments }) {
                     onPush={() => addToRecentlyUsed(command)}
                     target={<Result cmd={command} />}
                   />
+                  {recentlyUsed.length >= index ? (
+                    <Action
+                      title="Edit executed command"
+                      icon={Icon.Pencil}
+                      onAction={() => {
+                        const lastCommand = recentlyUsed[index] ?? "";
+                        setCmd(lastCommand ?? "");
+                      }}
+                    />
+                  ) : null}
                   {!isWindows && (
                     <>
                       {kittyInstalled ? (

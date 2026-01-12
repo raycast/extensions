@@ -16,6 +16,10 @@ function Command() {
     [pullRequestsWithAgentSessions],
   );
 
+  if (openPullRequests.length === 0) {
+    return null;
+  }
+
   return (
     <MenuBarExtra
       icon={{ source: "copilot.svg", tintColor: Color.PrimaryText }}

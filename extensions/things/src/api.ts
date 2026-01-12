@@ -3,7 +3,7 @@ import { promisify } from 'util';
 
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
 import { runAppleScript } from '@raycast/utils';
-import qs from 'qs';
+import queryString from 'query-string';
 import {
   Area,
   CommandListName,
@@ -343,13 +343,21 @@ export async function silentlyOpenThingsURL(url: string) {
   await asyncExec(`open -g "${url}"`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function generateQueryString(params: Record<string, any>): string {
+  return queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+}
+
 export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
   const { authToken } = getPreferenceValues<Preferences>();
 
   if (!authToken) throw new Error('unauthorized');
 
   await silentlyOpenThingsURL(
-    `things:///update?${qs.stringify({
+    `things:///update?${generateQueryString({
       'auth-token': authToken,
       id,
       ...todoParams,
@@ -363,7 +371,7 @@ export async function updateProject(id: string, projectParams: UpdateProjectPara
   if (!authToken) throw new Error('unauthorized');
 
   await silentlyOpenThingsURL(
-    `things:///update-project?${qs.stringify({
+    `things:///update-project?${generateQueryString({
       'auth-token': authToken,
       id,
       ...projectParams,
@@ -372,11 +380,11 @@ export async function updateProject(id: string, projectParams: UpdateProjectPara
 }
 
 export async function addTodo(todoParams: AddTodoParams) {
-  await silentlyOpenThingsURL(`things:///add?${qs.stringify(todoParams)}`);
+  await silentlyOpenThingsURL(`things:///add?${generateQueryString(todoParams)}`);
 }
 
 export async function addProject(projectParams: AddProjectParams) {
-  await silentlyOpenThingsURL(`things:///add-project?${qs.stringify(projectParams)}`);
+  await silentlyOpenThingsURL(`things:///add-project?${generateQueryString(projectParams)}`);
 }
 
 export function handleError(error: unknown, title?: string) {
