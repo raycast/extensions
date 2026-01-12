@@ -87,7 +87,8 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.0"
+    "@raycast/api": "^1.42.0",
+    "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
     "@types/node": "^18.8.3",
