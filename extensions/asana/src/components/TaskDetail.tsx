@@ -17,7 +17,7 @@ type TaskDetailProps = {
 
 export default function TaskDetail({ task: originalTask, workspace, mutateList }: TaskDetailProps) {
   const { data: task, isLoading: isLoadingDetail, mutate: mutateDetail } = useTaskDetail(originalTask);
-  const { data: subtasks, isLoading: isLoadingSubtasks } = useSubtasks(task.gid);
+  const { data: subtasks, isLoading: isLoadingSubtasks, mutate: mutateSubtasks } = useSubtasks(task.gid);
 
   const isLoading = isLoadingDetail || isLoadingSubtasks;
 
@@ -143,6 +143,7 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
             isDetail={true}
             mutateList={mutateList}
             mutateDetail={mutateDetail}
+            mutateSubtasks={mutateSubtasks}
           />
         </ActionPanel>
       }
