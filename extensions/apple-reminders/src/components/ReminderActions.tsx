@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, open, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import {
@@ -27,6 +27,7 @@ type ReminderActionsProps = {
 
 export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
   const { locations } = useLocations();
+  const attachedUrls = (reminder.attachedUrls ?? []).filter((url): url is string => Boolean(url));
 
   async function toggleReminder() {
     async function toggle() {
@@ -215,6 +216,17 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         icon={{ fileIcon: "/System/Applications/Reminders.app" }}
         application="com.apple.reminders"
       />
+      {attachedUrls.length ? (
+        <Action
+          title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
+          icon={Icon.Link}
+          onAction={async () => {
+            for (const url of attachedUrls) {
+              await open(url);
+            }
+          }}
+        />
+      ) : null}
 
       <ActionPanel.Section>
         <Action.Push

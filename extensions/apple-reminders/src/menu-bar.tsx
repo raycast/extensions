@@ -28,6 +28,10 @@ import { sortByDate } from "./hooks/useViewReminders";
 
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
 
+function getAttachedUrls(reminder: Reminder): string[] {
+  return (reminder.attachedUrls ?? []).filter((url): url is string => Boolean(url));
+}
+
 export default function Command() {
   const { titleType, hideMenuBarCountWhenEmpty, displayListTitleForMenuBarReminders, view, countType } =
     getPreferenceValues<Preferences.MenuBar>();
@@ -213,6 +217,8 @@ export default function Command() {
       {sections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>
           {section.items.map((reminder) => {
+            const attachedUrls = getAttachedUrls(reminder);
+
             return (
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
@@ -231,6 +237,17 @@ export default function Command() {
                   onAction={() => open(reminder.openUrl, "com.apple.reminders")}
                   icon={{ fileIcon: REMINDERS_FILE_ICON }}
                 />
+                {attachedUrls.length ? (
+                  <MenuBarExtra.Item
+                    title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
+                    icon={Icon.Link}
+                    onAction={async () => {
+                      for (const url of attachedUrls) {
+                        await open(url);
+                      }
+                    }}
+                  />
+                ) : null}
 
                 <MenuBarExtra.Item
                   title={reminder.isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
