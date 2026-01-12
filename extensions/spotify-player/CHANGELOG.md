@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Remove `dancannon` from contributors
+
 ## [Show Error View in Queue] - 2026-01-01
 
 - Add "queue" to README and mark as premium-only
