@@ -16,3 +16,4 @@ dist/
 # Logs
 *.log
 npm-debug.log*
+screenshot-demo/

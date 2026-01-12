@@ -47,6 +47,35 @@ function getFormatSortOrder(format: FontFormat): number {
   return order[format];
 }
 
+// Convert weight name/number to numeric value for sorting
+function getWeightSortOrder(weight: string | undefined): number {
+  if (!weight) return 400;
+  const w = weight.toLowerCase();
+  const weightMap: Record<string, number> = {
+    thin: 100,
+    hairline: 100,
+    extralight: 200,
+    ultralight: 200,
+    light: 300,
+    regular: 400,
+    normal: 400,
+    medium: 500,
+    semibold: 600,
+    demibold: 600,
+    bold: 700,
+    extrabold: 800,
+    ultrabold: 800,
+    black: 900,
+    heavy: 900,
+  };
+  // Check if it's a named weight
+  if (weightMap[w]) return weightMap[w];
+  // Try parsing as number
+  const num = parseInt(w, 10);
+  if (!isNaN(num)) return num;
+  return 400;
+}
+
 function sortFontsByFormat(fonts: FontWithSelection[]): FontWithSelection[] {
   return [...fonts].sort((a, b) => {
     // First sort by format
@@ -56,8 +85,8 @@ function sortFontsByFormat(fonts: FontWithSelection[]): FontWithSelection[] {
     // Then by family name
     const familyDiff = a.family.localeCompare(b.family);
     if (familyDiff !== 0) return familyDiff;
-    // Then by weight
-    return (a.weight || "").localeCompare(b.weight || "");
+    // Then by weight (numeric)
+    return getWeightSortOrder(a.weight) - getWeightSortOrder(b.weight);
   });
 }
 
