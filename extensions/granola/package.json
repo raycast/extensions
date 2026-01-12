@@ -39,7 +39,7 @@
       "description": "Select multiple notes and export them",
       "mode": "view"
     },
-        {
+    {
       "name": "create-note-from-transcript",
       "title": "Create Note from Transcript",
       "description": "Create a new note in Granola from a transcript",
@@ -60,14 +60,14 @@
   ],
   "tools": [
     {
-      "name": "ai-notes",
-      "title": "AI Notes",
-      "description": "Ask AI about your notes, meetings, and transcripts from Granola"
-    },
-    {
       "name": "list-meetings",
       "title": "List Meetings",
       "description": "List meetings with basic metadata (title, date, folders) without content"
+    },
+    {
+      "name": "get-note-content",
+      "title": "Get Note Content",
+      "description": "Retrieve the full content for a specific note"
     },
     {
       "name": "get-transcript",
@@ -75,15 +75,30 @@
       "description": "Retrieve the full transcript for a specific note"
     },
     {
+      "name": "list-folders",
+      "title": "List Folders",
+      "description": "List folders with metadata and note counts"
+    },
+    {
       "name": "save-to-notion",
       "title": "Save to Notion",
       "description": "Save one or more notes to Notion"
-      },
-      {
-        "name": "recipes",
-        "title": "Recipes",
-        "description": "List and search Granola recipes"
-      }
+    },
+    {
+      "name": "recipes",
+      "title": "Recipes",
+      "description": "List and search Granola recipes"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notionMaxBatchSize",
+      "type": "textfield",
+      "required": false,
+      "title": "Notion Max Batch Size",
+      "description": "Maximum number of notes to save to Notion in parallel per batch.",
+      "default": "20"
+    }
   ],
   "dependencies": {
     "@danielxceron/youtube-transcript": "^1.2.3",

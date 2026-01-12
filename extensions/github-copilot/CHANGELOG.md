@@ -1,5 +1,9 @@
 # GitHub Copilot Changelog
 
+## [Menu bar command] - 2026-01-09
+
+- Hide the menu bar command when there are no open pull requests
+
 ## [Model picker, custom agents and more] - 2025-12-08
 
 - Allow selecting a model when creating a task (Copilot Pro and Pro+ users only)

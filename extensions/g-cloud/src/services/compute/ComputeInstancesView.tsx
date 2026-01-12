@@ -17,7 +17,6 @@ import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
 import CreateVMForm from "./components/CreateVMForm";
 import InstanceListItem from "./components/InstanceListItem";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
-import { showFailureToast } from "@raycast/utils";
 import { LogsView } from "../logs-service";
 
 interface ComputeInstancesViewProps {
@@ -183,9 +182,10 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       });
     } catch (error: unknown) {
       console.error("Error fetching instances:", error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to refresh instances",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -226,9 +226,10 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       });
     } catch (error: unknown) {
       console.error("Error fetching instances:", error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to load instances",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -237,7 +238,8 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
   const startInstance = async (instance: ComputeInstance) => {
     if (!service) {
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Service not initialized",
         message: "Please try again",
       });
@@ -286,16 +288,18 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       setTimeout(() => fetchInstances(service), 3000);
     } catch (error: unknown) {
       console.error("Error starting instance:", error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to start instance",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
 
   const stopInstance = async (instance: ComputeInstance) => {
     if (!service) {
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Service not initialized",
         message: "Please try again",
       });
@@ -334,37 +338,31 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
       stoppingToast.hide();
 
-      if (result.success) {
-        if (result.isTimedOut) {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Instance stopping",
-            message: `${name} is in the process of stopping. This may take several minutes to complete.`,
-          });
-        } else {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Instance stopped",
-            message: `${name} is stopping. It may take a few moments to stop completely.`,
-          });
-        }
-
-        // Force instance refresh immediately to show updated status
-        await fetchInstances(service);
-
-        // Schedule another refresh after a delay to catch final state
-        setTimeout(() => fetchInstances(service), 10000);
+      if (result.isTimedOut) {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Instance stopping",
+          message: `${name} is in the process of stopping. This may take several minutes to complete.`,
+        });
       } else {
-        showFailureToast({
-          title: "Failed to stop instance",
-          message: "An error occurred while trying to stop the VM",
+        showToast({
+          style: Toast.Style.Success,
+          title: "Instance stopped",
+          message: `${name} is stopping. It may take a few moments to stop completely.`,
         });
       }
+
+      // Force instance refresh immediately to show updated status
+      await fetchInstances(service);
+
+      // Schedule another refresh after a delay to catch final state
+      setTimeout(() => fetchInstances(service), 10000);
     } catch (error: unknown) {
       console.error("Error stopping instance:", error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to stop instance",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -424,9 +422,10 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         });
       } catch (error) {
         refreshToast.hide();
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to refresh instances",
-          message: error instanceof Error ? error.message : String(error),
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     };

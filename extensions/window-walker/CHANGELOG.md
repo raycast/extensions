@@ -1,5 +1,16 @@
 # Changelog
 
+## [Performance & Pin Fixes] - 2026-01-05
+
+### Fixed
+
+- **Pins**: Pins now work by application name only, so pinning apps like Discord keeps it pinned regardless of which channel you're viewing.
+
+### Improved
+
+- **Refresh Rate**: Window list now auto-refreshes every 1 second (was 10 seconds).
+- **Icon Caching**: Icons are cached on disk and load in background, with automatic cleanup after 7 days.
+
 ## [Pin System Fixes] - 2026-01-05
 
 ### Fixed

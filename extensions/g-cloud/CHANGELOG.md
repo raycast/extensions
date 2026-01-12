@@ -1,5 +1,13 @@
 # Google Cloud CLI Changelog
 
+## [1.0.2] - 2026-01-05
+- Added Cloud Functions v2 service with Gen 2 support
+- Added function invocation from Raycast with live response
+- Added function creation form with streaming deployment logs
+- Added ApiErrorView for consistent API error handling across services
+- Improved service consistency and error handling patterns
+- Improved IAMService, SecretManagerService, CloudBuildService, ComputeService
+
 ## [1.0.1] - 2025-12-28
 - Added optimistic UI updates for VM start/stop actions
 - Fixed Streamer Mode not hiding "Copy Latest Value" action in Secrets list

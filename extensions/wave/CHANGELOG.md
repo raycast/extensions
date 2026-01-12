@@ -1,5 +1,10 @@
 # Wave Changelog
 
+## [Create Draft Invoice + Show Discounts] - 2026-01-08
+
+- Add new draft invoice
+- Show discounts in `Invoice`
+
 ## [Enhance Invoice] - 2025-08-20
 
 - Enhance `Invoice` to show amounts due and paid

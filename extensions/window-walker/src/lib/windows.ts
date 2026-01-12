@@ -48,8 +48,41 @@ function cleanupStaleTempFiles(): void {
   }
 }
 
+/**
+ * Clean up old icon cache files not accessed in 7 days.
+ * Called on module load to keep cache size manageable.
+ */
+function cleanupOldIconCache(): void {
+  try {
+    if (!existsSync(ICON_CACHE_DIR)) return;
+
+    const files = readdirSync(ICON_CACHE_DIR);
+    const now = Date.now();
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+    for (const file of files) {
+      if (file.endsWith(".png")) {
+        const filePath = join(ICON_CACHE_DIR, file);
+        try {
+          const stats = statSync(filePath);
+          // Delete icons not accessed in 7 days (use atime if available, else mtime)
+          const lastAccess = stats.atimeMs || stats.mtimeMs;
+          if (now - lastAccess > maxAge) {
+            unlinkSync(filePath);
+          }
+        } catch {
+          // Ignore individual file errors
+        }
+      }
+    }
+  } catch {
+    // Ignore cleanup errors
+  }
+}
+
 // Run cleanup on module load
 cleanupStaleTempFiles();
+cleanupOldIconCache();
 
 /**
  * PowerShell script to enumerate all visible windows with extended properties.
@@ -157,6 +190,29 @@ function runPowerShell(script: string): string {
 
 // In-memory cache for icon paths (process name -> icon path or null)
 const iconCache = new Map<string, string | null>();
+// Track pending icon extractions to avoid duplicate work
+const pendingExtractions = new Set<string>();
+
+/**
+ * Fast icon lookup - only returns cached icons, never blocks for extraction.
+ */
+export function getCachedIcon(processName: string): string | null {
+  const cacheKey = processName.toLowerCase();
+
+  // Check in-memory cache
+  if (iconCache.has(cacheKey)) {
+    return iconCache.get(cacheKey) || null;
+  }
+
+  // Check disk cache (fast filesystem check)
+  const iconPath = join(ICON_CACHE_DIR, `${cacheKey}.png`);
+  if (existsSync(iconPath)) {
+    iconCache.set(cacheKey, iconPath);
+    return iconPath;
+  }
+
+  return null;
+}
 
 /**
  * Extract icon from an executable and save as PNG.
@@ -215,13 +271,59 @@ try {
 }
 
 /**
+ * Extract icons for windows that don't have cached icons yet.
+ * Call this after initial window display for deferred icon loading.
+ */
+export function extractMissingIcons(windows: WindowInfo[]): void {
+  for (const w of windows) {
+    const cacheKey = w.processName.toLowerCase();
+    // Skip if already cached or already pending
+    if (iconCache.has(cacheKey) || pendingExtractions.has(cacheKey)) {
+      continue;
+    }
+    pendingExtractions.add(cacheKey);
+    // Extract synchronously but mark as pending to avoid duplicates
+    extractAppIcon(w.processPath, w.processName);
+    pendingExtractions.delete(cacheKey);
+  }
+}
+
+// Window list cache for instant loading
+let cachedWindowList: WindowInfo[] = [];
+let cacheTimestamp = 0;
+const CACHE_MAX_AGE = 5000; // 5 seconds before cache considered stale
+
+/**
  * Get a list of all visible windows.
+ * Returns cached results instantly if available, refreshes in background.
  */
 export function listWindows(): WindowInfo[] {
+  const now = Date.now();
+
+  // Return cached list instantly, schedule background refresh if stale
+  if (cachedWindowList.length > 0) {
+    if (now - cacheTimestamp > CACHE_MAX_AGE) {
+      // Cache is stale, refresh in background
+      setTimeout(() => {
+        refreshWindowListCache();
+      }, 0);
+    }
+    return cachedWindowList;
+  }
+
+  // No cache, do synchronous fetch
+  return refreshWindowListCache();
+}
+
+/**
+ * Force refresh the window list cache (call this after user actions).
+ */
+export function refreshWindowListCache(): WindowInfo[] {
   const output = runPowerShell(LIST_WINDOWS_SCRIPT);
-  if (!output) return [];
+  if (!output) return cachedWindowList; // Return old cache on error
 
   const windows: WindowInfo[] = [];
+  const windowsNeedingIcons: WindowInfo[] = [];
   const lines = output.split(/\r?\n/);
 
   for (const line of lines) {
@@ -236,11 +338,34 @@ export function listWindows(): WindowInfo[] {
 
       if (isNaN(handle) || !title) continue;
 
-      // Extract icon (async-ish, but cached)
-      const iconPath = extractAppIcon(processPath, processName);
+      // Use cached icons only for fast loading
+      const iconPath = getCachedIcon(processName);
+      const windowInfo: WindowInfo = {
+        handle,
+        title,
+        processName,
+        processPath,
+        isTopMost,
+        iconPath: iconPath || undefined,
+      };
+      windows.push(windowInfo);
 
-      windows.push({ handle, title, processName, processPath, isTopMost, iconPath: iconPath || undefined });
+      // Track windows needing icon extraction
+      if (!iconPath && processPath) {
+        windowsNeedingIcons.push(windowInfo);
+      }
     }
+  }
+
+  // Update cache
+  cachedWindowList = windows;
+  cacheTimestamp = Date.now();
+
+  // Schedule background icon extraction for windows without cached icons
+  if (windowsNeedingIcons.length > 0) {
+    setTimeout(() => {
+      extractMissingIcons(windowsNeedingIcons);
+    }, 100);
   }
 
   return windows;

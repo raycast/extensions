@@ -1,30 +1,25 @@
-import { ActionPanel, Action, List, showToast, Toast, Detail, Icon, Color, Clipboard } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
-import { exec } from "child_process";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Color, open } from "@raycast/api";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useGranolaData } from "./utils/useGranolaData";
 import { getTranscript } from "./utils/fetchData";
-import { getDocumentToFolderMapping } from "./utils/folderHelpers";
 import { useFolders } from "./utils/useFolders";
+import { getFoldersFromAPI } from "./utils/folderHelpers";
 import { mapIconToHeroicon, getDefaultIconUrl, mapColorToHex } from "./utils/iconMapper";
 import {
   sanitizeFileName,
   createExportFilename,
-  getDynamicBatchSize,
   calculateETA,
   formatProgressMessage,
+  showExportSuccessToast,
 } from "./utils/exportHelpers";
-import { ExportService, type ExportResult } from "./utils/exportService";
+import { ExportService } from "./utils/exportService";
 
 import { Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
 import { sortNotesByDate } from "./components/NoteComponents";
-
-interface BulkTranscriptResult extends ExportResult {
-  transcriptPreview: string; // Only a tiny preview for display
-  transcriptLength?: number; // Just the character count
-  id: string; // Alias for noteId to satisfy ExportableItem interface
-  folderNames?: string[];
-}
+import { toErrorMessage } from "./utils/errorUtils";
+import { getNotionBatchSize } from "./utils/notionBatching";
+import { getFolderNoteResults } from "./utils/searchUtils";
 
 interface BulkNotionResult {
   noteId: string;
@@ -34,6 +29,13 @@ interface BulkNotionResult {
   error?: string;
   errorDetails?: string;
 }
+
+const formatDate = (value?: string): string => {
+  if (!value) return "Unknown date";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Unknown date";
+  return date.toLocaleDateString();
+};
 
 export default function Command() {
   const { noteData, isLoading, hasError } = useGranolaData();
@@ -58,67 +60,100 @@ export default function Command() {
 
 function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untitledNoteTitle: string }) {
   const [selectedNoteIds, setSelectedNoteIds] = useState<Set<string>>(new Set());
-  const [bulkResults, setBulkResults] = useState<BulkTranscriptResult[]>([]);
-  const [showResults, setShowResults] = useState(false);
   const [notionResults, setNotionResults] = useState<BulkNotionResult[]>([]);
   const [showNotionResults, setShowNotionResults] = useState(false);
 
   const { folders, isLoading: foldersLoading } = useFolders();
+  const [foldersWithIds, setFoldersWithIds] = useState<typeof folders>([]);
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
 
-  const docToFolderNames = useMemo(() => {
-    const mapping: Record<string, string[]> = {};
-    folders.forEach((folder) => {
-      folder.document_ids.forEach((docId) => {
-        if (!mapping[docId]) {
-          mapping[docId] = [];
+  // Track timeout IDs and mount status to prevent memory leaks
+  const notionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
+
+  // Load document_ids lazily after initial render (for counting and filtering)
+  // This defers loading IDs until after the UI is shown, reducing initial memory footprint
+  useEffect(() => {
+    if (folders.length === 0 || foldersWithIds.length > 0) {
+      return;
+    }
+
+    let cancelled = false;
+    const abortController = new AbortController();
+
+    // Load IDs after a short delay to allow UI to render first
+    const timer = setTimeout(() => {
+      const loadFolderIds = async () => {
+        const foldersWithDocumentIds = await getFoldersFromAPI({
+          includeDocumentIds: true,
+          signal: abortController.signal,
+        });
+        if (!cancelled && !abortController.signal.aborted) {
+          setFoldersWithIds(foldersWithDocumentIds);
         }
-        mapping[docId].push(folder.title);
-      });
-    });
-    return mapping;
-  }, [folders]);
+      };
+      void loadFolderIds();
+    }, 100); // 100ms delay to allow initial render
 
-  const folderIdToDocIds = useMemo(() => {
-    const record: Record<string, Set<string>> = {};
-    folders.forEach((folder) => {
-      record[folder.id] = new Set(folder.document_ids);
-    });
-    return record;
-  }, [folders]);
+    return () => {
+      cancelled = true;
+      abortController.abort();
+      clearTimeout(timer);
+    };
+  }, [folders, foldersWithIds.length]);
 
-  const noteIdsSet = useMemo(() => new Set(notes.map((note) => note.id)), [notes]);
+  // Cleanup timeouts on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      if (notionTimeoutRef.current) {
+        clearTimeout(notionTimeoutRef.current);
+        notionTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
-  const folderNoteCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    folders.forEach((folder) => {
-      const relevantIds = folder.document_ids.filter((id) => noteIdsSet.has(id));
-      counts[folder.id] = relevantIds.length;
-    });
-    return counts;
-  }, [folders, noteIdsSet]);
+  // Use folders with IDs when available, otherwise use folders without IDs
+  const activeFolders = foldersWithIds.length > 0 ? foldersWithIds : folders;
 
-  const notesNotInFolders = useMemo(() => {
-    return notes.filter((note) => !docToFolderNames[note.id]?.length);
-  }, [notes, docToFolderNames]);
+  // Helper function to get folder names for a specific note (on-demand lookup instead of precomputing all mappings)
+  const getFolderNamesForNote = useMemo(() => {
+    // Use folders with IDs if available, otherwise use folders without IDs
+    const foldersToProcess = activeFolders.length > 0 ? activeFolders : folders;
+    return (noteId: string): string[] => {
+      const folderNames: string[] = [];
+      for (let i = 0; i < foldersToProcess.length; i++) {
+        const folder = foldersToProcess[i];
+        // Only check if folder has document_ids loaded (memory optimization)
+        if (folder.document_ids && folder.document_ids.length > 0) {
+          // Check if this note is in this folder
+          for (let j = 0; j < folder.document_ids.length; j++) {
+            if (folder.document_ids[j] === noteId) {
+              folderNames.push(folder.title);
+              break; // Note can only be in a folder once
+            }
+          }
+        }
+      }
+      return folderNames;
+    };
+  }, [folders, activeFolders]);
 
-  const filteredNotes = useMemo(() => {
-    if (selectedFolder === "all") {
-      return notes;
+  // Combine all folder-related computations into a single useMemo (like search-notes.tsx)
+  // This reduces memory overhead by computing only what's needed and reusing data structures
+  const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
+    const foldersToProcess = activeFolders.length > 0 ? activeFolders : folders;
+    return getFolderNoteResults(notes, foldersToProcess, selectedFolder);
+  }, [notes, folders, activeFolders, selectedFolder]);
+
+  // Compute filteredNoteIds on-demand instead of memoizing (only used in a few places)
+  const getFilteredNoteIds = () => {
+    const ids: string[] = [];
+    for (let i = 0; i < filteredNotes.length; i++) {
+      ids.push(filteredNotes[i].id);
     }
-
-    if (selectedFolder === "orphans") {
-      return notesNotInFolders;
-    }
-
-    const docIds = folderIdToDocIds[selectedFolder];
-    if (!docIds) {
-      return [];
-    }
-    return notes.filter((note) => docIds.has(note.id));
-  }, [notes, selectedFolder, folderIdToDocIds, notesNotInFolders]);
-
-  const filteredNoteIds = useMemo(() => filteredNotes.map((note) => note.id), [filteredNotes]);
+    return ids;
+  };
 
   const currentFolderLabel = useMemo(() => {
     if (selectedFolder === "all") {
@@ -127,9 +162,11 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
     if (selectedFolder === "orphans") {
       return "Notes Not in Folders";
     }
-    const match = folders.find((folder) => folder.id === selectedFolder);
+    // Use folders with IDs if available, otherwise use folders without IDs
+    const foldersToSearch = activeFolders.length > 0 ? activeFolders : folders;
+    const match = foldersToSearch.find((folder) => folder.id === selectedFolder);
     return match?.title || null;
-  }, [selectedFolder, folders]);
+  }, [selectedFolder, folders, activeFolders]);
 
   const filterLabel = useMemo(() => {
     if (selectedFolder === "all") {
@@ -152,7 +189,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
   };
 
   const selectAllNotes = () => {
-    setSelectedNoteIds(new Set(filteredNoteIds));
+    setSelectedNoteIds(new Set(getFilteredNoteIds()));
   };
 
   const clearSelection = () => {
@@ -171,37 +208,14 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
       return;
     }
 
-    if (noteIds.length > 500) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Too many notes",
-        message: "Please select 500 or fewer notes for Notion saving.",
-      });
-      return;
-    }
-
     const noteIdsSetForLookup = new Set(noteIds);
 
-    // Conservative batch sizing for Notion API stability
-    const getNotionBatchSize = (totalNotes: number): number => {
-      if (totalNotes <= 5) return 1; // Very small: sequential
-      if (totalNotes <= 20) return 3; // Small: 3 per batch
-      if (totalNotes <= 50) return 5; // Medium: 5 per batch
-      return 7; // Large: 7 per batch (conservative for API stability)
-    };
-
     const batchSize = getNotionBatchSize(noteIds.length);
-    const estimatedBatches = Math.ceil(noteIds.length / batchSize);
-    const estimatedTimeSeconds = estimatedBatches * 2.5; // ~2.5s per batch (800ms delay + API time + safety margin)
-    const timeDisplay =
-      estimatedTimeSeconds > 60
-        ? `~${Math.ceil(estimatedTimeSeconds / 60)} minutes`
-        : `~${Math.ceil(estimatedTimeSeconds)} seconds`;
-
+    const initialEta = calculateETA(noteIds.length, batchSize);
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Saving to Notion",
-      message: `${noteIds.length} notes in batches of ${batchSize} (${timeDisplay})`,
+      message: `${noteIds.length} notes in batches of ${batchSize} (~${initialEta})`,
     });
 
     const selectedNotes = notes.filter((note) => noteIdsSetForLookup.has(note.id));
@@ -222,56 +236,79 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
 
     // Process in batches with real-time progress updates
     for (let i = 0; i < selectedNotes.length; i += BATCH_SIZE) {
+      if (!isMountedRef.current) break; // Stop processing if component unmounted
+
       const batch = selectedNotes.slice(i, i + BATCH_SIZE);
 
       // Process batch in parallel with detailed error handling
       const batchPromises = batch.map(async (note) => {
+        if (!isMountedRef.current) return { success: false, noteId: note.id };
         try {
-          const { saveToNotion } = await import("./utils/granolaApi");
-          const result = await saveToNotion(note.id);
+          const { saveToNotionWithRetry } = await import("./utils/granolaApi");
+          const result = await saveToNotionWithRetry(note.id, {
+            maxRetries: 2,
+            onRetry: (attempt, delayMs) => {
+              if (isMountedRef.current) {
+                toast.message = `Rate limited, retrying in ${Math.ceil(delayMs / 1000)}s (attempt ${attempt})`;
+              }
+            },
+          });
 
-          // Update state with success
-          setNotionResults((prev) =>
-            prev.map((r) =>
-              r.noteId === note.id
-                ? {
-                    ...r,
-                    status: "success" as const,
-                    pageUrl: result.page_url,
-                  }
-                : r,
-            ),
-          );
+          // Only update state if component is still mounted
+          if (isMountedRef.current) {
+            setNotionResults((prev) =>
+              prev.map((r) =>
+                r.noteId === note.id
+                  ? {
+                      ...r,
+                      status: "success" as const,
+                      pageUrl: result.page_url,
+                    }
+                  : r,
+              ),
+            );
+          }
           return { success: true, noteId: note.id };
         } catch (error) {
+          if (!isMountedRef.current) return { success: false, noteId: note.id };
           // Extract detailed error information
-          let errorMessage = "Unknown error";
-          let errorDetails = String(error);
+          let errorMessage = toErrorMessage(error);
+          let errorDetails = errorMessage;
 
           if (error instanceof Error) {
             errorMessage = error.message;
+            const lowerMessage = error.message.toLowerCase();
+            const status = (error as { status?: number }).status;
             if (error.message.includes("Internal Server Error")) {
               errorDetails = `HTTP 500 - This specific note may have invalid data or the Granola API is temporarily unavailable. Note ID: ${note.id}`;
-            } else if (error.message.includes("rate limit")) {
+            } else if (
+              status === 429 ||
+              lowerMessage.includes("rate limit") ||
+              lowerMessage.includes("rate_limit") ||
+              lowerMessage.includes("ratelimit") ||
+              lowerMessage.includes("too many requests")
+            ) {
               errorDetails = `Rate limited - too many requests. Note ID: ${note.id}`;
-            } else if (error.message.includes("unauthorized")) {
+            } else if (lowerMessage.includes("unauthorized")) {
               errorDetails = `Authentication failed - check Granola app connection. Note ID: ${note.id}`;
             }
           }
 
-          // Update state with detailed error
-          setNotionResults((prev) =>
-            prev.map((r) =>
-              r.noteId === note.id
-                ? {
-                    ...r,
-                    status: "error" as const,
-                    error: errorMessage,
-                    errorDetails: errorDetails,
-                  }
-                : r,
-            ),
-          );
+          // Only update state if component is still mounted
+          if (isMountedRef.current) {
+            setNotionResults((prev) =>
+              prev.map((r) =>
+                r.noteId === note.id
+                  ? {
+                      ...r,
+                      status: "error" as const,
+                      error: errorMessage,
+                      errorDetails: errorDetails,
+                    }
+                  : r,
+              ),
+            );
+          }
 
           return { success: false, noteId: note.id };
         }
@@ -279,26 +316,24 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
 
       // Wait for the batch to complete then update progress
       await Promise.all(batchPromises);
+      if (!isMountedRef.current) break; // Stop if component unmounted
+
       processedCount += batch.length;
 
-      // Update progress with dynamic ETA after the batch completes
-      const progressPercent = Math.round((processedCount / selectedNotes.length) * 100);
-      const remainingNotes = selectedNotes.length - processedCount;
-      const remainingBatches = Math.ceil(remainingNotes / BATCH_SIZE);
-      const etaSeconds = remainingBatches * 2.5; // 2.5s per batch estimate
-      const etaDisplay = etaSeconds > 60 ? `${Math.ceil(etaSeconds / 60)}m` : `${Math.ceil(etaSeconds)}s`;
-
-      // Update toast with accurate count
-      toast.message = `${processedCount}/${selectedNotes.length} (${progressPercent}%) - ETA: ${etaDisplay}`;
-
-      // Conservative delay between batches
-      if (i + BATCH_SIZE < selectedNotes.length) {
-        await new Promise((resolve) => setTimeout(resolve, 800));
+      // Update toast with accurate count and ETA
+      if (isMountedRef.current) {
+        const remainingItems = selectedNotes.length - processedCount;
+        const eta = remainingItems > 0 ? calculateETA(remainingItems, BATCH_SIZE) : undefined;
+        toast.message = formatProgressMessage(processedCount, selectedNotes.length, eta);
       }
     }
 
-    // Final results summary
-    setTimeout(() => {
+    // Final results summary - store timeout ID in ref for cleanup
+    if (notionTimeoutRef.current) {
+      clearTimeout(notionTimeoutRef.current);
+    }
+    notionTimeoutRef.current = setTimeout(() => {
+      if (!isMountedRef.current) return; // Don't update state if component unmounted
       setNotionResults((currentResults) => {
         const successCount = currentResults.filter((r) => r.status === "success").length;
         const errorCount = currentResults.length - successCount;
@@ -314,7 +349,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
                   onAction: () => {
                     const firstSuccess = currentResults.find((r) => r.status === "success");
                     if (firstSuccess?.pageUrl) {
-                      exec(`open "${firstSuccess.pageUrl}"`);
+                      open(firstSuccess.pageUrl);
                     }
                   },
                 }
@@ -323,26 +358,18 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
 
         return currentResults;
       });
+      notionTimeoutRef.current = null; // Clear ref after timeout executes
     }, 100);
   };
 
-  const retrieveSelectedTranscripts = async (noteIdsParam?: string[]) => {
+  const exportSelectedTranscriptsToZip = async (noteIdsParam?: string[]) => {
     const noteIds = noteIdsParam ?? Array.from(selectedNoteIds);
 
     if (noteIds.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No notes selected",
-        message: "Please select at least one note to retrieve transcripts.",
-      });
-      return;
-    }
-
-    if (noteIds.length > 500) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Batch too large",
-        message: "Please select 500 or fewer notes. Consider processing in smaller batches for optimal performance.",
+        message: "Please select at least one note to export transcripts.",
       });
       return;
     }
@@ -350,135 +377,83 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
     const noteIdSetForLookup = new Set(noteIds);
     const selectedNotes = notes.filter((note) => noteIdSetForLookup.has(note.id));
 
-    // Initialize results with pending status
-    const initialResults: BulkTranscriptResult[] = selectedNotes.map((note) => ({
-      noteId: note.id,
-      id: note.id,
-      title: note.title || untitledNoteTitle,
-      transcriptPreview: "",
-      status: "pending",
-      folderNames: docToFolderNames[note.id] || [],
-    }));
-
-    setBulkResults(initialResults);
-    setShowResults(true);
-
-    await showToast({
+    const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Retrieving transcripts",
-      message: `Processing ${noteIds.length} notes...`,
+      title: "Exporting transcripts to zip",
+      message: `Processing ${noteIds.length} transcripts...`,
     });
 
-    const BATCH_SIZE = getDynamicBatchSize(selectedNotes.length);
-    let processedCount = 0;
+    try {
+      // Use shared ExportService for batch processing - retrieves transcripts directly during export
+      const { tempDir } = await ExportService.processBatchExport(
+        selectedNotes,
+        async (note) => {
+          // Retrieve transcript directly during export (no middleman step)
+          const transcript = await getTranscript(note.id);
 
-    // Performance estimation
-    const estimatedTimeSeconds = Math.ceil((selectedNotes.length / BATCH_SIZE) * (BATCH_SIZE * 0.5 + 0.1)); // ~0.5s per transcript + batch overhead
-    const timeDisplay =
-      estimatedTimeSeconds > 60
-        ? `~${Math.ceil(estimatedTimeSeconds / 60)} minutes`
-        : `~${estimatedTimeSeconds} seconds`;
+          // Find the note data for metadata
+          const createdDate = note.created_at ? new Date(note.created_at).toLocaleDateString() : "Unknown";
+          const source = note.creation_source || "Unknown";
 
-    // Show initial batch info with time estimate
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Starting bulk processing",
-      message: `${selectedNotes.length} transcripts in batches of ${BATCH_SIZE} (${timeDisplay})`,
-    });
+          // Format transcript content
+          const transcriptContent = `# ${note.title || "Untitled"}
 
-    // Process in batches for optimal speed/memory balance
-    for (let i = 0; i < selectedNotes.length; i += BATCH_SIZE) {
-      const batch = selectedNotes.slice(i, i + BATCH_SIZE);
+## Transcript
 
-      // Update progress with percentage and ETA
-      const progressPercent = Math.round((processedCount / selectedNotes.length) * 100);
-      const remainingNotes = selectedNotes.length - processedCount;
-      const remainingBatches = Math.ceil(remainingNotes / BATCH_SIZE);
-      const etaSeconds = remainingBatches * (BATCH_SIZE * 0.5 + 0.1);
-      const etaDisplay = etaSeconds > 60 ? `${Math.ceil(etaSeconds / 60)}m` : `${Math.ceil(etaSeconds)}s`;
+${transcript}
 
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Processing transcripts",
-        message: `${processedCount}/${selectedNotes.length} (${progressPercent}%) - ETA: ${etaDisplay}`,
-      });
+---
 
-      // Process batch in parallel
-      await Promise.all(
-        batch.map(async (note) => {
-          try {
-            const transcript = await getTranscript(note.id);
+*Exported from Granola on ${new Date().toLocaleString()}*  
+**Created:** ${createdDate} | **Source:** ${source}
+`;
 
-            // Create minimal preview
-            const previewTranscript = transcript.length > 100 ? transcript.substring(0, 100) + "..." : transcript;
+          const safeTitle = sanitizeFileName(note.title || "Untitled");
+          const fileName = `${safeTitle}_${note.id.substring(0, 8)}.md`;
 
-            // Store only metadata - transcript gets garbage collected
-            setBulkResults((prev) =>
-              prev.map((result) =>
-                result.noteId === note.id
-                  ? {
-                      ...result,
-                      transcriptPreview: String(previewTranscript || ""),
-                      transcriptLength: transcript.length,
-                      status: "success" as const,
-                    }
-                  : result,
-              ),
-            );
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            setBulkResults((prev) =>
-              prev.map((result) =>
-                result.noteId === note.id ? { ...result, status: "error" as const, error: errorMessage } : result,
-              ),
-            );
-          }
-        }),
+          return {
+            content: transcriptContent,
+            fileName,
+          };
+        },
+        {
+          filePrefix: "granola_transcripts",
+          includeOrganization: true,
+        },
+        (processed, total, eta) => {
+          toast.message = `${processed}/${total} • ~${eta}`;
+        },
       );
 
-      processedCount += batch.length;
-
-      // Dynamic pause based on batch size (larger batches = longer pause for cleanup)
-      if (i + BATCH_SIZE < selectedNotes.length) {
-        const pauseTime = Math.max(50, Math.min(200, BATCH_SIZE * 10)); // 50-200ms based on batch size
-        await new Promise((resolve) => setTimeout(resolve, pauseTime));
-      }
+      // Create and download zip
+      const zipFileName = createExportFilename("granola_transcripts");
+      await ExportService.createAndDownloadZip(tempDir, zipFileName);
+      await showExportSuccessToast(noteIds.length);
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Export failed";
+      toast.message = toErrorMessage(error);
     }
-
-    // Wait a moment for state to update, then calculate final counts
-    setTimeout(() => {
-      setBulkResults((currentResults) => {
-        const successCount = currentResults.filter((r) => r.status === "success").length;
-        const errorCount = currentResults.length - successCount;
-
-        showToast({
-          style: errorCount > 0 ? Toast.Style.Failure : Toast.Style.Success,
-          title: "Transcript retrieval complete",
-          message: `${successCount} successful, ${errorCount} failed`,
-        });
-
-        return currentResults;
-      });
-    }, 100);
   };
 
-  const retrieveFilteredTranscripts = async () => {
-    if (filteredNoteIds.length === 0) {
+  const exportFilteredTranscriptsToZip = async () => {
+    const targetIds = getFilteredNoteIds();
+    if (targetIds.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No notes in current filter",
-        message: `Try selecting a different folder before retrieving transcripts.`,
+        message: `Try selecting a different folder before exporting transcripts.`,
       });
       return;
     }
 
-    const targetIds = filteredNoteIds;
     setSelectedNoteIds(new Set(targetIds));
-    await retrieveSelectedTranscripts(targetIds);
+    await exportSelectedTranscriptsToZip(targetIds);
   };
 
   const saveFilteredToNotion = async () => {
-    if (filteredNoteIds.length === 0) {
+    const targetIds = getFilteredNoteIds();
+    if (targetIds.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No notes in current filter",
@@ -487,7 +462,6 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
       return;
     }
 
-    const targetIds = filteredNoteIds;
     setSelectedNoteIds(new Set(targetIds));
     await saveSelectedToNotion(targetIds);
   };
@@ -503,17 +477,6 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
       : selectedFolder === "orphans"
         ? "Search notes not in folders..."
         : `Search notes in ${filterLabel}...`;
-
-  if (showResults) {
-    return (
-      <BulkTranscriptResults
-        results={bulkResults}
-        onBackToSelection={() => setShowResults(false)}
-        notes={notes}
-        docToFolderNames={docToFolderNames}
-      />
-    );
-  }
 
   if (showNotionResults) {
     return <BulkNotionResults results={notionResults} onBackToSelection={() => setShowNotionResults(false)} />;
@@ -539,12 +502,11 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
           {!foldersLoading && folders.length > 0 && (
             <List.Dropdown.Section title="Folders">
               {folders
-                .slice()
                 .sort((a, b) => a.title.localeCompare(b.title))
                 .map((folder) => (
                   <List.Dropdown.Item
                     key={folder.id}
-                    title={`${folder.title} (${folderNoteCounts[folder.id] || 0})`}
+                    title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
                     value={folder.id}
                     icon={{
                       source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
@@ -561,9 +523,10 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
           {selectedNoteIds.size > 0 && (
             <>
               <Action
-                title={`Retrieve ${selectedNoteIds.size} Transcripts`}
-                icon={Icon.Download}
-                onAction={() => retrieveSelectedTranscripts()}
+                title={`Export ${selectedNoteIds.size} Transcripts to Zip`}
+                icon={Icon.ArrowDown}
+                onAction={() => exportSelectedTranscriptsToZip()}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
               <Action
                 title={`Save ${selectedNoteIds.size} to Notion`}
@@ -571,41 +534,35 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
                 onAction={() => saveSelectedToNotion()}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
+              <Action
+                title="Clear Selection"
+                icon={Icon.XMarkCircle}
+                onAction={clearSelection}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+              />
             </>
           )}
           <Action
-            title={
-              selectedFolder === "all"
-                ? `Retrieve ${filteredNoteIds.length} Transcripts`
-                : `Retrieve ${filteredNoteIds.length} Transcripts in ${filterLabel}`
-            }
-            icon={Icon.Download}
-            onAction={retrieveFilteredTranscripts}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            title={selectedFolder === "all" ? `Export All Transcripts to Zip` : `Export All from ${filterLabel} to Zip`}
+            icon={Icon.ArrowDown}
+            onAction={exportFilteredTranscriptsToZip}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           />
           <Action
             title={
               selectedFolder === "all"
-                ? `Save ${filteredNoteIds.length} Notes to Notion`
-                : `Save ${filteredNoteIds.length} from ${filterLabel} to Notion`
+                ? `Save ${filteredNotes.length} Notes to Notion`
+                : `Save ${filteredNotes.length} from ${filterLabel} to Notion`
             }
             icon={Icon.Document}
             onAction={saveFilteredToNotion}
             shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
           />
-          {selectedNoteIds.size > 0 && (
-            <Action
-              title="Clear Selection"
-              icon={Icon.XMarkCircle}
-              onAction={clearSelection}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-            />
-          )}
           <Action
             title={
               selectedFolder === "all"
-                ? `Select All Notes (${filteredNoteIds.length})`
-                : `Select All in ${filterLabel} (${filteredNoteIds.length})`
+                ? `Select All Notes (${filteredNotes.length})`
+                : `Select All in ${filterLabel} (${filteredNotes.length})`
             }
             icon={Icon.CheckCircle}
             onAction={selectAllNotes}
@@ -614,19 +571,48 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
         </ActionPanel>
       }
     >
-      {filteredNotes.map((note) => {
-        const folderNames = docToFolderNames[note.id] || [];
-        const accessories = [];
+      {sortNotesByDate(filteredNotes).map((note) => {
+        const folderNames = getFolderNamesForNote(note.id);
+        const accessories: List.Item.Accessory[] = [];
 
+        // Date as first accessory (matching search-notes.tsx)
+        accessories.push({ text: formatDate(note.created_at) });
+
+        // Folder icon as second accessory (matching search-notes.tsx)
         if (folderNames.length > 0) {
+          // Find the first folder to get its icon
+          const firstFolderName = folderNames[0];
+          const foldersToSearch = activeFolders.length > 0 ? activeFolders : folders;
+          const noteFolder = foldersToSearch.find((f) => f.title === firstFolderName);
+
+          if (noteFolder) {
+            accessories.push({
+              icon: {
+                source: noteFolder.icon ? mapIconToHeroicon(noteFolder.icon.value) : getDefaultIconUrl(),
+                tintColor: noteFolder.icon ? mapColorToHex(noteFolder.icon.color) : Color.Blue,
+              },
+              tooltip:
+                folderNames.length > 1 ? `In folders: ${folderNames.join(", ")}` : `In folder: ${firstFolderName}`,
+            });
+          } else {
+            accessories.push({
+              icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+              tooltip:
+                folderNames.length > 1 ? `In folders: ${folderNames.join(", ")}` : `In folder: ${firstFolderName}`,
+            });
+          }
+        } else {
+          // Show "No folder" indicator for orphaned notes (matching search-notes.tsx)
           accessories.push({
-            text: folderNames.join(", "),
-            icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+            icon: { source: Icon.Document, tintColor: Color.SecondaryText },
+            tooltip: "Not in any folder",
           });
         }
 
-        accessories.push({ date: new Date(note.created_at) });
-        accessories.push({ text: note.creation_source || "Unknown source" });
+        // Privacy indicator as third accessory (matching search-notes.tsx)
+        accessories.push({
+          text: note.public ? "Public" : "Private",
+        });
 
         return (
           <List.Item
@@ -639,459 +625,81 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
             accessories={accessories}
             actions={
               <ActionPanel>
-                <Action
-                  title={selectedNoteIds.has(note.id) ? "Deselect Note" : "Select Note"}
-                  icon={selectedNoteIds.has(note.id) ? Icon.XMarkCircle : Icon.CheckCircle}
-                  onAction={() => toggleNoteSelection(note.id)}
-                />
-                {selectedNoteIds.size > 0 && (
-                  <>
-                    <Action
-                      title={`Retrieve ${selectedNoteIds.size} Transcripts`}
-                      icon={Icon.Download}
-                      onAction={() => retrieveSelectedTranscripts()}
-                    />
-                    <Action
-                      title={`Save ${selectedNoteIds.size} to Notion`}
-                      icon={Icon.Document}
-                      onAction={() => saveSelectedToNotion()}
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    />
-                  </>
-                )}
-                <Action
-                  title={
-                    selectedFolder === "all"
-                      ? `Retrieve ${filteredNoteIds.length} Transcripts`
-                      : `Retrieve ${filteredNoteIds.length} Transcripts in ${filterLabel}`
-                  }
-                  icon={Icon.Download}
-                  onAction={retrieveFilteredTranscripts}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                />
-                <Action
-                  title={
-                    selectedFolder === "all"
-                      ? `Save ${filteredNoteIds.length} Notes to Notion`
-                      : `Save ${filteredNoteIds.length} from ${filterLabel} to Notion`
-                  }
-                  icon={Icon.Document}
-                  onAction={saveFilteredToNotion}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-                />
-                {selectedNoteIds.size > 0 && (
+                <ActionPanel.Section title="Selection">
                   <Action
-                    title="Clear Selection"
-                    icon={Icon.XMarkCircle}
-                    onAction={clearSelection}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    title={selectedNoteIds.has(note.id) ? "Deselect Note" : "Select Note"}
+                    icon={selectedNoteIds.has(note.id) ? Icon.XMarkCircle : Icon.CheckCircle}
+                    onAction={() => toggleNoteSelection(note.id)}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
                   />
-                )}
-                <Action
-                  title={
-                    selectedFolder === "all"
-                      ? `Select All Notes (${filteredNoteIds.length})`
-                      : `Select All in ${filterLabel} (${filteredNoteIds.length})`
-                  }
-                  icon={Icon.CheckCircle}
-                  onAction={selectAllNotes}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                />
+                  <Action
+                    title={
+                      selectedFolder === "all"
+                        ? `Select All (${filteredNotes.length})`
+                        : `Select All in ${filterLabel} (${filteredNotes.length})`
+                    }
+                    icon={Icon.CheckCircle}
+                    onAction={selectAllNotes}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                  />
+                  {selectedNoteIds.size > 0 && (
+                    <Action
+                      title={`Clear Selection (${selectedNoteIds.size})`}
+                      icon={Icon.XMarkCircle}
+                      onAction={clearSelection}
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    />
+                  )}
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Export">
+                  <Action
+                    title={
+                      selectedNoteIds.size > 0
+                        ? `Export ${selectedNoteIds.size} Selected Transcripts`
+                        : "Export This Transcript to Zip"
+                    }
+                    icon={Icon.ArrowDown}
+                    onAction={() =>
+                      selectedNoteIds.size > 0
+                        ? exportSelectedTranscriptsToZip()
+                        : exportSelectedTranscriptsToZip([note.id])
+                    }
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  />
+                  <Action
+                    title={
+                      selectedNoteIds.size > 0
+                        ? `Save ${selectedNoteIds.size} Selected to Notion`
+                        : "Save This Note to Notion"
+                    }
+                    icon={Icon.Document}
+                    onAction={() =>
+                      selectedNoteIds.size > 0 ? saveSelectedToNotion() : saveSelectedToNotion([note.id])
+                    }
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  />
+                  <Action
+                    title={selectedFolder === "all" ? `Export All Transcripts` : `Export All from ${filterLabel}`}
+                    icon={Icon.Download}
+                    onAction={exportFilteredTranscriptsToZip}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                  />
+                  <Action
+                    title={
+                      selectedFolder === "all"
+                        ? `Save All ${filteredNotes.length} to Notion`
+                        : `Save All from ${filterLabel}`
+                    }
+                    icon={Icon.Document}
+                    onAction={saveFilteredToNotion}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
         );
       })}
-    </List>
-  );
-}
-
-function BulkTranscriptResults({
-  results,
-  onBackToSelection,
-  notes,
-  docToFolderNames,
-}: {
-  results: BulkTranscriptResult[];
-  onBackToSelection: () => void;
-  notes: Doc[];
-  docToFolderNames: Record<string, string[]>;
-}) {
-  const [selectedResult, setSelectedResult] = useState<BulkTranscriptResult | null>(null);
-
-  if (selectedResult) {
-    return <IndividualTranscriptView result={selectedResult} onBackToResults={() => setSelectedResult(null)} />;
-  }
-
-  const successResults = results.filter((r) => r.status === "success");
-  const errorResults = results.filter((r) => r.status === "error");
-  const pendingResults = results.filter((r) => r.status === "pending");
-
-  const generateCombinedTranscript = async () => {
-    const BATCH_SIZE = getDynamicBatchSize(successResults.length);
-
-    // Performance estimation
-    const estimatedTimeSeconds = Math.ceil((successResults.length / BATCH_SIZE) * (BATCH_SIZE * 0.5 + 0.1));
-    const timeDisplay =
-      estimatedTimeSeconds > 60
-        ? `~${Math.ceil(estimatedTimeSeconds / 60)} minutes`
-        : `~${estimatedTimeSeconds} seconds`;
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Fetching all transcripts",
-      message: `${successResults.length} transcripts in batches of ${BATCH_SIZE} (${timeDisplay})`,
-    });
-
-    try {
-      // Get folder information for organizing transcripts with accurate data
-      const documentToFolders = await getDocumentToFolderMapping().catch(() => {
-        return {} as Record<string, string>;
-      });
-
-      // Group results by folder
-      const folderGroups: Record<string, BulkTranscriptResult[]> = {};
-      const unorganizedResults: BulkTranscriptResult[] = [];
-
-      for (const result of successResults) {
-        const folderName = documentToFolders[result.noteId];
-        if (folderName) {
-          if (!folderGroups[folderName]) {
-            folderGroups[folderName] = [];
-          }
-          folderGroups[folderName].push(result);
-        } else {
-          unorganizedResults.push(result);
-        }
-      }
-
-      const transcriptParts: string[] = [];
-      let processedCount = 0;
-
-      // Helper function to format individual transcript
-      const formatTranscript = async (result: BulkTranscriptResult) => {
-        const transcript = await getTranscript(result.noteId);
-
-        // Find the note data for metadata
-        const note = notes.find((n: Doc) => n.id === result.noteId);
-        const createdDate = note ? new Date(note.created_at).toLocaleDateString() : "Unknown";
-        const source = note?.creation_source || "Unknown";
-
-        return `# ${result.title}
-
-## Transcript
-
-${transcript}
-
----
-
-*Exported from Granola on ${new Date().toLocaleString()}*  
-**Created:** ${createdDate} | **Source:** ${source}
-
----
-
-`;
-      };
-
-      // Process folder groups first
-      for (const [folderName, folderResults] of Object.entries(folderGroups)) {
-        if (folderResults.length > 0) {
-          transcriptParts.push(`\n# 📁 ${folderName}\n\n`);
-
-          // Process folder's transcripts in batches
-          for (let i = 0; i < folderResults.length; i += BATCH_SIZE) {
-            const batch = folderResults.slice(i, i + BATCH_SIZE);
-
-            // Update progress with ETA
-            const remainingItems = successResults.length - processedCount;
-            const eta = calculateETA(remainingItems, BATCH_SIZE);
-            toast.message = formatProgressMessage(processedCount, successResults.length, eta);
-
-            // Fetch batch in parallel
-            const batchTranscripts = await Promise.all(batch.map(formatTranscript));
-
-            // Add to combined result
-            transcriptParts.push(...batchTranscripts);
-            processedCount += batch.length;
-
-            // Dynamic pause for cleanup
-            if (i + BATCH_SIZE < folderResults.length) {
-              const pauseTime = Math.max(50, Math.min(200, BATCH_SIZE * 10));
-              await new Promise((resolve) => setTimeout(resolve, pauseTime));
-            }
-          }
-        }
-      }
-
-      // Process unorganized transcripts
-      if (unorganizedResults.length > 0) {
-        transcriptParts.push(`\n# 📄 Other Notes\n\n`);
-
-        for (let i = 0; i < unorganizedResults.length; i += BATCH_SIZE) {
-          const batch = unorganizedResults.slice(i, i + BATCH_SIZE);
-
-          // Update progress
-          toast.message = formatProgressMessage(processedCount, successResults.length);
-
-          // Fetch batch in parallel
-          const batchTranscripts = await Promise.all(batch.map(formatTranscript));
-
-          // Add to combined result
-          transcriptParts.push(...batchTranscripts);
-          processedCount += batch.length;
-
-          // Dynamic pause for cleanup
-          if (i + BATCH_SIZE < unorganizedResults.length) {
-            const pauseTime = Math.max(50, Math.min(200, BATCH_SIZE * 10));
-            await new Promise((resolve) => setTimeout(resolve, pauseTime));
-          }
-        }
-      }
-
-      const combined = transcriptParts.join("\n");
-      await Clipboard.copy(combined);
-
-      toast.style = Toast.Style.Success;
-      toast.title = "All transcripts copied!";
-      toast.message = `${successResults.length} transcripts combined (${Math.round(combined.length / 1000)}k chars)`;
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to copy transcripts";
-      toast.message = String(error);
-    }
-  };
-
-  const exportTranscriptsToZip = async () => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Exporting transcripts to zip",
-      message: `Processing ${successResults.length} transcripts...`,
-    });
-
-    try {
-      // Use shared ExportService for batch processing
-      const { tempDir } = await ExportService.processBatchExport(
-        successResults,
-        async (result) => {
-          // Get full transcript
-          const transcript = await getTranscript(result.id);
-
-          // Find the note data for metadata
-          const note = notes.find((n: Doc) => n.id === result.id);
-          const createdDate = note ? new Date(note.created_at).toLocaleDateString() : "Unknown";
-          const source = note?.creation_source || "Unknown";
-
-          // Format transcript content
-          const transcriptContent = `# ${result.title || "Untitled"}
-
-## Transcript
-
-${transcript}
-
----
-
-*Exported from Granola on ${new Date().toLocaleString()}*  
-**Created:** ${createdDate} | **Source:** ${source}
-`;
-
-          const safeTitle = sanitizeFileName(result.title || "Untitled");
-          const fileName = `${safeTitle}_${result.id.substring(0, 8)}.md`;
-
-          return {
-            content: transcriptContent,
-            fileName,
-          };
-        },
-        {
-          maxItems: 500,
-          filePrefix: "granola_transcripts",
-          includeOrganization: true,
-        },
-        (processed, total, eta) => {
-          toast.message = `${processed}/${total} (${Math.round((processed / total) * 100)}%) - ETA: ${eta}`;
-        },
-      );
-
-      // Create and download zip
-      const zipFileName = createExportFilename("granola_transcripts");
-      await ExportService.createAndDownloadZip(tempDir, zipFileName);
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Export failed";
-      toast.message = error instanceof Error ? error.message : String(error);
-    }
-  };
-
-  return (
-    <List
-      navigationTitle={`Transcript Results (${successResults.length}/${results.length} successful)`}
-      searchBarPlaceholder="Search transcript results..."
-      actions={
-        <ActionPanel>
-          {successResults.length > 0 && (
-            <>
-              <Action
-                title="Export All to Zip"
-                icon={Icon.ArrowDown}
-                onAction={exportTranscriptsToZip}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-              />
-              <Action
-                title="Copy All Successful Transcripts"
-                icon={Icon.CopyClipboard}
-                onAction={generateCombinedTranscript}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
-            </>
-          )}
-          <Action
-            title="Back to Note Selection"
-            icon={Icon.ArrowLeft}
-            onAction={onBackToSelection}
-            shortcut={{ modifiers: ["cmd"], key: "b" }}
-          />
-        </ActionPanel>
-      }
-    >
-      {pendingResults.length > 0 && (
-        <List.Section title="Processing...">
-          {pendingResults.map((result) => (
-            <List.Item
-              key={result.noteId}
-              title={result.title}
-              icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
-              accessories={[{ text: "Processing..." }]}
-            />
-          ))}
-        </List.Section>
-      )}
-
-      {successResults.length > 0 && (
-        <List.Section title={`Successful (${successResults.length})`}>
-          {successResults.map((result) => {
-            const note = notes.find((n) => n.id === result.noteId);
-            const folderNames =
-              (result.folderNames && result.folderNames.length > 0
-                ? result.folderNames
-                : docToFolderNames[result.noteId]) || [];
-
-            const accessories = [];
-
-            if (folderNames.length > 0) {
-              accessories.push({
-                text: folderNames.join(", "),
-                icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
-              });
-            }
-
-            if (note) {
-              accessories.push({ date: new Date(note.created_at) });
-            }
-
-            accessories.push({ text: `${result.transcriptLength || 0} characters` });
-
-            return (
-              <List.Item
-                key={result.noteId}
-                title={result.title}
-                icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-                accessories={accessories}
-                actions={
-                  <ActionPanel>
-                    <Action title="View Transcript" icon={Icon.Eye} onAction={() => setSelectedResult(result)} />
-                    <Action
-                      title="Copy This Transcript"
-                      icon={Icon.CopyClipboard}
-                      onAction={async () => {
-                        // Show immediate feedback
-                        const toast = await showToast({
-                          style: Toast.Style.Animated,
-                          title: "Copying...",
-                        });
-                        try {
-                          // Fetch and copy in parallel with toast update
-                          const [transcript] = await Promise.all([
-                            getTranscript(result.noteId),
-                            new Promise((resolve) => setTimeout(resolve, 100)), // Min toast display time
-                          ]);
-
-                          await Clipboard.copy(transcript);
-                          toast.style = Toast.Style.Success;
-                          toast.title = "Copied!";
-                          toast.message = `${Math.round(transcript.length / 1000)}k characters`;
-                        } catch (error) {
-                          toast.style = Toast.Style.Failure;
-                          toast.title = "Copy failed";
-                          toast.message = String(error);
-                        }
-                      }}
-                    />
-                    <ActionPanel.Section>
-                      {successResults.length > 0 && (
-                        <>
-                          <Action
-                            title="Export All to Zip"
-                            icon={Icon.ArrowDown}
-                            onAction={exportTranscriptsToZip}
-                            shortcut={{ modifiers: ["cmd"], key: "e" }}
-                          />
-                          <Action
-                            title="Copy All Successful Transcripts"
-                            icon={Icon.CopyClipboard}
-                            onAction={generateCombinedTranscript}
-                            shortcut={{ modifiers: ["cmd"], key: "c" }}
-                          />
-                        </>
-                      )}
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
-        </List.Section>
-      )}
-
-      {errorResults.length > 0 && (
-        <List.Section title={`Failed (${errorResults.length})`}>
-          {errorResults.map((result) => {
-            const note = notes.find((n) => n.id === result.noteId);
-            const folderNames =
-              (result.folderNames && result.folderNames.length > 0
-                ? result.folderNames
-                : docToFolderNames[result.noteId]) || [];
-
-            const accessories = [];
-
-            if (folderNames.length > 0) {
-              accessories.push({
-                text: folderNames.join(", "),
-                icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
-              });
-            }
-
-            if (note) {
-              accessories.push({ date: new Date(note.created_at) });
-            }
-
-            accessories.push({ text: "Failed" });
-
-            return (
-              <List.Item
-                key={result.noteId}
-                title={result.title}
-                icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                accessories={accessories}
-                actions={
-                  <ActionPanel>
-                    <Action title="View Error" icon={Icon.ExclamationMark} onAction={() => setSelectedResult(result)} />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
-        </List.Section>
-      )}
     </List>
   );
 }
@@ -1120,7 +728,7 @@ function BulkNotionResults({
               onAction={() => {
                 const firstSuccess = successResults[0];
                 if (firstSuccess?.pageUrl) {
-                  exec(`open "${firstSuccess.pageUrl}"`);
+                  open(firstSuccess.pageUrl);
                 }
               }}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
@@ -1163,7 +771,7 @@ function BulkNotionResults({
                     icon={Icon.Globe}
                     onAction={() => {
                       if (result.pageUrl) {
-                        exec(`open "${result.pageUrl}"`);
+                        open(result.pageUrl);
                       }
                     }}
                   />
@@ -1213,94 +821,5 @@ function BulkNotionResults({
         </List.Section>
       )}
     </List>
-  );
-}
-
-function IndividualTranscriptView({
-  result,
-  onBackToResults,
-}: {
-  result: BulkTranscriptResult;
-  onBackToResults: () => void;
-}) {
-  const [transcript, setTranscript] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>("");
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchTranscript = async () => {
-      if (result.status !== "success") {
-        if (isMounted) {
-          setTranscript("");
-          setError(result.error || "Failed to retrieve transcript");
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        const fullTranscript = await getTranscript(result.noteId);
-        if (isMounted) {
-          setTranscript(fullTranscript);
-          setError("");
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(String(err));
-          setTranscript("");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchTranscript();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [result.noteId, result.status]);
-
-  const markdownContent = isLoading
-    ? `# ${result.title}\n\nLoading transcript...`
-    : error
-      ? `# ${result.title}\n\nError: ${error}`
-      : `# ${result.title}
-
-## Transcript
-
-${transcript}
-
----
-
-*Exported from Granola on ${new Date().toLocaleString()}*`;
-
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={markdownContent}
-      navigationTitle={`Transcript: ${result.title}`}
-      actions={
-        <ActionPanel>
-          {transcript && (
-            <Action.CopyToClipboard
-              title="Copy Transcript"
-              content={transcript}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
-          )}
-          <Action
-            title="Back to Results"
-            icon={Icon.ArrowLeft}
-            onAction={onBackToResults}
-            shortcut={{ modifiers: ["cmd"], key: "b" }}
-          />
-        </ActionPanel>
-      }
-    />
   );
 }

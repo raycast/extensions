@@ -12,7 +12,7 @@ import {
 import { CreateReminderForm } from "../create-reminder";
 import { getPriorityIcon } from "../helpers";
 import { Priority, Reminder, List as TList } from "../hooks/useData";
-import useLocations, { Location } from "../hooks/useLocations";
+import useLocations, { Location, resolveLocationIcon } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
 
 import EditReminder from "./EditReminder";
@@ -247,7 +247,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
             <Action
               key={location.id}
               title={location.name}
-              icon={location.icon}
+              icon={resolveLocationIcon(location.icon)}
               onAction={() => setReminderLocation(location)}
             />
           ))}
