@@ -88,6 +88,7 @@ export default function PortScanner() {
   if (openPorts) {
     return (
       <List isLoading={loading} navigationTitle="Open Ports">
+        {openPorts.length < 1 && <List.EmptyView title="No ports found" />}
         {openPorts.map((port) => (
           <List.Item key={port} title={`Port ${port}`} />
         ))}
