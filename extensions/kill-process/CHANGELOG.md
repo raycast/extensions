@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Windows Fix] - 2026-01-09
+## [Windows Fix] - {PR_MERGE_DATE}
 
  - Fix powershell command on Windows by adding -NoProfile
 
