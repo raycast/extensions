@@ -35,12 +35,21 @@
   ],
   "preferences": [
     {
+      "name": "rewriteArticleTitles",
+      "title": "Rewrite Article Titles",
+      "description": "Generate concise, easy-to-read titles (requires Raycast AI).",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "enableAISummary",
       "title": "Automatically Generate Summaries",
       "description": "Automatically summarize articles (requires Raycast AI).",
       "type": "checkbox",
       "label": "Enable",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -52,6 +61,7 @@
       "required": false,
       "data": [
         { "title": "Overview", "value": "overview" },
+        { "title": "Raycast-style Summary", "value": "raycast-style" },
         { "title": "Arc-style Summary", "value": "arc-style" },
         { "title": "Opposing Sides", "value": "opposite-sides" },
         { "title": "The 5 Ws", "value": "five-ws" },

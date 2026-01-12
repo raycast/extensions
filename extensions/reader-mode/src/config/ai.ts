@@ -17,6 +17,10 @@ export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
     model: AI.Model["OpenAI_GPT-5_nano"],
     creativity: "low",
   },
+  "raycast-style": {
+    model: AI.Model["OpenAI_GPT-5_nano"],
+    creativity: "low",
+  },
   "opposite-sides": {
     model: AI.Model["OpenAI_GPT-5_nano"],
     creativity: "low",

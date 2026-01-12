@@ -5,6 +5,7 @@ This document describes how to configure and customize the Reader extension's AI
 ## Overview
 
 Reader uses a modular configuration system for AI-powered summaries, allowing fine-tuned control over:
+
 - Which AI model handles each summary style
 - Creativity/temperature levels per style
 - Prompt templates and formatting
@@ -32,8 +33,9 @@ export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig>
 ### Current Configuration
 
 | Summary Style | Model | Creativity | Rationale |
-|--------------|-------|------------|-----------|
+| ------------- | ------- | ---------- | ----------- |
 | **Overview** | GPT-5 nano | Low | Factual summary requires consistency |
+| **Raycast-style** | GPT-5 nano | Low | Matches Raycast's native summary format |
 | **Opposing Sides** | GPT-5 nano | Low | Analytical comparison benefits from precision |
 | **The 5 Ws** | GPT-5 nano | Low | Structured extraction needs accuracy |
 | **ELI5** | GPT-5 nano | Medium | Simplified explanations allow more flexibility |
@@ -44,7 +46,7 @@ export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig>
 ### Creativity Levels
 
 | Level | When to Use | Example Styles |
-|-------|-------------|----------------|
+| ------- | ------------- | -------------- |
 | **None** | Deterministic output required | (Not currently used) |
 | **Low** | Factual, consistent summaries | Overview, 5 Ws, Entities |
 | **Medium** | Balance creativity and accuracy | ELI5 |
@@ -69,6 +71,7 @@ export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
 ```
 
 Available models (from `@raycast/api`):
+
 - `AI.Model["OpenAI_GPT-5_nano"]` — Fast, efficient
 - `AI.Model["OpenAI_GPT-5"]` — Balanced quality/speed
 - `AI.Model["Anthropic_Claude_Sonnet"]` — High quality
@@ -125,6 +128,7 @@ Format your response EXACTLY like this:
 ```
 
 **Key elements:**
+
 - Clear, specific instructions
 - Explicit formatting requirements
 - Example output structure
@@ -151,6 +155,7 @@ Keep it friendly and make it 2-3 short paragraphs.`,
 ### Adding a New Summary Style
 
 1. **Add the type** to `src/types/summary.ts`:
+
 ```typescript
 export type SummaryStyle =
   | "overview"
@@ -158,7 +163,8 @@ export type SummaryStyle =
   | ...;
 ```
 
-2. **Add AI config** in `src/config/ai.ts`:
+1. **Add AI config** in `src/config/ai.ts`:
+
 ```typescript
 export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
   "my-new-style": {
@@ -169,7 +175,8 @@ export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
 };
 ```
 
-3. **Add prompt config** in `src/config/prompts.ts`:
+1. **Add prompt config** in `src/config/prompts.ts`:
+
 ```typescript
 export const SUMMARY_PROMPTS: Record<SummaryStyle, PromptConfig> = {
   "my-new-style": {
@@ -182,7 +189,8 @@ Your instructions here...`,
 };
 ```
 
-4. **Add to preferences** in `package.json`:
+1. **Add to preferences** in `package.json`:
+
 ```json
 {
   "name": "defaultSummaryStyle",
@@ -193,7 +201,8 @@ Your instructions here...`,
 }
 ```
 
-5. **Add action** in `src/actions/ArticleActions.tsx`:
+1. **Add action** in `src/actions/ArticleActions.tsx`:
+
 ```typescript
 <ActionPanel.Section title="Summary Styles">
   <Action
@@ -211,12 +220,14 @@ Your instructions here...`,
 ## Summary Style Details
 
 ### Overview
+
 **Purpose:** Quick, scannable summary
 **Format:** One-liner + 3 bullets
 **Best for:** News, blog posts, general articles
 
 **Output example:**
-```
+
+```text
 Article discusses the impact of AI on creative work.
 
 - AI tools are automating routine creative tasks
@@ -225,24 +236,28 @@ Article discusses the impact of AI on creative work.
 ```
 
 ### Opposing Sides
+
 **Purpose:** Balanced perspective analysis
 **Format:** Two contrasting viewpoints
 **Best for:** Opinion pieces, debates, controversial topics
 
 **Output example:**
-```
+
+```text
 **Perspective A:** AI will democratize creativity by giving everyone access to professional-level tools.
 
 **Perspective B:** AI threatens to devalue human creativity and eliminate jobs for artists and writers.
 ```
 
 ### The 5 Ws
+
 **Purpose:** Structured factual breakdown
 **Format:** Who, What, Where, When, Why
 **Best for:** News stories, event coverage
 
 **Output example:**
-```
+
+```text
 - **Who:** OpenAI researchers
 - **What:** Released GPT-5 with improved reasoning
 - **Where:** San Francisco headquarters
@@ -251,28 +266,33 @@ Article discusses the impact of AI on creative work.
 ```
 
 ### Explain Like I'm 5
+
 **Purpose:** Simplified explanation
 **Format:** 2-3 friendly paragraphs
 **Best for:** Technical content, complex topics
 
 **Output example:**
-```
+
+```text
 Imagine your brain is like a big library full of books. AI is like a robot that can read ALL the books super fast and help you find the right answers when you ask questions.
 
 Sometimes people worry the robot might take over the library. But really, the robot is just a helper that makes it easier for everyone to learn new things!
 ```
 
 ### Translated Overview
+
 **Purpose:** Overview in another language
 **Format:** One-liner + 3 bullets in target language
 **Best for:** Language learning, international readers
 
 **Options:**
+
 - Language (20 supported languages)
 - Level: beginner, intermediate, advanced (currently unused but available)
 
 **Output example (Spanish):**
-```
+
+```text
 La inteligencia artificial está transformando el trabajo creativo.
 
 - Las herramientas de IA automatizan tareas creativas rutinarias
@@ -281,12 +301,14 @@ La inteligencia artificial está transformando el trabajo creativo.
 ```
 
 ### People, Places & Things
+
 **Purpose:** Entity extraction with context
 **Format:** Categorized lists with descriptions
 **Best for:** Articles with many named entities
 
 **Output example:**
-```
+
+```text
 **People:**
 - **Sam Altman:** CEO of OpenAI, announced the new model
 - **Demis Hassabis:** Google DeepMind CEO, commented on competition
@@ -300,12 +322,32 @@ La inteligencia artificial está transformando el trabajo creativo.
 - **API:** Programming interface for developers to access the model
 ```
 
+### Raycast-style Summary
+
+**Purpose:** Match Raycast's native summary format
+**Format:** 1-2 sentence summary + 3 key takeaways
+**Best for:** Consistent experience with Raycast's built-in summarization
+
+**Output example:**
+
+```text
+Ben Thompson critiques Apple's approach to Vision Pro content, arguing that the company fundamentally misunderstands the device's unique potential for immersive experiences.
+
+### Key Takeaways
+
+- The Vision Pro's true value lies in creating a sense of "presence" that traditional TV production techniques destroy
+- Apple continues to produce Vision Pro content using conventional TV broadcasting methods
+- The ideal Vision Pro sports experience would be a single, uninterrupted camera view
+```
+
 ### Arc-style Summary
+
 **Purpose:** Detailed, fact-specific summary
 **Format:** 4-7 bullet points with specifics
 **Best for:** Long articles needing comprehensive summaries
 
 **Characteristics:**
+
 - Captures author's tone and perspective
 - Includes specific details (prices, dates, numbers)
 - Fact-filled and concrete
@@ -313,7 +355,8 @@ La inteligencia artificial está transformando el trabajo creativo.
 - Special handling for recipes and restaurants
 
 **Output example:**
-```
+
+```text
 - OpenAI released GPT-5 on January 15, 2026, priced at $0.03/1K tokens for input
 - The model shows 89% accuracy on mathematical reasoning benchmarks, up from 73% in GPT-4
 - Available through API access with waitlist expected to clear by February 2026
@@ -332,7 +375,7 @@ La inteligencia artificial está transformando el trabajo creativo.
 20 languages are currently supported for Translated Overview:
 
 | Language | Code | Flag |
-|----------|------|------|
+| ---------- | ------ | ------ |
 | Spanish | es-ES | 🇪🇸 |
 | French | fr-FR | 🇫🇷 |
 | German | de-DE | 🇩🇪 |
@@ -371,6 +414,7 @@ This ensures the AI receives clear instructions like "translate into Spanish" ra
 ### Adding New Languages
 
 1. **Add to preferences** in `package.json`:
+
 ```json
 {
   "name": "translationLanguage",
@@ -381,13 +425,56 @@ This ensures the AI receives clear instructions like "translate into Spanish" ra
 }
 ```
 
-2. **Add to language mapping** in `src/config/prompts.ts`:
+1. **Add to language mapping** in `src/config/prompts.ts`:
+
 ```typescript
 const LANGUAGE_NAMES: Record<string, string> = {
   "sw-KE": "Swahili",
   // ...
 };
 ```
+
+---
+
+## Title Rewriting
+
+**File:** `src/config/prompts.ts`
+
+Reader can optionally rewrite article titles using AI to make them more concise and readable.
+
+### Configuration
+
+Enable via preferences:
+
+- **Rewrite Article Titles** — Uses GPT-5 nano to generate cleaner titles
+
+### How It Works
+
+1. When an article loads, if the preference is enabled and AI is available
+2. Checks cache for previously rewritten title
+3. If not cached, calls `AI.ask()` with a simple prompt to rewrite the title
+4. Caches and uses the rewritten title everywhere (header, navigation, copy actions)
+
+### Prompt
+
+```text
+Rewrite this article title to be concise and easy-to-read.
+
+Rules:
+- Keep it short and clear
+- Preserve the core meaning
+- Remove unnecessary words, filler, or clickbait
+- Do not add quotes around the title
+- Output ONLY the rewritten title, nothing else
+```
+
+### Caching
+
+Rewritten titles are cached per URL in LocalStorage:
+
+- Key format: `title:{url_hash}`
+- One title per URL (no style variants)
+- Cached indefinitely
 
 ---
 
@@ -404,6 +491,7 @@ Summaries are cached in LocalStorage to avoid regenerating identical requests.
 ```
 
 **Examples:**
+
 - `summary:https://example.com:overview:default`
 - `summary:https://example.com:translated:es-ES`
 
@@ -471,6 +559,7 @@ The extension uses Raycast's `useAI` hook with streaming enabled:
 - Final summary cached when done
 
 **Metrics tracked:**
+
 - Generation time (logged in milliseconds)
 - Estimated tokens (length / 4)
 - Success/failure status

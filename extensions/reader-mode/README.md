@@ -14,7 +14,7 @@
 
 _Read the web distraction-free in Raycast._
 
-Read web articles distraction-free with AI summaries. Extracts clean content, removes ads and clutter, offers 7 summary styles (Overview, ELI5, Translated, etc.), bypasses paywalls via archives, and handles blocked pages with browser extension fallback.
+Read web articles distraction-free with AI summaries. Extracts clean content, removes ads and clutter, offers 8 summary styles (Overview, Raycast-style, ELI5, Translated, etc.), bypasses paywalls via archives, and handles blocked pages with browser extension fallback.
 
 ## Quick Start
 
@@ -38,6 +38,7 @@ Read web articles distraction-free with AI summaries. Extracts clean content, re
 
 - **Clean Reading Experience** — Extracts article content and removes distractions
 - **AI Summaries** — Multiple summary styles powered by Raycast AI
+- **Rewrite Article Titles** — Optionally use AI to generate concise, easy-to-read titles
 - **Article Images** — Optionally display featured image (toggle in preferences)
 - **Browser Extension Fallback** — Access blocked pages and re-import member-only content via the [Raycast browser extension](https://www.raycast.com/browser-extension)
 - **Smart URL Detection** — Automatically detects URLs from arguments, clipboard, selection, or active browser tab
@@ -45,11 +46,12 @@ Read web articles distraction-free with AI summaries. Extracts clean content, re
 
 ## Summary Styles
 
-Reader Mode offers seven AI-powered summary styles accessible via the action panel:
+Reader Mode offers eight AI-powered summary styles accessible via the action panel:
 
 | Style | Description | Best For |
 | ------- | ------------- | ---------- |
 | **Overview** | One-liner + 3 key bullet points | Quick scanning of news and articles |
+| **Raycast-style Summary** | Brief summary + 3 key takeaways | Matches Raycast's native summary format |
 | **Arc-style Summary** | Detailed, fact-specific summary (4-7 points) | Long articles needing comprehensive summaries |
 | **Opposing Sides** | Two contrasting perspectives | Opinion pieces and debates |
 | **The 5 Ws** | Who, What, Where, When, Why breakdown | News stories and event coverage |

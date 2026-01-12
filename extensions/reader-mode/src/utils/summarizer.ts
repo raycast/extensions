@@ -69,8 +69,5 @@ export function logSummaryError(style: SummaryStyle, error: string, durationMs?:
  */
 export function formatSummaryBlock(summary: string, style: SummaryStyle): string {
   const styleLabel = getStyleLabel(style);
-  return `> **${styleLabel}**\n>\n${summary
-    .split("\n")
-    .map((line) => `> ${line}`)
-    .join("\n")}`;
+  return `**${styleLabel}**\n\n${summary}`;
 }

@@ -241,7 +241,8 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
     /^(.*\.)?theverge\.com$/i,
     {
       name: "TheVerge",
-      articleSelector: ".duet--article--article-body-component",
+      articleSelector:
+        ".duet--article--article-body-component, .duet--page-layout--standard-article, .duet--layout--entry-body-container",
       removeSelectors: [".duet--ad--ad-wrapper", ".duet--recirculation--related-list"],
     },
   ],

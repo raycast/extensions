@@ -10,6 +10,7 @@ import {
 import { BrowserTab } from "./types/browser";
 import { SummaryStyle } from "./types/summary";
 import { getStyleLabel, buildSummaryPrompt, logSummarySuccess, logSummaryError } from "./utils/summarizer";
+import { rewriteArticleTitle } from "./config/prompts";
 import { getCachedSummary, setCachedSummary } from "./utils/summaryCache";
 import { getAIConfigForStyle } from "./config/ai";
 import { resolveUrl, isValidUrl } from "./utils/url-resolver";
@@ -177,21 +178,29 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
     async (result: Awaited<ReturnType<typeof loadArticleFromUrl>>) => {
       clearStatusToast();
       if (result.status === "success") {
-        setArticle(result.article);
+        const articleToSet = result.article;
+
+        // Rewrite title if preference enabled and AI available
+        if (preferences.rewriteArticleTitles && canAccessAI) {
+          const rewrittenTitle = await rewriteArticleTitle(articleToSet.title, articleToSet.url);
+          articleToSet.title = rewrittenTitle;
+        }
+
+        setArticle(articleToSet);
         setBlockedUrl(null);
         setNotReadableUrl(null);
         setEmptyContentUrl(null);
         setError(null);
 
         // Show toast when article was retrieved via Paywall Hopper
-        if (result.article.archiveSource) {
+        if (articleToSet.archiveSource) {
           const sourceLabels: Record<string, string> = {
             googlebot: "Googlebot bypass",
             "archive.is": "archive.is",
             wayback: "Wayback Machine",
             browser: "browser tab",
           };
-          const label = sourceLabels[result.article.archiveSource.service] || result.article.archiveSource.service;
+          const label = sourceLabels[articleToSet.archiveSource.service] || articleToSet.archiveSource.service;
           await showToast({
             style: Toast.Style.Success,
             title: "Paywall bypassed",
@@ -214,7 +223,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
       }
       setIsLoading(false);
     },
-    [clearStatusToast],
+    [clearStatusToast, preferences.rewriteArticleTitles, canAccessAI],
   );
 
   // Initial article load

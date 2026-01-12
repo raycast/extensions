@@ -1,7 +1,15 @@
 /**
  * Summary style types for article summarization
  */
-export type SummaryStyle = "overview" | "opposite-sides" | "five-ws" | "eli5" | "translated" | "entities" | "arc-style";
+export type SummaryStyle =
+  | "overview"
+  | "opposite-sides"
+  | "five-ws"
+  | "eli5"
+  | "translated"
+  | "entities"
+  | "arc-style"
+  | "raycast-style";
 
 /**
  * Supported languages for translation (BCP 47 locale codes)

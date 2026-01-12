@@ -5,6 +5,7 @@ import { getStyleLabel } from "../utils/summarizer";
 
 export const SUMMARY_STYLES: { style: SummaryStyle; icon: Icon }[] = [
   { style: "overview", icon: Icon.List },
+  { style: "raycast-style", icon: Icon.RaycastLogoPos },
   { style: "arc-style", icon: Icon.Stars },
   { style: "opposite-sides", icon: Icon.Switch },
   { style: "five-ws", icon: Icon.QuestionMark },
