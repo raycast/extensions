@@ -1,5 +1,11 @@
 # Apple Reminders Changelog
 
+## [Simplify AI schema for locations] - 2026-01-09
+
+- Constrain location icons to a small string enum and map back to Raycast icons to reduce AI tool schema branching (Gemini 2.5 fix)
+- Tighten proximity/icon enums for the location tool while keeping legacy values falling back to default icons
+- Resolves: [apple-reminders] Apple Reminders Extension Fails with Gemini 2.5 Pro #20635
+
 ## [Fix Day Grouping option displays duplicate days] - 2025-11-30
 
 - Fix an issue where enabling `Use Time of Day Grouping` would cause duplicate day sections to appear in the `My Reminders` view (Today and Scheduled)

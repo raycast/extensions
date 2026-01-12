@@ -268,7 +268,7 @@
     }
   ],
   "ai": {
-    "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
+    "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Always include a calendar date in dueDate; time-only values (e.g., \"10:00:00\") are invalid. If the user mentions a day or recurrence (e.g., \"every Sunday at 10\"), pick the next occurrence and provide an ISO date/time.\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
     "evals": [
       {
         "input": "@apple-reminders Walk the dog tomorrow at 8am",
