@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Add action to open attached URL] - {PR_MERGE_DATE}
+
+- Detect the first URL in reminder notes (or Reminder URL when available) and expose an “Open Attached URL” action in the list and menu bar.
+
 ## [Simplify AI schema for locations] - 2026-01-09
 
 - Constrain location icons to a small string enum and map back to Raycast icons to reduce AI tool schema branching (Gemini 2.5 fix)

@@ -215,6 +215,9 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         icon={{ fileIcon: "/System/Applications/Reminders.app" }}
         application="com.apple.reminders"
       />
+      {reminder.attachedUrl ? (
+        <Action.Open title="Open Attached URL" target={reminder.attachedUrl} icon={Icon.Link} />
+      ) : null}
 
       <ActionPanel.Section>
         <Action.Push

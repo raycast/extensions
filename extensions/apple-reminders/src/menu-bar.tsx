@@ -231,6 +231,13 @@ export default function Command() {
                   onAction={() => open(reminder.openUrl, "com.apple.reminders")}
                   icon={{ fileIcon: REMINDERS_FILE_ICON }}
                 />
+                {reminder.attachedUrl ? (
+                  <MenuBarExtra.Item
+                    title="Open Attached URL"
+                    icon={Icon.Link}
+                    onAction={() => open(reminder.attachedUrl!)}
+                  />
+                ) : null}
 
                 <MenuBarExtra.Item
                   title={reminder.isCompleted ? "Mark as Incomplete" : "Mark as Complete"}

@@ -12,6 +12,7 @@ export type Location = {
 export type Reminder = {
   id: string;
   openUrl: string;
+  attachedUrl?: string | null;
   title: string;
   notes: string;
   dueDate: string | null;

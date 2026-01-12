@@ -1,4 +1,5 @@
 import EventKit
+import Foundation
 
 let isoDateFormatter: ISO8601DateFormatter = {
   let formatter = ISO8601DateFormatter()
@@ -221,9 +222,21 @@ extension EKReminder {
       }
     }
 
+    var attachedUrl = self.url?.absoluteString
+
+    if attachedUrl == nil, let notes = self.notes {
+      if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
+        let range = NSRange(notes.startIndex..<notes.endIndex, in: notes)
+        if let match = detector.firstMatch(in: notes, options: [], range: range) {
+          attachedUrl = (notes as NSString).substring(with: match.range)
+        }
+      }
+    }
+
     return Reminder(
       id: self.calendarItemIdentifier,
       openUrl: "x-apple-reminderkit://REMCDReminder/\(self.calendarItemIdentifier)",
+      attachedUrl: attachedUrl,
       title: self.title ?? "", notes: self.notes ?? "", dueDate: dueDateString,
       isCompleted: self.isCompleted, priority: reminderPriority.displayString,
       completionDate: completionDateString, isRecurring: isRecurring,
