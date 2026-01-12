@@ -77,7 +77,7 @@ export default function PortScanner() {
     return (
       <List isLoading={loading} navigationTitle="Open Ports">
         {openPorts.map((port) => (
-          <List.Item key={port} title={`Porta ${port}`} />
+          <List.Item key={port} title={`Port ${port}`} />
         ))}
       </List>
     );
