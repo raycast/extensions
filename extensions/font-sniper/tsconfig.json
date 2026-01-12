@@ -13,5 +13,5 @@
     "jsx": "react-jsx",
     "outDir": "dist"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }

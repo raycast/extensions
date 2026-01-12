@@ -10,6 +10,7 @@ import {
   Icon,
   Color,
   getPreferenceValues,
+  BrowserExtension,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { homedir } from "os";
@@ -18,15 +19,6 @@ import { FontInfo, FontFormat } from "./types";
 import { extractFonts, checkFontAccessibility } from "./utils/fontExtractor";
 import { downloadFont, downloadFonts } from "./utils/downloader";
 import { isValidUrl, getDomain } from "./utils/urlHelpers";
-
-interface Preferences {
-  showWoff2: boolean;
-  showWoff: boolean;
-  showTtf: boolean;
-  showOtf: boolean;
-  showEot: boolean;
-  convertWoff2ToTtf: boolean;
-}
 
 type ViewState = "form" | "loading" | "list";
 
@@ -125,36 +117,39 @@ export default function ExtractFonts() {
 
   // Try to prefill URL from clipboard on mount
   useEffect(() => {
+    let isMounted = true;
+
     async function prefillUrl() {
       try {
         // Try Browser Extension first (optional)
-        try {
-          const BrowserExtension = await import("@raycast/api").then(
-            (m) => m.BrowserExtension,
-          );
-          if (BrowserExtension) {
-            const tabs = await BrowserExtension.getTabs();
-            const activeTab = tabs.find((tab) => tab.active);
-            if (activeTab?.url && isValidUrl(activeTab.url)) {
-              setUrl(activeTab.url);
-              return;
-            }
+        if (BrowserExtension) {
+          const tabs = await BrowserExtension.getTabs();
+          const activeTab = tabs.find((tab) => tab.active);
+          if (activeTab?.url && isValidUrl(activeTab.url)) {
+            if (isMounted) setUrl(activeTab.url);
+            return;
           }
-        } catch {
-          // Browser Extension not available, fall through to clipboard
         }
+      } catch {
+        // Browser Extension not available, fall through to clipboard
+      }
 
+      try {
         // Fallback to clipboard
         const clipboardText = await Clipboard.readText();
         if (clipboardText && isValidUrl(clipboardText)) {
-          setUrl(clipboardText);
+          if (isMounted) setUrl(clipboardText);
         }
       } catch {
-        // Ignore errors
+        // Ignore clipboard errors
       }
     }
 
     prefillUrl();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   async function handleSubmit(values: {

@@ -74,15 +74,16 @@ export async function downloadFont(
     let filePath = join(destFolder, filename);
 
     // Handle filename conflicts by adding a number suffix
+    // Preserve the full filename structure (family-weight-style) when adding suffix
+    const ext = getExtension(outputFormat);
+    const baseNameWithoutExt = filename.replace(/\.[^.]+$/, "");
     let counter = 1;
     let fileExists = true;
     while (fileExists) {
       try {
         await fs.access(filePath);
         // File exists, try next number
-        const ext = getExtension(outputFormat);
-        const baseName = sanitizeFilename(font.family);
-        filePath = join(destFolder, `${baseName}_${counter}${ext}`);
+        filePath = join(destFolder, `${baseNameWithoutExt}_${counter}${ext}`);
         counter++;
       } catch {
         // File doesn't exist, we can use this path
@@ -115,7 +116,13 @@ export async function downloadFont(
 
     // Convert WOFF2 to TTF if enabled
     if (shouldConvert) {
-      data = await decompressWoff2(data);
+      try {
+        data = await decompressWoff2(data);
+      } catch (conversionError) {
+        throw new Error(
+          `WOFF2 to TTF conversion failed: ${conversionError instanceof Error ? conversionError.message : "Unknown conversion error"}`,
+        );
+      }
     }
 
     await fs.writeFile(filePath, data);

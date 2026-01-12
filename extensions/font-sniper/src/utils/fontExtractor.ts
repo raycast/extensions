@@ -237,14 +237,77 @@ function extractFontFamiliesFromValue(value: string): string[] {
   return families;
 }
 
+// Extract @font-face blocks using a brace-counting parser (ReDoS-safe)
+function extractFontFaceBlocks(css: string): string[] {
+  const blocks: string[] = [];
+  const fontFaceStart = /@font-face\s*\{/gi;
+  let match;
+
+  while ((match = fontFaceStart.exec(css)) !== null) {
+    const startIndex = match.index + match[0].length;
+    let braceCount = 1;
+    let endIndex = startIndex;
+
+    // Limit parsing to prevent infinite loops on malformed CSS
+    const maxLength = Math.min(startIndex + 10000, css.length);
+
+    while (braceCount > 0 && endIndex < maxLength) {
+      const char = css[endIndex];
+      if (char === "{") braceCount++;
+      else if (char === "}") braceCount--;
+      endIndex++;
+    }
+
+    if (braceCount === 0) {
+      blocks.push(css.slice(startIndex, endIndex - 1));
+    }
+  }
+
+  return blocks;
+}
+
+// Flatten nested CSS by extracting content from @media, @supports, @layer etc.
+function flattenNestedCSS(css: string): string {
+  let result = css;
+
+  // Extract content from nested at-rules (media queries, supports, layer, etc.)
+  const atRuleStart = /@(?:media|supports|layer|container)[^{]*\{/gi;
+  let match;
+
+  while ((match = atRuleStart.exec(css)) !== null) {
+    const startIndex = match.index + match[0].length;
+    let braceCount = 1;
+    let endIndex = startIndex;
+    const maxLength = Math.min(startIndex + 50000, css.length);
+
+    while (braceCount > 0 && endIndex < maxLength) {
+      const char = css[endIndex];
+      if (char === "{") braceCount++;
+      else if (char === "}") braceCount--;
+      endIndex++;
+    }
+
+    if (braceCount === 0) {
+      // Append the inner content (rules inside the at-rule)
+      result += " " + css.slice(startIndex, endIndex - 1);
+    }
+  }
+
+  return result;
+}
+
 function extractUsedFontFamilies(css: string): Set<string> {
   const families = new Set<string>();
 
-  // Remove @font-face blocks first
-  const cssWithoutFontFace = css.replace(
-    /@font-face\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/gi,
-    "",
-  );
+  // Flatten nested CSS (extract rules from media queries, etc.)
+  const flattenedCSS = flattenNestedCSS(css);
+
+  // Remove @font-face blocks using the safe parser approach
+  const fontFaceBlocks = extractFontFaceBlocks(flattenedCSS);
+  let cssWithoutFontFace = flattenedCSS;
+  for (const block of fontFaceBlocks) {
+    cssWithoutFontFace = cssWithoutFontFace.replace(block, "");
+  }
 
   // Match CSS rules: selector { ... font-family: value; ... }
   // This regex captures: selector(s) { declarations }
@@ -315,14 +378,9 @@ function deduplicateFonts(fonts: FontInfo[]): FontInfo[] {
 
 function parseFontFaceBlocks(css: string, baseUrl: string): FontInfo[] {
   const fonts: FontInfo[] = [];
+  const blocks = extractFontFaceBlocks(css);
 
-  // Match @font-face blocks - handle nested braces and multiline
-  const fontFaceRegex = /@font-face\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/gi;
-  let blockMatch;
-
-  while ((blockMatch = fontFaceRegex.exec(css)) !== null) {
-    const block = blockMatch[1];
-
+  for (const block of blocks) {
     // Extract font-family
     const familyMatch = block.match(
       /font-family\s*:\s*["']?([^"';}\n]+)["']?/i,
@@ -441,9 +499,15 @@ export async function extractFonts(pageUrl: string): Promise<FontInfo[]> {
   }
 
   // Also check inline styles in HTML elements
-  const inlineStyleRegex = /style=["']([^"']+)["']/gi;
+  // Use separate patterns for double-quoted and single-quoted to handle nested quotes
+  const doubleQuotedStyleRegex = /style="([^"]*)"/gi;
+  const singleQuotedStyleRegex = /style='([^']*)'/gi;
   let inlineMatch;
-  while ((inlineMatch = inlineStyleRegex.exec(html)) !== null) {
+  while ((inlineMatch = doubleQuotedStyleRegex.exec(html)) !== null) {
+    const families = extractUsedFontFamilies(inlineMatch[1]);
+    families.forEach((f) => usedFamilies.add(f));
+  }
+  while ((inlineMatch = singleQuotedStyleRegex.exec(html)) !== null) {
     const families = extractUsedFontFamilies(inlineMatch[1]);
     families.forEach((f) => usedFamilies.add(f));
   }

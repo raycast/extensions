@@ -10,6 +10,11 @@ A Raycast extension to identify and download fonts from websites.
 - Filter by format preferences
 - Batch download selected fonts
 
+## Screenshots
+
+![Enter a URL to extract fonts](metadata/font-sniper-1.png)
+![Select fonts to download](metadata/font-sniper-2.png)
+
 ## Disclaimer
 
 FontSniper is a developer utility designed to help designers and developers inspect and access publicly available font assets for testing and research purposes.
