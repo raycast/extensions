@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [JXA Performance Optimization] - {PR_MERGE_DATE}
+## [JXA Performance Optimization] - 2026-01-12
 
 - Reduced JXA fetch times by ~75% using `properties()` batching to minimize Apple Event overhead
 - Removed nested area tags from todo data (tags on containing areas are no longer fetched)
