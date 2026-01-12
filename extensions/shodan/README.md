@@ -1,80 +1,131 @@
-# Shodan extension for Raycast
+# Shodan for Raycast
 
-Search the [Shodan](https://www.shodan.io/) database for internet-connected devices, view detailed host information, and manage saved queries directly from [Raycast](https://www.raycast.com/).
+> Search the world's first search engine for Internet-connected devices, directly from [Raycast](https://www.raycast.com/).
+
+[Shodan](https://www.shodan.io/) indexes servers, webcams, routers, IoT devices, industrial control systems, and more. This extension brings Shodan's powerful reconnaissance capabilities to your fingertips.
 
 ## Features
 
-- **Search Shodan** - Execute powerful Shodan queries with real-time results
-- **Host Lookup** - Get detailed information for any IP address. Starts with free InternetDB lookup, then optionally load full Shodan data
-- **Honeyscore Check** - Verify if an IP is likely a honeypot (available in Host Detail view)
-- **Search History** - Automatically track your recent searches with ability to re-run or save as favorites
-- **Preset Queries** - Browse 75+ pre-built query templates for webcams, industrial systems, databases, and more
-- **Favorite Queries** - Save and organize your most-used search queries
-- **DNS Lookup** - Resolve hostnames and perform reverse DNS lookups
-- **Exploit Search** - Search the Shodan exploit database (requires paid membership)
-- **Network Alerts** - Manage your Shodan network monitoring alerts
-- **Account Info** - View API credits and account status
+### Search & Discovery
+
+- **Search Shodan** — Execute queries with filters, view results with vulnerability indicators
+- **Host Lookup** — Free initial lookup via InternetDB, with optional full Shodan scan
+- **DNS Lookup** — Resolve hostnames, reverse DNS, subdomain enumeration
+- **Exploit Search** — Search Shodan's exploit database (requires membership)
+
+### Organization & History
+
+- **75+ Preset Queries** — Ready-to-use queries across 13 categories
+- **Favorite Queries** — Save and organize your most-used searches
+- **Search History** — Automatic tracking with quick re-run
+
+### Analysis Tools
+
+- **Honeyscore Check** — Detect potential honeypots (0-100% probability)
+- **Vulnerability Display** — CVEs sorted by CVSS severity
+- **Screenshot Detection** — Shows count of available screenshots
+
+### Account Management
+
+- **Network Alerts** — Monitor IPs for changes
+- **Account Info** — Track API credits and plan status
 
 ## Setup
 
-1. Install the extension from the Raycast Store
-2. Get your Shodan API key from [account.shodan.io](https://account.shodan.io)
-3. Enter your API key when prompted (stored securely)
+1. Install from the [Raycast Store](https://www.raycast.com/store)
+2. Get your API key from [account.shodan.io](https://account.shodan.io)
+3. Enter the key when prompted
 
 ## Commands
 
-| Command          | Description                                                            |
-| ---------------- | ---------------------------------------------------------------------- |
-| Search Shodan    | Execute Shodan search queries and browse results                       |
-| Host Lookup      | Look up IP info (free via InternetDB, optional premium Shodan details) |
-| Search History   | View and re-run recent Shodan search queries                           |
-| Preset Queries   | Browse pre-built Shodan query templates                                |
-| Favorite Queries | View and run saved Shodan queries                                      |
-| DNS Lookup       | Resolve hostnames and perform reverse DNS lookups                      |
-| Search Exploits  | Search the Shodan exploit database                                     |
-| Network Alerts   | Manage network monitoring alerts                                       |
-| Account Info     | View API credits and account status                                    |
+| Command          | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| Search Shodan    | Query the Shodan database                         |
+| Host Lookup      | IP information (InternetDB free, Shodan detailed) |
+| Search History   | Re-run recent queries                             |
+| Preset Queries   | Browse 75+ pre-built queries                      |
+| Favorite Queries | Your saved searches                               |
+| DNS Lookup       | DNS resolution & subdomains                       |
+| Search Exploits  | Exploit database search                           |
+| Network Alerts   | Manage IP monitoring                              |
+| Account Info     | View credits & status                             |
 
-## Query Examples
+## Query Syntax
 
-```
-# Find Apache servers
-apache
+```bash
+# Basic search
+apache country:US
 
-# Search by country
-country:US port:22
+# Filter by port and product
+port:22 product:OpenSSH
 
-# Find specific products
-product:nginx
+# Organization search
+org:"Amazon" port:443
 
-# Search by organization
-org:"Google"
-
-# Find vulnerable systems
+# Vulnerability search
 vuln:CVE-2021-44228
+
+# Combined filters
+country:DE city:Berlin port:80 http.title:"Dashboard"
 ```
 
-## Preset Query Categories
+### Common Filters
 
-- **Webcams** - Exposed IP cameras and video streams
-- **Industrial** - SCADA/ICS systems and PLCs
-- **Databases** - MongoDB, Elasticsearch, Redis instances
-- **Network** - Routers, switches, and network devices
-- **Authentication** - Exposed login panels and authentication services
-- **Vulnerabilities** - Known CVEs and security issues
-- **IoT** - Smart home devices and IoT systems
-- **Cloud** - Cloud services and infrastructure
-- **Remote Access** - RDP, VNC, TeamViewer, and SSH services
-- **Storage** - NAS, FTP, and file sharing systems
-- **Home Automation** - Smart home controllers and devices
-- **Printers** - Network-connected printers
-- **Misc** - Game servers, development tools, and other devices
+| Filter                 | Example                            | Description             |
+| ---------------------- | ---------------------------------- | ----------------------- |
+| `port:`                | `port:3389`                        | Search by port number   |
+| `country:`             | `country:IT`                       | Two-letter country code |
+| `city:`                | `city:Rome`                        | City name               |
+| `org:`                 | `org:"Telecom Italia"`             | Organization name       |
+| `product:`             | `product:nginx`                    | Software/product name   |
+| `version:`             | `version:1.19.0`                   | Software version        |
+| `os:`                  | `os:"Windows Server"`              | Operating system        |
+| `hostname:`            | `hostname:example.com`             | Hostname/domain         |
+| `net:`                 | `net:192.168.0.0/24`               | CIDR notation           |
+| `vuln:`                | `vuln:CVE-2023-1234`               | CVE identifier          |
+| `has_screenshot:`      | `has_screenshot:true`              | Has screenshot          |
+| `http.title:`          | `http.title:Login`                 | HTML page title         |
+| `http.status:`         | `http.status:200`                  | HTTP status code        |
+| `ssl:`                 | `ssl:true`                         | Has SSL/TLS             |
+| `ssl.cert.subject.CN:` | `ssl.cert.subject.CN:*.google.com` | SSL certificate CN      |
+
+## Preset Categories
+
+| Category        | Examples                                  |
+| --------------- | ----------------------------------------- |
+| Webcams         | IP cameras, CCTV, video streams           |
+| Industrial      | SCADA, PLCs, Modbus, BACnet               |
+| Databases       | MongoDB, Elasticsearch, Redis, CouchDB    |
+| Network         | Routers, switches, firewalls              |
+| Authentication  | Exposed login panels, default credentials |
+| Vulnerabilities | Log4j, EternalBlue, Heartbleed            |
+| IoT             | Smart devices, sensors, controllers       |
+| Cloud           | AWS, Azure, Kubernetes, Docker            |
+| Remote Access   | RDP, VNC, TeamViewer, SSH                 |
+| Storage         | NAS, FTP, SMB shares                      |
+| Home Automation | Home Assistant, openHAB                   |
+| Printers        | Network printers, print servers           |
+| Misc            | Game servers, dev tools, misc             |
+
+## Keyboard Shortcuts
+
+| Action            | Shortcut |
+| ----------------- | -------- |
+| Copy IP           | `⌘ C`    |
+| Copy as JSON      | `⌘ ⇧ C`  |
+| View on Shodan    | `⌘ O`    |
+| Check Honeyscore  | `⌘ ⇧ H`  |
+| Save to Favorites | `⌘ S`    |
+| Delete            | `⌘ ⌫`    |
+
+**Tip:** Host Lookup uses InternetDB first (free, no credits) before querying Shodan.
 
 ## Credits
 
-Preset queries sourced from [advanced-shodan-requests](https://github.com/s-b-repo/advanced-shodan-requests).
+Preset queries sourced from:
 
-Additional inspiration from [awesome-shodan-queries](https://github.com/jakejarvis/awesome-shodan-queries) by Jake Jarvis.
+- [advanced-shodan-requests](https://github.com/s-b-repo/advanced-shodan-requests)
+- [awesome-shodan-queries](https://github.com/jakejarvis/awesome-shodan-queries)
 
 ## License
 

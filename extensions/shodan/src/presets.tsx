@@ -207,6 +207,11 @@ export default function PresetsCommand() {
       vulnerabilities: Icon.Bug,
       iot: Icon.House,
       cloud: Icon.Cloud,
+      remote: Icon.Desktop,
+      storage: Icon.Folder,
+      home: Icon.House,
+      printers: Icon.Print,
+      misc: Icon.Stars,
     };
     return icons[category];
   };
