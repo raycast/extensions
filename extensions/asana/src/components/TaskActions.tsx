@@ -40,7 +40,14 @@ type MutateParams = {
   rollbackUpdate?: <T extends Task>(task: T) => T;
 };
 
-export default function TaskActions({ task, workspace, isDetail, mutateList, mutateDetail, mutateSubtasks }: TaskActionProps) {
+export default function TaskActions({
+  task,
+  workspace,
+  isDetail,
+  mutateList,
+  mutateDetail,
+  mutateSubtasks,
+}: TaskActionProps) {
   const { pop, push } = useNavigation();
 
   async function mutate({ asyncUpdate, optimisticUpdate, rollbackUpdate }: MutateParams) {
