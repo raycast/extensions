@@ -5,6 +5,7 @@
   "description": "Search for books on Eurobuch and compare prices across multiple platforms",
   "icon": "extension-icon.png",
   "author": "wdeu",
+  "owner": "wdeu-team",
   "license": "MIT",
   "keywords": [
     "books",
@@ -19,7 +20,6 @@
   ],
   "categories": [
     "Productivity",
-    "Finance",
     "Web"
   ],
   "commands": [
@@ -88,29 +88,19 @@
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "@vitest/coverage-v8": "^2.1.9",
-    "@vitest/ui": "^2.1.8",
+    "@raycast/eslint-config": "^2.0.4",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
-    "vitest": "^2.1.8"
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui",
-    "prepublish": "./pre-publish-check.sh",
-    "publish": "npx @raycast/api@latest publish",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+    "publish": "npx @raycast/api@latest publish"
   },
-  
   "$schema": "https://www.raycast.com/schemas/extension.json"
 }
