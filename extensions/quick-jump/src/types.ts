@@ -59,8 +59,3 @@ export interface DisplayUrl {
   tags: string[];
   openIn?: string;
 }
-
-export interface Preferences {
-  jsonFilePath: string;
-  showAllGroupUrls?: boolean;
-}

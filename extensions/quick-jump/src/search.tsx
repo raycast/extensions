@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, useNavigation, Keyboard, getPreferenceValues } from "@raycast/api";
-import { Group, Url, Preferences } from "./types";
+import { Group, Url } from "./types";
 import { URLList } from "./url-list";
 import { useData } from "./use-data";
 import { getDomainKeywords, getTagAccessories, getEnhancedKeywords, combineKeywords, getFallbackIcon } from "./utils";

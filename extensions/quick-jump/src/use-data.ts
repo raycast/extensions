@@ -3,7 +3,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Root, Preferences } from "./types";
+import { Root } from "./types";
 import { ERROR_MESSAGES } from "./constants";
 import { validateConfiguration, ValidationResult } from "./validation";
 import { clearKeywordCache, clearDomainCache } from "./utils";
