@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "go-link-tree",
+  "title": "Go Link Tree",
+  "description": "Quick access to your personal link tree",
+  "icon": "link.png",
+  "author": "mikemajara",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "go",
+      "title": "Go",
+      "description": "Quick jump to links - type 'go' followed by your search",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "configPath",
+      "type": "textfield",
+      "required": true,
+      "title": "Configuration File",
+      "description": "Path to your links configuration file (YAML or JSON)",
+      "placeholder": "~/.config/go-link-tree/links.yaml"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "22.5.0",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

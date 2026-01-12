@@ -1,0 +1,187 @@
+# Example configuration file for Go Link Tree
+# Copy this file to ~/.config/go-link-tree/links.yaml (or your preferred location)
+
+version: 1
+
+# Global settings
+settings:
+  # Default browser for all links (can be overridden per-link)
+  # Use "default" for system default, or specify app name/bundle identifier
+  # Common bundle identifiers:
+  #   - Chrome: com.google.Chrome
+  #   - Brave: com.brave.Browser
+  #   - Firefox: org.mozilla.firefox
+  #   - Safari: com.apple.Safari
+  #   - Arc: company.thebrowser.Browser
+  #   - Edge: com.microsoft.edgemac
+  defaultBrowser: "default"
+
+  # Default browser profile (optional, can be overridden per-link)
+  # For Chrome/Brave/Edge: Use the profile display name (e.g., "Work", "Personal")
+  #   - This is the name you see in the browser's profile switcher
+  #   - Also works with directory names (e.g., "Profile 1", "Default")
+  # For Firefox: Use the profile name from about:profiles
+  # defaultProfile: "Work"
+
+  showFavicons: true
+
+# Link groups (become List.Section)
+groups:
+  - name: work
+    title: "🏢 Work"
+    links:
+      # Auto-detected icons: URLs from popular services get branded icons automatically!
+      - title: "GitHub"
+        url: "https://github.com/myorg"
+        keywords: ["gh", "code", "repos"]
+        # No icon specified - GitHub logo auto-detected via Iconify!
+
+      - title: "Jira Board"
+        url: "https://myorg.atlassian.net/browse/PROJ"
+        keywords: ["tickets", "issues", "bugs"]
+        # Auto-detected: Jira icon
+
+      - title: "Slack"
+        url: "https://myworkspace.slack.com"
+        keywords: ["chat", "messages"]
+        # Auto-detected: Slack icon
+
+      - title: "Notion"
+        url: "https://notion.so/myworkspace"
+        keywords: ["docs", "wiki", "notes"]
+        # Auto-detected: Notion icon
+
+  - name: dev
+    title: "💻 Development"
+    links:
+      - title: "Localhost:3000"
+        url: "http://localhost:3000"
+        keywords: ["local", "dev"]
+        # Auto-detected: Terminal icon for localhost
+
+      - title: "Vercel Dashboard"
+        url: "https://vercel.com/dashboard"
+        keywords: ["deploy", "hosting"]
+        # Auto-detected: Vercel icon
+
+      - title: "Supabase"
+        url: "https://supabase.com/dashboard"
+        keywords: ["database", "backend"]
+        # Auto-detected: Supabase icon
+
+      # Custom Iconify icon example
+      - title: "React Docs"
+        url: "https://react.dev"
+        keywords: ["react", "docs", "frontend"]
+        icon: "iconify:devicon:react-original" # Explicit Iconify icon
+
+  - name: personal
+    title: "🏠 Personal"
+    links:
+      - title: "Gmail"
+        url: "https://mail.google.com"
+        keywords: ["email", "inbox"]
+        # Auto-detected: Gmail icon
+
+      - title: "YouTube"
+        url: "https://youtube.com"
+        keywords: ["video", "watch"]
+        # Auto-detected: YouTube icon
+
+      - title: "Spotify"
+        url: "https://open.spotify.com"
+        keywords: ["music", "playlists"]
+        # Auto-detected: Spotify icon
+
+  - name: browser-specific
+    title: "🌐 Browser & Profile Examples"
+    links:
+      # Per-link application override examples
+      # These will open in the specified browser regardless of defaultBrowser setting
+      # If the specified app isn't installed, falls back to system default
+
+      - title: "Open in Chrome"
+        url: "https://chrome.google.com/webstore"
+        keywords: ["chrome", "extensions"]
+        application: "com.google.Chrome"
+
+      - title: "Open in Brave"
+        url: "https://brave.com"
+        keywords: ["brave", "privacy"]
+        application: "com.brave.Browser"
+
+      - title: "Open in Arc"
+        url: "https://arc.net"
+        keywords: ["arc"]
+        application: "company.thebrowser.Browser"
+
+      - title: "Open in Firefox"
+        url: "https://addons.mozilla.org"
+        keywords: ["firefox", "addons"]
+        application: "org.mozilla.firefox"
+
+      - title: "Open in Safari"
+        url: "https://www.apple.com/safari"
+        keywords: ["safari", "apple"]
+        application: "com.apple.Safari"
+
+      # Profile examples - open links in specific browser profiles
+      # Useful for separating work/personal accounts
+      # Use the profile display name you see in Chrome's profile switcher
+
+      - title: "Work Gmail (Chrome Work Profile)"
+        url: "https://mail.google.com"
+        keywords: ["work", "email", "gmail"]
+        application: "com.google.Chrome"
+        profile: "Work"  # Your profile's display name
+
+      - title: "Personal Gmail (Chrome Personal)"
+        url: "https://mail.google.com"
+        keywords: ["personal", "email", "gmail"]
+        application: "com.google.Chrome"
+        profile: "Personal"  # Or use "Default" for the default profile
+
+      - title: "Work Slack (Brave Work)"
+        url: "https://app.slack.com"
+        keywords: ["work", "slack", "chat"]
+        application: "com.brave.Browser"
+        profile: "Work"
+
+      - title: "Firefox Dev Profile"
+        url: "http://localhost:3000"
+        keywords: ["dev", "local", "firefox"]
+        application: "org.mozilla.firefox"
+        profile: "dev"  # Firefox profile name from about:profiles
+
+  - name: custom-icons
+    title: "🎨 Custom Icon Examples"
+    links:
+      # Iconify format: "iconify:{icon-set}:{icon-name}"
+      # Browse icons at: https://icon-sets.iconify.design/
+
+      - title: "Material Design Icon"
+        url: "https://example.com/mdi"
+        icon: "iconify:mdi:home-circle"
+        keywords: ["example"]
+
+      - title: "Devicon"
+        url: "https://example.com/dev"
+        icon: "iconify:devicon:typescript-original"
+        keywords: ["example"]
+
+      - title: "Simple Icons (brands)"
+        url: "https://example.com/brand"
+        icon: "iconify:simple-icons:raycast"
+        keywords: ["example"]
+
+      # Raycast built-in icons (Icon enum)
+      - title: "Built-in Raycast Icon"
+        url: "https://example.com/builtin"
+        icon: "Globe"
+        keywords: ["example"]
+
+      # SF Symbol
+      - title: "SF Symbol"
+        url: "https://example.com/sf"
+        icon: "sf-symbol:star.fill"
+        keywords: ["example"]
