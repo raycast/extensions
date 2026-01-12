@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import type { FC } from "react";
+import { useEffect, type FC } from "react";
 import { useSelection } from "../hooks/use-selection";
 import type { DiskUsageSend } from "../machines/disk-usage-machine";
 import selectionStore from "../stores/selection-store";
@@ -7,6 +7,7 @@ import type { FileNode } from "../types";
 import { createUsageBar } from "../utils/format";
 import { hasStoredSnapshot } from "../utils/storage";
 import { FolderView } from "./FolderView";
+import { existsSync } from "node:fs";
 
 const FileRow: FC<{
   node: FileNode;
@@ -17,6 +18,13 @@ const FileRow: FC<{
   const selection = useSelection();
   const isSelected = selection.has(node.path);
   const isDeletingThis = isDeleting && isSelected;
+  const isExists = existsSync(node.path);
+
+  useEffect(() => {
+    if (!isExists) {
+      send({ type: "ITEM_MISSING", path: node.path, bytes: node.bytes });
+    }
+  }, [node.path, isExists]);
 
   const isFolderWithContent = hasStoredSnapshot(node.path);
 
