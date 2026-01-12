@@ -23,6 +23,7 @@ vi.mock("node:fs", async () => {
   let mockFileContent = "";
   let mockFileExists = false;
   let mockThrowPermissionError = false;
+  let mockMtimeMs = Date.now();
 
   return {
     ...actual,
@@ -35,9 +36,16 @@ vi.mock("node:fs", async () => {
       }
       return mockFileContent;
     }),
+    statSync: vi.fn(
+      () =>
+        ({
+          mtimeMs: mockMtimeMs,
+        }) as fs.Stats,
+    ),
     __setMockFileContent: (content: string) => {
       mockFileContent = content;
       mockFileExists = true;
+      mockMtimeMs = Date.now(); // Use current time to ensure cache misses
     },
     __setMockFileExists: (exists: boolean) => {
       mockFileExists = exists;
@@ -48,11 +56,12 @@ vi.mock("node:fs", async () => {
   };
 });
 
-import { parseSSHConfig, getHostConfig } from "./sshConfig";
+import { parseSSHConfig, getHostConfig, clearCache } from "./sshConfig";
 
 describe("SSH Config Parser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearCache(); // Clear cache between tests
     (fs as unknown as MockedFS).__setMockFileExists(false);
     (fs as unknown as MockedFS).__setMockPermissionError(false);
   });
@@ -146,9 +155,10 @@ Host server1
     expect(hosts[0].user).toBe("admin");
   });
 
-  it("should throw error for missing config file", () => {
+  it("should return empty array for missing config file", () => {
     (fs as unknown as MockedFS).__setMockFileExists(false);
-    expect(() => parseSSHConfig()).toThrow("SSH config file not found");
+    const hosts = parseSSHConfig();
+    expect(hosts).toEqual([]);
   });
 
   it("should find specific host by alias", () => {

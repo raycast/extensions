@@ -7,6 +7,8 @@ import {
   Toast,
   Icon,
   useNavigation,
+  popToRoot,
+  Clipboard,
 } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import { parseSSHConfig } from "./utils/sshConfig";
@@ -64,7 +66,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search hosts...">
-      {hosts.map((host) => (
+      {hosts.map((host: SSHHostConfig) => (
         <List.Item
           key={host.host}
           title={host.host}
@@ -157,7 +159,7 @@ function RemotePathForm({ hostConfig }: { hostConfig: SSHHostConfig }) {
         title="Remote Path"
         placeholder="~ or /path/to/directory"
         value={remotePath}
-        onChange={(value) => {
+        onChange={(value: string) => {
           setRemotePath(value);
           setRemotePathError(undefined);
         }}
@@ -300,36 +302,70 @@ function RemoteFileList({
                       />
                     }
                   />
-                  <Action.CopyToClipboard
+                  <Action
                     title="Copy Path"
-                    content={
-                      remotePath.endsWith("/")
-                        ? `${remotePath}${file.name}`
-                        : `${remotePath}/${file.name}`
-                    }
+                    icon={Icon.Clipboard}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    onAction={async () => {
+                      const pathToCopy = remotePath.endsWith("/")
+                        ? `${remotePath}${file.name}`
+                        : `${remotePath}/${file.name}`;
+                      await Clipboard.copy(pathToCopy);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Path Copied",
+                        message: "Path copied to clipboard",
+                      });
+                      await popToRoot();
+                    }}
                   />
-                  <Action.CopyToClipboard
+                  <Action
                     title="Copy Name"
-                    content={file.name}
+                    icon={Icon.Clipboard}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onAction={async () => {
+                      await Clipboard.copy(file.name);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Name Copied",
+                        message: "Name copied to clipboard",
+                      });
+                      await popToRoot();
+                    }}
                   />
                 </>
               ) : (
                 <>
-                  <Action.CopyToClipboard
+                  <Action
                     title="Copy Path"
-                    content={
-                      remotePath.endsWith("/")
-                        ? `${remotePath}${file.name}`
-                        : `${remotePath}/${file.name}`
-                    }
+                    icon={Icon.Clipboard}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    onAction={async () => {
+                      const pathToCopy = remotePath.endsWith("/")
+                        ? `${remotePath}${file.name}`
+                        : `${remotePath}/${file.name}`;
+                      await Clipboard.copy(pathToCopy);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Path Copied",
+                        message: "Path copied to clipboard",
+                      });
+                      await popToRoot();
+                    }}
                   />
-                  <Action.CopyToClipboard
+                  <Action
                     title="Copy Name"
-                    content={file.name}
+                    icon={Icon.Clipboard}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onAction={async () => {
+                      await Clipboard.copy(file.name);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Name Copied",
+                        message: "Name copied to clipboard",
+                      });
+                      await popToRoot();
+                    }}
                   />
                 </>
               )}

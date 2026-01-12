@@ -3,6 +3,14 @@ import * as os from "node:os";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+// Cache for parsed SSH config
+interface CacheEntry {
+  hosts: SSHHostConfig[];
+  mtimeMs: number;
+}
+
+let configCache: CacheEntry | null = null;
+
 /**
  * Get the absolute path to the SSH config file
  * @returns The path to ~/.ssh/config
@@ -12,40 +20,18 @@ export function getSSHConfigPath(): string {
 }
 
 /**
- * Parse the SSH config file and extract host configurations
- * @returns Array of SSHHostConfig objects (one per host alias)
- * @throws Error if config file cannot be read
+ * Clear the SSH config cache
  */
-export function parseSSHConfig(): SSHHostConfig[] {
-  const configPath = getSSHConfigPath();
+export function clearCache(): void {
+  configCache = null;
+}
 
-  // Check if file exists
-  if (!fs.existsSync(configPath)) {
-    console.error("SSH config file not found:", configPath);
-    throw new Error(`SSH config file not found at ${configPath}`);
-  }
-
-  // Read the config file
-  let content: string;
-  try {
-    content = fs.readFileSync(configPath, "utf-8");
-  } catch (error) {
-    const nodeError = error as NodeJS.ErrnoException;
-    console.error("Error reading SSH config file:", {
-      code: nodeError.code,
-      message: nodeError.message,
-      path: configPath,
-    });
-
-    if (nodeError.code === "EACCES") {
-      throw new Error("Cannot read SSH config file: permission denied");
-    }
-    if (nodeError.code === "EISDIR") {
-      throw new Error("SSH config path is a directory, not a file");
-    }
-    throw new Error(`Failed to read SSH config file: ${nodeError.message}`);
-  }
-
+/**
+ * Parse SSH config content string and extract host configurations
+ * @param content The SSH config file content
+ * @returns Array of SSHHostConfig objects (one per host alias)
+ */
+export function parseConfigContent(content: string): SSHHostConfig[] {
   const hosts: SSHHostConfig[] = [];
   const lines = content.split("\n");
 
@@ -137,6 +123,54 @@ export function parseSSHConfig(): SSHHostConfig[] {
   }
 
   return hosts;
+}
+
+/**
+ * Parse the SSH config file and extract host configurations
+ * Uses caching based on file modification time
+ * @returns Array of SSHHostConfig objects (one per host alias), or empty array if file doesn't exist or cannot be read
+ */
+export function parseSSHConfig(): SSHHostConfig[] {
+  const configPath = getSSHConfigPath();
+
+  // Check if file exists
+  if (!fs.existsSync(configPath)) {
+    return [];
+  }
+
+  try {
+    // Check file modification time for cache invalidation
+    const stats = fs.statSync(configPath);
+    const mtimeMs = stats.mtimeMs;
+
+    // Return cached result if cache is valid
+    if (configCache && configCache.mtimeMs === mtimeMs) {
+      return configCache.hosts;
+    }
+
+    // Read the config file
+    const content = fs.readFileSync(configPath, "utf-8");
+
+    // Parse the content
+    const hosts = parseConfigContent(content);
+
+    // Update cache
+    configCache = {
+      hosts,
+      mtimeMs,
+    };
+
+    return hosts;
+  } catch (error) {
+    // Handle read errors gracefully - return empty array
+    const nodeError = error as NodeJS.ErrnoException;
+    console.error("Error reading SSH config file:", {
+      code: nodeError.code,
+      message: nodeError.message,
+      path: configPath,
+    });
+    return [];
+  }
 }
 
 /**

@@ -73,7 +73,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search hosts...">
-      {hosts.map((host) => (
+      {hosts.map((host: SSHHostConfig) => (
         <List.Item
           key={host.host}
           title={host.host}
@@ -346,7 +346,7 @@ function RemotePathForm({
         title="Remote Path"
         placeholder="/path/to/remote/destination"
         value={remotePath}
-        onChange={(value) => {
+        onChange={(value: string) => {
           setRemotePath(value);
           setRemotePathError(undefined);
         }}

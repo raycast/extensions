@@ -42,6 +42,7 @@
     "@vitest/ui": "^4.0.17",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
+    "react": "^18.2.0",
     "typescript": "^5.2.2",
     "vitest": "^4.0.17"
   },
