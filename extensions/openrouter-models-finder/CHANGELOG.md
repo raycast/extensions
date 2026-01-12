@@ -1,5 +1,11 @@
 # OpenRouter Models Finder Changelog
 
+## [Add Fuzzy Search] - {PR_MERGE_DATE}
+
+- Multi-term search with space-separated terms (all must match)
+- `useMemo` optimization for filtered results performance
+- Updated dependencies (@raycast/*, eslint, prettier, typescript)
+
 ## [Update README] - 2025-08-22
 
 - Removed redundant parts related to the development environment from the readme document, making the plugin description more concise and readable.
