@@ -1,6 +1,6 @@
 # Terminal Finder Changelog
 
-## [Fix Kitty Casing] - {PR_MERGE_DATE}
+## [Fix Kitty Casing] - 2026-01-12
 
 - Fix "Kitty" terminal not working due to different casing (ref: [Issue #24377](https://github.com/raycast/extensions/issues/24377))
 
