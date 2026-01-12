@@ -1,5 +1,11 @@
 # FileMaker Snippets Changelog
 
+## [FM Clipboard Conversion Commands] - {PR_MERGE_DATE}
+
+- Added two new no-view commands for quick clipboard conversions
+- Convert FM to XML: Reads FileMaker clipboard and copies XML text to clipboard
+- Convert XML to FM: Reads XML from clipboard and writes to FileMaker clipboard for pasting
+
 ## [Fixes] - 2025-10-29
 
 - Fix dynamic fields being overwritten when editing a snippet
