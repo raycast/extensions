@@ -1,6 +1,11 @@
 # Kill Process Changelog
 
-## [Windows Fix] - {PR_MERGE_DATE}
+## [Fixes and Improvements] - {PR_MERGE_DATE}
+
+ - Added shortcut for the **Copy Path** action
+ - Fixed shortcut not displaying on Windows for the **Reload** action
+
+## [Windows Fix] - 2026-01-12
 
  - Fix powershell command on Windows by adding -NoProfile
 
