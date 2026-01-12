@@ -75,4 +75,3 @@ Search for **IPScan** and install it with one click.
 - 🐛 [Report an issue](https://github.com/raycast/extensions/issues/new/choose)
 
 Please follow the **Community Guidelines** and **Extension Guidelines** when contributing or submitting updates.
- 
