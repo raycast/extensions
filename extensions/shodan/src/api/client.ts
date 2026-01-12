@@ -5,6 +5,7 @@ import {
   ApiInfo,
   DnsResolveResponse,
   DnsReverseResponse,
+  InternetDBResponse,
   ShodanAlert,
   ShodanDomainInfo,
   ShodanExploitResponse,
@@ -15,6 +16,7 @@ import {
 
 const SHODAN_API_BASE = "https://api.shodan.io";
 const EXPLOITS_API_BASE = "https://exploits.shodan.io/api";
+const INTERNETDB_API_BASE = "https://internetdb.shodan.io";
 
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
@@ -382,6 +384,25 @@ class ShodanClient {
     return this.request<{ success: boolean }>(`/shodan/alert/${id}`, {
       method: "DELETE",
     });
+  }
+
+  // Honeyscore - check if IP is a honeypot (Labs endpoint)
+  async getHoneyscore(ip: string): Promise<number> {
+    return this.request<number>(`/labs/honeyscore/${ip}`);
+  }
+
+  // InternetDB - free IP lookup (no API key required, no credits consumed)
+  async getInternetDB(ip: string): Promise<InternetDBResponse> {
+    const response = await fetch(`${INTERNETDB_API_BASE}/${ip}`);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("No information available for this IP address.");
+      }
+      throw new Error(`InternetDB request failed: ${response.statusText}`);
+    }
+
+    return response.json();
   }
 
   // Utility to check if API key is valid

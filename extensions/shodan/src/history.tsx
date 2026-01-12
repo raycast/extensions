@@ -1,15 +1,15 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo } from "react";
 import {
   List,
   ActionPanel,
   Action,
   Icon,
-  Form,
   useNavigation,
   Alert,
   confirmAlert,
   Color,
 } from "@raycast/api";
+import { useQueryHistory } from "./hooks/useQueryHistory";
 import { useFavorites } from "./hooks/useFavorites";
 import { useShodanSearch } from "./hooks/useShodanSearch";
 import { HostDetailView } from "./components/HostDetailView";
@@ -21,32 +21,22 @@ import {
 } from "./utils/formatters";
 import { copyAsJSON, copyAsCSV } from "./utils/export";
 import { filterResults } from "./utils/filter";
-import { FavoriteQuery, ShodanSearchMatch } from "./api/types";
+import { RecentSearch, ShodanSearchMatch } from "./api/types";
 
-function FavoriteResultsView({
-  favorite,
+function HistoryResultsView({
+  entry,
   onBack,
 }: {
-  favorite: FavoriteQuery;
+  entry: RecentSearch;
   onBack: () => void;
 }) {
   const { push } = useNavigation();
-  const { recordUsage } = useFavorites();
   const [filterQuery, setFilterQuery] = useState("");
-  const hasRecordedUsage = useRef(false);
 
   const { results, total, isLoading } = useShodanSearch({
-    query: favorite.query,
+    query: entry.query,
     enabled: true,
   });
-
-  // Record usage when component mounts (only once)
-  useEffect(() => {
-    if (!hasRecordedUsage.current) {
-      hasRecordedUsage.current = true;
-      recordUsage(favorite.id);
-    }
-  }, [favorite.id, recordUsage]);
 
   // Apply client-side filtering
   const filteredResults = useMemo(() => {
@@ -59,7 +49,7 @@ function FavoriteResultsView({
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={favorite.name}
+      navigationTitle={entry.query}
       searchBarPlaceholder="Filter results (e.g., country:us, port:443)..."
       onSearchTextChange={setFilterQuery}
       filtering={false}
@@ -70,7 +60,7 @@ function FavoriteResultsView({
           description={
             isFiltering
               ? `No results match "${filterQuery}". Try a different filter.`
-              : `No results for "${favorite.query}".`
+              : `No results for "${entry.query}".`
           }
           icon={Icon.XMarkCircle}
           actions={
@@ -83,7 +73,7 @@ function FavoriteResultsView({
 
       {displayResults.length > 0 && (
         <List.Section
-          title={`Results for "${favorite.name}"`}
+          title={`Results for "${entry.query}"`}
           subtitle={
             isFiltering
               ? `${filteredResults.length} of ${total.toLocaleString()} matches`
@@ -180,37 +170,36 @@ function FavoriteResultsView({
   );
 }
 
-export default function FavoritesCommand() {
-  const { favorites, removeFavorite, renameFavorite } = useFavorites();
-  const [selectedFavorite, setSelectedFavorite] =
-    useState<FavoriteQuery | null>(null);
-  const { push, pop } = useNavigation();
+export default function HistoryCommand() {
+  const { history, removeFromHistory, clearHistory } = useQueryHistory();
+  const { addFavorite, favorites } = useFavorites();
+  const [selectedEntry, setSelectedEntry] = useState<RecentSearch | null>(null);
 
-  if (selectedFavorite) {
+  if (selectedEntry) {
     return (
-      <FavoriteResultsView
-        favorite={selectedFavorite}
-        onBack={() => setSelectedFavorite(null)}
+      <HistoryResultsView
+        entry={selectedEntry}
+        onBack={() => setSelectedEntry(null)}
       />
     );
   }
 
-  if (favorites.length === 0) {
+  if (history.length === 0) {
     return (
       <List>
         <List.EmptyView
-          title="No Favorite Queries"
-          description="Save queries from the Search command to see them here."
-          icon={{ source: Icon.Star, tintColor: Color.Yellow }}
+          title="No Search History"
+          description="Your search queries will appear here after you search."
+          icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
         />
       </List>
     );
   }
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = async (id: string) => {
     const confirmed = await confirmAlert({
-      title: "Delete Favorite",
-      message: `Are you sure you want to delete "${name}"?`,
+      title: "Delete Entry",
+      message: "Are you sure you want to remove this from history?",
       primaryAction: {
         title: "Delete",
         style: Alert.ActionStyle.Destructive,
@@ -218,101 +207,116 @@ export default function FavoritesCommand() {
     });
 
     if (confirmed) {
-      await removeFavorite(id);
+      await removeFromHistory(id);
     }
   };
 
-  const handleRename = async (id: string, currentName: string) => {
-    push(
-      <Form
-        navigationTitle="Rename Favorite"
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title="Rename"
-              onSubmit={async (values) => {
-                await renameFavorite(id, values.name);
-                pop();
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField id="name" title="New Name" defaultValue={currentName} />
-      </Form>,
-    );
+  const handleClearAll = async () => {
+    const confirmed = await confirmAlert({
+      title: "Clear All History",
+      message: "Are you sure you want to clear all search history?",
+      primaryAction: {
+        title: "Clear All",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      await clearHistory();
+    }
   };
 
-  // Sort by last used, then by use count
-  const sortedFavorites = [...favorites].sort((a, b) => {
-    if (a.lastUsed && b.lastUsed) {
-      return new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime();
+  const handleSaveToFavorites = async (query: string) => {
+    // Check if already in favorites
+    if (favorites.some((f) => f.query === query)) {
+      return; // useFavorites will show the toast
     }
-    if (a.lastUsed) return -1;
-    if (b.lastUsed) return 1;
-    return b.useCount - a.useCount;
-  });
+    await addFavorite(query, query);
+  };
 
   return (
-    <List searchBarPlaceholder="Search favorites...">
+    <List searchBarPlaceholder="Search history...">
       <List.Section
-        title="Favorite Queries"
-        subtitle={`${favorites.length} saved`}
+        title="Recent Searches"
+        subtitle={`${history.length} entries`}
       >
-        {sortedFavorites.map((favorite) => (
-          <List.Item
-            key={favorite.id}
-            title={favorite.name}
-            subtitle={favorite.query}
-            icon={{ source: Icon.Star, tintColor: Color.Yellow }}
-            accessories={[
-              favorite.useCount > 0
-                ? { text: `${favorite.useCount} uses`, tooltip: "Times used" }
-                : null,
-              favorite.lastUsed
-                ? {
-                    text: formatTimestamp(favorite.lastUsed),
-                    tooltip: "Last used",
-                  }
-                : null,
-            ].filter((a): a is NonNullable<typeof a> => a !== null)}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section title="Run">
-                  <Action
-                    title="Run Query"
-                    icon={Icon.MagnifyingGlass}
-                    onAction={() => setSelectedFavorite(favorite)}
-                  />
-                </ActionPanel.Section>
+        {history.map((entry) => {
+          const isInFavorites = favorites.some((f) => f.query === entry.query);
 
-                <ActionPanel.Section title="Copy">
-                  <Action.CopyToClipboard
-                    title="Copy Query"
-                    content={favorite.query}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                </ActionPanel.Section>
+          return (
+            <List.Item
+              key={entry.id}
+              title={entry.query}
+              icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
+              accessories={[
+                isInFavorites
+                  ? {
+                      icon: { source: Icon.Star, tintColor: Color.Yellow },
+                      tooltip: "Saved to favorites",
+                    }
+                  : null,
+                {
+                  text: `${entry.resultCount.toLocaleString()} results`,
+                  tooltip: "Results count",
+                },
+                {
+                  text: formatTimestamp(entry.timestamp),
+                  tooltip: "Search time",
+                },
+              ].filter((a): a is NonNullable<typeof a> => a !== null)}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section title="Run">
+                    <Action
+                      title="Re-Run Query"
+                      icon={Icon.MagnifyingGlass}
+                      onAction={() => setSelectedEntry(entry)}
+                    />
+                  </ActionPanel.Section>
 
-                <ActionPanel.Section title="Manage">
-                  <Action
-                    title="Rename"
-                    icon={Icon.Pencil}
-                    onAction={() => handleRename(favorite.id, favorite.name)}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                  <Action
-                    title="Delete"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    onAction={() => handleDelete(favorite.id, favorite.name)}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+                  <ActionPanel.Section title="Copy">
+                    <Action.CopyToClipboard
+                      title="Copy Query"
+                      content={entry.query}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                  </ActionPanel.Section>
+
+                  <ActionPanel.Section title="Save">
+                    {!isInFavorites && (
+                      <Action
+                        title="Save to Favorites"
+                        icon={{ source: Icon.Star, tintColor: Color.Yellow }}
+                        onAction={() => handleSaveToFavorites(entry.query)}
+                        shortcut={{ modifiers: ["cmd"], key: "s" }}
+                      />
+                    )}
+                  </ActionPanel.Section>
+
+                  <ActionPanel.Section title="Manage">
+                    <Action
+                      title="Delete from History"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      onAction={() => handleDelete(entry.id)}
+                      shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    />
+                    <Action
+                      title="Clear All History"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      onAction={handleClearAll}
+                      shortcut={{
+                        modifiers: ["cmd", "shift"],
+                        key: "backspace",
+                      }}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );

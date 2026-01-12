@@ -1,4 +1,4 @@
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useCallback } from "react";
 import { randomUUID } from "crypto";
@@ -39,7 +39,6 @@ export function useFavorites() {
 
       const updated = [...favorites, newFavorite];
       setFavorites(updated);
-      await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
 
       await showToast({
         style: Toast.Style.Success,
@@ -54,7 +53,6 @@ export function useFavorites() {
     async (id: string): Promise<void> => {
       const updated = favorites.filter((f) => f.id !== id);
       setFavorites(updated);
-      await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
 
       await showToast({
         style: Toast.Style.Success,
@@ -71,7 +69,6 @@ export function useFavorites() {
         f.id === id ? { ...f, ...updates } : f,
       );
       setFavorites(updated);
-      await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
     },
     [favorites, setFavorites],
   );

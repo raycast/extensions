@@ -88,6 +88,13 @@
       "subtitle": "Shodan",
       "description": "View API credits and account status",
       "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Search History",
+      "subtitle": "Shodan",
+      "description": "View and re-run recent Shodan search queries",
+      "mode": "view"
     }
   ],
   "preferences": [

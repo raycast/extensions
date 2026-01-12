@@ -8,11 +8,47 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { ShodanHost, ShodanSearchMatch } from "../api/types";
+import { ShodanHost, ShodanSearchMatch, ShodanScreenshot } from "../api/types";
 import { getPortColor } from "../utils/formatters";
 import { copyHostAsJSON } from "../utils/export";
 import { useShodanHost } from "../hooks/useShodanHost";
+import { useHoneyscore } from "../hooks/useHoneyscore";
 import { formatCVSS, sortVulnsByCVSS } from "../utils/cvss";
+
+// Helper function for honeyscore badge
+function getHoneyscoreInfo(score: number | null): {
+  text: string;
+  color: Color;
+  isLikelyHoneypot: boolean;
+} {
+  if (score === null)
+    return {
+      text: "Unknown",
+      color: Color.SecondaryText,
+      isLikelyHoneypot: false,
+    };
+
+  const percentage = Math.round(score * 100);
+  if (score >= 0.7) {
+    return {
+      text: `${percentage}% - Likely Honeypot`,
+      color: Color.Red,
+      isLikelyHoneypot: true,
+    };
+  } else if (score >= 0.4) {
+    return {
+      text: `${percentage}% - Possibly Honeypot`,
+      color: Color.Orange,
+      isLikelyHoneypot: false,
+    };
+  } else {
+    return {
+      text: `${percentage}% - Unlikely Honeypot`,
+      color: Color.Green,
+      isLikelyHoneypot: false,
+    };
+  }
+}
 
 interface HostDetailViewProps {
   ip: string;
@@ -27,6 +63,26 @@ function countryCodeToFlag(countryCode: string | undefined): string {
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
+}
+
+// Extract screenshots from host data
+function getScreenshots(
+  host: ShodanHost | null,
+): { port: number; screenshot: ShodanScreenshot }[] {
+  if (!host || !host.data) return [];
+
+  const screenshots: { port: number; screenshot: ShodanScreenshot }[] = [];
+
+  for (const service of host.data) {
+    if (service.screenshot) {
+      screenshots.push({
+        port: service.port,
+        screenshot: service.screenshot,
+      });
+    }
+  }
+
+  return screenshots;
 }
 
 // Known ports that have well-known service names
@@ -287,12 +343,18 @@ function generatePartialMarkdown(match: ShodanSearchMatch): string {
 
 export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
   const [enableFullScan, setEnableFullScan] = useState(false);
+  const [checkHoneyscore, setCheckHoneyscore] = useState(false);
   const isMounted = useRef(true);
   const {
     host: fullHost,
     isLoading,
     error,
   } = useShodanHost({ ip, enabled: enableFullScan });
+
+  const { score: honeyscore, isLoading: honeyscoreLoading } = useHoneyscore({
+    ip,
+    enabled: checkHoneyscore,
+  });
 
   // Cancel request on unmount
   useEffect(() => {
@@ -306,11 +368,23 @@ export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
   const handleFullScan = () => {
     if (!isMounted.current) return;
     setEnableFullScan(true);
-    showToast({
-      style: Toast.Style.Animated,
-      title: "Loading full host data...",
-    });
   };
+
+  // Show toast when full scan completes
+  useEffect(() => {
+    if (enableFullScan && fullHost && !isLoading) {
+      showToast({
+        style: Toast.Style.Success,
+        title: "Host data loaded",
+        message: `${fullHost.ports.length} ports found`,
+      });
+    } else if (enableFullScan && error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load host data",
+      });
+    }
+  }, [enableFullScan, fullHost, isLoading, error]);
 
   // Determine what data to show
   const hasFullData = fullHost && !isLoading && !error;
@@ -339,6 +413,9 @@ export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
   const vulnList =
     host?.vulns || (match?.vulns ? Object.keys(match.vulns) : []);
 
+  // Get screenshots from full host data
+  const screenshots = getScreenshots(host);
+
   // Generate markdown
   let markdown = "";
   if (hasFullData && host) {
@@ -353,9 +430,12 @@ export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
     markdown = `# ${ip}\n\nPress "Full Scan" to load host data.`;
   }
 
+  // Only show loading spinner when actively fetching and no data yet
+  const showLoading = enableFullScan && isLoading && !fullHost;
+
   return (
     <Detail
-      isLoading={isLoading}
+      isLoading={showLoading}
       markdown={markdown}
       navigationTitle={ip}
       metadata={
@@ -450,6 +530,33 @@ export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
             </>
           )}
 
+          {checkHoneyscore && honeyscore !== null && (
+            <>
+              <Detail.Metadata.Separator />
+              <Detail.Metadata.Label
+                title="Honeyscore"
+                text={getHoneyscoreInfo(honeyscore).text}
+                icon={{
+                  source: getHoneyscoreInfo(honeyscore).isLikelyHoneypot
+                    ? Icon.Warning
+                    : Icon.Shield,
+                  tintColor: getHoneyscoreInfo(honeyscore).color,
+                }}
+              />
+            </>
+          )}
+
+          {screenshots.length > 0 && (
+            <>
+              <Detail.Metadata.Separator />
+              <Detail.Metadata.Label
+                title="Screenshots"
+                text={`${screenshots.length} available`}
+                icon={Icon.Image}
+              />
+            </>
+          )}
+
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="Shodan"
@@ -502,6 +609,40 @@ export function HostDetailView({ ip, searchMatch }: HostDetailViewProps) {
               url={`https://www.shodan.io/host/${ip}`}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Analysis">
+            {!checkHoneyscore ? (
+              <Action
+                title="Check Honeyscore"
+                icon={Icon.Shield}
+                onAction={() => {
+                  setCheckHoneyscore(true);
+                  showToast({
+                    style: Toast.Style.Animated,
+                    title: "Checking honeyscore...",
+                  });
+                }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+              />
+            ) : honeyscoreLoading ? (
+              <Action title="Checking Honeyscore…" icon={Icon.Clock} />
+            ) : (
+              <Action
+                title={`Honeyscore: ${honeyscore !== null ? Math.round(honeyscore * 100) + "%" : "N/A"}`}
+                icon={Icon.Shield}
+                onAction={() => {
+                  if (honeyscore !== null) {
+                    const info = getHoneyscoreInfo(honeyscore);
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "Honeyscore Result",
+                      message: info.text,
+                    });
+                  }
+                }}
+              />
+            )}
           </ActionPanel.Section>
 
           {vulnList.length > 0 && (

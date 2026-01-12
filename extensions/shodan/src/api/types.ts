@@ -41,6 +41,13 @@ export interface ShodanHTTP {
   };
 }
 
+export interface ShodanScreenshot {
+  data: string; // base64 encoded image
+  mime: string; // e.g., "image/png"
+  width?: number;
+  height?: number;
+}
+
 export interface ShodanService {
   port: number;
   transport: string;
@@ -52,6 +59,7 @@ export interface ShodanService {
   timestamp: string;
   ssl?: ShodanSSL;
   http?: ShodanHTTP;
+  screenshot?: ShodanScreenshot;
 }
 
 export interface ShodanHost {
@@ -183,6 +191,7 @@ export interface FavoriteQuery {
 }
 
 export interface RecentSearch {
+  id: string;
   query: string;
   timestamp: string;
   resultCount: number;
@@ -206,7 +215,12 @@ export type PresetCategory =
   | "authentication"
   | "vulnerabilities"
   | "iot"
-  | "cloud";
+  | "cloud"
+  | "remote"
+  | "storage"
+  | "home"
+  | "printers"
+  | "misc";
 
 // DNS types
 export interface DnsResolveResponse {
@@ -215,4 +229,19 @@ export interface DnsResolveResponse {
 
 export interface DnsReverseResponse {
   [ip: string]: string[];
+}
+
+// Honeyscore API response (Labs endpoint)
+export interface HoneyscoreResponse {
+  score: number; // 0.0 - 1.0 (higher = more likely honeypot)
+}
+
+// InternetDB API response (free, no API key required)
+export interface InternetDBResponse {
+  ip: string;
+  ports: number[];
+  hostnames: string[];
+  tags: string[];
+  cpes: string[];
+  vulns: string[];
 }

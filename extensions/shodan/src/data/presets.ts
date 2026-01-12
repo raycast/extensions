@@ -1,8 +1,9 @@
 /**
  * Preset Shodan Queries
  *
- * Many queries sourced from:
- * https://github.com/jakejarvis/awesome-shodan-queries
+ * Queries sourced from:
+ * - https://github.com/s-b-repo/advanced-shodan-requests
+ * - https://github.com/jakejarvis/awesome-shodan-queries
  *
  * Licensed under Creative Commons Zero v1.0 Universal
  */
@@ -12,7 +13,6 @@ import { PresetQuery, PresetCategory } from "../api/types";
 export const PRESET_QUERIES: PresetQuery[] = [
   // ============================================
   // Industrial Control Systems
-  // From: https://github.com/jakejarvis/awesome-shodan-queries
   // ============================================
   {
     id: "ics-samsung-billboards",
@@ -47,9 +47,41 @@ export const PRESET_QUERIES: PresetQuery[] = [
     risk: "high",
   },
   {
+    id: "ics-ipv6-cameras",
+    name: "IPv6 Cameras",
+    query: 'port:554 has_ipv6:true "200 ok"',
+    description: "IP cameras accessible via IPv6",
+    category: "industrial",
+    risk: "medium",
+  },
+  {
+    id: "ics-voting-machines",
+    name: "Voting Machines (US)",
+    query: '"voter system serial" country:US',
+    description: "US voting system serial interfaces",
+    category: "industrial",
+    risk: "high",
+  },
+  {
+    id: "ics-lawful-intercept",
+    name: "Lawful Intercept Systems",
+    query: '"Cisco IOS" "ADVIPSERVICESK9_LI-M"',
+    description: "Cisco lawful intercept capable routers",
+    category: "industrial",
+    risk: "high",
+  },
+  {
+    id: "ics-prison-phones",
+    name: "Prison Pay Phones",
+    query: '"[2J[H Encartele Confidential"',
+    description: "Prison inmate telephone systems",
+    category: "industrial",
+    risk: "high",
+  },
+  {
     id: "ics-tesla-powerpack",
     name: "Tesla PowerPack Systems",
-    query: 'http.title:"Tesla PowerPack System" http.component:"d3"',
+    query: 'http.title:"Tesla PowerPack System"',
     description: "Tesla PowerPack charging status dashboards",
     category: "industrial",
     risk: "medium",
@@ -67,86 +99,6 @@ export const PRESET_QUERIES: PresetQuery[] = [
     name: "Maritime Satellites",
     query: '"Cobham SATCOM" OR ("Sailor" "VSAT")',
     description: "Maritime satellite communication systems",
-    category: "industrial",
-    risk: "high",
-  },
-  {
-    id: "ics-submarine-control",
-    name: "Submarine Mission Control",
-    query: 'title:"Slocum Fleet Mission Control"',
-    description: "Submarine/underwater glider mission dashboards",
-    category: "industrial",
-    risk: "high",
-  },
-  {
-    id: "ics-refrigeration",
-    name: "CAREL Refrigeration Units",
-    query: '"Server: CarelDataServer" "200 Document follows"',
-    description: "CAREL PlantVisor refrigeration control systems",
-    category: "industrial",
-    risk: "medium",
-  },
-  {
-    id: "ics-wind-turbines",
-    name: "Nordex Wind Turbine Farms",
-    query: 'http.title:"Nordex Control"',
-    description: "Nordex wind turbine control systems",
-    category: "industrial",
-    risk: "high",
-  },
-  {
-    id: "ics-gps-trackers",
-    name: "C4 Max Vehicle GPS Trackers",
-    query: '"[1m[35mWelcome on console"',
-    description: "Commercial vehicle GPS tracking systems",
-    category: "industrial",
-    risk: "medium",
-  },
-  {
-    id: "ics-dicom-xray",
-    name: "DICOM Medical X-Ray Machines",
-    query: '"DICOM Server Response" port:104',
-    description: "Medical imaging devices using DICOM protocol",
-    category: "industrial",
-    risk: "high",
-  },
-  {
-    id: "ics-electricity-meters",
-    name: "GaugeTech Electricity Meters",
-    query: '"Server: EIG Embedded Web Server" "200 Document follows"',
-    description: "Industrial electricity monitoring meters",
-    category: "industrial",
-    risk: "medium",
-  },
-  {
-    id: "ics-siemens-automation",
-    name: "Siemens Industrial Automation",
-    query: '"Siemens, SIMATIC" port:161',
-    description: "Siemens SIMATIC industrial automation systems",
-    category: "industrial",
-    risk: "high",
-  },
-  {
-    id: "ics-siemens-hvac",
-    name: "Siemens HVAC Controllers",
-    query: '"Server: Microsoft-WinCE" "Content-Length: 12581"',
-    description: "Siemens building HVAC control systems",
-    category: "industrial",
-    risk: "medium",
-  },
-  {
-    id: "ics-door-locks",
-    name: "Door/Lock Access Controllers",
-    query: '"HID VertX" port:4070',
-    description: "HID VertX door access control systems",
-    category: "industrial",
-    risk: "high",
-  },
-  {
-    id: "ics-railroad",
-    name: "Railroad Management Systems",
-    query: '"log off" "select the appropriate"',
-    description: "Railroad management interfaces",
     category: "industrial",
     risk: "high",
   },
@@ -182,36 +134,31 @@ export const PRESET_QUERIES: PresetQuery[] = [
     category: "industrial",
     risk: "high",
   },
-
-  // ============================================
-  // Remote Desktop
-  // ============================================
   {
-    id: "rdp-vnc-noauth",
-    name: "VNC Without Authentication",
-    query: '"authentication disabled" "RFB 003.008"',
-    description: "VNC servers with authentication disabled",
-    category: "authentication",
+    id: "ics-dicom-xray",
+    name: "DICOM Medical X-Ray Machines",
+    query: '"DICOM Server Response" port:104',
+    description: "Medical imaging devices using DICOM protocol",
+    category: "industrial",
     risk: "high",
-  },
-  {
-    id: "rdp-windows",
-    name: "Windows RDP",
-    query: '"\\x03\\x00\\x00\\x0b\\x06\\xd0\\x00\\x00\\x124\\x00"',
-    description: "Windows Remote Desktop Protocol endpoints",
-    category: "network",
-    risk: "medium",
   },
 
   // ============================================
   // Network Infrastructure
-  // From: https://github.com/jakejarvis/awesome-shodan-queries
   // ============================================
   {
     id: "net-weave-scope",
     name: "Weave Scope Dashboards",
     query: 'title:"Weave Scope" http.favicon.hash:567176827',
     description: "Weave Scope container monitoring dashboards",
+    category: "network",
+    risk: "high",
+  },
+  {
+    id: "net-mongodb-info",
+    name: "MongoDB Server Information",
+    query: '"MongoDB Server Information" port:27017',
+    description: "MongoDB instances exposing server info",
     category: "network",
     risk: "high",
   },
@@ -226,7 +173,7 @@ export const PRESET_QUERIES: PresetQuery[] = [
   {
     id: "net-jenkins",
     name: "Jenkins CI Dashboards",
-    query: '"X-Jenkins" "Set-Cookie: JSESSIONID" http.title:"Dashboard"',
+    query: '"X-Jenkins" "Set-Cookie: JSESSIONID"',
     description: "Jenkins CI/CD server dashboards",
     category: "cloud",
     risk: "medium",
@@ -242,7 +189,7 @@ export const PRESET_QUERIES: PresetQuery[] = [
   {
     id: "net-docker-registry",
     name: "Docker Private Registries",
-    query: '"Docker-Distribution-Api-Version: registry" "200 OK" -gitlab',
+    query: '"Docker-Distribution-Api-Version: registry"',
     description: "Docker private container registries",
     category: "cloud",
     risk: "high",
@@ -258,7 +205,7 @@ export const PRESET_QUERIES: PresetQuery[] = [
   {
     id: "net-telnet-root",
     name: "Already Logged-In as Root (Telnet)",
-    query: '"root@" port:23 -login -password -name -Session',
+    query: '"root@" port:23 -login -password',
     description: "Telnet sessions already logged in as root",
     category: "authentication",
     risk: "high",
@@ -270,54 +217,6 @@ export const PRESET_QUERIES: PresetQuery[] = [
     description: "Exposed Android Debug Bridge (ADB) interfaces",
     category: "network",
     risk: "high",
-  },
-  {
-    id: "net-lantronix",
-    name: "Lantronix Serial-to-Ethernet",
-    query: "Lantronix password port:30718 -secured",
-    description: "Lantronix serial-to-ethernet adapters",
-    category: "network",
-    risk: "high",
-  },
-  {
-    id: "net-citrix",
-    name: "Citrix Virtual Apps",
-    query: '"Citrix Applications:" port:1604',
-    description: "Citrix virtual application servers",
-    category: "network",
-    risk: "medium",
-  },
-  {
-    id: "net-cisco-smart-install",
-    name: "Cisco Smart Install",
-    query: '"smart install client active"',
-    description: "Cisco devices with Smart Install active",
-    category: "network",
-    risk: "high",
-  },
-  {
-    id: "net-pbx-gateway",
-    name: "PBX IP Phone Gateways",
-    query: 'PBX "gateway console" -password port:23',
-    description: "PBX phone system gateways",
-    category: "network",
-    risk: "medium",
-  },
-  {
-    id: "net-polycom-video",
-    name: "Polycom Video Conferencing",
-    query: 'http.title:"- Polycom" "Server: lighttpd"',
-    description: "Polycom video conferencing systems",
-    category: "network",
-    risk: "medium",
-  },
-  {
-    id: "net-bomgar",
-    name: "Bomgar Help Desk Portal",
-    query: '"Server: Bomgar" "200 OK"',
-    description: "Bomgar remote support portals",
-    category: "network",
-    risk: "medium",
   },
   {
     id: "net-mikrotik",
@@ -345,13 +244,141 @@ export const PRESET_QUERIES: PresetQuery[] = [
   },
 
   // ============================================
-  // Webcams & Cameras
+  // Remote Access & VPN
   // ============================================
+  {
+    id: "remote-vnc-noauth",
+    name: "VNC Without Authentication",
+    query: '"authentication disabled" "RFB 003.008"',
+    description: "VNC servers with authentication disabled",
+    category: "remote",
+    risk: "high",
+  },
+  {
+    id: "remote-rdp-windows",
+    name: "Windows RDP",
+    query: '"\\x03\\x00\\x00\\x0b\\x06\\xd0\\x00\\x00\\x124\\x00"',
+    description: "Windows Remote Desktop Protocol endpoints",
+    category: "remote",
+    risk: "medium",
+  },
+  {
+    id: "remote-ssh",
+    name: "SSH Services",
+    query: 'port:22 "200 ok"',
+    description: "SSH servers responding on port 22",
+    category: "remote",
+    risk: "low",
+  },
+
+  // ============================================
+  // Storage & NAS
+  // ============================================
+  {
+    id: "storage-smb-noauth",
+    name: "SMB File Shares (No Auth)",
+    query: '"Authentication: disabled" port:445',
+    description: "SMB shares with authentication disabled",
+    category: "storage",
+    risk: "high",
+  },
+  {
+    id: "storage-ftp-anonymous",
+    name: "Anonymous FTP (Login Successful)",
+    query: '"220" "230 Login successful." port:21',
+    description: "FTP servers with successful anonymous login",
+    category: "storage",
+    risk: "high",
+  },
+  {
+    id: "storage-iomega",
+    name: "Iomega NAS Devices",
+    query: '"Set-Cookie: iomega=" -"manage/login.html"',
+    description: "Iomega NAS devices without login page",
+    category: "storage",
+    risk: "high",
+  },
+  {
+    id: "storage-buffalo",
+    name: "Buffalo TeraStation",
+    query: "Redirecting sencha port:9000",
+    description: "Buffalo TeraStation NAS devices",
+    category: "storage",
+    risk: "medium",
+  },
+  {
+    id: "storage-logitech-media",
+    name: "Logitech Media Server",
+    query: '"Server: Logitech Media Server"',
+    description: "Logitech media streaming servers",
+    category: "storage",
+    risk: "low",
+  },
+  {
+    id: "storage-plex",
+    name: "Plex Media Servers",
+    query: '"X-Plex-Protocol" "200 OK" port:32400',
+    description: "Plex media server instances",
+    category: "storage",
+    risk: "low",
+  },
+  {
+    id: "storage-synology",
+    name: "Synology NAS",
+    query: 'product:"Synology"',
+    description: "Synology network attached storage",
+    category: "storage",
+    risk: "medium",
+  },
+  {
+    id: "storage-qnap",
+    name: "QNAP NAS",
+    query: 'product:"QNAP"',
+    description: "QNAP network attached storage",
+    category: "storage",
+    risk: "medium",
+  },
+
+  // ============================================
+  // Webcams & Surveillance
+  // ============================================
+  {
+    id: "webcam-yawcam",
+    name: "Yawcam Webcams",
+    query: '"Server: yawcam" "Mime-Type: text/html"',
+    description: "Yawcam webcam streaming software",
+    category: "webcams",
+    risk: "medium",
+  },
+  {
+    id: "webcam-webcamxp",
+    name: "WebcamXP/7 Cameras",
+    query: '("webcam 7" OR "webcamXP") http.component:"mootools"',
+    description: "WebcamXP and Webcam 7 streaming servers",
+    category: "webcams",
+    risk: "medium",
+  },
+  {
+    id: "webcam-android-ip",
+    name: "Android IP Cameras",
+    query: '"Server: IP Webcam Server" "200 OK"',
+    description: "Android phones as IP cameras",
+    category: "webcams",
+    risk: "medium",
+  },
+  {
+    id: "webcam-dvr-h264",
+    name: "Security DVRs (H264)",
+    query: 'html:"DVR_H264 ActiveX"',
+    description: "H264 security DVR systems",
+    category: "webcams",
+    risk: "medium",
+  },
   {
     id: "webcam-axis",
     name: "Axis Network Cameras",
     query: 'product:"AXIS" has_screenshot:true',
-    description: "Axis network cameras with screenshots available",
+    description: "Axis network cameras with screenshots",
     category: "webcams",
     risk: "medium",
   },
@@ -371,21 +398,109 @@ export const PRESET_QUERIES: PresetQuery[] = [
     category: "webcams",
     risk: "medium",
   },
+
+  // ============================================
+  // Printers & Office Equipment
+  // ============================================
   {
-    id: "webcam-yawcam",
-    name: "Yawcam Webcams",
-    query: '"Server: yawcam" "Mime-Type: text/html"',
-    description: "Yawcam webcam streaming software",
-    category: "webcams",
+    id: "printer-hp",
+    name: "HP Printers",
+    query: '"Serial Number:" "Built:" "Server: HP HTTP"',
+    description: "HP printers with serial numbers exposed",
+    category: "printers",
+    risk: "low",
+  },
+  {
+    id: "printer-xerox",
+    name: "Xerox Devices",
+    query: 'ssl:"Xerox Generic Root"',
+    description: "Xerox printers and copiers",
+    category: "printers",
+    risk: "low",
+  },
+  {
+    id: "printer-epson",
+    name: "Epson Printers",
+    query: '"SERVER: EPSON_Linux UPnP" "200 OK"',
+    description: "Epson network printers",
+    category: "printers",
+    risk: "low",
+  },
+  {
+    id: "printer-canon",
+    name: "Canon Printers",
+    query: '"Server: KS_HTTP" "200 OK"',
+    description: "Canon network printers",
+    category: "printers",
+    risk: "low",
+  },
+  {
+    id: "printer-jetdirect",
+    name: "Network Printers (JetDirect)",
+    query: "port:9100 pjl",
+    description: "Network printers with JetDirect protocol",
+    category: "printers",
+    risk: "low",
+  },
+
+  // ============================================
+  // Home Automation & Consumer Devices
+  // ============================================
+  {
+    id: "home-yamaha",
+    name: "Yamaha Stereos",
+    query: '"Server: AV_Receiver" "HTTP/1.1 406"',
+    description: "Yamaha AV receivers and stereos",
+    category: "home",
+    risk: "low",
+  },
+  {
+    id: "home-airplay",
+    name: "Apple AirPlay Devices",
+    query: '"\\x08_airplay" port:5353',
+    description: "Apple AirPlay enabled devices",
+    category: "home",
+    risk: "low",
+  },
+  {
+    id: "home-chromecast",
+    name: "Google Chromecasts",
+    query: '"Chromecast:" port:8008',
+    description: "Google Chromecast devices",
+    category: "home",
+    risk: "low",
+  },
+  {
+    id: "home-crestron",
+    name: "Crestron Controllers",
+    query: '"Model: PYNG-HUB"',
+    description: "Crestron smart home controllers",
+    category: "home",
     risk: "medium",
   },
   {
-    id: "webcam-webcamxp",
-    name: "WebcamXP/7 Cameras",
-    query: 'title:"webcamXP" OR title:"webcam 7"',
-    description: "WebcamXP and Webcam 7 streaming servers",
-    category: "webcams",
+    id: "home-octoprint",
+    name: "OctoPrint 3D Printers",
+    query: 'title:"OctoPrint" -title:"Login"',
+    description: "OctoPrint 3D printer controllers without login",
+    category: "home",
     risk: "medium",
+  },
+  {
+    id: "home-assistant",
+    name: "Home Assistant",
+    query: 'title:"Home Assistant"',
+    description: "Home Assistant smart home platforms",
+    category: "home",
+    risk: "medium",
+  },
+  {
+    id: "home-smart-tv",
+    name: "Smart TVs",
+    query: '"webOS TV" OR "Tizen"',
+    description: "Smart TV devices exposed online",
+    category: "home",
+    risk: "low",
   },
 
   // ============================================
@@ -411,7 +526,7 @@ export const PRESET_QUERIES: PresetQuery[] = [
     id: "db-elastic-kibana",
     name: "Kibana Dashboards",
     query: 'title:"Kibana"',
-    description: "Kibana visualization dashboards for Elasticsearch",
+    description: "Kibana visualization dashboards",
     category: "databases",
     risk: "medium",
   },
@@ -537,58 +652,6 @@ export const PRESET_QUERIES: PresetQuery[] = [
   },
 
   // ============================================
-  // IoT Devices
-  // ============================================
-  {
-    id: "iot-home-assistant",
-    name: "Home Assistant",
-    query: 'title:"Home Assistant"',
-    description: "Home Assistant smart home platforms",
-    category: "iot",
-    risk: "medium",
-  },
-  {
-    id: "iot-printer",
-    name: "Network Printers",
-    query: "port:9100 pjl",
-    description: "Network printers with JetDirect",
-    category: "iot",
-    risk: "low",
-  },
-  {
-    id: "iot-nas",
-    name: "NAS Devices",
-    query: 'product:"Synology" OR product:"QNAP"',
-    description: "Network attached storage devices",
-    category: "iot",
-    risk: "medium",
-  },
-  {
-    id: "iot-smart-tv",
-    name: "Smart TVs",
-    query: '"webOS TV" OR "Tizen"',
-    description: "Smart TV devices exposed online",
-    category: "iot",
-    risk: "low",
-  },
-  {
-    id: "iot-hp-printers",
-    name: "HP Printers",
-    query: '"HP-ChaiSOE" port:80',
-    description: "HP printers with web interface",
-    category: "iot",
-    risk: "low",
-  },
-  {
-    id: "iot-canon-printers",
-    name: "Canon Printers",
-    query: '"Server: CANON HTTP Server"',
-    description: "Canon network printers",
-    category: "iot",
-    risk: "low",
-  },
-
-  // ============================================
   // Cloud Services
   // ============================================
   {
@@ -647,6 +710,70 @@ export const PRESET_QUERIES: PresetQuery[] = [
     category: "cloud",
     risk: "medium",
   },
+
+  // ============================================
+  // IoT Devices
+  // ============================================
+  {
+    id: "iot-smart-tv",
+    name: "Smart TVs (webOS/Tizen)",
+    query: '"webOS TV" OR "Tizen"',
+    description: "Smart TV devices exposed online",
+    category: "iot",
+    risk: "low",
+  },
+
+  // ============================================
+  // Miscellaneous
+  // ============================================
+  {
+    id: "misc-ethereum-miners",
+    name: "Ethereum Miners",
+    query: '"ETH - Total speed"',
+    description: "Cryptocurrency mining rigs",
+    category: "misc",
+    risk: "low",
+  },
+  {
+    id: "misc-dir-listing-pem",
+    name: "Directory Listings with PEM Files",
+    query: 'http.title:"Index of /" http.html:".pem"',
+    description: "Directory listings exposing certificate files",
+    category: "misc",
+    risk: "high",
+  },
+  {
+    id: "misc-wordpress-config",
+    name: "WordPress Config Setup",
+    query: 'http.html:"* The wp-config.php creation script"',
+    description: "WordPress installations in setup mode",
+    category: "misc",
+    risk: "high",
+  },
+  {
+    id: "misc-minecraft",
+    name: "Minecraft Servers",
+    query: '"Minecraft Server" "protocol 340"',
+    description: "Minecraft game servers",
+    category: "misc",
+    risk: "low",
+  },
+  {
+    id: "misc-north-korea",
+    name: "North Korea Networks",
+    query: "net:175.45.176.0/22,210.52.109.0/24",
+    description: "IP ranges assigned to North Korea",
+    category: "misc",
+    risk: "low",
+  },
+  {
+    id: "misc-qotd",
+    name: "Quote of the Day Services",
+    query: 'port:17 product:"Windows qotd"',
+    description: "Windows Quote of the Day services",
+    category: "misc",
+    risk: "low",
+  },
 ];
 
 export function getPresetsByCategory(category: PresetCategory): PresetQuery[] {
@@ -659,7 +786,7 @@ export function getPresetCategories(): PresetCategory[] {
 
 export function getCategoryDisplayName(category: PresetCategory): string {
   const displayNames: Record<PresetCategory, string> = {
-    webcams: "Webcams & Cameras",
+    webcams: "Webcams & Surveillance",
     industrial: "Industrial Control Systems",
     databases: "Databases",
     network: "Network Infrastructure",
@@ -667,6 +794,11 @@ export function getCategoryDisplayName(category: PresetCategory): string {
     vulnerabilities: "Known Vulnerabilities",
     iot: "IoT Devices",
     cloud: "Cloud Services",
+    remote: "Remote Access & VPN",
+    storage: "Storage & NAS",
+    home: "Home Automation",
+    printers: "Printers & Office",
+    misc: "Miscellaneous",
   };
   return displayNames[category];
 }
@@ -681,15 +813,18 @@ export function getCategoryIcon(category: PresetCategory): string {
     vulnerabilities: "bug",
     iot: "house",
     cloud: "cloud",
+    remote: "desktop",
+    storage: "folder",
+    home: "house",
+    printers: "print",
+    misc: "star",
   };
   return icons[category];
 }
 
 /**
  * Source Attribution:
- * Many queries in this file are sourced from the awesome-shodan-queries repository
- * by Jake Jarvis: https://github.com/jakejarvis/awesome-shodan-queries
- *
- * The repository is licensed under Creative Commons Zero v1.0 Universal (CC0 1.0)
- * which allows for free use, modification, and distribution.
+ * Queries sourced from:
+ * - https://github.com/s-b-repo/advanced-shodan-requests
+ * - https://github.com/jakejarvis/awesome-shodan-queries (CC0 1.0)
  */

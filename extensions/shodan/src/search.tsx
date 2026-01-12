@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import {
   List,
   ActionPanel,
@@ -10,6 +10,7 @@ import {
 import { useShodanSearch } from "./hooks/useShodanSearch";
 import { useFavorites } from "./hooks/useFavorites";
 import { useApiCredits } from "./hooks/useApiCredits";
+import { useQueryHistory } from "./hooks/useQueryHistory";
 import { HostDetailView } from "./components/HostDetailView";
 import { EmptyStates } from "./components/EmptyStates";
 import {
@@ -28,11 +29,26 @@ export default function SearchCommand() {
   const { push } = useNavigation();
   const { addFavorite } = useFavorites();
   const { queryCredits } = useApiCredits();
+  const { addToHistory } = useQueryHistory();
+  const lastTrackedQuery = useRef<string>("");
 
   const { results, total, isLoading } = useShodanSearch({
     query: submittedQuery,
     enabled: submittedQuery.length > 0,
   });
+
+  // Track successful searches in history
+  useEffect(() => {
+    if (
+      submittedQuery &&
+      total > 0 &&
+      !isLoading &&
+      lastTrackedQuery.current !== submittedQuery
+    ) {
+      lastTrackedQuery.current = submittedQuery;
+      addToHistory(submittedQuery, total);
+    }
+  }, [submittedQuery, total, isLoading, addToHistory]);
 
   const handleSearch = useCallback((query: string) => {
     // Ensure query is a string (fix [object] bug)
