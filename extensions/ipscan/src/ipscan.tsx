@@ -54,9 +54,21 @@ export default function PortScanner() {
     await showToast({ title: "Scanning in progress...", style: Toast.Style.Animated });
 
     const portsToScan = Array.from({ length: 1024 }, (_, i) => i + 1);
-    const results = await Promise.all(
-      portsToScan.map(async (port) => ((await scanPort(values.ip, port)) ? port : null)),
-    );
+
+    const batchSize = 100; // tune to 50–100 depending on your env
+    const results: ScanResult[] = []; // adapt type to your code
+    
+    for (let i = 0; i < ports.length; i += batchSize) {
+      const batch = ports.slice(i, i + batchSize).map((port) => scanPort(host, port));
+      try {
+        const batchResults = await Promise.all(batch);
+        results.push(...batchResults);
+      } catch (err) {
+        // handle/record errors per-batch so one failing socket doesn't stop the whole scan
+        console.error("Batch scan failed:", err);
+      }
+    }
+
     const found = results.filter((p): p is number => p !== null);
 
     setOpenPorts(found);
