@@ -47,17 +47,30 @@ function getErrorMessage(error: unknown): string {
     return "Too many requests. Please wait a moment and try again.";
   }
 
+  if (errorString.includes("contains no songs") || errorString.includes("could be found on Spotify")) {
+    return "AI didn't return any valid songs. Please try a different prompt.";
+  }
+
   return errorString;
 }
 
 async function resolveTracksOnSpotify(
   aiTracks: { title: string; artist: string }[],
 ): Promise<(SimplifiedTrackObject | null)[]> {
-  return await Promise.all(
+  const tracks = await Promise.all(
     aiTracks.map(async (song) => {
       try {
-        const response = await searchTracks(`track:${song.title} artist:${song.artist}`, 1);
-        const track = response?.items?.[0];
+        // First try strict search with track: and artist: filters
+        let response = await searchTracks(`track:${song.title} artist:${song.artist}`, 1);
+        let track = response?.items?.[0];
+        if (track) {
+          return track;
+        }
+
+        // Fallback: try a more lenient search without filters
+        // This helps when AI gives slightly wrong song/artist names
+        response = await searchTracks(`${song.title} ${song.artist}`, 1);
+        track = response?.items?.[0];
         if (track) {
           return track;
         }
@@ -67,6 +80,14 @@ async function resolveTracksOnSpotify(
       return null;
     }),
   );
+
+  // Check if any tracks were found on Spotify
+  const validTracks = tracks.filter((t) => t !== null);
+  if (validTracks.length === 0) {
+    throw new Error("None of the suggested songs could be found on Spotify. Please try a different prompt.");
+  }
+
+  return tracks;
 }
 
 function parseAiPlaylistResponse(data: string): AiPlaylist {
@@ -95,8 +116,10 @@ function parseAiPlaylistResponse(data: string): AiPlaylist {
   // Fix unescaped quotes within strings (try to be conservative)
   // This is tricky - we'll attempt to parse and if it fails, try more aggressive fixes
 
+  let playlist: AiPlaylist;
+
   try {
-    return JSON.parse(jsonString) as AiPlaylist;
+    playlist = JSON.parse(jsonString) as AiPlaylist;
   } catch (firstError) {
     // Try additional cleanup for common AI mistakes
 
@@ -118,7 +141,7 @@ function parseAiPlaylistResponse(data: string): AiPlaylist {
     jsonString = jsonString.substring(0, endIndex);
 
     try {
-      return JSON.parse(jsonString) as AiPlaylist;
+      playlist = JSON.parse(jsonString) as AiPlaylist;
     } catch (secondError) {
       // Log the problematic JSON for debugging
       console.error("Failed to parse AI response:", jsonString.substring(0, 500));
@@ -127,6 +150,13 @@ function parseAiPlaylistResponse(data: string): AiPlaylist {
       );
     }
   }
+
+  // Validate that the playlist has tracks
+  if (!playlist.tracks || !Array.isArray(playlist.tracks) || playlist.tracks.length === 0) {
+    throw new Error("AI response contains no songs. Please try again with a different prompt.");
+  }
+
+  return playlist;
 }
 
 function TuneHistoryList({
@@ -199,17 +229,19 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
   "description": <Playlist description>,
   "tracks": [
     {
-      "title": <Song title>,
-      "artist": <Song's artist>
+      "title": <Song title - use exact Spotify song name>,
+      "artist": <Primary artist name - use exact Spotify artist name>
     },
     ...
   ]
 }
 
+IMPORTANT: Use exact song titles and artist names as they appear on Spotify. Avoid abbreviations, misspellings, or alternate versions of names. For featured artists, only include the primary/main artist.
+
 If you have listed fewer than 20 songs you must keep adding valid songs until the playlist length is at least 20.
 
 `,
-        { model: AI.Model["OpenAI_GPT5-mini"] },
+        { model: AI.Model["xAI_Grok-4.1_Fast"] },
       );
 
       const aiPlaylist = parseAiPlaylistResponse(data);
@@ -270,14 +302,14 @@ Generate an updated playlist of 20-75 songs that follows this instruction. You m
 - Remove songs that don't fit
 - Add new songs that match the user's request
 
-IMPORTANT: Return ONLY valid JSON, no markdown, no explanation. Use this exact structure:
-{"name": "Playlist Name", "description": "Playlist description", "tracks": [{"title": "Song Title", "artist": "Artist Name"}]}
+IMPORTANT: Return ONLY valid JSON, no markdown, no explanation. Use exact song titles and artist names as they appear on Spotify. Use this exact structure:
+{"name": "Playlist Name", "description": "Playlist description", "tracks": [{"title": "Exact Song Title", "artist": "Primary Artist Name"}]}
 
 Ensure all strings are properly escaped and there are no trailing commas.`;
 
       await showToast({ style: Toast.Style.Animated, title: "Tuning playlist with AI..." });
 
-      const data = await AI.ask(aiPrompt, { model: AI.Model["OpenAI_GPT5-mini"] });
+      const data = await AI.ask(aiPrompt, { model: AI.Model["xAI_Grok-4.1_Fast"] });
       const aiPlaylist = parseAiPlaylistResponse(data);
       const spotifyTracks = await resolveTracksOnSpotify(aiPlaylist.tracks);
 
@@ -326,17 +358,19 @@ Ensure all strings are properly escaped and there are no trailing commas.`;
   "description": <Playlist description>,
   "tracks": [
     {
-      "title": <Song title>,
-      "artist": <Song's artist>
+      "title": <Song title - use exact Spotify song name>,
+      "artist": <Primary artist name - use exact Spotify artist name>
     },
     ...
   ]
 }
 
+IMPORTANT: Use exact song titles and artist names as they appear on Spotify. Avoid abbreviations, misspellings, or alternate versions of names. For featured artists, only include the primary/main artist.
+
 If you have listed fewer than 20 songs you must keep adding valid songs until the playlist length is at least 20.
 
 `,
-        { model: AI.Model["OpenAI_GPT5-mini"] },
+        { model: AI.Model["xAI_Grok-4.1_Fast"] },
       );
 
       const aiPlaylist = parseAiPlaylistResponse(data);
