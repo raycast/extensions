@@ -196,7 +196,7 @@ async function parsePluginMetadata(
     // Get components with names
     const components = {
       commands: getComponentFiles(path.join(pluginPath, "commands")),
-      skills: getComponentFiles(path.join(pluginPath, "skills")),
+      skills: getSkillsFromDirectory(path.join(pluginPath, "skills")),
       agents: getComponentFiles(path.join(pluginPath, "agents")),
       hooks: getHooks(pluginPath),
       mcp: fs.existsSync(path.join(pluginPath, ".mcp.json")),
@@ -250,6 +250,76 @@ function getHooks(pluginPath: string): { count: number; names: string[] } {
     const hooksData = JSON.parse(fs.readFileSync(hooksPath, "utf-8"));
     const hookNames = Object.keys(hooksData);
     return { count: hookNames.length, names: hookNames };
+  } catch {
+    return { count: 0, names: [] };
+  }
+}
+
+/**
+ * Parse YAML frontmatter from a markdown file
+ * Returns key-value pairs from the frontmatter block, or null if no frontmatter exists
+ */
+function parseYamlFrontmatter(content: string): Record<string, string> | null {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return null;
+
+  const frontmatter: Record<string, string> = {};
+  for (const line of match[1].split("\n")) {
+    const colonIndex = line.indexOf(":");
+    if (colonIndex > 0) {
+      const key = line.slice(0, colonIndex).trim();
+      let value = line.slice(colonIndex + 1).trim();
+      // Strip surrounding quotes from values
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      frontmatter[key] = value;
+    }
+  }
+  return frontmatter;
+}
+
+/**
+ * Extract skill name from a SKILL.md file, falling back to directory name
+ */
+function extractSkillName(skillMdPath: string, fallbackName: string): string {
+  const content = fs.readFileSync(skillMdPath, "utf-8");
+  const frontmatter = parseYamlFrontmatter(content);
+  return frontmatter?.name || fallbackName;
+}
+
+/**
+ * Get skills from skills directory
+ * Supports both subdirectory structure (with SKILL.md) and direct .md/.sh files
+ */
+function getSkillsFromDirectory(dir: string): {
+  count: number;
+  names: string[];
+} {
+  if (!fs.existsSync(dir)) return { count: 0, names: [] };
+
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const names: string[] = [];
+
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const skillMdPath = path.join(dir, entry.name, "SKILL.md");
+        if (fs.existsSync(skillMdPath)) {
+          names.push(extractSkillName(skillMdPath, entry.name));
+        }
+      } else if (
+        entry.isFile() &&
+        (entry.name.endsWith(".md") || entry.name.endsWith(".sh"))
+      ) {
+        names.push(entry.name.replace(/\.(md|sh)$/, ""));
+      }
+    }
+
+    return { count: names.length, names };
   } catch {
     return { count: 0, names: [] };
   }
