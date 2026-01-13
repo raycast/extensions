@@ -3,7 +3,7 @@
 ## [Fixes and Improvements] - {PR_MERGE_DATE}
 
  - Added shortcut for the **Copy Path** action
- - Fixed shortcut not displaying on Windows for the **Reload** action
+ - Added shortcut for the **Reload** action to the Windows version
 
 ## [Windows Fix] - 2026-01-12
 
