@@ -52,7 +52,7 @@ export default function FakerListItem({ item, pin, unpin }: FakerListItemProps) 
       actions={
         <ActionPanel>
           <DefaultActions value={value} updateValue={updateValue} />
-          {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={{ modifiers: ["cmd"], key: "o" }} />}
+          {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={Keyboard.Shortcut.Common.Open} />}
           {pin && (
             <Action
               title="Pin Entry"
