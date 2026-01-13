@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { listLogEntries, LogEntry, LogSeverity, LOG_RESOURCE_TYPES } from "../../utils/gcpApi";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { ApiErrorView } from "../../components/ApiErrorView";
+import { CloudShellAction } from "../../components/CloudShellAction";
 
 interface LogsViewProps {
   projectId: string;
@@ -273,6 +274,9 @@ ${JSON.stringify(entry.textPayload || entry.jsonPayload || entry.protoPayload ||
             title="Open in Cloud Console"
             url={`https://console.cloud.google.com/logs/query?project=${projectId}`}
           />
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -288,6 +292,9 @@ ${JSON.stringify(entry.textPayload || entry.jsonPayload || entry.protoPayload ||
                 title="Open in Cloud Console"
                 url={`https://console.cloud.google.com/logs/query?project=${projectId}`}
               />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -348,6 +355,9 @@ ${JSON.stringify(entry.textPayload || entry.jsonPayload || entry.protoPayload ||
                       title="Open in Cloud Console"
                       url={`https://console.cloud.google.com/logs/query?project=${projectId}`}
                     />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Cloud Shell">
+                    <CloudShellAction projectId={projectId} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }

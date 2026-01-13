@@ -1,5 +1,9 @@
 # Random Data Generator Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Added shortcuts to the Windows version
+
 ## [Windows & Dependency Updates] - 2025-10-23
 
 - Updated to the latest version of Faker (v10)

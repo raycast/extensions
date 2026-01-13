@@ -3,18 +3,18 @@ import GithubOcto from "../Octokit";
 import { TreeType, TopicType } from "../types/GithubType";
 import path from "path";
 
+// Last Updated: 2026-01-13
+const TREE_SHA = "782cf20ba81055f4ffbee45a1346245dc69d3b9c";
+
 /**
  * Make an api call to Github to fetch all documentation filenames.
  */
 export async function getPagesFromGithub() {
   await showToast(Toast.Style.Animated, "Fetching from GitHub");
   const octokit = new GithubOcto();
-  const { data } = await octokit.request(
-    "GET /repos/vercel/next.js/git/trees/5ecbe4206d7f7e9f8f8ac72df2eaad7a5ecada64",
-    {
-      recursive: true,
-    },
-  );
+  const { data } = await octokit.request(`GET /repos/vercel/next.js/git/trees/${TREE_SHA}`, {
+    recursive: true,
+  });
 
   if (!data || !data.tree) throw new Error("Please visit https://nextjs.org/");
   const results = data.tree
@@ -49,6 +49,7 @@ export async function getPagesFromGithub() {
     });
   await LocalStorage.setItem("topics", JSON.stringify(results));
   await LocalStorage.setItem("updated_at", Date.now());
+  await LocalStorage.setItem("current_sha", TREE_SHA);
   return JSON.stringify(results);
 }
 
@@ -72,9 +73,11 @@ export async function checkForUpdates(): Promise<string | undefined> {
 
   const last_updated_date = new Date(last_updated || "").setHours(0, 0, 0, 0);
   const today = new Date().setHours(0, 0, 0, 0);
+  const current_sha = await LocalStorage.getItem<string>("current_sha");
 
   // If the data is older than 24hours, fetch it from Github
-  if (last_updated === undefined || today > last_updated_date) {
+  //  OR if the SHA is different i.e. SHA was updated but extension is using old SHA
+  if (last_updated === undefined || today > last_updated_date || current_sha !== TREE_SHA) {
     await getPagesFromGithub();
     return await getPagesFromCache();
   }

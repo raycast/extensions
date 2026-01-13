@@ -12,15 +12,10 @@ type Input = {
   assignedFile?: string;
 };
 
-/**
- * AI Tool: Add a new translation key to Lokalise
- * This tool allows Raycast AI to add translation keys with user confirmation
- */
 export default async function AddTranslationKey(input: Input) {
   try {
     const { keyName, translationValue, description, screenshotPaths, isPlural, platform, assignedFile } = input;
 
-    // Validate inputs
     if (!keyName || keyName.trim().length === 0) {
       return {
         success: false,
@@ -35,7 +30,6 @@ export default async function AddTranslationKey(input: Input) {
       };
     }
 
-    // Check if key already exists
     const existingKeys = await client.listKeysFromDatabase({
       searchQuery: keyName,
       limit: 5,
@@ -54,7 +48,6 @@ export default async function AddTranslationKey(input: Input) {
       };
     }
 
-    // Add the key to Lokalise
     await client.createTranslationKey({
       keyName,
       translationValue,

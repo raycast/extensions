@@ -22,6 +22,7 @@ import { initializeQuickLink } from "../../utils/QuickLinks";
 import { listStorageBuckets, createStorageBucket, deleteStorageBucket } from "../../utils/gcpApi";
 import { LogsView } from "../logs-service";
 import { ApiErrorView } from "../../components/ApiErrorView";
+import { CloudShellAction } from "../../components/CloudShellAction";
 
 interface StorageBucketViewProps {
   projectId: string;
@@ -322,6 +323,9 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           <Action title="View Storage Statistics" icon={Icon.BarChart} onAction={() => viewBucketStats("")} />
           <Action title="View Iam Members" icon={Icon.Person} onAction={viewIAMMembers} />
           <Action title="View Iam Members by Principal" icon={Icon.PersonCircle} onAction={viewIAMMembersByPrincipal} />
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -334,6 +338,9 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
             <ActionPanel>
               <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchBuckets} />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -385,6 +392,9 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
                   <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />
                   <Action title="Delete Bucket" icon={Icon.Trash} onAction={() => deleteBucket(bucket.name)} />
                   <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchBuckets} />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Cloud Shell">
+                  <CloudShellAction projectId={projectId} />
                 </ActionPanel.Section>
               </ActionPanel>
             }
