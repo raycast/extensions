@@ -55,7 +55,8 @@ function formatError(err: unknown): string {
 }
 
 export default function Command() {
-  const { apiKey, defaultLanguage } = getPreferenceValues<ExtensionPreferences>();
+  const { apiKey, defaultLanguage } =
+    getPreferenceValues<ExtensionPreferences>();
   const [targetLang, setTargetLang] = useState(defaultLanguage);
   const [sourceText, setSourceText] = useState("");
   const [translation, setTranslation] = useState("");
