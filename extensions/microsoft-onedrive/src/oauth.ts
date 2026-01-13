@@ -125,7 +125,10 @@ export async function getAccessToken(): Promise<string> {
   if (tokenSet.refreshToken && tokenSet.isExpired()) {
     await refreshTokens(tokenSet.refreshToken);
     const newTokenSet = await client.getTokens();
-    return newTokenSet?.accessToken || "";
+    if (!newTokenSet?.accessToken) {
+      throw new Error("Failed to refresh access token");
+    }
+    return newTokenSet.accessToken;
   }
 
   return tokenSet.accessToken;
