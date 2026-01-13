@@ -33,7 +33,7 @@ export default function Command() {
   // sv add options
   const [selected_addons, set_selected_addons] = useState<string[]>([]);
 
-  const skip_addons = skip_addons_check || selected_addons.length > 0;
+  const skip_addons = skip_addons_check && selected_addons.length === 0;
 
   let command = get_base_command(package_manager);
 
@@ -77,7 +77,7 @@ export default function Command() {
 
   if (selected_addons.length > 0) {
     if (command_type === "create") {
-      command += ` && ${get_base_command(package_manager)}add`;
+      command += ` --add`;
     }
     command += ` ${selected_addons.join(" ")}`;
   }
@@ -205,14 +205,14 @@ export default function Command() {
 
           <Form.Checkbox
             id="skipAddons"
-            label={`Skip add-ons prompt${selected_addons.length > 0 ? " (must be enabled if addons are selected)" : ""}`}
+            label={`Skip add-ons prompt${selected_addons.length > 0 ? " (can't be enabled if addons are selected)" : ""}`}
             value={skip_addons}
             onChange={(value) => {
               if (selected_addons.length === 0) {
                 set_skip_addons_checks(value);
               }
             }}
-            info={`Don't show the interactive add-ons selection during project creation (must be enabled if addons are selected)`}
+            info={`Don't show the interactive add-ons selection during project creation (can't be enabled if addons are selected)`}
           />
         </>
       )}

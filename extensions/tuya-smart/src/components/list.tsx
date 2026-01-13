@@ -20,8 +20,7 @@ export interface CommandListProps {
 }
 
 export function DeviceList(props: DeviceListProps): JSX.Element {
-  const devices = props.devices;
-
+  const devices = props.devices ?? [];
   const pinnedDevices = devices.filter((device) => {
     return device.pinned;
   });

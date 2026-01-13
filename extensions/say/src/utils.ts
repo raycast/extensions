@@ -25,7 +25,7 @@ export const useSaySettings = () => {
   return { voice, rate, device, keepSilentOnError, setVoice, setRate, setAudioDevice, setKeepSilentOnError };
 };
 
-export const getSaySettings = () => {
+const getSaySettings = () => {
   const voice = getCache("voice");
   const rate = getCache("rate");
   const audioDevice = getCache("audioDevice");
@@ -33,7 +33,7 @@ export const getSaySettings = () => {
   return { voice, rate, audioDevice, keepSilentOnError };
 };
 
-export const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
+const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
   const { voice, rate, audioDevice, keepSilentOnError } = settings;
   return {
     voice: voice === systemDefault ? undefined : voice,
@@ -42,6 +42,8 @@ export const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings
     keepSilentOnError,
   };
 };
+
+export const getParsedSaySettings = (): ParsedSaySettings => parseSaySettings(getSaySettings());
 
 export const getSortedVoices = async () => {
   const orignalVoices = await getVoices();

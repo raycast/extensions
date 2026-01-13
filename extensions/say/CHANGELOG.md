@@ -1,5 +1,9 @@
 # Say - Text to Speech Changelog
 
+## [Enhancement] - 2025-12-17
+
+- Add AI Say Tool to say things out loud from AI Chat
+
 ## [Bugfix] - 2025-10-06
 
 - Fix missing await for say function to keep the command process alive

@@ -1,5 +1,8 @@
 # Spell Changelog
 
+## [Bug Fix] - 2025-12-03
+ - Fix for request error
+
 ## [Windows Support and Various Improvements] - 2025-11-06
 
 - Add windows support

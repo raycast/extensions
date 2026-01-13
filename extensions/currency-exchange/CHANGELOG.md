@@ -1,5 +1,7 @@
 # Currency Exchange Changelog
 
+## [Added missing contributor] - 2025-11-25
+
 ## [Update] - 2025-11-04
 
 - Toggled on windows support

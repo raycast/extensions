@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Icon, List, clearSearchBar } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, clearSearchBar } from "@raycast/api";
 import React from "react";
 import { useTargetLanguages } from "../hooks";
 import { languages, supportedLanguagesByCode } from "../languages";
 import { AUTO_DETECT } from "../simple-translate";
 
-export const TargetLanguageList: React.VFC = () => {
+export const TargetLanguageList: React.FC = () => {
   const [targetLanguages, setTargetLanguages] = useTargetLanguages();
 
   return (
@@ -22,7 +22,7 @@ export const TargetLanguageList: React.VFC = () => {
                     title="Remove"
                     icon={Icon.Minus}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => {
                       const updated = targetLanguages.filter((l) => l != lang);
                       setTargetLanguages(updated.length === 0 ? ["en"] : updated);
@@ -43,7 +43,7 @@ export const TargetLanguageList: React.VFC = () => {
                     }}
                   />
                   <Action
-                    title="Move down"
+                    title="Move Down"
                     icon={Icon.ArrowDown}
                     shortcut={{ modifiers: ["shift"], key: "arrowDown" }}
                     onAction={() => {

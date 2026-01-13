@@ -12,6 +12,7 @@ struct Location: Codable {
 struct Reminder: Codable {
   let id: String
   let openUrl: String
+  let attachedUrls: [String]
   let title: String
   let notes: String
   let dueDate: String?

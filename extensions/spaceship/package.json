@@ -29,6 +29,20 @@
   ],
   "commands": [
     {
+      "name": "check-domain-availability",
+      "title": "Check Domain Availability",
+      "description": "Check the availability of a domain",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "example.com",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "manage-domains",
       "title": "Manage Domains",
       "description": "View Domains and DNS Records",
@@ -40,8 +54,8 @@
     "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2",
     "dayjs": "^1.11.18"
   },
   "devDependencies": {

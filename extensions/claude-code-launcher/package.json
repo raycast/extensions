@@ -5,6 +5,9 @@
   "description": "Quickly open Claude Code in any directory with your preferred terminal.",
   "icon": "icon.png",
   "author": "stephendolan",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -40,6 +43,10 @@
         {
           "title": "Ghostty",
           "value": "Ghostty"
+        },
+        {
+          "title": "Warp",
+          "value": "Warp"
         }
       ]
     },

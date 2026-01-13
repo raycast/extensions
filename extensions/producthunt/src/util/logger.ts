@@ -30,11 +30,50 @@ const config: LoggerConfig = {
   enableToasts: false,
 };
 
+// Format log level with color emoji for better visibility
+function formatLevel(level: LogLevel): string {
+  switch (level) {
+    case "error":
+      return "❌";
+    case "warn":
+      return "⚠️";
+    case "info":
+      return "ℹ️";
+    case "debug":
+      return "🔍";
+    case "trace":
+      return "📍";
+  }
+}
+
+// Format data object for readable output
+function formatData(data?: Record<string, unknown>): string {
+  if (!data || Object.keys(data).length === 0) return "";
+  const pairs = Object.entries(data)
+    .filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => {
+      if (typeof v === "object") {
+        try {
+          return `${k}=${JSON.stringify(v)}`;
+        } catch {
+          return `${k}=[object]`;
+        }
+      }
+      return `${k}=${v}`;
+    });
+  return pairs.length > 0 ? ` (${pairs.join(", ")})` : "";
+}
+
 // Basic sink: send error to stderr, warnings to warn, others to log
 const sink: (e: LogEvent) => void = (e) => {
   const writer = e.level === "error" ? console.error : e.level === "warn" ? console.warn : console.log;
   try {
-    writer(JSON.stringify(e));
+    // Format: [emoji] [component:event] message (data)
+    const level = formatLevel(e.level);
+    const prefix = `${level} [${e.component}:${e.event}]`;
+    const message = e.msg ? ` ${e.msg}` : "";
+    const data = formatData(e.data);
+    writer(`${prefix}${message}${data}`);
   } catch {
     writer(`[log] ${e.level} ${e.component} ${e.event}`);
   }

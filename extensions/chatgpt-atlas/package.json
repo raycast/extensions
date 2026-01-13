@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "xmok"
   ],
   "platforms": [
     "macOS"
@@ -33,8 +34,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

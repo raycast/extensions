@@ -10,7 +10,7 @@ export default function AskAI(props) {
         buffer: props?.launchContext?.buffer,
         context: props?.launchContext?.context,
         useSelected: props?.launchContext?.useSelected,
-      }
+      },
     );
   } else {
     return useGemini(props, { context: prompt });

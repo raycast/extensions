@@ -18,7 +18,8 @@
     "ridemountainpig",
     "GLaDO8",
     "xmok",
-    "luiscarlospando"
+    "luiscarlospando",
+    "janrokita"
   ],
   "pastContributors": [
     "sh-cho"
@@ -52,6 +53,21 @@
       "subtitle": "Raindrop.io",
       "description": "Save the current browser tab to Raindrop",
       "mode": "view"
+    },
+    {
+      "name": "quick_add",
+      "title": "Quick Add Bookmark",
+      "subtitle": "Raindrop.io",
+      "description": "Quickly save a bookmark",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": true,
+          "placeholder": "URL"
+        }
+      ]
     }
   ],
   "tools": [
@@ -378,6 +394,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

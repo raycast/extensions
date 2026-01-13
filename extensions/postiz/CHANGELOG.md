@@ -1,5 +1,12 @@
 # Postiz Changelog
 
+## [Go to Different Periods in v2] - 2025-12-07
+
+In Search Posts **v2**:
+- "Go to Next Period" takes you to the next period e.g. _next month_
+- "Go to Previous Period" takes you to the previous period e.g. _previous week_
+- "Go to Date" takes you to a specific _date_ which will then be parsed according to **display** settings (e.g. _day_, _week_, _month_)
+
 ## [View Post as Markdown + Month Display Extends till EoM] - 2025-11-09
 
 - Posts are now shown in **markdown** to give a better idea
