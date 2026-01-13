@@ -1,10 +1,10 @@
 # Apple Reminders Changelog
 
-## [Fix crash when attachedUrls is undefined] - {PR_MERGE_DATE}
+## [Fix crash when attachedUrls is undefined] - 2026-01-13
 
 - Handle reminders where `attachedUrls` may be undefined to prevent runtime errors
 
-## [Open all attached reminder URLs] - {PR_MERGE_DATE}
+## [Open all attached reminder URLs] - 2026-01-13
 
 - Detect all URLs in reminder notes (and Reminder URL when available) and expose an “Open Attached URL(s)” action in the list and menu bar.
 
