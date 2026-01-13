@@ -62,9 +62,6 @@ function Actions(props: { name: string }) {
         <Action.Open
           icon={Icon.Code}
           shortcut={Keyboard.Shortcut.Common.Edit}
-          // settings.json is the case-sensitive name of the settings
-          // file for Windows Terminal. we do not need this.
-          // eslint-disable-next-line
           title="Open settings.json"
           target={`C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`}
         />
