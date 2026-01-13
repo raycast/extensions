@@ -1,6 +1,6 @@
 # Google Cloud CLI Changelog
 
-## [1.0.3] - 2026-01-12
+## [1.0.3] - {PR_MERGE_DATE}
 - Added Cloud Shell SSH connection action across all views
 - Added keyboard shortcut (Cmd+Opt+S) to copy Cloud Shell connection command
 - Improved action component error handling and input validation
