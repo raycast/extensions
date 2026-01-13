@@ -54,8 +54,8 @@ function formatError(err: unknown): string {
   return message;
 }
 
-export default function Command(): JSX.Element {
-  const { apiKey, defaultLanguage } = getPreferenceValues<Preferences>();
+export default function Command() {
+  const { apiKey, defaultLanguage } = getPreferenceValues<ExtensionPreferences>();
   const [targetLang, setTargetLang] = useState(defaultLanguage);
   const [sourceText, setSourceText] = useState("");
   const [translation, setTranslation] = useState("");
@@ -125,14 +125,14 @@ export default function Command(): JSX.Element {
   async function handlePaste(): Promise<void> {
     if (!translation) return;
     await Clipboard.paste(translation);
-    await popToRoot({ clearRootSearch: true });
+    await popToRoot({ clearSearchBar: true });
   }
 
   async function handleCopy(): Promise<void> {
     if (!translation) return;
     await Clipboard.copy(translation);
     await showHUD("Copied");
-    await popToRoot({ clearRootSearch: true });
+    await popToRoot({ clearSearchBar: true });
   }
 
   if (error === "No text selected") {
