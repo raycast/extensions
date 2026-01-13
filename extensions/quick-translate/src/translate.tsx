@@ -9,13 +9,8 @@ import {
   showHUD,
   Icon,
 } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import * as deepl from "deepl-node";
-
-interface Preferences {
-  apiKey: string;
-  defaultLanguage: string;
-}
 
 const LANGUAGES = [
   { code: "es", name: "Spanish" },
@@ -68,20 +63,23 @@ export default function Command(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const lastCheckedTextRef = useRef("");
 
-  async function doTranslate(text: string, lang: string): Promise<void> {
-    setIsLoading(true);
-    setError(null);
+  const doTranslate = useCallback(
+    async (text: string, lang: string): Promise<void> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await translateText(apiKey, text, lang);
-      setTranslation(result);
-      await Clipboard.copy(result);
-    } catch (err) {
-      setError(formatError(err));
-    } finally {
-      setIsLoading(false);
-    }
-  }
+      try {
+        const result = await translateText(apiKey, text, lang);
+        setTranslation(result);
+        await Clipboard.copy(result);
+      } catch (err) {
+        setError(formatError(err));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [apiKey],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -116,7 +114,7 @@ export default function Command(): JSX.Element {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [targetLang]);
+  }, [targetLang, doTranslate]);
 
   async function handleLanguageChange(lang: string): Promise<void> {
     if (!sourceText) return;
