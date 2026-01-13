@@ -1,5 +1,5 @@
 import { Detail, LocalStorage, ActionPanel, Action, Form } from "@raycast/api";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Command() {
   const [text, setText] = useState("");
