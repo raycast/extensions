@@ -4,8 +4,8 @@ import AddyError from "./error";
 type Init = { body?: Record<string, unknown> | null | undefined } & Omit<RequestInit, "body">;
 
 async function fetch<R = void>(path: string, init: Init = {}): Promise<R> {
-  const { apiKey, endpoint } = getPreferenceValues<{ apiKey: string; endpoint?: string }>();
-  const baseUrl = new URL("/api/v1/", endpoint ?? "https://app.addy.io");
+  const { apiKey, endpoint } = getPreferenceValues<ExtensionPreferences>();
+  const baseUrl = new URL("api/v1/", endpoint ?? "https://app.addy.io/");
   const url = new URL(path, baseUrl);
 
   const response = await global.fetch(url.toString(), {
