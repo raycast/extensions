@@ -242,7 +242,10 @@ export function EmptyFolderActionsPanel({
         <Action.Push
           title="Upload to Current Folder…"
           icon={Icon.Upload}
-          shortcut={{ modifiers: ["cmd"], key: "u" }}
+          shortcut={{
+            macOS: { modifiers: ["shift", "cmd"], key: "u" },
+            Windows: { modifiers: ["shift", "ctrl"], key: "u" },
+          }}
           target={
             <UploadForm
               destinationFolder={
