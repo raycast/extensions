@@ -349,7 +349,21 @@ export async function downloadFile(item: DriveItem): Promise<void> {
       position += chunk.length;
     }
 
-    const downloadsPath = path.join(os.homedir(), "Downloads", item.name);
+    let downloadsPath = path.join(os.homedir(), "Downloads", item.name);
+
+    let counter = 1;
+    while (
+      await fs
+        .access(downloadsPath)
+        .then(() => true)
+        .catch(() => false)
+    ) {
+      const ext = path.extname(item.name);
+      const nameWithoutExt = path.basename(item.name, ext);
+      downloadsPath = path.join(os.homedir(), "Downloads", `${nameWithoutExt} (${counter})${ext}`);
+      counter++;
+    }
+
     await fs.writeFile(downloadsPath, Buffer.from(buffer));
 
     toast.style = Toast.Style.Success;
