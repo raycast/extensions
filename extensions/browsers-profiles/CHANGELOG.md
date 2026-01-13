@@ -1,5 +1,9 @@
 # Raycast Browsers Profiles
 
+## [Fix Chromium profile discovery logics] - {PR_MERGE_DATE}
+
+- Fallback to original state file discovery if the Preferences folder does not exist
+
 ## [Allow the user to filter out non-interesting profiles] - 2026-01-13
 
 - Adding an option to let the users select only a subset of the available browsers
