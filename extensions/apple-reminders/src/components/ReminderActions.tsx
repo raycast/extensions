@@ -10,7 +10,7 @@ import {
 } from "swift:../../swift/AppleReminders";
 
 import { CreateReminderForm } from "../create-reminder";
-import { getPriorityIcon } from "../helpers";
+import { getAttachedUrls, getPriorityIcon } from "../helpers";
 import { Priority, Reminder, List as TList } from "../hooks/useData";
 import useLocations, { Location, resolveLocationIcon } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
@@ -27,7 +27,7 @@ type ReminderActionsProps = {
 
 export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
   const { locations } = useLocations();
-  const attachedUrls = reminder.attachedUrls.filter(Boolean);
+  const attachedUrls = getAttachedUrls(reminder);
 
   async function toggleReminder() {
     async function toggle() {
