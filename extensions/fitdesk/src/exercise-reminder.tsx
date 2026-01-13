@@ -30,7 +30,7 @@ export default function ExerciseReminder() {
     ]);
 
     // Get interval from preferences
-    const prefs = getPreferenceValues<Preferences.ExerciseReminder>();
+    const prefs = getPreferenceValues<{ reminderInterval: string }>();
     const intervalMinutes = parseInt(prefs.reminderInterval) || 45;
 
     // Update settings with preference interval
