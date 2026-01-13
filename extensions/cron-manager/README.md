@@ -2,6 +2,8 @@
 
 Manage your local cron jobs directly from Raycast. Create, edit, run, and monitor cron jobs with a beautiful and easy-to-use interface.
 
+![Cron Manager Screenshot](metadata/1-cron-manager.png)
+
 ## Features
 
 - **Create & Manage Jobs**: Easily create cron jobs with a user-friendly form.

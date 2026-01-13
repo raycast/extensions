@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
 import { CronJob } from "../types";
 
@@ -23,9 +23,25 @@ export async function readCrontab(): Promise<CronJob[]> {
 
 export async function writeCrontab(jobs: CronJob[]): Promise<void> {
   const fileContent = serializeCrontab(jobs);
-  // Escape double quotes for shell echo
-  const escapedContent = fileContent.replace(/"/g, '\\"');
-  await execAsync(`echo "${escapedContent}" | crontab -`);
+
+  return new Promise((resolve, reject) => {
+    const child = spawn("crontab", ["-"]);
+
+    child.stdin.write(fileContent);
+    child.stdin.end();
+
+    child.on("error", (error) => {
+      reject(error);
+    });
+
+    child.on("exit", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`crontab command failed with exit code ${code}`));
+      }
+    });
+  });
 }
 
 function parseCrontab(content: string): CronJob[] {
