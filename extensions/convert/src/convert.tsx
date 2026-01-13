@@ -145,6 +145,7 @@ export default function Command() {
       } else {
         const hslToRgbResult = HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]);
         setHEX(HSLtoHEX([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
+        setHSL([+hslMatch[2], +hslMatch[4], +hslMatch[7]]);
         setRGB(hslToRgbResult);
         setOKLCH(RGBtoOKLCH(hslToRgbResult));
         setClosestColor(findClosestColor(hslToRgbResult[0], hslToRgbResult[1], hslToRgbResult[2]));
