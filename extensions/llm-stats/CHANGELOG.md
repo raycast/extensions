@@ -1,3 +1,3 @@
-# Artificial Analysis Changelog
+# LLM Stats Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
