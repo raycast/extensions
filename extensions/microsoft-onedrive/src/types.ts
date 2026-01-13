@@ -116,10 +116,6 @@ export interface BreadcrumbPath {
   name: string;
 }
 
-export interface Preferences {
-  sharePermission: "edit" | "view";
-}
-
 export type SortOption = "relevance" | "lastModifiedDateTime";
 
 export interface SortConfig {
