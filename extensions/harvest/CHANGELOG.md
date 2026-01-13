@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [Flexible Duration Input] - {PR_MERGE_DATE}
+## [Flexible Duration Input] - 2026-01-13
 
 - Added: Duration field now accepts flexible formats like `15m`, `1h30m`, `1.5h`, `.5+15m`
 - Changed: Duration auto-formats on blur based on user's time format preference
