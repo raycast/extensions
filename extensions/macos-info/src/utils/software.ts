@@ -31,7 +31,7 @@ export async function getSoftwareInfo(property: SoftwareProperty, formatResponse
       throw new Error("No software data available");
     }
 
-    const value = data.SPSoftwareDataType[0][property];
+    const value = data.SPSoftwareDataType[0]?.[property] ?? 'Not available';
 
     if (!value) {
       throw new Error(`No ${property} information available`);
