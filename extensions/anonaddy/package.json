@@ -75,7 +75,7 @@
     {
       "name": "endpoint",
       "description": "Base URL for self-hosted Addy instances. Leave empty to use the default.",
-      "placeholder": "https://app.addy.io",
+      "placeholder": "https://app.addy.io/",
       "type": "textfield",
       "required": false,
       "title": "Custom URL"
