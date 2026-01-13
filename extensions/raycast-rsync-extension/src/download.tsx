@@ -17,6 +17,7 @@ import {
   TransferOptions,
   RsyncOptions,
 } from "./types/server";
+import { getRsyncPreferences } from "./utils/preferences";
 
 /**
  * Main download command component
@@ -157,11 +158,25 @@ function LocalPathForm({
 }) {
   const [localPath, setLocalPath] = useState<string>("");
   const [localPathError, setLocalPathError] = useState<string | undefined>();
-  const [humanReadable, setHumanReadable] = useState<boolean>(true);
-  const [showProgress, setShowProgress] = useState<boolean>(true);
-  const [deleteExtraneous, setDeleteExtraneous] = useState<boolean>(false);
 
-  async function handleSubmit(values: { localPath: string }) {
+  // Initialize rsync options with global preferences
+  const defaultRsyncOptions = getRsyncPreferences();
+  const [humanReadable, setHumanReadable] = useState<boolean>(
+    defaultRsyncOptions.humanReadable ?? false,
+  );
+  const [progress, setProgress] = useState<boolean>(
+    defaultRsyncOptions.progress ?? false,
+  );
+  const [deleteExtra, setDeleteExtra] = useState<boolean>(
+    defaultRsyncOptions.delete ?? false,
+  );
+
+  async function handleSubmit(values: {
+    localPath: string;
+    humanReadable: boolean;
+    progress: boolean;
+    deleteExtra: boolean;
+  }) {
     const localPathValue = values.localPath.trim();
 
     if (!localPathValue) {
@@ -201,11 +216,11 @@ function LocalPathForm({
       return;
     }
 
-    // Execute transfer
+    // Execute transfer using form values
     await executeTransfer(hostConfig, remotePath, localPathValue, {
-      humanReadable,
-      progress: showProgress,
-      delete: deleteExtraneous,
+      humanReadable: values.humanReadable,
+      progress: values.progress,
+      delete: values.deleteExtra,
     });
   }
 
@@ -310,27 +325,27 @@ function LocalPathForm({
       <Form.Separator />
       <Form.Description
         title="Rsync Options"
-        text="Configure additional rsync transfer options"
+        text="Configure options for this transfer"
       />
       <Form.Checkbox
         id="humanReadable"
         label="Human-readable file sizes (-h)"
         value={humanReadable}
         onChange={setHumanReadable}
-        info="Display file sizes in KB, MB, GB format"
+        info="Display file sizes in human-readable format (e.g., 1.5M, 500K)"
       />
       <Form.Checkbox
         id="progress"
         label="Show progress (-P)"
-        value={showProgress}
-        onChange={setShowProgress}
-        info="Show transfer progress and support partial transfers"
+        value={progress}
+        onChange={setProgress}
+        info="Display progress information and support partial transfers"
       />
       <Form.Checkbox
-        id="delete"
+        id="deleteExtra"
         label="Delete extraneous files (--delete)"
-        value={deleteExtraneous}
-        onChange={setDeleteExtraneous}
+        value={deleteExtra}
+        onChange={setDeleteExtra}
         info="Delete files in destination that don't exist in source (use with caution)"
       />
     </Form>

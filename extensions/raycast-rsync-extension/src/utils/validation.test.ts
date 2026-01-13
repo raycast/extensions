@@ -85,6 +85,43 @@ describe("Validation Utilities", () => {
       expect(result.valid).toBe(false);
       expect(result.error).toContain("Invalid path format");
     });
+
+    it("should return invalid for path with shell metacharacters (semicolon)", () => {
+      const result = validateRemotePath("/tmp/test; rm -rf /");
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain("shell metacharacters");
+    });
+
+    it("should return invalid for path with shell metacharacters (pipe)", () => {
+      const result = validateRemotePath("/tmp/test | cat");
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain("shell metacharacters");
+    });
+
+    it("should return invalid for path with shell metacharacters (ampersand)", () => {
+      const result = validateRemotePath("/tmp/test & echo");
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain("shell metacharacters");
+    });
+
+    it("should return invalid for path with shell metacharacters (backtick)", () => {
+      const result = validateRemotePath("/tmp/test`whoami`");
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain("shell metacharacters");
+    });
+
+    it("should return invalid for path with shell metacharacters (dollar sign)", () => {
+      const result = validateRemotePath("/tmp/test$HOME");
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain("shell metacharacters");
+    });
+
+    it("should allow parentheses in paths (legitimate filename characters)", () => {
+      const result = validateRemotePath("/tmp/test(file)");
+      // Parentheses are allowed as they can legitimately appear in filenames
+      // and are safely handled by our escaping
+      expect(result.valid).toBe(true);
+    });
   });
 
   describe("validatePort", () => {

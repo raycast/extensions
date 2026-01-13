@@ -31,6 +31,35 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "rsyncHumanReadable",
+      "type": "checkbox",
+      "title": "Human-readable file sizes",
+      "label": "Human-readable file sizes (-h)",
+      "description": "Display file sizes in KB, MB, GB format",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "rsyncProgress",
+      "type": "checkbox",
+      "title": "Show progress",
+      "label": "Show progress (-P)",
+      "description": "Show transfer progress and support partial transfers",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "rsyncDelete",
+      "type": "checkbox",
+      "title": "Delete extraneous files",
+      "label": "Delete extraneous files (--delete)",
+      "description": "Delete files in destination that don't exist in source (use with caution)",
+      "default": false,
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.65.0",
     "@raycast/utils": "^1.12.0"

@@ -33,7 +33,8 @@ describe("Rsync Options E2E", () => {
       expect(command).toContain("-avz");
       // Verify individual flags are present in the combined string
       expect(command).toMatch(/-[avz]+/);
-      const flagsMatch = command.match(/rsync -e "[^"]+" (-[^ ]+)/);
+      // Command now uses single quotes for escaping
+      const flagsMatch = command.match(/rsync -e '[^']+' (-[^ ]+)/);
       expect(flagsMatch).not.toBeNull();
       const flags = flagsMatch![1];
       expect(flags).toContain("a"); // archive
@@ -129,7 +130,8 @@ describe("Rsync Options E2E", () => {
       const command = buildRsyncCommand(options);
 
       // Extract the flags part (between -e and paths)
-      const flagsMatch = command.match(/rsync -e "[^"]+" (-[^ ]+)/);
+      // Command now uses single quotes for escaping
+      const flagsMatch = command.match(/rsync -e '[^']+' (-[^ ]+)/);
       expect(flagsMatch).not.toBeNull();
       const flags = flagsMatch![1];
 
@@ -161,8 +163,10 @@ describe("Rsync Options E2E", () => {
 
       // Should include both progress and human-readable flags
       expect(command).toMatch(/-[avz]+hP/);
-      expect(command).toContain("/local/file.txt");
-      expect(command).toContain("testserver:/remote/file.txt");
+      // Paths are now escaped with single quotes
+      expect(command).toContain("'/local/file.txt'");
+      expect(command).toContain("'testserver':");
+      expect(command).toContain("'/remote/file.txt'");
     });
 
     it("should handle upload with all options enabled", () => {
@@ -180,11 +184,12 @@ describe("Rsync Options E2E", () => {
 
       const command = buildRsyncCommand(options);
 
+      // Command now uses single quotes for escaping
       expect(command).toMatch(
-        /^rsync -e "ssh -F .+" -[avz]+hP --delete .+ testserver:.+$/,
+        /^rsync -e 'ssh -F .+' -[avz]+hP --delete .+ 'testserver':.+$/,
       );
-      expect(command).toContain("/local/directory");
-      expect(command).toContain("/remote/directory");
+      expect(command).toContain("'/local/directory'");
+      expect(command).toContain("'/remote/directory'");
     });
 
     it("should handle download with all options enabled", () => {
@@ -202,11 +207,14 @@ describe("Rsync Options E2E", () => {
 
       const command = buildRsyncCommand(options);
 
+      // Command now uses single quotes for escaping
       expect(command).toMatch(
-        /^rsync -e "ssh -F .+" -[avz]+hP --delete testserver:.+ .+$/,
+        /^rsync -e 'ssh -F .+' -[avz]+hP --delete 'testserver':.+ .+$/,
       );
-      expect(command).toContain("testserver:/remote/source");
-      expect(command).toContain("/local/destination");
+      expect(command).toContain("'testserver':");
+      expect(command).toContain("'/remote/source'");
+      // For downloads, local destination should have trailing slash to ensure directory is created
+      expect(command).toContain("'/local/destination/'");
     });
   });
 
@@ -294,9 +302,10 @@ describe("Rsync Options E2E", () => {
 
       const command = buildRsyncCommand(options);
 
-      // Verify command structure: rsync -e "ssh -F config" flags source dest
+      // Verify command structure: rsync -e 'ssh -F config' flags source dest
+      // Command now uses single quotes for escaping
       expect(command).toMatch(
-        /^rsync -e "ssh -F .+" -[avz]+hP .+ testserver:.+$/,
+        /^rsync -e 'ssh -F .+' -[avz]+hP .+ 'testserver':.+$/,
       );
     });
 

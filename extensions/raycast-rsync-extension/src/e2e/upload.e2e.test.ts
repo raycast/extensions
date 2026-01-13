@@ -75,9 +75,11 @@ describe("Upload E2E Flow", () => {
     const command = buildRsyncCommand(options);
     expect(command).toContain("rsync");
     expect(command).toContain("-a");
-    expect(command).toContain("testserver:");
-    expect(command).toContain(testLocalFile);
-    expect(command).toContain(remotePath);
+    // Host alias is now escaped with single quotes
+    expect(command).toContain("'testserver':");
+    // Paths are now escaped with single quotes
+    expect(command).toContain(`'${testLocalFile}'`);
+    expect(command).toContain(`'${remotePath}'`);
   });
 
   it("should handle missing local file error in upload workflow", () => {
@@ -197,9 +199,9 @@ describe("Upload E2E Flow", () => {
 
     const command = buildRsyncCommand(options);
 
-    // Verify command structure
-    expect(command).toMatch(/^rsync -e "ssh -F .+" -avz .+ production:.+$/);
-    expect(command).toContain(testLocalFile);
-    expect(command).toContain("/var/www/file.txt");
+    // Verify command structure (now uses single quotes for escaping)
+    expect(command).toMatch(/^rsync -e 'ssh -F .+' -avz .+ 'production':.+$/);
+    expect(command).toContain(`'${testLocalFile}'`);
+    expect(command).toContain("'/var/www/file.txt'");
   });
 });
