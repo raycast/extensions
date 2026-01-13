@@ -83,7 +83,7 @@ export default function Command() {
     // Handle ambiguous dot-separated dates (MM.dd.yyyy vs dd.MM.yyyy)
     const dotSeparatedMatch = dateString.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
     if (dotSeparatedMatch) {
-      const [, first, second, year, hour, minute, sec] = dotSeparatedMatch;
+      const [, first, second, , , , sec] = dotSeparatedMatch;
       const firstNum = parseInt(first, 10);
       const secondNum = parseInt(second, 10);
       const hasSeconds = sec !== undefined;
