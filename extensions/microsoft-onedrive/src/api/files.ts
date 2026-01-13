@@ -144,7 +144,9 @@ export async function searchFiles(
   try {
     // Relevance uses Microsoft Graph's default ranking, lastModifiedDateTime sorts by date
     const orderByParam = sortOption === "relevance" ? "" : "$orderby=lastModifiedDateTime desc&";
-    const endpoint = `${getDrivePrefix(driveId)}/root/search(q='${encodeURIComponent(query)}')?${orderByParam}${DRIVE_ITEM_SELECT}`;
+    // Escape single quotes for OData syntax before encoding
+    const escapedQuery = encodeURIComponent(query.replace(/'/g, "''"));
+    const endpoint = `${getDrivePrefix(driveId)}/root/search(q='${escapedQuery}')?${orderByParam}${DRIVE_ITEM_SELECT}`;
     const response = await graphRequest(endpoint);
     const data = (await response.json()) as SearchResult;
 
