@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-translate",
+  "title": "Quick Translate",
+  "description": "Translate selected text instantly using DeepL API",
+  "icon": "icon.png",
+  "author": "jonfer",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate Selection",
+      "description": "Translate selected text using DeepL",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "DeepL API Key",
+      "description": "Your DeepL API key (get one at deepl.com/pro-api)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultLanguage",
+      "title": "Default Language",
+      "description": "Default target language for translations",
+      "type": "dropdown",
+      "required": true,
+      "default": "es",
+      "data": [
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "English (US)",
+          "value": "en-US"
+        },
+        {
+          "title": "English (UK)",
+          "value": "en-GB"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt-PT"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^2.2.2",
+    "deepl-node": "^1.14.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
