@@ -1,0 +1,62 @@
+{
+  "name": "gcp-console-navigator",
+  "title": "GCP Console Navigator",
+  "description": "Quickly open GCP console resources by project and resource type",
+  "icon": "acorn-gcp.png",
+  
+  "author": "efabens",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "gcp-navigate",
+      "icon": "acorn-gcp.png",
+      "title": "GCP Console",
+      "subtitle": "Open GCP console for a project & resource",
+      "description": "Navigate to GCP console pages by project and resource type",
+      "mode": "view",
+      "keywords": ["gcp", "g"]
+    },
+    {
+      "name": "gcp-refresh-projects",
+      "icon": "acorn-gcp.png",
+      "title": "Refresh GCP Projects",
+      "description": "Manually refresh the cached GCP projects list",
+      "mode": "no-view",
+      "keywords": ["gcp", "refresh", "projects"]
+    },
+    {
+      "name": "add-project-keyword",
+      "icon": "acorn-gcp.png",
+      "title": "Add Project Keyword",
+      "description": "Add search keywords to a GCP project",
+      "mode": "view",
+      "keywords": ["gcp", "keyword", "alias"]
+    },
+    {
+      "name": "add-custom-resource",
+      "title": "Add Custom Resource",
+      "icon": "acorn-gcp.png",
+      "description": "Add or override a GCP resource type",
+      "mode": "view",
+      "keywords": ["gcp", "resource", "custom"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
