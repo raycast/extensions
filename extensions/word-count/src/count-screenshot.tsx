@@ -1,4 +1,4 @@
-import { closeMainWindow, showHUD, LaunchProps, LaunchType, open } from "@raycast/api";
+import { closeMainWindow, showHUD, LaunchProps, LaunchType, open, confirmAlert, Icon } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
 import { count } from "./lib/count";
 
@@ -39,6 +39,19 @@ export default async function Command({ launchContext }: LaunchProps<{ launchCon
   }
 
   // Initial invocation: launch ScreenOCR
+  if (process.platform === "win32") {
+    await confirmAlert({
+      title: "Not Supported on Windows",
+      message:
+        "Screenshot text recognition requires macOS. This feature uses the ScreenOCR extension which is not available on Windows.",
+      icon: Icon.Warning,
+      primaryAction: {
+        title: "OK",
+      },
+    });
+    return;
+  }
+
   await closeMainWindow();
 
   try {

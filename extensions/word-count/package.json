@@ -29,7 +29,7 @@
       "name": "count",
       "title": "Count",
       "subtitle": "Word Count",
-      "description": "CCount characters, words, sentences, and paragraphs in text.",
+      "description": "Count characters, words, sentences, and paragraphs in text.",
       "mode": "view",
       "keywords": [
         "word",
@@ -44,9 +44,6 @@
       "subtitle": "Word Count",
       "description": "Capture a screenshot and count words, characters, sentences, and paragraphs using OCR.",
       "mode": "no-view",
-      "platforms": [
-        "macOS"
-      ],
       "keywords": [
         "screenshot",
         "ocr",
