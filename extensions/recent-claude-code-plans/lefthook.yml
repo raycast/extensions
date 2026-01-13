@@ -1,0 +1,8 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,ts,tsx,json}"
+      run: npx biome check --write {staged_files} && git add {staged_files}
+    typecheck:
+      run: npm run typecheck
