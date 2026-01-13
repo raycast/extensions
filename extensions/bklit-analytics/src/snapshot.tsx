@@ -12,6 +12,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { fetchDeviceUsage, fetchTopCountries, fetchTopReferrers, fetchTopPages } from "./api/client";
 import { formatNumberLong } from "./utils/formatters";
+import { getCountryFlag } from "./utils/country-flags";
 import type { Preferences } from "./types";
 import { useState, useEffect } from "react";
 
@@ -133,12 +134,6 @@ export default function Command() {
     third: "#0ea2ff",
     fourth: "#543dd8",
     fifth: "#ef88ff",
-  };
-
-  // Helper to get country flag from flagpedia
-  const getCountryFlag = (countryCode: string): string => {
-    if (!countryCode || countryCode.length !== 2) return "";
-    return `https://flagcdn.com/w20/${countryCode.toLowerCase()}.png`;
   };
 
   // Generate QuickChart bar chart URL
