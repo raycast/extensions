@@ -113,7 +113,7 @@ export default function Command() {
             ))}
         </List.Section>
       ) : (
-        ""
+        null
       )}
 
       {PROFILES.profiles.list.some(
@@ -136,7 +136,7 @@ export default function Command() {
             ))}
         </List.Section>
       ) : (
-        ""
+       null 
       )}
     </List>
   );
