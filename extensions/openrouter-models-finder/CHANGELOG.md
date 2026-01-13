@@ -1,6 +1,6 @@
 # OpenRouter Models Finder Changelog
 
-## [Add Fuzzy Search] - {PR_MERGE_DATE}
+## [Add Fuzzy Search] - 2026-01-13
 
 - Multi-term search with space-separated terms (all must match)
 - `useMemo` optimization for filtered results performance
