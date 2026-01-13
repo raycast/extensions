@@ -27,7 +27,7 @@ type ReminderActionsProps = {
 
 export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
   const { locations } = useLocations();
-  const attachedUrls = (reminder.attachedUrls ?? []).filter((url): url is string => Boolean(url));
+  const attachedUrls = reminder.attachedUrls.filter(Boolean);
 
   async function toggleReminder() {
     async function toggle() {

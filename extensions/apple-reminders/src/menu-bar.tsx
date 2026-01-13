@@ -29,7 +29,7 @@ import { sortByDate } from "./hooks/useViewReminders";
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
 
 function getAttachedUrls(reminder: Reminder): string[] {
-  return (reminder.attachedUrls ?? []).filter((url): url is string => Boolean(url));
+  return reminder.attachedUrls.filter(Boolean);
 }
 
 export default function Command() {
