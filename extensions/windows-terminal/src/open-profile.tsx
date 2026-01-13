@@ -112,9 +112,7 @@ export default function Command() {
               <List.Item key={item.guid} icon={Icon.Network} title={item.name} actions={<Actions name={item.name} />} />
             ))}
         </List.Section>
-      ) : (
-        null
-      )}
+      ) : null}
 
       {PROFILES.profiles.list.some(
         (item) => item.source === "Microsoft.WSL" || item.source === "Windows.Terminal.Wsl",
@@ -123,8 +121,7 @@ export default function Command() {
           {PROFILES.profiles.list
             .filter(
               (item) =>
-                (item.hidden !== true && item.source === "Microsoft.WSL") ||
-                (item.hidden !== true && item.source === "Windows.Terminal.Wsl"),
+                item.hidden !== true && (item.source === "Microsoft.WSL" || item.source === "Windows.Terminal.Wsl"),
             )
             .map((item) => (
               <List.Item
@@ -135,9 +132,7 @@ export default function Command() {
               />
             ))}
         </List.Section>
-      ) : (
-       null 
-      )}
+      ) : null}
     </List>
   );
 }
