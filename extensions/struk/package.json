@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "struk",
+  "title": "Struk",
+  "description": "AI-powered text formatting. Get your free API key at struk.ai/integrations/raycast",
+  "icon": "assets/command-icon.png",
+  "author": "johnstonstruk",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clean-format",
+      "title": "Clean & Format",
+      "subtitle": "Struk",
+      "description": "Clean up messy text",
+      "mode": "no-view"
+    },
+    {
+      "name": "action-items",
+      "title": "Action Items",
+      "subtitle": "Struk",
+      "description": "Extract tasks from meeting notes",
+      "mode": "no-view"
+    },
+    {
+      "name": "merge-structure",
+      "title": "Merge & Structure",
+      "subtitle": "Struk",
+      "description": "Combine multiple text blocks",
+      "mode": "no-view"
+    },
+    {
+      "name": "repurpose",
+      "title": "Repurpose Content",
+      "subtitle": "Struk",
+      "description": "Transform content for different formats",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Struk API Key",
+      "description": "Get your API key from struk.ai/api-keys",
+      "placeholder": "sk_struk_..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "dev": "ray develop"
+  }
+}
