@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createShareLink, deleteFile, downloadFile, getParentFolderUrl } from "../api/files";
 import { batchGetDriveItems, getRecentFiles, isInsightsAvailable, type UsedInsight } from "../api/insights";
 import { authorize } from "../oauth";
-import type { DriveItem, Preferences } from "../types";
+import type { DriveItem } from "../types";
 
 export interface EnrichedInsight extends UsedInsight {
   driveItem?: DriveItem;

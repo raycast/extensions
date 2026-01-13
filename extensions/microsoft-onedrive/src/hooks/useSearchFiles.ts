@@ -23,7 +23,7 @@ import {
   searchFiles,
 } from "../api/files";
 import { authorize } from "../oauth";
-import type { BreadcrumbPath, Drive, DriveItem, Preferences, SortConfig } from "../types";
+import type { BreadcrumbPath, Drive, DriveItem, SortConfig } from "../types";
 import { findInstalledOfficeApps } from "../utils/display";
 
 export function useSearchFiles() {
