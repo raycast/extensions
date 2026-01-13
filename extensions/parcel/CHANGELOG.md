@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Internationalization and Carrier Name Display] - {PR_MERGE_DATE}
+## [Internationalization and Carrier Name Display] - 2026-01-13
 
 - Removed hardcoded locale value introduced in a previous change - dates now display correctly for all international users
 - Carrier names are now displayed throughout the interface instead of codes (e.g., "FedEx" instead of "fedex") for better readability
