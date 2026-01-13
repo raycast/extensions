@@ -1,8 +1,6 @@
 # Antigravity Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
-
-## [Added Antigravity] - 2026-01-04
+## [Update] - {PR_MERGE_DATE}
 
 Add a detailed quota usage view
 
