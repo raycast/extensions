@@ -1,6 +1,11 @@
 # Harvest Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Flexible Duration Input] - {PR_MERGE_DATE}
+
+- Added: Duration field now accepts flexible formats like `15m`, `1h30m`, `1.5h`, `.5+15m`
+- Changed: Duration auto-formats on blur based on user's time format preference
+
+## [Bug Fixes] - 2025-11-24
 
 - Fix: Resolved issue where task selection would not update in the New Time Entry form
 
