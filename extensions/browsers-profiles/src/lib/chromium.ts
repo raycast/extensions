@@ -59,21 +59,35 @@ export const getChromiumProfiles = (filter: string[]) => {
 
     directories.forEach((directory: string) => {
       const preferences = `${path}/${directory}/Preferences`;
-      const file = fs.readFileSync(preferences, "utf-8");
-      const profile = JSON.parse(file);
-      const profileName = profile.profile.name;
-      const profileLabel = infoCacheData[directory]?.name || profileName;
+      if (fs.existsSync(preferences)) {
+        const file = fs.readFileSync(preferences, "utf-8");
+        const profile = JSON.parse(file);
+        const profileName = profile.profile.name;
+        const profileLabel = infoCacheData[directory]?.name || profileName;
 
-      browserProfiles.push({
-        type: browser.type,
-        browser: browser.title,
-        app: browser.app,
-        path: directory,
-        name: profileName,
-        uid: directory,
-        label: profileLabel,
-        icon: browser.icon,
-      });
+        browserProfiles.push({
+          type: browser.type,
+          browser: browser.title,
+          app: browser.app,
+          path: directory,
+          name: profileName,
+          uid: directory,
+          label: profileLabel,
+          icon: browser.icon,
+        });
+      } else {
+        const name = infoCacheData[directory]?.name;
+        browserProfiles.push({
+          type: browser.type,
+          browser: browser.title,
+          app: browser.app,
+          path: directory,
+          name,
+          label: name,
+          uid: directory,
+          icon: browser.icon,
+        });
+      }
     });
 
     sortProfiles(browserProfiles);
