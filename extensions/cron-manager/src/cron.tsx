@@ -88,7 +88,7 @@ export default function Command() {
 
     // Add pending log?
 
-    exec(job.command, (error, stdout, stderr) => {
+    exec(job.command, { shell: false }, (error, stdout, stderr) => {
       const time = new Date().toLocaleTimeString();
       if (error) {
         const errorLog: Log = {
