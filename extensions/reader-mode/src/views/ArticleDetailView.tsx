@@ -12,6 +12,7 @@ interface ArticleDetailViewProps {
   shouldShowSummary: boolean;
   canAccessAI: boolean;
   onSummarize: (style: SummaryStyle) => void;
+  onStopSummarizing?: () => void;
   onReimportFromBrowser?: () => void;
 }
 
@@ -70,6 +71,7 @@ export function ArticleDetailView({
   shouldShowSummary,
   canAccessAI,
   onSummarize,
+  onStopSummarizing,
   onReimportFromBrowser,
 }: ArticleDetailViewProps) {
   const markdown = buildMarkdown(article, summaryStyle, currentSummary, isSummarizing, shouldShowSummary);
@@ -85,7 +87,9 @@ export function ArticleDetailView({
           markdown={markdown}
           currentSummary={currentSummary}
           canAccessAI={canAccessAI}
+          isSummarizing={isSummarizing}
           onSummarize={onSummarize}
+          onStopSummarizing={onStopSummarizing}
           onReimportFromBrowser={onReimportFromBrowser}
           archiveSource={article.archiveSource}
         />

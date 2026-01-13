@@ -3,6 +3,51 @@ import { SummaryStyle, TranslationOptions } from "../types/summary";
 import { getCachedTitle, setCachedTitle } from "../utils/summaryCache";
 
 /**
+ * Prompt for rewriting article titles
+ */
+const TITLE_REWRITE_PROMPT = `Rewrite this article title to be concise and easy-to-read.
+
+Rules:
+- Keep it short and clear
+- Preserve the core meaning
+- Remove unnecessary words, filler, or clickbait
+- Do not add quotes around the title
+- Output ONLY the rewritten title, nothing else
+
+Original title: `;
+
+/**
+ * Rewrite an article title using AI
+ * Returns the original title if AI is unavailable or on error
+ */
+export async function rewriteArticleTitle(originalTitle: string, url: string): Promise<string> {
+  if (!environment.canAccess(AI)) {
+    return originalTitle;
+  }
+
+  const cached = await getCachedTitle(url);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const rewritten = await AI.ask(TITLE_REWRITE_PROMPT + originalTitle, {
+      model: AI.Model["OpenAI_GPT-4.1_nano"],
+      creativity: "low",
+    });
+
+    const cleanTitle = rewritten.trim();
+    if (cleanTitle) {
+      await setCachedTitle(url, cleanTitle);
+      return cleanTitle;
+    }
+    return originalTitle;
+  } catch {
+    return originalTitle;
+  }
+}
+
+/**
  * Prompt configuration for each summary style
  */
 interface PromptConfig {
@@ -39,7 +84,7 @@ Format your response EXACTLY like this:
   },
 
   "arc-style": {
-    label: "Arc-style Summary",
+    label: "Arc-style",
     buildPrompt: (context) => `${context}
 The reader opened a webpage that's too long for them to read right now.
 
@@ -153,7 +198,7 @@ If a category has no relevant entities, you may omit it.`,
   },
 
   "raycast-style": {
-    label: "Raycast-style Summary",
+    label: "Raycast-style",
     buildPrompt: (context) => `${context}
 
 Summarize this article with the following format:
@@ -209,49 +254,4 @@ export function buildPromptForStyle(
   const context = buildBaseContext(title, content);
   const config = getPromptConfig(style);
   return config.buildPrompt(context, translationOptions);
-}
-
-/**
- * Prompt for rewriting article titles
- */
-const TITLE_REWRITE_PROMPT = `Rewrite this article title to be concise and easy-to-read.
-
-Rules:
-- Keep it short and clear
-- Preserve the core meaning
-- Remove unnecessary words, filler, or clickbait
-- Do not add quotes around the title
-- Output ONLY the rewritten title, nothing else
-
-Original title: `;
-
-/**
- * Rewrite an article title using AI
- * Returns the original title if AI is unavailable or on error
- */
-export async function rewriteArticleTitle(originalTitle: string, url: string): Promise<string> {
-  if (!environment.canAccess(AI)) {
-    return originalTitle;
-  }
-
-  const cached = await getCachedTitle(url);
-  if (cached) {
-    return cached;
-  }
-
-  try {
-    const rewritten = await AI.ask(TITLE_REWRITE_PROMPT + originalTitle, {
-      model: AI.Model["OpenAI_GPT-5_nano"],
-      creativity: "low",
-    });
-
-    const cleanTitle = rewritten.trim();
-    if (cleanTitle) {
-      await setCachedTitle(url, cleanTitle);
-      return cleanTitle;
-    }
-    return originalTitle;
-  } catch {
-    return originalTitle;
-  }
 }

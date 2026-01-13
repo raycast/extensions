@@ -164,12 +164,15 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
     /^(.*\.)?nytimes\.com$/i,
     {
       name: "NYTimes",
-      articleSelector: "article",
+      articleSelector: 'article, [name="articleBody"]',
       removeSelectors: [
-        '[data-testid="share-tools"]',
         ".ad",
         ".newsletter-signup",
         '[data-testid="inline-message"]',
+        '[data-testid="onsite-messaging-unit-dock"]',
+        '[data-testid="imageblock-wrapper"]',
+        '[data-testid="share-tools"]',
+        "#top-wrapper",
         ".story-footer",
         // Lightbox/modal spans that leak "Open modal at item X of Y" accessibility text
         ".kyt-wljQC",
@@ -181,6 +184,7 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
         ".css-b9twaf",
         // Correction policy boilerplate
         ".css-1j12tm1",
+        ".css-16uri30", // Header
         ".css-s2htvn",
       ],
       // Convert block elements to inline for better markdown rendering

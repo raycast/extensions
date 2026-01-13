@@ -11,7 +11,7 @@ import { BrowserTab } from "./types/browser";
 import { SummaryStyle } from "./types/summary";
 import { getStyleLabel, buildSummaryPrompt, logSummarySuccess, logSummaryError } from "./utils/summarizer";
 import { rewriteArticleTitle } from "./config/prompts";
-import { getCachedSummary, setCachedSummary } from "./utils/summaryCache";
+import { getCachedSummary, setCachedSummary, getLastSummaryStyle } from "./utils/summaryCache";
 import { getAIConfigForStyle } from "./config/ai";
 import { resolveUrl, isValidUrl } from "./utils/url-resolver";
 import { loadArticleFromUrl, loadArticleViaPaywallHopper } from "./utils/article-loader";
@@ -114,10 +114,23 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
         const durationMs = summaryStartTime ? Date.now() - summaryStartTime : undefined;
         logSummaryError(summaryStyle, err.message, durationMs);
 
+        // Sanitize error message - extract HTTP status if present, otherwise show generic message
+        let userMessage = err.message;
+        const httpStatusMatch = err.message.match(/HTTP Status:\s*(\d+)/);
+        if (httpStatusMatch) {
+          const statusCode = httpStatusMatch[1];
+          userMessage =
+            statusCode === "503"
+              ? "AI service temporarily unavailable. Please try again."
+              : `AI service error (HTTP ${statusCode}). Please try again.`;
+        } else if (err.message.includes("<!DOCTYPE") || err.message.includes("<html")) {
+          userMessage = "AI service error. Please try again.";
+        }
+
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to generate summary",
-          message: err.message,
+          message: userMessage,
         });
       }
     },
@@ -172,6 +185,45 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
     },
     [article, preferences.translationLanguage],
   );
+
+  // Handle stopping summarization - reverts to last cached summary or hides block
+  const handleStopSummarizing = useCallback(async () => {
+    // Clear prompt to stop useAI execution
+    setSummaryPrompt("");
+
+    if (!article) {
+      setSummaryStyle(null);
+      return;
+    }
+
+    // Get the last successfully used style from cache
+    const lastStyle = await getLastSummaryStyle(article.url);
+
+    if (lastStyle) {
+      // Revert to the last cached summary
+      const language = lastStyle === "translated" ? preferences.translationLanguage : undefined;
+      const cached = await getCachedSummary(article.url, lastStyle, language);
+
+      if (cached) {
+        setSummaryStyle(lastStyle);
+        setCachedSummaryState(cached);
+      } else {
+        // No cached summary found - hide summary block
+        setSummaryStyle(null);
+        setCachedSummaryState(null);
+      }
+    } else {
+      // No previous style - hide summary block
+      setSummaryStyle(null);
+      setCachedSummaryState(null);
+    }
+
+    // Hide toast
+    if (toastRef.current) {
+      toastRef.current.hide();
+      toastRef.current = null;
+    }
+  }, [article, preferences.translationLanguage]);
 
   // Process article loading result
   const handleLoadResult = useCallback(
@@ -311,7 +363,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
     const result = await reimportFromBrowserTab(article.url);
 
     if (result.status === "success") {
-      setArticle(result.article);
+      // Preserve the existing title (which may be AI-rewritten) when reimporting
+      setArticle({ ...result.article, title: article.title });
       setSummaryInitialized(false); // Reset to allow new summary generation
       urlLog.log("reimport:complete", { url: article.url });
     } else if (result.status === "tab_inactive") {
@@ -337,7 +390,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
     const result = await reimportFromBrowserTab(reimportInactiveTab.url);
 
     if (result.status === "success") {
-      setArticle(result.article);
+      // Preserve the existing title (which may be AI-rewritten) when reimporting
+      const existingTitle = article?.title || result.article.title;
+      setArticle({ ...result.article, title: existingTitle });
       setReimportInactiveTab(null);
       setSummaryInitialized(false);
       urlLog.log("reimport:retry-success", { url: reimportInactiveTab.url });
@@ -529,6 +584,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
       shouldShowSummary={shouldShowSummary}
       canAccessAI={canAccessAI}
       onSummarize={handleSummarize}
+      onStopSummarizing={isSummarizing ? handleStopSummarizing : undefined}
       onReimportFromBrowser={hasBrowserExtensionAvailable ? handleReimportFromBrowser : undefined}
     />
   );

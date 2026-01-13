@@ -19,7 +19,9 @@ interface ArticleActionsProps {
   markdown: string;
   currentSummary: string | null;
   canAccessAI: boolean;
+  isSummarizing?: boolean;
   onSummarize: (style: SummaryStyle) => void;
+  onStopSummarizing?: () => void;
   onReimportFromBrowser?: () => void;
   archiveSource?: ArchiveSource;
 }
@@ -29,12 +31,17 @@ export function ArticleActions({
   markdown,
   currentSummary,
   canAccessAI,
+  isSummarizing,
   onSummarize,
+  onStopSummarizing,
   onReimportFromBrowser,
   archiveSource,
 }: ArticleActionsProps) {
   return (
     <ActionPanel>
+      {isSummarizing && onStopSummarizing && (
+        <Action title="Stop Summarizing" icon={Icon.Stop} onAction={onStopSummarizing} />
+      )}
       {canAccessAI && (
         <ActionPanel.Submenu
           title={currentSummary ? "Change Summary Style" : "Summarize…"}

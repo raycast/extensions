@@ -61,8 +61,8 @@
       "required": false,
       "data": [
         { "title": "Overview", "value": "overview" },
-        { "title": "Raycast-style Summary", "value": "raycast-style" },
-        { "title": "Arc-style Summary", "value": "arc-style" },
+        { "title": "Raycast-style", "value": "raycast-style" },
+        { "title": "Arc-style", "value": "arc-style" },
         { "title": "Opposing Sides", "value": "opposite-sides" },
         { "title": "The 5 Ws", "value": "five-ws" },
         { "title": "Explain Like I'm 5", "value": "eli5" },
