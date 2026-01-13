@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clickup-task-creator",
+  "title": "ClickUp Task Creator",
+  "description": "Create tasks in ClickUp with list selection, assignee, and priority",
+  "icon": "icon.png",
+  "author": "mathieudutour",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a new task in ClickUp",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "ClickUp API Token",
+      "description": "Your ClickUp API token",
+      "placeholder": "pk_..."
+    },
+    {
+      "name": "workspaceId",
+      "type": "textfield",
+      "required": true,
+      "title": "Workspace ID",
+      "description": "Your ClickUp Workspace ID (Team ID)",
+      "placeholder": "12345678"
+    },
+    {
+      "name": "spaceId",
+      "type": "textfield",
+      "required": false,
+      "title": "Space ID (Optional)",
+      "description": "Limit lists to a specific Space. Leave empty to show all lists.",
+      "placeholder": "90123456789"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.12.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
