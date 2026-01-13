@@ -11,6 +11,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { exec } from "child_process";
+import { promisify } from "util";
 import { useState, useEffect } from "react";
 import CronActions from "./components/CronActions";
 import CronForm from "./components/CronForm";
@@ -18,6 +19,8 @@ import JobLogs from "./components/JobLogs";
 import { CronJob, Log } from "./types";
 import { getNextRun, explainCron } from "./utils/cronUtils";
 import { readCrontab, writeCrontab } from "./utils/crontabSync";
+
+const execAsync = promisify(exec);
 
 export default function Command() {
   const [jobs, setJobs] = useState<CronJob[]>([]);
@@ -84,37 +87,36 @@ export default function Command() {
   };
 
   const runJob = async (job: CronJob) => {
-    showToast(Toast.Style.Animated, "Running Job", job.command);
+    await showToast(Toast.Style.Animated, "Running Job", job.command);
 
-    // Add pending log?
-
-    exec(job.command, { shell: false }, (error, stdout, stderr) => {
+    try {
+      const { stdout } = await execAsync(job.command);
       const time = new Date().toLocaleTimeString();
-      if (error) {
-        const errorLog: Log = {
-          id: Date.now(),
-          jobId: job.id,
-          time,
-          message: stderr || error.message,
-          type: "error",
-        };
-        setLogs((prev) => [errorLog, ...prev]);
-        showToast(Toast.Style.Failure, "Job Failed", error.message);
-      } else {
-        const successLog: Log = {
-          id: Date.now(),
-          jobId: job.id,
-          time,
-          message: stdout || "Command executed successfully (no output)",
-          type: "success",
-        };
-        setLogs((prev) => [successLog, ...prev]);
-        showToast(Toast.Style.Success, "Job Completed");
+      const successLog: Log = {
+        id: Date.now(),
+        jobId: job.id,
+        time,
+        message: stdout || "Command executed successfully (no output)",
+        type: "success",
+      };
+      setLogs((prev) => [successLog, ...prev]);
+      showToast(Toast.Style.Success, "Job Completed");
 
-        // Update last run
-        handleUpdateJob({ ...job, lastRun: "Just now", status: "active" }); // Reset failed status if it was failed?
-      }
-    });
+      // Update last run
+      handleUpdateJob({ ...job, lastRun: "Just now", status: "active" });
+    } catch (error) {
+      const err = error as { message: string; stderr?: string };
+      const time = new Date().toLocaleTimeString();
+      const errorLog: Log = {
+        id: Date.now(),
+        jobId: job.id,
+        time,
+        message: err.stderr || err.message,
+        type: "error",
+      };
+      setLogs((prev) => [errorLog, ...prev]);
+      showToast(Toast.Style.Failure, "Job Failed", err.message);
+    }
   };
 
   const getStatusIcon = (status: CronJob["status"]) => {
