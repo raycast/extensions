@@ -39,7 +39,7 @@ export default function Command() {
           id="scratchpad"
           value={text}
           onChange={setText}
-          placeholder="Type here... Cmd+Enter to view"
+          placeholder="Type here... Press Cmd+Enter to see rendered preview. Math: \(...\) for inline, $$...$$ for block"
         />
       </Form>
     );
@@ -51,10 +51,7 @@ export default function Command() {
       markdown={text || "Press Enter to start typing"}
       actions={
         <ActionPanel>
-          <Action
-            title="Edit"
-            onAction={() => setIsEditing(true)}
-          />
+          <Action title="Edit" onAction={() => setIsEditing(true)} />
         </ActionPanel>
       }
     />

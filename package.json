@@ -4,7 +4,7 @@
   "title": "Scratchpad",
   "description": "A minimal scratchpad with autosave",
   "icon": "assets/command-icon.png",
-  "author": "dvirzagury",
+  "author": "dvirzg",
   "license": "MIT",
   "commands": [
     {
