@@ -17,10 +17,6 @@ import {
   ReminderSettings,
 } from "./storage";
 
-interface Preferences {
-  reminderInterval: string;
-}
-
 export default function ExerciseReminder() {
   const [settings, setSettings] = useState<ReminderSettings | null>(null);
   const [todayCount, setTodayCount] = useState(0);
@@ -34,7 +30,7 @@ export default function ExerciseReminder() {
     ]);
 
     // Get interval from preferences
-    const prefs = getPreferenceValues<Preferences>();
+    const prefs = getPreferenceValues<Preferences.ExerciseReminder>();
     const intervalMinutes = parseInt(prefs.reminderInterval) || 45;
 
     // Update settings with preference interval

@@ -14,6 +14,7 @@ import {
   getExercisesThisMonth,
   getStreak,
   clearHistory,
+  loadDemoData,
   CompletedExercise,
 } from "./storage";
 import { categoryLabels, categoryIcons, Category } from "./exercises";
@@ -191,6 +192,15 @@ ${recentExercises}
             icon={Icon.ArrowClockwise}
             onAction={loadHistory}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <Action
+            title="Load Demo Data"
+            icon={Icon.Download}
+            onAction={async () => {
+              await loadDemoData();
+              await loadHistory();
+            }}
+            shortcut={{ modifiers: ["cmd"], key: "d" }}
           />
           {history.length > 0 && (
             <Action
