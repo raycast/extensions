@@ -3,7 +3,7 @@
   "title": "GCP Console Navigator",
   "description": "Quickly open GCP console resources by project and resource type",
   "icon": "acorn-gcp.png",
-  
+  "access": "private", 
   "author": "efabens",
   "license": "MIT",
   "commands": [
