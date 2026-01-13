@@ -28,6 +28,8 @@ const LANGUAGES = [
   { code: "zh", name: "Chinese" },
 ] as const;
 
+type LanguageCode = (typeof LANGUAGES)[number]["code"];
+
 function getLanguageName(code: string): string {
   return LANGUAGES.find((lang) => lang.code === code)?.name ?? code;
 }
@@ -55,8 +57,7 @@ function formatError(err: unknown): string {
 }
 
 export default function Command() {
-  const { apiKey, defaultLanguage } =
-    getPreferenceValues<ExtensionPreferences>();
+  const { apiKey, defaultLanguage } = getPreferenceValues<Preferences>();
   const [targetLang, setTargetLang] = useState(defaultLanguage);
   const [sourceText, setSourceText] = useState("");
   const [translation, setTranslation] = useState("");
@@ -117,7 +118,7 @@ export default function Command() {
     };
   }, [targetLang, doTranslate]);
 
-  async function handleLanguageChange(lang: string): Promise<void> {
+  async function handleLanguageChange(lang: LanguageCode): Promise<void> {
     if (!sourceText) return;
     setTargetLang(lang);
     await doTranslate(sourceText, lang);
