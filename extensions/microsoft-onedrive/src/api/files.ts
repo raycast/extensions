@@ -53,11 +53,15 @@ async function batchResolveThumbnails(items: DriveItem[]): Promise<void> {
   for (let i = 0; i < itemsNeedingResolution.length; i += BATCH_SIZE) {
     const batch = itemsNeedingResolution.slice(i, i + BATCH_SIZE);
 
-    const batchRequests: BatchRequest[] = batch.map((item, index) => ({
-      id: `${index}`,
-      method: "GET",
-      url: `/me/drive/items/${item.id}/thumbnails`,
-    }));
+    const batchRequests: BatchRequest[] = batch.map((item, index) => {
+      const driveId = item.parentReference?.driveId;
+      const drivePrefix = driveId ? `/drives/${driveId}` : "/me/drive";
+      return {
+        id: `${index}`,
+        method: "GET",
+        url: `${drivePrefix}/items/${item.id}/thumbnails`,
+      };
+    });
 
     try {
       const accessToken = await getAccessToken();
