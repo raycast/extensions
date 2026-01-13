@@ -4,6 +4,8 @@
 
 - Removed hardcoded locale value introduced in a previous change - dates now display correctly for all international users
 - Carrier names are now displayed throughout the interface instead of codes (e.g., "FedEx" instead of "fedex") for better readability
+- Improved date parsing to correctly handle ambiguous dates (MM.dd.yyyy vs dd.MM.yyyy) by detecting the format based on date values
+- Enhanced date display format: recent dates (within 14 days) show as "Wednesday 09:00", older dates show as "30 December at 11:15" for better readability
 
 ## [Add Delivery Overhaul] - 2025-11-06
 

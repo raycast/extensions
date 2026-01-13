@@ -24,12 +24,14 @@ const UNKNOWN_DATE_PLACEHOLDER = "--//--";
 
 /**
  * Supported date formats for parsing delivery dates.
+ * American formats (MM.dd.yyyy) are tried before European (dd.MM.yyyy) to handle ambiguous dates correctly.
  */
 const DATE_FORMATS = [
+  "MM.dd.yyyy HH:mm:ss", // American with seconds
+  "MM.dd.yyyy HH:mm", // American without seconds
   "dd.MM.yyyy HH:mm:ss", // European with seconds
   "dd.MM.yyyy HH:mm", // European without seconds
-  "MMMM dd, yyyy HH:mm", // American
-  "MM.dd.yyyy HH:mm", // American
+  "MMMM dd, yyyy HH:mm", // American written format
   "yyyy-MM-dd HH:mm:ss", // ISO 8601
   "EEEE, d MMMM h:mm a", // Day name, date, 12-hour time (e.g. "Saturday, 31 May 5:26 am")
   "EEEE, d MMMM", // Day name and date (e.g. "Saturday, 31 May")
@@ -71,11 +73,48 @@ export default function Command() {
 
   /**
    * Try to parse a date string using a set of known formats.
+   * For ambiguous dot-separated dates (MM.dd.yyyy vs dd.MM.yyyy), tries American format first,
+   * then European format, and picks the one that makes chronological sense.
    *
    * @param dateString The date string to parse
    * @returns Date object if valid, otherwise null
    */
   const parseDate = (dateString: string): Date | null => {
+    // Handle ambiguous dot-separated dates (MM.dd.yyyy vs dd.MM.yyyy)
+    const dotSeparatedMatch = dateString.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+    if (dotSeparatedMatch) {
+      const [, first, second, year, hour, minute, sec] = dotSeparatedMatch;
+      const firstNum = parseInt(first, 10);
+      const secondNum = parseInt(second, 10);
+      const hasSeconds = sec !== undefined;
+
+      // If first number > 12, it must be European format (dd.MM)
+      if (firstNum > 12) {
+        const fmt = hasSeconds ? `dd.MM.yyyy HH:mm:ss` : `dd.MM.yyyy HH:mm`;
+        const date = parse(dateString, fmt, new Date());
+        if (isValid(date)) return date;
+      }
+      // If second number > 12, it must be American format (MM.dd)
+      else if (secondNum > 12) {
+        const fmt = hasSeconds ? `MM.dd.yyyy HH:mm:ss` : `MM.dd.yyyy HH:mm`;
+        const date = parse(dateString, fmt, new Date());
+        if (isValid(date)) return date;
+      }
+      // Both <= 12, ambiguous - try American first (MM.dd), then European (dd.MM)
+      else {
+        // Try American format first
+        const americanFmt = hasSeconds ? `MM.dd.yyyy HH:mm:ss` : `MM.dd.yyyy HH:mm`;
+        const americanDate = parse(dateString, americanFmt, new Date());
+        if (isValid(americanDate)) return americanDate;
+
+        // Try European format
+        const europeanFmt = hasSeconds ? `dd.MM.yyyy HH:mm:ss` : `dd.MM.yyyy HH:mm`;
+        const europeanDate = parse(dateString, europeanFmt, new Date());
+        if (isValid(europeanDate)) return europeanDate;
+      }
+    }
+
+    // Try all other formats
     for (const fmt of DATE_FORMATS) {
       const date = parse(dateString, fmt, new Date());
       if (isValid(date)) return date;
@@ -84,7 +123,7 @@ export default function Command() {
   };
 
   /**
-   * Format a date string as 'Feb 26, 14:30' or 'Feb 26' if no time.
+   * Format a date string as 'Wednesday 09:00' for recent dates or '30 December at 11:15' for older dates.
    *
    * @param dateString The date string to format
    * @returns Formatted date and time or 'Not available' if invalid
@@ -100,22 +139,37 @@ export default function Command() {
       console.error(`All supported date formats failed for: ${dateString}`);
       return dateString;
     }
-    const dateFormatted = date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-    });
 
-    // Only show time if the original string had time information
-    if (!hasTimeInfo) {
-      return dateFormatted;
+    const now = new Date();
+    const daysDiff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+    // For dates within the last 14 days (2 weeks), show day name with time
+    // This covers recent tracking events that are still relevant
+    if (daysDiff >= 0 && daysDiff < 14) {
+      const dayName = date.toLocaleDateString(undefined, { weekday: "long" });
+      if (hasTimeInfo) {
+        const timeFormatted = date.toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+        return `${dayName} ${timeFormatted}`;
+      }
+      return dayName;
     }
 
-    const timeFormatted = date.toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-    return `${dateFormatted}, ${timeFormatted}`;
+    // For older dates, show "DD Month at HH:mm"
+    const day = date.getDate();
+    const month = date.toLocaleDateString(undefined, { month: "long" });
+    if (hasTimeInfo) {
+      const timeFormatted = date.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      return `${day} ${month} at ${timeFormatted}`;
+    }
+    return `${day} ${month}`;
   };
 
   /**
