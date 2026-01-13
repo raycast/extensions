@@ -34,3 +34,27 @@ export function groupMessagesByDate<T extends MessageWithDate>(messages: T[]): M
 
   return groups;
 }
+
+export function extractUrlFromText(text: string): string | null {
+  if (!text || text.trim().length === 0) {
+    return null;
+  }
+
+  const trimmedText = text.trim();
+
+  const urlRegex = /^(https?:\/\/[^\s]+)$/i;
+  const match = trimmedText.match(urlRegex);
+
+  if (match) {
+    return match[1];
+  }
+
+  const urlPattern = /^(https?:\/\/[^\s]+)(\s.*)?$/i;
+  const partialMatch = trimmedText.match(urlPattern);
+
+  if (partialMatch && (!partialMatch[2] || partialMatch[2].trim().length < 10)) {
+    return partialMatch[1];
+  }
+
+  return null;
+}

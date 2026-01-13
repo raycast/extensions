@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, Icon, Image } from "@raycast/api";
 import { SavedMessage } from "../services/telegram-client";
 import { getMediaTypeIcon, getMediaDisplayTitle } from "../utils/media";
+import { extractUrlFromText } from "../utils/message";
 import { SavedMessageDetail } from "./saved-message-detail";
 import { SavedMessageListItemDetail } from "./saved-message-list-item-detail";
 import { ToggleDetailAction, RefreshAction } from "./actions";
@@ -30,6 +31,8 @@ export function SavedMessageListItem({
     icon = getMediaTypeIcon(message.media.type);
   }
 
+  const url = extractUrlFromText(message.text);
+
   return (
     <List.Item
       key={message.id}
@@ -43,10 +46,23 @@ export function SavedMessageListItem({
       detail={isShowingDetail ? <SavedMessageListItemDetail message={message} /> : undefined}
       actions={
         <ActionPanel>
-          {!isShowingDetail && (
-            <Action.Push icon={Icon.Eye} title="View Message" target={<SavedMessageDetail message={message} />} />
+          {url ? (
+            <>
+              <Action.OpenInBrowser url={url} title="Open Link" />
+              {!isShowingDetail && (
+                <Action.Push icon={Icon.Eye} title="View Message" target={<SavedMessageDetail message={message} />} />
+              )}
+              <Action.CopyToClipboard content={url} title="Copy Link" />
+              <Action.CopyToClipboard content={message.text} title="Copy Message" />
+            </>
+          ) : (
+            <>
+              {!isShowingDetail && (
+                <Action.Push icon={Icon.Eye} title="View Message" target={<SavedMessageDetail message={message} />} />
+              )}
+              <Action.CopyToClipboard content={message.text} title="Copy Message" />
+            </>
           )}
-          <Action.CopyToClipboard content={message.text} title="Copy Message" />
           <ToggleDetailAction isShowingDetail={isShowingDetail} onToggle={onToggleDetail} />
           <RefreshAction onRefresh={onRefresh} />
         </ActionPanel>
