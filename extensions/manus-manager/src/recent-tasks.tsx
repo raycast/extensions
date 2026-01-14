@@ -93,7 +93,6 @@ export default function Command() {
   }, [error]);
 
   const tasks = data?.data ?? [];
-  console.log(tasks);
 
   const handleDelete = async (taskId: string) => {
     const confirmed = await confirmAlert({
