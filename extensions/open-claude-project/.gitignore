@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# macOS
+.DS_Store
+*.swp
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# Raycast
+.raycast/
+
+# Debug
+*.log
+npm-debug.log*
+
+# Environment variables (just in case)
+.env
+.env.local
+.env.*.local
