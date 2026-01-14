@@ -72,13 +72,13 @@ export default function AssetView({ asset }: { asset: AssetResponseDto }) {
             shortcut={Keyboard.Shortcut.Common.Open}
           />
           <Action
-            title="Copy Image to Clipboard"
+            title="Copy to Clipboard"
             icon={Icon.CopyClipboard}
             onAction={copyImage}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action
-            title="Save Image to Downloads"
+            title="Save to Downloads"
             icon={Icon.Download}
             onAction={downloadImage}
             shortcut={downloadKeyboardShortcut}
