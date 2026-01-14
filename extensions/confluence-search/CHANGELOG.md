@@ -1,6 +1,6 @@
 # Confluence Changelog
 
-## [Improved Search for Whiteboards] - {PR_MERGE_DATE}
+## [Improved Search for Whiteboards] - 2026-01-14
 
 - Add `Whiteboards` to global Search results with a distinct icon
 - Add command option to include whiteboard results
