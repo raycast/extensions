@@ -21,10 +21,6 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-interface Preferences {
-  concurrency: string;
-}
-
 interface Snapshot {
   id: string;
   date: string;

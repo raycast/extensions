@@ -1,8 +1,8 @@
-# Time Machine Snapshot Manager
+# Time Machine Snapshot Manager Changelog
 
-## Version 1.0.0
+## [1.0.0] - {PR_MERGE_DATE}
 
-Time Machine Snapshot Manager extension for Raycast. Reclaim disk space by bulk-deleting Time Machine local snapshots that macOS creates when your backup disk is disconnected.
+Initial release of Time Machine Snapshot Manager
 
 ### Features
 
