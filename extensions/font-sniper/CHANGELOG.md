@@ -1,6 +1,6 @@
 # Font Sniper Changelog
 
-## [Initial Release] - 2025-01-12
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Extract fonts from any website URL
 - Support for WOFF2, WOFF, TTF, OTF, and EOT formats
