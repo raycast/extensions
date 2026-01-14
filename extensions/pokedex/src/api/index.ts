@@ -2,7 +2,7 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { PokeAPI, Pokemon, TypeChartType, Nature, Move } from "../types";
+import { Error, Move, Nature, PokeAPI, Pokemon, TypeChartType } from "../types";
 
 const cache = new Cache();
 const { language: language_id, duration } = getPreferenceValues();
@@ -485,22 +485,94 @@ export const fetchNaturesWithCaching = async (): Promise<
       }
       increased_stat_id
       decreased_stat_id
-      increased_stat: StatByIncreasedStatId {
+    }
+    allstats: stat {
+      id
+      name
+      statnames(where: {language_id: {_eq: $language_id}}) {
         name
-        statnames(where: {language_id: {_eq: $language_id}}) {
-          name
-        }
-      }
-      decreased_stat: stat {
-        name
-        statnames(where: {language_id: {_eq: $language_id}}) {
-          name
-        }
       }
     }
   }`;
 
   const variables = { language_id };
+  const key = `natures-with-stats-${JSON.stringify(variables)}`;
+  const now = Date.now();
 
-  return fetchDataWithCaching(query, variables, "pokenatures", true);
+  // Check cache
+  if (expiration) {
+    const cachedData = cache.get(key);
+    if (cachedData) {
+      try {
+        const parsed: CachedData<Nature[]> = JSON.parse(cachedData);
+        if (parsed.timestamp && parsed.value) {
+          if (now - parsed.timestamp < expiration) {
+            return parsed.value;
+          }
+        }
+      } catch (error) {
+        console.error(`Error parsing cached data for key: ${key}`, error);
+      }
+    }
+  }
+
+  // Fetch fresh data
+  const config: AxiosRequestConfig = {
+    method: "post",
+    url: "https://graphql.pokeapi.co/v1beta2",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: JSON.stringify({ query, variables }),
+    timeout: 10000,
+  };
+
+  try {
+    const {
+      data,
+    }: AxiosResponse<{
+      data: {
+        pokenatures: Nature[];
+        allstats: Array<{
+          id: number;
+          name: string;
+          statnames: Array<{ name: string }>;
+        }>;
+      };
+      errors?: Error[];
+    }> = await axios(config);
+
+    if (Array.isArray(data.errors) && data.errors.length) {
+      showFailureToast(data.errors[0].message);
+      return undefined;
+    }
+
+    const result = data.data;
+
+    // Create a map of stats by ID
+    const statsMap = new Map(result.allstats.map((stat) => [stat.id, stat]));
+
+    // Match stats to natures
+    const naturesWithStats: Nature[] = result.pokenatures.map((nature) => ({
+      ...nature,
+      increased_stat: nature.increased_stat_id
+        ? statsMap.get(nature.increased_stat_id) || null
+        : null,
+      decreased_stat: nature.decreased_stat_id
+        ? statsMap.get(nature.decreased_stat_id) || null
+        : null,
+    }));
+
+    // Cache the result
+    const dataToCache: CachedData<Nature[]> = {
+      timestamp: now,
+      value: naturesWithStats,
+    };
+    cache.set(key, JSON.stringify(dataToCache));
+
+    return naturesWithStats;
+  } catch (e: any) {
+    showFailureToast(e.message);
+    return undefined;
+  }
 };
