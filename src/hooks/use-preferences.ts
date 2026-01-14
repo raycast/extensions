@@ -3,27 +3,15 @@ import { useState, useEffect } from "react";
 import { PREF_POLL_INTERVAL } from "../constants";
 
 /**
- * Folder contents preferences
- */
-export interface FolderContentsPreferences {
-  folderContentsSortPrimary: string;
-  folderContentsSortSecondary: string;
-  folderContentsSortTertiary: string;
-  folderContentsViewType: string;
-  gridSeparateSections: boolean;
-  showPreviewPane: boolean;
-}
-
-/**
  * Hook for folder contents preferences with polling
  * Polls for changes every 2 seconds to reflect preference updates
  */
-export function useFolderContentsPreferences(): FolderContentsPreferences {
-  const [prefs, setPrefs] = useState<FolderContentsPreferences>(() => getPreferenceValues<FolderContentsPreferences>());
+export function useFolderContentsPreferences(): Preferences {
+  const [prefs, setPrefs] = useState<Preferences>(() => getPreferenceValues<Preferences>());
 
   useEffect(() => {
     const update = () => {
-      const current = getPreferenceValues<FolderContentsPreferences>();
+      const current = getPreferenceValues<Preferences>();
       setPrefs((prev) => {
         // Only update if any preference changed
         if (

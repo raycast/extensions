@@ -47,10 +47,6 @@ interface FolderEditFormProps {
   navigateToFolderAfterSave?: boolean;
 }
 
-interface Preferences {
-  defaultFolderColor?: string;
-}
-
 interface FormValues {
   name: string;
   applications: string[];

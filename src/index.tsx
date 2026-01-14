@@ -14,10 +14,6 @@ interface LaunchContext {
   folderName?: string;
 }
 
-interface Preferences {
-  showPreviewPane: boolean;
-}
-
 export default function Command(props: LaunchProps<{ launchContext?: LaunchContext }>) {
   // Handle deeplink context - render folder contents directly if opened via quicklink
   const context = props.launchContext as LaunchContext | undefined;
