@@ -1,10 +1,15 @@
-import { Icon, List, showToast, Toast, Color } from "@raycast/api";
+import { Icon, List, showToast, Toast, Color, ActionPanel } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { ZeroEvalAPI } from "./utils/zeroeval-api";
 import { ArenaModel } from "./types";
 import { getOrganizationLogo } from "./utils/organization-logos";
-import { useModels, findModelById } from "./utils/use-models";
-import { ModelActions } from "./components/actions/ModelActions";
+import { useModels } from "./utils/use-models";
+import {
+  ShowDetailsAction,
+  ModelDetailsLinkAction,
+  OpenPlaygroundAction,
+  CompareWithSubmenu,
+} from "./components/actions/ModelActions";
 import { ARENAS_BY_SECTION } from "./utils/arenas";
 
 const api = new ZeroEvalAPI();
@@ -83,8 +88,7 @@ export default function Command() {
         />
       ) : (
         models.map((model: ArenaModel, index) => {
-          const cachedModel = findModelById(allModels, model.model_id);
-
+          const cachedModel = allModels?.find((m) => m.model_id === model.model_id);
           return (
             <List.Item
               key={model.variant_id}
@@ -100,7 +104,14 @@ export default function Command() {
                 },
                 createScoreAccessory(model, index),
               ]}
-              actions={<ModelActions modelId={model.model_id} modelName={cachedModel?.name || model.model_name} />}
+              actions={
+                <ActionPanel>
+                  <ShowDetailsAction modelId={model.model_id} />
+                  <ModelDetailsLinkAction modelId={model.model_id} />
+                  <OpenPlaygroundAction modelId={model.model_id} />
+                  <CompareWithSubmenu modelId={model.model_id} />
+                </ActionPanel>
+              }
             />
           );
         })

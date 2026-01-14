@@ -1,9 +1,14 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
+import { Icon, List, showToast, Toast, ActionPanel } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { ModelListItem } from "./types";
 import { useModels } from "./utils/use-models";
 import { getOrganizationLogo } from "./utils/organization-logos";
-import { ModelActions } from "./components/actions/ModelActions";
+import {
+  ShowDetailsAction,
+  ModelDetailsLinkAction,
+  OpenPlaygroundAction,
+  CompareWithSubmenu,
+} from "./components/actions/ModelActions";
 import { formatParamCount, formatContextSize, formatPriceFromString } from "./utils/formatting";
 
 type SortCriteria = "input-price" | "output-price" | "context-window" | "throughput" | "params";
@@ -118,9 +123,16 @@ export default function Command() {
               icon={getOrganizationLogo(model.organization_id)}
               title={model.name}
               subtitle={model.organization}
-              keywords={[model.organization]}
+              keywords={[model.organization_id, model.organization, model.model_id].filter(Boolean) as string[]}
               accessories={accessories}
-              actions={<ModelActions modelId={model.model_id} modelName={model.name} />}
+              actions={
+                <ActionPanel>
+                  <ShowDetailsAction modelId={model.model_id} />
+                  <ModelDetailsLinkAction modelId={model.model_id} />
+                  <OpenPlaygroundAction modelId={model.model_id} />
+                  <CompareWithSubmenu modelId={model.model_id} />
+                </ActionPanel>
+              }
             />
           );
         })

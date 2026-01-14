@@ -2,7 +2,7 @@ import { Detail, showToast, Toast, Icon, ActionPanel } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { ZeroEvalAPI } from "../../utils/zeroeval-api";
 import { ORGANIZATION_LOGOS } from "../../utils/organization-logos";
-import { ModelDetailsLinkAction } from "../actions/ModelDetailsLinkAction";
+import { ModelDetailsLinkAction } from "../actions/ModelActions";
 import { formatParamCount, formatContextSize, formatPrice } from "../../utils/formatting";
 
 interface ModelDetailFormProps {

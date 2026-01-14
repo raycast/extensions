@@ -1,10 +1,15 @@
-import { Icon, List, showToast, Toast, Color } from "@raycast/api";
+import { Icon, List, showToast, Toast, Color, ActionPanel } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 import { ZeroEvalAPI } from "./utils/zeroeval-api";
 import { getOrganizationLogo } from "./utils/organization-logos";
-import { useModels, findModelById } from "./utils/use-models";
-import { ModelActions } from "./components/actions/ModelActions";
+import { useModels } from "./utils/use-models";
+import {
+  ShowDetailsAction,
+  ModelDetailsLinkAction,
+  OpenPlaygroundAction,
+  CompareWithSubmenu,
+} from "./components/actions/ModelActions";
 import { getCategoryIcon } from "./utils/category-icons";
 
 const api = new ZeroEvalAPI();
@@ -127,9 +132,7 @@ export default function Command() {
         categoryData?.benchmarks.map((benchmark) => (
           <List.Section key={benchmark.benchmark_id} title={benchmark.name}>
             {benchmark.top_models.slice(0, 5).map((model, index) => {
-              // Find model in cached list to get additional info
-              const cachedModel = findModelById(allModels, model.model_id);
-
+              const cachedModel = allModels?.find((m) => m.model_id === model.model_id);
               // Add Trophy icon to first element in each section
               const accessories: List.Item.Accessory[] = [
                 index === 0
@@ -153,9 +156,24 @@ export default function Command() {
                   icon={getOrganizationLogo(cachedModel?.organization_id || model.organization_name.toLowerCase())}
                   title={cachedModel?.name || model.model_name}
                   subtitle={cachedModel?.organization || model.organization_name}
-                  keywords={[cachedModel?.organization || model.organization_name, benchmark.name]}
+                  keywords={
+                    [
+                      model.model_id,
+                      model.organization_name,
+                      cachedModel?.organization_id,
+                      benchmark.name,
+                      benchmark.benchmark_id,
+                    ].filter(Boolean) as string[]
+                  }
                   accessories={accessories}
-                  actions={<ModelActions modelId={model.model_id} modelName={cachedModel?.name || model.model_name} />}
+                  actions={
+                    <ActionPanel>
+                      <ShowDetailsAction modelId={model.model_id} />
+                      <ModelDetailsLinkAction modelId={model.model_id} />
+                      <OpenPlaygroundAction modelId={model.model_id} />
+                      <CompareWithSubmenu modelId={model.model_id} />
+                    </ActionPanel>
+                  }
                 />
               );
             })}
