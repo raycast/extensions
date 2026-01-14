@@ -1,5 +1,9 @@
 # iTerm Changelog
 
+## [New Feature] - 2026-01-07
+
+- Added `Open iTerm Profile` command to open specific iTerm profiles in new window or tab
+
 ## [Extension improvement] - 2025-11-19
 - Added configuration to open iTerm in a new window or a new tab for `Open iTerm Here` command
 

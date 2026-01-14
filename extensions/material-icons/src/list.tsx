@@ -1,9 +1,9 @@
-import { ActionPanel, Action, List, showToast, Toast, Color, Icon as RcIcon } from "@raycast/api";
+import { ActionPanel, Action, List, Icon as RcIcon } from "@raycast/api";
 import { useState, useEffect, useMemo, memo } from "react";
-import fetch, { AbortError } from "node-fetch";
 import * as fzy from "fzy.js";
 import DownloadForm from "./download-form";
 import { Icon, IconAsset } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export default function ListView() {
   const { icons, search, isLoading } = useSearch();
@@ -19,7 +19,7 @@ export default function ListView() {
   );
 }
 
-const SearchListItem: React.VFC<{ icon: Icon }> = memo(({ icon }) => {
+const SearchListItem = memo(({ icon }: { icon: Icon }) => {
   return (
     <List.Item
       title={icon.name}
@@ -28,7 +28,7 @@ const SearchListItem: React.VFC<{ icon: Icon }> = memo(({ icon }) => {
         { text: icon.categories },
         ...icon.assets
           .slice(1)
-          .map((asset) => ({ icon: { source: asset.url, tintColor: { light: "black", dark: "white" } } })),
+          .map((asset: IconAsset) => ({ icon: { source: asset.url, tintColor: { light: "black", dark: "white" } } })),
       ]}
       actions={
         <ActionPanel>
@@ -73,9 +73,8 @@ function useSearch() {
     fetchIcons(controller.signal)
       .then(setIcons)
       .catch((e) => {
-        if (e instanceof AbortError) return;
-        console.error("fetch error", e);
-        showToast({ style: Toast.Style.Failure, title: "Could not fetch icons" });
+        if (e.name === "AbortError") return;
+        showFailureToast(e, { title: "Could not fetch icons" });
       });
 
     return () => {

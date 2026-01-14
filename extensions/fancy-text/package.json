@@ -7,7 +7,8 @@
   "author": "peduarte",
   "contributors": [
     "pernielsentikaer",
-    "ridemountainpig"
+    "ridemountainpig",
+    "nexxai"
   ],
   "categories": [
     "Fun"
@@ -35,24 +36,52 @@
   ],
   "preferences": [
     {
-  "name": "defaultAction",
-  "description": "Default Action",
-  "type": "dropdown",
-  "required": false,
-  "title": "Default Action",
-  "default": "copy",
-  "placeholder": "Default Action",
-  "data": [
-    {
-      "title": "Copy to Clipboard",
-      "value": "copy"
+      "name": "defaultAction",
+      "description": "Default Action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "default": "copy",
+      "placeholder": "Default Action",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ]
     },
     {
-      "title": "Paste",
-      "value": "paste"
+      "name": "decorationText",
+      "description": "Text Decoration",
+      "type": "textfield",
+      "required": false,
+      "title": "Text Decoration",
+      "default": "",
+      "placeholder": "Text to surround fancy text with (e.g., ✨, **, etc.)"
+    },
+    {
+      "name": "defaultDecorationStyle",
+      "description": "Default Decoration Style",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Decoration Style",
+      "default": "clean",
+      "placeholder": "Default Decoration Style",
+      "data": [
+        {
+          "title": "Clean (No Decoration)",
+          "value": "clean"
+        },
+        {
+          "title": "Surrounded",
+          "value": "surrounded"
+        }
+      ]
     }
-  ]
-}
   ],
   "dependencies": {
     "@raycast/api": "^1.85.0",

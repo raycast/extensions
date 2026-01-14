@@ -1,4 +1,36 @@
-# G-Cloud Changelog
+# Google Cloud CLI Changelog
+
+## [1.0.3] - 2026-01-13
+- Added Cloud Shell SSH connection action across all views
+- Added keyboard shortcut (Cmd+Opt+S) to copy Cloud Shell connection command
+- Improved action component error handling and input validation
+
+## [1.0.2] - 2026-01-05
+- Added Cloud Functions v2 service with Gen 2 support
+- Added function invocation from Raycast with live response
+- Added function creation form with streaming deployment logs
+- Added ApiErrorView for consistent API error handling across services
+- Improved service consistency and error handling patterns
+- Improved IAMService, SecretManagerService, CloudBuildService, ComputeService
+
+## [1.0.1] - 2025-12-28
+- Added optimistic UI updates for VM start/stop actions
+- Fixed Streamer Mode not hiding "Copy Latest Value" action in Secrets list
+- Fixed Streamer Mode toggle not updating secret value display in real-time
+- Allow copying secrets even when Streamer Mode is enabled (display remains masked)
+- Redesigned Secret detail view to match design patterns (metadata sidebar, tables)
+
+## [1.0.0] - 2025-12-15
+- Added Streamer Mode - hide sensitive data (emails, IPs, secrets) with Cmd+Shift+H
+- Added Windows compatibility
+- Added Cloud Run service support
+- Added Cloud Logging service support
+- Added Doctor view for diagnostics and troubleshooting gcloud setup
+- Added REST API layer for faster performance
+- Added gcloud CLI auto-detection - no more manual path configuration required
+- Removed redundant per-service commands, improving ergonomics
+- Improved error handling
+- Improved UI and date formatting
 
 ## [0.1.32] - 2025-07-08
 - Add Secret Manager command for managing Google Cloud secrets

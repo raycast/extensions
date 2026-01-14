@@ -15,13 +15,15 @@ import {
 import { SecretManagerService, Secret } from "./SecretManagerService";
 import SecretDetailView from "./SecretDetailView";
 import CreateSecretForm from "./components/CreateSecretForm";
-import { showFailureToast } from "@raycast/utils";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
+import { useStreamerMode } from "../../utils/useStreamerMode";
+import { StreamerModeAction } from "../../components/StreamerModeAction";
+import { CloudShellAction } from "../../components/CloudShellAction";
 
 interface SecretListViewProps {
   projectId: string;
   gcloudPath: string;
-  onProjectChange: (projectId: string) => void;
+  onProjectChange?: (projectId: string) => void;
 }
 
 export default function SecretListView({ projectId, gcloudPath, onProjectChange }: SecretListViewProps) {
@@ -31,6 +33,7 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
   const [searchText, setSearchText] = useState<string>("");
   const [service, setService] = useState<SecretManagerService | null>(null);
   const { push } = useNavigation();
+  const { isEnabled: isStreamerMode } = useStreamerMode();
 
   useEffect(() => {
     const secretService = new SecretManagerService(gcloudPath, projectId);
@@ -66,9 +69,10 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
       } catch (error) {
         (await loadingToast).hide();
         console.error("Failed to load secrets:", error);
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to load secrets",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
         setIsLoading(false);
@@ -108,9 +112,10 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
         message: `Found ${secretsData.length} secret${secretsData.length === 1 ? "" : "s"}`,
       });
     } catch (error) {
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to refresh secrets",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -132,14 +137,20 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
     });
 
     if (confirmed) {
-      const success = await service.deleteSecret(secretId);
-      if (success) {
+      try {
+        await service.deleteSecret(secretId);
         showToast({
           style: Toast.Style.Success,
           title: "Secret deleted",
           message: `Secret "${secretId}" has been deleted`,
         });
         await refreshSecrets();
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to delete secret",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
   };
@@ -196,9 +207,10 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
         }
       } catch (error) {
         (await loadingToast).hide();
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to access secret",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
@@ -281,6 +293,9 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
         <ActionPanel>
           <Action title="Create Secret" icon={Icon.Plus} onAction={handleCreateSecret} />
           <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshSecrets} />
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -299,6 +314,9 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
             <ActionPanel>
               <Action title="Create Secret" icon={Icon.Plus} onAction={handleCreateSecret} />
               {!isLoading && <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshSecrets} />}
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -317,11 +335,13 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
                 <ActionPanel>
                   <ActionPanel.Section title="Secret Actions">
                     <Action title="View Details" icon={Icon.Eye} onAction={() => handleViewDetails(secret)} />
-                    <Action
-                      title="Copy Latest Value"
-                      icon={Icon.Clipboard}
-                      onAction={() => handleQuickCopyValue(secret)}
-                    />
+                    {!isStreamerMode && (
+                      <Action
+                        title="Copy Latest Value"
+                        icon={Icon.Clipboard}
+                        onAction={() => handleQuickCopyValue(secret)}
+                      />
+                    )}
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Management">
                     <Action
@@ -344,6 +364,12 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteSecret(secret)}
                     />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Privacy">
+                    <StreamerModeAction />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Cloud Shell">
+                    <CloudShellAction projectId={projectId} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }

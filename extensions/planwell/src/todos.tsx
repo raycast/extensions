@@ -3,15 +3,16 @@ import {
   Icon,
   ActionPanel,
   Action,
-  Color,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useState } from "react";
 import { getTodos, toggleTodoComplete } from "./utils/vault";
 import { TodoDetail } from "./components/TodoDetail";
+import { designTokens } from "./utils/design-tokens";
 
 export default function Command() {
+  const { accent } = designTokens.colors;
   const [todos, setTodos] = useState(getTodos());
 
   const pendingTodos = todos.filter((t) => !t.isCompleted);
@@ -38,7 +39,7 @@ export default function Command() {
               {pendingTodos.map((t) => (
                 <List.Item
                   key={t.id}
-                  icon={{ source: Icon.Circle, tintColor: t.color }}
+                  icon={{ source: Icon.Circle, tintColor: accent.primary }}
                   title={t.name}
                   actions={
                     <ActionPanel>
@@ -64,7 +65,7 @@ export default function Command() {
               {completedTodos.map((t) => (
                 <List.Item
                   key={t.id}
-                  icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+                  icon={{ source: Icon.CheckCircle, tintColor: accent.primary }}
                   title={t.name}
                   actions={
                     <ActionPanel>

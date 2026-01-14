@@ -4,30 +4,39 @@ import { useState } from "react";
 import generateBaseUrl from "./lib/utils/generate-base-url";
 import { useVirtualizor } from "./lib/hooks";
 import { ListVirtualServersResponse, VirtualServersInfoResponse } from "./lib/types/vps";
+import { Panel } from "./lib/types/panel";
 
-export default function VirtualServers() {
+export default function VirtualServers(props: { panel?: Panel }) {
   const [action, setAction] = useState("");
   const [ID, setID] = useState<string | null>("");
 
-  const { isLoading: isFetching, data, revalidate } = useVirtualizor<ListVirtualServersResponse>("listvs");
-  const { isLoading: isDoingAction } = useVirtualizor<MessageResponse>(action, {
-    params: {
-      svs: ID || "",
-      do: "1",
+  const {
+    isLoading: isFetching,
+    data,
+    revalidate,
+  } = useVirtualizor<ListVirtualServersResponse>("listvs", undefined, props.panel);
+  const { isLoading: isDoingAction } = useVirtualizor<MessageResponse>(
+    action,
+    {
+      params: {
+        svs: ID || "",
+        do: "1",
+      },
+      execute: Boolean(action) && Boolean(ID),
+      async onWillExecute() {
+        await showToast(Toast.Style.Animated, "PROCESSING", `${action} Server ${ID}`);
+      },
+      async onData(data) {
+        await showToast(Toast.Style.Success, data.done.msg, data.output);
+        setAction("");
+        revalidate();
+      },
+      async onError() {
+        setAction("");
+      },
     },
-    execute: Boolean(action) && Boolean(ID),
-    async onWillExecute() {
-      await showToast(Toast.Style.Animated, "PROCESSING", `${action} Server ${ID}`);
-    },
-    async onData(data) {
-      await showToast(Toast.Style.Success, data.done.msg, data.output);
-      setAction("");
-      revalidate();
-    },
-    async onError() {
-      setAction("");
-    },
-  });
+    props.panel,
+  );
   const isLoading = isFetching || isDoingAction;
 
   function getIcon(status: number) {
@@ -60,31 +69,37 @@ export default function VirtualServers() {
             actions={
               !isLoading && (
                 <ActionPanel>
-                  <Action.Push icon={Icon.Eye} title="View VPS Info" target={<ViewVPSInfo vpsid={vps.vpsid} />} />
+                  <Action.Push
+                    icon={Icon.Eye}
+                    title="View VPS Info"
+                    target={<ViewVPSInfo vpsid={vps.vpsid} panel={props.panel} />}
+                  />
                   <Action icon={Icon.Redo} title="Revalidate" onAction={revalidate} />
-                  <ActionPanel.Section>
-                    {vps.status !== 0 && (
-                      <>
+                  {!props.panel && (
+                    <ActionPanel.Section>
+                      {vps.status !== 0 && (
+                        <>
+                          <Action
+                            icon={{ source: Icon.Redo, tintColor: Color.Blue }}
+                            title="Restart VPS"
+                            onAction={() => setAction("restart")}
+                          />
+                          <Action
+                            icon={{ source: Icon.Stop, tintColor: Color.Red }}
+                            title="Stop VPS"
+                            onAction={() => setAction("stop")}
+                          />
+                        </>
+                      )}
+                      {vps.status === 0 && (
                         <Action
-                          icon={{ source: Icon.Redo, tintColor: Color.Blue }}
-                          title="Restart VPS"
-                          onAction={() => setAction("restart")}
+                          icon={{ source: Icon.Play, tintColor: Color.Green }}
+                          title="Start VPS"
+                          onAction={() => setAction("start")}
                         />
-                        <Action
-                          icon={{ source: Icon.Stop, tintColor: Color.Red }}
-                          title="Stop VPS"
-                          onAction={() => setAction("stop")}
-                        />
-                      </>
-                    )}
-                    {vps.status === 0 && (
-                      <Action
-                        icon={{ source: Icon.Play, tintColor: Color.Green }}
-                        title="Start VPS"
-                        onAction={() => setAction("start")}
-                      />
-                    )}
-                  </ActionPanel.Section>
+                      )}
+                    </ActionPanel.Section>
+                  )}
                 </ActionPanel>
               )
             }
@@ -94,18 +109,22 @@ export default function VirtualServers() {
   );
 }
 
-function ViewVPSInfo({ vpsid }: { vpsid: string }) {
-  const { isLoading, data } = useVirtualizor<VirtualServersInfoResponse>("vpsmanage", {
-    params: {
-      svs: vpsid,
+function ViewVPSInfo({ vpsid, panel }: { vpsid: string; panel?: Panel }) {
+  const { isLoading, data } = useVirtualizor<VirtualServersInfoResponse>(
+    "vpsmanage",
+    {
+      params: {
+        svs: vpsid,
+      },
+      execute: true,
     },
-    execute: true,
-  });
+    panel,
+  );
   const markdonw = "```" + JSON.stringify(data) + "```";
   return (
     <Detail
       isLoading={isLoading}
-      markdown={markdonw}
+      markdown={markdonw || "LOADING..."}
       metadata={
         data && (
           <Detail.Metadata>

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { extractErrorMessage } from "./utils/errors";
 import { findReadingPlanDatabase } from "./logos/installations";
 import { getSqlInstance } from "./utils/sql";
+import { LOGOS_BUNDLE_ID } from "./logos/constants";
+import { encodeForRefLy } from "./utils/encodeForRefLy";
 
 type Preferences = {
   documentsDbPath?: string;
@@ -177,8 +179,3 @@ function hyphenateGuid(hex: string) {
   }
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
-
-function encodeForRefLy(value: string) {
-  return encodeURIComponent(value).replace(/%20/g, "+");
-}
-const LOGOS_BUNDLE_ID = "com.logos.desktop.logos";

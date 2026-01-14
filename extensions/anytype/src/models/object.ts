@@ -4,7 +4,6 @@ import {
   ObjectLayout,
   PropertyLinkWithValue,
   PropertyWithValue,
-  RawProperty,
   RawPropertyWithValue,
   RawType,
   Type,
@@ -18,24 +17,26 @@ export enum BodyFormat {
 export interface CreateObjectRequest {
   name: string;
   icon: ObjectIcon;
-  body: string;
   template_id: string;
   type_key: string;
   properties: PropertyLinkWithValue[];
+  body: string; // TODO: rename to markdown?
 }
 
 export interface UpdateObjectRequest {
   name?: string;
   icon?: ObjectIcon;
+  type_key?: string; // TODO: add support in forms
   properties?: PropertyLinkWithValue[];
+  markdown?: string;
 }
 
 export interface RawSpaceObject {
   object: string;
   id: string;
   name: string;
-  icon: ObjectIcon;
-  type: RawType;
+  icon: ObjectIcon | null;
+  type: RawType | null;
   snippet: string;
   layout: ObjectLayout;
   space_id: string;
@@ -57,35 +58,4 @@ export interface SpaceObjectWithBody extends Omit<RawSpaceObjectWithBody, "icon"
   icon: Image.ImageLike;
   type: Type;
   properties: PropertyWithValue[];
-}
-
-export interface Block {
-  id: string;
-  children_ids: string[];
-  background_color: string;
-  align: string;
-  vertical_align: string;
-  text: Text;
-  file: File;
-  property: RawProperty;
-}
-
-export interface Text {
-  text: string;
-  style: string;
-  checked: boolean;
-  color: string;
-  icon: ObjectIcon;
-}
-
-export interface File {
-  hash: string;
-  name: string;
-  type: string;
-  mime: string;
-  size: number;
-  added_at: number;
-  target_object_id: string;
-  state: string;
-  style: string;
 }

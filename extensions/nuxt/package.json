@@ -108,6 +108,13 @@
       "placeholder": "U",
       "required": false,
       "default": "U"
+    },
+    {
+      "name": "customTemplatesPath",
+      "title": "Custom Templates Directory",
+      "type": "directory",
+      "description": "Path to a directory containing custom templates. Expected structure: /components/template.vue, /pages/template.vue, /api/template.ts, /layouts/template.vue, /composables/template.ts",
+      "required": false
     }
   ],
   "dependencies": {

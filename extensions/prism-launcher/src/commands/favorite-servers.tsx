@@ -27,7 +27,7 @@ import {
 import NoInstall from "./no-install";
 
 export default function FavoriteServers() {
-  const { data: isPrismInstalledData } = usePromise(isPrismLauncherInstalled, []);
+  const { data: isPrismInstalledData, isLoading: isPrismInstalledLoading } = usePromise(isPrismLauncherInstalled, []);
   const isPrismInstalled = isPrismInstalledData ?? false;
 
   const [servers, setServers] = useState<Server[]>();
@@ -89,7 +89,7 @@ export default function FavoriteServers() {
   return (
     <List
       searchBarPlaceholder={"Search favorite servers..."}
-      {...(isPrismInstalled ? { isLoading: servers === undefined } : {})}
+      {...(isPrismInstalled ? { isLoading: servers === undefined } : { isLoading: isPrismInstalledLoading })}
     >
       <When condition={isPrismInstalled}>
         {servers && servers.length > 0 ? (

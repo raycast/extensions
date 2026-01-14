@@ -1,5 +1,9 @@
 # Convert Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added OKLCH color conversion
+
 ## [Feat: Windows Support] - 2025-10-05
 
 - Introduced Windows platform compatibility

@@ -101,7 +101,7 @@ function ShareSecretAction() {
 Let's break this down:
 
 - The `<ShareSecretAction>` returns an [`<Action.SubmitForm>`](../api-reference/user-interface/actions.md#action.submitform).
-- The `handleSubmit()` gets called when the form is submitted with it's values.
+- The `handleSubmit()` gets called when the form is submitted with its values.
   - First we check if the user entered a secret. If not, we show a toast.
   - Then we show a toast to hint that there is a network call in progress to share the secret.
   - We call [Doppler's API](https://docs.doppler.com/reference/share-secret) with the form values

@@ -9,6 +9,10 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "issue_id_to_html_link",

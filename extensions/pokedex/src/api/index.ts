@@ -297,13 +297,14 @@ export const fetchPokemonWithCaching = async (
             }
           }
         }
-        pokemon_v2_pokemonspeciesflavortexts(where: {language_id: {_eq: $language_id}}) {
+        pokemon_v2_pokemonspeciesflavortexts(where: {language_id: {_eq: $language_id}}, order_by: {version_id: asc}) {
           flavor_text
           pokemon_v2_version {
             id
             name
             pokemon_v2_versiongroup {
               name
+              generation_id
               pokemon_v2_generation {
                 name
                 pokemon_v2_generationnames(where: {language_id: {_eq: 9}}) {

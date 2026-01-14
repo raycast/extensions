@@ -1,5 +1,17 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Anytype MCP Server] - {PR_MERGE_DATE}
+
+Update Anytype MCP Server to use the latest version of the Anytype API.
+
+## [Add Circleback MCP Server] - {PR_MERGE_DATE}
+
+Add official Circleback MCP Server to registry.
+
+## [Add Atono MCP Server] - 2025-12-08
+
+Add official Atono MCP Server to registry to manage projects
+
 ## [Update Nuxt MCP Server URL] - 2025-11-17
 
 ## [Update Nuxt UI MCP Server URL] - 2025-09-23

@@ -4,6 +4,7 @@ import type { SearchEngine } from "./types";
 import { getCustomSearchEngines, addCustomSearchEngine } from "./data/custom-search-engines";
 import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { isValidUrl } from "./utils";
+import { platform } from "os";
 
 type AddCustomSearchEngineProps = {
   engine?: SearchEngine;
@@ -11,10 +12,17 @@ type AddCustomSearchEngineProps = {
 };
 
 export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCustomSearchEngineProps) {
+  const isWindows = platform() === "win32";
   const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [triggerError, setTriggerError] = useState<string | undefined>();
-  const [urlError, setUrlError] = useState<string | undefined>();
+  const [urlErrors, setUrlErrors] = useState<Record<number, string | undefined>>({});
+  const [urls, setUrls] = useState<string[]>(() => {
+    if (engine?.urls && engine.urls.length > 0) {
+      return engine.urls;
+    }
+    return engine?.u ? [engine.u] : [""];
+  });
 
   const isEditing = !!engine;
 
@@ -25,6 +33,7 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
     domain: string;
     category?: string;
     subcategory?: string;
+    [key: string]: string | undefined;
   }) => {
     // Validation
     let hasErrors = false;
@@ -46,18 +55,27 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
       setTriggerError(undefined);
     }
 
-    if (!values.url.trim()) {
-      setUrlError("URL is required");
-      hasErrors = true;
-    } else if (!values.url.includes("{{{s}}}")) {
-      setUrlError("URL must contain {{{s}}} placeholder for the search query");
-      hasErrors = true;
-    } else if (!isValidUrl(values.url.replace("{{{s}}}", "test"))) {
-      setUrlError("Invalid URL format");
-      hasErrors = true;
-    } else {
-      setUrlError(undefined);
+    const newUrlErrors: Record<number, string | undefined> = {};
+    const validUrls: string[] = [];
+
+    for (let i = 0; i < urls.length; i++) {
+      const urlValue = values[`url_${i}`]?.trim() || "";
+
+      if (!urlValue) {
+        newUrlErrors[i] = "URL is required";
+        hasErrors = true;
+      } else if (!urlValue.includes("{{{s}}}")) {
+        newUrlErrors[i] = "URL must contain {{{s}}} placeholder";
+        hasErrors = true;
+      } else if (!isValidUrl(urlValue.replace("{{{s}}}", "test"))) {
+        newUrlErrors[i] = "Invalid URL format";
+        hasErrors = true;
+      } else {
+        validUrls.push(urlValue);
+      }
     }
+
+    setUrlErrors(newUrlErrors);
 
     if (hasErrors) {
       return;
@@ -85,9 +103,10 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
 
     const newEngine: SearchEngine = {
       s: values.name.trim(),
-      d: new URL(values.url.trim()).hostname,
+      d: new URL(validUrls[0].trim()).hostname,
       t: cleanedTrigger,
-      u: values.url.trim(),
+      u: validUrls[0].trim(),
+      urls: validUrls.length > 1 ? validUrls : undefined,
       c: (values.category?.trim() as SearchEngine["c"]) || "Online Services",
       sc: values.subcategory?.trim(),
       isCustom: true,
@@ -112,12 +131,64 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
     }
   };
 
+  const addUrl = () => {
+    setUrls([...urls, ""]);
+  };
+
+  const removeUrl = (index: number) => {
+    if (urls.length > 1) {
+      setUrls(urls.filter((_, i) => i !== index));
+      const newUrlErrors = { ...urlErrors };
+      delete newUrlErrors[index];
+      setUrlErrors(newUrlErrors);
+    }
+  };
+
+  const updateUrl = (index: number, value: string) => {
+    const newUrls = [...urls];
+    newUrls[index] = value;
+    setUrls(newUrls);
+
+    if (urlErrors[index]) {
+      const newUrlErrors = { ...urlErrors };
+      delete newUrlErrors[index];
+      setUrlErrors(newUrlErrors);
+    }
+  };
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={isEditing ? "Update Search Engine" : "Add Search Engine"} onSubmit={handleSubmit} />
-          <Action title="Cancel" icon={Icon.XMarkCircle} onAction={pop} />
+          <ActionPanel.Section>
+            <Action.SubmitForm
+              title={isEditing ? "Update Search Engine" : "Add Search Engine"}
+              onSubmit={handleSubmit}
+            />
+            <Action title="Cancel" icon={Icon.XMarkCircle} onAction={pop} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="URL Management">
+            <Action
+              title="Add Another URL"
+              icon={Icon.Plus}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "n" },
+                Windows: { modifiers: ["ctrl"], key: "n" },
+              }}
+              onAction={addUrl}
+            />
+            {urls.length > 1 && (
+              <Action
+                title="Remove Last URL"
+                icon={Icon.Minus}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "backspace" },
+                  Windows: { modifiers: ["ctrl"], key: "backspace" },
+                }}
+                onAction={() => removeUrl(urls.length - 1)}
+              />
+            )}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -137,13 +208,23 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
         error={triggerError}
         onChange={() => setTriggerError(undefined)}
       />
-      <Form.TextField
-        id="url"
-        title="Search URL"
-        placeholder="https://example.com/search?q={{{s}}}"
-        defaultValue={engine?.u || ""}
-        error={urlError}
-        onChange={() => setUrlError(undefined)}
+      {urls.map((url, index) => (
+        <Form.TextField
+          key={index}
+          id={`url_${index}`}
+          title={urls.length > 1 ? `Search URL ${index + 1}` : "Search URL"}
+          placeholder="https://example.com/search?q={{{s}}}"
+          defaultValue={url}
+          error={urlErrors[index]}
+          onChange={(value) => updateUrl(index, value)}
+        />
+      ))}
+      <Form.Description
+        text={
+          urls.length > 1
+            ? `💡 Press ${isWindows ? "Ctrl+N" : "Cmd+N"} to add more URLs, ${isWindows ? "Ctrl+Backspace" : "Cmd+Backspace"} to remove the last one. Multiple URLs will open in separate tabs.`
+            : `💡 Press ${isWindows ? "Ctrl+N" : "Cmd+N"} to add more search URLs (will open in separate tabs).`
+        }
       />
       <Form.TextField
         id="category"

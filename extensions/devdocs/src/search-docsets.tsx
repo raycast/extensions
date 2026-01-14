@@ -3,8 +3,9 @@ import { useFetch, useLocalStorage } from "@raycast/utils";
 import { Doc } from "./types";
 import { SearchEntries } from "./search-entries";
 import { useEffect, useState } from "react";
+import React from "react";
 
-export default function SearchDocsets(): JSX.Element {
+export default function SearchDocsets() {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
   const defaultDocs = { docs: ["css", "html", "http", "javascript", "dom"].join("/") };
   const { value: docSlugsStorage } = useLocalStorage("docs", JSON.stringify(defaultDocs));
@@ -42,22 +43,30 @@ export default function SearchDocsets(): JSX.Element {
 
   return (
     <List isLoading={isLoading} filtering={true} onSearchTextChange={setSearchText}>
-      {((filteredDocs[0].length > 0 || filteredDocs[1].length) > 0 && DocumentationSection(filteredDocs)) ||
-        (documentations[0].length > 0 && documentations[1].length && DocumentationSection(documentations))}
+      {((filteredDocs[0].length > 0 || filteredDocs[1].length > 0) && DocumentationSection(filteredDocs)) ||
+        (documentations[0].length > 0 && documentations[1].length > 0 && DocumentationSection(documentations))}
     </List>
   );
 }
 
-function DocumentationSection(docs: [Doc[], Doc[]]): JSX.Element {
+function DocumentationSection(docs: [Doc[], Doc[]]) {
   return (
     <>
-      <List.Section title="Preferred">{docs[0]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
-      <List.Section title="Available">{docs[1]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
+      <List.Section title="Preferred">
+        {docs[0]?.map((doc) => (
+          <DocItem key={doc.slug} doc={doc} />
+        ))}
+      </List.Section>
+      <List.Section title="Available">
+        {docs[1]?.map((doc) => (
+          <DocItem key={doc.slug} doc={doc} />
+        ))}
+      </List.Section>
     </>
   );
 }
 
-function DocItem({ doc }: { doc: Doc }): JSX.Element {
+function DocItem({ doc }: { doc: Doc }) {
   const quicklink = {
     link: `raycast://extensions/${environment.ownerOrAuthorName}/${
       environment.extensionName
@@ -68,7 +77,7 @@ function DocItem({ doc }: { doc: Doc }): JSX.Element {
     <List.Item
       title={doc.name}
       icon={{
-        source: `https://github.com/freeCodeCamp/devdocs/blob/main/public/icons/docs/${doc.slug.split("~")[0]}/16@2x.png?raw=true`,
+        source: `https://cdn.jsdelivr.net/gh/freeCodeCamp/devdocs@main/public/icons/docs/${doc.slug.split("~")[0]}/16@2x.png?raw=true`,
         fallback: Icon.Book,
       }}
       subtitle={doc.version}

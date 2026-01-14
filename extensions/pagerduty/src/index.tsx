@@ -1,23 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Form,
-  getPreferenceValues,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Form, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
 import { format, parseISO } from "date-fns";
-import axios from "axios";
-import { setTimeout } from "timers/promises";
-
-interface Preference {
-  apiKey: string | null | undefined;
-}
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
 
 interface UpdateIncidentResponse {
   incident: IncidentItem;
@@ -25,6 +9,10 @@ interface UpdateIncidentResponse {
 
 interface ListIncidentsResponse {
   incidents: IncidentItem[];
+  limit: number;
+  offset: number;
+  total: number | null;
+  more: boolean;
 }
 
 interface GetMeResponse {
@@ -34,44 +22,14 @@ interface GetMeResponse {
 interface GetMeError {
   error: string;
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isGetMeError(e: any): e is GetMeError {
-  return e !== null && typeof e.error === "string";
-}
-
 interface ErrorResponse {
   error: { message: string; code: number; errors: string[] };
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isErrorResponse(e: any): e is ErrorResponse {
-  return (
-    e !== null &&
-    e !== null &&
-    e.error === "object" &&
-    typeof e.error.message === "string" &&
-    typeof e.error.code === "number" &&
-    typeof e.error.errors === "object"
-  );
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildErrorMessage(error: any): string {
-  if (axios.isAxiosError(error) && isErrorResponse(error.response?.data)) {
-    const response = error.response?.data as ErrorResponse;
-    return `${response.error.message} reason: ${response.error.errors?.join(", ")}`;
-  } else if (axios.isAxiosError(error) && isGetMeError(error.response?.data)) {
-    return (error.response?.data as GetMeError).error;
-  } else {
-    console.log(error);
-    return "Failed to update incident.";
-  }
-}
 
 type IncidentStatus = "triggered" | "acknowledged" | "resolved";
-
 interface IncidentItem {
   id: string;
-  status: "triggered" | "acknowledged" | "resolved";
+  status: IncidentStatus;
   title: string;
   summary: string;
   incident_number: number;
@@ -82,90 +40,78 @@ interface IncidentItem {
 
 type Filter = "all" | IncidentStatus;
 
-interface State {
-  items?: IncidentItem[];
-  filter?: Filter;
-  error?: Error;
-}
-
-const pagerDutyClient = (() => {
-  const preference = getPreferenceValues<Preference>();
-  return axios.create({
-    baseURL: "https://api.pagerduty.com",
+const { apiKey } = getPreferenceValues<Preferences>();
+const API_URL = "https://api.pagerduty.com";
+const API_HEADERS = {
+  Authorization: `Token token=${apiKey}`,
+};
+const PAGE_LIMIT = "25";
+const makeRequest = async <T,>(endpoint: string, options?: RequestInit) => {
+  const response = await fetch(API_URL + endpoint, {
+    ...options,
     headers: {
-      Authorization: `Token token=${preference.apiKey}`,
+      ...API_HEADERS,
+      ...options?.headers,
     },
   });
-})();
+  if (!response.headers.get("Content-Type")?.includes("json")) throw new Error(await response.text());
+  const result = await response.json();
+  if (!response.ok) {
+    const err = result as ErrorResponse | GetMeError;
+    if (typeof err.error === "string") throw new Error(err.error);
+    throw new Error(`${err.error.message} reason: ${err.error.errors?.join(", ")}`);
+  }
+  return result as T;
+};
+const pagerDutyClient = {
+  get: <T,>(endpoint: string) => makeRequest<T>(endpoint),
+  post: <T,>(endpoint: string, options: RequestInit) => makeRequest<T>(endpoint, { ...options, method: "POST" }),
+  put: <T,>(endpoint: string, options: RequestInit) => makeRequest<T>(endpoint, { ...options, method: "PUT" }),
+};
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
-  const { pop } = useNavigation();
+  const [filter, setFilter] = useState<Filter>("all");
 
-  const filterIncidents = useCallback(() => {
-    if (state.filter === undefined || state.filter === "all") {
-      return state.items;
-    } else {
-      return state.items?.filter((item) => item.status === state.filter);
-    }
-  }, [state.items, state.filter]);
-
-  async function updateIncident(id: string, newStatus: IncidentStatus) {
-    const items = state.items ?? [];
-    const index = items.findIndex((i) => i.id === id);
-    if (index < 0) {
-      showToast(Toast.Style.Failure, "Failed to update incident status.");
-      return;
-    }
-
-    items[index].status = newStatus;
-    setState({ items: items });
-
-    if (newStatus === "resolved") {
-      await setTimeout(600);
-      pop();
-    }
-  }
-
-  useEffect(() => {
-    async function fetchIncidents() {
-      try {
-        const { data: response } = await pagerDutyClient.get<ListIncidentsResponse>("/incidents", {
-          params: {
+  const {
+    isLoading,
+    data: incidents,
+    pagination,
+    mutate,
+  } = useCachedPromise(
+    () => async (options) => {
+      const data = await pagerDutyClient.get<ListIncidentsResponse>(
+        "/incidents?" +
+          new URLSearchParams({
             sort_by: "created_at:desc",
-          },
-        });
-        setState({ items: response.incidents });
-      } catch (error) {
-        setState({
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        });
-      }
-    }
-    fetchIncidents();
-  }, []);
+            limit: PAGE_LIMIT,
+            offset: String(options.page * +PAGE_LIMIT),
+          }),
+      );
+      return {
+        data: data.incidents,
+        hasMore: data.more,
+      };
+    },
+    [],
+    { initialData: [] },
+  );
 
-  if (state.error) {
-    showToast(Toast.Style.Failure, state.error.message);
-  }
+  const filteredIncidents = filter === "all" ? incidents : incidents.filter((item) => item.status === filter);
 
   return (
     <List
-      isLoading={!state.items && !state.error}
+      isLoading={isLoading}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter Incidents by Status"
-          value={state.filter}
-          onChange={(newValue) => setState((previous) => ({ ...previous, filter: newValue as Filter }))}
-        >
+        <List.Dropdown tooltip="Filter Incidents by Status" onChange={(value) => setFilter(value as Filter)}>
           <List.Dropdown.Item title="All" value={"all"} />
           <List.Dropdown.Item title="Triggered" value={"triggered"} />
           <List.Dropdown.Item title="Acknowledged" value={"acknowledged"} />
           <List.Dropdown.Item title="Resolved" value={"resolved"} />
         </List.Dropdown>
       }
+      pagination={pagination}
     >
-      {filterIncidents()?.map((incident) => (
+      {filteredIncidents.map((incident) => (
         <List.Item
           key={incident.id}
           title={`#${incident.incident_number}: ${incident.title}`}
@@ -192,7 +138,7 @@ export default function Command() {
                 <></>
               ) : (
                 <ActionPanel.Section>
-                  <UpdateIncidentStatusAction item={incident} onUpdate={updateIncident} />
+                  <UpdateIncidentStatusAction item={incident} mutateIncidents={mutate} />
                 </ActionPanel.Section>
               )}
             </ActionPanel>
@@ -215,45 +161,48 @@ export default function Command() {
   );
 }
 
-function UpdateIncidentStatusAction(props: {
-  item: IncidentItem;
-  onUpdate: (id: string, newStatus: IncidentStatus) => void;
-}) {
+function UpdateIncidentStatusAction(props: { item: IncidentItem; mutateIncidents: MutatePromise<IncidentItem[]> }) {
   async function onUpdateIncidentStatus(
     item: IncidentItem,
     newStatus: IncidentStatus,
-    note: string | undefined = undefined
+    note: string | undefined = undefined,
   ) {
-    showToast(Toast.Style.Animated, "Updating...");
+    const toast = await showToast(Toast.Style.Animated, "Updating...", "Getting user info");
 
     try {
-      const { data: me } = await pagerDutyClient.get<GetMeResponse>("/users/me");
+      const me = await pagerDutyClient.get<GetMeResponse>("/users/me");
       if (note) {
-        await pagerDutyClient.post(
-          `/incidents/${item.id}/notes`,
-          { note: { content: note } },
-          { headers: { from: me.user.email } }
-        );
+        toast.message = "Adding note";
+        await pagerDutyClient.post(`/incidents/${item.id}/notes`, {
+          headers: { from: me.user.email },
+          body: JSON.stringify({
+            note: { content: note },
+          }),
+        });
       }
-      const { data: updated } = await pagerDutyClient.put<UpdateIncidentResponse>(
-        `/incidents/${item.id}`,
+      toast.message = "Updating incident";
+      await props.mutateIncidents(
+        pagerDutyClient.put<UpdateIncidentResponse>(`/incidents/${item.id}`, {
+          headers: { from: me.user.email },
+          body: JSON.stringify({
+            incident: {
+              type: "incident",
+              status: newStatus,
+            },
+          }),
+        }),
         {
-          incident: {
-            type: "incident",
-            status: newStatus,
+          optimisticUpdate(data) {
+            return data.map((i) => (i.id === item.id ? { ...i, status: newStatus } : i));
           },
         },
-        { headers: { from: me.user.email } }
       );
 
-      showToast(
-        Toast.Style.Success,
-        `Incident #${updated.incident.incident_number} has been ${updated.incident.status}.`
-      );
-      props.onUpdate(item.id, updated.incident.status);
+      toast.style = Toast.Style.Success;
+      toast.title = `Incident #${item.incident_number} has been ${newStatus}.`;
     } catch (error) {
-      const message = buildErrorMessage(error);
-      showToast(Toast.Style.Failure, message);
+      toast.style = Toast.Style.Failure;
+      toast.title = `${error}`;
     }
   }
 

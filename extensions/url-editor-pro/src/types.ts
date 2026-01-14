@@ -9,3 +9,11 @@ export interface ParseResult {
   query?: Record<string, string | null | undefined>;
   alias?: string;
 }
+
+export interface TemplateGroup {
+  id: string;
+  name: string;
+  description?: string;
+  templates: string[];
+  enabled?: boolean;
+}

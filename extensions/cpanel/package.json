@@ -10,6 +10,10 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "preferences": [
     {
       "name": "cpanel_url",
@@ -116,8 +120,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
