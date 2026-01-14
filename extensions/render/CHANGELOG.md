@@ -1,6 +1,6 @@
 # Render Changelog
 
-## [Add Service Pinning] - {PR_MERGE_DATE}
+## [Add Service Pinning] - 2026-01-14
 
 Added ability to pin frequently used services to the top of the list.
 
