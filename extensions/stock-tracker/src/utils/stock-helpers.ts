@@ -78,7 +78,7 @@ export function getStockIcon(
 }
 
 export function formatStockSubtitle(stock: StockItem, defaultExchange: string, maxLength: number = 60): string {
-  // Symbol'den exchange ve symbol'ü ayır (örn: "NASDAQ:AAPL" -> "NASDAQ" ve "AAPL")
+  // Extract exchange and symbol from symbol string (e.g., "NASDAQ:AAPL" -> "NASDAQ" and "AAPL")
   const colonIndex = stock.symbol.indexOf(":");
   const exchange =
     colonIndex > 0

@@ -27,7 +27,7 @@ async function loadSavedLocale(): Promise<Locale | null> {
 
     // Try preferences first
     try {
-      const preferences = getPreferenceValues<{ language?: string }>();
+      const preferences = getPreferenceValues<Preferences>();
       if (preferences.language === "tr" || preferences.language === "en") {
         return preferences.language as Locale;
       }

@@ -93,39 +93,39 @@ function calculateRelevanceScore<T extends StockItem | WatchlistItem>(stock: T, 
   const normalizedQuery = normalizeTurkishChars(query.toLowerCase().trim());
   const { name, symbol, symbolOnly } = normalizeStockFields(stock);
 
-  // Tam eşleşme - en yüksek öncelik (diğer kontrolleri atla)
+  // Exact match - highest priority (skip other checks)
   if (hasExactMatch(name, symbol, symbolOnly, normalizedQuery)) {
     return RELEVANCE_SCORES.EXACT_MATCH;
   }
 
   let score = 0;
 
-  // Başlangıç eşleşmesi - yüksek öncelik
+  // Starts with match - high priority
   if (hasStartsWithMatch(name, symbol, symbolOnly, normalizedQuery)) {
     score += RELEVANCE_SCORES.STARTS_WITH;
   }
 
-  // Symbol tam eşleşmesi - orta-yüksek öncelik
+  // Symbol exact match - medium-high priority
   if (hasSymbolExactMatch(symbol, symbolOnly, normalizedQuery)) {
     score += RELEVANCE_SCORES.SYMBOL_EXACT_MATCH;
   }
 
-  // Symbol başlangıç eşleşmesi - orta öncelik
+  // Symbol starts with match - medium priority
   if (hasSymbolStartsWithMatch(symbol, symbolOnly, normalizedQuery)) {
     score += RELEVANCE_SCORES.SYMBOL_STARTS_WITH;
   }
 
-  // Name içeriyor - düşük öncelik
+  // Name contains - low priority
   if (name.includes(normalizedQuery)) {
     score += RELEVANCE_SCORES.NAME_CONTAINS;
   }
 
-  // Symbol içeriyor - düşük öncelik
+  // Symbol contains - low priority
   if (symbol.includes(normalizedQuery) || symbolOnly.includes(normalizedQuery)) {
     score += RELEVANCE_SCORES.SYMBOL_CONTAINS;
   }
 
-  // Kelime bazlı eşleşme bonusu
+  // Word-based match bonus
   const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0);
   score += calculateWordScore(name, symbol, symbolOnly, queryWords);
 
@@ -180,7 +180,7 @@ export function sortStocksByRelevance<T extends StockItem | WatchlistItem>(stock
     const scoreA = calculateRelevanceScore(a, query);
     const scoreB = calculateRelevanceScore(b, query);
 
-    // Yüksek skorlu sonuçlar önce gelir
+    // Higher scored results come first
     return scoreB - scoreA;
   });
 }

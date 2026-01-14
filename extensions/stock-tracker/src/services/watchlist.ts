@@ -86,7 +86,7 @@ export async function addStockToWatchlist(watchlistId: string, stock: StockItem)
   watchlist.stocks.push(watchlistItem);
   await LocalStorage.setItem(STORAGE_KEYS.WATCHLISTS, JSON.stringify(watchlists));
 
-  // Son kullanılan watchlist'i kaydet
+  // Save last used watchlist
   await LocalStorage.setItem(STORAGE_KEYS.LAST_WATCHLIST_ID, watchlistId);
 }
 

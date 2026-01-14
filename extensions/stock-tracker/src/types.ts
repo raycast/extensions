@@ -93,15 +93,9 @@ export type WatchlistArray = Watchlist[];
 // Preference Types
 // ============================================================================
 
-export interface ColumnPreferences {
-  column1?: string;
-  column2?: string;
-  column3?: string;
-}
-
-export interface AppPreferences extends ColumnPreferences {
-  language?: "tr" | "en";
-}
+// Use auto-generated Preferences type from raycast-env.d.ts
+// ColumnPreferences is now an alias for Preferences for backward compatibility
+export type ColumnPreferences = Preferences;
 
 // ============================================================================
 // Form Types
