@@ -1,5 +1,11 @@
 # Changelog
 
+## [Fixed Error: Request timeout after 5000ms] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Request Timeout**: Fixed error where request to get window list would timeout after 5 seconds.
+
 ## [Performance & Pin Fixes] - 2026-01-05
 
 ### Fixed
