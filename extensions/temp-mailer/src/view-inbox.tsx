@@ -20,6 +20,8 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [mailAddress, setMailAddress] = useState<string | null>(null);
+  const tempMailInstanceRef = useRef<TempMail | null>(null);
+  const currentAddressRef = useRef<string | null>(null);
 
   useEffect(() => {
     const normalizedSearch = searchText.toLowerCase();
@@ -34,9 +36,17 @@ export default function Command() {
     return storedAddress;
   };
 
+  const getTempMailInstance = (address: string) => {
+    if (!tempMailInstanceRef.current || currentAddressRef.current !== address) {
+      tempMailInstanceRef.current = new TempMail(address);
+      currentAddressRef.current = address;
+    }
+    return tempMailInstanceRef.current;
+  };
+
   const fetchMails = async (address: string) => {
     try {
-      const tempMailInstance = new TempMail(address);
+      const tempMailInstance = getTempMailInstance(address);
       const mails = (await tempMailInstance.fetchInbox()).mail_list || [];
       return mails;
     } catch {
@@ -46,7 +56,7 @@ export default function Command() {
   };
 
   const fetchMailDetails = async (mails: MailItem[], address: string) => {
-    const tempMailInstance = new TempMail(address);
+    const tempMailInstance = getTempMailInstance(address);
     const detailEntries = await Promise.all(
       mails.map(async (mail) => {
         const details = await tempMailInstance.fetchMailById(mail.mail_id);

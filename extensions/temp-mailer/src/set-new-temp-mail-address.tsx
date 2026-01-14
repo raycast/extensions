@@ -11,7 +11,6 @@ export default function Command() {
   const setMailAddress = async ({ mail_username, mail_domain }: { mail_username: string; mail_domain: string }) => {
     const mailAddress = `${mail_username}@${mail_domain}`;
     await LocalStorage.setItem("mail_address", mailAddress);
-    popToRoot();
   };
 
   const { handleSubmit, itemProps } = useForm<CreateMailFormValues>({
@@ -33,6 +32,8 @@ export default function Command() {
           title: "Yay!",
           message: `${trimmedUsername}@${values.mail_domain} your mail address has been set`,
         });
+
+        popToRoot();
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
