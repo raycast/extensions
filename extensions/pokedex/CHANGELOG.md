@@ -1,6 +1,6 @@
 # Pokédex Changelog
 
-## [Type Mastery & Prefix Cleanup] - 2026-01-10 [@DanBennettUK](https://github.com/DanBennettUK)
+## [Type Mastery & Prefix Cleanup] - {PR_MERGE_DATE}
 
 - Added **Natures** command to explore stat changes and localized names for all Pokémon natures.
 - Added **Type Chart** command for a comprehensive overview of type effectiveness, strengths, and weaknesses.
