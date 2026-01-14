@@ -1,5 +1,15 @@
 # Things Changelog
 
+## [Tag Filtering and Grouping] - {PR_MERGE_DATE}
+
+- Added tag filter dropdown to list views (matches Things native behavior)
+- Tag filtering supports full inheritance: todo → project → area tags
+- Tag filtering supports hierarchy: selecting a parent tag matches all descendants
+- Tags display with hierarchy indicator (e.g., "bikes › masi")
+- Added "No Tag" filter option for untagged todos
+- Area tags are lazy-loaded only when filtering (preserves fast initial load)
+- Added preference to toggle grouping by project or area
+
 ## [Reduce JXA Latency for List Fetching] - 2026-02-09
 
 - Todo list views and the menu bar command now fetch tags and lists in a single JXA call instead of two

@@ -266,6 +266,62 @@ const mapAreaJxa = `area => {
   };
 }`;
 
+export type TagWithParent = {
+  name: string;
+  parent: string | null;
+};
+
+export const getTagsWithHierarchy = (): Promise<TagWithParent[]> =>
+  executeJxa(
+    `
+  const things = Application('${preferences.thingsAppIdentifier}');
+  return things.tags().map(tag => ({
+    name: tag.name(),
+    parent: tag.parentTag() ? tag.parentTag().name() : null
+  }));
+`,
+    'Get tags with hierarchy',
+  );
+
+export const getAreaTagsForTodos = async (commandListName: CommandListName): Promise<Record<string, string>> => {
+  const entries: Array<{ id: string; tags: string }> = await executeJxa(
+    `
+  const things = Application('${preferences.thingsAppIdentifier}');
+  const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
+  const result = [];
+
+  todos.forEach(todo => {
+    const props = todo.properties();
+    let areaTags = '';
+
+    const areaRef = props.area;
+    if (areaRef) {
+      areaTags = areaRef.tagNames() || '';
+    }
+
+    const projectRef = props.project;
+    if (projectRef) {
+      const projectProps = projectRef.properties();
+      const projectAreaRef = projectProps.area;
+      if (projectAreaRef) {
+        const projectAreaTags = projectAreaRef.tagNames() || '';
+        areaTags = areaTags ? areaTags + ', ' + projectAreaTags : projectAreaTags;
+      }
+    }
+
+    if (areaTags) {
+      result.push({ id: props.id, tags: areaTags });
+    }
+  });
+
+  return result;
+`,
+    'Get area tags for filtering',
+  );
+
+  return Object.fromEntries((entries || []).map((entry) => [entry.id, entry.tags]));
+};
+
 type CollectionMap = {
   tags: string[];
   projects: Project[];
