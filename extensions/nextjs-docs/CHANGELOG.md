@@ -1,6 +1,10 @@
 # Next.js Documentation Changelog
 
-## [Update Tree SHA] - {PR_MERGE_DATE}
+## [Add Windows Support] - {PR_MERGE_DATE}
+
+- Updated Octokit to 7.0.6
+
+## [Update Tree SHA] - 2026-01-13
 
 - Update the SHA used for fetching `docs` to fix topics not loading (ref: [Issue #24403](https://github.com/raycast/extensions/issues/24403))
 
