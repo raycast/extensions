@@ -5,7 +5,18 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { createGroup, deleteGroup } from "../lib/db";
 import type { Group } from "../lib/db";
 
-import { Action, ActionPanel, Form, List, Toast, showToast, useNavigation, confirmAlert, Alert } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  List,
+  Toast,
+  showToast,
+  useNavigation,
+  confirmAlert,
+  Alert,
+  Keyboard,
+} from "@raycast/api";
 
 export function ManageGroups({ user }: { user: User }) {
   const { data: groups, isLoading: isLoadingGroups, revalidate } = useGroups(user);
@@ -56,7 +67,12 @@ export function ManageGroups({ user }: { user: User }) {
                   title="Create New Group"
                   target={<CreateGroup user={user} groups={groups || []} revalidate={revalidate} />}
                 />
-                <Action title="Delete Group" onAction={() => doDelete(group.id, group.name)} />
+                <Action
+                  title="Delete Group"
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={() => doDelete(group.id, group.name)}
+                />
               </ActionPanel>
             }
           />

@@ -9,7 +9,7 @@ export async function getGroups(userId: string) {
 }
 
 export async function createGroup(group: Omit<Group, "id">) {
-  return supabase.from('groups').insert(group).returns<Group>();
+  return supabase.from("groups").insert(group).returns<Group>();
 }
 
 export async function deleteGroup(id: string) {
