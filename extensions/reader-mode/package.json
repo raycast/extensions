@@ -139,7 +139,7 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.2.1",
+    "@chrismessina/raycast-logger": "^1.2.2",
     "@mozilla/readability": "^0.6.0",
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
