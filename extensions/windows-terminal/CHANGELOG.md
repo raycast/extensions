@@ -1,6 +1,6 @@
 # Windows Terminal Changelog
 
-## [Quality of Life Enhancements and Fixes] - {PR_MERGE_DATE}
+## [Quality of Life Enhancements and Fixes] - 2026-01-14
 
 - Fixed a bug where profiles won't start due to the main window closing early
 - Improved handling of WSL profiles

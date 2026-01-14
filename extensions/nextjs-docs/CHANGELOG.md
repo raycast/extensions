@@ -1,6 +1,6 @@
 # Next.js Documentation Changelog
 
-## [Add Windows Support] - {PR_MERGE_DATE}
+## [Add Windows Support] - 2026-01-14
 
 - Updated Octokit to 7.0.6
 

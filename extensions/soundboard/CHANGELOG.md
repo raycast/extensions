@@ -1,6 +1,6 @@
 # Soundboard Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-01-09
 
 - Added "Close the Raycast window after triggering a sound" option to preferences
 

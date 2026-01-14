@@ -1,6 +1,6 @@
 # Convert Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-01-13
 
 - Added OKLCH color conversion
 

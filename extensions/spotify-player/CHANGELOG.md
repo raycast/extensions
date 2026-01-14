@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2026-01-13
 
 - Remove `dancannon` from contributors
 

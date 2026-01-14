@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Fixes and Improvements] - {PR_MERGE_DATE}
+## [Fixes and Improvements] - 2026-01-13
 
 - Added shortcut for the **Copy Path** action
 - Added shortcut for the **Reload** action to the Windows version

@@ -1,6 +1,6 @@
 # Cursor Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-01-14
 
 - Update description
 
