@@ -24,7 +24,7 @@ const MODES = [
 ];
 
 export default function Command() {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [agentProfile, setAgentProfile] = useState(DEFAULT_AGENT_PROFILE);
   const [mode, setMode] = useState(DEFAULT_MODE);

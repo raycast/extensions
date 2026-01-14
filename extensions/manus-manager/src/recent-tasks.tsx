@@ -50,7 +50,7 @@ function buildTaskTitle(task: Task) {
 }
 
 export default function Command() {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | TaskStatus>("all");
