@@ -1,6 +1,6 @@
 # Battery Menu Bar Changelog
 
-## [Enhanced Battery Status; Adding *Charging on Hold* support] - {PR_MERGE_DATE}
+## [Enhanced Battery Status; Adding *Charging on Hold* support] - 2026-01-14
 
 - New charging status properties: "fully charged", "on hold", "charging", "discharging", "unknown"
 - Battery status subtitle now reflects detailed charging states (Fully Charged, Charging on Hold, etc.)
