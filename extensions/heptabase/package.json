@@ -15,7 +15,8 @@
   "commands": [
     {
       "name": "append-to-journal",
-      "title": "Append to Heptabase Journal",
+      "title": "Append to Journal",
+      "subtitle": "Heptabase",
       "description": "Add content to today's Heptabase journal",
       "mode": "view",
       "arguments": [
@@ -36,7 +37,7 @@
     },
     {
       "name": "search-heptabase",
-      "title": "Search Heptabase",
+      "title": "Search Knowledge Base",
       "subtitle": "Heptabase",
       "description": "Semantic search for cards, PDFs, journals, and highlights",
       "mode": "view"
