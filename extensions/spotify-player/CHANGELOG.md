@@ -1,10 +1,10 @@
 # Spotify Player Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2026-01-14
 
 - Remove `dancannon` from contributors
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-01-14
 
 - Fixed error toast when Menu Bar Player command is disabled (handles "No enabled command" error)
 
