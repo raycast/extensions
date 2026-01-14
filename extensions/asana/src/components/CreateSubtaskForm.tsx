@@ -5,6 +5,7 @@ import { useUsers } from "../hooks/useUsers";
 import { useMe } from "../hooks/useMe";
 import { useSections } from "../hooks/useSections";
 import { getErrorMessage } from "../helpers/errors";
+import { escapeHtml } from "../helpers/task";
 import TaskDetail from "./TaskDetail";
 import { Task, createSubtask, SubtaskPayload } from "../api/tasks";
 
@@ -38,7 +39,7 @@ export default function CreateSubtaskForm({ parentTask, workspace, mutateSubtask
       try {
         const payload: SubtaskPayload = {
           name: values.name,
-          ...(values.description ? { html_notes: `<body>${values.description}</body>` } : {}),
+          ...(values.description ? { html_notes: `<body>${escapeHtml(values.description)}</body>` } : {}),
           ...(values.assignee ? { assignee: values.assignee } : {}),
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
           ...(parentProjectId
