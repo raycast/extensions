@@ -1,4 +1,4 @@
-import { getAssetThumbnailPath, init } from "@immich/sdk";
+import { getAssetThumbnailPath, getAssetOriginalPath, init } from "@immich/sdk";
 import { getPreferenceValues } from "@raycast/api";
 
 const { base_url, api_key } = getPreferenceValues<Preferences>();
@@ -7,3 +7,4 @@ const buildAuthenticatedUrl = (route: string) => `${buildUrl("api" + route)}?api
 export const initialize = () => init({ baseUrl: buildUrl("api"), apiKey: api_key });
 
 export const getAssetThumbnail = (id: string) => buildAuthenticatedUrl(getAssetThumbnailPath(id));
+export const getAssetOriginal = (id: string) => buildAuthenticatedUrl(getAssetOriginalPath(id));
