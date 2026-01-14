@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, showToast, Toast, openExtensionPreferences } from "@raycast/api";
+import { List, showToast, Toast, openExtensionPreferences, LocalStorage } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { client } from "./api/client";
 import { ConfigurationRequired, InitialSyncRequired, NoTranslationsFound } from "./components/empty-states";
@@ -8,22 +8,36 @@ import { TranslationDetail } from "./components/translation-detail";
 import { FilterSortDropdown, type SortOption } from "./components/filter-sort-dropdown";
 import { useSync } from "./hooks/use-sync";
 
+const SHOWING_DETAIL_KEY = "view-translations-showing-detail";
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("created-desc");
 
   const [dropdownSelection, setDropdownSelection] = useState<string | undefined>();
+  const [showingDetail, setShowingDetail] = useState(false);
+
+  useEffect(() => {
+    LocalStorage.getItem<boolean>(SHOWING_DETAIL_KEY).then((value) => {
+      if (value !== undefined) {
+        setShowingDetail(value);
+      }
+    });
+  }, []);
+
+  const handleToggleDetail = (value: boolean) => {
+    setShowingDetail(value);
+    LocalStorage.setItem(SHOWING_DETAIL_KEY, value);
+  };
 
   const [needsSync, setNeedsSync] = useState(false);
   const { isSyncing, handleSync } = useSync();
 
-  // Check if initial sync is needed
   useEffect(() => {
     client.needsInitialSync().then(setNeedsSync);
   }, []);
 
-  // Fetch keys from database
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async (platforms: string[], searchQuery: string, sort: SortOption) => {
       const needsInitialSync = await client.needsInitialSync();
@@ -78,14 +92,12 @@ export default function Command() {
     return <ConfigurationRequired onOpenPreferences={openExtensionPreferences} />;
   }
 
-  // Show sync prompt if database is empty
   if (needsSync && !isSyncing) {
     return (
       <InitialSyncRequired onSync={() => handleSync(onSyncSuccess)} onOpenPreferences={openExtensionPreferences} />
     );
   }
 
-  // Handle dropdown change (combined filter & sort)
   const handleDropdownChange = (value: string) => {
     setDropdownSelection(value);
     const [type, ...rest] = value.split("-");
@@ -112,6 +124,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading || isSyncing}
+      isShowingDetail={showingDetail}
       searchBarPlaceholder="Search translation keys..."
       onSearchTextChange={setSearchText}
       searchBarAccessory={
@@ -132,6 +145,8 @@ export default function Command() {
             keyData={key}
             target={<TranslationDetail keyId={key.keyId} />}
             onSync={() => handleSync(onSyncSuccess)}
+            showingDetail={showingDetail}
+            onToggleDetail={() => handleToggleDetail(!showingDetail)}
           />
         ))
       )}

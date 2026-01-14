@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, open, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import {
@@ -10,7 +10,7 @@ import {
 } from "swift:../../swift/AppleReminders";
 
 import { CreateReminderForm } from "../create-reminder";
-import { getPriorityIcon } from "../helpers";
+import { getAttachedUrls, getPriorityIcon } from "../helpers";
 import { Priority, Reminder, List as TList } from "../hooks/useData";
 import useLocations, { Location, resolveLocationIcon } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
@@ -27,6 +27,7 @@ type ReminderActionsProps = {
 
 export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
   const { locations } = useLocations();
+  const attachedUrls = getAttachedUrls(reminder);
 
   async function toggleReminder() {
     async function toggle() {
@@ -215,6 +216,31 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         icon={{ fileIcon: "/System/Applications/Reminders.app" }}
         application="com.apple.reminders"
       />
+      {attachedUrls.length ? (
+        <Action
+          title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
+          icon={Icon.Link}
+          onAction={async () => {
+            let failedCount = 0;
+            for (const url of attachedUrls) {
+              try {
+                await open(url);
+              } catch (error) {
+                console.error("Failed to open URL", url, error);
+                failedCount++;
+              }
+            }
+
+            if (failedCount > 0) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
+                message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
+              });
+            }
+          }}
+        />
+      ) : null}
 
       <ActionPanel.Section>
         <Action.Push

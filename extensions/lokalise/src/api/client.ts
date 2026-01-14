@@ -71,7 +71,6 @@ export interface ProcessedTranslationKey {
   }>;
 }
 
-// Domain utility functions
 function normalizePlatform(platform: string): SupportedPlatforms {
   if (platform === "ios" || platform === "android" || platform === "other") {
     return platform;
@@ -79,9 +78,49 @@ function normalizePlatform(platform: string): SupportedPlatforms {
   return "web";
 }
 
-function processScreenshotPath(filePath: string): ScreenshotData | null {
+async function processScreenshotPath(filePath: string): Promise<ScreenshotData | null> {
   try {
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB limit to prevent memory issues
+
+    // Handle URLs - download and convert to base64
+    if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+      const response = await fetch(filePath);
+      if (!response.ok) {
+        return null;
+      }
+
+      const contentLength = response.headers.get("content-length");
+      if (contentLength && parseInt(contentLength) > MAX_SIZE) {
+        console.warn(`Screenshot too large (${contentLength} bytes), skipping: ${filePath}`);
+        return null;
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+
+      if (arrayBuffer.byteLength > MAX_SIZE) {
+        console.warn(`Screenshot too large (${arrayBuffer.byteLength} bytes), skipping: ${filePath}`);
+        return null;
+      }
+
+      const buffer = Buffer.from(arrayBuffer);
+      const base64Data = buffer.toString("base64");
+      const mimeType = getMimeType(filePath);
+      const dataUri = `data:${mimeType};base64,${base64Data}`;
+
+      return {
+        data: dataUri,
+        title: getFileName(filePath),
+      };
+    }
+
+    // Handle local file paths
     const fileBuffer = readFileSync(filePath);
+
+    if (fileBuffer.byteLength > MAX_SIZE) {
+      console.warn(`Screenshot too large (${fileBuffer.byteLength} bytes), skipping: ${filePath}`);
+      return null;
+    }
+
     const base64Data = fileBuffer.toString("base64");
     const mimeType = getMimeType(filePath);
     const dataUri = `data:${mimeType};base64,${base64Data}`;
@@ -159,7 +198,6 @@ function extractDefaultTranslation(key: Key): string {
     return englishTranslation.translation || "";
   }
 
-  // Fallback to first available translation
   return extractMainTranslation(key);
 }
 
@@ -174,7 +212,6 @@ function processScreenshots(screenshots: Key["screenshots"]): Array<{ url: strin
         return null;
       }
 
-      // Handle direct screenshot object with url and title
       if ("url" in screenshot && typeof screenshot.url === "string") {
         return {
           url: screenshot.url,
@@ -183,7 +220,6 @@ function processScreenshots(screenshots: Key["screenshots"]): Array<{ url: strin
         };
       }
 
-      // Handle nested screenshot structure
       if ("screenshot" in screenshot && typeof screenshot.screenshot === "object" && screenshot.screenshot) {
         const nestedScreenshot = screenshot.screenshot;
         if ("url" in nestedScreenshot && typeof nestedScreenshot.url === "string") {
@@ -197,7 +233,6 @@ function processScreenshots(screenshots: Key["screenshots"]): Array<{ url: strin
         }
       }
 
-      // Handle url_thumbnail fallback
       if ("url_thumbnail" in screenshot && typeof screenshot.url_thumbnail === "string") {
         return {
           url: screenshot.url_thumbnail,
@@ -234,10 +269,6 @@ function processTranslations(
     .filter((t): t is { languageIso: string; languageName: string; text: string } => t !== null);
 }
 
-/**
- * Client for extension domain logic
- * Provides a clean abstraction over the Lokalise SDK and handles all business logic
- */
 export class Client {
   private get projectId(): string {
     return getProjectId();
@@ -247,9 +278,6 @@ export class Client {
     return getLokaliseClient();
   }
 
-  /**
-   * List all files in the project
-   */
   async listFiles(): Promise<TranslationFile[]> {
     const response = await this.client.files().list({ project_id: this.projectId });
     return (response.items || []).map((file: File) => ({
@@ -258,27 +286,20 @@ export class Client {
     }));
   }
 
-  /**
-   * Create a new translation key
-   * Processes screenshot paths and handles all domain logic internally
-   * Automatically adds the key to the local database
-   */
   async createTranslationKey(params: CreateTranslationKeyParams): Promise<void> {
     const platform = normalizePlatform(params.platform);
 
-    // Process screenshots: read files and convert to base64
+    // Process screenshots: read files/URLs and convert to base64
     const screenshots: ScreenshotData[] = [];
     if (params.screenshotPaths && params.screenshotPaths.length > 0) {
       for (const filePath of params.screenshotPaths) {
-        const processedScreenshot = processScreenshotPath(filePath);
+        const processedScreenshot = await processScreenshotPath(filePath);
         if (processedScreenshot) {
           screenshots.push(processedScreenshot);
         }
-        // Silently skip failed screenshots - they'll be logged but won't block the operation
       }
     }
 
-    // Build filenames object if file is assigned
     const filenames: Filenames | undefined =
       params.assignedFile && params.assignedFile !== "none" && params.assignedFile.trim()
         ? {
@@ -327,9 +348,6 @@ export class Client {
     }
   }
 
-  /**
-   * List translation keys with optional filtering
-   */
   async listKeys(params: ListKeysParams = {}): Promise<Key[]> {
     const {
       platform,
@@ -348,27 +366,21 @@ export class Client {
       include_screenshots: includeScreenshots ? 1 : 0,
     };
 
-    // Filter by platform on the server side
     if (platform && (platform === "web" || platform === "ios" || platform === "android" || platform === "other")) {
       baseParams.filter_platforms = platform;
     }
 
-    // Filter by search query on the server side
     if (searchQuery && searchQuery.trim()) {
       baseParams.filter_keys = searchQuery.trim();
     }
 
     const response = await this.client.keys().list(baseParams);
 
-    // Log pagination info for debugging
     console.log(`Lokalise API response - Page: ${page}, Items: ${response.items?.length || 0}`);
 
     return response.items || [];
   }
 
-  /**
-   * Get a single translation key by ID
-   */
   async getKey(keyId: number): Promise<Key> {
     const response = await this.client.keys().get(keyId, {
       project_id: this.projectId,
@@ -376,10 +388,6 @@ export class Client {
     return response;
   }
 
-  /**
-   * Process a Key into a ProcessedTranslationKey with all domain logic applied
-   * This method handles all data transformation and extraction logic
-   */
   processKey(key: Key, getLanguageName: (isoCode: string) => string): ProcessedTranslationKey {
     return {
       keyId: key.key_id,
@@ -399,63 +407,40 @@ export class Client {
     };
   }
 
-  /**
-   * Process multiple keys into ProcessedTranslationKey array
-   */
   processKeys(keys: Key[], getLanguageName: (isoCode: string) => string): ProcessedTranslationKey[] {
     return keys.map((key) => this.processKey(key, getLanguageName));
   }
 
-  /**
-   * List keys from the local database with advanced filtering
-   * Supports multiple platforms and advanced search capabilities
-   */
   async listKeysFromDatabase(params: ListKeysFromDatabaseParams = {}): Promise<ProcessedTranslationKey[]> {
     const filters: DatabaseFilters = {
       platforms: params.platforms && params.platforms.length > 0 ? params.platforms : undefined,
       searchQuery: params.searchQuery,
       searchInTranslations: params.searchInTranslations ?? true,
-      limit: params.limit || 200, // Default to 200 results max
+      limit: params.limit || 200,
       sortBy: params.sortBy,
     };
 
     return await getAllKeys(filters);
   }
 
-  /**
-   * Get a single key from the database by ID
-   */
   async getKeyFromDatabase(keyId: number): Promise<ProcessedTranslationKey | null> {
     return await getKeyById(keyId);
   }
 
-  /**
-   * Check if the database has been initialized with keys
-   */
   async hasDatabaseKeys(): Promise<boolean> {
     return await hasKeys();
   }
 
-  /**
-   * Sync all keys from Lokalise to the local database
-   * Fetches keys in batches and stores them in a transaction
-   */
   async syncFromLokalise(
     onProgress?: (current: number, total: number) => void,
   ): Promise<{ success: boolean; error?: Error; keysCount: number }> {
     return await syncService.syncFromLokalise(onProgress);
   }
 
-  /**
-   * Check if an initial sync is needed (database is empty)
-   */
   async needsInitialSync(): Promise<boolean> {
     return await syncService.needsInitialSync();
   }
 
-  /**
-   * Get the current sync status
-   */
   getSyncStatus(): {
     status: "idle" | "syncing" | "error";
     error?: Error;
@@ -464,21 +449,13 @@ export class Client {
     return syncService.getSyncStatus();
   }
 
-  /**
-   * Start background sync with a specified interval
-   * @param intervalMinutes - Interval in minutes between syncs
-   */
   startBackgroundSync(intervalMinutes?: number): void {
     syncService.startBackgroundSync(intervalMinutes);
   }
 
-  /**
-   * Stop background sync
-   */
   stopBackgroundSync(): void {
     syncService.stopBackgroundSync();
   }
 }
 
-// Export a singleton instance for convenience
 export const client = new Client();

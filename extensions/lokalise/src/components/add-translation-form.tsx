@@ -1,5 +1,14 @@
 import { useRef, useState, useEffect } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, openExtensionPreferences, environment } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  openExtensionPreferences,
+  environment,
+  useNavigation,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
@@ -26,9 +35,12 @@ export interface AddTranslationFormProps {
     assignedFile?: string;
     screenshotUrls?: string[];
   };
+  onSuccess?: () => void;
 }
 
-export function AddTranslationForm({ draftValues }: AddTranslationFormProps) {
+export function AddTranslationForm({ draftValues, onSuccess }: AddTranslationFormProps) {
+  const { pop } = useNavigation();
+
   const keyNameRef = useRef<Form.TextField>(null);
   const isPluralRef = useRef<Form.Checkbox>(null);
   const translationValueRef = useRef<Form.TextArea>(null);
@@ -46,13 +58,10 @@ export function AddTranslationForm({ draftValues }: AddTranslationFormProps) {
     [],
     {
       initialData: [],
-      onError: () => {
-        // Silently fail - files dropdown will just be empty
-      },
+      onError: () => {},
     },
   );
 
-  // Download screenshots from URLs when draftValues are provided
   useEffect(() => {
     async function downloadScreenshots() {
       if (!draftValues?.screenshotUrls || draftValues.screenshotUrls.length === 0) {
@@ -78,7 +87,7 @@ export function AddTranslationForm({ draftValues }: AddTranslationFormProps) {
             const arrayBuffer = await response.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
 
-            // Get file extension from URL or default to png
+            // Extract file extension from URL
             const urlPath = new URL(url).pathname;
             const ext = urlPath.split(".").pop()?.toLowerCase() || "png";
             const filename = `screenshot-${i + 1}.${ext}`;
@@ -140,6 +149,12 @@ export function AddTranslationForm({ draftValues }: AddTranslationFormProps) {
       screenshotsRef.current?.reset();
 
       keyNameRef.current?.focus();
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        pop();
+      }
     } catch (error: unknown) {
       if (error instanceof Error && (error.message.includes("not configured") || error.message.includes("API token"))) {
         await showToast({

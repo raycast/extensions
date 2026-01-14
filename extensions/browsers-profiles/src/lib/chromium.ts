@@ -2,26 +2,22 @@ import fs from "fs";
 import os from "os";
 
 import browsers from "./supported-browsers.json";
-import { sortProfiles } from "./utils";
+import { sortProfiles, isBrowserEnabled } from "./utils";
+import { BrowserProfile } from "./types";
 
-type ChromiumProfiles = {
+type BrowserProfiles = {
   name: string;
-  profiles: ChromiumProfile[];
+  profiles: BrowserProfile[];
 };
 
-export type ChromiumProfile = {
-  type: string;
-  browser: string;
-  app: string;
-  path: string;
-  name: string;
-  icon: string;
-};
-
-export const getChromiumProfiles = () => {
-  const profiles: ChromiumProfiles[] = [];
+export const getChromiumProfiles = (filter: string[]) => {
+  const profiles: BrowserProfiles[] = [];
 
   browsers.chromium.forEach((browser) => {
+    if (!isBrowserEnabled(filter, browser)) {
+      return null;
+    }
+
     const path = `${os.homedir()}${browser.path}`;
     const exists = fs.existsSync(path);
 
@@ -52,20 +48,33 @@ export const getChromiumProfiles = () => {
           }
         >
       | undefined;
+
     if (!infoCacheData) {
       return null;
     }
 
-    const browserProfiles: ChromiumProfile[] = Object.entries(infoCacheData).map(
-      ([profileDir, { name: profileName }]) => ({
+    const directories = fs.readdirSync(path);
+
+    const browserProfiles: BrowserProfile[] = [];
+
+    directories.forEach((directory: string) => {
+      const preferences = `${path}/${directory}/Preferences`;
+      const file = fs.readFileSync(preferences, "utf-8");
+      const profile = JSON.parse(file);
+      const profileName = profile.profile.name;
+      const profileLabel = infoCacheData[directory]?.name || profileName;
+
+      browserProfiles.push({
         type: browser.type,
         browser: browser.title,
         app: browser.app,
-        path: profileDir,
+        path: directory,
         name: profileName,
+        uid: directory,
+        label: profileLabel,
         icon: browser.icon,
-      })
-    );
+      });
+    });
 
     sortProfiles(browserProfiles);
 

@@ -609,14 +609,14 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "anytype",
     title: "Anytype",
     description:
-      "A Model Context Protocol (MCP) server for Anytype that enables AI assistants to seamlessly interact with Anytype's API through natural language. Manage spaces, objects, properties, types and more in your knowledge base.",
+      "An MCP server enabling AI assistants to interact with Anytype - your safe haven for digital collaboration - to organize channels, pages, lists, and more through natural language.",
     icon: "anytype.png",
     homepage: "https://github.com/anyproto/anytype-mcp",
     configuration: {
       command: "npx",
       args: ["-y", "@anyproto/anytype-mcp"],
       env: {
-        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-05-20"}',
+        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-11-08"}',
       },
     },
   },

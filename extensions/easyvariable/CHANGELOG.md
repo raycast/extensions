@@ -1,6 +1,6 @@
 # EasyVariable Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-01-08
 
 - Remove incoming arguments
 
