@@ -1,5 +1,5 @@
 import { Detail, Icon, LaunchProps, List } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import ping from "ping";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
@@ -20,7 +20,7 @@ type PingResult = {
 
 async function probeWin32(domain: string): Promise<PingResult> {
   if (!/^[a-zA-Z0-9.-]+$/.test(domain)) {
-    showFailureToast("Invalid domain format");
+    throw new Error("Invalid domain format");
   }
 
   const cmd = `ping -n 3 ${domain}`;
