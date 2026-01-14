@@ -11,6 +11,7 @@ import {
   Color,
   getPreferenceValues,
   BrowserExtension,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { homedir } from "os";
@@ -466,13 +467,13 @@ export default function ExtractFonts() {
                 <Action
                   title="Open Download Folder"
                   icon={Icon.Folder}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                  shortcut={Keyboard.Shortcut.Common.OpenWith}
                   onAction={() => open(getDestFolder())}
                 />
                 <Action
                   title="New Search"
                   icon={Icon.ArrowLeft}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={goBack}
                 />
               </ActionPanel>
