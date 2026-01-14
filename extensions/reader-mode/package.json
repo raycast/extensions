@@ -5,6 +5,7 @@
   "description": "Read the web distraction-free in Raycast.",
   "icon": "reader-icon.png",
   "author": "chrismessina",
+  "contributors": ["heytommy"],
   "platforms": [
     "macOS",
     "Windows"

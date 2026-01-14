@@ -43,8 +43,6 @@ export const TRUNCATION_PATTERNS: RegExp[] = [
 
 export const PAYWALL_KEYWORDS: RegExp[] = [
   /subscribe now/i,
-  /subscribe to (?:unlock|read|access)/i,
-  /try unlimited access/i,
   /start your (?:free )?(?:trial|subscription)/i,
   /already a (?:subscriber|member)\?/i,
   /create (?:a )?(?:free )?account/i,
@@ -216,7 +214,6 @@ export function isKnownPaywalledSite(url: string): boolean {
     "wired.com",
     "medium.com",
     "substack.com",
-    "every.to",
   ];
 
   return knownPaywalledDomains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));

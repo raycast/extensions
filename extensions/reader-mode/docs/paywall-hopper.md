@@ -534,3 +534,4 @@ paywallLog.log("bypass:wayback:failed", { url, reason });
 - [magnolia1234/bypass-paywalls-clean-filters](https://gitflic.ru/project/magnolia1234/bypass-paywalls-clean-filters) — Paywall patterns
 - [nang-dev/hover-paywalls-browser-extension](https://github.com/nang-dev/hover-paywalls-browser-extension) — Browser extension approach (deprecated)
 - [Paywall Bypass Script](https://greasyfork.org/en/scripts/495817) — Service list and patterns
+- [Wallhopper](https://github.com/modularizer/WallHopper) — Bypass article paywalls with one line of javascript

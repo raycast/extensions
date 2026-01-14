@@ -28,10 +28,28 @@ function buildMarkdown(
   // 1. Title
   parts.push(`# ${article.title}`);
 
-  // 2. Metadata (byline • siteName)
+  // 2. Metadata (byline • siteName • archive source)
   const metaParts: string[] = [];
   if (article.byline) metaParts.push(article.byline);
   if (article.siteName) metaParts.push(article.siteName);
+  if (article.archiveSource) {
+    const sourceLabels: Record<string, string> = {
+      googlebot: "Googlebot",
+      bingbot: "Bingbot",
+      "social-referrer": "Social Referrer",
+      wallhopper: "WallHopper",
+      "archive.is": "Archive.is",
+      wayback: "Wayback Machine",
+      browser: "Browser",
+    };
+    const label = sourceLabels[article.archiveSource.service] || article.archiveSource.service;
+    // Link to archive URL if available (Archive.is, Wayback Machine)
+    if (article.archiveSource.url) {
+      metaParts.push(`Retrieved via [${label}](${article.archiveSource.url})`);
+    } else {
+      metaParts.push(`Retrieved via ${label}`);
+    }
+  }
   if (metaParts.length > 0) {
     parts.push("", `*${metaParts.join(" • ")}*`);
   }

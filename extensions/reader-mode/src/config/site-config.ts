@@ -164,15 +164,12 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
     /^(.*\.)?nytimes\.com$/i,
     {
       name: "NYTimes",
-      articleSelector: 'article, [name="articleBody"]',
+      articleSelector: "article",
       removeSelectors: [
+        '[data-testid="share-tools"]',
         ".ad",
         ".newsletter-signup",
         '[data-testid="inline-message"]',
-        '[data-testid="onsite-messaging-unit-dock"]',
-        '[data-testid="imageblock-wrapper"]',
-        '[data-testid="share-tools"]',
-        "#top-wrapper",
         ".story-footer",
         // Lightbox/modal spans that leak "Open modal at item X of Y" accessibility text
         ".kyt-wljQC",
@@ -184,7 +181,6 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
         ".css-b9twaf",
         // Correction policy boilerplate
         ".css-1j12tm1",
-        ".css-16uri30", // Header
         ".css-s2htvn",
       ],
       // Convert block elements to inline for better markdown rendering
@@ -245,8 +241,7 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
     /^(.*\.)?theverge\.com$/i,
     {
       name: "TheVerge",
-      articleSelector:
-        ".duet--article--article-body-component, .duet--page-layout--standard-article, .duet--layout--entry-body-container",
+      articleSelector: ".duet--article--article-body-component",
       removeSelectors: [".duet--ad--ad-wrapper", ".duet--recirculation--related-list"],
     },
   ],
@@ -266,7 +261,7 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
     /^(.*\.)?reuters\.com$/i,
     {
       name: "Reuters",
-      articleSelector: '[data-testid="Article"], [data-testid="article-body"]',
+      articleSelector: '[data-testid="Article"]',
       removeSelectors: [
         ".ad",
         ".newsletter-subscribe-form",
@@ -278,9 +273,6 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
         '[data-testid="AuthorBio"]',
         '[data-testid="NewTabSymbol"]',
         '[data-testid="Link"] > span[style*="clip"]',
-        '[data-testid="Slideshow"]',
-        ".related-coverage",
-        ".trust-principles",
       ],
     },
   ],
@@ -295,15 +287,9 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
         ".embed-tc-newsletter",
         ".related-posts",
         ".ad-unit",
-        ".article__meta",
         ".wp-block-techcrunch-inline-cta",
-        ".wp-block-techcrunch-post-authors-list",
         '[data-ctatext="View Bio"]',
         ".wp-block-image__credits", // Remove "Image Credits:" spans from figcaptions
-        ".wp-block-post-featured-image",
-        "#h-latest-in",
-        ".wp-block-tc23-post-relevant-terms",
-        ".newsletter-signup-compact__description",
       ],
     },
   ],
@@ -328,35 +314,6 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
       name: "Apple",
       articleSelector: '*[itemprop="articleBody"]',
       preferSchemaOrg: true,
-    },
-  ],
-
-  // Boston Globe
-  [
-    /^(.*\.)?bostonglobe\.com$/i,
-    {
-      name: "Boston Globe",
-      articleSelector: "#article-body",
-      removeSelectors: [".ad", ".newsletter"],
-    },
-  ],
-
-  // Slate
-  [
-    /^(.*\.)?slate\.com$/i,
-    {
-      name: "Slate",
-      articleSelector: ".article__body",
-      removeSelectors: [
-        ".article__top-image",
-        " .article__rubric",
-        ".article__podcast-subscribe",
-        ".recirc-line",
-        ".slate-ad",
-        ".newsletter-signup",
-        ".social-share",
-        ".article__tags",
-      ],
     },
   ],
 
@@ -427,6 +384,16 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
       name: "Bloomberg",
       articleSelector: "article",
       removeSelectors: [".ad", '[data-component="paywall"]', ".newsletter-signup", ".sticky-ad", ".right-rail"],
+    },
+  ],
+
+  // Reuters
+  [
+    /^(.*\.)?reuters\.com$/i,
+    {
+      name: "Reuters",
+      articleSelector: '[data-testid="article-body"]',
+      removeSelectors: [".ad", '[data-testid="Slideshow"]', ".related-coverage", ".trust-principles"],
     },
   ],
 
@@ -610,33 +577,6 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
         "nav",
         ".menu-main-menu-container",
         "#menu-main-menu",
-      ],
-    },
-  ],
-
-  // Every.to
-  [
-    /^(.*\.)?every\.to$/i,
-    {
-      name: "Every",
-      articleSelector: '[itemprop="articleBody"]',
-      removeSelectors: ["#comments-box", ".mb-8"],
-    },
-  ],
-
-  // Financial Times
-  [
-    /^(.*\.)?ft\.com$/i,
-    {
-      name: "FinancialTimes",
-      articleSelector: "article",
-      removeSelectors: [
-        ".o-topper__visual",
-        ".article-image__placeholder",
-        '[data-trackable="share-nav"]',
-        ".o-ads",
-        ".n-content-recommended",
-        ".o-teaser-collection",
       ],
     },
   ],

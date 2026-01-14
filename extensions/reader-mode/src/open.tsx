@@ -69,28 +69,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
   // Refs
   const fetchStartedRef = useRef(false);
   const toastRef = useRef<Toast | null>(null);
-  const statusToastRef = useRef<Toast | null>(null);
-
-  // Status update callback for paywall bypass progress
-  const handleStatusUpdate = useCallback(async (message: string) => {
-    if (!statusToastRef.current) {
-      statusToastRef.current = await showToast({
-        style: Toast.Style.Animated,
-        title: "Bypassing paywall...",
-        message,
-      });
-    } else {
-      statusToastRef.current.message = message;
-    }
-  }, []);
-
-  // Clear status toast when loading completes
-  const clearStatusToast = useCallback(() => {
-    if (statusToastRef.current) {
-      statusToastRef.current.hide();
-      statusToastRef.current = null;
-    }
-  }, []);
 
   // Get AI config based on current summary style
   const aiConfig = getAIConfigForStyle(summaryStyle);
@@ -228,7 +206,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
   // Process article loading result
   const handleLoadResult = useCallback(
     async (result: Awaited<ReturnType<typeof loadArticleFromUrl>>) => {
-      clearStatusToast();
       if (result.status === "success") {
         const articleToSet = result.article;
 
@@ -248,6 +225,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
         if (articleToSet.archiveSource) {
           const sourceLabels: Record<string, string> = {
             googlebot: "Googlebot bypass",
+            bingbot: "Bingbot bypass",
+            "social-referrer": "Social media referrer",
+            wallhopper: "WallHopper",
             "archive.is": "archive.is",
             wayback: "Wayback Machine",
             browser: "browser tab",
@@ -275,7 +255,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
       }
       setIsLoading(false);
     },
-    [clearStatusToast, preferences.rewriteArticleTitles, canAccessAI],
+    [preferences.rewriteArticleTitles, canAccessAI],
   );
 
   // Initial article load
@@ -301,7 +281,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
         skipPreCheck: preferences.skipPreCheck,
         enablePaywallHopper: preferences.enablePaywallHopper,
         showArticleImage: preferences.showArticleImage,
-        onStatusUpdate: handleStatusUpdate,
       });
       handleLoadResult(result);
     }
@@ -313,7 +292,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
     preferences.enablePaywallHopper,
     preferences.showArticleImage,
     handleLoadResult,
-    handleStatusUpdate,
   ]);
 
   // Auto-trigger summary generation when article loads (if enabled)
@@ -424,16 +402,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
       skipPreCheck: true,
       enablePaywallHopper: preferences.enablePaywallHopper,
       showArticleImage: preferences.showArticleImage,
-      onStatusUpdate: handleStatusUpdate,
     });
     handleLoadResult(result);
-  }, [
-    notReadableUrl,
-    handleLoadResult,
-    preferences.enablePaywallHopper,
-    preferences.showArticleImage,
-    handleStatusUpdate,
-  ]);
+  }, [notReadableUrl, handleLoadResult, preferences.enablePaywallHopper, preferences.showArticleImage]);
 
   // Handler to try Paywall Hopper directly for known paywalled sites
   const handleTryPaywallHopper = useCallback(async () => {
@@ -447,7 +418,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
 
     const result = await loadArticleViaPaywallHopper(notReadableUrl, {
       showArticleImage: preferences.showArticleImage,
-      onStatusUpdate: handleStatusUpdate,
     });
 
     if (result.status === "success") {
@@ -458,7 +428,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
       setNotReadableUrl(notReadableUrl);
       setIsLoading(false);
     }
-  }, [notReadableUrl, handleLoadResult, preferences.showArticleImage, handleStatusUpdate]);
+  }, [notReadableUrl, handleLoadResult, preferences.showArticleImage]);
 
   // Handler for URL form submission
   const handleUrlSubmit = useCallback(
@@ -481,17 +451,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Open }
         skipPreCheck: preferences.skipPreCheck,
         enablePaywallHopper: preferences.enablePaywallHopper,
         showArticleImage: preferences.showArticleImage,
-        onStatusUpdate: handleStatusUpdate,
       });
       handleLoadResult(result);
     },
-    [
-      preferences.skipPreCheck,
-      preferences.enablePaywallHopper,
-      preferences.showArticleImage,
-      handleLoadResult,
-      handleStatusUpdate,
-    ],
+    [preferences.skipPreCheck, preferences.enablePaywallHopper, preferences.showArticleImage, handleLoadResult],
   );
 
   // --- Render Logic ---

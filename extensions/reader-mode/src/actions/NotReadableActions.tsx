@@ -17,8 +17,8 @@ export function NotReadableActions({ url, onRetryWithoutCheck, onTryPaywallHoppe
       />
       {onTryPaywallHopper && (
         <Action
-          title="Try to Hop Paywall"
-          icon={Icon.Download}
+          title="Try Paywall Hopper"
+          icon={Icon.LockUnlocked}
           onAction={onTryPaywallHopper}
           shortcut={{ modifiers: ["cmd"], key: "p" }}
         />

@@ -4,7 +4,6 @@ import { parseArticle } from "./readability";
 import { formatArticle } from "./markdown";
 import { isBrowserExtensionAvailable, tryGetContentFromOpenTab } from "./browser-extension";
 import { tryBypassPaywall, createArchiveSource, ArchiveSource } from "./paywall-hopper";
-import { ArchiveStatusCallback } from "./archive-fetcher";
 import { detectPaywallInText } from "./paywall-detector";
 import { BrowserTab } from "../types/browser";
 import { ArticleState } from "../types/article";
@@ -23,8 +22,6 @@ interface LoadArticleOptions {
   enablePaywallHopper?: boolean;
   /** Whether to show the article image at the top (default: true) */
   showArticleImage?: boolean;
-  /** Callback for status updates during paywall bypass */
-  onStatusUpdate?: ArchiveStatusCallback;
 }
 
 /**
@@ -57,7 +54,7 @@ export async function loadArticleFromUrl(
       if (options.enablePaywallHopper) {
         paywallLog.log("hopper:blocked-page-detected", { url, statusCode: 403 });
 
-        const hopperResult = await tryBypassPaywall(url, options.onStatusUpdate);
+        const hopperResult = await tryBypassPaywall(url);
 
         if (hopperResult.success && hopperResult.html) {
           paywallLog.log("hopper:bypass-success", {
@@ -191,7 +188,7 @@ export async function loadArticleFromUrl(
       });
 
       // Try to get full content via Paywall Hopper
-      const hopperResult = await tryBypassPaywall(url, options.onStatusUpdate);
+      const hopperResult = await tryBypassPaywall(url);
 
       if (hopperResult.success && hopperResult.html) {
         // Parse the bypassed content
@@ -275,7 +272,6 @@ export async function loadArticleFromUrl(
     url,
     title: formatted.title,
     markdownLength: formatted.markdown.length,
-    bypassedCheck: options.skipPreCheck,
   });
 
   const article: ArticleState = {
@@ -286,7 +282,6 @@ export async function loadArticleFromUrl(
     url,
     source,
     textContent: parseResult.article.textContent,
-    bypassedReadabilityCheck: options.skipPreCheck,
   };
 
   return { status: "success", article };
@@ -300,12 +295,11 @@ export async function loadArticleViaPaywallHopper(
   url: string,
   options: {
     showArticleImage?: boolean;
-    onStatusUpdate?: ArchiveStatusCallback;
   },
 ): Promise<LoadArticleResult> {
   paywallLog.log("hopper:direct-attempt", { url });
 
-  const hopperResult = await tryBypassPaywall(url, options.onStatusUpdate);
+  const hopperResult = await tryBypassPaywall(url);
 
   if (!hopperResult.success || !hopperResult.html) {
     paywallLog.log("hopper:direct-failed", { url, error: hopperResult.error });
