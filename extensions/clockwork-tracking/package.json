@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clockwork-tracking",
+  "title": "Clockwork Time Tracking",
+  "description": "Track time in Clockwork Pro for Jira directly from Raycast",
+  "icon": "extension-icon.png",
+  "author": "gogoisprograming",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Get from: Jira > Apps > Clockwork > API Tokens (or visit {your-jira}/plugins/servlet/ac/clockwork-cloud/clockwork-api-tokens)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "jiraBaseUrl",
+      "title": "Jira Base URL",
+      "description": "Your Jira instance URL (e.g., https://mycompany.atlassian.net)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://mycompany.atlassian.net"
+    },
+    {
+      "name": "accountId",
+      "title": "Jira Account ID (Optional)",
+      "description": "Find in Jira: click your avatar > Profile > copy ID from URL after /people/. Filters worklogs to only yours.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "712020:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    }
+  ],
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Clockwork Menu Bar",
+      "description": "Shows current tracking status in the menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "start-tracking",
+      "title": "Start Tracking Time",
+      "description": "Start tracking time for a Jira issue",
+      "mode": "view"
+    },
+    {
+      "name": "stop-tracking",
+      "title": "Stop Tracking Time",
+      "description": "Stop the current time tracking session",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-time-entries",
+      "title": "View Time Entries",
+      "description": "View recent time entries and worklogs",
+      "mode": "view"
+    },
+    {
+      "name": "todays-total",
+      "title": "Today's Total Time",
+      "description": "View total time tracked today",
+      "mode": "view"
+    },
+    {
+      "name": "open-clockwork",
+      "title": "Open Clockwork in Jira",
+      "description": "Open Clockwork timesheet in Jira",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-current-issue",
+      "title": "Open Current Issue",
+      "description": "Open the currently tracked issue in browser",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
