@@ -115,8 +115,8 @@ export default function Command() {
           keywords={[app.name, app.displayName, toPinyin(app.displayName), ...app.tags]}
           actions={
             <ActionPanel>
-              <Action.Push title="Manage Tags" icon={Icon.Tag} target={openTagManagement(app)} />
               <Action.Open title="Open App" target={app.path} />
+              <Action.Push title="Manage Tags" icon={Icon.Tag} target={openTagManagement(app)} />
             </ActionPanel>
           }
         />
