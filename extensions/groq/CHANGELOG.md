@@ -1,5 +1,9 @@
 # Groq Changelog
 
+## [Updated Models] - 2025-11-17
+
+- Removed deprecated `DeepSeek R1 70B 128k`
+
 ## [Update] - 2025-08-14
 
 - Added `OpenAI GPT OSS 120B`

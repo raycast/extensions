@@ -1,5 +1,22 @@
 # Media Converter Changelog
 
+## [1.5.2] - 2025-10-31
+
+### Added
+
+- `Copy FFmpeg Command` action in the Converter Form, to allow the user to inspect the command or run it by themselves in terminal.
+
+### Fixed
+
+- CRF option removed from AVI as it is not actually available
+- Applied `-pix_fmt yuv420p` to all videos except `.mov` to broaden support when converting from specific/unsupported video codecs
+
+### API Changes
+
+- Simplified/centralized a `buildVideoQuality` factory for the AI tool
+  - Tidied up some logic in `convert-media.ts` (the AI tool)
+- Tidied up some unused exports (some were left because they will definitely come in handy in future updates)
+
 ## [1.5.1] - 2025-08-25
 
 ### Fixed

@@ -1,5 +1,9 @@
 # Remove Paywall Changelog
 
+## [Update and fixes] - 2025-11-21
+
+- Fixed issue with freedium.cfd not working to use updated freedium-mirror.cfd URL
+
 ## [Browser integration and advanced features] - 2025-07-15
 
 - Added "Remove Paywall from Current Tab" command with automatic browser detection

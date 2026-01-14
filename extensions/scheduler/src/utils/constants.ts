@@ -2,6 +2,7 @@ export const STORAGE_KEYS = {
   SCHEDULED_COMMANDS: "scheduledCommands",
   EXECUTION_LOGS: "executionLogs",
   COMMAND_PERMISSIONS: "command_permissions",
+  BACKGROUND_REFRESH_STATUS: "background_refresh_status",
 } as const;
 
 export const EXECUTION = {

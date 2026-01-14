@@ -65,38 +65,6 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
     setTaskId(defaultTask ? defaultTask.task.id.toString() : null);
   }, [tasks, taskId]);
 
-  function setTimeFormat(value?: string) {
-    if (!value) return;
-
-    if (company?.time_format === "decimal") {
-      if (value.includes(":")) {
-        const parsed = value.split(":");
-        const hour = parseInt(parsed[0]);
-        const minute = parseInt(parsed[1]);
-        if (!isNaN(hour)) {
-          if (!isNaN(minute)) {
-            value = parseFloat(`${hour}.${minute / 60}`)
-              .toFixed(2)
-              .toString();
-          } else {
-            value = hour.toString();
-          }
-        }
-      }
-    }
-    if (company?.time_format === "hours_minutes") {
-      if (!value.includes(":")) {
-        const parsed = parseFloat(value);
-        if (!isNaN(parsed)) {
-          const hour = Math.floor(parsed);
-          const minute = parseInt(((parsed - hour) * 60).toFixed(0));
-          value = `${hour}:${minute < 10 ? "0" : ""}${minute}`;
-        }
-      }
-    }
-    return setHours(value);
-  }
-
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
       showToast({
@@ -124,6 +92,22 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
       return;
     }
 
+    // Normalize hours to decimal format (always store as decimal, regardless of input format)
+    let normalizedHours: string | undefined = undefined;
+    if (hours) {
+      if (hours.includes(":")) {
+        // Convert H:mm to decimal (keep full precision for accurate rounding later)
+        const parsed = hours.split(":");
+        const hour = parseInt(parsed[0]) || 0;
+        const minute = parseInt(parsed[1]) || 0;
+        normalizedHours = (hour + minute / 60).toString();
+      } else {
+        // Already decimal, validate it's a number
+        const parsed = parseFloat(hours);
+        normalizedHours = !isNaN(parsed) ? parsed.toString() : undefined;
+      }
+    }
+
     const updatedFavorite: Favorite = {
       id: favorite?.id ?? Date.now().toString(), // Reuse existing ID if editing, otherwise create new
       projectId: selectedProject.project.id,
@@ -133,7 +117,7 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
       clientId: selectedProject.client.id,
       clientName: selectedProject.client.name,
       notes: notes || undefined,
-      hours: hours || undefined,
+      hours: normalizedHours,
     };
 
     await onSave(updatedFavorite);
@@ -192,7 +176,6 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
           placeholder="Leave blank to start a timer"
           value={hours}
           onChange={setHours}
-          onBlur={() => setTimeFormat(hours)}
         />
       )}
     </Form>

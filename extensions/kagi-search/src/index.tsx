@@ -130,18 +130,16 @@ export default function Command() {
                         icon={{ source: Icon.QuestionMark }}
                       />
                     )}
-                    {true && (
-                      <ActionPanel.Item
-                        title="Open First Result"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                        onAction={async () => {
-                          await addHistory(item);
-                          await open(`https://kagi.com/search?q=${encodeURIComponent(item.query + " !")}`);
-                          await closeMainWindow();
-                        }}
-                        icon={{ source: Icon.Exclamationmark }}
-                      />
-                    )}
+                    <ActionPanel.Item
+                      title="Open First Result"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                      onAction={async () => {
+                        await addHistory(item);
+                        await open(`https://kagi.com/search?q=${encodeURIComponent(item.query + " !")}`);
+                        await closeMainWindow();
+                      }}
+                      icon={{ source: Icon.Exclamationmark }}
+                    />
                   </ActionPanel.Section>
                 ) : (
                   <ActionPanel.Section title="Result">

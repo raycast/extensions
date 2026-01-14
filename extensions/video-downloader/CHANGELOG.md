@@ -1,5 +1,22 @@
 # Video Downloader Changelog
 
+## [Fix: Windows Path Resolution Issues] - 2025-12-07
+
+- Resolved error with `winget` command detection on Windows systems
+- Fixed path validation issue where `fs.existsSync()` incorrectly returned false for existing Windows paths
+
+## [Feat: Windows Update Libraries Support] - 2025-12-07
+
+- Added support for updating yt-dlp and FFmpeg on Windows using winget
+
+## [Improvement] - 2025-11-11
+
+- Updated extension icon.
+
+## [Fix: Update Button Text to "Open in Explorer" on Windows] - 2025-10-20
+
+- The text on the "Open in Finder" button will now display "Open in Explorer" on Windows.
+
 ## [Fix: Instagram Same Title Issue] - 2025-10-03
 
 - Resolved a bug where videos from the same Instagram user overwrote each other due to identical filenames. Filenames now include both username and video ID for uniqueness.

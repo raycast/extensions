@@ -11,7 +11,7 @@ import { checkProfileConfiguration } from "./util";
 export const groupEntriesByDate = (allEntries?: HistoryEntry[]): GroupedEntries =>
   allEntries
     ? allEntries.reduce((acc, cur) => {
-        const title = "Historique";
+        const title = "Results";
         const groupEntries = acc.get(title) ?? [];
         groupEntries.push(cur);
         acc.set(title, groupEntries);

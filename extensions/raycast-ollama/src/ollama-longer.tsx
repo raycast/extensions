@@ -8,7 +8,7 @@ import { AnswerView } from "./lib/ui/AnswerView/main";
 const pref = getPreferenceValues<Preferences>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
-export default function Command(): JSX.Element {
+export default function Command() {
   const c = CommandAnswer.LONGER;
   const p = `Act as a professional content writer tasked with expanding a client's text while maintaining its essence and style. (replyWithRewrittenText)
 

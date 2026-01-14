@@ -1,13 +1,16 @@
 import { Color, Grid } from "@raycast/api";
+import type { Kit } from "@/types";
 import { familyStylesByPrefix, iconForStyle } from "@/utils/data";
 
 type StyleSelectorProps = {
   setType: (newValue: string) => void;
   STYLE_PREFERENCE: string;
   account: string;
+  kits?: Kit[];
+  isKitsLoading?: boolean;
 };
 
-export const StyleSelector = ({ setType, STYLE_PREFERENCE, account }: StyleSelectorProps) => {
+export const StyleSelector = ({ setType, STYLE_PREFERENCE, account, kits }: StyleSelectorProps) => {
   return (
     <Grid.Dropdown
       tooltip="Select Family & Style"
@@ -64,6 +67,18 @@ export const StyleSelector = ({ setType, STYLE_PREFERENCE, account }: StyleSelec
                 />
               ))}
           </Grid.Dropdown.Section>
+          {kits && kits.length > 0 && (
+            <Grid.Dropdown.Section title="Custom Kits">
+              {kits.map((kit) => (
+                <Grid.Dropdown.Item
+                  key={`kit:${kit.id ?? kit.token}`}
+                  title={kit.name}
+                  value={`kit:${kit.id ?? kit.token}`}
+                  icon={{ source: iconForStyle("fas"), tintColor: Color.SecondaryText }}
+                />
+              ))}
+            </Grid.Dropdown.Section>
+          )}
         </>
       ) : (
         <>

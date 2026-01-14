@@ -1,5 +1,18 @@
 # Things Changelog
 
+## [JXA Performance Optimization] - 2026-01-12
+
+- Reduced JXA fetch times by ~75% using `properties()` batching to minimize Apple Event overhead
+- Removed nested area tags from todo data (tags on containing areas are no longer fetched)
+
+## [Improved Query String Creation] - 2026-01-08
+
+- Replaced the `⁠qs` package with `⁠query-string` to automatically exclude empty strings and null values when generating Things URLs
+
+## [Timeout increasing in AppleScript] - 2025-10-30
+
+- Increased timeout to 60 seconds in AppleScript
+
 ## [Fix Timeout on macOS Tahoe] - 2025-10-15
 
 - Fixed timeout errors when opening "Add New To-Do" command on macOS Tahoe (26.x)

@@ -1,5 +1,5 @@
 import { Detail } from "@raycast/api";
-import { EXTENSION_TITLE } from "../constants";
+import { EXTENSION_TITLE } from "@/constants";
 
 interface ImageViewProps {
   image: string;

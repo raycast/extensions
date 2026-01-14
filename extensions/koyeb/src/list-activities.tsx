@@ -1,5 +1,5 @@
 import { useFetch } from "@raycast/utils";
-import { API_URL, headers, parseResponse } from "./koyeb";
+import { API_URL, headers, KOYEB_LIMIT, parseResponse } from "./koyeb";
 import { Color, Icon, Image, List } from "@raycast/api";
 import { Activity } from "./types";
 
@@ -20,6 +20,7 @@ const ACTIVITY_VERB_COLORS: Record<string, Color.ColorLike> = {
   payment_succeeded: Color.Blue,
   succeeded: Color.Green,
   updated: Color.Blue,
+  paused: Color.Orange,
 };
 
 function getActivityIcon(activity: Activity): Image.ImageLike {
@@ -59,16 +60,42 @@ function getTitle(activity: Activity) {
     switch (activity.verb) {
       case "created":
         return activity.actor.name;
+      case "canceled":
+        return "A subscription was canceled";
       case "payment_succeeded":
         return "A payment succeeded";
     }
   }
 
   if (activity.object.type === "organization") {
+    if (activity.verb === "deactivating" || activity.verb === "deactivated")
+      return `${activity.verb} organization ${activity.object.name}`;
     switch (activity.metadata.event) {
       case "payment_method_refreshed":
       case "payment_method_updated":
         return `Updated organization ${activity.object.name}`;
+      case "plan_updated":
+        return "Updated organization plan";
+      default:
+        return activity.actor.name;
+    }
+  }
+
+  if (activity.object.type === "app") {
+    switch (activity.verb) {
+      case "deleted":
+      case "paused":
+        return `${activity.verb} all services within ${activity.object.name}`;
+      default:
+        return activity.actor.name;
+    }
+  }
+
+  if (activity.object.type === "service") {
+    switch (activity.verb) {
+      case "deleted":
+      case "paused":
+        return `${activity.verb} service`;
       default:
         return activity.actor.name;
     }
@@ -98,6 +125,7 @@ function getSubtitle(activity: Activity) {
     switch (activity.metadata.event) {
       case "payment_method_refreshed":
       case "payment_method_updated":
+      case "plan_updated":
         return undefined;
       default:
         if (activity.verb === "updated") return `Updated organization ${activity.object.name}`;
@@ -113,6 +141,14 @@ function getSubtitle(activity: Activity) {
     if (activity.verb === "created") return "Logged in";
   }
 
+  if (activity.object.type === "app") {
+    if (activity.verb === "created") return `Created app ${activity.object.name}`;
+  }
+
+  if (activity.object.type === "service") {
+    if (activity.verb === "created") return "Created service";
+  }
+
   return undefined;
 }
 
@@ -125,8 +161,12 @@ function getAccessories(activity: Activity) {
       accessories.push({ tag: activity.object.name });
       break;
     case "deployment":
-      accessories.push({ tag: `${activity.object.metadata?.app_name}/${activity.object.metadata?.app_name}` });
+      accessories.push({ tag: `${activity.object.metadata?.app_name}/${activity.object.metadata?.definition?.name}` });
       if (activity.metadata.region) accessories.push({ tag: activity.metadata.region.toUpperCase() });
+      break;
+    case "service":
+      accessories.push({ text: `${activity.object.metadata?.app_name}/${activity.object.name}` });
+      accessories.push({ tag: activity.object.metadata?.service_type });
       break;
   }
 
@@ -135,19 +175,24 @@ function getAccessories(activity: Activity) {
 }
 
 export default function ListActivities() {
-  const { isLoading, data: activities } = useFetch(API_URL + "activities?limit=20", {
+  const {
+    isLoading,
+    data: activities,
+    pagination,
+  } = useFetch((options) => API_URL + `activities?limit=${KOYEB_LIMIT}&offset=${options.page * KOYEB_LIMIT}`, {
     headers,
     parseResponse,
-    mapResult(result: { activities: Activity[] }) {
+    mapResult(result: { activities: Activity[]; has_next: boolean }) {
       return {
         data: result.activities,
+        hasMore: result.has_next,
       };
     },
     initialData: [],
   });
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} pagination={pagination}>
       {activities.map((activity) => (
         <List.Item
           key={activity.id}

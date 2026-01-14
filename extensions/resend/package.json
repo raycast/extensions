@@ -16,6 +16,10 @@
     "Communication",
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -120,6 +124,11 @@
       "description": "List all API keys in your Resend account"
     },
     {
+      "name": "list-emails",
+      "title": "List Emails",
+      "description": "List all Emails in your Resend account"
+    },
+    {
       "name": "create-api-key",
       "title": "Create API Key",
       "description": "Create a new API key with specified permissions"
@@ -196,9 +205,9 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.0.1",
-    "resend": "^4.6.0"
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^2.2.1",
+    "resend": "^6.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

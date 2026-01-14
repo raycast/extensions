@@ -54,7 +54,8 @@ export enum ConnectionState {
  */
 export class MusicAssistantApi {
   private ws?: Websocket;
-  private commandId: number;
+  private commandCounter = 0;
+  private authToken?: string;
   public baseUrl?: string;
   public state: ConnectionState = ConnectionState.DISCONNECTED;
   public serverInfo?: ServerInfoMessage;
@@ -63,14 +64,14 @@ export class MusicAssistantApi {
   public providers: { [instance_id: string]: ProviderInstance } = {};
   public providerManifests: { [domain: string]: ProviderManifest } = {};
   public syncTasks: SyncTask[] = [];
-  public fetchesInProgress: number[] = [];
+  public fetchesInProgress: string[] = [];
   public get hasStreamingProviders() {
     return Object.values(this.providers).some((p) => p.is_streaming_provider);
   }
   private eventCallbacks: Array<[EventType, string, CallableFunction]>;
   private partialResult: { [msg_id: string]: Array<any> };
   private commands: Map<
-    number,
+    string,
     {
       resolve: (result?: any) => void;
       reject: (err: any) => void;
@@ -78,7 +79,6 @@ export class MusicAssistantApi {
   >;
 
   constructor(private debug = false) {
-    this.commandId = 0;
     this.eventCallbacks = [];
     this.commands = new Map();
     this.partialResult = {};
@@ -92,17 +92,25 @@ export class MusicAssistantApi {
     this.ws?.close();
   }
 
-  public initialize(baseUrl: string) {
+  public initialize(baseUrl: string, authToken: string) {
     if (this.ws) throw new Error("already initialized");
+    if (!authToken) throw new Error("Authentication token is required");
     if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
+    this.authToken = authToken;
     this.baseUrl = baseUrl;
     const wsUrl = baseUrl.replace("http", "ws") + "/ws";
     this.log(`Connecting to Music Assistant API ${wsUrl}`);
     this.state = ConnectionState.CONNECTING;
+    let isAuthenticated = false;
+    let authMessageId: string | null = null;
+    let pendingServerInfo: ServerInfoMessage | null = null;
     // connect to the websocket api
     const wsBuilder = new WebsocketBuilder(wsUrl)
       .onOpen((i, ev) => {
         this.log("connection opened");
+        isAuthenticated = false;
+        authMessageId = null;
+        pendingServerInfo = null;
         // state is updated on first message to be sure data is coming in
       })
       .onClose((i, ev) => {
@@ -125,6 +133,46 @@ export class MusicAssistantApi {
       .onMessage((i, ev) => {
         // Message retrieved on the websocket
         const msg = JSON.parse(ev.data);
+        if ("server_version" in msg && !pendingServerInfo && !isAuthenticated) {
+          pendingServerInfo = msg as ServerInfoMessage;
+          authMessageId = this._genCmdId();
+          const authCommand: CommandMessage = {
+            command: "auth",
+            message_id: authMessageId,
+            args: { token: this.authToken },
+          };
+          this.log("sending auth command", authMessageId);
+          i.send(JSON.stringify(authCommand));
+          return;
+        }
+
+        if (authMessageId && !isAuthenticated && "message_id" in msg && msg.message_id === authMessageId) {
+          if ("error_code" in msg || "error" in msg) {
+            const err =
+              (msg as ErrorResultMessage).details || (msg as ErrorResultMessage).error_code || (msg as any).error;
+            this.log("authentication failed", msg);
+            this.state = ConnectionState.DISCONNECTED;
+            this.signalEvent({
+              event: EventType.Error,
+              object_id: "",
+              data: err ?? "Authentication failed",
+            });
+            this.ws?.close();
+            return;
+          }
+          isAuthenticated = true;
+          if (pendingServerInfo) {
+            this.handleServerInfoMessage(pendingServerInfo);
+            pendingServerInfo = null;
+          }
+          return;
+        }
+
+        if (!isAuthenticated) {
+          this.log("received message before authentication", msg);
+          return;
+        }
+
         if ("event" in msg) {
           this.handleEventMessage(msg as EventMessage);
         } else if ("server_version" in msg) {
@@ -132,7 +180,7 @@ export class MusicAssistantApi {
         } else if ("message_id" in msg) {
           this.handleResultMessage(msg);
         } else {
-          // unknown message receoved
+          // unknown message received
           console.error("received unknown message", msg);
         }
       })
@@ -1231,7 +1279,12 @@ export class MusicAssistantApi {
 
   private handleResultMessage(msg: SuccessResultMessage | ErrorResultMessage) {
     // Handle result of a command
-    const resultPromise = this.commands.get(msg.message_id as number);
+    if (msg.message_id === undefined || msg.message_id === null) {
+      console.error("[resultMessage] Missing message_id", msg);
+      return;
+    }
+    const messageId = String(msg.message_id);
+    const resultPromise = this.commands.get(messageId);
 
     if ("error_code" in msg) {
       // always handle error (as we may be missing a resolve promise for this command)
@@ -1245,19 +1298,19 @@ export class MusicAssistantApi {
 
     if ("partial" in msg && msg.partial) {
       // handle partial results (for large listings that are split in multiple messages)
-      if (!(msg.message_id in this.partialResult)) {
-        this.partialResult[msg.message_id] = [];
+      if (!(messageId in this.partialResult)) {
+        this.partialResult[messageId] = [];
       }
-      this.partialResult[msg.message_id].push(...msg.result);
+      this.partialResult[messageId].push(...msg.result);
       return;
-    } else if (msg.message_id in this.partialResult) {
+    } else if (messageId in this.partialResult) {
       // if we have partial results, append them to the final result
-      if ("result" in msg) msg.result = this.partialResult[msg.message_id].concat(msg.result);
-      delete this.partialResult[msg.message_id];
+      if ("result" in msg) msg.result = this.partialResult[messageId].concat(msg.result);
+      delete this.partialResult[messageId];
     }
 
-    this.commands.delete(msg.message_id as number);
-    this.fetchesInProgress = this.fetchesInProgress.filter((x) => x != msg.message_id);
+    this.commands.delete(messageId);
+    this.fetchesInProgress = this.fetchesInProgress.filter((x) => x != messageId);
 
     if ("error_code" in msg) {
       resultPromise.reject(msg.details || msg.error_code);
@@ -1274,6 +1327,7 @@ export class MusicAssistantApi {
     }
     this.serverInfo = msg;
     this.state = ConnectionState.CONNECTED;
+    void this._fetchState();
     this.signalEvent({
       event: EventType.CONNECTED,
       object_id: "",
@@ -1302,7 +1356,7 @@ export class MusicAssistantApi {
     });
   }
 
-  private _sendCommand(command: string, args?: Record<string, any>, msgId?: number): void {
+  private _sendCommand(command: string, args?: Record<string, any>, msgId?: string): void {
     if (this.state !== ConnectionState.CONNECTED) {
       throw new Error(`Connection lost, currently ${ConnectionState[this.state]}, command: ${command}`);
     }
@@ -1322,7 +1376,56 @@ export class MusicAssistantApi {
     this.ws!.send(JSON.stringify(msg));
   }
 
-  private _genCmdId() {
-    return ++this.commandId;
+  private async _fetchState() {
+    try {
+      const [players, queues, manifests, providers, syncTasks] = await Promise.all([
+        this.getPlayers(),
+        this.getPlayerQueues(),
+        this.sendCommand<ProviderManifest[]>("providers/manifests"),
+        this.sendCommand<ProviderInstance[]>("providers"),
+        this.sendCommand<SyncTask[]>("music/synctasks"),
+      ]);
+
+      this.players = {};
+      for (const player of players) {
+        if (!player.available) continue;
+        this.players[player.player_id] = player;
+      }
+
+      this.queues = {};
+      for (const queue of queues) {
+        this.queues[queue.queue_id] = queue;
+      }
+
+      this.providerManifests = {};
+      for (const manifest of manifests) {
+        this.providerManifests[manifest.domain] = manifest;
+      }
+
+      this.providers = {};
+      for (const provider of providers) {
+        this.providers[provider.instance_id] = provider;
+      }
+
+      this.syncTasks = syncTasks;
+    } catch (error) {
+      this.log("Failed to fetch initial state", error);
+    }
+  }
+
+  private _genCmdId(): string {
+    const cryptoObj = typeof globalThis !== "undefined" ? (globalThis as any).crypto : undefined;
+    if (cryptoObj?.randomUUID) {
+      return cryptoObj.randomUUID();
+    }
+    if (cryptoObj?.getRandomValues) {
+      return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c: string) => {
+        const num = Number(c);
+        const rnd = cryptoObj.getRandomValues(new Uint8Array(1))[0];
+        return (num ^ (rnd & (15 >> (num / 4)))).toString(16);
+      });
+    }
+    this.commandCounter += 1;
+    return this.commandCounter.toString();
   }
 }

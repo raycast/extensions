@@ -1,5 +1,10 @@
 # Time Tracking Changelog
 
+## [Add Tags] - 2025-12-05
+
+- Add support for tagging timers (ref: [Issue #23323](https://github.com/raycast/extensions/issues/23323))
+- More robust error handling in Edit Form
+
 ## [Rename Timers + Modernize] - 2025-08-14
 
 - Rename timers using Edit Form (ref: [Issue #20915](https://github.com/raycast/extensions/issues/20915))

@@ -33,10 +33,8 @@ export function showError() {
 			markdown={messages.filter(Boolean).join(LINE_BREAK)}
 			actions={
 				<ActionPanel>
-					<>
-						<Action.OpenInBrowser title="Open Guide" url={ENTE_CLI_INSTALLATION_URL} />
-						<Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
-					</>
+					<Action.OpenInBrowser title="Open Guide" url={ENTE_CLI_INSTALLATION_URL} />
+					<Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
 				</ActionPanel>
 			}
 		/>

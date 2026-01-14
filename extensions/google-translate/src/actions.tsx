@@ -34,22 +34,27 @@ export const ConfigurableCopyPasteActions = ({ defaultActionsPrefix, value }: Ac
   );
 };
 
-export const ToggleFullTextAction: React.VFC<{
+export const ToggleFullTextAction: React.FC<{
   onAction: () => void;
 }> = ({ onAction }) => {
   return (
-    <Action title="Toggle Full Text" icon={Icon.Text} onAction={onAction} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+    <Action
+      title="Toggle Full Text"
+      icon={Icon.Text}
+      onAction={onAction}
+      shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
+    />
   );
 };
 
-export const OpenOnGoogleTranslateWebsiteAction: React.VFC<{
+export const OpenOnGoogleTranslateWebsiteAction: React.FC<{
   translation: Pick<SimpleTranslateResult, "langFrom" | "langTo">;
   translationText: string;
 }> = ({ translationText, translation }) => {
   return (
     <Action.OpenInBrowser
       title="Open in Google Translate"
-      shortcut={{ modifiers: ["opt"], key: "enter" }}
+      shortcut={{ macOS: { modifiers: ["opt"], key: "enter" }, Windows: { modifiers: ["alt"], key: "enter" } }}
       url={
         "https://translate.google.com/?sl=" +
         translation.langFrom +

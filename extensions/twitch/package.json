@@ -10,7 +10,8 @@
     "suth",
     "pernielsentikaer",
     "MiracleXYZ",
-    "Sheraff"
+    "Sheraff",
+    "taken"
   ],
   "license": "MIT",
   "preferences": [
@@ -19,7 +20,7 @@
       "type": "dropdown",
       "title": "Primary Action",
       "required": false,
-      "default": "detail",
+      "default": "web",
       "data": [
         {
           "title": "Open via Browser",
@@ -34,8 +35,8 @@
     },
     {
       "name": "streamlink",
-      "type": "textfield",
-      "default": "/opt/homebrew/bin/streamlink",
+      "type": "file",
+      "default": "",
       "title": "Location of Streamlink binary",
       "required": false,
       "description": "Use 'where streamlink' or install via brew install streamlink"
@@ -51,8 +52,10 @@
     },
     {
       "name": "streamlinkConfig",
-      "type": "textfield",
+      "type": "file",
+      "default": "",
       "title": "Custom Streamlink Config",
+      "default": "",
       "required": false,
       "description": "(optional) Path to custom streamlink config file"
     },
@@ -79,6 +82,10 @@
         {
           "title": "Worst",
           "value": "worst"
+        },
+        {
+          "title": "Audio Only",
+          "value": "audio_only"
         }
       ]
     },
@@ -151,5 +158,9 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }

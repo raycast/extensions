@@ -17,7 +17,6 @@
     "LunaticMuch",
     "aeorge",
     "daquinoaldo",
-    "ppy",
     "lin",
     "marcotf",
     "qeude",
@@ -38,10 +37,15 @@
     "nicolas-marien",
     "iontea",
     "ridemountainpig",
-    "kud"
+    "kud",
+    "MartinGonzalez",
+    "brndnly",
+    "oscmarb",
+    "emergerrrd"
   ],
   "pastContributors": [
-    "Lemon"
+    "Lemon",
+    "ppy"
   ],
   "categories": [
     "Developer Tools",
@@ -95,6 +99,14 @@
           "default": false,
           "label": "Recently Closed",
           "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the list."
         }
       ]
     },
@@ -419,6 +431,14 @@
           "default": false,
           "label": "Recently Closed",
           "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the menu list."
         },
         {
           "name": "maxitems",

@@ -1,7 +1,7 @@
 import { Script } from "../type";
 import vkbeautify from "vkbeautify";
 
-export const foramtJson: Script = {
+export const formatJson: Script = {
   info: {
     title: "Format JSON",
     desc: "Format JSON documents",
@@ -12,7 +12,7 @@ export const foramtJson: Script = {
   run(input) {
     try {
       return vkbeautify.json(input, 2);
-    } catch (error) {
+    } catch {
       throw Error("Invalid JSON");
     }
   },
@@ -28,7 +28,7 @@ export const minifyJson: Script = {
   run(input) {
     try {
       return vkbeautify.jsonmin(input);
-    } catch (error) {
+    } catch {
       throw Error("Invalid JSON");
     }
   },
@@ -44,7 +44,7 @@ export const escapeJson: Script = {
   run(input) {
     try {
       return JSON.stringify(input);
-    } catch (error) {
+    } catch {
       throw Error("Invalid JSON");
     }
   },
@@ -60,7 +60,7 @@ export const unescapeJson: Script = {
   run(input) {
     try {
       return JSON.parse(input);
-    } catch (error) {
+    } catch {
       throw Error("Invalid JSON");
     }
   },

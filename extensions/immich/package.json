@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "immich",
+  "title": "Immich",
+  "description": "Self-hosted photo and video management solution",
+  "icon": "immich_new.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "base_url",
+      "title": "Base URL",
+      "placeholder": "https://demo.immich.app/",
+      "description": "Immich Base URL",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "xXX...Xxx",
+      "description": "Immich API Key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "api-keys",
+      "title": "API Keys",
+      "description": "Manage API Keys",
+      "mode": "view"
+    },
+    {
+      "name": "explore",
+      "title": "Explore",
+      "description": "Search your photos",
+      "mode": "view"
+    },
+    {
+      "name": "library",
+      "title": "Library",
+      "description": "Browse Library",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "page",
+          "placeholder": "PAGE",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Albums",
+              "value": "albums"
+            }
+          ],
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@immich/sdk": "^2.2.3",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

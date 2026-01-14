@@ -2,10 +2,11 @@ import {
   recognizeText as recognizeTextSwift,
   detectBarcode as detectBarcodeSwift,
 } from "swift:../swift";
-import { getUserSelectedLanguages, usePreferences } from "./hooks";
+import { getUserSelectedLanguages } from "./hooks";
+import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 
 export const recognizeText = async (isFullScreen = false) => {
-  const preference = usePreferences();
+  const preference = getPreferenceValues<Preferences>();
 
   try {
     const languages = await getUserSelectedLanguages();
@@ -18,6 +19,7 @@ export const recognizeText = async (isFullScreen = false) => {
       preference.ignoreLineBreaks,
       preference.customWordsList ? preference.customWordsList.split(",") : [],
       languages.map((lang) => lang.value),
+      Boolean(preference.playSound),
     );
 
     return recognizedText;
@@ -28,14 +30,39 @@ export const recognizeText = async (isFullScreen = false) => {
 };
 
 export const detectBarcode = async () => {
-  const preference = usePreferences();
+  const preference = getPreferenceValues<Preferences>();
 
   try {
-    const detectedCodes = await detectBarcodeSwift(preference.keepImage);
+    const detectedCodes = await detectBarcodeSwift(
+      preference.keepImage,
+      Boolean(preference.playSound),
+    );
 
     return detectedCodes;
   } catch (error) {
     console.error(error);
     throw new Error("Failed to detect barcode");
+  }
+};
+
+export const showSuccessToast = async (title: string) => {
+  const preference = getPreferenceValues<Preferences>();
+
+  if (preference.showToast) {
+    await showToast({
+      style: Toast.Style.Success,
+      title,
+    });
+  }
+};
+
+export const showFailureToast = async (title: string) => {
+  const preference = getPreferenceValues<Preferences>();
+
+  if (preference.showToast) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title,
+    });
   }
 };

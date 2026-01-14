@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Color, Grid, Icon, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { runAppleScript, runPowerShellScript, usePromise } from "@raycast/utils";
 import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
-import { runAppleScriptSync } from "run-applescript";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
-import { RemoveMethods, useRecentEntries } from "./db";
+import { RemoveMethods, useRecentEntries } from "./lib/db";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -14,20 +13,19 @@ import {
   ListOrGridEmptyView,
   ListOrGridItem,
   ListOrGridSection,
-} from "./grid-or-list";
+} from "./lib/grid-or-list";
 import { getBuildScheme } from "./lib/vscode";
-import { usePinnedEntries } from "./pinned";
+import { usePinnedEntries } from "./lib/pinned";
 import {
   build,
-  bundleIdentifier,
   closeOtherWindows,
   gitBranchColor,
   keepSectionOrder,
   layout,
   showGitBranch,
   terminalApp,
-} from "./preferences";
-import { EntryLike, EntryType, PinMethods } from "./types";
+} from "./lib/preferences";
+import { EntryLike, EntryType, PinMethods } from "./lib/types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
@@ -36,10 +34,12 @@ import {
   isRemoteEntry,
   isRemoteWorkspaceEntry,
   isValidHexColor,
+  isWin,
   isWorkspaceEntry,
-} from "./utils";
+} from "./lib/utils";
 import { getEditorApplication } from "./utils/editor";
 import { getGitBranch } from "./utils/git";
+import { OpenInShell } from "./lib/actions";
 
 export default function Command() {
   const { data, isLoading, error, ...removeMethods } = useRecentEntries();
@@ -144,7 +144,7 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & 
 }
 
 function LocalItem(
-  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean } & PinMethods & RemoveMethods
+  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean } & PinMethods & RemoveMethods,
 ) {
   const name = decodeURIComponent(basename(props.uri));
   const path = fileURLToPath(props.uri);
@@ -166,12 +166,14 @@ function LocalItem(
         if (mounted) {
           setGitBranch(branch);
         }
-      } catch (error) {
+      } catch {
         // Silently handle errors - they're already handled in getGitBranch
       }
     }
 
-    fetchGitBranch();
+    if (showGitBranch) {
+      fetchGitBranch();
+    }
     return () => {
       mounted = false;
     };
@@ -182,9 +184,18 @@ function LocalItem(
   };
 
   const getAction = (revert = false) => {
-    return () => {
+    return async () => {
       if (closeOtherWindows !== revert) {
-        runAppleScriptSync(`
+        if (isWin) {
+          await runPowerShellScript(`
+        $AppName = "${build}"
+
+        while (Get-Process -Name $AppName -ErrorAction SilentlyContinue | Where-Object {$_.MainWindowTitle}) {
+          Get-Process -Name $AppName | Where-Object {$_.MainWindowTitle} | Select-Object -First 1 | ForEach-Object {$_.CloseMainWindow()}
+        }
+          `);
+        } else {
+          await runAppleScript(`
         tell application "System Events"
           tell process "${build}"
             repeat while window 1 exists
@@ -193,8 +204,10 @@ function LocalItem(
           end tell
         end tell
         `);
+        }
       }
-      open(props.uri, bundleIdentifier);
+
+      open(isWin ? path : props.uri, editorApp);
     };
   };
 
@@ -232,7 +245,7 @@ function LocalItem(
               icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
               onAction={getAction()}
             />
-            <Action.ShowInFinder path={path} />
+            <OpenInShell path={path} />
             <Action
               title={getTitle(true)}
               icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
@@ -247,7 +260,7 @@ function LocalItem(
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 onAction={() =>
                   open(path, terminalApp).catch(() =>
-                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`)
+                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`),
                   )
                 }
               />
@@ -270,12 +283,19 @@ function LocalItem(
 }
 
 function RemoteItem(
-  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods
+  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods,
 ) {
   const remotePath = decodeURI(basename(props.uri));
   const scheme = getBuildScheme();
 
   const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
+
+  let keywords: string[] = [];
+  if (isRemoteEntry(props.entry)) {
+    keywords = props.entry.remoteAuthority.split("+");
+  } else if (isRemoteWorkspaceEntry(props.entry)) {
+    keywords = props.entry.remoteAuthority.split("+");
+  }
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
@@ -300,6 +320,7 @@ function RemoteItem(
       subtitle={props.subtitle || "/"}
       icon="remote.svg"
       content="remote.svg"
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

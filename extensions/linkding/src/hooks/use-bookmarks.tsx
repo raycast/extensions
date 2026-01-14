@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { confirmAlert, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { GetLinkdingBookmarkResponse, LinkdingBookmark, PostLinkdingBookmarkPayload } from "../types/linkding-types";
@@ -54,6 +54,7 @@ const useBookmarks = () => {
   };
 
   const deleteBookmark = async (id: number) => {
+    if (!(await confirmAlert({ title: "Delete this bookmark?", message: "This cannot be undone!" }))) return;
     const toast = await showToast(Toast.Style.Animated, "Deleting bookmark");
     try {
       await mutate(fetch(`${serverUrl}/api/bookmarks/${id}`, { ...requestOpts, method: "DELETE" }), {
@@ -68,7 +69,22 @@ const useBookmarks = () => {
     }
   };
 
-  return { isLoading, bookmarks, setFilter, createBookmark, deleteBookmark };
+  const archiveBookmark = async (id: number) => {
+    const toast = await showToast(Toast.Style.Animated, "Archiving bookmark");
+    try {
+      await mutate(fetch(`${serverUrl}/api/bookmarks/${id}/archive/`, { ...requestOpts, method: "POST" }), {
+        optimisticUpdate: (bookmarks) => bookmarks.filter((bookmark) => bookmark.id !== id),
+      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Bookmark archived";
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to archive bookmark";
+      toast.message = String(err);
+    }
+  };
+
+  return { isLoading, bookmarks, setFilter, createBookmark, deleteBookmark, archiveBookmark };
 };
 
 export default useBookmarks;

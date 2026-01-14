@@ -51,6 +51,10 @@
               "value": "supabase"
             },
             {
+              "title": "Nuxt",
+              "value": "nuxt"
+            },
+            {
               "title": "Tailwind",
               "value": "tailwind"
             },

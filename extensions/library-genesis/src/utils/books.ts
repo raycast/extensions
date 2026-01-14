@@ -126,7 +126,6 @@ export async function downloadBookToDefaultDirectory(url = "", book: BookEntry) 
   try {
     const fileName = buildFileName(downloadPath, name, extension);
     const filePath = `${downloadPath}/${fileName}`;
-
     const arrayBuffer = await fetchImageArrayBuffer(url, toast.signal);
     console.log(url, arrayBuffer.byteLength / 1024, "KB");
 

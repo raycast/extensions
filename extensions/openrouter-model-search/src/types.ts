@@ -1,11 +1,13 @@
+export type Modality = "text" | "image" | "file" | "audio" | "video" | "embeddings";
+
 export interface OpenRouterModel {
   id: string;
   name: string;
   created: number;
   description: string;
   architecture: {
-    input_modalities: string[];
-    output_modalities: string[];
+    input_modalities: Modality[];
+    output_modalities: Modality[];
     tokenizer: string;
     instruct_type?: string;
   };

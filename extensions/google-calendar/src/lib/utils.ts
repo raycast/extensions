@@ -107,8 +107,20 @@ export function formatRecurrence(recurrence: string[]): string {
   return rules.join("\n");
 }
 
-export function isInternal() {
-  return environment.supportPath.includes("com.raycast.macos.internal");
+function isInternal() {
+  return environment.supportPath.includes("internal");
+}
+
+export function getClientId() {
+  if (environment.raycastVersion.split(".").length === 4) {
+    return isInternal()
+      ? "690234628480-ic526rvseca4983uujs693rnqh49kgjh.apps.googleusercontent.com"
+      : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
+  } else {
+    return isInternal()
+      ? "690234628480-4h8a6h78482ks82g3s1ghrqa0ce8qgo3.apps.googleusercontent.com"
+      : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
+  }
 }
 
 export function toISO8601WithTimezoneOffset(date = new Date()) {

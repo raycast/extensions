@@ -8,6 +8,7 @@ import {
   Icon,
   openCommandPreferences,
   getPreferenceValues,
+  Clipboard,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
@@ -18,6 +19,7 @@ import {
   OUTPUT_IMAGE_EXTENSIONS,
   type MediaType,
   type AllOutputExtension,
+  type OutputVideoExtension,
   type QualitySettings,
   getMediaType,
   AUDIO_BITRATES,
@@ -32,7 +34,7 @@ import {
   DEFAULT_VBR_QUALITIES,
   AUDIO_COMPRESSION_LEVEL,
   type AudioCompressionLevel,
-  VIDEO_ENCODING_MODES,
+  ALLOWED_VIDEO_ENCODING_MODES,
   type VideoEncodingMode,
   VIDEO_BITRATE,
   type VideoBitrate,
@@ -233,13 +235,48 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       actions={
         <ActionPanel>
           {currentFiles && currentFiles.length > 0 && selectedFileType && (
-            <Action.SubmitForm
-              title="Convert"
-              onSubmit={handleSubmit}
-              icon={Icon.NewDocument}
-              // For some reason, this still shows up as cmd+return instead of just return, so no use for now
-              /* shortcut={{ modifiers: [], key: "return" }} */
-            />
+            <>
+              <Action.SubmitForm
+                title="Convert"
+                onSubmit={handleSubmit}
+                icon={Icon.NewDocument}
+                // For some reason, this still shows up as cmd+return instead of just return, so no use for now
+                /* shortcut={{ modifiers: [], key: "return" }} */
+              />
+              <Action
+                title="Copy FFmpeg Command"
+                icon={Icon.Clipboard}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                  windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                }}
+                onAction={async () => {
+                  if (!outputFormat || !currentQualitySetting) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Configuration incomplete",
+                      message: "Output format and quality settings must be configured",
+                    });
+                    return;
+                  }
+                  try {
+                    const command = await convertMedia(currentFiles[0], outputFormat, currentQualitySetting, true);
+                    await Clipboard.copy(command);
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Command copied to clipboard",
+                      message: currentFiles.length > 1 ? "Command for the first file copied" : "FFmpeg command copied",
+                    });
+                  } catch (error) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to generate command",
+                      message: String(error),
+                    });
+                  }
+                }}
+              />
+            </>
           )}
         </ActionPanel>
       }
@@ -648,7 +685,7 @@ function QualitySettingsComponent({
                 }}
                 info="CRF provides constant visual quality, VBR uses variable bitrate for target file size"
               >
-                {VIDEO_ENCODING_MODES.map((mode) => (
+                {(ALLOWED_VIDEO_ENCODING_MODES[outputFormat as OutputVideoExtension] || []).map((mode) => (
                   <Form.Dropdown.Item
                     key={mode}
                     value={mode}

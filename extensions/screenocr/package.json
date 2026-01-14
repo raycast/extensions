@@ -7,7 +7,8 @@
   "author": "huzef44",
   "contributors": [
     "anwarulislam",
-    "xilopaint"
+    "xilopaint",
+    "pernielsentikaer"
   ],
   "categories": [
     "Productivity"
@@ -122,6 +123,22 @@
       "default": true
     },
     {
+      "name": "playSound",
+      "description": "Play camera shutter sound when capturing screenshots",
+      "type": "checkbox",
+      "required": false,
+      "label": "Play sounds",
+      "default": true
+    },
+    {
+      "name": "showToast",
+      "description": "Show toast notifications for command results",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show toast messages",
+      "default": true
+    },
+    {
       "name": "ignoreLineBreaks",
       "description": "Ignores Line Breaks",
       "type": "checkbox",
@@ -178,12 +195,12 @@
     "use-immer": "^0.11.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "24.0.13",
-    "@types/react": "19.1.8",
-    "eslint": "^8.57.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

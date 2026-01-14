@@ -1,13 +1,8 @@
-import crypto from "node:crypto";
 import { useMemo } from "react";
 
 import { showFailureToast, useFetch } from "@raycast/utils";
 
-const getPasswordSha = (password: string): string => {
-  const hash = crypto.createHash("sha1");
-  hash.update(password);
-  return hash.digest("hex").toUpperCase();
-};
+import { getPasswordSha, parsePwnedPasswordsResponse } from "@/lib";
 
 export const useOnlineCheck = (password: string) => {
   const sha = getPasswordSha(password);
@@ -18,14 +13,7 @@ export const useOnlineCheck = (password: string) => {
 
   const { data, isLoading } = useFetch(url!, {
     execute: !!url,
-    parseResponse: async (response) => {
-      const text = await response.text();
-
-      return text.split("\n").map((line) => {
-        const [hash, count] = line.split(":");
-        return { hash, count: parseInt(count, 10) };
-      });
-    },
+    parseResponse: parsePwnedPasswordsResponse,
     onError(error) {
       showFailureToast("Failed to fetch data", error);
     },

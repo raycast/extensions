@@ -324,3 +324,25 @@ export interface BankTransactionUpdateData {
 export interface BankTransactionResponse {
   bank_transaction: BankTransaction;
 }
+
+export interface TaskFormValues {
+  project: string;
+  name: string;
+  is_billable: boolean;
+  billing_rate?: string;
+  billing_period?: string;
+  status?: string;
+}
+
+export interface TaskCreateData {
+  name: string;
+  currency: string;
+  is_billable?: boolean;
+  billing_rate?: string;
+  billing_period?: string;
+  status?: string;
+}
+
+export interface TaskResponse {
+  task: Task;
+}

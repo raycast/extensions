@@ -9,6 +9,7 @@ import { parseRepoUrl } from "@/utils/parseRepoUrl";
 import { Readme } from "@/screens/Readme";
 import { CopyInstallCommandActions } from "@/components/CopyInstallCommandActions";
 import Favorites from "@/favorites";
+import { ExtensionPreferences } from "@/types";
 
 interface PackageListItemProps {
   result: Package;
@@ -158,7 +159,10 @@ export const PackageListItem = ({
                 title="Remove from Favorites"
                 onAction={handleRemoveFromFaves}
                 icon={Icon.StarDisabled}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                }}
                 style={Action.Style.Destructive}
               />
             ) : (
@@ -166,7 +170,10 @@ export const PackageListItem = ({
                 title="Add to Favorites"
                 onAction={handleAddToFaves}
                 icon={Icon.Star}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                }}
               />
             )}
             {isViewingFavorites ? (
@@ -174,7 +181,10 @@ export const PackageListItem = ({
                 title="Remove All Favorites"
                 onAction={handleRemoveAllFaves}
                 icon={Icon.Trash}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "backspace" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "backspace" },
+                }}
                 style={Action.Style.Destructive}
               />
             ) : (
@@ -203,13 +213,19 @@ export const PackageListItem = ({
               url={`https://bundlephobia.com/package/${pkg.name}`}
               title="Open Bundlephobia"
               icon={Icon.LevelMeter}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+              }}
             />
             <Action.OpenInBrowser
               url={`https://esm.sh/${pkg.name}`}
               title="Open Esm.sh URL"
               icon={Icon.Cloud}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+              }}
             />
             {repoUrl && type === "github" ? (
               <Action.OpenInBrowser
@@ -221,7 +237,10 @@ export const PackageListItem = ({
                     dark: "github-dark.png",
                   },
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "." }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "." },
+                  Windows: { modifiers: ["ctrl"], key: "." },
+                }}
               />
             ) : null}
             {type === "github" || (type === "gitlab" && owner && name) ? (

@@ -1,0 +1,58 @@
+import { AssetResponseDto, getAssetInfo, updateAsset } from "@immich/sdk";
+import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { initialize, getAssetThumbnail } from "../immich";
+
+export default function AssetView({ asset }: { asset: AssetResponseDto }) {
+  const { data: info } = useCachedPromise(
+    async (id) => {
+      initialize();
+      const res = await getAssetInfo({ id });
+      return res;
+    },
+    [asset.id],
+  );
+
+  const toggleFavorite = async (asset: AssetResponseDto) => {
+    const toast = await showToast(Toast.Style.Animated, "Toggling Favorite", asset.originalFileName);
+    try {
+      await updateAsset({ id: asset.id, updateAssetDto: { isFavorite: !asset.isFavorite } });
+      toast.style = Toast.Style.Success;
+      toast.title = "Favorite Toggled";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to toggle favorite";
+      toast.message = `${error}`;
+    }
+  };
+
+  return (
+    <Detail
+      markdown={`![](${getAssetThumbnail(asset.id)}) \n---\n ${info?.exifInfo?.description || ""}`}
+      metadata={
+        info && (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="Description" text={info.exifInfo?.description || ""} />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label title="Details" />
+            <Detail.Metadata.Label icon={Icon.Image} title="" text={asset.originalFileName} />
+            <Detail.Metadata.TagList title="Tags">
+              {asset.tags?.map((tag) => (
+                <Detail.Metadata.TagList.Item key={tag.id} text={tag.name} />
+              ))}
+            </Detail.Metadata.TagList>
+          </Detail.Metadata>
+        )
+      }
+      actions={
+        <ActionPanel>
+          {asset.isFavorite ? (
+            <Action icon={Icon.HeartDisabled} title="Unfavorite" onAction={() => toggleFavorite(asset)} />
+          ) : (
+            <Action icon={Icon.Heart} title="Favorite" onAction={() => toggleFavorite(asset)} />
+          )}
+        </ActionPanel>
+      }
+    />
+  );
+}

@@ -58,6 +58,7 @@ export default function CanIUse() {
                   target={
                     <FeatureDetail
                       feature={featureName}
+                      featureTitle={feat.title}
                       showReleaseDate={showReleaseDate}
                       showPartialSupport={showPartialSupport}
                       briefMode={briefMode}

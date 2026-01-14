@@ -1,4 +1,5 @@
 /* eslint @raycast/prefer-title-case: off */
+import process from "node:process";
 import { useEffect, useState } from "react";
 import { Action, Icon } from "@raycast/api";
 import { callbackLaunchCommand } from "raycast-cross-extension";
@@ -23,9 +24,11 @@ export const OpenWith = ({ icon, version }: ActionProps) => {
   return destinationPath ? <Action.OpenWith path={destinationPath} /> : null;
 };
 
-export const MakeBadge = ({ icon, version }: ActionProps) => (
-  <Action icon="shieldsdotio.svg" title="Make Badge" onAction={() => launchSocialBadge(icon, version)} />
-);
+export const MakeBadge = ({ icon, version }: ActionProps) =>
+  // [TODO] The Badge extension cannot work properly on Windows yet.
+  process.platform === "darwin" ? (
+    <Action icon="shieldsdotio.svg" title="Make Badge" onAction={() => launchSocialBadge(icon, version)} />
+  ) : null;
 
 export const CopySvg = ({ icon, version }: ActionProps) => {
   return <Action title="Copy SVG" onAction={() => copySvg({ version, icon })} icon={Icon.Clipboard} />;
@@ -74,7 +77,7 @@ export const Supports = () => (
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=new+icon&template=icon_request.yml"
     />
     <Action.OpenInBrowser
-      title="Report an Oudated Icon"
+      title="Report an Outdated Icon"
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=update+icon%2Fdata&template=icon_update.yml"
     />
   </>

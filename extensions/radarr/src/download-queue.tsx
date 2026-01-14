@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { List, ActionPanel, Action, Icon, Color, confirmAlert, Alert } from "@raycast/api";
 
-import { useInstanceManager } from "./hooks/useInstanceManager";
-import { useQueue, removeQueueItem } from "./hooks/useRadarrAPI";
-import { formatMovieTitle, formatFileSize, formatOverview } from "./utils";
-import type { QueueItem } from "./types";
+import { useInstanceManager } from "@/lib/hooks/useInstanceManager";
+import { useQueue, removeQueueItem } from "@/lib/hooks/useRadarrAPI";
+import { formatMovieTitle, formatFileSize, formatOverview } from "@/lib/utils/formatting";
+import type { QueueItem } from "@/lib/types/queue";
 
 export default function DownloadQueue() {
   const {

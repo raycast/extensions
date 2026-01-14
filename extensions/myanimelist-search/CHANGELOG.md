@@ -1,5 +1,9 @@
 # Myanimelist search Changelog
 
+## [New Addition] - 2025-12-01
+
+- Added windows support
+
 ## [New Commands and API overhaul] - 2025-02-28
 
 - Added 1 new command: Manage Watchlist

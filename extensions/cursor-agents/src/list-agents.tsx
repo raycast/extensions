@@ -194,7 +194,10 @@ function AgentListItem(props: {
                 icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
                 title="Open Pull Request"
                 url={props.agent.target.prUrl}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "return" },
+                  windows: { modifiers: ["ctrl", "shift"], key: "return" },
+                }}
               />
             )}
           </ActionPanel.Section>
@@ -209,7 +212,10 @@ function AgentListItem(props: {
               icon={Icon.SpeechBubble}
               title="Add Follow-Up"
               target={<FollowupInstruction agent={props.agent} />}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "n" },
+                windows: { modifiers: ["ctrl", "shift"], key: "n" },
+              }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
@@ -236,13 +242,19 @@ function AgentListItem(props: {
               title={props.isShowingDetail ? "Hide Details" : "Show Details"}
               icon={Icon.Sidebar}
               onAction={() => props.setIsShowingDetail(!props.isShowingDetail)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                windows: { modifiers: ["ctrl", "shift"], key: "d" },
+              }}
             />
             <Action.Push
               icon={Icon.Message}
               title="View Conversation"
               target={<AgentConversation agent={props.agent} />}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                windows: { modifiers: ["ctrl", "shift"], key: "v" },
+              }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Others">

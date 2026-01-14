@@ -12,6 +12,7 @@ Control your WLED LED strip devices directly from Raycast. Manage multiple devic
 - **Effects Browser** - Browse and apply 100+ WLED effects
 - **Persistent Storage** - Devices and custom colors are saved automatically
 - **Keyboard Shortcuts** - Quick access with Cmd+1 through Cmd+4 for brightness
+- **Scenes** - Create scenes to quickly apply specific states to the connected devices
 
 ## Getting Started
 
@@ -19,7 +20,8 @@ Control your WLED LED strip devices directly from Raycast. Manage multiple devic
 2. Click "Add Device" to add your first WLED device
 3. Enter device name (e.g., "Bedroom Strip") and IP address (e.g., "192.168.1.100")
 4. Enable "Test Connection" to verify the device is reachable
-5. Select your device to start controlling it!
+5. Select your device to start controlling it using different actions
+6. Do you have favorite color combinations? Save them as a scene and apply them with a single command
 
 ## Finding Your WLED Device IP
 
@@ -58,7 +60,6 @@ nmap -p 80 192.168.1.0/24
 - WLED device(s) on your local network
 - Device IP address (see "Finding Your WLED Device IP" above)
 
-
 ## Troubleshooting
 
 **Connection Test Fails**
@@ -68,7 +69,7 @@ nmap -p 80 192.168.1.0/24
 - Test manually: `curl http://192.168.1.100/json`
 
 **Device Won't Control**
-- Click "Refresh" in the control panel
+- Try using "Refresh" action
 - Verify device is still online
 - Check if IP address changed (consider using static IPs)
 
@@ -78,6 +79,7 @@ nmap -p 80 192.168.1.0/24
 - Always enable "Test Connection" when adding devices
 - Use keyboard shortcuts (`Cmd+1` through `Cmd+4`) for quick brightness control
 - The custom color picker remembers your last used color
+- Create scenes to apply colors to different devices with a single command
 
 ## About WLED
 

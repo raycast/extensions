@@ -1,5 +1,13 @@
 # Installed Extensions Changelog
 
+## [Cross-plaform Keyboard Shortcuts] - 2026-01-05
+
+- Update `shortcut`s to be cross-platform
+
+## [Enhancement] - 2025-11-15
+
+- Add icon path for Windows
+
 ## [Enhancement] - 2025-10-08
 
 - Add support for Windows

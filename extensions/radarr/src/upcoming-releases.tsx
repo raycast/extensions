@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Grid, ActionPanel, Action, Icon } from "@raycast/api";
 
-import { useInstanceManager } from "./hooks/useInstanceManager";
-import { useCalendar } from "./hooks/useRadarrAPI";
-import { getMoviePoster, formatReleaseDate } from "./utils";
-import type { CalendarMovie } from "./types";
+import { useInstanceManager } from "@/lib/hooks/useInstanceManager";
+import { useCalendar } from "@/lib/hooks/useRadarrAPI";
+import { getMoviePoster, formatReleaseDate, getNextReleaseDate } from "@/lib/utils/formatting";
+import type { CalendarMovie } from "@/lib/types/movie";
 
 type MonitoringFilter = "all" | "monitored" | "unmonitored";
 
@@ -25,35 +25,13 @@ export default function UpcomingReleases() {
     data: calendarMovies,
     isLoading,
     error,
+    mutate,
   } = useCalendar(selectedInstance, today.toISOString().split("T")[0], twoMonthsFromNow.toISOString().split("T")[0]);
 
   const movieGridItem = (movie: CalendarMovie) => {
     const poster = getMoviePoster(movie);
-
-    // Get next future release date
-    const today = new Date();
-    let nextReleaseDate = null;
-
-    // Check digital release first
-    if (movie.digitalRelease && new Date(movie.digitalRelease) > today) {
-      nextReleaseDate = movie.digitalRelease;
-    }
-    // Then check cinema release
-    else if (movie.inCinemas && new Date(movie.inCinemas) > today) {
-      nextReleaseDate = movie.inCinemas;
-    }
-    // Finally check physical release
-    else if (movie.physicalRelease && new Date(movie.physicalRelease) > today) {
-      nextReleaseDate = movie.physicalRelease;
-    }
-    // If no future dates, use the latest available date
-    else {
-      nextReleaseDate = movie.digitalRelease || movie.inCinemas || movie.physicalRelease;
-    }
-
+    const nextReleaseDate = getNextReleaseDate(movie);
     const formattedDate = nextReleaseDate ? formatReleaseDate(nextReleaseDate) : "TBA";
-
-    // Create subtitle with year and release date
     const subtitle = `${movie.year} • ${formattedDate}`;
 
     return (
@@ -89,7 +67,7 @@ export default function UpcomingReleases() {
               )}
             </ActionPanel.Section>
             <ActionPanel.Section>
-              <Action title="Refresh" icon={Icon.RotateClockwise} onAction={() => window.location.reload()} />
+              <Action title="Refresh" icon={Icon.RotateClockwise} onAction={() => mutate()} />
             </ActionPanel.Section>
             {instances.length > 1 && (
               <ActionPanel.Section title="Instance">
@@ -140,7 +118,7 @@ export default function UpcomingReleases() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action title="Retry" icon={Icon.RotateClockwise} onAction={() => window.location.reload()} />
+              <Action title="Retry" icon={Icon.RotateClockwise} onAction={() => mutate()} />
             </ActionPanel>
           }
         />
@@ -163,33 +141,9 @@ export default function UpcomingReleases() {
           );
         })
         .sort((a, b) => {
-          const today = new Date();
+          const dateA = getNextReleaseDate(a);
+          const dateB = getNextReleaseDate(b);
 
-          // Get next future release date for movie A
-          let dateA = "";
-          if (a.digitalRelease && new Date(a.digitalRelease) > today) {
-            dateA = a.digitalRelease;
-          } else if (a.inCinemas && new Date(a.inCinemas) > today) {
-            dateA = a.inCinemas;
-          } else if (a.physicalRelease && new Date(a.physicalRelease) > today) {
-            dateA = a.physicalRelease;
-          } else {
-            dateA = a.digitalRelease || a.inCinemas || a.physicalRelease || "";
-          }
-
-          // Get next future release date for movie B
-          let dateB = "";
-          if (b.digitalRelease && new Date(b.digitalRelease) > today) {
-            dateB = b.digitalRelease;
-          } else if (b.inCinemas && new Date(b.inCinemas) > today) {
-            dateB = b.inCinemas;
-          } else if (b.physicalRelease && new Date(b.physicalRelease) > today) {
-            dateB = b.physicalRelease;
-          } else {
-            dateB = b.digitalRelease || b.inCinemas || b.physicalRelease || "";
-          }
-
-          // Sort by closest release date first
           if (!dateA && !dateB) return a.sortTitle.localeCompare(b.sortTitle);
           if (!dateA) return 1;
           if (!dateB) return -1;

@@ -1,5 +1,6 @@
 import { Form, Icon, Image } from "@raycast/api";
 import type { useForm } from "@raycast/utils";
+import { JSX } from "react";
 
 import {
   notionColorToTintColor,

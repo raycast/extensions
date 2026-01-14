@@ -1,25 +1,35 @@
 import { getErrorMessage } from "../helpers/getError";
-import { SimplifiedTrackObject } from "../helpers/spotify.api";
+import { PagingPlaylistTrackObject, PlaylistTrackObject, SimplifiedTrackObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 export async function getPlaylistTracks(playlistId: string, limit: number, offset?: number) {
   const { spotifyClient } = getSpotifyClient();
+  const tracks: SimplifiedTrackObject[] = [];
+  let next: string | null = null;
+  let currentOffset = offset ?? 0;
 
   try {
-    const response = await spotifyClient.getPlaylistsByPlaylistIdTracks(playlistId, {
-      limit,
-      ...(offset !== undefined && { offset }),
-    });
+    let response: PagingPlaylistTrackObject;
+    do {
+      response = await spotifyClient.getPlaylistsByPlaylistIdTracks(playlistId, {
+        limit: Math.min(limit - tracks.length, 50),
+        offset: currentOffset,
+      });
 
-    // Normalize the response to match the SimplifiedTrackObject type
-    // because the Spotify API returns a SavedTrackObject type
-    const tracks = (response?.items ?? []).map((trackItem) => {
-      return {
-        ...(trackItem.track || {}),
-      };
-    });
+      if (response.items) {
+        const normalizedTracks = (response?.items ?? []).map((trackItem: PlaylistTrackObject) => {
+          return {
+            ...(trackItem.track || {}),
+          };
+        });
+        tracks.push(...(normalizedTracks as SimplifiedTrackObject[]));
+      }
 
-    return { items: tracks as SimplifiedTrackObject[] };
+      next = response.next;
+      currentOffset += 50;
+    } while (next && tracks.length < limit && response.items && response.items.length > 0);
+
+    return { items: tracks };
   } catch (err) {
     const error = getErrorMessage(err);
     console.log("getPlaylistTracks.ts Error:", error);

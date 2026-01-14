@@ -111,3 +111,13 @@ export async function handleVLCError(error: unknown, action: string): Promise<vo
     message: vlcError.message || "An unknown error occurred",
   });
 }
+
+interface VLCStatus {
+  rate?: number;
+  [key: string]: unknown;
+}
+
+export async function getVLCStatus(): Promise<VLCStatus> {
+  const response = await makeVLCRequest({ command: "" });
+  return (await response.json()) as VLCStatus;
+}

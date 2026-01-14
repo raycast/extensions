@@ -1,7 +1,7 @@
 # Code Quarkus
 
-Generate Quarkus project directly from Raycast, powered by the official https://code.quarkus.io service. 
-You can also easily find the right extension for you project, get the command to add it and easily access its documentation
+Generate Quarkus project directly from Raycast, powered by the official https://code.quarkus.io service.
+You can also easily find the right extension for your project, get the command to add it and easily access its documentation
 
 ## Features
 - Generate Quarkus projects without leaving Raycast
@@ -21,8 +21,10 @@ You can also easily find the right extension for you project, get the command to
 - Open Raycast
 - Search for "Create Quarkus Project"
 - Fill in your project configuration (Quarkus version, build tool, groupId, artifact name, java version)
+- [Optional] You can save your personal preferences by ticking "save configuration as preferred".
 
   ![image](assets/config.png)
+  ![image](assets/personal-preferences.png)
 - [Optional] open the preferences and configure it to match what you want.
 - Select dependencies
 
@@ -47,9 +49,9 @@ You can configure the following things:
 - Open Raycast
 - Search for "Find Quarkus Extension"
 - Type in the name the extension you're looking for.
-- When you've fond the extension you can press enter. It will automatically copy the quarkus cli command to execute to add this extension to your project.
-- ![image](assets/find-extention.png)
-- You can also open the action menu and choose one of this option:
+- When you've found the extension you can press enter. It will automatically copy the quarkus cli command to execute to add this extension to your project.
+- ![image](assets/find-extension.png)
+- You can also open the action menu and choose one of these options:
   - See the extension guide: It will open your browser on the guide for this particular extension.
   - Copy the Maven Command to Add This Extension: It will copy in your clipboard the maven command to add this extension.
   - Copy the Gradle Command to Add This Extension: It will copy in your clipboard the gradle command to add this extension.
@@ -57,9 +59,9 @@ You can configure the following things:
   - Copy the Maven Dependency Snippet: It will copy in your clipboard the snippet to add to your pom.xml to add this extension.
   - Copy the Gradle Dependency Snippet: It will copy in your clipboard the snippet to add to your build.gradle to add this extension.
   - Copy Groupid:artifactid:version: It will copy in your clipboard the groupid:artifactid:version.
-![image](assets/find-extention-actions-1.png)
-![image](assets/find-extention-actions-2.png)
-![image](assets/find-extention-actions-3.png)
+![image](assets/find-extension-actions-1.png)
+![image](assets/find-extension-actions-2.png)
+![image](assets/find-extension-actions-3.png)
 
 ## Requirements
 macOS

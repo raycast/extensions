@@ -42,16 +42,16 @@
     "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
     "cron-parser": "^5.4.0",
-    "cronstrue": "^3.3.0"
+    "cronstrue": "^3.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "24.7.0",
-    "@types/react": "19.2.2",
-    "eslint": "^9.37.0",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.6",
+    "eslint": "^9.39.1",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
   },

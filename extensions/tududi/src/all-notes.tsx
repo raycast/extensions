@@ -22,7 +22,7 @@ interface Note {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<{ apiUrl: string; email: string; password: string }>();
+  const preferences = getPreferenceValues<{ apiUrl: string; token: string }>();
   const [notes, setNotes] = useState<Note[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>("");
@@ -30,20 +30,9 @@ export default function Command() {
   useEffect(() => {
     async function loadData() {
       try {
-        // Login to get session cookie
-        const loginRes = await fetch(`${preferences.apiUrl}/api/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: preferences.email, password: preferences.password }),
-        });
-        if (!loginRes.ok) {
-          throw new Error("Login failed");
-        }
-        const cookie = loginRes.headers.get("set-cookie");
-
         // Fetch projects
         const projectsRes = await fetch(`${preferences.apiUrl}/api/projects`, {
-          headers: cookie ? { Cookie: cookie } : undefined,
+          headers: { Authorization: `Bearer ${preferences.token}` },
         });
         if (projectsRes.ok) {
           const projectsData = (await projectsRes.json()) as { projects: Project[] };
@@ -52,7 +41,7 @@ export default function Command() {
 
         // Fetch notes
         const notesRes = await fetch(`${preferences.apiUrl}/api/notes`, {
-          headers: cookie ? { Cookie: cookie } : undefined,
+          headers: { Authorization: `Bearer ${preferences.token}` },
         });
         if (notesRes.ok) {
           const notesData = (await notesRes.json()) as Note[];
@@ -64,7 +53,7 @@ export default function Command() {
     }
 
     loadData();
-  }, [preferences.apiUrl, preferences.email, preferences.password]);
+  }, [preferences.apiUrl, preferences.token]);
 
   const filteredNotes = notes.filter((note) => {
     if (!selectedProjectFilter) return true;
@@ -112,7 +101,7 @@ export default function Command() {
 }
 
 function NoteDetail({ note }: { note: Note }) {
-  const preferences = getPreferenceValues<{ apiUrl: string; email: string; password: string }>();
+  const preferences = getPreferenceValues<{ apiUrl: string; token: string }>();
   return (
     <Detail
       markdown={`# ${note.title}\n\n${note.content}`}

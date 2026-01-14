@@ -8,7 +8,11 @@ import { Bookmark } from "../types";
 import { BookmarkItem } from "./BookmarkItem";
 interface BookmarkListProps {
   bookmarks: Bookmark[] | undefined;
-  hasMore?: boolean;
+  pagination?: {
+    pageSize: number;
+    hasMore: boolean;
+    onLoadMore: () => void;
+  };
   isLoading: boolean;
   error?: Error;
   onRefresh?: () => void;
@@ -17,7 +21,7 @@ interface BookmarkListProps {
   emptyViewDescription?: string;
   filterFn?: (bookmark: Bookmark) => boolean;
   onSearch?: (text: string) => void;
-  loadMore?: () => void;
+  onBookmarkVisit?: (bookmark: Bookmark) => void;
 }
 function SearchBookmarkList({ searchText }: { searchText: string }) {
   const { t } = useTranslation();
@@ -26,7 +30,6 @@ function SearchBookmarkList({ searchText }: { searchText: string }) {
   return (
     <BookmarkList
       bookmarks={bookmarks}
-      hasMore={false}
       isLoading={isLoadingBookmarks}
       onRefresh={revalidateBookmarks}
       searchBarPlaceholder={t("bookmarkList.searchPlaceholder")}
@@ -38,14 +41,14 @@ function SearchBookmarkList({ searchText }: { searchText: string }) {
 
 export function BookmarkList({
   bookmarks,
-  hasMore,
+  pagination,
   isLoading,
   onRefresh,
   searchBarPlaceholder,
   emptyViewTitle,
   emptyViewDescription,
   onSearch,
-  loadMore,
+  onBookmarkVisit,
 }: BookmarkListProps) {
   const { t } = useTranslation();
   const { push } = useNavigation();
@@ -73,9 +76,7 @@ export function BookmarkList({
     [onSearch],
   );
 
-  const onLoadMore = useCallback(() => {
-    loadMore?.();
-  }, [loadMore]);
+  // Pagination is handled directly by Raycast's List component
 
   const handleCleanCache = useCallback(() => {}, []);
 
@@ -86,14 +87,14 @@ export function BookmarkList({
     const listTitle = searchText
       ? t("bookmarkList.filterResults", { searchText, count: displayBookmarks.length })
       : t("bookmarkList.title", { count: displayBookmarks.length });
-    const hasMoreNotice = hasMore ? "..." : "";
+    const hasMoreNotice = pagination?.hasMore ? "..." : "";
 
     return {
       displayBookmarks,
       listTitle,
       hasMoreNotice,
     };
-  }, [searchFilteredBookmarks, searchText, hasMore, t]);
+  }, [searchFilteredBookmarks, searchText, pagination?.hasMore, t]);
 
   if (!bookmarks) {
     return (
@@ -113,11 +114,7 @@ export function BookmarkList({
       isShowingDetail={displayInfo.displayBookmarks.length > 0}
       searchBarPlaceholder={searchBarPlaceholder || defaultValues.searchBarPlaceholder}
       onSearchTextChange={handleSearchTextChange}
-      pagination={{
-        onLoadMore,
-        hasMore: hasMore || false,
-        pageSize: 20,
-      }}
+      pagination={pagination}
       navigationTitle={t("bookmarkList.title", { count: displayInfo.displayBookmarks.length })}
     >
       {searchText && (
@@ -144,6 +141,7 @@ export function BookmarkList({
             config={config}
             onRefresh={onRefresh || (() => {})}
             onCleanCache={handleCleanCache}
+            onVisit={onBookmarkVisit}
           />
         ))}
       </List.Section>

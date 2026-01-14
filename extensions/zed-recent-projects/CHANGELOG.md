@@ -1,5 +1,13 @@
 #  Zed Recent Projects Changelog
 
+## [Windows Support] - 2025-12-28
+
+- Added Windows support.
+
+## [Update] - 2025-11-03
+
+Update to @raycast/api 1.103, fix types, and add tests to Zed db schema v30.
+
 ## [Fixes] - 2025-10-15
 
 - Fix projects loading if user has custom configuration in ~/.sqliterc.

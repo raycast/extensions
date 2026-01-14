@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Update] - 2025-11-06
+
+- Add support for Bun, implemented suggestion from [#22693](https://github.com/raycast/extensions/issues/22693)
+
 ## [Improvements and Fix] - 2025-10-14
 
 - Fix broken search link, implemented suggestion from [#21972](https://github.com/raycast/extensions/issues/21972)

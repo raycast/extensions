@@ -69,11 +69,17 @@
       "title": "List Portals",
       "description": "View Portals",
       "mode": "view"
+    },
+    {
+      "name": "my-inbox",
+      "title": "My Inbox",
+      "description": "Notifications from all subscribed inboxes",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^2.2.1",
     "date-fns": "^4.1.0"
   },
   "devDependencies": {

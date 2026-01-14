@@ -1,7 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export const usePreferences = () => {
-  let { API_TOKEN, STYLE_PREFERENCE } = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences>();
+  let { API_TOKEN, STYLE_PREFERENCE } = preferences;
+  const { KIT_FILTER, REMEMBER_LAST_KIT } = preferences;
   let account = "pro";
 
   //if pro API Token not provided, use free API Token
@@ -11,5 +13,5 @@ export const usePreferences = () => {
     STYLE_PREFERENCE = "fas";
   }
 
-  return { API_TOKEN, STYLE_PREFERENCE, account };
+  return { API_TOKEN, STYLE_PREFERENCE, account, kitFilter: KIT_FILTER, rememberLastKit: REMEMBER_LAST_KIT };
 };

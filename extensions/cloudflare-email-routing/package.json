@@ -5,6 +5,9 @@
   "description": "Create, list, edit, and delete Cloudflare email aliases directly from Raycast.",
   "icon": "extension-icon.png",
   "author": "erayack",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Productivity",
     "Communication"
@@ -27,8 +30,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.96.3",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0",
     "cloudflare": "^3.0.0"
   },
   "devDependencies": {
@@ -81,5 +84,8 @@
       "default": false,
       "label": "Enable Pre-allocation"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

@@ -8,7 +8,8 @@
   "contributors": [
     "Sclafus",
     "effektsvk",
-    "wxiaoyun"
+    "wxiaoyun",
+    "lukrencijus"
   ],
   "categories": [
     "Productivity",
@@ -68,6 +69,22 @@
               "value": "claude-3.7-reasoning"
             },
             {
+              "title": "Claude 4",
+              "value": "claude-4-sonnet"
+            },
+            {
+              "title": "Claude 4 Reasoning",
+              "value": "claude-4-sonnet-reasoning"
+            },
+            {
+              "title": "Claude 4.5",
+              "value": "claude-4.5-sonnet"
+            },
+            {
+              "title": "Claude 4.5 Reasoning",
+              "value": "claude-4.5-sonnet-reasoning"
+            },
+            {
               "title": "DeepSeek R1 (Llama Distilled)",
               "value": "deepseek-r1-groq"
             },
@@ -92,7 +109,7 @@
               "value": "gemini-2.0-flash"
             },
             {
-              "title": "Gemini 2.0 Flash Lite Preview",
+              "title": "Gemini 2.0 Flash Lite",
               "value": "gemini-2.0-flash-lite-preview-02-05"
             },
             {
@@ -104,8 +121,28 @@
               "value": "gemini-2.5-flash-thinking"
             },
             {
+              "title": "Gemini 2.5 Flash Lite",
+              "value": "gemini-2.5-flash-lite"
+            },
+            {
+              "title": "Gemini 2.5 Flash Lite (Thinking)",
+              "value": "gemini-2.5-flash-lite-thinking"
+            },
+            {
               "title": "Gemini 2.5 Pro",
               "value": "gemini-2.5-pro"
+            },
+            {
+              "title": "Gemini 2.5 Flash Image",
+              "value": "gemini-2.5-flash-image-preview"
+            },
+            {
+              "title": "Gemini Imagen 4",
+              "value": "gemini-imagen-4"
+            },
+            {
+              "title": "Gemini Imagen 4 Ultra",
+              "value": "gemini-imagen-4-ultra"
             },
             {
               "title": "GPT ImageGen",
@@ -136,6 +173,22 @@
               "value": "gpt-4o-mini"
             },
             {
+              "title": "GPT-5",
+              "value": "gpt-5-chat"
+            },
+            {
+              "title": "GPT-5 Reasoning",
+              "value": "gpt-5-reasoning"
+            },
+            {
+              "title": "GPT-5 Mini",
+              "value": "gpt-5-mini"
+            },
+            {
+              "title": "GPT-5 Nano",
+              "value": "gpt-5-nano"
+            },
+            {
               "title": "GPT-o3 Mini",
               "value": "gpt-o3-mini"
             },
@@ -150,6 +203,18 @@
             {
               "title": "Grok 3 Mini",
               "value": "grok-v3-mini"
+            },
+            {
+              "title": "Grok 4",
+              "value": "grok-v4"
+            },
+            {
+              "title": "Grok 4 Fast",
+              "value": "grok-v4-fast"
+            },
+            {
+              "title": "Grok 4 Fast Reasoning",
+              "value": "grok-v4-fast-reasoning"
             },
             {
               "title": "Llama 3.3 70B",
@@ -203,5 +268,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

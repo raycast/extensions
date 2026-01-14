@@ -121,7 +121,7 @@ export default function DownloadVideo() {
 
         if (filePath) {
           toast.primaryAction = {
-            title: "Open in Finder",
+            title: isMac ? "Open in Finder" : "Open in Explorer",
             shortcut: { modifiers: ["cmd", "shift"], key: "o" },
             onAction: () => {
               open(path.dirname(filePath));
@@ -275,11 +275,9 @@ export default function DownloadVideo() {
               }}
             />
           </ActionPanel.Section>
-          {isMac && (
-            <ActionPanel.Section>
-              <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
-            </ActionPanel.Section>
-          )}
+          <ActionPanel.Section>
+            <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       searchBarAccessory={
