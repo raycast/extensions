@@ -1,6 +1,6 @@
 # Screenshot Changelog
 
-## [Fix All In One command on macOS Tahoe] - {PR_MERGE_DATE}
+## [Fix All In One command on macOS Tahoe] - 2026-01-14
 
 - Fixed All In One command not working on macOS Tahoe by using AppleScript to activate Screenshot.app
 
