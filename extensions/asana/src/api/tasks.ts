@@ -202,6 +202,7 @@ export type SubtaskPayload = {
   assignee?: string;
   due_on?: string;
   html_notes?: string;
+  memberships?: { project: string; section?: string }[];
 };
 
 export async function createSubtask(parentId: string, payload: SubtaskPayload) {

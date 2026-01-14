@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { FormValidation, getAvatarIcon, useForm, MutatePromise } from "@raycast/utils";
 import { useUsers } from "../hooks/useUsers";
 import { useMe } from "../hooks/useMe";
+import { useSections } from "../hooks/useSections";
 import { getErrorMessage } from "../helpers/errors";
 import TaskDetail from "./TaskDetail";
 import { Task, createSubtask, SubtaskPayload } from "../api/tasks";
@@ -12,6 +13,7 @@ type SubtaskFormValues = {
   description: string;
   assignee: string;
   due_date: Date | null;
+  section: string;
 };
 
 type CreateSubtaskFormProps = {
@@ -26,6 +28,9 @@ export default function CreateSubtaskForm({ parentTask, workspace, mutateSubtask
   const { data: users, isLoading: isLoadingUsers } = useUsers(workspace);
   const { data: me, isLoading: isLoadingMe } = useMe();
 
+  const parentProjectId = parentTask.projects[0]?.gid;
+  const { data: sections, isLoading: isLoadingSections } = useSections(parentProjectId);
+
   const { handleSubmit, itemProps, reset, focus } = useForm<SubtaskFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating subtask" });
@@ -36,6 +41,11 @@ export default function CreateSubtaskForm({ parentTask, workspace, mutateSubtask
           ...(values.description ? { html_notes: `<body>${values.description}</body>` } : {}),
           ...(values.assignee ? { assignee: values.assignee } : {}),
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
+          ...(parentProjectId
+            ? {
+                memberships: [{ project: parentProjectId, ...(values.section ? { section: values.section } : {}) }],
+              }
+            : {}),
         };
 
         const subtask = await createSubtask(parentTask.gid, payload);
@@ -58,6 +68,7 @@ export default function CreateSubtaskForm({ parentTask, workspace, mutateSubtask
           description: "",
           due_date: null,
           assignee: values.assignee,
+          section: values.section,
         });
 
         focus("name");
@@ -75,6 +86,7 @@ export default function CreateSubtaskForm({ parentTask, workspace, mutateSubtask
       description: "",
       assignee: "",
       due_date: null,
+      section: "",
     },
   });
 
@@ -83,7 +95,7 @@ export default function CreateSubtaskForm({ parentTask, workspace, mutateSubtask
   return (
     <Form
       navigationTitle={`Add subtask to "${parentTask.name}"`}
-      isLoading={isLoadingUsers || isLoadingMe}
+      isLoading={isLoadingUsers || isLoadingMe || isLoadingSections}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Subtask" onSubmit={handleSubmit} />
@@ -92,6 +104,15 @@ export default function CreateSubtaskForm({ parentTask, workspace, mutateSubtask
     >
       <Form.Description title="Parent Task" text={parentTask.name} />
       <Form.Description title="Project" text={projectInfo} />
+
+      {parentProjectId && sections && sections.length > 0 && (
+        <Form.Dropdown title="Section" {...itemProps.section}>
+          <Form.Dropdown.Item title="No section" value="" icon={Icon.Tray} />
+          {sections.map((section) => (
+            <Form.Dropdown.Item key={section.gid} value={section.gid} title={section.name} icon={Icon.Tray} />
+          ))}
+        </Form.Dropdown>
+      )}
 
       <Form.Separator />
 
