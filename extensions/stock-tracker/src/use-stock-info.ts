@@ -29,12 +29,15 @@ export function useStockInfo(symbols: string[]): {
           setQuotes({});
         } else {
           setQuotes(
-            quoteResponse.result.reduce((acc, quote) => {
-              if (quote.symbol && symbols.includes(quote.symbol)) {
-                acc[quote.symbol] = quote;
-              }
-              return acc;
-            }, {} as Record<string, Quote>)
+            quoteResponse.result.reduce(
+              (acc, quote) => {
+                if (quote.symbol && symbols.includes(quote.symbol)) {
+                  acc[quote.symbol] = quote;
+                }
+                return acc;
+              },
+              {} as Record<string, Quote>,
+            ),
           );
         }
       } catch (e) {

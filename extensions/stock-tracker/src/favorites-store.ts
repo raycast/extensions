@@ -18,7 +18,7 @@ export function useFavorites(): { favorites: string[]; favoritesStore: Favorites
       setFavorites(newFavorites);
       LocalStorage.setItem("favorites", JSON.stringify(newFavorites));
     },
-    [setFavorites]
+    [setFavorites],
   );
 
   // Load from local storage on mount
@@ -39,7 +39,7 @@ export function useFavorites(): { favorites: string[]; favoritesStore: Favorites
       updateFavorites([...favorites, symbol]);
       showToast({ title: `Added ${symbol} to favorites` });
     },
-    [favorites, updateFavorites]
+    [favorites, updateFavorites],
   );
 
   const remove = useCallback(
@@ -50,7 +50,7 @@ export function useFavorites(): { favorites: string[]; favoritesStore: Favorites
       updateFavorites(favorites.filter((s) => s !== symbol));
       showToast({ title: `Removed ${symbol} from favorites` });
     },
-    [favorites, updateFavorites]
+    [favorites, updateFavorites],
   );
 
   const moveUp = useCallback(
@@ -65,7 +65,7 @@ export function useFavorites(): { favorites: string[]; favoritesStore: Favorites
       newFavs[index - 1] = symbol;
       updateFavorites(newFavs);
     },
-    [favorites, updateFavorites]
+    [favorites, updateFavorites],
   );
 
   const moveDown = useCallback(
@@ -80,7 +80,7 @@ export function useFavorites(): { favorites: string[]; favoritesStore: Favorites
       newFavs[index + 1] = symbol;
       updateFavorites(newFavs);
     },
-    [favorites, updateFavorites]
+    [favorites, updateFavorites],
   );
 
   return {

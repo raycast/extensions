@@ -27,7 +27,7 @@ async function request<T>(
   path: string,
   params: { [key: string]: string },
   cookie: string,
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<T> {
   const url = new URL(path, "https://query1.finance.yahoo.com");
   for (const key in params) {

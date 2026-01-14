@@ -6,7 +6,7 @@ interface QuoteResult {
 
 export interface QuoteResponse {
   result: Quote[];
-  error: any;
+  error: unknown;
 }
 
 export interface Quote {
