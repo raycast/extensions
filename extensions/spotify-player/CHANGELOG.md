@@ -4,6 +4,10 @@
 
 - Remove `dancannon` from contributors
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed error toast when Menu Bar Player command is disabled (handles "No enabled command" error)
+
 ## [Minor Fixes] - 2026-01-06
 
 - Fixed error toast "Menu Bar Player must be activated" when using Next/Previous in Now Playing without the Menu Bar Player command enabled
