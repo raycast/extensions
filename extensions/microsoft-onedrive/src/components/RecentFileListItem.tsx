@@ -22,28 +22,18 @@ export function RecentFileListItem({
   onReveal,
   onCreateShareLink,
 }: RecentFileListItemProps) {
-  const driveItem = insight.driveItem;
-  const fileName = insight.resourceVisualization.title;
-
-  // Use DriveItem if available, otherwise fallback to insight data
-  const displayItem: DriveItem = driveItem || {
-    id: insight.resourceReference.id,
-    name: fileName,
-    webUrl: insight.resourceReference.webUrl,
-    createdDateTime: "",
-    lastModifiedDateTime: "",
-    folder: insight.resourceVisualization.type === "folder" ? { childCount: 0 } : undefined,
-  };
+  // driveItem is guaranteed to exist because useMyRecentFiles filters out items without it
+  const driveItem = insight.driveItem!;
 
   return (
     <List.Item
       key={insight.id}
-      icon={getItemIcon(displayItem)}
-      title={fileName}
-      detail={<FileItemDetail item={displayItem} lastAccessedDateTime={insight.lastUsed.lastAccessedDateTime} />}
+      icon={getItemIcon(driveItem)}
+      title={driveItem.name}
+      detail={<FileItemDetail item={driveItem} lastAccessedDateTime={insight.lastUsed.lastAccessedDateTime} />}
       actions={
         <FileActionsPanel
-          item={displayItem}
+          item={driveItem}
           installedOfficeApps={installedOfficeApps}
           onDelete={onDelete}
           onDownload={onDownload}
