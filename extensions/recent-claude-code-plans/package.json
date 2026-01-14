@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "recent-claude-code-plans",
+  "title": "Recent Claude Code Plans",
+  "description": "Show recently modified Claude Code plan files",
+  "icon": "icon.png",
+  "author": "lukasz_wojtaszek",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Claude Code Plans",
+      "description": "Show recently modified Claude Code plans",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "directory",
+      "type": "textfield",
+      "required": true,
+      "title": "Directory",
+      "description": "Path to the directory to monitor",
+      "default": "~/.claude/plans",
+      "placeholder": "~/.claude/plans"
+    },
+    {
+      "name": "limit",
+      "type": "textfield",
+      "required": false,
+      "title": "Limit",
+      "description": "Number of recent files to show",
+      "default": "10",
+      "placeholder": "10"
+    },
+    {
+      "name": "editor",
+      "type": "appPicker",
+      "required": false,
+      "title": "Editor",
+      "description": "App to open files with. Leave empty for system default."
+    },
+    {
+      "name": "showPreview",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Preview",
+      "description": "Show file content preview in detail panel",
+      "default": true,
+      "label": "Enable file preview"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
+    "@types/node": "^22.0.0",
+    "@types/sharp": "^0.31.1",
+    "lefthook": "^2.0.13",
+    "sharp": "^0.34.5",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --write src/",
+    "format": "biome format --write src/",
+    "typecheck": "tsc --noEmit",
+    "generate-icons": "npx tsx scripts/generate-icons.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
