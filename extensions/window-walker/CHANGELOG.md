@@ -1,12 +1,12 @@
 # Changelog
 
-## [Fixed Error: Request timeout after 5000ms] - {PR_MERGE_DATE}
+## [1.2.1] - {PR_MERGE_DATE}
 
 ### Fixed
 
 - **Request Timeout**: Fixed error where request to get window list would timeout after 5 seconds.
 
-## [Performance & Pin Fixes] - 2026-01-05
+## [1.1.5] - 2026-01-05
 
 ### Fixed
 
@@ -17,7 +17,7 @@
 - **Refresh Rate**: Window list now auto-refreshes every 1 second (was 10 seconds).
 - **Icon Caching**: Icons are cached on disk and load in background, with automatic cleanup after 7 days.
 
-## [Pin System Fixes] - 2026-01-05
+## [1.1.0] - 2026-01-05
 
 ### Fixed
 
