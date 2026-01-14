@@ -5,7 +5,10 @@
   "description": "Identify and download fonts from any website.",
   "icon": "extension-icon.png",
   "author": "riomadeit",
-  "categories": ["Developer Tools", "Web"],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -72,10 +75,10 @@
     "woff2-encoder": "^2.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
+    "eslint": "^9.39.2",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
