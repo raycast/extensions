@@ -164,7 +164,7 @@ export function DeviceListItem(props: { device: Device; onAction: (device: Devic
   const tintColor = online ? Color.Green : Color.Red;
   const tooltip: string | undefined = online ? "Online" : "Offline";
 
-  const icon = { source: Icon.Speaker, tintColor };
+  const icon = { source: Icon.Desktop, tintColor };
 
   return (
     <List.Item

@@ -4,7 +4,7 @@
 
 - Added switches in root search
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-01-07
 
 Fixed an error that caused the extension to crash
 
