@@ -1,5 +1,12 @@
 # Clockify Changelog
 
+## [Time Entry Management] - 2026-01-14
+
+- Add "Stop Timer at" action to stop running timer at a specific past time
+- Add "Add Time Entry" to create completed entries with start and end times
+- Add optional start time field when starting new timers
+- Fix API request format to use top-level start/end fields per Clockify API spec
+
 ## [Select Tag During Start + Modernize] - 2025-08-18
 
 - `Action` to `openExtensionPreferences` in invalid token view

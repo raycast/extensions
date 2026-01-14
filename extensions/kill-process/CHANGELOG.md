@@ -1,8 +1,13 @@
 # Kill Process Changelog
 
-## [Windows Fix] - {PR_MERGE_DATE}
+## [Fixes and Improvements] - 2026-01-13
 
- - Fix powershell command on Windows by adding -NoProfile
+- Added shortcut for the **Copy Path** action
+- Added shortcut for the **Reload** action to the Windows version
+
+## [Windows Fix] - 2026-01-12
+
+- Fix powershell command on Windows by adding -NoProfile
 
 ## [Fixed Force Kill in MacOS] - 2025-12-16
 
@@ -10,12 +15,12 @@
 
 ## [Windows Fix] - 2025-12-02
 
- - Fix CPU and Memory values on Windows
+- Fix CPU and Memory values on Windows
 
 ## [AI Updates] - 2025-11-27
 
- - Extract AI instructions from package.json into dedicated `ai.yaml` file
- - Fix and clarify AI eval criteria wording, and improve the instructions for some edge cases
+- Extract AI instructions from package.json into dedicated `ai.yaml` file
+- Fix and clarify AI eval criteria wording, and improve the instructions for some edge cases
 
 ## [Windows Support] - 2025-08-29
 

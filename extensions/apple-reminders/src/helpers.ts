@@ -2,7 +2,7 @@ import { UTCDate } from "@date-fns/utc";
 import { Color, Icon } from "@raycast/api";
 import { addDays, format, isThisYear, isBefore, formatISO, isSameDay } from "date-fns";
 
-import { Location, Priority } from "./hooks/useData";
+import { Location, Priority, Reminder } from "./hooks/useData";
 
 export function isFullDay(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
@@ -97,4 +97,8 @@ export function getIntervalValidationError(interval?: string): string | undefine
   if (!interval) return "Interval is required";
   if (isNaN(Number(interval))) return "Interval must be a number";
   if ((interval as unknown as number) < 1) return "Must be greater than 0";
+}
+
+export function getAttachedUrls(reminder: Reminder): string[] {
+  return (reminder.attachedUrls || []).filter(Boolean);
 }
