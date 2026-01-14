@@ -368,7 +368,7 @@ export default function Command() {
     console.log("[DELETE] Password prepared for shell (special chars protected)");
 
     // Read user preference for concurrency
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences.CleanSnapshots>();
     const concurrencyLimit = parseInt(preferences.concurrency || "3", 10);
     console.log(`[DELETE] Using concurrency limit: ${concurrencyLimit} thread(s)`);
 
