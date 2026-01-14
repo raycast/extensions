@@ -8,7 +8,6 @@
   "contributors": [
     "andreaselia",
     "stelo",
-    "thomaslombart",
     "srikirank",
     "vimtor",
     "samuelkraft",
@@ -17,6 +16,9 @@
     "dinocosta",
     "janosorcsik",
     "faridrashidi"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "license": "MIT",
   "platforms": [

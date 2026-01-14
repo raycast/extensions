@@ -19,6 +19,7 @@ import { useStreamerMode } from "../../utils/useStreamerMode";
 import { maskEmailIfEnabled } from "../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
 import { ApiErrorView } from "../../components/ApiErrorView";
+import { CloudShellAction } from "../../components/CloudShellAction";
 
 interface IAMViewProps {
   projectId: string;
@@ -494,6 +495,9 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
           <ActionPanel>
             <Action title="Add Role" icon={Icon.Plus} onAction={() => showAddRoleForm(principal)} />
             <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
+            <ActionPanel.Section title="Cloud Shell">
+              <CloudShellAction projectId={projectId} />
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />,
@@ -700,6 +704,9 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
             <Action title="Clear Service Filter" icon={Icon.XmarkCircle} onAction={() => setSelectedService(null)} />
           )}
           <StreamerModeAction />
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       filtering={false}
@@ -767,6 +774,9 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
                           />
                         ))}
                         <StreamerModeAction />
+                        <ActionPanel.Section title="Cloud Shell">
+                          <CloudShellAction projectId={projectId} />
+                        </ActionPanel.Section>
                       </ActionPanel>
                     }
                   />

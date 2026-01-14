@@ -10,7 +10,6 @@
   "contributors": [
     "mathieudutour",
     "metakirby5",
-    "thomaslombart",
     "erics118",
     "bkeys818",
     "alexs",
@@ -23,6 +22,9 @@
     "abesto",
     "xmok",
     "pernielsentikaer"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "platforms": [
     "Windows",
