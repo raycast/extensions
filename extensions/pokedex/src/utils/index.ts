@@ -1,5 +1,5 @@
 import { Detail, getPreferenceValues } from "@raycast/api";
-import { Pokemon, PokemonType, TypeChartType } from "../types";
+import { PokemonFormType, PokemonType, TypeChartType } from "../types";
 
 const { artwork } = getPreferenceValues();
 
@@ -112,7 +112,12 @@ export const localeName = (
     : pokemon.name;
 };
 
-export const filterPokemonForms = (id: number, pokemons: Pokemon[]) => {
+export const filterPokemonForms = <
+  T extends { name: string; pokemonforms: PokemonFormType[] },
+>(
+  id: number,
+  pokemons: T[],
+): T[] => {
   // removes Pokemon forms without official images on pokemon.com
   let formNames: string[] = [];
   let varieties: string[] = [];
@@ -194,7 +199,7 @@ export const filterPokemonForms = (id: number, pokemons: Pokemon[]) => {
     pokemons = pokemons.filter((p) => formNames.includes(p.name));
   }
 
-  const forms: Pokemon[] = [];
+  const forms: T[] = [];
 
   pokemons.forEach((p) => {
     if (varieties.length) {
@@ -206,7 +211,7 @@ export const filterPokemonForms = (id: number, pokemons: Pokemon[]) => {
         forms.push({
           ...p,
           pokemonforms: pokemonforms,
-        });
+        } as T);
       });
     } else {
       forms.push(p);

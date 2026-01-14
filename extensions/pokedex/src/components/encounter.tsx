@@ -8,17 +8,22 @@ export default function PokemonEncounters(props: {
   encounters: PokemonEncounter[];
 }) {
   const generations = groupBy(
-    props.encounters,
+    props.encounters.filter(
+      (e) => e.version?.versiongroup?.generation?.generationnames?.[0]?.name,
+    ),
     (e) => e.version.versiongroup.generation.generationnames[0].name,
   );
 
   return (
     <List throttle navigationTitle={`${props.name} | Where to find`}>
       {Object.entries(generations).map(([generation, groups]) => {
-        const locations = uniqBy(groups, (l) => l.location_area.name);
+        const locations = uniqBy(
+          groups.filter((l) => l.locationarea),
+          (l) => l.locationarea.name,
+        );
         const versions = groupBy(
           locations,
-          (l) => l.version.versionnames[0].name,
+          (l) => l.version.versionnames[0]?.name || l.version.name,
         );
 
         return (
