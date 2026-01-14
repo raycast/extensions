@@ -1,7 +1,7 @@
 import { AssetResponseDto, getAssetInfo, updateAsset } from "@immich/sdk";
 import { Action, ActionPanel, Detail, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { initialize, getAssetThumbnail, getAssetOriginal } from "../immich";
+import { initialize, getAssetThumbnail, getAssetOriginal, getAssetWebUrl } from "../immich";
 import { downloadAndCopyImage, downloadImageToDownloads } from "../utils/download";
 
 export default function AssetView({ asset }: { asset: AssetResponseDto }) {
@@ -65,6 +65,12 @@ export default function AssetView({ asset }: { asset: AssetResponseDto }) {
           ) : (
             <Action icon={Icon.Heart} title="Favorite" onAction={() => toggleFavorite(asset)} />
           )}
+          <Action.OpenInBrowser
+            title="Open in Immich"
+            url={getAssetWebUrl(asset.id)}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
           <Action
             title="Copy Image to Clipboard"
             icon={Icon.CopyClipboard}
