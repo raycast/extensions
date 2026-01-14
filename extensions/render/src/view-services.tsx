@@ -27,11 +27,29 @@ import {
   getDomainIcon,
   getServiceIcon,
 } from './utils';
-import { useCachedPromise } from '@raycast/utils';
+import { useCachedPromise, useLocalStorage } from '@raycast/utils';
 
 const renderService = new Service(getKey());
 
 export default function Command() {
+  const {
+    value: pinnedIds,
+    setValue: setPinnedIds,
+    isLoading: isLoadingPinned,
+  } = useLocalStorage<string[]>('pinned-services', []);
+
+  async function pinService(serviceId: string) {
+    const current = pinnedIds ?? [];
+    if (!current.includes(serviceId)) {
+      await setPinnedIds([serviceId, ...current]);
+    }
+  }
+
+  async function unpinService(serviceId: string) {
+    const current = pinnedIds ?? [];
+    await setPinnedIds(current.filter((id) => id !== serviceId));
+  }
+
   const { isLoading: isLoadingOwners, data: owners } = useCachedPromise(
     async () => {
       const owners = await renderService.getOwners();
@@ -60,11 +78,21 @@ export default function Command() {
       keepPreviousData: true,
     },
   );
-  const isLoading = isLoadingOwners || isLoadingServices;
+  const isLoading = isLoadingOwners || isLoadingServices || isLoadingPinned;
+
+  const pinnedServices = useMemo(() => {
+    if (!pinnedIds || !services.length) return [];
+    return pinnedIds
+      .map((id) => services.find((s) => s.id === id))
+      .filter((s): s is ServiceResponse => s !== undefined);
+  }, [pinnedIds, services]);
+
+  const pinnedIdSet = useMemo(() => new Set(pinnedIds ?? []), [pinnedIds]);
 
   const serviceMap = useMemo(() => {
     const map: Record<string, ServiceResponse[]> = {};
     for (const service of services) {
+      if (pinnedIdSet.has(service.id)) continue; // Exclude pinned services
       const { ownerId } = service;
       if (!map[ownerId]) {
         map[ownerId] = [];
@@ -72,7 +100,7 @@ export default function Command() {
       map[ownerId].push(service);
     }
     return map;
-  }, [services]);
+  }, [services, pinnedIdSet]);
 
   const ownerMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -88,6 +116,53 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search service">
+      {pinnedServices.length > 0 && (
+        <List.Section key="pinned" title="Pinned">
+          {pinnedServices.map((service) => (
+            <List.Item
+              key={service.id}
+              icon={getServiceIcon(service)}
+              title={service.name}
+              subtitle={formatServiceType(service)}
+              accessories={[
+                { icon: Icon.Pin },
+                { date: new Date(service.updatedAt) },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    icon={Icon.BlankDocument}
+                    title="Show Details"
+                    target={<ServiceView service={service} />}
+                  />
+                  <Action.Push
+                    icon={Icon.Hammer}
+                    title="Show Deploys"
+                    target={<DeployListView service={service} />}
+                    shortcut={{ modifiers: ['cmd'], key: 'd' }}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in Render"
+                    url={getServiceUrl(service)}
+                    shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open Repo"
+                    url={service.repo}
+                    shortcut={{ modifiers: ['cmd'], key: 'g' }}
+                  />
+                  <Action
+                    icon={Icon.PinDisabled}
+                    title="Unpin Service"
+                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
+                    onAction={() => unpinService(service.id)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
       {Object.keys(ownerMap).map((owner) => (
         <List.Section key={owner} title={ownerMap[owner]}>
           {serviceMap[owner] &&
@@ -120,6 +195,12 @@ export default function Command() {
                       title="Open Repo"
                       url={service.repo}
                       shortcut={{ modifiers: ['cmd'], key: 'g' }}
+                    />
+                    <Action
+                      icon={Icon.Pin}
+                      title="Pin Service"
+                      shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
+                      onAction={() => pinService(service.id)}
                     />
                   </ActionPanel>
                 }
