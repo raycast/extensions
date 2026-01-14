@@ -1,5 +1,5 @@
 import { Detail, getPreferenceValues } from "@raycast/api";
-import { PokemonV2Pokemon, PokemonV2Pokemontype } from "../types";
+import { Pokemon, PokemonType, TypeChartType } from "../types";
 
 const { artwork } = getPreferenceValues();
 
@@ -48,25 +48,32 @@ export const typeColor: Record<string, string> = {
   fairy: "#dab4d4",
 };
 
-export const calculateEffectiveness = (types: PokemonV2Pokemontype[]) => {
+export const calculateEffectiveness = (
+  types: PokemonType[],
+  allTypes: TypeChartType[],
+) => {
   const effectivenessMap = new Map<string, number>();
   const typeNameMap = new Map<string, string>();
 
-  types.forEach((type) => {
-    type.pokemon_v2_type.pokemonV2TypeefficaciesByTargetTypeId.forEach(
-      (efficacy) => {
-        const relationName = efficacy.pokemon_v2_type.name;
-        const currentFactor = effectivenessMap.get(relationName) || 1;
-        effectivenessMap.set(
-          relationName,
-          (currentFactor * efficacy.damage_factor) / 100,
-        );
-        typeNameMap.set(
-          relationName,
-          efficacy.pokemon_v2_type.pokemon_v2_typenames[0].name,
-        );
-      },
-    );
+  allTypes.forEach((attacker) => {
+    let factor = 1;
+    types.forEach((pType) => {
+      const efficacy = attacker.typeefficacies.find(
+        (eff) => eff.target_type_id === pType.type.id,
+      );
+      if (efficacy) {
+        factor = (factor * efficacy.damage_factor) / 100;
+      }
+    });
+
+    if (factor !== 1) {
+      const relationName = attacker.name;
+      effectivenessMap.set(relationName, factor);
+      typeNameMap.set(
+        relationName,
+        attacker.typenames[0]?.name || attacker.name,
+      );
+    }
   });
 
   const normal: Detail.Metadata.TagList.Item.Props[] = [];
@@ -105,10 +112,7 @@ export const localeName = (
     : pokemon.name;
 };
 
-export const filterPokemonForms = (
-  id: number,
-  pokemons: PokemonV2Pokemon[],
-) => {
+export const filterPokemonForms = (id: number, pokemons: Pokemon[]) => {
   // removes Pokemon forms without official images on pokemon.com
   let formNames: string[] = [];
   let varieties: string[] = [];
@@ -190,18 +194,18 @@ export const filterPokemonForms = (
     pokemons = pokemons.filter((p) => formNames.includes(p.name));
   }
 
-  const forms: PokemonV2Pokemon[] = [];
+  const forms: Pokemon[] = [];
 
   pokemons.forEach((p) => {
     if (varieties.length) {
       varieties.forEach((variety) => {
-        const pokemonforms = p.pokemon_v2_pokemonforms.filter(
+        const pokemonforms = p.pokemonforms.filter(
           (f) => f.form_name === variety,
         );
 
         forms.push({
           ...p,
-          pokemon_v2_pokemonforms: pokemonforms,
+          pokemonforms: pokemonforms,
         });
       });
     } else {

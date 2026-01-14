@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "anhthang",
   "contributors": [
-    "miguel-felix1"
+    "miguel-felix1",
+    "DanBennett"
   ],
   "license": "MIT",
   "categories": [
@@ -24,28 +25,90 @@
       "title": "Pokémon",
       "subtitle": "Pokédex",
       "description": "A digital encyclopedia that provides information about Pokémon.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Pokémon name or number",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "ability",
       "title": "Abilities",
       "subtitle": "Pokédex",
       "description": "An Ability is a unique, passive trait that provides a special effect for a Pokémon, influencing its battle performance or interactions with the environment.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Ability name",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "move",
       "title": "Moves",
       "subtitle": "Pokédex",
       "description": "A move is a skill or attack that Pokémon use in battle, varying in type, power, accuracy, and additional effects.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Move name",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "weakness",
       "title": "Weaknesses",
       "subtitle": "Pokédex",
       "description": "Discover the types of moves that are particularly effective against a specific Pokémon.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Pokémon name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "type_chart",
+      "title": "Type Chart",
+      "subtitle": "Pokédex",
+      "description": "View Pokémon type interactions, including strengths, weaknesses, and immunities.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Type name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "nature",
+      "title": "Natures",
+      "subtitle": "Pokédex",
+      "description": "Explore different Pokémon natures and their effects on stat growth.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Nature name",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

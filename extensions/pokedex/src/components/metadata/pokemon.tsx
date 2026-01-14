@@ -1,11 +1,10 @@
 import { Color, Detail, List } from "@raycast/api";
-import uniqBy from "lodash.uniqby";
-import { PokemonV2Pokemon } from "../../types";
+import { Pokemon } from "../../types";
 import { typeColor } from "../../utils";
 
 export default function PokemonMetadata(props: {
   type?: string;
-  pokemon: PokemonV2Pokemon;
+  pokemon: Pokemon;
 }) {
   const { pokemon } = props;
 
@@ -13,32 +12,32 @@ export default function PokemonMetadata(props: {
     props.type === "detail" ? Detail.Metadata : List.Item.Detail.Metadata;
 
   const meta = [
-    <Metadata.TagList key="type" title="Type">
-      {pokemon.pokemon_v2_pokemontypes.map((t) => {
+    <Detail.Metadata.TagList key="types" title="Types">
+      {props.pokemon.pokemontypes.map((type) => {
         return (
-          <Metadata.TagList.Item
-            key={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
-            text={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
-            color={typeColor[t.pokemon_v2_type.name]}
-            icon={`types/${t.pokemon_v2_type.name}.svg`}
+          <Detail.Metadata.TagList.Item
+            key={type.type.name}
+            text={type.type.typenames[0].name}
+            color={typeColor[type.type.name]}
           />
         );
       })}
-    </Metadata.TagList>,
-    <Metadata.TagList key="abilities" title="Abilities">
-      {uniqBy(
-        pokemon.pokemon_v2_pokemonabilities,
-        (a) => a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name,
-      ).map((t) => {
+    </Detail.Metadata.TagList>,
+    <Detail.Metadata.TagList key="abilities" title="Abilities">
+      {props.pokemon.pokemonabilities.map((ability) => {
         return (
-          <Metadata.TagList.Item
-            key={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
-            text={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
-            color={t.is_hidden ? Color.SecondaryText : Color.PrimaryText}
+          <Detail.Metadata.TagList.Item
+            key={ability.ability.abilitynames[0].name}
+            text={
+              ability.is_hidden
+                ? `${ability.ability.abilitynames[0].name} (Hidden)`
+                : ability.ability.abilitynames[0].name
+            }
+            color={Color.PrimaryText}
           />
         );
       })}
-    </Metadata.TagList>,
+    </Detail.Metadata.TagList>,
     <Metadata.Label
       key="height"
       title="Height"
