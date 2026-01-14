@@ -82,11 +82,6 @@ function DetailedAuditsView({ report }: { report: LighthouseReport }) {
   return <Detail markdown={generateMarkdown()} />;
 }
 
-interface Preferences {
-  outputPath?: string;
-  lighthousePath?: string;
-}
-
 interface FormValues {
   url: string;
   device: 'mobile' | 'desktop';

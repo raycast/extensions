@@ -1,6 +1,6 @@
 # SEO Lighthouse Changelog
 
-## [1.1.9] - 2025-12-22
+## [1.1.9] - {PR_MERGE_DATE}
 - Added Ask AI chat for quick insights on scanned reports.
 - Expanded report content with richer summaries.
 - Added email draft generation with report highlights.

@@ -44,14 +44,6 @@ export interface LighthouseReport {
   timing?: { total?: number };
 }
 
-export interface LighthouseOptions {
-  url: string;
-  outputPath?: string;
-  lighthousePath?: string;
-  device?: 'mobile' | 'desktop';
-  categories?: string[];
-}
-
 export function expandHomeDir(filePath: string): string {
   if (filePath.startsWith('~')) {
     return nodePath.join(nodeOs.homedir(), filePath.slice(1));
