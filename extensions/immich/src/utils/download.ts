@@ -20,13 +20,20 @@ async function fetchFileToDisk(filePath: string, url: string) {
 }
 
 /**
+ * Sanitizes a filename by removing any path components.
+ * @param name - The original filename.
+ * @returns The sanitized filename.
+ */
+const safeFileName = (name: string) => name.replace(/^.*[\\/]/, "");
+
+/**
  * Downloads an image from a URL, saves it into the OS' temp folder and copies it to the clipboard.
  * @param url - The URL of the image to download.
  * @param filename - The filename to use for the temporary file.
  */
 export async function downloadAndCopyImage(url: string, filename: string) {
   try {
-    const path = join(await realpath(tmpdir()), filename);
+    const path = join(await realpath(tmpdir()), safeFileName(filename));
     await showToast(Toast.Style.Animated, "Downloading image", "Please wait...");
     await fetchFileToDisk(path, url);
     await Clipboard.copy({ file: path });
@@ -43,7 +50,7 @@ export async function downloadAndCopyImage(url: string, filename: string) {
  */
 export async function downloadImageToDownloads(url: string, filename: string) {
   try {
-    const path = join(homedir(), "Downloads", filename);
+    const path = join(homedir(), "Downloads", safeFileName(filename));
     await showToast(Toast.Style.Animated, "Downloading image", "Please wait...");
     await fetchFileToDisk(path, url);
     await showToast(Toast.Style.Success, "Download complete", path);
