@@ -23,6 +23,13 @@
 - Updated log display to match Convex dashboard styling
 - Improved document browsing UX with cleaner layout
 - Console output now starts collapsed by default in logs
+- Renamed "Switch Project" command to "Manage Projects" for clarity
+- Improved authentication flow - users are now properly logged out when signing out
+
+### Fixed
+
+- Fixed search functionality in Manage Projects - teams, projects, and deployments can now be filtered by name and slug
+- Fixed authentication state management to properly reflect logout across the UI
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

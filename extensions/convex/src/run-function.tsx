@@ -8,7 +8,6 @@
 import {
   Action,
   ActionPanel,
-  Color,
   Detail,
   Form,
   Icon,
@@ -19,6 +18,7 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { useConvexAuth } from "./hooks/useConvexAuth";
+import { useAuthenticatedListGuard } from "./components/AuthenticatedListGuard";
 import {
   useFunctions,
   useTeams,
@@ -33,13 +33,7 @@ interface FunctionWithPath extends FunctionSpec {
 }
 
 export default function RunFunctionCommand() {
-  const {
-    session,
-    isLoading: authLoading,
-    isAuthenticated,
-    login,
-    selectedContext,
-  } = useConvexAuth();
+  const { session, selectedContext } = useConvexAuth();
   const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
 
@@ -68,31 +62,11 @@ export default function RunFunctionCommand() {
     deploymentName,
   );
 
-  // Handle not authenticated
-  if (authLoading) {
-    return <List isLoading={true} searchBarPlaceholder="Loading..." />;
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Sign in to Convex"
-          description="Connect your Convex account to run functions"
-          icon={Icon.Key}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Sign in with Convex"
-                icon={Icon.Key}
-                onAction={login}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
+  // Handle authentication
+  const authGuard = useAuthenticatedListGuard(
+    "Connect your Convex account to run functions",
+  );
+  if (authGuard) return authGuard;
 
   // No deployment selected
   if (!deploymentName) {
@@ -186,10 +160,7 @@ export default function RunFunctionCommand() {
               keywords={[fn.functionType, modulePath, fn.identifier]}
               accessories={[
                 {
-                  tag: {
-                    value: fn.functionType,
-                    color: getFunctionColor(fn.functionType),
-                  },
+                  text: fn.functionType,
                 },
               ]}
               actions={
@@ -340,23 +311,19 @@ function FunctionRunner({
       markdown={buildMarkdown()}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.TagList title="Type">
-            <Detail.Metadata.TagList.Item
-              text={functionSpec.functionType}
-              color={getFunctionColor(functionSpec.functionType)}
-            />
-          </Detail.Metadata.TagList>
+          <Detail.Metadata.Label
+            title="Type"
+            text={functionSpec.functionType}
+          />
 
           <Detail.Metadata.Label
             title="Module"
             text={functionSpec.modulePath}
-            icon={Icon.Document}
           />
 
           <Detail.Metadata.Label
             title="Full Path"
             text={functionSpec.fullPath}
-            icon={Icon.Link}
           />
 
           <Detail.Metadata.Separator />
@@ -365,28 +332,20 @@ function FunctionRunner({
             <Detail.Metadata.Label
               title="Expected Args"
               text={formatArgsPreview(functionSpec.args)}
-              icon={Icon.Text}
             />
           )}
 
           {result && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.TagList title="Status">
-                <Detail.Metadata.TagList.Item
-                  text="Success"
-                  color={Color.Green}
-                />
-              </Detail.Metadata.TagList>
+              <Detail.Metadata.Label title="Status" text="Success" />
               <Detail.Metadata.Label
                 title="Execution Time"
                 text={`${result.executionTime}ms`}
-                icon={Icon.Clock}
               />
               <Detail.Metadata.Label
                 title="Result Type"
                 text={getResultType(result.data)}
-                icon={Icon.Code}
               />
             </>
           )}
@@ -394,9 +353,7 @@ function FunctionRunner({
           {error && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.TagList title="Status">
-                <Detail.Metadata.TagList.Item text="Failed" color={Color.Red} />
-              </Detail.Metadata.TagList>
+              <Detail.Metadata.Label title="Status" text="Failed" />
             </>
           )}
         </Detail.Metadata>
@@ -470,7 +427,9 @@ function ArgumentsForm({
   onSubmit,
   isRunning,
 }: ArgumentsFormProps) {
-  const [argsJson, setArgsJson] = useState("{}");
+  const [argsJson, setArgsJson] = useState(() =>
+    getDefaultArgsJson(functionSpec.args),
+  );
   const [parseError, setParseError] = useState<string | null>(null);
   const { pop } = useNavigation();
 
@@ -554,26 +513,69 @@ function getFunctionIcon(type: string): Icon {
   }
 }
 
-function getFunctionColor(type: string): Color {
-  switch (type) {
-    case "query":
-      return Color.Blue;
-    case "mutation":
-      return Color.Orange;
-    case "action":
-      return Color.Purple;
-    default:
-      return Color.SecondaryText;
-  }
-}
-
 function formatArgsPreview(args: string): string {
-  // Args is typically a validator string like "v.object({...})"
-  // Simplify for display
+  // Args is typically a JSON schema string - parse it to show field names
+  try {
+    const argsSchema = JSON.parse(args);
+    if (argsSchema && typeof argsSchema === "object") {
+      if (argsSchema.type === "object" && argsSchema.fields) {
+        const fieldNames = Object.keys(argsSchema.fields);
+        if (fieldNames.length === 0) return "none";
+        return fieldNames.join(", ");
+      }
+    }
+  } catch {
+    // If not JSON, show truncated string
+  }
+
   if (args.length > 100) {
     return args.substring(0, 100) + "...";
   }
   return args;
+}
+
+// Parse function args schema to generate default JSON
+function getDefaultArgsJson(args?: string): string {
+  if (!args) return "{}";
+
+  try {
+    const argsSchema = typeof args === "string" ? JSON.parse(args) : args;
+
+    // If it's already an object, use it as template
+    if (argsSchema && typeof argsSchema === "object") {
+      // Generate default values based on schema
+      const defaults: Record<string, unknown> = {};
+
+      if (argsSchema.type === "object" && argsSchema.fields) {
+        for (const [key, fieldSchema] of Object.entries(argsSchema.fields)) {
+          const schema = fieldSchema as {
+            type?: string;
+            fieldType?: { type?: string };
+          };
+          const fieldType = schema.type || schema.fieldType?.type;
+
+          if (fieldType === "string") defaults[key] = "";
+          else if (
+            fieldType === "number" ||
+            fieldType === "int64" ||
+            fieldType === "float64"
+          )
+            defaults[key] = 0;
+          else if (fieldType === "boolean") defaults[key] = false;
+          else if (fieldType === "array") defaults[key] = [];
+          else if (fieldType === "object") defaults[key] = {};
+          else if (fieldType === "id") defaults[key] = "";
+          else defaults[key] = null;
+        }
+      }
+
+      return JSON.stringify(defaults, null, 2);
+    }
+  } catch {
+    // Ignore parse errors
+  }
+
+  return "{}";
 }
 
 function getResultType(result: unknown): string {

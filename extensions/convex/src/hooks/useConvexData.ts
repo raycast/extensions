@@ -134,7 +134,7 @@ export function useLogs(
   deploymentName: string | null,
   options: UseLogsOptions = {},
 ): UseLogsResult {
-  const { functionFilter, limit = 50, autoRefresh = true } = options;
+  const { limit = 50, autoRefresh = true } = options;
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -167,7 +167,6 @@ export function useLogs(
         const response = await getLogs(deploymentName, accessToken, {
           cursor: cursorRef.current,
           limit,
-          functionFilter,
         });
 
         // Filter out duplicates and add new logs
@@ -199,7 +198,7 @@ export function useLogs(
         setIsLoading(false);
       }
     },
-    [accessToken, deploymentName, limit, functionFilter],
+    [accessToken, deploymentName, limit],
   );
 
   // Initial fetch and polling

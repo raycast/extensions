@@ -4,21 +4,11 @@
  * Standalone client for Convex's BigBrain API (api.convex.dev/api/dashboard)
  * Used for fetching teams, projects, deployments, and user profile.
  */
-
-/**
- * BigBrain API base URL
- */
-const BIG_BRAIN_URL = "https://api.convex.dev";
-
-/**
- * BigBrain Dashboard API base path
- */
-const BIG_BRAIN_DASHBOARD_PATH = "/api/dashboard";
-
-/**
- * Client identifier header value
- */
-const CONVEX_CLIENT_ID = "convex-panel-raycast-1.0.0";
+import {
+  BIG_BRAIN_URL,
+  BIG_BRAIN_DASHBOARD_PATH,
+  CONVEX_CLIENT_ID,
+} from "./constants";
 
 // ============================================================================
 // Types
@@ -168,7 +158,6 @@ export async function getDeployments(
     },
   );
 
-  // Ensure each deployment has a URL - construct from name if not provided by API
   return deployments.map((deployment) => ({
     ...deployment,
     url: deployment.url ?? `https://${deployment.name}.convex.cloud`,

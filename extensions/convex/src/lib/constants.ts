@@ -9,6 +9,9 @@ export const STORAGE_KEYS = {
   TOKEN_EXPIRES_AT: "convex-token-expires-at",
   REFRESH_TOKEN: "convex-refresh-token",
   SELECTED_TEAM_ID: "convex-selected-team-id",
+  SELECTED_TEAM_SLUG: "convex-selected-team-slug",
   SELECTED_PROJECT_ID: "convex-selected-project-id",
+  SELECTED_PROJECT_SLUG: "convex-selected-project-slug",
   SELECTED_DEPLOYMENT_NAME: "convex-selected-deployment-name",
+  SELECTED_DEPLOYMENT_TYPE: "convex-selected-deployment-type",
 } as const;

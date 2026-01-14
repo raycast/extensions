@@ -9,19 +9,12 @@
  */
 
 import { LocalStorage, open, showToast, Toast } from "@raycast/api";
-
-const AUTH_ISSUER = "https://auth.convex.dev";
-const AUTH_CLIENT_ID = "HFtA247jp9iNs08NTLIB7JsNPMmRIyfi";
-const BIG_BRAIN_URL = "https://api.convex.dev";
-
-const STORAGE_KEYS = {
-  ACCESS_TOKEN: "convex-access-token",
-  TOKEN_EXPIRES_AT: "convex-token-expires-at",
-  REFRESH_TOKEN: "convex-refresh-token",
-  SELECTED_TEAM_ID: "convex-selected-team-id",
-  SELECTED_PROJECT_ID: "convex-selected-project-id",
-  SELECTED_DEPLOYMENT_NAME: "convex-selected-deployment-name",
-} as const;
+import {
+  AUTH_ISSUER,
+  AUTH_CLIENT_ID,
+  BIG_BRAIN_URL,
+  STORAGE_KEYS,
+} from "./constants";
 
 interface DeviceAuthResponse {
   device_code: string;
@@ -125,17 +118,14 @@ export async function pollForDeviceToken(
       return response.json();
     }
 
-    // Check for pending/slow_down errors (expected while user is authenticating)
     const errorBody = await response.json().catch(() => ({}));
     const error = errorBody.error;
 
     if (error === "authorization_pending" || error === "slow_down") {
-      // Wait and retry
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
       continue;
     }
 
-    // Other errors are fatal
     if (error === "expired_token") {
       throw new Error("Authentication expired. Please try again.");
     }
@@ -246,7 +236,6 @@ export function isSessionExpired(session: ConvexSession): boolean {
   if (!session.expiresAt) {
     return false;
   }
-  // Consider expired 5 minutes before actual expiry
   return Date.now() > session.expiresAt - 5 * 60 * 1000;
 }
 
@@ -260,30 +249,24 @@ export async function authenticate(): Promise<ConvexSession> {
   });
 
   try {
-    // Start device authorization
     const deviceAuth = await startDeviceAuthorization();
 
-    // Show code to user and open browser
     toast.style = Toast.Style.Animated;
     toast.title = "Waiting for authentication";
     toast.message = `Code: ${deviceAuth.user_code}`;
 
-    // Open browser for authentication
     await open(deviceAuth.verification_uri_complete);
 
-    // Poll for token
     const tokens = await pollForDeviceToken(deviceAuth);
     if (!tokens) {
       throw new Error("Authentication expired or cancelled");
     }
 
-    // Exchange for dashboard token
     toast.title = "Completing authentication...";
     toast.message = undefined;
 
     const session = await exchangeForDashboardToken(tokens.access_token);
 
-    // Save session
     await saveSession(session);
 
     toast.style = Toast.Style.Success;
@@ -304,8 +287,11 @@ export async function authenticate(): Promise<ConvexSession> {
 
 export interface SelectedContext {
   teamId: number | null;
+  teamSlug: string | null;
   projectId: number | null;
+  projectSlug: string | null;
   deploymentName: string | null;
+  deploymentType: string | null;
 }
 
 export async function saveSelectedContext(
@@ -317,10 +303,22 @@ export async function saveSelectedContext(
       context.teamId.toString(),
     );
   }
+  if (context.teamSlug) {
+    await LocalStorage.setItem(
+      STORAGE_KEYS.SELECTED_TEAM_SLUG,
+      context.teamSlug,
+    );
+  }
   if (context.projectId) {
     await LocalStorage.setItem(
       STORAGE_KEYS.SELECTED_PROJECT_ID,
       context.projectId.toString(),
+    );
+  }
+  if (context.projectSlug) {
+    await LocalStorage.setItem(
+      STORAGE_KEYS.SELECTED_PROJECT_SLUG,
+      context.projectSlug,
     );
   }
   if (context.deploymentName) {
@@ -329,22 +327,40 @@ export async function saveSelectedContext(
       context.deploymentName,
     );
   }
+  if (context.deploymentType) {
+    await LocalStorage.setItem(
+      STORAGE_KEYS.SELECTED_DEPLOYMENT_TYPE,
+      context.deploymentType,
+    );
+  }
 }
 
 export async function loadSelectedContext(): Promise<SelectedContext> {
   const teamIdStr = await LocalStorage.getItem<string>(
     STORAGE_KEYS.SELECTED_TEAM_ID,
   );
+  const teamSlug = await LocalStorage.getItem<string>(
+    STORAGE_KEYS.SELECTED_TEAM_SLUG,
+  );
   const projectIdStr = await LocalStorage.getItem<string>(
     STORAGE_KEYS.SELECTED_PROJECT_ID,
+  );
+  const projectSlug = await LocalStorage.getItem<string>(
+    STORAGE_KEYS.SELECTED_PROJECT_SLUG,
   );
   const deploymentName = await LocalStorage.getItem<string>(
     STORAGE_KEYS.SELECTED_DEPLOYMENT_NAME,
   );
+  const deploymentType = await LocalStorage.getItem<string>(
+    STORAGE_KEYS.SELECTED_DEPLOYMENT_TYPE,
+  );
 
   return {
     teamId: teamIdStr ? parseInt(teamIdStr, 10) : null,
+    teamSlug: teamSlug ?? null,
     projectId: projectIdStr ? parseInt(projectIdStr, 10) : null,
+    projectSlug: projectSlug ?? null,
     deploymentName: deploymentName ?? null,
+    deploymentType: deploymentType ?? null,
   };
 }

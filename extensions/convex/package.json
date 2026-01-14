@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "convex-tools",
-  "title": "Convex Tools",
+  "name": "convex",
+  "title": "Convex",
   "description": "Interact with your Convex projects directly from Raycast",
   "icon": "command-icon.png",
   "author": "devwithbobby",
@@ -14,51 +14,66 @@
   "commands": [
     {
       "name": "switch-project",
-      "title": "Switch Convex Project",
+      "title": "Manage Projects",
       "subtitle": "Convex",
-      "description": "Switch between your Convex projects and deployments",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "description": "Manage and switch between your Convex projects",
+      "mode": "view"
+    },
+    {
+      "name": "switch-deployment",
+      "title": "Switch Deployment",
+      "subtitle": "Convex",
+      "description": "Quick switch between dev, prod, and preview deployments",
+      "mode": "view"
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Dashboard",
+      "subtitle": "Convex",
+      "description": "Open the current deployment in Convex dashboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-deployment-url",
+      "title": "Copy Deployment URL",
+      "subtitle": "Convex",
+      "description": "Copy the current deployment URL to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "data",
+      "title": "Data",
+      "subtitle": "Convex",
+      "description": "Browse and search documents in your Convex tables",
+      "mode": "view"
     },
     {
       "name": "run-function",
-      "title": "Run Convex Function",
+      "title": "Run Function",
       "subtitle": "Convex",
-      "description": "Search and run Convex queries, mutations, and actions",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "description": "Execute Convex queries, mutations, and actions with arguments",
+      "mode": "view"
     },
     {
-      "name": "browse-tables",
-      "title": "Browse Convex Tables",
+      "name": "logs",
+      "title": "Logs",
       "subtitle": "Convex",
-      "description": "Browse and search documents in your Convex tables",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "description": "Stream and view function execution logs",
+      "mode": "view"
     },
     {
-      "name": "view-logs",
-      "title": "View Convex Logs",
+      "name": "search-docs",
+      "title": "Search Docs",
       "subtitle": "Convex",
-      "description": "Stream and view function execution logs from your deployment",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "description": "Search and browse Convex documentation",
+      "mode": "view"
     },
     {
-      "name": "view-documentation",
-      "title": "View Convex Documentation",
-      "subtitle": "Convex",
-      "description": "Browse and search Convex documentation links",
-      "mode": "view",
-      "icon": "command-icon.png"
-    },
-    {
-      "name": "view-components",
-      "title": "View Convex Components",
+      "name": "components",
+      "title": "Components",
       "subtitle": "Convex",
       "description": "Browse and install Convex components",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "mode": "view"
     }
   ],
   "dependencies": {

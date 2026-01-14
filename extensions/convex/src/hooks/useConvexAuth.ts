@@ -30,8 +30,11 @@ export function useConvexAuth(): UseConvexAuthReturn {
   const [session, setSession] = useState<ConvexSession | null>(null);
   const [selectedContext, setSelectedContextState] = useState<SelectedContext>({
     teamId: null,
+    teamSlug: null,
     projectId: null,
+    projectSlug: null,
     deploymentName: null,
+    deploymentType: null,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -74,8 +77,11 @@ export function useConvexAuth(): UseConvexAuthReturn {
     setSession(null);
     setSelectedContextState({
       teamId: null,
+      teamSlug: null,
       projectId: null,
+      projectSlug: null,
       deploymentName: null,
+      deploymentType: null,
     });
   }, []);
 
