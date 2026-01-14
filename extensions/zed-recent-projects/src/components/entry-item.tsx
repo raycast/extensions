@@ -3,10 +3,10 @@ import { Color, Icon, List } from "@raycast/api";
 import { Entry } from "../lib/entry";
 import { getGitBranch } from "../lib/git";
 import { showFailureToast } from "@raycast/utils";
-import { showGitBranch } from "../lib/preferences";
+import { showGitBranch, showColoredIcons, showOpenStatus } from "../lib/preferences";
 import ColorHash from "color-hash";
 
-const colorHash = new ColorHash({ saturation: 0.7, lightness: 0.7 });
+const colorHash = showColoredIcons ? new ColorHash({ saturation: 0.7, lightness: 0.7 }) : null;
 
 export interface EntryItemProps extends Pick<List.Item.Props, "icon" | "accessoryIcon" | "actions" | "keywords"> {
   entry: Entry;
@@ -37,12 +37,26 @@ function useGitBranch(path: string) {
   return branch;
 }
 
+function getEntryIcon(entry: Entry): List.Item.Props["icon"] {
+  if (entry.type === "remote") {
+    return "remote.svg";
+  }
+
+  // Use colored dots if preference is enabled
+  if (showColoredIcons && colorHash) {
+    return { source: Icon.Dot, tintColor: colorHash.hex(entry.title) };
+  }
+
+  // Default: use folder icon
+  return entry.path ? { fileIcon: entry.path } : Icon.Folder;
+}
+
 export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
   const branch = entry.type === "local" && entry.path ? useGitBranch(entry.path) : undefined;
 
   const accessories: List.Item.Accessory[] = [];
 
-  if (entry.isOpen) {
+  if (showOpenStatus && entry.isOpen) {
     accessories.push({
       tag: { value: "Open", color: Color.Green },
     });
@@ -64,7 +78,7 @@ export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
         tooltip: entry.subtitle,
       }}
       accessories={accessories}
-      icon={entry.type === "remote" ? "remote.svg" : { source: Icon.Dot, tintColor: colorHash.hex(entry.title) }}
+      icon={getEntryIcon(entry)}
       {...props}
     />
   );

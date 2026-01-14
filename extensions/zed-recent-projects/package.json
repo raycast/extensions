@@ -76,6 +76,23 @@
       "label": "Show Git Branch",
       "default": true,
       "description": "Display the current Git branch for files and folders in Git repositories"
+    },
+    {
+      "name": "showColoredIcons",
+      "type": "checkbox",
+      "title": "Visual Customization",
+      "required": false,
+      "label": "Show Colored Icons",
+      "default": false,
+      "description": "Use colored dots instead of folder icons for easier visual identification of projects"
+    },
+    {
+      "name": "showOpenStatus",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Open Status",
+      "default": true,
+      "description": "Display an 'Open' tag for projects currently open in Zed"
     }
   ],
   "dependencies": {
