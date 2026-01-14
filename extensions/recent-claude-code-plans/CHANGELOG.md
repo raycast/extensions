@@ -1,6 +1,6 @@
 # Recent Claude Code Plans Changelog
 
-## [Initial Version] - 2026-01-14
+## [Initial Version] - {PR_MERGE_DATE}
 
 - List recently modified Claude Code plan files
 - Preview file contents with syntax highlighting
