@@ -1,6 +1,6 @@
 # Immich Changelog
 
-## [Open, Copy and Download assets] - {PR_MERGE_DATE}
+## [Open, Copy and Download assets] - 2026-01-14
 
 - Add Open in Immich, Copy and Download actions for assets in the Asset View
 
