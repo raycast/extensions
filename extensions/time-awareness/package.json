@@ -13,6 +13,7 @@
 		{
 			"name": "time-awareness-menu-bar",
 			"title": "Time Awareness Menu Bar",
+			"subtitle": "Time Awareness",
 			"description": "Track activity time and get notifications when reached the end of the interval",
 			"mode": "menu-bar",
 			"interval": "10s"
