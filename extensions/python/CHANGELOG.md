@@ -1,6 +1,6 @@
 # Python Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-01-15
 
 - Add support for Windows platform.
 - Bump all dependencies to the latest.
