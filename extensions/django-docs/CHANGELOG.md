@@ -1,6 +1,6 @@
 # Django Docs Changelog
 
-## [1.0.1] - 2026-01-14
+## [1.0.1] - {PR_MERGE_DATE}
 
 - Fixed linting errors
 
