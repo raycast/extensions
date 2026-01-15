@@ -20,7 +20,6 @@ export default function Command() {
         message: `Port: ${portField} is invalid (must be a number between 1 and 65535)`,
         style: Toast.Style.Failure,
       });
-      });
       return;
     }
 
