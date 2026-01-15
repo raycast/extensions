@@ -5,7 +5,8 @@ type Init = { body?: Record<string, unknown> | null | undefined } & Omit<Request
 
 async function fetch<R = void>(path: string, init: Init = {}): Promise<R> {
   const { apiKey, endpoint } = getPreferenceValues<ExtensionPreferences>();
-  const baseUrl = new URL("api/v1/", endpoint ?? "https://app.addy.io/");
+  const base = endpoint ?? "https://app.addy.io/";
+  const baseUrl = new URL("api/v1/", base.endsWith("/") ? base : `${base}/`);
   const url = new URL(path, baseUrl);
 
   const response = await global.fetch(url.toString(), {
