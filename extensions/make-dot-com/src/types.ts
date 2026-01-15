@@ -177,3 +177,71 @@ export type StartStopScenarioResponse = {
     islinked?: boolean;
   };
 };
+
+// Incomplete Executions (DLQ - Dead Letter Queue)
+export type IncompleteExecution = {
+  id: string;
+  scenarioId: number;
+  scenarioName?: string;
+  companyId?: number;
+  companyName?: string;
+  teamId?: number;
+  resolved?: boolean;
+  deleted?: boolean;
+  created?: string;
+  reason?: string;
+  resultData?: unknown;
+};
+
+export type ListIncompleteExecutionsResponse = {
+  dlqs: IncompleteExecution[];
+  pg?: MakePagination;
+};
+
+// Scenario Triggers (Webhooks)
+export type ScenarioTrigger = {
+  id: number;
+  name: string;
+  udid?: string;
+  scope?: string;
+  queueCount?: number;
+  queueLimit?: number;
+  typeName?: string;
+  type?: string;
+  url?: string;
+  enabled?: boolean;
+};
+
+export type ListScenarioTriggersResponse = {
+  hooks: ScenarioTrigger[];
+};
+
+// Webhook Queue Items (Hook Incomings)
+export type WebhookQueueItem = {
+  id: string;
+  hookId: number;
+  date?: string;
+  requestId?: string;
+  data?: unknown;
+};
+
+export type ListWebhookQueueResponse = {
+  incomings: WebhookQueueItem[];
+  pg?: MakePagination;
+};
+
+// Hook Details
+export type MakeHook = {
+  id: number;
+  name: string;
+  teamId: number;
+  scenarioId?: number;
+  queueCount?: number;
+  queueLimit?: number;
+  url?: string;
+  enabled?: boolean;
+};
+
+export type GetHookResponse = {
+  hook: MakeHook;
+};
