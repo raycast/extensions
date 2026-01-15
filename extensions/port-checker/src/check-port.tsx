@@ -9,13 +9,12 @@ type Values = {
 
 export default function Command() {
   async function handleSubmit(values: Values) {
-    console.log(values);
     const host = values.hostField;
     const portField = values.portField;
     const timeoutField = values.timeoutField;
 
     const re = /^[0-9]+$/;
-    if (!(re.test(portField) && +portField >= 1 && +portField <= 2 ** 16)) {
+    if (!(re.test(portField) && +portField >= 1 && +portField < 2 ** 16)) {
       showToast({
         title: "Invalid Port",
         message: `Port: ${portField} is invalid (must be a number between 1 and 65536)`,
