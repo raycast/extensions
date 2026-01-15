@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "target": "ES2022",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "moduleResolution": "NodeNext",
+    "noEmit": true
+  },
+  "include": ["src/**/*", "raycast-env.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}

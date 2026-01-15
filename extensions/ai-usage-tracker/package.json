@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-usage-tracker",
+  "title": "AI Usage Tracker",
+  "description": "Track usage statistics across Claude, Codex, and Antigravity AI providers",
+  "icon": "extension-icon.png",
+  "author": "watzon",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/watzon/raycast-ai-usage-tracker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/watzon/raycast-ai-usage-tracker/issues"
+  },
+  "homepage": "https://github.com/watzon/raycast-ai-usage-tracker#readme",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "usage-dashboard",
+      "title": "AI Usage Dashboard",
+      "description": "View detailed usage statistics for Claude, Codex, and Antigravity",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "claudeEnabled",
+      "type": "checkbox",
+      "title": "Claude",
+      "description": "Enable Claude usage tracking",
+      "required": false,
+      "default": true,
+      "label": "Enable Claude"
+    },
+    {
+      "name": "codexEnabled",
+      "type": "checkbox",
+      "title": "Codex",
+      "description": "Enable Codex usage tracking",
+      "required": false,
+      "default": true,
+      "label": "Enable Codex"
+    },
+    {
+      "name": "antigravityEnabled",
+      "type": "checkbox",
+      "title": "Antigravity",
+      "description": "Enable Antigravity usage tracking",
+      "required": false,
+      "default": true,
+      "label": "Enable Antigravity"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
