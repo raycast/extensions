@@ -1,6 +1,6 @@
 # Render Changelog
 
-## [Add Deploy Status Badges] - {PR_MERGE_DATE}
+## [Add Deploy Status Badges] - 2026-01-15
 
 - Display deploy status badges on all services in the main list
 - Show service-level "Suspended" status when applicable
