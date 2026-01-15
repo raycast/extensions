@@ -5,7 +5,7 @@
 - Refactor audio handling into a platform abstraction layer.
 - Moves macOS binary logic to src/platform/macos and adds
 - Windows support via PowerShell AudioDeviceCmdlets.
-- Update packages
+- Update raycast package
 
 ## [Fix] - 2025-09-11
 
