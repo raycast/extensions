@@ -1,6 +1,6 @@
 # Keyboard Typing Practice Changelog
 
-## [1.0.0] - 2026-01-15
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Start Practice command with live typing feedback and auto-saved sessions.
