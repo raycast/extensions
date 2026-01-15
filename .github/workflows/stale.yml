@@ -42,5 +42,7 @@ jobs:
           # Limiting
           operations-per-run: 100
 
+          ascending: true
+
           # Debug
           #debug-only: true
