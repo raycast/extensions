@@ -172,7 +172,12 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Folder}
           title="No Projects Found"
-          description="Check your paths in Extension Settings (Cmd+,)"
+          description="Check defined paths in Extension Settings"
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Settings" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
         />
       ) : (
         projects.map((project) => {
