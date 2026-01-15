@@ -1,10 +1,16 @@
 # Spotify Player Changelog
 
-## [Fix Queue Fallback for Generate Playlist] - {PR_MERGE_DATE}
+## [Generate Playlist: AI Tuning and Improved Playback] - {PR_MERGE_DATE}
 
-- Added "Play Playlist" option to immediately start playing a generated playlist without saving it to your library
-- Fixed "Add Songs to Queue" in Generate Playlist failing when no active player exists
-- When there's no active Spotify session, the first track now plays directly to initialize playback, then remaining tracks are added to the queue
+- Added AI Playlist Tuning: type a prompt in the search bar to refine your generated playlist with full context awareness
+- Added Tune History with undo/redo navigation between playlist versions
+- Added "Play Playlist" option to immediately start playing without saving to library
+- Modified `play()` API to accept a list of track URIs for batch playback
+- Upgraded AI model to newer, more reliable version
+- Improved AI prompt to reduce generation issues and ensure songs are found on Spotify
+- Enhanced error handling with friendly messages for AI service outages, rate limits, and invalid responses
+- Improved Spotify song matching with fallback search when strict match fails
+- Fixed "Add Songs to Queue" failing when no active player exists
 - Added retry logic for play and queue operations to handle cases where Spotify takes time to open
 
 ## [Fix] - 2026-01-14
