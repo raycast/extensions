@@ -70,20 +70,7 @@ export function refreshTimers(): TimerTask[] {
     try {
       // process.kill(pid, 0) returns true if process exists, throws if not
       // Note: We check the group leader pid
-      process.kill(task.pid, 0);
-
-      // Also check if time has passed (just in case process is stuck or pid reused?)
-      // Actually, if the process is still there, it's probably fine to keep it.
-      // But if it's way past due time, maybe we should remove it?
-      // Let's trust the process existence for now, but maybe add a sanity check.
-      if (Date.now() > task.dueTime + 5000) {
-        // If it's 5 seconds past due time, it should be done.
-        // If process is still there, maybe it's a zombie or something else.
-        // But let's assume if it's running, it's valid.
-        // Wait, if the sleep finished, the process might be gone.
-        return false;
-      }
-      return true;
+      return process.kill(task.pid, 0);
     } catch {
       return false;
     }
