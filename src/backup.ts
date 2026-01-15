@@ -5,31 +5,18 @@ import { homedir } from "os";
 import { getFolders } from "./storage";
 import { Folder } from "./types";
 
-/**
- * Preferences that can be exported/imported
- */
-export interface ExportedPreferences {
-  folderContentsSortPrimary?: string;
-  folderContentsSortSecondary?: string;
-  folderContentsSortTertiary?: string;
-  folderContentsViewType?: string;
-  showPreviewPane?: boolean;
-  gridSeparateSections?: boolean;
-  defaultFolderColor?: string;
-}
-
 export interface ExportData {
   version: number;
   exportedAt: string;
   folders: Folder[];
-  preferences?: ExportedPreferences;
+  preferences?: Partial<Preferences>;
 }
 
 /**
  * Get current preferences for export
  */
-function getCurrentPreferences(): ExportedPreferences {
-  const prefs = getPreferenceValues<ExportedPreferences>();
+function getCurrentPreferences(): Partial<Preferences> {
+  const prefs = getPreferenceValues<Preferences>();
   return {
     folderContentsSortPrimary: prefs.folderContentsSortPrimary,
     folderContentsSortSecondary: prefs.folderContentsSortSecondary,
