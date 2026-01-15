@@ -135,7 +135,7 @@ export async function authenticationCheck() {
     return true;
   }
   try {
-    return await attemptLogin(getPreferenceValues<LoginPayload>(), { showToast: false });
+    return await attemptLogin(getPreferenceValues<Preferences>(), { showToast: false });
   } catch (error) {
     await logout();
     return false;
