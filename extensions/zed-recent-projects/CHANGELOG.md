@@ -1,6 +1,6 @@
 #  Zed Recent Projects Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-01-15
 
 - Add colored dots per project for easy visual identification
 - Show green "Open" tag for projects currently open in Zed
