@@ -1,5 +1,12 @@
 # Audio Device Changelog
 
+## [Update] - {PR_MERGE_DATE}
+- Add Windows support via platform abstraction
+- Refactor audio handling into a platform abstraction layer.
+- Moves macOS binary logic to src/platform/macos and adds
+- Windows support via PowerShell AudioDeviceCmdlets.
+- Update packages
+
 ## [Fix] - 2025-09-11
 
 - Remove problematic "airplay support" toggle

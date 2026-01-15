@@ -25,6 +25,8 @@ import {
   setDefaultOutputDevice,
   setDefaultSystemDevice,
   TransportType,
+  isWindows,
+  getAudioAPI,
 } from "./audio-device";
 import { createDeepLink } from "./utils";
 
@@ -104,7 +106,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
                   <DeviceActions ioType={ioType} device={d} onSelection={() => recordDeviceSelection(d)} />
                 </ActionPanel>
               }
-              accessories={getAccessories(isCurrent)}
+              accessories={getAccessories(isCurrent, d)}
             />
           );
         })}
@@ -146,6 +148,7 @@ function DeviceActions({
   return (
     <>
       <SetAudioDeviceAction device={device} type={ioType} onSelection={onSelection} />
+      {isWindows && <SetCommunicationDeviceAction device={device} type={ioType} onSelection={onSelection} />}
       <Action.CreateQuicklink
         quicklink={{
           name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
@@ -204,6 +207,35 @@ function SetAudioDeviceAction({ device, type, onSelection }: SetAudioDeviceActio
         } catch (e) {
           console.log(e);
           showToast(Toast.Style.Failure, `Failed setting "${device.name}" as ${type} device`);
+        }
+      }}
+    />
+  );
+}
+
+function SetCommunicationDeviceAction({ device, type, onSelection }: SetAudioDeviceActionProps) {
+  return (
+    <Action
+      title={`Set as ${type === "input" ? "Input" : "Output"} Communication Device`}
+      icon={Icon.Phone}
+      shortcut={{ modifiers: ["cmd"], key: "c" }}
+      onAction={async () => {
+        try {
+          const api = await getAudioAPI();
+          if (api.setDefaultOutputDevice && api.setDefaultInputDevice) {
+            if (type === "input") {
+              await api.setDefaultInputDevice(device.id);
+            } else {
+              await api.setDefaultOutputDevice(device.id);
+            }
+            onSelection?.();
+            closeMainWindow({ clearRootSearch: true });
+            popToRoot({ clearSearchBar: true });
+            showHUD(`Set "${device.name}" as ${type} communication device`);
+          }
+        } catch (e) {
+          console.log(e);
+          showToast(Toast.Style.Failure, `Failed setting "${device.name}" as ${type} communication device`);
         }
       }}
     />
@@ -317,14 +349,28 @@ function getIcon(device: AudioDevice, isCurrent: boolean) {
   };
 }
 
-function getAccessories(isCurrent: boolean) {
-  return [
-    {
-      icon: isCurrent ? Icon.Checkmark : undefined,
-    },
-  ];
+function getAccessories(isCurrent: boolean, device?: AudioDevice) {
+  const accessories: Array<{ icon: Icon; tooltip?: string }> = [];
+
+  if (isCurrent) {
+    accessories.push({ icon: Icon.Checkmark });
+  }
+
+  if (isWindows && device?.isCommunication && !isCurrent) {
+    accessories.push({ icon: Icon.Phone, tooltip: "Communication Device" });
+  }
+
+  return accessories;
 }
 
 function getSubtitle(device: AudioDevice) {
-  return Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0];
+  if (!device.transportType) {
+    return "";
+  }
+
+  if (isWindows) {
+    return device.transportType.charAt(0).toUpperCase() + device.transportType.slice(1);
+  }
+
+  return Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0] || "";
 }
