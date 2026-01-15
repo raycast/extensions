@@ -308,6 +308,8 @@ async function isShowingHiddenDevices() {
 }
 
 function getDeviceIcon(device: AudioDevice): string | null {
+  const name = device.name.toLowerCase();
+
   // Check for AirPlay devices first
   if (device.transportType === TransportType.Airplay) {
     return "airplay.png";
@@ -315,7 +317,6 @@ function getDeviceIcon(device: AudioDevice): string | null {
 
   // Check if it's a Bluetooth device
   if (device.transportType === TransportType.Bluetooth || device.transportType === TransportType.BluetoothLowEnergy) {
-    const name = device.name.toLowerCase();
     if (name.includes("airpods max")) {
       return "airpods-max.png";
     } else if (name.includes("airpods pro")) {
@@ -327,14 +328,21 @@ function getDeviceIcon(device: AudioDevice): string | null {
     return "bluetooth-speaker.png";
   }
 
-  // Not AirPlay or Bluetooth
+  // Windows-specific transport types
+  if (isWindows && device.transportType) {
+    if (device.transportType === TransportType.Headphones || device.transportType === "headphones") {
+      return "bluetooth-speaker.png";
+    }
+  }
+
+  // Not a special device with custom icon
   return null;
 }
 
 function getIcon(device: AudioDevice, isCurrent: boolean) {
   const deviceIcon = getDeviceIcon(device);
 
-  // If it's a special device (AirPods/AirPlay/Bluetooth), show its specific icon
+  // If it's a special device (AirPods/AirPlay/Bluetooth/Headphones), show its specific icon
   if (deviceIcon) {
     return {
       source: deviceIcon,
@@ -369,7 +377,24 @@ function getSubtitle(device: AudioDevice) {
   }
 
   if (isWindows) {
-    return device.transportType.charAt(0).toUpperCase() + device.transportType.slice(1);
+    const typeLabels: Record<string, string> = {
+      hdmi: "HDMI Output",
+      displayport: "DisplayPort",
+      usb: "USB Audio",
+      bluetooth: "Bluetooth",
+      headphones: "Headphones",
+      headset: "Headset",
+      microphone: "Microphone",
+      mic: "Microphone",
+      speakers: "Speakers",
+      speaker: "Speakers",
+      spdif: "Digital (SPDIF/Optical)",
+      virtual: "Virtual Device",
+      builtin: "Built-in Audio",
+    };
+
+    const transportType = device.transportType.toLowerCase();
+    return typeLabels[transportType] || device.transportType.charAt(0).toUpperCase() + device.transportType.slice(1);
   }
 
   return Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0] || "";

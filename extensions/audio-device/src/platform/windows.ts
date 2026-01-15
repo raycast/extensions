@@ -78,32 +78,48 @@ function mapToDevice(windowsDevice: WindowsAudioDevice, type: "input" | "output"
     name: windowsDevice.Name,
     isInput: type === "input",
     isOutput: type === "output",
-    transportType: mapTransportType(windowsDevice.Type),
+    transportType: mapTransportType(windowsDevice.Name),
     index: windowsDevice.Index,
     isDefault: windowsDevice.Default,
     isCommunication: windowsDevice.DefaultComm,
   };
 }
 
-function mapTransportType(windowsType: string): string {
+function mapTransportType(deviceName: string): string {
   const typeMap: Record<string, string> = {
-    HDMI: "hdmi",
-    DisplayPort: "displayport",
-    USB: "usb",
-    Bluetooth: "bluetooth",
-    Headphones: "builtin",
-    Microphone: "builtin",
-    Speakers: "builtin",
-    SPDIF: "unknown",
+    // More specific multi-word patterns first
+    "realtek digital": "spdif",
+    "digital output": "spdif",
+    "steam streaming": "virtual",
+    nvidia: "hdmi",
+    // Then device types
+    headphones: "headphones",
+    headset: "headphones",
+    earbuds: "headphones",
+    airpods: "headphones",
+    microphone: "microphone",
+    speakers: "speakers",
+    // Then shorter patterns
+    hdmi: "hdmi",
+    displayport: "displayport",
+    usb: "usb",
+    bluetooth: "bluetooth",
+    mic: "microphone",
+    speaker: "speakers",
+    spdif: "spdif",
+    optical: "spdif",
+    dp: "displayport",
+    virtual: "virtual",
   };
 
+  const lowerName = deviceName.toLowerCase();
   for (const [key, value] of Object.entries(typeMap)) {
-    if (windowsType.toLowerCase().includes(key.toLowerCase())) {
+    if (lowerName.includes(key)) {
       return value;
     }
   }
 
-  return "unknown";
+  return "speakers";
 }
 
 async function setDefault(deviceId: string, type: "input" | "output", communication = false): Promise<void> {

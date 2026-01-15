@@ -14,6 +14,10 @@ export enum TransportType {
   Usb = "usb",
   Virtual = "virtual",
   Unknown = "unknown",
+  Headphones = "headphones",
+  Microphone = "microphone",
+  Speakers = "speakers",
+  SPDIF = "spdif",
 }
 
 export type Platform = "macOS" | "Windows";
