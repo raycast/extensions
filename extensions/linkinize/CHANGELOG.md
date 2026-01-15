@@ -1,3 +1,5 @@
 # Linkinize Changelog
 
-## [Initial Version] - 2023-09-21
+## [Initial Version] - {PR_MERGE_DATE}
+
+- Initial version code
