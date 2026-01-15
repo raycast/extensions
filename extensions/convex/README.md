@@ -1,12 +1,14 @@
 # Convex Tools for Raycast
 
-Interact with your [Convex](https://convex.dev) projects directly from Raycast. Switch between projects, run functions, browse tables, and view real-time logs without leaving your keyboard.
+Convex Tools - A Raycast extension for interacting with your Convex backend directly from Raycast.
+
+This extension provides quick access to essential Convex development workflows without leaving your keyboard:
 
 ## Features
 
-### Switch Convex Project
+### Manage Projects
 
-Quickly switch between your Convex teams, projects, and deployments. Your selection is persisted across commands.
+Navigate between your Convex teams, projects, and deployments (dev/prod/preview). Your selection is persisted across commands. Search teams and projects by name or slug for quick access.
 
 ### Run Convex Function
 
@@ -58,6 +60,10 @@ Browse and install Convex components:
 - Copy install commands
 - Direct links to documentation and npm
 
+## Why I built this
+
+I was building a Convex desktop application and found myself constantly alt-tabbing to the dashboard just to check logs and run seed functions. After doing this approximately 47 times too many, I decided to bring those features to Raycast. Tables got added because... well, I was already there.
+
 ## Installation
 
 ### From Raycast Store (Recommended)
@@ -94,21 +100,21 @@ This extension uses **OAuth 2.0 Device Authorization Flow** to securely authenti
 
 ### First Time Setup
 
-1. Open Raycast and search for "Switch Convex Project"
+1. Open Raycast and search for "Manage Projects"
 2. Click "Sign in with Convex" to authenticate
 3. Select your team, project, and deployment
 4. You're ready to use all commands!
 
 ### Switching Deployments
 
-1. Open "Switch Convex Project" command
+1. Open "Manage Projects" command
 2. Navigate through Teams → Projects → Deployments
 3. Select your desired deployment
 4. All other commands will now use this deployment
 
 ### Running Functions
 
-1. Open "Run Convex Function" command
+1. Open "Run Function" command
 2. Search for your function by name or type
 3. Enter JSON arguments (if needed)
 4. Press Enter to execute
@@ -116,7 +122,7 @@ This extension uses **OAuth 2.0 Device Authorization Flow** to securely authenti
 
 ### Browsing Tables
 
-1. Open "Browse Convex Tables" command
+1. Open "Data" command
 2. Select a table from the list
 3. Browse documents with pagination
 4. View full document details
@@ -135,7 +141,7 @@ This extension uses **OAuth 2.0 Device Authorization Flow** to securely authenti
 
 ### "No Deployment Selected"
 
-Use the "Switch Convex Project" command to select a team, project, and deployment first.
+Use the "Manage Projects" command to select a team, project, and deployment first.
 
 ### Authentication Issues
 
