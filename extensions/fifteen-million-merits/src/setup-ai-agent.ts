@@ -2,7 +2,7 @@ import { type LaunchProps, LaunchType, launchCommand, showToast, Toast } from "@
 import * as fs from "fs";
 import { homedir } from "os";
 import * as path from "path";
-import { updateCounterAndFocus } from "./lib/storage";
+import { syncFocusMode, updateCounter } from "./lib/storage";
 import type { ClaudeSettings, CursorHooks, OpencodeConfig } from "./types";
 
 function readJsonFile<T>(filePath: string, defaultValue: T): T {
@@ -160,7 +160,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       agents.push("Codex CLI");
     }
 
-    await updateCounterAndFocus(0);
+    const { currentCount, newCount } = await updateCounter(0);
+    await syncFocusMode(currentCount, newCount);
 
     try {
       await launchCommand({

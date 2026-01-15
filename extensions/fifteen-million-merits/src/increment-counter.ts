@@ -1,5 +1,16 @@
-import { updateCounterAndFocus } from "./lib/storage";
+import { PopToRootType, showHUD } from "@raycast/api";
+import { isEnabled, refreshMenuBar, syncFocusMode, updateCounter } from "./lib/storage";
 
 export default async function Command() {
-  await updateCounterAndFocus(1);
+  await showHUD("incrementing AI agent count", {
+    popToRootType: PopToRootType.Immediate,
+  });
+
+  const enabled = await isEnabled();
+  if (!enabled) return;
+
+  const { currentCount, newCount } = await updateCounter(1);
+
+  await syncFocusMode(currentCount, newCount);
+  await refreshMenuBar();
 }

@@ -13,6 +13,7 @@
     {
       "name": "show-ai-agent-sessions-counter",
       "title": "Show AI Agent Sessions Counter",
+      "subtitle": "Fifteen Million Merits",
       "description": "Displays the current number of active AI Agent sessions and focus state.",
       "mode": "menu-bar",
       "interval": "10s"
@@ -56,6 +57,7 @@
     {
       "name": "increment-counter",
       "title": "Increment AI Agent Count",
+      "subtitle": "Fifteen Million Merits",
       "description": "Increments the persistent counter and triggers Focus if count is 0.",
       "mode": "no-view"
     },
@@ -82,6 +84,14 @@
       "type": "textfield",
       "required": true,
       "default": "social,news"
+    },
+    {
+      "name": "distractionThreshold",
+      "title": "Distraction Threshold",
+      "description": "Minimum active sessions needed to disable Focus Mode. At least 1 agent must be active (default).",
+      "type": "textfield",
+      "required": false,
+      "default": "1"
     }
   ],
   "dependencies": {

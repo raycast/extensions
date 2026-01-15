@@ -4,20 +4,15 @@ import {
   getCount,
   getMerits,
   isEnabled,
-  resetCounterAndFocus,
+  resetCounter,
   resetMerits,
   setEnabled,
-  updateCounterAndFocus,
+  syncFocusMode,
+  updateCounter,
 } from "./lib/storage";
 
 export default function Command() {
-  const {
-    data: enabled,
-    isLoading: isEnabledLoading,
-    mutate: mutateEnabled,
-  } = useCachedPromise(async () => {
-    return await isEnabled();
-  }, []);
+  const { data: enabled, isLoading: isEnabledLoading, mutate: mutateEnabled } = useCachedPromise(isEnabled, []);
 
   const {
     data: sessionData,
@@ -41,8 +36,8 @@ export default function Command() {
   const handleUpdate = async (delta: number) => {
     await mutateSessions(
       (async () => {
-        const newCount = await updateCounterAndFocus(delta);
-        const newMerits = await getMerits();
+        const { currentCount, newCount, newMerits } = await updateCounter(delta);
+        await syncFocusMode(currentCount, newCount);
         return { count: newCount, merits: newMerits };
       })(),
       {
@@ -62,7 +57,9 @@ export default function Command() {
   const handleReset = async () => {
     await mutateSessions(
       (async () => {
-        await resetCounterAndFocus();
+        const currentCount = await getCount();
+        await resetCounter();
+        await syncFocusMode(currentCount, 0);
         return { count: 0, merits };
       })(),
       {
