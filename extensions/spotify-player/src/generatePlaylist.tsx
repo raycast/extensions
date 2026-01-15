@@ -119,35 +119,10 @@ function parseAiPlaylistResponse(data: string): AiPlaylist {
 
   try {
     playlist = JSON.parse(jsonString) as AiPlaylist;
-  } catch (firstError) {
-    // Try additional cleanup for common AI mistakes
-
-    // Sometimes AI adds comments or extra text after JSON
-    let braceCount = 0;
-    let endIndex = jsonString.length;
-
-    for (let i = 0; i < jsonString.length; i++) {
-      if (jsonString[i] === "{") braceCount++;
-      if (jsonString[i] === "}") {
-        braceCount--;
-        if (braceCount === 0) {
-          endIndex = i + 1;
-          break;
-        }
-      }
-    }
-
-    jsonString = jsonString.substring(0, endIndex);
-
-    try {
-      playlist = JSON.parse(jsonString) as AiPlaylist;
-    } catch (secondError) {
-      // Log the problematic JSON for debugging
-      console.error("Failed to parse AI response:", jsonString.substring(0, 500));
-      throw new Error(
-        `Failed to parse AI response: ${secondError instanceof Error ? secondError.message : "Invalid JSON"}`,
-      );
-    }
+  } catch (error) {
+    // Log the problematic JSON for debugging
+    console.error("Failed to parse AI response:", jsonString.substring(0, 500));
+    throw new Error(`Failed to parse AI response: ${error instanceof Error ? error.message : "Invalid JSON"}`);
   }
 
   // Validate that the playlist has tracks
