@@ -27,3 +27,15 @@ export function toScenarioExecutionLogUrl(opts: {
     normalizeBrowserBaseUrl(opts.baseUrl),
   ).toString();
 }
+
+export function toWebhookQueueItemUrl(opts: {
+  baseUrl: string;
+  teamId: number;
+  hookId: number;
+  itemId: string;
+}): string {
+  return new URL(
+    `/${opts.teamId}/hooks/${opts.hookId}/queue/${opts.itemId}`,
+    normalizeBrowserBaseUrl(opts.baseUrl),
+  ).toString();
+}
