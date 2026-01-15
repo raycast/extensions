@@ -390,8 +390,7 @@ Return 10-25 songs as minified JSON only:
       let startedPlayback = false;
 
       // Using Promise.all could improve performance here, but it would disrupt the order of songs in the queue.
-      for (let i = 0; i < tracks.length; i++) {
-        const track = tracks[i];
+      for (const track of tracks) {
         if (!track || !track.uri) continue;
 
         try {
