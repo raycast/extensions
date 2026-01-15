@@ -1,6 +1,6 @@
 # Better Aliases Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-15
 
 - **Auto-trigger aliases**: When you type the alias, the expand alias command will automatically open url, application, or insert snippet.
 - **Batch Opening**: Open all filtered aliases simultaneously with `Opt + Shift + Enter`, or use `Opt + Shift + [1-9]` to open a specific number of items. (They will be opened in reverse order.)
