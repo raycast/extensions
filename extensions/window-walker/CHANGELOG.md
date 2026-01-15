@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.1] - {PR_MERGE_DATE}
+## [Fixes] - {PR_MERGE_DATE}
 
 ### Fixed
 
@@ -12,7 +12,7 @@
 
 - **Window name encoding** Missing special characters like é, ő, etc. and emojis from titles caused by not specifying encoding in PS script
 
-## [1.1.5] - 2026-01-05
+## [Performance & Pin Fixes] - 2026-01-05
 
 ### Fixed
 
@@ -23,7 +23,7 @@
 - **Refresh Rate**: Window list now auto-refreshes every 1 second (was 10 seconds).
 - **Icon Caching**: Icons are cached on disk and load in background, with automatic cleanup after 7 days.
 
-## [1.1.0] - 2026-01-05
+## [Pin System Fixes] - 2026-01-05
 
 ### Fixed
 
