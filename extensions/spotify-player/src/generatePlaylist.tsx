@@ -1,5 +1,5 @@
 import { AI, Action, ActionPanel, Icon, LaunchProps, List, Toast, showToast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import retry from "async-retry";
 import { useEffect, useState } from "react";
 import { searchTracks } from "./api/searchTracks";
@@ -28,7 +28,6 @@ type PlaylistVersion = {
 type ErrorState = {
   message: string;
   failedPrompt: string;
-  isInitialGeneration: boolean;
 };
 
 function getErrorMessage(error: unknown): string {
@@ -159,6 +158,27 @@ function parseAiPlaylistResponse(data: string): AiPlaylist {
   return playlist;
 }
 
+async function generatePlaylistFromPrompt(prompt: string): Promise<PlaylistVersion> {
+  const data = await AI.ask(
+    `Generate a playlist of 10-25 songs based on "${prompt}". Use ONLY listed artists if mentioned, otherwise infer culturally relevant songs with high specificity. Return ONLY minified JSON:
+
+{"name": "<Playlist name>", "description": "<Description>", "tracks": [{"title": "<Exact Spotify song title>", "artist": "<Primary artist>"}]}
+
+Use exact Spotify song/artist names. No markdown, no explanation.`,
+    { model: AI.Model["OpenAI_GPT-5_mini"] },
+  );
+
+  const aiPlaylist = parseAiPlaylistResponse(data);
+  const spotifyTracks = await resolveTracksOnSpotify(aiPlaylist.tracks);
+
+  return {
+    name: aiPlaylist.name,
+    description: aiPlaylist.description,
+    tracks: spotifyTracks,
+    prompt: prompt,
+  };
+}
+
 function TuneHistoryList({
   history,
   currentIndex,
@@ -202,114 +222,68 @@ function TuneHistoryList({
 export default function Command(props: LaunchProps<{ arguments: Arguments.GeneratePlaylist }>) {
   const [history, setHistory] = useState<PlaylistVersion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [error, setError] = useState<ErrorState | null>(null);
+  const [tuneError, setTuneError] = useState<ErrorState | null>(null);
+  const [isTuning, setIsTuning] = useState(false);
+  const [historyInitialized, setHistoryInitialized] = useState(false);
+
+  // Use usePromise for initial playlist generation (handles React Strict Mode correctly)
+  // Empty dependency array ensures this only runs once on mount
+  const {
+    data: initialPlaylist,
+    isLoading: isInitialLoading,
+    error: initialError,
+    revalidate,
+  } = usePromise(
+    async () => {
+      const prompt = props.arguments.description;
+      return await generatePlaylistFromPrompt(prompt);
+    },
+    [],
+    {
+      onError: (err) => {
+        showFailureToast(getErrorMessage(err), { title: "Could not generate playlist" });
+      },
+    },
+  );
+
+  // Initialize history when initialPlaylist becomes available (only once)
+  useEffect(() => {
+    if (initialPlaylist && !historyInitialized) {
+      setHistory([initialPlaylist]);
+      setCurrentIndex(0);
+      setHistoryInitialized(true);
+    }
+  }, [initialPlaylist, historyInitialized]);
 
   const currentPlaylist = history[currentIndex];
   const canRevert = currentIndex > 0;
   const canRedo = currentIndex < history.length - 1;
-
-  // Initial playlist generation
-  useEffect(() => {
-    generateInitialPlaylist();
-  }, []);
-
-  async function generateInitialPlaylist() {
-    const prompt = props.arguments.description;
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const data = await AI.ask(
-        `Generate a playlist of at least 20 songs and no more than 75 songs based strictly on the description "${prompt}", using ONLY the listed artists if any are explicitly mentioned, but if no artists are listed then infer culturally relevant songs, themes, and sub genres with high specificity, selecting deep and intentional tracks that fit the exact vibe, enforcing smooth energy progression and subgenre consistency, avoiding generic picks, and returning only a fully minified valid JSON object with the following structure:
-
-{
-  "name": <Playlist name>,
-  "description": <Playlist description>,
-  "tracks": [
-    {
-      "title": <Song title - use exact Spotify song name>,
-      "artist": <Primary artist name - use exact Spotify artist name>
-    },
-    ...
-  ]
-}
-
-IMPORTANT: Use exact song titles and artist names as they appear on Spotify. Avoid abbreviations, misspellings, or alternate versions of names. For featured artists, only include the primary/main artist.
-
-If you have listed fewer than 20 songs you must keep adding valid songs until the playlist length is at least 20.
-
-`,
-        { model: AI.Model["xAI_Grok-4.1_Fast"] },
-      );
-
-      const aiPlaylist = parseAiPlaylistResponse(data);
-      const spotifyTracks = await resolveTracksOnSpotify(aiPlaylist.tracks);
-
-      setHistory([
-        {
-          name: aiPlaylist.name,
-          description: aiPlaylist.description,
-          tracks: spotifyTracks,
-          prompt: prompt,
-        },
-      ]);
-      setCurrentIndex(0);
-      setError(null);
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      setError({
-        message: errorMessage,
-        failedPrompt: prompt,
-        isInitialGeneration: true,
-      });
-      setSearchText(prompt);
-      await showFailureToast(errorMessage, { title: "Could not generate playlist" });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const isLoading = isInitialLoading || isTuning;
 
   async function tunePlaylist(prompt: string) {
     if (!prompt.trim()) return;
-
-    // If we're in error state from initial generation, retry initial generation
-    if (error?.isInitialGeneration) {
-      await retryWithPrompt(prompt);
-      return;
-    }
-
     if (!currentPlaylist) return;
 
     try {
-      setIsLoading(true);
-      setError(null);
+      setIsTuning(true);
+      setTuneError(null);
 
       const currentTracksContext = currentPlaylist.tracks
         .filter(Boolean)
-        .map((t) => `- "${t!.name}" by ${t!.artists?.map((a) => a.name).join(", ")}`)
-        .join("\n");
+        .map((t) => `"${t!.name}" - ${t!.artists?.map((a) => a.name).join(", ")}`)
+        .join(", ");
 
-      const aiPrompt = `You are tuning an existing playlist. Here are the current songs:
+      const aiPrompt = `Current playlist: [${currentTracksContext}]
 
-${currentTracksContext}
+Modify with: "${prompt}"
 
-The user wants to modify this playlist with the following instruction: "${prompt}"
-
-Generate an updated playlist of 20-75 songs that follows this instruction. You may:
-- Keep songs that fit the new criteria
-- Remove songs that don't fit
-- Add new songs that match the user's request
-
-IMPORTANT: Return ONLY valid JSON, no markdown, no explanation. Use exact song titles and artist names as they appear on Spotify. Use this exact structure:
-{"name": "Playlist Name", "description": "Playlist description", "tracks": [{"title": "Exact Song Title", "artist": "Primary Artist Name"}]}
-
-Ensure all strings are properly escaped and there are no trailing commas.`;
+Return 10-25 songs as minified JSON only:
+{"name": "<Name>", "description": "<Desc>", "tracks": [{"title": "<Exact Spotify title>", "artist": "<Primary artist>"}]}`;
 
       await showToast({ style: Toast.Style.Animated, title: "Tuning playlist with AI..." });
 
-      const data = await AI.ask(aiPrompt, { model: AI.Model["xAI_Grok-4.1_Fast"] });
+      const data = await AI.ask(aiPrompt, { model: AI.Model["OpenAI_GPT4o-mini"] });
       const aiPlaylist = parseAiPlaylistResponse(data);
       const spotifyTracks = await resolveTracksOnSpotify(aiPlaylist.tracks);
 
@@ -324,7 +298,7 @@ Ensure all strings are properly escaped and there are no trailing commas.`;
       setHistory((prev) => [...prev.slice(0, currentIndex + 1), newVersion]);
       setCurrentIndex((prev) => prev + 1);
       setSearchText("");
-      setError(null);
+      setTuneError(null);
 
       await showToast({
         style: Toast.Style.Success,
@@ -333,84 +307,21 @@ Ensure all strings are properly escaped and there are no trailing commas.`;
       });
     } catch (err) {
       const errorMessage = getErrorMessage(err);
-      setError({
+      setTuneError({
         message: errorMessage,
         failedPrompt: prompt,
-        isInitialGeneration: false,
       });
       setSearchText(prompt);
       await showFailureToast(errorMessage, { title: "Could not tune playlist" });
     } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function retryWithPrompt(prompt: string) {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const data = await AI.ask(
-        `Generate a playlist of at least 20 songs and no more than 75 songs based strictly on the description "${prompt}", using ONLY the listed artists if any are explicitly mentioned, but if no artists are listed then infer culturally relevant songs, themes, and sub genres with high specificity, selecting deep and intentional tracks that fit the exact vibe, enforcing smooth energy progression and subgenre consistency, avoiding generic picks, and returning only a fully minified valid JSON object with the following structure:
-
-{
-  "name": <Playlist name>,
-  "description": <Playlist description>,
-  "tracks": [
-    {
-      "title": <Song title - use exact Spotify song name>,
-      "artist": <Primary artist name - use exact Spotify artist name>
-    },
-    ...
-  ]
-}
-
-IMPORTANT: Use exact song titles and artist names as they appear on Spotify. Avoid abbreviations, misspellings, or alternate versions of names. For featured artists, only include the primary/main artist.
-
-If you have listed fewer than 20 songs you must keep adding valid songs until the playlist length is at least 20.
-
-`,
-        { model: AI.Model["xAI_Grok-4.1_Fast"] },
-      );
-
-      const aiPlaylist = parseAiPlaylistResponse(data);
-      const spotifyTracks = await resolveTracksOnSpotify(aiPlaylist.tracks);
-
-      setHistory([
-        {
-          name: aiPlaylist.name,
-          description: aiPlaylist.description,
-          tracks: spotifyTracks,
-          prompt: prompt,
-        },
-      ]);
-      setCurrentIndex(0);
-      setSearchText("");
-      setError(null);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Playlist generated",
-        message: `"${aiPlaylist.name}" - ${spotifyTracks.filter(Boolean).length} songs`,
-      });
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      setError({
-        message: errorMessage,
-        failedPrompt: prompt,
-        isInitialGeneration: true,
-      });
-      setSearchText(prompt);
-      await showFailureToast(errorMessage, { title: "Could not generate playlist" });
-    } finally {
-      setIsLoading(false);
+      setIsTuning(false);
     }
   }
 
   function revertToPrevious() {
     if (canRevert) {
       setCurrentIndex((prev) => prev - 1);
-      setError(null);
+      setTuneError(null);
       showToast({ style: Toast.Style.Success, title: "Reverted to previous version" });
     }
   }
@@ -418,7 +329,7 @@ If you have listed fewer than 20 songs you must keep adding valid songs until th
   function redoNext() {
     if (canRedo) {
       setCurrentIndex((prev) => prev + 1);
-      setError(null);
+      setTuneError(null);
       showToast({ style: Toast.Style.Success, title: "Restored next version" });
     }
   }
@@ -426,7 +337,7 @@ If you have listed fewer than 20 songs you must keep adding valid songs until th
   function jumpToVersion(index: number) {
     if (index >= 0 && index < history.length) {
       setCurrentIndex(index);
-      setError(null);
+      setTuneError(null);
       showToast({ style: Toast.Style.Success, title: `Jumped to version ${index + 1}` });
     }
   }
@@ -480,6 +391,7 @@ If you have listed fewer than 20 songs you must keep adding valid songs until th
         async () => {
           await play({ uris: trackUris });
         },
+        // Retry logic to handle cases where Spotify is not open yet.
         { retries: 3, minTimeout: 1000 },
       );
 
@@ -553,16 +465,20 @@ If you have listed fewer than 20 songs you must keep adding valid songs until th
     }
   }
 
-  // The AI might return duplicate songs, so we need to filter them out
-  const tracks = [...new Set(currentPlaylist?.tracks)];
-  const hasPlaylist = tracks && tracks.length > 0 && !error;
+  // The AI might return duplicate songs, so we need to filter them out by track ID
+  const tracks =
+    currentPlaylist?.tracks?.filter(
+      (track, index, arr) => track && arr.findIndex((t) => t?.id === track.id) === index,
+    ) ?? [];
+  const hasPlaylist = tracks && tracks.length > 0;
+  const hasError = initialError || tuneError;
 
   // Determine placeholder text based on state
   const getPlaceholder = () => {
     if (isLoading) {
       return history.length === 0 ? "Generating playlist..." : "Tuning playlist...";
     }
-    if (error) {
+    if (hasError) {
       return "Edit prompt and press Enter to retry";
     }
     return "Search songs or enter a prompt to tune";
@@ -576,13 +492,35 @@ If you have listed fewer than 20 songs you must keep adding valid songs until th
         onSearchTextChange={setSearchText}
         searchBarPlaceholder={getPlaceholder()}
       >
-        {/* Error state UI */}
-        {error && !isLoading && (
+        {/* Initial generation error state */}
+        {initialError && !isLoading && (
           <>
             <List.Item
               icon={Icon.ExclamationMark}
               title="Error"
-              subtitle={error.message}
+              subtitle={getErrorMessage(initialError)}
+              accessories={[{ tag: { value: "Failed", color: "#FF6B6B" } }]}
+            />
+            <List.Item
+              icon={Icon.RotateClockwise}
+              title="Retry"
+              subtitle="Press Enter to retry generating the playlist"
+              actions={
+                <ActionPanel>
+                  <Action title="Retry" icon={Icon.RotateClockwise} onAction={() => revalidate()} />
+                </ActionPanel>
+              }
+            />
+          </>
+        )}
+
+        {/* Tuning error state */}
+        {tuneError && !isLoading && (
+          <>
+            <List.Item
+              icon={Icon.ExclamationMark}
+              title="Tuning Error"
+              subtitle={tuneError.message}
               accessories={[{ tag: { value: "Failed", color: "#FF6B6B" } }]}
             />
             <List.Item
@@ -595,36 +533,28 @@ If you have listed fewer than 20 songs you must keep adding valid songs until th
                     title="Retry"
                     icon={Icon.RotateClockwise}
                     onAction={() => {
-                      const promptToUse = searchText.trim() || error.failedPrompt;
-                      if (error.isInitialGeneration) {
-                        retryWithPrompt(promptToUse);
-                      } else {
-                        tunePlaylist(promptToUse);
-                      }
+                      const promptToUse = searchText.trim() || tuneError.failedPrompt;
+                      tunePlaylist(promptToUse);
                     }}
                   />
                 </ActionPanel>
               }
             />
-
-            {/* If we have previous history, allow reverting */}
-            {history.length > 0 && !error.isInitialGeneration && (
-              <List.Item
-                icon={Icon.ArrowCounterClockwise}
-                title="Keep Previous Version"
-                subtitle={`Stay with "${currentPlaylist?.name}"`}
-                actions={
-                  <ActionPanel>
-                    <Action title="Keep Previous" icon={Icon.ArrowCounterClockwise} onAction={() => setError(null)} />
-                  </ActionPanel>
-                }
-              />
-            )}
+            <List.Item
+              icon={Icon.ArrowCounterClockwise}
+              title="Keep Previous Version"
+              subtitle={`Stay with "${currentPlaylist?.name}"`}
+              actions={
+                <ActionPanel>
+                  <Action title="Keep Previous" icon={Icon.ArrowCounterClockwise} onAction={() => setTuneError(null)} />
+                </ActionPanel>
+              }
+            />
           </>
         )}
 
         {/* Normal playlist UI - only show when no error */}
-        {hasPlaylist && (
+        {hasPlaylist && !hasError && (
           <>
             <List.Item
               icon={Icon.Wand}
@@ -714,12 +644,12 @@ If you have listed fewer than 20 songs you must keep adding valid songs until th
           </>
         )}
 
-        {/* Track list - show even during error if we have previous tracks */}
+        {/* Track list - show even during tuning error if we have tracks */}
         {tracks && tracks.length > 0 && (
-          <List.Section title={error ? `Previous: ${currentPlaylist?.name}` : currentPlaylist?.name}>
-            {tracks.map((track) => {
+          <List.Section title={tuneError ? `Previous: ${currentPlaylist?.name}` : currentPlaylist?.name}>
+            {tracks.map((track, index) => {
               if (!track) return null;
-              return <TrackListItem key={track.id} track={track} album={track.album} showGoToAlbum />;
+              return <TrackListItem key={`${track.id}-${index}`} track={track} album={track.album} showGoToAlbum />;
             })}
           </List.Section>
         )}
