@@ -122,8 +122,8 @@ function makeRequest(
     };
 
     const req = lib.request(options, (res) => {
-      const chunks: Buffer[] = [];
-      res.on("data", (chunk) => chunks.push(chunk));
+      const chunks: Uint8Array[] = [];
+      res.on("data", (chunk: Uint8Array) => chunks.push(chunk));
       res.on("end", () => {
         const data = Buffer.concat(chunks);
         if (res.statusCode === 200) {

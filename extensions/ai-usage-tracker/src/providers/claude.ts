@@ -99,7 +99,7 @@ function loadCredentials(): CredentialsResult | null {
   const isExpired = Date.now() >= expiresAtMs;
 
   return {
-    token: oauth.accessToken,
+    token: oauth.accessToken!,
     refreshToken: oauth.refreshToken,
     scopes: oauth.scopes,
     isExpired,
@@ -325,13 +325,11 @@ export async function fetchClaudeUsage(): Promise<ProviderUsage> {
 
   let accessToken = credentials.token;
   const scopes = credentials.scopes ?? OAUTH_SCOPES;
+  const refreshToken = credentials.refreshToken;
 
   async function tryRefresh(): Promise<string | null> {
-    if (!credentials.refreshToken) return null;
-    const refreshed = await refreshAccessToken(
-      credentials.refreshToken,
-      scopes,
-    );
+    if (!refreshToken) return null;
+    const refreshed = await refreshAccessToken(refreshToken, scopes);
     return refreshed?.accessToken ?? null;
   }
 
