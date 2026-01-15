@@ -331,28 +331,36 @@ tell application "iTerm"
 end tell`;
 }
 
+// Escape string for AppleScript double-quoted strings
+function escapeForAppleScript(str: string): string {
+  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 function openInTerminal(
   projectPath: string,
   continueSession: boolean,
   terminal: string,
   t: I18nStrings,
 ) {
-  const escapedPath = projectPath.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   const claudeCmd = continueSession ? "claude -c" : "claude";
-  const fullCmd = `cd "${escapedPath}" && ${claudeCmd}`;
+  // Use single quotes for shell (only need to escape single quotes)
+  const shellSafePath = projectPath.replace(/'/g, `'"'"'`);
+  const fullCmd = `cd '${shellSafePath}' && ${claudeCmd}`;
+  // Escape entire command for AppleScript embedding
+  const appleScriptCmd = escapeForAppleScript(fullCmd);
 
   let script: string;
 
   switch (terminal) {
     case "iterm":
-      script = getITermScript(fullCmd);
+      script = getITermScript(appleScriptCmd);
       break;
 
     case "terminal":
       script = `
 tell application "Terminal"
   activate
-  do script "${fullCmd}"
+  do script "${appleScriptCmd}"
 end tell`;
       break;
 
@@ -365,7 +373,7 @@ delay 0.5
 tell application "System Events"
   keystroke "t" using command down
   delay 0.3
-  keystroke "${fullCmd}"
+  keystroke "${appleScriptCmd}"
   keystroke return
 end tell`;
       break;
@@ -577,7 +585,7 @@ export default function Command() {
               <Action
                 title={t.openPreferences}
                 icon={Icon.Gear}
-                shortcut={{ modifiers: ["cmd"], key: "," }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                 onAction={openExtensionPreferences}
               />
             </ActionPanel.Section>
