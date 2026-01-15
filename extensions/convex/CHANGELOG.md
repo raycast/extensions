@@ -31,7 +31,7 @@
 - Fixed search functionality in Manage Projects - teams, projects, and deployments can now be filtered by name and slug
 - Fixed authentication state management to properly reflect logout across the UI
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-15
 
 ### Added
 
