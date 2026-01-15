@@ -1,6 +1,6 @@
 # Netherlands Railways Train Search Changelog
 
-## [0.0.4] - {PR_MERGE_DATE}
+## [0.0.4] - 2026-01-15
 
 - Added "Reverse Direction" action to swap From and To stations (⌘R)
 
