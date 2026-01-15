@@ -30,7 +30,7 @@ jobs:
       - uses: actions/stale@v9
         with:
           repo-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-
+          only-issue-labels: "never-match-this"
           # PRs
           stale-pr-message: "This pull request has been automatically marked as stale because it did not have any recent activity.\n\nIt will be closed if no further activity occurs in the next 7 days to keep our backlog clean 😊"
           close-pr-message: "This pull request has been automatically closed due to inactivity.\n\nFeel free to comment in the thread when you're ready to continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss this."
