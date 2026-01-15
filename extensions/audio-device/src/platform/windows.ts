@@ -125,7 +125,7 @@ function mapTransportType(deviceName: string): string {
 async function setDefault(deviceId: string, type: "input" | "output", communication = false): Promise<void> {
   await ensureAudioModule();
 
-  const setCommand = `Set-AudioDevice -ID '${deviceId}' ${communication ? "-CommunicationOnly" : "-DefaultOnly"}`;
+  const setCommand = `Set-AudioDevice -ID ([System.Security.SecurityElement]::Escape('${deviceId}')) ${communication ? "-CommunicationOnly" : "-DefaultOnly"}`;
 
   await runPowerShell(setCommand);
 }
