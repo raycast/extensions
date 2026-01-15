@@ -14,7 +14,9 @@ import { presentMakeApiError } from "./make-api";
 import { toScenarioEditUrl } from "./make-browser-url";
 import { ScenarioLogs } from "./scenario-logs";
 import type {
+  GetHookResponse,
   GetScenarioResponse,
+  MakeHook,
   MakeScenario,
   StartStopScenarioResponse,
 } from "./types";
@@ -63,18 +65,44 @@ export function ScenarioDetail(props: Props) {
   const [scenario, setScenario] = useState<MakeScenario | null>(
     props.initialScenario ?? null,
   );
+  const [hook, setHook] = useState<MakeHook | null>(null);
   const consumptionOps =
     typeof props.consumptionOperations === "number"
       ? props.consumptionOperations
       : null;
 
+  // Get webhook queue count from hook
+  const webhookQueueCount = hook?.queueCount ?? 0;
+
   async function refreshScenario() {
     try {
       setIsLoading(true);
-      const res = await props.client.getJson<GetScenarioResponse>(
+      const scenarioRes = await props.client.getJson<GetScenarioResponse>(
         `/api/v2/scenarios/${props.scenarioId}`,
       );
-      setScenario(res.scenario);
+
+      // Debug logging
+      console.log("Scenario response:", JSON.stringify(scenarioRes.scenario));
+      console.log("dlqCount:", scenarioRes.scenario?.dlqCount);
+      console.log("hookId:", scenarioRes.scenario?.hookId);
+
+      setScenario(scenarioRes.scenario);
+
+      // Fetch hook details if scenario has a webhook
+      if (scenarioRes.scenario?.hookId) {
+        try {
+          const hookRes = await props.client.getJson<GetHookResponse>(
+            `/api/v2/hooks/${scenarioRes.scenario.hookId}`,
+          );
+          console.log("Hook response:", JSON.stringify(hookRes.hook));
+          setHook(hookRes.hook);
+        } catch (err) {
+          console.error("Failed to fetch hook:", err);
+          setHook(null);
+        }
+      } else {
+        setHook(null);
+      }
     } catch (e) {
       await presentMakeApiError(e, "Failed to load scenario");
     } finally {
@@ -232,6 +260,21 @@ export function ScenarioDetail(props: Props) {
               title="Scheduling"
               text={schedulingSummary(s)}
             />
+            <Detail.Metadata.Separator />
+            {typeof s.dlqCount === "number" && s.dlqCount > 0 ? (
+              <Detail.Metadata.Label
+                title="Incomplete Executions"
+                text={`${s.dlqCount}`}
+                icon={{ source: Icon.ExclamationMark, tintColor: "red" }}
+              />
+            ) : null}
+            {webhookQueueCount > 0 ? (
+              <Detail.Metadata.Label
+                title="Webhook Queue"
+                text={`${webhookQueueCount}`}
+                icon={{ source: Icon.Clock, tintColor: "orange" }}
+              />
+            ) : null}
           </Detail.Metadata>
         ) : null
       }
@@ -246,6 +289,9 @@ export function ScenarioDetail(props: Props) {
                 baseUrl={props.baseUrl}
                 teamId={props.teamId}
                 scenarioId={props.scenarioId}
+                dlqCount={s?.dlqCount}
+                hookId={s?.hookId}
+                webhookQueueCount={webhookQueueCount}
               />
             }
           />
