@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openhue",
-  "title": "Openhue",
+  "title": "OpenHue",
   "description": "Control your Philips Hue lightning system from Raycast",
   "icon": "extension-icon.png",
-  "author": "thibault_pensec",
+  "author": "thibauult",
   "platforms": [
     "macOS",
     "Windows"

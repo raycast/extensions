@@ -1,6 +1,6 @@
 # OpenHue
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub issues](https://img.shields.io/github/issues/openhue/openhue-raycast)](https://github.com/openhue/openhue-raycast/issues)
 [![GitHub stars](https://img.shields.io/github/stars/openhue/openhue-raycast)](https://github.com/openhue/openhue-raycast/stargazers)
 
