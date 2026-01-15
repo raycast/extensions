@@ -41,6 +41,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
       detached: true,
       stdio: "ignore",
     });
+    child.unref();
 
     if (child.pid) {
       addTimer({
@@ -53,8 +54,6 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
         dueTime: Date.now() + delayInSeconds * 1000,
       });
     }
-
-    child.unref();
 
     await showToast({
       style: Toast.Style.Success,
