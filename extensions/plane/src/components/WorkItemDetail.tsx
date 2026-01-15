@@ -46,6 +46,16 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
         ? {
             metadata: (
               <Detail.Metadata>
+                {project && (
+                  <Detail.Metadata.Label
+                    title="Identifier"
+                    text={`${project.identifier}-${workItem.sequenceId}`}
+                    icon={Icon.BullsEye}
+                  />
+                )}
+                <Detail.Metadata.Separator />
+                {project && <Detail.Metadata.Label title="Project" text={project?.name} icon={Icon.Folder} />}
+                <Detail.Metadata.Separator />
                 {state && <Detail.Metadata.Label title="State" text={state.name} icon={getStateIcon(state)} />}
 
                 <Detail.Metadata.Label
@@ -54,6 +64,14 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
                   icon={priorityToIcon(workItem.priority as PriorityEnum)}
                 />
 
+                {workItem.startDate ? (
+                  <Detail.Metadata.Label
+                    title="Start Date"
+                    text={format(new Date(workItem.startDate), "MM/dd/yyyy")}
+                    icon={Icon.Calendar}
+                  />
+                ) : null}
+
                 {workItem.targetDate ? (
                   <Detail.Metadata.Label
                     title="Due Date"
@@ -61,10 +79,6 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
                     icon={Icon.Calendar}
                   />
                 ) : null}
-
-                <Detail.Metadata.Separator />
-
-                <Detail.Metadata.Label title="Project" text={project?.name} icon={Icon.Folder} />
               </Detail.Metadata>
             ),
             actions: (
