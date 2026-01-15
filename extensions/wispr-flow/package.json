@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wispr-flow",
+  "title": "Wispr Flow - Voice to Text",
+  "description": "Start and stop voice recording with Wispr Flow.",
+  "icon": "icon.png",
+  "author": "mattiacolombomc",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "wispr-flow",
+      "title": "Wispr Flow",
+      "subtitle": "Wispr Flow",
+      "description": "Control Wispr Flow voice recording",
+      "mode": "view"
+    },
+    {
+      "name": "start-recording",
+      "title": "Start Recording",
+      "subtitle": "Wispr Flow",
+      "description": "Start voice recording",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "subtitle": "Wispr Flow",
+      "description": "Stop voice recording",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-app",
+      "title": "Open Wispr Flow",
+      "subtitle": "Wispr Flow",
+      "description": "Open Wispr Flow app",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@raycast"
+    ]
+  }
+}
