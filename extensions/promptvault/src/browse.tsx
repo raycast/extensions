@@ -446,7 +446,7 @@ ${content}
                     title={showArchived ? "Hide Archived" : "Show Archived"}
                     onAction={() => setShowArchived(!showArchived)}
                     icon={showArchived ? Icon.EyeDisabled : Icon.Tray}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
                   />
 
                   <Action

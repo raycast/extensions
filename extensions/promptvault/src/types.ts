@@ -1,12 +1,4 @@
 /**
- * Raycast extension preferences
- */
-export type Preferences = {
-  apiUrl: string;
-  apiKey: string;
-};
-
-/**
  * Category from API
  */
 export type Category = {

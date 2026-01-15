@@ -20,6 +20,6 @@
       "react": ["./node_modules/@types/react"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "exclude": ["node_modules", "dist", "../../node_modules"]
 }
