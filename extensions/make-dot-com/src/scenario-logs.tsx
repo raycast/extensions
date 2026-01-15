@@ -22,7 +22,7 @@ type Props = {
   teamId: number;
   scenarioId: number;
   dlqCount?: number;
-  hookId?: number | null;
+  hookId?: number | null | undefined;
   webhookQueueCount?: number;
 };
 
