@@ -1,6 +1,6 @@
 # Quick Jump Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-01-15
 
 ### Added
 - Detail views for URLs and groups (Cmd+D) showing comprehensive information including URLs, tags, placeholders, templates, and search keywords
