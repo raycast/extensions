@@ -1,0 +1,197 @@
+import { getPreferenceValues } from "@raycast/api";
+import https from "https";
+import fs from "fs";
+import os from "os";
+import path from "path";
+import { parse as parseYaml } from "yaml";
+import { ApiResponse, Preferences } from "./types";
+
+// Path to openhue config file
+const OPENHUE_CONFIG_PATH = path.join(os.homedir(), ".openhue", "config.yaml");
+
+export class HueApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public errors?: Array<{ description: string }>,
+  ) {
+    super(message);
+    this.name = "HueApiError";
+  }
+}
+
+interface OpenHueConfig {
+  bridge?: string;
+  key?: string;
+}
+
+/**
+ * Load credentials from the openhue config file (~/.openhue/config.yaml)
+ */
+function loadOpenHueConfig(): { bridgeIP: string; applicationKey: string } | null {
+  try {
+    if (!fs.existsSync(OPENHUE_CONFIG_PATH)) {
+      return null;
+    }
+
+    const content = fs.readFileSync(OPENHUE_CONFIG_PATH, "utf-8");
+    const config = parseYaml(content) as OpenHueConfig;
+
+    if (config.bridge && config.key) {
+      return {
+        bridgeIP: config.bridge,
+        applicationKey: config.key,
+      };
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Get credentials from (in order of priority):
+ * 1. Raycast extension preferences
+ * 2. OpenHue config file (~/.openhue/config.yaml)
+ */
+export function getCredentials(): { bridgeIP: string; applicationKey: string } | null {
+  // First, try Raycast preferences
+  const preferences = getPreferenceValues<Preferences>();
+
+  if (preferences.bridgeIP && preferences.applicationKey) {
+    return {
+      bridgeIP: preferences.bridgeIP,
+      applicationKey: preferences.applicationKey,
+    };
+  }
+
+  // Fall back to openhue config file
+  return loadOpenHueConfig();
+}
+
+export function getBridgeBaseUrl(bridgeIP: string): string {
+  return `https://${bridgeIP}`;
+}
+
+/**
+ * Make an HTTPS request to the Hue Bridge.
+ * Uses Node.js https module directly to handle self-signed certificates.
+ */
+export async function hueRequest<T>(
+  endpoint: string,
+  options: {
+    method?: "GET" | "PUT" | "POST" | "DELETE";
+    body?: unknown;
+    bridgeIP?: string;
+    applicationKey?: string;
+  } = {},
+): Promise<T> {
+  const { method = "GET", body, bridgeIP, applicationKey } = options;
+
+  // Use provided credentials or get from preferences
+  let ip = bridgeIP;
+  let key = applicationKey;
+
+  if (!ip || !key) {
+    const credentials = getCredentials();
+    if (!credentials) {
+      throw new HueApiError("Bridge not configured. Please run Setup Hue Bridge first.");
+    }
+    ip = credentials.bridgeIP;
+    key = credentials.applicationKey;
+  }
+
+  // Debug logging
+  console.log(`[hueRequest] endpoint=${endpoint}, ip=${ip}, key=${key ? key.substring(0, 8) + "..." : "NONE"}`);
+
+  return new Promise((resolve, reject) => {
+    const postData = body ? JSON.stringify(body) : undefined;
+
+    const headers: Record<string, string | number> = {
+      "Content-Type": "application/json",
+    };
+
+    // Add application key for authenticated endpoints
+    if (key && !endpoint.startsWith("/api")) {
+      headers["hue-application-key"] = key;
+    }
+
+    console.log(`[hueRequest] headers:`, JSON.stringify(headers));
+
+    if (postData) {
+      headers["Content-Length"] = Buffer.byteLength(postData);
+    }
+
+    const reqOptions: https.RequestOptions = {
+      hostname: ip,
+      port: 443,
+      path: endpoint,
+      method: method,
+      headers: headers,
+      rejectUnauthorized: false, // Accept self-signed certificates
+    };
+
+    const req = https.request(reqOptions, (res) => {
+      let data = "";
+
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+
+      res.on("end", () => {
+        try {
+          // Check HTTP status first
+          if (res.statusCode && res.statusCode >= 400) {
+            reject(new HueApiError(`HTTP ${res.statusCode}: ${data.substring(0, 200)}`, res.statusCode));
+            return;
+          }
+
+          const parsed = JSON.parse(data);
+
+          // Check for API errors in the response
+          if (parsed.errors && parsed.errors.length > 0) {
+            reject(new HueApiError(parsed.errors[0].description, res.statusCode, parsed.errors));
+            return;
+          }
+
+          resolve(parsed as T);
+        } catch {
+          // Include status code and more of the response in error
+          const preview = data.substring(0, 300).replace(/\n/g, " ");
+          reject(new HueApiError(`Failed to parse (HTTP ${res.statusCode}): ${preview}`, res.statusCode));
+        }
+      });
+    });
+
+    req.on("error", (e) => {
+      reject(new HueApiError(`Connection failed: ${e.message}`));
+    });
+
+    req.setTimeout(15000, () => {
+      req.destroy();
+      reject(new HueApiError("Request timeout"));
+    });
+
+    if (postData) {
+      req.write(postData);
+    }
+    req.end();
+  });
+}
+
+export async function hueGet<T>(endpoint: string): Promise<ApiResponse<T>> {
+  return hueRequest<ApiResponse<T>>(endpoint, { method: "GET" });
+}
+
+export async function huePut<T>(endpoint: string, body: unknown): Promise<ApiResponse<T>> {
+  return hueRequest<ApiResponse<T>>(endpoint, { method: "PUT", body });
+}
+
+export async function huePost<T>(endpoint: string, body: unknown): Promise<T> {
+  return hueRequest<T>(endpoint, { method: "POST", body });
+}
+
+export async function hueDelete<T>(endpoint: string): Promise<ApiResponse<T>> {
+  return hueRequest<ApiResponse<T>>(endpoint, { method: "DELETE" });
+}

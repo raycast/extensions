@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openhue",
+  "title": "Openhue",
+  "description": "Control your Philips Hue lightning system from Raycast",
+  "icon": "extension-icon.png",
+  "author": "thibault_pensec",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lights",
+      "title": "Control Lights",
+      "description": "View and control individual Hue lights",
+      "mode": "view"
+    },
+    {
+      "name": "rooms",
+      "title": "Control Rooms",
+      "description": "View and control Hue rooms",
+      "mode": "view"
+    },
+    {
+      "name": "scenes",
+      "title": "Activate Scenes",
+      "description": "Browse and activate Hue scenes",
+      "mode": "view"
+    },
+    {
+      "name": "setup",
+      "title": "Setup Hue Bridge",
+      "description": "Connect to your Philips Hue Bridge",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bridgeIP",
+      "title": "Bridge IP Address",
+      "description": "IP address of your Hue Bridge (leave empty to auto-discover)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "applicationKey",
+      "title": "Application Key",
+      "description": "Hue application key (obtained during setup)",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
