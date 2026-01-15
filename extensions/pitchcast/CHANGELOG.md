@@ -1,3 +1,3 @@
-# pitch Changelog
+# Pitchcast Changelog
 
-## [Initial Version] - 2025-10-16
+## [Initial Version] - 2026-01-14
