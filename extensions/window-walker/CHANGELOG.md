@@ -1,6 +1,6 @@
 # Changelog
 
-## [Encoding Fixes] - {PR_MERGE_DATE}
+## [Encoding Fixes] - 2026-01-15
 
 ### Fixed
 
