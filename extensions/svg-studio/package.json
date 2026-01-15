@@ -43,5 +43,8 @@
   "prettier": {
     "printWidth": 120,
     "singleQuote": false
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
