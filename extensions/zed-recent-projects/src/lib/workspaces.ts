@@ -44,7 +44,6 @@ export interface Workspace {
   uri: string;
   host?: string;
   isOpen?: boolean;
-  allPaths?: string[];
   wsl?: { user: string | null; distro: string | null } | null;
 }
 
@@ -67,19 +66,13 @@ export function parseZedWorkspace(zedWorkspace: ZedWorkspace): Workspace | null 
 
   if (zedWorkspace.type === "local") {
     const processedPath = path.replace(/\/+$/, "");
-    const workspace: Workspace = {
+    return {
       id: zedWorkspace.id,
       lastOpened: zedWorkspace.timestamp,
       type: zedWorkspace.type,
       uri: "file://" + processedPath,
       path: processedPath,
     };
-
-    if (paths.length > 1) {
-      workspace.allPaths = paths;
-    }
-
-    return workspace;
   }
 
   if (zedWorkspace.type === "remote") {
@@ -90,21 +83,15 @@ export function parseZedWorkspace(zedWorkspace: ZedWorkspace): Workspace | null 
 
     const hasWsl = "kind" in zedWorkspace && zedWorkspace.kind === "wsl" && zedWorkspace.user && zedWorkspace.distro;
     const wsl = hasWsl ? { user: zedWorkspace.user, distro: zedWorkspace.distro } : null;
-    const workspace: Workspace = {
+    return {
       id: zedWorkspace.id,
       lastOpened: zedWorkspace.timestamp,
       type: zedWorkspace.type,
       uri,
       path: processedPath,
       host: zedWorkspace.host,
+      ...(hasWsl && { wsl }),
     };
-
-    if (hasWsl) workspace.wsl = wsl;
-    if (paths.length > 1) {
-      workspace.allPaths = paths.map((p) => p.replace(/^\/+/, "").replace(/\/+$/, ""));
-    }
-
-    return workspace;
   }
 
   return null;

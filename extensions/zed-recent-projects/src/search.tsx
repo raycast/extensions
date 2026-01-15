@@ -7,7 +7,8 @@ import { EntryItem } from "./components/entry-item";
 import { usePinnedEntries } from "./hooks/use-pinned-entries";
 import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
 import { Workspace } from "./lib/workspaces";
-import { closeZedWindow, getZedBundleId, openMultiFolderInZed, ZedBuild } from "./lib/zed";
+import { closeZedWindow, getZedBundleId, ZedBuild } from "./lib/zed";
+import { showOpenStatus } from "./lib/preferences";
 import { execWindowsZed } from "./lib/windows";
 import { platform } from "os";
 
@@ -80,13 +81,13 @@ export function Command() {
             <EntryItem
               key={entry.uri}
               entry={entry}
-              keywords={[entry.isOpen ? "open" : "closed"]}
+              keywords={showOpenStatus ? [entry.isOpen ? "open" : "closed"] : undefined}
               actions={
                 <ActionPanel>
-                  <OpenInZedAction entry={entry} allPaths={entry.allPaths} zedBuild={zedBuild} />
+                  <OpenInZedAction entry={entry} />
                   {isMac && entry.isOpen && (
                     <Action
-                      title="Close Project"
+                      title="Close Project Window"
                       icon={Icon.XMarkCircle}
                       onAction={() => closeEntry(entry)}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
@@ -146,18 +147,13 @@ export function Command() {
               <EntryItem
                 key={entry.uri}
                 entry={entry}
-                keywords={[entry.isOpen ? "open" : "closed"]}
+                keywords={showOpenStatus ? [entry.isOpen ? "open" : "closed"] : undefined}
                 actions={
                   <ActionPanel>
-                    <OpenInZedAction
-                      entry={entry}
-                      allPaths={entry.allPaths}
-                      zedBuild={zedBuild}
-                      onOpen={() => openEntry(workspace)}
-                    />
+                    <OpenInZedAction entry={entry} onOpen={() => openEntry(workspace)} />
                     {isMac && entry.isOpen && (
                       <Action
-                        title="Close Project"
+                        title="Close Project Window"
                         icon={Icon.XMarkCircle}
                         onAction={() => closeEntry(entry)}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
@@ -189,27 +185,13 @@ export function Command() {
   );
 }
 
-function OpenInZedAction({
-  entry,
-  allPaths,
-  zedBuild,
-  onOpen,
-}: {
-  entry: Entry;
-  allPaths?: string[];
-  zedBuild: ZedBuild;
-  onOpen?: () => void;
-}) {
+function OpenInZedAction({ entry, onOpen }: { entry: Entry; onOpen?: () => void }) {
   const { app } = useZedContext();
   const zedIcon = { fileIcon: app.path };
   const openZedInWsl = () => execWindowsZed(["--wsl", `${entry.wsl?.user}@${entry.wsl?.distro}`, `/${entry.path}`]);
 
   if (entry.wsl) {
     return <Action title="Open in Zed" onAction={openZedInWsl} icon={zedIcon} />;
-  }
-
-  if (allPaths && allPaths.length > 1) {
-    return <Action title="Open in Zed" icon={zedIcon} onAction={() => openMultiFolderInZed(entry, zedBuild)} />;
   }
 
   if (onOpen) {

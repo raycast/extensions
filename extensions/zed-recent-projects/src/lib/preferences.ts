@@ -6,6 +6,6 @@ export const zedBuild = preferences.build;
 
 export const showGitBranch = preferences.showGitBranch;
 
-export const showColoredIcons = preferences.showColoredIcons;
+export const projectIconStyle = preferences.projectIconStyle;
 
 export const showOpenStatus = preferences.showOpenStatus;

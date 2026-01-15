@@ -32,10 +32,6 @@ exports[`parseZedWorkspace > parse WSL workspace with user and distro 1`] = `
 
 exports[`parseZedWorkspace > parse local workspace with multiple paths 1`] = `
 {
-  "allPaths": [
-    "/Users/raycast/Projects/zed-project-1",
-    "/Users/raycast/Projects/zed-project-2",
-  ],
   "id": 1,
   "lastOpened": 1757750879526,
   "path": "/Users/raycast/Projects/zed-project-1",
@@ -56,10 +52,6 @@ exports[`parseZedWorkspace > parse local workspace with single path 1`] = `
 
 exports[`parseZedWorkspace > parse remote workspace with multiple paths 1`] = `
 {
-  "allPaths": [
-    "home/user/project1",
-    "home/user/project2",
-  ],
   "host": "example.com",
   "id": 1,
   "lastOpened": 1757750879526,

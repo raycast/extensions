@@ -3,10 +3,10 @@ import { Color, Icon, List } from "@raycast/api";
 import { Entry } from "../lib/entry";
 import { getGitBranch } from "../lib/git";
 import { showFailureToast } from "@raycast/utils";
-import { showGitBranch, showColoredIcons, showOpenStatus } from "../lib/preferences";
+import { showGitBranch, projectIconStyle, showOpenStatus } from "../lib/preferences";
 import ColorHash from "color-hash";
 
-const colorHash = showColoredIcons ? new ColorHash({ saturation: 0.7, lightness: 0.7 }) : null;
+const colorHash = projectIconStyle === "colored-dot" ? new ColorHash({ saturation: 0.7, lightness: 0.7 }) : null;
 
 export interface EntryItemProps extends Pick<List.Item.Props, "icon" | "accessoryIcon" | "actions" | "keywords"> {
   entry: Entry;
@@ -43,7 +43,7 @@ function getEntryIcon(entry: Entry): List.Item.Props["icon"] {
   }
 
   // Use colored dots if preference is enabled
-  if (showColoredIcons && colorHash) {
+  if (projectIconStyle === "colored-dot" && colorHash) {
     return { source: Icon.Dot, tintColor: colorHash.hex(entry.title) };
   }
 

@@ -78,13 +78,22 @@
       "description": "Display the current Git branch for files and folders in Git repositories"
     },
     {
-      "name": "showColoredIcons",
-      "type": "checkbox",
+      "name": "projectIconStyle",
+      "type": "dropdown",
       "title": "Visual Customization",
       "required": false,
-      "label": "Show Colored Icons",
-      "default": false,
-      "description": "Use colored dots instead of folder icons for easier visual identification of projects"
+      "default": "icon",
+      "description": "Choose how project icons are displayed",
+      "data": [
+        {
+          "value": "icon",
+          "title": "Icons"
+        },
+        {
+          "value": "colored-dot",
+          "title": "Colored Dots"
+        }
+      ]
     },
     {
       "name": "showOpenStatus",
