@@ -5,9 +5,14 @@ export interface ParsedPreferences {
   activeIntervalSeconds: number;
   activeIntervalMinutes: number;
   idleThresholdSeconds: number;
-  enableConfetti: boolean;
 }
 
+/**
+ * Retrieves and parses user preferences with fallback to defaults.
+ * Converts string preferences to numbers and performs validation.
+ *
+ * @returns {ParsedPreferences} Parsed preference values with computed fields
+ */
 export function getParsedPreferences(): ParsedPreferences {
   const preferences = getPreferenceValues<Preferences>();
 
@@ -18,6 +23,5 @@ export function getParsedPreferences(): ParsedPreferences {
     activeIntervalSeconds: activeIntervalMinutes * 60,
     activeIntervalMinutes,
     idleThresholdSeconds,
-    enableConfetti: preferences.enableConfetti ?? true,
   };
 }

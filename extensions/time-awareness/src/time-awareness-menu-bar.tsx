@@ -1,42 +1,35 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
 import { ICONS } from "./constants";
-import { processActiveState } from "./services/active-session";
-import { triggerIntervalCompleteNotification } from "./utils/notifications";
-import { getParsedPreferences } from "./utils/preferences";
-import { resetActiveState, resetSessionTimeOnly, resetStatsOnly } from "./utils/storage";
+import { useActiveSession } from "./hooks/useActiveSession";
+import { useConfettiSetting } from "./hooks/useConfettiSetting";
 import { formatTime } from "./utils/time";
 
 export default function Command() {
-  const { activeIntervalMinutes } = getParsedPreferences();
+  const session = useActiveSession();
+  const { confettiEnabled, toggleConfetti } = useConfettiSetting();
 
-  const {
-    data: state,
-    isLoading,
-    revalidate,
-  } = usePromise(processActiveState, [], {
-    onData: async ({ shouldNotify }) => {
-      if (shouldNotify) {
-        await triggerIntervalCompleteNotification(activeIntervalMinutes);
-      }
-    },
-    onError: (error) => {
-      showFailureToast(error, { title: "Failed to check active status" });
-    },
-  });
-
-  const activeSeconds = state?.accumulatedActiveSeconds ?? 0;
-  const sessionCount = state?.sessionCount ?? 0;
-  const isIdle = state?.isIdle ?? false;
+  const menuBarTitle = session.showAchievement
+    ? ICONS.ACHIEVEMENT
+    : session.isIdle
+      ? ICONS.IDLE_HEART
+      : formatTime(session.activeSeconds, false);
 
   return (
-    <MenuBarExtra title={isIdle ? ICONS.IDLE_HEART : formatTime(activeSeconds, false)} isLoading={isLoading}>
+    <MenuBarExtra title={menuBarTitle} isLoading={session.isLoading}>
       <MenuBarExtra.Section title="Current Session">
-        <MenuBarExtra.Item title={`Active Time: ${formatTime(activeSeconds)}`} />
+        <MenuBarExtra.Item title={`Active Time: ${formatTime(session.activeSeconds)}`} />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Stats">
-        <MenuBarExtra.Item title={`Intervals Completed: ${sessionCount}`} />
+        <MenuBarExtra.Item title={`Intervals Completed: ${session.sessionCount}`} />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section title="Settings">
+        <MenuBarExtra.Item
+          icon={confettiEnabled ? Icon.Checkmark : Icon.XMarkCircle}
+          title="Enable Confetti"
+          onAction={toggleConfetti}
+        />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
@@ -44,33 +37,16 @@ export default function Command() {
           icon={Icon.ArrowClockwise}
           title="Refresh"
           shortcut={{ modifiers: ["cmd"], key: "r" }}
-          onAction={revalidate}
+          onAction={session.actions.refresh}
         />
         <MenuBarExtra.Item
           icon={Icon.Clock}
           title="Reset Session Time"
           shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-          onAction={async () => {
-            await resetSessionTimeOnly();
-            revalidate();
-          }}
+          onAction={session.actions.resetSessionTime}
         />
-        <MenuBarExtra.Item
-          icon={Icon.Hashtag}
-          title="Reset Stats"
-          onAction={async () => {
-            await resetStatsOnly();
-            revalidate();
-          }}
-        />
-        <MenuBarExtra.Item
-          icon={Icon.Trash}
-          title="Reset All"
-          onAction={async () => {
-            await resetActiveState();
-            revalidate();
-          }}
-        />
+        <MenuBarExtra.Item icon={Icon.Hashtag} title="Reset Stats" onAction={session.actions.resetStats} />
+        <MenuBarExtra.Item icon={Icon.Trash} title="Reset All" onAction={session.actions.resetAll} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

@@ -36,15 +36,6 @@
 			"type": "textfield",
 			"default": "180",
 			"required": false
-		},
-		{
-			"name": "enableConfetti",
-			"title": "Confetti Celebration",
-			"label": "Enable Confetti",
-			"description": "Show confetti celebration when an interval is completed",
-			"type": "checkbox",
-			"default": true,
-			"required": false
 		}
 	],
 	"dependencies": {
