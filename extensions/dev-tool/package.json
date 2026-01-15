@@ -1,0 +1,230 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "dev-tool",
+    "title": "Dev-Tool",
+    "description": "各种加解密、散列与文本处理工具（SM4、UUID、MD5、Base64、Hex、Hash、JWT、Bcrypt、文本对比）",
+    "icon": "extension-icon.png",
+    "author": "ruqing_wang",
+    "categories":
+    [
+        "Developer Tools"
+    ],
+    "platforms":
+    [
+        "macOS",
+        "Windows"
+    ],
+    "license": "MIT",
+    "commands":
+    [
+        {
+            "name": "sm4-form",
+            "title": "SM4",
+            "subtitle": "SM4 加密/解密",
+            "description": "SM4 加密和解密工具，支持保留key历史记录",
+            "mode": "view"
+        },
+        {
+            "name": "uuid",
+            "title": "UUID",
+            "subtitle": "UUID 生成",
+            "description": "随机字符串 UUID 生成，支持指定结果样式",
+            "mode": "no-view",
+            "arguments":
+            [
+                {
+                    "name": "dash",
+                    "type": "dropdown",
+                    "placeholder": "默认保留连字符",
+                    "optional": true,
+                    "data":
+                    [
+                        {
+                            "title": "去掉 -",
+                            "value": "true"
+                        },
+                        {
+                            "title": "保留 -",
+                            "value": "false"
+                        }
+                    ]
+                },
+                {
+                    "name": "upper",
+                    "type": "dropdown",
+                    "placeholder": "默认小写",
+                    "optional": true,
+                    "data":
+                    [
+                        {
+                            "title": "大写",
+                            "value": "true"
+                        },
+                        {
+                            "title": "小写",
+                            "value": "false"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "md5",
+            "title": "MD5",
+            "subtitle": "MD5 Hash",
+            "description": "简单的 MD5 Hash 工具",
+            "mode": "no-view",
+            "arguments":
+            [
+                {
+                    "name": "text",
+                    "type": "text",
+                    "placeholder": "待 MD5 文本"
+                }
+            ]
+        },
+        {
+            "name": "base64",
+            "title": "Base64",
+            "subtitle": "Base64 编解码",
+            "description": "Base64 编码和解码工具",
+            "mode": "no-view",
+            "arguments":
+            [
+                {
+                    "name": "op",
+                    "type": "dropdown",
+                    "placeholder": "默认 Decode",
+                    "data":
+                    [
+                        {
+                            "title": "Encode",
+                            "value": "encode"
+                        },
+                        {
+                            "title": "Decode",
+                            "value": "decode"
+                        }
+                    ]
+                },
+                {
+                    "name": "text",
+                    "type": "text",
+                    "placeholder": "输入文本或 Base64 文本"
+                }
+            ]
+        },
+        {
+            "name": "hex",
+            "title": "Hex",
+            "subtitle": "Hex 编解码",
+            "description": "十六进制 Hex 编码和解码工具",
+            "mode": "no-view",
+            "arguments":
+            [
+                {
+                    "name": "op",
+                    "type": "dropdown",
+                    "placeholder": "默认 Decode",
+                    "data":
+                    [
+                        {
+                            "title": "Encode",
+                            "value": "encode"
+                        },
+                        {
+                            "title": "Decode",
+                            "value": "decode"
+                        }
+                    ]
+                },
+                {
+                    "name": "text",
+                    "type": "text",
+                    "placeholder": "输入文本或 hex 文本"
+                }
+            ]
+        },
+        {
+            "name": "hash",
+            "title": "Hash",
+            "subtitle": "Hash 生成",
+            "description": "通用 Hash 生成，支持三种模式",
+            "mode": "no-view",
+            "arguments":
+            [
+                {
+                    "name": "alg",
+                    "type": "dropdown",
+                    "placeholder": "默认 SHA256",
+                    "data":
+                    [
+                        {
+                            "title": "SHA512",
+                            "value": "sha512"
+                        },
+                        {
+                            "title": "SHA256",
+                            "value": "sha256"
+                        },
+                        {
+                            "title": "SHA1",
+                            "value": "sha1"
+                        }
+                    ]
+                },
+                {
+                    "name": "text",
+                    "type": "text",
+                    "placeholder": "待 Hash 文本"
+                }
+            ]
+        },
+        {
+            "name": "bcrypt-form",
+            "title": "Bcrypt",
+            "subtitle": "Bcrypt 加密/校验",
+            "description": "Bcrypt 加密和校验工具，支持指定位数salt",
+            "mode": "view"
+        },
+        {
+            "name": "jwt-form",
+            "title": "JWT",
+            "subtitle": "JWT 解析/生成",
+            "description": "JWT 解析和生成工具，支持指定 Secret",
+            "mode": "view"
+        },
+        {
+            "name": "textdiff-form",
+            "title": "文本对比",
+            "subtitle": "文本对比",
+            "description": "简单的文本对比工具，期待后续改进的更丰富",
+            "mode": "view"
+        }
+    ],
+    "dependencies":
+    {
+        "@raycast/api": "^1.104.1",
+        "@raycast/utils": "^1.17.0",
+        "bcryptjs": "^3.0.3",
+        "gm-crypto": "^0.1.12"
+    },
+    "devDependencies":
+    {
+        "@raycast/eslint-config": "^2.0.4",
+        "@types/node": "22.13.10",
+        "@types/react": "19.0.10",
+        "eslint": "^9.22.0",
+        "prettier": "^3.5.3",
+        "typescript": "^5.8.2"
+    },
+    "scripts":
+    {
+        "build": "ray build",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
