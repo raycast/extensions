@@ -1,4 +1,4 @@
-import { Icon, List, showToast, Toast, Color, ActionPanel } from "@raycast/api";
+import { Icon, List, showToast, Toast, Color, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { ZeroEvalAPI } from "./utils/zeroeval-api";
 import { ArenaModel } from "./types";
@@ -10,7 +10,7 @@ import {
   OpenPlaygroundAction,
   CompareWithSubmenu,
 } from "./components/actions/ModelActions";
-import { ARENAS_BY_SECTION } from "./utils/arenas";
+import { ARENAS_BY_SECTION, getArenaById } from "./utils/arenas";
 
 const api = new ZeroEvalAPI();
 
@@ -63,6 +63,7 @@ export default function Command() {
 
   const models = leaderboardData?.leaderboard || [];
   const isLoading = isLoadingLeaderboard || isLoadingModels;
+  const arena = getArenaById(selectedArena);
 
   return (
     <List
@@ -87,34 +88,51 @@ export default function Command() {
           description="Try selecting a different arena"
         />
       ) : (
-        models.map((model: ArenaModel, index) => {
-          const cachedModel = allModels?.find((m) => m.model_id === model.model_id);
-          return (
-            <List.Item
-              key={model.variant_id}
-              icon={getOrganizationLogo(cachedModel?.organization_id || model.organization.toLowerCase())}
-              title={cachedModel?.name || model.model_name}
-              subtitle={cachedModel?.organization || model.organization}
-              keywords={[cachedModel?.organization || model.organization]}
-              accessories={[
-                {
-                  text: `${model.wins}`,
-                  icon: Icon.ThumbsUp,
-                  tooltip: "Votes",
-                },
-                createScoreAccessory(model, index),
-              ]}
-              actions={
-                <ActionPanel>
-                  <ShowDetailsAction modelId={model.model_id} />
-                  <ModelDetailsLinkAction modelId={model.model_id} />
-                  <OpenPlaygroundAction modelId={model.model_id} />
-                  <CompareWithSubmenu modelId={model.model_id} />
-                </ActionPanel>
-              }
-            />
-          );
-        })
+        <>
+          <List.Section>
+            {arena && (
+              <List.Item
+                title={`Open ${arena.name} Arena`}
+                icon={Icon.GameController}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser url={arena.link} />
+                  </ActionPanel>
+                }
+              />
+            )}
+          </List.Section>
+          <List.Section title="Leaderboard">
+            {models.map((model: ArenaModel, index) => {
+              const cachedModel = allModels?.find((m) => m.model_id === model.model_id);
+              return (
+                <List.Item
+                  key={model.variant_id}
+                  icon={getOrganizationLogo(cachedModel?.organization_id || model.organization.toLowerCase())}
+                  title={cachedModel?.name || model.model_name}
+                  subtitle={cachedModel?.organization || model.organization}
+                  keywords={[cachedModel?.organization || model.organization]}
+                  accessories={[
+                    {
+                      text: `${model.wins}`,
+                      icon: Icon.ThumbsUp,
+                      tooltip: "Votes",
+                    },
+                    createScoreAccessory(model, index),
+                  ]}
+                  actions={
+                    <ActionPanel>
+                      <ShowDetailsAction modelId={model.model_id} />
+                      <ModelDetailsLinkAction modelId={model.model_id} />
+                      <OpenPlaygroundAction modelId={model.model_id} />
+                      <CompareWithSubmenu modelId={model.model_id} />
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+          </List.Section>
+        </>
       )}
     </List>
   );
