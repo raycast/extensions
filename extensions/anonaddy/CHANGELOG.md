@@ -1,6 +1,6 @@
 # Addy Changelog
 
-## [Self-hosted Support] - {PR_MERGE_DATE}
+## [Self-hosted Support] - 2026-01-15
 
 ### Added
 - Support for self-hosted Addy instances via the Custom URL preference
