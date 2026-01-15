@@ -3,11 +3,17 @@
 ## [Unreleased] - {PR_MERGE_DATE}
 
 ### Added
-- **Core**: Add Windows platform support
 - **Remotes**: Add submenu for remote links and pages
   - Introduce `RepositoryAttachedLinksAction` submenu
   - Enhance `RemoteWebPageAction.Base` to show remote title
   - Expand host-specific web page links for GitHub, GitLab, Gitea, Bitbucket, and Azure DevOps
+- **Manage Repositories**: Add "Delete Folder" action for repository directories
+- **Repository**: Allow creating new Git repositories
+  - Introduce `CreateRepositoryForm` to initialize empty Git repositories
+  - Add `CopyToClipboardMenuAction` for repository paths and remote URLs
+  - Refactor "Add Repository" into a submenu for better organization
+- **Git**: Add keyboard shortcuts for remote host actions (Issues, Actions, Pipelines)
+- **Git**: Enable Commit Changes action for empty repositories
 
 ### Changed
 - **Core**: Reorder `FileManagerActions` and `ToggleDetailAction` in views

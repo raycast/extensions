@@ -18,8 +18,7 @@
     "gitea"
   ],
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Developer Tools",

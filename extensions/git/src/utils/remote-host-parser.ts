@@ -139,6 +139,7 @@ function githubParser(_url: string, parsed: URLComponents): RemoteHostParserResu
             title: "Issues",
             url: `${scheme}://${hostname}/${path}/issues`,
             icon: { source: `https://api.iconify.design/ri/issues-line.svg`, fallback: Icon.Bug },
+            shortcut: { modifiers: ["cmd"], key: "i" },
           },
           {
             title: "Pull Requests",
@@ -149,6 +150,7 @@ function githubParser(_url: string, parsed: URLComponents): RemoteHostParserResu
             title: "Actions",
             url: `${scheme}://${hostname}/${path}/actions`,
             icon: Icon.Play,
+            shortcut: { modifiers: ["cmd"], key: "b" },
           },
           {
             title: "Projects",
@@ -255,6 +257,7 @@ function gitlabParser(_url: string, parsed: URLComponents): RemoteHostParserResu
             title: "Issues",
             url: `${scheme}://${hostname}/${path}/-/issues`,
             icon: { source: `https://api.iconify.design/ri/issues-line.svg`, fallback: Icon.Bug },
+            shortcut: { modifiers: ["cmd"], key: "i" },
           },
           {
             title: "Issue Board",
@@ -278,6 +281,7 @@ function gitlabParser(_url: string, parsed: URLComponents): RemoteHostParserResu
             title: "Pipelines",
             url: `${scheme}://${hostname}/${path}/-/pipelines`,
             icon: { source: `https://api.iconify.design/uil/rocket.svg`, fallback: Icon.Hammer },
+            shortcut: { modifiers: ["cmd"], key: "b" },
           },
           {
             title: "Releases",
@@ -381,6 +385,7 @@ function giteaParser(_url: string, parsed: URLComponents): RemoteHostParserResul
             title: "Issues",
             url: `${scheme}://${hostname}/${path}/issues`,
             icon: { source: `https://api.iconify.design/ri/issues-line.svg`, fallback: Icon.Bug },
+            shortcut: { modifiers: ["cmd"], key: "i" },
           },
           {
             title: "Pull Requests",
@@ -391,6 +396,7 @@ function giteaParser(_url: string, parsed: URLComponents): RemoteHostParserResul
             title: "Actions",
             url: `${scheme}://${hostname}/${path}/actions`,
             icon: Icon.Play,
+            shortcut: { modifiers: ["cmd"], key: "b" },
           },
           {
             title: "Releases",

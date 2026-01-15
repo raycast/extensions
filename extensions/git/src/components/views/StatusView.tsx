@@ -281,7 +281,7 @@ function FileListItem(
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            {context.branches.data.currentBranch && <CommitChangesAction {...context} />}
+            <CommitChangesAction {...context} />
             <ConflictAbortAction {...context} />
             <FileStageAllAction {...context} />
             <FileUnstageAllAction {...context} />
