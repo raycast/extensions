@@ -1,0 +1,138 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jan-ai-assistant",
+  "title": "Jan AI Assistant",
+  "description": "Process text, perform quick actions, and create reminders using Jan.ai",
+  "icon": "command-icon.png",
+  "author": "michael_derham",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "process-text",
+      "title": "Process with Jan.ai",
+      "description": "Process selected text with Jan.ai AI assistant",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text to process (optional - uses clipboard if empty)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quick-actions",
+      "title": "Jan.ai Quick Actions",
+      "description": "Quick AI actions on selected text",
+      "mode": "view"
+    },
+    {
+      "name": "create-reminder",
+      "title": "Create Reminder from Text",
+      "description": "Parse text with Jan.ai and create a reminder in Apple Reminders",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "e.g., 'Call dentist tomorrow' or 'Electric bill $150 due Jan 15'",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "reminders-to-csv",
+      "title": "Convert Reminders to CSV",
+      "description": "Parse reminders text and convert to CSV table with expenses and income separated",
+      "mode": "view"
+    },
+    {
+      "name": "create-reminder-from-pdf-direct",
+      "title": "Create Reminder from PDF",
+      "description": "Process PDF invoices - supports file selection and clipboard paste (⌘C file in Finder)",
+      "mode": "view"
+    },
+    {
+      "name": "process-pdf-native",
+      "title": "Process PDF with Jan.ai",
+      "description": "Send PDFs to Jan.ai for tasks, summaries, or custom queries - supports clipboard paste (⌘C file)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Jan.ai API URL",
+      "description": "Jan.ai API endpoint",
+      "default": "http://localhost:1337/v1/chat/completions",
+      "placeholder": "http://localhost:1337/v1/chat/completions"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Jan.ai API Key",
+      "description": "Your Jan.ai API key",
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "defaultModel",
+      "type": "textfield",
+      "required": true,
+      "title": "Default Model",
+      "description": "Jan.ai model to use (e.g., llama-3.1-8b-instruct)",
+      "placeholder": "llama-3.1-8b-instruct"
+    },
+    {
+      "name": "temperature",
+      "type": "textfield",
+      "required": false,
+      "title": "Temperature",
+      "description": "Temperature for text generation (0.0-1.0)",
+      "default": "0.7",
+      "placeholder": "0.7"
+    },
+    {
+      "name": "maxTokens",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Tokens",
+      "description": "Maximum tokens for responses",
+      "default": "2000",
+      "placeholder": "2000"
+    },
+    {
+      "name": "reminderList",
+      "type": "textfield",
+      "required": false,
+      "title": "Reminder List Name",
+      "description": "Apple Reminders list to add tasks to",
+      "default": "To Do",
+      "placeholder": "To Do"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.12.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.13",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
