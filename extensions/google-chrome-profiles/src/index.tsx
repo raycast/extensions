@@ -34,6 +34,7 @@ import {
   ChromeAction,
   ChromeTarget,
 } from "./util/util";
+import { getFavicon } from "@raycast/utils";
 
 const ProfileItem = (props: { index: number; profile: Profile }) => {
   const { index, profile } = props;
@@ -178,7 +179,7 @@ function ListBookmarks(props: { profile: Profile }) {
 
   const bookmarks = Object.values((bookmarkFile ?? { roots: {} }).roots)
     .flatMap(extractBookmarksUrlRecursively)
-    .filter((e) => !e.url.startsWith("chrome://"))
+    .filter((e): e is Required<GoogleChromeBookmarkURL> => e.url != null && !e.url.startsWith("chrome://"))
     .map((b) => createBookmarkListItem(b.url, b.name))
     .filter((b) => !searchText || matchSearchText(searchText, b.url, b.title));
 
@@ -279,7 +280,7 @@ function ListBookmarks(props: { profile: Profile }) {
               key={index}
               title={b.title}
               subtitle={b.subtitle}
-              icon={{ source: b.iconURL, fallback: Icon.Globe }}
+              icon={getFavicon(b.iconURL, { fallback: Icon.Globe, mask: Image.Mask.Circle })}
               actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.openUrl(b.url)} />}
             />
           ))}

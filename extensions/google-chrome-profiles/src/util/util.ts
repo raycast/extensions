@@ -16,7 +16,7 @@ export const createBookmarkListItem = (url: string, name?: string) => {
     url: url,
     title: name ? name : urlToDisplay,
     subtitle: name ? urlToDisplay : undefined,
-    iconURL: `https://www.google.com/s2/favicons?domain=${urlOrigin}&sz=${32}`,
+    iconURL: urlOrigin,
   };
 };
 
@@ -92,6 +92,22 @@ export const formatAsUrl = (str: string) => {
 };
 
 /**
+ * Escapes a string for safe use in AppleScript string literals.
+ * Prevents injection attacks by escaping special characters.
+ *
+ * @param str The string to escape
+ * @returns A safely escaped string for AppleScript interpolation
+ */
+export const escapeAppleScriptString = (str: string): string => {
+  return str
+    .replace(/\\/g, "\\\\") // Escape backslashes first (must be first!)
+    .replace(/"/g, '\\"') // Escape double quotes
+    .replace(/\n/g, "\\n") // Escape newlines
+    .replace(/\r/g, "\\r") // Escape carriage returns
+    .replace(/\t/g, "\\t"); // Escape tabs
+};
+
+/**
  * Run the script that opens Google Chrome.
  *
  * - `ChromeAction.Focus`: focuses the existing profile window (or opens it if not open)
@@ -110,6 +126,10 @@ export const openGoogleChrome = async (
   const action = target.action;
   const url = action === "openUrl" ? target.url : undefined;
 
+  // Escape all user-controlled input to prevent AppleScript injection
+  const escapedProfileName = escapeAppleScriptString(profile.name);
+  const escapedUrl = url ? escapeAppleScriptString(url) : undefined;
+
   // Use menu bar item 8 for Profiles menu (language-independent position)
   // Chrome menu bar: 1=Apple, 2=Chrome, 3=File, 4=Edit, 5=View, 6=History, 7=Bookmarks, 8=Profiles, 9=Tab, 10=Window, 11=Help
   const script = `
@@ -120,13 +140,13 @@ export const openGoogleChrome = async (
         set profileMenu to menu 1 of menu bar item 8 of menu bar 1
         set menuItems to name of menu items of profileMenu
 
-        if "${profile.name}" is in menuItems then
-          click menu item "${profile.name}" of profileMenu
+        if "${escapedProfileName}" is in menuItems then
+          click menu item "${escapedProfileName}" of profileMenu
         else
           set foundMatch to false
           repeat with menuItemName in menuItems
             if menuItemName is not missing value then
-              if menuItemName contains "${profile.name}" then
+              if menuItemName contains "${escapedProfileName}" then
                 click menu item menuItemName of profileMenu
                 set foundMatch to true
                 exit repeat
@@ -158,10 +178,10 @@ export const openGoogleChrome = async (
     }
     
     ${
-      url
+      escapedUrl
         ? `
     tell application "Google Chrome"
-      set targetURL to "${url}"
+      set targetURL to "${escapedUrl}"
       set tabCount to count of tabs of front window
       set foundTab to false
       repeat with t from 1 to tabCount
@@ -192,10 +212,12 @@ export const openGoogleChrome = async (
 
   // Fallback: use shell script to open Chrome with profile directory
   const fallbackUrl = action === "focus" ? "about:blank" : url || "about:blank";
+  const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
+  const escapedFallbackUrl = escapeAppleScriptString(fallbackUrl);
   const fallbackScript = `
     set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    set theProfile to quoted form of "${profile.directory}"
-    set theLink to quoted form of "${fallbackUrl}"
+    set theProfile to quoted form of "${escapedProfileDirectory}"
+    set theLink to quoted form of "${escapedFallbackUrl}"
     do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
   `;
 
