@@ -415,10 +415,6 @@ function ServiceView(props: ServiceProps) {
   );
 }
 
-interface ServiceProps {
-  service: ServiceResponse;
-}
-
 function DeployListView(props: ServiceProps) {
   const { service } = props;
 
