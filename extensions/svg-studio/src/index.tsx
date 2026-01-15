@@ -195,6 +195,13 @@ export default function Command() {
           setSvgInput(text);
           await showToast(Toast.Style.Animated, "SVG Studio", "Launching...");
           await openPreview(text);
+          // Clear clipboard and input to prevent repeated auto-opening on next launch
+          try {
+            await Clipboard.copy("");
+          } catch (e) {
+            // ignore if clipboard clearing fails
+          }
+          setSvgInput("");
           await popToRoot();
         } else {
           setViewState("manual");
@@ -212,6 +219,13 @@ export default function Command() {
       return;
     }
     await openPreview(svgInput);
+    // Clear clipboard and reset input to prevent accidental re-opening
+    try {
+      await Clipboard.copy("");
+    } catch (e) {
+      // ignore
+    }
+    setSvgInput("");
     await popToRoot();
   };
 
