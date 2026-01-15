@@ -14,11 +14,12 @@ export default function Command() {
     const timeoutField = values.timeoutField;
 
     const re = /^[0-9]+$/;
-    if (!(re.test(portField) && +portField >= 1 && +portField < 2 ** 16)) {
+    if (!(re.test(portField) && +portField >= 1 && +portField <= 65535)) {
       showToast({
         title: "Invalid Port",
-        message: `Port: ${portField} is invalid (must be a number between 1 and 65536)`,
+        message: `Port: ${portField} is invalid (must be a number between 1 and 65535)`,
         style: Toast.Style.Failure,
+      });
       });
       return;
     }
