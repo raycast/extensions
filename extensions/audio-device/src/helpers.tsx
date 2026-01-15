@@ -218,7 +218,7 @@ function SetCommunicationDeviceAction({ device, type, onSelection }: SetAudioDev
     <Action
       title={`Set as ${type === "input" ? "Input" : "Output"} Communication Device`}
       icon={Icon.Phone}
-      shortcut={{ modifiers: ["cmd"], key: "c" }}
+      shortcut={null}
       onAction={async () => {
         try {
           const api = await getAudioAPI();
