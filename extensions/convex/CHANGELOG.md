@@ -1,6 +1,6 @@
 # Convex Changelog
 
-## [Enhanced Logs, Data & Documentation] - {PR_MERGE_DATE}
+## [Enhanced Logs, Data & Documentation] - 2026-01-15
 
 - Add documentation browser with 60+ Convex docs organized by category
 - Add component browser with 30+ components, install commands, and npm stats
