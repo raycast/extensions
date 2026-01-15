@@ -2,15 +2,28 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import type { MakeClient } from "./make-api";
 import { presentMakeApiError } from "./make-api";
-import { toScenarioExecutionLogUrl } from "./make-browser-url";
+import {
+  toScenarioExecutionLogUrl,
+  toWebhookQueueItemUrl,
+} from "./make-browser-url";
 import { ScenarioExecutionDetail } from "./scenario-execution-detail";
-import type { ListScenarioLogsResponse, ScenarioLog } from "./types";
+import type {
+  IncompleteExecution,
+  ListIncompleteExecutionsResponse,
+  ListScenarioLogsResponse,
+  ListWebhookQueueResponse,
+  ScenarioLog,
+  WebhookQueueItem,
+} from "./types";
 
 type Props = {
   client: MakeClient;
   baseUrl: string;
   teamId: number;
   scenarioId: number;
+  dlqCount?: number;
+  hookId?: number | null;
+  webhookQueueCount?: number;
 };
 
 type StatusFilter = "all" | "success" | "warning" | "error";
@@ -158,6 +171,13 @@ function ScenarioLogsFilterDropdown(props: {
   );
 }
 
+function fmtDateShort(iso?: string): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return iso;
+  return d.toLocaleString();
+}
+
 export function ScenarioLogs(props: Props) {
   const [filterKey, setFilterKey] = useState<CombinedFilterKey>("all:all");
   const filter = useMemo(() => parseCombinedFilter(filterKey), [filterKey]);
@@ -165,6 +185,65 @@ export function ScenarioLogs(props: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [logs, setLogs] = useState<ScenarioLog[]>([]);
   const [hasMore, setHasMore] = useState(true);
+
+  // Incomplete executions (DLQ)
+  const [incompleteExecutions, setIncompleteExecutions] = useState<
+    IncompleteExecution[]
+  >([]);
+  const [isLoadingDlq, setIsLoadingDlq] = useState(false);
+
+  // Webhook queue items
+  const [webhookQueueItems, setWebhookQueueItems] = useState<
+    WebhookQueueItem[]
+  >([]);
+  const [isLoadingWebhookQueue, setIsLoadingWebhookQueue] = useState(false);
+
+  async function loadIncompleteExecutions() {
+    if (!props.dlqCount || props.dlqCount === 0) {
+      setIncompleteExecutions([]);
+      return;
+    }
+
+    setIsLoadingDlq(true);
+    try {
+      const res = await props.client.getJson<ListIncompleteExecutionsResponse>(
+        "/api/v2/dlqs",
+        { scenarioId: props.scenarioId },
+      );
+      setIncompleteExecutions(res.dlqs ?? []);
+    } catch (e) {
+      // DLQ endpoint may require additional scopes; silently fail
+      console.error("Failed to load incomplete executions:", e);
+      setIncompleteExecutions([]);
+    } finally {
+      setIsLoadingDlq(false);
+    }
+  }
+
+  async function loadWebhookQueueItems() {
+    if (
+      !props.hookId ||
+      !props.webhookQueueCount ||
+      props.webhookQueueCount === 0
+    ) {
+      setWebhookQueueItems([]);
+      return;
+    }
+
+    setIsLoadingWebhookQueue(true);
+    try {
+      const res = await props.client.getJson<ListWebhookQueueResponse>(
+        `/api/v2/hooks/${props.hookId}/incomings`,
+      );
+      console.log("Webhook queue items:", JSON.stringify(res));
+      setWebhookQueueItems(res.incomings ?? []);
+    } catch (e) {
+      console.error("Failed to load webhook queue items:", e);
+      setWebhookQueueItems([]);
+    } finally {
+      setIsLoadingWebhookQueue(false);
+    }
+  }
 
   async function loadPage(offset: number, mode: "replace" | "append") {
     setIsLoading(true);
@@ -200,11 +279,19 @@ export function ScenarioLogs(props: Props) {
     setLogs([]);
     setHasMore(true);
     void loadPage(0, "replace");
-  }, [props.scenarioId, filterKey]);
+    void loadIncompleteExecutions();
+    void loadWebhookQueueItems();
+  }, [
+    props.scenarioId,
+    filterKey,
+    props.dlqCount,
+    props.hookId,
+    props.webhookQueueCount,
+  ]);
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDlq || isLoadingWebhookQueue}
       navigationTitle={`Executions — Scenario ${props.scenarioId}`}
       searchBarPlaceholder="Search executions…"
       searchBarAccessory={
@@ -216,130 +303,248 @@ export function ScenarioLogs(props: Props) {
         onLoadMore: () => void loadPage(logs.length, "append"),
       }}
     >
-      {logs.map((log, idx) => {
-        const typeLower = normalizeLogType(log.type);
-        const isAuditEvent = isAuditLogType(typeLower);
+      {/* Incomplete Executions (DLQ) Section */}
+      {incompleteExecutions.length > 0 ? (
+        <List.Section
+          title="Incomplete Executions"
+          subtitle={`${incompleteExecutions.length} pending`}
+        >
+          {incompleteExecutions.map((dlq) => (
+            <List.Item
+              key={dlq.id}
+              title={dlq.reason || "Incomplete Execution"}
+              subtitle={fmtDateShort(dlq.created)}
+              icon={{ source: Icon.ExclamationMark, tintColor: "red" }}
+              accessories={[{ tag: { value: "Incomplete", color: "red" } }]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Dlq Id"
+                    content={dlq.id}
+                  />
+                  <ActionPanel.Section>
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      onAction={() => {
+                        void loadPage(0, "replace");
+                        void loadIncompleteExecutions();
+                        void loadWebhookQueueItems();
+                      }}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      ) : null}
 
-        // Important: audit events can include an `id`, but it's not an execution id.
-        const executionIdRaw = isAuditEvent
-          ? null
-          : (log.executionId ?? log.id);
-        const executionId =
-          executionIdRaw !== null && executionIdRaw !== undefined
-            ? String(executionIdRaw)
-            : null;
+      {/* Webhook Queue Items */}
+      {webhookQueueItems.length > 0 ? (
+        <List.Section
+          title="Webhook Queue"
+          subtitle={`${webhookQueueItems.length} pending`}
+        >
+          {webhookQueueItems.map((item) => {
+            const queueItemUrl = props.hookId
+              ? toWebhookQueueItemUrl({
+                  baseUrl: props.baseUrl,
+                  teamId: props.teamId,
+                  hookId: props.hookId,
+                  itemId: item.id,
+                })
+              : null;
 
-        const executionName =
-          typeof log.executionName === "string" && log.executionName.trim()
-            ? log.executionName.trim()
-            : null;
-
-        const key = String(
-          log.imtId ?? executionId ?? `${log.timestamp ?? "unknown"}:${idx}`,
-        );
-        const title = isAuditEvent
-          ? typeLower === "modify"
-            ? "Edited"
-            : titleCaseWord(typeLower)
-          : (executionName ?? statusLabel(log.status));
-        const url = executionId
-          ? toScenarioExecutionLogUrl({
-              baseUrl: props.baseUrl,
-              teamId: props.teamId,
-              scenarioId: props.scenarioId,
-              executionId,
-            })
-          : null;
-
-        const accessories: List.Item.Accessory[] = [];
-        if (!isAuditEvent) {
-          if (log.duration !== undefined)
-            accessories.push({ text: fmtDurationMs(log.duration) });
-          if (log.operations !== undefined)
-            accessories.push({ text: String(log.operations) });
-        }
-        if (log.timestamp) accessories.push({ date: new Date(log.timestamp) });
-
-        const authorName = log.detail?.author?.name?.trim() || null;
-        const typeLabel = typeLower ? typeLower : null;
-
-        return (
-          <List.Item
-            key={key}
-            title={title}
-            subtitle={
-              log.timestamp
-                ? isAuditEvent
-                  ? [typeLabel, authorName, fmtDate(log.timestamp)]
-                      .filter(Boolean)
-                      .join(" • ")
-                  : [typeLabel, fmtDate(log.timestamp)]
-                      .filter(Boolean)
-                      .join(" • ")
-                : undefined
-            }
-            icon={
-              isAuditEvent
-                ? iconForAuditType(typeLower)
-                : statusIcon(log.status)
-            }
-            keywords={[
-              executionId ?? "",
-              log.imtId ? String(log.imtId) : "",
-              log.type ? String(log.type) : "",
-              executionName ?? "",
-              typeof log.status === "number" ? String(log.status) : "",
-            ].filter(Boolean)}
-            accessories={accessories}
-            actions={
-              <ActionPanel>
-                {executionId ? (
-                  <Action.Push
-                    title="Show Execution Details"
-                    target={
-                      <ScenarioExecutionDetail
-                        client={props.client}
-                        baseUrl={props.baseUrl}
-                        teamId={props.teamId}
-                        scenarioId={props.scenarioId}
-                        executionId={executionId}
+            return (
+              <List.Item
+                key={item.id}
+                title={`Queued Webhook`}
+                subtitle={
+                  item.date
+                    ? fmtDateShort(item.date)
+                    : (item.requestId ?? item.id)
+                }
+                icon={{ source: Icon.Clock, tintColor: "orange" }}
+                accessories={[{ tag: { value: "Queued", color: "orange" } }]}
+                actions={
+                  <ActionPanel>
+                    {queueItemUrl ? (
+                      <Action.OpenInBrowser
+                        title="Open in Make.com"
+                        url={queueItemUrl}
+                        icon={Icon.Globe}
                       />
-                    }
-                  />
-                ) : null}
+                    ) : null}
+                    <ActionPanel.Section>
+                      <Action.CopyToClipboard
+                        title="Copy Queue Item Id"
+                        content={item.id}
+                      />
+                      {item.requestId ? (
+                        <Action.CopyToClipboard
+                          title="Copy Request Id"
+                          content={item.requestId}
+                        />
+                      ) : null}
+                      {queueItemUrl ? (
+                        <Action.CopyToClipboard
+                          title="Copy URL"
+                          content={queueItemUrl}
+                        />
+                      ) : null}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action
+                        title="Refresh"
+                        icon={Icon.ArrowClockwise}
+                        onAction={() => {
+                          void loadPage(0, "replace");
+                          void loadIncompleteExecutions();
+                          void loadWebhookQueueItems();
+                        }}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      ) : null}
 
-                {url ? (
-                  <Action.OpenInBrowser
-                    title="Open in Make.com"
-                    url={url}
-                    icon={Icon.Globe}
-                  />
-                ) : null}
+      {/* Regular Executions Section */}
+      <List.Section title="Executions">
+        {logs.map((log, idx) => {
+          const typeLower = normalizeLogType(log.type);
+          const isAuditEvent = isAuditLogType(typeLower);
 
-                <ActionPanel.Section>
+          // Important: audit events can include an `id`, but it's not an execution id.
+          const executionIdRaw = isAuditEvent
+            ? null
+            : (log.executionId ?? log.id);
+          const executionId =
+            executionIdRaw !== null && executionIdRaw !== undefined
+              ? String(executionIdRaw)
+              : null;
+
+          const executionName =
+            typeof log.executionName === "string" && log.executionName.trim()
+              ? log.executionName.trim()
+              : null;
+
+          const key = String(
+            log.imtId ?? executionId ?? `${log.timestamp ?? "unknown"}:${idx}`,
+          );
+          const title = isAuditEvent
+            ? typeLower === "modify"
+              ? "Edited"
+              : titleCaseWord(typeLower)
+            : (executionName ?? statusLabel(log.status));
+          const url = executionId
+            ? toScenarioExecutionLogUrl({
+                baseUrl: props.baseUrl,
+                teamId: props.teamId,
+                scenarioId: props.scenarioId,
+                executionId,
+              })
+            : null;
+
+          const accessories: List.Item.Accessory[] = [];
+          if (!isAuditEvent) {
+            if (log.duration !== undefined)
+              accessories.push({ text: fmtDurationMs(log.duration) });
+            if (log.operations !== undefined)
+              accessories.push({ text: String(log.operations) });
+          }
+          if (log.timestamp)
+            accessories.push({ date: new Date(log.timestamp) });
+
+          const authorName = log.detail?.author?.name?.trim() || null;
+          const typeLabel = typeLower ? typeLower : null;
+
+          return (
+            <List.Item
+              key={key}
+              title={title}
+              subtitle={
+                log.timestamp
+                  ? isAuditEvent
+                    ? [typeLabel, authorName, fmtDate(log.timestamp)]
+                        .filter(Boolean)
+                        .join(" • ")
+                    : [typeLabel, fmtDate(log.timestamp)]
+                        .filter(Boolean)
+                        .join(" • ")
+                  : undefined
+              }
+              icon={
+                isAuditEvent
+                  ? iconForAuditType(typeLower)
+                  : statusIcon(log.status)
+              }
+              keywords={[
+                executionId ?? "",
+                log.imtId ? String(log.imtId) : "",
+                log.type ? String(log.type) : "",
+                executionName ?? "",
+                typeof log.status === "number" ? String(log.status) : "",
+              ].filter(Boolean)}
+              accessories={accessories}
+              actions={
+                <ActionPanel>
                   {executionId ? (
-                    <Action.CopyToClipboard
-                      title="Copy Execution Id"
-                      content={executionId}
+                    <Action.Push
+                      title="Show Execution Details"
+                      target={
+                        <ScenarioExecutionDetail
+                          client={props.client}
+                          baseUrl={props.baseUrl}
+                          teamId={props.teamId}
+                          scenarioId={props.scenarioId}
+                          executionId={executionId}
+                        />
+                      }
                     />
                   ) : null}
-                  {url ? (
-                    <Action.CopyToClipboard title="Copy URL" content={url} />
-                  ) : null}
-                </ActionPanel.Section>
 
-                <ActionPanel.Section>
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={() => void loadPage(0, "replace")}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+                  {url ? (
+                    <Action.OpenInBrowser
+                      title="Open in Make.com"
+                      url={url}
+                      icon={Icon.Globe}
+                    />
+                  ) : null}
+
+                  <ActionPanel.Section>
+                    {executionId ? (
+                      <Action.CopyToClipboard
+                        title="Copy Execution Id"
+                        content={executionId}
+                      />
+                    ) : null}
+                    {url ? (
+                      <Action.CopyToClipboard title="Copy URL" content={url} />
+                    ) : null}
+                  </ActionPanel.Section>
+
+                  <ActionPanel.Section>
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      onAction={() => {
+                        void loadPage(0, "replace");
+                        void loadIncompleteExecutions();
+                        void loadWebhookQueueItems();
+                      }}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 }
