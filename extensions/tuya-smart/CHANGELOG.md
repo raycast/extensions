@@ -1,6 +1,6 @@
 # Tuya Smart Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-01-15
 
 - Added switches in root search
 
