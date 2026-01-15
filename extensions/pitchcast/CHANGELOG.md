@@ -1,3 +1,3 @@
 # Pitchcast Changelog
 
-## [Initial Version] - 2026-01-14
+## [Initial Version] - {PR_MERGE_DATE}
