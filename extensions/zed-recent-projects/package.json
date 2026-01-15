@@ -91,7 +91,7 @@
       "type": "checkbox",
       "required": false,
       "label": "Show Open Status",
-      "default": true,
+      "default": false,
       "description": "Display an 'Open' tag for projects currently open in Zed"
     }
   ],
