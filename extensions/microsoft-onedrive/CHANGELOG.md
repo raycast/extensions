@@ -1,6 +1,6 @@
 # Microsoft OneDrive Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-01-15
 
 ### Added
 
