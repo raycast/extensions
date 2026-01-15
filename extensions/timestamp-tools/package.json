@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timestamp-tools",
+  "title": "TimeStamp Tools",
+  "description": "convert timestamp or date",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-timestamp-to-date",
+      "title": "Convert Timestamp to Date",
+      "description": "Convert Unix timestamp to human-readable date with multiple formats",
+      "mode": "view",
+      "subtitle": "Convert timestamp to date"
+    },
+    {
+      "name": "convert-date-to-timestamp",
+      "title": "Convert Date to Timestamp",
+      "description": "Convert human-readable date to Unix timestamp",
+      "mode": "view",
+      "subtitle": "Convert date to timestamp"
+    },
+    {
+      "name": "date-difference-calculator",
+      "title": "Date Difference Calculator",
+      "description": "Calculate difference between two dates in years/months/days",
+      "mode": "view",
+      "subtitle": "Calculate date difference"
+    },
+    {
+      "name": "time-operation",
+      "title": "Time Operation",
+      "description": "Add years/months/days to a specified date",
+      "mode": "view",
+      "subtitle": "Time addition operation"
+    },
+    {
+      "name": "time-analysis",
+      "title": "Time Analysis",
+      "description": "Analyze date information (year/quarter/week/day/time)",
+      "mode": "view",
+      "subtitle": "Time detail analysis"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "ayu_cao",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ]
+}
