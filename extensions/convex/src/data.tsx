@@ -132,7 +132,7 @@ export default function BrowseTablesCommand() {
       <List>
         <List.EmptyView
           title="No Deployment Selected"
-          description="Use 'Switch Project' to select a deployment first"
+          description="Use 'Manage Projects' to select a deployment first"
         />
       </List>
     );

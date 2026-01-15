@@ -1,7 +1,7 @@
 /**
- * Switch Convex Project Command
+ * Manage Projects Command
  *
- * Allows users to switch between their Convex projects and deployments.
+ * Allows users to manage and switch between their Convex projects and deployments.
  * This is the foundational command that sets the active deployment for other commands.
  */
 

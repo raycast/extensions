@@ -51,7 +51,7 @@ export default function SwitchDeploymentCommand() {
       <List>
         <List.EmptyView
           title="No Project Selected"
-          description="Use 'Switch Project' to select a project first"
+          description="Use 'Manage Projects' to select a project first"
         />
       </List>
     );

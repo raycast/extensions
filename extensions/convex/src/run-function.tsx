@@ -74,7 +74,7 @@ export default function RunFunctionCommand() {
       <List>
         <List.EmptyView
           title="No Deployment Selected"
-          description="Use 'Switch Convex Project' to select a deployment first"
+          description="Use 'Manage Projects' to select a deployment first"
           icon={Icon.Cloud}
         />
       </List>

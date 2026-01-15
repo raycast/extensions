@@ -14,7 +14,7 @@
 - Improve field value formatting for timestamps, objects, and arrays
 - Update log display to match Convex dashboard styling
 
-## [Initial Version] - 2026-01-15
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add project switcher to navigate between teams, projects, and deployments
 - Add function runner to execute queries, mutations, and actions with arguments

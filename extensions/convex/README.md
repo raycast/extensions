@@ -1,16 +1,18 @@
 # Convex Tools for Raycast
 
-Convex Tools - A Raycast extension for interacting with your Convex backend directly from Raycast.
-
-This extension provides quick access to essential Convex development workflows without leaving your keyboard:
+Interact with your [Convex](https://convex.dev) projects directly from Raycast. Switch between projects, run functions, browse tables, view real-time logs, search documentation, and explore components without leaving your keyboard.
 
 ## Features
 
 ### Manage Projects
 
-Navigate between your Convex teams, projects, and deployments (dev/prod/preview). Your selection is persisted across commands. Search teams and projects by name or slug for quick access.
+Quickly manage and switch between your Convex teams, projects, and deployments. Your selection is persisted across all commands.
 
-### Run Convex Function
+### Switch Deployment
+
+Quick switcher for changing between dev, prod, and preview deployments within your current project. Perfect for when you need to quickly check something in a different environment.
+
+### Run Function
 
 Search and execute your Convex queries, mutations, and actions:
 
@@ -18,51 +20,60 @@ Search and execute your Convex queries, mutations, and actions:
 - JSON argument input with validation
 - View execution results with timing
 - Copy results to clipboard
+- Support for queries, mutations, and actions
 
-### Browse Convex Tables
+### Data
 
 Explore your database tables and documents:
 
 - List all tables in your deployment
 - Paginated document browsing
-- View full document details
+- View full document details with metadata panel
+- Collapsible raw JSON view (toggle with ⌘+J)
+- Enhanced field value formatting for timestamps, objects, and arrays
 - Copy document IDs and JSON
+- Search and filter documents
 
-### View Convex Logs
+### Logs
 
-Stream real-time function execution logs:
+Stream real-time function execution logs with enhanced features:
 
 - Live log streaming from your deployment
-- Filter by function name and search
+- Function call tree visualization showing parent-child relationships
+- Collapsible console output (toggle with ⌘+L)
+- Request-level filtering to view all executions in a request
+- Enhanced metadata showing execution environment, caller, and identity
+- Copy execution IDs
+- Filter by function name
 - View execution time, status, and errors
-- Function call tree visualization
-- Collapsible console output
-- Request-level filtering
 - Pause/resume streaming
 
-### View Convex Documentation
+### Search Docs
 
 Quick access to Convex documentation:
 
-- Browse 60+ documentation links
-- Organized by category (Getting Started, Features, API Reference, etc.)
-- Search by title, category, or URL
-- Direct browser access to docs
-- Copy URLs and titles
+- Browse 60+ documentation articles
+- Organized by categories (Getting Started, Database, Functions, etc.)
+- Quick links to guides and API references
+- Search functionality
 
-### View Convex Components
+### Components
 
-Browse and install Convex components:
+Discover and install Convex components:
 
-- 30+ official and community components
-- Categorized by AI, Backend, Database, Integrations, Payments, etc.
-- View weekly download stats
+- Browse 30+ available components
+- View component descriptions and features
 - Copy install commands
-- Direct links to documentation and npm
+- See npm download stats
+- Direct links to component repositories
 
-## Why I built this
+### Open Dashboard
 
-I was building a Convex desktop application and found myself constantly alt-tabbing to the dashboard just to check logs and run seed functions. After doing this approximately 47 times too many, I decided to bring those features to Raycast. Tables got added because... well, I was already there.
+Quickly open the current deployment in the Convex dashboard in your browser. No-view command for instant access.
+
+### Copy Deployment URL
+
+Copy your current deployment URL to clipboard with a single command. Perfect for sharing or pasting into configuration files.
 
 ## Installation
 
@@ -114,7 +125,7 @@ This extension uses **OAuth 2.0 Device Authorization Flow** to securely authenti
 
 ### Running Functions
 
-1. Open "Run Function" command
+1. Open "Run Convex Function" command
 2. Search for your function by name or type
 3. Enter JSON arguments (if needed)
 4. Press Enter to execute
@@ -125,17 +136,41 @@ This extension uses **OAuth 2.0 Device Authorization Flow** to securely authenti
 1. Open "Data" command
 2. Select a table from the list
 3. Browse documents with pagination
-4. View full document details
+4. View full document details with metadata
+5. Toggle raw JSON view with ⌘+J
+
+### Viewing Logs
+
+1. Open "Logs" command
+2. View real-time function execution logs
+3. Toggle console output with ⌘+L
+4. Filter by function name or request ID
+5. View call trees and execution metadata
+
+### Searching Documentation
+
+1. Open "Search Docs" command
+2. Browse by category or search
+3. Select an article to open in browser
+
+### Browsing Components
+
+1. Open "Components" command
+2. Browse available components
+3. Copy install commands
+4. Open component repositories
 
 ## Keyboard Shortcuts
 
-| Action            | Shortcut |
-| ----------------- | -------- |
-| Go back           | `⌘ [`    |
-| Copy to clipboard | `⌘ C`    |
-| Copy JSON         | `⌘ ⇧ C`  |
-| Open in Dashboard | `⌘ O`    |
-| Load more         | `⌘ L`    |
+| Action                 | Shortcut |
+| ---------------------- | -------- |
+| Go back                | `⌘ [`    |
+| Copy to clipboard      | `⌘ C`    |
+| Copy JSON              | `⌘ ⇧ C`  |
+| Open in Dashboard      | `⌘ O`    |
+| Load more              | `⌘ L`    |
+| Toggle console (Logs)  | `⌘ L`    |
+| Toggle raw JSON (Data) | `⌘ J`    |
 
 ## Troubleshooting
 
@@ -170,17 +205,34 @@ This extension is part of the [Convex Panel](https://github.com/convex-panel/con
 ```
 apps/raycast/
 ├── src/
-│   ├── switch-project.tsx    # Project switcher command
-│   ├── run-function.tsx      # Function runner command
-│   ├── browse-tables.tsx     # Table browser command
+│   ├── switch-project.tsx       # Manage Projects command
+│   ├── switch-deployment.tsx    # Switch Deployment command
+│   ├── run-function.tsx         # Run Function command
+│   ├── data.tsx                 # Data browser command
+│   ├── logs.tsx                 # Logs viewer command
+│   ├── search-docs.tsx          # Search Docs command
+│   ├── components.tsx           # Components browser command
+│   ├── open-dashboard.tsx       # Open Dashboard command
+│   ├── copy-deployment-url.tsx  # Copy Deployment URL command
 │   ├── lib/
-│   │   ├── auth.ts           # OAuth device code flow
-│   │   └── api.ts            # Convex API client
+│   │   ├── auth.ts              # OAuth device code flow
+│   │   ├── api.ts               # Convex API client
+│   │   ├── bigbrain.ts          # BigBrain API for docs/components
+│   │   └── constants.ts         # Shared constants
 │   ├── hooks/
-│   │   ├── useConvexAuth.ts  # Authentication hook
-│   │   └── useConvexData.ts  # Data fetching hooks
+│   │   ├── useConvexAuth.ts     # Authentication hook
+│   │   └── useConvexData.ts     # Data fetching hooks
 │   └── components/
-│       └── AuthGuard.tsx     # Authentication wrapper
+│       ├── AuthGuard.tsx        # Authentication wrapper
+│       ├── AuthenticatedListGuard.tsx
+│       └── DeploymentSelector.tsx
+├── assets/
+│   ├── command-icon.png
+│   └── extension-icon.svg
+├── metadata/
+│   ├── convex-1.png             # Screenshots
+│   ├── convex-2.png
+│   └── convex-3.png
 ├── package.json
 └── README.md
 ```
