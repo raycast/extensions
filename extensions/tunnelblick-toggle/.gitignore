@@ -1,0 +1,18 @@
+# Node.js
+node_modules
+dist
+.DS_Store
+
+# Raycast
+.raycast
+raycast-env.d.ts
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor
+.vscode
+.idea
+*.swp
