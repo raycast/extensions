@@ -16,21 +16,21 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "zacks-rank",
+      "name": "zacks-search",
       "title": "Zacks Search",
       "subtitle": "Search for any stock ticker",
       "description": "Search for a stock and view Zacks Rank and detailed financial data",
       "mode": "view"
     },
     {
-      "name": "recent-stocks",
+      "name": "zacks-recents",
       "title": "Zacks Recents",
       "subtitle": "View recently searched stocks",
       "description": "Quick access to your recently searched stock tickers",
       "mode": "view"
     },
     {
-      "name": "quick-lookup",
+      "name": "zacks-quick",
       "title": "Zacks",
       "subtitle": "Enter ticker directly",
       "description": "Quickly look up a stock by entering the ticker symbol directly",

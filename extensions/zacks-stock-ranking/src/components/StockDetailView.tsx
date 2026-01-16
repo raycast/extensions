@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Detail, LaunchProps, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Detail, LocalStorage } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getZacksData, getZacksRankColor, formatCurrency, formatPercent, formatNumber } from "./api";
-import { RecentTicker, ZacksQuoteData } from "./types";
+import { getZacksData, getZacksRankColor, formatCurrency, formatPercent, formatNumber } from "../api";
+import { RecentTicker, ZacksQuoteData } from "../types";
 
 const RECENTS_KEY = "recent-tickers";
 const MAX_RECENTS = 10;
 
-async function addToRecents(symbol: string, name: string) {
+export async function addToRecents(symbol: string, name: string) {
   const stored = await LocalStorage.getItem<string>(RECENTS_KEY);
   const recents: RecentTicker[] = stored ? JSON.parse(stored) : [];
   const filtered = recents.filter((r) => r.symbol !== symbol);
@@ -66,38 +66,39 @@ function StockMetadata({ data }: { data: ZacksQuoteData }) {
   );
 }
 
-interface QuickLookupArguments {
+interface StockDetailViewProps {
   ticker: string;
+  name?: string;
 }
 
-export default function QuickLookup(props: LaunchProps<{ arguments: QuickLookupArguments }>) {
-  const ticker = props.arguments.ticker.toUpperCase().trim();
+export function StockDetailView({ ticker, name }: StockDetailViewProps) {
+  const symbol = ticker.toUpperCase().trim();
 
   const { data, isLoading, error } = useCachedPromise(
-    async (symbol: string) => {
-      const result = await getZacksData(symbol);
+    async (sym: string) => {
+      const result = await getZacksData(sym);
       if (result) {
-        await addToRecents(symbol, result.name || symbol);
+        await addToRecents(sym, result.name || name || sym);
       }
       return result;
     },
-    [ticker],
+    [symbol],
     { keepPreviousData: false },
   );
 
   if (error) {
-    return <Detail markdown={`# Error\n\nFailed to fetch data for **${ticker}**:\n\n${error.message}`} />;
+    return <Detail markdown={`# Error\n\nFailed to fetch data for **${symbol}**:\n\n${error.message}`} />;
   }
 
   if (!data && !isLoading) {
     return (
       <Detail
-        markdown={`# Not Found\n\nNo data found for ticker **${ticker}**.\n\nMake sure you entered a valid stock symbol.`}
+        markdown={`# Not Found\n\nNo data found for ticker **${symbol}**.\n\nMake sure you entered a valid stock symbol.`}
       />
     );
   }
 
-  const markdown = data ? generateMarkdown(data) : `# Loading ${ticker}...`;
+  const markdown = data ? generateMarkdown(data) : `# Loading ${symbol}...`;
 
   return (
     <Detail
@@ -106,8 +107,8 @@ export default function QuickLookup(props: LaunchProps<{ arguments: QuickLookupA
       metadata={data ? <StockMetadata data={data} /> : undefined}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open on Zacks.com" url={`https://www.zacks.com/stock/quote/${ticker}`} />
-          <Action.CopyToClipboard title="Copy Ticker" content={ticker} />
+          <Action.OpenInBrowser title="Open on Zacks.com" url={`https://www.zacks.com/stock/quote/${symbol}`} />
+          <Action.CopyToClipboard title="Copy Ticker" content={symbol} />
           {data && (
             <Action.CopyToClipboard
               title="Copy Price"

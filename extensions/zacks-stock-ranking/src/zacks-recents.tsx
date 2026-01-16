@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast 
 import { useCachedPromise } from "@raycast/utils";
 import { getZacksData, getZacksRankColor, formatCurrency, formatPercent } from "./api";
 import { RecentTicker, ZacksQuoteData } from "./types";
-import { StockDetail } from "./zacks-rank";
+import { StockDetailView } from "./components/StockDetailView";
 
 const RECENTS_KEY = "recent-tickers";
 
@@ -118,7 +118,7 @@ export default function RecentStocks() {
                   <Action.Push
                     title="View Stock Details"
                     icon={Icon.Eye}
-                    target={<StockDetail ticker={recent.symbol} name={recent.name} />}
+                    target={<StockDetailView ticker={recent.symbol} name={recent.name} />}
                   />
                   <Action.OpenInBrowser
                     title="Open on Zacks.com"

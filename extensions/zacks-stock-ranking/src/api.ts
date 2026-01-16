@@ -1,3 +1,4 @@
+import { useFetch } from "@raycast/utils";
 import { TickerSearchResult, ZacksApiResponse, ZacksQuoteData } from "./types";
 
 const YAHOO_SEARCH_BASE = "https://query1.finance.yahoo.com/v1/finance/search";
@@ -97,4 +98,41 @@ export function formatCurrency(value: string): string {
   const num = parseFloat(value);
   if (isNaN(num)) return value;
   return `$${num.toFixed(2)}`;
+}
+
+// Hook for searching tickers using useFetch
+export function useTickerSearch(query: string) {
+  return useFetch<TickerSearchResult[]>(
+    `${YAHOO_SEARCH_BASE}?q=${encodeURIComponent(query)}&quotesCount=10&newsCount=0&listsCount=0`,
+    {
+      execute: query.length >= 1,
+      keepPreviousData: true,
+      async parseResponse(response) {
+        const result: YahooSearchResponse = await response.json();
+        return result.quotes
+          .filter((q) => q.quoteType === "EQUITY" || q.quoteType === "ETF")
+          .map((q) => ({
+            symbol: q.symbol,
+            name: q.longname || q.shortname || q.symbol,
+          }));
+      },
+    },
+  );
+}
+
+// Hook for fetching Zacks data using useFetch
+export function useZacksData(ticker: string) {
+  const symbol = ticker.toUpperCase();
+
+  return useFetch<ZacksQuoteData | null>(
+    `${ZACKS_QUOTE_BASE}?t=${encodeURIComponent(symbol)}`,
+    {
+      execute: ticker.length > 0,
+      keepPreviousData: false,
+      async parseResponse(response) {
+        const result: ZacksApiResponse = await response.json();
+        return result[symbol] || null;
+      },
+    },
+  );
 }
