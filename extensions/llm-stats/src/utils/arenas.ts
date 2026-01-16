@@ -112,7 +112,7 @@ export const ARENAS_BY_SECTION = new Map<string, Arena[]>([
     [
       {
         id: "stock-arena",
-        name: "Stocks Arena",
+        name: "Stocks",
         icon: Icon.LineChart,
         link: "https://llm-stats.com/arenas/trading-arena",
       },

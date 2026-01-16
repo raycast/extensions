@@ -1,5 +1,5 @@
-import { Icon, List, showToast, Toast, Color, ActionPanel, Action } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Icon, List, Color, ActionPanel, Action } from "@raycast/api";
+import { useCachedPromise, useCachedState, showFailureToast } from "@raycast/utils";
 import { ZeroEvalAPI } from "./utils/zeroeval-api";
 import { ArenaModel } from "./types";
 import { getOrganizationLogo } from "./utils/organization-logos";
@@ -35,11 +35,7 @@ export default function Command() {
     [selectedArena],
     {
       onError: (error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load leaderboard",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        showFailureToast(error, { title: "Failed to load leaderboard" });
       },
     },
   );
@@ -81,12 +77,10 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {models.length === 0 && !isLoading ? (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="No models found"
-          description="Try selecting a different arena"
-        />
+      {isLoading ? (
+        <></>
+      ) : models.length === 0 ? (
+        <List.EmptyView title="No models available for this arena" />
       ) : (
         <>
           <List.Section>

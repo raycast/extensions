@@ -1,17 +1,13 @@
-import { Detail, showToast, Toast, Icon, ActionPanel } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Detail, Icon, ActionPanel } from "@raycast/api";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { ZeroEvalAPI } from "../../utils/zeroeval-api";
 import { ORGANIZATION_LOGOS } from "../../utils/organization-logos";
 import { CompareWithSubmenu, ModelDetailsLinkAction, OpenPlaygroundAction } from "../actions/ModelActions";
 import { formatParamCount, formatContextSize, formatPrice } from "../../utils/formatting";
 
-interface ModelDetailFormProps {
-  modelId: string;
-}
-
 const api = new ZeroEvalAPI();
 
-export function ModelDetailForm({ modelId }: ModelDetailFormProps) {
+export function ModelDetailForm({ modelId }: { modelId: string }) {
   const {
     data: modelInfo,
     isLoading,
@@ -23,11 +19,7 @@ export function ModelDetailForm({ modelId }: ModelDetailFormProps) {
     [modelId],
     {
       onError: (error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load model information",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        showFailureToast(error, { title: "Failed to load model information" });
       },
     },
   );
