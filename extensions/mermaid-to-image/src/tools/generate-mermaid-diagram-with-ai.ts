@@ -4,6 +4,7 @@ import { generateMermaidDiagram } from "../utils/diagram";
 import { cleanupTempFile } from "../utils/files";
 import { promisify } from "util";
 import { exec } from "child_process";
+import { pathToFileURL } from "url";
 import fs from "fs";
 
 const execPromise = promisify(exec);
@@ -36,17 +37,17 @@ async function copyImageToClipboard(imagePath: string, format: string): Promise<
 /**
  * @raycast AI Tool
  * @name generateMermaidImageTool
- * @description **Receives a Mermaid syntax string**, generates a PNG diagram image, copies it to the clipboard, and **returns the file path** for display in the AI chat. When you receive the file path, **you MUST display it in the conversation using this exact markdown format**: ![Mermaid Diagram](file://<file_path>) - make sure to encode the file path properly. The AI should generate the Mermaid syntax first, then call this tool, then display the returned image path using the markdown format above.
+ * @description Generates a Mermaid diagram image from the provided syntax and returns **ready-to-display markdown**. The tool outputs markdown that already includes the image reference, so the AI must **output the returned value exactly as-is** without modification. Do NOT call this tool multiple times for the same diagram. The image is automatically copied to the clipboard.
  * @param {MermaidToolInput} input - The object containing the `mermaidSyntax` field.
- * @returns {Promise<string>} - The absolute file path to the generated PNG image.
+ * @returns {Promise<string>} - Ready-to-display markdown containing the diagram image (e.g., `![Mermaid Diagram](file://...)`). Output this exactly as returned.
  */
 export default async function generateMermaidImageTool(input: MermaidToolInput): Promise<string> {
   const { mermaidSyntax } = input;
 
-  // Input validation
+  // Input validation - throw error instead of returning error message
   if (!mermaidSyntax?.trim()) {
     console.error("AI Tool called with invalid syntax:", mermaidSyntax);
-    return "Mermaid syntax was not provided or is empty. Cannot generate diagram.";
+    throw new Error("Mermaid syntax was not provided or is empty. Cannot generate diagram.");
   }
 
   console.log("AI Tool 'generateMermaidImageTool' called with syntax:", mermaidSyntax);
@@ -73,8 +74,9 @@ export default async function generateMermaidImageTool(input: MermaidToolInput):
     toast.style = Toast.Style.Success;
     toast.title = "Diagram generated and copied";
 
-    // Return the file path for AI to display in conversation
-    return outputImagePath;
+    // Convert file path to file URL and return ready-to-display markdown
+    const fileUrl = pathToFileURL(outputImagePath).toString();
+    return `![Mermaid Diagram](${fileUrl})`;
   } catch (error) {
     console.error("AI tool execution failed:", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -84,7 +86,8 @@ export default async function generateMermaidImageTool(input: MermaidToolInput):
       message: errorMessage,
     });
 
-    return `Diagram generation failed: ${errorMessage}. Please check if the Mermaid syntax is correct.`;
+    // Throw error instead of returning error message string
+    throw new Error(`Diagram generation failed: ${errorMessage}. Please check if the Mermaid syntax is correct.`);
   } finally {
     // Clean up only the temporary .mmd file, keep the generated image
     if (tempFileRef.current) {
