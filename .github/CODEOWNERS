@@ -84,6 +84,7 @@
 /extensions/anycoffee                                               @aymericio
 /extensions/anytype                                                 @jmetrikat @Juoper
 /extensions/apify                                                   @xmok
+/extensions/apis-guru-search                                        @zebapy
 /extensions/app-creator                                             @EvanZhouDev
 /extensions/app-icon-generator                                      @hunter-ji @pernielsentikaer
 /extensions/app-keeper-manager                                      @onlysunjun
@@ -800,6 +801,7 @@
 /extensions/gitmoji                                                 @ricoberger @joshmedeski @ridemountainpig
 /extensions/gitpod                                                  @henit-chobisa @Palanikannan1437 @henit-chobisa @pernielsentikaer @henit-chobisa
 /extensions/gleam-packages                                          @ryanmiville
+/extensions/gles-to-malioc                                          @RomanVPX
 /extensions/glide                                                   @titouv
 /extensions/global-media-key                                        @douo
 /extensions/glossary                                                @javierarce
