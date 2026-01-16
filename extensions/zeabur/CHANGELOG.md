@@ -1,6 +1,6 @@
 # Zeabur Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-01-16
 
 - Added the AI Hub command to view your AI Hub balance and usage.
 
