@@ -11,7 +11,7 @@
 - **Customizable Speed**: Adjust reading speed on the fly
 - **Keyboard Controls**: Play/pause with spacebar, navigate with shortcuts
 
-![Parse Banner](./metadata/parse-1.png)
+![Parse Banner](./assets/parse-1.png)
 
 ## How to Use
 
