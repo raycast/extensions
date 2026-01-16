@@ -1,14 +1,10 @@
 # Local Holidays
-
-A Raycast extension that displays upcoming holidays from a local JSON file.
+- A Raycast extension that displays upcoming holidays from a local JSON file.
 
 ## Setup
-
-Create the following file on your machine:
-
-~/.raycast_extensions/holidays.json
-
-Example format:
+- Create the following file on your machine:
+- ~/.raycast_extensions/holidays.json
+- Example format:
 
 ```json
 [
@@ -18,19 +14,12 @@ Example format:
 ```
 
 ## Behavior
-
-Shows all holidays from today onwards
-
-Groups holidays by month
-
-Normal holidays are shown with a green check icon
-
-Flexi holidays are shown with a blue circle icon
+- Shows all holidays from today onwards
+- Groups holidays by month
+- Normal holidays are shown with a amber star icon
+- Flexi holidays are shown with a blue questionmark icon
 
 ## Notes
-
-No holiday data is bundled with the extension
-
-The extension reads from the local filesystem
-
-No network access is used
+- No holiday data is bundled with the extension
+- The extension reads from the local filesystem
+- No network access is used
