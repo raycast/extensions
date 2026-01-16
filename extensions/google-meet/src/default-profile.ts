@@ -4,10 +4,10 @@ import { getMeetTab, openMeetTabDefaultProfile, getTimeout } from "./helpers";
 export default async function main() {
   try {
     await openMeetTabDefaultProfile();
+    const meetTab = await getMeetTab();
 
     const timeout = getTimeout();
     await new Promise((r) => setTimeout(r, timeout));
-    const meetTab = await getMeetTab();
 
     await Clipboard.copy(meetTab);
     await showHUD("Copied meet link to clipboard");

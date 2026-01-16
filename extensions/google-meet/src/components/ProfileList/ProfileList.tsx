@@ -9,11 +9,10 @@ export const ProfileList: FC = () => {
   const onSelect = useCallback(async (email: string) => {
     try {
       await openMeetTabSelectedProfile(email);
+      const meetTab = await getMeetTab();
 
       const timeout = getTimeout();
       await new Promise((r) => setTimeout(r, timeout));
-
-      const meetTab = await getMeetTab();
 
       await Clipboard.copy(meetTab.split("?")[0]);
       await showHUD("Copied meet link to clipboard");
