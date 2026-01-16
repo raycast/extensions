@@ -302,6 +302,7 @@ export default function Command() {
               title={service.name}
               subtitle={formatServiceType(service)}
               accessories={[
+                { icon: Icon.Pin },
                 ...(() => {
                   const tag = getServiceStatusTag(
                     service,
@@ -310,7 +311,6 @@ export default function Command() {
                   );
                   return tag ? [{ tag }] : [];
                 })(),
-                { icon: Icon.Pin },
                 { date: new Date(service.updatedAt) },
               ]}
               actions={
