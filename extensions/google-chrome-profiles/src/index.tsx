@@ -179,33 +179,49 @@ function ListBookmarks(props: { profile: Profile }) {
 
   const bookmarks = Object.values((bookmarkFile ?? { roots: {} }).roots)
     .flatMap(extractBookmarksUrlRecursively)
-    .filter((e): e is Required<GoogleChromeBookmarkURL> => e.url != null && !e.url.startsWith("chrome://"))
+    .filter((e): e is Required<GoogleChromeBookmarkURL> => (e.url && isValidUrl(e.url)) == true)
     .map((b) => createBookmarkListItem(b.url, b.name))
     .filter((b) => !searchText || matchSearchText(searchText, b.url, b.title));
 
   const newTabItems: { target: ChromeTarget; title: string; subtitle?: string; icon: Icon }[] = searchText
-    ? [
-        (function () {
-          const searchTextAsURL = formatAsUrl(searchText);
-          // Check for a valid domain pattern: at least 2 characters after the dot (e.g., google.com, google.fr)
-          const looksLikeUrl = /\.[a-z]{2,}/i.test(searchText);
-          if (looksLikeUrl && isValidUrl(searchTextAsURL)) {
-            return {
-              target: ChromeAction.openUrl(searchTextAsURL),
+    ? (function () {
+        // Check for a valid domain pattern: at least 2 characters after the dot (e.g., google.com, google.fr)
+        if (isValidUrl(searchText)) {
+          return [
+            {
+              target: ChromeAction.openUrl(searchText),
               title: "Go To",
-              subtitle: searchTextAsURL,
+              subtitle: searchText,
               icon: Icon.Link,
-            };
-          } else {
-            return {
+            },
+          ];
+        } else {
+          const looksLikeUrl = /\.[a-z]{2,}/i.test(searchText);
+
+          return [
+            ...(looksLikeUrl
+              ? (function () {
+                  // the user is certainly trying to reach a URL (for example typing "github.com")
+                  const searchTextAsURL = formatAsUrl(searchText);
+                  return [
+                    {
+                      target: ChromeAction.openUrl(searchTextAsURL),
+                      title: "Go To",
+                      subtitle: searchTextAsURL,
+                      icon: Icon.Link,
+                    },
+                  ];
+                })()
+              : []),
+            {
               target: ChromeAction.openUrl(newTabUrlWithQuery(searchText)),
               title: "Search Text in a New Tab",
               subtitle: searchText,
               icon: Icon.MagnifyingGlass,
-            };
-          }
-        })(),
-      ]
+            },
+          ];
+        }
+      })()
     : [{ target: ChromeAction.NewTab, title: "New Tab", subtitle: undefined, icon: Icon.Plus }];
 
   const clipboardItem: { target: ChromeTarget; title: string; subtitle?: string; icon: Icon } | null = clipboard

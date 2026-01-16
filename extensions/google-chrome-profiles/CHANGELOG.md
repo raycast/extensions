@@ -5,6 +5,8 @@
 - Bring the profile window to front instead of adding a new tab
 - Simplify deeplink integration
 - Improve bookmark favicon display
+- Support opening chrome://, chrome-extension://, about:, and view-source: URLs from bookmarks
+- Improve URL detection to directly open valid URLs
 
 ## [Refactor] - 2025-09-03
 

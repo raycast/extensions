@@ -70,18 +70,75 @@ const hasMatch = (search: string[], words: string[]) => {
 };
 
 /**
- * Uses `URL` API.
- * @param urlString
- * @returns `true` if the `URL` constructor succeeds to create the URL. Note that `raycast.com` returns `false` because the protocol ("http" / "https") is missing).
+ * Determines whether a string is a valid, launchable URL for a Chrome profile launcher.
+ *
+ * This validator is intentionally *opinionated* and aligned with how Chrome users
+ * expect URLs to behave, rather than with generic RFC or WHATWG URL validity.
+ *
+ * The function:
+ * - Accepts only explicit, absolute URLs (no implicit scheme repair).
+ * - Allows Chrome-navigable schemes that users commonly open in a tab.
+ * - Explicitly blocks execution-oriented schemes (bookmarklets).
+ *
+ * ✅ Allowed schemes:
+ *   - http://
+ *   - https://
+ *   - chrome://
+ *   - chrome-extension://
+ *   - about:
+ *   - view-source:
+ *
+ * 🚫 Explicitly rejected schemes:
+ *   - javascript:
+ *   - data:
+ *   - vbscript:
+ *
+ * ❌ Rejected inputs include:
+ *   - URLs requiring parser repair (e.g. "http:/example.com", "http:example.com")
+ *   - Relative paths ("/settings", "../index.html")
+ *   - Bare hostnames ("example.com")
+ *   - Bookmarklets or executable payloads
+ *
+ * The function does NOT:
+ * - Check reachability or network availability
+ * - Validate host existence or DNS
+ * - Guarantee that Chrome will successfully open the URL (some chrome:// pages are restricted)
+ *
+ * This behavior is intentional and optimized for safe, predictable profile launching.
  */
-export const isValidUrl = (urlString: string) => {
-  try {
-    new URL(urlString);
-    return true;
-  } catch (err) {
+export function isValidUrl(str: string): boolean {
+  if (typeof str !== "string") return false;
+
+  const trimmed = str.trim();
+
+  // Explicit deny list (execution vectors)
+  if (/^(javascript|data|vbscript):/i.test(trimmed)) {
     return false;
   }
-};
+
+  try {
+    const url = new URL(trimmed);
+
+    // Allowlist of schemes Chrome users expect
+    switch (url.protocol) {
+      case "http:":
+      case "https:":
+      case "chrome:":
+      case "chrome-extension:":
+      case "about:":
+        return true;
+
+      case "view-source:":
+        // view-source: can wrap another URL; require something after it
+        return trimmed.length > "view-source:".length;
+
+      default:
+        return false;
+    }
+  } catch {
+    return false;
+  }
+}
 
 export const formatAsUrl = (str: string) => {
   if (str.startsWith("http://") || str.startsWith("https://")) {
@@ -176,7 +233,7 @@ export const openGoogleChrome = async (
     `
         : ""
     }
-    
+
     ${
       escapedUrl
         ? `
@@ -191,7 +248,7 @@ export const openGoogleChrome = async (
           exit repeat
         end if
       end repeat
-      
+
       if foundTab is false then
         open location targetURL
       end if
