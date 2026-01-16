@@ -1,6 +1,6 @@
 # Font Sniper Changelog
 
-## {PR_MERGE_DATE}
+## 2026-01-16
 
 - Added Windows support
 - Added WOFF to TTF/OTF conversion (previously only WOFF2)
