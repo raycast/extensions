@@ -1,6 +1,6 @@
 # Parse Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2026-01-16
 
 - Speed read text at 300-700 WPM using RSVP technique
 - Automatic clipboard integration with history
