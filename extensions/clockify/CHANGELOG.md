@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Add menu bar timer] - {PR_MERGE_DATE}
+## [Add menu bar timer] - 2026-01-16
 
 - Added a menu bar command that shows the current timer counting up.
 - Allows stopping the timer directly from the menu bar.
