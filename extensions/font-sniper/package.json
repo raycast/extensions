@@ -10,7 +10,10 @@
     "Web"
   ],
   "license": "MIT",
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "extract-fonts",
