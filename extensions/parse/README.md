@@ -28,6 +28,10 @@
 - `⌘ + C` - Copy text
 - `⌘ + D` - Delete item
 
+## Demo
+
+![Parse Banner](./assets/window.gif)
+
 ## Notes
 
 - Based on [this tweet from Oliur](https://x.com/UltraLinx/status/2011434505253650868)
