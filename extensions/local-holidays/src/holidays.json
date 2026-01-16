@@ -1,0 +1,27 @@
+[
+  { "date": "2026-01-01", "name": "New Year Holiday", "optional": false },
+  { "date": "2026-01-26", "name": "Republic Day", "optional": false },
+  { "date": "2026-03-19", "name": "Chandramana Ugadi", "optional": false },
+  { "date": "2026-05-01", "name": "May Day", "optional": false },
+  { "date": "2026-05-28", "name": "Bakrid", "optional": false },
+  { "date": "2026-09-14", "name": "Ganesh Chaturthi", "optional": false },
+  { "date": "2026-10-02", "name": "Gandhi Jayanthi", "optional": false },
+  { "date": "2026-10-21", "name": "Vijayadashami", "optional": false },
+  { "date": "2026-12-25", "name": "Christmas", "optional": false },
+
+  { "date": "2026-01-15", "name": "Makara Sankranti / Pongal", "optional": true },
+  { "date": "2026-01-16", "name": "Thiruvalluvar Day", "optional": true },
+  { "date": "2026-03-02", "name": "Holi Festival", "optional": true },
+  { "date": "2026-03-27", "name": "Sri Ramanavami", "optional": true },
+  { "date": "2026-03-31", "name": "Mahaveer Jayanthi", "optional": true },
+  { "date": "2026-04-03", "name": "Good Friday", "optional": true },
+  { "date": "2026-04-20", "name": "Basava Jayanthi / Akshaya Tritiya", "optional": true },
+  { "date": "2026-06-26", "name": "Last Day of Moharram", "optional": true },
+  { "date": "2026-08-21", "name": "Varamahalakshmi Vrata", "optional": true },
+  { "date": "2026-08-26", "name": "Eid Milad", "optional": true },
+  { "date": "2026-09-04", "name": "Sri Krishna Janmashtami", "optional": true },
+  { "date": "2026-10-20", "name": "Mahanavami / Ayudhapooja", "optional": true },
+  { "date": "2026-11-10", "name": "Balipadyami / Deepawali", "optional": true },
+  { "date": "2026-11-24", "name": "Guru Nanak Jayanthi", "optional": true },
+  { "date": "2026-12-24", "name": "Christmas Eve", "optional": true }
+]

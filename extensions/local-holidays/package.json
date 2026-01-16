@@ -1,0 +1,26 @@
+{
+  "name": "local-holidays",
+  "version": "1.0.0",
+  "title": "Office Holidays",
+  "description": "Shows holidays from a local JSON file",
+  "author": "balamurugan_selvaraju",
+  "license": "MIT",
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Office Holidays",
+      "description": "List upcoming Office holidays",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "scripts": {
+    "dev": "npx ray develop",
+    "build": "npx ray build",
+    "publish": "npx ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.1"
+  }
+}
