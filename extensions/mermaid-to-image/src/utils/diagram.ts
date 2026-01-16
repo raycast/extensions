@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { environment, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { promisify } from "util";
 import { execFile } from "child_process";
 import { MutableRefObject } from "react";
@@ -97,10 +97,12 @@ async function generateDiagramWithExplicitNode(
 
 /**
  * Generate Mermaid diagram using explicit Node.js path and execFile
+ * @param forceFormat - Optional parameter to force a specific output format (e.g., 'png' for AI Tool)
  */
 export async function generateMermaidDiagram(
   mermaidCode: string,
   tempFileRef: MutableRefObject<string | null>,
+  forceFormat?: string,
 ): Promise<string> {
   try {
     const preferences = getPreferenceValues<Preferences>();
@@ -110,10 +112,20 @@ export async function generateMermaidDiagram(
     const tempFile = createTempFile(cleanCode, "mmd");
     tempFileRef.current = tempFile;
 
-    // Create output path
-    const outputPath = path.join(environment.supportPath, `diagram-${Date.now()}.${preferences.outputFormat}`);
+    // Determine output format (force PNG for AI Tool, otherwise use preference)
+    const outputFormat = forceFormat || preferences.outputFormat;
 
-    console.log(`Generating diagram, theme: ${preferences.theme}, format: ${preferences.outputFormat}`);
+    // Create permanent directory for AI-generated diagrams in Downloads folder
+    const homeDir = process.env.HOME || process.env.USERPROFILE || "";
+    const diagramsDir = path.join(homeDir, "Downloads", "MermaidDiagrams");
+    if (!fs.existsSync(diagramsDir)) {
+      fs.mkdirSync(diagramsDir, { recursive: true });
+    }
+
+    // Create output path in Downloads/MermaidDiagrams directory
+    const outputPath = path.join(diagramsDir, `diagram-${Date.now()}.${outputFormat}`);
+
+    console.log(`Generating diagram, theme: ${preferences.theme}, format: ${outputFormat}`);
 
     // Find Node.js path
     let nodePath;

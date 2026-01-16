@@ -1,8 +1,7 @@
-import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Clipboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { generateMermaidDiagram } from "../utils/diagram";
 import { cleanupTempFile } from "../utils/files";
-import { Preferences } from "../types";
 import { promisify } from "util";
 import { exec } from "child_process";
 import fs from "fs";
@@ -37,9 +36,9 @@ async function copyImageToClipboard(imagePath: string, format: string): Promise<
 /**
  * @raycast AI Tool
  * @name generateMermaidImageTool
- * @description **Receives a Mermaid syntax string**, uses this syntax to generate a chart image (the format is based on user preferences), and copies the **generated image** to the system clipboard. This tool is used to complete the final steps of a user's request to "generate/draw a chart and copy an image". The AI should generate the Mermaid grammar first, then call this tool passing in that grammar.
+ * @description **Receives a Mermaid syntax string**, generates a PNG diagram image, copies it to the clipboard, and **returns the file path** for display in the AI chat. When you receive the file path, **you MUST display it in the conversation using this exact markdown format**: ![Mermaid Diagram](file://<file_path>) - make sure to encode the file path properly. The AI should generate the Mermaid syntax first, then call this tool, then display the returned image path using the markdown format above.
  * @param {MermaidToolInput} input - The object containing the `mermaidSyntax` field.
- * @returns {Promise<string>} - A message string describing the result of the operation (successful generation and copying of the image, or an error).
+ * @returns {Promise<string>} - The absolute file path to the generated PNG image.
  */
 export default async function generateMermaidImageTool(input: MermaidToolInput): Promise<string> {
   const { mermaidSyntax } = input;
@@ -51,7 +50,6 @@ export default async function generateMermaidImageTool(input: MermaidToolInput):
   }
 
   console.log("AI Tool 'generateMermaidImageTool' called with syntax:", mermaidSyntax);
-  const preferences = getPreferenceValues<Preferences>();
   const tempFileRef = { current: null as string | null };
   let outputImagePath: string | null = null;
 
@@ -62,20 +60,21 @@ export default async function generateMermaidImageTool(input: MermaidToolInput):
       title: "Generating diagram...",
     });
 
-    // Generate the diagram
-    outputImagePath = await generateMermaidDiagram(mermaidSyntax, tempFileRef);
+    // Generate the diagram (force PNG format for AI chat compatibility)
+    outputImagePath = await generateMermaidDiagram(mermaidSyntax, tempFileRef, "png");
 
     // Update toast to show progress
     toast.title = "Copying image to clipboard...";
 
-    // Copy to clipboard
-    await copyImageToClipboard(outputImagePath, preferences.outputFormat);
+    // Copy to clipboard (PNG format)
+    await copyImageToClipboard(outputImagePath, "png");
 
     // Update toast to show success
     toast.style = Toast.Style.Success;
-    toast.title = "Diagram copied to clipboard";
+    toast.title = "Diagram generated and copied";
 
-    return "The Mermaid diagram was successfully generated and copied to your clipboard.";
+    // Return the file path for AI to display in conversation
+    return outputImagePath;
   } catch (error) {
     console.error("AI tool execution failed:", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -87,15 +86,12 @@ export default async function generateMermaidImageTool(input: MermaidToolInput):
 
     return `Diagram generation failed: ${errorMessage}. Please check if the Mermaid syntax is correct.`;
   } finally {
-    // Clean up temporary files
-    if (outputImagePath) {
-      cleanupTempFile(outputImagePath);
-      console.log("Cleaned image file:", outputImagePath);
-    }
-
+    // Clean up only the temporary .mmd file, keep the generated image
     if (tempFileRef.current) {
       cleanupTempFile(tempFileRef.current);
-      console.log("Cleaned temporary file:", tempFileRef.current);
+      console.log("Cleaned temporary .mmd file:", tempFileRef.current);
     }
+    // Note: outputImagePath is NOT cleaned up - images are kept permanently in
+    // ~/Downloads/MermaidDiagrams/
   }
 }
