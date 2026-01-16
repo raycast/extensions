@@ -18,7 +18,7 @@ import { homedir } from "os";
 import { join } from "path";
 import { FontInfo, FontFormat } from "./types";
 import { extractFonts, checkFontAccessibility } from "./utils/fontExtractor";
-import { downloadFont, downloadFonts } from "./utils/downloader";
+import { downloadFonts } from "./utils/downloader";
 import { isValidUrl, getDomain } from "./utils/urlHelpers";
 
 type ViewState = "form" | "loading" | "list";
@@ -204,7 +204,7 @@ export default function ExtractFonts() {
       // Check accessibility for each font
       toast.message = "Checking font accessibility...";
       const checkedFonts = await Promise.all(
-        filteredFonts.map(checkFontAccessibility),
+        filteredFonts.map((font) => checkFontAccessibility(font, targetUrl)),
       );
 
       // Add selection state (all deselected by default)
@@ -292,7 +292,7 @@ export default function ExtractFonts() {
       (completed, total) => {
         toast.message = `${completed}/${total}`;
       },
-      { convertWoff2ToTtf: preferences.convertWoff2ToTtf },
+      { convertWoff2ToTtf: preferences.convertWoff2ToTtf, pageUrl: sourceUrl },
     );
 
     const successful = results.filter((r) => r.success).length;
@@ -307,29 +307,6 @@ export default function ExtractFonts() {
       toast.title = `Downloaded ${successful} fonts, ${failed} failed`;
       toast.message =
         results.find((r) => !r.success)?.error || "Some downloads failed";
-    }
-  }
-
-  async function handleDownloadSingle(font: FontInfo) {
-    const destFolder = getDestFolder();
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Downloading...",
-      message: font.family,
-    });
-
-    const result = await downloadFont(font, destFolder, {
-      convertWoff2ToTtf: preferences.convertWoff2ToTtf,
-    });
-
-    if (result.success) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Downloaded";
-      toast.message = result.filePath;
-    } else {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Download failed";
-      toast.message = result.error;
     }
   }
 
@@ -423,29 +400,21 @@ export default function ExtractFonts() {
                 ? [{ tag: { value: "Embedded", color: Color.Blue } }]
                 : []),
               ...(!font.accessible
-                ? [{ tag: { value: "Cannot Access", color: Color.Red } }]
+                ? [{ tag: { value: "Access Denied", color: Color.Red } }]
                 : []),
             ]}
             actions={
               <ActionPanel>
                 {font.accessible && (
-                  <>
-                    <Action
-                      title={font.selected ? "Deselect" : "Select"}
-                      icon={font.selected ? Icon.Circle : Icon.CheckCircle}
-                      onAction={() => toggleSelection(index)}
-                    />
-                    <Action
-                      title="Download This Font"
-                      icon={Icon.Download}
-                      onAction={() => handleDownloadSingle(font)}
-                    />
-                  </>
+                  <Action
+                    title={font.selected ? "Deselect" : "Select"}
+                    icon={font.selected ? Icon.Circle : Icon.CheckCircle}
+                    onAction={() => toggleSelection(index)}
+                  />
                 )}
                 <Action
                   title="Download Selected Fonts"
                   icon={Icon.Download}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={handleDownloadSelected}
                 />
                 <Action
@@ -459,7 +428,7 @@ export default function ExtractFonts() {
                       ? Icon.Circle
                       : Icon.CheckCircle
                   }
-                  shortcut={{ modifiers: ["cmd"], key: "a" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
                   onAction={
                     selectedCount === accessibleCount ? deselectAll : selectAll
                   }

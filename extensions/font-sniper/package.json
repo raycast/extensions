@@ -10,11 +10,12 @@
     "Web"
   ],
   "license": "MIT",
+  "platforms": ["macOS", "Windows"],
   "commands": [
     {
       "name": "extract-fonts",
       "title": "Download Fonts",
-      "description": "Extract and download fonts from a website URL",
+      "description": "Identify and download fonts from any website.",
       "mode": "view"
     }
   ],
@@ -63,16 +64,16 @@
     {
       "name": "convertWoff2ToTtf",
       "title": "Conversion",
-      "label": "Auto-convert WOFF2 to TTF",
-      "description": "Automatically convert WOFF2 fonts to TTF format when downloading",
+      "label": "Auto-convert to desktop format",
+      "description": "Automatically convert web fonts (WOFF/WOFF2) to desktop formats (TTF/OTF) when downloading",
       "type": "checkbox",
-      "default": false,
+      "default": true,
       "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.56.0",
-    "woff2-encoder": "^2.0.0"
+    "fontverter": "^2.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

@@ -1,19 +1,14 @@
 # Font Sniper
 
-A Raycast extension to identify and download fonts from websites.
+A Raycast extension to identify and download fonts from any website.
 
 ## Features
 
-- Extract fonts from any website URL
+- Identify and download fonts from any website
 - Support for WOFF2, WOFF, TTF, OTF, and EOT formats
-- Auto-convert WOFF2 to TTF for desktop use
+- Auto-convert web fonts to desktop formats (TTF/OTF)
 - Filter by format preferences
 - Batch download selected fonts
-
-## Screenshots
-
-![Enter a URL to extract fonts](metadata/font-sniper-1.png)
-![Select fonts to download](metadata/font-sniper-2.png)
 
 ## Disclaimer
 
