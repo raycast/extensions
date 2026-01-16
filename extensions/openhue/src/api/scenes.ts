@@ -1,21 +1,49 @@
-import { hueGet, huePut } from "./client";
-import { Scene, ScenePut, ResourceIdentifier } from "./types";
+import { SceneApi } from "./generated/src/apis/SceneApi";
+import { Configuration } from "./generated/src/runtime";
+import { SceneGet, ScenePut, ResourceIdentifier } from "./generated/src/models";
+import { getFetchAdapter } from "./fetch-adapter";
+import { getCredentials } from "./client";
 
-const SCENES_ENDPOINT = "/clip/v2/resource/scene";
+// Create configured API instance
+let sceneApiInstance: SceneApi | null = null;
 
-export async function getScenes(): Promise<Scene[]> {
-  const response = await hueGet<Scene>(SCENES_ENDPOINT);
-  return response.data;
+async function getSceneApi(): Promise<SceneApi> {
+  if (!sceneApiInstance) {
+    const fetchAdapter = await getFetchAdapter();
+    const credentials = getCredentials();
+
+    if (!credentials) {
+      throw new Error("Bridge not configured. Please run Setup Hue Bridge first.");
+    }
+
+    const config = new Configuration({
+      basePath: `https://${credentials.bridgeIP}`,
+      fetchApi: fetchAdapter,
+      apiKey: credentials.applicationKey,
+    });
+
+    sceneApiInstance = new SceneApi(config);
+  }
+
+  return sceneApiInstance;
 }
 
-export async function getScene(sceneId: string): Promise<Scene | null> {
-  const response = await hueGet<Scene>(`${SCENES_ENDPOINT}/${sceneId}`);
-  return response.data[0] ?? null;
+export async function getScenes(): Promise<SceneGet[]> {
+  const api = await getSceneApi();
+  const response = await api.getScenes();
+  return response.data || [];
+}
+
+export async function getScene(sceneId: string): Promise<SceneGet | null> {
+  const api = await getSceneApi();
+  const response = await api.getScene(sceneId);
+  return response.data?.[0] ?? null;
 }
 
 export async function updateScene(sceneId: string, data: ScenePut): Promise<ResourceIdentifier[]> {
-  const response = await huePut<ResourceIdentifier>(`${SCENES_ENDPOINT}/${sceneId}`, data);
-  return response.data;
+  const api = await getSceneApi();
+  const response = await api.updateScene(sceneId, data);
+  return response.data || [];
 }
 
 export async function activateScene(
@@ -31,11 +59,13 @@ export async function activateScene(
 }
 
 // Helper to group scenes by room
-export function groupScenesByRoom(scenes: Scene[]): Map<string, Scene[]> {
-  const grouped = new Map<string, Scene[]>();
+export function groupScenesByRoom(scenes: SceneGet[]): Map<string, SceneGet[]> {
+  const grouped = new Map<string, SceneGet[]>();
 
   for (const scene of scenes) {
-    const roomId = scene.group.rid;
+    const roomId = scene.group?.rid;
+    if (!roomId) continue;
+
     const existing = grouped.get(roomId) ?? [];
     existing.push(scene);
     grouped.set(roomId, existing);

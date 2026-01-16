@@ -72,6 +72,9 @@
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
+    "generate-code": "curl -s https://api.redocly.com/registry/bundle/openhue/openhue/v2/openapi.yaml?branch=main -o openapi.yaml && npx @openapitools/openapi-generator-cli generate -c openapi-generator-config.yaml && npm run generate-code:indexes && npm run fix-lint",
+    "generate-code:indexes": "node -e \"const fs=require('fs');const apis=fs.readdirSync('src/api/generated/src/apis').filter(f=>f.endsWith('.ts')&&f!=='index.ts').map(f=>'export * from \\\"./'+f.replace('.ts','')+'\\\"');fs.writeFileSync('src/api/generated/src/apis/index.ts','// Export all API classes\\n'+apis.join(';\\n')+';\\n');const models=fs.readdirSync('src/api/generated/src/models').filter(f=>f.endsWith('.ts')&&f!=='index.ts').map(f=>'export * from \\\"./'+f.replace('.ts','')+'\\\"');fs.writeFileSync('src/api/generated/src/models/index.ts','// Export all models\\n'+models.join(';\\n')+';\\n')\"",
+    "generate:api": "npx @openapitools/openapi-generator-cli generate -c openapi-generator-config.yaml",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"

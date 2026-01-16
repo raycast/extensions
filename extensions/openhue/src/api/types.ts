@@ -271,9 +271,3 @@ export interface AuthResponse {
     description: string;
   };
 }
-
-// Preferences type
-export interface Preferences {
-  bridgeIP?: string;
-  applicationKey?: string;
-}

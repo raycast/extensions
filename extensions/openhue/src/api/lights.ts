@@ -1,21 +1,49 @@
-import { hueGet, huePut } from "./client";
-import { Light, LightPut, ResourceIdentifier } from "./types";
+import { LightApi } from "./generated/src/apis/LightApi";
+import { Configuration } from "./generated/src/runtime";
+import { LightGet, LightPut, ResourceIdentifier } from "./generated/src/models";
+import { getFetchAdapter } from "./fetch-adapter";
+import { getCredentials } from "./client";
 
-const LIGHTS_ENDPOINT = "/clip/v2/resource/light";
+// Create configured API instance
+let lightApiInstance: LightApi | null = null;
 
-export async function getLights(): Promise<Light[]> {
-  const response = await hueGet<Light>(LIGHTS_ENDPOINT);
-  return response.data;
+async function getLightApi(): Promise<LightApi> {
+  if (!lightApiInstance) {
+    const fetchAdapter = await getFetchAdapter();
+    const credentials = getCredentials();
+
+    if (!credentials) {
+      throw new Error("Bridge not configured. Please run Setup Hue Bridge first.");
+    }
+
+    const config = new Configuration({
+      basePath: `https://${credentials.bridgeIP}`,
+      fetchApi: fetchAdapter,
+      apiKey: credentials.applicationKey,
+    });
+
+    lightApiInstance = new LightApi(config);
+  }
+
+  return lightApiInstance;
 }
 
-export async function getLight(lightId: string): Promise<Light | null> {
-  const response = await hueGet<Light>(`${LIGHTS_ENDPOINT}/${lightId}`);
-  return response.data[0] ?? null;
+export async function getLights(): Promise<LightGet[]> {
+  const api = await getLightApi();
+  const response = await api.getLights();
+  return response.data || [];
+}
+
+export async function getLight(lightId: string): Promise<LightGet | null> {
+  const api = await getLightApi();
+  const response = await api.getLight(lightId);
+  return response.data?.[0] ?? null;
 }
 
 export async function updateLight(lightId: string, data: LightPut): Promise<ResourceIdentifier[]> {
-  const response = await huePut<ResourceIdentifier>(`${LIGHTS_ENDPOINT}/${lightId}`, data);
-  return response.data;
+  const api = await getLightApi();
+  const response = await api.updateLight(lightId, data);
+  return response.data || [];
 }
 
 export async function toggleLight(lightId: string, on: boolean): Promise<ResourceIdentifier[]> {

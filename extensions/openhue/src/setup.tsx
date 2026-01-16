@@ -10,9 +10,11 @@ import {
   Clipboard,
   List,
   Form,
+  environment,
 } from "@raycast/api";
+import path from "path";
 import { discoverBridges, authenticate, isLinkButtonError, getApplicationKey } from "./api/auth";
-import { BridgeDiscovery } from "./api/types";
+import type { BridgeDiscovery } from "./api/generated/src/models";
 
 type SetupState =
   | { step: "discovering" }
@@ -249,11 +251,13 @@ function SelectBridgeView({
 }
 
 function WaitingForButtonView({ bridgeIP, onCancel }: { bridgeIP: string; onCancel: () => void }) {
+  const waitingIcon = path.join(environment.assetsPath, "connect-waiting.png");
+
   return (
     <Detail
       markdown={`# Press the Link Button
 
-![Hue Bridge](https://www.philips-hue.com/content/dam/hue/masters/consumer/consumer-luminaires/bridges-and-controls/hue-bridge/packshot/packshot-bridge-EU.png)
+![Waiting](${waitingIcon})
 
 **Please press the large button on top of your Hue Bridge** to authorize this extension.
 
@@ -270,6 +274,8 @@ Waiting for button press...`}
 }
 
 function SuccessView({ bridgeIP, applicationKey }: { bridgeIP: string; applicationKey: string }) {
+  const successIcon = path.join(environment.assetsPath, "connect-ok.png");
+
   const handleCopyCredentials = async () => {
     await Clipboard.copy(`Bridge IP: ${bridgeIP}\nApplication Key: ${applicationKey}`);
     await showToast({
@@ -281,6 +287,8 @@ function SuccessView({ bridgeIP, applicationKey }: { bridgeIP: string; applicati
   return (
     <Detail
       markdown={`# Successfully Connected! 🎉
+
+![Success](${successIcon})
 
 Your Hue Bridge has been successfully connected.
 
@@ -323,9 +331,13 @@ function ErrorView({
   onRetry: () => void;
   onManualEntry: () => void;
 }) {
+  const errorIcon = path.join(environment.assetsPath, "connect-ko.png");
+
   return (
     <Detail
       markdown={`# Error
+
+![Error](${errorIcon})
 
 Something went wrong during setup:
 

@@ -1,9 +1,16 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, openExtensionPreferences } from "@raycast/api";
 import { useLightsWithRooms, findRoomForLight } from "./hooks/useHue";
 import { toggleLight, setLightBrightness, setLightColorTemperature, setLightColor } from "./api/lights";
-import { Light, Room } from "./api/types";
+import type { LightGet as Light, RoomGet as Room } from "./api/generated/src/models";
 import { getCredentials } from "./api/client";
 import { xyToHex, mirekToHex, hexToXY, PRESET_COLORS, PRESET_TEMPERATURES } from "./utils/color";
+
+function formatArchetype(archetype: string): string {
+  return archetype
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 export default function LightsCommand() {
   const credentials = getCredentials();
@@ -180,7 +187,7 @@ function LightListItem({ light, revalidate }: { light: Light; revalidate: () => 
     <List.Item
       icon={iconTintColor ? { source: Icon.LightBulb, tintColor: iconTintColor } : Icon.LightBulb}
       title={light.metadata.name}
-      subtitle={light.metadata.archetype.replace(/_/g, " ")}
+      subtitle={formatArchetype(light.metadata.archetype)}
       accessories={accessories}
       actions={
         <ActionPanel>

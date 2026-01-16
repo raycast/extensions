@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, openExtensionPreferences } from "@raycast/api";
 import { useScenesWithRooms, getRoomName } from "./hooks/useHue";
 import { activateScene, groupScenesByRoom } from "./api/scenes";
-import { Scene } from "./api/types";
+import type { SceneGet as Scene } from "./api/generated/src/models";
 import { getCredentials } from "./api/client";
 
 export default function ScenesCommand() {

@@ -2,7 +2,12 @@ import { useCachedPromise } from "@raycast/utils";
 import { getLights } from "../api/lights";
 import { getRooms, getGroupedLights } from "../api/rooms";
 import { getScenes } from "../api/scenes";
-import { Light, Room, GroupedLight, Scene } from "../api/types";
+import type {
+  LightGet as Light,
+  RoomGet as Room,
+  GroupedLightGet as GroupedLight,
+  SceneGet as Scene,
+} from "../api/generated/src/models";
 import { getCredentials } from "../api/client";
 
 export function useLights() {
@@ -74,6 +79,7 @@ export function useLightsWithRooms(): {
   lights: Light[];
   rooms: Room[];
   groupedLights: GroupedLight[];
+  scenes: Scene[];
   isLoading: boolean;
   error: Error | undefined;
   revalidate: () => Promise<void>;
@@ -81,17 +87,25 @@ export function useLightsWithRooms(): {
   const lightsResult = useLights();
   const roomsResult = useRooms();
   const groupedLightsResult = useGroupedLights();
+  const scenesResult = useScenes();
 
   const revalidate = async () => {
-    await Promise.all([lightsResult.revalidate(), roomsResult.revalidate(), groupedLightsResult.revalidate()]);
+    await Promise.all([
+      lightsResult.revalidate(),
+      roomsResult.revalidate(),
+      groupedLightsResult.revalidate(),
+      scenesResult.revalidate(),
+    ]);
   };
 
   return {
     lights: lightsResult.data ?? [],
     rooms: roomsResult.data ?? [],
     groupedLights: groupedLightsResult.data ?? [],
-    isLoading: lightsResult.isLoading || roomsResult.isLoading || groupedLightsResult.isLoading,
-    error: lightsResult.error || roomsResult.error || groupedLightsResult.error,
+    scenes: scenesResult.data ?? [],
+    isLoading:
+      lightsResult.isLoading || roomsResult.isLoading || groupedLightsResult.isLoading || scenesResult.isLoading,
+    error: lightsResult.error || roomsResult.error || groupedLightsResult.error || scenesResult.error,
     revalidate,
   };
 }

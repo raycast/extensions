@@ -1,7 +1,8 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, openExtensionPreferences } from "@raycast/api";
 import { useLightsWithRooms, findGroupedLightForRoom } from "./hooks/useHue";
 import { toggleRoom, setRoomBrightness } from "./api/rooms";
-import { Room, GroupedLight } from "./api/types";
+import { activateScene } from "./api/scenes";
+import type { RoomGet as Room, GroupedLightGet as GroupedLight, SceneGet as Scene } from "./api/generated/src/models";
 import { getCredentials } from "./api/client";
 
 export default function RoomsCommand() {
@@ -32,7 +33,7 @@ function NoBridgeConfigured() {
 }
 
 function RoomsList() {
-  const { rooms, groupedLights, isLoading, error, revalidate } = useLightsWithRooms();
+  const { rooms, groupedLights, scenes, isLoading, error, revalidate } = useLightsWithRooms();
 
   if (error) {
     showToast({
@@ -49,7 +50,16 @@ function RoomsList() {
     <List isLoading={isLoading} searchBarPlaceholder="Search rooms...">
       {sortedRooms.map((room) => {
         const groupedLight = findGroupedLightForRoom(room, groupedLights);
-        return <RoomListItem key={room.id} room={room} groupedLight={groupedLight} revalidate={revalidate} />;
+        const roomScenes = scenes.filter((s) => s.group?.rid === room.id);
+        return (
+          <RoomListItem
+            key={room.id}
+            room={room}
+            groupedLight={groupedLight}
+            scenes={roomScenes}
+            revalidate={revalidate}
+          />
+        );
       })}
     </List>
   );
@@ -58,10 +68,12 @@ function RoomsList() {
 function RoomListItem({
   room,
   groupedLight,
+  scenes,
   revalidate,
 }: {
   room: Room;
   groupedLight: GroupedLight | undefined;
+  scenes: Scene[];
   revalidate: () => Promise<void>;
 }) {
   const isOn = groupedLight?.on.on ?? false;
@@ -124,6 +136,23 @@ function RoomListItem({
     }
   };
 
+  const handleActivateScene = async (scene: Scene) => {
+    try {
+      await activateScene(scene.id);
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Scene "${scene.metadata.name}" activated`,
+      });
+      await revalidate();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to activate scene",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
   return (
     <List.Item
       icon={archetypeIcon}
@@ -141,6 +170,23 @@ function RoomListItem({
                   onAction={handleToggle}
                 />
               </ActionPanel.Section>
+
+              {scenes.length > 0 && (
+                <ActionPanel.Section title="Scenes">
+                  <ActionPanel.Submenu title="Activate Scene" icon={Icon.Image}>
+                    {scenes
+                      .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
+                      .map((scene) => (
+                        <Action
+                          key={scene.id}
+                          icon={Icon.Play}
+                          title={scene.metadata.name}
+                          onAction={() => handleActivateScene(scene)}
+                        />
+                      ))}
+                  </ActionPanel.Submenu>
+                </ActionPanel.Section>
+              )}
 
               <ActionPanel.Section title="Brightness">
                 <Action

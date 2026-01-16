@@ -1,5 +1,11 @@
 import https from "https";
+import fs from "fs";
+import path from "path";
+import { environment } from "@raycast/api";
 import { AuthResponse, BridgeDiscovery } from "./types";
+
+// Load Hue Bridge root CA certificate for SSL verification
+const HUE_ROOT_CA = fs.readFileSync(path.join(environment.assetsPath, "root_ca_cert.pem"));
 
 const DISCOVERY_URL = "https://discovery.meethue.com";
 
@@ -33,7 +39,10 @@ export async function authenticate(
         "Content-Type": "application/json",
         "Content-Length": Buffer.byteLength(postData),
       },
-      rejectUnauthorized: false, // Accept self-signed certificates
+      ca: HUE_ROOT_CA, // Use Philips Hue root CA for certificate verification
+      rejectUnauthorized: true,
+      // Hue bridge certs are issued to bridge ID, not IP - skip hostname verification
+      checkServerIdentity: () => undefined,
     };
 
     const req = https.request(options, (res) => {
