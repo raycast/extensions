@@ -1,33 +1,29 @@
 import { ActionPanel, Action, showHUD, Clipboard, showToast, Toast, List, getPreferenceValues } from "@raycast/api";
 import { FC, useCallback } from "react";
-import { getMeetTab, openMeetTabSelectedProfile, Preferences, getTimeout } from "../../helpers";
+import { getMeetTab, openMeetTabSelectedProfile, getTimeout } from "../../helpers";
 import { useCacheHelpers } from "../../hooks";
 
 export const ProfileList: FC = () => {
   const { profiles, onRemoveItem } = useCacheHelpers();
-  const { timeout: prefTimeout } = getPreferenceValues<Preferences>();
 
-  const onSelect = useCallback(
-    async (email: string) => {
-      try {
-        await openMeetTabSelectedProfile(email);
+  const onSelect = useCallback(async (email: string) => {
+    try {
+      await openMeetTabSelectedProfile(email);
 
-        const timeout = getTimeout(prefTimeout);
-        await new Promise((r) => setTimeout(r, timeout));
+      const timeout = getTimeout();
+      await new Promise((r) => setTimeout(r, timeout));
 
-        const meetTab = await getMeetTab();
+      const meetTab = await getMeetTab();
 
-        await Clipboard.copy(meetTab.split("?")[0]);
-        await showHUD("Copied meet link to clipboard");
-      } catch (err) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't copy to clipboard",
-        });
-      }
-    },
-    [prefTimeout]
-  );
+      await Clipboard.copy(meetTab.split("?")[0]);
+      await showHUD("Copied meet link to clipboard");
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't copy to clipboard",
+      });
+    }
+  }, []);
 
   const onRemove = useCallback(
     (email: string) => {

@@ -1,14 +1,11 @@
 import { showHUD, Clipboard, showToast, Toast } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
-import { getMeetTab, openMeetTabDefaultProfile, Preferences, getTimeout } from "./helpers";
+import { getMeetTab, openMeetTabDefaultProfile, getTimeout } from "./helpers";
 
 export default async function main() {
-  const { timeout: prefTimeout } = getPreferenceValues<Preferences>();
-
   try {
     await openMeetTabDefaultProfile();
 
-    const timeout = getTimeout(prefTimeout);
+    const timeout = getTimeout();
     await new Promise((r) => setTimeout(r, timeout));
     const meetTab = await getMeetTab();
 
