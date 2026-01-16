@@ -1,0 +1,85 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "leave-time-calculator",
+	"version": "0.0.1",
+	"title": "Leave Time Calculator / 退勤時間計算",
+	"description": "Calculate your leave time based on start time and break duration / 出勤時間から退勤時間を計算",
+	"icon": "command-icon.png",
+	"author": "harunonsystem",
+	"categories": [
+		"Productivity"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "calculate-leave-time",
+			"title": "Calculate Leave Time",
+			"description": "Enter start time and calculate when to leave work",
+			"mode": "view",
+			"interval": "1m",
+			"preferences": [
+				{
+					"name": "defaultWorkHours",
+					"type": "textfield",
+					"required": false,
+					"title": "Default Work Hours",
+					"description": "Default work hours per day (e.g., 8, 9)",
+					"default": "8"
+				},
+				{
+					"name": "defaultBreakMinutes",
+					"type": "textfield",
+					"required": false,
+					"title": "Default Break Minutes",
+					"description": "Default break time in minutes (e.g., 60)",
+					"default": "60"
+				},
+				{
+					"name": "language",
+					"type": "dropdown",
+					"required": false,
+					"title": "Language / 言語",
+					"description": "Display language (System: auto-detect from macOS)",
+					"default": "system",
+					"data": [
+						{
+							"title": "System / システム設定",
+							"value": "system"
+						},
+						{
+							"title": "English",
+							"value": "en"
+						},
+						{
+							"title": "日本語",
+							"value": "ja"
+						}
+					]
+				}
+			]
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.104.1",
+		"@raycast/utils": "^2.2.2",
+		"react": "^19.2.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.11",
+		"@types/bun": "latest",
+		"@types/node": "^20.17.6",
+		"@types/react": "^19.2.7",
+		"typescript": "^5.7.2",
+		"vitest": "^4.0.17"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"publish": "npx @raycast/api@latest publish",
+		"test": "vitest",
+		"check": "biome check",
+		"format": "biome check --write"
+	}
+}
