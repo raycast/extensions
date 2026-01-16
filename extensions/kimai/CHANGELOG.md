@@ -1,6 +1,6 @@
 # Kimai Changelog
 
-## [Update] - 2026-01-16
+## [Update] - {PR_MERGE_DATE}
 
 - Add "Stop Active Timer" command to quickly stop running time entries
 - Add weekly and monthly hours display in menu bar dropdown
