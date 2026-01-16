@@ -5,9 +5,11 @@
 - **Inline Image Display in AI Chat**: Generated diagrams now automatically appear as inline images in Raycast AI conversations
 - AI Tool now returns file paths that are automatically rendered as markdown images in the chat
 - Permanent diagram storage for future reference and reuse
+- **Automatic Cleanup of Old Temporary Files**: Manual mode now automatically cleans up temporary files older than 1 hour on each launch, preventing disk space accumulation
 
 ### Changed
 - **New Storage Location**: AI-generated diagrams are now saved to `~/Downloads/MermaidDiagrams/` for easier access
+- **Manual Mode Storage**: Manual mode uses `environment.supportPath` for temporary storage (separate from AI-generated diagrams)
 - AI Tool now exclusively uses PNG format (optimized for AI chat display)
 - Diagram files are no longer cleaned up after generation - they remain permanently accessible
 
@@ -15,11 +17,13 @@
 - Enhanced JSDoc description to explicitly instruct AI how to display images using markdown syntax
 - Better user experience: diagrams appear both in chat AND are copied to clipboard
 - Clearer documentation about where diagrams are stored and how they're managed
+- Three-layer cleanup protection: immediate cleanup on component unmount, periodic cleanup on launch, and time-based cleanup for orphaned files
 
 ### Technical
-- Added `forceFormat` parameter to `generateMermaidDiagram()` function
+- Added `forceFormat` parameter to `generateMermaidDiagram()` function to distinguish AI vs manual mode
 - Modified cleanup logic to preserve generated images while removing temporary files
-- Storage path changed from internal support directory to user-accessible Downloads folder
+- Storage path changed from internal support directory to user-accessible Downloads folder (AI mode only)
+- Added `cleanupOldTempFiles()` function to prevent temporary file accumulation from crashes or incomplete cleanups
 
 ## [Add selected text support] - 2025-08-05
 ### Added

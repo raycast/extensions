@@ -66,6 +66,13 @@ Use the extension directly in Raycast AI conversations:
 - Retention: Diagrams are kept permanently for future reference
 - Easy access: Open in Finder to view all generated diagrams
 
+**Manual Mode File Management:**
+- **Storage**: Temporary files are stored in a hidden system directory (`environment.supportPath`)
+- **Automatic Cleanup**: Files are automatically deleted when you close the preview
+- **Old File Cleanup**: Files older than 1 hour are automatically cleaned up on each launch to prevent disk space accumulation
+- **No Manual Intervention**: You don't need to worry about temporary files - they're managed automatically
+- **Saving**: Use the "Save Image" action (⌘S) to explicitly save diagrams to your preferred location
+
 ## Preferences
 
 Configure the extension in Raycast preferences:

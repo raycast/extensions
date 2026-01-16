@@ -19,7 +19,7 @@
       {
         "input": "@mermaid-to-image Draw a simple flowchart A -> B and copy the image.",
         "mocks": {
-          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+          "generate-mermaid-diagram-with-ai": "/Users/username/Downloads/MermaidDiagrams/diagram-1234567890.png"
         },
         "expected": [
           {
@@ -28,7 +28,7 @@
             }
           },
           {
-            "includes": "copied to your clipboard"
+            "includes": "diagram"
           }
         ],
         "usedAsExample": true
@@ -36,7 +36,7 @@
       {
         "input": "@mermaid-to-image convert below mermaid code to image and copy it. graph TD        A[Start] --> B{Is it working?}        B -->|Yes| C[Great!]        B -->|No| D[Debug]        D --> B",
         "mocks": {
-          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+          "generate-mermaid-diagram-with-ai": "/Users/username/Downloads/MermaidDiagrams/diagram-1234567891.png"
         },
         "expected": [
           {
@@ -50,7 +50,7 @@
       {
         "input": "@mermaid-to-image Create a class diagram for Vehicle and Car (Car inherits from Vehicle) and copy the resulting image.",
         "mocks": {
-          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+          "generate-mermaid-diagram-with-ai": "/Users/username/Downloads/MermaidDiagrams/diagram-1234567892.png"
         },
         "expected": [
           {
