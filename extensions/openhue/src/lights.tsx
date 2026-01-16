@@ -50,6 +50,8 @@ function LightsList() {
     });
   }
 
+  const getRoomName = (room?: Room) => room?.metadata?.name ?? "Unassigned";
+
   // Group lights by room
   const lightsByRoom = new Map<string, { room: Room | undefined; lights: Light[] }>();
 
@@ -67,26 +69,17 @@ function LightsList() {
   const sortedRooms = Array.from(lightsByRoom.entries()).sort((a, b) => {
     if (a[0] === "unassigned") return 1;
     if (b[0] === "unassigned") return -1;
-    const nameA = a[1].room?.metadata.name ?? "";
-    const nameB = b[1].room?.metadata.name ?? "";
+    const nameA = getRoomName(a[1].room) ?? "";
+    const nameB = getRoomName(b[1].room) ?? "";
     return nameA.localeCompare(nameB);
   });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search lights...">
       {sortedRooms.map(([roomKey, { room, lights: roomLights }]) => (
-        <List.Section
-          key={roomKey}
-          title={room?.metadata.name ?? "Unassigned"}
-          subtitle={`${roomLights.length} lights`}
-        >
+        <List.Section key={roomKey} title={getRoomName(room)} subtitle={`${roomLights.length} lights`}>
           {roomLights.map((light) => (
-            <LightListItem
-              key={light.id}
-              light={light}
-              roomName={room?.metadata.name ?? "Unassigned"}
-              revalidate={revalidate}
-            />
+            <LightListItem key={light.id} light={light} roomName={getRoomName(room)} revalidate={revalidate} />
           ))}
         </List.Section>
       ))}
