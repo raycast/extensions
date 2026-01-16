@@ -34,6 +34,46 @@ export async function createFetchAdapter(): Promise<typeof fetch> {
       }
     }
 
+    // Helper to build a minimal Response-like object without relying on
+    // global Response/Headers implementations (which may not exist in
+    // the Raycast Node environment).
+    const buildResponse = (status: number, statusText: string, payload: unknown): Response => {
+      const responseBody = JSON.stringify(payload);
+
+      const responseLike = {
+        ok: status >= 200 && status < 300,
+        status,
+        statusText,
+        url,
+        redirected: false,
+        type: "basic" as ResponseType,
+        body: null,
+        bodyUsed: true,
+        headers: {} as Headers,
+        clone() {
+          return this as Response;
+        },
+        async json() {
+          return JSON.parse(responseBody);
+        },
+        async text() {
+          return responseBody;
+        },
+        async arrayBuffer() {
+          const encoder = new TextEncoder();
+          return encoder.encode(responseBody).buffer;
+        },
+        async blob() {
+          throw new Error("blob() not implemented in custom fetch adapter");
+        },
+        async formData() {
+          throw new Error("formData() not implemented in custom fetch adapter");
+        },
+      } as unknown as Response;
+
+      return responseLike;
+    };
+
     try {
       // Make request using existing hueRequest
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,48 +82,22 @@ export async function createFetchAdapter(): Promise<typeof fetch> {
         body,
       });
 
-      // Convert to fetch Response
-      const responseBody = JSON.stringify(result);
-      const response = new Response(responseBody, {
-        status: 200,
-        statusText: "OK",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      return response;
+      return buildResponse(200, "OK", result);
     } catch (error) {
       if (error instanceof HueApiError) {
         // Convert HueApiError to fetch Response with error status
-        const errorBody = JSON.stringify({
+        const errorPayload = {
           errors: error.errors || [{ description: error.message }],
-        });
-
-        const response = new Response(errorBody, {
-          status: error.statusCode || 500,
-          statusText: error.message,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        return response;
+        };
+        return buildResponse(error.statusCode || 500, error.message, errorPayload);
       }
 
       // Convert unexpected errors to error Response
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      const errorBody = JSON.stringify({
+      const errorPayload = {
         errors: [{ description: errorMessage }],
-      });
-
-      return new Response(errorBody, {
-        status: 500,
-        statusText: errorMessage,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      };
+      return buildResponse(500, errorMessage, errorPayload);
     }
   };
 }

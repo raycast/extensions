@@ -18,6 +18,10 @@ const OPENHUE_CONFIG_PATH = path.join(os.homedir(), ".openhue", "config.yaml");
 // Load Hue Bridge root CA certificate for SSL verification
 const HUE_ROOT_CA = fs.readFileSync(path.join(environment.assetsPath, "root_ca_cert.pem"));
 
+// Simple global rate limiter to avoid hitting Hue Bridge HTTP 429
+const MIN_REQUEST_INTERVAL_MS = 200; // ~5 requests/second max
+let nextAvailableTime = Date.now();
+
 export class HueApiError extends Error {
   constructor(
     message: string,
@@ -145,52 +149,66 @@ export async function hueRequest<T>(
       checkServerIdentity: () => undefined,
     };
 
-    const req = https.request(reqOptions, (res) => {
-      let data = "";
+    const executeRequest = () => {
+      const req = https.request(reqOptions, (res) => {
+        let data = "";
 
-      res.on("data", (chunk) => {
-        data += chunk;
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+
+        res.on("end", () => {
+          try {
+            // Check HTTP status first
+            if (res.statusCode && res.statusCode >= 400) {
+              reject(new HueApiError(`HTTP ${res.statusCode}: ${data.substring(0, 200)}`, res.statusCode));
+              return;
+            }
+
+            const parsed = JSON.parse(data);
+
+            // Check for API errors in the response
+            if (parsed.errors && parsed.errors.length > 0) {
+              reject(new HueApiError(parsed.errors[0].description, res.statusCode, parsed.errors));
+              return;
+            }
+
+            resolve(parsed as T);
+          } catch {
+            // Include status code and more of the response in error
+            const preview = data.substring(0, 300).replace(/\n/g, " ");
+            reject(new HueApiError(`Failed to parse (HTTP ${res.statusCode}): ${preview}`, res.statusCode));
+          }
+        });
       });
 
-      res.on("end", () => {
-        try {
-          // Check HTTP status first
-          if (res.statusCode && res.statusCode >= 400) {
-            reject(new HueApiError(`HTTP ${res.statusCode}: ${data.substring(0, 200)}`, res.statusCode));
-            return;
-          }
-
-          const parsed = JSON.parse(data);
-
-          // Check for API errors in the response
-          if (parsed.errors && parsed.errors.length > 0) {
-            reject(new HueApiError(parsed.errors[0].description, res.statusCode, parsed.errors));
-            return;
-          }
-
-          resolve(parsed as T);
-        } catch {
-          // Include status code and more of the response in error
-          const preview = data.substring(0, 300).replace(/\n/g, " ");
-          reject(new HueApiError(`Failed to parse (HTTP ${res.statusCode}): ${preview}`, res.statusCode));
-        }
+      req.on("error", (e) => {
+        console.error(`[hueRequest] error:`, e);
+        reject(new HueApiError(`Connection failed: ${e.message}`));
       });
-    });
 
-    req.on("error", (e) => {
-      console.error(`[hueRequest] error:`, e);
-      reject(new HueApiError(`Connection failed: ${e.message}`));
-    });
+      req.setTimeout(15000, () => {
+        req.destroy();
+        reject(new HueApiError("Request timeout"));
+      });
 
-    req.setTimeout(15000, () => {
-      req.destroy();
-      reject(new HueApiError("Request timeout"));
-    });
+      if (postData) {
+        req.write(postData);
+      }
+      req.end();
+    };
 
-    if (postData) {
-      req.write(postData);
+    // Apply simple global rate limiting so we don't overwhelm the bridge
+    const now = Date.now();
+    const startTime = Math.max(now, nextAvailableTime);
+    const delay = startTime - now;
+    nextAvailableTime = startTime + MIN_REQUEST_INTERVAL_MS;
+
+    if (delay <= 0) {
+      executeRequest();
+    } else {
+      setTimeout(executeRequest, delay);
     }
-    req.end();
   });
 }
 

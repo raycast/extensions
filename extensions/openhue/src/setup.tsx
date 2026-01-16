@@ -12,9 +12,12 @@ import {
   Form,
   environment,
 } from "@raycast/api";
+import fs from "fs";
+import os from "os";
 import path from "path";
+import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 import { discoverBridges, authenticate, isLinkButtonError, getApplicationKey } from "./api/auth";
-import type { BridgeDiscovery } from "./api/generated/src/models";
+import type { BridgeDiscovery } from "./api/types";
 
 type SetupState =
   | { step: "discovering" }
@@ -24,6 +27,42 @@ type SetupState =
   | { step: "waiting-for-button"; bridgeIP: string }
   | { step: "success"; bridgeIP: string; applicationKey: string }
   | { step: "error"; message: string };
+
+function saveToOpenHueConfig(bridgeIP: string, applicationKey: string) {
+  try {
+    const configDir = path.join(os.homedir(), ".openhue");
+    const configPath = path.join(configDir, "config.yaml");
+
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+
+    let existing: unknown = {};
+    if (fs.existsSync(configPath)) {
+      try {
+        const content = fs.readFileSync(configPath, "utf-8");
+        existing = parseYaml(content) ?? {};
+      } catch {
+        // Ignore parse errors and overwrite with a minimal valid config
+        existing = {};
+      }
+    }
+
+    const updated = {
+      ...(typeof existing === "object" && existing !== null ? existing : {}),
+      bridge: bridgeIP,
+      key: applicationKey,
+    } as Record<string, unknown>;
+
+    fs.writeFileSync(configPath, stringifyYaml(updated), "utf-8");
+  } catch (error) {
+    console.error("[Setup] Failed to update ~/.openhue/config.yaml:", error);
+    void showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to update ~/.openhue/config.yaml",
+    });
+  }
+}
 
 export default function SetupCommand() {
   const [state, setState] = useState<SetupState>({ step: "discovering" });
@@ -77,6 +116,7 @@ export default function SetupCommand() {
 
         const applicationKey = getApplicationKey(response);
         if (applicationKey) {
+          saveToOpenHueConfig(bridgeIP, applicationKey);
           setState({ step: "success", bridgeIP, applicationKey });
           await showToast({
             style: Toast.Style.Success,
@@ -296,14 +336,16 @@ Your Hue Bridge has been successfully connected.
 
 **Application Key:** \`${applicationKey}\`
 
+These credentials have been saved to \`~/.openhue/config.yaml\`.
+
 ---
 
 ## Next Steps
 
-1. **Copy the credentials** using the action below
-2. **Open Extension Preferences** and paste the values
-3. Start using the extension to control your lights!
+1. Start using the extension to control your lights.
+2. (Optional) **Open Extension Preferences** if you want to also store the credentials there.
 
+> If \`~/.openhue/config.yaml\` already existed, its \`bridge\` and \`key\` values have been updated.
 > **Important:** Save your Application Key securely. You will need it if you reinstall the extension.`}
       actions={
         <ActionPanel>

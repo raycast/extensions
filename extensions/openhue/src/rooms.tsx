@@ -44,7 +44,7 @@ function RoomsList() {
   }
 
   // Sort rooms by name
-  const sortedRooms = [...rooms].sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
+  const sortedRooms = [...rooms].sort((a, b) => (a.metadata?.name ?? "").localeCompare(b.metadata?.name ?? ""));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search rooms...">
@@ -76,12 +76,14 @@ function RoomListItem({
   scenes: Scene[];
   revalidate: () => Promise<void>;
 }) {
-  const isOn = groupedLight?.on.on ?? false;
+  const isOn = groupedLight?.on?.on ?? false;
   const brightness = groupedLight?.dimming?.brightness ?? 100;
-  const lightCount = room.children.filter((c) => c.rtype === "device").length;
+  const lightCount = room.children?.filter((c) => c.rtype === "device").length ?? 0;
+  const roomName = room.metadata?.name ?? "Unknown Room";
+  const roomArchetype = room.metadata?.archetype ?? "other";
 
   // Get archetype icon
-  const archetypeIcon = getArchetypeIcon(room.metadata.archetype);
+  const archetypeIcon = getArchetypeIcon(roomArchetype);
 
   const accessories: List.Item.Accessory[] = [];
 
@@ -99,13 +101,13 @@ function RoomListItem({
   });
 
   const handleToggle = async () => {
-    if (!groupedLight) return;
+    if (!groupedLight?.id) return;
 
     try {
       await toggleRoom(groupedLight.id, !isOn);
       await showToast({
         style: Toast.Style.Success,
-        title: `${room.metadata.name} turned ${isOn ? "off" : "on"}`,
+        title: `${roomName} turned ${isOn ? "off" : "on"}`,
       });
       await revalidate();
     } catch (error) {
@@ -118,13 +120,13 @@ function RoomListItem({
   };
 
   const handleSetBrightness = async (value: number) => {
-    if (!groupedLight) return;
+    if (!groupedLight?.id) return;
 
     try {
       await setRoomBrightness(groupedLight.id, value);
       await showToast({
         style: Toast.Style.Success,
-        title: `${room.metadata.name} brightness set to ${value}%`,
+        title: `${roomName} brightness set to ${value}%`,
       });
       await revalidate();
     } catch (error) {
@@ -137,11 +139,12 @@ function RoomListItem({
   };
 
   const handleActivateScene = async (scene: Scene) => {
+    if (!scene.id) return;
     try {
       await activateScene(scene.id);
       await showToast({
         style: Toast.Style.Success,
-        title: `Scene "${scene.metadata.name}" activated`,
+        title: `Scene "${scene.metadata?.name ?? "Unknown"}" activated`,
       });
       await revalidate();
     } catch (error) {
@@ -156,8 +159,8 @@ function RoomListItem({
   return (
     <List.Item
       icon={archetypeIcon}
-      title={room.metadata.name}
-      subtitle={formatArchetype(room.metadata.archetype)}
+      title={roomName}
+      subtitle={formatArchetype(roomArchetype)}
       accessories={accessories}
       actions={
         <ActionPanel>
@@ -175,12 +178,12 @@ function RoomListItem({
                 <ActionPanel.Section title="Scenes">
                   <ActionPanel.Submenu title="Activate Scene" icon={Icon.Image}>
                     {scenes
-                      .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
+                      .sort((a, b) => (a.metadata?.name ?? "").localeCompare(b.metadata?.name ?? ""))
                       .map((scene) => (
                         <Action
                           key={scene.id}
                           icon={Icon.Play}
-                          title={scene.metadata.name}
+                          title={scene.metadata?.name ?? "Unknown Scene"}
                           onAction={() => handleActivateScene(scene)}
                         />
                       ))}

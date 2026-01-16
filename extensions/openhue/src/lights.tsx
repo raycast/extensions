@@ -81,7 +81,12 @@ function LightsList() {
           subtitle={`${roomLights.length} lights`}
         >
           {roomLights.map((light) => (
-            <LightListItem key={light.id} light={light} revalidate={revalidate} />
+            <LightListItem
+              key={light.id}
+              light={light}
+              roomName={room?.metadata.name ?? "Unassigned"}
+              revalidate={revalidate}
+            />
           ))}
         </List.Section>
       ))}
@@ -89,13 +94,23 @@ function LightsList() {
   );
 }
 
-function LightListItem({ light, revalidate }: { light: Light; revalidate: () => Promise<void> }) {
-  const isOn = light.on.on;
+function LightListItem({
+  light,
+  roomName,
+  revalidate,
+}: {
+  light: Light;
+  roomName: string;
+  revalidate: () => Promise<void>;
+}) {
+  const isOn = light.on?.on ?? false;
   const brightness = light.dimming?.brightness ?? 100;
+  const lightName = light.metadata?.name ?? "Unknown Light";
+  const lightArchetype = light.metadata?.archetype ?? "unknown";
 
   // Determine light color for icon
   let iconTintColor: string | undefined;
-  if (light.color?.xy) {
+  if (light.color?.xy?.x !== undefined && light.color?.xy?.y !== undefined) {
     iconTintColor = xyToHex(light.color.xy.x, light.color.xy.y, brightness);
   } else if (light.color_temperature?.mirek) {
     iconTintColor = mirekToHex(light.color_temperature.mirek);
@@ -116,10 +131,10 @@ function LightListItem({ light, revalidate }: { light: Light; revalidate: () => 
 
   const handleToggle = async () => {
     try {
-      await toggleLight(light.id, !isOn);
+      await toggleLight(light.id!, !isOn);
       await showToast({
         style: Toast.Style.Success,
-        title: `${light.metadata.name} turned ${isOn ? "off" : "on"}`,
+        title: `${lightName} turned ${isOn ? "off" : "on"}`,
       });
       await revalidate();
     } catch (error) {
@@ -133,10 +148,10 @@ function LightListItem({ light, revalidate }: { light: Light; revalidate: () => 
 
   const handleSetBrightness = async (value: number) => {
     try {
-      await setLightBrightness(light.id, value);
+      await setLightBrightness(light.id!, value);
       await showToast({
         style: Toast.Style.Success,
-        title: `${light.metadata.name} brightness set to ${value}%`,
+        title: `${lightName} brightness set to ${value}%`,
       });
       await revalidate();
     } catch (error) {
@@ -151,10 +166,10 @@ function LightListItem({ light, revalidate }: { light: Light; revalidate: () => 
   const handleSetColor = async (hex: string) => {
     try {
       const xy = hexToXY(hex);
-      await setLightColor(light.id, xy.x, xy.y);
+      await setLightColor(light.id!, xy.x, xy.y);
       await showToast({
         style: Toast.Style.Success,
-        title: `${light.metadata.name} color updated`,
+        title: `${lightName} color updated`,
       });
       await revalidate();
     } catch (error) {
@@ -168,10 +183,10 @@ function LightListItem({ light, revalidate }: { light: Light; revalidate: () => 
 
   const handleSetTemperature = async (mirek: number) => {
     try {
-      await setLightColorTemperature(light.id, mirek);
+      await setLightColorTemperature(light.id!, mirek);
       await showToast({
         style: Toast.Style.Success,
-        title: `${light.metadata.name} temperature updated`,
+        title: `${lightName} temperature updated`,
       });
       await revalidate();
     } catch (error) {
@@ -186,8 +201,9 @@ function LightListItem({ light, revalidate }: { light: Light; revalidate: () => 
   return (
     <List.Item
       icon={iconTintColor ? { source: Icon.LightBulb, tintColor: iconTintColor } : Icon.LightBulb}
-      title={light.metadata.name}
-      subtitle={formatArchetype(light.metadata.archetype)}
+      title={lightName}
+      subtitle={`${roomName} • ${formatArchetype(lightArchetype)}`}
+      keywords={[roomName]}
       accessories={accessories}
       actions={
         <ActionPanel>

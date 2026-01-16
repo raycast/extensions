@@ -1,5 +1,5 @@
 import { LightApi } from "./generated/src/apis/LightApi";
-import { Configuration } from "./generated/src/runtime";
+import { Configuration, ResponseError } from "./generated/src/runtime";
 import { LightGet, LightPut, ResourceIdentifier } from "./generated/src/models";
 import { getFetchAdapter } from "./fetch-adapter";
 import { getCredentials } from "./client";
@@ -28,21 +28,50 @@ async function getLightApi(): Promise<LightApi> {
   return lightApiInstance;
 }
 
+async function handleApiError<T>(apiCall: () => Promise<T>): Promise<T> {
+  try {
+    return await apiCall();
+  } catch (error) {
+    if (error instanceof ResponseError) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const json: any = await error.response.json();
+        const description =
+          (Array.isArray(json?.errors) && typeof json.errors[0]?.description === "string"
+            ? json.errors[0].description
+            : undefined) || `HTTP ${error.response.status} ${error.response.statusText}`;
+
+        console.error("[Hue API] request failed", {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          description,
+        });
+
+        throw new Error(description);
+      } catch {
+        throw new Error(`HTTP ${error.response.status} ${error.response.statusText}`);
+      }
+    }
+
+    throw error instanceof Error ? error : new Error(String(error));
+  }
+}
+
 export async function getLights(): Promise<LightGet[]> {
   const api = await getLightApi();
-  const response = await api.getLights();
+  const response = await handleApiError(() => api.getLights());
   return response.data || [];
 }
 
 export async function getLight(lightId: string): Promise<LightGet | null> {
   const api = await getLightApi();
-  const response = await api.getLight(lightId);
+  const response = await handleApiError(() => api.getLight(lightId));
   return response.data?.[0] ?? null;
 }
 
 export async function updateLight(lightId: string, data: LightPut): Promise<ResourceIdentifier[]> {
   const api = await getLightApi();
-  const response = await api.updateLight(lightId, data);
+  const response = await handleApiError(() => api.updateLight(lightId, data));
   return response.data || [];
 }
 

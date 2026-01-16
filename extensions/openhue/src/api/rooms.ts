@@ -1,6 +1,6 @@
 import { RoomApi } from "./generated/src/apis/RoomApi";
 import { GroupedLightApi } from "./generated/src/apis/GroupedLightApi";
-import { Configuration } from "./generated/src/runtime";
+import { Configuration, ResponseError } from "./generated/src/runtime";
 import { RoomGet, GroupedLightGet, GroupedLightPut, ResourceIdentifier } from "./generated/src/models";
 import { getFetchAdapter } from "./fetch-adapter";
 import { getCredentials } from "./client";
@@ -40,33 +40,62 @@ async function getGroupedLightApi(): Promise<GroupedLightApi> {
   return groupedLightApiInstance;
 }
 
+async function handleApiError<T>(apiCall: () => Promise<T>): Promise<T> {
+  try {
+    return await apiCall();
+  } catch (error) {
+    if (error instanceof ResponseError) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const json: any = await error.response.json();
+        const description =
+          (Array.isArray(json?.errors) && typeof json.errors[0]?.description === "string"
+            ? json.errors[0].description
+            : undefined) || `HTTP ${error.response.status} ${error.response.statusText}`;
+
+        console.error("[Hue API] request failed", {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          description,
+        });
+
+        throw new Error(description);
+      } catch {
+        throw new Error(`HTTP ${error.response.status} ${error.response.statusText}`);
+      }
+    }
+
+    throw error instanceof Error ? error : new Error(String(error));
+  }
+}
+
 export async function getRooms(): Promise<RoomGet[]> {
   const api = await getRoomApi();
-  const response = await api.getRooms();
+  const response = await handleApiError(() => api.getRooms());
   return response.data || [];
 }
 
 export async function getRoom(roomId: string): Promise<RoomGet | null> {
   const api = await getRoomApi();
-  const response = await api.getRoom(roomId);
+  const response = await handleApiError(() => api.getRoom(roomId));
   return response.data?.[0] ?? null;
 }
 
 export async function getGroupedLights(): Promise<GroupedLightGet[]> {
   const api = await getGroupedLightApi();
-  const response = await api.getGroupedLights();
+  const response = await handleApiError(() => api.getGroupedLights());
   return response.data || [];
 }
 
 export async function getGroupedLight(groupedLightId: string): Promise<GroupedLightGet | null> {
   const api = await getGroupedLightApi();
-  const response = await api.getGroupedLight(groupedLightId);
+  const response = await handleApiError(() => api.getGroupedLight(groupedLightId));
   return response.data?.[0] ?? null;
 }
 
 export async function updateGroupedLight(groupedLightId: string, data: GroupedLightPut): Promise<ResourceIdentifier[]> {
   const api = await getGroupedLightApi();
-  const response = await api.updateGroupedLight(groupedLightId, data);
+  const response = await handleApiError(() => api.updateGroupedLight(groupedLightId, data));
   return response.data || [];
 }
 
