@@ -124,15 +124,12 @@ export function useTickerSearch(query: string) {
 export function useZacksData(ticker: string) {
   const symbol = ticker.toUpperCase();
 
-  return useFetch<ZacksQuoteData | null>(
-    `${ZACKS_QUOTE_BASE}?t=${encodeURIComponent(symbol)}`,
-    {
-      execute: ticker.length > 0,
-      keepPreviousData: false,
-      async parseResponse(response) {
-        const result: ZacksApiResponse = await response.json();
-        return result[symbol] || null;
-      },
+  return useFetch<ZacksQuoteData | null>(`${ZACKS_QUOTE_BASE}?t=${encodeURIComponent(symbol)}`, {
+    execute: ticker.length > 0,
+    keepPreviousData: false,
+    async parseResponse(response) {
+      const result: ZacksApiResponse = await response.json();
+      return result[symbol] || null;
     },
-  );
+  });
 }
