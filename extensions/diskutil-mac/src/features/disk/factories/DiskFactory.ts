@@ -2,13 +2,7 @@ import Disk from "../../../models/Disk";
 import { DiskParser } from "../parser/DiskParser";
 
 /**
- * Factory for creating Disk instances only.
- * Breaks circular dependency by separating parsing from object creation.
- *
- * Creation flow:
- * 1. Parse string to extract data (DiskParser.parseStringToData)
- * 2. Create Disk object from data (DiskFactory.createDisk)
- * 3. Initialize async data (disk.init()) - called in parallel by consumer
+ * Factory for creating Disk instances.
  */
 export default class DiskFactory {
   /**
