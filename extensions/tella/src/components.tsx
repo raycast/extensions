@@ -92,7 +92,6 @@ export function RateLimitErrorDetail({
 }: {
   error: RateLimitError;
   onRetry: () => void;
-  context?: Record<string, unknown>;
 }) {
   const retryAfter = error.retryAfter || 60; // Default to 60 seconds if not specified
   const waitTime =

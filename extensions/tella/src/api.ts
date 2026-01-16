@@ -19,10 +19,6 @@ import type {
 const API = "https://api.tella.com/v1";
 const MAX_RETRY_ATTEMPTS = 3;
 
-type Preferences = {
-  tellaApiKey: string;
-};
-
 export class RateLimitError extends Error {
   retryAfter?: number;
   constructor(message: string, retryAfter?: number) {

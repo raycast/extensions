@@ -1,5 +1,6 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import type { Video, TranscriptSentence } from "./types";
+import { CACHE_FRESH_THRESHOLD_MS } from "./utils";
 
 const CACHE_KEY_PREFIX = "tella-videos-cache";
 const TRANSCRIPT_CACHE_KEY = "tella-transcripts-cache";
@@ -52,8 +53,6 @@ export async function setVideoCache(
     // Silently fail - caching is best effort
   }
 }
-
-import { CACHE_FRESH_THRESHOLD_MS } from "./utils";
 
 export function isCacheFresh(cache: VideoCache): boolean {
   const duration = getCacheDuration();

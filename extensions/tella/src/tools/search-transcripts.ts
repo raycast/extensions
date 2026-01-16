@@ -118,7 +118,9 @@ function calculateScore(sentenceText: string, keywords: string[]): number {
     if (lowerText.includes(keyword)) {
       score += 1;
       // Bonus for exact word match (not just substring)
-      if (new RegExp(`\\b${keyword}\\b`).test(lowerText)) {
+      // Escape special regex characters in keyword for safety
+      const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      if (new RegExp(`\\b${escapedKeyword}\\b`).test(lowerText)) {
         score += 0.5;
       }
     }
@@ -279,7 +281,8 @@ export default async function tool(input: Input): Promise<string> {
           if (start > 0) excerpt = "..." + excerpt;
           if (end < cached.text.length) excerpt = excerpt + "...";
         } else {
-          excerpt = cached.text.slice(0, 300) + "...";
+          excerpt =
+            cached.text.slice(0, 300) + (cached.text.length > 300 ? "..." : "");
         }
 
         results.push({
