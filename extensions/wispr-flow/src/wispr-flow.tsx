@@ -214,7 +214,7 @@ export default function Command() {
         />
         <List.Item
           icon={Icon.Person}
-          title="Created by @mattiacolombomc"
+          title="Created by `@mattiacolombomc`"
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
