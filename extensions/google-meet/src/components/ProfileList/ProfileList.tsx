@@ -1,20 +1,20 @@
 import { ActionPanel, Action, showHUD, Clipboard, showToast, Toast, List, getPreferenceValues } from "@raycast/api";
 import { FC, useCallback } from "react";
-import { getMeetTab, openMeetTabSelectedProfile } from "../../helpers";
+import { getMeetTab, openMeetTabSelectedProfile, Preferences, getTimeout } from "../../helpers";
 import { useCacheHelpers } from "../../hooks";
 
 export const ProfileList: FC = () => {
   const { profiles, onRemoveItem } = useCacheHelpers();
   const { timeout: prefTimeout } = getPreferenceValues<Preferences>();
 
-  const regexp = /^[0-9]+$/;
-  const timeout = regexp.test(prefTimeout) ? parseInt(prefTimeout) : 500;
-
   const onSelect = useCallback(
     async (email: string) => {
       try {
         await openMeetTabSelectedProfile(email);
+
+        const timeout = getTimeout(prefTimeout);
         await new Promise((r) => setTimeout(r, timeout));
+
         const meetTab = await getMeetTab();
 
         await Clipboard.copy(meetTab.split("?")[0]);
@@ -26,7 +26,7 @@ export const ProfileList: FC = () => {
         });
       }
     },
-    [timeout]
+    [prefTimeout],
   );
 
   const onRemove = useCallback(
@@ -38,7 +38,7 @@ export const ProfileList: FC = () => {
         title: "Profile removed!",
       });
     },
-    [onRemoveItem]
+    [onRemoveItem],
   );
 
   return (
