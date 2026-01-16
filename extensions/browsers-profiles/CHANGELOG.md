@@ -1,6 +1,6 @@
 # Raycast Browsers Profiles
 
-## [Fix crash when reading Chromium profiles] - {PR_MERGE_DATE}
+## [Fix crash when reading Chromium profiles] - 2026-01-16
 
 - Fix ENOENT error when iterating over non-profile directories in browser data folder
 
