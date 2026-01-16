@@ -1,0 +1,89 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "m3raycast",
+    "title": "m3Raycast",
+    "description": "Interact with m3Tools from Raycast.",
+    "icon": "extension-icon.png",
+    "author": "thomas",
+    "categories": [
+        "Productivity",
+        "Other"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "create-client",
+            "title": "Create Client",
+            "description": "Create a new client in m3Tools.",
+            "mode": "view"
+        },
+        {
+            "name": "create-project",
+            "title": "Create Project",
+            "description": "Create a new project for a client in m3Tools.",
+            "mode": "view"
+        },
+        {
+            "name": "start-timer",
+            "title": "Start Timer",
+            "description": "Start a timer for a project in m3Tools.",
+            "mode": "view"
+        },
+        {
+            "name": "stop-timer",
+            "title": "Stop Timer",
+            "description": "Stop a running timer in m3Tools.",
+            "mode": "view"
+        },
+        {
+            "name": "whitelist-ip",
+            "title": "Whitelist IP",
+            "description": "Whitelist your IP on DigitalOcean firewalls.",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.91.2",
+        "@raycast/utils": "^1.17.0",
+        "node-fetch": "^3.3.2"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.11",
+        "@types/node": "20.8.10",
+        "@types/react": "18.3.3",
+        "eslint": "^8.57.0",
+        "prettier": "^3.3.3",
+        "typescript": "^5.4.5"
+    },
+    "scripts": {
+        "build": "ray build",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    },
+    "preferences": [
+        {
+            "name": "apiUrl",
+            "type": "textfield",
+            "required": true,
+            "title": "API URL",
+            "description": "The base URL for the Make Me Modern API.",
+            "default": "https://tools.makememodern.com"
+        },
+        {
+            "name": "apiToken",
+            "type": "password",
+            "required": true,
+            "title": "API Token",
+            "description": "Your Raycast API token for M3 authentication."
+        },
+        {
+            "name": "username",
+            "type": "textfield",
+            "required": true,
+            "title": "Username",
+            "description": "Your username for tools.makememodern.com."
+        }
+    ]
+}
