@@ -72,13 +72,7 @@ export default function BrowsePlaylists() {
 
     // Handle rate limit errors with a better UI
     if (error instanceof RateLimitError) {
-      return (
-        <RateLimitErrorDetail
-          error={error}
-          onRetry={revalidate}
-          context={{ command: "Browse Playlists", visibility }}
-        />
-      );
+      return <RateLimitErrorDetail error={error} onRetry={revalidate} />;
     }
 
     // Handle other errors with debug info

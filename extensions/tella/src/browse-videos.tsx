@@ -388,16 +388,7 @@ export default function BrowseVideos({
     // Handle rate limit errors with a better UI
     if (errorToShow instanceof RateLimitError) {
       return (
-        <RateLimitErrorDetail
-          error={errorToShow}
-          onRetry={handleRefresh}
-          context={{
-            command: "Browse Videos",
-            playlistId: playlistId || null,
-            viewMode,
-            errorType: error ? "list" : "details",
-          }}
-        />
+        <RateLimitErrorDetail error={errorToShow} onRetry={handleRefresh} />
       );
     }
 

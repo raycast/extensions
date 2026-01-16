@@ -443,13 +443,7 @@ export default function SearchTranscripts() {
 
     // Handle rate limit errors with a better UI
     if (error instanceof RateLimitError) {
-      return (
-        <RateLimitErrorDetail
-          error={error}
-          onRetry={forceRefresh}
-          context={{ command: "Search Transcripts" }}
-        />
-      );
+      return <RateLimitErrorDetail error={error} onRetry={forceRefresh} />;
     }
 
     // Handle other errors with debug info
