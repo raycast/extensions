@@ -30,7 +30,7 @@
 
 ## Demo
 
-![Parse Banner](./assets/window.gif)
+![Parse Demo](./assets/window.gif)
 
 ## Notes
 
