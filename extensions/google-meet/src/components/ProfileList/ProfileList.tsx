@@ -26,7 +26,7 @@ export const ProfileList: FC = () => {
         });
       }
     },
-    [prefTimeout],
+    [prefTimeout]
   );
 
   const onRemove = useCallback(
@@ -38,7 +38,7 @@ export const ProfileList: FC = () => {
         title: "Profile removed!",
       });
     },
-    [onRemoveItem],
+    [onRemoveItem]
   );
 
   return (
