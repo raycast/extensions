@@ -1,0 +1,118 @@
+{
+  "name": "codex-manager",
+  "title": "Codex Manager",
+  "description": "Manage Codex MCP servers and skills with safe local operations",
+  "icon": "icon.png",
+  "author": "jose_de_freitas",
+  "license": "MIT",
+  "version": "0.0.1",
+  "categories": ["Developer Tools", "Productivity"],
+  "commands": [
+    {
+      "name": "mcp-servers",
+      "title": "Codex: MCP Servers",
+      "description": "View and manage MCP servers",
+      "mode": "view",
+      "path": "mcp-servers.tsx",
+      "icon": "icon.png"
+    },
+    {
+      "name": "skills",
+      "title": "Codex: Skills",
+      "description": "View and manage Codex skills",
+      "mode": "view",
+      "path": "skills.tsx",
+      "icon": "icon.png"
+    },
+    {
+      "name": "doctor",
+      "title": "Codex: Doctor",
+      "description": "Diagnose common Codex configuration issues",
+      "mode": "view",
+      "path": "doctor.tsx",
+      "icon": "icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "configPath",
+      "title": "MCP Config Path",
+      "description": "Path to the Codex config.toml file.",
+      "type": "textfield",
+      "default": "~/.codex/config.toml",
+      "required": true
+    },
+    {
+      "name": "skillsDir",
+      "title": "Skills Folder",
+      "description": "Path to the Codex skills directory.",
+      "type": "textfield",
+      "default": "~/.codex/skills/",
+      "required": true
+    },
+    {
+      "name": "editorPreference",
+      "title": "Preferred Editor",
+      "description": "Open files with the system default or VS Code (code).",
+      "type": "dropdown",
+      "default": "default",
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "VS Code (code)",
+          "value": "code"
+        }
+      ],
+      "required": true
+    },
+    {
+      "name": "argsFormat",
+      "title": "Args Format",
+      "description": "How to enter args in forms.",
+      "type": "dropdown",
+      "default": "lines",
+      "data": [
+        {
+          "title": "Lines",
+          "value": "lines"
+        },
+        {
+          "title": "JSON",
+          "value": "json"
+        }
+      ],
+      "required": true
+    },
+    {
+      "name": "createBackup",
+      "label": "Create backup",
+      "description": "Create a timestamped backup before writing config.toml.",
+      "type": "checkbox",
+      "default": true,
+      "required": true
+    }
+  ],
+  "scripts": {
+    "dev": "npx ray develop",
+    "build": "npx ray build -e dist",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@iarna/toml": "3.0.0",
+    "@raycast/api": "1.104.1",
+    "gray-matter": "4.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "20.19.28",
+    "eslint": "8.57.1",
+    "typescript": "5.9.3",
+    "vitest": "2.1.9"
+  }
+}
