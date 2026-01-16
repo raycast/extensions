@@ -2,7 +2,6 @@
 
 ## Parse is a Raycast extension that lets you speed read any copied text using RSVP (Rapid Serial Visual Presentation) technique.
 
-
 ## Features
 
 - **Speed Reading**: Read text at 300-700 WPM using RSVP technique
@@ -31,5 +30,5 @@
 
 ## Notes
 
-- Based on [this tweet from Oliur](https://x.com/UltraLinx/status/2011434505253650868) 
-- Ping [@traf](https://x.com/traf) with any ideas/feedback
+- Based on [this tweet from Oliur](https://x.com/UltraLinx/status/2011434505253650868)
+- Ping [`@traf`](https://x.com/traf) with any ideas/feedback

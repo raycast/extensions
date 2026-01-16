@@ -12,10 +12,6 @@ import {
   LocalStorage,
 } from "@raycast/api";
 
-interface Preferences {
-  wpm: string;
-}
-
 interface ClipboardItem {
   id: string;
   text: string;
@@ -29,7 +25,7 @@ const MIN_WORD_COUNT = 10;
 const POLL_INTERVAL = 1000;
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
   const defaultWpm = parseInt(preferences.wpm) || 400;
 
   const [clipboardHistory, setClipboardHistory] = useState<ClipboardItem[]>([]);

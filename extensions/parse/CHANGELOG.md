@@ -1,6 +1,6 @@
 # Parse Changelog
 
-## v1.0
+## [1.0.0] - {PR_MERGE_DATE}
 
 - Speed read text at 300-700 WPM using RSVP technique
 - Automatic clipboard integration with history
