@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vixai",
+  "title": "Vixai",
+  "description": "Vixai extension for Raycast",
+  "icon": "extension-icon.png",
+  "author": "vixaidev",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-wallet",
+      "title": "My Wallet",
+      "subtitle": "Vixai",
+      "description": "Get wallet info",
+      "mode": "view"
+    },
+    {
+      "name": "buy-token",
+      "title": "Buy Token",
+      "subtitle": "Vixai",
+      "description": "Buy token using SOL",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "tokenMint",
+          "type": "text",
+          "title": "Token Address",
+          "placeholder": "Enter token address",
+          "required": true
+        },
+        {
+          "name": "inputAmount",
+          "type": "text",
+          "title": "Amount (in SOL)",
+          "placeholder": "Enter amount in SOL",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "sell-token",
+      "title": "Sell Token",
+      "subtitle": "Vixai",
+      "description": "Sell a token",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "inputMint",
+          "type": "text",
+          "title": "Token Address",
+          "placeholder": "Enter token address"
+        },
+        {
+          "name": "inputAmount",
+          "type": "text",
+          "title": "Amount",
+          "placeholder": "Enter amount"
+        }
+      ]
+    },
+    {
+      "name": "get-portfolio",
+      "title": "Wallet Portfolio",
+      "subtitle": "Vixai",
+      "description": "Get wallet portfolio",
+      "mode": "view"
+    },
+    {
+      "name": "send-token",
+      "title": "Send Token",
+      "subtitle": "Vixai",
+      "description": "Send token to another wallet address.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.2",
+    "@raycast/utils": "^1.17.0",
+    "@solana/kit": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

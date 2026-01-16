@@ -3,9 +3,13 @@
   "name": "simple-icons",
   "title": "Brand Icons - simpleicons.org",
   "type": "module",
-  "description": "Browse, Search, and Copy 3200+ popular brand icons from Simple Icons.",
+  "description": "Browse, Search, and Copy 3300+ popular brand icons from Simple Icons.",
   "icon": "simpleicons-icon.png",
   "author": "litomore",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Design Tools",
     "Media"
@@ -22,7 +26,7 @@
     {
       "name": "index",
       "title": "Search Brand Icons",
-      "description": "Browse, search, and copy 3200+ free SVG icons for popular brands from Simple Icons",
+      "description": "Browse, search, and copy 3300+ SVG icons for popular brands from Simple Icons",
       "mode": "view"
     }
   ],
@@ -37,6 +41,15 @@
       "default": ""
     },
     {
+      "name": "releaseVersion",
+      "title": "Release Version",
+      "placeholder": "e.g. simple-icons@latest",
+      "description": "This field is used to specify the release version of the npm package. It is used to download the asset pack from npm. You can use a versioned release (e.g. `simple-icons@14`) or a tag (e.g. `latest`). If you leave it empty, the extension will use the latest version of the package.",
+      "required": false,
+      "type": "textfield",
+      "default": "simple-icons"
+    },
+    {
       "name": "defaultDetailAction",
       "title": "Default detail action",
       "description": "The default action when viewing detail of an item",
@@ -46,6 +59,10 @@
         {
           "value": "OpenWith",
           "title": "Open With"
+        },
+        {
+          "value": "MakeBadge",
+          "title": "Make Badge"
         },
         {
           "value": "CopySvg",
@@ -107,25 +124,37 @@
       "required": false,
       "type": "checkbox",
       "default": true
+    },
+    {
+      "name": "shuffleOnStart",
+      "title": "Shuffle on Start",
+      "label": "Enabled",
+      "description": "Shuffle icons when the extension starts",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "array-shuffle": "^4.0.0",
     "date-fns": "^4.1.0",
     "fast-fuzzy": "^1.12.0",
-    "got": "^14.4.6",
+    "got": "^14.6.5",
     "lodash": "^4.17.21",
-    "nano-spawn": "^0.2.0",
+    "pacote": "^21.0.4",
     "raycast-cross-extension": "^0.2.3",
-    "simple-icons": "^14.8.0"
+    "semver": "^7.7.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.15",
-    "@types/react": "^18.3.18",
-    "eslint": "^8.57.1",
-    "prettier": "^3.5.2",
-    "typescript": "^5.7.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.21",
+    "@types/pacote": "^11.1.8",
+    "@types/react": "^19.2.7",
+    "@types/semver": "^7.7.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   }
 }

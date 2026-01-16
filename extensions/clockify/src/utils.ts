@@ -1,7 +1,7 @@
 import { Cache, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import fetch from "node-fetch";
 import uniqWith from "lodash.uniqwith";
-import { ClockifyRegion, FetcherArgs, FetcherResponse, PreferenceValues, TimeEntry, Project, Task } from "./types";
+import { FetcherArgs, FetcherResponse, TimeEntry, Project, Task } from "./types";
 import { showFailureToast } from "@raycast/utils";
 
 const cache = new Cache();
@@ -9,7 +9,7 @@ const TIME_ENTRIES_CACHE_KEY = "clockify/timeEntries";
 const PROJECTS_CACHE_KEY = "clockify/projects";
 
 // https://clockify.me/help/getting-started/data-regions
-const getApiUrl = (region: ClockifyRegion): string => {
+const getApiUrl = (region: Preferences["region"]): string => {
   switch (region) {
     case "AU":
       return `https://apse2.clockify.me/api/v1`;
@@ -32,15 +32,15 @@ export async function fetcher(
   url: string,
   { method, body, headers, ...args }: FetcherArgs = {},
 ): Promise<FetcherResponse> {
-  const preferences: PreferenceValues = getPreferenceValues();
-  const token = String(preferences?.token);
-  const apiURL = getApiUrl(preferences?.region);
+  const preferences = getPreferenceValues<Preferences>();
+  const token = preferences.token;
+  const apiURL = getApiUrl(preferences.region);
 
   try {
     const response = await fetch(`${apiURL}${url}`, {
       headers: { "X-Api-Key": token, "Content-Type": "application/json", ...headers },
       method: method || "GET",
-      body: body ? JSON.stringify(body) : null,
+      body: body ? JSON.stringify(body) : undefined,
       ...args,
     });
 
@@ -61,8 +61,8 @@ export async function fetcher(
 }
 
 export function validateToken(): boolean {
-  const preferences: PreferenceValues = getPreferenceValues();
-  const token = String(preferences?.token);
+  const preferences = getPreferenceValues<Preferences>();
+  const token = preferences.token;
 
   if (token.length !== 48) {
     showToast(Toast.Style.Failure, "Invalid API Key detected");
@@ -274,22 +274,24 @@ export async function addNewTimeEntry(
   description: string | undefined | null,
   projectId: string,
   taskId: string | undefined | null,
-  callback?: () => void,
+  callbackOrTagIds?: (() => void) | string[],
+  startTime?: Date,
 ): Promise<void> {
   showToast(Toast.Style.Animated, "Starting…");
+
+  // Handle both callback-style (for restarting entries) and tagIds-style (for new entries form)
+  const tagIds = Array.isArray(callbackOrTagIds) ? callbackOrTagIds : [];
+  const callback = typeof callbackOrTagIds === "function" ? callbackOrTagIds : undefined;
 
   const workspaceId = await LocalStorage.getItem("workspaceId");
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
     method: "POST",
     body: {
+      start: (startTime || new Date()).toISOString(),
       description,
       taskId,
       projectId,
-      timeInterval: {
-        start: new Date().toISOString(),
-        end: null,
-        duration: null,
-      },
+      tagIds,
       customFieldValues: [],
     },
   });

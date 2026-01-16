@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Icon, List } from '@raycast/api';
 
 import { AddNewTodo } from '../add-new-todo';
+import { CommandListName } from '../types';
 
 type TodoListEmptyViewProps = {
   searchText: string;
-  commandListName: string;
+  commandListName: CommandListName;
 };
 
 export default function TodoListEmptyView({ searchText, commandListName }: TodoListEmptyViewProps) {

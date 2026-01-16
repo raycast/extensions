@@ -13,7 +13,7 @@ import { FormValidation, showFailureToast, useCachedPromise, useForm, usePromise
 import fetch from "node-fetch";
 import { getProjects, getTasks, getTypesOfWork, task } from "./composables/FetchData";
 import { convertDurationsToSeconds, validateDuration } from "./composables/ValidateDuration";
-import { authorizationInProgress, baseURI, getTokens } from "./composables/WebClient";
+import { baseURI, getTokens } from "./composables/WebClient";
 
 interface FormValues {
   note: string;
@@ -21,15 +21,15 @@ interface FormValues {
   taskId: string;
   typeOfWorkId: string;
   date: Date | null;
-  startTime: string;
+  startTime?: string;
   duration: string;
   isBillable: boolean;
 }
 
-const logTime = async (token: string, values: FormValues, tasks: task[] | string) => {
+export const logTime = async (token: string, values: FormValues, tasks: task[] | string) => {
   values.date = values.date ? values.date : new Date();
   if (!Array.isArray(tasks)) {
-    return;
+    return false;
   }
   const task = tasks.filter((value) => value.id === values.taskId)[0];
   const body = JSON.stringify({
@@ -61,13 +61,15 @@ const logTime = async (token: string, values: FormValues, tasks: task[] | string
     });
     if (!response.ok) {
       showFailureToast("Couldn't log time");
+      return false;
     } else {
       await showHUD("Successfully logged time");
+      return true;
     }
   } catch (error) {
     showFailureToast(error as Error);
     console.error(error);
-    return;
+    return false;
   }
 };
 
@@ -86,7 +88,7 @@ export default function Command(props: LaunchProps) {
   } = useCachedPromise(getProjects, [token?.accessToken as string, "", 1000], {
     execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
-      if ((!data || data.length === 0) && !authorizationInProgress) {
+      if (!data || data.length === 0) {
         revalidateProjects();
       }
       if (props.launchContext?.projectId) {
@@ -107,7 +109,7 @@ export default function Command(props: LaunchProps) {
   } = useCachedPromise(getTasks, [token?.accessToken as string, "", 1000], {
     execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
-      if ((!data || data.length === 0) && !authorizationInProgress) {
+      if (!data || data.length === 0) {
         revalidateTasks();
       }
       if (props.launchContext?.taskId) {
@@ -128,7 +130,7 @@ export default function Command(props: LaunchProps) {
   } = useCachedPromise(getTypesOfWork, [token?.accessToken as string], {
     execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
-      if (!Array.isArray(data) && !authorizationInProgress) {
+      if (!Array.isArray(data)) {
         revalidateTypesOfWork();
       }
       if (props.launchContext?.typeOfWorkId) {

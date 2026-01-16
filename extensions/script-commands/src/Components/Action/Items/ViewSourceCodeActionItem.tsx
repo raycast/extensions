@@ -1,6 +1,6 @@
 import { SourceCodeDetail } from "@components";
 
-import { IconConstants, ShortcutConstants } from "@constants";
+import { IconConstants, ShortcutConstants } from "Const";
 
 import { ScriptCommand } from "@models";
 

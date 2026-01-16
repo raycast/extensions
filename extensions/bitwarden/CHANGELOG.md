@@ -1,5 +1,34 @@
 # Bitwarden Changelog
 
+## [Added PasteUsernameAction] - 2026-01-01
+
+## [Added support for Windows] - 2025-10-15
+
+## [New Command] - 2025-10-07
+
+- Add Create Login command to create new login items
+
+## [Improvements] - 2025-09-02
+
+- Sync vault on command launch
+- Reorganize preferences
+
+## [Fix] - 2025-06-26
+
+- Catch any errors caused by `OTPAuth.TOTP` constructor
+
+## [Fix] - 2025-06-25
+
+- Check if user can access `BrowserExtension` before getting tabs
+
+## [Fix] - 2025-06-24
+
+- More authenticator error handling to prevent "TypeError: t is not a function" error
+
+## [Fix] - 2025-06-05
+
+- Fix attempt for authenticator "TypeError: t is not a function" error
+
 ## [New Preference] - 2025-04-09
 
 - Add primary action preference for authenticator command

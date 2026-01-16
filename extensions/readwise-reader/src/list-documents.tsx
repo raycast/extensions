@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, open } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { list } from "./api/list";
@@ -6,6 +6,7 @@ import { titlecase } from "./utils/titlecase";
 import { type Document } from "./utils/document";
 import { type Category } from "./utils/category";
 import { type PaginationOptions } from "@raycast/utils/dist/types";
+import { getOpenUrlFromFullUrl } from "./utils";
 
 function getProgressIcon(readingProgress: number) {
   const asPercentage = readingProgress * 100;
@@ -24,6 +25,8 @@ function getProgressIcon(readingProgress: number) {
 
 type Preference = {
   defaultListLocation: Document["location"];
+  token: string;
+  openInDesktopApp: boolean;
 };
 
 export default function ListDocumentsCommand() {
@@ -113,7 +116,11 @@ ${article.summary}
               icon={getProgressIcon(article.reading_progress)}
               actions={
                 <ActionPanel title={article.title}>
-                  <Action.OpenInBrowser url={article.url} title="Open Article in Readwise" />
+                  <Action
+                    title="Open Article in Readwise"
+                    onAction={() => open(getOpenUrlFromFullUrl(article.url))}
+                    icon={Icon.Globe}
+                  />
                   <Action.OpenInBrowser url={article.source_url} title="Open Article in Source Website" />
                   <ActionPanel.Submenu title="Filter by Category…" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}>
                     <Action
@@ -155,7 +162,12 @@ ${article.summary}
                     <Action
                       title="Pdf"
                       onAction={() => setCategory("pdf")}
-                      icon={{ source: { light: "pdf-light.svg", dark: "pdf-dark.svg" } }}
+                      icon={{
+                        source: {
+                          light: "pdf-light.svg",
+                          dark: "pdf-dark.svg",
+                        },
+                      }}
                       shortcut={{ modifiers: ["cmd"], key: "7" }}
                     />
                     <Action

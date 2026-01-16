@@ -157,7 +157,10 @@ export function SearchLinks() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title={"Copy Link"} content={shortLink} />
-                <Action.OpenInBrowser title={"Open Link"} url={shortLink} />
+                <Action.OpenInBrowser
+                  title={"Open Link Page"}
+                  url={`${DUB_CO_URL}/${workspaceId}/links/${domain}/${key}`}
+                />
                 <Action
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title={"Delete Link"}
@@ -172,14 +175,14 @@ export function SearchLinks() {
                     icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
                   />
                   <Action.OpenInBrowser
-                    title="Go to Dub.co"
-                    shortcut={Keyboard.Shortcut.Common.Open}
-                    url={DUB_CO_URL}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open Analytics"
+                    title="Open Analytics Page"
                     shortcut={{ modifiers: ["cmd"], key: "v" }}
                     url={`${DUB_APP_URL}/${workspaceId}/analytics?domain=${domain}&key=${key}&interval=30d`}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open Events Page"
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    url={`${DUB_APP_URL}/${workspaceId}/events?domain=${domain}&key=${key}&interval=30d`}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

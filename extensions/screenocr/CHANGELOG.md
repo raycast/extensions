@@ -1,5 +1,15 @@
 # ScreenOCR Changelog
 
+## [Improvements] - 2025-11-13
+
+- Added option to hide toast messages
+- Added option to mute shutter sound
+
+## [Improvements] - 2025-07-13
+
+- Added support for Arabic and Najdi languages
+- Added support for detecting barcodes and QR codes
+
 ## [Improvements] - 2024-10-07
 
 - Migrated codebase to use new Swift macros

@@ -1,35 +1,26 @@
-import { Icon, List, ActionPanel, Action, Detail, useNavigation } from "@raycast/api";
-import { Data } from "./types/dovetail";
-import { formatRelativeDate, formatFullDate, cleanMarkdown } from "./utils/formatting";
-import { useState, useEffect } from "react";
-import { useAuth } from "./hooks/useAuth";
-import { getDataExportMarkdown } from "./api/client";
-import { useSearch } from "./hooks/useSearch";
-import { getData } from "./api/client";
+import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { format } from "date-fns";
+import { BaseUrl, buildHeaders, endpoints, ExportDataResponse } from "./api/endpoints";
+import { useAuth } from "./hooks/useAuth";
+import { useSearch } from "./hooks/useSearch";
+import { cleanMarkdown, formatFullDate, formatRelativeDate } from "./utils/formatting";
 
 function DataDetail({ dataId }: { dataId: string }) {
   const { token } = useAuth();
-  const [markdown, setMarkdown] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
-  const dovetailUrl = `https://dovetail.com/data/${dataId}`;
+  const dataUrl = `https://dovetail.com/data/${dataId}`;
 
-  useEffect(() => {
-    async function fetchMarkdown() {
-      setIsLoading(true);
-      try {
-        const data = await getDataExportMarkdown(dataId, token);
-        const created = format(new Date(data.created_at), "dd MMM yyyy");
-        let content = cleanMarkdown(data.content_markdown || "");
-        content = content.replace(/^\[?AudioVideo.*\n?/im, "");
-        setMarkdown(`# ${data.title}\n\n**Created on ${created}**\n\n${content}`);
-      } catch (e) {
-        setMarkdown("Failed to load data export.");
-      }
-      setIsLoading(false);
-    }
-    fetchMarkdown();
-  }, [dataId, token]);
+  const { data: markdown, isLoading } = useFetch(BaseUrl + `/v1/data/${dataId}/export/markdown`, {
+    headers: buildHeaders(token),
+    parseResponse: async (response) => {
+      const json = await response.json();
+      const data = ExportDataResponse.parse(json.data);
+      const created = format(new Date(data.created_at), "dd MMM yyyy");
+      let content = cleanMarkdown(data.content_markdown || "");
+      content = content.replace(/^\[?AudioVideo.*\n?/im, "");
+      return `# ${data.title}\n\n**Created on ${created}**\n\n${content}`;
+    },
+  });
 
   return (
     <Detail
@@ -38,7 +29,7 @@ function DataDetail({ dataId }: { dataId: string }) {
       navigationTitle="Data Details"
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={dovetailUrl} title="Open in Dovetail" />
+          <Action.OpenInBrowser url={dataUrl} title="Open in Dovetail" />
         </ActionPanel>
       }
     />
@@ -46,21 +37,22 @@ function DataDetail({ dataId }: { dataId: string }) {
 }
 
 export default function SearchData() {
-  const { data, isLoading, onSearchTextChange, numberOfResults } = useSearch<Data>(getData);
+  const { data, isLoading, onQueryChange, numberOfResults, pagination } = useSearch(endpoints.data);
   const { push } = useNavigation();
 
   return (
     <List
       isLoading={isLoading}
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={onQueryChange}
       throttle
       searchBarPlaceholder="Search for data in any project..."
+      pagination={pagination}
     >
       <List.Section title="Most relevant" subtitle={numberOfResults}>
         {data.map((item) => (
           <List.Item
             key={item.id}
-            title={item.title || "Untitled"}
+            title={item.title ?? "Untitled"}
             icon={Icon.Document}
             accessories={[{ text: formatRelativeDate(item.created_at), tooltip: formatFullDate(item.created_at) }]}
             actions={

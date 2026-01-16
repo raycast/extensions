@@ -67,7 +67,9 @@ function AppDeploymentsList({ app }: { app: App }) {
     <List isLoading={isLoading}>
       <List.Section title={`Apps / ${app.spec.name} / Deployments`}>
         {data?.deployments.map((deployment) => {
-          const { full_name } = deployment.cause_details.digitalocean_user_action.user;
+          const userAction = deployment.cause_details?.digitalocean_user_action;
+          const user = userAction?.user;
+          const full_name = user?.full_name || "System";
           let title = `${full_name}'s deployment `;
           if (deployment.phase === "ACTIVE") title += "went live";
           return (
@@ -75,7 +77,7 @@ function AppDeploymentsList({ app }: { app: App }) {
               key={deployment.id}
               icon={{ source: Icon.Dot, tintColor: getDeploymentColor(deployment.phase) }}
               title={title}
-              subtitle={deployment.cause_details.digitalocean_user_action.name}
+              subtitle={userAction?.name || "Unknown action"}
               accessories={[
                 { tag: { value: deployment.phase, color: getDeploymentColor(deployment.phase) } },
                 { date: new Date(deployment.updated_at) },

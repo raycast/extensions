@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+  open,
+  getPreferenceValues,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Fragment } from "react";
 
@@ -60,6 +71,7 @@ export default function TaskActions({
   quickLinkView,
 }: TaskActionsProps) {
   const { pop } = useNavigation();
+  const { useConfetti } = getPreferenceValues<Preferences>();
 
   const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
 
@@ -85,6 +97,13 @@ export default function TaskActions({
       }
     } catch (error) {
       await showFailureToast(error, { title: "Unable to complete task" });
+    }
+    if (useConfetti) {
+      try {
+        await open("raycast://extensions/raycast/raycast/confetti");
+      } catch (error) {
+        await showFailureToast(error, { title: "Unable to show celebration" });
+      }
     }
   }
 
@@ -232,19 +251,29 @@ export default function TaskActions({
           target={<TaskEdit task={task} />}
         />
 
-        <Action.PickDate
+        <ActionPanel.Submenu
           title="Schedule Task"
-          type={Action.PickDate.Type.DateTime}
+          icon={Icon.Calendar}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-          onChange={(date) =>
-            updateTask({
-              id: task.id,
-              due: date
-                ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
-                : { string: "no date" },
-            })
-          }
-        />
+        >
+          <Action.PickDate
+            title="Pick Date"
+            type={Action.PickDate.Type.DateTime}
+            onChange={(date) =>
+              updateTask({
+                id: task.id,
+                due: date
+                  ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
+                  : { string: "no date" },
+              })
+            }
+          />
+          <Action
+            title="Set Due to Every Day"
+            icon={Icon.Repeat}
+            onAction={() => updateTask({ id: task.id, due: { string: "every day" } })}
+          />
+        </ActionPanel.Submenu>
 
         {data?.user?.premium_status !== "not_premium" ? (
           <Action.PickDate

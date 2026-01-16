@@ -1,7 +1,20 @@
-import { Action, ActionPanel, Alert, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  Keyboard,
+  Toast,
+  confirmAlert,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { getCalendarClient } from "../lib/google";
 import { showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "@googleapis/calendar";
+
+const preferences: Preferences.ListEvents = getPreferenceValues();
 
 const EventActions = ({
   event,
@@ -12,9 +25,29 @@ const EventActions = ({
   calendar: calendar_v3.Schema$CalendarListEntry | null;
   revalidate: () => void;
 }) => {
+  const meetingAction = {
+    title: "Open Meeting",
+    url: event.conferenceData?.entryPoints?.[0]?.uri,
+    shortcut: { modifiers: ["cmd"], key: "m" } as Keyboard.Shortcut,
+  };
+  const eventAction = {
+    title: "Open in Google Calendar",
+    url: event.htmlLink,
+    shortcut: { modifiers: ["cmd"], key: "o" } as Keyboard.Shortcut,
+  };
+  const openCommandJoinsMeeting = preferences.openCommandJoinsMeeting && meetingAction.url;
+  const primaryAction = openCommandJoinsMeeting ? meetingAction : eventAction;
+  const secondaryAction = openCommandJoinsMeeting ? eventAction : meetingAction;
   return (
     <ActionPanel>
-      {event.htmlLink && <Action.OpenInBrowser title="Open in Google Calendar" url={event.htmlLink} />}
+      {primaryAction.url && <Action.OpenInBrowser title={primaryAction.title} url={primaryAction.url} />}
+      {secondaryAction.url && (
+        <Action.OpenInBrowser
+          title={secondaryAction.title}
+          url={secondaryAction.url}
+          shortcut={secondaryAction.shortcut}
+        />
+      )}
       <ActionPanel.Section>
         {event.id && (
           <ActionPanel.Submenu

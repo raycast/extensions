@@ -7,10 +7,11 @@ interface Props {
   bookmark: LinkdingBookmark;
   preferences: Preferences;
   onDelete: (id: number) => void;
+  onArchive: (id: number) => void;
   onCopy: () => void;
 }
 
-const SearchListItem = ({ bookmark, preferences, onDelete, onCopy }: Props) => {
+const SearchListItem = ({ bookmark, preferences, onDelete, onCopy, onArchive }: Props) => {
   const subtitle = useMemo(() => {
     if (!preferences.showDescription) {
       return "";
@@ -33,7 +34,7 @@ const SearchListItem = ({ bookmark, preferences, onDelete, onCopy }: Props) => {
   return (
     <List.Item
       icon={getFavicon(bookmark.url, { fallback: Icon.Globe })}
-      title={bookmark.title.length > 0 ? bookmark.title : bookmark.website_title ?? bookmark.url}
+      title={bookmark.title.length > 0 ? bookmark.title : (bookmark.website_title ?? bookmark.url)}
       subtitle={subtitle}
       accessories={tags}
       actions={
@@ -46,6 +47,12 @@ const SearchListItem = ({ bookmark, preferences, onDelete, onCopy }: Props) => {
               shortcut={Keyboard.Shortcut.Common.Edit}
             />
             <Action.CopyToClipboard content={bookmark.url} onCopy={onCopy} shortcut={Keyboard.Shortcut.Common.Copy} />
+            <Action
+              onAction={() => onArchive(bookmark.id)}
+              icon={{ source: Icon.Document }}
+              title="Archive"
+              shortcut={{ modifiers: ["ctrl"], key: "a" }}
+            />
             <Action
               onAction={() => onDelete(bookmark.id)}
               icon={{ source: Icon.Trash }}

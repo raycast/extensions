@@ -1,6 +1,6 @@
 # Drafts Changelog
 
-## [Add Find Features and AI Extension Support] - {PR_MERGE_DATE}
+## [Add Find Features and AI Extension Support] - 2025-04-10
 
 New Commands to search through Drafts database
 

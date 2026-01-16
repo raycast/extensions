@@ -4,7 +4,7 @@
   "title": "Bundlephobia Search",
   "description": "Find package and check its size on Bundlephobia",
   "icon": "icon.png",
-  "author": "vette",
+  "author": "dgrzedzielski",
   "contributors": [
     "rushelex"
   ],
@@ -32,7 +32,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^5.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

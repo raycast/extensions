@@ -344,8 +344,7 @@
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.12.7",
     "@types/react": "18.3.1",
-    "react-devtools": "^4.28.4",
-    "eslint": "^8.51.0",
+        "eslint": "^8.51.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
   },

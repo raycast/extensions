@@ -30,6 +30,7 @@ export type PickColorCommandLaunchProps = LaunchProps<{
   launchContext: {
     source?: "menu-bar" | "organize-colors";
     copyToClipboard?: boolean;
+    colorFormat?: string;
     callbackLaunchOptions?: LaunchOptions;
   };
 }>;

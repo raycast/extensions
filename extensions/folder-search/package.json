@@ -36,8 +36,18 @@
   ],
   "preferences": [
     {
+      "default": true,
+      "description": "Filter out non-user visible folders in ~/Library. This does not affect cloud storage folders (iCloud Drive, Dropbox, OneDrive, Google Drive) which will always be shown.",
+      "label": "Filter Library Folders",
+      "name": "filterLibraryFolders",
+      "required": false,
+      "title": "Search Behavior",
+      "type": "checkbox"
+    },
+    {
       "default": "250",
       "description": "The maximum number of search results that Folder Search should return",
+      "label": "Maximum Results",
       "name": "maxResults",
       "required": false,
       "title": "Maximum Results",
@@ -45,11 +55,11 @@
     },
     {
       "default": true,
-      "description": "Filter out non-user visible folders in ~/Library. This does not affect cloud storage folders (iCloud Drive, Dropbox, OneDrive, Google Drive) which will always be shown.",
-      "label": "Filter Library Folders",
-      "name": "filterLibraryFolders",
+      "description": "Open the destination folder after moving files. Disable this to keep your workflow uninterrupted.",
+      "label": "Open folder after move",
+      "name": "openFolderAfterMove",
       "required": false,
-      "title": "Filter System Library Folders",
+      "title": "Move Behavior",
       "type": "checkbox"
     },
     {
@@ -71,7 +81,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.96.3",
+    "@raycast/api": "^1.99.3",
     "@raycast/utils": "^1.19.1",
     "binary-split": "^1.0.5",
     "fs-extra": "^11.3.0",
@@ -80,12 +90,12 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^22.15.3",
-    "@types/react": "^19.1.2",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "@types/node": "^22.15.23",
+    "@types/react": "^19.1.6",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3",
     "react": "^19.1.0",
     "typescript": "^5.8.3"
   },

@@ -10,7 +10,7 @@ type DetailsProps = {
   message: Message;
 };
 
-export default function Details({ message }: DetailsProps): JSX.Element {
+export default function Details({ message }: DetailsProps): React.JSX.Element {
   const attachmentType = getAttachmentType(message);
   const date = new Date(message.date);
 

@@ -1,12 +1,12 @@
-import type { Registry } from '@scaleway/sdk'
+import type { Registryv1 } from '@scaleway/sdk'
 import { useDataLoader } from '@scaleway/use-dataloader'
 import { useAPI } from 'helpers/useAPI'
 
 type DataLoaderOptions<T> = Parameters<typeof useDataLoader<T>>[2]
 
 export const useImagesQuery = (
-  params: Registry.v1.ListImagesRequest,
-  dataloaderOptions: DataLoaderOptions<Registry.v1.ListImagesResponse> = {}
+  params: Registryv1.ListImagesRequest,
+  dataloaderOptions: DataLoaderOptions<Registryv1.ListImagesResponse> = {}
 ) => {
   const { registryV1 } = useAPI()
 
@@ -16,8 +16,8 @@ export const useImagesQuery = (
 }
 
 export const useAllImagesQuery = (
-  params: Registry.v1.ListImagesRequest,
-  dataloaderOptions: DataLoaderOptions<Registry.v1.ListImagesResponse['images']> = {}
+  params: Registryv1.ListImagesRequest,
+  dataloaderOptions: DataLoaderOptions<Registryv1.ListImagesResponse['images']> = {}
 ) => {
   const { registryV1 } = useAPI()
 

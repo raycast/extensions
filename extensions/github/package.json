@@ -17,7 +17,6 @@
     "LunaticMuch",
     "aeorge",
     "daquinoaldo",
-    "ppy",
     "lin",
     "marcotf",
     "qeude",
@@ -35,7 +34,18 @@
     "shyaka",
     "sushichan044",
     "luarmr",
-    "iontea"
+    "nicolas-marien",
+    "iontea",
+    "ridemountainpig",
+    "kud",
+    "MartinGonzalez",
+    "brndnly",
+    "oscmarb",
+    "emergerrrd"
+  ],
+  "pastContributors": [
+    "Lemon",
+    "ppy"
   ],
   "categories": [
     "Developer Tools",
@@ -89,6 +99,14 @@
           "default": false,
           "label": "Recently Closed",
           "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the list."
         }
       ]
     },
@@ -217,6 +235,12 @@
       "mode": "view"
     },
     {
+      "name": "my-starred-repositories",
+      "title": "My Starred Repositories",
+      "description": "List repositories you have starred",
+      "mode": "view"
+    },
+    {
       "name": "workflow-runs",
       "title": "Workflow Runs",
       "description": "Manage workflow runs for a selected GitHub repository.",
@@ -250,36 +274,6 @@
           "description": "Show the unread count in the menu bar.",
           "default": true,
           "required": false
-        },
-        {
-          "name": "repositoryFilterMode",
-          "type": "dropdown",
-          "required": false,
-          "default": "all",
-          "title": "Repository Filter Mode",
-          "description": "How to filter repositories",
-          "data": [
-            {
-              "title": "All Repositories",
-              "value": "all"
-            },
-            {
-              "title": "Include Only Listed Repositories",
-              "value": "include"
-            },
-            {
-              "title": "Exclude Listed Repositories",
-              "value": "exclude"
-            }
-          ]
-        },
-        {
-          "name": "repositoryList",
-          "type": "textfield",
-          "required": false,
-          "title": "Repository List",
-          "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
-          "placeholder": "owner/repo1, owner/repo2, owner/repo3"
         }
       ]
     },
@@ -439,42 +433,20 @@
           "description": "Includes pull request you recently closed in the menu list."
         },
         {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the menu list."
+        },
+        {
           "name": "maxitems",
           "description": "Maximum pull requests shown per category.",
           "type": "textfield",
           "required": false,
           "title": "Max Pull Requests per category",
           "placeholder": "5"
-        },
-        {
-          "name": "repositoryFilterMode",
-          "type": "dropdown",
-          "required": false,
-          "default": "all",
-          "title": "Repository Filter Mode",
-          "description": "How to filter repositories",
-          "data": [
-            {
-              "title": "All Repositories",
-              "value": "all"
-            },
-            {
-              "title": "Include Only Listed Repositories",
-              "value": "include"
-            },
-            {
-              "title": "Exclude Listed Repositories",
-              "value": "exclude"
-            }
-          ]
-        },
-        {
-          "name": "repositoryList",
-          "type": "textfield",
-          "required": false,
-          "title": "Repository List",
-          "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
-          "placeholder": "owner/repo1, owner/repo2, owner/repo3"
         }
       ]
     }
@@ -881,6 +853,36 @@
       "default": true,
       "label": "PRs include team review requests",
       "description": "Include PRs where your team's review was requested as well as your own."
+    },
+    {
+      "name": "repositoryFilterMode",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "title": "Repository Filter Mode",
+      "description": "How to filter repositories",
+      "data": [
+        {
+          "title": "All Repositories",
+          "value": "all"
+        },
+        {
+          "title": "Include Only Listed Repositories",
+          "value": "include"
+        },
+        {
+          "title": "Exclude Listed Repositories",
+          "value": "exclude"
+        }
+      ]
+    },
+    {
+      "name": "repositoryList",
+      "type": "textfield",
+      "required": false,
+      "title": "Repository List",
+      "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
+      "placeholder": "owner/repo1, owner/repo2, owner/repo3"
     }
   ],
   "dependencies": {
@@ -918,5 +920,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

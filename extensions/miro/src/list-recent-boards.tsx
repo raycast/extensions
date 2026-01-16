@@ -4,11 +4,11 @@ import ListBoards from "./components/list-boards";
 
 export default function ListRecentBoards() {
   const { isLoading, data, mutate } = useCachedPromise(
-    async () => {
+    async (fetch) => {
       await miro.authorize();
-      return await miro.fetchRecentItems();
+      return await fetch();
     },
-    [],
+    [miro.fetchRecentItems],
     {
       initialData: [],
     }

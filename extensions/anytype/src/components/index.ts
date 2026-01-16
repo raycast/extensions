@@ -1,6 +1,7 @@
 export * from "./Actions/ListSubmenu";
 export * from "./Actions/ObjectActions";
 export * from "./Actions/SpaceActions";
+export * from "./Actions/TagSubmenu";
 export * from "./CreateForm/CreateObjectForm";
 export * from "./CreateForm/CreatePropertyForm";
 export * from "./CreateForm/CreateSpaceForm";

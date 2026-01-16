@@ -19,7 +19,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
   const { data: playlist, isLoading } = usePromise(
     async () => {
       const data = await AI.ask(
-        `Generate a playlist of 20 to 50 songs based on this description: "${props.arguments.description}". IMPORTANT: If the description contains a list of artist names (e.g., "songs from artist1, artist2, artist3, artist4, artist5"), ONLY include songs from those specific artists. Do not include any songs from artists not mentioned in the description. Ensure the songs transition smoothly between each other. Return me only a parsable and minified JSON object with the following structure:
+        `Generate a playlist of at least 20 songs and no more than 75 songs based strictly on the description "${props.arguments.description}", using ONLY the listed artists if any are explicitly mentioned, but if no artists are listed then infer culturally relevant songs, themes, and sub genres with high specificity, selecting deep and intentional tracks that fit the exact vibe, enforcing smooth energy progression and subgenre consistency, avoiding generic picks, and returning only a fully minified valid JSON object with the following structure:
 
 {
   "name": <Playlist name>,
@@ -31,8 +31,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
     },
     ...
   ]
-}`,
-        { model: AI.Model["OpenAI_GPT4o-mini"] },
+}
+
+If you have listed fewer than 20 songs you must keep adding valid songs until the playlist length is at least 20.
+
+`,
+        { model: AI.Model["OpenAI_GPT5-mini"] },
       );
       const match = data.match(/[{\\[]{1}([,:{}\\[\]0-9.\-+Eaeflnr-u \n\r\t]|".*?")+[}\]]{1}/gis)?.[0];
       if (!match) {

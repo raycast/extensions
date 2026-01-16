@@ -4,46 +4,46 @@ import * as changeCase from "change-case";
 import { spongeCase as spongeCaseLib } from "sponge-case";
 import { swapCase as swapCaseLib } from "swap-case";
 
-function isAlphabetic(char: string) {
-  return /\p{L}/u.test(char);
-}
+export type CaseFunction = (input: string, options?: changeCase.Options) => string;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const spongeCase = (input: string, _options?: changeCase.Options) => spongeCaseLib(input);
+const ALPHABETIC_REGEX = /\p{L}/u;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const swapCase = (input: string, _options?: changeCase.Options) => swapCaseLib(input);
+export const spongeCase: CaseFunction = (input) => spongeCaseLib(input);
 
-export const lowerCase = (input: string, options?: changeCase.Options) =>
-  changeCase.noCase(input, options).toLowerCase();
+export const swapCase: CaseFunction = (input) => swapCaseLib(input);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const lowerFirst = (input: string, _options?: changeCase.Options) => {
-  if (input.length <= 1) {
+export const lowerCase: CaseFunction = (input, options) => {
+  const preferences = getPreferenceValues<Preferences>();
+  if (preferences.preservePunctuation) {
     return input.toLowerCase();
   }
+  return changeCase.noCase(input, options).toLowerCase();
+};
 
-  // lowercase the first alphabetic character
-  let res = "";
+export const lowerFirst: CaseFunction = (input) => {
+  const idx = input.search(ALPHABETIC_REGEX);
+  if (idx === -1) return input.toLowerCase();
+  return input.slice(0, idx) + input[idx].toLowerCase() + input.slice(idx + 1);
+};
 
-  for (let i = 0; i < input.length; i++) {
-    if (isAlphabetic(input[i])) {
-      res += input[i].toLowerCase();
-      break;
-    }
-    res += input[i];
+// Note: We intentionally do NOT pre-lowercase the input here.
+// The change-case library author explicitly chose not to pre-lowercase because:
+// 1. Words like "iPhone" and "NASA" would become "iphone" and "nasa"
+// 2. Context-aware conversions (e.g., "hereAreSomeWords" → "Here Are Some Words") would break
+// See: https://github.com/blakeembrey/change-case/issues/308
+export const capitalCase: CaseFunction = (input, options) => {
+  const preferences = getPreferenceValues<Preferences>();
+  if (preferences.preservePunctuation) {
+    return input.replace(/(^|[\s\-_])(\w)/g, (_, sep, char) => sep + char.toUpperCase());
   }
-
-  return res + input.slice(res.length);
+  return changeCase.capitalCase(input, options);
 };
 
-export const kebabUpperCase = (input: string, options?: changeCase.Options) => {
-  const kebabCase = changeCase.kebabCase(input, options);
-  return kebabCase.toUpperCase();
+export const kebabUpperCase: CaseFunction = (input, options) => {
+  return changeCase.kebabCase(input, options).toUpperCase();
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const handleSmallWordsTitleCase = (input: string, sentenceCase: boolean, _options?: changeCase.Options) => {
+const handleSmallWordsTitleCase = (input: string, isSentenceCase: boolean): string => {
   const exceptions =
     getPreferenceValues<ExtensionPreferences>()
       .exceptions.split(",")
@@ -51,34 +51,23 @@ const handleSmallWordsTitleCase = (input: string, sentenceCase: boolean, _option
 
   const smallWords = new Set<string>([...exceptions, ...SMALL_WORDS]);
 
-  return titleCaseLib(input, { sentenceCase, smallWords });
+  return titleCaseLib(input, { sentenceCase: isSentenceCase, smallWords });
 };
 
-export const sentenceCase = (input: string, options?: changeCase.Options) =>
-  handleSmallWordsTitleCase(input, true, options);
+export const sentenceCase: CaseFunction = (input) => handleSmallWordsTitleCase(input, true);
 
-export const titleCase = (input: string, options?: changeCase.Options) =>
-  handleSmallWordsTitleCase(input, false, options);
+export const titleCase: CaseFunction = (input) => handleSmallWordsTitleCase(input, false);
 
-export const upperCase = (input: string, options?: changeCase.Options) =>
-  changeCase.noCase(input, options).toUpperCase();
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const upperFirst = (input: string, _options?: changeCase.Options) => {
-  if (input.length <= 1) {
+export const upperCase: CaseFunction = (input, options) => {
+  const preferences = getPreferenceValues<Preferences>();
+  if (preferences.preservePunctuation) {
     return input.toUpperCase();
   }
+  return changeCase.noCase(input, options).toUpperCase();
+};
 
-  // uppercase the first alphabetic character
-  let res = "";
-
-  for (let i = 0; i < input.length; i++) {
-    if (isAlphabetic(input[i])) {
-      res += input[i].toUpperCase();
-      break;
-    }
-    res += input[i];
-  }
-
-  return res + input.slice(res.length);
+export const upperFirst: CaseFunction = (input) => {
+  const idx = input.search(ALPHABETIC_REGEX);
+  if (idx === -1) return input.toUpperCase();
+  return input.slice(0, idx) + input[idx].toUpperCase() + input.slice(idx + 1);
 };

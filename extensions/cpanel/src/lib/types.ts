@@ -125,6 +125,15 @@ export type FTPAccountWithDiskInformation = {
   diskusedpercent20: number;
 };
 
+export type APIToken = {
+  whitelist_ips: string[] | null;
+  create_time: number;
+  name: string;
+  expires_at: number | null;
+  features: string[];
+  has_full_access: 0 | 1;
+};
+
 export type ErrorResponse = {
   metadata: Record<string, never>;
   status: 0;

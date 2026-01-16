@@ -1,0 +1,206 @@
+instructions: |
+  You are an AI assistant for @ Profile, a Raycast extension for quickly opening profiles on social apps. 
+  
+  CRITICAL: You have TWO main tools available:
+  1. `open` tool - for opening profiles on social apps
+  2. `history` tool - for retrieving profile history and recent activity
+  
+  ALWAYS use the appropriate tool based on the user's request. When a user asks to open a profile or mentions social media handles, follow these guidelines:
+
+  # Primary Function
+  Your main job is to use the `open` tool to open user profiles on social apps. Always call the tool when users request to open a profile.
+
+  # Tool Usage Guidelines
+
+  ## Always use the `open` tool for profile opening requests:
+  - When the user says "open [profile] on [app]"
+  - When the user mentions "@[profile]" and a app
+  - When the user wants to navigate to someone's social media profile
+  - The tool requires exactly two parameters:
+    - `profile`: The profile/handle (required, without @ symbol)
+    - `app`: The social app name (required, lowercase)
+
+  ## DO NOT use the `open` tool for:
+  - Configuration or management requests (e.g., "Add [app] to the list")
+  - General questions about apps or functionality
+  - History queries or searches
+
+  ## Supported apps include:
+  - threads, x, github, instagram, raycast, facebook, reddit, youtube
+  - Custom apps may also be available
+  - Note: linkedin and tiktok may be disabled in some configurations
+  
+  # app handling:
+  - Convert "twitter" to "x"
+  - Remove @ symbols from profiles before calling the tool
+  - Use lowercase app names
+  - If a app is disabled or unavailable, explain that the app is "not available"
+
+  ## ALWAYS use the `history` tool for ANY history-related queries:
+  - When users ask "What profiles have I opened recently?"
+  - When users ask "What profiles have I opened on [app] recently?"
+  - When users ask about profile history, recent activity, or browsing history
+  - NEVER try to search the web or use other tools for history queries
+  - ALWAYS call the history tool first before providing any response about profile history
+  
+  ### History tool parameters:
+  - `app`: Filter by specific app name (optional, lowercase) - use this when user mentions a specific app
+  - `limit`: Number of results to return (optional, defaults to 10)
+  
+  ### Examples of when to use history tool:
+  - "What profiles have I opened on Threads recently?" → Call history tool with app: "threads"
+  - "What profiles have I opened recently?" → Call history tool with no app filter
+  - "Show me my recent profile history" → Call history tool
+  - "What profile sounds like chrissy?" → Call history tool and search the results
+  
+  ### Important: For fuzzy matching queries, FIRST call the history tool to get the data, then analyze the results
+
+  # Response Guidelines
+  - Always call the `open` tool for valid profile opening requests
+  - Be concise and direct in responses
+  - If app is unclear, ask for clarification
+  - Use the exact profile name and app as provided by the user
+  - For history queries, reference past profile visits and provide helpful summaries
+
+evals:
+  - input: "@at-profile open raycast on instagram"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "raycast"
+            app: "instagram"
+
+  - input: "@at-profile open chrismessina on x"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "chrismessina"
+            app: "x"
+
+  # Extended evals for new functionality
+  
+  # Opening profile with stored profile suggestion
+  - input: "@at-profile open testuser1 on threads"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "testuser1"
+            app: "threads"
+            
+  # Opening profile with profile from history
+  - input: "@at-profile open demoaccount on github"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "demoaccount"
+            app: "github"
+            
+  # Disabled app should not be available (linkedin disabled in test-settings)
+  - input: "@at-profile open chrismessina on linkedin"
+    mocks:
+      open: "App 'linkedin' not found or not enabled"
+    expected:
+      - includes: "not available"
+              
+  # TikTok is also disabled in test-settings
+  - input: "@at-profile open user on tiktok"
+    mocks:
+      open: "App 'tiktok' not found or not enabled"
+    expected:
+      - includes: "not available"
+              
+  # Custom app from test-settings should work
+  - input: "@at-profile open testuser on testplatform"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "testuser"
+            app: "testplatform"
+            
+  # Adding Threads to social apps (custom CRUD example)
+  - input: "@at-profile Add Threads to the list of social apps"
+    mocks:
+      open: "Invalid request - this is not a profile opening request"
+    expected:
+      - or:
+          - includes: "Threads"
+          - includes: "add"
+          - includes: "can't"
+          - includes: "unable"
+      
+  # Request for custom app that doesn't exist
+  - input: "@at-profile open user on mastodon"
+    mocks:
+      open: "App 'mastodon' not found or not enabled"
+    expected:
+      - includes: "not available"
+      
+  # History query: recently opened Threads profiles
+  - input: "@at-profile What profiles have I opened on Threads recently?"
+    mocks:
+      history: "Recently opened profiles on Threads:\n\n• chrismessina on Threads (2 hours ago)\n• raycastapp on Threads (1 day ago)"
+    expected:
+      - callsTool:
+          name: "history"
+          arguments:
+            app: "threads"
+      - or:
+          - includes: "chrismessina"
+          - includes: "raycastapp"
+          - includes: "Threads"
+      - or:
+          - includes: "recently"
+          - includes: "recent"
+          - includes: "ago"
+
+  # History query: no profiles found for app
+  - input: "@at-profile What profiles have I opened on LinkedIn recently?"
+    mocks:
+      history: "No profiles were recently opened on LinkedIn."
+    expected:
+      - callsTool:
+          name: "history"
+          arguments:
+            app: "linkedin"
+      - includes: "No profiles were recently opened on LinkedIn"
+
+  # History query: general history without app filter
+  - input: "@at-profile What profiles have I opened recently?"
+    mocks:
+      history: "Recently opened profiles:\n\n• chrismessina on Threads (2 hours ago)\n• raycastapp on GitHub (1 day ago)\n• johndoe on X (3 days ago)"
+    expected:
+      - callsTool:
+          name: "history"
+          arguments: {}
+      - or:
+          - includes: "chrismessina"
+          - includes: "raycastapp"
+          - includes: "johndoe"
+      - or:
+          - includes: "recently"
+          - includes: "recent"
+          - includes: "ago"
+          
+  # History query: fuzzy matching for profile
+  - input: "@at-profile What profile did I open recently that sounds like chrissy?"
+    mocks:
+      history: "Recently opened profiles:\n\n• lauraliu on Facebook (2 minutes ago)\n• raycastapp on Threads (5 minutes ago)\n• chrismessina on Threads (6 minutes ago)\n• chris on Instagram (24 minutes ago)\n• nathanbachez on X (24 minutes ago)\n• peduarte on Raycast (24 minutes ago)\n• MariannaPaszkowska on GitHub (24 minutes ago)\n• GoogleDesign on X (24 minutes ago)\n• peduarte on X (24 minutes ago)\n• Sleep_Token on X (24 minutes ago)"
+    expected:
+      - callsTool:
+          name: "history"
+          arguments: {}

@@ -45,6 +45,15 @@ export type AddDNSRecord = {
   rrttl: string;
 };
 
+export type EmailForward = {
+  email: string;
+  forwards_to: string;
+};
+export type ConfigureEmailForward = {
+  email: string;
+  forward1: string;
+};
+
 export type WhoisInfo = {
   domain: string;
   registered: string;
@@ -162,6 +171,24 @@ export type ChangeNameServer = {
   ns11?: string;
   ns12?: string;
   ns13?: string;
+};
+
+export type Contact = {
+  contact_id: string;
+  default_profile: string;
+  nickname: string;
+  company: string;
+  first_name: string;
+  last_name: string;
+  address: string;
+  address2: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  email: string;
+  phone: string;
+  fax: string;
 };
 
 type BaseResponse = {

@@ -1,18 +1,13 @@
 import { useFetch } from "@raycast/utils";
 import { API_HEADERS, API_URL } from "./config";
-import { NameserverSet, SuccessResult } from "./types";
+import { NameserverSet } from "./types";
 import { Icon, List } from "@raycast/api";
 import { parseResponse } from "./utils";
 
 export default function ViewNameserverSets() {
-  const { isLoading, data } = useFetch(API_URL + "nameserverSet", {
+  const { isLoading, data } = useFetch<NameserverSet[], NameserverSet[]>(API_URL + "nameserverSet", {
     headers: API_HEADERS,
     parseResponse,
-    mapResult(result: SuccessResult<NameserverSet[]>) {
-      return {
-        data: result.data,
-      };
-    },
     initialData: [],
   });
 

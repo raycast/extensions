@@ -3,19 +3,25 @@ export type NameAndScope = {
   name: string;
 };
 
-export type SearchResultDocument = NameAndScope & {
-  description: string;
-  runtimeCompat: {
-    browser?: boolean;
-    deno?: boolean;
-    node?: boolean;
-    workerd?: boolean;
-    bun?: boolean;
-  };
-  score?: number;
-  _omc: number;
-  id: string;
+export type RuntimeCompat = {
+  browser?: boolean;
+  deno?: boolean;
+  node?: boolean;
+  workerd?: boolean;
+  bun?: boolean;
 };
+
+export type DescriptionAndRuntimeCompat = {
+  description: string;
+  runtimeCompat: RuntimeCompat;
+};
+
+export type SearchResultDocument = NameAndScope &
+  DescriptionAndRuntimeCompat & {
+    score?: number;
+    _omc: number;
+    id: string;
+  };
 
 export type SearchResult = {
   id: number;
@@ -44,23 +50,16 @@ export type GitHubRepository = {
   createdAt: string;
 };
 
-export type Package = NameAndScope & {
-  description: string;
-  githubRepository: GitHubRepository | null;
-  runtimeCompat: {
-    browser?: boolean;
-    deno?: boolean;
-    node?: boolean;
-    workerd?: boolean;
-    bun?: boolean;
+export type Package = NameAndScope &
+  DescriptionAndRuntimeCompat & {
+    githubRepository: GitHubRepository | null;
+    updatedAt: string | null;
+    createdAt: string | null;
+    versionCount: number | null;
+    score: number | null;
+    latestVersion: string | null;
+    whenFeatured: string | null;
   };
-  updatedAt: string | null;
-  createdAt: string | null;
-  versionCount: number | null;
-  score: number | null;
-  latestVersion: string | null;
-  whenFeatured: string | null;
-};
 
 export type VersionPackageBase = {
   scope: string;
@@ -117,3 +116,11 @@ export type ApiResults<T> = {
   items: T[];
   total: number;
 };
+
+export type StatsData = {
+  newest: Array<Package>;
+  updated: Array<VersionPackageBase>;
+  featured: Array<Package>;
+};
+
+export type WithKey<T> = T & { key: string };

@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Development
+.DS_Store
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Backup files
+*.backup
+
+# Cache
+.cache/

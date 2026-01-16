@@ -8,10 +8,12 @@
   "contributors": [
     "sven",
     "koseduhemak",
-    "ryanp",
     "LunaticMuch",
-    "nick318",
     "marinsokol"
+  ],
+  "pastContributors": [
+    "ryanp",
+    "nick318"
   ],
   "license": "MIT",
   "commands": [
@@ -82,7 +84,6 @@
     "eslint": "^8.48.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
-    "react-devtools": "^4.28.0",
     "typescript": "^5.2.2"
   },
   "scripts": {
@@ -91,5 +92,8 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "node publish.mjs"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

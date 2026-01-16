@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reverso-context",
   "title": "Reverso Context",
-  "description": "Shows translation with usage examples via Reverso Context",
+  "description": "Get Translations and Examples via Reverso Context",
   "icon": "reverso-context.png",
-  "author": "MrModest",
+  "author": "adielBm",
+  "contributors": [
+    "MrModest"
+  ],
   "categories": [
     "Web",
     "Productivity"
@@ -13,17 +16,18 @@
   "commands": [
     {
       "name": "context",
-      "title": "Translate With The Context",
+      "title": "Translate",
       "subtitle": "Reverso Context",
-      "description": "Shows translation with usage examples via Reverso Context",
-      "mode": "view"
-    },
-    {
-      "name": "context_2nd",
-      "title": "Translate With The Context (2nd Pair)",
-      "subtitle": "Reverso Context",
-      "description": "The same as previous one, but you can set second pair of languages to another shortcut",
-      "mode": "view"
+      "description": "Get Translations, Pronunciation and Examples.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Enter text",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -193,183 +197,26 @@
       ]
     },
     {
-      "name": "correctLangPairDirection_2nd",
-      "type": "checkbox",
-      "required": false,
-      "title": "Translation direction (2nd pair)",
-      "default": false,
-      "description": "Corrects translation direction based on typed text language",
-      "label": "Auto reverse direction (2nd pair)"
-    },
-    {
-      "name": "langFrom_2nd",
-      "type": "dropdown",
-      "required": false,
-      "title": "From language (2nd pair)",
-      "default": "en",
-      "description": "From language",
-      "data": [
-        {
-          "title": "🇬🇧 English",
-          "value": "en"
-        },
-        {
-          "title": "🇩🇪 German",
-          "value": "de"
-        },
-        {
-          "title": "🇷🇺 Russian",
-          "value": "ru"
-        },
-        {
-          "title": "🇦🇪 Arabic",
-          "value": "ar"
-        },
-        {
-          "title": "🇪🇸 Spanish",
-          "value": "es"
-        },
-        {
-          "title": "🇫🇷 French",
-          "value": "fr"
-        },
-        {
-          "title": "🇮🇱 Hebrew",
-          "value": "he"
-        },
-        {
-          "title": "🇮🇹 Italian",
-          "value": "it"
-        },
-        {
-          "title": "🇯🇵 Japanese",
-          "value": "ja"
-        },
-        {
-          "title": "🇳🇱 Dutch",
-          "value": "nl"
-        },
-        {
-          "title": "🇵🇱 Polish",
-          "value": "pl"
-        },
-        {
-          "title": "🇵🇹 Portuguese",
-          "value": "pt"
-        },
-        {
-          "title": "🇷🇴 Romanian",
-          "value": "ro"
-        },
-        {
-          "title": "🇸🇪 Swedish",
-          "value": "sv"
-        },
-        {
-          "title": "🇹🇷 Turkish",
-          "value": "tr"
-        },
-        {
-          "title": "🇺🇦 Ukrainian",
-          "value": "uk"
-        },
-        {
-          "title": "🇨🇳 Chinese",
-          "value": "zh"
-        }
-      ]
-    },
-    {
-      "name": "langTo_2nd",
-      "type": "dropdown",
-      "required": false,
-      "title": "To language (2nd pair)",
-      "default": "en",
-      "description": "To language",
-      "data": [
-        {
-          "title": "🇬🇧 English",
-          "value": "en"
-        },
-        {
-          "title": "🇩🇪 German",
-          "value": "de"
-        },
-        {
-          "title": "🇷🇺 Russian",
-          "value": "ru"
-        },
-        {
-          "title": "🇦🇪 Arabic",
-          "value": "ar"
-        },
-        {
-          "title": "🇪🇸 Spanish",
-          "value": "es"
-        },
-        {
-          "title": "🇫🇷 French",
-          "value": "fr"
-        },
-        {
-          "title": "🇮🇱 Hebrew",
-          "value": "he"
-        },
-        {
-          "title": "🇮🇹 Italian",
-          "value": "it"
-        },
-        {
-          "title": "🇯🇵 Japanese",
-          "value": "ja"
-        },
-        {
-          "title": "🇳🇱 Dutch",
-          "value": "nl"
-        },
-        {
-          "title": "🇵🇱 Polish",
-          "value": "pl"
-        },
-        {
-          "title": "🇵🇹 Portuguese",
-          "value": "pt"
-        },
-        {
-          "title": "🇷🇴 Romanian",
-          "value": "ro"
-        },
-        {
-          "title": "🇸🇪 Swedish",
-          "value": "sv"
-        },
-        {
-          "title": "🇹🇷 Turkish",
-          "value": "tr"
-        },
-        {
-          "title": "🇺🇦 Ukrainian",
-          "value": "uk"
-        },
-        {
-          "title": "🇨🇳 Chinese",
-          "value": "zh"
-        }
-      ]
+      "name": "puppeteerExecutablePath",
+      "type": "textfield",
+      "required": true,
+      "title": "Puppeteer Executable Path",
+      "default": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "description": "Executable path of your browser for Puppeteer."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "axios": "^0.21.1",
-    "languagedetect": "^2.0.0"
+    "@raycast/api": "^1.99.3",
+    "languagedetect": "^2.0.0",
+    "puppeteer-core": "^24.2.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

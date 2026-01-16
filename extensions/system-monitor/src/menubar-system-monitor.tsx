@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { MenuBarExtra, Icon } from "@raycast/api";
+import { MenuBarExtra, Icon, getPreferenceValues, Image } from "@raycast/api";
 import { usePromise, runAppleScript } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 
@@ -13,6 +13,8 @@ import { getBatteryData } from "./Power/PowerUtils";
 import { formatBytes, isObjectEmpty } from "./utils";
 
 export default function Command() {
+  const { customIconUrl } = getPreferenceValues();
+
   const {
     data: systemInfo,
     revalidate: revalidateSystem,
@@ -97,7 +99,15 @@ export default function Command() {
   }, 1000);
 
   return (
-    <MenuBarExtra icon={{ source: "command-icon.png" }} tooltip="System Monitor" isLoading={isLoading}>
+    <MenuBarExtra
+      icon={{
+        source: customIconUrl || "command-icon.png",
+        mask: Image.Mask.RoundedRectangle,
+        fallback: "command-icon.png",
+      }}
+      tooltip="System Monitor"
+      isLoading={isLoading}
+    >
       <MenuBarExtra.Section title="System Info">
         <MenuBarExtra.Item
           title="macOS"

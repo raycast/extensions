@@ -6,6 +6,8 @@ Spotify's most common features, now at your fingertips. Search for music and pod
 
 ## Commands
 
+> Commands with "💸" require Spotify Premium
+
 ### Search
 
 A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.
@@ -98,6 +100,14 @@ Use this to start a radio station based on the current song.
 
 Use this to copy the URL of the current song/episode.
 
+### Copy Artist And Title
+
+Use this to copy the artist and track title of the current song/episode.
+
+### Find Lyrics
+
+Use this to find and display lyrics for the currently playing song. The lyrics are fetched from Genius and displayed directly within Raycast, preserving section structure like [Intro], [Verse], and [Chorus]. Includes options to copy the lyrics or song information.
+
 ### Just Play
 
 Use this to quickly start playing a song based on your query.
@@ -113,6 +123,10 @@ Use this to skip ahead 15 seconds.
 ### Back 15 Seconds
 
 Use this to go back 15 seconds.
+
+### Queue (💸)
+
+Use this to see your queue.
 
 ---
 

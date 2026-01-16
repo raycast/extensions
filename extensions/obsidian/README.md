@@ -4,7 +4,7 @@
 
 # Obsidian for Raycast
 
-This is a raycast extension with commands for the note taking and knowledge management app [Obsidian]( https://obsidian.md/). To use it, install the extension from the [Raycast Store](https://www.raycast.com/KevinBatdorf/obsidian), open Raycast Search and type one of the following commands.
+This is a raycast extension with commands for the note taking and knowledge management app [Obsidian](https://obsidian.md/). To use it, install the extension from the [Raycast Store](https://www.raycast.com/KevinBatdorf/obsidian), open Raycast Search and type one of the following commands.
 
 ## Overview
 
@@ -23,10 +23,10 @@ This is a raycast extension with commands for the note taking and knowledge mana
 
 ## Search Note
 
-This command allows for quick access to all of your notes. By default you can search notes by title. Enabeling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
+This command allows for quick access to all of your notes. By default you can search notes by title. Enabling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
 Use the tag filter in the top right corner to filter notes based on their tags (both YAML frontmatter and inline tags).
 
-Enabeling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
+Enabling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
 
 - Note content
 - Character Count
@@ -210,10 +210,6 @@ Clicking it will reveal a list of your vaults. You can view your bookmarked note
 
 - exclude folders, files and paths so they don't show up in the search
 - select image size (small, medium, large)
-
-## Previous Developer / Maintainer
-
-This extension was originally developed by [Marc Julian Schwarz](https://marc-julian.de/). As of 15th May 2023, Marc Julian is no longer maintaining this extension due to time constraints related to his university studies. This extension will now be further developed and maintained by [Kevin Batdorf](https://github.com/KevinBatdorf/). "Thank you for taking over this extension and keeping it alive for the community." -Marc Julian
 
 ## Blog posts:
 

@@ -3,6 +3,7 @@ import sportInfo from "./getSportInfo";
 
 interface Team {
   displayName: string;
+  id: string;
   logos: { href: string }[];
   links: { href: string }[];
 }

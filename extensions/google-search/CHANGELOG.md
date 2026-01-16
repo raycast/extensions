@@ -1,5 +1,9 @@
 # Google Search Changelog
 
+## [Windows] - 2025-11-06
+
+- Release extension for Windows
+
 ## [Update] - 2025-02-22
 
 - Add clipboard fallback preference for selected text searches

@@ -1,4 +1,3 @@
-import { Response } from "@raycast/utils";
 import { decode as htmlDecode } from "he";
 import { strEq } from "./utils";
 

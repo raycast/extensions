@@ -39,6 +39,8 @@ export interface MyPreferences {
   deepLAuthKey: string;
   deepLEndpoint: string;
 
+  enableDeepLXTranslate: boolean;
+
   enableGoogleTranslate: boolean;
 
   enableBingTranslate: boolean;
@@ -64,6 +66,11 @@ export interface MyPreferences {
   openAIAPIKey: string;
   openAIAPIURL: string;
   openAIModel: string;
+
+  enableGeminiTranslate: boolean;
+  geminiAPIKey: string;
+  geminiAPIURL: string;
+  geminiModel: string;
 
   bingHost: string;
 }
@@ -96,6 +103,10 @@ export class AppKeyStore {
   static openAIAPIKey = myPreferences.openAIAPIKey.trim();
   static openAIEndpoint = myPreferences.openAIAPIURL.trim() || "https://api.openai.com/v1/chat/completions";
   static openAIModel = myPreferences.openAIModel.trim() || "gpt-3.5-turbo";
+
+  static geminiAPIKey = myPreferences.geminiAPIKey.trim();
+  static geminiEndpoint = myPreferences.geminiAPIURL.trim() || "https://generativelanguage.googleapis.com";
+  static geminiModel = myPreferences.geminiModel.trim() || "gemini-2.0-flash";
 }
 
 // Test AES online: https://www.sojson.com/encrypt_aes.html

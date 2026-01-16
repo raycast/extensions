@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { AppleSilicon } from '@scaleway/sdk'
+import { Applesiliconv1alpha1 } from '@scaleway/sdk'
 
-export const SERVER_STATUSES = AppleSilicon.v1alpha1.SERVER_TRANSIENT_STATUSES.reduce(
+export const SERVER_STATUSES = Applesiliconv1alpha1.SERVER_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -19,13 +19,14 @@ export const SERVER_STATUSES = AppleSilicon.v1alpha1.SERVER_TRANSIENT_STATUSES.r
     updating: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     locking: { source: Icon.Lock, tintColor: Color.Red },
     locked: { source: Icon.Lock, tintColor: Color.Red },
+    busy: { source: Icon.Lock, tintColor: Color.Red },
     unlocking: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     reinstalling: { source: Icon.CircleProgress100, tintColor: Color.Blue },
   }
 )
 
-export const getServerStatusIcon = (server: AppleSilicon.v1alpha1.Server) =>
+export const getServerStatusIcon = (server: Applesiliconv1alpha1.Server) =>
   SERVER_STATUSES[server.status]
 
-export const isServerTransient = (server?: AppleSilicon.v1alpha1.Server) =>
-  server ? AppleSilicon.v1alpha1.SERVER_TRANSIENT_STATUSES.includes(server.status) : false
+export const isServerTransient = (server?: Applesiliconv1alpha1.Server) =>
+  server ? Applesiliconv1alpha1.SERVER_TRANSIENT_STATUSES.includes(server.status) : false

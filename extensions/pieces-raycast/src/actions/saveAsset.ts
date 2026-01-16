@@ -90,7 +90,7 @@ export async function saveFileToPieces(file: string): Promise<Asset | null> {
   }
 
   const seed: Seed = {
-    type: SeedTypeEnum.Asset,
+    type: SeedTypeEnum.SeededAsset,
     asset: {
       application,
       format: {
@@ -124,7 +124,7 @@ export async function saveTextToPieces(
     return null;
   }
   const seed: Seed = {
-    type: SeedTypeEnum.Asset,
+    type: SeedTypeEnum.SeededAsset,
     asset: {
       application,
       format: {

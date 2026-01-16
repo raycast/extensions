@@ -1,5 +1,9 @@
 # Dovetail Changelog
 
+## [Search with pagination] - 2025-05-20
+
+- Add pagination to the search data, insights, and contacts actions
+
 ## [Search contacts and view data] - 2025-05-12
 
 - Switch to new `/v1/data`, `/v1/insights`, and `/v1/contacts` endpoints for improved reliability

@@ -2,16 +2,15 @@ import { Toast } from "@raycast/api";
 
 export const SHADCN_URL = {
   DOCS_COMPONENTS: "https://ui.shadcn.com/docs/components",
-  API_COMPONENTS: "https://ui.shadcn.com/api/components",
   EXAMPLES: "https://ui.shadcn.com/examples",
   GITHUB: "https://github.com/shadcn-ui/ui/tree/main",
-  RAW_GITHUB_COMPONENTS: "https://raw.githubusercontent.com/shadcn/ui/main/apps/www/content/docs/components",
+  RAW_GITHUB_COMPONENTS: "https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/content/docs/components",
 } as const;
 
 export const OCTOKIT_CONFIG = {
-  owner: "shadcn",
+  owner: "shadcn-ui",
   repo: "ui",
-  pathExamples: "apps/www/app/examples",
+  pathExamples: "apps/v4/app/(app)/examples",
 } as const;
 
 export const CREATE_ERROR_TOAST_OPTIONS = (e: Error): Toast.Options => ({

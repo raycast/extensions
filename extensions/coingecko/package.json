@@ -8,7 +8,10 @@
   "contributors": [
     "mike182uk"
   ],
-  "categories": ["Finance", "Web"],
+  "categories": [
+    "Finance",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -295,7 +298,6 @@
     "eslint": "^8.40.0",
     "eslint-config-prettier": "^8.8.0",
     "prettier": "^2.8.8",
-    "react-devtools": "^4.27.7",
     "typescript": "5.0.4"
   },
   "scripts": {

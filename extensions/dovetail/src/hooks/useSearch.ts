@@ -1,44 +1,50 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import qs from "qs";
+import { useState } from "react";
+import { ApiEndpoint, BaseUrl, buildHeaders, EndpointData, PageSize } from "../api/endpoints";
 import { useAuth } from "./useAuth";
 
-type FetchFunction<T> = (query: string, token?: string) => Promise<{ data: T[] }>;
+interface SearchApi<Data> {
+  data: Data[];
+  isLoading: boolean;
+  onQueryChange: (value: string) => void;
+  numberOfResults: string;
+  pagination: List.Props["pagination"];
+}
 
-export function useSearch<T>(fetchFunction: FetchFunction<T>) {
+export function useSearch<Endpoint extends ApiEndpoint>(endpoint: Endpoint): SearchApi<EndpointData<Endpoint>> {
   const { token } = useAuth();
   const [query, setQuery] = useState("");
-  const [data, setData] = useState<T[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const cancelRef = useRef<AbortController | null>(null);
 
-  const fetchData = useCallback(
-    async (searchQuery: string) => {
-      setIsLoading(true);
-      try {
-        const result = await fetchFunction(searchQuery, token ?? undefined);
-        setData(result.data);
-      } catch (error) {
-        console.error("Search error:", error);
-        setData([]);
-      } finally {
-        setIsLoading(false);
-      }
+  const { isLoading, data, pagination } = useFetch(
+    ({ cursor }) =>
+      BaseUrl +
+      endpoint.path +
+      `?${qs.stringify({ filter: endpoint.buildFilter(query), page: { start_cursor: cursor, limit: PageSize } })}`,
+    {
+      headers: buildHeaders(token),
+      parseResponse: async (response) => {
+        const json = await response.json();
+        return endpoint.schema.parse(json);
+      },
+      mapResult: (result) => ({
+        data: result.data,
+        hasMore: result.page.has_more,
+        cursor: result.page.next_cursor,
+      }),
+      keepPreviousData: true,
+      initialData: [],
     },
-    [token, fetchFunction],
   );
-
-  useEffect(() => {
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-    fetchData(query);
-    return () => cancelRef.current?.abort();
-  }, [query, fetchData]);
-
-  const onSearchTextChange = useCallback((text: string) => {
-    setQuery(text);
-    setData([]);
-  }, []);
 
   const numberOfResults = data.length === 1 ? "1 result" : `${data.length} results`;
 
-  return { data, isLoading, onSearchTextChange, numberOfResults };
+  return {
+    data,
+    isLoading,
+    onQueryChange: setQuery,
+    numberOfResults,
+    pagination,
+  };
 }

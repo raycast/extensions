@@ -31,7 +31,9 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
     transformer: true;
 }, {
     me: import("@trpc/server").TRPCQueryProcedure<{
-        input: void;
+        input: {
+            device?: string | undefined;
+        } | undefined;
         output: {
             associatedSpaces: {
                 myTags: string[];

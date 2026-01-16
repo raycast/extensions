@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "git",
+  "title": "Git",
+  "description": "Full-fledged Git Client for managing local repositories",
+  "icon": "extension-icon.png",
+  "author": "ernest0n",
+  "keywords": [
+    "repository",
+    "project",
+    "clone",
+    "commit",
+    "worktree",
+    "github",
+    "gitlab",
+    "bitbucket",
+    "azure devops",
+    "gitea"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-repositories",
+      "title": "Manage Git Repositories",
+      "description": "List of Git repositories",
+      "mode": "view"
+    },
+    {
+      "name": "clone-repository",
+      "title": "Clone Git Repository",
+      "description": "Clone a Git repository from URL",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Repository URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-repository",
+      "title": "Open Git Repository",
+      "description": "Open a Git repository management interface",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "path",
+          "placeholder": "Path to repository",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "configure-issue-trackers",
+      "icon": "issue-trackers-icon.png",
+      "title": "Configure Issue Trackers",
+      "description": "Manage URL tracker rules for linking commit messages",
+      "mode": "view",
+      "keywords": [
+        "link",
+        "url"
+      ]
+    },
+    {
+      "name": "manage-ai-message-prompts",
+      "title": "Manage AI Message Prompts",
+      "icon": "presets-icon.png",
+      "description": "Configure AI commit message prompt presets",
+      "mode": "view",
+      "keywords": [
+        "preset",
+        "commit",
+        "message"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultTerminal",
+      "required": true,
+      "type": "appPicker",
+      "title": "Default Terminal",
+      "default": "com.apple.Terminal",
+      "description": "The default terminal app to open repository directory in (e.g. 'Terminal', 'Warp')"
+    },
+    {
+      "name": "externalGitClient",
+      "required": true,
+      "type": "appPicker",
+      "title": "External Git Client",
+      "default": "com.apple.Terminal",
+      "description": "The external git client to use for git commands (e.g. 'GitKraken')"
+    },
+    {
+      "name": "commitsPerPage",
+      "required": false,
+      "type": "textfield",
+      "title": "Max Commits to Load",
+      "default": "30",
+      "description": "Number of commits to load per pagination page. Small values cause frequent lags during scrolling. Large values cause slow initial list loading."
+    },
+    {
+      "name": "maxBranchesToLoad",
+      "required": false,
+      "type": "textfield",
+      "title": "Max Branches to Load",
+      "default": "80",
+      "description": "Maximum number of branches to load in local and remote branches sections"
+    },
+    {
+      "name": "maxTagsToLoad",
+      "required": false,
+      "type": "textfield",
+      "title": "Max Tags to Load",
+      "default": "80",
+      "description": "Maximum number of tags to load in tags list"
+    },
+    {
+      "name": "autoGenerateCommitMessage",
+      "required": false,
+      "type": "checkbox",
+      "label": "Auto Generate Commit Message",
+      "default": false,
+      "description": "Automatically generate a commit message using AI when opening the commit message view."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.1",
+    "fast-fuzzy": "^1.12.0",
+    "file-type": "^21.0.0",
+    "nanoid": "^5.1.5",
+    "simple-git": "^3.27.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

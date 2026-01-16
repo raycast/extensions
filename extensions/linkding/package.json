@@ -17,13 +17,29 @@
     {
       "name": "search-bookmarks",
       "title": "Search Linkding",
-      "description": "Searches through Linkding Bookmarks",
+      "description": "Search Linkding bookmarks",
       "mode": "view"
     },
     {
       "name": "create-bookmarks",
       "title": "Create Bookmark",
-      "description": "Create new Bookmarks",
+      "description": "Create new bookmark",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Options",
+          "name": "useCurrentBrowserTab",
+          "type": "checkbox",
+          "label": "Use current browser tab",
+          "description": "If the focused app is a browser, try to get the current tab's URL and prefill it when creating a bookmark.",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "save-browser-tab",
+      "title": "Save Browser Tab",
+      "description": "Save current browser tab to Linkding",
       "mode": "view"
     }
   ],
@@ -69,19 +85,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.91.0",
-    "@raycast/utils": "^1.18.1",
-    "cheerio": "^1.0.0-rc.12",
-    "fuse.js": "^7.1.0"
+    "@raycast/api": "1.103.0",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^5.7.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
@@ -90,5 +103,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

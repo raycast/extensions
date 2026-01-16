@@ -1,4 +1,4 @@
-import { List } from '@raycast/api';
+import { List } from "@raycast/api";
 
 interface DropdownProps {
   options: {
@@ -12,7 +12,7 @@ interface DropdownProps {
 
 export function Dropdown({ options, onDropdownChange, value, tooltip }: DropdownProps) {
   return (
-    <List.Dropdown onChange={onDropdownChange} value={value} tooltip={tooltip || ''}>
+    <List.Dropdown onChange={onDropdownChange} value={value} tooltip={tooltip || ""}>
       {options.map(({ label, value }) => (
         <List.Dropdown.Item key={value} title={label} value={value} />
       ))}

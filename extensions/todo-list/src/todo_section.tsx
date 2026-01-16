@@ -14,7 +14,7 @@ const TodoSection = ({ sectionKey, selectedTag }: { sectionKey: keyof TodoSectio
         .map((item, i) =>
           selectedTag == item.tag || selectedTag == "All" ? (
             <SingleTodoItem idx={i} item={item} key={i} sectionKey={sectionKey} />
-          ) : null
+          ) : null,
         )}
     </List.Section>
   );

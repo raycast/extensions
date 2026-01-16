@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "font-sniper",
+  "title": "Font Sniper",
+  "description": "Identify and download fonts from any website.",
+  "icon": "extension-icon.png",
+  "author": "riomadeit",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "extract-fonts",
+      "title": "Download Fonts",
+      "description": "Extract and download fonts from a website URL",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showWoff2",
+      "title": "Font Formats",
+      "label": "Show WOFF2",
+      "description": "Include WOFF2 format fonts in results",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showWoff",
+      "label": "Show WOFF",
+      "description": "Include WOFF format fonts in results",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showTtf",
+      "label": "Show TTF",
+      "description": "Include TTF format fonts in results",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showOtf",
+      "label": "Show OTF",
+      "description": "Include OTF format fonts in results",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showEot",
+      "label": "Show EOT",
+      "description": "Include EOT format fonts in results",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "convertWoff2ToTtf",
+      "title": "Conversion",
+      "label": "Auto-convert WOFF2 to TTF",
+      "description": "Automatically convert WOFF2 fonts to TTF format when downloading",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.0",
+    "woff2-encoder": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^9.39.2",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -11,6 +11,7 @@ import {
   List,
   showToast,
   Form,
+  getPreferenceValues,
 } from "@raycast/api";
 
 import { useEffect, useState } from "react";
@@ -24,49 +25,62 @@ import {
   Timer,
   TimerList,
 } from "./Timers";
+import { useForm } from "@raycast/utils";
 
-function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date) => void }) {
-  const [error, setError] = useState("");
+function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date, name: string, tag: string) => void }) {
+  const { default_tag } = getPreferenceValues<Preferences.StartTimer>();
+  type FormValues = {
+    id: string;
+    name: string;
+    tag: string;
+    start: Date | null;
+    end: Date | null;
+  };
+  const { itemProps, handleSubmit, values, setValidationError } = useForm<FormValues>({
+    onSubmit(values) {
+      const { start, end, name, tag } = values;
+      if (!start) {
+        setValidationError("start", "The item is required");
+        return;
+      }
+      if (!end) {
+        setValidationError("end", "The item is required");
+        return;
+      }
+      props.onUpdate(start, end, name, tag);
+    },
+    initialValues: {
+      id: props.timer.id,
+      name: props.timer.name || "",
+      tag: props.timer.tag || "",
+      start: new Date(props.timer.start),
+      end: new Date(props.timer.end!),
+    },
+    validation: {
+      start(value) {
+        if (!value) return "The item is required";
+        if (value > new Date()) return "Start Date must be a date in the past";
+        if (values.end && values.end <= value) return "Start Date must be before End Date";
+      },
+      end(value) {
+        if (!value) return "The item is required";
+        if (value > new Date()) return "End Date must be a date in the past";
+        if (values.start && values.start >= value) return "End Date must be after Start Date";
+      },
+    },
+  });
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit"
-            onSubmit={(input) => {
-              const start: Date = input["start-date"];
-              const end: Date = input["end-date"];
-              if (start >= end) {
-                setError("End Date must be after Start Date");
-                return false;
-              }
-              if (end > new Date()) {
-                setError("End Date must be a date in the past");
-                return false;
-              }
-              props.onUpdate(start, end);
-            }}
-          />
+          <Action.SubmitForm icon={Icon.EditShape} title="Submit" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.DatePicker
-        title="Start Date"
-        id={"start-date"}
-        defaultValue={new Date(props.timer.start)}
-        // This is important to clear the state of the form. Without it, subsequent submits
-        // will send stale values.
-        onChange={() => setError("")}
-      />
-      <Form.DatePicker
-        error={error}
-        title="End Date"
-        id={"end-date"}
-        defaultValue={new Date(props.timer.end!)}
-        // This is important to clear the state of the form. Without it, subsequent submits
-        // will send stale values.
-        onChange={() => setError("")}
-      />
+      <Form.TextField title="Name" placeholder="Unnamed timer" {...itemProps.name} />
+      <Form.DatePicker title="Start Date" {...itemProps.start} />
+      <Form.DatePicker title="End Date" {...itemProps.end} />
+      <Form.TextField title="Tag" placeholder={default_tag || "Tag"} {...itemProps.tag} />
     </Form>
   );
 }
@@ -103,8 +117,8 @@ export default function Command() {
     return (
       <EditForm
         timer={editingTimer}
-        onUpdate={async (start, end) => {
-          await editTimer({ ...editingTimer, start: start.getTime(), end: end.getTime() });
+        onUpdate={async (start, end, name, tag) => {
+          await editTimer({ ...editingTimer, start: start.getTime(), end: end.getTime(), name, tag });
           getTimers().then(refresh);
           setEditingTimer(undefined);
         }}
@@ -129,6 +143,7 @@ export default function Command() {
               : new Date(timer.start).toLocaleString()
           }
           accessories={[
+            { tag: timer.tag },
             {
               text: (timer.end ? "✅ " : "⏳ ") + formatDuration(getDuration(timer)),
             },
@@ -156,6 +171,7 @@ export default function Command() {
                       type: LaunchType.UserInitiated,
                       arguments: {
                         name: timer.name,
+                        tag: timer.tag,
                       },
                     });
                   }}
@@ -185,7 +201,7 @@ export default function Command() {
                       message: "This action cannot be undone.",
                       icon: { source: Icon.Trash, tintColor: Color.Red },
                       primaryAction: {
-                        style: Alert.ActionStyle.Default,
+                        style: Alert.ActionStyle.Destructive,
                         title: "Delete timer",
                       },
                       rememberUserChoice: true,
@@ -201,6 +217,7 @@ export default function Command() {
               />
               <Action
                 icon={Icon.Download}
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title="Export Timers as CSV"
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
                 onAction={exportTimers}

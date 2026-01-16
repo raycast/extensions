@@ -1,6 +1,5 @@
 import { LaunchType, Toast, environment, showToast, updateCommandMetadata } from "@raycast/api";
 import { type AccountBalance, ErrorResponse, SuccessResponse } from "./lib/types";
-import fetch from "cross-fetch";
 import { showFailureToast } from "@raycast/utils";
 import generateApiUrl from "./lib/utils/generateApiUrl";
 

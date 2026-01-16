@@ -304,8 +304,8 @@ type AppDeployment = {
   phase: AppDeploymentPhase;
   tier_slug: string;
   cause_details: {
-    digitalocean_user_action: {
-      user: {
+    digitalocean_user_action?: {
+      user?: {
         uuid: string;
         email: string;
         full_name: string;

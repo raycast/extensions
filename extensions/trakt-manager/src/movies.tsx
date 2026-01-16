@@ -4,9 +4,11 @@ import { PaginationOptions } from "@raycast/utils/dist/types";
 import { setMaxListeners } from "node:events";
 import { setTimeout } from "node:timers/promises";
 import { useCallback, useRef, useState } from "react";
+import { GenericDetail } from "./components/generic-detail";
 import { GenericGrid } from "./components/generic-grid";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
+import { createMovieMarkdown, createMovieMetadata } from "./lib/detail-helpers";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 import { TraktMovieListItem, withPagination } from "./lib/schema";
 
@@ -124,6 +126,14 @@ export default function Command() {
     [],
   );
 
+  const movieMarkdown = useCallback((movie: TraktMovieListItem) => {
+    return createMovieMarkdown(movie.movie);
+  }, []);
+
+  const movieMetadata = useCallback((movie: TraktMovieListItem) => {
+    return createMovieMetadata(movie);
+  }, []);
+
   return (
     <GenericGrid
       isLoading={isLoading || actionLoading}
@@ -141,18 +151,37 @@ export default function Command() {
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={getFavicon(TRAKT_APP_URL)}
-              title="Open in Trakt"
-              url={getTraktUrl("movies", item.movie.ids.slug)}
+            <Action.Push
+              icon={Icon.Eye}
+              title="View Details"
+              target={
+                <GenericDetail
+                  item={item}
+                  isLoading={false}
+                  markdown={movieMarkdown}
+                  metadata={movieMetadata}
+                  navigationTitle={(movie) => movie.movie.title}
+                  actions={(movie) => (
+                    <ActionPanel>
+                      <ActionPanel.Section>
+                        <Action.OpenInBrowser
+                          icon={getFavicon(TRAKT_APP_URL)}
+                          title="Open in Trakt"
+                          shortcut={Keyboard.Shortcut.Common.Open}
+                          url={getTraktUrl("movies", movie.movie.ids.slug)}
+                        />
+                        <Action.OpenInBrowser
+                          icon={getFavicon(IMDB_APP_URL)}
+                          title="Open in Imdb"
+                          shortcut={{ modifiers: ["cmd"], key: "i" }}
+                          url={getIMDbUrl(movie.movie.ids.imdb)}
+                        />
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  )}
+                />
+              }
             />
-            <Action.OpenInBrowser
-              icon={getFavicon(IMDB_APP_URL)}
-              title="Open in IMDb"
-              url={getIMDbUrl(item.movie.ids.imdb)}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action
               title="Add to Watchlist"
               icon={Icon.Bookmark}
@@ -164,6 +193,20 @@ export default function Command() {
               icon={Icon.Clock}
               shortcut={Keyboard.Shortcut.Common.Duplicate}
               onAction={() => handleAction(item, addMovieToHistory, "Movie added to history")}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              icon={getFavicon(TRAKT_APP_URL)}
+              title="Open in Trakt"
+              shortcut={Keyboard.Shortcut.Common.Open}
+              url={getTraktUrl("movies", item.movie.ids.slug)}
+            />
+            <Action.OpenInBrowser
+              icon={getFavicon(IMDB_APP_URL)}
+              title="Open in Imdb"
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              url={getIMDbUrl(item.movie.ids.imdb)}
             />
           </ActionPanel.Section>
         </ActionPanel>

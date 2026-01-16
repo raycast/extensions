@@ -4,14 +4,16 @@ import { flag } from "country-emoji";
 import { useState } from "react";
 import useTopScorers from "./hooks/useTopScorers";
 
-function getAge(date: string) {
+function getAge(date: string | undefined) {
+  if (!date) return "Unknown";
   const birthDate = moment(date, "YYYY-MM-DD");
   const currentDate = moment();
   const age = currentDate.diff(birthDate, "years");
   return age.toString();
 }
 
-function getFormattedDate(date: string) {
+function getFormattedDate(date: string | undefined) {
+  if (!date) return "Unknown";
   const parsedDate = moment(date, "YYYY-MM-DD");
   const formattedDate = parsedDate.format("D MMMM YYYY");
   return formattedDate.toString();

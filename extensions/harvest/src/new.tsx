@@ -9,15 +9,17 @@ import {
   Alert,
   confirmAlert,
   Icon,
-  LocalStorage,
   getPreferenceValues,
 } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { formatHours, isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
-import { HarvestProjectAssignment, HarvestTimeEntry } from "./services/responseTypes";
+import { parseDuration } from "./services/parseDuration";
+import { HarvestTimeEntry } from "./services/responseTypes";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
-import { Dictionary, find, groupBy, isDate, isEmpty, omitBy, reduce } from "lodash";
+import { find, groupBy, isDate, isEmpty, omitBy } from "es-toolkit/compat";
+
 dayjs.extend(isToday);
 
 export default function Command({
@@ -33,13 +35,27 @@ export default function Command({
 }) {
   const { pop } = useNavigation();
   const { data: company, error } = useCompany();
-  const { data: projects } = useMyProjects();
+  const { data: projects, isLoading: isLoadingProjects } = useMyProjects();
   const [projectId, setProjectId] = useState<string | null>(entry?.project.id.toString() ?? null);
   const [taskId, setTaskId] = useState<string | null>(entry?.task.id.toString() ?? null);
   const [notes, setNotes] = useState<string>(entry?.notes ?? "");
   const [hours, setHours] = useState<string>(formatHours(entry?.hours?.toFixed(2), company));
+  const [hoursError, setHoursError] = useState<string | undefined>();
   const [spentDate, setSpentDate] = useState<Date>(viewDate ?? new Date());
-  const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
+  const { showClient = false, timeFormat = "company" } = getPreferenceValues<{
+    showClient?: boolean;
+    timeFormat?: "company" | "hours_minutes" | "decimal";
+  }>();
+
+  // Use useLocalStorage for persisting last used project/task
+  const {
+    value: lastProject,
+    setValue: setLastProject,
+    isLoading: isLoadingLastProject,
+  } = useLocalStorage<{
+    projectId: string;
+    taskId: string;
+  }>("lastProject");
 
   useEffect(() => {
     if (error) {
@@ -61,39 +77,21 @@ export default function Command({
 
   const groupedProjects = useMemo(() => {
     // return an array of arrays thats grouped by client to easily group them via a map function
-    return reduce<
-      Dictionary<[HarvestProjectAssignment, ...HarvestProjectAssignment[]]>,
-      Array<Array<HarvestProjectAssignment>>
-    >(
-      groupBy(projects, (o) => o.client.id),
-      (result, value) => {
-        result.push(value);
-        return result;
-      },
-      []
-    );
+    const grouped = groupBy(projects, (o) => o.client.id);
+    return Object.values(grouped);
   }, [projects]);
 
   useEffect(() => {
-    if (!entry) {
-      // no entry was passed, recall last submitted project/task
-      LocalStorage.getItem("lastProject").then((value) => {
-        console.log("restoring last used entry...", { value });
-        if (value) {
-          const { projectId, taskId } = JSON.parse(value.toString());
-          setProjectId(projectId);
-          setTaskId(taskId);
-          // setTaskAssignments(projectId);
-        }
-      });
-    } else {
-      // setTaskAssignments();
+    if (!entry && lastProject) {
+      setProjectId(lastProject?.projectId?.toString());
+      setTaskId(lastProject?.taskId?.toString());
     }
+  }, [entry, lastProject]);
 
-    return () => {
-      setProjectId(null);
-    };
-  }, [entry]);
+  // Watch for changes to projectId to reset taskId unless the change is related to lastProject being loaded
+  useEffect(() => {
+    if (lastProject && lastProject.projectId !== projectId) setTaskId(null);
+  }, [projectId]);
 
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
@@ -111,7 +109,7 @@ export default function Command({
       return;
     }
 
-    setTimeFormat(hours);
+    formatDuration(hours);
     const spentDate = isDate(values.spent_date) ? values.spent_date : viewDate;
 
     if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !hours)
@@ -148,7 +146,7 @@ export default function Command({
       });
     });
 
-    await LocalStorage.setItem("lastProject", JSON.stringify({ projectId: values.project_id, taskId: values.task_id }));
+    await setLastProject({ projectId: values.project_id.toString(), taskId: values.task_id.toString() });
 
     if (timeEntry) {
       toast.hide();
@@ -165,50 +163,37 @@ export default function Command({
     return project ? project.task_assignments : [];
   }, [projects, projectId]);
 
-  useEffect(() => {
-    if (tasks.length === 0) setTaskId(null);
-    if (tasks.some((o) => o.task.id.toString() === taskId)) return;
-    const defaultTask = tasks[0];
-
-    setTaskId(defaultTask ? defaultTask.task.id.toString() : null);
-  }, [tasks, taskId]);
-
-  function setTimeFormat(value?: string) {
-    // This function can be called directly from the onBlur event to better match the Harvest app behavior when it exists
-    if (!value) return;
-
-    if (company?.time_format === "decimal") {
-      if (value.includes(":")) {
-        const parsed = value.split(":");
-        const hour = parseInt(parsed[0]);
-        const minute = parseInt(parsed[1]);
-        if (!isNaN(hour)) {
-          if (!isNaN(minute)) {
-            value = parseFloat(`${hour}.${minute / 60}`)
-              .toFixed(2)
-              .toString();
-          } else {
-            value = hour.toString();
-          }
-        }
-      }
+  function formatDuration(value?: string) {
+    if (!value) {
+      setHoursError(undefined);
+      return;
     }
-    if (company?.time_format === "hours_minutes") {
-      if (!value.includes(":")) {
-        const parsed = parseFloat(value);
-        if (!isNaN(parsed)) {
-          const hour = Math.floor(parsed);
-          const minute = parseInt(((parsed - hour) * 60).toFixed(0));
-          value = `${hour}:${minute < 10 ? "0" : ""}${minute}`;
-        }
-      }
+
+    const duration = parseDuration(value);
+    if (!duration) {
+      setHoursError("Invalid duration");
+      return;
     }
-    return setHours(value);
+
+    setHoursError(undefined);
+    const totalMinutes = Math.round(duration.asMinutes());
+    const useHoursMinutes =
+      timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes");
+
+    if (useHoursMinutes) {
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      return setHours(`${h}:${m < 10 ? "0" : ""}${m}`);
+    } else {
+      // decimal
+      return setHours((totalMinutes / 60).toFixed(2));
+    }
   }
 
   return (
     <Form
       navigationTitle={entry?.id ? "Edit Time Entry" : "New Time Entry"}
+      isLoading={!entry && ((!tasks.length && isLoadingProjects) || isLoadingLastProject)}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -229,10 +214,7 @@ export default function Command({
         title="Project"
         key={`project-${entry?.id}`}
         value={projectId ?? ""}
-        onChange={(newValue) => {
-          setProjectId(newValue);
-          // setTaskAssignments(newValue);
-        }}
+        onChange={setProjectId}
       >
         {groupedProjects?.map((groupedProject) => {
           const client = groupedProject[0].client;
@@ -253,7 +235,12 @@ export default function Command({
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" value={taskId ?? ""} onChange={setTaskId}>
+      <Form.Dropdown
+        id="task_id"
+        title="Task"
+        value={tasks.find((t) => t.task.id.toString() === taskId) ? taskId ?? "" : ""}
+        onChange={setTaskId}
+      >
         {tasks?.map((task) => {
           return <Form.Dropdown.Item value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
@@ -272,9 +259,15 @@ export default function Command({
         <Form.TextField
           id="hours"
           title="Duration"
-          placeholder="Enter numbers, or blank to start a new timer"
+          placeholder="Leave blank to start a new timer"
           value={hours}
-          onChange={setHours}
+          error={hoursError}
+          onChange={(v) => {
+            setHours(v);
+            setHoursError(undefined);
+          }}
+          onBlur={(e) => formatDuration(e.target.value)}
+          info="You can enter numbers (decimal or h:mm format), simple durations (e.g. 1h30m), or simple time math (e.g. 1+15m-5m)"
         />
       )}
       <Form.DatePicker

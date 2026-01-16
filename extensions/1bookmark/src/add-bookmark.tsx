@@ -16,7 +16,7 @@ import { runAppleScript, useCachedState } from "@raycast/utils";
 import { trpc } from "./utils/trpc.util";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
 import MyAccount from "./views/MyAccount";
-import { LoginView } from "./views/LoginView";
+import { LoginFormInView } from "./components/LoginFormInView";
 import { NewTagForm } from "./views/NewTagForm";
 import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
 import { useMyTags } from "./hooks/use-tags.hook";
@@ -206,7 +206,7 @@ function Body(props: { onlyPop?: boolean }) {
   const { loggedOutStatus } = useLoggedOutStatus();
 
   if (loggedOutStatus) {
-    return <LoginView />;
+    return <LoginFormInView />;
   }
 
   if (!enabledSpaces) {

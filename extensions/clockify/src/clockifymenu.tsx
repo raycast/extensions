@@ -10,7 +10,7 @@ class DataWrapper {
   public currentlyElapsedTime: string | null = null;
 }
 
-export default function ClockifyMenuCommand(): JSX.Element {
+export default function ClockifyMenuCommand() {
   const [currentData, setCurrentData] = useState<DataWrapper | null>(null);
 
   const handleStopTimer = async () => {

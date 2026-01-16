@@ -12,6 +12,7 @@ import {
   LaunchProps,
   openCommandPreferences,
   Image,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { pause } from "./api/pause";
@@ -38,7 +39,8 @@ import { useSpotifyAppData } from "./hooks/useSpotifyAppData";
 import { seek } from "./api/seek";
 
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
-  const { hideArtistName, maxTextLength, iconType } = getPreferenceValues<Preferences.NowPlayingMenuBar>();
+  const { hideArtistName, maxTextLength, iconType, cleanupTitle } =
+    getPreferenceValues<Preferences.NowPlayingMenuBar>();
 
   const [uriFromSpotify, setUriFromSpotify] = useCachedState<string | undefined>("currentlyPlayingUri", undefined);
   const shouldExecute = React.useRef<boolean>(false);
@@ -97,13 +99,13 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   let title = "";
   let coverImageUrl = "";
-  let menuItems: JSX.Element | null = null;
+  let menuItems: React.JSX.Element | null = null;
 
   if (isTrack) {
     const { artists, id: trackId, album } = item as TrackObject;
     const artistName = artists?.[0]?.name;
     const artistId = artists?.[0]?.id;
-    title = formatTitle({ name, artistName, hideArtistName, maxTextLength });
+    title = formatTitle({ name, artistName, hideArtistName, maxTextLength, cleanupTitle });
     // Get the image with the lowest resolution
     coverImageUrl = album?.images.slice(-1)[0]?.url || "";
 
@@ -189,7 +191,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   } else {
     const { show } = item as EpisodeObject;
     const showName = show.name;
-    title = formatTitle({ name, artistName: showName, hideArtistName, maxTextLength });
+    title = formatTitle({ name, artistName: showName, hideArtistName, maxTextLength, cleanupTitle });
     coverImageUrl = show.images.slice(-1)[0]?.url || "";
 
     menuItems = (
@@ -339,7 +341,10 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           title="Copy URL"
           icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "c" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+          }}
           onAction={async () => {
             await Clipboard.copy({
               html: `<a href=${external_urls?.spotify}>${title}</a>`,
@@ -351,7 +356,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           icon="spotify-icon.svg"
           title="Open on Spotify"
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() =>
             isSpotifyInstalled ? open(uri || "spotify") : open(external_urls?.spotify || "https://play.spotify.com")
           }
@@ -360,7 +365,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>
@@ -386,7 +391,7 @@ function OpenSpotify({ isLoading }: { title?: string; isLoading: boolean }) {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>
@@ -423,7 +428,7 @@ function NothingPlaying({ title = "Nothing is playing right now", isLoading }: {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>

@@ -2,7 +2,6 @@ import { Action, ActionPanel, List, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useWatchlist from "./useWatchlist";
 import { distance } from "fastest-levenshtein";
-import useSymbols from "./useSymbols";
 import CommandWrapper from "./CommandWrapper";
 import { formatPrice } from "./utilities";
 import useCoins, { CoinData } from "./useCoins";
@@ -75,7 +74,6 @@ function TokenPriceContent() {
   const { coins, isLoading } = useCoins();
   const [selected, setSelected] = useState<string | null>(null);
 
-  const { data: symbols } = useSymbols();
   const { isInWatchlist } = useWatchlist();
   const watchlistCoins = coins?.filter((coin) => isInWatchlist(coin.id));
   const otherCoins = coins?.filter((coin) => !isInWatchlist(coin.id));
@@ -102,7 +100,7 @@ function TokenPriceContent() {
       searchBarPlaceholder="Search for a token..."
       onSelectionChange={(item) => setSelected(item)}
     >
-      {symbols && (
+      {
         <>
           <List.Section title="Watchlist">
             {filteredWatchlist?.map((coin) => (
@@ -115,7 +113,7 @@ function TokenPriceContent() {
             ))}
           </List.Section>
         </>
-      )}
+      }
     </List>
   );
 }

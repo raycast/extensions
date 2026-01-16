@@ -1,5 +1,34 @@
 # Brand.dev Changelog
 
+## [Retrieve Styleguide + Take Screenshots] - 2025-10-14
+
+### Retrieve Styleguide
+
+### Take Screenshots
+
+### Retrieve Brands
+
+- Now search by Domain, Ticker or Name
+- More data:
+    1. Content Rating (NSFW/SFW)
+    2. Industries (EIC)
+    3. Links
+
+## [Quick Search via Search Text] - 2025-08-14
+
+- If a Brand is not found when you search/filter, you can now quickly trigger a search for that query
+
+## [Show Stocks, Fonts, Contact] - 2025-06-12
+
+- Replace "View on brand.dev" with "Go to example.com" as Brand.dev has removed their world.brand.dev site for previews
+- Modernize to use latest Raycast config
+- Update Brand data:
+    - add: Stock (only for listed companies)
+    - add: Fonts
+    - add: Email
+    - add: Phone
+    - remove: Verified
+
 ## [Open Multiple Logos] - 2025-01-26
 
 - In `Detail` view the proper Address item title is shown e.g. "Country Code" instead of "country_code"

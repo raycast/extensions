@@ -13,6 +13,10 @@ type Note = {
 };
 
 const DB_PATH = resolve(homedir(), "Library/Containers/com.chabomakers.Antinote/Data/Documents/notes.sqlite3");
+const SETAPP_DB_PATH = resolve(
+  homedir(),
+  "Library/Containers/com.chabomakers.Antinote-setapp/Data/Documents/notes.sqlite3",
+);
 
 const query = `
   SELECT id, content, created, lastModified
@@ -52,12 +56,19 @@ async function openInAntinote(noteId: string) {
 
 export default function Command() {
   const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
-  const { isLoading, data: notes, permissionView } = useSQL<Note>(DB_PATH, query);
+  const [version, setVersion] = useState<string | null>(null);
+
+  const {
+    isLoading,
+    data: notes,
+    permissionView,
+  } = useSQL<Note>(version === "setapp" ? SETAPP_DB_PATH : DB_PATH, query);
 
   useEffect(() => {
     async function checkInstallation() {
-      const installed = await checkAntinoteInstalled();
+      const { installed, version } = await checkAntinoteInstalled();
       setIsInstalled(installed);
+      setVersion(version);
     }
 
     checkInstallation();

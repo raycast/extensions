@@ -79,10 +79,10 @@ export class XcodeSimulatorService {
 
   /**
    * Boot XcodeSimulator
-   * @param xcodeSimulator The XcodeSimulator to boot
+   * @param xcodeSimulatorUDID The XcodeSimulator UDID to boot
    */
-  static boot(xcodeSimulator: XcodeSimulator): Promise<void> {
-    return execAsync(`xcrun simctl boot ${xcodeSimulator.udid}`).then(() => {
+  static boot(xcodeSimulatorUDID: string): Promise<void> {
+    return execAsync(`xcrun simctl boot ${xcodeSimulatorUDID}`).then(() => {
       // Silently launch Simulator application
       XcodeSimulatorService.launchSimulatorApplication();
     });
@@ -90,11 +90,11 @@ export class XcodeSimulatorService {
 
   /**
    * Shutdown XcodeSimulator
-   * @param xcodeSimulator The XcodeSimulator to shutdown
+   * @param xcodeSimulatorUDID The XcodeSimulator UDID to shutdown
    */
-  static shutdown(xcodeSimulator: XcodeSimulator): Promise<void> {
+  static shutdown(xcodeSimulatorUDID: string): Promise<void> {
     // Shutdown Simulator
-    return execAsync(`xcrun simctl shutdown ${xcodeSimulator.udid}`).then();
+    return execAsync(`xcrun simctl shutdown ${xcodeSimulatorUDID}`).then();
   }
 
   /**
@@ -103,21 +103,21 @@ export class XcodeSimulatorService {
   static toggle(xcodeSimulator: XcodeSimulator): Promise<void> {
     switch (xcodeSimulator.state) {
       case XcodeSimulatorState.booted:
-        return XcodeSimulatorService.shutdown(xcodeSimulator);
+        return XcodeSimulatorService.shutdown(xcodeSimulator.udid);
       case XcodeSimulatorState.shuttingDown:
         return Promise.resolve();
       case XcodeSimulatorState.shutdown:
-        return XcodeSimulatorService.boot(xcodeSimulator);
+        return XcodeSimulatorService.boot(xcodeSimulator.udid);
     }
   }
 
   /**
    * Restart XcodeSimulator
-   * @param xcodeSimulator The XcodeSimulator to restart
+   * @param xcodeSimulatorUDID The XcodeSimulator udid to restart
    */
-  static async restart(xcodeSimulator: XcodeSimulator): Promise<void> {
-    await XcodeSimulatorService.shutdown(xcodeSimulator);
-    await XcodeSimulatorService.boot(xcodeSimulator);
+  static async restart(xcodeSimulatorUDID: string): Promise<void> {
+    await XcodeSimulatorService.shutdown(xcodeSimulatorUDID);
+    await XcodeSimulatorService.boot(xcodeSimulatorUDID);
   }
 
   /**
@@ -133,7 +133,7 @@ export class XcodeSimulatorService {
   ): Promise<void> {
     try {
       // Boot Xcode Simulator and ignore any errors
-      await XcodeSimulatorService.boot(xcodeSimulator);
+      await XcodeSimulatorService.boot(xcodeSimulator.udid);
       // eslint-disable-next-line no-empty
     } catch {}
     // Launch application by bundle identifier
@@ -155,7 +155,7 @@ export class XcodeSimulatorService {
   ): Promise<void> {
     try {
       // Boot Xcode Simulator and ignore any errors
-      await XcodeSimulatorService.boot(xcodeSimulator);
+      await XcodeSimulatorService.boot(xcodeSimulator.udid);
       // eslint-disable-next-line no-empty
     } catch {}
     return execAsync(
@@ -174,17 +174,17 @@ export class XcodeSimulatorService {
   /**
    * Opens a URL in a Simulator
    * @param url The url which should be opened
-   * @param simulator The optional Simulator where the url should be opened.
+   * @param simulatorUDID The optional simulator udid where the url should be opened.
    */
-  static async openUrl(url: string, simulator?: XcodeSimulator) {
+  static async openUrl(url: string, simulatorUDID?: string) {
     // Trim url
     const trimmedUrl = url.trim();
     // Check if the url has a valid scheme e.g. (maps://, https://raycast.com)
     if (!XcodeSimulatorService.isValidUrl(trimmedUrl)) {
       throw new XcodeSimulatorOpenUrlError(XcodeSimulatorOpenUrlErrorReason.badUrl);
     }
-    // Check if no simulator is presented
-    if (!simulator) {
+    // Check if no simulator udid is presented
+    if (!simulatorUDID) {
       // Check if Xcode is not installed
       if (!(await XcodeService.isXcodeInstalled())) {
         // Throw error
@@ -199,7 +199,7 @@ export class XcodeSimulatorService {
       }
     }
     // Open URL in simulator
-    return execAsync(["xcrun", "simctl", "openurl", simulator?.udid ?? "booted", `"${trimmedUrl}"`].join(" ")).then(
+    return execAsync(["xcrun", "simctl", "openurl", simulatorUDID ?? "booted", `"${trimmedUrl}"`].join(" ")).then(
       () => {
         // Silently launch Simulator application
         XcodeSimulatorService.launchSimulatorApplication();
@@ -241,7 +241,15 @@ export class XcodeSimulatorService {
   }
 
   /**
-   * Rename XcodeSimulator
+   * Deletes a XcodeSimulator
+   * @param xcodeSimulator The Xcode Simulator to delete
+   */
+  static async delete(xcodeSimulator: XcodeSimulator): Promise<void> {
+    return execAsync(`xcrun simctl delete ${xcodeSimulator.udid}`).then();
+  }
+
+  /**
+   * Trigger iCloud Sync for XcodeSimulator
    * @param xcodeSimulator The Xcode Simulator to trigger iCloud Sync to
    */
   static async triggerIcloudSync(xcodeSimulator: XcodeSimulator): Promise<void> {

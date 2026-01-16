@@ -10,10 +10,14 @@ export function EmptyViewType({ title, contextValues }: EmptyViewTypeProps) {
   return (
     <List.EmptyView
       title={title}
-      description="Create a new property by pressing ⏎"
+      description="Create a new type by pressing ⏎"
       actions={
         <ActionPanel>
-          <Action.Push title="Create Type" target={<CreateTypeForm draftValues={contextValues} />} icon={Icon.Plus} />
+          <Action.Push
+            title="Create Type"
+            target={<CreateTypeForm draftValues={contextValues} enableDrafts={false} />}
+            icon={Icon.Plus}
+          />
         </ActionPanel>
       }
     />

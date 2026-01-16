@@ -5,6 +5,10 @@
   "description": "Raycast extension for browsing and applying icons from macOSicons.com",
   "icon": "logo.png",
   "author": "shldk",
+  "contributors": [
+    "bendrucker",
+    "naokiiida"
+  ],
   "categories": [
     "System",
     "Fun"
@@ -56,5 +60,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

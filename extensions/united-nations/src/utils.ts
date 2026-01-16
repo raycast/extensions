@@ -1,3 +1,4 @@
+import process from "node:process";
 import { useEffect } from "react";
 import { LaunchType, confirmAlert, getPreferenceValues, open } from "@raycast/api";
 import { getVoices, killRunningSay, say } from "mac-say";
@@ -6,7 +7,9 @@ import { crossLaunchCommand } from "raycast-cross-extension";
 import { useCachedState } from "@raycast/utils";
 import { recommendVoices } from "./constants.js";
 import { i18n } from "./i18n.js";
-import { LanguageCode } from "./types.js";
+import { LanguageCode, RssItem } from "./types.js";
+
+export const isWindows = process.platform === "win32";
 
 export const textToSpeech = async (text: string, voice?: string) => {
   await killRunningSay();
@@ -42,7 +45,7 @@ export const useVoice = (languageCode: LanguageCode) => {
   const { detechSystemVoiceSettings } = getPreferenceValues<Preferences>();
   const [voice, setVoice] = useCachedState<string>(`${languageCode}-voice`, "");
   const loadVoices = async () => {
-    if (!detechSystemVoiceSettings) {
+    if (isWindows || !detechSystemVoiceSettings) {
       setVoice("");
       return;
     }
@@ -94,3 +97,14 @@ export const latinSearchFilter = (languageCode: LanguageCode, text: string, sear
       return true;
   }
 };
+
+export const arrayifyRssItem = (rssItem?: RssItem | RssItem[]): RssItem[] => {
+  if (Array.isArray(rssItem)) return rssItem;
+  if (typeof rssItem === "object") return [rssItem];
+  return [];
+};
+
+export const stripSpecialEscapedCharacters = (markdownContent: string) =>
+  markdownContent
+    // We don't want LaTeX content
+    .replace(/\\([[\]])/g, "$1");

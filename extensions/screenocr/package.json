@@ -7,7 +7,8 @@
   "author": "huzef44",
   "contributors": [
     "anwarulislam",
-    "xilopaint"
+    "xilopaint",
+    "pernielsentikaer"
   ],
   "categories": [
     "Productivity"
@@ -84,6 +85,14 @@
         {
           "title": "🇻🇳 Vietnamese (Vietnam)",
           "value": "vi-VT"
+        },
+        {
+          "title": "🇸🇦 Arabic (Saudi Arabia)",
+          "value": "ar-SA"
+        },
+        {
+          "title": "🇸🇦 Arabic, Najdi (Saudi Arabia)",
+          "value": "ars-SA"
         }
       ]
     },
@@ -111,6 +120,22 @@
       "type": "checkbox",
       "required": true,
       "label": "Use language correction",
+      "default": true
+    },
+    {
+      "name": "playSound",
+      "description": "Play camera shutter sound when capturing screenshots",
+      "type": "checkbox",
+      "required": false,
+      "label": "Play sounds",
+      "default": true
+    },
+    {
+      "name": "showToast",
+      "description": "Show toast notifications for command results",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show toast messages",
       "default": true
     },
     {
@@ -156,23 +181,29 @@
       "title": "Recognize Text on Entire Screen",
       "description": "Detect all text from the captured screen",
       "mode": "no-view"
+    },
+    {
+      "name": "detect-barcode",
+      "title": "Detect Barcode/QR Code",
+      "description": "Detect barcodes and QR codes from the captured screen area",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
-    "use-immer": "^0.9.0"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
+    "use-immer": "^0.11.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

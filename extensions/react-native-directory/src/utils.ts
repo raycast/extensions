@@ -1,6 +1,6 @@
 import { Color } from "@raycast/api";
-import { Library, Query } from "./types";
-import { compatibilityColors, platformColors } from "./constants";
+import { LibraryType, Query } from "./types";
+import { compatibilityColors, MUL, platformColors, SUFFIXES } from "./constants";
 
 const toQueryString = (query: Partial<Query>): string => {
   return new URLSearchParams(query as Record<string, string>).toString();
@@ -70,7 +70,7 @@ export const getTimeSinceToday = (date: string | Date): string => {
   return `${value} ${pluralize(unit, value)} ago`;
 };
 
-export const getCompatibilityTags = (library: Library): string[] => {
+export const getCompatibilityTags = (library: LibraryType): string[] => {
   const tags: string[] = [];
   if (library.dev) tags.push("Development Tool");
   if (library.template) tags.push("Template");
@@ -80,7 +80,7 @@ export const getCompatibilityTags = (library: Library): string[] => {
   return tags;
 };
 
-export const getSupportedPlatforms = (library: Library): string[] => {
+export const getSupportedPlatforms = (library: LibraryType): string[] => {
   const platforms: string[] = [];
   if (library.android) platforms.push("Android");
   if (library.ios) platforms.push("iOS");
@@ -99,3 +99,16 @@ export const getCompatibilityColor = (tag: string): Color => {
 export const getPlatformColor = (platform: string): Color => {
   return platformColors[platform] || Color.PrimaryText;
 };
+
+export function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) {
+    return "0 B";
+  }
+
+  const dm = Math.max(0, decimals);
+  const sizeRange = Math.floor(Math.log(bytes) / Math.log(MUL));
+  const value = bytes / Math.pow(MUL, sizeRange);
+  const formatted = parseFloat(value.toFixed(dm));
+
+  return `${formatted} ${SUFFIXES[sizeRange]}`;
+}

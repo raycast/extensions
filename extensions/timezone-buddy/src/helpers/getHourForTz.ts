@@ -1,9 +1,12 @@
-export function getHourForTz(tz: string): number {
+import { getDateWithOffset } from "./getDateWithOffset";
+
+export function getHourForTz(tz: string, offsetHrs?: number): number {
   const formatter = new Intl.DateTimeFormat(["en-GB"], {
     timeZone: tz,
     hour: "numeric",
     hour12: false,
   });
 
-  return Number(formatter.format(new Date()));
+  const date = getDateWithOffset(offsetHrs);
+  return Number(formatter.format(date));
 }

@@ -1,11 +1,9 @@
 import React from "react";
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { LanguageCodeSet } from "../types";
 import { useAllLanguageSets, usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
 import { AddLanguageForm } from "./AddLanguageForm";
 import { isSameLanguageSet, formatLanguageSet, getLanguageSetObjects } from "../utils";
-import { getLanguageFlag } from "../languages";
 
 export function LanguagesManagerItem({
   languageSet,
@@ -21,13 +19,12 @@ export function LanguagesManagerItem({
   const { langFrom, langTo } = getLanguageSetObjects(languageSet);
 
   const langsTo = Array.isArray(langTo) ? langTo : [langTo];
-  const langsToFlags = langsTo.map((l) => getLanguageFlag(l)).join(" ");
   const langsToLabel = langsTo.map((l) => l.name).join(", ");
 
   return (
     <List.Item
-      subtitle={`${getLanguageFlag(langFrom)} -> ${langsToFlags}`}
-      title={`${langFrom.name} -> ${langsToLabel}`}
+      title={`${langFrom.name}   ->`}
+      subtitle={` ${langsToLabel}`}
       keywords={[langFrom.name, langFrom.code, ...langsTo.flatMap((l) => [l.name, l.code])]}
       icon={selected ? { tintColor: Color.Green, source: Icon.Checkmark } : undefined}
       actions={
@@ -51,14 +48,14 @@ export const SaveCurrentLanguageSet: React.FC<{ languageSet: LanguageCodeSet; on
       subtitle={formatLanguageSet(languageSet)}
       actions={
         <ActionPanel>
-          <Action title="Save current set" onAction={onSelect} />
+          <Action title="Save Current Set" onAction={onSelect} />
         </ActionPanel>
       }
     />
   );
 };
 
-export const LanguagesManagerList: React.VFC = () => {
+export const LanguagesManagerList: React.FC = () => {
   const navigation = useNavigation();
   const preferencesLanguageSet = usePreferencesLanguageSet();
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
@@ -68,7 +65,7 @@ export const LanguagesManagerList: React.VFC = () => {
     <List
       actions={
         <ActionPanel>
-          <Action title="Remove all" onAction={() => setLanguages([])} />
+          <Action title="Remove All" onAction={() => setLanguages([])} />
         </ActionPanel>
       }
     >
@@ -78,7 +75,8 @@ export const LanguagesManagerList: React.VFC = () => {
         actions={
           <ActionPanel>
             <Action.Push
-              title="Add new language set..."
+              icon={Icon.Plus}
+              title="Add New Language Set…"
               target={
                 <AddLanguageForm
                   onAddLanguage={(langSet) => {

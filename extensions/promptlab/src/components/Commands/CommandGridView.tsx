@@ -30,6 +30,7 @@ export default function CommandGridView(props: {
           cancel={cancel}
           files={selectedFiles}
           speaking={speaking}
+          // @ts-expect-error: To keep to original code
           stopSpeech={stopSpeech}
           restartSpeech={restartSpeech}
         />
@@ -57,6 +58,7 @@ export default function CommandGridView(props: {
                 files={selectedFiles}
                 listItem={item.trim()}
                 speaking={speaking}
+                // @ts-expect-error: To keep to original code
                 stopSpeech={stopSpeech}
                 restartSpeech={restartSpeech}
               />

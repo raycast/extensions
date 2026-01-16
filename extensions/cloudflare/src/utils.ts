@@ -100,25 +100,36 @@ function toUrl(domain: string): string {
   return `https://${domain}`;
 }
 
-function handleNetworkError(e: unknown): void {
+async function handleNetworkError(e: unknown): Promise<void> {
   const error = e as AxiosError;
-  const status = error.response?.status;
-  if (!status) {
-    showFailureToast('', { title: 'Unknown error' });
+
+  const response = error.response;
+  const toast = await showFailureToast('Please try again later.');
+  if (!response) {
+    toast.title = 'Unknown error';
+    return;
   }
-  if (status === 400 || status === 403) {
-    showFailureToast('Please make sure that your API token is valid.', {
-      title: 'Failed to authorize',
-      message: 'Please make sure that your API token is valid.',
-      primaryAction: {
-        title: 'Open Extension Preferences',
-        onAction: openExtensionPreferences,
-      },
-    });
+
+  const status = response.status;
+  if (!status) {
+    toast.title = 'Network error';
+    return;
+  }
+
+  if (status === 401) {
+    toast.title = 'Failed to authorize';
+    toast.message = 'Please make sure that your API token is valid.';
+    toast.primaryAction = {
+      title: 'Open Extension Preferences',
+      onAction: openExtensionPreferences,
+    };
   } else {
-    showFailureToast('Please try again later.', {
-      title: 'Network error',
-    });
+    const data = response.data as {
+      errors: Array<{ code: number; message: string }>;
+    };
+    const error = data.errors[0];
+    toast.title = `${error.code} error`;
+    toast.message = error.message;
   }
 }
 

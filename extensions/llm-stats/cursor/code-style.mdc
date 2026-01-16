@@ -1,0 +1,98 @@
+# Cursor Rules for Raycast Extension Development
+
+## General Development Principles
+
+### Architecture and Data Flow
+- **Commands are entry points**: Each command file in `/src` (e.g., `open-repository.tsx`) is a Raycast entry point. It's responsible for initializing state hooks and rendering the main UI view.
+- **Views for UI**: UI is organized into `View` components (e.g., `BranchesView.tsx`) located in `/src/components/views/`. Commands render these views as the primary interface.
+- **Actions for Operations**: All user operations are implemented as `Action` components in `/src/components/actions/`. They are used within the `ActionPanel` of `View` components.
+- **Context for State Passing**: A shared context (containing state hooks and manager instances) is passed down from the command to all child `View` and `Action` components. This avoids prop drilling.
+- **Hooks for Logic**: All state management and data fetching logic is encapsulated in custom hooks within `/src/hooks/`.
+
+### Naming Conventions
+- **Commands**: `kebab-case` (e.g., `open-repository.tsx`)
+- **Components**: `PascalCase` (e.g., `FileActions.tsx`, `BranchesView.tsx`)
+- **Utilities**: `kebab-case` (e.g., `data-manager.ts`)
+- **Hooks**: `camelCase` with a `use` prefix (e.g., `useRepository.ts`)
+- **Types**: `PascalCase` (e.g., `Repository`, `Branch`)
+- **Constants**: `UPPER_SNAKE_CASE`
+
+## Raycast API Best Practices
+
+### State Management and Data Fetching
+- **Use `useCachedPromise` for Data**: All hooks that fetch data (e.g., `useBranches`, `useStatus`) must use `useCachedPromise` from `@raycast/utils`. The repository path must be part of the dependency array to ensure a separate cache for each repository.
+- **Revalidate Data After Mutations**: After any operation that changes repository state, call the `.revalidate()` function on the relevant data hooks (`branches.revalidate()`, `status.revalidate()`) to refresh the UI.
+- **Use `useCachedState` for UI State**: For simple, persistent UI state (like filters or dropdown selections), use `useCachedState`.
+
+### Error Handling and Toast Notifications
+- **Manager Classes Handle Errors**: Manager classes are responsible for catching errors and displaying failure toasts.
+- **Avoid Double Toasts**: `Action` components that call manager classes should not have their own `catch` blocks for showing error toasts, as this would result in duplicate notifications. A `try...catch` block can be used for cleanup or navigation on failure, but should not show a toast for errors already handled by the manager.
+- **Use Streaming Toasts for Long Operations**: For long-running commands, manager classes' `outputHandler` provides real-time feedback using an animated toast that updates with `stdout`.
+
+### Icons and UI
+- **Use Both Built-in and Custom Icons**: Use built-in icons from `@raycast/api`'s `Icon` where appropriate. For domain-specific concepts, use custom SVG icons from the `/assets` directory.
+- **Create Semantic Icon Components**: For icons that change based on state (e.g., file status, remote provider), create a dedicated component in `/src/components/icons/` (e.g., `StatusIcons.tsx`) that returns the correct icon.
+
+### Confirming Destructive Operations
+- **Use `confirmAlert()` for All Destructive Operations**: Any action that results in data loss or is hard to reverse (e.g., deleting a branch, discarding changes) must be wrapped in `confirmAlert()`.
+- **Use `Alert.ActionStyle.Destructive`**: The primary confirmation button for a destructive action must use the `Destructive` style.
+
+### Preferences and Settings
+- **Use `getPreferenceValues()` Directly**: Access user preferences directly via `getPreferenceValues()` from `@raycast/api`. Do not create wrapper utilities or config files.
+
+## TypeScript and Typing
+
+### JSDoc Comments
+- **Document All Public Types**: All exported interfaces, types, and complex functions must have clear JSDoc comments explaining their purpose, properties, and parameters. This is crucial for maintainability.
+
+### Error Handling
+- **Safely Access Error Messages**: Always check `error instanceof Error` before accessing `error.message` to avoid runtime errors. Provide a fallback for unknown error types.
+
+### Property Access
+```ts
+// Bad example: extracts intermediate properties, making the code less clear
+const primaryProvider = modelInfo?.providers?.[0];
+const inputPrice = primaryProvider?.pricing?.input_per_million;
+text={inputPrice} // Not recommended
+
+// Good example: uses full inline property access, preferred for clarity and consistency
+text={modelInfo?.providers?.[0]?.pricing?.input_per_million} // Recommended
+```
+/*
+Explanation:
+- Bad: Extracting intermediate variables (`primaryProvider`, `inputPrice`) from nested structures makes the data flow less explicit, can lead to code duplication, and hinders maintainability.
+- Good: Inline property access keeps the code concise, explicit, and consistent, even if it means duplicating the access path.
+*/
+
+### Inline Computations
+
+```ts
+// Bad example: extracting even simple single-line computations or ternaries to variables, which reduces code clarity and increases duplication risk
+const modelName = cachedModel?.name || model.model_name;
+title={modelName} // Not recommended
+
+const markdown = markdownParts.length > 0 ? markdownParts.join("\n\n") : "";
+markdown={markdown} // Not recommended
+
+// Good example: keep all single-line logic (ternary, mapping, arithmetic) inline at use site for clarity and consistent style
+title={cachedModel?.name || model.model_name} // Recommended
+markdown={markdownParts.length > 0 ? markdownParts.join("\n\n") : ""} // Recommended
+```
+**Explanation:**
+- **Bad**: Extracting simple one-liners (ternary, mapping, arithmetic) to variables makes the code less transparent, increases cognitive load, and scatters state and logic.
+- **Good**: Always write simple computations inline at the usage site, even if they are duplicated elsewhere. This matches the codebase style and maximizes directness/readability.
+
+**Exception:**
+If the logic spans multiple lines, involves branching/complex conditional, or inlining would seriously harm readability, then extract it to a variable as an exception.
+
+## Performance
+- **Cache Results**: Rely on `useCachedPromise` to cache the results of expensive operations.
+
+## What NOT to Do
+- ❌ Do not use emojis instead of built-in or custom SVG icons.
+- ❌ Do not create separate storage managers for frecency data; use `useCachedPromise` or `useCachedState`.
+- ❌ Do not create config files for preferences (use the API).
+- ❌ Do not create `NavigationActions` (they are available in the Raycast API).
+- ❌ Do not use non-English localization in the code; use only English with commonly accepted terminology.
+- ❌ Do not use the following shortcut combinations in Actions: `cmd+enter`, `cmd+k`, `cmd+p`.
+- ❌ Do not assign a shortcut to the first Action in an ActionPanel.

@@ -1,5 +1,14 @@
 # Gitmoji Changelog
 
+## [Maintenance] - 2025-11-28
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
+## [Upgrade gitmoji] - 2025-05-19
+
+- Add frecency sorting
+
 ## [Upgrade gitmoji] - 2023-08-19
 
 - Fix raycast reserved modifier keys

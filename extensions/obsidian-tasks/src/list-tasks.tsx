@@ -5,7 +5,6 @@ import { EditTaskForm } from "./components/EditTaskForm";
 import { TaskItem } from "./components/TaskItem";
 import { useTasks } from "./hooks/useTasks";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
 
 export default function Command() {
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);

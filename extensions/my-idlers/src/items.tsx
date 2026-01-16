@@ -75,32 +75,91 @@ export default function Items(props: LaunchProps<{ arguments: Arguments.Items }>
         <ItemsSection title="Labels" icon={icon} items={labels.map((label) => ({ ...label, name: label.label }))} />
       )}
       {item === "domains" && (
-        <List.Section title="Domains" subtitle={domains.length.toString()}>
-          {domains.map((domain) => (
-            <DomainItem key={domain.id} domain={domain} />
-          ))}
-        </List.Section>
+        <>
+          <List.Section title="Active Domains" subtitle={domains.filter((domain) => domain.active).length.toString()}>
+            {domains
+              .filter((domain) => domain.active)
+              .map((domain) => (
+                <DomainItem key={domain.id} domain={domain} />
+              ))}
+          </List.Section>
+          <List.Section
+            title="Inactive Domains"
+            subtitle={domains.filter((domain) => !domain.active).length.toString()}
+          >
+            {domains
+              .filter((domain) => !domain.active)
+              .map((domain) => (
+                <DomainItem key={domain.id} domain={domain} />
+              ))}
+          </List.Section>
+        </>
       )}
       {item === "servers" && (
-        <List.Section title="Servers" subtitle={servers.length.toString()}>
-          {servers.map((server) => (
-            <ServerItem key={server.id} server={server} mutate={mutate} />
-          ))}
-        </List.Section>
+        <>
+          <List.Section title="Active Servers" subtitle={servers.filter((server) => server.active).length.toString()}>
+            {servers
+              .filter((server) => server.active)
+              .map((server) => (
+                <ServerItem key={server.id} server={server} mutate={mutate} />
+              ))}
+          </List.Section>
+          <List.Section
+            title="Inactive Servers"
+            subtitle={servers.filter((server) => !server.active).length.toString()}
+          >
+            {servers
+              .filter((server) => !server.active)
+              .map((server) => (
+                <ServerItem key={server.id} server={server} mutate={mutate} />
+              ))}
+          </List.Section>
+        </>
       )}
       {item === "reseller" && (
-        <List.Section title="Resellers" subtitle={resellers.length.toString()}>
-          {resellers.map((reseller) => (
-            <HostingItem key={reseller.id} host={reseller} />
-          ))}
-        </List.Section>
+        <>
+          <List.Section
+            title="Active Resellers"
+            subtitle={resellers.filter((reseller) => reseller.active).length.toString()}
+          >
+            {resellers
+              .filter((reseller) => reseller.active)
+              .map((reseller) => (
+                <HostingItem key={reseller.id} host={reseller} />
+              ))}
+          </List.Section>
+          <List.Section
+            title="Inactive Resellers"
+            subtitle={resellers.filter((reseller) => !reseller.active).length.toString()}
+          >
+            {resellers
+              .filter((reseller) => !reseller.active)
+              .map((reseller) => (
+                <HostingItem key={reseller.id} host={reseller} />
+              ))}
+          </List.Section>
+        </>
       )}
       {item === "shared" && (
-        <List.Section title="Shared" subtitle={shared.length.toString()}>
-          {shared.map((item) => (
-            <HostingItem key={item.id} host={item} />
-          ))}
-        </List.Section>
+        <>
+          <List.Section title="Active Shared" subtitle={shared.filter((item) => item.active).length.toString()}>
+            {shared
+              .filter((sharedItem) => sharedItem.active)
+              .map((sharedItem) => (
+                <HostingItem key={sharedItem.id} host={sharedItem} />
+              ))}
+          </List.Section>
+          <List.Section
+            title="Inactive Shared"
+            subtitle={shared.filter((sharedItem) => !sharedItem.active).length.toString()}
+          >
+            {shared
+              .filter((sharedItem) => !sharedItem.active)
+              .map((sharedItem) => (
+                <HostingItem key={sharedItem.id} host={sharedItem} />
+              ))}
+          </List.Section>
+        </>
       )}
     </List>
   );

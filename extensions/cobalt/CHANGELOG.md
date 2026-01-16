@@ -1,5 +1,10 @@
 # Cobalt Changelog
 
+## [Download History command and improvements] - 2025-06-27
+
+- Added `Download History` command (Thanks @ripgrim!)
+- Minor under-the-hood improvements
+
 ## [General improvements, API update] - 2024-11-20
 
 - Updated dependencies

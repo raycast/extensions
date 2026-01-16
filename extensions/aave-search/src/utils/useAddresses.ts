@@ -1,6 +1,6 @@
 import { useFetch, useLocalStorage } from "@raycast/utils";
 import { DATA_CSV_URL } from "../config/constants";
-import { ChainList } from "@bgd-labs/rpc-env";
+import { ChainList } from "@bgd-labs/toolbox";
 
 export type ListItem = {
   path: string[];

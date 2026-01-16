@@ -1,9 +1,14 @@
 import { Color } from "@raycast/api";
-import { Customer, InvoiceStatus, Money } from "./types";
+import { Customer, InvoiceItem, InvoiceStatus, Money } from "./types";
 
+// we use a separate function because in the case of discounts, the value returned from the api is adjusted to account for it
+export function calculateInvoiceItemAmount(item: InvoiceItem) {
+  return Number(+item.unitPrice * +item.quantity).toFixed(item.subtotal.currency.exponent);
+}
 export function getInvoiceStatusColor(status: InvoiceStatus) {
   switch (status) {
     case "PAID":
+    case "OVERPAID":
       return Color.Green;
     case "OVERDUE":
       return Color.Red;
@@ -12,7 +17,7 @@ export function getInvoiceStatusColor(status: InvoiceStatus) {
     case "SENT":
       return Color.Blue;
     case "PARTIAL":
-      return Color.Magenta;
+      return Color.Yellow;
     case "SAVED":
     case "VIEWED":
       return Color.Purple;

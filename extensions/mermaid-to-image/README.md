@@ -25,7 +25,11 @@ npm install -g @mermaid-js/mermaid-cli
 
 ## Usage
 
-1. **Copy Mermaid Code**: Copy any valid Mermaid diagram code to your clipboard
+1. **Prepare Mermaid Code**: 
+   - **Option 1**: Select text containing Mermaid diagram code in any application
+   - **Option 2**: Copy Mermaid diagram code to your clipboard
+   
+   Example:
    ```
    graph TD
        A[Start] --> B{Is it working?}
@@ -36,7 +40,7 @@ npm install -g @mermaid-js/mermaid-cli
 
 2. **Run the Extension**: Open Raycast and run "Mermaid to Image"
 
-3. **View and Share**: The extension will automatically generate an image from your clipboard content
+3. **View and Share**: The extension will automatically generate an image from your selected text or clipboard content (selected text takes priority)
 
 4. **Available Actions**:
    - **Copy Image** (⌘⇧C): Copy the generated image to your clipboard

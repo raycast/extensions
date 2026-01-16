@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hammerspoon",
+  "title": "Hammerspoon",
+  "description": "Control Hammerspoon from Raycast",
+  "version": "1.1.0",
+  "icon": "icon-prod.png",
+  "author": "bjrmatos",
+  "contributors": [
+    "that70schris"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.14"
+  },
+  "commands": [
+    {
+      "name": "reload-configuration-file",
+      "title": "Reload Configuration File",
+      "description": "Reloads the Hammerspoon configuration file",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openConsole",
+          "label": "Open Console",
+          "description": "Open the Hammerspoon Console after reloading the configuration file",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-console",
+      "title": "Open Console",
+      "description": "Opens the Hammerspoon Console window and focuses it",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-preferences",
+      "title": "Open Preferences",
+      "description": "Displays the Hammerspoon Preferences panel and focuses it",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-documentation",
+      "title": "Open Documentation",
+      "description": "Displays the Hammerspoon documentation panel and focuses it",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart",
+      "title": "Restart",
+      "description": "Quits and restarts Hammerspoon",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-version",
+      "title": "Show Version",
+      "description": "Shows the version of Hammerspoon",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-console",
+      "title": "Clear Console",
+      "description": "Clears the Hammerspoon Console",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.94.0",
+    "@raycast/utils": "1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "9.22.0",
+    "ora": "8.1.1",
+    "prettier": "3.5.3",
+    "typescript": "5.8.2",
+    "zx": "8.2.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "dev-mode": "zx publish.mjs dev",
+    "publish": "zx publish.mjs"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,5 +1,9 @@
 # Wikipedia Changelog
 
+## [Language improvements] - 2025-05-30
+- Fix open article in another language
+- Add the ability to delete recent articles
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add languages] - 2025-01-02

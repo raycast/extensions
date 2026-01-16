@@ -172,7 +172,7 @@ export function ResolutionForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Resolution" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save and Resize" onSubmit={handleSubmit} />
         </ActionPanel>
       }
       isLoading={isLoading}

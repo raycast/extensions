@@ -16,6 +16,7 @@ import { Cache } from "~/utils/cache";
 import { captureException } from "~/utils/development";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
+import { platform } from "~/utils/platform";
 
 export type Session = {
   active: boolean;
@@ -63,11 +64,11 @@ export function SessionProvider(props: SessionProviderProps) {
         const lastActivityTime = new Date(lastActivityTimeString);
 
         const vaultTimeoutMs = +getPreferenceValues<Preferences>().repromptIgnoreDuration;
-        if (vaultTimeoutMs === VAULT_TIMEOUT.SYSTEM_LOCK) {
+        if (platform === "macos" && vaultTimeoutMs === VAULT_TIMEOUT.SYSTEM_LOCK) {
           if (await checkSystemLockedSinceLastAccess(lastActivityTime)) {
             throw new LockVaultError(VAULT_LOCK_MESSAGES.SYSTEM_LOCK);
           }
-        } else if (vaultTimeoutMs === VAULT_TIMEOUT.SYSTEM_SLEEP) {
+        } else if (platform === "macos" && vaultTimeoutMs === VAULT_TIMEOUT.SYSTEM_SLEEP) {
           if (await checkSystemSleptSinceLastAccess(lastActivityTime)) {
             throw new LockVaultError(VAULT_LOCK_MESSAGES.SYSTEM_SLEEP);
           }

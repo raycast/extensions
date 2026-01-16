@@ -28,7 +28,7 @@ type StatusErrors = { [key: number]: ErrorText }
 export async function jiraFetchObject<Result>(
   path: string,
   params: QueryParams = {},
-  statusErrors?: StatusErrors
+  statusErrors?: StatusErrors,
 ): Promise<Result> {
   const cancelLatestFetchObjectRequest = () => {
     if (abortController) {
@@ -54,7 +54,7 @@ export async function jiraFetch(
   path: string,
   params: QueryParams = {},
   statusErrors?: StatusErrors,
-  requestInit?: RequestInit
+  requestInit?: RequestInit,
 ): Promise<Response> {
   const paramKeys = Object.keys(params)
   const query = paramKeys.map((key) => `${key}=${encodeURI(params[key])}`).join("&")

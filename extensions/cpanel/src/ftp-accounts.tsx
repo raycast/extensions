@@ -42,6 +42,7 @@ export default function FTPAccounts() {
             <ActionPanel>
               <Action.Push
                 icon={Icon.Plus}
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title="Create FTP Account"
                 target={<CreateFTPAccount onAccountCreated={revalidate} />}
               />

@@ -6,6 +6,7 @@ import { uniqBy } from "lodash";
 import { getGitHubClient } from "../api/githubClient";
 import { PullRequestFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
+import { getRepositoryFilter } from "../helpers/repository";
 
 enum SectionType {
   Open = "Open",
@@ -24,6 +25,9 @@ export function useMyPullRequests({
   includeRecentlyClosed,
   includeReviewRequests,
   includeReviewed,
+  includeDrafts,
+  filterMode,
+  repositoryList,
 }: {
   repository: string | null;
   sortQuery: string;
@@ -32,33 +36,48 @@ export function useMyPullRequests({
   includeRecentlyClosed: boolean;
   includeReviewRequests: boolean;
   includeReviewed: boolean;
+  includeDrafts: boolean;
+  filterMode: Preferences.MyPullRequests["repositoryFilterMode"];
+  repositoryList: string[];
 }) {
   const { github } = getGitHubClient();
 
   const { data, ...rest } = useCachedPromise(
-    async (repo, sortTxt, enableAssigned, enableMentioned, enableClosed, enableReviewRequests, enableReviewed) => {
+    async (
+      repo,
+      sortTxt,
+      enableAssigned,
+      enableMentioned,
+      enableClosed,
+      enableReviewRequests,
+      enableReviewed,
+      enableDrafts,
+      filterMode,
+      repositoryList,
+    ) => {
       const numberOfDays = 14;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
       const updatedFilter = `updated:>${twoWeeksAgo}`;
+      const draftFilter = enableDrafts ? "" : "draft:false";
 
-      const repositoryFilter = repo ? `repo:${repo}` : "";
+      const repositoryFilter = getRepositoryFilter(filterMode, repositoryList, repo);
 
       const { includeTeamReviewRequests } = getPreferenceValues<Preferences>();
       const reviewRequestedQuery = includeTeamReviewRequests ? "review-requested" : "user-review-requested";
 
       const results = await Promise.all(
         [
-          `is:pr author:@me archived:false is:open`,
+          `is:pr author:@me archived:false is:open ${draftFilter}`,
           ...(enableClosed ? [`is:pr author:@me archived:false is:closed ${updatedFilter}`] : []),
-          ...(enableAssigned ? [`is:pr assignee:@me archived:false is:open`] : []),
+          ...(enableAssigned ? [`is:pr assignee:@me archived:false is:open ${draftFilter}`] : []),
           ...(enableAssigned && enableClosed ? [`is:pr assignee:@me archived:false is:closed ${updatedFilter}`] : []),
-          ...(enableMentioned ? [`is:pr mentions:@me archived:false is:open`] : []),
+          ...(enableMentioned ? [`is:pr mentions:@me archived:false is:open ${draftFilter}`] : []),
           ...(enableMentioned && enableClosed ? [`is:pr mentions:@me archived:false is:closed ${updatedFilter}`] : []),
-          ...(enableReviewRequests ? [`is:pr ${reviewRequestedQuery}:@me archived:false is:open`] : []),
+          ...(enableReviewRequests ? [`is:pr ${reviewRequestedQuery}:@me archived:false is:open ${draftFilter}`] : []),
           ...(enableReviewRequests && enableClosed
             ? [`is:pr ${reviewRequestedQuery}:@me archived:false is:closed ${updatedFilter}`]
             : []),
-          ...(enableReviewed ? [`is:pr reviewed-by:@me archived:false is:open`] : []),
+          ...(enableReviewed ? [`is:pr reviewed-by:@me archived:false is:open ${draftFilter}`] : []),
           ...(enableReviewed && enableClosed
             ? [`is:pr reviewed-by:@me archived:false is:closed ${updatedFilter}`]
             : []),
@@ -80,6 +99,9 @@ export function useMyPullRequests({
       includeRecentlyClosed,
       includeReviewRequests,
       includeReviewed,
+      includeDrafts,
+      filterMode,
+      repositoryList,
     ],
   );
 

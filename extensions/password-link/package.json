@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "password-link",
+  "title": "Password.link",
+  "description": "Create and manage encrypted one-time secrets with client-side encryption using password.link",
+  "icon": "icon.png",
+  "author": "taylor_drayson",
+  "license": "MIT",
+  "categories": [
+    "Security"
+  ],
+  "commands": [
+    {
+      "name": "new-secret",
+      "title": "New Secret",
+      "subtitle": "password.link",
+      "description": "Create encrypted secrets with client-side encryption",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "message",
+          "placeholder": "Message",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "secret",
+          "placeholder": "Content",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list-secrets",
+      "title": "List Secrets",
+      "subtitle": "password.link",
+      "description": "View and manage your encrypted secrets",
+      "mode": "view"
+    },
+    {
+      "name": "new-secret-request",
+      "title": "New Secret Request",
+      "subtitle": "password.link",
+      "description": "Create request links for collecting secrets from others",
+      "mode": "view"
+    },
+    {
+      "name": "list-secret-requests",
+      "title": "List Secret Requests",
+      "subtitle": "password.link",
+      "description": "View and manage your secret request links",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "publicKey",
+      "type": "password",
+      "required": true,
+      "title": "Public API Key",
+      "description": "Your password.link public API key (found in Account Settings > API Keys)"
+    },
+    {
+      "name": "privateKey",
+      "type": "password",
+      "required": true,
+      "title": "Private API Key",
+      "description": "Your password.link private API key (found in Account Settings > API Keys)"
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Base URL",
+      "description": "Your password.link domain (e.g., https://password.link or your custom domain)",
+      "default": "https://password.link"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0",
+    "sjcl": "^1.0.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/sjcl": "^1.0.34",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

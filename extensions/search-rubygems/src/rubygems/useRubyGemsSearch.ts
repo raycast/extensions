@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import type { GemsSearchResponse } from "./types";
 
@@ -13,7 +13,10 @@ export const useRubyGemsSearch = async (searchTerm = ""): Promise<GemsSearchResp
     return jsonResponse as GemsSearchResponse;
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Searching rubygems.org failed!");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Searching rubygems.org failed!",
+    });
     return Promise.resolve([]);
   }
 };

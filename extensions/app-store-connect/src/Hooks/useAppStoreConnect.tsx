@@ -22,7 +22,7 @@ export class ATCError extends Error {
 interface Pagination {
   pageSize: number;
   hasMore: boolean;
-  onLoadMore: (page: number) => void;
+  onLoadMore: () => void;
 }
 
 interface AppStoreConnectApiResponse {
@@ -117,7 +117,7 @@ export function useAppStoreConnectApi<T>(
     if (loadAll) {
       if (pagination) {
         if (pagination.hasMore) {
-          pagination.onLoadMore(-1);
+          pagination.onLoadMore();
         }
       }
     }

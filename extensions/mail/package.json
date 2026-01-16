@@ -16,7 +16,8 @@
     "ridemountainpig",
     "ViGeng",
     "dante",
-    "5z99tsb75z"
+    "5z99tsb75z",
+    "xilopaint"
   ],
   "categories": [
     "Applications",
@@ -149,6 +150,12 @@
       "title": "Mark All as Read",
       "description": "Mark all your emails as read.",
       "mode": "no-view"
+    },
+    {
+      "name": "copy-foreground-mail-deeplink",
+      "title": "Copy Mail Deeplink",
+      "description": "Copy the deeplink of the selected email in Apple Mail.",
+      "mode": "no-view"
     }
   ],
   "tools": [
@@ -168,9 +175,19 @@
       "description": "List addresses in Apple Mail."
     },
     {
+      "name": "list-account-emails",
+      "title": "List Account Emails",
+      "description": "List all available email addresses from the user's mail accounts."
+    },
+    {
       "name": "send-email",
       "title": "Send Email",
       "description": "Send an email with Apple Mail."
+    },
+    {
+      "name": "copy-email-link",
+      "title": "Copy Email Link",
+      "description": "Copy the local link (URI) of the selected Apple Mail email so you can jump directly to that message. This makes it convenient to locate a specific email for context."
     }
   ],
   "dependencies": {

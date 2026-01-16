@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Grid } from "@raycast/api";
+import { Action, ActionPanel, Grid, List } from "@raycast/api";
 import { useState } from "react";
 
 import { PageItem } from "./components/page-item";

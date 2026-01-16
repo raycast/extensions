@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Color,
-  Form,
   Icon,
   List,
   closeMainWindow,
@@ -10,15 +9,16 @@ import {
   open,
   Keyboard,
   LaunchProps,
+  getPreferenceValues,
 } from "@raycast/api";
+import React, { useRef } from "react";
 import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log, logDiagnostics } from "./utils";
 import { runAppleScript } from "run-applescript";
-import { SpotlightSearchResult } from "./types";
+import { SpotlightSearchResult, SpotlightSearchPreferences } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
-import { useCommandBase } from "./hooks/useCommandBase";
 import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
-import path from "node:path";
+import path from "path";
 import { userInfo } from "os";
 import { showFailureToast } from "@raycast/utils";
 
@@ -29,7 +29,7 @@ interface IconDictionary {
 
 const IconDictionaried: IconDictionary = Icon as IconDictionary;
 
-export default function Command(props: LaunchProps) {
+function Command(props: LaunchProps) {
   const {
     searchText,
     setSearchText,
@@ -53,13 +53,19 @@ export default function Command(props: LaunchProps) {
     hasSearched,
   } = useFolderSearch();
 
-  // Use the shared command base hook
-  useCommandBase({
-    commandName: "search",
-    launchProps: props,
-    searchText,
-    setSearchText,
-  });
+  // Use a ref to track if we've logged
+  const hasLoggedRef = useRef(false);
+
+  // Simple launch logging - only once per mount
+  React.useEffect(() => {
+    if (!hasLoggedRef.current) {
+      log("debug", "search", "Command launched", {
+        searchText,
+        timestamp: new Date().toISOString(),
+      });
+      hasLoggedRef.current = true;
+    }
+  }, []); // Empty dependency array ensures this only runs once
 
   // Handle returning from directory view
   const handleReturnFromDirectory = () => {
@@ -84,7 +90,7 @@ export default function Command(props: LaunchProps) {
   };
 
   // Render actions for the folder list items
-  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number) => {
+  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number, isPinnedSection = false) => {
     const enclosingFolder = path.dirname(result.path);
     return (
       <ActionPanel title={folderName(result)}>
@@ -102,19 +108,22 @@ export default function Command(props: LaunchProps) {
             try {
               const moveResult = await moveFinderItems(result.path);
               if (moveResult.success) {
-                open(result.path);
+                // Only open the folder if the preference is enabled
+                const { openFolderAfterMove } = getPreferenceValues<SpotlightSearchPreferences>();
+                if (openFolderAfterMove) {
+                  open(result.path);
+                }
                 closeMainWindow();
                 popToRoot({ clearSearchBar: true });
               }
             } catch (error) {
               // Show error to user with showFailureToast
               showFailureToast(error, { title: "Could not move Finder selection" });
-              console.error("Error in Move Finder Selection action:", error);
             }
           }}
         />
         <Action.OpenWith
-          title="Open With…"
+          title="Open with…"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           path={result.path}
           onOpen={() => popToRoot({ clearSearchBar: true })}
@@ -129,13 +138,13 @@ export default function Command(props: LaunchProps) {
           title={!resultIsPinned(result) ? "Pin" : "Unpin"}
           icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-          onAction={() => toggleResultPinnedStatus(result, resultIndex)}
+          onAction={() => toggleResultPinnedStatus(result)}
         />
-        {resultIsPinned(result) && (
+        {resultIsPinned(result) && isPinnedSection && (
           <>
             {resultIndex > 0 && (
               <Action
-                title="Move Pin Up"
+                title="Move Pin up"
                 icon={Icon.ArrowUpCircle}
                 shortcut={Keyboard.Shortcut.Common.MoveUp}
                 onAction={() => movePinUp(result, resultIndex)}
@@ -209,38 +218,53 @@ export default function Command(props: LaunchProps) {
                 shortcut: Keyboard.Shortcut;
                 appleScript: (result: SpotlightSearchResult) => string;
               },
-              pluginIndex: number
+              pluginIndex: number,
             ) => (
               <Action
                 key={pluginIndex}
                 title={plugin.title}
-                icon={IconDictionaried[plugin.icon]}
+                icon={IconDictionaried[plugin.icon] || plugin.icon}
                 shortcut={{ ...plugin.shortcut }}
                 onAction={() => {
-                  popToRoot({ clearSearchBar: true });
-                  closeMainWindow({ clearRootSearch: true });
-                  runAppleScript(plugin.appleScript(result));
+                  // Debug logging to see which plugin is failing
+                  log("debug", "search", "Plugin action triggered", {
+                    title: plugin.title,
+                    appleScriptType: typeof plugin.appleScript,
+                    isFunction: typeof plugin.appleScript === "function",
+                  });
+
+                  try {
+                    popToRoot({ clearSearchBar: true });
+                    closeMainWindow({ clearRootSearch: true });
+                    runAppleScript(plugin.appleScript(result));
+                  } catch (error) {
+                    // Show user-friendly error message
+                    showFailureToast(error, { title: `Plugin "${plugin.title}" failed` });
+                    // Keep debug logging for developers
+                    log("error", "search", "Plugin execution failed", {
+                      title: plugin.title,
+                      error: error instanceof Error ? error.message : String(error),
+                      appleScriptType: typeof plugin.appleScript,
+                    });
+                  }
                 }}
               />
-            )
+            ),
           )}
         </ActionPanel.Section>
       </ActionPanel>
     );
   };
 
-  return !(hasCheckedPlugins && hasCheckedPreferences) ? (
-    // prevent flicker due to details pref being async
-    <Form />
-  ) : (
+  return (
     <List
-      isLoading={isQuerying}
+      isLoading={!(hasCheckedPlugins && hasCheckedPreferences)}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search folders"
       isShowingDetail={isShowingDetail}
       throttle={true}
       searchText={searchText}
-      selectedItemId={selectedItemId}
+      selectedItemId={selectedItemId || undefined}
       searchBarAccessory={
         hasCheckedPlugins && hasCheckedPreferences ? (
           <List.Dropdown tooltip="Scope" onChange={setSearchScope} value={searchScope}>
@@ -251,16 +275,20 @@ export default function Command(props: LaunchProps) {
         ) : null
       }
     >
-      {!searchText && props.launchType === "userInitiated" && pinnedResults.length > 0 ? (
+      {!(hasCheckedPlugins && hasCheckedPreferences) ? (
+        // Show loading state while checking preferences and plugins
+        <List.EmptyView title="Loading..." description="Setting up folder search" icon={Icon.MagnifyingGlass} />
+      ) : !searchText && !props.fallbackText && pinnedResults.length > 0 ? (
         <FolderListSection
           title="Pinned"
           results={pinnedResults}
           isShowingDetail={isShowingDetail}
           resultIsPinned={resultIsPinned}
           renderActions={renderFolderActions}
+          isPinnedSection={true}
         />
-      ) : !searchText && props.launchType === "userInitiated" ? (
-        // No pins and no search text
+      ) : !searchText && !props.fallbackText ? (
+        // No pins and no search text (and not fallback mode)
         <List.EmptyView
           title="No Pinned Folders"
           description="Search to find folders or pin your favorites"
@@ -268,7 +296,19 @@ export default function Command(props: LaunchProps) {
         />
       ) : (
         <>
-          {isQuerying || (searchText && !hasSearched) ? (
+          {isQuerying ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for matching folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : searchText && !hasSearched ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for matching folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : props.fallbackText && !hasSearched ? (
             <List.EmptyView
               title="Searching..."
               description="Looking for matching folders"
@@ -276,20 +316,21 @@ export default function Command(props: LaunchProps) {
             />
           ) : hasSearched && results.length === 0 ? (
             <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
-          ) : !searchText ? (
-            // Only show this when there's no search text at all
-            <List.EmptyView
-              title="Enter a search term"
-              description="Type to search for folders"
-              icon={Icon.MagnifyingGlass}
-            />
-          ) : (
+          ) : results.length > 0 ? (
             <FolderListSection
               title="Results"
               results={results}
               isShowingDetail={isShowingDetail}
               resultIsPinned={resultIsPinned}
               renderActions={renderFolderActions}
+              isPinnedSection={false}
+            />
+          ) : (
+            // Only show this when there's truly no search text and no fallback
+            <List.EmptyView
+              title="Enter a search term"
+              description="Type to search for folders"
+              icon={Icon.MagnifyingGlass}
             />
           )}
         </>
@@ -297,3 +338,5 @@ export default function Command(props: LaunchProps) {
     </List>
   );
 }
+
+export default Command;

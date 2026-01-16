@@ -2,7 +2,15 @@ import { getApplications, showToast, Toast } from "@raycast/api";
 
 async function isAntinoteInstalled() {
   const applications = await getApplications();
-  return applications.some((app) => app.bundleId === "com.chabomakers.Antinote");
+  if (applications.some((app) => app.bundleId === "com.chabomakers.Antinote")) {
+    return { installed: true, version: "standalone" };
+  }
+
+  if (applications.some((app) => app.bundleId === "com.chabomakers.Antinote-setapp")) {
+    return { installed: true, version: "setapp" };
+  }
+
+  return { installed: false, version: null };
 }
 
 export async function checkAntinoteInstalled() {

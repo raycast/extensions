@@ -175,6 +175,17 @@
       }
     },
     {
+      "id": "auditmanager",
+      "title": "AWS Audit Manager",
+      "subtitle": "Continually audit your AWS usage to simplify risk and compliance assessment",
+      "match": "auditmanager AWS Audit Manager",
+      "arg": "/auditmanager/home",
+      "autocomplete": "AWS Audit Manager",
+      "icon": {
+        "path": "./aws-icons/auditmanager.png"
+      }
+    },
+    {
       "id": "backup",
       "title": "AWS Backup",
       "subtitle": "AWS Backup centrally manages and automates backups across AWS services",
@@ -1961,13 +1972,13 @@
     },
     {
       "id": "bedrock",
-      "title": "AWS Audit Manager",
-      "subtitle": "Continuously assess controls for risk and compliance",
-      "match": "bedrock AWS Audit Manager",
-      "arg": "/auditmanager/home",
-      "autocomplete": "AWS Audit Manager",
+      "title": "Amazon Bedrock",
+      "subtitle": "Build and scale generative AI applications with foundation models",
+      "match": "bedrock Amazon Bedrock",
+      "arg": "/bedrock/home",
+      "autocomplete": "Amazon Bedrock",
       "icon": {
-        "path": "./aws-icons/auditmanager.png"
+        "path": "./aws-icons/bedrock.png"
       }
     },
     {

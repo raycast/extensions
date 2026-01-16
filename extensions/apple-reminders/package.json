@@ -12,7 +12,10 @@
     "phil_s",
     "michalzuch",
     "ridemountainpig",
-    "maxnyby"
+    "maxnyby",
+    "vmrjnvc",
+    "ramith123",
+    "sch01ar"
   ],
   "owner": "raycast",
   "access": "public",
@@ -162,6 +165,15 @@
           "default": false,
           "required": false,
           "title": "Sort"
+        },
+        {
+          "name": "displayListTitleForMenuBarReminders",
+          "type": "checkbox",
+          "label": "Display the name of the list",
+          "description": "When enabled, the name of the list from which the reminder originates will be displayed in the menu bar next to the reminder’s name.",
+          "default": false,
+          "required": false,
+          "title": "Extra"
         }
       ],
       "interval": "10m"
@@ -257,7 +269,7 @@
     }
   ],
   "ai": {
-    "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
+    "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Always include a calendar date in dueDate; time-only values (e.g., \"10:00:00\") are invalid. If the user mentions a day or recurrence (e.g., \"every Sunday at 10\"), pick the next occurrence and provide an ISO date/time.\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
     "evals": [
       {
         "input": "@apple-reminders Walk the dog tomorrow at 8am",
@@ -559,23 +571,22 @@
   },
   "dependencies": {
     "@date-fns/utc": "^1.2.0",
-    "@raycast/api": "^1.91.1",
+    "@raycast/api": "^1.96.1",
     "@raycast/utils": "^1.18.1",
-    "chrono-node": "^2.7.5",
+    "chrono-node": "^2.8.2",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/lodash": "^4.17.0",
-    "@types/node": "^20.12.4",
-    "@types/react": "^18.2.74",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.2.5",
-    "react": "^18.2.0",
-    "typescript": "^5.4.3"
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

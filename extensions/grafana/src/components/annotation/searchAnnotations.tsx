@@ -1,11 +1,29 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// TODO: remove any types and be fully-type safe
 import { ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { DeleteAnnotationAction, PatchAnnotationAction } from "./annotationActions";
 import { useState, useEffect, useRef } from "react";
-import { AbortError } from "node-fetch";
+import { z } from "zod";
 
 import { annotationGetQuery } from "./queries";
+
+// Zod schema for the raw annotation response from Grafana API
+// Retrieved from https://grafana.com/docs/grafana/latest/developers/http_api/annotations/#find-annotations
+const AnnotationResponseSchema = z.object({
+  id: z.number(),
+  alertId: z.number(),
+  dashboardId: z.number(),
+  dashboardUID: z.string().optional(),
+  panelId: z.number(),
+  userId: z.number(),
+  userName: z.string().optional(),
+  prevState: z.string().optional(),
+  newState: z.string().optional(),
+  time: z.number(),
+  timeEnd: z.number().optional(),
+  text: z.string().optional(),
+  metric: z.string().optional(),
+  tags: z.array(z.string()).nullable().optional(),
+  data: z.record(z.string(), z.unknown()).optional(),
+});
 
 interface SearchState {
   results: Annotation[];
@@ -13,48 +31,52 @@ interface SearchState {
 }
 
 interface Annotation {
-  id?: number;
-  alertId?: number;
-  alertName?: string;
-  dashboardId?: number;
-  panelId?: number;
-  userId?: number;
+  id: number;
+  alertId: number;
+  dashboardId: number;
+  dashboardUID?: string;
+  panelId: number;
+  userId: number;
+  userName?: string;
   prevState?: string;
   newState?: string;
-  created?: number;
-  updated?: number;
   time: number;
   timeEnd?: number;
-  text: string;
-  tags?: string[];
-  login?: string;
-  email?: string;
-  avatarUrl?: string;
-  data?: any;
+  text?: string;
+  metric?: string;
+  tags?: string[] | null;
+  data?: Record<string, unknown>;
+  uniqueKey?: string;
 }
 
-export function SearchAnnotations(): JSX.Element {
+export function SearchAnnotations() {
   const { state, search } = useSearch();
 
   return (
     <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+          <SearchListItem
+            key={
+              searchResult.uniqueKey ||
+              searchResult.id ||
+              `annotation-${searchResult.time}-${searchResult.text?.slice(0, 10)}`
+            }
+            searchResult={searchResult}
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: Annotation }): JSX.Element {
-  // console.log(searchResult)
+function SearchListItem({ searchResult }: { searchResult: Annotation }) {
   const humanReadableDate = new Date(searchResult.time).toLocaleString();
   return (
     <List.Item
-      title={searchResult.text || (searchResult.alertName ? searchResult.alertName : "")}
-      subtitle={searchResult.newState}
-      // subtitle={searchResult.tags.join(" - ")}
+      title={searchResult.text || searchResult.metric || "Annotation"}
+      subtitle={searchResult.newState || searchResult.userName || ""}
+      // subtitle={searchResult.tags?.join(" - ") || ""}
       // accessoryTitle={searchResult.isStarred ? "⭐" : ""}
       accessoryTitle={humanReadableDate}
       actions={
@@ -96,7 +118,7 @@ function useSearch() {
         isLoading: false,
       }));
     } catch (error) {
-      if (error instanceof AbortError) {
+      if (error instanceof DOMException && error.name === "AbortError") {
         return;
       }
 
@@ -123,20 +145,43 @@ async function performSearchOnAnnotations(searchText: string, signal: AbortSigna
     return Promise.reject(response.statusText);
   }
 
-  type Json = Record<string, unknown>;
+  const rawData = await response.json();
 
-  const annotations = (await response.json()) as Json[];
+  // Parse the response using Zod schema
+  const parseResult = z.array(AnnotationResponseSchema).safeParse(rawData);
+
+  if (!parseResult.success) {
+    console.error("Failed to parse annotation response:", parseResult.error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to parse annotation data from Grafana API",
+      message: JSON.stringify(parseResult.error),
+    });
+    return [];
+  }
+
+  const annotations = parseResult.data;
 
   return annotations
-    .filter((annotation) => annotation.text || annotation.alertName)
-    .map((annotation) => {
-      // console.log(annotation);
+    .filter((annotation) => annotation.text || annotation.metric)
+    .map((annotation, index) => {
       return {
-        id: annotation.id as number,
-        time: annotation.time as any,
-        text: annotation.text as string,
-        alertName: annotation.alertName as string,
-        newState: annotation.newState as string,
+        id: annotation.id,
+        alertId: annotation.alertId,
+        dashboardId: annotation.dashboardId,
+        dashboardUID: annotation.dashboardUID,
+        panelId: annotation.panelId,
+        userId: annotation.userId,
+        userName: annotation.userName,
+        prevState: annotation.prevState,
+        newState: annotation.newState,
+        time: annotation.time,
+        timeEnd: annotation.timeEnd,
+        text: annotation.text,
+        metric: annotation.metric,
+        tags: annotation.tags,
+        data: annotation.data,
+        uniqueKey: `${annotation.id}-${annotation.time}-${index}`, // Create unique key
       };
     });
 }

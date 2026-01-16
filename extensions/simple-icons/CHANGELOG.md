@@ -1,5 +1,62 @@
 # Brand Icons Changelog
 
+## [New Feature] - 2025-12-07
+
+- Add support for shuffling icons on start
+
+## [Enhancement] - 2025-12-04
+
+- Add Windows support
+- Use default AI model for searching icons
+- Add affiliate parameter to Raycast links
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-11-03
+
+- Fix typos
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-10-13
+
+- Fix useEffect dependencies
+- Bump all dependencies to the latest
+
+## [Improvements] - 2025-08-12
+
+- Add support for creating social badges through cross-extension
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2025-08-04
+
+- Handle error when reading a non-existent file in `makeCopyToDownload`
+- Fix `titleToSlug` logics for legacy Simple Icons versions
+- Bump all dependencies to the latest
+
+## [Bugfix & Enhancement] - 2025-07-29
+
+- Fix a bug which cannot update icon packs
+- Add a field `file` to cross-extension callback values
+- Add a new preference option for loading history versions
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-07-15
+
+- Use [pacote](https://npmjs.com/pacote) for downloading and extracting icons
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-06-20
+
+- We reached 3300+ icons!
+- Update extension icon to liquid glass style
+- Update extension screenshots with macOS Tahoe wallpaper
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-06-04
+
+- Use local vendor instead of simple-icons/sdk
+- Add compatibility with Simple Icons v15
+- Bump all dependencies to the latest
+
 ## [Fixes] - 2025-02-28
 
 - Fix a long prompt issue
@@ -130,4 +187,4 @@
 
 ## [Initial Version] - 2024-01-12
 
-- Over 2900 Free SVG icons for popular brands. See them all on one page at https://simpleicons.org. Contributions, corrections & requests can be made on GitHub.
+- Over 2900 SVG icons for popular brands. See them all on one page at https://simpleicons.org. Contributions, corrections & requests can be made on GitHub.

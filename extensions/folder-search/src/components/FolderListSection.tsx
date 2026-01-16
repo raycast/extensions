@@ -8,7 +8,8 @@ interface FolderListSectionProps {
   results: SpotlightSearchResult[];
   isShowingDetail: boolean;
   resultIsPinned: (result: SpotlightSearchResult) => boolean;
-  renderActions: (result: SpotlightSearchResult, resultIndex: number) => JSX.Element;
+  renderActions: (result: SpotlightSearchResult, resultIndex: number, isPinnedSection?: boolean) => JSX.Element;
+  isPinnedSection?: boolean;
 }
 
 export function FolderListSection({
@@ -17,6 +18,7 @@ export function FolderListSection({
   isShowingDetail,
   resultIsPinned,
   renderActions,
+  isPinnedSection = false,
 }: FolderListSectionProps) {
   return (
     <List.Section title={title}>
@@ -28,6 +30,7 @@ export function FolderListSection({
           subtitle={!isShowingDetail ? enclosingFolderName(result) : ""}
           icon={{ fileIcon: result.path }}
           accessories={resultIsPinned(result) ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []}
+          quickLook={{ path: result.path, name: folderName(result) }}
           detail={
             <List.Item.Detail
               metadata={
@@ -57,7 +60,7 @@ export function FolderListSection({
               }
             />
           }
-          actions={renderActions(result, resultIndex)}
+          actions={renderActions(result, resultIndex, isPinnedSection)}
         />
       ))}
     </List.Section>

@@ -10,6 +10,8 @@ export interface Resolution {
   title: string;
   /** Whether this is a custom resolution */
   isCustom?: boolean;
+  /** Whether this resolution is starred */
+  isStarred?: boolean;
 }
 
 /**

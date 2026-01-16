@@ -5,6 +5,7 @@ interface Team {
   logos: { href: string }[];
   links: { href: string }[];
   displayName: string;
+  id: string;
 }
 
 interface NHLTransaction {

@@ -1,14 +1,3 @@
-export interface Preferences {
-  filePath: string;
-  showDueDate: boolean;
-  maxMenubarDescriptionLength: string;
-  menubarTaskCount: boolean;
-  showIcon: boolean;
-  sortByPriority: boolean;
-  showCompletedDate: boolean;
-  refreshIntervalInMinutes: string;
-}
-
 export enum Priority {
   HIGHEST = "highest",
   HIGH = "high",

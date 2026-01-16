@@ -1,11 +1,11 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
-import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
 import { Spaces } from "./views/SpacesView";
 import { BookmarkItem } from "./components/BookmarkItem";
 import { BookmarkFilter } from "./components/BookmarkFilter";
-import { LoginView } from "./views/LoginView";
+import { LoginFormInView } from "./components/LoginFormInView";
 import { useMe } from "./hooks/use-me.hook";
 import { useMyBookmarks } from "./hooks/use-bookmarks.hook";
 import { usePrepareBookmarkSearch } from "./hooks/use-prepare-bookmark-search.hook";
@@ -18,10 +18,14 @@ import { cache } from "./utils/cache.util";
 import { useCachedState } from "@raycast/utils";
 import { CACHED_KEY_RANKING_ENTRIES } from "./utils/constants.util";
 import { RankingEntries } from "./types";
+import { trpc } from "./utils/trpc.util";
+import { SpaceAuthFormBody } from "./views/SpaceAuthForm";
 
 export function Body() {
   const me = useMe();
   const { enabledSpaceIds } = useEnabledSpaces();
+  const { data: authRequiredSpaceIds, refetch: refetchAuthRequiredSpaceIds } =
+    trpc.spaceAuth.listAuthRequiredSpaceIds.useQuery();
   const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
   const [rankingEntries, setRankingEntries] = useCachedState<RankingEntries>(CACHED_KEY_RANKING_ENTRIES, {});
 
@@ -30,10 +34,9 @@ export function Body() {
     cache.set("keyword", keyword);
   }, [keyword]);
 
-  const refetch = useCallback(() => {
-    refetchBookmarks();
-    me.refetch();
-  }, [refetchBookmarks, me.refetch]);
+  const refetch = useCallback(async () => {
+    await Promise.all([refetchBookmarks(), me.refetch(), refetchAuthRequiredSpaceIds()]);
+  }, [refetchBookmarks, me.refetch, refetchAuthRequiredSpaceIds]);
 
   const selectedTags = useMemo(() => {
     if (!me.data) return [];
@@ -64,8 +67,6 @@ export function Body() {
     rankingEntries,
   });
 
-  const { loggedOutStatus } = useLoggedOutStatus();
-
   const { hasSpaceFilter, hasCreatorFilter, hasTagFilter } = filteredData;
   const hasFilter = hasSpaceFilter || hasCreatorFilter || hasTagFilter;
   const filterText = useMemo(() => {
@@ -78,8 +79,21 @@ export function Body() {
     return hasFilter ? `Filtered by ${helpTexts.join(", ")} pattern` : "";
   }, [hasSpaceFilter, hasCreatorFilter, hasTagFilter, hasFilter]);
 
+  const unauthenticatedSpaceId = useMemo(() => {
+    if (!enabledSpaceIds || !authRequiredSpaceIds) {
+      return undefined;
+    }
+
+    return enabledSpaceIds.find((id) => authRequiredSpaceIds.includes(id));
+  }, [enabledSpaceIds, authRequiredSpaceIds]);
+
+  const { loggedOutStatus } = useLoggedOutStatus();
   if (loggedOutStatus) {
-    return <LoginView />;
+    return <LoginFormInView />;
+  }
+
+  if (unauthenticatedSpaceId) {
+    return <SpaceAuthFormBody spaceId={unauthenticatedSpaceId} refetch={refetch} />;
   }
 
   if (!data) {

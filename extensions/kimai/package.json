@@ -5,6 +5,9 @@
   "description": "Add new Kimai time log from Raycast",
   "icon": "kimai-icon.png",
   "author": "marinsokol",
+  "contributors": [
+    "codiini"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity",
@@ -105,5 +108,8 @@
     "lint": "ray lint",
     "pull": "npx @raycast/api@latest pull-contributions",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

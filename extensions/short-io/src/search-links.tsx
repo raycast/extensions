@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import React, { useMemo } from "react";
+import { useState } from "react";
 import { formatISODate, isEmpty } from "./utils/common-utils";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { ActionGoShortIo } from "./components/action-go-short-io";
@@ -9,15 +9,32 @@ import EditLink from "./edit-link";
 import { alertDialog } from "./components/alert-dialog";
 import { useShortLinks } from "./hooks/useShortLinks";
 import Style = Toast.Style;
+import { useDomains } from "./hooks/useDomains";
+import { getFavicon } from "@raycast/utils";
 
 export default function SearchLinks() {
-  const { data, isLoading, mutate } = useShortLinks();
-  const shortLinks = useMemo(() => {
-    return data || [];
-  }, [data]);
+  const [domainId, setDomainId] = useState("");
+  const { data: domains, isLoading: isLoadingDomains } = useDomains();
+  const { data: shortLinks, isLoading: isLoadingLinks, mutate } = useShortLinks(domainId);
 
   return (
-    <List isLoading={isLoading} isShowingDetail={shortLinks.length !== 0 && true} searchBarPlaceholder={"Search links"}>
+    <List
+      isLoading={isLoadingLinks || isLoadingDomains}
+      isShowingDetail={shortLinks.length !== 0}
+      searchBarPlaceholder={"Search links"}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Domain" onChange={setDomainId} storeValue>
+          {domains?.map((domain) => (
+            <List.Dropdown.Item
+              key={domain.id}
+              icon={getFavicon(`https://${domain.hostname}`)}
+              title={domain.hostname}
+              value={domain.id.toString()}
+            />
+          ))}
+        </List.Dropdown>
+      }
+    >
       <ListEmptyView
         title={"No Link"}
         icon={{ source: { light: "empty-link-icon.svg", dark: "empty-link-icon@dark.svg" } }}

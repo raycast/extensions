@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from '@raycast/api'
+import React, { useMemo, useCallback } from 'react'
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, useNavigation } from '@raycast/api'
 import { Project } from '../project'
 import StartDevelopment from './StartDevelopment'
 import { OpenInEditor, OpenInTerminal, OpenUrl } from './Open'
@@ -10,59 +11,117 @@ import { Copy } from './Copy'
 import Cache from './Cache'
 import { Directory } from './DirectoriesDropdown'
 import { PrimaryAction } from '../helpers'
-import React from 'react'
 import AddToFavorites from './AddToFavorites'
+import GitCommitsDetail from './GitCommitsDetail'
+import GitStatisticsDetail from './GitStatisticsDetail'
 
 type ProjectListItemProps = {
     project: Project
     directories: Directory[]
-    onFavoriteChange: (project: Project) => void
+    onFavoriteChange: () => void
 }
 
-export default function ProjectListItem({ project, directories, onFavoriteChange }: ProjectListItemProps) {
+const ProjectListItem = React.memo(({ project, directories, onFavoriteChange }: ProjectListItemProps) => {
     const preferences = getPreferenceValues()
+    const { push } = useNavigation()
 
-    const actionsMap: Record<PrimaryAction, JSX.Element> = {
-        'start-development': <StartDevelopment project={project} />,
-        'open-in-editor': <OpenInEditor project={project} />,
-        'open-in-terminal': <OpenInTerminal project={project} />,
-        'open-url': <OpenUrl project={project} />,
-        'open-git-remotes': <OpenGitRemotes project={project} />,
-    }
+    const primaryDirectory = useMemo(() => {
+        return directories.find((dir) => dir.name === project.primaryDirectory.name)
+    }, [directories, project.primaryDirectory.name])
 
-    const defaultOrder: PrimaryAction[] = ['open-in-editor', 'start-development', 'open-in-terminal', 'open-url', 'open-git-remotes']
-    const primaryAction = preferences.primaryAction as PrimaryAction
-    const actionOrder = [primaryAction, ...defaultOrder.filter((action) => action !== primaryAction)]
+    const actionsMap = useMemo<Record<PrimaryAction, React.JSX.Element>>(
+        () => ({
+            'start-development': (
+                <StartDevelopment
+                    project={project}
+                    key="start-development"
+                />
+            ),
+            'open-in-editor': (
+                <OpenInEditor
+                    project={project}
+                    key="open-in-editor"
+                />
+            ),
+            'open-in-terminal': (
+                <OpenInTerminal
+                    project={project}
+                    key="open-in-terminal"
+                />
+            ),
+            'open-url': (
+                <OpenUrl
+                    project={project}
+                    key="open-url"
+                />
+            ),
+            'open-git-remotes': (
+                <OpenGitRemotes
+                    project={project}
+                    key="open-git-remotes"
+                />
+            ),
+        }),
+        [project],
+    )
 
-    const actions = () => {
-        return (
-            <>
-                {actionOrder.map((action) => React.cloneElement(actionsMap[action], { key: action }))}
-                <OpenUrl project={project} />
-                <OpenGitRemotes project={project} />
-            </>
-        )
-    }
+    const orderedActions = useMemo(() => {
+        const defaultOrder: PrimaryAction[] = ['open-in-editor', 'start-development', 'open-in-terminal', 'open-url', 'open-git-remotes']
+        const primaryAction = preferences.primaryAction as PrimaryAction
+        return [primaryAction, ...defaultOrder.filter((action) => action !== primaryAction)]
+    }, [preferences.primaryAction])
+
+    const handleGitCommits = useCallback(() => {
+        push(<GitCommitsDetail project={project} />)
+    }, [push, project])
+
+    const handleRepoStatistics = useCallback(() => {
+        push(<GitStatisticsDetail project={project} />)
+    }, [push, project])
+
+    const accessories = useMemo(
+        () => [
+            {
+                icon: project.isFavorite ? { source: Icon.Star, tintColor: Color.Yellow } : null,
+                tooltip: project.isFavorite ? 'Favorite' : null,
+            },
+            { text: project.displayPath, tooltip: 'Full Path' },
+            {
+                tag: {
+                    value: project.primaryDirectory.name,
+                    color: primaryDirectory?.icon?.tintColor || Color.Orange,
+                },
+                tooltip: 'Main Directory',
+            },
+        ],
+        [project.isFavorite, project.displayPath, project.primaryDirectory.name, primaryDirectory?.icon?.tintColor],
+    )
 
     return (
         <List.Item
-            key={project.name}
             icon={Icon.Folder}
             title={project.name}
             subtitle={project.description || ''}
-            data-directory={project.primaryDirectory.name}
-            accessories={[
-                { icon: project.isFavorite ? { source: Icon.Star, tintColor: Color.Yellow } : null, tooltip: project.isFavorite ? 'Favorite' : null },
-                { text: project.displayPath, tooltip: 'Full Path' },
-                { tag: { value: project.primaryDirectory.name, color: directories.find((conf) => conf.name === project.primaryDirectory.name)?.icon?.tintColor || Color.Orange }, tooltip: 'Main Directory' },
-            ]}
+            accessories={accessories}
             actions={
                 <ActionPanel>
-                    <ActionPanel.Section title="Open project">{actions()}</ActionPanel.Section>
+                    <ActionPanel.Section title="Open project">{orderedActions.map((action) => actionsMap[action])}</ActionPanel.Section>
                     <ActionPanel.Section title="Actions">
                         <AddToFavorites
                             project={project}
                             onFavoriteChange={onFavoriteChange}
+                        />
+                        <Action
+                            title="Git Commits"
+                            icon={Icon.List}
+                            shortcut={{ modifiers: ['cmd'], key: 'g' }}
+                            onAction={handleGitCommits}
+                        />
+                        <Action
+                            title="Repo Statistics"
+                            icon={Icon.BarChart}
+                            shortcut={{ modifiers: ['cmd'], key: 's' }}
+                            onAction={handleRepoStatistics}
                         />
                         <Config project={project} />
                         <Copy project={project} />
@@ -91,4 +150,8 @@ export default function ProjectListItem({ project, directories, onFavoriteChange
             }
         />
     )
-}
+})
+
+ProjectListItem.displayName = 'ProjectListItem'
+
+export default ProjectListItem

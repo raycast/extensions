@@ -1,12 +1,24 @@
-import { ActionPanel, Action, List, open, Icon, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  open,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Application,
+} from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
 import { AddFromFinderAction } from "@components/add-from-finder-action";
+import { SearchUsingSpotlightAction } from "@components/search-using-spotlight-action";
 import { useZoxide } from "@hooks/use-zoxide";
 import { basename, dirname } from "path";
 import { base64ShellSanitize } from "@utils/misc";
 
-export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) => {
+export const SearchResult = ({ searchResult, searchText }: { searchResult: SearchResult; searchText?: string }) => {
   const [, setRemovedKeys] = useCachedState<string[]>("removed-keys", []);
+  const { "open-in": openIn } = getPreferenceValues<{ "open-in": Application }>();
 
   const { revalidate: addQuery } = useZoxide(`add "${base64ShellSanitize(searchResult.originalPath)}"`, {
     keepPreviousData: false,
@@ -24,7 +36,7 @@ export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) =
   const openResult = async () => {
     try {
       await addQuery();
-      open(searchResult.originalPath);
+      open(searchResult.originalPath, openIn?.bundleId || "Finder");
     } catch (error) {
       showFailureToast(error, { title: "Failed to open folder" });
     }
@@ -55,6 +67,7 @@ export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) =
         <ActionPanel>
           <ActionPanel.Section>
             <Action title="Open Folder" onAction={openResult} />
+            <SearchUsingSpotlightAction searchText={searchText || ""} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard

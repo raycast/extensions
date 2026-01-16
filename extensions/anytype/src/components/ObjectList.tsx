@@ -16,8 +16,7 @@ import { Member, MemberStatus, Property, Space, SpaceObject, Type } from "../mod
 import {
   defaultTintColor,
   formatMemberRole,
-  isUserProperty,
-  isUserType,
+  itemMatchesSearch,
   localStorageKeys,
   pluralize,
   processObject,
@@ -52,11 +51,15 @@ export function ObjectList({ space }: ObjectListProps) {
     searchText,
     [],
   );
-  const { types, typesError, isLoadingTypes, mutateTypes, typesPagination } = useTypes(space.id);
+  const { types, typesError, isLoadingTypes, mutateTypes, typesPagination } = useTypes(space.id, searchText);
   const { properties, propertiesError, isLoadingProperties, mutateProperties, propertiesPagination } = useProperties(
     space.id,
+    searchText,
   );
-  const { members, membersError, isLoadingMembers, mutateMembers, membersPagination } = useMembers(space.id);
+  const { members, membersError, isLoadingMembers, mutateMembers, membersPagination } = useMembers(
+    space.id,
+    searchText,
+  );
   const { pinnedObjects, pinnedObjectsError, isLoadingPinnedObjects, mutatePinnedObjects } = usePinnedObjects(
     localStorageKeys.suffixForViewsPerSpace(space.id, ViewType.objects),
   );
@@ -86,7 +89,7 @@ export function ObjectList({ space }: ObjectListProps) {
         title: "Failed to fetch latest data",
       });
     }
-  }, [objectsError, typesError, membersError]);
+  }, [objectsError, typesError, propertiesError, membersError]);
 
   useEffect(() => {
     if (pinnedObjectsError || pinnedTypesError || pinnedPropertiesError || pinnedMembersError) {
@@ -94,10 +97,10 @@ export function ObjectList({ space }: ObjectListProps) {
         title: "Failed to fetch pinned data",
       });
     }
-  }, [pinnedObjectsError, pinnedTypesError, pinnedMembersError]);
+  }, [pinnedObjectsError, pinnedTypesError, pinnedPropertiesError, pinnedMembersError]);
 
-  const filterItems = <T extends { name: string }>(items: T[], searchText: string): T[] => {
-    return items?.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()));
+  const filterItems = <T extends { name: string; snippet?: string }>(items: T[], searchText: string): T[] => {
+    return items.filter((item) => itemMatchesSearch(item, searchText));
   };
 
   const processType = (type: Type, isPinned: boolean) => {
@@ -107,10 +110,7 @@ export function ObjectList({ space }: ObjectListProps) {
       icon: type.icon,
       title: type.name,
       subtitle: { value: "", tooltip: "" },
-      accessories: [
-        ...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : []),
-        ...(!isUserType(type.key) ? [{ icon: Icon.Lock, tooltip: "System" }] : []),
-      ],
+      accessories: [...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : [])],
       mutate: [mutateTypes, mutatePinnedTypes as MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>],
       object: type,
       layout: type.layout,
@@ -125,10 +125,7 @@ export function ObjectList({ space }: ObjectListProps) {
       icon: property.icon,
       title: property.name,
       subtitle: { value: "", tooltip: "" },
-      accessories: [
-        ...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : []),
-        ...(!isUserProperty(property.key) ? [{ icon: Icon.Lock, tooltip: "System" }] : []),
-      ],
+      accessories: [...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : [])],
       mutate: [
         mutateProperties,
         mutatePinnedProperties as MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>,
@@ -178,6 +175,7 @@ export function ObjectList({ space }: ObjectListProps) {
             (object) =>
               !pinnedObjects?.some((pinned) => pinned.id === object.id && pinned.space_id === object.space_id),
           )
+          .filter((object) => filterItems([object], searchText).length > 0)
           .map((object) => processObject(object, false, mutateObjects, mutatePinnedObjects));
 
         return { processedPinned, processedRegular };
@@ -204,6 +202,7 @@ export function ObjectList({ space }: ObjectListProps) {
               .filter((property) => filterItems([property], searchText).length > 0)
               .map((property) => processProperty(property, true))
           : [];
+
         const processedRegular = properties
           .filter((property) => !pinnedProperties?.some((pinned) => pinned.id === property.id))
           .filter((property) => filterItems([property], searchText).length > 0)
@@ -273,7 +272,7 @@ export function ObjectList({ space }: ObjectListProps) {
           <List.Dropdown.Item
             title="Properties"
             value={ViewType.properties}
-            icon={{ source: "icons/type/pricetags.svg", tintColor: defaultTintColor }}
+            icon={{ source: "icons/type/list.svg", tintColor: defaultTintColor }}
           />
           <List.Dropdown.Item
             title="Members"
@@ -342,7 +341,7 @@ export function ObjectList({ space }: ObjectListProps) {
                 <EmptyViewType
                   title={`No ${currentView.charAt(0).toUpperCase() + currentView.slice(1)} Found`}
                   contextValues={{
-                    space: space.id,
+                    spaceId: space.id,
                     name: searchText,
                   }}
                 />

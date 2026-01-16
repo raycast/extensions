@@ -4,35 +4,118 @@ on:
   push:
     paths:
       - "extensions/**/package.json"
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   update:
     runs-on: ubuntu-latest
     if: github.repository == 'raycast/extensions'
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout with minimal sparse checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
+          sparse-checkout: |
+            scripts/
+            .github/
+      - name: Generate and apply sparse checkout
+        run: |
+          # Use null-terminated + pipe for bombproof path *filtering* (no file I/O)
+          echo "Fetching package.json files using git (null-terminated for scale)..."
+          if ! PACKAGE_FILES_RAW=$(git ls-tree -r --name-only -z HEAD -- extensions/ | tr '\0' '\n' | grep '/package\.json$'); then
+            echo "::error::Failed to fetch file list using git"
+            exit 1
+          fi
+          
+          if [ -z "$PACKAGE_FILES_RAW" ]; then
+            echo "::warning::No package.json files found in extensions/"
+            exit 1
+          fi
+          
+          # Already newline-clean from tr/grep—no extra sed needed
+          PACKAGE_FILES="$PACKAGE_FILES_RAW"
+          
+          echo "Found package.json files:"
+          echo "$PACKAGE_FILES"
+          
+          # Join with spaces for Git
+          PACKAGE_FILES_SPACED=$(echo "$PACKAGE_FILES" | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+          
+          # Dynamically fetch all files from scripts/ and .github/ for full dir support (small overhead)
+          echo "Fetching core files from scripts/ and .github/..."
+          SCRIPTS_FILES=$(git ls-tree -r --name-only HEAD -- scripts/ | tr '\n' ' ' || echo "")
+          GITHUB_FILES=$(git ls-tree -r --name-only HEAD -- .github/ | tr '\n' ' ' || echo "")
+          
+          # Combine: extensions packages + core files + explicit must-haves (dedup + prefix / for exact non-cone paths)
+          CORE_PATHS="$SCRIPTS_FILES $GITHUB_FILES scripts/generate-code-owners.js .github/CODEOWNERS .github/raycast2github.json .github/extensionName2Folder.json"
+          ALL_SPACED=$(echo "$PACKAGE_FILES_SPACED $CORE_PATHS" | tr ' ' '\n' | sort -u | sed 's|^|\/|' | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+          
+          echo "Total sparse paths: $(echo "$ALL_SPACED" | wc -w)"
+          
+          # Set up sparse checkout: No-cone for exact files (dirs created via read-tree)
+          echo "Setting up sparse checkout..."
+          if ! git sparse-checkout set --no-cone; then
+            echo "::error::Failed to initialize sparse checkout"
+            exit 1
+          fi
+          
+          if ! git sparse-checkout set $ALL_SPACED; then
+            echo "::error::Failed to set sparse checkout files"
+            exit 1
+          fi
+          
+          # Force update working directory (now with full file list = reliable dir creation)
+          if ! git read-tree -m -u HEAD; then
+            echo "::error::Failed to update working directory"
+            exit 1
+          fi
+          
+          # Fallback: Ensure core dirs exist and key files are checked out (safety net for sparse quirks)
+          echo "Ensuring core dirs/files..."
+          mkdir -p scripts .github || true
+          git checkout HEAD -- scripts/generate-code-owners.js .github/CODEOWNERS .github/raycast2github.json .github/extensionName2Folder.json || echo "::warning::Fallback checkout had issues (non-fatal)"
+          
+          echo "Files actually checked out:"
+          find . -type f -name "*.json" | head -20
+          ls -la scripts/ .github/ || true  # Debug: Confirm dirs/files
+          
+          # Store normalized for the script
+          echo "PACKAGE_FILES<<EOF" >> $GITHUB_ENV
+          echo "$PACKAGE_FILES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "PACKAGE_FILES_SPACED=$PACKAGE_FILES_SPACED" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20.15.1
-
       - name: Generate
         working-directory: scripts
-        run: ./generate-code-owners.js
-
+        run: ./generate-code-owners.js "$PACKAGE_FILES"
+        env:
+          PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}
+      - name: Set SHORT_SHA
+        run: echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-8)" >> $GITHUB_ENV
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if git diff --quiet; then
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+            echo "No changes to commit"
+          else
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected, will commit"
+          fi
       - name: Commit
+        if: steps.check-changes.outputs.has-changes == 'true'
         uses: raycast/github-actions/git-commit@master
         with:
           repo_dir: ${{ github.workspace }}
-          message: "Update CODEOWNERs"
-
+          message: "Update CODEOWNERs (${{ env.SHORT_SHA }})"
+        continue-on-error: true
       - name: Notify Failure to Slack
         if: failure()
         uses: raycast/github-actions/slack-send@master
@@ -40,5 +123,5 @@ jobs:
           webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
           color: "danger"
           text: |
-            :no_entry_sign: ${env.GITHUB_WORKFLOW} has failed
-            <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|Action logs> | <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }|Commit: ${ env.GITHUB_SHA.substr(0,8) }>
+            :no_entry_sign: ${{ github.workflow }} has failed for commit ${{ env.SHORT_SHA }}
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Action logs> | <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|Commit: ${{ env.SHORT_SHA }}>

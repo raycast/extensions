@@ -17,8 +17,8 @@
     {
       "name": "battery_optimizer",
       "title": "Battery Optimizer",
-      "description": "limit charging above 80%",
-      "mode": "no-view"
+      "description": "Set battery charging limit to prevent overcharging",
+      "mode": "view"
     },
     {
       "name": "reset_battery_optimizer",
@@ -28,9 +28,15 @@
     },
     {
       "name": "get_battery_threshold",
-      "title": "Get Battery Threshold",
-      "description": "Check the current battery charging limit",
+      "title": "Get Battery Threshold (bclm)",
+      "description": "Check the current battery charging limit using BCLM",
       "mode": "no-view"
+    },
+    {
+      "name": "battery_status_view",
+      "title": "Battery Status View (batt)",
+      "description": "Detailed view of battery status and charging settings using BATT",
+      "mode": "view"
     },
     {
       "name": "battery_optimizer_menu_bar",
@@ -42,11 +48,36 @@
   ],
   "preferences": [
     {
+      "name": "batteryTool",
+      "type": "dropdown",
+      "required": true,
+      "title": "Battery Management Tool",
+      "description": "Choose between BCLM (older macOS) or BATT (macOS 15+)",
+      "data": [
+        {
+          "title": "BCLM",
+          "value": "bclm"
+        },
+        {
+          "title": "BATT",
+          "value": "batt"
+        }
+      ],
+      "default": "batt"
+    },
+    {
       "name": "customBCLMPath",
       "type": "textfield",
       "required": false,
       "title": "Custom BCLM Executable Path",
       "description": "Set this if your BCLM executable is in a non-standard location. Find by running `which bclm` in the terminal."
+    },
+    {
+      "name": "customBattPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom BATT Executable Path",
+      "description": "Set this if your BATT executable is in a non-standard location. Find by running `which batt` in the terminal."
     },
     {
       "name": "add_system_service",

@@ -1,6 +1,35 @@
 # Obsidian Changelog
 
+## [New Open Workspace command, Callout Support, Copy Files Action] - 2025-12-25
+
+- Adds new Open Workspace command that shows a list of all workspaces in your vault. Requires advanced URI plugin and workspaces core plugin to be enabled
+- Adds callout support by rendering them as quotes with emojis
+- Adds "Copy File Path" action (opt + shift + c) to notes, vaults, and media items
+- Fixes bookmarked notes not shown in the menubar
+- Fixes Create Note AI tool prepending "undefined" to all notes
+- Improved test coverage to 83%
+
+## [Welcoming AI, Sort Notes, Better Tag Search, Code Improvements] - 2025-12-16
+
+- Adds new syntax to search for tagged notes: "tag:someTag". This can be used in combination with a normal search. For example "tag:someTag some text", this searches for notes with the tag "someTag" and then filters those notes with "some text"
+- Adds new sorting orders: Relevance, File name (A to Z), File name (Z to A), Modified time (new to old), Modified time (old to new), Created time (new to old), Created time (old to new)
+- Adds AI commands/tools for appending to notes, creating notes, opening notes, reading notes, searching notes, updating notes and finding vaults
+- Adds Obsidian Canvas files
+- Adds the option to auto-focus the content field in the Create Note command
+- Improves memory usage during search by doing two-fold search, first on note metadata then on note content in a more memory efficient way
+- Introduces a proper interface for the Obsidian app, many more tests and DOCUMENTATION.md, CONTRIBUTING.md, REFERENCE.md to help contributors
+- Fixes a bug where templates would load selected text even when the template was not used
+- Fixes several internal bugs
+- REFERENCE.md was used to manually check the current state of the extension
+
+## [Bug fixes] - 2025-06-10
+
+- Fixes a bug, which create a tagged note a wrong way. Changes an order of properties block and note text
+
+## [Chore: Fixing typos in the README] - 2025-05-14
+
 ## [Spring Cleaning] - 2025-04-05
+
 - Closes Raycast after creating a note with the Create Note command
 - Adds `{selection}` and `{selected}` templates to Create Note command which both get replaced by the currently selected text
 - Fixes bug where a tag dropdown selection would reset after the Quick Look action
@@ -8,36 +37,46 @@
 - Change extension author
 
 ## [Prepend to Daily Note] - 2025-02-01
+
 - Adds prepend option to Append to Daily Note
 
 ## [Bug fixes] - 2025-01-28
+
 - Fixes locale bug on Append Task command
 - Fixes issue where tags were being converted to lowercase
 
 ## [Task Creation Date] - 2024-12-03
+
 - Tasks added now log the creation date.
 
 ## [Support for Fuzzy Search] - 2024-09-05
+
 - Add option to use Fuzzy Search on notes search. Disabled by default in note search config.
 
 ## [Bugfix for nested bookmarks] - 2024-02-06
+
 - Fixes a bug where nested bookmarks would not be displayed correctly in search
 
 ## [Support luxon formats in templates] - 2024-01-30
+
 - Support luxon date and time format (e.g. dd, MM, YYYY,...) in templates
 
 ## [Fix Search Media HotKey bug] - 2024-01-26
+
 - Checks for defined `searchArgument` in MediaGrid value before filtering
 
 ## [Copy Note Title action] - 2024-01-17
+
 - Add `Copy Note Title` action
 
 ## [Bugfixes and cache behavior tweak] - 2023-11-19
+
 - Will now skip the cache if the value is an empty array
 - Fixes a bug where no default application crashes the extension
 - Fixes a bug where deleting the vault config path can't find the notes
 
 ## [New features and bugfixes] - 2023-10-12
+
 - Adds extension setting to open note in default application
 - Adds quick actions to the Random Note command
 - Adds support for using {content} in templates
@@ -52,12 +91,15 @@
 - Filter out vault paths that don't actually exist.
 
 ## [Menubar cache bug fixes] - 2023-09-15
+
 - Fixes a bug where the cache fallback would crash the extension
 
 ## [Apply templates on task file name] - 2023-08-5
+
 - The Append Task command will now apply template placeholders to file name for dynamic file names
 
 ## [Bug fixes] - 2023-07-20
+
 - Fixes and issue where tags as objects would crash the plugin
 
 ## [Add week placeholder] - 2023-07-14

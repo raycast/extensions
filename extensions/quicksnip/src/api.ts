@@ -1,4 +1,4 @@
-const baseUrl = "https://quicksnip.dev";
+const baseUrl = "https://api.quicksnip.dev";
 
 export interface Language {
   name: string;
@@ -18,10 +18,10 @@ export interface Snippet {
   code: string;
 }
 
-export const languagesUrl = `${baseUrl}/consolidated/_index.json`;
+export const languagesUrl = `${baseUrl}/languages`;
 
 export const iconUrlForLanguage = (lang: string): string => {
   return `${baseUrl}/icons/${lang.toLowerCase()}.svg`;
 };
 
-export const snippetUrlForLanguage = (lang: string) => `${baseUrl}/consolidated/${lang.toLowerCase()}.json`;
+export const snippetsUrlForLanguage = (lang: string) => `${baseUrl}/snippets/${lang.toLowerCase()}/all`;

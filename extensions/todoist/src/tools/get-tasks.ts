@@ -1,4 +1,5 @@
 import { Task } from "../api";
+import { mapPriority } from "../helpers/priorities";
 import { getTodoistApi, withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
@@ -81,5 +82,11 @@ type Input = {
 export default withTodoistApi(async (input: Input) => {
   const todoistApi = getTodoistApi();
   const { data } = await todoistApi.get<{ results: Task[] }>("/tasks/filter", { params: input });
-  return data.results;
+
+  const results = data.results.map((input) => ({
+    ...input,
+    priority: mapPriority(input.priority),
+  }));
+
+  return results;
 });

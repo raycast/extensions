@@ -121,7 +121,7 @@ export default async function runModel(basePrompt: string, prompt: string, input
           const jsonData = (await response.text()).split("\n").map((line) => {
             try {
               return JSON.parse(line.replace(/data: ?/g, ""));
-            } catch (error) {
+            } catch {
               return undefined;
             }
           });

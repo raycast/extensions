@@ -7,19 +7,19 @@ import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 
-import { Preferences, ResponseData, ROW_STATUS, ResourceObj } from "./types";
+import { Preferences, ResponseData, ROW_STATUS, AttachmentObj } from "./types";
 import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse } from "./types";
 
 const cache = new Cache();
 
-const parseResponse = async (response: Response) => {
+const parseResponse = async <T>(response: Response): Promise<T> => {
   const cookie = response.headers.get("Set-Cookie");
 
   if (cookie) {
     cache.set("cookie", cookie);
   }
   const data = await response.json();
-  return data;
+  return data as T;
 };
 
 const getHost = () => {
@@ -110,8 +110,8 @@ const getFetch = <T>(options: AxiosRequestConfig) => {
 };
 
 export const getMe = () => {
-  return getUseFetch<MeResponse>(getRequestUrl(`/api/v1/auth/status`), {
-    method: "POST",
+  return getUseFetch<MeResponse>(getRequestUrl(`/api/v1/auth/sessions/current`), {
+    method: "GET",
   });
 };
 
@@ -126,9 +126,9 @@ export const sendMemo = (data: PostMemoParams) => {
 };
 
 export const getRecentTags = async (): Promise<string[]> => {
-  const me = await getFetch<MeResponse>({
-    url: getRequestUrl(`/api/v1/auth/status`),
-    method: "POST",
+  const { user: me } = await getFetch<MeResponse>({
+    url: getRequestUrl(`/api/v1/auth/sessions/current`),
+    method: "GET",
   });
 
   const memos = await getFetch<{
@@ -159,28 +159,28 @@ export const postFile = (filePath: string, filename: string) => {
   const formData = new FormData();
   formData.append("file", readFile, {
     filename: path.basename(filePath),
-    contentType: mime.getType(filePath) || undefined,
+    contentType: mime.getType(filePath) || "application/octet-stream",
   });
 
   return getFetch<PostFileResponse>({
-    url: getRequestUrl(`/api/v1/resources`),
+    url: getRequestUrl(`/api/v1/attachments`),
     method: "POST",
     data: {
       content: readFile.toString("base64"),
       filename,
-      type: mime.getType(filePath) || undefined,
+      type: mime.getType(filePath) || "application/octet-stream",
     },
   });
 };
 
-export const postMemoResources = (memoName: string, resources: Partial<ResourceObj>[]) => {
-  const url = getRequestUrl(`/api/v1/${memoName}/resources`);
+export const postMemoAttachments = (memoName: string, attachments: Partial<AttachmentObj>[]) => {
+  const url = getRequestUrl(`/api/v1/${memoName}/attachments`);
 
   return getFetch<object>({
     url,
     method: "PATCH",
     data: {
-      resources,
+      attachments,
     },
   });
 };
@@ -201,27 +201,22 @@ export const getAllMemos = (currentUserId?: number, { state = ROW_STATUS.NORMAL 
     },
     MemoInfoResponse[],
     MemoInfoResponse[]
-  >(
-    (options) => {
-      return `${url}&pageToken=${options?.cursor || ""}`;
+  >(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
     },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
-      },
-      parseResponse,
-      mapResult(result) {
-        return {
-          data: result?.memos || [],
-          cursor: result?.nextPageToken || "",
-          hasMore: !!result.nextPageToken || false,
-        };
-      },
-      keepPreviousData: true,
-      initialData: [],
+    parseResponse,
+    mapResult(result) {
+      return {
+        data: result?.memos || [],
+        cursor: result?.nextPageToken || "",
+        hasMore: !!result.nextPageToken || false,
+      };
     },
-  );
+    keepPreviousData: true,
+    initialData: [],
+  });
 
   return { isLoading, data: currentUserId ? data : [], revalidate, pagination };
 };
@@ -259,8 +254,8 @@ export const deleteMemo = (memoName: string) => {
   });
 };
 
-export const getResourceBinToBase64 = async (resourceName: string, resourceFilename: string) => {
-  const url = getRequestUrl(`/file/${resourceName}/${resourceFilename}?thumbnail=1`);
+export const getAttachmentBinToBase64 = async (attachmentName: string, attachmentFilename: string) => {
+  const url = getRequestUrl(`/file/${attachmentName}/${attachmentFilename}?thumbnail=1`);
 
   const blob = await getFetch<ArrayBuffer>({
     url,
@@ -270,7 +265,7 @@ export const getResourceBinToBase64 = async (resourceName: string, resourceFilen
 
   const base64 = Buffer.from(blob).toString("base64");
 
-  const mimeType = mime.getType(resourceFilename) || "image/jpeg";
+  const mimeType = mime.getType(attachmentFilename) || "image/jpeg";
   const fullBase64 = `data:${mimeType};base64,${base64}`;
 
   return fullBase64;

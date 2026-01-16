@@ -1,73 +1,62 @@
-import { LocalStorage } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { randomUUID } from "crypto";
-import { useCallback, useEffect, useState } from "react";
-
-const STORAGE_KEY = "history";
+import { useCallback } from "react";
 
 export enum Type {
-  Web,
+  Web = "web",
+  Image = "image",
 }
 
 export interface HistoryItem {
   id: string;
   query: string;
-  type: Type;
   date: number;
 }
 
-const get = async () => JSON.parse((await LocalStorage.getItem(STORAGE_KEY)) ?? JSON.stringify([])) as HistoryItem[];
-const set = (history: HistoryItem[]) => LocalStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+export default function useHistory(type: Type) {
+  const { value, setValue, removeValue, isLoading } = useLocalStorage<HistoryItem[]>(type, []);
 
-export default function useHistory() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [items, setItems] = useState([] as HistoryItem[]);
-
-  const addToHistory = useCallback(
-    (query: string, type: Type) => {
+  const addHistoryItem = useCallback(
+    (query: string) => {
       const newItem = {
         id: randomUUID(),
         query: query.toLocaleLowerCase(),
-        type,
         date: Date.now(),
       } as HistoryItem;
 
-      const nextItems = [
-        newItem,
-        ...items.filter((item) => (item.query === newItem.query && item.type === newItem.type) === false),
-      ];
+      // Don't allow modification while the history is still loading
+      if (isLoading || value == null) {
+        console.warn("history is still loading, cannot add new item");
+        return;
+      }
 
-      setItems(nextItems);
-      return set(nextItems);
+      const nextItems = [newItem, ...value.filter((item) => item.query !== newItem.query)];
+
+      return setValue(nextItems);
     },
-    [items, setItems],
+    [value, setValue, type],
   );
 
-  const removeFromHistory = useCallback(
+  const removeHistoryItem = useCallback(
     (id: string) => {
-      const nextItems = [...items.filter((item) => item.id !== id)];
+      // Don't allow modification while the history is still loading
+      if (isLoading || value == null) {
+        console.warn("history is still loading, cannot remove item");
+        return;
+      }
 
-      setItems(nextItems);
-      return set(nextItems);
+      const nextItems = [...value.filter((item) => item.id !== id)];
+
+      return setValue(nextItems);
     },
-    [items, setItems],
+    [value, setValue],
   );
 
-  const clearHistory = useCallback(() => {
-    const nextItems = [] as HistoryItem[];
-
-    setItems(nextItems);
-    return set(nextItems);
-  }, [setItems]);
-
-  useEffect(() => {
-    const initialize = async () => {
-      const items = await get();
-      setItems(items);
-      setIsLoading(false);
-    };
-
-    initialize();
-  }, []);
-
-  return { isLoading, items, addToHistory, removeFromHistory, clearHistory };
+  return {
+    isLoadingHistory: isLoading,
+    historyItems: value ?? [],
+    addHistoryItem,
+    removeHistoryItem,
+    clearHistory: removeValue,
+  };
 }

@@ -1,8 +1,9 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
 import { getChargeThreshold, setBatteryThreshold } from "./utils";
 import { usePromise } from "@raycast/utils";
+import { getBatteryTool } from "./utils/batteryTools";
 
-export default function BatterOptimizerMenuBar() {
+export default function BatteryOptimizerMenuBar() {
   const {
     isLoading,
     data: chargingThreshold,
@@ -11,21 +12,23 @@ export default function BatterOptimizerMenuBar() {
     try {
       return await getChargeThreshold();
     } catch {
-      return "100";
+      return 100;
     }
   });
 
-  // Currently, bclm only supports 80 and 100 as charging thresholds.
-  const batteryOptimizerEnabled = chargingThreshold === "80";
+  // Both BCLM and BATT support 80% as standard battery optimization threshold
+  const batteryOptimizerEnabled = chargingThreshold === 80;
+  const batteryTool = getBatteryTool();
 
   return (
     <MenuBarExtra
       isLoading={isLoading}
       icon={batteryOptimizerEnabled ? Icon.BatteryDisabled : Icon.BatteryCharging}
-      tooltip="Batter Optimizer"
+      tooltip={`Battery Optimizer (${batteryTool.toUpperCase()})`}
     >
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title={`🔋 Charging Threshold：${chargingThreshold}%`} />
+        <MenuBarExtra.Item title={`🔋 Charging Threshold: ${chargingThreshold}%`} />
+        <MenuBarExtra.Item title={`Using: ${batteryTool.toUpperCase()}`} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         {batteryOptimizerEnabled ? (

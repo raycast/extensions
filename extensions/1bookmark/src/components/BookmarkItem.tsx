@@ -44,7 +44,6 @@ export const BookmarkItem = (props: {
       actions={
         <BookmarkItemActionPanel
           bookmark={bookmark}
-          me={me}
           refetch={refetch}
           rankingEntries={rankingEntries}
           setRankingEntries={setRankingEntries}

@@ -6,16 +6,18 @@ import { promises as fsPromises } from "fs";
 import path from "path";
 
 function isSystem(appPath: string): boolean {
-  return path.normalize(appPath).startsWith("/System/");
+  const normalizedPath = path.normalize(appPath);
+  if (normalizedPath.startsWith("/System/")) return true;
+  return false;
 }
 
 export function filterApps(apps: Application[]): Application[] {
   return apps.filter((app) => isSystem(app.path) === false).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function pathExists(filePath: string): Promise<boolean> {
+export async function pathExists(path: string): Promise<boolean> {
   return fsPromises
-    .access(filePath)
+    .access(path)
     .then(() => true)
     .catch(() => false);
 }

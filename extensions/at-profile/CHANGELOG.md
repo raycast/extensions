@@ -1,14 +1,51 @@
 # @ Profile Changelog
 
-## Fixed - 2025-05-12
+## [Prevent Infinite Loop in Open Profile and add Screenshots] - 2025-08-08
 
-- Fixed Twitter and X to lead to X ([#18534](https://github.com/raycast/extensions/issues/18534))
+### Added
 
-## [Add Social Platforms & Sort List] - 2025-05-07
+- **Screenshots**: Added screenshots to for Raycast Store
 
-- Add new social platforms: Behance, CodePen, Dev.to, Dribbble, Medium, Product Hunt, Spotify
-- Reorder all platforms alphabetically for better UX and consistency
-- Clean up inline documentation examples to reflect updated platform list
+### Fixed
+
+- **Infinite Loop**: Fixed infinite loop in Open Profile
+
+### Changed
+
+- **Raycast API**: Updated Raycast API to v1.102.3
+
+## [Profile History and Custom Apps] - 2025-08-07
+
+### Added
+
+- **New "Open Profile" Command**: Open a profile from a dynamic list of Apps, or choose from a handy list of recent profiles
+- **New "History" Command**: Displays a list of recently opened profiles filterable by App
+- **New "Manage Apps" Command**: Allows users to enable and disable apps or add custom apps
+- **Import/Export**: Allows users to import and export their settings, history, and profile history
+
+### Changed
+
+- Updated "Quick Profile" Command to use editable list of Apps in `./src/utils/default-apps.ts`
+
+## [Enhanced Platform Management] - 2025-01-07
+
+### Added
+
+- **New "Manage Apps" Command**: Renamed and enhanced platform management interface
+- Dynamic platform loading - no more hardcoded dropdown values
+- Real-time platform status updates with enable/disable functionality
+- Comprehensive YAML import/export for settings backup and sharing
+- Enhanced documentation with screenshots and feature explanations
+
+### Changed
+
+- Improved app management interface with better organization
+- Improved user interface with clearer section titles
+- Updated README with comprehensive feature documentation
+
+## [Fixes] - 2025-05-12
+
+- Fixed Twitter and X to lead to X [#18534](https://github.com/raycast/extensions/issues/18534)
 
 ## [Add AI Tool] - 2025-03-10
 

@@ -7,6 +7,7 @@ import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { useLocalStorageItem } from "~/utils/localstorage";
+import { platform } from "~/utils/platform";
 import { getLabelForTimeoutPreference } from "~/utils/preferences";
 
 type UnlockFormProps = {
@@ -90,7 +91,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
                 icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
                 title={showPassword ? "Hide Password" : "Show Password"}
                 onAction={() => setShowPassword((prev) => !prev)}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, windows: { key: "e", modifiers: ["alt"] } }}
               />
             </>
           )}
@@ -115,7 +116,10 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         onChange={setPassword}
         ref={(field) => field?.focus()}
       />
-      <Form.Description title="" text={`Press ⌘E to ${showPassword ? "hide" : "show"} password`} />
+      <Form.Description
+        title=""
+        text={`Press ${platform === "macos" ? "⌥" : "Alt"}+E to ${showPassword ? "hide" : "show"} password`}
+      />
       {!!lockReason && (
         <>
           <Form.Description title="ℹ️" text={lockReason} />

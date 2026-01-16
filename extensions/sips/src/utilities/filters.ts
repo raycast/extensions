@@ -390,6 +390,10 @@ export const colorEffectFilters: Filter[] = [
     CIFilterName: "CIVignette",
     thumbnail: "thumbnails/vignette.webp",
     category: FilterCategory.colorEffect,
+    presets: {
+      inputIntensity: 1.0,
+      inputRadius: `(imgSize's width / 2)`,
+    },
   },
   {
     name: "X-Ray",

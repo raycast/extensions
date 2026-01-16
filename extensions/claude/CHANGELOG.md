@@ -1,5 +1,13 @@
 # Claude Changelog
 
+## [Update] - 2025-11-03
+
+- Feature: Added dynamic model retrieval removing the need to update the extension with each model release.
+
+## [Update] - 2025-05-23
+
+- Feature: Added new [Claude Sonnet 4](https://www.anthropic.com/news/claude-4)
+
 ## [Added missing contributor] - 2025-03-03
 
 ## [Update] - 2025-02-26

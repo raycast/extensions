@@ -117,14 +117,11 @@
     "@catppuccin/palette": "^1.2.0",
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
-    "ajv": "^8.17.1",
     "axios": "^1.8.4",
-    "fuse.js": "^7.0.0",
-    "js-yaml": "^4.1.0"
+    "fuse.js": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/js-yaml": "^4.0.9",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.57.0",

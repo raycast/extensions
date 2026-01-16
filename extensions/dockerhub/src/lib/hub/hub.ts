@@ -46,15 +46,12 @@ export class Hub {
     this.#password = password ?? "";
 
     this.#client.interceptors.request.use(
-      async (config: AxiosRequestConfig) => {
+      async (config) => {
         if (this.#token === "") {
           this.#token = await getToken();
         }
         if (this.#token !== "") {
-          config.headers = {
-            Authorization: `Bearer ${this.#token}`,
-            ...config.headers,
-          };
+          config.headers.Authorization = `Bearer ${this.#token}`;
         }
         return config;
       },

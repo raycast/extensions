@@ -6,7 +6,7 @@ import {
   updateTask,
   getAllUncompletedTasks,
 } from "../utils/taskOperations";
-import { Preferences, Priority, Task } from "../types";
+import { Priority, Task } from "../types";
 import { priorityToValue } from "../utils/priority";
 
 export const useTasks = (preferences: Preferences) => {
@@ -19,7 +19,19 @@ export const useTasks = (preferences: Preferences) => {
       setIsLoading(true);
       const highestPriorityTask = await getHighestPriorityTask();
       setTopTask(highestPriorityTask);
-      const tasks = await getAllUncompletedTasks();
+      let tasks = await getAllUncompletedTasks();
+
+      if (preferences.showOnlyCurrent) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        tasks = tasks.filter((task) => {
+          const { dueDate, scheduledDate } = task;
+          return (dueDate && dueDate < tomorrow) || (scheduledDate && scheduledDate < tomorrow);
+        });
+      }
 
       if (preferences.sortByPriority) {
         tasks.sort((a, b) => {

@@ -1,5 +1,29 @@
 # Oracle Cloud Changelog
 
+## [Manage Vaults, Secrets, Versions and Bundle] - 2026-01-01
+
+- view vaults
+    - view secrets
+        - view versions
+            - view bundle
+
+## [Manage Bucket Objects + View NoSQL Database] - 2025-09-15
+
+- view NoSQL Databases
+- view objects in buckets w/ filesize
+    1. upload object
+    2. delete object
+
+## [View Object Storage Buckets + Implement Provider w/ Context] - 2025-07-14
+
+- add initial "Object Storage" command to view buckets
+- `dev`: implement Provider w/ Context so checks can be shared
+
+## [Add Terminate Instance Action] - 2025-06-03
+
+- (Confirm and) Terminate Instance
+- Add "Open in OCI" `Action`
+
 ## [Perform Instance Actions] - 2025-02-13
 
 - Add instance actions:

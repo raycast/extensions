@@ -1,22 +1,14 @@
 import { LocalStorage } from "@raycast/api";
 import { apiRequest } from "@/functions/apiRequest";
 import { useCachedPromise } from "@raycast/utils";
-import { Errors, LikesResult, User } from "@/types";
+import { LikesResult, User } from "@/types";
 
 export const useLikes = () => {
-  const { isLoading: loading, data: likes } = useCachedPromise(
-    async () => {
-      const data = (await getUserLikes()) as LikesResult[] | Errors;
-      if (Array.isArray(data)) return data;
-      throw new Error(data.errors?.join("\n"));
+  const { isLoading: loading, data: likes } = useCachedPromise(getUserLikes, [], {
+    failureToastOptions: {
+      title: "Failed to fetch likes.",
     },
-    [],
-    {
-      failureToastOptions: {
-        title: "Failed to fetch likes.",
-      },
-    },
-  );
+  });
 
   return {
     loading,

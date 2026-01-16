@@ -4,11 +4,11 @@ import ListBoards from "./components/list-boards";
 
 export default function ListMyBoards() {
   const { isLoading, data, mutate } = useCachedPromise(
-    async () => {
+    async (fetch) => {
       await miro.authorize();
-      return await miro.fetchMyItems();
+      return await fetch();
     },
-    [],
+    [miro.fetchMyItems],
     {
       initialData: [],
     }

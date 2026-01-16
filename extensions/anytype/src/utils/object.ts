@@ -1,8 +1,8 @@
 import { getPreferenceValues, Icon } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { Member, Property, SortProperty, SpaceObject, Type } from "../models";
-import { getDateLabel, getShortDateLabel } from "../utils";
+import { Member, Property, SortProperty, SpaceObject, Tag, Type } from "../models";
+import { getDateLabel, getShortDateLabel, propKeys } from "../utils";
 
 export function processObject(
   object: SpaceObject,
@@ -17,6 +17,12 @@ export function processObject(
   const date = dateProperty && dateProperty.date ? dateProperty.date : undefined;
   const hasValidDate = date && new Date(date).getTime() !== 0;
 
+  const tagProperty = object.properties.find((property) => property.key === propKeys.tag);
+  const tags =
+    tagProperty && Array.isArray(tagProperty.multi_select)
+      ? tagProperty.multi_select.map((tag: Tag) => tag.name).join(", ")
+      : undefined;
+
   // Use proper labels: if sort is 'Name', use Last Modified labels
   const label = sort === SortProperty.Name ? "Last Modified Date" : getDateLabel();
   const shortLabel = sort === SortProperty.Name ? "Modified" : getShortDateLabel();
@@ -26,18 +32,20 @@ export function processObject(
     id: object.id,
     icon: object.icon,
     title: object.name,
-    subtitle: {
-      value: object.type.name,
-      tooltip: `Type: ${object.type.name}`,
-    },
+    subtitle: undefined,
     accessories: [
       ...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : []),
+      ...(tags ? [{ icon: Icon.Tag, tooltip: `${tagProperty?.name}: ${tags}` }] : []),
       {
         date: hasValidDate ? new Date(date) : undefined,
         tooltip: hasValidDate
           ? `${label}: ${format(new Date(date), "EEEE d MMMM yyyy 'at' HH:mm")}`
           : `Never ${shortLabel}`,
         text: hasValidDate ? undefined : "—",
+      },
+      {
+        icon: object.type.icon,
+        tooltip: `Type: ${object.type.name}`,
       },
     ],
     mutate: [mutateObjects, mutatePinnedObjects].filter(Boolean) as MutatePromise<
