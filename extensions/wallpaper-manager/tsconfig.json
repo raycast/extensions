@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "module": "esnext",
+        "target": "es2019",
+        "lib": [
+            "es2019",
+            "dom"
+        ],
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "jsx": "react-jsx",
+        "noEmit": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true
+    },
+    "include": [
+        "src/**/*",
+        "raycast-env.d.ts"
+    ]
+}
