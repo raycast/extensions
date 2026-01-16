@@ -1,6 +1,6 @@
 # Codeforces Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-01-16
 
 - Updated Codeforces API documentation
 - Added support for filtering problems by difficulty
