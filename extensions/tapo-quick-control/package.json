@@ -1,0 +1,93 @@
+{
+  "name": "tapo-quick-control",
+  "title": "Tapo Quick Control",
+  "description": "Fast cached control for Tapo P110 & L530 with fallback discovery",
+  "icon": "command-icon.png",
+  "author": "user_c6aeea2acd3ebf6bc97d",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "plug",
+      "title": "Priz (P110)",
+      "description": "Toggle P110 plug (cached IP + rediscover)",
+      "mode": "view"
+    },
+    {
+      "name": "light",
+      "title": "Işık (L530)",
+      "description": "Control L530 (on/off + color)",
+      "mode": "view"
+    },
+    {
+      "name": "devices",
+      "title": "Tüm Cihazlar",
+      "description": "List all cached/discovered devices",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "title": "Language / Dil",
+      "description": "Select app language.",
+      "required": true,
+      "data": [
+        { "title": "Türkçe", "value": "tr" },
+        { "title": "English", "value": "en" }
+      ],
+      "default": "tr"
+    },
+    {
+      "name": "tapoEmail",
+      "type": "textfield",
+      "title": "Tapo Email",
+      "description": "Your TP-Link Tapo account email address.",
+      "required": true
+    },
+    {
+      "name": "tapoPassword",
+      "type": "password",
+      "title": "Tapo Password",
+      "description": "Your TP-Link Tapo account password.",
+      "required": true
+    },
+    {
+      "name": "subnet",
+      "type": "textfield",
+      "title": "Subnet (Optional)",
+      "description": "Override subnet scan, e.g. 192.168.1.0/24",
+      "required": false
+    },
+    {
+      "name": "p110Ip",
+      "type": "textfield",
+      "title": "P110 IP (Optional)",
+      "description": "Manual IP for P110 (overrides cache if valid).",
+      "required": false
+    },
+    {
+      "name": "l530Ip",
+      "type": "textfield",
+      "title": "L530 IP (Optional)",
+      "description": "Manual IP for L530 (overrides cache if valid).",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "ray:dev": "ray dev",
+    "ray:build": "ray build"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.74.0",
+    "local-devices": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tp-link-tapo-connect": "^2.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.3.3",
+    "typescript": "^5.6.3"
+  }
+}
