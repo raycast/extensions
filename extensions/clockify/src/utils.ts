@@ -138,7 +138,7 @@ export async function getTimeEntries({ onError }: { onError?: (state: boolean) =
   );
 
   if (error === "Unauthorized") {
-    onError && onError(false);
+    onError?.(false);
     return [];
   }
 
@@ -239,7 +239,7 @@ export async function getProjects({ onError }: { onError?: (state: boolean) => v
 
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/projects?page-size=1000&archived=false`);
   if (error === "Unauthorized") {
-    onError && onError(false);
+    onError?.(false);
     return [];
   }
 

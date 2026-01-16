@@ -20,8 +20,6 @@ import {
   stopCurrentTimer,
   addNewTimeEntry,
   getAllTimeEntriesFromLocalStorage,
-  getProjects,
-  getTasksForProject,
   fetcher,
   dateDiffToString,
 } from "./utils";
@@ -72,11 +70,7 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
       keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
       actions={
         <ActionPanel>
-          <Action
-            icon={Icon.Stop}
-            title="Stop Timer"
-            onAction={() => stopCurrentTimer(updateTimeEntries)}
-          />
+          <Action icon={Icon.Stop} title="Stop Timer" onAction={() => stopCurrentTimer(updateTimeEntries)} />
           <Action.Push
             icon={Icon.Clock}
             title="Stop Timer at…"
@@ -220,7 +214,7 @@ export default function Main() {
 }
 
 function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
-  const { config, isValidToken, setIsValidToken } = useConfig();
+  const { config, isValidToken } = useConfig();
   const [projects, setProjects] = useState<Project[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
