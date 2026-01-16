@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useMemo } from "react";
 import {
   List,
   ActionPanel,
@@ -9,7 +10,6 @@ import {
   Clipboard,
   open,
 } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
 import {
   listVideos,
   getVideo,
