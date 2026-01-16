@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List, getSelectedText, Clipboard, showToast, Toast, closeMainWindow } from "@raycast/api";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { toUnicodeVariant, VARIANTS } from "./lib/toUnicodeVariant";
 
 export default function Command() {
