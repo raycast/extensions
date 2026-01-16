@@ -46,15 +46,13 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
         ? {
             metadata: (
               <Detail.Metadata>
-                {project && (
-                  <Detail.Metadata.Label
-                    title="Identifier"
-                    text={`${project.identifier}-${workItem.sequenceId}`}
-                    icon={Icon.BullsEye}
-                  />
-                )}
+                <Detail.Metadata.Label
+                  title="Identifier"
+                  text={`${project.identifier}-${workItem.sequenceId}`}
+                  icon={Icon.BullsEye}
+                />
                 <Detail.Metadata.Separator />
-                {project && <Detail.Metadata.Label title="Project" text={project?.name} icon={Icon.Folder} />}
+                <Detail.Metadata.Label title="Project" text={project?.name} icon={Icon.Folder} />
                 <Detail.Metadata.Separator />
                 {state && <Detail.Metadata.Label title="State" text={state.name} icon={getStateIcon(state)} />}
 
@@ -67,7 +65,7 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
                 {workItem.startDate ? (
                   <Detail.Metadata.Label
                     title="Start Date"
-                    text={format(new Date(workItem.startDate), "MM/dd/yyyy")}
+                    text={format(new Date(workItem.startDate), "dd-MMM-yyyy")}
                     icon={Icon.Calendar}
                   />
                 ) : null}
@@ -75,7 +73,7 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
                 {workItem.targetDate ? (
                   <Detail.Metadata.Label
                     title="Due Date"
-                    text={format(new Date(workItem.targetDate), "MM/dd/yyyy")}
+                    text={format(new Date(workItem.targetDate), "dd-MMM-yyyy")}
                     icon={Icon.Calendar}
                   />
                 ) : null}

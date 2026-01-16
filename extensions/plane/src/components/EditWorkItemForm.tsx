@@ -88,8 +88,8 @@ export default function EditWorkItemForm(props: EditWorkItemFormProps) {
       descriptionHtml: parseHtmlToMarkdown(workItem?.descriptionHtml || ""),
       stateId: workItem?.state || undefined,
       priorityName: workItem?.priority?.toString() || undefined,
-      startDate: workItem?.startDate || undefined,
-      targetDate: workItem?.targetDate || undefined,
+      startDate: workItem?.startDate ? new Date(workItem.startDate) : undefined,
+      targetDate: workItem?.targetDate ? new Date(workItem.targetDate) : undefined,
     },
   });
 
@@ -154,7 +154,6 @@ export default function EditWorkItemForm(props: EditWorkItemFormProps) {
       <Form.DatePicker
         id="startDate"
         title="Start Date"
-        min={new Date()}
         value={values.startDate}
         onChange={(value) => setValue("startDate", value || undefined)}
       />
