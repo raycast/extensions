@@ -1,0 +1,147 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "r2-media-uploader",
+  "title": "R2 Media Uploader",
+  "description": "Upload images & videos to R2 from Finder selection or clipboard",
+  "icon": "extension-icon.png",
+  "author": "rene_wang",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "accountId",
+      "title": "Cloudflare Account ID",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "description": "Your Cloudflare Account ID (used for the R2 S3 endpoint)."
+    },
+    {
+      "name": "accessKeyId",
+      "title": "R2 Access Key ID",
+      "type": "password",
+      "required": true,
+      "description": "S3 Access Key ID for R2."
+    },
+    {
+      "name": "secretAccessKey",
+      "title": "R2 Secret Access Key",
+      "type": "password",
+      "required": true,
+      "description": "S3 Secret Access Key for R2."
+    },
+    {
+      "name": "customDomain",
+      "title": "Custom Domain (Optional)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://cdn.example.com",
+      "description": "Used to build the final public URL. Can be overridden per bucket profile."
+    },
+    {
+      "name": "customDomains",
+      "title": "Custom Domains (Comma-separated, Optional)",
+      "type": "textfield",
+      "multiline": true,
+      "required": false,
+      "placeholder": "https://img.example.com, https://vid.example.com",
+      "description": "Optional list of domains to choose from at upload time. You can enter one per line or comma-separated."
+    },
+    {
+      "name": "bucketNames",
+      "title": "Bucket Names (Comma-separated, Optional)",
+      "type": "textfield",
+      "multiline": true,
+      "required": false,
+      "placeholder": "my-images, my-videos",
+      "description": "Optional list of bucket names to choose from at upload time. You can enter one per line or comma-separated."
+    },
+    {
+      "name": "defaultFolderTemplate",
+      "title": "Default Folder Template",
+      "type": "textfield",
+      "required": false,
+      "default": "uploads/{yyyy}/{mm}/{dd}",
+      "placeholder": "uploads/{yyyy}/{mm}/{dd}",
+      "description": "Used when the selected bucket has no per-bucket template. Example: uploads/{yyyy}/{mm}/{dd}"
+    },
+    {
+      "name": "defaultFilenameTemplate",
+      "title": "Default Filename Template",
+      "type": "textfield",
+      "required": false,
+      "default": "{name}_{time}.{ext}",
+      "placeholder": "{name}_{time}.{ext}",
+      "description": "Used when the selected bucket has no per-bucket template. Example: {name}_{time}.{ext}"
+    },
+    {
+      "name": "defaultProfile",
+      "title": "Default Bucket Profile Name (Optional)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "images",
+      "description": "If set, commands will default to this profile name."
+    },
+    {
+      "name": "autoCopyUrl",
+      "title": "Auto Copy URL After Upload",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Copy URL(s) to clipboard",
+      "description": "When enabled, the uploaded file URL(s) will be copied to your clipboard."
+    },
+    {
+      "name": "bucketProfilesJson",
+      "title": "Bucket Profiles (JSON)",
+      "type": "textfield",
+      "multiline": true,
+      "required": false,
+      "default": "[]",
+      "description": "Array of bucket profiles. Fields: name, bucket, keyTemplate (or pathPrefix + filenameTemplate), publicBaseUrl (optional)."
+    }
+  ],
+  "commands": [
+    {
+      "name": "upload-from-clipboard",
+      "title": "Upload from Clipboard",
+      "description": "Upload an image (or a copied file) from the clipboard to R2 and copy the URL.",
+      "mode": "view"
+    },
+    {
+      "name": "upload-selected-files",
+      "title": "Upload Selected Files",
+      "description": "Upload the currently selected Finder files to R2 and copy the URL(s).",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "@aws-sdk/client-s3": "^3.888.0",
+    "mime-types": "^2.1.35",
+    "nanoid": "^5.1.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
