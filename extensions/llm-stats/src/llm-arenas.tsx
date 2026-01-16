@@ -92,6 +92,7 @@ export default function Command() {
           <List.Section>
             {arena && (
               <List.Item
+                key="open-arena"
                 title={`Open ${arena.name} Arena`}
                 icon={Icon.GameController}
                 actions={
@@ -107,19 +108,16 @@ export default function Command() {
               const cachedModel = allModels?.find((m) => m.model_id === model.model_id);
               return (
                 <List.Item
-                  key={model.variant_id}
+                  key={model.model_id}
                   icon={getOrganizationLogo(cachedModel?.organization_id || model.organization.toLowerCase())}
                   title={cachedModel?.name || model.model_name}
                   subtitle={cachedModel?.organization || model.organization}
                   keywords={[cachedModel?.organization || model.organization]}
-                  accessories={[
-                    {
-                      text: `${model.wins}`,
-                      icon: Icon.ThumbsUp,
-                      tooltip: "Votes",
-                    },
-                    createScoreAccessory(model, index),
-                  ]}
+                  accessories={
+                    [createVoteAccessory(model), createScoreAccessory(model, index)].filter(
+                      Boolean,
+                    ) as List.Item.Accessory[]
+                  }
                   actions={
                     <ActionPanel>
                       <ShowDetailsAction modelId={model.model_id} />
@@ -177,5 +175,19 @@ function createScoreAccessory(model: ArenaModel, index: number): List.Item.Acces
       color: Color.SecondaryText,
     },
     tooltip: "Score",
+  };
+}
+
+function createVoteAccessory(model: ArenaModel): List.Item.Accessory | undefined {
+  if (!model.wins) {
+    return undefined;
+  }
+
+  return {
+    text: {
+      value: `${model.wins}`,
+      color: Color.PrimaryText,
+    },
+    tooltip: "Votes",
   };
 }
