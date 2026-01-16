@@ -14,9 +14,9 @@
 - Added summary display of disk information at the top of the details list
 - Minor bug fixes, code improvements, and refactoring
 
-## [Third Release] - 2026-01-02
+## [1.2.0] - {PR_MERGE_DATE}
 
 - Improved disk accessories for a few cases as well as Mounted/Unmounted status icons
 - Introduced progressive rendering for faster initialization performance. (Slightly chunked for performance - feedback welcome)
-- Improved filtering and used Removable/Fixed instad of Internal/External.
-- Refactored codebase
+- Improved filtering and used Removable/Fixed instead of Internal/External.
+- Refactored and modularized codebase

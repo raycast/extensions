@@ -31,11 +31,6 @@ export class DiskActions {
       title: `Ejecting ${this.disk.identifier}`,
     });
 
-    if (this.disk.removable) {
-      showFailureToast("Fixed drives cannot be ejected", { title: "Can't eject fixed drives" });
-      return;
-    }
-
     try {
       await execDiskCommand(`diskutil eject "${this.disk.identifier}"`);
       await showToast({
@@ -43,7 +38,9 @@ export class DiskActions {
         title: `Ejected ${this.disk.identifier}`,
       });
     } catch (error) {
-      showFailureToast(`${error} Only removable drives or disk images can be ejected`, { title: "Ejection Error" });
+      showFailureToast(`${error} Only removable drives or disk images can be fully ejected.`, {
+        title: "Ejection Error",
+      });
     }
   }
 
