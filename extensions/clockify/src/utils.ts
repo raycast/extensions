@@ -1,5 +1,4 @@
 import { Cache, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import fetch from "node-fetch";
 import uniqWith from "lodash.uniqwith";
 import { FetcherArgs, FetcherResponse, TimeEntry, Project, Task } from "./types";
 import { showFailureToast } from "@raycast/utils";
