@@ -5,7 +5,7 @@ import { useCacheHelpers } from "../../hooks";
 
 export const ProfileList: FC = () => {
   const { profiles, onRemoveItem } = useCacheHelpers();
-  const { timeout: prefTimeout } = getPreferenceValues();
+  const { timeout: prefTimeout } = getPreferenceValues<Preferences>();
 
   const regexp = /^[0-9]+$/;
   const timeout = regexp.test(prefTimeout) ? parseInt(prefTimeout) : 500;
