@@ -1,6 +1,6 @@
 # Font Sniper
 
-A Raycast extension to identify and download fonts from any website.
+A Raycast extension to identify and download fonts from any website
 
 ## Features
 
