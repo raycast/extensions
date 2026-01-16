@@ -19,7 +19,7 @@ export const cache = new Cache();
 function safeParse<T>(value: string, key: string, fallback: T): T {
   try {
     return JSON.parse(value) as T;
-  } catch (error) {
+  } catch {
     cache.remove(key);
     return fallback;
   }
@@ -136,7 +136,7 @@ export async function authenticationCheck() {
   }
   try {
     return await attemptLogin(getPreferenceValues<Preferences>(), { showToast: false });
-  } catch (error) {
+  } catch {
     await logout();
     return false;
   }
@@ -172,7 +172,7 @@ export async function performSync(options?: { organizationId?: string; workspace
           Authorization: `Bearer ${token}`,
           "X-Client-Source": "raycast",
         },
-      }
+      },
     );
     applySyncResponse(response.data as SyncResponse);
     return true;

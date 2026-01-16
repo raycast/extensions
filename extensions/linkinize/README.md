@@ -7,8 +7,9 @@ Linkinize is a collaborative bookmark manager that lets you save, categorize, an
 Linkinize Raycast extension makes it easy to access your bookmarks without leaving your screen.
 
 ### Features:
-* Search Through Your bookmarks instantly
-* Switch Workspaces
-* Synchronize Bookmarks (automatically/manual)
+
+- Search Through Your bookmarks instantly
+- Switch Workspaces
+- Synchronize Bookmarks (automatically/manual)
 
 to learn more about Linkinize check [Linkinize](https://linkinize.com "The Ultimate Bookmark Manager for Teams") website.
