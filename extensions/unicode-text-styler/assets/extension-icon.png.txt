@@ -1,8 +1,0 @@
-You need to create a 512x512 PNG icon.
-
-Quick options:
-1. Use any 512x512 image temporarily
-2. Create one online at https://www.figma.com or similar
-3. Use an emoji as icon (see below)
-
-For now, you can use SF Symbols or create a simple colored square.
