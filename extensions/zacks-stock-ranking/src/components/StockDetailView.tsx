@@ -1,19 +1,8 @@
-import { Action, ActionPanel, Detail, LocalStorage } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { getZacksData, getZacksRankColor, formatCurrency, formatPercent, formatNumber } from "../api";
-import { RecentTicker, ZacksQuoteData } from "../types";
-
-const RECENTS_KEY = "recent-tickers";
-const MAX_RECENTS = 10;
-
-export async function addToRecents(symbol: string, name: string) {
-  const stored = await LocalStorage.getItem<string>(RECENTS_KEY);
-  const recents: RecentTicker[] = stored ? JSON.parse(stored) : [];
-  const filtered = recents.filter((r) => r.symbol !== symbol);
-  filtered.unshift({ symbol, name, timestamp: Date.now() });
-  const trimmed = filtered.slice(0, MAX_RECENTS);
-  await LocalStorage.setItem(RECENTS_KEY, JSON.stringify(trimmed));
-}
+import { Action, ActionPanel, Detail } from "@raycast/api";
+import { useEffect } from "react";
+import { useZacksData, getZacksRankColor, formatCurrency, formatPercent, formatNumber } from "../api";
+import { addToRecents } from "../recents";
+import { ZacksQuoteData } from "../types";
 
 function generateMarkdown(data: ZacksQuoteData): string {
   const change = parseFloat(data.net_change);
@@ -74,17 +63,13 @@ interface StockDetailViewProps {
 export function StockDetailView({ ticker, name }: StockDetailViewProps) {
   const symbol = ticker.toUpperCase().trim();
 
-  const { data, isLoading, error } = useCachedPromise(
-    async (sym: string) => {
-      const result = await getZacksData(sym);
-      if (result) {
-        await addToRecents(sym, result.name || name || sym);
-      }
-      return result;
-    },
-    [symbol],
-    { keepPreviousData: false },
-  );
+  const { data, isLoading, error } = useZacksData(symbol);
+
+  useEffect(() => {
+    if (data) {
+      addToRecents(symbol, data.name || name || symbol);
+    }
+  }, [data, symbol, name]);
 
   if (error) {
     return <Detail markdown={`# Error\n\nFailed to fetch data for **${symbol}**:\n\n${error.message}`} />;

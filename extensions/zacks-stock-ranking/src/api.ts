@@ -16,50 +16,6 @@ interface YahooSearchResponse {
   quotes: YahooQuote[];
 }
 
-export async function searchTickers(query: string): Promise<TickerSearchResult[]> {
-  if (!query || query.length < 1) {
-    return [];
-  }
-
-  try {
-    const url = `${YAHOO_SEARCH_BASE}?q=${encodeURIComponent(query)}&quotesCount=10&newsCount=0&listsCount=0`;
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Search failed: ${response.status}`);
-    }
-    const data: YahooSearchResponse = await response.json();
-    // Filter to only stocks/ETFs and map to our format
-    return data.quotes
-      .filter((q) => q.quoteType === "EQUITY" || q.quoteType === "ETF")
-      .map((q) => ({
-        symbol: q.symbol,
-        name: q.longname || q.shortname || q.symbol,
-      }));
-  } catch (error) {
-    console.error("Ticker search error:", error);
-    return [];
-  }
-}
-
-export async function getZacksData(ticker: string): Promise<ZacksQuoteData | null> {
-  try {
-    const response = await fetch(`${ZACKS_QUOTE_BASE}?t=${encodeURIComponent(ticker.toUpperCase())}`);
-    if (!response.ok) {
-      throw new Error(`Zacks API failed: ${response.status}`);
-    }
-    const data: ZacksApiResponse = await response.json();
-    const tickerData = data[ticker.toUpperCase()];
-    return tickerData || null;
-  } catch (error) {
-    console.error("Zacks API error:", error);
-    return null;
-  }
-}
-
 // Helper to format the Zacks rank with color
 export function getZacksRankColor(rank: string): string {
   switch (rank) {

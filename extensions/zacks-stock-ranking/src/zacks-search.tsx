@@ -1,21 +1,13 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { searchTickers } from "./api";
+import { useTickerSearch } from "./api";
 import { TickerSearchResult } from "./types";
 import { StockDetailView } from "./components/StockDetailView";
 
 export default function SearchZacksRank() {
   const [searchText, setSearchText] = useState("");
 
-  const { data: searchResults, isLoading } = useCachedPromise(
-    async (query: string) => {
-      if (!query || query.length < 1) return [];
-      return searchTickers(query);
-    },
-    [searchText],
-    { keepPreviousData: true },
-  );
+  const { data: searchResults, isLoading } = useTickerSearch(searchText);
 
   return (
     <List

@@ -1,15 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getZacksData, getZacksRankColor, formatCurrency, formatPercent } from "./api";
+import { useZacksData, getZacksRankColor, formatCurrency, formatPercent } from "./api";
+import { getRecents, removeRecent, clearRecents } from "./recents";
 import { RecentTicker, ZacksQuoteData } from "./types";
 import { StockDetailView } from "./components/StockDetailView";
-
-const RECENTS_KEY = "recent-tickers";
-
-interface RecentWithData extends RecentTicker {
-  zacksData?: ZacksQuoteData | null;
-  isLoading?: boolean;
-}
 
 function formatTimeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -22,18 +16,15 @@ function formatTimeAgo(timestamp: number): string {
   return `${days}d ago`;
 }
 
-function getAccessories(recent: RecentWithData): List.Item.Accessory[] {
+function getAccessories(data: ZacksQuoteData | null | undefined, timestamp: number): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
 
-  if (recent.zacksData) {
-    const data = recent.zacksData;
+  if (data) {
     const change = parseFloat(data.net_change);
     const isPositive = !isNaN(change) && change >= 0;
 
-    // Price
     accessories.push({ text: formatCurrency(data.last) });
 
-    // Change with color
     accessories.push({
       tag: {
         value: formatPercent(data.percent_net_change),
@@ -41,7 +32,6 @@ function getAccessories(recent: RecentWithData): List.Item.Accessory[] {
       },
     });
 
-    // Zacks Rank with recommendation text
     if (data.zacks_rank && data.zacks_rank !== "NA" && data.zacks_rank_text) {
       accessories.push({
         tag: {
@@ -52,95 +42,84 @@ function getAccessories(recent: RecentWithData): List.Item.Accessory[] {
     }
   }
 
-  // Time ago
-  accessories.push({ text: formatTimeAgo(recent.timestamp), icon: Icon.Clock });
+  accessories.push({ text: formatTimeAgo(timestamp), icon: Icon.Clock });
 
   return accessories;
 }
 
+interface RecentStockItemProps {
+  recent: RecentTicker;
+  onRemove: (symbol: string) => void;
+  onClearAll: () => void;
+}
+
+function RecentStockItem({ recent, onRemove, onClearAll }: RecentStockItemProps) {
+  const { data } = useZacksData(recent.symbol);
+
+  return (
+    <List.Item
+      key={recent.symbol}
+      title={recent.symbol}
+      subtitle={data?.name || recent.name}
+      accessories={getAccessories(data, recent.timestamp)}
+      icon={{
+        source: `https://assets.parqet.com/logos/symbol/${recent.symbol}`,
+        fallback: Icon.Building,
+      }}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="View Stock Details"
+            icon={Icon.Eye}
+            target={<StockDetailView ticker={recent.symbol} name={recent.name} />}
+          />
+          <Action.OpenInBrowser title="Open on Zacks.com" url={`https://www.zacks.com/stock/quote/${recent.symbol}`} />
+          <Action.CopyToClipboard title="Copy Ticker" content={recent.symbol} />
+          <Action
+            title="Remove from Recents"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            onAction={() => onRemove(recent.symbol)}
+          />
+          <Action
+            title="Clear All Recents"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+            onAction={onClearAll}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 export default function RecentStocks() {
-  const {
-    data: recentsWithData,
-    isLoading,
-    revalidate,
-  } = useCachedPromise(async () => {
-    const stored = await LocalStorage.getItem<string>(RECENTS_KEY);
-    const recents: RecentTicker[] = stored ? JSON.parse(stored) : [];
+  const { data: recents, isLoading, revalidate } = useCachedPromise(getRecents, []);
 
-    if (recents.length === 0) return [];
-
-    // Fetch Zacks data for all recent stocks in parallel
-    const recentsWithData: RecentWithData[] = await Promise.all(
-      recents.map(async (recent) => {
-        try {
-          const zacksData = await getZacksData(recent.symbol);
-          return { ...recent, zacksData };
-        } catch {
-          return { ...recent, zacksData: null };
-        }
-      }),
-    );
-
-    return recentsWithData;
-  }, []);
-
-  async function clearRecents() {
-    await LocalStorage.removeItem(RECENTS_KEY);
+  async function handleClearRecents() {
+    await clearRecents();
     await showToast({ style: Toast.Style.Success, title: "Cleared recent stocks" });
     revalidate();
   }
 
-  async function removeRecent(symbol: string) {
-    const stored = await LocalStorage.getItem<string>(RECENTS_KEY);
-    const current: RecentTicker[] = stored ? JSON.parse(stored) : [];
-    const filtered = current.filter((r) => r.symbol !== symbol);
-    await LocalStorage.setItem(RECENTS_KEY, JSON.stringify(filtered));
+  async function handleRemoveRecent(symbol: string) {
+    await removeRecent(symbol);
     await showToast({ style: Toast.Style.Success, title: `Removed ${symbol}` });
     revalidate();
   }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter recent stocks...">
-      {recentsWithData && recentsWithData.length > 0 ? (
-        <List.Section title="Recent Stocks" subtitle={`${recentsWithData.length} stocks`}>
-          {recentsWithData.map((recent: RecentWithData) => (
-            <List.Item
+      {recents && recents.length > 0 ? (
+        <List.Section title="Recent Stocks" subtitle={`${recents.length} stocks`}>
+          {recents.map((recent: RecentTicker) => (
+            <RecentStockItem
               key={recent.symbol}
-              title={recent.symbol}
-              subtitle={recent.zacksData?.name || recent.name}
-              accessories={getAccessories(recent)}
-              icon={{
-                source: `https://assets.parqet.com/logos/symbol/${recent.symbol}`,
-                fallback: Icon.Building,
-              }}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="View Stock Details"
-                    icon={Icon.Eye}
-                    target={<StockDetailView ticker={recent.symbol} name={recent.name} />}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open on Zacks.com"
-                    url={`https://www.zacks.com/stock/quote/${recent.symbol}`}
-                  />
-                  <Action.CopyToClipboard title="Copy Ticker" content={recent.symbol} />
-                  <Action
-                    title="Remove from Recents"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                    onAction={() => removeRecent(recent.symbol)}
-                  />
-                  <Action
-                    title="Clear All Recents"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-                    onAction={clearRecents}
-                  />
-                </ActionPanel>
-              }
+              recent={recent}
+              onRemove={handleRemoveRecent}
+              onClearAll={handleClearRecents}
             />
           ))}
         </List.Section>

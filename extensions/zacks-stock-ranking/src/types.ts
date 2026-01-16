@@ -4,11 +4,6 @@ export interface TickerSearchResult {
   name: string;
 }
 
-export interface TickerSearchResponse {
-  results: TickerSearchResult[];
-  message?: string;
-}
-
 // Nested source data from Zacks API
 export interface SungardSourceData {
   dividend: string;
