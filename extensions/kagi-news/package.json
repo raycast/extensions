@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kagi-news",
   "title": "Kagi News",
-  "description": "Browse news articles and sources from Kagi News",
+  "description": "Read and explore Kagi News articles and sources seamlessly in Raycast",
   "icon": "extension-icon.png",
   "author": "mickaphd",
   "contributors": [
@@ -19,9 +19,9 @@
   "commands": [
     {
       "name": "kagi-news",
-      "title": "Browse Daily News",
+      "title": "Daily News",
       "subtitle": "Kagi News",
-      "description": "Browse news articles and sources from Kagi News",
+      "description": "Read and explore Kagi News articles and sources seamlessly in Raycast",
       "mode": "view"
     }
   ],
@@ -141,40 +141,112 @@
       ]
     },
     {
-      "name": "showPrimaryImage",
+      "name": "showBusinessAnglePoints",
       "type": "checkbox",
       "required": false,
       "title": "Display Sections",
-      "label": "Show Primary Image",
-      "description": "Display the main article image",
+      "label": "Show Business Angle Points",
+      "description": "Display business angle points and analysis",
+      "default": false
+    },
+    {
+      "name": "showBusinessAngleText",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Business Angle Text",
+      "description": "Display business angle narrative",
+      "default": false
+    },
+    {
+      "name": "showCulinarySignificance",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Culinary Significance",
+      "description": "Display culinary-related information",
+      "default": false
+    },
+    {
+      "name": "showDesignPrinciples",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Design Principles",
+      "description": "Display design principles and concepts",
+      "default": false
+    },
+    {
+      "name": "showDestinationHighlights",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Destination Highlights",
+      "description": "Display destination highlights and attractions",
+      "default": false
+    },
+    {
+      "name": "showDidYouKnow",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Did You Know",
+      "description": "Display the 'Did You Know' section",
       "default": true
+    },
+    {
+      "name": "showDiyTips",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show DIY Tips",
+      "description": "Display DIY tips and instructions",
+      "default": false
+    },
+    {
+      "name": "showEconomicImplications",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Economic Implications",
+      "description": "Display economic implications and impacts",
+      "default": false
+    },
+    {
+      "name": "showFutureOutlook",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Future Outlook",
+      "description": "Display future outlook and predictions",
+      "default": false
+    },
+    {
+      "name": "showGameplayMechanics",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Gameplay Mechanics",
+      "description": "Display gameplay mechanics and rules",
+      "default": false
+    },
+    {
+      "name": "showGeopoliticalContext",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Geopolitical Context",
+      "description": "Display geopolitical context and analysis",
+      "default": false
     },
     {
       "name": "showTalkingPoints",
       "type": "checkbox",
       "required": false,
       "title": "",
-      "label": "Show Talking Points",
+      "label": "Show Highlights",
       "description": "Display key talking points from the article",
       "default": true
-    },
-    {
-      "name": "showSecondaryImage",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Show Secondary Image",
-      "description": "Display the secondary article image",
-      "default": false
-    },
-    {
-      "name": "showPerspectives",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Show Perspectives",
-      "description": "Display different perspectives on the story",
-      "default": false
     },
     {
       "name": "showHistoricalBackground",
@@ -186,12 +258,12 @@
       "default": false
     },
     {
-      "name": "showTechnicalDetails",
+      "name": "showHumanitarianImpact",
       "type": "checkbox",
       "required": false,
       "title": "",
-      "label": "Show Technical Details",
-      "description": "Display technical information",
+      "label": "Show Humanitarian Impact",
+      "description": "Display humanitarian impact and concerns",
       "default": false
     },
     {
@@ -204,15 +276,6 @@
       "default": false
     },
     {
-      "name": "showTimeline",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Show Timeline",
-      "description": "Display timeline of events",
-      "default": false
-    },
-    {
       "name": "showInternationalReactions",
       "type": "checkbox",
       "required": false,
@@ -222,13 +285,148 @@
       "default": false
     },
     {
-      "name": "showDidYouKnow",
+      "name": "showKeyPlayers",
       "type": "checkbox",
       "required": false,
       "title": "",
-      "label": "Show Did You Know",
-      "description": "Display the 'Did You Know' section",
+      "label": "Show Key Players",
+      "description": "Display key players and stakeholders",
+      "default": false
+    },
+    {
+      "name": "showLeagueStandings",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show League Standings",
+      "description": "Display league standings and rankings",
+      "default": false
+    },
+    {
+      "name": "showLocation",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Location",
+      "description": "Display location information",
+      "default": false
+    },
+    {
+      "name": "showPerformanceStatistics",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Performance Statistics",
+      "description": "Display performance statistics and metrics",
+      "default": false
+    },
+    {
+      "name": "showPerspectives",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Perspectives",
+      "description": "Display different perspectives on the story",
+      "default": false
+    },
+    {
+      "name": "showPrimaryImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Primary Image",
+      "description": "Display the main article image",
       "default": true
+    },
+    {
+      "name": "showQuote",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Quote",
+      "description": "Display featured quote with attribution",
+      "default": false
+    },
+    {
+      "name": "showScientificSignificance",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Scientific Significance",
+      "description": "Display scientific significance and findings",
+      "default": false
+    },
+    {
+      "name": "showSecondaryImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Secondary Image",
+      "description": "Display the secondary article image",
+      "default": false
+    },
+    {
+      "name": "showSuggestedQna",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Suggested Q&A",
+      "description": "Display suggested questions and answers",
+      "default": false
+    },
+    {
+      "name": "showTechnicalDetails",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Technical Details",
+      "description": "Display technical information",
+      "default": false
+    },
+    {
+      "name": "showTechnicalSpecifications",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Technical Specifications",
+      "description": "Display technical specifications",
+      "default": false
+    },
+    {
+      "name": "showTimeline",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Timeline",
+      "description": "Display timeline of events",
+      "default": false
+    },
+    {
+      "name": "showTravelAdvisory",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Travel Advisory",
+      "description": "Display travel advisories and warnings",
+      "default": false
+    },
+    {
+      "name": "showUserActionItems",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show User Action Items",
+      "description": "Display recommended user action items",
+      "default": false
+    },
+    {
+      "name": "showUserExperienceImpact",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show User Experience Impact",
+      "description": "Display user experience impact analysis",
+      "default": false
     }
   ],
   "dependencies": {

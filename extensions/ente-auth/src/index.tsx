@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { getFavicon, getProgressIcon, useFrecencySorting, usePromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { getJsonFormatFromStore } from "./helpers";
@@ -43,7 +43,7 @@ export default function Command() {
 	const Label = Metadata.Label;
 	const Separator = Metadata.Separator;
 
-	const PreferredAction = getPreferenceValues().primaryAction;
+	const PreferredAction = getPreferenceValues<Preferences>().primaryAction;
 
 	return (
 		<List navigationTitle="Get TOTP" isLoading={firstLoad} searchBarPlaceholder="Search..." isShowingDetail>
@@ -117,7 +117,7 @@ export default function Command() {
 										icon={Icon.Key}
 										content={item.next_totp}
 										onCopy={() => visitItem(item)}
-										shortcut={{ modifiers: ["cmd"], key: "n" }}
+										shortcut={Keyboard.Shortcut.Common.New}
 									/>
 								</ActionPanel.Section>
 								<ActionPanel.Section>

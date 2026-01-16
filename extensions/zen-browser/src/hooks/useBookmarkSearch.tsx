@@ -8,7 +8,7 @@ import { getPlacesDbPath } from "../util";
 import { useRetrySQLError } from "./useRetrySQLError";
 
 const whereClauses = (terms: string[]) => {
-  return terms.map((t) => `b.title LIKE '%${t}%'`).join(" AND ");
+  return terms.map((t) => `(b.title LIKE '%${t}%' OR p.url LIKE '%${t}%')`).join(" AND ");
 };
 
 const getBookmarkQuery = (query?: string) => {

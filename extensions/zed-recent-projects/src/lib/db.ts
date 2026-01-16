@@ -1,4 +1,5 @@
-import { execFilePromise } from "./utils";
+import { execFilePromise, isWindows } from "./utils";
+import { executeSQL } from "@raycast/utils";
 
 // Zed Build types
 export type ZedBuild = "Zed" | "Zed Preview" | "Zed Dev";
@@ -28,7 +29,27 @@ export const DEFAULT_WORKSPACE_DB_VERSION = 28;
 
 export async function queryDb(dbPath: string, query: string): Promise<string> {
   try {
-    // Apply `--init /dev/null` to ignore user sqlite configuration
+    if (isWindows) {
+      try {
+        const res = await executeSQL(dbPath, query);
+
+        if (!res || !Array.isArray(res) || res.length === 0) {
+          return "";
+        }
+
+        const firstRow = res[0] as Record<string, unknown>;
+        if (res.length === 1 && Object.keys(firstRow).length === 1) {
+          return String(Object.values(firstRow)[0]);
+        }
+
+        return res.map((row) => Object.values(row as Record<string, unknown>).join("\t")).join("\n");
+      } catch (error) {
+        console.error(`Error querying Zed workspace DB (executeSQL): ${error}`);
+        throw error;
+      }
+    }
+
+    // Apply `--init /dev/null` to ignore user sqlite configuration on Unix-like systems
     const result = await execFilePromise("sqlite3", ["--init", "/dev/null", dbPath, query]);
 
     if (result.stderr) {
@@ -110,6 +131,8 @@ export const ZED_WORKSPACES_QUERY_26 = `SELECT
   workspace_id as id,
   paths,
   timestamp,
+  window_id,
+  session_id,
   host,
   user,
   port
@@ -127,9 +150,13 @@ export const ZED_WORKSPACES_QUERY_28 = `SELECT
   workspace_id as id,
   paths,
   timestamp,
+  window_id,
+  session_id,
   host,
   user,
-  port
+  port,
+  kind,
+  distro
 FROM workspaces
 LEFT JOIN remote_connections ON remote_connection_id = remote_connections.id
 WHERE paths IS NOT NULL AND paths != ''

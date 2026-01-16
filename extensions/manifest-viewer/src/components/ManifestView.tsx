@@ -89,7 +89,10 @@ export default function ManifestView({ url }: ManifestViewProps) {
         key="reload"
         title="Reload"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "r" },
+          Windows: { modifiers: ["ctrl"], key: "r" },
+        }}
         onAction={loadContent}
       />
       <Action.OpenInBrowser key="browser" url={url} />

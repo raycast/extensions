@@ -23,7 +23,7 @@ export async function callUAPI<T>(
         Authorization: `cpanel ${CPANEL_USERNAME}:${API_TOKEN}`,
       },
     });
-    const result: ErrorResponse | SuccessResponse<T> = await response.json();
+    const result = (await response.json()) as ErrorResponse | SuccessResponse<T>;
     if (!result.status) throw new Error(result.errors.join());
     if (result.data === 0) throw new Error("Something went wrong");
     toast.style = Toast.Style.Success;

@@ -11,6 +11,13 @@ import {
 } from "./utils";
 import { ACL } from "@uploadthing/shared";
 import { useCachedPromise } from "@raycast/utils";
+// this is needed to solve error: https://docs.uploadthing.com/faq#i-am-getting-a-invalid-signing-secret-error
+import { webcrypto as crypto } from "node:crypto";
+
+// should work fine on windows and mac
+if (!globalThis.crypto) {
+  globalThis.crypto = crypto;
+}
 
 export const useUpload = () => {
   const toast = useRef<Toast | null>(null);
@@ -32,6 +39,7 @@ export const useUpload = () => {
     },
     onSuccess: (data) => {
       console.log(data);
+      if (data[0].error) throw new Error(data[0].error.message);
       toast.current!.style = Toast.Style.Success;
       toast.current!.title = "Files uploaded";
 
@@ -96,7 +104,7 @@ export const useAppInfo = () => {
 export const useFiles = () => {
   const utapi = new UTApi({ token: getToken() });
   const LIMIT = 20;
-  const { isLoading, data, pagination, revalidate } = useCachedPromise(
+  const { isLoading, data, pagination, mutate } = useCachedPromise(
     () => async (options: { page: number }) => {
       const res = await utapi.listFiles({
         offset: options.page * LIMIT,
@@ -111,5 +119,5 @@ export const useFiles = () => {
     [],
     { initialData: [] },
   );
-  return { isLoading, files: data, pagination, revalidate };
+  return { isLoading, files: data, pagination, mutate };
 };

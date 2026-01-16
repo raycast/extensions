@@ -4,6 +4,7 @@ Browse, search, and copy 3300+ SVG icons for popular brands from [Simple Icons](
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 [![raycast-pro-enhanced-badge]][raycast-pro-enhanced-link]
+[![raycast-macos-windows-badge]][raycast-macos-windows-link]
 
 ## Disclaimer
 
@@ -20,7 +21,7 @@ We ask that all users read our [legal disclaimer](https://github.com/simple-icon
 - Browse history versions of Simple Icons
 - Keep updating every week
 - Expose launch API for other extensions
-- Searching icons through AI (requires [Raycast Pro](https://raycast.com/pro))
+- Searching icons through AI (requires [Raycast Pro](https://raycast.com/pro?via=litomore))
 
 ## API
 
@@ -48,3 +49,5 @@ MIT
 [raycast-cross-extension-link]: https://github.com/LitoMore/raycast-cross-extension-conventions
 [raycast-pro-enhanced-badge]: https://shields.io/badge/Raycast-Pro_Enhanced-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
 [raycast-pro-enhanced-link]: https://github.com/LitoMore/raycast-pro-enhanced-extensions
+[raycast-macos-windows-badge]: https://shields.io/badge/Raycast-macOS%20|%20Windows-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
+[raycast-macos-windows-link]: https://raycast.com/store?via=litomore

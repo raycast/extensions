@@ -1,94 +1,114 @@
+// This service is used to cache note metadata and make it reusable between
+// commands of this extension. This means running a command will set the cache
+// and the next command run can reuse the previously cached data.
+
 import { Cache } from "@raycast/api";
+import { Note } from "@/obsidian";
 import { BYTES_PER_MEGABYTE } from "../../utils/constants";
 import { Logger } from "../logger/logger.service";
-import { Note } from "../vault/notes/notes.types";
-import { loadNotes } from "../vault/vault.service";
-import { Vault } from "../vault/vault.types";
-
-//--------------------------------------------------------------------------------
-// This cache is shared accross all commands.
-//--------------------------------------------------------------------------------
 
 const logger = new Logger("Cache");
-const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 500 });
+const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 100 }); // 100MB for metadata only
 
-/**
- * Cache all notes for a given vault.
- *
- * @param vault - Vault to cache notes for
- * @returns The cached notes for the vault
- */
-export function cacheNotesFor(vault: Vault) {
-  const notes = loadNotes(vault);
-  cache.set(vault.name, JSON.stringify({ lastCached: Date.now(), notes: notes }));
-  return notes;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+interface CachedNotesData {
+  lastCached: number;
+  notes: Note[];
 }
 
-/**
- * Renews the cache for a given vault by reloading all notes from disk.
- *
- * @param vault - Vault to renew the cache for
- */
-export function renewCache(vault: Vault) {
-  console.log("Renew Cache");
-  cacheNotesFor(vault);
-}
-
-/**
- * Test if cache exists for a given vault.
- *
- * @param vault - Vault to test if cache exists for
- * @returns true if cache exists for vault
- */
-export function cacheExistForVault(vault: Vault) {
-  if (cache.has(vault.name)) {
-    return true;
-  } else {
-    console.log("Cache does not exist for vault: " + vault.name);
+export function setNotesInCache(cacheKey: string, notes: Note[]): void {
+  const data: CachedNotesData = {
+    lastCached: Date.now(),
+    notes,
+  };
+  try {
+    cache.set(cacheKey, JSON.stringify(data));
+    logger.info(`Cached ${notes.length} notes for ${cacheKey}`);
+  } catch (error) {
+    logger.error(`Failed to cache notes. Error: ${error}`);
   }
 }
 
 /**
- * Updates a note that has already been cached.
- *
- * @param vault - The Vault to update the note in
- * @param note - The updated note
+ * Gets notes from cache if available and not stale.
  */
-
-export function updateNoteInCache(vault: Vault, note: Note) {
-  if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "{}");
-    data.notes = data.notes.map((n: Note) => (n.path === note.path ? note : n));
-    cache.set(vault.name, JSON.stringify(data));
+export function getNotesFromCache(cacheKey: string): Note[] | null {
+  if (!cache.has(cacheKey)) {
+    logger.info(`No cache for ${cacheKey}`);
+    return null;
   }
+
+  try {
+    const cached = cache.get(cacheKey);
+    if (!cached) return null;
+
+    const data: CachedNotesData = JSON.parse(cached);
+
+    // Check if stale
+    if (Date.now() - data.lastCached > CACHE_TTL) {
+      logger.info(`Cache stale for ${cacheKey}`);
+      return null;
+    }
+
+    // Convert lastModified back to Date objects after JSON parsing
+    const notesWithDates = data.notes.map((note) => ({
+      ...note,
+      lastModified: new Date(note.lastModified),
+    }));
+
+    logger.info(`Using cached notes for ${cacheKey}`);
+    return notesWithDates;
+  } catch (error) {
+    logger.error(`Failed to parse cached notes. Error: ${error}`);
+    return null;
+  }
+}
+
+/**
+ * Invalidates the cache for a given vault.
+ */
+export function invalidateNotesCache(cacheKey: string): void {
+  cache.remove(cacheKey);
+  logger.info(`Invalidated cache for ${cacheKey}`);
+}
+
+/**
+ * Updates a single note in the cache.
+ */
+export function updateNoteInCache(cacheKey: string, notePath: string, updates: Partial<Note>): void {
+  const cached = getNotesFromCache(cacheKey);
+  if (!cached) {
+    logger.info(`No cache to update for ${cacheKey}`);
+    return;
+  }
+
+  const updatedNotes = cached.map((note) => (note.path === notePath ? { ...note, ...updates } : note));
+
+  setNotesInCache(cacheKey, updatedNotes);
+  logger.info(`Updated note ${notePath} in cache`);
 }
 
 /**
  * Deletes a note from the cache.
- *
- * @param vault - The Vault to delete the note from
- * @param note - The note to delete from the cache
  */
-export function deleteNoteFromCache(vault: Vault, note: Note) {
-  if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "{}");
-    data.notes = data.notes.filter((n: Note) => n.path !== note.path);
-    cache.set(vault.name, JSON.stringify(data));
+export function deleteNoteFromCache(cacheKey: string, notePath: string): void {
+  const cached = getNotesFromCache(cacheKey);
+  if (!cached) {
+    logger.info(`No cache to delete from for ${cacheKey}`);
+    return;
   }
+
+  const filteredNotes = cached.filter((note) => note.path !== notePath);
+
+  setNotesInCache(cacheKey, filteredNotes);
+  logger.info(`Deleted note ${notePath} from cache`);
 }
 
-export function getNotesFromCache(vault: Vault) {
-  if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "{}");
-    if (data.notes?.length > 0 && data.lastCached > Date.now() - 1000 * 60 * 5) {
-      const notes_ = data.notes as Note[];
-      logger.info("Using cached notes.");
-      return notes_;
-    }
-  }
-  return cacheNotesFor(vault);
-}
-
-export function clearCache() {
+/**
+ * Clears all cache entries.
+ */
+export function clearCache(): void {
   cache.clear();
+  logger.info("Cleared all cache");
 }

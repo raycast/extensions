@@ -1,4 +1,19 @@
 import { DEFAULT_TITLE, FALLBACK_ICON } from "./constants";
+import { Application, Image } from "@raycast/api";
+
+export function mergePlaceholders(
+  globalPlaceholders: Record<string, string> | undefined,
+  localPlaceholders: Record<string, string> | undefined,
+): Record<string, string> | undefined {
+  if (!globalPlaceholders && !localPlaceholders) {
+    return undefined;
+  }
+
+  return {
+    ...globalPlaceholders,
+    ...localPlaceholders,
+  };
+}
 
 export function applyTemplate(templateUrl: string, placeholders: Record<string, string>): string {
   if (!templateUrl || !placeholders) {
@@ -18,30 +33,46 @@ export function applyTemplate(templateUrl: string, placeholders: Record<string, 
   return finalUrl;
 }
 
+// Cache for domain keyword extraction
+const domainCache = new Map<string, string[]>();
+
+export function clearDomainCache() {
+  domainCache.clear();
+}
+
 export function getDomainKeywords(url: string): string[] {
   if (!url) return [];
 
+  // Check cache first
+  const cached = domainCache.get(url);
+  if (cached) return cached;
+
+  let result: string[];
   try {
     const { hostname } = new URL(url);
 
     // Handle IP addresses
     if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) {
-      return [hostname];
+      result = [hostname];
+    } else {
+      // Extract domain parts
+      const parts = hostname.split(".");
+      result = [hostname, ...parts];
     }
-
-    // Extract domain parts
-    const parts = hostname.split(".");
-    return [hostname, ...parts];
   } catch {
     // Fallback for malformed URLs
     const domainMatch = url.match(/([a-z0-9\-_]+\.)+[a-z0-9\-_]+/i);
     if (domainMatch && domainMatch[0]) {
       const hostname = domainMatch[0];
       const parts = hostname.split(".");
-      return [hostname, ...parts];
+      result = [hostname, ...parts];
+    } else {
+      result = [];
     }
-    return [];
   }
+
+  domainCache.set(url, result);
+  return result;
 }
 
 export function getSafeTitle(title?: string): string {
@@ -71,8 +102,19 @@ export function extractPlaceholders(templateUrl: string): string[] {
   return matches.map((match) => match.slice(2, -1));
 }
 
+// Simple memoization cache for keyword generation
+const keywordCache = new Map<string, string[]>();
+
+export function clearKeywordCache() {
+  keywordCache.clear();
+}
+
 export function getEnhancedKeywords(text: string): string[] {
   if (!text) return [];
+
+  // Check cache first
+  const cached = keywordCache.get(text);
+  if (cached) return cached;
 
   const keywords = new Set<string>();
 
@@ -83,7 +125,10 @@ export function getEnhancedKeywords(text: string): string[] {
     }
   });
 
-  return Array.from(keywords).filter((k) => k.length > 0);
+  const result = Array.from(keywords).filter((k) => k.length > 0);
+  keywordCache.set(text, result);
+
+  return result;
 }
 
 export function combineKeywords(...keywordArrays: (string | string[])[]): string[] {
@@ -94,7 +139,7 @@ export function combineKeywords(...keywordArrays: (string | string[])[]): string
       allKeywords.add(item);
     } else if (Array.isArray(item)) {
       item.forEach((keyword) => {
-        if (keyword && typeof keyword === "string") {
+        if (keyword) {
           allKeywords.add(keyword);
         }
       });
@@ -102,6 +147,16 @@ export function combineKeywords(...keywordArrays: (string | string[])[]): string
   });
 
   return Array.from(allKeywords).filter((k) => k.length > 0);
+}
+
+export function getAppIcon(appNameOrBundleId: string, applications: Application[]): Image.ImageLike | undefined {
+  const app = applications.find(
+    (app) => app.name === appNameOrBundleId || app.bundleId === appNameOrBundleId || app.path === appNameOrBundleId,
+  );
+  if (app) {
+    return { fileIcon: app.path };
+  }
+  return undefined;
 }
 
 export function getFallbackIcon(providedIcon?: string, hasOpenIn?: boolean): string | undefined {

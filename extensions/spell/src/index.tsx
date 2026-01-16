@@ -27,7 +27,9 @@ export default function Command() {
   const { data, isLoading } = useFetch<SearchResult[]>(
     "https://api.datamuse.com/words?" +
       // send the search query to the API
-      new URLSearchParams({ sp: searchText.toLowerCase(), v: preferences.language === "es" ? "es" : "enwiki" }),
+      new URLSearchParams(
+        preferences.language === "es" ? { sp: searchText.toLowerCase(), v: "es" } : { sp: searchText.toLowerCase() },
+      ),
     {
       keepPreviousData: true, // removes flickering
       execute: searchText.length > 0 && !cache.get(cacheKey),

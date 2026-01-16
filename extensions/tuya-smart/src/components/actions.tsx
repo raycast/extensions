@@ -20,6 +20,26 @@ export function DevicePinAction(props: { device: Device; onAction: (device: Devi
   );
 }
 
+export function SwitchPinAction(props: {
+  deviceId: string;
+  commandCode: string;
+  isPinned: boolean;
+  onTogglePin: (deviceId: string, commandCode: string) => void;
+}): JSX.Element {
+  const { isPinned, onTogglePin, deviceId, commandCode } = props;
+  return (
+    <Action
+      title={isPinned ? "Unpin Switch" : "Pin Switch"}
+      icon={Icon.Pin}
+      shortcut={{ modifiers: ["opt", "shift"], key: "p" }}
+      onAction={() => {
+        onTogglePin(deviceId, commandCode);
+        showToast(Toast.Style.Success, isPinned ? "Unpinned Switch" : "Pinned Switch");
+      }}
+    />
+  );
+}
+
 export function BooleanCommand(props: {
   deviceId: string;
   command: FunctionItem;

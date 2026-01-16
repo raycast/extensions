@@ -1,6 +1,8 @@
 import { List, Action, ActionPanel, Icon, showToast, Toast, confirmAlert, Alert, Color, Clipboard } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { getHistory, getFavorites, toggleFavorite, deleteHistoryItem, clearHistory, HistoryItem } from "./storage";
+import { getHistory, getFavorites, toggleFavorite, deleteHistoryItem, clearHistory } from "./storage";
+import { HistoryItem } from "./types";
+import { formatDate } from "./utils";
 
 type ViewMode = "all" | "favorites";
 
@@ -116,22 +118,6 @@ export default function ViewHistory() {
       style: Toast.Style.Success,
       title: "Copied original link",
     });
-  };
-
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInMins = Math.floor(diffInMs / 60000);
-    const diffInHours = Math.floor(diffInMs / 3600000);
-    const diffInDays = Math.floor(diffInMs / 86400000);
-
-    if (diffInMins < 1) return "Just now";
-    if (diffInMins < 60) return `${diffInMins}m ago`;
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-
-    return date.toLocaleDateString();
   };
 
   return (

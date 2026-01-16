@@ -13,7 +13,6 @@ import {
 } from "@raycast/api";
 import { useForm, withAccessToken } from "@raycast/utils";
 import { parseHTML } from "linkedom";
-import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
 import { useSearchPages } from "./hooks";
@@ -159,7 +158,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         }
 
         await showToast({ style: Toast.Style.Success, title: "Captured content to page" });
-      } catch (error) {
+      } catch {
         await showToast({ style: Toast.Style.Failure, title: "Failed capturing content to page" });
       }
     },

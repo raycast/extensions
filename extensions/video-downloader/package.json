@@ -179,13 +179,14 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "@types/validator": "^13.15.10",
     "date-fns": "^4.1.0",
     "execa": "^9.6.0",
-    "is-url-superb": "^6.1.0",
     "pretty-bytes": "^6.1.1",
-    "srt-parser-2": "^1.2.3"
+    "srt-parser-2": "^1.2.3",
+    "validator": "^13.15.23"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

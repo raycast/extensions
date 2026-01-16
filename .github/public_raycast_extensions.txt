@@ -17,6 +17,7 @@ vercast
 ohdear
 devutils
 arc
+dia
 netlify
 pinata
 plane

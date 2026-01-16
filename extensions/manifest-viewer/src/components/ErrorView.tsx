@@ -34,7 +34,10 @@ export default function ErrorView({ message, url, httpStatus, manifestType, onRe
           title="Retry"
           icon={Icon.ArrowClockwise}
           onAction={onRetry}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "r" },
+            Windows: { modifiers: ["ctrl"], key: "r" },
+          }}
         />
       )}
       {url && (
@@ -47,7 +50,10 @@ export default function ErrorView({ message, url, httpStatus, manifestType, onRe
         content={message}
         title="Copy Error Message"
         icon={Icon.Document}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "c" },
+          Windows: { modifiers: ["ctrl"], key: "c" },
+        }}
       />
     </ActionPanel>
   );

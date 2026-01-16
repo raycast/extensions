@@ -1,7 +1,11 @@
 import { getAccessToken } from "@raycast/utils";
 import { getOctokit } from "../lib/oauth";
 import { handleGitHubError } from "../lib/github-client";
-import { AI, environment } from "@raycast/api";
+import { AI, environment, getPreferenceValues } from "@raycast/api";
+import { parseUsageData } from "../tools/parse-copilot-usage";
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
 
 // The state of an agent session returned from Copilot API
 enum AgentSessionState {
@@ -90,13 +94,69 @@ type GetJobResponse =
         id: number;
         number: number;
       };
+      session_id: string;
     };
+
+interface GetSessionResponse {
+  resource_global_id: string;
+}
+
+type QuotaSnapshot = {
+  entitlement: number;
+  overage_count: number;
+  overage_permitted: boolean;
+  percent_remaining: number;
+  quota_id: string;
+  quota_remaining: number;
+  remaining: number;
+  unlimited: boolean;
+  timestamp_utc: string;
+};
+
+type CopilotInternalUserResponse = {
+  access_type_sku: string;
+  analytics_tracking_id: string;
+  assigned_date: string;
+  can_signup_for_limited: boolean;
+  chat_enabled: boolean;
+  copilot_plan: string;
+  organization_login_list: string[];
+  organization_list: Array<{
+    login: string;
+    name: string;
+  }>;
+  quota_reset_date: string;
+  quota_snapshots: {
+    chat?: QuotaSnapshot;
+    completions?: QuotaSnapshot;
+    premium_interactions?: QuotaSnapshot;
+  };
+  quota_reset_date_utc: string;
+};
+
+type CopilotUsage = {
+  inlineSuggestions: {
+    percentageUsed: number;
+    limit: number | null;
+  };
+  chatMessages: {
+    percentageUsed: number;
+    limit: number | null;
+  };
+  premiumRequests: {
+    percentageUsed: number;
+    limit: number | null;
+  };
+  allowanceResetAt: string;
+};
 
 export async function createTask(
   repository: string,
   prompt: string,
   branch: string,
-): Promise<{ pullRequestUrl: string }> {
+  model: string | null,
+  customAgent: string | null,
+): Promise<{ pullRequestUrl: string; sessionUrl: string }> {
   const { token } = getAccessToken();
 
   let generatedTitle: string | null = null;
@@ -117,21 +177,25 @@ export async function createTask(
     }
   }
 
+  const body = {
+    problem_statement: prompt,
+    event_type: "raycast",
+    pull_request: {
+      title: generatedTitle ?? prompt,
+      base_ref: branch,
+      head_ref: null,
+    },
+    model,
+    ...(customAgent ? { custom_agent: customAgent } : {}),
+  };
+
   const createJobResponse = await fetch(`https://api.githubcopilot.com/agents/swe/v1/jobs/${repository}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      problem_statement: prompt,
-      event_type: "raycast",
-      pull_request: {
-        title: generatedTitle ?? prompt,
-        base_ref: branch,
-        head_ref: null,
-      },
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!createJobResponse.ok) {
@@ -140,21 +204,22 @@ export async function createTask(
         "Failed to create task. Please check if Copilot coding agent is enabled for your user at https://github.com/settings/copilot/features.",
       );
     } else {
-      throw new Error(`Failed to create task: ${createJobResponse.statusText}`);
+      const errorText = await createJobResponse.text();
+      throw new Error(`Failed to create task (${createJobResponse.statusText}): ${errorText}`);
     }
   }
 
   const createJobResult = (await createJobResponse.json()) as CreateJobResponse;
-  return { pullRequestUrl: await pollJobUntilPullRequestUrlReady({ repository, jobId: createJobResult.job_id }) };
+  return pollJobUntilPullRequestReady({ repository, jobId: createJobResult.job_id });
 }
 
-const pollJobUntilPullRequestUrlReady = async ({
+const pollJobUntilPullRequestReady = async ({
   repository,
   jobId,
 }: {
   repository: string;
   jobId: string;
-}): Promise<string> => {
+}): Promise<{ pullRequestUrl: string; sessionUrl: string }> => {
   const { token } = getAccessToken();
 
   const getJobResponse = await fetch(`https://api.githubcopilot.com/agents/swe/v1/jobs/${repository}/${jobId}`, {
@@ -171,7 +236,26 @@ const pollJobUntilPullRequestUrlReady = async ({
 
   if (getJobResult.status !== "pending") {
     const pullRequestUrl = `https://github.com/${repository}/pull/${getJobResult.pull_request.number}`;
-    return pullRequestUrl;
+
+    const getSessionResponse = await fetch(`https://api.githubcopilot.com/agents/sessions/${getJobResult.session_id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Copilot-Integration-Id": "copilot-raycast",
+      },
+    });
+
+    if (!getSessionResponse.ok) {
+      throw new Error(`Failed to get session information: ${getSessionResponse.statusText}`);
+    }
+
+    const getSessionResult = (await getSessionResponse.json()) as GetSessionResponse;
+
+    const sessionUrl = `https://github.com/copilot/tasks/pull/${getSessionResult.resource_global_id}`;
+
+    return {
+      pullRequestUrl,
+      sessionUrl,
+    };
   } else if (getJobResult.error) {
     if (getJobResult.error.response_status_code === "422") {
       throw new Error(
@@ -182,11 +266,48 @@ const pollJobUntilPullRequestUrlReady = async ({
     }
   } else {
     await sleep(1_000);
-    return pollJobUntilPullRequestUrlReady({ repository, jobId });
+    return pollJobUntilPullRequestReady({ repository, jobId });
   }
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Get the GitHub Copilot authentication token from apps.json (auto-generated by Copilot IDE extensions)
+ * File location defaults to ~/.config/github-copilot/apps.json
+ * @throws Error if the file doesn't exist, is invalid JSON, or contains no valid token
+ */
+const getCopilotAppToken = async (): Promise<string> => {
+  const prefs = getPreferenceValues<{ copilotAppsJsonPath?: string }>();
+  const appsJsonPath = prefs.copilotAppsJsonPath?.trim()
+    ? prefs.copilotAppsJsonPath.trim()
+    : join(homedir(), ".config", "github-copilot", "apps.json");
+
+  if (!existsSync(appsJsonPath)) {
+    throw new Error(
+      "GitHub Copilot configuration not found. Please sign in to Copilot using an IDE extension (VS Code, JetBrains, etc.) first.",
+    );
+  }
+
+  const appsJsonContent = readFileSync(appsJsonPath, "utf-8");
+  const appsJson = JSON.parse(appsJsonContent) as Record<string, Record<string, unknown>>;
+
+  // Get the first available oauth_token from the apps.json
+  // Structure: { "github.com:appId": { user: string, oauth_token: string, githubAppId: string }, ... }
+  for (const appKey in appsJson) {
+    const appData = appsJson[appKey];
+    if (appData && typeof appData === "object" && "oauth_token" in appData) {
+      const token = appData.oauth_token;
+      if (typeof token === "string" && token.length > 0) {
+        return token;
+      }
+    }
+  }
+
+  throw new Error(
+    "No valid authentication token found. Please sign in to GitHub Copilot using an IDE extension first.",
+  );
+};
 
 export const fetchSessions = async (): Promise<PullRequestWithAgentSessions[]> => {
   const { token } = getAccessToken();
@@ -294,6 +415,31 @@ export const fetchSessions = async (): Promise<PullRequestWithAgentSessions[]> =
   return transformedPullRequestsWithAgentSessions;
 };
 
+export const fetchCopilotUsage = async (): Promise<CopilotUsage> => {
+  const token = await getCopilotAppToken();
+
+  const response = await fetch("https://api.github.com/copilot_internal/user", {
+    headers: { authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("Authentication failed. Please verify your GitHub Copilot setup.");
+    }
+    throw new Error(`Failed to fetch Copilot usage: ${response.status} ${response.statusText}`);
+  }
+
+  const data = JSON.parse(await response.text()) as CopilotInternalUserResponse;
+  return parseUsageData(data);
+};
+
 // Export types for use in other files
-export type { AgentSession, PullRequest, PullRequestWithAgentSessions };
+export type {
+  AgentSession,
+  PullRequest,
+  PullRequestWithAgentSessions,
+  CopilotUsage,
+  CopilotInternalUserResponse,
+  QuotaSnapshot,
+};
 export { AgentSessionState };

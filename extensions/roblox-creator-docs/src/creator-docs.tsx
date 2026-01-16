@@ -125,8 +125,26 @@ function processCodeBlocks(text: string): string {
   return text.replace(/```(lua|luau)\n([\s\S]*?)```/g, (_m, _lang, code) => `\`\`\`lua\n${code}\`\`\``);
 }
 
+// Helper: Build type lookup from docs (enums, datatypes, classes)
+function buildTypeLookup(docs: DocItem[]): Map<string, string> {
+  const lookup = new Map<string, string>();
+  for (const doc of docs) {
+    if (doc.category === "Enums" && doc.type === "enum") {
+      lookup.set(doc.title, "enums");
+    } else if (doc.category === "Classes" && (doc.type === "class" || doc.type === "service")) {
+      lookup.set(doc.title, "classes");
+    } else if (doc.category === "Datatypes" && doc.type === "datatype") {
+      lookup.set(doc.title, "datatypes");
+    } else if (doc.category === "Globals" && doc.type === "global") {
+      // Globals like task, os, etc. - link to globals
+      lookup.set(doc.title, "globals");
+    }
+  }
+  return lookup;
+}
+
 // Helper: Render markdown for detail view
-function renderDetailMarkdown(doc: DocItem): string {
+function renderDetailMarkdown(doc: DocItem, typeLookup: Map<string, string>): string {
   if (!doc?.title || !doc?.url) return "**Error:** Invalid documentation item";
 
   const parts: string[] = [];
@@ -134,40 +152,23 @@ function renderDetailMarkdown(doc: DocItem): string {
   // Header
   parts.push(`## \`${doc.title}\`\n\n\`${doc.type}\` · ${doc.category}\n\n`);
 
-  // Metadata
-  if (doc.metadata) {
-    const { parameters, returnType, tags, security } = doc.metadata;
-
-    if (parameters?.length) {
-      parts.push(`### Parameters\n\n`);
-      parameters.forEach((p, i) => {
-        parts.push(`${p.name} · \`${processClassReferences(p.type)}\``);
-        if (p.description) parts.push(`\n\n${processClassReferences(p.description)}`);
-        if (i < parameters.length - 1) parts.push(`\n\n`);
-      });
-      parts.push(`\n\n`);
-    }
-
-    if (returnType) parts.push(`### Returns\n\n\`${processClassReferences(returnType)}\`\n\n`);
-    if (tags?.length) parts.push(`### Tags\n\n${tags.map((t) => `\`${t}\``).join("  ")}\n\n`);
-    if (security) parts.push(`**Security:** ${security}\n\n`);
-
-    if (parameters || returnType || tags || security) parts.push(`---\n\n`);
+  // Signature (for methods/functions) - make types clickable only if they exist
+  if (doc.signature) {
+    const linkedSignature = doc.signature.replace(/: ([A-Z]\w+)/g, (_m, type) => {
+      const typeCategory = typeLookup.get(type);
+      if (typeCategory) {
+        return `: [${type}](https://create.roblox.com/docs/reference/engine/${typeCategory}/${type})`;
+      }
+      return `: ${type}`; // No link if type not found in docs
+    });
+    parts.push(`### Signature\n\n${linkedSignature}\n\n`);
   }
 
-  // Content
-  const hasContent = doc.content?.trim();
-  const contentMatchesDescription = doc.content?.trim() === doc.description?.trim();
-
-  if (doc.description && (!hasContent || contentMatchesDescription)) {
+  // Description
+  if (doc.description) {
     parts.push(`### Description\n\n${processCodeBlocks(processClassReferences(doc.description))}\n\n`);
-  } else if (hasContent && !contentMatchesDescription) {
-    const truncated = doc.content!.length > 1500 ? doc.content!.substring(0, 1500) : doc.content!;
-    parts.push(`### Details\n\n${processCodeBlocks(processClassReferences(truncated))}\n\n`);
-  } else if (!doc.description && !hasContent) {
-    parts.push(
-      `### Description\n\n*No preview available*\n\n*This item has limited documentation. View the full page for more details.*\n\n`,
-    );
+  } else if (!doc.signature) {
+    parts.push(`### Description\n\n*No preview available. View the full page for details.*\n\n`);
   }
 
   // Footer - always add this
@@ -189,6 +190,9 @@ export default function Command() {
   useEffect(() => {
     loadDocsData();
   }, []); // loadDocsData is stable
+
+  // Build type lookup for linking types in signatures
+  const typeLookup = useMemo(() => buildTypeLookup(allDocs), [allDocs]);
 
   const isSearchEmpty = searchText.trim() === "";
 
@@ -216,17 +220,16 @@ export default function Command() {
       if (!titleMatch) {
         // Only check other fields if title doesn't match
         const descriptionMatch = doc.description.toLowerCase().includes(searchLower);
-        const keywordMatch = doc.keywords.some((keyword) => keyword.toLowerCase().includes(searchLower));
         const categoryMatch = doc.category.toLowerCase().includes(searchLower);
         const typeMatch = doc.type.toLowerCase().includes(searchLower);
 
         // Skip if no match at all
-        if (!descriptionMatch && !keywordMatch && !categoryMatch && !typeMatch) {
+        if (!descriptionMatch && !categoryMatch && !typeMatch) {
           continue;
         }
 
         // Non-title matches get lower scores
-        const matchScore = descriptionMatch ? 100 : keywordMatch ? 75 : 50;
+        const matchScore = descriptionMatch ? 100 : 50;
         const categoryMultiplier = doc.category === "Classes" ? 8 : 1;
 
         results.push({ doc, score: matchScore * categoryMultiplier });
@@ -360,7 +363,7 @@ export default function Command() {
               title={displayTitle}
               subtitle={!showingDetail ? doc.category : undefined}
               accessories={!showingDetail ? [{ text: doc.type }, { text: truncatedDescription }] : undefined}
-              detail={showingDetail ? <List.Item.Detail markdown={renderDetailMarkdown(doc)} /> : undefined}
+              detail={showingDetail ? <List.Item.Detail markdown={renderDetailMarkdown(doc, typeLookup)} /> : undefined}
               actions={
                 <ActionPanel>
                   <Action title="Open in Browser" onAction={() => open(doc.url)} icon={getIcon(ACTION_ICONS.browser)} />

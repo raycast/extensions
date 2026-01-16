@@ -1,5 +1,13 @@
 # Search Router Changelog
 
+## [Make Windows Compatible] - 2025-12-16
+
+- Update action shortcuts for Windows compatibility
+
+## [Feature] - 2025-12-15
+
+- Added support for multiple search URLs for custom search engines
+
 ## [Make Windows Compatible] - 2025-11-11
 
 - Update package.json to include Windows platform compatibility
