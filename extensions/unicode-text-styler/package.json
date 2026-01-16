@@ -20,55 +20,55 @@
     },
     {
       "name": "bold",
-      "title": "Style as Bold",
+      "title": "Bold",
       "description": "Style selected text as Unicode bold",
       "mode": "no-view"
     },
     {
       "name": "italic",
-      "title": "Style as Italic",
+      "title": "Italic",
       "description": "Style selected text as Unicode italic",
       "mode": "no-view"
     },
     {
       "name": "monospace",
-      "title": "Style as Monospace",
+      "title": "Monospace",
       "description": "Style selected text as Unicode monospace",
       "mode": "no-view"
     },
     {
       "name": "bold-italic",
-      "title": "Style as Bold Italic",
+      "title": "Bold Italic",
       "description": "Style selected text as Unicode bold italic",
       "mode": "no-view"
     },
     {
       "name": "script",
-      "title": "Style as Script",
+      "title": "Script",
       "description": "Style selected text as Unicode script/cursive",
       "mode": "no-view"
     },
     {
       "name": "gothic",
-      "title": "Style as Gothic",
+      "title": "Gothic",
       "description": "Style selected text as Unicode gothic",
       "mode": "no-view"
     },
     {
       "name": "doublestruck",
-      "title": "Style as Double-Struck",
+      "title": "Double-Struck",
       "description": "Style selected text as Unicode double-struck",
       "mode": "no-view"
     },
     {
       "name": "sans",
-      "title": "Style as Sans-Serif",
+      "title": "Sans-Serif",
       "description": "Style selected text as Unicode sans-serif",
       "mode": "no-view"
     },
     {
       "name": "bold-sans",
-      "title": "Style as Bold Sans-Serif",
+      "title": "Bold Sans-Serif",
       "description": "Style selected text as Unicode bold sans-serif",
       "mode": "no-view"
     }

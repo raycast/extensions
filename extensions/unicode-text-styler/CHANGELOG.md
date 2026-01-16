@@ -1,6 +1,6 @@
 # Unicode Text Styler Changelog
 
-## [Initial Version] - 2026-01-16
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 
