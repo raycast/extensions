@@ -9,9 +9,7 @@ interface Props {
 
 export function TranscriptionItem({ transcription }: Props) {
   const displayText = getDisplayText(transcription);
-  const hasEnhancement = Boolean(
-    transcription.enhancedText && transcription.text !== transcription.enhancedText
-  );
+  const hasEnhancement = Boolean(transcription.enhancedText && transcription.text !== transcription.enhancedText);
 
   return (
     <List.Item
@@ -51,10 +49,7 @@ export function TranscriptionItem({ transcription }: Props) {
   );
 }
 
-function buildAccessories(
-  transcription: Transcription,
-  hasEnhancement: boolean
-): List.Item.Accessory[] {
+function buildAccessories(transcription: Transcription, hasEnhancement: boolean): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
 
   if (hasEnhancement) {

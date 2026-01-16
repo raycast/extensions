@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Action, ActionPanel, List, showToast, Toast, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Icon, openExtensionPreferences } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { getDatabaseInfo, buildQuery, parseTranscriptions } from "./lib/database";
 import { TranscriptionItem } from "./components/TranscriptionItem";
@@ -33,7 +33,7 @@ export default function SearchTranscriptions() {
           description="Make sure VoiceInk is installed and has created at least one transcription. You can also configure a custom path in extension preferences."
           actions={
             <ActionPanel>
-              <Action.OpenExtensionPreferences />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -56,17 +56,13 @@ export default function SearchTranscriptions() {
           icon={searchText ? Icon.MagnifyingGlass : Icon.Message}
           title={searchText ? "No Results" : "No Transcriptions"}
           description={
-            searchText
-              ? `No transcriptions matching "${searchText}"`
-              : "Your VoiceInk transcription history is empty."
+            searchText ? `No transcriptions matching "${searchText}"` : "Your VoiceInk transcription history is empty."
           }
         />
       ) : (
         <List.Section
           title={searchText ? "Search Results" : "All Transcriptions"}
-          subtitle={
-            transcriptions.length >= LIMIT ? `${LIMIT}+ found` : `${transcriptions.length} found`
-          }
+          subtitle={transcriptions.length >= LIMIT ? `${LIMIT}+ found` : `${transcriptions.length} found`}
         >
           {transcriptions.map((transcription) => (
             <TranscriptionItem key={transcription.id} transcription={transcription} />

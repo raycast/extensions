@@ -4,17 +4,9 @@ import { join } from "path";
 import { existsSync } from "fs";
 import type { Transcription, TranscriptionRow } from "./types";
 
-interface Preferences {
-  databaseSource: "auto" | "official" | "ce" | "custom";
-  customDatabasePath?: string;
-}
-
 // Known VoiceInk database locations
 const DB_PATHS = {
-  official: join(
-    homedir(),
-    "Library/Application Support/com.prakashjoshipax.VoiceInk/default.store"
-  ),
+  official: join(homedir(), "Library/Application Support/com.prakashjoshipax.VoiceInk/default.store"),
   ce: join(homedir(), "Library/Application Support/com.metrovoc.VoiceInk/default.store"),
 };
 

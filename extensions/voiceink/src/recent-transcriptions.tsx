@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Icon, openExtensionPreferences } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { getDatabaseInfo, buildQuery, parseTranscriptions } from "./lib/database";
 import { TranscriptionItem } from "./components/TranscriptionItem";
@@ -8,21 +8,17 @@ const LIMIT = 50;
 export default function RecentTranscriptions() {
   const dbInfo = getDatabaseInfo();
 
-  const { isLoading, data } = useExec(
-    "sqlite3",
-    ["-json", "-readonly", dbInfo.path, buildQuery(LIMIT)],
-    {
-      execute: dbInfo.available,
-      parseOutput: ({ stdout }) => parseTranscriptions(stdout),
-      onError: (error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load transcriptions",
-          message: error.message,
-        });
-      },
-    }
-  );
+  const { isLoading, data } = useExec("sqlite3", ["-json", "-readonly", dbInfo.path, buildQuery(LIMIT)], {
+    execute: dbInfo.available,
+    parseOutput: ({ stdout }) => parseTranscriptions(stdout),
+    onError: (error) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load transcriptions",
+        message: error.message,
+      });
+    },
+  });
 
   if (!dbInfo.available) {
     return (
@@ -33,7 +29,7 @@ export default function RecentTranscriptions() {
           description="Make sure VoiceInk is installed and has created at least one transcription. You can also configure a custom path in extension preferences."
           actions={
             <ActionPanel>
-              <Action.OpenExtensionPreferences />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />

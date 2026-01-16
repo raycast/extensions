@@ -24,9 +24,7 @@ export function TranscriptionDetail({ transcription }: Props) {
               text={`${transcription.powerModeEmoji} ${transcription.powerModeName || ""}`}
             />
           )}
-          {transcription.modelName && (
-            <Detail.Metadata.Label title="Model" text={transcription.modelName} />
-          )}
+          {transcription.modelName && <Detail.Metadata.Label title="Model" text={transcription.modelName} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Duration" text={formatDuration(transcription.duration)} />
           <Detail.Metadata.Label title="Time" text={date.toLocaleString()} />
@@ -42,11 +40,7 @@ export function TranscriptionDetail({ transcription }: Props) {
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
           )}
-          <Action.Paste
-            title="Paste Text"
-            content={displayText}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-          />
+          <Action.Paste title="Paste Text" content={displayText} shortcut={{ modifiers: ["cmd", "shift"], key: "v" }} />
         </ActionPanel>
       }
     />
