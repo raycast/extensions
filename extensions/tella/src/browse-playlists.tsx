@@ -40,17 +40,17 @@ export default function BrowsePlaylists() {
   const [searchText, setSearchText] = useState("");
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
-    async () => {
-      const response = await listPlaylists({ visibility, limit: 100 });
+    async (vis: "personal" | "org") => {
+      const response = await listPlaylists({ visibility: vis, limit: 100 });
       return response.playlists;
     },
     [visibility],
     {
-      onError: (error) => {
+      onError: (err: Error) => {
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to load playlists",
-          message: error.message,
+          message: err.message,
         });
       },
     },
@@ -268,10 +268,10 @@ function PlaylistItem({
                       title: "Playlist deleted",
                     });
                     onRefresh();
-                  } catch (error) {
+                  } catch (err) {
                     push(
                       <ErrorDetail
-                        error={error}
+                        error={err instanceof Error ? err : String(err)}
                         context={{
                           action: "Delete Playlist",
                           playlistId: playlist.id,

@@ -14,6 +14,7 @@ import {
   LocalStorage,
   Form,
   open,
+  Clipboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
@@ -348,9 +349,10 @@ export default function BrowseVideos({
     isLoading: isLoadingDetails,
     error: detailsError,
   } = useCachedPromise(
-    async () => {
+    async (mode: ViewMode, idsKey: string) => {
       // Only fetch when in grid view and we have video IDs
-      if (viewMode !== "grid" || visibleVideoIds.length === 0) {
+      // idsKey is used as a cache key to trigger refetch when visible video IDs change
+      if (mode !== "grid" || !idsKey || idsKey === "") {
         return {} as Record<string, Video>;
       }
       return fetchVideoDetails(visibleVideoIds, FETCH_CONCURRENCY);
@@ -492,7 +494,6 @@ export default function BrowseVideos({
           <Grid.Section title="Syncing...">
             <Grid.Item
               title="Syncing videos..."
-              icon={Icon.ArrowClockwise}
               content={Icon.ArrowClockwise}
             />
           </Grid.Section>
@@ -665,10 +666,10 @@ function VideoActions({
                     title: "Removed from playlist",
                   });
                   onRefresh();
-                } catch (error) {
+                } catch (err) {
                   push(
                     <ErrorDetail
-                      error={error}
+                      error={err instanceof Error ? err : String(err)}
                       context={{
                         action: "Remove from Playlist",
                         videoId: video.id,
@@ -697,10 +698,10 @@ function VideoActions({
               });
               await open(duplicatedVideo.links.viewPage);
               onRefresh();
-            } catch (error) {
+            } catch (err) {
               push(
                 <ErrorDetail
-                  error={error}
+                  error={err instanceof Error ? err : String(err)}
                   context={{
                     action: "Duplicate and open video",
                     videoId: video.id,
@@ -759,10 +760,10 @@ function VideoActions({
                   title: "Video deleted",
                 });
                 onRefresh();
-              } catch (error) {
+              } catch (err) {
                 push(
                   <ErrorDetail
-                    error={error}
+                    error={err instanceof Error ? err : String(err)}
                     context={{
                       action: "Delete Video",
                       videoId: video.id,
@@ -814,11 +815,14 @@ function VideoSettingsForm({
     data: fullVideo,
     isLoading,
     error: fetchError,
-  } = useCachedPromise(async () => {
-    // Fetch full details (will be cached by useCachedPromise)
-    const response = await getVideo(video.id);
-    return response.video;
-  }, [video.id]);
+  } = useCachedPromise(
+    async (videoId: string) => {
+      // Fetch full details (will be cached by useCachedPromise)
+      const response = await getVideo(videoId);
+      return response.video;
+    },
+    [video.id],
+  );
 
   // Use fullVideo when available, fallback to video for initial render
   const videoToUse = fullVideo || video;
@@ -1251,17 +1255,17 @@ function TranscriptView({
   videoName: string;
 }) {
   const { data, isLoading, error } = useCachedPromise(
-    async () => {
-      const response = await getVideo(videoId);
+    async (id: string) => {
+      const response = await getVideo(id);
       return response.video.transcript;
     },
     [videoId],
     {
-      onError: (error) => {
+      onError: (err: Error) => {
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to load transcript",
-          message: error.message,
+          message: err.message,
         });
       },
     },
@@ -1385,18 +1389,21 @@ function AddToPlaylistAction({
   const { data: playlists, revalidate } = useCachedPromise(async () => {
     const response = await listPlaylists({ limit: 100 });
     return response.playlists;
-  }, []);
+  });
 
   // Fetch full video details to get playlistIds if not provided
   // (list endpoint doesn't include playlistIds)
-  const { data: fullVideo } = useCachedPromise(async () => {
-    // Only fetch if playlistIds not already available
-    if (videoPlaylistIds !== undefined) {
-      return null;
-    }
-    const response = await getVideo(videoId);
-    return response.video;
-  }, [videoId, videoPlaylistIds]);
+  const { data: fullVideo } = useCachedPromise(
+    async (id: string, existingPlaylistIds: string[] | undefined) => {
+      // Only fetch if playlistIds not already available
+      if (existingPlaylistIds !== undefined) {
+        return null;
+      }
+      const response = await getVideo(id);
+      return response.video;
+    },
+    [videoId, videoPlaylistIds],
+  );
 
   // Use provided playlistIds or fetch from full video
   const currentPlaylistIds = videoPlaylistIds ?? fullVideo?.playlistIds;
@@ -1567,7 +1574,7 @@ function CreatePlaylistAndAddVideoForm({
         id="visibility"
         title="Visibility"
         value={visibility}
-        onChange={setVisibility}
+        onChange={(newValue) => setVisibility(newValue as "personal" | "org")}
       >
         <Form.Dropdown.Item value="personal" title="Personal" />
         <Form.Dropdown.Item value="org" title="Organization" />
@@ -1722,17 +1729,17 @@ function ExportStatusView({
     isLoading,
     revalidate,
   } = useCachedPromise(
-    async () => {
-      const response = await getVideo(videoId);
+    async (id: string) => {
+      const response = await getVideo(id);
       return response.video;
     },
     [videoId],
     {
-      onError: (error) => {
+      onError: (err: Error) => {
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to load exports",
-          message: error.message,
+          message: err.message,
         });
       },
     },
