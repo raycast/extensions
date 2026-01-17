@@ -34,6 +34,13 @@ export default function Command() {
           return;
         }
 
+        const ext = path.extname(filePath).slice(1).toLowerCase();
+        if (!["ttf", "woff", "woff2", "eot", "otf"].includes(ext)) {
+          setError("Selected file is not a supported font format");
+          setIsLoading(false);
+          return;
+        }
+
         setSelectedFile(filePath);
         setIsLoading(false);
       } catch (e) {
