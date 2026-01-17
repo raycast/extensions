@@ -1,6 +1,6 @@
 # LLM Stats Changelog
 
-## [Unreleased] - {PR_MERGE_DATE}
+## [Unreleased] - 2026-01-17
 
 ### Added
 - External links support for arenas
