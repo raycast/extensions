@@ -1,6 +1,6 @@
 # Everything Search Changelog
 
-## [CLI Arguments] - 2026-01-17
+## [CLI Arguments] - {PR_MERGE_DATE}
 - Added the ability to specify custom CLI arguments
 - Everything 1.5a is now supported through `-instance 1.5a`
 
