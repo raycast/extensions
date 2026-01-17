@@ -1,6 +1,6 @@
 import { Icon, MenuBarExtra, Cache, Color, Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 interface Preferences {
   refreshInterval: string;
@@ -52,7 +52,7 @@ function formatLastChecked(ts: number): string {
   return new Date(ts).toLocaleTimeString();
 }
 
-export default function Command(): JSX.Element | null {
+export default function Command(): React.ReactElement | null {
   const prefs = getPreferenceValues<Preferences>();
   const interval = parseInt(prefs.refreshInterval, 10) * 1000;
   const [force, setForce] = useState(0);
