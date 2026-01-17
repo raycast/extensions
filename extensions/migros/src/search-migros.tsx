@@ -43,11 +43,6 @@ import { t } from "./lib/translations";
 // Types & Constants
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface Preferences {
-  zipCode: string;
-  language: string;
-}
-
 interface StoreAvailability {
   store: StoreInfo;
   stock: number | string;
