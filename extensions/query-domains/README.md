@@ -22,7 +22,7 @@ You need a query.domains API key to use this extension.
 3. Navigate to [API Keys page](https://query.domains/account/api-keys)
 4. Copy your API key
 
-![API Key Dashboard](./media/screenshot-1-api-key-dashboard.png)
+![API Key Dashboard](./metadata/screenshot-1-api-key-dashboard.png)
 
 ### 2. Install and Configure
 
@@ -31,7 +31,7 @@ You need a query.domains API key to use this extension.
 3. You'll be prompted to enter your API Key
 4. Paste your API key and confirm
 
-![API Key Configuration](./media/screenshot-2-raycast-api-config.png)
+![API Key Configuration](./metadata/screenshot-2-raycast-api-config.png)
 
 ### 3. (Optional) Customize TLD List
 
@@ -40,7 +40,7 @@ You need a query.domains API key to use this extension.
 3. Edit the "TLD List" field with your preferred TLDs (comma-separated)
 4. Default: `com,ai,org,net,io,app,dev,xyz,co,me,tech,online`
 
-![TLD List Configuration](./media/screenshot-3-tld-list-preferences.png)
+![TLD List Configuration](./metadata/screenshot-3-tld-list-preferences.png)
 
 ## Usage
 
@@ -50,7 +50,7 @@ You need a query.domains API key to use this extension.
 2. Enter a keyword (e.g., `mycompany`)
 3. The extension will check availability for all configured TLDs
 
-![Basic Search Results](./media/screenshot-4-basic-search.png)
+![Basic Search Results](./metadata/screenshot-4-basic-search.png)
 
 ### Check Specific TLD
 
@@ -58,7 +58,7 @@ You need a query.domains API key to use this extension.
 2. If `.xyz` is not in your default list, it will be checked first
 3. Your default TLDs will also be checked
 
-![Specific TLD Search](./media/screenshot-5-specific-tld-search.png)
+![Specific TLD Search](./metadata/screenshot-5-specific-tld-search.png)
 
 ### View Domain Details
 
@@ -67,7 +67,7 @@ You need a query.domains API key to use this extension.
    - **Available domains**: Ready-to-register status
    - **Registered domains**: Registration date, expiration date, and monthly traffic stats
 
-![Domain Detail View](./media/screenshot-6-registered-domain-detail.png)
+![Domain Detail View](./metadata/screenshot-6-registered-domain-detail.png)
 
 ## Keyboard Shortcuts
 
@@ -78,7 +78,7 @@ You need a query.domains API key to use this extension.
 ## Screenshots
 
 ### Main Interface
-![Main Interface](./media/screenshot-7-main-interface.png)
+![Main Interface](./metadata/screenshot-7-main-interface.png)
 
 ## API Information
 

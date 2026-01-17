@@ -1,8 +1,3 @@
-export interface Preferences {
-  apiKey: string;
-  tldList?: string;
-}
-
 export interface DomainCheckResult {
   domain: string;
   status: "registered" | "available";

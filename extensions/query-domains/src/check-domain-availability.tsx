@@ -11,10 +11,15 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Preferences, BulkCheckResponse } from "./types";
+import { BulkCheckResponse } from "./types";
 import { formatRegistrationDate } from "./utils";
 import { DEFAULT_TLDS } from "./constants";
 import { DomainDetail } from "./components/DomainDetail";
+
+interface Preferences {
+  apiKey: string;
+  tldList?: string;
+}
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
