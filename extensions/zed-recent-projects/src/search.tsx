@@ -217,15 +217,13 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
     return <Action title="Open in Zed" onAction={openMultiFolder} icon={zedIcon} />;
   }
 
-  // Default: open via URI scheme
-  const openSingleFolder = async () => {
-    setTimeout(revalidate, 200);
-    await closeMainWindow();
-    await openWithZedCli(cliPath!, [entry.paths[0]]);
-  };
-
   // If CLI available, use it for consistency (handles revalidation)
   if (cliPath) {
+    const openSingleFolder = async () => {
+      setTimeout(revalidate, 200);
+      await closeMainWindow();
+      await openWithZedCli(cliPath!, [entry.paths[0]]);
+    };
     return <Action title="Open in Zed" icon={zedIcon} onAction={openSingleFolder} />;
   }
 
