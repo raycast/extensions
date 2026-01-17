@@ -17,23 +17,24 @@ type ParseInputReturn = {
   startTime?: Date;
   titleError?: string;
   startTimeError?: string;
+  input: string;
 };
 
 function parseInput(input: string): ParseInputReturn {
   const trimmed = input.trim();
   if (!trimmed) {
-    return {};
+    return { input };
   }
   const results = chrono.parse(input);
   if (results.length === 0) {
-    return { title: input, startTimeError: `No time detected – try adding “at 3pm”` };
+    return { input, title: input, startTimeError: `No time detected – try adding “at 3pm”` };
   }
 
   const title = trimmed.replace(results[0].text, "");
   const startTime = results[0].start.date();
   const titleError = (title || "").trim() === "" ? "Title cannot be empty" : "";
 
-  return { title, titleError, startTime };
+  return { input, title, titleError, startTime };
 }
 
 function Command() {
@@ -45,6 +46,10 @@ function Command() {
       input: FormValidation.Required,
     },
     onSubmit: async () => {
+      if (parsed.input !== values.input) {
+        await showToast({ style: Toast.Style.Failure, title: "Parsing date..." });
+        return;
+      }
       if (parsed.titleError || !parsed.startTime || parsed.startTimeError) {
         await showToast({
           style: Toast.Style.Failure,
@@ -97,6 +102,7 @@ function Command() {
   const [parsed, setParsed] = useState<ParseInputReturn>({
     title: "",
     startTime: undefined,
+    input: "",
   });
   useEffect(() => {
     const timeout = setTimeout(() => {
