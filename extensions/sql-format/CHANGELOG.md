@@ -1,6 +1,6 @@
 # Changelog
 
-## [Support SQL Format Dialect] - 2026-01-17
+## [Support SQL Format Dialect] - {PR_MERGE_DATE}
 ### Added New Features
 - Added new Preference "SQL Dialect" to select for user, the default value is "sql" as same as old
 
