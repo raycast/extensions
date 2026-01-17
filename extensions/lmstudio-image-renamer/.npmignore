@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Source files (Raycast uses built output)
+src/
+
+# Config files
+tsconfig.json
+.eslintrc*
+.prettierrc*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Raycast dev
+.raycast/
+
+# Logs
+*.log
+npm-debug.log*
