@@ -201,7 +201,9 @@ export default function ListNotes() {
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
   const preferences = getPreferenceValues<RotePreferences>();
-  const webUrl = preferences.webUrl?.replace(/\/$/, "") || "";
+  const webUrl =
+    (preferences.webUrl as unknown as string | undefined)?.replace(/\/$/, "") ||
+    "";
 
   // Extract unique tags from notes
   const allTags = useMemo(() => {

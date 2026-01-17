@@ -70,7 +70,9 @@ export default async function QuickAdd() {
 
     // 如果没有配置，则使用 preference 设置
     if (!tags) {
-      const tagSetting = preferences.quickAddTag?.trim();
+      const tagSetting = (
+        preferences.quickAddTag as unknown as string | undefined
+      )?.trim();
       if (tagSetting) {
         tags = tagSetting
           .split(/[,\s]+/)

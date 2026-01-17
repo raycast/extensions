@@ -30,11 +30,12 @@ class RoteApiClient {
   private loginPromise: Promise<void> | null = null;
 
   constructor() {
-    const preferences = getPreferenceValues<RotePreferences>();
+    const preferences = getPreferenceValues<Preferences>();
     this.baseUrl =
-      preferences.apiEndpoint.replace(/\/$/, "").trim() + "/v2/api";
-    this.username = (preferences.username || "").trim();
-    this.password = preferences.password || "";
+      (preferences.apiEndpoint as unknown as string).replace(/\/$/, "").trim() +
+      "/v2/api";
+    this.username = ((preferences.username as unknown as string) || "").trim();
+    this.password = (preferences.password as unknown as string) || "";
   }
 
   // 加载存储的 token
