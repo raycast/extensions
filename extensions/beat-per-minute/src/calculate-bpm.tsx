@@ -1,11 +1,22 @@
-import { useCallback, useState, useRef } from "react";
-import { ActionPanel, Action, List, getPreferenceValues, Icon, openCommandPreferences } from "@raycast/api";
+import { useCallback, useState, useRef, useEffect } from "react";
+import {
+  ActionPanel,
+  Action,
+  List,
+  getPreferenceValues,
+  Icon,
+  openCommandPreferences,
+  Clipboard,
+  Toast,
+  showToast,
+} from "@raycast/api";
 
 export default function Command() {
   const startTime = useRef(0);
   const [taps, setTaps] = useState<number>(0);
   const [bpm, setBPM] = useState<number>(0);
   const preferences = getPreferenceValues<Preferences>();
+  const timeoutId = useRef<NodeJS.Timeout | null>(null);
 
   interface Preferences {
     seconds: number;
@@ -26,6 +37,21 @@ export default function Command() {
     setTaps((previous) => previous + 1);
 
     setBPM((taps / timesince) * 60);
+
+    const bpmToSave = Math.round((taps / timesince) * 60);
+
+    if (timeoutId.current !== null) {
+      clearTimeout(timeoutId.current);
+    }
+
+    timeoutId.current = setTimeout(async () => {
+      await Clipboard.copy(bpmToSave.toString());
+      await showToast({
+        style: Toast.Style.Success,
+        title: `BPM: ${bpmToSave}`,
+        message: "Copied to clipboard...",
+      });
+    }, 5000);
   }, [taps]);
 
   return (
@@ -47,7 +73,7 @@ export default function Command() {
               <Action
                 icon={Icon.Gear}
                 title="Open Command Preferences"
-                shortcut={{ modifiers: ["cmd"], key: "," }}
+                shortcut={{ modifiers: ["cmd"], key: "," }} // `shortcut` prop provided to the Action `Open Command Preferences` is reserved by Raycast and has been removed. Please use another shortcut
                 onAction={openCommandPreferences}
               />
             </ActionPanel.Section>

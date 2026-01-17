@@ -5,6 +5,7 @@
   "description": "Calculate BPM for a song by using the enter button on the keyboard",
   "icon": "metronome.png",
   "author": "pernielsentikaer",
+  "contributors": ["mite404"],
   "categories": [
     "Media"
   ],
