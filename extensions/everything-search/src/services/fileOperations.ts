@@ -14,13 +14,14 @@ export async function loadFilesList(searchText: string, preferences: Preferences
     return [];
   }
 
-  const { esExePath, defaultSort } = preferences;
+  const { esExePath, customCliArgs, defaultSort } = preferences;
 
   try {
     const esCommand = esExePath || "es.exe";
+    const additionalArgs = customCliArgs ? ` ${customCliArgs}` : "";
 
     // Use es.exe with CSV output format to get file info in one call
-    const command = `chcp 65001 > nul && "${esCommand}" -n 100 -csv -name -filename-column -size -date-created -date-modified ${defaultSort} ${searchText}`;
+    const command = `chcp 65001 > nul && "${esCommand}" -n 100 -csv -name -filename-column -size -date-created -date-modified ${defaultSort}${additionalArgs} ${searchText}`;
 
     const { stdout } = await execAsync(command);
 

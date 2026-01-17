@@ -29,6 +29,15 @@
           "placeholder": "C:\\Program Files\\Everything\\es.exe"
         },
         {
+          "name": "customCliArgs",
+          "title": "Custom CLI Arguments",
+          "description": "Additional arguments to pass to es.exe (e.g., -instance 1.5a)",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "placeholder": "-instance 1.5a"
+        },
+        {
           "name": "fileExplorerCommand",
           "title": "Custom File Explorer Command",
           "description": "Custom command to open directories. Use %s as a placeholder for the path.",
