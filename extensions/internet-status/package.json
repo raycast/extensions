@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "internet-status",
+  "title": "Internet Status",
+  "description": "Monitor your internet connectivity from the menubar.",
+  "icon": "extension-icon.png",
+  "author": "meshal",
+  "platforms": ["macOS"],
+  "categories": ["System"],
+  "keywords": ["online check", "connectivity", "network", "wifi", "internet", "connection", "offline", "status"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar-status",
+      "title": "Menu Bar Status",
+      "description": "Show internet connectivity status in the menubar.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "check-connection",
+      "title": "Check Connection",
+      "description": "Manually check internet connectivity and show the result.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "How often to check connectivity.",
+      "type": "dropdown",
+      "required": true,
+      "default": "30",
+      "data": [
+        { "title": "10 Seconds", "value": "10" },
+        { "title": "20 Seconds", "value": "20" },
+        { "title": "30 Seconds", "value": "30" },
+        { "title": "1 Minute", "value": "60" },
+        { "title": "2 Minutes", "value": "120" },
+        { "title": "5 Minutes", "value": "300" },
+        { "title": "10 Minutes", "value": "600" }
+      ]
+    },
+    {
+      "name": "hideWhenOnline",
+      "title": "Hide When Online",
+      "description": "Only show the menubar icon when offline.",
+      "type": "checkbox",
+      "required": true,
+      "default": false,
+      "label": "Hide menubar icon when online"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
