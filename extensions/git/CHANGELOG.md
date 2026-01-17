@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-01-17
 
 ### Added
 - **Remotes**: Add submenu for remote links and pages
