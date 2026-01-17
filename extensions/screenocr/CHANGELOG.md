@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-01-17
 
 - Fix caching issues
 
