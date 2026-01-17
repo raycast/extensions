@@ -4,7 +4,7 @@
   "title": "Paste as Slack Mrkdwn",
   "description": "Paste Markdown or rich text into Slack with proper formatting. Works great with content from ChatGPT, Notion, and other apps.",
   "icon": "icon.png",
-  "author": "ryananderson",
+  "author": "ryanaspire",
   "categories": [
     "Productivity"
   ],
