@@ -1,0 +1,124 @@
+{
+  "name": "rote",
+  "version": "1.0.0",
+  "title": "Rote",
+  "description": "Quick access to your Rote notes - create, search, and manage your fleeting thoughts",
+  "icon": "extension-icon.png",
+  "author": "aber_yan",
+  "categories": ["Productivity", "Applications"],
+  "license": "MIT",
+  "keywords": [
+    "rote",
+    "notes",
+    "note-taking",
+    "productivity",
+    "fleeting-thoughts",
+    "quick-notes",
+    "markdown"
+  ],
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Rote",
+      "description": "Search your Rote notes",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "Rote",
+      "description": "Create a new Rote note",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add Note",
+      "subtitle": "Rote",
+      "description": "Quickly add a note with selected text or clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "list-notes",
+      "title": "List Notes",
+      "subtitle": "Rote",
+      "description": "Browse your recent Rote notes",
+      "mode": "view"
+    },
+    {
+      "name": "random-note",
+      "title": "Random Note",
+      "subtitle": "Rote",
+      "description": "Show a random note from your collection",
+      "mode": "view"
+    },
+    {
+      "name": "config-quick-add",
+      "title": "Config Quick Add",
+      "subtitle": "Rote",
+      "description": "Configure default tags for Quick Add",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiEndpoint",
+      "title": "API Endpoint",
+      "description": "Your Rote backend API URL (e.g., https://rote-backend.example.com)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://rote-backend.example.com"
+    },
+    {
+      "name": "webUrl",
+      "title": "Web URL",
+      "description": "Your Rote frontend URL for opening notes in browser (e.g., https://rote.example.com)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://rote.example.com"
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Your Rote username or email",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "username or email"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Your Rote password",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "quickAddTag",
+      "title": "Quick Add Default Tag",
+      "description": "Default tag for Quick Add notes (e.g., excerpt, clip)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "excerpt"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
