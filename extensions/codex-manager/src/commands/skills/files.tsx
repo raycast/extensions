@@ -10,11 +10,12 @@ import {
   getPreferenceValues,
   showInFinder,
   showToast,
+  trash,
 } from "@raycast/api";
 import fs from "fs/promises";
 import path from "path";
 import { useEffect, useState } from "react";
-import type { Preferences, Skill } from "@/types";
+import type { Skill } from "@/types";
 import { openInEditor } from "@/lib/editor";
 import SkillEntryForm from "@/commands/skills/entry-form";
 
@@ -181,7 +182,7 @@ export default function SkillFiles({ skill }: { skill: Skill }) {
     }
 
     try {
-      await fs.rm(entry.path, { recursive: true, force: true });
+      await trash(entry.path);
       await showToast({ style: Toast.Style.Success, title: "Entry deleted" });
       await loadEntries();
     } catch (error) {

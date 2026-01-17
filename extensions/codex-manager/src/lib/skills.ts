@@ -4,6 +4,7 @@ import { Dirent } from "fs";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
+import { trash } from "@raycast/api";
 import matter from "gray-matter";
 import type { Skill, SkillMetadata } from "@/types";
 
@@ -148,7 +149,7 @@ export async function createSkill(
 }
 
 export async function deleteSkill(skillPath: string): Promise<void> {
-  await fs.rm(skillPath, { recursive: true, force: true });
+  await trash(skillPath);
 }
 
 export async function updateSkillMetadata(

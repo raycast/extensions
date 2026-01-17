@@ -10,7 +10,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import type { Preferences, ValidationIssue } from "@/types";
+import type { ValidationIssue } from "@/types";
 import { expandTilde, pathExists } from "@/lib/paths";
 import { readTomlConfig } from "@/lib/toml";
 import { detectMcpBlockKey, getMcpServers } from "@/lib/mcp";

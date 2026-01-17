@@ -35,11 +35,3 @@ export type ValidationIssue = {
   severity: "error" | "warning";
   action?: "openConfig" | "openSkills";
 };
-
-export type Preferences = {
-  configPath: string;
-  skillsDir: string;
-  editorPreference: "default" | "code";
-  argsFormat: "lines" | "json";
-  createBackup: boolean;
-};

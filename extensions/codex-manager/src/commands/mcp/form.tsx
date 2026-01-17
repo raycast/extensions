@@ -8,7 +8,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useMemo } from "react";
-import type { McpServer, McpServerDoc, Preferences } from "@/types";
+import type { McpServer, McpServerDoc } from "@/types";
 import { buildDuplicateName, deleteMcpServer, setMcpServer } from "@/lib/mcp";
 import { expandTilde, pathExists } from "@/lib/paths";
 import { readTomlConfig, writeTomlConfig } from "@/lib/toml";

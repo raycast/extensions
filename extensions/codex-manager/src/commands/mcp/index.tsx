@@ -13,7 +13,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import type { McpServer, McpServerDoc, Preferences } from "@/types";
+import type { McpServer, McpServerDoc } from "@/types";
 import { expandTilde, pathExists } from "@/lib/paths";
 import { readTomlConfig, writeTomlConfig } from "@/lib/toml";
 import { deleteMcpServer, getMcpServers } from "@/lib/mcp";

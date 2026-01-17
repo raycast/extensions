@@ -16,7 +16,7 @@ import {
 import fs from "fs/promises";
 import path from "path";
 import { useEffect, useState } from "react";
-import type { Preferences, Skill } from "@/types";
+import type { Skill } from "@/types";
 import { expandTilde, ensureDirExists, pathExists } from "@/lib/paths";
 import { deleteSkill, listSkills } from "@/lib/skills";
 import SkillForm from "@/commands/skills/form";

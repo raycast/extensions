@@ -15,5 +15,5 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "raycast-env.d.ts"]
 }

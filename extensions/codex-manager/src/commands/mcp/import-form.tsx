@@ -12,7 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
-import type { McpServerDoc, Preferences } from "@/types";
+import type { McpServerDoc } from "@/types";
 import { getMcpServers, setMcpServer } from "@/lib/mcp";
 import { expandTilde, pathExists } from "@/lib/paths";
 import { readTomlConfig, writeTomlConfig } from "@/lib/toml";
