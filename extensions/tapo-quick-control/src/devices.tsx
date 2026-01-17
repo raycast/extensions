@@ -1,14 +1,24 @@
-import { Action, ActionPanel, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  List,
+  Toast,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
+import { formatDeviceTitle, readDeviceOn, supportsPower } from "./lib/device-utils";
 import { getStrings } from "./lib/i18n";
-import { getCache, clearCache } from "./lib/storage";
-import { getInfo, setPlugPower, setLightPower } from "./lib/tapo";
-import { Prefs, DeviceKind } from "./lib/types";
+import { clearCache, getSelectedDeviceIds } from "./lib/storage";
+import { getDeviceInfo, listDevices, setDevicePower } from "./lib/tapo";
+import { DeviceRecord, Prefs } from "./lib/types";
 
 type Row = {
-  kind: DeviceKind;
-  title: string;
+  device: DeviceRecord;
   subtitle: string;
+  statusLabel: string;
+  resolvedIp?: string | null;
 };
 
 export default function Command() {
@@ -19,33 +29,43 @@ export default function Command() {
 
   async function refresh() {
     setLoading(true);
-    const cache = await getCache();
+    try {
+      const devices = await listDevices(prefs);
+      const selectedIds = await getSelectedDeviceIds();
+      const filtered =
+        prefs.deviceScope === "selected" && selectedIds.length > 0
+          ? devices.filter((d) => selectedIds.includes(d.id))
+          : devices;
 
-    const kinds: DeviceKind[] = ["P110", "L530"];
-    const out: Row[] = [];
-
-    for (const k of kinds) {
-      try {
-        const info = await getInfo(prefs, k);
-        const ip = cache[k]?.ip ?? strings.unknownIp;
-        const isOn = Boolean(info?.device_on ?? info?.deviceOn ?? info?.device_on === true);
-        out.push({
-          kind: k,
-          title: k === "P110" ? (prefs.p110Alias || strings.plugTitle) : (prefs.l530Alias || strings.lightTitle),
-          subtitle: `${ip} • ${isOn ? strings.on : strings.off}`,
-        });
-      } catch (e) {
-        const ip = cache[k]?.ip ?? strings.noCache;
-        out.push({
-          kind: k,
-          title: k === "P110" ? (prefs.p110Alias || strings.plugTitle) : (prefs.l530Alias || strings.lightTitle),
-          subtitle: `${ip} • ${strings.errorPrefix}: ${e instanceof Error ? e.message : String(e)}`,
-        });
+      if (filtered.length === 0) {
+        setRows([]);
+        return;
       }
-    }
 
-    setRows(out);
-    setLoading(false);
+      const nextRows = await mapLimit(filtered, 4, async (device) => {
+        if (!supportsPower(device.category)) {
+          const ipLabel = device.ip || strings.noIp;
+          const subtitle = `${device.model} • ${ipLabel} • ${strings.statusUnknown}`;
+          return { device, subtitle, statusLabel: strings.statusUnknown, resolvedIp: device.ip ?? null };
+        }
+
+        try {
+          const { info, ip } = await getDeviceInfo(prefs, device);
+          const isOn = readDeviceOn(info);
+          const statusLabel = isOn === null ? strings.statusUnknown : isOn ? strings.on : strings.off;
+          const ipLabel = ip || strings.noIp;
+          const subtitle = `${device.model} • ${ipLabel} • ${statusLabel}`;
+          return { device, subtitle, statusLabel, resolvedIp: ip };
+        } catch (e) {
+          const subtitle = `${device.model} • ${strings.errorPrefix}: ${e instanceof Error ? e.message : String(e)}`;
+          return { device, subtitle, statusLabel: strings.statusUnknown, resolvedIp: null };
+        }
+      });
+
+      setRows(nextRows);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -54,26 +74,24 @@ export default function Command() {
 
   return (
     <List isLoading={loading}>
-      {rows.map((r) => (
+      <List.EmptyView title={strings.noDevicesFound} />
+      {rows.map((row) => (
         <List.Item
-          key={r.kind}
-          title={r.title}
-          subtitle={r.subtitle}
-          accessories={[{ tag: r.kind }]}
+          key={row.device.id}
+          title={formatDeviceTitle(row.device)}
+          subtitle={row.subtitle}
+          accessories={[{ tag: row.device.category }, { text: row.statusLabel }]}
           actions={
             <ActionPanel>
-              {r.kind === "P110" ? (
+              {supportsPower(row.device.category) ? (
                 <>
-                  <Action title={strings.open} onAction={() => runPlug(prefs, true, refresh, strings)} />
-                  <Action title={strings.close} onAction={() => runPlug(prefs, false, refresh, strings)} />
+                  <Action title={strings.open} onAction={() => runPower(prefs, row.device, true, refresh, strings)} />
+                  <Action title={strings.close} onAction={() => runPower(prefs, row.device, false, refresh, strings)} />
                 </>
-              ) : (
-                <>
-                  <Action title={strings.open} onAction={() => runLight(prefs, true, refresh, strings)} />
-                  <Action title={strings.close} onAction={() => runLight(prefs, false, refresh, strings)} />
-                </>
-              )}
-
+              ) : null}
+              <Action.Push title={strings.showInfo} target={<DeviceDetail device={row.device} />} />
+              <Action.CopyToClipboard title={strings.copyDeviceId} content={row.device.id} />
+              {row.resolvedIp ? <Action.CopyToClipboard title={strings.copyIp} content={row.resolvedIp} /> : null}
               <Action title={strings.refresh} onAction={refresh} />
               <Action
                 title={strings.clearCache}
@@ -92,15 +110,41 @@ export default function Command() {
   );
 }
 
-async function runPlug(
+function DeviceDetail({ device }: { device: DeviceRecord }) {
+  const prefs = getPreferenceValues<Prefs>();
+  const strings = getStrings(prefs);
+  const [infoMd, setInfoMd] = useState<string>(strings.deviceChecking);
+
+  useEffect(() => {
+    (async () => {
+      if (!supportsPower(device.category)) {
+        const payload = { source: "cloud", device };
+        setInfoMd("```json\n" + JSON.stringify(payload, null, 2) + "\n```");
+        return;
+      }
+      try {
+        const { info, ip } = await getDeviceInfo(prefs, device);
+        const payload = { ...info, resolvedIp: ip };
+        setInfoMd("```json\n" + JSON.stringify(payload, null, 2) + "\n```");
+      } catch (e) {
+        setInfoMd(`${strings.errorPrefix}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    })();
+  }, []);
+
+  return <Detail markdown={infoMd} />;
+}
+
+async function runPower(
   prefs: Prefs,
+  device: DeviceRecord,
   on: boolean,
   refresh: () => Promise<void>,
   strings: ReturnType<typeof getStrings>,
 ) {
   const toast = await showToast({ style: Toast.Style.Animated, title: on ? strings.opening : strings.closing });
   try {
-    await setPlugPower(prefs, on);
+    await setDevicePower(prefs, device, on);
     toast.style = Toast.Style.Success;
     toast.title = on ? strings.opened : strings.closed;
     await refresh();
@@ -111,21 +155,18 @@ async function runPlug(
   }
 }
 
-async function runLight(
-  prefs: Prefs,
-  on: boolean,
-  refresh: () => Promise<void>,
-  strings: ReturnType<typeof getStrings>,
-) {
-  const toast = await showToast({ style: Toast.Style.Animated, title: on ? strings.opening : strings.closing });
-  try {
-    await setLightPower(prefs, on);
-    toast.style = Toast.Style.Success;
-    toast.title = on ? strings.lightOpened : strings.lightClosed;
-    await refresh();
-  } catch (e) {
-    toast.style = Toast.Style.Failure;
-    toast.title = strings.failed;
-    toast.message = e instanceof Error ? e.message : String(e);
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let idx = 0;
+
+  async function worker() {
+    while (idx < items.length) {
+      const current = idx++;
+      results[current] = await fn(items[current]);
+    }
   }
+
+  const workers = Array.from({ length: Math.max(1, limit) }, () => worker());
+  await Promise.all(workers);
+  return results;
 }

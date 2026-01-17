@@ -1,27 +1,33 @@
 {
   "name": "tapo-quick-control",
   "title": "Tapo Quick Control",
-  "description": "Fast cached control for Tapo P110 & L530 with fallback discovery",
+  "description": "Control Tapo devices with cached IPs, discovery, and device selection",
   "icon": "command-icon.png",
   "author": "user_c6aeea2acd3ebf6bc97d",
   "license": "MIT",
   "commands": [
     {
       "name": "plug",
-      "title": "Priz (P110)",
-      "description": "Toggle P110 plug (cached IP + rediscover)",
+      "title": "Prizler",
+      "description": "Control all Tapo plug models (cached IP + rediscover)",
       "mode": "view"
     },
     {
       "name": "light",
-      "title": "Işık (L530)",
-      "description": "Control L530 (on/off + color)",
+      "title": "Isiklar",
+      "description": "Control all Tapo light models (on/off + color when supported)",
       "mode": "view"
     },
     {
       "name": "devices",
-      "title": "Tüm Cihazlar",
-      "description": "List all cached/discovered devices",
+      "title": "Tum Cihazlar",
+      "description": "List and control all Tapo devices",
+      "mode": "view"
+    },
+    {
+      "name": "select-devices",
+      "title": "Cihaz Secimi",
+      "description": "Choose which devices to control by default",
       "mode": "view"
     }
   ],
@@ -56,7 +62,26 @@
       "name": "subnet",
       "type": "textfield",
       "title": "Subnet (Optional)",
-      "description": "Override subnet scan, e.g. 192.168.1.0/24",
+      "description": "Override subnet scan, e.g. 192.168.1.0/24 (auto-detected if empty)",
+      "required": false
+    },
+    {
+      "name": "deviceScope",
+      "type": "dropdown",
+      "title": "Device Scope",
+      "description": "Use all devices or only selected ones.",
+      "required": true,
+      "data": [
+        { "title": "All Devices", "value": "all" },
+        { "title": "Selected Devices", "value": "selected" }
+      ],
+      "default": "all"
+    },
+    {
+      "name": "ipOverrides",
+      "type": "textfield",
+      "title": "IP Overrides (Optional)",
+      "description": "deviceId=ip, alias=ip or model=ip (comma/semicolon/newline separated).",
       "required": false
     },
     {
@@ -79,7 +104,7 @@
     "ray:build": "ray build"
   },
   "dependencies": {
-    "@raycast/api": "^1.74.0",
+    "@raycast/api": "^1.104.1",
     "local-devices": "^4.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -87,7 +112,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
-    "@types/react": "^18.3.3",
+    "@types/react": "19.0.10",
     "typescript": "^5.6.3"
   }
 }

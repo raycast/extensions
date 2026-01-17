@@ -1,25 +1,53 @@
-import { loginDeviceByIp } from "tp-link-tapo-connect";
-import { discoverByKind } from "./discovery";
+import { cloudLogin, loginDeviceByIp, type TapoDeviceInfo } from "tp-link-tapo-connect";
+import { discoverDeviceIp } from "./discovery";
 import { getStrings } from "./i18n";
-import { getCache, setCachedDevice, touchDevice } from "./storage";
-import { DeviceKind, Prefs } from "./types";
+import { getCachedDevice, setCachedDevice, touchDevice } from "./storage";
+import { categorizeDevice } from "./device-utils";
+import { DeviceRecord, Prefs } from "./types";
+
+type DeviceConnection = {
+  dev: { turnOn: () => Promise<void>; turnOff: () => Promise<void>; setHSL: (h: number, s: number, l: number) => Promise<void>; setBrightness: (b: number) => Promise<void>; getDeviceInfo: () => Promise<TapoDeviceInfo> };
+  ip: string;
+  discovered: boolean;
+};
 
 function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function baseFromIp(ip: string): string | null {
-  const parts = ip.trim().split(".");
-  if (parts.length !== 4) return null;
-  const nums = parts.map((p) => Number(p));
-  if (nums.some((n) => !Number.isFinite(n) || n < 0 || n > 255)) return null;
-  return `${nums[0]}.${nums[1]}.${nums[2]}.0`;
+function parseIpOverrides(raw?: string): Record<string, string> {
+  if (!raw) return {};
+  const out: Record<string, string> = {};
+  const entries = raw
+    .split(/[\n,;]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  for (const entry of entries) {
+    const [keyRaw, ipRaw] = entry.split("=").map((s) => s.trim());
+    if (!keyRaw || !ipRaw) continue;
+    out[keyRaw.toLowerCase()] = ipRaw;
+  }
+
+  return out;
 }
 
-function getManualIp(prefs: Prefs, kind: DeviceKind): string | null {
-  const raw = kind === "P110" ? prefs.p110Ip : prefs.l530Ip;
-  const ip = raw?.trim();
-  return ip ? ip : null;
+function getManualIpForDevice(prefs: Prefs, device: DeviceRecord): string | null {
+  const overrides = parseIpOverrides(prefs.ipOverrides);
+  const byId = overrides[device.id.toLowerCase()];
+  if (byId) return byId;
+
+  const aliasKey = device.alias?.trim().toLowerCase();
+  if (aliasKey && overrides[aliasKey]) return overrides[aliasKey];
+
+  const modelKey = device.model?.trim().toLowerCase();
+  if (modelKey && overrides[modelKey]) return overrides[modelKey];
+
+  const model = device.model?.toUpperCase() ?? "";
+  if (prefs.p110Ip && model.includes("P110")) return prefs.p110Ip.trim();
+  if (prefs.l530Ip && model.includes("L530")) return prefs.l530Ip.trim();
+
+  return null;
 }
 
 async function connectWithTimeout(prefs: Prefs, ip: string, timeoutMs: number) {
@@ -34,67 +62,70 @@ async function connectWithTimeout(prefs: Prefs, ip: string, timeoutMs: number) {
   ]);
 }
 
-export async function getDevice(prefs: Prefs, kind: DeviceKind) {
-  const cache = await getCache();
-  const cached = cache[kind];
+export async function listDevices(prefs: Prefs): Promise<DeviceRecord[]> {
+  const cloud = await cloudLogin(prefs.tapoEmail, prefs.tapoPassword);
+  const devices = await cloud.listDevices();
 
-  // 0) manual IP (override)
-  const manualIp = getManualIp(prefs, kind);
-  const hintBases = [manualIp, cached?.ip].map((ip) => (ip ? baseFromIp(ip) : null)).filter(Boolean) as string[];
-  if (manualIp) {
-    try {
-      const dev = await connectWithTimeout(prefs, manualIp, 800);
-      await setCachedDevice(kind, manualIp, kind);
-      return { dev, ip: manualIp, discovered: false };
-    } catch {
-      // manual fail -> try cache/discovery
-    }
-  }
+  return devices.map((d) => ({
+    id: d.deviceId,
+    alias: d.alias || d.deviceName || d.deviceModel,
+    model: d.deviceModel,
+    type: d.deviceType,
+    mac: d.deviceMac,
+    category: categorizeDevice(d.deviceModel, d.deviceType),
+    ip: d.ip,
+  }));
+}
 
-  // 1) cache IP ile ultra-hizli check
-  if (cached?.ip) {
+export async function getDeviceConnection(prefs: Prefs, device: DeviceRecord): Promise<DeviceConnection> {
+  const cached = await getCachedDevice(device.id);
+  const manualIp = getManualIpForDevice(prefs, device);
+
+  let ip = null;
+  if (manualIp) ip = manualIp;
+
+  if (!ip && cached?.ip) {
     try {
       const dev = await connectWithTimeout(prefs, cached.ip, 800);
-      await touchDevice(kind);
+      await touchDevice(device.id);
       return { dev, ip: cached.ip, discovered: false };
     } catch {
       // cache fail -> discovery
     }
   }
 
-  // 2) discovery
-  const ip = await discoverByKind(prefs, kind, hintBases);
+  ip = await discoverDeviceIp(prefs, device, { manualIp, cachedIp: cached?.ip ?? null });
   if (!ip) {
     const strings = getStrings(prefs);
-    throw new Error(strings.deviceNotFound(kind));
+    throw new Error(strings.deviceNotFound(device.alias || device.model || device.id));
   }
 
-  // 3) yeni IP ile baglan + cachele
   const dev = await connectWithTimeout(prefs, ip, 1200);
-  await setCachedDevice(kind, ip, kind);
+  await setCachedDevice({
+    id: device.id,
+    ip,
+    alias: device.alias,
+    model: device.model,
+    category: device.category,
+    lastSeenAt: Date.now(),
+  });
   return { dev, ip, discovered: true };
 }
 
-export async function getInfo(prefs: Prefs, kind: DeviceKind) {
-  const { dev } = await getDevice(prefs, kind);
-  return dev.getDeviceInfo();
+export async function getDeviceInfo(prefs: Prefs, device: DeviceRecord) {
+  const { dev, ip } = await getDeviceConnection(prefs, device);
+  const info = await dev.getDeviceInfo();
+  return { info, ip };
 }
 
-export async function setPlugPower(prefs: Prefs, on: boolean) {
-  const { dev } = await getDevice(prefs, "P110");
+export async function setDevicePower(prefs: Prefs, device: DeviceRecord, on: boolean) {
+  const { dev } = await getDeviceConnection(prefs, device);
   if (on) return dev.turnOn();
   return dev.turnOff();
 }
 
-export async function setLightPower(prefs: Prefs, on: boolean) {
-  const { dev } = await getDevice(prefs, "L530");
-  if (on) return dev.turnOn();
-  return dev.turnOff();
-}
-
-// L530 color: Hue 0-360, Saturation 0-100
-export async function setLightColorHS(prefs: Prefs, hue: number, sat: number) {
-  const { dev } = await getDevice(prefs, "L530");
+export async function setLightColorHS(prefs: Prefs, device: DeviceRecord, hue: number, sat: number) {
+  const { dev } = await getDeviceConnection(prefs, device);
   const h = Math.max(0, Math.min(360, Math.round(hue)));
   const s = Math.max(0, Math.min(100, Math.round(sat)));
   let lum = 100;
@@ -106,4 +137,10 @@ export async function setLightColorHS(prefs: Prefs, hue: number, sat: number) {
     // Best-effort: keep default brightness.
   }
   return dev.setHSL(h, s, lum);
+}
+
+export async function setLightBrightness(prefs: Prefs, device: DeviceRecord, brightness: number) {
+  const { dev } = await getDeviceConnection(prefs, device);
+  const b = Math.max(1, Math.min(100, Math.round(brightness)));
+  return dev.setBrightness(b);
 }

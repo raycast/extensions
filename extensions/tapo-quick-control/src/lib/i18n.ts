@@ -1,9 +1,11 @@
-import { DeviceKind, Prefs } from "./types";
+import { Prefs } from "./types";
 
 export type Language = "tr" | "en";
 
 type Strings = {
   deviceChecking: string;
+  devicesLoading: string;
+  noDevicesFound: string;
   open: string;
   close: string;
   opening: string;
@@ -17,6 +19,7 @@ type Strings = {
   failed: string;
   toggle: string;
   statusChanging: string;
+  statusUnknown: string;
   colorChange: string;
   colorChanging: string;
   colorSet: (hue: number, sat: number) => string;
@@ -24,9 +27,11 @@ type Strings = {
   customColor: string;
   hueLabel: string;
   satLabel: string;
+  selectDevice: string;
   plugTitle: string;
   lightTitle: string;
   unknownIp: string;
+  noIp: string;
   noCache: string;
   on: string;
   off: string;
@@ -34,7 +39,17 @@ type Strings = {
   refresh: string;
   clearCache: string;
   cacheCleared: string;
-  deviceNotFound: (kind: DeviceKind) => string;
+  deviceNotFound: (name: string) => string;
+  selected: string;
+  notSelected: string;
+  selectAll: string;
+  clearSelection: string;
+  selectionSaved: string;
+  addSelection: string;
+  removeSelection: string;
+  showInfo: string;
+  copyDeviceId: string;
+  copyIp: string;
   colors: {
     red: string;
     green: string;
@@ -49,6 +64,8 @@ type Strings = {
 const STRINGS: Record<Language, Strings> = {
   tr: {
     deviceChecking: "Cihaz kontrol ediliyor...",
+    devicesLoading: "Cihazlar yukleniyor...",
+    noDevicesFound: "Cihaz bulunamadi.",
     open: "Ac",
     close: "Kapat",
     opening: "Aciliyor...",
@@ -62,6 +79,7 @@ const STRINGS: Record<Language, Strings> = {
     failed: "Basarisiz",
     toggle: "Ac/Kapat",
     statusChanging: "Durum degistiriliyor...",
+    statusUnknown: "Bilinmiyor",
     colorChange: "Renk Degistir",
     colorChanging: "Renk ayarlaniyor...",
     colorSet: (hue: number, sat: number) => `Renk ayarlandi (H:${Math.round(hue)} S:${Math.round(sat)})`,
@@ -69,9 +87,11 @@ const STRINGS: Record<Language, Strings> = {
     customColor: "Ozel (Hue/Sat)",
     hueLabel: "Hue (0-360)",
     satLabel: "Saturation (0-100)",
+    selectDevice: "Cihaz Sec",
     plugTitle: "Priz (P110)",
     lightTitle: "Isik (L530)",
     unknownIp: "bilinmiyor",
+    noIp: "ip-yok",
     noCache: "cache-yok",
     on: "Acik",
     off: "Kapali",
@@ -79,8 +99,18 @@ const STRINGS: Record<Language, Strings> = {
     refresh: "Yenile",
     clearCache: "Cache Temizle",
     cacheCleared: "Cache temizlendi",
-    deviceNotFound: (kind: DeviceKind) =>
-      `${kind} cihaz bulunamadi. Ag taramasi basarisiz. Subnet veya manuel IP ayarini kontrol et.`,
+    deviceNotFound: (name: string) =>
+      `${name} cihaz bulunamadi. Ag taramasi basarisiz. Subnet veya manuel IP ayarini kontrol et.`,
+    selected: "Secili",
+    notSelected: "Secili degil",
+    selectAll: "Hepsini Sec",
+    clearSelection: "Secimi Temizle",
+    selectionSaved: "Secim kaydedildi",
+    addSelection: "Secime Ekle",
+    removeSelection: "Secimden Cikar",
+    showInfo: "Bilgileri Goster",
+    copyDeviceId: "Cihaz ID Kopyala",
+    copyIp: "IP Kopyala",
     colors: {
       red: "Kirmizi",
       green: "Yesil",
@@ -93,6 +123,8 @@ const STRINGS: Record<Language, Strings> = {
   },
   en: {
     deviceChecking: "Checking device...",
+    devicesLoading: "Loading devices...",
+    noDevicesFound: "No devices found.",
     open: "On",
     close: "Off",
     opening: "Turning on...",
@@ -106,6 +138,7 @@ const STRINGS: Record<Language, Strings> = {
     failed: "Failed",
     toggle: "Toggle",
     statusChanging: "Toggling...",
+    statusUnknown: "Unknown",
     colorChange: "Change Color",
     colorChanging: "Setting color...",
     colorSet: (hue: number, sat: number) => `Color set (H:${Math.round(hue)} S:${Math.round(sat)})`,
@@ -113,9 +146,11 @@ const STRINGS: Record<Language, Strings> = {
     customColor: "Custom (Hue/Sat)",
     hueLabel: "Hue (0-360)",
     satLabel: "Saturation (0-100)",
+    selectDevice: "Select Device",
     plugTitle: "Plug (P110)",
     lightTitle: "Light (L530)",
     unknownIp: "unknown",
+    noIp: "no-ip",
     noCache: "no-cache",
     on: "On",
     off: "Off",
@@ -123,8 +158,18 @@ const STRINGS: Record<Language, Strings> = {
     refresh: "Refresh",
     clearCache: "Clear Cache",
     cacheCleared: "Cache cleared",
-    deviceNotFound: (kind: DeviceKind) =>
-      `${kind} device not found. Network scan failed. Check subnet or manual IP.`,
+    deviceNotFound: (name: string) =>
+      `${name} device not found. Network scan failed. Check subnet or manual IP.`,
+    selected: "Selected",
+    notSelected: "Not selected",
+    selectAll: "Select All",
+    clearSelection: "Clear Selection",
+    selectionSaved: "Selection saved",
+    addSelection: "Add to Selection",
+    removeSelection: "Remove from Selection",
+    showInfo: "Show Info",
+    copyDeviceId: "Copy Device ID",
+    copyIp: "Copy IP",
     colors: {
       red: "Red",
       green: "Green",

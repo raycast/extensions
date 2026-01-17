@@ -1,21 +1,57 @@
 import net from "net";
 import find from "local-devices";
-import { cloudLogin, loginDevice, loginDeviceByIp, type TapoDevice } from "tp-link-tapo-connect";
+import { loginDeviceByIp } from "tp-link-tapo-connect";
 import { discoverLocalDevices } from "tp-link-tapo-connect/dist/discover";
+import { resolveMacToIp } from "tp-link-tapo-connect/dist/network-tools";
 import { getLocalSubnets, iterate24, normalizeSubnetPref } from "./net";
-import { DeviceKind, Prefs } from "./types";
+import { DeviceRecord, Prefs } from "./types";
+
+export type DiscoveryHints = {
+  manualIp?: string | null;
+  cachedIp?: string | null;
+};
 
 type ProbeResult = { ip: string; open: boolean };
+
+type DeviceInfoShape = {
+  device_id?: string;
+  deviceId?: string;
+  mac?: string;
+  model?: string;
+  device_model?: string;
+  ip?: string;
+};
 
 function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function kindFromModel(raw: string): DeviceKind | null {
-  const modelRaw = raw.toUpperCase();
-  if (modelRaw.includes("P110")) return "P110";
-  if (modelRaw.includes("L530")) return "L530";
-  return null;
+function baseFromIp(ip: string): string | null {
+  const parts = ip.trim().split(".");
+  if (parts.length !== 4) return null;
+  const nums = parts.map((p) => Number(p));
+  if (nums.some((n) => !Number.isFinite(n) || n < 0 || n > 255)) return null;
+  return `${nums[0]}.${nums[1]}.${nums[2]}.0`;
+}
+
+function normalizeMac(raw?: string): string | null {
+  if (!raw) return null;
+  return raw.replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
+}
+
+function deviceMatches(info: DeviceInfoShape, target: DeviceRecord): boolean {
+  const infoId = info.device_id ?? info.deviceId;
+  if (infoId && infoId === target.id) return true;
+
+  const infoMac = normalizeMac(info.mac);
+  const targetMac = normalizeMac(target.mac);
+  if (infoMac && targetMac && infoMac === targetMac) return true;
+
+  const modelRaw = String(info.model ?? info.device_model ?? "").toUpperCase();
+  const targetModel = target.model?.toUpperCase();
+  if (modelRaw && targetModel && modelRaw === targetModel) return true;
+
+  return false;
 }
 
 async function tcpProbe(ip: string, port: number, timeoutMs: number): Promise<ProbeResult> {
@@ -57,30 +93,38 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
   return results;
 }
 
-async function tryIdentifyKind(prefs: Prefs, ip: string, timeoutMs: number): Promise<DeviceKind | null> {
-  // Validate by logging in and reading device info
-  const dev = await Promise.race([
-    loginDeviceByIp(prefs.tapoEmail, prefs.tapoPassword, ip),
+async function connectWithTimeout(prefs: Prefs, ip: string, timeoutMs: number) {
+  const devPromise = loginDeviceByIp(prefs.tapoEmail, prefs.tapoPassword, ip);
+  return Promise.race([
+    devPromise,
     (async () => {
       await delay(timeoutMs);
       throw new Error("timeout");
     })(),
   ]);
+}
 
-  const info = await Promise.race([
+async function getInfoWithTimeout(dev: { getDeviceInfo: () => Promise<DeviceInfoShape> }, timeoutMs: number) {
+  return Promise.race([
     dev.getDeviceInfo(),
     (async () => {
       await delay(timeoutMs);
       throw new Error("timeout");
     })(),
   ]);
-
-  const modelRaw = String(info?.model ?? info?.device_model ?? "");
-  return kindFromModel(modelRaw);
 }
 
-async function discoverByLocalDevices(prefs: Prefs, kind: DeviceKind): Promise<string | null> {
-  let devices: { loginDevice: () => Promise<{ getDeviceInfo: () => Promise<{ ip?: string; model?: string; device_model?: string }> }> }[];
+async function verifyIpForDevice(prefs: Prefs, device: DeviceRecord, ip: string, timeoutMs: number): Promise<boolean> {
+  const probe = await tcpProbe(ip, 80, 200);
+  if (!probe.open) return false;
+
+  const dev = await connectWithTimeout(prefs, ip, timeoutMs);
+  const info = await getInfoWithTimeout(dev, timeoutMs);
+  return deviceMatches(info, device);
+}
+
+async function discoverByLocalDevices(prefs: Prefs, device: DeviceRecord): Promise<string | null> {
+  let devices: { loginDevice: () => Promise<{ getDeviceInfo: () => Promise<DeviceInfoShape> }> }[];
 
   try {
     devices = await discoverLocalDevices(prefs.tapoEmail, prefs.tapoPassword);
@@ -88,10 +132,10 @@ async function discoverByLocalDevices(prefs: Prefs, kind: DeviceKind): Promise<s
     return null;
   }
 
-  for (const device of devices) {
+  for (const candidate of devices) {
     try {
       const dev = await Promise.race([
-        device.loginDevice(),
+        candidate.loginDevice(),
         (async () => {
           await delay(1000);
           throw new Error("timeout");
@@ -106,10 +150,9 @@ async function discoverByLocalDevices(prefs: Prefs, kind: DeviceKind): Promise<s
         })(),
       ]);
 
-      const modelRaw = String(info?.model ?? info?.device_model ?? "");
-      const foundKind = kindFromModel(modelRaw);
-
-      if (foundKind === kind && info?.ip) return info.ip;
+      if (deviceMatches(info, device)) {
+        return info.ip ?? null;
+      }
     } catch {
       // ignore and try next device
     }
@@ -118,7 +161,7 @@ async function discoverByLocalDevices(prefs: Prefs, kind: DeviceKind): Promise<s
   return null;
 }
 
-async function discoverByArpTable(prefs: Prefs, kind: DeviceKind): Promise<string | null> {
+async function discoverByArpTable(prefs: Prefs, device: DeviceRecord): Promise<string | null> {
   let devices: { ip?: string }[];
 
   try {
@@ -127,57 +170,12 @@ async function discoverByArpTable(prefs: Prefs, kind: DeviceKind): Promise<strin
     return null;
   }
 
-  for (const device of devices) {
-    const ip = device.ip;
+  for (const candidate of devices) {
+    const ip = candidate.ip;
     if (!ip) continue;
     try {
-      const foundKind = await tryIdentifyKind(prefs, ip, 1200);
-      if (foundKind === kind) return ip;
-    } catch {
-      // ignore and try next device
-    }
-  }
-
-  return null;
-}
-
-async function discoverByCloud(prefs: Prefs, kind: DeviceKind): Promise<string | null> {
-  let devices: TapoDevice[];
-
-  try {
-    const cloud = await cloudLogin(prefs.tapoEmail, prefs.tapoPassword);
-    devices = await cloud.listDevices();
-  } catch {
-    return null;
-  }
-
-  const candidates = devices.filter((d) => {
-    const modelRaw = String(d.deviceModel ?? (d as { device_model?: string }).device_model ?? "");
-    const found = kindFromModel(modelRaw);
-    return found === kind || !modelRaw;
-  });
-
-  for (const device of candidates) {
-    try {
-      const dev = await Promise.race([
-        loginDevice(prefs.tapoEmail, prefs.tapoPassword, device),
-        (async () => {
-          await delay(1500);
-          throw new Error("timeout");
-        })(),
-      ]);
-
-      const info = await Promise.race([
-        dev.getDeviceInfo(),
-        (async () => {
-          await delay(1500);
-          throw new Error("timeout");
-        })(),
-      ]);
-
-      const modelRaw = String(info?.model ?? info?.device_model ?? "");
-      const foundKind = kindFromModel(modelRaw);
-      if (foundKind === kind && info?.ip) return info.ip;
+      const ok = await verifyIpForDevice(prefs, device, ip, 1200);
+      if (ok) return ip;
     } catch {
       // ignore and try next device
     }
@@ -218,43 +216,75 @@ function listScanSubnets(prefs: Prefs, hintBases?: string[]) {
   return out;
 }
 
-export async function discoverByKind(
+export async function discoverDeviceIp(
   prefs: Prefs,
-  kind: DeviceKind,
-  hintBases?: string[],
+  device: DeviceRecord,
+  hints?: DiscoveryHints,
 ): Promise<string | null> {
-  // 0) Fast local discovery without subnet scan
-  const local = await discoverByLocalDevices(prefs, kind);
+  const manualIp = hints?.manualIp ?? null;
+  const cachedIp = hints?.cachedIp ?? null;
+
+  if (manualIp) {
+    try {
+      const ok = await verifyIpForDevice(prefs, device, manualIp, 900);
+      if (ok) return manualIp;
+    } catch {
+      // manual fail -> continue
+    }
+  }
+
+  if (cachedIp) {
+    try {
+      const ok = await verifyIpForDevice(prefs, device, cachedIp, 900);
+      if (ok) return cachedIp;
+    } catch {
+      // cache fail -> continue
+    }
+  }
+
+  if (device.ip) {
+    try {
+      const ok = await verifyIpForDevice(prefs, device, device.ip, 900);
+      if (ok) return device.ip;
+    } catch {
+      // cloud ip fail -> continue
+    }
+  }
+
+  if (device.mac) {
+    try {
+      const macIp = await resolveMacToIp(device.mac);
+      if (macIp) {
+        const ok = await verifyIpForDevice(prefs, device, macIp, 1000);
+        if (ok) return macIp;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const local = await discoverByLocalDevices(prefs, device);
   if (local) return local;
 
-  // 1) ARP table discovery (no MAC prefix filter)
-  const arp = await discoverByArpTable(prefs, kind);
+  const arp = await discoverByArpTable(prefs, device);
   if (arp) return arp;
 
-  // 2) Cloud-assisted discovery (resolves local IP via MAC)
-  const cloud = await discoverByCloud(prefs, kind);
-  if (cloud) return cloud;
+  const hintBases = [manualIp, cachedIp, device.ip]
+    .map((ip) => (ip ? baseFromIp(ip) : null))
+    .filter(Boolean) as string[];
 
   const subnets = listScanSubnets(prefs, hintBases);
   if (subnets.length === 0) return null;
 
-  for (const { base, cidr } of subnets) {
-    // Bu implementasyon /24 içindir (hız + basitlik). /24 değilse yine de base üzerinden /24 tarıyoruz.
-    if (cidr !== 24) {
-      // İstersen sonra genişletebiliriz; şu an kesin ve hızlı olması için /24 ile sınırlı.
-    }
-
+  for (const { base } of subnets) {
     const ips = Array.from(iterate24(base));
-
-    // 2) TCP 9999 hızlı tarama
-    const probed = await mapLimit(ips, 64, (ip) => tcpProbe(ip, 9999, 180));
+    const probed = await mapLimit(ips, 64, (ip) => tcpProbe(ip, 80, 180));
     const candidates = probed.filter((r) => r.open).map((r) => r.ip);
 
-    // 3) Adaylarda kimlik doğrulama
     for (const ip of candidates) {
       try {
-        const foundKind = await tryIdentifyKind(prefs, ip, 1200);
-        if (foundKind === kind) return ip;
+        const ok = await verifyIpForDevice(prefs, device, ip, 1200);
+        if (ok) return ip;
       } catch {
         // ignore
       }

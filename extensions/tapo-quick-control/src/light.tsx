@@ -1,8 +1,10 @@
-import { Action, ActionPanel, Color, Form, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Detail, Form, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import { readDeviceOn, supportsColor } from "./lib/device-utils";
 import { getStrings } from "./lib/i18n";
-import { getInfo, setLightPower, setLightColorHS } from "./lib/tapo";
-import { Prefs } from "./lib/types";
+import { getSelectedDeviceIds } from "./lib/storage";
+import { getDeviceInfo, listDevices, setDevicePower, setLightColorHS } from "./lib/tapo";
+import { DeviceRecord, Prefs } from "./lib/types";
 
 const COLOR_PRESET_VALUES = {
   red: { hue: 0, sat: 100, tint: Color.Red },
@@ -20,6 +22,9 @@ export default function Command() {
   const prefs = getPreferenceValues<Prefs>();
   const strings = getStrings(prefs);
 
+  const [devices, setDevices] = useState<DeviceRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deviceId, setDeviceId] = useState<string>("");
   const [hue, setHue] = useState<string>("200");
   const [sat, setSat] = useState<string>("100");
   const [colorChoice, setColorChoice] = useState<string>("red");
@@ -27,31 +32,72 @@ export default function Command() {
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       try {
-        const info = await getInfo(prefs, "L530");
+        const list = await listDevices(prefs);
+        const selectedIds = await getSelectedDeviceIds();
+        const lights = list.filter((d) => d.category === "light");
+        const filtered =
+          prefs.deviceScope === "selected" && selectedIds.length > 0
+            ? lights.filter((d) => selectedIds.includes(d.id))
+            : lights;
+        setDevices(filtered);
+        if (filtered.length > 0) setDeviceId(filtered[0].id);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const selectedDevice = useMemo(() => devices.find((d) => d.id === deviceId) ?? null, [devices, deviceId]);
+
+  useEffect(() => {
+    if (!selectedDevice) {
+      setIsOn(null);
+      return;
+    }
+    (async () => {
+      try {
+        const { info } = await getDeviceInfo(prefs, selectedDevice);
         setIsOn(readDeviceOn(info));
       } catch {
         setIsOn(null);
       }
     })();
-  }, []);
+  }, [deviceId]);
+
+  if (!loading && devices.length === 0) {
+    return <Detail markdown={strings.noDevicesFound} />;
+  }
 
   const toggleTitle = isOn === null ? strings.toggle : isOn ? strings.close : strings.open;
+  const colorSupported = supportsColor(selectedDevice?.model, selectedDevice?.category);
 
   return (
     <Form
+      isLoading={loading}
       actions={
         <ActionPanel>
-          <Action title={toggleTitle} onAction={() => runToggle(prefs, isOn, setIsOn, strings)} />
-          <Action title={strings.open} onAction={() => runPower(prefs, true, setIsOn, strings)} />
-          <Action title={strings.close} onAction={() => runPower(prefs, false, setIsOn, strings)} />
           <Action
-            title={strings.colorChange}
-            onAction={() => runColor(prefs, colorChoice, hue, sat, setIsOn, strings)}
+            title={toggleTitle}
+            onAction={() => runToggle(prefs, selectedDevice, isOn, setIsOn, strings)}
           />
+          <Action title={strings.open} onAction={() => runPower(prefs, selectedDevice, true, setIsOn, strings)} />
+          <Action title={strings.close} onAction={() => runPower(prefs, selectedDevice, false, setIsOn, strings)} />
+          {colorSupported ? (
+            <Action
+              title={strings.colorChange}
+              onAction={() => runColor(prefs, selectedDevice, colorChoice, hue, sat, setIsOn, strings)}
+            />
+          ) : null}
         </ActionPanel>
       }
     >
+      <Form.Dropdown id="device" title={strings.selectDevice} value={deviceId} onChange={setDeviceId}>
+        {devices.map((device) => (
+          <Form.Dropdown.Item key={device.id} value={device.id} title={device.alias || device.model} />
+        ))}
+      </Form.Dropdown>
       <Form.Dropdown id="color" title={strings.color} value={colorChoice} onChange={setColorChoice}>
         {Object.entries(COLOR_PRESET_VALUES).map(([key, preset]) => (
           <Form.Dropdown.Item
@@ -69,29 +115,23 @@ export default function Command() {
   );
 }
 
-function readDeviceOn(info: unknown): boolean | null {
-  if (!info || typeof info !== "object") return null;
-  const data = info as { device_on?: boolean; deviceOn?: boolean };
-  if (typeof data.device_on === "boolean") return data.device_on;
-  if (typeof data.deviceOn === "boolean") return data.deviceOn;
-  return null;
-}
-
 async function runToggle(
   prefs: Prefs,
+  device: DeviceRecord | null,
   isOn: boolean | null,
   setIsOn: (v: boolean | null) => void,
   strings: ReturnType<typeof getStrings>,
 ) {
+  if (!device) return;
   const toast = await showToast({ style: Toast.Style.Animated, title: strings.statusChanging });
   try {
     let current = isOn;
     if (current === null) {
-      const info = await getInfo(prefs, "L530");
+      const { info } = await getDeviceInfo(prefs, device);
       current = readDeviceOn(info);
     }
     const next = current === null ? true : !current;
-    await setLightPower(prefs, next);
+    await setDevicePower(prefs, device, next);
     setIsOn(next);
     toast.style = Toast.Style.Success;
     toast.title = next ? strings.lightOpened : strings.lightClosed;
@@ -104,13 +144,15 @@ async function runToggle(
 
 async function runPower(
   prefs: Prefs,
+  device: DeviceRecord | null,
   on: boolean,
   setIsOn: (v: boolean | null) => void,
   strings: ReturnType<typeof getStrings>,
 ) {
+  if (!device) return;
   const toast = await showToast({ style: Toast.Style.Animated, title: on ? strings.openingNow : strings.closingNow });
   try {
-    await setLightPower(prefs, on);
+    await setDevicePower(prefs, device, on);
     setIsOn(on);
     toast.style = Toast.Style.Success;
     toast.title = on ? strings.lightOpened : strings.lightClosed;
@@ -123,18 +165,20 @@ async function runPower(
 
 async function runColor(
   prefs: Prefs,
+  device: DeviceRecord | null,
   choice: string,
   hueInput: string,
   satInput: string,
   setIsOn: (v: boolean | null) => void,
   strings: ReturnType<typeof getStrings>,
 ) {
+  if (!device) return;
   const toast = await showToast({ style: Toast.Style.Animated, title: strings.colorChanging });
   try {
     const preset = COLOR_PRESET_VALUES[choice as ColorPresetKey];
     const hue = preset ? preset.hue : Number(hueInput);
     const sat = preset ? preset.sat : Number(satInput);
-    await setLightColorHS(prefs, hue, sat);
+    await setLightColorHS(prefs, device, hue, sat);
     setIsOn(true);
     toast.style = Toast.Style.Success;
     toast.title = strings.colorSet(hue, sat);
