@@ -3,7 +3,7 @@
   "name": "neon",
   "title": "Neon",
   "description": "Manage Neon Projects and API Keys",
-  "icon": "neon.png",
+  "icon": "neon-logomark.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
@@ -34,9 +34,9 @@
     }
   ],
   "dependencies": {
-    "@neondatabase/api-client": "^2.1.0",
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.2.0"
+    "@neondatabase/api-client": "^2.6.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
