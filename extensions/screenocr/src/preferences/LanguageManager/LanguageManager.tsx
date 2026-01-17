@@ -80,7 +80,7 @@ export const LanguagesManagerList = () => {
   const selectLanguage = (language: Language) => {
     setSelectedLanguages((prev) => [...prev, language]);
     const selectedLanguagesWithoutPrimary = selectedLanguages.filter(
-      (lang) => lang.value !== preference.primaryLanguage
+      (lang) => lang.value !== preference.primaryLanguage,
     );
     const payload = [...selectedLanguagesWithoutPrimary, language];
     LocalStorage.setItem("SelectedLanguages", JSON.stringify(payload));
@@ -89,15 +89,18 @@ export const LanguagesManagerList = () => {
 
   const unselectLanguage = (language: Language) => {
     setSelectedLanguages((prev) =>
-      prev.filter((lang) => lang.value !== language.value)
+      prev.filter((lang) => lang.value !== language.value),
     );
     const updatedLanguages = selectedLanguages.filter(
       (lang) => lang.value !== language.value,
     );
     const updatedLanguagesWithoutPrimary = updatedLanguages.filter(
-      (lang) => lang.value !== preference.primaryLanguage
+      (lang) => lang.value !== preference.primaryLanguage,
     );
-    LocalStorage.setItem("SelectedLanguages", JSON.stringify(updatedLanguagesWithoutPrimary));
+    LocalStorage.setItem(
+      "SelectedLanguages",
+      JSON.stringify(updatedLanguagesWithoutPrimary),
+    );
   };
 
   useEffect(() => {
