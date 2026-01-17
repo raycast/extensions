@@ -30,6 +30,10 @@ export default function Command({ worklog, onSave }: Props) {
   const [endTime, setEndTime] = useState<Date | null>(worklog?.endTime ? new Date(worklog.endTime) : null);
   const [destination, setDestination] = useState<string>("local");
 
+
+
+
+
   const [issues, setIssues] = useState<JiraIssue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
