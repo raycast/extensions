@@ -78,24 +78,23 @@ export const LanguagesManagerList = () => {
   };
 
   const selectLanguage = (language: Language) => {
-    setSelectedLanguages((prev) => [...prev, language]);
     const selectedLanguagesWithoutPrimary = selectedLanguages.filter(
       (lang) => lang.value !== preference.primaryLanguage,
     );
+    setSelectedLanguages((prev) => [...prev, language]);
     const payload = [...selectedLanguagesWithoutPrimary, language];
     LocalStorage.setItem("SelectedLanguages", JSON.stringify(payload));
     showToast(Toast.Style.Success, "Language set was saved!");
   };
 
   const unselectLanguage = (language: Language) => {
+    const updatedLanguagesWithoutPrimary = selectedLanguages.filter(
+      (lang) =>
+        lang.value !== language.value &&
+        lang.value !== preference.primaryLanguage,
+    );
     setSelectedLanguages((prev) =>
       prev.filter((lang) => lang.value !== language.value),
-    );
-    const updatedLanguages = selectedLanguages.filter(
-      (lang) => lang.value !== language.value,
-    );
-    const updatedLanguagesWithoutPrimary = updatedLanguages.filter(
-      (lang) => lang.value !== preference.primaryLanguage,
     );
     LocalStorage.setItem(
       "SelectedLanguages",
