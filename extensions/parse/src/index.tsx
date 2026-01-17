@@ -87,7 +87,11 @@ export default function Command() {
           }
         }
 
-        setClipboardHistory(items);
+        setClipboardHistory((prev) => {
+          if (prev.length !== items.length) return items;
+          if (prev.every((p, i) => p.id === items[i]?.id)) return prev;
+          return items;
+        });
 
         if (
           items.length > 0 &&
