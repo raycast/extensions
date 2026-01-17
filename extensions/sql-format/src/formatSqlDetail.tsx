@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 
 interface Preferences {
-  autopaste: boolean;
+  autoPaste: boolean;
 }
 
 /**
@@ -19,7 +19,7 @@ interface Preferences {
  * @param sql - The formatted SQL string to display
  */
 export const FormattedSqlDetail = ({ sql }: { sql: string }) => {
-  const { autopaste } = getPreferenceValues<Preferences>();
+  const { autoPaste } = getPreferenceValues<Preferences>();
 
   // Handles copying SQL to clipboard and shows success toast
   const handleCopy = async () => {
@@ -35,8 +35,8 @@ export const FormattedSqlDetail = ({ sql }: { sql: string }) => {
       navigationTitle="Formatted SQL"
       actions={
         <ActionPanel>
-          {autopaste && <Action.Paste title="Paste" content={sql} />}
-          {!autopaste && <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={handleCopy} />}
+          {autoPaste && <Action.Paste title="Paste" content={sql} />}
+          {!autoPaste && <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={handleCopy} />}
         </ActionPanel>
       }
     />
