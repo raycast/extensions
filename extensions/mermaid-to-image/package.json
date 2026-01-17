@@ -175,5 +175,8 @@
       "required": false,
       "placeholder": "/Users/username/.nvm/versions/node/v22.12.0/bin/mmdc"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

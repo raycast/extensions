@@ -1,6 +1,6 @@
 # Mermaid to Image Changelog
 
-## [AI Chat Integration Enhancement] - {PR_MERGE_DATE}
+## [AI Chat Integration Enhancement] - 2026-01-17
 ### Added
 - **Inline Image Display in AI Chat**: Generated diagrams now automatically appear as inline images in Raycast AI conversations
 - AI Tool now returns **ready-to-display markdown** that AI outputs directly without modification
