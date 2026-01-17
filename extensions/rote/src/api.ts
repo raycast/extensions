@@ -4,6 +4,7 @@ import {
   Toast,
   LocalStorage,
 } from "@raycast/api";
+import type { Preferences } from "@raycast/api";
 import {
   ApiResponse,
   Note,

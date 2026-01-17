@@ -5,6 +5,7 @@ import {
   Icon,
   getPreferenceValues,
 } from "@raycast/api";
+import type { Preferences } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getApiClient } from "./api";
 import { Note } from "./types";
@@ -66,7 +67,7 @@ export default function RandomNote() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
-  const preferences = getPreferenceValues<RotePreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const webUrl =
     (preferences.webUrl as unknown as string | undefined)?.replace(/\/$/, "") ||
     "";

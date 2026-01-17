@@ -7,15 +7,15 @@ import {
   getPreferenceValues,
   LocalStorage,
 } from "@raycast/api";
+import type { Preferences } from "@raycast/api";
 import { getApiClient } from "./api";
-import { RotePreferences } from "./types";
 
 // Quick Add - create note from selected text or clipboard
 
 const QUICK_ADD_TAGS_KEY = "quick_add_default_tags";
 
 export default async function QuickAdd() {
-  const preferences = getPreferenceValues<RotePreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   let content = "";
 
   // 优先使用选中的文字
@@ -59,7 +59,7 @@ export default async function QuickAdd() {
     try {
       const stored = await LocalStorage.getItem<string>(QUICK_ADD_TAGS_KEY);
       if (stored) {
-        const configTags = JSON.parse(stored) as string[];
+        const configTags = JSON.parse(stored) as unknown as string[];
         if (configTags.length > 0) {
           tags = configTags;
         }
@@ -76,8 +76,8 @@ export default async function QuickAdd() {
       if (tagSetting) {
         tags = tagSetting
           .split(/[,\s]+/)
-          .map((t) => t.trim())
-          .filter((t) => t.length > 0);
+          .map((t: string) => t.trim())
+          .filter((t: string) => t.length > 0);
       }
     }
 

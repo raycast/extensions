@@ -10,6 +10,7 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
+import type { Preferences } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { getApiClient } from "./api";
 import { Note } from "./types";
@@ -200,7 +201,7 @@ export default function ListNotes() {
   const [isLoading, setIsLoading] = useState(true);
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
-  const preferences = getPreferenceValues<RotePreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const webUrl =
     (preferences.webUrl as unknown as string | undefined)?.replace(/\/$/, "") ||
     "";

@@ -6,6 +6,7 @@ import {
   Color,
   getPreferenceValues,
 } from "@raycast/api";
+import type { Preferences } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { getApiClient } from "./api";
 import { Note } from "./types";
@@ -159,7 +160,7 @@ export default function SearchNotes() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [isShowingDetail, setIsShowingDetail] = useState(true);
-  const preferences = getPreferenceValues<RotePreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const webUrl =
     (preferences.webUrl as unknown as string | undefined)?.replace(/\/$/, "") ||
     "";
