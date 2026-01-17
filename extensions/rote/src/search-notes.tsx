@@ -8,7 +8,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { getApiClient } from "./api";
-import { Note, RotePreferences } from "./types";
+import { Note } from "./types";
 
 // Search notes with detail panel
 

@@ -7,7 +7,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getApiClient } from "./api";
-import { Note, RotePreferences } from "./types";
+import { Note } from "./types";
 
 // Random note - metadata at bottom
 

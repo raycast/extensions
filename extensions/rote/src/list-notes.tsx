@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { getApiClient } from "./api";
-import { Note, RotePreferences } from "./types";
+import { Note } from "./types";
 import EditNote from "./edit-note";
 
 // List notes with filters and detail panel

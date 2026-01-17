@@ -5,7 +5,6 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import {
-  RotePreferences,
   ApiResponse,
   Note,
   CreateNotePayload,
