@@ -94,7 +94,6 @@ export const LanguagesManagerList = () => {
     const updatedLanguages = selectedLanguages.filter(
       (lang) => lang.value !== language.value,
     );
-    LocalStorage.setItem("SelectedLanguages", JSON.stringify(updatedLanguages));
     const updatedLanguagesWithoutPrimary = updatedLanguages.filter(
       (lang) => lang.value !== preference.primaryLanguage
     );
