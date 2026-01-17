@@ -2,12 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "font-converter",
   "title": "Font Converter",
-  "description": "Convert any font between TTF, OTF, WOFF, WOFF2, EOT, and SVG formats directly from Raycast",
+  "description": "Convert fonts to TTF, WOFF, WOFF2, and EOT formats directly from Raycast",
   "icon": "extension-icon.png",
   "author": "meshal",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Developer Tools",
@@ -18,18 +17,21 @@
     {
       "name": "convert-font",
       "title": "Convert Font",
+      "subtitle": "Font Converter",
       "description": "Convert a font file into one or more formats.",
       "mode": "view"
     },
     {
       "name": "generate-font-face-css",
-      "title": "Generate @font-face CSS",
+      "title": "Generate @Font-Face CSS",
+      "subtitle": "Font Converter",
       "description": "Generate a CSS snippet for the converted font files.",
       "mode": "no-view"
     },
     {
       "name": "preview-font",
       "title": "Preview Font",
+      "subtitle": "Font Converter",
       "description": "Preview any installed or custom font.",
       "mode": "view"
     }
@@ -38,6 +40,7 @@
     "@raycast/api": "^1.103.9",
     "@raycast/utils": "^1.17.0",
     "fonteditor-core": "^2.6.3",
+    "fontverter": "^2.0.0",
     "opentype.js": "^1.3.4"
   },
   "devDependencies": {

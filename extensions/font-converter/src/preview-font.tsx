@@ -1,8 +1,9 @@
-import { Detail, getSelectedFinderItems, environment } from "@raycast/api";
+import { Detail, getSelectedFinderItems } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
-import { createFont, woff2, FontEditor, TTF } from "fonteditor-core";
+import { createFont, FontEditor, TTF } from "fonteditor-core";
+import fontverter from "fontverter";
 import opentype from "opentype.js";
 
 export default function Command() {
@@ -24,28 +25,21 @@ export default function Command() {
         const filePath = items[0].path;
         const ext = path.extname(filePath).slice(1).toLowerCase();
 
-        if (!["ttf", "woff", "woff2", "eot", "svg", "otf"].includes(ext)) {
+        if (!["ttf", "woff", "woff2", "eot", "otf"].includes(ext)) {
           setError("Selected file is not a supported font format");
           setIsLoading(false);
           return;
         }
 
-        const buffer = fs.readFileSync(filePath);
+        let buffer = fs.readFileSync(filePath);
 
-        // Initialize woff2 if needed (for fonteditor-core metadata extraction)
         if (ext === "woff2") {
-          const wasmSource = path.join(environment.assetsPath, "woff2.wasm");
-          const wasmDest = path.join(path.dirname(__filename), "woff2.wasm");
-
-          if (!fs.existsSync(wasmDest)) {
-            fs.copyFileSync(wasmSource, wasmDest);
-          }
-          await woff2.init();
+          buffer = await fontverter.convert(buffer, "sfnt");
         }
 
-        // Use fonteditor-core for metadata as it handles various formats well
+        const inputType = ext === "woff2" ? "ttf" : ext;
         const font = createFont(buffer, {
-          type: ext as FontEditor.FontType,
+          type: inputType as FontEditor.FontType,
           hinting: true,
           kerning: true,
         });
@@ -63,14 +57,9 @@ export default function Command() {
         };
         setMetadata(meta);
 
-        // Use opentype.js for rendering preview
-        // opentype.js supports ttf, otf, woff. woff2 support is limited/requires external decoder usually,
-        // but let's try parsing the buffer directly.
-        // If it fails, we might need to convert to ttf using fonteditor-core first.
-
+        // opentype.js doesn't support eot, convert to ttf first
         let previewBuffer = buffer;
-        if (ext === "woff2" || ext === "eot" || ext === "svg") {
-          // Convert to ttf for opentype.js
+        if (ext === "eot") {
           const ttfBuffer = font.write({ type: "ttf", hinting: false });
           previewBuffer = Buffer.from(ttfBuffer as Buffer);
         }

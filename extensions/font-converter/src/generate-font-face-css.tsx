@@ -1,17 +1,15 @@
-import { showToast, Toast, getSelectedFinderItems, Clipboard, showHUD, environment } from "@raycast/api";
+import { getSelectedFinderItems, Clipboard, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import fs from "fs";
-import { createFont, woff2, FontEditor, TTF } from "fonteditor-core";
+import { createFont, FontEditor, TTF } from "fonteditor-core";
+import fontverter from "fontverter";
 
 export default async function Command() {
   try {
     const items = await getSelectedFinderItems();
     if (items.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No file selected",
-        message: "Please select a font file in Finder",
-      });
+      await showFailureToast("No file selected", { message: "Please select a font file in Finder" });
       return;
     }
 
@@ -20,30 +18,20 @@ export default async function Command() {
     const fileName = path.basename(filePath);
     const fontFamily = path.basename(filePath, path.extname(filePath));
 
-    if (!["ttf", "woff", "woff2", "eot", "svg", "otf"].includes(ext)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Unsupported format",
-        message: "Selected file is not a supported font format",
-      });
+    if (!["ttf", "woff", "woff2", "eot", "otf"].includes(ext)) {
+      await showFailureToast("Unsupported format", { message: "Selected file is not a supported font format" });
       return;
     }
 
-    const buffer = fs.readFileSync(filePath);
+    let buffer = fs.readFileSync(filePath);
 
-    // Initialize woff2 if needed
     if (ext === "woff2") {
-      const wasmSource = path.join(environment.assetsPath, "woff2.wasm");
-      const wasmDest = path.join(path.dirname(__filename), "woff2.wasm");
-
-      if (!fs.existsSync(wasmDest)) {
-        fs.copyFileSync(wasmSource, wasmDest);
-      }
-      await woff2.init();
+      buffer = await fontverter.convert(buffer, "sfnt");
     }
 
+    const inputType = ext === "woff2" ? "ttf" : ext;
     const font = createFont(buffer, {
-      type: ext as FontEditor.FontType,
+      type: inputType as FontEditor.FontType,
       hinting: true,
       kerning: true,
     });
@@ -77,10 +65,6 @@ export default async function Command() {
     await Clipboard.copy(css);
     await showHUD("CSS copied to clipboard");
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to generate CSS",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Failed to generate CSS" });
   }
 }

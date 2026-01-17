@@ -1,13 +1,15 @@
-import { Action, ActionPanel, List, showToast, Toast, getSelectedFinderItems, Icon, environment } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, getSelectedFinderItems, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 
-import { createFont, woff2, FontEditor } from "fonteditor-core";
+import { createFont, FontEditor } from "fonteditor-core";
+import fontverter from "fontverter";
 
-type FontFormat = "ttf" | "woff" | "woff2" | "eot" | "svg";
+type FontFormat = "ttf" | "woff" | "woff2" | "eot";
 
-const FORMATS: FontFormat[] = ["ttf", "woff", "woff2", "eot", "svg"];
+const FORMATS: FontFormat[] = ["ttf", "woff", "woff2", "eot"];
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -54,46 +56,46 @@ export default function Command() {
     });
 
     try {
-      const buffer = fs.readFileSync(selectedFile);
+      let buffer = fs.readFileSync(selectedFile);
       const ext = path.extname(selectedFile).slice(1).toLowerCase();
-
-      // Initialize woff2 if needed (either for input or output)
-      if (ext === "woff2" || targetFormat === "woff2") {
-        const wasmSource = path.join(environment.assetsPath, "woff2.wasm");
-        // fonteditor-core expects woff2.wasm in the same directory as the script in Node
-        const wasmDest = path.join(path.dirname(__filename), "woff2.wasm");
-
-        if (!fs.existsSync(wasmDest)) {
-          fs.copyFileSync(wasmSource, wasmDest);
-        }
-
-        await woff2.init();
-      }
-
-      const font = createFont(buffer, {
-        type: ext as FontEditor.FontType,
-        hinting: true,
-        kerning: true,
-      });
-
-      const outputBuffer = font.write({
-        type: targetFormat,
-      });
-
       const dir = path.dirname(selectedFile);
       const name = path.basename(selectedFile, path.extname(selectedFile));
       const outputPath = path.join(dir, `${name}.${targetFormat}`);
 
-      fs.writeFileSync(outputPath, Buffer.from(outputBuffer as Buffer));
+      if (ext === "woff2") {
+        buffer = await fontverter.convert(buffer, "sfnt");
+      }
 
+      let outputBuffer: Buffer;
+      if (targetFormat === "woff2") {
+        let ttfBuffer: Buffer;
+        if (ext === "woff2") {
+          ttfBuffer = buffer;
+        } else {
+          const font = createFont(buffer, {
+            type: ext as FontEditor.FontType,
+            hinting: true,
+            kerning: true,
+          });
+          ttfBuffer = Buffer.from(font.write({ type: "ttf" }) as Buffer);
+        }
+        outputBuffer = await fontverter.convert(ttfBuffer, "woff2");
+      } else {
+        const inputType = ext === "woff2" ? "ttf" : ext;
+        const font = createFont(buffer, {
+          type: inputType as FontEditor.FontType,
+          hinting: true,
+          kerning: true,
+        });
+        outputBuffer = Buffer.from(font.write({ type: targetFormat }) as Buffer);
+      }
+
+      fs.writeFileSync(outputPath, outputBuffer);
       toast.style = Toast.Style.Success;
       toast.title = "Conversion successful";
       toast.message = `Saved to ${path.basename(outputPath)}`;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Conversion failed";
-      toast.message = error instanceof Error ? error.message : String(error);
-      console.error(error);
+      await showFailureToast(error, { title: "Conversion failed" });
     } finally {
       setIsLoading(false);
     }
