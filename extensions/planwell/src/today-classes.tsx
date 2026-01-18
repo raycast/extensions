@@ -18,7 +18,17 @@ import {
   getVaultPath,
 } from "./utils/vault";
 import { Class } from "./types";
-import { getDay, set, isAfter, isBefore, formatDistanceToNow } from "date-fns";
+import {
+  getDay,
+  set,
+  isAfter,
+  isBefore,
+  formatDistanceToNow,
+  format,
+  startOfWeek,
+  parseISO,
+  isSameWeek,
+} from "date-fns";
 import { ClassDetail } from "./components/ClassDetail";
 import { QuickAddClass } from "./components/QuickAddClass";
 import path from "path";
@@ -55,9 +65,29 @@ export default function Command() {
   const refreshClasses = () => setRefreshKey((k) => k + 1);
 
   // Filter classes for today
-  const todaysClasses = allClasses.filter((c) =>
-    c.occurrences.some((o) => o.dayOfWeek === dayOfWeek),
-  );
+  const todaysClasses = allClasses.filter((c) => {
+    // Must have occurrence for today's day
+    if (!c.occurrences.some((o) => o.dayOfWeek === dayOfWeek)) {
+      return false;
+    }
+
+    const today = format(now, "yyyy-MM-dd");
+
+    if (c.isRecurring && c.startDate) {
+      // Recurring: check date range
+      if (today < c.startDate) return false;
+      if (c.endDate && today > c.endDate) return false;
+    } else if (!c.isRecurring && c.startDate) {
+      // One-off: check if in same week as startDate
+      const startWeek = startOfWeek(parseISO(c.startDate), { weekStartsOn: 1 });
+      const currentWeek = startOfWeek(now, { weekStartsOn: 1 });
+      if (!isSameWeek(startWeek, currentWeek, { weekStartsOn: 1 })) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 
   // Add time information to classes
   const classesWithTime: ClassWithTime[] = todaysClasses.map((c) => {

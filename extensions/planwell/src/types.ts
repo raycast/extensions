@@ -2,6 +2,9 @@ export interface Class {
   id: string;
   name: string;
   occurrences: Occurrence[];
+  isRecurring?: boolean;
+  startDate?: string;
+  endDate?: string;
   content: string;
 }
 
@@ -24,6 +27,7 @@ export interface Event {
   startDate: string;
   endDate: string;
   content: string;
+  isImportant?: boolean;
 }
 
 export interface Todo {

@@ -14,6 +14,8 @@ A Raycast extension for [PlanWell](https://planwellmd.com) - the markdown-native
 ### Upcoming Events
 - View multi-day events
 - See time until start/end
+- Mark events as important (red dot indicator)
+- Toggle sort: chronological or important first
 - View event notes
 
 ### Todos
@@ -29,6 +31,7 @@ A Raycast extension for [PlanWell](https://planwellmd.com) - the markdown-native
 
 - **Vault Path**: Path to your PlanWell vault folder
 - **Default View**: Choose between "All Periods" or "Classes Only"
+- **Event Sorting**: Default sort order for upcoming events (Chronological or Important First)
 - **External Editor**: App to open markdown files
 - **Obsidian Vault Name**: Required if using Obsidian as external editor
 - **Obsidian Subfolder**: For symlink setups (optional)
@@ -40,6 +43,8 @@ A Raycast extension for [PlanWell](https://planwellmd.com) - the markdown-native
 - `Cmd+Shift+O` - Open in External Editor
 - `Cmd+Backspace` - Delete class
 - `Cmd+R` - Refresh list
+- `Ctrl+I` - Toggle event importance
+- `Ctrl+S` - Toggle event sort order
 
 ## Requirements
 

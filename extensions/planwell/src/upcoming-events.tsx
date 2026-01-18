@@ -5,8 +5,10 @@ import {
   Action,
   open,
   getPreferenceValues,
+  Color,
 } from "@raycast/api";
-import { getEvents, getVaultPath } from "./utils/vault";
+import { useState, useCallback } from "react";
+import { getEvents, getVaultPath, toggleEventImportant } from "./utils/vault";
 import {
   isAfter,
   parseISO,
@@ -17,17 +19,25 @@ import {
 } from "date-fns";
 import { EventDetail } from "./components/EventDetail";
 import path from "path";
-import { designTokens } from "./utils/design-tokens";
 
 interface Preferences {
   externalEditor?: { name: string; path: string };
   obsidianVaultName?: string;
   obsidianSubfolder?: string;
+  showImportantFirst?: string;
 }
 
 export default function Command() {
-  const { accent } = designTokens.colors;
   const preferences = getPreferenceValues<Preferences>();
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [showImportantFirst, setShowImportantFirst] = useState(
+    preferences.showImportantFirst === "important",
+  );
+
+  const refresh = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
+
   const allEvents = getEvents();
   const now = new Date();
 
@@ -37,10 +47,19 @@ export default function Command() {
     return isAfter(end, now) || end.toDateString() === now.toDateString();
   });
 
-  // Sort by start date
+  // Sort by start date first
   upcoming.sort((a, b) => {
     return parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime();
   });
+
+  // If "Important First" is enabled, sort important events to top
+  if (showImportantFirst) {
+    upcoming.sort((a, b) => {
+      if (a.isImportant && !b.isImportant) return -1;
+      if (!a.isImportant && b.isImportant) return 1;
+      return 0;
+    });
+  }
 
   return (
     <List searchBarPlaceholder="Search upcoming events...">
@@ -72,8 +91,12 @@ export default function Command() {
 
           return (
             <List.Item
-              key={e.id}
-              icon={{ source: Icon.Star, tintColor: accent.primary }}
+              key={`${e.id}-${refreshKey}`}
+              icon={
+                e.isImportant
+                  ? { source: Icon.CircleFilled, tintColor: Color.Red }
+                  : undefined
+              }
               title={e.name}
               subtitle={subtitle}
               accessories={[{ text: `${e.startDate} → ${e.endDate}` }]}
@@ -83,6 +106,29 @@ export default function Command() {
                     title="Show Notes"
                     icon={Icon.Document}
                     target={<EventDetail event={e} />}
+                  />
+                  <Action
+                    title={
+                      e.isImportant
+                        ? "Unmark as Important"
+                        : "Mark as Important"
+                    }
+                    icon={Icon.Circle}
+                    shortcut={{ modifiers: ["ctrl"], key: "i" }}
+                    onAction={() => {
+                      toggleEventImportant(e.id);
+                      refresh();
+                    }}
+                  />
+                  <Action
+                    title={
+                      showImportantFirst
+                        ? "Sort Chronologically"
+                        : "Sort Important First"
+                    }
+                    icon={Icon.List}
+                    shortcut={{ modifiers: ["ctrl"], key: "s" }}
+                    onAction={() => setShowImportantFirst((v) => !v)}
                   />
                   <Action
                     title="Open in Planwell"
