@@ -9,13 +9,20 @@ export interface Entry {
   title: string;
   subtitle: string;
   type: ZedWorkspaceType;
+  isOpen?: boolean;
+  wsl?: { user: string | null; distro: string | null } | null;
 }
 
 export function getEntry(workspace: Workspace): Entry | null {
   try {
+    const suffix = workspace.wsl
+      ? ` [WSL: ${workspace.wsl.distro}]`
+      : workspace.type === "remote"
+        ? " [SSH: " + workspace.host + "]"
+        : "";
+
     const title = decodeURIComponent(basename(workspace.path)) || workspace.path;
-    const subtitle =
-      tildify(dirname(workspace.path)) + (workspace.type === "remote" ? " [SSH: " + workspace.host + "]" : "");
+    const subtitle = tildify(dirname(workspace.path)) + suffix;
 
     return {
       id: workspace.id,
@@ -24,6 +31,8 @@ export function getEntry(workspace: Workspace): Entry | null {
       uri: workspace.uri,
       title,
       subtitle,
+      isOpen: workspace.isOpen,
+      wsl: workspace.wsl,
     };
   } catch {
     return null;

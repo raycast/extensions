@@ -9,7 +9,6 @@ import {
   getImageFamiliesByProject,
   diskTypes,
 } from "../../../utils/computeResources";
-import { showFailureToast } from "@raycast/utils";
 
 interface CreateVMFormProps {
   projectId: string;
@@ -81,9 +80,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       } catch (error: unknown) {
         console.error("Error loading resources:", error);
         toast.hide();
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to load resources",
-          message: error instanceof Error ? error.message : "An unknown error occurred",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
 
         setIsLoading(false);
@@ -179,14 +179,15 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     return true;
   };
 
-  const validateCustomMachineType = (values: Record<string, string>): boolean => {
+  const validateCustomMachineType = async (values: Record<string, string>): Promise<boolean> => {
     if (values.machineType !== "custom") {
       return true;
     }
 
     const cores = parseInt(values.customCores || "0", 10);
     if (isNaN(cores) || cores < 1 || cores > 96) {
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid CPU Cores",
         message: "CPU cores must be between 1 and 96",
       });
@@ -195,7 +196,8 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
 
     const memory = parseInt(values.customMemory || "0", 10);
     if (isNaN(memory) || memory < 256 || memory % 256 !== 0) {
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid Memory",
         message: "Memory must be a multiple of 256 MiB",
       });
@@ -210,7 +212,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       return;
     }
 
-    if (!validateCustomMachineType(values)) {
+    if (!(await validateCustomMachineType(values))) {
       return;
     }
 
@@ -339,9 +341,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       pop();
     } catch (error: unknown) {
       toast.hide();
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to create VM instance",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };

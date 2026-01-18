@@ -8,7 +8,7 @@ import { AnswerView } from "./lib/ui/AnswerView/main";
 const pref = getPreferenceValues<Preferences>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
-export default function Command(): JSX.Element {
+export default function Command() {
   const c = CommandAnswer.EXPLAIN;
   const p = `Act as a dictionary and encyclopedia, providing clear and concise explanations for given words or concepts.
 

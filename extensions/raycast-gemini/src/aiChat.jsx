@@ -240,7 +240,7 @@ export default function Chat({ launchContext }) {
               try {
                 const selectedText = await getSelectedText();
                 setSearchText((oldText) => oldText + selectedText);
-              } catch (error) {
+              } catch {
                 toast(Toast.Style.Failure, "Could not get the selected text");
               }
             }}

@@ -1,5 +1,9 @@
 # Soundboard Changelog
 
+## [Enhancement] - 2026-01-09
+
+- Added "Close the Raycast window after triggering a sound" option to preferences
+
 ## [Fix] - 2023-12-08
 
 - Fixed Move Down hotkey

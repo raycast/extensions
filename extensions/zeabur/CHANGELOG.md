@@ -1,5 +1,9 @@
 # Zeabur Changelog
 
+## [Feature] - 2026-01-16
+
+- Added the AI Hub command to view your AI Hub balance and usage.
+
 ## [Feature] - 2025-12-17
 
 - Added the manage servers command to manage the servers on Zeabur.

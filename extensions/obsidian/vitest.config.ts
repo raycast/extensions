@@ -18,6 +18,7 @@ export default defineConfig({
         "**/*.tsx", // Exclude all TSX files (React components)
         "**/*.config.*",
         "**/constants.tsx",
+        "**/*hooks.ts", // Can't easily test hooks with useEffect etc.
       ],
       include: ["src/**/*.ts"], // Only include .ts files in src
     },

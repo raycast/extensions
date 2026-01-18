@@ -1,7 +1,8 @@
-import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { API, Quest, PaginatedResponse } from "./api";
+import { getCached, setCache, CacheKeys } from "./cache";
 
 function QuestDetail({ quest }: { quest: Quest }) {
   const objectivesList = quest.objectives.map((obj) => `- ${obj}`).join("\n");
@@ -83,8 +84,22 @@ ${quest.locations.map((loc) => `- ${loc}`).join("\n")}
 export default function SearchQuests() {
   const [searchText, setSearchText] = useState("");
 
+  const cachedPages = useRef<Map<number, Quest[]>>(new Map());
+
+  // Load cached pages on mount
+  useEffect(() => {
+    for (let i = 1; i <= 10; i++) {
+      const cached = getCached<Quest[]>(CacheKeys.quests(i));
+      if (cached) cachedPages.current.set(i, cached);
+    }
+  }, []);
+
   const { isLoading, data, pagination } = useFetch((options) => `${API.quests}?page=${options.page + 1}`, {
     mapResult(result: PaginatedResponse<Quest>) {
+      const page = result.pagination.page;
+      // Cache each page
+      setCache(CacheKeys.quests(page), result.data);
+      cachedPages.current.set(page, result.data);
       return {
         data: result.data,
         hasMore: result.pagination.hasNextPage,
@@ -92,6 +107,13 @@ export default function SearchQuests() {
     },
     keepPreviousData: true,
     initialData: [],
+    onError() {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load quests",
+        message: "Server temporarily unavailable. Please try again.",
+      });
+    },
   });
 
   const quests = data || [];

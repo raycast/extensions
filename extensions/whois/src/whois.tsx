@@ -9,7 +9,7 @@ export default function Whois(props: LaunchProps<{ arguments: Arguments.Whois }>
   const { data: domainOrIp, isLoading: domainLoading } = useDomainOrIp(input);
   const { data: whoisData, isLoading: whoisLoading } = useWhoisData(domainOrIp, domainOrIp !== null);
 
-  if (!domainLoading && !domainOrIp) {
+  if (!domainLoading && (!domainOrIp || domainOrIp.ip === null)) {
     const message =
       process.platform === "darwin"
         ? "Cannot find domain or URL from browser"

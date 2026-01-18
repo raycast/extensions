@@ -3,42 +3,18 @@ import { useState, useMemo, useEffect } from "react";
 import { usePeople } from "./utils/usePeople";
 import { Person, Document, Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
-import getCache from "./utils/getCache";
+import { getDocumentsByIds } from "./utils/fetchData";
 import { NoteListItem } from "./components/NoteComponents";
-import { hasWorkEmailDomain } from "./utils/emailDomainUtils";
 import { useFavicon } from "./utils/toolHelpers";
+import { formatLastMeetingLabel, sortPeople, type PeopleSortOption } from "./utils/searchUtils";
 
-type SortOption = "name" | "last-meeting" | "meeting-count" | "company";
+type SortOption = PeopleSortOption;
 
 export default function Command() {
   const { people, isLoading, hasError } = usePeople();
   const [sortBy, setSortBy] = useState<SortOption>("last-meeting");
 
-  const sortedPeople = useMemo(() => {
-    const filteredPeople = people.filter(hasWorkEmailDomain);
-    const peopleCopy = [...filteredPeople];
-
-    switch (sortBy) {
-      case "name":
-        return peopleCopy.sort((a, b) => a.name.localeCompare(b.name));
-      case "last-meeting":
-        return peopleCopy.sort((a, b) => {
-          const dateA = a.lastMeetingDate || "";
-          const dateB = b.lastMeetingDate || "";
-          return dateB.localeCompare(dateA); // Most recent first
-        });
-      case "meeting-count":
-        return peopleCopy.sort((a, b) => (b.meetingCount || 0) - (a.meetingCount || 0));
-      case "company":
-        return peopleCopy.sort((a, b) => {
-          const companyA = a.company_name || "zzz"; // Put empty companies at the end
-          const companyB = b.company_name || "zzz";
-          return companyA.localeCompare(companyB);
-        });
-      default:
-        return peopleCopy;
-    }
-  }, [people, sortBy]);
+  const sortedPeople = useMemo(() => sortPeople(people, sortBy), [people, sortBy]);
 
   if (isLoading) {
     return <List isLoading={true} />;
@@ -70,10 +46,8 @@ export default function Command() {
 
 // Custom hook to fetch favicon for a person (only if no avatar exists)
 function usePersonFavicon(person: Person) {
-  // Don't fetch favicon if person already has an avatar
   const shouldFetch = !person.avatar;
 
-  // Get domain from person's email
   const domain = person.email ? person.email.split("@")[1] : null;
 
   return useFavicon(domain, Icon.PersonCircle, shouldFetch);
@@ -84,6 +58,8 @@ function usePersonMeetings(person: Person) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchMeetings = async () => {
       setIsLoading(true);
 
@@ -91,22 +67,17 @@ function usePersonMeetings(person: Person) {
         const meetingIds = person.meetingIds || [];
 
         if (meetingIds.length === 0) {
-          setMeetings([]);
-          setIsLoading(false);
+          if (!cancelled) {
+            setMeetings([]);
+            setIsLoading(false);
+          }
           return;
         }
 
-        const cacheData = await getCache();
-        const meetingsList: Document[] = [];
-
-        if (cacheData?.state?.documents) {
-          Object.values(cacheData.state.documents).forEach((doc: unknown) => {
-            const document = doc as Document;
-            if (meetingIds.includes(document.id)) {
-              meetingsList.push(document);
-            }
-          });
-        }
+        const documents = await getDocumentsByIds(meetingIds);
+        if (cancelled) return;
+        const meetingIdsSet = new Set(meetingIds);
+        const meetingsList = documents.filter((document) => meetingIdsSet.has(document.id));
 
         meetingsList.sort((a, b) => {
           const dateA = new Date(a.created_at || 0);
@@ -114,15 +85,24 @@ function usePersonMeetings(person: Person) {
           return dateB.getTime() - dateA.getTime();
         });
 
-        setMeetings(meetingsList);
+        if (!cancelled) {
+          setMeetings(meetingsList);
+        }
       } catch (error) {
-        setMeetings([]);
+        if (!cancelled) {
+          setMeetings([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchMeetings();
+    return () => {
+      cancelled = true;
+    };
   }, [person.meetingIds]);
 
   return { meetings, isLoading };
@@ -130,9 +110,7 @@ function usePersonMeetings(person: Person) {
 
 function PersonMeetingsList({ person }: { person: Person }) {
   const { meetings, isLoading } = usePersonMeetings(person);
-  // Get fresh panels data with cache TTL
-  const cacheData = getCache();
-  const panels = cacheData?.state?.documentPanels;
+  // Panels are loaded on-demand in NoteListItem when details are viewed
 
   if (isLoading) {
     return <List isLoading={true} />;
@@ -150,7 +128,7 @@ function PersonMeetingsList({ person }: { person: Person }) {
           description={`No meetings found with ${person.name}.`}
         />
       ) : (
-        meetings.map((meeting) => <NoteListItem key={meeting.id} doc={meeting as Doc} panels={panels} />)
+        meetings.map((meeting) => <NoteListItem key={meeting.id} doc={meeting as Doc} />)
       )}
     </List>
   );
@@ -167,26 +145,12 @@ function PersonListItem({ person }: { person: Person }) {
     });
   }
 
-  if (person.lastMeetingDate) {
-    const date = new Date(person.lastMeetingDate);
-    const now = new Date();
-    const daysDiff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-    let formattedDate: string;
-    if (daysDiff === 0) {
-      formattedDate = "Today";
-    } else if (daysDiff === 1) {
-      formattedDate = "Yesterday";
-    } else if (daysDiff < 7) {
-      formattedDate = date.toLocaleDateString("en-US", { weekday: "long" });
-    } else {
-      formattedDate = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    }
-
+  const meetingLabel = formatLastMeetingLabel(person.lastMeetingDate);
+  if (meetingLabel) {
     accessories.push({
-      text: formattedDate,
+      text: meetingLabel.text,
       icon: Icon.Clock,
-      tooltip: `Last meeting: ${date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`,
+      tooltip: meetingLabel.tooltip,
     });
   }
 
