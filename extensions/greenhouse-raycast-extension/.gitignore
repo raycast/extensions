@@ -1,12 +1,3 @@
-# Project-specific
-# Ralph loop files (don't commit these)
-ralph.log
-.last-branch
-archive/
-
-# Greenhouse client (local dev tool, not part of extension)
-greenhouse-client/
-
 # --- GitHub.gitignore: Node ---
 # Logs
 logs
@@ -149,9 +140,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
-
-# --- GitHub.gitignore: TypeScript ---
-404: Not Found
 
 # --- GitHub.gitignore: Global/macOS ---
 # General
