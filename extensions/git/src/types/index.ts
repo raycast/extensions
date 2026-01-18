@@ -21,6 +21,8 @@ export type Preferences = {
   maxTagsToLoad: string;
   /** Automatically generate a commit message using AI when opening the commit view. */
   autoGenerateCommitMessage: boolean;
+  /** Automatically open the last visited repository when running the Manage Repositories command. */
+  openLastVisitedRepository: boolean;
 };
 
 /**

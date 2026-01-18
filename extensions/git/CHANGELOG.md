@@ -1,5 +1,15 @@
 # Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+- **Manage Repositories**: Auto-open last visited repository
+  - Introduce `openLastVisitedRepository` preference to automatically open the previously visited repository
+  - Cache the path of the last opened repository between sessions
+  - Automatically navigate to the last visited repository if preference is enabled
+  - Update `Show Repository` action to track and clear last visited path
+- **Language Icons**: Add icons for HTML and Markdown files
+
 ## [Update] - 2026-01-17
 
 ### Added
