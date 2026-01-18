@@ -1,0 +1,20 @@
+# Node
+node_modules
+dist
+.DS_Store
+
+# Raycast
+.raycast
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# Scratch/temp files
+scratch.txt
+*.scratch
+temp.*
