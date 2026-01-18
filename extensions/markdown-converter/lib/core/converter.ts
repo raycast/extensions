@@ -1,4 +1,5 @@
 import TurndownService from "turndown";
+import { tables } from "turndown-plugin-gfm";
 import { DOMParserAdapter } from "./adapters/index.js";
 import { mdlog } from "./logging.js";
 import { debugConfig } from "./env.js";
@@ -237,6 +238,225 @@ function promoteWordHeadingsInPlace(doc: Document) {
       heading.id = paragraph.id;
     }
     paragraph.replaceWith(heading);
+  }
+}
+
+/**
+ * Checks if all cells in a table row appear to be header cells based on styling.
+ * Detects bold text, <b>/<strong> wrappers, or explicit bold font-weight styles.
+ */
+function rowAppearsToBeHeader(row: HTMLTableRowElement): boolean {
+  const cells = Array.from(row.cells);
+  if (cells.length === 0) {
+    return false;
+  }
+
+  // Check if all cells have bold styling or bold wrapper elements
+  return cells.every((cell) => {
+    // Skip empty cells - they don't disqualify the row
+    const textContent = cell.textContent?.trim();
+    if (!textContent) {
+      return true;
+    }
+
+    // Check for <b> or <strong> as direct wrapper of content
+    const firstChild = cell.firstElementChild;
+    if (firstChild && (firstChild.tagName === "B" || firstChild.tagName === "STRONG")) {
+      // Verify the bold element contains most/all of the cell content
+      const boldText = firstChild.textContent?.trim() ?? "";
+      if (boldText === textContent) {
+        return true;
+      }
+    }
+
+    // Check for bold font-weight in inline styles on the cell itself
+    const style = cell.getAttribute("style") ?? "";
+    if (/font-weight\s*:\s*(bold|[6-9]\d\d)/i.test(style)) {
+      return true;
+    }
+
+    // Check for nested spans with bold styling
+    const spans = Array.from(cell.querySelectorAll("span"));
+    for (const span of spans) {
+      const spanStyle = span.getAttribute("style") ?? "";
+      if (/font-weight\s*:\s*(bold|[6-9]\d\d)/i.test(spanStyle)) {
+        const spanText = span.textContent?.trim() ?? "";
+        if (spanText === textContent) {
+          return true;
+        }
+      }
+    }
+
+    // Check for <b> or <strong> nested inside other elements (e.g., <p><strong>text</strong></p>)
+    // This handles Google Docs tables after convertGoogleDocsStylesToSemanticHtml runs
+    const boldElements = Array.from(cell.querySelectorAll("b, strong"));
+    for (const boldEl of boldElements) {
+      const boldText = boldEl.textContent?.trim() ?? "";
+      if (boldText === textContent) {
+        return true;
+      }
+    }
+
+    return false;
+  });
+}
+
+/**
+ * Extracts plain text content from a cell, removing bold wrappers.
+ * Used when converting styled td cells to semantic th elements.
+ */
+function extractCellContentWithoutBold(cell: HTMLTableCellElement): string {
+  // Check for <b> or <strong> as direct wrapper
+  const firstChild = cell.firstElementChild;
+  if (firstChild && (firstChild.tagName === "B" || firstChild.tagName === "STRONG")) {
+    const boldText = firstChild.textContent?.trim() ?? "";
+    const cellText = cell.textContent?.trim() ?? "";
+    if (boldText === cellText) {
+      return boldText;
+    }
+  }
+
+  // Check for bold spans
+  const span = cell.querySelector("span");
+  if (span) {
+    const spanStyle = span.getAttribute("style") ?? "";
+    if (/font-weight\s*:\s*(bold|[6-9]\d\d)/i.test(spanStyle)) {
+      const spanText = span.textContent?.trim() ?? "";
+      const cellText = cell.textContent?.trim() ?? "";
+      if (spanText === cellText) {
+        return spanText;
+      }
+    }
+  }
+
+  // Check for nested <b> or <strong> elements (e.g., Google Docs after style conversion)
+  const boldEl = cell.querySelector("b, strong");
+  if (boldEl) {
+    const boldText = boldEl.textContent?.trim() ?? "";
+    const cellText = cell.textContent?.trim() ?? "";
+    if (boldText === cellText) {
+      return boldText;
+    }
+  }
+
+  // Return the cell's text content
+  return cell.textContent?.trim() ?? "";
+}
+
+/**
+ * Promotes styled table header rows to semantic <th> elements.
+ * Tables from Word/Google Docs often lack proper <thead>/<th> structure,
+ * using bold styling instead. This normalization allows turndown-plugin-gfm
+ * to correctly convert them to GFM pipe tables.
+ */
+function normalizeTableHeaders(doc: Document): void {
+  const tables = Array.from(doc.body.querySelectorAll("table"));
+
+  for (const table of tables) {
+    // Skip if table already has <th> elements
+    if (table.querySelector("th")) {
+      continue;
+    }
+
+    // Get the first row - could be in thead or directly in table/tbody
+    const firstRow = table.querySelector("tr") as HTMLTableRowElement | null;
+    if (!firstRow) {
+      continue;
+    }
+
+    // Check if first row appears to be a header based on styling
+    if (!rowAppearsToBeHeader(firstRow)) {
+      continue;
+    }
+
+    // Convert all <td> in the first row to <th>, stripping bold wrappers
+    const cells = Array.from(firstRow.cells);
+    for (const cell of cells) {
+      if (cell.tagName === "TD") {
+        const th = doc.createElement("th");
+        // Use plain text content, removing any bold formatting
+        th.textContent = extractCellContentWithoutBold(cell);
+
+        // Copy attributes except style (since we're removing bold styling)
+        for (const attr of Array.from(cell.attributes)) {
+          if (attr.name.toLowerCase() !== "style") {
+            th.setAttribute(attr.name, attr.value);
+          }
+        }
+
+        cell.replaceWith(th);
+      }
+    }
+
+    // Optionally wrap the header row in thead if not already
+    if (!firstRow.closest("thead")) {
+      const thead = doc.createElement("thead");
+      const tbody = table.querySelector("tbody") ?? doc.createElement("tbody");
+
+      // Move remaining rows to tbody if needed
+      const remainingRows = Array.from(table.querySelectorAll("tr")).slice(1);
+
+      // If tbody doesn't exist in DOM, we need to create structure
+      if (!table.querySelector("tbody")) {
+        for (const row of remainingRows) {
+          tbody.appendChild(row);
+        }
+      }
+
+      // Insert thead before tbody
+      thead.appendChild(firstRow);
+      table.insertBefore(thead, table.firstChild);
+
+      // Ensure tbody is in the table
+      if (!table.contains(tbody) && tbody.children.length > 0) {
+        table.appendChild(tbody);
+      }
+    }
+  }
+}
+
+/**
+ * Simplifies table cell content by unwrapping nested block elements while preserving inline content.
+ * Google Docs wraps cell content in <p><span>text</span></p> which causes
+ * turndown to add unwanted newlines. This flattens block wrappers but keeps images and links.
+ */
+function simplifyTableCells(doc: Document): void {
+  const tables = Array.from(doc.body.querySelectorAll("table"));
+
+  for (const table of tables) {
+    const cells = Array.from(table.querySelectorAll("td, th"));
+
+    for (const cell of cells) {
+      // Check if cell contains block elements that might cause formatting issues
+      const hasBlockElements = cell.querySelector("p, div");
+      if (!hasBlockElements) {
+        continue;
+      }
+
+      // Check if cell contains images or links that should be preserved
+      const hasPreservableContent = cell.querySelector("img, a");
+      
+      if (hasPreservableContent) {
+        // Unwrap block elements but preserve their inline children
+        const blockElements = Array.from(cell.querySelectorAll("p, div"));
+        for (const block of blockElements) {
+          // Replace block with its children
+          while (block.firstChild) {
+            block.parentNode?.insertBefore(block.firstChild, block);
+          }
+          block.remove();
+        }
+        // Remove any remaining br elements that could cause issues
+        const brs = Array.from(cell.querySelectorAll("br"));
+        for (const br of brs) {
+          br.remove();
+        }
+      } else {
+        // No images/links - safe to use plain text
+        const textContent = cell.textContent?.trim() ?? "";
+        cell.textContent = textContent;
+      }
+    }
   }
 }
 
@@ -924,7 +1144,13 @@ function normalizeGoogleDocsHtml(html: string, context: ConversionContext): stri
     // Remove non-breaking spaces that Google Docs adds
     removeNonBreakingSpaces(doc);
 
-  convertMonospaceSpansToCode(doc);
+    // Normalize table headers for GFM conversion
+    normalizeTableHeaders(doc);
+
+    // Simplify table cells by flattening nested block elements
+    simplifyTableCells(doc);
+
+    convertMonospaceSpansToCode(doc);
     
     // Apply some Word normalization techniques that also work for Google Docs
     convertInlineBoundarySpacesToNbsp(doc);
@@ -1061,6 +1287,8 @@ function normalizeWordHtml(html: string, context: ConversionContext): string {
     replaceOfficeParagraphNodes(doc);
     convertInlineBoundarySpacesToNbsp(doc);
     promoteWordHeadingsInPlace(doc);
+    normalizeTableHeaders(doc);
+    simplifyTableCells(doc);
     transformMonospaceBlocks(doc);
     convertMonospaceSpansToCode(doc);
     convertBoldSpansToStrong(doc);
@@ -1079,7 +1307,43 @@ function createTurndownService(imageHandling: ImageHandlingMode = 'preserve'): T
     linkStyle: "inlined",
   });
 
-  turndownInstance.keep(["pre", "code"]);
+  // Enable GFM tables plugin for HTML table to pipe-table conversion
+  // Tables without valid header rows are preserved as HTML by the plugin
+  turndownInstance.use(tables);
+
+  turndownInstance.keep(["code"]);
+
+  // Custom rule to handle bare <pre> elements (without nested <code>)
+  // Turndown's default fencedCodeBlock rule only handles <pre><code>
+  turndownInstance.addRule("barePre", {
+    filter: function (node) {
+      return (
+        node.nodeName === "PRE" &&
+        !node.querySelector("code")
+      );
+    },
+    replacement: function (content, node) {
+      const element = node as HTMLPreElement;
+      // Use textContent to avoid any nested HTML tags
+      // Trim trailing whitespace to avoid extra blank lines
+      const code = (element.textContent || "").replace(/\s+$/, "");
+      return "\n```\n" + code + "\n```\n";
+    },
+  });
+
+  // Custom rule to treat <samp> and <kbd> as inline code
+  // These are semantic HTML elements typically rendered in monospace
+  // - <samp>: sample output from a computer program
+  // - <kbd>: keyboard input
+  // Use textContent to avoid Turndown's underscore escaping inside code spans
+  turndownInstance.addRule("monospaceInline", {
+    filter: ["samp", "kbd"],
+    replacement: function (_content, node) {
+      const text = (node as HTMLElement).textContent || "";
+      if (!text.trim()) return "";
+      return "`" + text + "`";
+    },
+  });
 
   // Custom rule to handle paragraphs inside list items (Word behavior)
   turndownInstance.addRule("listParagraph", {
