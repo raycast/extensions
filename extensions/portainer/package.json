@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "portainer",
+  "title": "Portainer",
+  "description": "Manage Docker containers, stacks, images, volumes, and networks via Portainer",
+  "icon": "command-icon.png",
+  "author": "FammasMaz",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "containers",
+      "title": "Containers",
+      "subtitle": "Portainer",
+      "description": "List and manage Docker containers",
+      "mode": "view"
+    },
+    {
+      "name": "stacks",
+      "title": "Stacks",
+      "subtitle": "Portainer",
+      "description": "List and manage Portainer stacks",
+      "mode": "view"
+    },
+    {
+      "name": "images",
+      "title": "Images",
+      "subtitle": "Portainer",
+      "description": "List Docker images",
+      "mode": "view"
+    },
+    {
+      "name": "volumes",
+      "title": "Volumes",
+      "subtitle": "Portainer",
+      "description": "List Docker volumes",
+      "mode": "view"
+    },
+    {
+      "name": "networks",
+      "title": "Networks",
+      "subtitle": "Portainer",
+      "description": "List Docker networks",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "portainerUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Portainer URL",
+      "description": "URL of your Portainer instance (e.g., https://portainer.example.com:9443)",
+      "placeholder": "https://portainer.example.com:9443"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Portainer API access token"
+    },
+    {
+      "name": "defaultEndpointId",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Environment ID",
+      "description": "ID of the default Portainer environment to use (defaults to 1)",
+      "default": "1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
