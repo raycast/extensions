@@ -51,14 +51,11 @@ export default async function Command() {
     // Remove path to screenshot
     const cleanedLatex = latex.includes(".png:") ? latex.substring(latex.indexOf(".png:") + 5).trim() : latex.trim();
 
-    // Update latex variable with cleaned version
-    const finalLatex = cleanedLatex;
-
     // Step 5: Copy to clipboard
-    await Clipboard.copy(finalLatex);
+    await Clipboard.copy(cleanedLatex);
 
     // Show success with preview
-    const preview = finalLatex.length > 40 ? finalLatex.substring(0, 40) + "..." : finalLatex;
+    const preview = cleanedLatex.length > 40 ? cleanedLatex.substring(0, 40) + "..." : cleanedLatex;
     log("Success!", { preview });
     await showHUD(`✅ Copied: ${preview}`);
   } catch (error) {
@@ -75,7 +72,7 @@ export default async function Command() {
   } finally {
     // Always clean up the screenshot file
     if (screenshotPath) {
-      cleanupScreenshot(screenshotPath);
+      await cleanupScreenshot(screenshotPath);
     }
   }
 }

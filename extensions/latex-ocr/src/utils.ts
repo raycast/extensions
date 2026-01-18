@@ -1,4 +1,5 @@
-import { existsSync, statSync, unlinkSync } from "fs";
+import { existsSync, statSync } from "fs";
+import { trash } from "@raycast/api";
 import { join } from "path";
 import { tmpdir } from "os";
 import { exec } from "child_process";
@@ -65,10 +66,11 @@ export function takeScreenshot(): Promise<string | null> {
 /**
  * Clean up temporary screenshot file
  */
-export function cleanupScreenshot(filePath: string) {
+export async function cleanupScreenshot(filePath: string) {
   try {
     if (existsSync(filePath)) {
-      unlinkSync(filePath);
+      await trash(filePath);
+      log("Screenshot file deleted", { path: filePath });
     }
   } catch (e) {
     log("Failed to cleanup screenshot", e);
