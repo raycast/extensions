@@ -58,7 +58,7 @@ export default async function Command({ launchContext }: LaunchProps<{ launchCon
     await showHUD("🔍 Processing screenshot...");
     await crossLaunchCommand({
       name: "recognize-text",
-      type: LaunchType.UserInitiated,
+      type: LaunchType.Background,
       extensionName: "screenocr",
       ownerOrAuthorName: "huzef44",
     });
