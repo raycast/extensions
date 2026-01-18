@@ -233,7 +233,7 @@ export default function SearchPosts() {
                 setPostState(value as State);
               }
             }}
-            defaultValue="week"
+            defaultValue="display=week"
             storeValue
           >
             <List.Dropdown.Section title="Display">
