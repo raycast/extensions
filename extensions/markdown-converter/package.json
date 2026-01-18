@@ -91,6 +91,7 @@
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
     "turndown": "^7.1.2",
+    "turndown-plugin-gfm": "^1.0.2",
     "unified": "^11.0.5"
   },
   "devDependencies": {
