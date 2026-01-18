@@ -58,28 +58,47 @@ export function calculateTodayTotal(intakes: CaffeineIntake[]): number {
 
 /**
  * Parse bedtime string (HH:mm format) to Date for today
- * If bedtime has already passed today, returns bedtime for tomorrow
+ * If bedtime has already passed today, returns bedtime for tomorrow (unless allowPastTime is true)
  *
  * @param bedtimeStr - Bedtime in HH:mm format (e.g., "22:00")
+ * @param allowPastTime - If true, returns today's bedtime even if it has passed (for past-bedtime judgment)
  * @returns Date object representing the next occurrence of bedtime
  */
-export function getBedtimeDate(bedtimeStr: string): Date {
+export function getBedtimeDate(bedtimeStr: string, allowPastTime = false): Date {
   const [hours, minutes] = bedtimeStr.split(":").map(Number);
   const bedtime = new Date();
   bedtime.setHours(hours, minutes || 0, 0, 0);
 
-  const now = new Date();
-  if (bedtime <= now) {
-    bedtime.setDate(bedtime.getDate() + 1);
+  if (!allowPastTime) {
+    const now = new Date();
+    if (bedtime <= now) {
+      bedtime.setDate(bedtime.getDate() + 1);
+    }
   }
 
   return bedtime;
 }
 
 /**
+ * Hours after bedtime to resume normal caffeine judgment
+ * During this period, judgment is based on current residual caffeine amount
+ *
+ * Rationale:
+ * - 2 hours before bedtime is within the margin of error for caffeine metabolism
+ * - To provide additional buffer, normal judgment resumes 6 hours after bedtime
+ * - Example: If bedtime is 22:00, normal "prediction to next bedtime" judgment resumes after 4:00 AM
+ */
+const HOURS_AFTER_BEDTIME_TO_RESUME_NORMAL_JUDGMENT = 6;
+
+/**
  * Determine status based on predicted residual and settings
  *
  * Status determination logic:
+ * - If past bedtime (within 6 hours): Judge by current residual caffeine
+ *   - "no-more-caffeine": Current residual >= threshold
+ *   - "warning": Current residual >= 50% of threshold
+ *   - "safe": Below warning thresholds
+ * - After 6 hours from bedtime: Resume normal judgment (predict next bedtime)
  * - "no-more-caffeine": Daily max exceeded OR predicted residual > threshold
  * - "warning": Predicted residual is 70-100% of threshold, OR 50%+ if within 2 hours of bedtime
  * - "safe": Below warning thresholds
@@ -88,8 +107,9 @@ export function getBedtimeDate(bedtimeStr: string): Date {
  * @param maxCaffeineAtBedtime - Maximum allowed residual at bedtime in mg
  * @param todayTotal - Total caffeine consumed today in mg
  * @param dailyMaxCaffeine - Optional daily maximum caffeine limit in mg
- * @param currentTime - Current time (optional, for proximity check)
- * @param bedtime - Bedtime date (optional, for proximity check)
+ * @param currentTime - Current time (optional, for proximity check and past-bedtime judgment)
+ * @param bedtime - Bedtime date (optional, for proximity check and past-bedtime judgment)
+ * @param currentResidual - Current residual caffeine in mg (optional, for past-bedtime judgment)
  * @returns Caffeine status: "safe", "warning", or "no-more-caffeine"
  */
 export function determineStatus(
@@ -99,7 +119,23 @@ export function determineStatus(
   dailyMaxCaffeine?: number,
   currentTime?: Date,
   bedtime?: Date,
+  currentResidual?: number,
 ): CaffeineStatus {
+  if (currentTime && bedtime && currentTime > bedtime && currentResidual !== undefined) {
+    const resumeNormalJudgmentTime = new Date(bedtime);
+    resumeNormalJudgmentTime.setHours(bedtime.getHours() + HOURS_AFTER_BEDTIME_TO_RESUME_NORMAL_JUDGMENT);
+
+    if (currentTime < resumeNormalJudgmentTime) {
+      const warningThreshold = maxCaffeineAtBedtime * 0.5;
+      if (currentResidual >= maxCaffeineAtBedtime) {
+        return "no-more-caffeine";
+      } else if (currentResidual >= warningThreshold) {
+        return "warning";
+      }
+      return "safe";
+    }
+  }
+
   if (dailyMaxCaffeine && todayTotal >= dailyMaxCaffeine) {
     return "no-more-caffeine";
   }
@@ -156,15 +192,20 @@ export function calculateCaffeineMetrics(
   }
 
   const todayTotal = calculateTodayTotal(intakes);
+
+  const todayBedtime = getBedtimeDate(settings.bedtime, true);
+
   if (newDrinkAmount !== undefined) {
     const todayTotalWithNew = todayTotal + newDrinkAmount;
+    const currentResidualWithNew = currentResidual + newDrinkAmount;
     const status = determineStatus(
       predictedResidualAtBedtimeWithNewDrink!,
       settings.maxCaffeineAtBedtime,
       todayTotalWithNew,
       settings.dailyMaxCaffeine,
       now,
-      bedtime,
+      todayBedtime,
+      currentResidualWithNew,
     );
 
     return {
@@ -182,7 +223,8 @@ export function calculateCaffeineMetrics(
     todayTotal,
     settings.dailyMaxCaffeine,
     now,
-    bedtime,
+    todayBedtime,
+    currentResidual,
   );
 
   return {
