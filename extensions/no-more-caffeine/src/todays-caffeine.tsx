@@ -1,19 +1,9 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  confirmAlert,
-  Alert,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getIntakes, deleteIntake } from "./utils/storage";
 import { calculateCaffeineMetrics } from "./utils/caffeineModel";
-import { CaffeineIntake, Settings } from "./types";
+import { getSettings } from "./utils/preferences";
+import { CaffeineIntake } from "./types";
 
 /**
  * Format date as "Today", "Yesterday", or "MMM DD, YYYY"
@@ -116,19 +106,7 @@ function groupIntakesByDate(intakes: CaffeineIntake[]): Map<string, CaffeineInta
 export default function Command() {
   const { data: intakes, isLoading, revalidate } = useCachedPromise(getIntakes);
 
-  const preferences = getPreferenceValues<{
-    bedtime: string;
-    halfLife: string;
-    maxCaffeineAtBedtime: string;
-    dailyMaxCaffeine?: string;
-  }>();
-
-  const settings: Settings = {
-    bedtime: preferences.bedtime || "22:00",
-    halfLife: parseFloat(preferences.halfLife || "5"),
-    maxCaffeineAtBedtime: parseFloat(preferences.maxCaffeineAtBedtime || "50"),
-    dailyMaxCaffeine: preferences.dailyMaxCaffeine ? parseFloat(preferences.dailyMaxCaffeine) : undefined,
-  };
+  const settings = getSettings();
 
   const calculation = intakes ? calculateCaffeineMetrics(intakes, settings) : null;
 
