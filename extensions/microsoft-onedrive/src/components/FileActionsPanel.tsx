@@ -98,12 +98,12 @@ export function FileActionsPanel({
           >
             <Action
               title="Relevance"
-              icon={sorting.config.field === "relevance" ? Icon.Check : Icon.Circle}
+              icon={sorting.config.field === "relevance" ? Icon.CheckCircle : Icon.Circle}
               onAction={() => sorting.onChange("relevance")}
             />
             <Action
               title="Last Modified"
-              icon={sorting.config.field === "lastModifiedDateTime" ? Icon.Check : Icon.Circle}
+              icon={sorting.config.field === "lastModifiedDateTime" ? Icon.CheckCircle : Icon.Circle}
               onAction={() => sorting.onChange("lastModifiedDateTime")}
             />
           </ActionPanel.Submenu>

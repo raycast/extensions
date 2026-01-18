@@ -1,5 +1,11 @@
 # Microsoft OneDrive Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+### Changed
+
+- Updated the checkmark icon used in the **Filter by Date** action to improve design consistency.
+
 ## [Improvement] - 2026-01-15
 
 ### Added
