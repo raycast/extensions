@@ -31,7 +31,6 @@
     "title"
   ],
   "license": "MIT",
-  "type": "module",
   "debug": {
     "reloadShortcut": {
       "key": "r",
