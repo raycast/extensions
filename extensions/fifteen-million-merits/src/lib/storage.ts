@@ -56,9 +56,7 @@ function parseDistractionThreshold(value: string | undefined): number {
  * threshold = 3 (if user configured it)
  */
 export function getDistractionThreshold(): number {
-  const { distractionThreshold } = getPreferenceValues<{
-    distractionThreshold: string;
-  }>();
+  const { distractionThreshold } = getPreferenceValues<Preferences>();
 
   return parseDistractionThreshold(distractionThreshold);
 }
@@ -273,10 +271,7 @@ export async function handleFocusMode(newCount: number): Promise<void> {
     return open("raycast://focus/complete");
   }
 
-  const { focusGoal, focusCategories } = getPreferenceValues<{
-    focusGoal: string;
-    focusCategories: string;
-  }>();
+  const { focusGoal, focusCategories } = getPreferenceValues<Preferences>();
 
   const encodedGoal = encodeURIComponent(focusGoal);
   const focusUrl = `raycast://focus/start?goal=${encodedGoal}&categories=${focusCategories}`;

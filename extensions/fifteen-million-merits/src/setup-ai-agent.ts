@@ -134,7 +134,7 @@ async function setupCodexAlias(startCommand: string, endCommand: string) {
   }
 }
 
-export default async function Command(props: LaunchProps<{ arguments: Arguments.SetupAiAgent }>) {
+export default async function Command(props: LaunchProps<Arguments.SetupAiAgent>) {
   const { agent } = props.arguments;
 
   try {
