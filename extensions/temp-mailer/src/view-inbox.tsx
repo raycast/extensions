@@ -56,34 +56,42 @@ export default function Command() {
   };
 
   const fetchMailDetails = async (mails: MailItem[], address: string) => {
-    const tempMailInstance = getTempMailInstance(address);
-    const detailEntries = await Promise.all(
-      mails.map(async (mail) => {
-        const details = await tempMailInstance.fetchMailById(mail.mail_id);
-        if (!details) return null;
+    try {
+      const tempMailInstance = getTempMailInstance(address);
+      const detailEntries = await Promise.all(
+        mails.map(async (mail) => {
+          try {
+            const details = await tempMailInstance.fetchMailById(mail.mail_id);
+            if (!details) return null;
 
-        const preparedMarkdown = turndownService.turndown(details.html as string);
-        return {
-          [mail.mail_id]: {
-            ...details,
-            markdown: `# ${details.subject}\n\n**From:** ${details.from_mail}\n\n**Date:** ${details.date}\n\n${preparedMarkdown}`,
-          },
-        } as Record<number, MailResponse & { markdown: string }>;
-      }),
-    );
-
-    const mergedDetails = detailEntries
-      .filter((entry): entry is Record<number, MailResponse & { markdown: string }> => Boolean(entry))
-      .reduce(
-        (acc, entry) => ({
-          ...acc,
-          ...entry,
+            const preparedMarkdown = turndownService.turndown(details.html as string);
+            return {
+              [mail.mail_id]: {
+                ...details,
+                markdown: `# ${details.subject}\n\n**From:** ${details.from_mail}\n\n**Date:** ${details.date}\n\n${preparedMarkdown}`,
+              },
+            } as Record<number, MailResponse & { markdown: string }>;
+          } catch {
+            return null;
+          }
         }),
-        {} as Record<number, MailResponse & { markdown: string }>,
       );
 
-    if (Object.keys(mergedDetails).length > 0) {
-      setMailDetails((prev) => ({ ...prev, ...mergedDetails }));
+      const mergedDetails = detailEntries
+        .filter((entry): entry is Record<number, MailResponse & { markdown: string }> => Boolean(entry))
+        .reduce(
+          (acc, entry) => ({
+            ...acc,
+            ...entry,
+          }),
+          {} as Record<number, MailResponse & { markdown: string }>,
+        );
+
+      if (Object.keys(mergedDetails).length > 0) {
+        setMailDetails((prev) => ({ ...prev, ...mergedDetails }));
+      }
+    } catch (error) {
+      await showFailureToast("Failed to fetch mail details");
     }
   };
 
