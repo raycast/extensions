@@ -1,0 +1,72 @@
+{
+  "name": "greenhouse-raycast-extension",
+  "title": "Greenhouse",
+  "version": "0.0.3",
+  "description": "Raycast extension for Greenhouse jobs and applicant pipeline stages",
+  "icon": "command-icon.png",
+  "author": "jai",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "private": true,
+  "preferences": [
+    {
+      "name": "harvestApiKey",
+      "title": "Harvest API Key",
+      "type": "password",
+      "required": true,
+      "description": "Greenhouse Harvest API key with read access."
+    },
+    {
+      "name": "harvestBaseUrl",
+      "title": "Harvest Base URL",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://harvest.greenhouse.io/v1",
+      "description": "Optional override for the Harvest API base URL."
+    },
+    {
+      "name": "recruitingBaseUrl",
+      "title": "Recruiting Base URL",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://s101.recruiting.eu.greenhouse.io",
+      "default": "https://s101.recruiting.eu.greenhouse.io",
+      "description": "Optional override for the Greenhouse Recruiting app base URL."
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Greenhouse",
+      "description": "Browse Greenhouse jobs and pipelines",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "refresh-cache",
+      "title": "Refresh Greenhouse Cache",
+      "description": "Background refresh of cached jobs and pipeline data",
+      "mode": "no-view",
+      "interval": "1h"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "lint": "eslint src/** && prettier --check \"src/**\"",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.9",
+    "@types/react": "^19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17"
+  }
+}
