@@ -1,9 +1,15 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
-import { getFavicon, useFetch } from "@raycast/utils";
+import { getFavicon, useCachedPromise, useFetch } from "@raycast/utils";
 import { XMLParser } from "fast-xml-parser";
 
 interface Domain {
   domain: string; exdate: string
+}
+interface DomainInfo {
+  expiry: string;
+  nameservers: {
+    nameserver: string[];
+  };
 }
 interface DNSRecord { id: number; name: string; type: string; content: string }
 interface XMLResult<T> {
@@ -19,7 +25,9 @@ interface XMLResult<T> {
 }
 
 const { username, password } = getPreferenceValues<Preferences>();
-const parser = new XMLParser();
+const parser = new XMLParser({
+  isArray: (name) => ["result", "nameserver"].includes(name),
+});
 
 function buildApiUrl(endpoint: string, params: Record<string, string> = {}) {
   const url = new URL(endpoint, "https://api.fabulous.com/");
@@ -28,21 +36,32 @@ function buildApiUrl(endpoint: string, params: Record<string, string> = {}) {
   Object.entries(params).forEach(([key, val]) => url.searchParams.append(key, val));
   return url.toString();
 }
-
-function useFabulous<T>(endpoint: string, params?: Record<string, string>) {
-  return useFetch(buildApiUrl(endpoint, params), {
-    async parseResponse(response) {
+async function parseApiResponse<T>(response: Response) {
       const txt = await response.text();
       const obj: XMLResult<T> = await parser.parse(txt);
       const { status } = obj.fabulous.response;
-      if (status !== 200) throw new Error(obj.fabulous.response.reason);
+      if (![200, 201, 202].includes(status)) throw new Error(obj.fabulous.response.reason);
       return obj.fabulous.response.results?.result;
-    },
+    }
+    async function callApi<T>(endpoint: string, params: Record<string, string> = {}) {
+      const response = await fetch(buildApiUrl(endpoint, params));
+      const result = await parseApiResponse<T>(response);
+      return result;
+    }
+
+function useFabulous<T>(endpoint: string, params?: Record<string, string>) {
+  return useFetch(buildApiUrl(endpoint, params), {
+    parseResponse: parseApiResponse<T>,
   });
 }
 
 export default function Domains() {
-  const { isLoading, data: domains = [] } = useFabulous<Domain[]>("listDomains");
+  // const { isLoading, data: domains = [] } = useFabulous<Domain[]>("listDomains");
+  const { isLoading, data: domains } = useCachedPromise(async() => {
+    const domains = await callApi<Domain[]>("listDomains") ?? [];
+    const infos = await Promise.all(domains.map(({domain}) => callApi<DomainInfo>("domainInfo", {domain: domain})))
+    return domains.map((domain, index) => ({...domain, ...infos[index]}));
+  }, [], {initialData:[]})
   return (
     <List isLoading={isLoading}>
       {domains.map((domainItem) => (
@@ -53,7 +72,6 @@ export default function Domains() {
           accessories={[{ date: new Date(domainItem.exdate) }]}
           actions={
             <ActionPanel>
-              {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action.Push icon={Icon.List} title="DNS Records" target={<DNSRecords domain={domainItem.domain} />} />
             </ActionPanel>
           }
@@ -74,6 +92,7 @@ function DNSRecords({ domain }: { domain: string }) {
       {records.map((record, recordIndex) => (
         <List.Item
           key={recordIndex}
+          icon={Icon.Text}
           title={record.id.toString()}
           detail={
             <List.Item.Detail
