@@ -1,13 +1,14 @@
-import { Form, ActionPanel, Action, showToast, Toast, Detail, Icon, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Detail, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { saveIntake, getIntakes, getCustomDrinks } from "./utils/storage";
 import { BUILT_IN_PRESETS, OTHER_OPTION } from "./utils/drinkPresets";
 import { calculateCaffeineMetrics } from "./utils/caffeineModel";
-import { CaffeineIntake, Settings, CaffeineCalculation } from "./types";
+import { getSettings } from "./utils/preferences";
+import { CaffeineIntake, CaffeineCalculation } from "./types";
 
 function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
 interface FormValues {
@@ -42,6 +43,13 @@ function getStatusMessage(status: string): string {
   }
 }
 
+interface PreferenceValues {
+  bedtime: string;
+  halfLife: string;
+  maxCaffeineAtBedtime: string;
+  dailyMaxCaffeine?: string;
+}
+
 export default function Command() {
   const [drinkType, setDrinkType] = useState<string>("");
   const [caffeineAmount, setCaffeineAmount] = useState<string>("");
@@ -51,19 +59,7 @@ export default function Command() {
   const { data: intakes, revalidate: revalidateIntakes } = useCachedPromise(getIntakes);
   const { data: customDrinks } = useCachedPromise(getCustomDrinks);
 
-  const preferences = getPreferenceValues<{
-    bedtime: string;
-    halfLife: string;
-    maxCaffeineAtBedtime: string;
-    dailyMaxCaffeine?: string;
-  }>();
-
-  const settings: Settings = {
-    bedtime: preferences.bedtime || "22:00",
-    halfLife: parseFloat(preferences.halfLife || "5"),
-    maxCaffeineAtBedtime: parseFloat(preferences.maxCaffeineAtBedtime || "50"),
-    dailyMaxCaffeine: preferences.dailyMaxCaffeine ? parseFloat(preferences.dailyMaxCaffeine) : undefined,
-  };
+  const settings = getSettings();
 
   useEffect(() => {
     if (!drinkType || drinkType === OTHER_OPTION) {

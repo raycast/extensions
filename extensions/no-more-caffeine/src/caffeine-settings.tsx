@@ -1,21 +1,12 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, List, Icon, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getCustomDrinks, saveCustomDrink, deleteCustomDrink } from "./utils/storage";
+import { getSettings } from "./utils/preferences";
 import { CustomDrink } from "./types";
 
 function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
 function CustomDrinkForm({
@@ -89,12 +80,7 @@ export default function Command() {
   const [editingDrink, setEditingDrink] = useState<CustomDrink | undefined>();
   const { data: customDrinks, revalidate } = useCachedPromise(getCustomDrinks);
 
-  const preferences = getPreferenceValues<{
-    bedtime: string;
-    halfLife: string;
-    maxCaffeineAtBedtime: string;
-    dailyMaxCaffeine?: string;
-  }>();
+  const preferences = getSettings();
 
   async function handleSaveCustomDrink(drink: CustomDrink) {
     try {

@@ -1,8 +1,8 @@
-import { MenuBarExtra, Icon, Color, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, Color, launchCommand, LaunchType } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getIntakes } from "./utils/storage";
 import { calculateCaffeineMetrics } from "./utils/caffeineModel";
-import { Settings } from "./types";
+import { getSettings } from "./utils/preferences";
 
 function getStatusText(status: string): string {
   switch (status) {
@@ -33,19 +33,7 @@ function getStatusColor(status: string): Color {
 export default function Command() {
   const { data: intakes, isLoading } = useCachedPromise(getIntakes);
 
-  const preferences = getPreferenceValues<{
-    bedtime: string;
-    halfLife: string;
-    maxCaffeineAtBedtime: string;
-    dailyMaxCaffeine?: string;
-  }>();
-
-  const settings: Settings = {
-    bedtime: preferences.bedtime || "22:00",
-    halfLife: parseFloat(preferences.halfLife || "5"),
-    maxCaffeineAtBedtime: parseFloat(preferences.maxCaffeineAtBedtime || "50"),
-    dailyMaxCaffeine: preferences.dailyMaxCaffeine ? parseFloat(preferences.dailyMaxCaffeine) : undefined,
-  };
+  const settings = getSettings();
 
   const calculation = intakes ? calculateCaffeineMetrics(intakes, settings) : null;
   const statusText = calculation ? getStatusText(calculation.status) : "Loading...";
