@@ -43,13 +43,6 @@ function getStatusMessage(status: string): string {
   }
 }
 
-interface PreferenceValues {
-  bedtime: string;
-  halfLife: string;
-  maxCaffeineAtBedtime: string;
-  dailyMaxCaffeine?: string;
-}
-
 export default function Command() {
   const [drinkType, setDrinkType] = useState<string>("");
   const [caffeineAmount, setCaffeineAmount] = useState<string>("");
