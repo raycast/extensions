@@ -1,10 +1,6 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-interface Preferences {
-  apiKey: string;
-}
-
 export type Channel = "COM1" | "COM2" | "INTERCOM1" | "INTERCOM2";
 
 interface SendOptions {

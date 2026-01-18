@@ -1,11 +1,7 @@
 import { LaunchProps, closeMainWindow } from "@raycast/api";
 import { sendToSayIntentions } from "./sayintentions";
 
-interface Arguments {
-  message: string;
-}
-
-export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.TalkToAtcCom2 }>) {
   await closeMainWindow();
 
   // message is guaranteed non-empty by required: true in package.json
