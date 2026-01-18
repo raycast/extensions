@@ -307,7 +307,7 @@ export async function handleFocusMode(newCount: number): Promise<void> {
  */
 export async function syncFocusMode(current: number, next: number): Promise<void> {
   const threshold = getDistractionThreshold();
-  if ((current >= threshold) !== (next >= threshold)) {
+  if (current >= threshold !== next >= threshold) {
     await handleFocusMode(next);
   }
 }
