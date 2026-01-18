@@ -2,8 +2,6 @@ import { LaunchProps, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.RenameCurrentSpace }>) {
-
-export default async function Command(props: LaunchProps<{ arguments: RenameArguments }>) {
   const { newName } = props.arguments;
 
   try {
