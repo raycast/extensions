@@ -219,6 +219,7 @@ export const ActionPanelForIcon: FC<Props> = ({
 
       {firstFormat && (
         <Action
+          icon={Icon.Download}
           title={`Download ${firstFormat.label}`}
           onAction={async () => {
             if (!defaultUrl || !defaultFilename) {

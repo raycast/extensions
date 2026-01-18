@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Windows/Linux Compatibility] - 2026-01-07
+
+- Add Windows to the list of supported platforms.
+
 ## [Windows/Linux Compatibility] - 2026-01-06
 
 - Add platform check to skip AppleScript fallback on non-macOS systems

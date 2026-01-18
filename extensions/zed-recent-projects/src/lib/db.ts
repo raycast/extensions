@@ -1,6 +1,5 @@
-import { execFilePromise } from "./utils";
+import { execFilePromise, isWindows } from "./utils";
 import { executeSQL } from "@raycast/utils";
-import { isWindows } from "./utils";
 
 // Zed Build types
 export type ZedBuild = "Zed" | "Zed Preview" | "Zed Dev";
@@ -132,6 +131,8 @@ export const ZED_WORKSPACES_QUERY_26 = `SELECT
   workspace_id as id,
   paths,
   timestamp,
+  window_id,
+  session_id,
   host,
   user,
   port
@@ -149,6 +150,8 @@ export const ZED_WORKSPACES_QUERY_28 = `SELECT
   workspace_id as id,
   paths,
   timestamp,
+  window_id,
+  session_id,
   host,
   user,
   port,

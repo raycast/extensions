@@ -9,6 +9,10 @@
 - Modernized error handling using `@raycast/utils` while respecting user preferences
 - Updated dependencies
 
+## [Improvements] - 2026-01-17
+
+- Fix caching issues
+
 ## [Improvements] - 2025-11-13
 
 - Added option to hide toast messages

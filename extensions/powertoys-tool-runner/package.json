@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "powertoys-tool-runner",
+  "title": "PowerToys Tool Runner",
+  "description": "Quickly open PowerToys tools",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "color-picker",
+      "title": "Color Picker",
+      "description": "Launch PowerToys Color Picker",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Color Picker.png"
+    },
+    {
+      "name": "measure-tool",
+      "title": "Measure Tool",
+      "description": "Launch PowerToys Screen Ruler",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "MeasureTool.png"
+    },
+    {
+      "name": "shortcut-guide",
+      "title": "Shortcut Guide",
+      "description": "Launch PowerToys Shortcut Guide",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Shortcut Guide.png"
+    },
+    {
+      "name": "always-on-top",
+      "title": "Pin Always on Top",
+      "description": "Pin the active window always on top",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Always On Top.png"
+    },
+    {
+      "name": "extract-text",
+      "title": "Extract Text (OCR)",
+      "description": "Launch PowerToys Text Extractor",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "PowerOCR.png"
+    },
+    {
+      "name": "fancy-zones",
+      "title": "Fancy Zones Editor",
+      "description": "Launch PowerToys FancyZones Editor",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "FancyZones.png"
+    },
+    {
+      "name": "hosts-editor",
+      "title": "Hosts File Editor",
+      "description": "Launch PowerToys Hosts File Editor",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Host File Editor.png"
+    },
+    {
+      "name": "registry-preview",
+      "title": "Registry Preview",
+      "description": "Launch PowerToys Registry Preview",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Registry Preview.png"
+    },
+    {
+      "name": "workspaces",
+      "title": "Workspaces Editor",
+      "description": "Launch PowerToys Workspaces Editor",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Workspaces.png"
+    },
+    {
+      "name": "crop-and-lock-reparent",
+      "title": "Crop and Lock - Reparent",
+      "description": "Launch PowerToys Crop and Lock Reparent",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Crop And Lock.png"
+    },
+    {
+      "name": "crop-and-lock-thumbnail",
+      "title": "Crop and Lock - Thumbnail",
+      "description": "Launch PowerToys Crop and Lock Thumbnail",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Crop And Lock.png"
+    },
+    {
+      "name": "environment-variables",
+      "title": "Environment Variables",
+      "description": "Launch PowerToys Environment Variables Editor",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Environment Manager.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "LostViking09",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ]
+}

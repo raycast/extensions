@@ -1,6 +1,6 @@
 # Wayback Machine Changelog
 
-## [Update dependencies & add Default View preference] - {PR_MERGE_DATE}
+## [Update dependencies & add Default View preference] - 2026-01-01
 
 - Added preference to set default view to open on Wayback Machine
 - Added preference to check for snapshots before opening

@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-01-05
 
 - Add a toggle to filter installed packages, allowing users to hide dependencies and show only those explicitly "installed on request".
 

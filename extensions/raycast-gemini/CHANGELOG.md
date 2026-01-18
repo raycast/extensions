@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-01-01
 
 - 🪟 Add support for Windows platform.
 - ⬆️ Bump all dependencies to the latest.

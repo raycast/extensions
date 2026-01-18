@@ -8,6 +8,8 @@ export interface ZedBaseWorkspace {
   timestamp: number;
   type: ZedWorkspaceType;
   paths: string;
+  window_id: number | null;
+  session_id: string | null;
 }
 
 export interface ZedLocalWorkspace extends ZedBaseWorkspace {
@@ -41,6 +43,7 @@ export interface Workspace {
   path: string;
   uri: string;
   host?: string;
+  isOpen?: boolean;
   wsl?: { user: string | null; distro: string | null } | null;
 }
 
@@ -54,10 +57,11 @@ export function parseZedWorkspace(zedWorkspace: ZedWorkspace): Workspace | null 
     .map((p) => p.trim())
     .filter((p) => p);
 
-  if (paths.length !== 1) {
+  if (paths.length === 0) {
     return null;
   }
 
+  // Use first path as primary path
   const path = paths[0];
 
   if (zedWorkspace.type === "local") {
@@ -79,16 +83,15 @@ export function parseZedWorkspace(zedWorkspace: ZedWorkspace): Workspace | null 
 
     const hasWsl = "kind" in zedWorkspace && zedWorkspace.kind === "wsl" && zedWorkspace.user && zedWorkspace.distro;
     const wsl = hasWsl ? { user: zedWorkspace.user, distro: zedWorkspace.distro } : null;
-    const base: Workspace = {
+    return {
       id: zedWorkspace.id,
       lastOpened: zedWorkspace.timestamp,
       type: zedWorkspace.type,
       uri,
       path: processedPath,
       host: zedWorkspace.host,
+      ...(hasWsl && { wsl }),
     };
-    if (hasWsl) base.wsl = wsl;
-    return base;
   }
 
   return null;

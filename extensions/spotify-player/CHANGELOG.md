@@ -1,5 +1,13 @@
 # Spotify Player Changelog
 
+## [Fix] - 2026-01-14
+
+- Fixed error toast when Menu Bar Player command is disabled (handles "No enabled command" error)
+
+## [Chore] - 2026-01-13
+
+- Remove `dancannon` from contributors
+
 ## [Minor Fixes] - 2026-01-06
 
 - Fixed error toast "Menu Bar Player must be activated" when using Next/Previous in Now Playing without the Menu Bar Player command enabled

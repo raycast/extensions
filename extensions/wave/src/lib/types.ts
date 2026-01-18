@@ -32,6 +32,18 @@ export enum InvoiceStatus {
   VIEWED = "VIEWED",
 }
 
+export type InvoiceItem = {
+  product: {
+    id: string;
+    name: string;
+  };
+  quantity: string;
+  unitPrice: string;
+  subtotal: {
+    value: string;
+    currency: Pick<Currency, "symbol" | "exponent">;
+  };
+};
 export type Invoice = {
   id: string;
   createdAt: string;
@@ -53,26 +65,24 @@ export type Invoice = {
   dueDate: string;
   amountDue: Money;
   amountPaid: Money;
-  total: {
+  subtotal: {
     value: string;
     currency: {
       symbol: string;
     };
   };
-  items: Array<{
-    product: {
-      id: string;
-      name: string;
-    };
-    quantity: string;
-    price: string;
-    subtotal: {
-      value: string;
-      currency: {
-        symbol: string;
-      };
-    };
+  discounts: Array<{
+    name: string;
   }>;
+  discountTotal: {
+    value: string;
+    currency: Pick<Currency, "symbol">;
+  };
+  total: {
+    value: string;
+    currency: Pick<Currency, "symbol">;
+  };
+  items: Array<InvoiceItem>;
 };
 
 export type Customer = {

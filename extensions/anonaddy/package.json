@@ -67,10 +67,18 @@
   "preferences": [
     {
       "name": "apiKey",
-      "description": "The API key used to interact with Addy's API.",
+      "description": "Your personal access token from Addy. Generate one at Settings → API Keys.",
       "type": "password",
       "required": true,
       "title": "Addy API Key"
+    },
+    {
+      "name": "endpoint",
+      "description": "Base URL for self-hosted Addy instances. Leave empty to use the default.",
+      "placeholder": "https://app.addy.io/",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom URL"
     }
   ]
 }
