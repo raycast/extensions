@@ -181,7 +181,7 @@ export default function Command() {
                   }
                 }}
               />
-              <Action.Open title="Reveal in Finder" target={p.path} />
+              <Action.ShowInFinder path={p.path} />
               <Action.CopyToClipboard title="Copy Path" content={p.path} />
             </ActionPanel>
           }
