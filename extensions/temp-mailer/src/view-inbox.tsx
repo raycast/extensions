@@ -90,7 +90,7 @@ export default function Command() {
       if (Object.keys(mergedDetails).length > 0) {
         setMailDetails((prev) => ({ ...prev, ...mergedDetails }));
       }
-    } catch (error) {
+    } catch {
       await showFailureToast("Failed to fetch mail details");
     }
   };
