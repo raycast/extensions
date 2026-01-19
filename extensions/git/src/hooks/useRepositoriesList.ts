@@ -15,12 +15,6 @@ export function useRepositoriesList() {
   // Cache the list of repositories between sessions
   const [repositories, setRepositories] = useCachedState<Repository[]>("managed-repositories-list", []);
 
-  // Cache the last visited repository path
-  const [lastVisitedRepositoryPath, setLastVisitedRepositoryPath] = useCachedState<string | undefined>(
-    "last-visited-repository-path",
-    undefined,
-  );
-
   // Revalidate all repositories in the list: remove if not valid, update languageStats if missing
   useEffect(() => {
     const invalidRepositories = repositories.filter((repo) => {
@@ -124,7 +118,5 @@ export function useRepositoriesList() {
     visitRepository,
     removeRepository,
     updateCloningState,
-    lastVisitedRepository: lastVisitedRepositoryPath,
-    setLastVisitedRepository: setLastVisitedRepositoryPath,
   };
 }

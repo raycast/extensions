@@ -13,13 +13,12 @@ import {
   Image,
   LaunchType,
   launchCommand,
-  getPreferenceValues,
 } from "@raycast/api";
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
 import { RepositoryDirectoryActions } from "./components/actions/RepositoryDirectoryActions";
 import OpenRepository from "./open-repository";
-import { Repository, RepositoryCloningState, RepositoryCloningProcess, Remote, Preferences } from "./types";
+import { Repository, RepositoryCloningState, RepositoryCloningProcess, Remote } from "./types";
 import { useRepositoriesView } from "./hooks/useRepositoriesView";
 import { useGitRemotes } from "./hooks/useGitRemotes";
 import { RemoteHostIcon } from "./components/icons/RemoteHostIcons";
@@ -41,35 +40,7 @@ export default function ManageRepositories() {
     visitRepository,
     removeRepository,
     updateCloningState,
-    lastVisitedRepository,
-    setLastVisitedRepository,
   } = useRepositoriesList();
-  const { push } = useNavigation();
-  const preferences = getPreferenceValues<Preferences>();
-
-  // Auto-open last visited repository if preference is enabled
-  const { push } = useNavigation();
-  const preferences = getPreferenceValues<Preferences>();
-
-  // Track if auto-open has already been executed to prevent double execution in React Strict Mode
-  const hasAutoOpenedRef = useRef(false);
-
-  // Auto-open last visited repository if preference is enabled
-  useEffect(() => {
-    if (!preferences.openLastVisitedRepository || !lastVisitedRepository || hasAutoOpenedRef.current) return;
-
-    try {
-      GitManager.validateDirectory(lastVisitedRepository);
-    } catch {
-      setLastVisitedRepository(undefined);
-      return;
-    }
-    // Mark as executed before push to prevent double execution
-    hasAutoOpenedRef.current = true;
-
-    push(<OpenRepository arguments={{ path: lastVisitedRepository }} />, () => setLastVisitedRepository(undefined));
-  }, [lastVisitedRepository, preferences.openLastVisitedRepository]);
-
   // Separate cloning repositories from regular ones
   const cloningRepositories = useMemo(() => allRepositories.filter((repo) => repo.cloning), [allRepositories]);
   const currentRepositories = useMemo(() => allRepositories.filter((repo) => !repo.cloning), [allRepositories]);
@@ -167,7 +138,6 @@ function RepositoryListItem({
   const { gitManager } = useGitRepository(repo.path);
   if (!gitManager) return null;
   const { data: remotes } = useGitRemotes(gitManager);
-  const { setLastVisitedRepository } = useRepositoriesList();
 
   const accessories: List.Item.Accessory[] = useMemo(() => {
     const result = [];
@@ -214,11 +184,7 @@ function RepositoryListItem({
               title="Show Repository"
               target={<OpenRepository arguments={{ path: repo.path }} />}
               icon={Icon.Book}
-              onPush={() => {
-                setLastVisitedRepository(repo.path);
-                onOpen();
-              }}
-              onPop={() => setLastVisitedRepository(undefined)}
+              onPush={onOpen}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

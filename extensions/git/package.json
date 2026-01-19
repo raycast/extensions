@@ -138,14 +138,6 @@
       "label": "Auto Generate Commit Message",
       "default": false,
       "description": "Automatically generate a commit message using AI when opening the commit message view."
-    },
-    {
-      "name": "openLastVisitedRepository",
-      "required": true,
-      "type": "checkbox",
-      "label": "Open Previously Visited Repository",
-      "default": false,
-      "description": "Automatically open the previously visited repository when running the Manage Repositories command"
     }
   ],
   "dependencies": {
