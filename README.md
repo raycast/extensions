@@ -7,28 +7,23 @@ Control macOS display brightness directly from Raycast.
 - **Set Brightness**: Set display brightness to any level between 1-100
 - **Show Brightness**: Display the current brightness level
 
+Works with all Mac displays including XDR/Liquid Retina displays.
+
 ## Prerequisites
 
-### 1. Install brightness tool
+This extension requires [Lunar](https://lunar.fyi/) to be installed:
 
 ```bash
-brew install brightness
+brew install --cask lunar
 ```
 
-### 2. Grant Raycast Permissions
+After installing Lunar, install the CLI:
 
-For brightness control to work, Raycast needs permissions:
+```bash
+/Applications/Lunar.app/Contents/MacOS/Lunar install-cli
+```
 
-1. Open **System Settings** → **Privacy & Security**
-2. Grant Raycast access to:
-   - **Accessibility** (required for XDR displays)
-   - **Screen Recording** (may be needed)
-
-**Note for XDR Display Users**: The standard `brightness` tool may not work with XDR displays (Liquid Retina XDR). If you encounter errors, consider using:
-- [BetterDisplay](https://github.com/waydabber/BetterDisplay) (recommended)
-- [Lunar](https://lunar.fyi/)
-
-These apps provide better XDR display support and can be controlled via CLI or Raycast extensions.
+Lunar is free for basic brightness control.
 
 ## Installation
 

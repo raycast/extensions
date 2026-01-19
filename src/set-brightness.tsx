@@ -1,6 +1,7 @@
-import { showToast, Toast, showHUD, LaunchProps } from "@raycast/api";
+import { showToast, Toast, showHUD, LaunchProps, LocalStorage } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { homedir } from "os";
 
 const execAsync = promisify(exec);
 
@@ -8,33 +9,10 @@ interface SetBrightnessArguments {
   level: string;
 }
 
-// AppleScript to set brightness using keyboard simulation
-async function setBrightnessWithKeys(targetLevel: number): Promise<void> {
-  // First, get current brightness to calculate steps
-  let currentBrightness = 50; // Default assumption
-  
-  try {
-    const { stdout } = await execAsync("brightness -l 2>/dev/null | grep -oE '[0-9.]+$'");
-    const value = parseFloat(stdout.trim());
-    if (!isNaN(value)) {
-      currentBrightness = Math.round(value * 100);
-    }
-  } catch {
-    // If we can't get current brightness, start from middle
-  }
-
-  const diff = targetLevel - currentBrightness;
-  const steps = Math.abs(diff);
-  const keyCode = diff > 0 ? 144 : 145; // 144 = brightness up, 145 = brightness down
-
-  if (steps === 0) {
-    return;
-  }
-
-  // Press the brightness key multiple times
-  const script = `repeat ${steps} times\n  tell application "System Events" to key code ${keyCode}\n  delay 0.05\nend repeat`;
-  
-  await execAsync(`osascript -e '${script}'`);
+// Set brightness using Lunar CLI
+async function setBrightnessWithLunar(level: number): Promise<void> {
+  const lunarPath = `${homedir()}/.local/bin/lunar`;
+  await execAsync(`"${lunarPath}" set brightness ${level}`);
 }
 
 export default async function Command(props: LaunchProps<{ arguments: SetBrightnessArguments }>) {
@@ -70,14 +48,16 @@ export default async function Command(props: LaunchProps<{ arguments: SetBrightn
     });
 
     try {
-      await setBrightnessWithKeys(brightnessLevel);
+      await setBrightnessWithLunar(brightnessLevel);
+      // Store the brightness value for the "Show Brightness" command
+      await LocalStorage.setItem("lastBrightness", brightnessLevel.toString());
       await showHUD(`✓ Brightness set to ${brightnessLevel}%`);
     } catch (error: any) {
-      if (error.message.includes("not allowed")) {
+      if (error.message.includes("lunar") || error.message.includes("not found")) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Permission Required",
-          message: "Grant Raycast Accessibility permission in System Settings",
+          title: "Lunar Not Installed",
+          message: "Install Lunar: brew install --cask lunar",
         });
       } else {
         throw error;
