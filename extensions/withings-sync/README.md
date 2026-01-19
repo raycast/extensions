@@ -2,6 +2,12 @@
 
 Sync your Withings health data (weight, blood pressure, body composition) to Garmin Connect directly from Raycast.
 
+## Screenshots
+
+<!-- Add screenshots of your extension here -->
+<!-- ![View Measurements](metadata/view-measurements.png) -->
+<!-- ![Sync to Garmin](metadata/sync-to-garmin.png) -->
+
 ## Features
 
 - 📊 **View Measurements**: View your recent Withings measurements including weight (lb or kg), body fat, blood pressure, and heart rate
@@ -122,6 +128,14 @@ Run the "Configure Withings & Garmin" command and click "Authorize Withings"
 
 - Ensure you have recent measurements in your Withings account
 - The extension shows measurements from the last 7 days by default (configurable in preferences)
+
+## Contributing
+
+Contributions are welcome! Feel free to:
+
+- Report bugs or request features via [GitHub Issues](https://github.com/thebruge/withings-raycast/issues)
+- Submit pull requests for improvements
+- Share feedback on the extension
 
 ## Credits
 

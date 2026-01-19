@@ -23,7 +23,7 @@ import {
   FitFileData,
   DateWeightMap,
 } from "./garmin-api";
-import { logDataComparison, writeDebugData } from "./debug-utils";
+import { writeDebugData } from "./debug-utils";
 
 interface SyncResult {
   success: boolean;
@@ -133,17 +133,10 @@ export default function SyncToGarmin() {
 
       // Check if this measurement already exists in Garmin (prevent duplicates)
       if (measurement.weight) {
-        console.log(`[SYNC] Checking if measurement exists in Garmin:`, {
-          date: measurement.date.toISOString(),
-          weight: measurement.weight,
-        });
-
         const exists = await garmin.measurementExistsInGarmin(
           measurement.date,
           measurement.weight,
         );
-
-        console.log(`[SYNC] Measurement exists check result: ${exists}`);
 
         if (exists) {
           await showToast({
@@ -342,14 +335,6 @@ export default function SyncToGarmin() {
         endDate,
       );
 
-      console.log(`[CHECK] Garmin weight data fetched:`, {
-        dateRange: `${oldestMeasurement.date.toISOString().split("T")[0]} to ${newestMeasurement.date.toISOString().split("T")[0]}`,
-        daysFound: Object.keys(weightData).length,
-        data: weightData,
-      });
-
-      // Log detailed comparison
-      logDataComparison(measurements, weightData);
 
       // Write debug data to file for inspection
       await writeDebugData("garmin-check", {
@@ -932,7 +917,6 @@ export default function SyncToGarmin() {
                       isNew: isNew,
                     };
 
-                    console.log(`[BADGE] Checking ${dateKey}:`, debugEntry);
                     badgeDebug.push(debugEntry);
 
                     if (!existsInGarmin) return true;

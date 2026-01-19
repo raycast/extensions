@@ -148,9 +148,7 @@ export class GarminAPI {
             };
           }
         } catch (dayError) {
-          console.log(
-            `No Garmin weight data for ${currentDate.toISOString().split("T")[0]}`,
-          );
+          // No data for this date
         }
 
         currentDate.setDate(currentDate.getDate() + 1);
@@ -180,30 +178,14 @@ export class GarminAPI {
         !weightData.dateWeightList ||
         weightData.dateWeightList.length === 0
       ) {
-        console.log(
-          `[GARMIN] No data found for ${date.toISOString().split("T")[0]}`,
-        );
         return false;
       }
 
-      console.log(
-        `[GARMIN] Found ${weightData.dateWeightList.length} measurements for ${date.toISOString().split("T")[0]}:`,
-        weightData.dateWeightList.map(
-          (m: { weight: number }) => (m.weight / 1000).toFixed(2) + "kg",
-        ),
-      );
-
       const TOLERANCE_KG = 0.1;
-      const exists = weightData.dateWeightList.some(
+      return weightData.dateWeightList.some(
         (measurement: { weight: number }) =>
           Math.abs(measurement.weight / 1000 - weight) < TOLERANCE_KG,
       );
-
-      console.log(
-        `[GARMIN] Checking weight ${weight}kg - Match found: ${exists}`,
-      );
-
-      return exists;
     } catch (error) {
       console.error(`[GARMIN] Error checking measurement:`, error);
       return false;
