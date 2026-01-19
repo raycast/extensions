@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gcloud-config-manager",
+  "title": "Gcloud Config Manager",
+  "description": "Manage Google Cloud SDK configurations easily",
+  "icon": "command-icon.png",
+  "author": "brandon-braner",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "list-configs",
+      "title": "List Gcloud Configurations",
+      "description": "View and switch between gcloud configurations",
+      "mode": "view",
+      "script": "src/list-configs.tsx"
+    },
+    {
+      "name": "create-config",
+      "title": "Create Gcloud Configuration",
+      "description": "Create a new gcloud configuration",
+      "mode": "view",
+      "script": "src/create-config.tsx"
+    },
+    {
+      "name": "duplicate-config",
+      "title": "Duplicate Gcloud Configuration",
+      "description": "Duplicate an existing gcloud configuration",
+      "mode": "view",
+      "script": "src/duplicate-config.tsx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.6",
+    "@types/react": "^18.2.48",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
