@@ -2,7 +2,7 @@
 
 Track your caffeine intake and predict residual levels in your body to make informed decisions about whether you can safely consume more caffeine.
 
-Instead of just tracking *total daily intake*, this extension estimates the *remaining caffeine in your body* using exponential decay calculations and uses that plus time of day to determine whether additional caffeine is likely to disturb your sleep.
+Instead of just tracking _total daily intake_, this extension estimates the _remaining caffeine in your body_ using exponential decay calculations and uses that plus time of day to determine whether additional caffeine is likely to disturb your sleep.
 
 ## Features
 
@@ -15,18 +15,42 @@ Instead of just tracking *total daily intake*, this extension estimates the *rem
 
 ## Commands
 
-| Command | Description |
-|--------|-------------|
-| **Log Caffeine** | Log intake and see predicted impact on bedtime levels |
-| **Today's Caffeine** | View history, current residual, and predicted bedtime levels |
-| **Caffeine Settings** | Configure bedtime, half-life, thresholds, and custom drinks |
-| **Caffeine Status** | Menu bar showing current status with quick access |
+| Command               | Description                                                  |
+| --------------------- | ------------------------------------------------------------ |
+| **Log Caffeine**      | Log intake and see predicted impact on bedtime levels        |
+| **Today's Caffeine**  | View history, current residual, and predicted bedtime levels |
+| **Caffeine Settings** | Configure bedtime, half-life, thresholds, and custom drinks  |
+| **Caffeine Status**   | Menu bar showing current status with quick access            |
 
 ## Status Indicators
 
 - **Safe** 🟢 - Safe to consume more caffeine
 - **Warning** 🟠 - Approaching your caffeine limit
 - **No More Caffeine** 🔴 - May disturb sleep or exceed daily limit
+
+### How Status is Determined
+
+The extension uses two different judgment modes depending on the time:
+
+**Before Bedtime (Normal Mode)**
+
+- Predicts caffeine levels at your next bedtime
+- Status based on predicted residual caffeine vs. your threshold
+- Helps you avoid consuming caffeine too close to bedtime
+
+**After Bedtime (Past-Bedtime Mode)**
+
+- Active for 6 hours after your configured bedtime
+- Status based on **current** residual caffeine in your body (not prediction)
+- Prevents late-night caffeine consumption when levels are still high
+- Example: If bedtime is 22:00, this mode is active until 04:00
+
+**After 6 Hours Past Bedtime**
+
+- Returns to normal prediction mode
+- Starts predicting for the next day's bedtime
+
+This ensures the extension correctly warns you about caffeine intake even after bedtime has passed, addressing the common scenario where you might still be awake with significant caffeine in your system.
 
 ## Settings
 
