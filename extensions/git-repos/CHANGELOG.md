@@ -1,6 +1,6 @@
 # Git Repos Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-01-19
 
 - Added "Create Quicklink" action to GitRepoListItem component
 - Added "shkreios" to contributors list
