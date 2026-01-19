@@ -1,6 +1,6 @@
 # try Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-01-19
 
 - Fixed directory creation error on first launch when parent directories don't exist
 - Added configurable try directory path preference (default: ~/src/tries)
