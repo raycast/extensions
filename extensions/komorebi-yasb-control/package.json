@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "komorebi-yasb-control",
+  "title": "Komorebi & YASB Control",
+  "description": "Control your komorebi and YASB inside Raycast.",
+  "icon": "komorebi-icon.png",
+  "author": "nivx18818",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "komorebi-stop",
+      "title": "Stop Komorebi",
+      "subtitle": "komorebi",
+      "description": "Stop komorebi tiling window management",
+      "mode": "no-view"
+    },
+    {
+      "name": "komorebi-retile",
+      "title": "Retile Windows",
+      "subtitle": "komorebi",
+      "description": "Force retiling of all windows",
+      "mode": "no-view"
+    },
+    {
+      "name": "komorebi-focus",
+      "title": "Cycle Focus",
+      "subtitle": "komorebi",
+      "description": "Cycle focus between windows",
+      "mode": "view"
+    },
+    {
+      "name": "komorebi-move",
+      "title": "Move Window",
+      "subtitle": "komorebi",
+      "description": "Move focused window in a direction",
+      "mode": "view"
+    },
+    {
+      "name": "komorebi-resize",
+      "title": "Resize Window",
+      "subtitle": "komorebi",
+      "description": "Resize focused window",
+      "mode": "view"
+    },
+    {
+      "name": "komorebi-workspace",
+      "title": "Switch Workspace",
+      "subtitle": "komorebi",
+      "description": "Switch to a different workspace",
+      "mode": "view"
+    },
+    {
+      "name": "komorebi-stack",
+      "title": "Stack Operations",
+      "subtitle": "komorebi",
+      "description": "Stack and unstack windows",
+      "mode": "view"
+    },
+    {
+      "name": "komorebi-stackbar",
+      "title": "Stack Bar Mode",
+      "subtitle": "komorebi",
+      "description": "Configure stack bar visibility",
+      "mode": "view"
+    },
+    {
+      "name": "explorer-restart",
+      "title": "Restart Windows Explorer",
+      "subtitle": "Windows",
+      "description": "Restart Windows Explorer",
+      "mode": "no-view"
+    },
+    {
+      "name": "yasb-start",
+      "title": "Start YASB",
+      "subtitle": "YASB",
+      "description": "Start YASB status bar",
+      "icon": "yasb-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "yasb-stop",
+      "title": "Stop YASB",
+      "subtitle": "YASB",
+      "description": "Stop YASB status bar",
+      "icon": "yasb-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "yasb-reload",
+      "title": "Reload YASB",
+      "subtitle": "YASB",
+      "description": "Reload YASB status bar",
+      "icon": "yasb-icon.png",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.9",
+    "@types/react": "^19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

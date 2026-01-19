@@ -1,0 +1,11 @@
+# dependencies
+/node_modules
+
+# IDEs and editors
+.vscode/*
+
+# OS
+.DS_Store
+
+# TypeScript declaration files
+*.d.ts
