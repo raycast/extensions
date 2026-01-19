@@ -4,6 +4,8 @@ import { WriteStream } from "fs";
 
 /**
  * Represents a file or directory within the project structure.
+ * Note: When using streaming processing, file content is not stored in this structure
+ * but is formatted and written to output immediately to reduce memory usage.
  */
 export interface ProjectEntry {
   /** The name of the file or directory. */
@@ -16,7 +18,9 @@ export interface ProjectEntry {
   size?: number;
   /** The programming language of the file, if applicable. */
   language?: string;
-  /** The content of the file, or a message indicating why content is not included. */
+  /** The content of the file, or a message indicating why content is not included.
+   * Used only for error messages or when content cannot be read.
+   * In streaming mode, file content is not stored here to reduce memory usage. */
   content?: string;
   /** For directories, an array of child entries. */
   children?: ProjectEntry[];
@@ -72,7 +76,36 @@ export interface GenerationConfig {
 }
 
 /**
+ * Information about Finder selection for UI decision making.
+ */
+export interface FinderSelectionInfo {
+  /** Available options based on the selection */
+  hasFiles: boolean;
+  hasDirectories: boolean;
+  /** Paths of selected files */
+  selectedFiles: string[];
+  /** Suggested directory path (parent of files or selected directory) */
+  suggestedDirectory: string;
+  /** Display names for UI */
+  fileNames: string[];
+  /** Name of the suggested directory, if available. */
+  directoryName?: string;
+}
+
+/**
+ * Enhanced configuration for project code generation with file-specific options.
+ */
+export interface EnhancedGenerationConfig extends GenerationConfig {
+  /** Whether to process only specific files instead of entire directory */
+  processOnlySelectedFiles?: boolean;
+  /** List of specific file paths to process (when processOnlySelectedFiles is true) */
+  selectedFilePaths?: string[];
+  /** List of custom ignore patterns */
+  additionalIgnorePatterns?: string;
+}
+
+/**
  * Configuration specifically for the core file processing logic,
  * omitting outputFileName as it's primarily for UI/path construction.
  */
-export type FileProcessorConfig = Omit<GenerationConfig, "outputFileName">;
+export type FileProcessorConfig = Omit<EnhancedGenerationConfig, "outputFileName">;
