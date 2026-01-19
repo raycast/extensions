@@ -1,6 +1,6 @@
 # Neon Changelog
 
-## [Create PSQL 18 + New Logo] - {PR_MERGE_DATE}
+## [Create PSQL 18 + New Logo] - 2026-01-19
 
 - Create a Project with Postgres 18
 - Updated logo to match Neon's new brand
