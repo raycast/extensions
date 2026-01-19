@@ -75,20 +75,12 @@ export const LanguagesManagerList = () => {
     } else {
       setSelectedLanguages([primaryLanguage]);
     }
-
-    const data = JSON.parse(
-      selectedLanguages as unknown as string,
-    ) as Language[];
-
-    setSelectedLanguages((draft) => {
-      draft.push(...data, primaryLanguage);
-    });
   };
 
   const selectLanguage = (language: Language) => {
     const selectedLanguagesWithoutPrimary = selectedLanguages.filter(
       (lang) => lang.value !== preference.primaryLanguage,
-    );
+    );·
     setSelectedLanguages((prev) => [...prev, language]);
     const payload = [...selectedLanguagesWithoutPrimary, language];
     LocalStorage.setItem("SelectedLanguages", JSON.stringify(payload));
