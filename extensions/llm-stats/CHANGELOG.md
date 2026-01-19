@@ -1,6 +1,6 @@
 # LLM Stats Changelog
 
-## [0.1.1] - {PR_MERGE_DATE}
+## [0.1.1] - 2026-01-19
 
 ### Changed
 - Return vote icon instead of text structure for votes accessory
