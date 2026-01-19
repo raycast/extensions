@@ -1,67 +1,158 @@
 instructions: |
-    You are an AI assistant for Granola. When you answer, follow these core rules:
-
-    - CRITICAL: every `ai-notes` call must include the `includeTranscript` flag. Set it to true only when the user explicitly wants the transcript or a transcript summary; otherwise set it to false. Skip the flag only when you use `listFolders: true`. This applies even when you add other parameters like `date`, `contentFilter`, or `contentType`.
-    - For task or action-item requests about the "latest" meeting (e.g., "What are the tasks from my latest meeting"), first call `list-meetings` with `{ "date": "latest", "limit": 1 }`, then call `ai-notes` with `{ "noteId": "<id>", "includeTranscript": false }`. Do not add `contentFilter` or `excludeContent` in that flow.
-    - Use `list-meetings` only when the user wants a meeting list, when you need IDs before another tool (such as saving to Notion), or when you must disambiguate multiple candidates. For any single-note request based on recency—including "list my most recent meeting", "summarize the transcript of my latest note", or "last meeting about the product launch"—call `ai-notes` directly (no `list-meetings` beforehand) with the appropriate `title`/`contentType` and set `includeTranscript` according to the user's request.
-    - Use the `title` parameter for topical queries ("meeting about the product launch"). Use `contentFilter` for note categories or types ("meeting notes", "client calls"). If the user only specifies time ("latest meeting"), avoid `contentFilter`. When the user names a meeting type in plural ("project meetings"), normalise the filter to the singular form (use `"project meeting"`).
-    - When the user wants meeting notes exported (e.g., "save my last 3 meeting notes"), first call `ai-notes` with `contentFilter: "meeting"` and `includeTranscript: false` to gather the note IDs, then call the export tool.
-    - Respect content-type preferences: set `contentType: "original"` for requests like "my notes" or "original"; set `contentType: "enhanced"` for "AI/enhanced" requests; otherwise omit it.
-    - Turn on `includeTranscript` when the user asks for the transcript, what was said, or to summarise a transcript; keep it false for summaries such as TL;DR requests unless the transcript is mentioned.
-    - Use `ai-notes` to retrieve transcripts and transcript summaries. Only call `get-transcript` when the user supplies a specific note ID and wants the raw transcript alone.
-    - For folder questions, call `ai-notes` with `listFolders: true`. When the user needs notes from a specific folder, supply that folder's ID via `folderId`.
-    - Always call the `recipes` tool (action `"get"`) before any other tool when the user invokes `/slug` or explicitly requests a recipe; the recipes call must be the very first tool call for that query (e.g., `/tldr` → `recipes({ "action": "get", "slug": "tldr" })`). After fetching the recipe, continue with the necessary note tools.
-    - After you have the right note IDs, call `save-to-notion` if the user wants to export notes to Notion.
+    - Use `list-meetings` to get note IDs before any content or transcript request.
+    - For any request that needs content (summaries, tasks, original/enhanced notes, TL;DR), you MUST call `get-note-content` after `list-meetings`. Do not answer using only metadata.
+    - For transcript requests, you MUST call `get-transcript` after `list-meetings`. Do not answer without the transcript tool output.
+    - For "latest"/"most recent", call `list-meetings` with `{ "date": "latest", "limit": 1 }` (or higher if the user asks for multiple).
+    - Use `title` in `list-meetings` for topical queries.
+    - Use `get-note-content` for note content; set `contentType` to `"original"` or `"enhanced"` only when requested.
+    - Use `get-transcript` only for transcript requests.
+    - Use `list-folders` only for folder questions or to get a folder ID.
+    - If the user explicitly mentions a folder (for example, includes the word "folder" or asks for a folder by name), call `list-folders` first, then use the matching folder ID with `list-meetings`.
+    - If the user asks for available recipes or to search recipes, call `recipes` with action `"list"` or `"search"` and the query.
+    - Any `/slug` token (for example `/tldr`) is a recipe; call `recipes` first with that slug and do not treat it as a title.
+    - Use `save-to-notion` only after you have the note IDs, pass them as `noteIds`, and preserve the order returned by `list-meetings`.
 
 evals:
     - input: "@granola Please summarize my last note"
       mocks:
-        ai-notes:
-          - content: "### Meeting Context\n\n*   Testing session for Granola application's transcription capabilities\n*   Two participants simulating back-and-forth conversation..."
-            date: "2025-03-06T16:15:20.057Z"
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+        list-meetings:
+          - id: "sample-id-123"
             title: "Summary"
-            id: "sample-id-123"
+            date: "2025-03-06T16:15:20.057Z"
+        get-note-content:
+          title: "Summary"
+          date: "2025-03-06T16:15:20.057Z"
+          content: "### Meeting Context\n\n*   Testing session for Granola application's transcription capabilities\n*   Two participants simulating back-and-forth conversation..."
+          folderIds: []
+          folderNames: []
       expected:
         - callsTool:
-            name: "ai-notes"
-            arguments: {}
-    
+            name: "list-meetings"
+            arguments:
+              date: "latest"
+              limit: 1
+        - callsTool:
+            name: "get-note-content"
+            arguments:
+              noteId: "sample-id-123"
+
     - input: "@granola Show me the transcript of my last meeting about the product launch"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "sample-id-456"
             title: "Product Launch"
             date: "2025-03-06T16:15:20.057Z"
-        ai-notes:
-          - content: "Product launch planning discussion"
-            date: "2025-03-06T16:15:20.057Z"
-            title: "Product Launch"
-            id: "sample-id-456"
-            transcript: "John: Let's discuss the product launch timeline.\nSarah: I think we should aim for next quarter.\nJohn: That makes sense, we still need to finalize the marketing materials."
+        get-transcript:
+          transcript: "John: Let's discuss the product launch timeline.\nSarah: I think we should aim for next quarter.\nJohn: That makes sense, we still need to finalize the marketing materials."
+          title: "Product Launch"
+          date: "2025-03-06T16:15:20.057Z"
       expected:
         - callsTool:
-            name: "ai-notes"
+            name: "list-meetings"
             arguments:
               title: "product launch"
-              includeTranscript: true
-    
+              limit: 1
+        - callsTool:
+            name: "get-transcript"
+            arguments:
+              noteId: "sample-id-456"
+
     - input: "@granola summarize the transcript of my latest note"
       mocks:
-        ai-notes:
-          - content: "Weekly team sync discussion"
-            date: "2025-04-10T14:30:00.000Z"
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+        list-meetings:
+          - id: "sample-id-789"
             title: "Team Sync"
-            id: "sample-id-789"
-            transcript: "**Me:** Let's review our progress for this sprint.\n\n**Sarah:** We've completed the new dashboard feature.\n\n**John:** QA found two minor bugs we need to fix before release."
+            date: "2025-04-10T14:30:00.000Z"
+        get-transcript:
+          transcript: "**Me:** Let's review our progress for this sprint.\n\n**Sarah:** We've completed the new dashboard feature.\n\n**John:** QA found two minor bugs we need to fix before release."
+          title: "Team Sync"
+          date: "2025-04-10T14:30:00.000Z"
       expected:
         - callsTool:
-            name: "ai-notes"
+            name: "list-meetings"
             arguments:
-              includeTranscript: true
-    
+              date: "latest"
+              limit: 1
+        - callsTool:
+            name: "get-transcript"
+            arguments:
+              noteId: "sample-id-789"
+
     - input: "@granola what folders do I have"
       mocks:
-        ai-notes:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
           - id: "folder-123"
             name: "Work Projects"
             description: "Notes related to ongoing work projects"
@@ -75,27 +166,37 @@ evals:
             noteIds: ["note-3", "note-4"]
       expected:
         - callsTool:
-            name: "ai-notes"
-            arguments:
-              listFolders: true
-    
+            name: "list-folders"
+            arguments: {}
+
     - input: "@granola save my last 3 meeting notes to Notion"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "note-1"
             title: "Team Sync"
             date: "2025-03-15T14:00:00.000Z"
           - id: "note-2"
-            title: "Client Call"
-            date: "2025-03-14T16:30:00.000Z"
-          - id: "note-3"
-            title: "Planning Session"
-            date: "2025-03-13T11:00:00.000Z"
-        ai-notes:
-          - id: "note-1"
-            title: "Team Sync"
-            date: "2025-03-15T14:00:00.000Z"
-          - id: "note-2" 
             title: "Client Call"
             date: "2025-03-14T16:30:00.000Z"
           - id: "note-3"
@@ -109,7 +210,7 @@ evals:
               pageUrl: "https://www.notion.so/team-sync-123"
             - noteId: "note-2"
               title: "Client Call"
-              status: "success" 
+              status: "success"
               pageUrl: "https://www.notion.so/client-call-456"
             - noteId: "note-3"
               title: "Planning Session"
@@ -117,67 +218,175 @@ evals:
               pageUrl: "https://www.notion.so/planning-789"
       expected:
         - callsTool:
-            name: "ai-notes"
+            name: "list-meetings"
             arguments:
-              contentFilter: "meeting"
-        - callsTool: "save-to-notion"
-    
+              date: "latest"
+              limit: 3
+        - callsTool:
+            name: "save-to-notion"
+
     - input: "@granola list my most recent meeting"
       mocks:
-        ai-notes:
-          - content: "Product roadmap discussion with engineering team"
-            date: "2025-03-16T10:00:00.000Z"
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+        list-meetings:
+          - id: "latest-meeting-123"
             title: "Engineering Sync"
-            id: "latest-meeting-123"
+            date: "2025-03-16T10:00:00.000Z"
       expected:
         - callsTool:
-            name: "ai-notes"
+            name: "list-meetings"
             arguments:
-              includeTranscript: false
+              date: "latest"
+              limit: 1
 
     - input: "@granola show me my original notes from yesterday"
       mocks:
-        ai-notes:
-          - content: "Raw user-written content about the meeting"
-            date: "2025-03-15T14:00:00.000Z"
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+        list-meetings:
+          - id: "original-notes-123"
             title: "User Notes"
-            id: "original-notes-123"
+            date: "2025-03-15T14:00:00.000Z"
+        get-note-content:
+          title: "User Notes"
+          date: "2025-03-15T14:00:00.000Z"
+          content: "Raw user-written content about the meeting"
+          folderIds: []
+          folderNames: []
       expected:
         - callsTool:
-            name: "ai-notes"
+            name: "list-meetings"
             arguments:
-              contentType: "original"
               date: "yesterday"
-              includeTranscript: false
+        - callsTool:
+            name: "get-note-content"
+            arguments:
+              noteId: "original-notes-123"
+              contentType: "original"
 
     - input: "@granola get the enhanced AI notes for my project meetings"
       mocks:
-        ai-notes:
-          - content: "AI-enhanced structured notes with key insights"
-            date: "2025-03-16T09:00:00.000Z"
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+        list-meetings:
+          - id: "enhanced-notes-456"
             title: "Project Meeting"
-            id: "enhanced-notes-456"
+            date: "2025-03-16T09:00:00.000Z"
+        get-note-content:
+          title: "Project Meeting"
+          date: "2025-03-16T09:00:00.000Z"
+          content: "AI-enhanced structured notes with key insights"
+          folderIds: []
+          folderNames: []
       expected:
+        - or:
+            - callsTool:
+                name: "list-meetings"
+                arguments:
+                  title: "project"
+            - callsTool:
+                name: "list-meetings"
+                arguments:
+                  folderId: "folder-123"
         - callsTool:
-            name: "ai-notes"
+            name: "get-note-content"
             arguments:
+              noteId: "enhanced-notes-456"
               contentType: "enhanced"
-              contentFilter: "project meeting"
-              includeTranscript: false
 
     - input: "@granola what are the tasks from my latest meeting?"
       mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         list-meetings:
           - id: "latest-meeting-123"
             title: "Product Launch Planning"
             date: "2025-03-16T14:00:00.000Z"
             folderIds: ["work-folder-456"]
             folderNames: ["Work Projects"]
-        ai-notes:
-          - content: "### Product Launch Tasks\n\n- Finalize marketing materials by Friday\n- Schedule demo with engineering team\n- Prepare presentation for stakeholders\n- Review budget allocation for Q2"
-            date: "2025-03-16T14:00:00.000Z"
-            title: "Product Launch Planning"
-            id: "latest-meeting-123"
+        get-note-content:
+          title: "Product Launch Planning"
+          date: "2025-03-16T14:00:00.000Z"
+          content: "### Product Launch Tasks\n\n- Finalize marketing materials by Friday\n- Schedule demo with engineering team\n- Prepare presentation for stakeholders\n- Review budget allocation for Q2"
+          folderIds: ["work-folder-456"]
+          folderNames: ["Work Projects"]
       expected:
         - callsTool:
             name: "list-meetings"
@@ -185,15 +394,24 @@ evals:
               date: "latest"
               limit: 1
         - callsTool:
-            name: "ai-notes"
+            name: "get-note-content"
             arguments:
               noteId: "latest-meeting-123"
-              includeTranscript: false 
-
-    
 
     - input: "@granola /tldr my latest meeting"
       mocks:
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
         recipes:
           - slug: "tldr"
             id: "r-101"
@@ -203,11 +421,12 @@ evals:
           - id: "latest-meeting-123"
             title: "Engineering Sync"
             date: "2025-03-16T10:00:00.000Z"
-        ai-notes:
-          - content: "Product roadmap discussion with engineering team"
-            date: "2025-03-16T10:00:00.000Z"
-            title: "Engineering Sync"
-            id: "latest-meeting-123"
+        get-note-content:
+          title: "Engineering Sync"
+          date: "2025-03-16T10:00:00.000Z"
+          content: "Product roadmap discussion with engineering team"
+          folderIds: []
+          folderNames: []
       expected:
         - callsTool:
             name: "recipes"
@@ -215,6 +434,114 @@ evals:
               action: "get"
               slug: "tldr"
         - callsTool:
-            name: "ai-notes"
+            name: "list-meetings"
             arguments:
-              includeTranscript: false
+              date: "latest"
+              limit: 1
+        - callsTool:
+            name: "get-note-content"
+            arguments:
+              noteId: "latest-meeting-123"
+
+    - input: "@granola show me meetings in my Work Projects folder"
+      mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+        list-meetings:
+          - id: "note-1"
+            title: "Roadmap Review"
+            date: "2025-03-11T10:00:00.000Z"
+          - id: "note-2"
+            title: "Sprint Planning"
+            date: "2025-03-10T09:00:00.000Z"
+      expected:
+        - callsTool:
+            name: "list-folders"
+            arguments: {}
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              folderId: "folder-123"
+
+    - input: "@granola what recipes are available?"
+      mocks:
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+            - slug: "action-items"
+              defaultConfig:
+                instructions: "Extract action items"
+          sharedRecipes: []
+          unlistedRecipes: []
+      expected:
+        - callsTool:
+            name: "recipes"
+            arguments:
+              action: "list"
+
+    - input: "@granola list my meetings from last week about hiring"
+      mocks:
+        recipes:
+          featureEnabled: true
+          userRecipes: []
+          defaultRecipes:
+            - slug: "tldr"
+              defaultConfig:
+                instructions: "Provide a concise TL;DR"
+          sharedRecipes: []
+          unlistedRecipes: []
+        list-folders:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+        list-meetings:
+          - id: "note-55"
+            title: "Hiring Sync"
+            date: "2025-03-05T13:00:00.000Z"
+          - id: "note-56"
+            title: "Recruiting Pipeline"
+            date: "2025-03-03T09:30:00.000Z"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              title: "hiring"
+              date: "last week"

@@ -5,17 +5,11 @@
   "description": "Generate placeholder content",
   "icon": "paragraph-icon.png",
   "author": "AntonNiklasson",
-  "license": "MIT",
   "contributors": [
     "GastroGeek",
     "stelo",
-    "enkia"
-  ],
-  "categories": [
-    "Data",
-    "Design Tools",
-    "Developer Tools",
-    "Web"
+    "enkia",
+    "j3lte"
   ],
   "keywords": [
     "generator",
@@ -30,6 +24,13 @@
     "macOS",
     "Windows"
   ],
+  "categories": [
+    "Data",
+    "Design Tools",
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "paragraphs",
@@ -117,17 +118,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "lorem-ipsum": "^2.0.8",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.103.10",
+    "lorem-ipsum": "^2.0.8"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^22.1.0",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.5.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,6 +1,6 @@
 import { fetchGranolaData } from "./fetchData";
-import { NoteData, PanelsByDocId } from "./types";
-import getCache from "./getCache";
+import { NoteData } from "./types";
+import { toError } from "./errorUtils";
 
 /**
  * Type guard to validate if the fetched data matches NoteData shape
@@ -35,26 +35,18 @@ function isNoteData(data: unknown): data is NoteData {
   return true;
 }
 
-function extractPanelsFromCache(cache: unknown): PanelsByDocId | null {
-  if (typeof cache !== "object" || cache === null) return null;
-  const maybeState = (cache as { state?: unknown }).state;
-  if (typeof maybeState !== "object" || maybeState === null) return null;
-  const maybePanels = (maybeState as { documentPanels?: unknown }).documentPanels;
-  if (typeof maybePanels !== "object" || maybePanels === null) return null;
-  return maybePanels as PanelsByDocId;
-}
-
 export interface GranolaDataState {
   noteData: NoteData | null;
-  panels: PanelsByDocId | null;
   isLoading: boolean;
   hasError: boolean;
   error?: Error;
 }
 
 /**
- * Shared hook for loading Granola notes and panel data
- * Consolidates the common pattern used across multiple command files
+ * Shared hook for loading Granola notes from API
+ * Panels are loaded on-demand using useDocumentPanels hook when needed
+ * Large fields (notes_markdown, people) are stripped immediately in fetchGranolaData
+ * to reduce memory usage before data flows through the component tree
  */
 export function useGranolaData(): GranolaDataState {
   try {
@@ -64,29 +56,20 @@ export function useGranolaData(): GranolaDataState {
     if (!isNoteData(fetchResult)) {
       return {
         noteData: null,
-        panels: null,
         isLoading: false,
         hasError: true,
         error: new Error("Invalid data shape returned from Granola API. Expected NoteData structure."),
       };
     }
 
+    // Data is already transformed (stripped) in fetchGranolaData, so we can use it directly
+    // This avoids keeping references to the original data with large fields
     const noteData: NoteData = fetchResult;
-    // Load panels from local cache (kept fresh via small TTL in getCache)
-    let panels: PanelsByDocId | null = null;
-    try {
-      const cacheData = getCache();
-      // The Granola app stores panels under state.documentPanels in the local cache
-      panels = extractPanelsFromCache(cacheData);
-    } catch {
-      panels = null;
-    }
 
     // Check loading state
     if (!noteData?.data && noteData.isLoading === true) {
       return {
         noteData,
-        panels,
         isLoading: true,
         hasError: false,
       };
@@ -96,27 +79,24 @@ export function useGranolaData(): GranolaDataState {
     if (!noteData?.data && noteData.isLoading === false) {
       return {
         noteData,
-        panels,
         isLoading: false,
         hasError: true,
         error: new Error("No data available"),
       };
     }
 
-    // Success state (panels may be null; UI should handle fallback to markdown)
+    // Success state
     return {
       noteData,
-      panels,
       isLoading: false,
       hasError: false,
     };
   } catch (error) {
     return {
       noteData: null,
-      panels: null,
       isLoading: false,
       hasError: true,
-      error: error instanceof Error ? error : new Error(String(error)),
+      error: toError(error),
     };
   }
 }

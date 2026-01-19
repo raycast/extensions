@@ -1,4 +1,4 @@
-import { PathLike } from "fs";
+import type { PathLike } from "node:fs";
 
 export interface FileNode {
   path: string;
@@ -13,27 +13,24 @@ export interface Volume {
   usageLabel: string;
 }
 
-export interface FolderSnapshot {
+export interface DirectorySnapshot {
   accessible: FileNode[];
   restricted: FileNode[];
 }
 
-export type FileSystemIndex = Record<string, FolderSnapshot>;
-
 export interface DiskUsageContext {
-  fsIndex: FileSystemIndex;
   volume: Volume;
-  error: string;
   activePath: string;
+  heapUsed: string;
+  needsScan: boolean;
+  error: string;
   isProcessingDeletion: boolean;
 }
 
 export type DiskUsageEvent =
   | { type: "REFRESH" }
-  | { type: "CACHE_HIT" }
-  | { type: "CACHE_MISS" }
-  | { type: "SCAN_PROGRESS"; path: string }
-  | { type: "SCAN_SUCCESS"; data: FileSystemIndex }
-  | { type: "SCAN_FAILURE"; error: unknown }
-  | { type: "DELETE_ITEMS"; paths: PathLike[] }
-  | { type: "RETRY" };
+  | { type: "RETRY" }
+  | { type: "SCAN_PROGRESS"; path: string; heap: string }
+  | { type: "SCAN_SUCCESS" }
+  | { type: "SCAN_FAILURE"; error: string }
+  | { type: "DELETE_ITEMS"; paths: PathLike[] };

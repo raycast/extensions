@@ -29,4 +29,3 @@ It's probably not the most performant approach, but it provides all the informat
 ## Known Issues
 
 - The extension is not very performant, especially with HDDs, due to the nature of fetching data from the command-line `diskutil list` command.
-- SD cards inserted into the internal card reader are reported as internal disks.

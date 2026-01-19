@@ -1,15 +1,20 @@
 # Dia Changelog
 
-## Bookmarks improvement and fix - 2025-12-11
+## [Handle error in Search History + Fix CHANGELOG Dates] - 2025-12-25
+
+- Handle error in Search History when file is not found
+- Fix the format of CHANGELOG to render dates properly
+
+## [Bookmarks improvement and fix] - 2025-12-11
 
 - Added Bookmarks in the global Search command (in addition to tabs, browser history and google suggestions)
 - Use Action.Open to open bookmarks instead of AppleScript (fix #23370 #23352 #23340 #23329)
 
-## Search Open and Pinned Tabs - 2025-12-01
+## [Search Open and Pinned Tabs] - 2025-12-01
 
 - Added support for Dia's new AppleScript API to search open and pinned tabs.
 
-## New Features - 2025-11-27
+## [New Features] - 2025-11-27
 
 ### Added
 
@@ -24,7 +29,7 @@
 - **Search Tabs**: Currently unavailable due to Dia browser's limited AppleScript support
   - Note: Expected to be supported in Dia's next version
 
-## Fix Description - 2025-04-29
+## [Fix Description] - 2025-04-29
 
 - Updated the description to fix grammatical issues
 

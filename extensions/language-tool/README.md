@@ -2,12 +2,10 @@
 
 > Instant spelling and grammar correction using LanguageTool API. Get real-time suggestions and improve your text quality in multiple languages.
 
-![Raycast LanguageTool Extension](./assets/extension-icon.png)
-
 ## 🚀 Features
 
 - ✅ **Check Text** - Interactive form with detailed results and corrections
-- ⚡ **Check Text Instant** - Quick clipboard check and paste (background mode)
+- ⚡ **Check Text Instant** - Quick selected text or clipboard check and paste (background mode)
 - 🌍 **30+ Languages** - Auto-detection or manual selection
 - 🎯 **Smart Sorting** - Most used languages appear first (frecency-based)
 - 💾 **Persistent Settings** - Your preferred language is remembered
@@ -61,10 +59,12 @@ npm run build
 
 ### Check Text Instant (Background)
 
-1. Copy text to clipboard
+1. Select text or copy to clipboard
 2. Open Raycast
 3. Type "Check Text Instant"
 4. ✨ Corrected text is automatically pasted!
+
+**Note:** The command prioritizes selected text over clipboard content. If no text is selected, it uses the clipboard.
 
 Perfect for quick corrections while writing emails, documents, or messages.
 

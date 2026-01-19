@@ -1,8 +1,10 @@
 import { Cache } from "@raycast/api";
 import fetch from "node-fetch";
-import JSZip from "jszip";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const unzip = require("unzip-stream");
 import { load as yamlLoad } from "js-yaml";
 import packageJson from "../package.json";
+import { Readable } from "stream";
 
 export interface DocItem {
   id: string;
@@ -10,7 +12,6 @@ export interface DocItem {
   description: string;
   url: string;
   category: string;
-  keywords: string[];
   type:
     | "class"
     | "service"
@@ -19,19 +20,13 @@ export interface DocItem {
     | "reference"
     | "enum"
     | "global"
+    | "datatype"
     | "property"
     | "method"
     | "event"
     | "callback"
     | "function";
-  content?: string; // Full markdown/YAML content for detail view
-  metadata?: {
-    // For API references (classes, enums, etc.)
-    parameters?: Array<{ name: string; type: string; description?: string }>;
-    returnType?: string;
-    security?: string;
-    tags?: string[];
-  };
+  signature?: string; // For methods/functions: "(param: Type, ...) → ReturnType"
 }
 
 // Constants
@@ -59,16 +54,11 @@ interface FileMetadata {
   description?: string;
   path: string;
   type: string;
-  content?: string; // Store full content for detail view
   subitems?: Array<{
     type: string;
     title: string;
     description?: string;
-    summary?: string;
-    parameters?: Array<{ name: string; type: string; default?: string }>;
-    returnType?: string;
-    security?: string;
-    tags?: string[];
+    signature?: string;
   }>;
 }
 
@@ -128,24 +118,19 @@ interface SubitemData {
   type: string;
   title: string;
   description?: string;
-  summary?: string;
-  parameters?: Array<{ name: string; type: string; default?: string; summary?: string }>;
-  returnType?: string;
-  security?: string;
-  tags?: string[];
+  signature?: string;
 }
 
 class RobloxDocsDataFetcher {
   private cache: Cache;
   private cacheKey = "roblox-docs-data";
-  private cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours as fallback
+  private cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
   private lastUpdateCheckKey = "roblox-docs-last-update-check";
   private updateCheckInterval = 60 * 60 * 1000; // Check for updates once per hour
   private extensionVersion: string;
 
   // Memory optimization constants
-  private readonly BATCH_SIZE = 15; // Process files in smaller batches
-  private readonly GC_INTERVAL = 30; // Trigger GC more frequently
+  private readonly GC_INTERVAL = 10; // Trigger GC every N files
 
   constructor() {
     this.cache = new Cache();
@@ -180,6 +165,7 @@ class RobloxDocsDataFetcher {
   /**
    * Load docs data immediately from cache, then check for updates in background
    * Returns cached data instantly if available, otherwise fetches fresh data
+   * If cache is stale, returns stale data while refreshing in background (no downtime)
    */
   async fetchDocsData(): Promise<DocItem[]> {
     // Try to load from cache first for instant startup
@@ -188,21 +174,48 @@ class RobloxDocsDataFetcher {
     if (cachedData && cachedData.data.length > 0) {
       // Check for updates in background (non-blocking)
       this.checkForUpdatesInBackground(cachedData.sha);
-
       return cachedData.data;
     }
 
-    // No valid cache, fetch fresh data (blocking)
+    // No valid cache - check if we have stale data we can use while refreshing
+    const staleData = this.getCachedData(true);
+
+    if (staleData && staleData.data.length > 0) {
+      // Return stale data - background refresh disabled due to memory constraints
+      // User can manually refresh via "Clear Cache & Refresh" action
+      return staleData.data;
+    }
+
+    // No cache at all, fetch fresh data (blocking)
     return this.fetchFreshData();
   }
 
-  private getCachedData(): { data: DocItem[]; sha: string | null; timestamp: number; version?: string } | null {
+  /**
+   * Check if the current cache is stale (expired or version mismatch)
+   * Returns true if using stale data, false if cache is fresh or empty
+   */
+  isCacheStale(): boolean {
+    const validCache = this.getCachedData(false);
+    if (validCache) return false; // Cache is valid
+
+    const staleCache = this.getCachedData(true);
+    return staleCache !== null; // Has stale data
+  }
+
+  private getCachedData(
+    allowStale = false,
+  ): { data: DocItem[]; sha: string | null; timestamp: number; version?: string } | null {
     const cachedData = this.cache.get(this.cacheKey);
     if (!cachedData) return null;
 
     try {
       const parsed = JSON.parse(cachedData);
       const now = Date.now();
+
+      // If allowing stale data, return it as long as it has data
+      if (allowStale && parsed.data && parsed.data.length > 0) {
+        return parsed;
+      }
 
       // Validate version and expiry
       if (parsed.version !== this.extensionVersion || now - parsed.timestamp > this.cacheExpiry) {
@@ -250,7 +263,7 @@ class RobloxDocsDataFetcher {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 60000);
+      const timeout = setTimeout(() => controller.abort(), 120000); // 2 min timeout for streaming
 
       const zipResponse = await fetch("https://github.com/Roblox/creator-docs/archive/refs/heads/main.zip", {
         signal: controller.signal,
@@ -258,9 +271,10 @@ class RobloxDocsDataFetcher {
       clearTimeout(timeout);
 
       if (!zipResponse.ok) throw new Error(`Failed to download docs: ${zipResponse.statusText}`);
+      if (!zipResponse.body) throw new Error("No response body");
 
-      const zipBuffer = await zipResponse.buffer();
-      const docItems = await this.processZipArchiveOptimized(zipBuffer);
+      // Stream the ZIP and process files as they arrive - never loads entire ZIP into memory
+      const docItems = await this.processZipStream(zipResponse.body as unknown as Readable);
 
       // Cache results
       const cacheData = {
@@ -278,83 +292,76 @@ class RobloxDocsDataFetcher {
     }
   }
 
-  private async processZipArchiveOptimized(zipBuffer: Buffer): Promise<DocItem[]> {
-    try {
-      const zip = await JSZip.loadAsync(zipBuffer);
-      const docItems: DocItem[] = [];
+  private processZipStream(stream: Readable): Promise<DocItem[]> {
+    const docItems: DocItem[] = [];
 
-      // Filter relevant files first
-      const relevantFiles: { path: string; file: JSZip.JSZipObject }[] = [];
+    return new Promise((resolve, reject) => {
+      const parser = unzip.Parse();
 
-      zip.forEach((relativePath, file) => {
-        // Filter for relevant files in content/en-us directory
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      parser.on("entry", (entry: any) => {
+        const filePath = entry.path as string;
+        const type = entry.type as string;
+
+        // Only process relevant files
         if (
-          relativePath.includes("content/en-us/") &&
-          (relativePath.endsWith(".md") || relativePath.endsWith(".yaml")) &&
-          !file.dir
+          type === "File" &&
+          filePath.includes("content/en-us/") &&
+          (filePath.endsWith(".md") || filePath.endsWith(".yaml"))
         ) {
-          relevantFiles.push({ path: relativePath, file });
+          const chunks: Buffer[] = [];
+
+          entry.on("data", (chunk: Buffer) => {
+            chunks.push(chunk);
+          });
+
+          entry.on("end", () => {
+            try {
+              const contentStr = Buffer.concat(chunks).toString("utf-8");
+              const url = filePath.substring(filePath.indexOf("content/en-us/"));
+
+              let metadata: FileMetadata | null = null;
+              if (filePath.endsWith(".md")) {
+                metadata = this.parseMarkdownFile(filePath, url, contentStr);
+              } else if (filePath.endsWith(".yaml")) {
+                metadata = this.parseYamlFile(filePath, url, contentStr);
+              }
+
+              if (metadata) {
+                const docItem = this.metadataToDocItem(metadata);
+                if (docItem) {
+                  docItems.push(docItem);
+
+                  if (metadata.subitems) {
+                    for (const subitem of metadata.subitems) {
+                      const subDocItem = this.subitemToDocItem(subitem, metadata);
+                      if (subDocItem) {
+                        docItems.push(subDocItem);
+                      }
+                    }
+                  }
+                }
+              }
+            } catch (error) {
+              console.error(`Error processing ${filePath}:`, error);
+            }
+          });
+        } else {
+          // Skip non-relevant files
+          entry.autodrain();
         }
       });
 
-      // Process files in batches to manage memory
-      for (let i = 0; i < relevantFiles.length; i += this.BATCH_SIZE) {
-        const batch = relevantFiles.slice(i, i + this.BATCH_SIZE);
+      parser.on("close", () => {
+        resolve(docItems);
+      });
 
-        const batchPromises = batch.map(async ({ path, file }) => {
-          try {
-            const content = await file.async("text");
-            const url = path.substring(path.indexOf("content/en-us/"));
+      parser.on("error", (error: Error) => {
+        reject(error);
+      });
 
-            if (path.endsWith(".md")) {
-              return this.parseMarkdownFile(path, url, content);
-            } else if (path.endsWith(".yaml")) {
-              return this.parseYamlFile(path, url, content);
-            }
-            return null;
-          } catch (error) {
-            console.error(`Error processing ${path}:`, error);
-            return null;
-          }
-        });
-
-        const batchResults = await Promise.all(batchPromises);
-        const validMetadata = batchResults.filter((m): m is FileMetadata => m !== null);
-
-        // Convert metadata to DocItems and add to results
-        for (const metadata of validMetadata) {
-          const docItem = this.metadataToDocItem(metadata);
-          if (docItem) {
-            docItems.push(docItem);
-
-            // Add subitems as separate entries
-            if (metadata.subitems) {
-              for (const subitem of metadata.subitems) {
-                const subDocItem = this.subitemToDocItem(subitem, metadata);
-                if (subDocItem) {
-                  docItems.push(subDocItem);
-                }
-              }
-            }
-          }
-        }
-
-        // Force garbage collection periodically to free memory
-        if (i > 0 && i % this.GC_INTERVAL === 0) {
-          if (global.gc) {
-            global.gc();
-          }
-        }
-
-        // Small delay to prevent overwhelming the system
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      }
-
-      return docItems;
-    } catch (error) {
-      console.error("Error processing ZIP archive:", error);
-      throw error;
-    }
+      stream.pipe(parser);
+    });
   }
 
   private parseMarkdownFile(filePath: string, url: string, content: string): FileMetadata | null {
@@ -366,22 +373,17 @@ class RobloxDocsDataFetcher {
           path: url,
           type: "article",
           title: this.extractTitleFromPath(filePath),
-          content: this.truncateContent(content), // Truncate content to save memory
         };
       }
 
       const metadataStr = metadataMatch[1];
       const metadata = yamlLoad(metadataStr) as Record<string, unknown>;
 
-      // Extract the markdown content after frontmatter
-      const markdownContent = content.substring(metadataMatch[0].length).trim();
-
       return {
         title: (metadata.title as string) || this.extractTitleFromPath(filePath),
         description: this.truncateDescription(metadata.description as string),
         path: url,
         type: "article",
-        content: this.truncateContent(markdownContent), // Truncate to save memory
       };
     } catch (error) {
       console.error(`Error parsing YAML frontmatter in ${filePath}:`, error);
@@ -389,7 +391,6 @@ class RobloxDocsDataFetcher {
         path: url,
         type: "article",
         title: this.extractTitleFromPath(filePath),
-        content: this.truncateContent(content),
       };
     }
   }
@@ -406,7 +407,6 @@ class RobloxDocsDataFetcher {
         type: data.type || "class",
         path: url,
         description: this.truncateDescription(data.summary),
-        content: data.summary || "", // Store main summary as content
         subitems: [],
       };
 
@@ -415,7 +415,7 @@ class RobloxDocsDataFetcher {
         const keyData = data[key as keyof YAMLDocData];
         if (keyData && Array.isArray(keyData)) {
           // Limit subitems to prevent memory bloat
-          const items = keyData.slice(0, 50); // Max 50 subitems per category
+          const items = keyData.slice(0, 15); // Max 15 subitems per category
 
           for (const item of items) {
             // Skip deprecated items
@@ -430,27 +430,28 @@ class RobloxDocsDataFetcher {
               title = item.name;
             }
 
-            const itemWithDescription = item as {
+            const itemData = item as {
               summary?: string;
               description?: string;
-              parameters?: Array<{ name: string; type: string; default?: string; summary?: string }>;
+              parameters?: Array<{ name: string; type: string; summary?: string }>;
               return_type?: string;
-              security?: string | { read?: string; write?: string };
-              tags?: string[];
             };
 
-            // Use description if available (contains full content with code blocks), otherwise use summary
-            const fullContent = itemWithDescription.description || itemWithDescription.summary || "";
+            // Build signature for methods/functions/events/callbacks
+            // Store raw types - UI will resolve links based on available docs
+            let signature: string | undefined;
+            if (itemData.parameters && itemData.parameters.length > 0) {
+              const params = itemData.parameters.map((p) => `${p.name}: ${p.type}`).join(", ");
+              signature = `(${params})` + (itemData.return_type ? ` → ${itemData.return_type}` : "");
+            } else if (itemData.return_type) {
+              signature = `() → ${itemData.return_type}`;
+            }
 
             metadata.subitems!.push({
               type: key,
               title,
-              description: this.truncateDescription(itemWithDescription.summary || itemWithDescription.description),
-              summary: fullContent, // Store full content (description preferred over summary)
-              parameters: itemWithDescription.parameters,
-              returnType: itemWithDescription.return_type,
-              security: this.formatSecurity(itemWithDescription.security),
-              tags: itemWithDescription.tags,
+              description: this.truncateDescription(itemData.summary || itemData.description),
+              signature,
             });
           }
         }
@@ -466,46 +467,12 @@ class RobloxDocsDataFetcher {
   private truncateDescription(description: string | undefined): string {
     if (!description) return "";
 
-    // Limit description length to prevent memory bloat
-    const maxLength = 200;
+    // Limit description to 150 chars (enough for params + brief summary)
+    const maxLength = 150;
     if (description.length > maxLength) {
       return description.substring(0, maxLength) + "...";
     }
     return description;
-  }
-
-  private truncateContent(content: string | undefined): string {
-    if (!content) return "";
-
-    // Limit content to first 2000 characters to prevent memory issues
-    // The UI will show a link to view full docs in browser
-    const maxLength = 2000;
-    if (content.length > maxLength) {
-      return content.substring(0, maxLength);
-    }
-    return content;
-  }
-
-  private formatSecurity(security: string | { read?: string; write?: string } | undefined): string | undefined {
-    if (!security) return undefined;
-
-    // If it's already a string
-    if (typeof security === "string") {
-      // Don't show if it's just "None"
-      return security === "None" ? undefined : security;
-    }
-
-    // If it's an object, format it nicely
-    const parts: string[] = [];
-    if (security.read && security.read !== "None") {
-      parts.push(`Read: ${security.read}`);
-    }
-    if (security.write && security.write !== "None") {
-      parts.push(`Write: ${security.write}`);
-    }
-
-    // Only return if there's meaningful security info (not all "None")
-    return parts.length > 0 ? parts.join(", ") : undefined;
   }
 
   private metadataToDocItem(metadata: FileMetadata): DocItem | null {
@@ -513,19 +480,13 @@ class RobloxDocsDataFetcher {
       return null;
     }
 
-    const category = this.getCategoryFromPath(metadata.path);
-    const type = this.getTypeFromMetadata(metadata);
-    const url = this.pathToUrl(metadata.path);
-
     return {
       id: this.generateIdFromPath(metadata.path),
       title: metadata.title,
       description: metadata.description || "",
-      url,
-      category,
-      keywords: this.generateKeywords(metadata.title, metadata.description || "", metadata.path),
-      type,
-      content: metadata.content, // Pass through full content
+      url: this.pathToUrl(metadata.path),
+      category: this.getCategoryFromPath(metadata.path),
+      type: this.getTypeFromMetadata(metadata),
     };
   }
 
@@ -534,11 +495,9 @@ class RobloxDocsDataFetcher {
       return null;
     }
 
-    const category = this.getCategoryFromPath(parentMetadata.path);
     const baseUrl = this.pathToUrl(parentMetadata.path);
 
-    // Extract just the property/method name for the anchor (remove class prefix if present)
-    // Handle both "Class.Property" and "Class:Method" formats
+    // Extract anchor name for direct navigation
     let anchorName = subitem.title;
     if (subitem.title.includes(":")) {
       anchorName = subitem.title.split(":").pop() || subitem.title;
@@ -546,40 +505,14 @@ class RobloxDocsDataFetcher {
       anchorName = subitem.title.split(".").pop() || subitem.title;
     }
 
-    // Generate URL with anchor link for direct navigation to the specific property/method/event
-    const url = `${baseUrl}#${anchorName}`;
-
-    // Determine the specific type based on subitem.type
-    const itemType: DocItem["type"] = SUBITEM_TYPE_MAP[subitem.type] || "reference";
-
-    // Just use the summary/description as content
-    // Metadata will be displayed separately in the UI to avoid duplication
-    const content = subitem.summary || subitem.description || "";
-
     return {
       id: `${this.generateIdFromPath(parentMetadata.path)}-${subitem.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
       title: subitem.title,
-      description: subitem.description || "No information provided",
-      url,
-      category,
-      keywords: this.generateKeywords(subitem.title, subitem.description || "", parentMetadata.path),
-      type: itemType,
-      content, // Include detailed content
-      metadata: {
-        parameters: subitem.parameters?.map((p) => {
-          const parts: string[] = [];
-          if (p.summary) parts.push(p.summary);
-          if (p.default) parts.push(`default: ${p.default}`);
-          return {
-            name: p.name,
-            type: p.type,
-            description: parts.length > 0 ? parts.join(" | ") : undefined,
-          };
-        }),
-        returnType: subitem.returnType,
-        security: subitem.security,
-        tags: subitem.tags,
-      },
+      description: subitem.description || "",
+      url: `${baseUrl}#${anchorName}`,
+      category: this.getCategoryFromPath(parentMetadata.path),
+      type: SUBITEM_TYPE_MAP[subitem.type] || "reference",
+      signature: subitem.signature,
     };
   }
 
@@ -591,6 +524,7 @@ class RobloxDocsDataFetcher {
   private getCategoryFromPath(path: string): string {
     if (path.includes("/reference/engine/classes/")) return "Classes";
     if (path.includes("/reference/engine/enums/")) return "Enums";
+    if (path.includes("/reference/engine/datatypes/")) return "Datatypes";
     if (path.includes("/reference/engine/globals/")) return "Globals";
     if (path.includes("/tutorials/")) return "Tutorials";
     if (path.includes("/scripting/")) return "Scripting";
@@ -608,37 +542,10 @@ class RobloxDocsDataFetcher {
     if (metadata.type === "service") return "service";
     if (metadata.type === "enum") return "enum";
     if (metadata.type === "global") return "global";
+    if (metadata.path.includes("/reference/engine/datatypes/")) return "datatype";
     if (metadata.path.includes("/tutorials/")) return "tutorial";
     if (metadata.path.includes("/reference/")) return "reference";
     return "guide";
-  }
-
-  private generateKeywords(title: string, description: string, path: string): string[] {
-    const keywords = new Set<string>();
-
-    // Add title words
-    title
-      .toLowerCase()
-      .split(/\W+/)
-      .forEach((word) => {
-        if (word.length > 2) keywords.add(word);
-      });
-
-    // Add description words
-    description
-      .toLowerCase()
-      .split(/\W+/)
-      .forEach((word) => {
-        if (word.length > 2) keywords.add(word);
-      });
-
-    // Add path-based keywords
-    const pathParts = path.toLowerCase().split("/");
-    pathParts.forEach((part) => {
-      if (part.length > 2) keywords.add(part);
-    });
-
-    return Array.from(keywords).slice(0, 10);
   }
 
   private generateIdFromPath(path: string): string {

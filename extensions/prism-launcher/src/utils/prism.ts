@@ -5,6 +5,7 @@ import * as path from "path";
 import nbt from "prismarine-nbt";
 import type { Instance, Server } from "../types";
 import { getPreferences } from "./preferences";
+import { getShortcutTargetPath } from "./powershell";
 
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
@@ -12,28 +13,13 @@ export const isMac = process.platform === "darwin";
 export async function getPrismLauncherPath(): Promise<string | null> {
   const { path: installPath, bundleId, name } = getPreferences("installPath");
 
-  // Workaround for Windows: appPicker preference does not return full path on Windows, looking for common path for now
-  const commonWindowsPrismPath = path.join(
-    `${process.env.HOME}`,
-    "AppData",
-    "Local",
-    "Programs",
-    "PrismLauncher",
-    "prismlauncher.exe",
-  );
-
-  if (isWin && name === "Prism Launcher" && (await fs.exists(commonWindowsPrismPath))) return commonWindowsPrismPath;
-
-  const executableName = path.basename(installPath);
-
   if (!(await fs.pathExists(installPath))) return null;
 
-  // Checks to verify it's actually PrismLauncher
   if (isMac && bundleId !== "org.prismlauncher.PrismLauncher") return null;
+  const shortcutTargetPath = (await getShortcutTargetPath(installPath)) || "";
+  if (isWin && path.basename(shortcutTargetPath) !== "prismlauncher.exe" && name === "Prism Launcher") return null;
 
-  if (isWin && executableName.toLowerCase() !== "prismlauncher.exe" && name === "Prism Launcher") return null;
-
-  return installPath;
+  return shortcutTargetPath;
 }
 
 /**

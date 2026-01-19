@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Fix "Clone and Open" action when repository doesn't exist] - 2025-12-17
+
+* Fix the clone command to append the target directory only when it exists
+* Always show the "Clone with Options" action instead of conditionally
+
 ## [Moved Contributor] - 2025-12-10
 
 ## [Fix filter visited repositories] - 2025-12-09
