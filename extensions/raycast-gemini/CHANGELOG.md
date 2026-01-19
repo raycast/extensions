@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [New models & SDK Migration] - {PR_MERGE_DATE}
+## [New models & SDK Migration] - 2026-01-19
 
 - 🆕 New Model: Gemini 3.0 Flash
 - 🆕 New Model: Gemini 3.0 Pro
