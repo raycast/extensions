@@ -29,7 +29,6 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
     summaryStyle,
     currentSummary,
     isSummarizing,
-    shouldShowSummary,
     canAccessAI,
     hasBrowserExtensionAvailable,
     showUrlForm,
@@ -124,7 +123,6 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
       summaryStyle={summaryStyle}
       currentSummary={currentSummary}
       isSummarizing={isSummarizing}
-      shouldShowSummary={shouldShowSummary}
       canAccessAI={canAccessAI}
       onSummarize={handleSummarize}
       onStopSummarizing={isSummarizing ? handleStopSummarizing : undefined}

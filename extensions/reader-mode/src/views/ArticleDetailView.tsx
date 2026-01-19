@@ -9,7 +9,6 @@ interface ArticleDetailViewProps {
   summaryStyle: SummaryStyle | null;
   currentSummary: string | null;
   isSummarizing: boolean;
-  shouldShowSummary: boolean;
   canAccessAI: boolean;
   onSummarize: (style: SummaryStyle) => void;
   onStopSummarizing?: () => void;
@@ -21,7 +20,6 @@ function buildMarkdown(
   summaryStyle: SummaryStyle | null,
   currentSummary: string | null,
   isSummarizing: boolean,
-  shouldShowSummary: boolean,
 ): string {
   const parts: string[] = [];
 
@@ -55,7 +53,8 @@ function buildMarkdown(
   }
 
   // 3. Summary section (if applicable)
-  if (shouldShowSummary && summaryStyle) {
+  // Show summary if: auto-summary is enabled OR user manually requested one (summaryStyle is set)
+  if (summaryStyle) {
     parts.push("", "---");
 
     if (isSummarizing && currentSummary) {
@@ -86,13 +85,12 @@ export function ArticleDetailView({
   summaryStyle,
   currentSummary,
   isSummarizing,
-  shouldShowSummary,
   canAccessAI,
   onSummarize,
   onStopSummarizing,
   onReimportFromBrowser,
 }: ArticleDetailViewProps) {
-  const markdown = buildMarkdown(article, summaryStyle, currentSummary, isSummarizing, shouldShowSummary);
+  const markdown = buildMarkdown(article, summaryStyle, currentSummary, isSummarizing);
 
   return (
     <Detail
