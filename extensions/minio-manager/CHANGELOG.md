@@ -1,6 +1,6 @@
 # MinIO Manager Changelog
 
-## [Enhanced Upload & File List] - {PR_MERGE_DATE}
+## [Enhanced Upload & File List] - 2026-01-19
 
 ### Upload Improvements
 - Implemented concurrent multipart upload for large files
