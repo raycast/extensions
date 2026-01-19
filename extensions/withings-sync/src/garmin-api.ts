@@ -5,12 +5,6 @@ import fs from "fs/promises";
 import path from "path";
 import os from "os";
 
-interface Preferences {
-  garminUsername: string;
-  garminPassword: string;
-  includeBloodPressure: boolean;
-}
-
 export class GarminAPI {
   private client: GarminConnect;
   private authenticated = false;

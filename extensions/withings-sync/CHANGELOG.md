@@ -7,7 +7,7 @@
 - **Weight Unit Display**: Fixed bug where weight measurements were always displayed in kg regardless of user preference setting. Weight now correctly displays in pounds (lb) or kilograms (kg) based on the "Weight Unit" preference.
 - **Garmin Data Check Date Range**: Fixed bug where "Check Garmin for Existing Data" would miss measurements that occurred later in the day. Now extends the end date to end of day (23:59:59) to ensure all measurements are found.
 
-## [2.0.0] - 2025-12-27
+## [2.0.0] - 2026-01-18
 
 Major feature update with enhanced sync capabilities.
 
@@ -58,7 +58,7 @@ None - fully backward compatible
 
 ---
 
-## [Initial Version] - 2025-12-27
+## [Initial Version] - 2026-01-18
 
 Initial release of Withings Sync extension.
 
