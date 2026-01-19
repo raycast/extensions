@@ -3,8 +3,6 @@ import { homedir } from "os";
 import { existsSync } from "fs";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-const preferences = getPreferenceValues<Preferences>();
-
 const DEFAULT_CONFIG_FILE = `${homedir()}/Library/Application Support/com.nuebling.mac-mouse-fix/config.plist`;
 const PLIST_BUDDY = "/usr/libexec/PlistBuddy";
 
