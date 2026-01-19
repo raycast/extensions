@@ -27,4 +27,4 @@ Monocle is a noise-cancelling app for your screen with cursor shake detection.
 
 ## Requirements
 
-- [Monocle](https://www.heyiam.dk/monocle) must be installed and running
+- [Monocle](https://www.heyiam.dk/monocle) must be installed on your Mac. If it isn’t installed, the Raycast commands will offer a link to download it.
