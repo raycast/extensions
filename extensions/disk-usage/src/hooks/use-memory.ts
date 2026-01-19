@@ -8,7 +8,7 @@ export const useMemory = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setHeap(`${toMB(process.memoryUsage().heapUsed)} MB`);
-    }, 5000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);

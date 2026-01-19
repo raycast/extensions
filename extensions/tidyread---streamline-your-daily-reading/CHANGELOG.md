@@ -1,6 +1,6 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-11-03
 
 - Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
 

@@ -1,5 +1,7 @@
 # Plane Changelog
 
+## [Add Start Date and Due Date to Work Item Creation and Editing] - 2026-01-17
+
 ## [Update README with correct API Base Path format] - 2025-11-04
 
 ## [Add API Key Authentication and Support for Self-Hosted Plane Instances] - 2025-11-04

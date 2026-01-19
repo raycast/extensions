@@ -1,5 +1,12 @@
 #  Zed Recent Projects Changelog
 
+## [Enhancements] - 2026-01-15
+
+- Add colored dots per project for easy visual identification
+- Show green "Open" tag for projects currently open in Zed
+- Reorder list when opening a project to show it at the top
+- Add "Close Project" action to close open Zed windows directly (macOS only)
+- Add "open" and "closed" keywords to filter projects by typing in the search bar
 ## [Windows Support] - 2025-12-28
 
 - Added Windows support.

@@ -1,5 +1,13 @@
 # Parcel Changelog
 
+## [Internationalization and Carrier Name Display] - 2026-01-13
+
+- Removed hardcoded locale value introduced in a previous change - dates now display correctly for all international users
+- Carrier names are now displayed throughout the interface instead of codes (e.g., "FedEx" instead of "fedex") for better readability
+- Removed redundant date labels - no longer shows "(Today)" when date already displays "Today" or "(Tomorrow)" when it already displays "Tomorrow"
+- Improved date parsing to correctly handle ambiguous dates (MM.dd.yyyy vs dd.MM.yyyy) by detecting the format based on date values
+- Enhanced date display format: recent dates (within 14 days) show as "Wednesday 09:00", older dates show as "30 December at 11:15" for better readability
+
 ## [Add Delivery Overhaul] - 2025-11-06
 
 - Add Delivery now works on both Mac and Windows without requiring the Parcel Mac app to be installed by using Parcel's Add Delivery API

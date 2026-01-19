@@ -1,6 +1,14 @@
 # Visual Studio Code Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Fix: Windows Support] - 2026-01-08
+
+- Resolved `setLocale` warnings in bash by clearing environment variables.
+- "Commands" command now supports Windows.
+- "Open With VSCode" command now works on Windows.
+- "Open New VSCode" command now supports Windows.
+- Updated Dependencies
+
+## [Update] - 2025-12-12
 
 - Added Windows support
 

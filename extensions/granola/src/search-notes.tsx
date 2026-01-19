@@ -1,52 +1,68 @@
 import { List, Icon, Color } from "@raycast/api";
-import { useState, useMemo } from "react";
+import { showFailureToast } from "@raycast/utils";
+import { useState, useMemo, useEffect } from "react";
 import { useGranolaData } from "./utils/useGranolaData";
 import { useFolders } from "./utils/useFolders";
+import { getFoldersFromAPI } from "./utils/folderHelpers";
 import { Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
 import { sortNotesByDate, NoteListItem } from "./components/NoteComponents";
 import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "./utils/iconMapper";
+import { toError } from "./utils/errorUtils";
+import { getFolderNoteResults } from "./utils/searchUtils";
 
 export default function Command() {
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
   const { folders, isLoading: foldersLoading } = useFolders();
-  const { noteData, panels, isLoading, hasError } = useGranolaData();
+  const { noteData, isLoading, hasError } = useGranolaData();
+  const [foldersWithIds, setFoldersWithIds] = useState<typeof folders>([]);
 
-  const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
-    const allNotes = noteData?.data?.docs || [];
-    const noteIds = new Set(allNotes.map((d) => d.id));
-
-    const notesInFolders = new Set<string>();
-    const counts: Record<string, number> = {};
-
-    folders.forEach((folder) => {
-      // Intersect folder.document_ids with currently loaded documents to keep counts accurate without cache
-      const filteredIds = folder.document_ids.filter((id) => noteIds.has(id));
-      counts[folder.id] = filteredIds.length;
-      filteredIds.forEach((docId) => notesInFolders.add(docId));
-    });
-
-    const orphanNotes = allNotes.filter((doc) => !notesInFolders.has(doc.id));
-
-    let filtered: Doc[];
-    if (selectedFolder === "all") {
-      filtered = allNotes;
-    } else if (selectedFolder === "orphans") {
-      filtered = orphanNotes;
-    } else {
-      filtered = allNotes.filter((doc) => {
-        const folder = folders.find((f) => f.id === selectedFolder);
-        if (!folder) return false;
-        return folder.document_ids.includes(doc.id);
-      });
+  // Load document_ids lazily after initial render (for counting and filtering)
+  // This defers loading IDs until after the UI is shown, reducing initial memory footprint
+  useEffect(() => {
+    if (folders.length === 0 || foldersWithIds.length > 0) {
+      return;
     }
 
-    return {
-      filteredNotes: filtered,
-      notesNotInFolders: orphanNotes,
-      folderNoteCounts: counts,
+    let cancelled = false;
+    const abortController = new AbortController();
+
+    // Load IDs after a short delay to allow UI to render first
+    const timer = setTimeout(() => {
+      const loadFolderIds = async () => {
+        try {
+          const foldersWithDocumentIds = await getFoldersFromAPI({
+            includeDocumentIds: true,
+            signal: abortController.signal,
+          });
+          if (!cancelled && !abortController.signal.aborted) {
+            setFoldersWithIds(foldersWithDocumentIds);
+          }
+        } catch (error) {
+          if (!cancelled && !abortController.signal.aborted) {
+            showFailureToast(toError(error), { title: "Failed to load folder IDs" });
+          }
+        }
+      };
+      void loadFolderIds();
+    }, 100); // 100ms delay to allow initial render
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+      clearTimeout(timer);
     };
-  }, [noteData?.data?.docs, folders, selectedFolder]);
+  }, [folders, foldersWithIds.length]);
+
+  // Use folders with IDs when available, otherwise use folders without IDs
+  const activeFolders = foldersWithIds.length > 0 ? foldersWithIds : folders;
+
+  // Optimized memoization: compute only what's needed, reuse arrays where possible
+  const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
+    const allNotes = noteData?.data?.docs || [];
+    const foldersToProcess = activeFolders.length > 0 ? activeFolders : folders;
+    return getFolderNoteResults(allNotes, foldersToProcess, selectedFolder);
+  }, [noteData?.data?.docs, folders, activeFolders, selectedFolder]);
 
   if (isLoading) {
     return <List isLoading={true} />;
@@ -89,7 +105,7 @@ export default function Command() {
                   .map((folder) => (
                     <List.Dropdown.Item
                       key={folder.id}
-                      title={`${folder.title} (${folderNoteCounts[folder.id] || 0})`}
+                      title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
                       value={folder.id}
                       icon={{
                         source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
@@ -103,13 +119,7 @@ export default function Command() {
         }
       >
         {sortNotesByDate(filteredNotes).map((doc: Doc) => (
-          <NoteListItem
-            key={doc.id}
-            doc={doc}
-            panels={panels || {}}
-            untitledNoteTitle={untitledNoteTitle}
-            folders={folders}
-          />
+          <NoteListItem key={doc.id} doc={doc} untitledNoteTitle={untitledNoteTitle} folders={activeFolders} />
         ))}
       </List>
     );

@@ -314,7 +314,16 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
 export async function fetchResourceCounts(
   gcloudPath: string,
   projectId: string,
-): Promise<{ compute: number; storage: number; iam: number; network: number; secrets: number; cloudrun: number }> {
+): Promise<{
+  compute: number;
+  storage: number;
+  iam: number;
+  network: number;
+  secrets: number;
+  cloudrun: number;
+  cloudfunctions: number;
+  cloudbuild: number;
+}> {
   // Import REST API functions dynamically to avoid circular dependencies
   const {
     listComputeInstances,
@@ -323,18 +332,30 @@ export async function fetchResourceCounts(
     listVpcNetworks,
     listSecrets,
     listCloudRunServices,
+    listCloudFunctions,
+    listBuildTriggers,
   } = await import("./utils/gcpApi");
 
   // Run all count queries in parallel using REST APIs for better performance
-  const [computeResult, storageResult, iamResult, networkResult, secretsResult, cloudrunResult] =
-    await Promise.allSettled([
-      listComputeInstances(gcloudPath, projectId),
-      listStorageBuckets(gcloudPath, projectId),
-      getProjectIamPolicy(gcloudPath, projectId),
-      listVpcNetworks(gcloudPath, projectId),
-      listSecrets(gcloudPath, projectId),
-      listCloudRunServices(gcloudPath, projectId),
-    ]);
+  const [
+    computeResult,
+    storageResult,
+    iamResult,
+    networkResult,
+    secretsResult,
+    cloudrunResult,
+    cloudfunctionsResult,
+    cloudbuildResult,
+  ] = await Promise.allSettled([
+    listComputeInstances(gcloudPath, projectId),
+    listStorageBuckets(gcloudPath, projectId),
+    getProjectIamPolicy(gcloudPath, projectId),
+    listVpcNetworks(gcloudPath, projectId),
+    listSecrets(gcloudPath, projectId),
+    listCloudRunServices(gcloudPath, projectId),
+    listCloudFunctions(gcloudPath, projectId),
+    listBuildTriggers(gcloudPath, projectId),
+  ]);
 
   const getArrayCount = (result: PromiseSettledResult<unknown[]>): number => {
     if (result.status === "fulfilled" && Array.isArray(result.value)) {
@@ -357,5 +378,7 @@ export async function fetchResourceCounts(
     network: getArrayCount(networkResult as PromiseSettledResult<unknown[]>),
     secrets: getArrayCount(secretsResult as PromiseSettledResult<unknown[]>),
     cloudrun: getArrayCount(cloudrunResult as PromiseSettledResult<unknown[]>),
+    cloudfunctions: getArrayCount(cloudfunctionsResult as PromiseSettledResult<unknown[]>),
+    cloudbuild: getArrayCount(cloudbuildResult as PromiseSettledResult<unknown[]>),
   };
 }

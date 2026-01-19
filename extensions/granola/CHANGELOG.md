@@ -1,5 +1,49 @@
 # Granola Changelog
 
+## [2.0.1] - 2026-01-06
+
+### ✨ Enhancements
+- Added "Open in Granola" action (⌘O) to open notes directly in the Granola app using deeplinks
+- Updated API client version from 6.72.0 to 6.476.0
+
+### 🧹 Cleanup
+- Updated README.md to reflect 2.0.0 changes
+- Removed deprecated `ai-notes.ts` tool (replaced by `get-note-content` in 2.0.0)
+- Removed unused `getCache.ts` utility (replaced by API-based fetching in 2.0.0)
+
+## 2.0.0 - 2026-01-06
+
+### 🚀 Exports & Notion
+- Export Notes now streams small batches to disk, writes files immediately, and batches enhanced notes/My Notes retrieval to reduce memory usage and timeouts during large exports.
+- Export Transcripts now exports directly to a ZIP (no intermediate retrieve/results or clipboard flow) with unified progress/ETA messaging.
+- Export and transcript lists now use selection-focused action panels with consistent shortcuts and clearer "Export/Save All" actions.
+- Added batch Save to Notion from Export Notes with a live results list, per-note errors, and quick open/copy actions.
+- Removed the hard 500-item cap for exports/Notion; batching now scales with selection size.
+- ZIP creation now uses balanced compression and clearer "Exported to Downloads" toasts.
+- Added configurable "Notion Max Batch Size" preference to control parallel Notion saves.
+
+### 🧭 Browsing & Details
+- Search Notes, People, and Companies now load panel content and "My Notes" on demand for note details (fixing cases where only raw AI notes showed).
+- Note list accessories now show date, folder icon (or "not in any folder"), and privacy indicator; folder counts show "..." until document IDs load.
+- Folder filtering now loads document IDs lazily to avoid heavy upfront work.
+
+### 🤖 AI Tools
+- Removed `ai-notes` and replaced it with explicit `list-meetings` -> `get-note-content`/`get-transcript` flows for clearer intent and lower memory use.
+- Added `get-note-content` for note bodies (original/enhanced/auto) and `list-folders` for folder metadata and note counts.
+- Updated `list-meetings` guidance to fetch IDs before content or transcript requests and to use stripped document payloads.
+- Recipes tool now supports unlisted recipes with normalized slug matching.
+- `get-transcript` now validates missing note IDs with a clear error response.
+- Expanded AI eval coverage and guidance for folders, recipes, and Notion exports.
+
+### 🔧 Bug Fixes & Performance
+- Fixed `create-note-from-transcript` streaming chunks with improved delimiter and validation.
+- Reduced memory usage by stripping large fields from document fetches before caching, eliminating cache-file reads, and lazy-loading panels/My Notes via new hooks.
+- Replaced cache reads with API-backed document lists in people/company search to avoid loading large local cache files.
+- Added batch panel/notes fetch APIs and on-demand folder ID loading to keep large exports responsive.
+- Create Note from Transcript now supports cancellation and safer streaming cleanup; Create Note uses Raycast `open` instead of shell execution.
+- Addressed reported memory and export failures from: [#24094](https://github.com/raycast/extensions/issues/24094), [#23944](https://github.com/raycast/extensions/issues/23944), [#23801](https://github.com/raycast/extensions/issues/23801), [#23190](https://github.com/raycast/extensions/issues/23190), [#22674](https://github.com/raycast/extensions/issues/22674), [#22544](https://github.com/raycast/extensions/issues/22544), [#22076](https://github.com/raycast/extensions/issues/22076).
+
+and many many more fixes and improvements, etc!
 ## [1.6.2] - 2025-12-14
 
 - Updated extension icon
