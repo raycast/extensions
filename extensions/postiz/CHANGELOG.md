@@ -1,6 +1,6 @@
 # Postiz Changelog
 
-## [Character Counter in New Post] - {PR_MERGE_DATE}
+## [Character Counter in New Post] - 2026-01-19
 
 In **Create Post**:
 - Added character counter for content based on selected channel
