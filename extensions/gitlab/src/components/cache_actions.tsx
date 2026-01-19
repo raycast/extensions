@@ -2,7 +2,7 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, popToRoot, showT
 import { clearLargeObjectCache } from "../cache";
 import { getErrorMessage, showErrorToast } from "../utils";
 
-export function ClearLocalCacheAction(): JSX.Element {
+export function ClearLocalCacheAction() {
   async function handleAction() {
     try {
       if (
@@ -30,7 +30,7 @@ export function ClearLocalCacheAction(): JSX.Element {
   );
 }
 
-export function CacheActionPanelSection(): JSX.Element {
+export function CacheActionPanelSection() {
   return (
     <ActionPanel.Section title="Cache">
       <ClearLocalCacheAction />

@@ -3,10 +3,17 @@
   "name": "raycast-tapo-smart-devices",
   "title": "Tapo Smart Devices",
   "description": "Manage Tapo smart home device, for example plugs and lightbulbs, with just a few keystrokes",
-  "icon": "command-icon.png",
+  "icon": "extension-icon.png",
   "author": "timrogers",
   "categories": [
     "Productivity"
+  ],
+  "contributors": [
+    "yusifaliyevpro"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -42,19 +49,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
+    "@raycast/api": "^1.104.1",
+    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/utils": "^2.2.2",
     "local-devices": "github:timrogers/local-devices",
-    "tp-link-tapo-connect": "^1.0.8"
+    "tp-link-tapo-connect": "^2.0.8"
   },
   "devDependencies": {
-    "@types/node": "~18.6.4",
-    "@types/react": "^18.0.15",
-    "@typescript-eslint/eslint-plugin": "^5.32.0",
-    "@typescript-eslint/parser": "^5.32.0",
-    "eslint": "^8.21.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.7.1",
-    "typescript": "^4.7.4"
+    "@types/node": "^20.19.6",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

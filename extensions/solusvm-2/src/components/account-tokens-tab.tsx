@@ -57,10 +57,10 @@ function UpdateTokens() {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Generating token", values.name);
       try {
-        const result: AccessTokenResource = await callApi("account/tokens", {
+        const result = (await callApi("account/tokens", {
           method: "POST",
           body: values,
-        });
+        })) as AccessTokenResource;
         toast.style = Toast.Style.Success;
         toast.title = "Generated token";
         reset();

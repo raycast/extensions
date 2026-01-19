@@ -1,4 +1,7 @@
+import process from "node:process";
 import { ExtensionMetadata } from "./types";
+
+export const isWindows = process.platform === "win32";
 
 export function formatItem(item: ExtensionMetadata, format?: string) {
   const formatPattern = format || "{title} ({link})";

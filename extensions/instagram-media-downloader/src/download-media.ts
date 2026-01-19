@@ -2,6 +2,7 @@ import axios from "axios";
 import { createWriteStream, existsSync } from "fs";
 import { showToast, Toast, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import * as cheerio from "cheerio";
 
 interface InstagramMediaEdge {
   node: {
@@ -67,6 +68,70 @@ export async function getInstagramMediaURLByGraphQL(shortcode: string) {
   } catch (error) {
     showFailureToast(error, { title: "Could not fetch Instagram media" });
     return null;
+  }
+}
+
+export async function getInstagramStoryURL(username: string): Promise<string[]> {
+  try {
+    const response = await axios.get(`https://media.mollygram.com/?url=${username}&method=allstories`);
+    const $ = cheerio.load(response.data["html"]);
+
+    const downloadUrls: string[] = [];
+
+    $('a[title="Download"]').each((index: number, element) => {
+      const href = $(element).attr("href");
+      if (href) {
+        downloadUrls.push(decodeURIComponent(href.split("media=")[1]));
+      }
+    });
+
+    return downloadUrls;
+  } catch (error) {
+    showFailureToast(error, { title: "Could not fetch Instagram story" });
+    return [];
+  }
+}
+
+export async function getInstagramHighlightStoryURL(url: string) {
+  try {
+    const response = await axios.get(`https://media.mollygram.com/?url=${url}`);
+    const $ = cheerio.load(response.data["html"]);
+
+    const highlightUrls: { img: string; url: string }[] = [];
+
+    $('a[title="Download"]').each((index: number, element) => {
+      const href = $(element).attr("href");
+
+      let $current = $(element);
+      let imgSrc: string | undefined;
+
+      for (let i = 0; i < 5; i++) {
+        const $container = $current.parent();
+        if (!$container.length) break;
+
+        const posterSrc = $container.find("video").attr("poster");
+        const imageSrc = $container.find("img").attr("src");
+
+        if (posterSrc || imageSrc) {
+          imgSrc = posterSrc || imageSrc;
+          break;
+        }
+
+        $current = $container;
+      }
+
+      if (href && imgSrc) {
+        highlightUrls.push({
+          img: decodeURIComponent(imgSrc.split("media=")[1]),
+          url: decodeURIComponent(href.split("media=")[1]),
+        });
+      }
+    });
+
+    return highlightUrls;
+  } catch (error) {
+    showFailureToast(error, { title: "Could not fetch Instagram highlight story" });
+    return [];
   }
 }
 

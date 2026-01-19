@@ -46,7 +46,6 @@
     "@types/node": "16.11.7",
     "@types/react": "17.0.34",
     "eslint": "8.2.0",
-    "react-devtools": "4.21.0",
     "typescript": "4.4.4"
   },
   "scripts": {

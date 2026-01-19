@@ -9,4 +9,4 @@ Manage your Digital Assets (https://daminik.com)
 You will need the following:
 
 1. API Token from your Workspace settings
-2. The slug of your workspace (e.g. if your workspace is example.daminik.com, the slug will be `example` ONLY)
+2. Your Workspace URL w/ Slug (e.g. `https://slug.daminik.com`)

@@ -36,8 +36,18 @@
   ],
   "preferences": [
     {
+      "default": true,
+      "description": "Filter out non-user visible folders in ~/Library. This does not affect cloud storage folders (iCloud Drive, Dropbox, OneDrive, Google Drive) which will always be shown.",
+      "label": "Filter Library Folders",
+      "name": "filterLibraryFolders",
+      "required": false,
+      "title": "Search Behavior",
+      "type": "checkbox"
+    },
+    {
       "default": "250",
       "description": "The maximum number of search results that Folder Search should return",
+      "label": "Maximum Results",
       "name": "maxResults",
       "required": false,
       "title": "Maximum Results",
@@ -45,11 +55,11 @@
     },
     {
       "default": true,
-      "description": "Filter out non-user visible folders in ~/Library. This does not affect cloud storage folders (iCloud Drive, Dropbox, OneDrive, Google Drive) which will always be shown.",
-      "label": "Filter Library Folders",
-      "name": "filterLibraryFolders",
+      "description": "Open the destination folder after moving files. Disable this to keep your workflow uninterrupted.",
+      "label": "Open folder after move",
+      "name": "openFolderAfterMove",
       "required": false,
-      "title": "Filter System Library Folders",
+      "title": "Move Behavior",
       "type": "checkbox"
     },
     {

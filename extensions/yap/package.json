@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yap",
+  "title": "Yap",
+  "description": "Post on socials in a single click",
+  "icon": "extension_icon.png",
+  "author": "chaseonraycast",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "x-post",
+      "title": "Yap on X (Twitter)",
+      "description": "Quickly create a post on X (Twitter)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "confirmBeforePosting",
+      "title": "Confirm Before Posting",
+      "description": "Show confirmation dialog before posting tweets",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Require confirmation before posting"
+    },
+    {
+      "name": "confirmBeforeSubmitting",
+      "title": "Confirm Before Submitting Feedback",
+      "description": "Show confirmation dialog before submitting feedback",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Require confirmation before submitting feedback"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Yap API key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0",
+    "ky": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npm run build && npx @raycast/api@latest publish"
+  }
+}

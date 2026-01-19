@@ -12,7 +12,7 @@ export class OperaActions {
 function NewTabActions({ query }: { query?: string }): ReactElement {
   return (
     <ActionPanel title="New Tab">
-      <ActionPanel.Item
+      <Action
         onAction={function () {
           openNewTab(query);
         }}
@@ -34,11 +34,12 @@ function TabListItemActions({ tab }: { tab: Tab }) {
 function HistoryItemActions({ title, url }: { title: string; url: string }): ReactElement {
   return (
     <ActionPanel title={title}>
-      <ActionPanel.Item
+      <Action
         onAction={function () {
           openNewHistoryTab(url);
         }}
         title={"Open in Tab"}
+        icon="opera-logo.png"
       />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
     </ActionPanel>
@@ -51,5 +52,5 @@ function GoToTab(props: { tab: Tab }) {
     await closeMainWindow();
   }
 
-  return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <Action title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }

@@ -7,9 +7,6 @@ export function createValidationsForRest(rest: DataModelWithFields["fields"]): a
     switch (field.type) {
       case "TEXT":
       case "FULL_NAME": {
-        acc[field.name] = (value) => {
-          if ((!field.isNullable && !value) || value.length === 0) return "Required";
-        };
         break;
       }
       case "LINKS": {
@@ -25,19 +22,12 @@ export function createValidationsForRest(rest: DataModelWithFields["fields"]): a
               }
             }
           }
-
-          if (!field.isNullable) {
-            if (!value) {
-              return "Required";
-            }
-          }
         };
         break;
       }
       case "EMAILS": {
         acc[field.name] = (value) => {
           const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
           if (value) {
             const emails = value.split(",");
             for (const email of emails) {
@@ -45,10 +35,6 @@ export function createValidationsForRest(rest: DataModelWithFields["fields"]): a
                 return `Invalid ${field.name}`;
               }
             }
-          }
-
-          if (!field.isNullable && (!value || value.length === 0)) {
-            return "Required";
           }
         };
         break;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon, Toast, Keyboard, closeMainWindow } from '@raycast/api';
+import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon, Toast, Keyboard, closeMainWindow, getPreferenceValues } from '@raycast/api';
 import { focusOrOpenUrl, isSupportBrowser } from './open-url';
 import { useLocalStorage } from '@raycast/utils';
 import type { FormFields, ReusableFilter, ReusableFilterFormProps, SavedSearch } from './types';
@@ -197,6 +197,7 @@ export default function Command() {
   const { push } = useNavigation();
   const { value: savedSearches = [], setValue: setSavedSearches } = useLocalStorage<SavedSearch[]>('saved-searches', []);
   const { value: reusableFilters = [], setValue: setReusableFilters } = useLocalStorage<ReusableFilter[]>('repo-filters', []);
+  const preferences = getPreferenceValues();
 
   const [assignee, setAssignee] = useState('');
   const [author, setAuthor] = useState('');
@@ -220,7 +221,7 @@ export default function Command() {
   const [updated, setUpdated] = useState('');
 
   const [excludeApps, setExcludeApps] = useState(true);
-  const [isReuseTab, setIsReuseTab] = useState(true);
+  const [isReuseTab, setIsReuseTab] = useState(preferences.reuseTab);
 
   const [selectedSearchId, setSelectedSearchId] = useState('');
 
@@ -360,7 +361,7 @@ export default function Command() {
               setFilter(search.type || '');
               setFork(search.fork || '');
               setForks(search.forks || '');
-              setIsReuseTab(search.reuseTab ?? true);
+              setIsReuseTab(search.reuseTab ?? preferences.reuseTab);
               setIssueState(search.state || '');
               setLabels(search.labels || '');
               setLanguage(search.language || '');
@@ -384,7 +385,7 @@ export default function Command() {
             setFilter('code');
             setFork('');
             setForks('');
-            setIsReuseTab(true);
+            setIsReuseTab(preferences.reuseTab);
             setIssueState('');
             setLabels('');
             setLanguage('');

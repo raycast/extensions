@@ -1,5 +1,9 @@
 # UUID Generator Changelog
 
+## [Added support for formatting UUID] - 2025-09-15
+
+- You can now format UUID without dashes into standard UUID format
+
 ## [Added support for parsing TypeID] - 2025-02-26
 
 - You can now parse TypeID into a UUID

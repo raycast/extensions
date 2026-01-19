@@ -1,10 +1,12 @@
-import { Action, ActionPanel, Grid } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Grid, Keyboard } from "@raycast/api";
 import { hex } from "color-convert";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import colors from "tailwindcss/colors";
 import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
+
+import { moveFirstMatchToFront } from "./utils/move-to-front-extension";
 
 const hiddenColors = [
   "inherit",
@@ -19,9 +21,12 @@ const hiddenColors = [
   "blueGray",
 ];
 
+const preferences = getPreferenceValues<Preferences.SearchColors>();
+
 export default function SearchColors() {
   const [searchText, setSearchText] = useState("");
   const [filteredColors, filterColors] = useState(Object.entries(colors));
+
   useEffect(() => {
     // If there's no search text, show all colors
     if (!searchText) {
@@ -35,8 +40,9 @@ export default function SearchColors() {
           const t = Object.entries(shades).filter(([shade]) => shade.includes(searchText));
           return [name, Object.fromEntries(t)];
         })
-        .filter(([name, shades]) => Object.keys(shades).length > 0);
+        .filter(([, shades]) => Object.keys(shades).length > 0);
       console.log(filteredShades);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       filterColors(filteredShades as any);
       return;
     }
@@ -69,48 +75,152 @@ export default function SearchColors() {
                   value as string,
                   (value as string).replace("#", ""),
                 ]}
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section>
-                      <Action.CopyToClipboard
-                        title="Copy HEX"
-                        content={value as string}
-                        shortcut={{ modifiers: ["cmd"], key: "h" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy RGB"
-                        content={`rgb(${hex.rgb(value as string).join(", ")})`}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy HSL"
-                        content={`hsl(${hex.hsl(value as string).join(", ")})`}
-                        shortcut={{ modifiers: ["cmd"], key: "s" }}
-                      />
-                    </ActionPanel.Section>
-                    <ActionPanel.Section>
-                      <Action.CopyToClipboard
-                        title="Copy Background Class"
-                        content={`bg-${name}-${shade}`}
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Text Class"
-                        content={`text-${name}-${shade}`}
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Border Class"
-                        content={`border-${name}-${shade}`}
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
-                      />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
+                actions={<Actions preferences={preferences} name={name} shade={shade} value={value as string} />}
               />
             ))}
           </Grid.Section>
         ))}
     </Grid>
+  );
+}
+
+function Actions({
+  preferences,
+  name,
+  shade,
+  value,
+}: {
+  preferences: Preferences.SearchColors;
+  name: string;
+  shade: string;
+  value: string;
+}) {
+  let sections = [
+    {
+      actions: [
+        {
+          id: "color-name",
+          title: "Copy color name",
+          content: `${name}-${shade}`,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "n" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "n" },
+          } as Keyboard.Shortcut,
+        },
+        {
+          id: "bg-class",
+          title: "Copy Background Class",
+          content: `bg-${name}-${shade}`,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "b" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "b" },
+          } as Keyboard.Shortcut,
+        },
+        {
+          id: "text-class",
+          title: "Copy Text Class",
+          content: `text-${name}-${shade}`,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "t" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "t" },
+          } as Keyboard.Shortcut,
+        },
+        {
+          id: "border-class",
+          title: "Copy Border Class",
+          content: `border-${name}-${shade}`,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "o" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "o" },
+          } as Keyboard.Shortcut,
+        },
+        {
+          id: "shadow-class",
+          title: "Copy Shadow Class",
+          content: `shadow-${name}-${shade}`,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "a" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "a" },
+          } as Keyboard.Shortcut,
+        },
+        {
+          id: "ring-class",
+          title: "Copy Ring Class",
+          content: `ring-${name}-${shade}`,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "i" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "i" },
+          } as Keyboard.Shortcut,
+        },
+        {
+          id: "outline-class",
+          title: "Copy Outline Class",
+          content: `outline-${name}-${shade}`,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "u" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "u" },
+          } as Keyboard.Shortcut,
+        },
+      ],
+    },
+    {
+      actions: [
+        {
+          id: "value-hex",
+          title: "Copy Hex Value",
+          content: value,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "h" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "h" },
+          } as Keyboard.Shortcut,
+        },
+        {
+          id: "value-rgb",
+          title: "Copy RGB Value",
+          content: `rgb(${hex.rgb(value)})`,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "r" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "r" },
+          } as Keyboard.Shortcut,
+        },
+        {
+          id: "value-hsl",
+          title: "Copy HSL Value",
+          content: `hsl(${hex.hsl(value)})`,
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "s" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "s" },
+          } as Keyboard.Shortcut,
+        },
+      ],
+    },
+  ].map((section) => {
+    return {
+      ...section,
+      actions: moveFirstMatchToFront(section.actions, (action) => action.id === preferences.defaultAction),
+    };
+  });
+
+  sections = moveFirstMatchToFront(sections, (section) =>
+    section.actions.some((action) => action.id === preferences.defaultAction),
+  );
+
+  return (
+    <ActionPanel>
+      {sections.map((section, index) => {
+        return (
+          <ActionPanel.Section key={`section-${index}`}>
+            {section.actions.map((action) => (
+              <Action.CopyToClipboard
+                key={`${action.id}-action`}
+                title={action.title}
+                content={action.content}
+                shortcut={action.shortcut}
+              />
+            ))}
+          </ActionPanel.Section>
+        );
+      })}
+    </ActionPanel>
   );
 }

@@ -17,8 +17,15 @@
     "tleo19",
     "Tarocch1",
     "santiago_perez",
-    "jonasengelmann",
-    "drewbabel"
+    "drewbabel",
+    "hayden_barnes",
+    "pernielsentikaer",
+    "j3lte",
+    "0xdhrv",
+    "xmok"
+  ],
+  "pastContributors": [
+    "jonasengelmann"
   ],
   "license": "MIT",
   "commands": [
@@ -70,6 +77,20 @@
       "subtitle": "Google Chrome",
       "description": "Create New Incognito Window.",
       "mode": "no-view"
+    },
+    {
+      "name": "new-guest-window",
+      "title": "Create New Guest Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Guest Window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-current-in-guest",
+      "title": "Open Current Tab in Guest",
+      "subtitle": "Google Chrome",
+      "description": "Open the current active tab's URL in a new Chrome Guest window.",
+      "mode": "no-view"
     }
   ],
   "tools": [
@@ -84,6 +105,16 @@
       "description": "Open a blank new window or a window to a given website."
     },
     {
+      "name": "new-guest-window",
+      "title": "New Guest Window",
+      "description": "Open a blank new guest window or a guest window to a given website."
+    },
+    {
+      "name": "open-current-in-guest",
+      "title": "Open Current Tab in Guest",
+      "description": "Open the current active tab's URL in a new Chrome Guest window."
+    },
+    {
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
       "description": "Search bookmarks for a given query."
@@ -92,6 +123,11 @@
       "name": "search-history",
       "title": "Search History",
       "description": "Search history for a given query."
+    },
+    {
+      "name": "get-profiles",
+      "title": "Get Profiles",
+      "description": "Get all Chrome profiles."
     }
   ],
   "ai": {
@@ -173,6 +209,61 @@
         ]
       },
       {
+        "input": "@google-chrome open a new guest window",
+        "mocks": {
+          "new-guest-window": "New guest window opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-guest-window",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new guest window"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new guest window to github.com",
+        "mocks": {
+          "new-guest-window": "New guest window opened to https://github.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-guest-window",
+              "arguments": {
+                "website": {
+                  "includes": "github.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new guest window to https://github.com"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open current tab in guest",
+        "mocks": {
+          "open-current-in-guest": "Opened current tab URL in guest window"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-current-in-guest",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opens the current tab in a guest window"
+          }
+        ]
+      },
+      {
         "input": "@google-chrome search bookmarks for raycast",
         "mocks": {
           "search-bookmarks": [
@@ -244,7 +335,33 @@
             }
           },
           {
-            "meetsCriteria": "Returns the history for Raycast"
+            "meetsCriteria": "Lists history results including Raycast"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome get me my profiles",
+        "mocks": {
+          "get-profiles": [
+            {
+              "id": "Default",
+              "name": "Personal"
+            },
+            {
+              "id": "Profile 1",
+              "name": "Test Profile"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-profiles"
+            }
+          },
+          {
+            "meetsCriteria": "Lists available Chrome profiles"
           }
         ]
       }
@@ -294,28 +411,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.18.1",
-    "run-applescript": "^6.0.0",
-    "sql.js": "^1.12.0"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "run-applescript": "^7.1.0",
+    "sql.js": "^1.13.0"
   },
   "devDependencies": {
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.5",
     "@types/sql.js": "^1.4.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.9.4"
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

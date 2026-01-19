@@ -68,17 +68,17 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
     setListSearchText,
     objectSearchText,
     setObjectSearchText,
-    isLoading,
+    isLoadingData,
   } = useCreateObjectData(draftValues);
 
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [typeKeysForLists, setTypeKeysForLists] = useState<string[]>([]);
 
   const selectedTypeDef = types.find((type) => type.id === selectedTypeId);
   const selectedTypeKey = selectedTypeDef?.key ?? "";
   const hasSelectedSpaceIdAndType = Boolean(selectedSpaceId && selectedTypeKey);
 
-  const properties = selectedTypeDef?.properties.filter((p) => !Object.values(bundledPropKeys).includes(p.key)) || [];
+  const properties = selectedTypeDef?.properties?.filter((p) => !Object.values(bundledPropKeys).includes(p.key)) || [];
   const { tagsMap } = useTagsMap(
     selectedSpaceId,
     properties
@@ -101,7 +101,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
   const { handleSubmit, itemProps } = useForm<CreateObjectFormValues>({
     initialValues: draftValues,
     onSubmit: async (values) => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         await showToast({ style: Toast.Style.Animated, title: "Creating object..." });
         const propertiesEntries: PropertyLinkWithValue[] = [];
@@ -185,7 +185,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
 
         const response = await createObject(selectedSpaceId, request);
 
-        if (response.object?.id) {
+        if (response.object.id) {
           if (selectedListId) {
             const request: AddObjectsToListRequest = { objects: [response.object.id] };
             await addObjectsToList(selectedSpaceId, selectedListId, request);
@@ -200,7 +200,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
       } catch (error) {
         await showFailureToast(error, { title: "Failed to create object" });
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     },
     validation: {
@@ -228,15 +228,16 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
   function getQuicklink(): { name: string; link: string } {
     const url = "raycast://extensions/any/anytype/create-object";
 
-    const defaults: Record<string, unknown> = {
-      space: selectedSpaceId,
-      type: selectedTypeId,
-      list: selectedListId,
-      name: itemProps.name.value,
-      icon: itemProps.icon.value,
-      description: itemProps.description.value,
-      body: itemProps.body.value,
-      source: itemProps.source.value,
+    const defaults: Record<string, PropertyFieldValue> = {
+      [itemProps.spaceId.id]: selectedSpaceId,
+      [itemProps.typeId.id]: selectedTypeId,
+      [itemProps.templateId.id]: selectedTemplateId,
+      [itemProps.listId.id]: selectedListId,
+      [itemProps.name.id]: itemProps.name.value,
+      [itemProps.icon.id]: itemProps.icon.value,
+      [itemProps.description.id]: itemProps.description.value,
+      [itemProps.body.id]: itemProps.body.value,
+      [itemProps.source.id]: itemProps.source.value,
     };
 
     properties.forEach((prop) => {
@@ -264,7 +265,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
   return (
     <Form
       navigationTitle="Create Object"
-      isLoading={loading || isLoading}
+      isLoading={isLoading || isLoadingData}
       enableDrafts={enableDrafts}
       actions={
         <ActionPanel>
@@ -279,8 +280,8 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
       }
     >
       <Form.Dropdown
-        id="space"
-        title="Space"
+        id="spaceId"
+        title="Channel"
         value={selectedSpaceId}
         onChange={(v) => {
           setSelectedSpaceId(v);
@@ -291,16 +292,16 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
           setObjectSearchText("");
         }}
         storeValue={true}
-        placeholder="Search spaces..."
-        info="Select the space where the object will be created"
+        placeholder="Search channels..."
+        info="Select the channel where the object will be created"
       >
-        {spaces?.map((space) => (
+        {spaces.map((space) => (
           <Form.Dropdown.Item key={space.id} value={space.id} title={space.name} icon={space.icon} />
         ))}
       </Form.Dropdown>
 
       <Form.Dropdown
-        id="type"
+        id="typeId"
         title="Type"
         value={selectedTypeId}
         onChange={setSelectedTypeId}
@@ -314,7 +315,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
       </Form.Dropdown>
 
       <Form.Dropdown
-        id="template"
+        id="templateId"
         title="Template"
         value={selectedTemplateId}
         onChange={setSelectedTemplateId}
@@ -334,7 +335,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
       </Form.Dropdown>
 
       <Form.Dropdown
-        id="list"
+        id="listId"
         title="Collection"
         value={selectedListId}
         onChange={setSelectedListId}

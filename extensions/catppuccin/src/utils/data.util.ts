@@ -1,72 +1,76 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
-import * as yaml from "js-yaml";
-import Ajv from "ajv";
 
-export type DataType = "ports" | "userstyles";
+export type DataType = "ports" | "categories" | "collaborators" | "showcases" | "userstyles";
 
-const ajv = new Ajv();
+const API_BASE_URL = "https://catppuccin.dvh.sh";
+const dataCache: { [key in DataType]?: any } = {};
 
-const DATA_LOCATIONS = {
-  ports: {
-    repository: "catppuccin/catppuccin",
-    yaml_path: "resources/ports.yml",
-    schema_path: "resources/ports.schema.json",
-    fallback_hash: "a1ce9a7c29c6aa323f43caa88f21bf51faa91c3a",
-  },
-  userstyles: {
-    repository: "catppuccin/userstyles",
-    yaml_path: "scripts/userstyles.yml",
-    schema_path: "scripts/userstyles.schema.json",
-    fallback_hash: "4ee2fffe0492ec2be6d744f770a1cdaa98226d44",
-  },
-};
-
-const getURL = (type: DataType, version: "main" | "fallback", schema: boolean = false): string => {
-  const locations = DATA_LOCATIONS[type];
-  return `https://raw.githubusercontent.com/${locations.repository}/${version == "fallback" ? locations.fallback_hash : version}/${schema ? locations.schema_path : locations.yaml_path}`;
-};
-
-const dataCache: { [key in DataType]?: unknown } = {};
-
-const fetchYAML = async (url: string): Promise<unknown> => {
-  const res = await axios.get(url);
-  return yaml.load(res.data);
-};
-
-const fetchSchema = async (url: string): Promise<unknown> => {
-  const res = await axios.get(url);
-  return res.data;
-};
-
-const validateSchema = <T>(data: unknown, schema: unknown): data is T => {
-  const validate = ajv.compile<T>(schema);
-  return validate(data);
-};
-
-const fetchData = async <T>(type: DataType): Promise<T> => {
+export const fetchData = async <T>(type: DataType): Promise<Record<string, T>> => {
   if (dataCache[type]) {
-    return dataCache[type] as T;
+    return dataCache[type];
   }
 
   try {
-    const [dataJSON, schema] = await Promise.all([
-      fetchYAML(getURL(type, "main")),
-      fetchSchema(getURL(type, "main", true)),
-    ]);
+    let allData: T[] = [];
+    let page = 1;
+    let hasMore = true;
 
-    if (!validateSchema<T>(dataJSON, schema)) {
-      const fallbackData = await fetchYAML(getURL(type, "fallback"));
-      if (!validateSchema<T>(fallbackData, schema)) {
-        throw new Error("Data validation failed for both main and fallback data.");
+    while (hasMore) {
+      const response = await axios.get(`${API_BASE_URL}/${type}?page=${page}&per_page=100`);
+
+      if (response.data && Array.isArray(response.data)) {
+        allData = [...allData, ...response.data];
+        hasMore = false;
+      } else if (response.data && response.data[type]) {
+        if (Array.isArray(response.data[type])) {
+          allData = [...allData, ...response.data[type]];
+        } else {
+          const items = Object.entries(response.data[type]).map(([key, value]: [string, any]) => ({
+            ...value,
+            identifier: key,
+          }));
+          allData = [...allData, ...items];
+        }
+
+        if (response.data.pagination) {
+          hasMore = page < response.data.pagination.total_pages;
+        } else {
+          hasMore = false;
+        }
+      } else {
+        hasMore = false;
       }
-      dataCache[type] = fallbackData;
-      return fallbackData as T;
+
+      page++;
     }
-    dataCache[type] = dataJSON;
-    return dataJSON as T;
+
+    const dataObject: Record<string, T> = {};
+    allData.forEach((item: any) => {
+      const key = item.identifier || item.key || item.username || item.title || item.name || item.id;
+      if (key) {
+        dataObject[key] = item;
+      }
+    });
+
+    dataCache[type] = dataObject;
+    return dataObject;
   } catch (error) {
-    throw new Error(`Failed to fetch data: ${(error as Error).message}`);
+    throw new Error(`Failed to fetch ${type}: ${(error as Error).message}`);
   }
 };
 
-export { fetchData };
+export const getApiHealth = async (): Promise<boolean> => {
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/health`);
+    return data.status === "healthy" || data.status === "ok";
+  } catch {
+    return false;
+  }
+};
+
+export const clearCache = () => {
+  Object.keys(dataCache).forEach((key) => {
+    delete dataCache[key as DataType];
+  });
+};

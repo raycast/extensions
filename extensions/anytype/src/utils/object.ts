@@ -35,7 +35,7 @@ export function processObject(
     subtitle: undefined,
     accessories: [
       ...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : []),
-      ...(tags ? [{ icon: Icon.Tag, tooltip: `Tags: ${tags}` }] : []),
+      ...(tags ? [{ icon: Icon.Tag, tooltip: `${tagProperty?.name}: ${tags}` }] : []),
       {
         date: hasValidDate ? new Date(date) : undefined,
         tooltip: hasValidDate

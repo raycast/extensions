@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-scholar",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "title": "Google Scholar",
   "description": "Search Google Scholar for academic articles, papers, and research.",
   "icon": "extension-icon.png",
@@ -14,46 +14,11 @@
       "subtitle": "Google Scholar",
       "description": "Search Google Scholar for academic articles, papers, and research.",
       "mode": "view"
-    },
-    {
-      "name": "show-bookmarks",
-      "title": "Show Bookmarks",
-      "subtitle": "Google Scholar",
-      "description": "View and manage your saved Google Scholar articles.",
-      "mode": "view"
-    }
-  ],
-  "tools": [
-    {
-      "name": "search-scholar",
-      "title": "Search Google Scholar Articles",
-      "description": "Searches Google Scholar for academic articles based on keywords, author, publication, and year. Use this to find research papers. Input is a SearchParams object.",
-      "tool": "src/tools/search-scholar.ts"
-    },
-    {
-      "name": "getSavedBookmarks",
-      "title": "Get Saved Bookmarks",
-      "description": "Retrieves a list of all currently saved bookmarked articles. Takes no arguments.",
-      "tool": "src/tools/getSavedBookmarks.ts"
-    },
-    {
-      "name": "toggleArticleBookmark",
-      "title": "Toggle Article Bookmark",
-      "description": "Saves an article to bookmarks if not already saved, or removes it if it is. This is the primary tool for adding or removing a single bookmark. Expects a complete 'SearchResult' object as input (including link, title, authors, year, publication). Returns the new bookmark state.",
-      "tool": "src/tools/toggleArticleBookmark.ts"
-    },
-    {
-      "name": "checkIfArticleIsBookmarked",
-      "title": "Check If Article Is Bookmarked",
-      "description": "Checks if an article is bookmarked without changing its state. Expects the article's unique link (URL string) as input.",
-      "tool": "src/tools/checkIfArticleIsBookmarked.ts"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.77.0",
-    "@raycast/utils": "^1.17.0",
-    "axios": "^1.6.2",
-    "cheerio": "^1.0.0-rc.12"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
@@ -70,149 +35,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "ai": {
-    "evals": [
-      {
-        "input": "@google-scholar Find me articles about machine learning between 2020 and 2025",
-        "mocks": {
-          "search-scholar": [
-            {
-              "authors": "ZH Zhou",
-              "citationCount": "3096",
-              "link": "https://books.google.com/books?hl=en&lr=&id=ctM-EAAAQBAJ&oi=fnd&pg=PR6&dq=machine+learning&ots=o_MpU0Qr0s&sig=3v3IENNmscQu3G7kfCRsD3yDnC4",
-              "publication": "- books.google.com",
-              "snippet": "… from data is called learning or training. The … machine learning is to find or approximate \nground-truth. In this book, models are sometimes called learners, which are machine learning …",
-              "title": "Machine learning",
-              "year": "2021"
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "search-scholar",
-              "arguments": {
-                "allWords": "machine learning",
-                "atLeastOne": "",
-                "authors": "",
-                "endYear": "2025",
-                "exactPhrase": "",
-                "publication": "",
-                "sortBy": "relevance",
-                "startYear": "2020",
-                "withoutWords": "",
-                "wordOccurrence": "any"
-              }
-            }
-          }
-        ]
-      },
-      {
-        "input": "@google-scholar list my bookmarks",
-        "mocks": {
-          "getSavedBookmarks": {
-            "success": true,
-            "bookmarks": [
-              {
-                "title": "Sample Bookmarked Article",
-                "authors": "Author One, Author Two",
-                "year": "2023",
-                "publication": "Journal of Examples",
-                "link": "http://example.com/bookmark1",
-                "savedAt": "2023-01-01T12:00:00Z",
-                "snippet": "This is a snippet for a bookmarked article.",
-                "citationCount": "10"
-              }
-            ]
-          }
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "getSavedBookmarks",
-              "arguments": {}
-            }
-          }
-        ]
-      },
-      {
-        "input": "@google-scholar is http://example.com/articleX bookmarked?",
-        "mocks": {
-          "checkIfArticleIsBookmarked": {
-            "success": true,
-            "isBookmarked": false
-          }
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "checkIfArticleIsBookmarked",
-              "arguments": {
-                "articleLink": "http://example.com/articleX"
-              }
-            }
-          }
-        ]
-      },
-      {
-        "input": "@google-scholar bookmark the article titled 'Test Article' with link 'http://example.com/test'",
-        "mocks": {
-          "toggleArticleBookmark": {
-            "success": true,
-            "message": "Article successfully bookmarked.",
-            "newBookmarkState": true
-          }
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "toggleArticleBookmark",
-              "arguments": {
-                "article": {
-                  "title": "Test Article",
-                  "link": "http://example.com/test",
-                  "authors": null,
-                  "year": null,
-                  "publication": null,
-                  "snippet": null,
-                  "citationCount": null,
-                  "pdfLink": null
-                }
-              }
-            }
-          }
-        ]
-      },
-      {
-        "input": "@google-scholar remove the bookmark for the article 'http://example.com/test'",
-        "mocks": {
-          "toggleArticleBookmark": {
-            "success": true,
-            "message": "Article successfully removed from bookmarks.",
-            "newBookmarkState": false
-          }
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "toggleArticleBookmark",
-              "arguments": {
-                "article": {
-                  "link": "http://example.com/test",
-                  "title": "Unknown Title (link only)",
-                  "authors": null,
-                  "year": null,
-                  "publication": null,
-                  "snippet": null,
-                  "citationCount": null,
-                  "pdfLink": null
-                }
-              }
-            }
-          }
-        ]
-      }
-    ]
   }
 }

@@ -1,20 +1,15 @@
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { Document } from "langchain/document";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import * as React from "react";
-import { OllamaApiChatMessageRole, OllamaServerAuthorizationMethod } from "../../ollama/enum";
+import { OllamaApiChatMessageRole } from "../../ollama/enum";
 import { Ollama } from "../../ollama/ollama";
 import {
   OllamaApiChatMessage,
   OllamaApiChatRequestBody,
   OllamaApiChatResponse,
   OllamaApiTagsResponseModel,
-  OllamaServerAuth,
 } from "../../ollama/types";
 import { AddSettingsCommandChat, GetSettingsCommandChatByIndex } from "../../settings/settings";
-import { RaycastChat, SettingsChatModel } from "../../settings/types";
+import { RaycastChat } from "../../settings/types";
 import { Preferences, RaycastImage } from "../../types";
 import { GetAvailableModel, PromptTokenParser } from "../function";
 import { McpServerConfig, McpToolInfo } from "../../mcp/types";
@@ -48,8 +43,6 @@ export async function ChangeChat(
   const vi = await VerifyChatModelInstalled(
     c.models.main.server_name,
     c.models.main.tag,
-    c.models.embedding?.server_name,
-    c.models.embedding?.tag,
     c.models.vision?.server_name,
     c.models.vision?.tag
   ).catch(async (e) => {
@@ -70,19 +63,10 @@ export async function ChangeChat(
  * @param vt - Vision Model Tag
  * @returns Return `true` if all configured model are installed.
  */
-async function VerifyChatModelInstalled(
-  ms: string,
-  mt: string,
-  es?: string,
-  et?: string,
-  vs?: string,
-  vt?: string
-): Promise<boolean> {
+async function VerifyChatModelInstalled(ms: string, mt: string, vs?: string, vt?: string): Promise<boolean> {
   const am: Map<string, OllamaApiTagsResponseModel[]> = new Map();
   am.set(ms, await GetAvailableModel(ms));
   if ((am.get(ms) as OllamaApiTagsResponseModel[]).filter((v) => v.name === mt).length === 0) return false;
-  if (es && et && !am.has(es)) am.set(es, await GetAvailableModel(es));
-  if (es && et && (am.get(es) as OllamaApiTagsResponseModel[]).filter((v) => v.name === et).length === 0) return false;
   if (vs && vt && !am.has(vs)) am.set(vs, await GetAvailableModel(vs));
   if (vs && vt && (am.get(vs) as OllamaApiTagsResponseModel[]).filter((v) => v.name === vt).length === 0) return false;
   return true;
@@ -123,152 +107,6 @@ export function ClipboardConversation(chat?: RaycastChat): string {
 }
 
 /**
- * Get Headers for Ollama Langchain.
- * @param settings - Ollama Server Auth
- */
-function LangChainGetOllamaHeaders(settings?: OllamaServerAuth): Record<string, string> | undefined {
-  if (!settings) return undefined;
-  if (settings && settings.mode === OllamaServerAuthorizationMethod.BASIC)
-    return {
-      Authorization: `${settings.mode} ${btoa(`${settings.username}:${settings.password}`)}`,
-    };
-  if (settings && settings.mode === OllamaServerAuthorizationMethod.BEARER)
-    return { Authorization: `${settings.mode} ${settings.token}` };
-}
-
-/**
- * Get Configured LangChain OllamaEmbedding
- * @param settings
- */
-function LangChainGetOllamaEmbeddings(settings: SettingsChatModel): OllamaEmbeddings {
-  const headers = LangChainGetOllamaHeaders(settings.server.auth);
-  return new OllamaEmbeddings({ baseUrl: settings.server.url, model: settings.tag, headers: headers });
-}
-
-/**
- * Get how many tokens are required for given string.
- * @param text
- * @returns tokens
- */
-function StringToTokens(text: string): number {
-  return Number(Number(text.length / 3).toFixed(0));
-}
-
-/**
- * Get how many tokens are required for given document.
- * @param document
- * @returns tokens
- */
-function DocumentToTokens(document: Document<Record<string, any>>): number {
-  return StringToTokens(document.pageContent);
-}
-
-/**
- * Get how many tokens are required for given documents.
- * @param documents
- * @returns tokens
- */
-function DocumentsToTokens(documents: Document<Record<string, any>>[]): number {
-  let o = 0;
-  for (const d of documents) o += DocumentToTokens(d);
-  return o;
-}
-
-/**
- * Get how many tokens are required by chat history.
- * @param chat
- * @returns tokens
- */
-function ChatToTokens(chat: RaycastChat): number {
-  if (chat.messages.length === 0) return 0;
-  const lastMessage = chat.messages[chat.messages.length - 1];
-  let o = 0;
-  if (lastMessage.prompt_eval_count) o += lastMessage.prompt_eval_count;
-  if (lastMessage.eval_count) o += lastMessage.eval_count;
-  if (chat.messages.length > Number(preferences.ollamaChatHistoryMessagesNumber)) {
-    const removedMessage =
-      chat.messages[chat.messages.length - Number(preferences.ollamaChatHistoryMessagesNumber) - 1];
-    if (removedMessage.prompt_eval_count) o -= removedMessage.prompt_eval_count;
-    if (removedMessage.eval_count) o -= removedMessage.eval_count;
-  }
-  return o;
-}
-
-/**
- * Retrieval of relevant information by affinity that fits all available contextual windows.
- * @param query
- * @param token - available tokens.
- * @param documents
- * @param ollamaModelEmbedding - ollama model settings.
- */
-async function GetDocumentByAffinity(
-  query: string,
-  token: number,
-  documents: Document<Record<string, any>>[],
-  ollamaModelEmbedding: SettingsChatModel
-): Promise<Document<Record<string, any>>[]> {
-  await showToast({ style: Toast.Style.Animated, title: "📥 Embeddings..." });
-  const textsplitter = new RecursiveCharacterTextSplitter({
-    chunkOverlap: 200,
-    chunkSize: 1000,
-  });
-  const vectorstore = await MemoryVectorStore.fromDocuments(
-    await textsplitter.splitDocuments(documents),
-    LangChainGetOllamaEmbeddings(ollamaModelEmbedding)
-  );
-  const retriever = vectorstore.asRetriever(((token * 3) / 1000) * 0.8);
-  return await retriever.invoke(query);
-}
-
-/**
- * Convert documents into raw json.
- * @param documents
- */
-function DocumentsToJson(documents: Document<Record<string, any>>[]): string {
-  const o = [];
-  for (const document of documents) {
-    o.push({
-      source: document.metadata.source,
-      content: document.pageContent,
-    });
-  }
-  return JSON.stringify(o);
-}
-
-/**
- * Get document knowledge, if tokens are not enough perform embeddings ans search by affinity.
- * @param query
- * @param chat
- * @param documents
- * @param image
- */
-async function GetDocuments(
-  query: string,
-  chat: RaycastChat,
-  documents: Document<Record<string, any>>[],
-  image: RaycastImage[] | undefined
-): Promise<string> {
-  /* Get Model used for inference */
-  let model = chat.models.main;
-  if (chat.models.tools && chat.mcp_server) model = chat.models.tools;
-  if (chat.models.vision && image) model = chat.models.vision;
-
-  /* Get required tokens */
-  const ollama = new Ollama(model.server);
-  const availableToken = ollama.OllamaApiShowParseModelfile(await ollama.OllamaApiShow(model.tag)).parameter.num_ctx;
-  const requiredToken = StringToTokens(query) + ChatToTokens(chat) + DocumentsToTokens(documents);
-
-  /* If tokens are not enough proceed with embedding */
-  if (requiredToken > availableToken) {
-    let model = chat.models.main;
-    if (chat.models.embedding) model = chat.models.embedding;
-    documents = await GetDocumentByAffinity(query, availableToken - StringToTokens(query), documents, model);
-  }
-
-  return DocumentsToJson(documents);
-}
-
-/**
  * Get Messages for Inference with Context data.
  * @param chat.
  * @param query - User Prompt.
@@ -290,10 +128,9 @@ function GetMessagesForInference(
 
   /* Create Prompt */
   let content = query;
-  if (context && (context.tools || context.documents)) {
+  if (context && context.tools) {
     content = `Respond to the user's prompt using the provided context information. Cite sources with url when available.\nUser Prompt: '${query}'`;
     if (context.tools) content += `Context from Tools Calling: '${context.tools.data}'\n`;
-    if (context.documents) content += `Context from Documents: ${context.documents}\n`;
   }
 
   /* Add User Query */
@@ -377,7 +214,6 @@ async function ToolsCall(
 async function Inference(
   query: string,
   image: RaycastImage[] | undefined,
-  documents: Document<Record<string, any>>[] | undefined,
   context: PromptContext,
   chat: RaycastChat,
   setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
@@ -408,8 +244,6 @@ async function Inference(
                   model: chat.models.main.tag,
                   created_at: "",
                   images: image,
-                  files:
-                    documents && documents.map((d) => d.metadata.source).filter((v, i) => i === documents.indexOf(v)),
                   messages: [
                     { role: OllamaApiChatMessageRole.USER, content: query },
                     { role: OllamaApiChatMessageRole.ASSISTANT, content: data },
@@ -436,7 +270,6 @@ async function Inference(
             m.messages[m.messages.length - 1] = {
               ...data,
               images: image,
-              files: documents && documents.map((d) => d.metadata.source).filter((v, i) => i === documents.indexOf(v)),
               tools: context.tools && context.tools.meta,
               messages: m.messages[m.messages.length - 1].messages,
             };
@@ -455,7 +288,6 @@ async function Inference(
 export async function Run(
   query: string,
   image: RaycastImage[] | undefined,
-  documents: Document<Record<string, any>>[] | undefined,
   chat: RaycastChat,
   setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>
@@ -467,9 +299,6 @@ export async function Run(
   /* Parse token on query */
   query = await PromptTokenParser(query);
 
-  /* If documents are defined add them to the context */
-  if (documents) context.documents = await GetDocuments(query, chat, documents, image);
-
   /* Call Tools of mcp_server is defined */
   if (chat.mcp_server) {
     const [data, meta] = await ToolsCall(query, chat, image);
@@ -477,5 +306,5 @@ export async function Run(
   }
 
   /* Start Inference */
-  await Inference(query, image, documents, context, chat, setChat, setLoading);
+  await Inference(query, image, context, chat, setChat, setLoading);
 }

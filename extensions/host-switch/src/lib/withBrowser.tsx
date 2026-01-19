@@ -28,7 +28,9 @@ export const withBrowser = <P extends object>(Component: ComponentType<P>) => {
 
     if (!browser) {
       if (application) {
-        return <Detail markdown={`**${application.name}** is not supported. Use Safari, Arc or Chrome instead`} />;
+        return (
+          <Detail markdown={`**${application.name}** is not supported. Use Safari, Arc, Brave or Chrome instead`} />
+        );
       }
       return null;
     }

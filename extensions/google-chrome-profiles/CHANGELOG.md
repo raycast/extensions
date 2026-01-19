@@ -1,5 +1,9 @@
 # Google Chrome Profiles Changelog
 
+## [Refactor] - 2025-09-03
+
+- Refactor the extension to use the new `open-profile` and `open-profile-url` commands.
+
 ## [Quicklinks] - 2024-07-29
 - Add support for quicklinks to open a chosen profile in a specific url.
 

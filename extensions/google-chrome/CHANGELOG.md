@@ -1,5 +1,47 @@
 # Google Chrome Changelog
 
+## [Fixes] - 2026-01-05
+
+- Fix infinite rendering with depth bug in new tab `Action`
+- Handle error in "new tab" `Command`
+
+## [Support for Guest Profile] - 2025-11-17
+
+- Add support for Guest profile in all commands
+- Update dependencies to latest versions
+
+## [Add Exclude Search Feature] - 2025-11-05
+
+- Add support for excluding search terms using " -" (space + dash) prefix
+- Example: "raycast -firefox" finds items containing "raycast" but not "firefox"
+- Support for searching literal "-" character using "\-" escape sequence (e.g., "foo \-bar" to find "foo-bar")
+- Works across all search functions: tabs, history, bookmarks, and search all
+- Fix SQL injection vulnerability in history search
+- Improve performance by skipping filtering when no search query is provided
+- Handle invalid URLs (e.g., javascript: protocol) gracefully to prevent crashes
+- Fix `ERR_INVALID_URL` error in Tab class methods (realFavicon, googleFavicon, urlWithoutScheme)
+- Display warning icon and helpful message for bookmarks/history with unsupported URL protocols
+
+## [Improvements] - 2025-10-13
+
+- Fix weird issue with a constant not working (ref: [#22053](https://github.com/raycast/extensions/issues/22053), [#22026](https://github.com/raycast/extensions/issues/22026), [#21966](https://github.com/raycast/extensions/issues/21966), [#21973](https://github.com/raycast/extensions/issues/21973), [#21928](https://github.com/raycast/extensions/issues/21928))
+- Add support for searching history in a specific profile.
+- Add support for getting all Chrome profiles in AI
+- Rewritten some of the logic to use `usePromise` instead of `useEffect`
+- Updated dependencies, mainly SQL.js was giving issues
+
+## [Fix Search Bookmarks] - 2025-10-01
+
+- Fix the "Search Bookmarks" command returning an error when the hard-coded default profile directory does not exist.
+
+## [Update the dependencies to fix search history and find tab] - 2025-09-03
+
+## [Chore: Updated contributors] - 2025-09-03
+
+## [Add Refresh Tab Command] - 2025-08-25
+
+- Add Reload Tab action to refresh a selected tab in the Search Tab command.
+
 ## [Fix New Tab Command React Hooks Violation] - 2025-05-27
 
 - Fix React Rules of Hooks violation causing TypeError when opening new tabs.

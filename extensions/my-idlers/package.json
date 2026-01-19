@@ -92,8 +92,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
     "dayjs": "^1.11.13"
   },
   "devDependencies": {

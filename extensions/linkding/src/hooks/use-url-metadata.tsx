@@ -1,14 +1,18 @@
 import { useFetch } from "@raycast/utils";
-import { load } from "cheerio";
+import { extractDescription, extractTitle } from "../util/extract-html";
 import { isValidUrl } from "../util/is-valid-url";
 
 const useUrlMetadata = (url: string) => {
   const { data: metadata } = useFetch(url, {
-    mapResult: (response: string) => {
-      const $ = load(response);
-      const title = $("title").text().trim();
-      const description = $("meta[name='description']").attr("content")?.trim();
-      return { data: { title, description } };
+    mapResult: (html: string) => {
+      // assume what we need is in the first few KB
+      const initialSegment = html.slice(0, 8192);
+      return {
+        data: {
+          title: extractTitle(initialSegment),
+          description: extractDescription(initialSegment),
+        },
+      };
     },
     // no need to surface, since failure is not critical and could happen for legitimate reasons
     onError: (err) => console.warn(`Failed to fetch metadata from ${url}: ${String(err)}"`),

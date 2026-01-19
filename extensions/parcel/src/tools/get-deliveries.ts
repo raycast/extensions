@@ -1,4 +1,4 @@
-import { fetchDeliveries, getStatusDescription, FilterMode } from "../api";
+import { fetchDeliveries, FilterMode, getStatusDescription } from "../api";
 
 /**
  * Get a list of deliveries from Parcel.

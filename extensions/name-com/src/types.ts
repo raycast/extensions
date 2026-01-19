@@ -12,24 +12,24 @@ type Contact = {
 
 export type Domain = {
   domainName: string;
-  locked: boolean;
-  autorenewEnabled: boolean;
-  expireDate: string;
   createDate: string;
-};
-export type DomainDetails = Domain & {
+  expireDate: string;
+  autorenewEnabled: boolean;
+  locked: boolean;
+  contacts: {
+    admin: Contact;
+    billing: Contact;
+    registrant: Contact;
+    tech: Contact;
+  };
   nameservers: string[];
-  registrant: Contact;
-  admin: Contact;
-  tech: Contact;
-  billing: Contact;
   renewalPrice: number;
 };
 
 export type DNSRecord = {
   id: number;
   domainName: string;
-  host?: string;
+  host: string;
   fqdn: string;
   type: "A" | "AAAA" | "ANAME" | "CNAME" | "MX" | "NS" | "SRV" | "TXT";
   answer: string;

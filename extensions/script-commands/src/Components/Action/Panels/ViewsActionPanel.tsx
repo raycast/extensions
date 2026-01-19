@@ -4,7 +4,7 @@ import { ViewSourceCodeActionItem } from "@components";
 
 import { ScriptCommand } from "@models";
 
-import { ShortcutConstants } from "@constants";
+import { ShortcutConstants } from "Const";
 
 type Props = {
   url: string;

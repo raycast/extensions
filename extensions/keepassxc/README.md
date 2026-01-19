@@ -10,7 +10,7 @@
 
 To use this extension, you will need:
 
-- [KeePassXC](https://keepassxc.org).
+- [KeePassXC](https://keepassxc.org)
 
 ## Security Note
 

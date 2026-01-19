@@ -1,5 +1,27 @@
 # Downloads Manager Changelog
 
+## [AI tools] - 2025-12-25
+
+- Added the `Get Latest Download` tool to get the path of the latest download with Raycast AI.
+- Added the `Copy Latest Download` tool to copy the latest download with Raycast AI.
+- Added the `Delete Latest Download` tool to delete latest download with Raycast AI.
+- Added the `Open Latest Download` tool to open the latest download with Raycast AI.
+- Added the `Paste Latest Download` tool to paste the latest download into the currently opened window with Raycast AI.
+- Added the `Show Latest Download` tool highlight the latest download in the downloads folder with Raycast AI.
+
+## [Add Windows support] - 2025-12-19
+
+- Added support for Windows
+
+## [Fixes] - 2025-12-10
+
+- Fixes [#23514](https://github.com/raycast/extensions/issues/23514)
+- Updated dependencies
+
+## [Add Grid layout] - 2025-12-01
+
+- Added a Grid layout to the Manage Downloads command. Comes with an Action to toggle between layouts as well as a Preference for setting the default layout
+
 ## [Add delete last downloaded item command] - 2025-06-03
 
 - Added the command `Delete Latest Download`, which deletes the latest download.

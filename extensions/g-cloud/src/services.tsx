@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { List, Icon, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { CacheManager } from "./utils/CacheManager";
 import { initializeQuickLink } from "./utils/QuickLinks";
 
@@ -33,10 +32,6 @@ export default function Command() {
       viewServices(lastProjectId);
     } else {
       setError("No recent projects found. Please open the main extension first.");
-      showFailureToast({
-        title: "No recent projects",
-        message: "Please open the main extension first",
-      });
       setIsLoading(false);
     }
   }

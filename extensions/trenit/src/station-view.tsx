@@ -43,14 +43,14 @@ function displayToast({
 }
 
 export function StationView(props: { station: Station }) {
-  const [direction, setDirection] = useState("false");
+  const [isArrival, setDirection] = useState("false");
   const [currentIcon, setCurrentIcon] = useState<string>("dot_left.svg");
 
   const {
     isLoading: isLoading,
     data: trains,
     revalidate,
-  } = useFetch(getUrl(props.station.id, direction), {
+  } = useFetch(getUrl(props.station.id, isArrival), {
     onWillExecute() {
       displayToast({ title: "Loading Data", style: Toast.Style.Animated });
     },
@@ -125,13 +125,22 @@ export function StationView(props: { station: Station }) {
                         <List.Item.Detail.Metadata.TagList.Item text={train.delay} color={Color.Red} />
                       )}
                       {train.isBlinking && (
-                        <List.Item.Detail.Metadata.TagList.Item text="Departing now" color={Color.Blue} />
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={isArrival == "true" ? "Arriving now" : "Departing now"}
+                          color={Color.Blue}
+                        />
                       )}
                     </List.Item.Detail.Metadata.TagList>
 
                     <List.Item.Detail.Metadata.Label title="Info" />
-                    <List.Item.Detail.Metadata.Label title="Scheduled departure" text={train.time} />
-                    <List.Item.Detail.Metadata.Label title="Platform" text={train.platform} />
+                    <List.Item.Detail.Metadata.Label
+                      title={isArrival == "true" ? "Scheduled arrival" : "Scheduled departure"}
+                      text={train.time}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Platform"
+                      text={train.icon == "bus" ? "Bus" : train.platform}
+                    />
                     <List.Item.Detail.Metadata.Label title="Train" text={`${train.carrier} ${train.number}`} />
                     {train.isReplacedByBus && (
                       <List.Item.Detail.Metadata.Label title="This train is replaced by a bus" />
@@ -154,7 +163,7 @@ export function StationView(props: { station: Station }) {
               <ActionPanel>
                 <Action.CopyToClipboard
                   title="Copy Train Info"
-                  content={getContentForCopyToClipboardAction(train, direction == "true")}
+                  content={getContentForCopyToClipboardAction(train, isArrival == "true")}
                   icon={Icon.CopyClipboard}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />

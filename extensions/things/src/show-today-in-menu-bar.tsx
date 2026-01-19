@@ -11,8 +11,9 @@ import {
 } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 
-import { Todo, getListTodos, getLists, setTodoProperty, updateTodo, handleError } from './api';
+import { getListTodos, getLists, setTodoProperty, updateTodo, handleError, updateProject } from './api';
 import { listItems, menuBarStatusIcons } from './helpers';
+import { Todo } from './types';
 
 const TASK_NAME_LENGTH_LIMIT = 30;
 
@@ -42,7 +43,11 @@ export default function ShowTodayInMenuBar() {
 
   async function schedule(todo: Todo, when: string) {
     try {
-      await updateTodo(todo.id, { when });
+      if (todo.isProject) {
+        await updateProject(todo.id, { when });
+      } else {
+        await updateTodo(todo.id, { when });
+      }
       await mutate();
       await showToast({ style: Toast.Style.Success, title: 'Scheduled to-do' });
     } catch (error) {
@@ -52,7 +57,11 @@ export default function ShowTodayInMenuBar() {
 
   async function moveTo(todo: Todo, listId: string) {
     try {
-      await updateTodo(todo.id, { 'list-id': listId });
+      if (todo.isProject) {
+        await updateProject(todo.id, { 'area-id': listId });
+      } else {
+        await updateTodo(todo.id, { 'list-id': listId });
+      }
       await mutate();
       await showToast({ style: Toast.Style.Success, title: 'Moved to-do' });
     } catch (error) {
@@ -95,15 +104,17 @@ export default function ShowTodayInMenuBar() {
 
                 {lists && lists.length > 0 ? (
                   <MenuBarExtra.Submenu title="Move To" icon={Icon.ArrowRight}>
-                    {lists.map((list) => {
-                      return (
-                        <MenuBarExtra.Item
-                          key={list.id}
-                          {...listItems.list(list)}
-                          onAction={() => moveTo(todo, list.id)}
-                        />
-                      );
-                    })}
+                    {lists
+                      .filter((list) => (todo.isProject ? list.type === 'area' : true))
+                      .map((list) => {
+                        return (
+                          <MenuBarExtra.Item
+                            key={list.id}
+                            {...listItems.list(list)}
+                            onAction={() => moveTo(todo, list.id)}
+                          />
+                        );
+                      })}
                   </MenuBarExtra.Submenu>
                 ) : null}
               </MenuBarExtra.Submenu>

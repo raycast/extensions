@@ -40,10 +40,12 @@ export enum TranslationType {
   Caiyun = "Caiyun Translate",
   Apple = "Apple Translate",
   DeepL = "DeepL Translate",
+  DeepLX = "DeepLX Translate",
   Google = "Google Translate",
   Bing = "Bing Translate",
   Volcano = "Volcano Translate",
   OpenAI = "OpenAI Translate",
+  Gemini = "Gemini Translate",
 }
 
 export enum DictionaryType {
@@ -85,6 +87,7 @@ export type QueryResponse =
   | VolcanoDetectResult
   | GoogleTranslateResult
   | OpenAITranslateResult
+  | GeminiTranslateResult
   | YoudaoTranslateResponse;
 
 export interface RequestErrorInfo {
@@ -145,6 +148,10 @@ export interface AppleTranslateResult {
 }
 
 export interface OpenAITranslateResult {
+  translatedText: string;
+}
+
+export interface GeminiTranslateResult {
   translatedText: string;
 }
 

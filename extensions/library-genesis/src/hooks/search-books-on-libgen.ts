@@ -60,7 +60,7 @@ export const searchBooksOnLibgen = (searchContent: string, searchType: SearchTyp
           showToast(Toast.Style.Failure, String(error));
         });
     },
-    [searchContent, chosenMirror],
+    [searchContent, chosenMirror, searchType],
   );
 
   useEffect(() => {

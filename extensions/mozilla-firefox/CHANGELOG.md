@@ -1,5 +1,14 @@
 # Mozilla Firefox Changelog
 
+## [Major Refactor & Bug Fixes] - 2025-09-01
+
+- **BREAKING**: Refactored all classes to functional components
+- **NEW**: Added browser selection preference (Firefox, Firefox Nightly, Firefox ESR, Firefox Developer Edition)
+- **FIXED**: Completely rewrote new-tab functionality using CLI commands instead of AppleScript
+- **IMPROVED**: Replaced all AppleScript automation with reliable `open -a` CLI commands
+- **REMOVED**: Eliminated `run-applescript` dependency for better performance and reliability
+- **ENHANCED**: Simplified error handling and improved cross-browser compatibility
+
 ## [Fix for non-standard profile names] - 2024-08-06
 
 - Fixes issue (#11920) by adding a new preference.

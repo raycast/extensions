@@ -10,9 +10,9 @@ interface I_preferences {
   korEngMode: boolean;
 }
 
-const PAPAGO_TRANSLATE_API_URL = "https://naveropenapi.apigw.ntruss.com/nmt/v1/translation";
+const PAPAGO_TRANSLATE_API_URL = "https://papago.apigw.ntruss.com/nmt/v1/translation";
 
-const PAPAGO_DETECT_API_URL = "https://naveropenapi.apigw.ntruss.com/langs/v1/dect";
+const PAPAGO_DETECT_API_URL = "https://papago.apigw.ntruss.com/langs/v1/dect";
 
 const { sourceLanguage, targetLanguage, korEngMode } = getPreferenceValues<I_preferences>();
 
@@ -47,11 +47,12 @@ export const getTranslationText = async (text: string) => {
   if (source === target) return { status: 200, translatedText: text };
 
   try {
-    const response = await axiosInstance.post(PAPAGO_TRANSLATE_API_URL, {
+    const params = new URLSearchParams({
       source,
       target,
       text,
     });
+    const response = await axiosInstance.post(PAPAGO_TRANSLATE_API_URL, params);
 
     return { status: 200, translatedText: response.data.message.result.translatedText };
   } catch (error) {

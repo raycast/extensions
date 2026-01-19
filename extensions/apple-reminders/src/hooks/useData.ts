@@ -12,6 +12,7 @@ export type Location = {
 export type Reminder = {
   id: string;
   openUrl: string;
+  attachedUrls?: string[];
   title: string;
   notes: string;
   dueDate: string | null;
@@ -22,6 +23,7 @@ export type Reminder = {
   recurrenceRule: string;
   list: { id: string; title: string; color: string } | null;
   location?: Location;
+  creationDate?: Date;
 };
 
 export type List = { id: string; title: string; color: string; isDefault: boolean };

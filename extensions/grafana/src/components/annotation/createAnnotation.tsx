@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// TODO: remove any types and be fully-type safe
 import { ActionPanel, showToast, Toast, Form, Action, popToRoot } from "@raycast/api";
 import { getErrorMessage } from "../../utils";
 import { annotationCreationQuery } from "./queries";

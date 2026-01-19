@@ -53,34 +53,23 @@ export function useDebouncedVenues(
             onAction: wipeStorage,
           },
         });
+        setIsLoading(false);
         await resetToast();
         return;
       }
       const features = await fetchVenues(debouncedQuery, abortController.signal);
-      try {
-        if (!features || features.length === 0) {
-          setToast(
-            showToast({
-              title: `No results searching for "${debouncedQuery}"`,
-              style: Toast.Style.Failure,
-            }),
-          );
-          setIsLoading(false);
-          return;
-        }
-        setVenueResults(features);
-        await resetToast();
-      } catch (error) {
-        console.error(error);
+      if (features?.length === 0) {
         setToast(
           showToast({
-            title: "Something went wrong",
+            title: `No results searching for "${debouncedQuery}"`,
             style: Toast.Style.Failure,
           }),
         );
-      } finally {
-        setIsLoading(false);
+      } else if (features && features.length > 0) {
+        setVenueResults(features);
+        await resetToast();
       }
+      setIsLoading(false);
     })();
     return () => abortController.abort();
   }, [debouncedQuery]);

@@ -6,7 +6,10 @@
   "icon": "jwt.png",
   "author": "gdsmith",
   "contributors": [
-    "zhhanging"
+    "zhhanging",
+    "joaogf.dev",
+    "YourMCGeek",
+    "pernielsentikaer"
   ],
   "categories": [
     "Data",
@@ -29,28 +32,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "csv-parse": "^5.0.4",
-    "jose": "^4.6.0",
-    "node-fetch": "^3.2.3",
-    "raycast-hooks": "^1.0.3",
-    "react-dom": "^19.0.0"
+    "@raycast/api": "^1.104.1",
+    "csv-parse": "^6.1.0",
+    "jose": "^6.1.3",
+    "raycast-hooks": "^1.0.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "eslint": "^8.57.1",
-    "prettier": "^2.5.1",
-    "react": "^19.0.0",
-    "react-devtools": "^6.1.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -5,6 +5,9 @@
   "description": "Find synonyms for words and translate if necessary",
   "icon": "./image.png",
   "author": "xmorse",
+  "contributors": [
+    "rom100maim"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -29,24 +32,32 @@
           "title": "Raycast AI"
         },
         {
-          "value": "fireworks",
-          "title": "Fireworks.ai"
-        },
-        {
           "value": "openai",
           "title": "OpenAI"
         },
         {
-          "value": "together",
-          "title": "Together.ai"
+          "value": "openai-compatible",
+          "title": "OpenAI Compatible"
         },
         {
           "value": "anthropic",
           "title": "Anthropic"
         },
         {
+          "value": "fireworks",
+          "title": "Fireworks.ai"
+        },
+        {
           "value": "groq",
           "title": "Groq"
+        },
+        {
+          "value": "together",
+          "title": "Together.ai"
+        },
+        {
+          "value": "lmstudio",
+          "title": "LMStudio"
         }
       ],
       "required": true,
@@ -61,12 +72,39 @@
       "description": "API Key for OpenAI"
     },
     {
-      "title": "Fireworks.ai API Key",
-      "label": "",
-      "name": "fireworksApiKey",
+      "title": "OpenAI Model",
+      "label": "Model for OpenAI",
+      "name": "openaiModel",
+      "type": "textfield",
+      "default": "gpt-4.1-mini",
+      "required": false,
+      "description": "Model name for OpenAI"
+    },
+    {
+      "title": "OpenAI Compatible URL",
+      "label": "Base URL for OpenAI compatible provider",
+      "name": "openaiCompatibleUrl",
+      "type": "textfield",
+      "default": "",
+      "required": false,
+      "description": "Base URL for OpenAI compatible provider"
+    },
+    {
+      "title": "OpenAI Compatible Key",
+      "label": "API Key for OpenAI compatible provider",
+      "name": "openaiCompatibleKey",
       "type": "password",
       "required": false,
-      "description": "API Key for Fireworks.ai"
+      "description": "API Key for OpenAI compatible provider"
+    },
+    {
+      "title": "OpenAI Compatible Model",
+      "label": "Model for OpenAI compatible provider",
+      "name": "openaiCompatibleModel",
+      "type": "textfield",
+      "default": "",
+      "required": false,
+      "description": "Model name for OpenAI compatible provider"
     },
     {
       "title": "Anthropic API Key",
@@ -77,12 +115,30 @@
       "description": "API Key for Anthropic"
     },
     {
-      "title": "Together.ai API Key",
+      "title": "Anthropic Model",
+      "label": "Model for Anthropic",
+      "name": "anthropicModel",
+      "type": "textfield",
+      "default": "claude-3-haiku-20240307",
+      "required": false,
+      "description": "Model name for Anthropic"
+    },
+    {
+      "title": "Fireworks.ai API Key",
       "label": "",
-      "name": "togetherApiKey",
+      "name": "fireworksApiKey",
       "type": "password",
       "required": false,
-      "description": "API Key for Together.ai"
+      "description": "API Key for Fireworks.ai"
+    },
+    {
+      "title": "Fireworks.ai Model",
+      "label": "Model for Fireworks.ai",
+      "name": "fireworksModel",
+      "type": "textfield",
+      "default": "accounts/fireworks/models/llama-v3p1-70b-instruct",
+      "required": false,
+      "description": "Model name for Fireworks.ai"
     },
     {
       "title": "Groq API Key",
@@ -91,35 +147,80 @@
       "type": "password",
       "required": false,
       "description": "API Key for Groq"
+    },
+    {
+      "title": "Groq Model",
+      "label": "Model for Groq",
+      "name": "groqModel",
+      "type": "textfield",
+      "default": "llama-3.1-70b-versatile",
+      "required": false,
+      "description": "Model name for Groq"
+    },
+    {
+      "title": "Together.ai API Key",
+      "label": "",
+      "name": "togetherApiKey",
+      "type": "password",
+      "required": false,
+      "description": "API Key for Together.ai"
+    },
+    {
+      "title": "Together.ai Model",
+      "label": "Model for Together.ai",
+      "name": "togetherModel",
+      "type": "textfield",
+      "default": "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+      "required": false,
+      "description": "Model name for Together.ai"
+    },
+    {
+      "title": "LMStudio Model",
+      "label": "Model for LMStudio",
+      "name": "lmstudioModel",
+      "type": "textfield",
+      "default": "",
+      "required": false,
+      "description": "Model name for LMStudio"
+    },
+    {
+      "title": "LMStudio Base URL",
+      "label": "Base URL for LMStudio",
+      "name": "lmstudioBaseUrl",
+      "type": "textfield",
+      "default": "http://localhost:1234/v1",
+      "required": false,
+      "description": "Base URL for LMStudio"
     }
   ],
   "dependencies": {
-    "@ai-sdk/anthropic": "^1.0.5",
-    "@ai-sdk/openai": "^1.0.8",
-    "@raycast/api": "^1.87.5",
-    "@raycast/utils": "^1.18.1",
+    "@ai-sdk/anthropic": "^2.0.1",
+    "@ai-sdk/openai": "^2.0.7",
+    "@ai-sdk/openai-compatible": "^1.0.3",
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^2.2.0",
     "@types/play-sound": "^1.1.2",
-    "ai": "^4.0.17",
-    "dedent": "^1.5.3",
-    "openai": "^4.76.2",
+    "ai": "^5.0.8",
+    "dedent": "^1.6.0",
+    "openai": "^5.12.2",
     "partial-json": "^0.1.7",
     "play-sound": "^1.1.6",
-    "undici": "^7.1.0",
-    "zod": "^3.24.1"
+    "undici": "^7.13.0",
+    "zod": "^4.0.16"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.10.2",
-    "@types/react": "18",
-    "eslint": "^8",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.1.9",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint --fix",
+    "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

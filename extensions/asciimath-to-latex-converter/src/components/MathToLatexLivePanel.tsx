@@ -15,7 +15,9 @@ interface MathToLatexLivePanelProps {
   defaultWrapLatex: WrapStyle; // Changed from boolean to WrapStyle
 }
 
-export default function MathToLatexLivePanel({ defaultWrapLatex }: MathToLatexLivePanelProps) {
+export default function MathToLatexLivePanel({
+  defaultWrapLatex,
+}: MathToLatexLivePanelProps) {
   const [input, setInput] = useState("");
   // Use the passed preference directly as the initial state
   const [wrapStyle, setWrapStyle] = useState<WrapStyle>(defaultWrapLatex);
@@ -32,7 +34,12 @@ export default function MathToLatexLivePanel({ defaultWrapLatex }: MathToLatexLi
       setError(null);
     } catch (e: unknown) {
       setLatex("");
-      if (e && typeof e === "object" && "message" in e && typeof (e as { message: string }).message === "string") {
+      if (
+        e &&
+        typeof e === "object" &&
+        "message" in e &&
+        typeof (e as { message: string }).message === "string"
+      ) {
         setError((e as { message: string }).message);
       } else {
         setError("Conversion failed");
@@ -49,7 +56,12 @@ export default function MathToLatexLivePanel({ defaultWrapLatex }: MathToLatexLi
       setError(null);
     } catch (e: unknown) {
       setLatex("");
-      if (e && typeof e === "object" && "message" in e && typeof (e as { message: string }).message === "string") {
+      if (
+        e &&
+        typeof e === "object" &&
+        "message" in e &&
+        typeof (e as { message: string }).message === "string"
+      ) {
         setError((e as { message: string }).message);
       } else {
         setError("Conversion failed");
@@ -67,7 +79,15 @@ export default function MathToLatexLivePanel({ defaultWrapLatex }: MathToLatexLi
           {latex && (
             <Action
               title="Show Rendered Preview"
-              onAction={() => push(<LatexPreviewDetail latex={latex} wrapStyle={wrapStyle} onEdit={pop} />)}
+              onAction={() =>
+                push(
+                  <LatexPreviewDetail
+                    latex={latex}
+                    wrapStyle={wrapStyle}
+                    onEdit={pop}
+                  />,
+                )
+              }
               shortcut={{ modifiers: [], key: "enter" }}
             />
           )}
@@ -92,13 +112,26 @@ export default function MathToLatexLivePanel({ defaultWrapLatex }: MathToLatexLi
         onChange={handleInputChange}
         autoFocus
       />
-      <Form.Dropdown id="wrapStyle" title="LaTeX Wrapping Style" value={wrapStyle} onChange={handleWrapChange}>
+      <Form.Dropdown
+        id="wrapStyle"
+        title="LaTeX Wrapping Style"
+        value={wrapStyle}
+        onChange={handleWrapChange}
+      >
         <Form.Dropdown.Item value="none" title="None" />
         <Form.Dropdown.Item value="single" title="Single ($...$)" />
         <Form.Dropdown.Item value="double" title="Double ($$...$$)" />
       </Form.Dropdown>
-      <Form.Description title="LaTeX Output" text={latex ? wrappedLatex : "No LaTeX output available."} />
-      {error && <Form.Description title="Conversion Error" text={`An error occurred: ${error}`} />}
+      <Form.Description
+        title="LaTeX Output"
+        text={latex ? wrappedLatex : "No LaTeX output available."}
+      />
+      {error && (
+        <Form.Description
+          title="Conversion Error"
+          text={`An error occurred: ${error}`}
+        />
+      )}
     </Form>
   );
 }

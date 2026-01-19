@@ -257,7 +257,15 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
       },
       amount: (value: string | undefined) => {
         if (!value) return 'Please enter an amount';
-        const num = Number(value);
+
+        // Normalize the amount based on currency format, similar to formatToYnabAmount
+        const normalizedAmount = activeBudgetCurrency
+          ? value
+              .replaceAll(activeBudgetCurrency.group_separator, '')
+              .replaceAll(activeBudgetCurrency.decimal_separator, '.')
+          : value;
+
+        const num = Number(normalizedAmount);
         if (isNaN(num)) return 'Please enter a valid number';
         if (num === 0) return 'Amount cannot be zero';
         return undefined;

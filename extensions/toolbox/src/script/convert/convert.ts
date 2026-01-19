@@ -13,7 +13,7 @@ export const yamlToJson: Script = {
   run(input) {
     try {
       return JSON.stringify(yaml.load(input), null, 2);
-    } catch (error) {
+    } catch {
       throw Error("Invalid YAML");
     }
   },
@@ -30,7 +30,7 @@ export const javaScriptToJson: Script = {
   run(input) {
     try {
       return JSON.stringify(JSON5.parse(input), null, 2);
-    } catch (error) {
+    } catch {
       throw Error("Invalid JavaScript Object");
     }
   },
@@ -47,7 +47,7 @@ export const jsonToJavaScript: Script = {
   run(input) {
     try {
       return JSON5.stringify(JSON.parse(input), null, 2);
-    } catch (error) {
+    } catch {
       throw Error("Invalid JSON");
     }
   },
@@ -64,7 +64,7 @@ export const JsonToYaml: Script = {
   run(input) {
     try {
       return yaml.dump(JSON.parse(input));
-    } catch (error) {
+    } catch {
       throw Error("Invalid JSON");
     }
   },

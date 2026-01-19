@@ -1,5 +1,15 @@
 # VMware vCenter Changelog
 
+## [Improvement] - 2025-11-24
+
+- [Improvement] New Liquid Glass Icon.
+- [Improvement] Added Windows support.
+- [Improvement] Adjusted shortcuts for better Raycast consistency.
+
+## [Improvement] - 2025-06-11
+
+- Implement AI tools that can: list virtual machines, retrieve detailed information about them, open the virtual machine console, and shut down, restart, or power on virtual machines. 
+
 ## [BugFix] - 2024-05-28
 
 - [BugFix] Fixed "TypeError: Cannot read properties of undefined (reading 'status')".

@@ -5,6 +5,9 @@
   "description": "Shorten and search links with your own domain via Short.io",
   "icon": "short-io-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -50,6 +53,7 @@
       "type": "password",
       "required": true,
       "title": "API Secret Key",
+      "placeholder": "sk_xxxxxxxxxxxxxxxx",
       "description": "Short.io API secret key."
     },
     {
@@ -63,23 +67,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^2.0.1",
     "axios": "^1.8.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@typescript-eslint/eslint-plugin": "^8.16.0",
-    "@typescript-eslint/parser": "^8.16.0",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.4.1",
-    "typescript": "^5.7.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.3.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

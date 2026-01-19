@@ -7,6 +7,7 @@ import * as child_process from "child_process";
 import { existsSync, writeFileSync, unlinkSync } from "fs";
 import { LanguageCode } from "./languages";
 import { LanguageCodeSet } from "./types";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export const AUTO_DETECT = "auto";
 
@@ -16,6 +17,7 @@ export type SimpleTranslateResult = {
   pronunciationText?: string;
   langFrom: LanguageCode;
   langTo: LanguageCode;
+  proxy?: string;
 };
 
 export class TranslateError extends Error {}
@@ -78,12 +80,14 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
     const translated1 = await simpleTranslate(text, {
       langFrom: options.langFrom,
       langTo: options.langTo,
+      proxy: options.proxy,
     });
 
     if (translated1?.langFrom) {
       const translated2 = await simpleTranslate(translated1.translatedText, {
         langFrom: options.langTo[0],
         langTo: [translated1.langFrom],
+        proxy: options.proxy,
       });
 
       return [translated1, translated2];
@@ -95,45 +99,69 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
       simpleTranslate(text, {
         langFrom: options.langFrom,
         langTo: options.langTo,
+        proxy: options.proxy,
       }),
       simpleTranslate(text, {
         langFrom: options.langTo[0],
         langTo: [options.langFrom],
+        proxy: options.proxy,
       }),
     ]);
   }
 }
 
-export async function playTTS(text: string, langTo: string) {
+export async function playTTS(text: string, langTo: string, proxy?: string) {
   const audioUrl = googleTTS.getAudioUrl(text, {
     lang: langTo,
     slow: false,
     host: "https://translate.google.com",
   });
-  https.get(audioUrl, (response) => {
+
+  let agent: HttpsProxyAgent<string> | undefined;
+
+  if (proxy) {
+    try {
+      agent = new HttpsProxyAgent(proxy);
+    } catch (e) {
+      console.error(`Error creating proxy agent for ${proxy}:`, e);
+      agent = undefined; // Fallback to no proxy if agent creation fails
+    }
+  }
+
+  // The options object for https.get. If 'agent' is undefined, it won't be included,
+  // and https.get will use the default agent.
+  const requestOptions: https.RequestOptions = {
+    agent: agent,
+  };
+
+  https.get(audioUrl, requestOptions, (response) => {
     const chunks: Uint8Array[] = [];
 
     response.on("data", (chunk) => {
       chunks.push(chunk);
     });
 
-    response.on("end", () => {
-      const audioData = Buffer.concat(chunks);
+    response
+      .on("end", () => {
+        const audioData = Buffer.concat(chunks);
 
-      const tempFilePath = path.join(os.tmpdir(), "translation.mp3");
-      writeFileSync(tempFilePath, audioData);
+        const tempFilePath = path.join(os.tmpdir(), "translation.mp3");
+        writeFileSync(tempFilePath, audioData);
 
-      // Play the audio file using afplay
-      const afplayProcess = child_process.spawn("afplay", [tempFilePath]);
+        // Play the audio file using afplay
+        const afplayProcess = child_process.spawn("afplay", [tempFilePath]);
 
-      afplayProcess.on("exit", (code) => {
-        if (code !== 0) {
-          console.error("Error playing audio");
-        }
-        if (existsSync(tempFilePath)) {
-          unlinkSync(tempFilePath);
-        }
+        afplayProcess.on("exit", (code) => {
+          if (code !== 0) {
+            console.error(`Error playing audio: afplay exited with code ${code}`);
+          }
+          if (existsSync(tempFilePath)) {
+            unlinkSync(tempFilePath);
+          }
+        });
+      })
+      .on("error", (error) => {
+        console.error("Error downloading audio:", error);
       });
-    });
   });
 }

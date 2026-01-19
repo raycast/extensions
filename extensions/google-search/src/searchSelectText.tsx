@@ -11,11 +11,7 @@ import {
 } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { getSearchHistory } from "./utils/handleResults";
-import { SearchResult, HISTORY_KEY } from "./utils/types";
-
-interface Preferences {
-  useClipboardFallback: boolean;
-}
+import { SearchResult, HISTORY_KEY, Preferences } from "./utils/types";
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();

@@ -1,57 +1,90 @@
 import fse from "fs-extra";
 import * as XLSX from "xlsx";
-import { environment, open, showInFinder } from "@raycast/api";
-import React, { useState } from "react";
-import { isEmpty, showCustomHUD } from "./utils/common-utils";
+import { open, showInFinder } from "@raycast/api";
+import React, { useEffect, useMemo, useState } from "react";
+import { getFinderPath, isEmpty, showCustomHUD } from "./utils/common-utils";
 import { FileType, TemplateType } from "./types/file-type";
-import { getTemplateFile } from "./hooks/hooks";
 import { NewFileHereListLayout } from "./components/new-file-here-list-layout";
 import { NewFileHereGridLayout } from "./components/new-file-here-grid-layout";
 import { rtfPreContent } from "./utils/constants";
 import { createdAction, layout } from "./types/preferences";
+import NewFileWithDetails from "./new-file-with-details";
+import { useTemplateFiles } from "./hooks/useTemplateFiles";
+import path, { parse } from "path";
 
 export default function NewFileWithTemplate() {
-  const [refresh, setRefresh] = useState<number>(0);
-  const launchContext = environment.launchContext;
-  const navigationTitle = launchContext?.navigationTitle || "New File With Template";
+  const navigationTitle = "New File with Template";
 
-  //hooks
-  const { folder, templateFiles, isLoading } = getTemplateFile(refresh);
+  const { data, isLoading, mutate } = useTemplateFiles();
+  const [folder, setFolder] = useState<string>("");
 
-  return layout === "List" ? (
-    <NewFileHereListLayout
-      navigationTitle={navigationTitle}
-      isLoading={isLoading}
-      templateFiles={templateFiles}
-      folder={folder}
-      setRefresh={setRefresh}
-    />
-  ) : (
-    <NewFileHereGridLayout
-      navigationTitle={navigationTitle}
-      isLoading={isLoading}
-      templateFiles={templateFiles}
-      folder={folder}
-      setRefresh={setRefresh}
-    />
-  );
+  const templateFiles = useMemo(() => {
+    return data || [];
+  }, [data]);
+
+  const section = useMemo(() => {
+    return data?.length > 0 ? "Template" : "Document";
+  }, [data]);
+
+  useEffect(() => {
+    const getFolderName = async () => {
+      const finderPath = await getFinderPath();
+      const parsedPath = parse(finderPath);
+      setFolder(parsedPath.name);
+    };
+    getFolderName().then();
+  }, [data]);
+
+  switch (layout) {
+    case "List":
+      return (
+        <NewFileHereListLayout
+          navigationTitle={navigationTitle}
+          isLoading={isLoading}
+          templateFiles={templateFiles}
+          folder={folder}
+          mutate={mutate}
+        />
+      );
+    case "Form":
+      return (
+        <NewFileWithDetails
+          newFileType={{ section: section, index: 0 }}
+          templateFiles={templateFiles}
+          folder={folder}
+          isLoading={isLoading}
+          navigationTitle={navigationTitle}
+        />
+      );
+    default:
+      return (
+        <NewFileHereGridLayout
+          navigationTitle={navigationTitle}
+          isLoading={isLoading}
+          templateFiles={templateFiles}
+          folder={folder}
+          mutate={mutate}
+        />
+      );
+  }
 }
 
-export function buildFileName(path: string, name: string, extension: string) {
-  const directoryExists = fse.existsSync(path + name + "." + extension);
-  if (!directoryExists) {
+export function buildFileName(desPath: string, name: string, extension: string) {
+  const originalPath = path.join(desPath, name + "." + extension);
+  if (!fse.existsSync(originalPath)) {
     return name + "." + extension;
   } else {
     let index = 2;
-    while (directoryExists) {
-      const newName = name + " " + index + "." + extension;
-      const directoryExists = fse.existsSync(path + newName);
-      if (!directoryExists) {
-        return newName;
-      }
+    let newName: string;
+    let newPath: string;
+
+    do {
+      newName = name + " " + index + "." + extension;
+      newPath = path.join(desPath, newName);
       index++;
-    }
-    return name + "-" + index + "." + extension;
+    } while (fse.existsSync(newPath));
+
+    return newName;
   }
 }
 
@@ -59,7 +92,7 @@ export async function createNewFile(fileType: FileType, desPath: string, fileNam
   fileName = isEmpty(fileName)
     ? buildFileName(desPath, fileType.name, fileType.extension)
     : fileName + "." + fileType.extension;
-  const filePath = desPath + fileName;
+  const filePath = path.join(desPath, fileName);
 
   switch (fileType.name) {
     case "Excel": {
@@ -97,8 +130,7 @@ export async function createNewFileByTemplate(template: TemplateType, desPath: s
       customFileName = customFileName + "." + template.extension;
     }
   }
-
-  const filePath = desPath + customFileName;
+  const filePath = path.join(desPath, customFileName);
   fse.copyFileSync(template.path, filePath);
   await showCreateSuccess(customFileName, filePath, desPath);
 }

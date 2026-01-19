@@ -1,7 +1,6 @@
 import { Icon, Image, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { format, isBefore, parseISO, startOfDay, add as addDate } from "date-fns";
-import { compareAsc } from "date-fns";
+import { compareAsc, format, isBefore, parseISO, startOfDay, add as addDate } from "date-fns";
 import { partition } from "lodash";
 import React, { useMemo } from "react";
 import { getCompletedReminders } from "swift:../../swift/AppleReminders";
@@ -12,7 +11,7 @@ import { Data, Priority, Reminder } from "./useData";
 
 const { useTimeOfDayGrouping } = getPreferenceValues<Preferences.MyReminders>();
 
-export type SortByOption = "default" | "dueDate" | "priority" | "title";
+export type SortByOption = "default" | "dueDate" | "priority" | "title" | "creationDate";
 
 export type SortByOptions = {
   label: string;
@@ -31,6 +30,7 @@ export const sortByOptions: SortByOptions = [
   { label: "Due Date", icon: Icon.List, value: "dueDate" },
   { label: "Priority", icon: Icon.Exclamationmark, value: "priority" },
   { label: "Title", icon: Icon.Lowercase, value: "title" },
+  { label: "Creation Date", icon: Icon.Clock, value: "creationDate" },
 ];
 
 export function sortByTitle(a: Reminder, b: Reminder): number {
@@ -49,6 +49,10 @@ export function sortByDate(a: Reminder, b: Reminder): number {
   }
 
   return compareAsc(new Date(a.dueDate), new Date(b.dueDate));
+}
+
+export function sortByCreationDate(a: Reminder, b: Reminder): number {
+  return compareAsc(a?.creationDate ?? new Date(), b?.creationDate ?? new Date());
 }
 
 export function sortByPriority(a: Reminder, b: Reminder): number {
@@ -138,7 +142,7 @@ export function groupByDueDates(reminders: Reminder[]) {
   }
 
   const remindersOnDate = useTimeOfDayGrouping
-    ? allDueDates.filter((date) => !isBefore(date, today))
+    ? allDueDates.filter((date) => !isBefore(date, today) && !isToday(date))
     : allDueDates.filter((date) => date);
 
   remindersOnDate.forEach((date) => {
@@ -269,6 +273,9 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
         break;
       case "dueDate":
         sortedReminders.sort(applySortOrder(orderBy, sortByDate));
+        break;
+      case "creationDate":
+        sortedReminders.sort(applySortOrder(orderBy, sortByCreationDate));
         break;
       case "priority":
         sortedReminders.sort(applySortOrder(orderBy, sortByPriority));

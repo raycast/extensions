@@ -63,6 +63,7 @@ export async function searchSpotlight(
             maxResults,
           });
           abortable?.current?.abort();
+          resolve(searchResults);
           return;
         }
 
@@ -82,20 +83,20 @@ export async function searchSpotlight(
       });
 
       searchStream.on("error", (error: Error) => {
-        // Check if this is an AbortError (which is expected during typing)
         if (error.name === "AbortError" || error.message.includes("aborted")) {
           log("debug", "searchSpotlight", "Search aborted", {
             search,
             searchScope,
           });
+          resolve(searchResults);
         } else {
           log("error", "searchSpotlight", "Error during search", {
             error,
             search,
             searchScope,
           });
+          reject(error);
         }
-        reject(error);
       });
     });
 
@@ -136,7 +137,6 @@ export async function searchSpotlight(
 
     return filteredResults;
   } catch (error: unknown) {
-    // Check if this is an AbortError, which is expected during typing
     if (error instanceof Error && (error.name === "AbortError" || error.message.includes("aborted"))) {
       log("debug", "searchSpotlight", "Search aborted", {
         search,

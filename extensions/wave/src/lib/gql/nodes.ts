@@ -18,6 +18,7 @@ const Invoice = `
     amountDue {
         value
         currency {
+            code
             symbol
         }
     }
@@ -28,6 +29,21 @@ const Invoice = `
         }
     }
     taxTotal {
+        value
+        currency {
+            symbol
+        }
+    }
+    subtotal {
+        value
+        currency {
+            symbol
+        }
+    }
+    discounts {
+        name
+    }
+    discountTotal {
         value
         currency {
             symbol
@@ -55,11 +71,12 @@ const Invoice = `
         }
         description
         quantity
-        price
+        unitPrice
         subtotal {
             value
             currency {
-            symbol
+                symbol
+                exponent
             }
         }
         total {

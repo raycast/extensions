@@ -39,9 +39,9 @@ export default function Conns(): JSX.Element {
             (item: ConnectionT) =>
               item.metadata.host.includes(searchText) ||
               item.metadata.destinationIP.includes(searchText) ||
-              item.metadata.destinationPort.includes(searchText)
+              item.metadata.destinationPort.includes(searchText),
           )
-        : ([] as Array<ConnectionT>)
+        : ([] as Array<ConnectionT>),
     );
   }, [searchText, connections.connections.length]);
 

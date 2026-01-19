@@ -89,6 +89,16 @@ const sanitizeFileName = (name: string): string => {
     .replace(/[^a-zA-Z0-9._-]/g, "");
 };
 
+/**
+ * Estimates the number of tokens in a text string using a simple heuristic.
+ * Uses the approximation: 1 token ≈ 4 characters for English code.
+ * @param content The text content to estimate tokens for.
+ * @returns The estimated number of tokens.
+ */
+const estimateTokens = (content: string): number => {
+  return Math.ceil(content.length / 4);
+};
+
 const INITIAL_STATE: AppState = {
   isLoading: false, // Don't start with loading state to prevent flicker
   currentStep: "selectDirectory",
@@ -673,6 +683,30 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       // Use results from generation
       const estimatedTokens = result.estimatedTokens;
       const fileSize = result.fileSize;
+
+      // Save generation result and move to results screen
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        progress: null,
+        generationResult: {
+          filePath: outputFilePath,
+          fileName: finalOutputFileName,
+          tokens: estimatedTokens,
+          size: fileSize,
+          copiedToClipboard: state.outputToClipboard,
+        },
+        currentStep: "showResults",
+      }));
+
+      // Copy to clipboard if requested
+      if (state.outputToClipboard) {
+        await Clipboard.copy(projectCodeString);
+      }
+
+      // Calculate estimated tokens for UI display
+      const estimatedTokens = estimateTokens(projectCodeString);
+      const fileSize = projectCodeString.length;
 
       // Save generation result and move to results screen
       setState((prev) => ({

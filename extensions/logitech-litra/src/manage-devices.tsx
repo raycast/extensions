@@ -46,19 +46,19 @@ export default function Command() {
       {devices.length
         ? devices.map((device) => (
             <List.Item
-              key={device.serial_number}
+              key={device.device_path}
               title={device.device_type}
               subtitle={`${device.is_on ? "💡" : "💡🚫"} ${device.brightness_in_lumen} lm / ${
                 device.temperature_in_kelvin
-              } K (${device.serial_number})`}
+              } K (${device.serial_number || device.device_path})`}
               actions={
                 <ActionPanel>
                   <Action
                     title="Toggle"
                     icon={Icon.LightBulb}
                     onAction={async () => {
-                      await toggle(device.serial_number, litraBinaryPath);
-                      const isDeviceOn = await isOn(device.serial_number, litraBinaryPath);
+                      await toggle(device.device_path, litraBinaryPath);
+                      const isDeviceOn = await isOn(device.device_path, litraBinaryPath);
 
                       if (isDeviceOn) {
                         await showToast({ title: `Turned on ${device.device_type}`, style: Toast.Style.Success });
@@ -75,7 +75,7 @@ export default function Command() {
                       title={`Set Temperature to ${temperature}K`}
                       icon={Icon.Temperature}
                       onAction={async () => {
-                        await setTemperatureInKelvin(device.serial_number, temperature, litraBinaryPath);
+                        await setTemperatureInKelvin(device.device_path, temperature, litraBinaryPath);
                         await showToast({
                           title: `Set ${device.device_type}'s temperature to ${temperature}K`,
                           style: Toast.Style.Success,
@@ -91,7 +91,7 @@ export default function Command() {
                       title={`Set Brightness to ${brightness}%`}
                       icon={Icon.CircleProgress100}
                       onAction={async () => {
-                        await setBrightnessPercentage(device.serial_number, brightness, litraBinaryPath);
+                        await setBrightnessPercentage(device.device_path, brightness, litraBinaryPath);
                         await showToast({
                           title: `Set ${device.device_type}'s brightness to ${brightness}%`,
                           style: Toast.Style.Success,

@@ -17,8 +17,10 @@ vercast
 ohdear
 devutils
 arc
+dia
 netlify
 pinata
+plane
 grafbase
 tailscale
 todoist
@@ -57,4 +59,13 @@ laravel-herd
 playtester
 model-context-protocol-registry
 clarify
+clipmate
+send-ai
+kaleidoscope
 exa
+v0-by-vercel
+github-copilot
+cursor-agents
+circleback
+sound-search
+pieces-raycast

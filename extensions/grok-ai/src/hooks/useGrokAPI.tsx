@@ -39,3 +39,42 @@ export function getConfiguration(): Preferences {
   });
   return config;
 }
+
+// API response types
+interface APIModel {
+  id: string;
+  object: string;
+  created: number;
+  owned_by: string;
+}
+
+interface ModelsResponse {
+  object: string;
+  data: APIModel[];
+}
+
+export async function fetchModels(apiKey: string): Promise<APIModel[]> {
+  debugLog("Fetching models from API");
+
+  try {
+    const response = await fetch("https://api.x.ai/v1/models", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
+    }
+
+    const data: ModelsResponse = await response.json();
+    debugLog("Models fetched successfully", data);
+
+    return data.data || [];
+  } catch (error) {
+    debugLog("Error fetching models", error);
+    throw error;
+  }
+}

@@ -1,5 +1,17 @@
 # Swift Command Changelog
 
+## [Add Clipboard Placeholder and Shortcuts] - 2025-11-03
+
+### Added
+
+- Add clipboard placeholder
+- Add shortcut key to insert placeholder
+- Run command on multiple terminals
+
+### Changed
+
+- Remove the display of Arguments
+
 ## [Add Import Alias Command] - 2025-04-29
 
 ### Added

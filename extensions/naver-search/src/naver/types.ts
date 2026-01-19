@@ -13,6 +13,7 @@ export interface SearchResult {
 
 export interface Preferences {
   rememberSearchHistory: boolean;
+  useClipboardFallback: boolean;
 }
 
 export const SearchTypeDict: { [key: string]: { name: string; searchURL: string; baseURL: string; isDict: boolean } } =

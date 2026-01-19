@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import _ from "lodash";
 import { todoAtom, editingTagAtom, editingTagNameAtom } from "./atoms";
-import { ActionPanel, Form, Action, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, Action, useNavigation, Icon, Color } from "@raycast/api";
 import { useState } from "react";
 
 const TodoTagForm = () => {
@@ -26,12 +26,13 @@ const TodoTagForm = () => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
             onSubmit={() => {
               editTodoTag();
               pop();
             }}
           />
-          <Action onAction={() => pop()} title="Cancel" />
+          <Action icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={() => pop()} title="Cancel" />
         </ActionPanel>
       }
     >

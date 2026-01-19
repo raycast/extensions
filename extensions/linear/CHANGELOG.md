@@ -1,5 +1,26 @@
 # Linear Changelog
 
+## [Update Shortcuts] - 2026-01-06
+
+- Updated shortcuts to make them cross-platform
+- Updated README with information
+
+## [Notification improvements] - 2025-10-29
+
+- Improved notification display to support all notification types by reading directly from the API
+- Added "Mark all as read" action to notifications command and menu bar extension
+- Bumped `@linear/sdk` to v61.0.0
+
+## [Schema deprecation and update SDK] - 2025-10-13
+
+- Bumped `@linear/sdk` to v60.0.0
+- Removed references to "roadmap" which was [deprecated](https://linear.app/changelog/2024-07-25-priority-for-projects-and-micro-adjust) July 2024
+- Corrected project list empty state message
+
+## [Status Preference] - 2025-10-09
+
+- Added "Preferred Status" preference to "Create Issue for Myself" command to specify the initial status for new issues
+
 ## [Update API and bug fixes] - 2025-04-15
 
 - Updated dependencies

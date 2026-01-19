@@ -159,14 +159,14 @@ export default function TeamSchedule({ teamId }: { teamId: string }) {
     }
 
     if (game?.competitions?.[0]?.status?.type?.state === "in") {
-      accessoryTitle = `${game?.competitions[0]?.competitors[1]?.team.abbreviation} ${game?.competitions[0]?.competitors[1]?.score.displayValue} - ${game?.competitions[0]?.competitors[0]?.team?.abbreviation} ${game?.competitions[0]?.competitors[0]?.score.displayValue}     ${period}${periodNumber} ${timeDisplay}`;
+      accessoryTitle = `${game?.competitions[0]?.competitors[1]?.team.abbreviation} ${game?.competitions[0]?.competitors[1]?.score?.displayValue || "0"} - ${game?.competitions[0]?.competitors[0]?.team?.abbreviation} ${game?.competitions[0]?.competitors[0]?.score?.displayValue || "0"}     ${period}${periodNumber} ${timeDisplay}`;
       accessoryColor = Color.Green;
       accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (game?.competitions?.[0]?.status?.type?.state === "post") {
-      accessoryTitle = `${game?.competitions?.[0]?.competitors?.[1]?.team?.abbreviation} ${game?.competitions?.[0]?.competitors?.[1]?.score.displayValue} - ${game?.competitions?.[0]?.competitors?.[0]?.team?.abbreviation} ${game?.competitions?.[0]?.competitors?.[0]?.score.displayValue}`;
+      accessoryTitle = `${game?.competitions?.[0]?.competitors?.[1]?.team?.abbreviation} ${game?.competitions?.[0]?.competitors?.[1]?.score?.displayValue || "0"} - ${game?.competitions?.[0]?.competitors?.[0]?.team?.abbreviation} ${game?.competitions?.[0]?.competitors?.[0]?.score?.displayValue || "0"}`;
       accessoryColor = Color.SecondaryText;
       accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";

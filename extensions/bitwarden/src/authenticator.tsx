@@ -6,6 +6,7 @@ import {
   BrowserExtension,
   Clipboard,
   Color,
+  environment,
   getPreferenceValues,
   Icon,
   List,
@@ -33,6 +34,7 @@ import { Err, Ok, Result, tryCatch } from "~/utils/errors";
 import { useVaultSearch } from "~/utils/search";
 import ListFolderDropdown from "~/components/ListFolderDropdown";
 import ComponentReverser from "~/components/ComponentReverser";
+import { useStateEffect } from "~/utils/hooks/useStateEffect";
 
 const AuthenticatorCommand = () => (
   <RootErrorBoundary>
@@ -247,8 +249,11 @@ function useGetCodeForAction(action: "copy" | "paste") {
 
 function useActiveTab() {
   return usePromise(async () => {
+    if (!environment.canAccess(BrowserExtension)) return undefined;
+
     const [tabs, error] = await tryCatch(BrowserExtension.getTabs());
     if (error) return undefined;
+
     const activeTab = tabs.find((tab) => tab.active);
     return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
   });
@@ -264,34 +269,42 @@ type AuthenticatorOptions = {
 const authenticator = {
   parseTotp(totpString: string): AuthenticatorOptions {
     if (totpString.includes("otpauth")) {
-      const [otp, error] = tryCatch(() => OTPAuth.URI.parse(totpString));
-      if (error) throw error;
-      if (!(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid authenticator key");
+      const [totp, parseError] = tryCatch(() => OTPAuth.URI.parse(totpString));
+      if (parseError) throw parseError;
+      if (!(totp instanceof OTPAuth.TOTP)) throw new Error("Invalid authenticator key");
 
-      return { algorithm: otp.algorithm, secret: otp.secret.base32.toString(), period: otp.period, digits: otp.digits };
+      return {
+        algorithm: totp.algorithm,
+        secret: totp.secret.base32.toString(),
+        period: totp.period,
+        digits: totp.digits,
+      };
     }
 
     return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
   },
   getGenerator(totpString: string): Result<OTPAuth.TOTP> {
-    const [options, error] = tryCatch(() => authenticator.parseTotp(totpString));
-    if (error) return Err(error);
-    return Ok(new OTPAuth.TOTP(options));
+    const [options, parseError] = tryCatch(() => authenticator.parseTotp(totpString));
+    if (parseError) {
+      captureException("Failed to parse key", parseError);
+      return Err(new Error("Failed to parse authenticator key"));
+    }
+    const [generator, initError] = tryCatch(() => new OTPAuth.TOTP(options));
+    if (initError) {
+      captureException("Failed to initialize authenticator", initError);
+      return Err(new Error("Failed to initialize authenticator"));
+    }
+
+    return Ok(generator);
   },
   useCode(item: Item, canGenerate = true) {
-    const [generator, error, isLoading = false] = useMemo(() => {
+    const [[generator, error, isLoading = false], setState] = useStateEffect(() => {
       const { totp } = item.login ?? {};
       if (!canGenerate) return Loading(new Error("Needs confirmation..."));
       if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
       if (!totp) return Err(new Error("No TOTP found"));
 
-      const [generator, error] = authenticator.getGenerator(totp);
-      if (error) return Err(error);
-
-      const [testGenerate, testGenerateError] = tryCatch(() => generator.generate());
-      if (testGenerateError || !testGenerate) return Err(new Error("Failed to initialize"));
-
-      return Ok(generator);
+      return authenticator.getGenerator(totp);
     }, [item, canGenerate]);
 
     const [code, setCode] = useState<string | null>(null);
@@ -300,29 +313,45 @@ const authenticator = {
     useEffect(() => {
       if (error) return;
 
-      const setTimeAndCode = () => {
-        const timeRemaining = Math.ceil(generator.remaining() / 1000);
-        setTime(timeRemaining);
-
-        if (timeRemaining === generator.period) {
-          setCode(generator.generate());
-        }
-      };
-
       let interval: NodeJS.Timeout | undefined;
-      // set an initial timeout to ensure the first evaluation is time accurate
-      // and then keep evaluating every second
-      const timeout = setTimeout(() => {
-        setTimeAndCode();
-        interval = setInterval(setTimeAndCode, 1000);
-      }, generator.remaining() % 1000);
+      let timeout: NodeJS.Timeout | undefined;
 
-      setCode(generator.generate()); // first generation before the interval starts
-
-      return () => {
+      const cleanup = () => {
         clearTimeout(timeout);
         clearInterval(interval);
       };
+
+      const setTimeAndCode = () => {
+        try {
+          const timeRemaining = Math.ceil(generator.remaining() / 1000);
+          setTime(timeRemaining);
+
+          if (timeRemaining === generator.period) {
+            setCode(generator.generate());
+          }
+        } catch (error) {
+          setState(Err(new Error("Failed to regenerate")));
+          cleanup();
+          captureException("Failed to regenerate", error);
+        }
+      };
+
+      try {
+        // set an initial timeout to ensure the first evaluation is time accurate
+        // and then keep evaluating every second
+        timeout = setTimeout(() => {
+          setTimeAndCode();
+          interval = setInterval(setTimeAndCode, 1000);
+        }, generator.remaining() % 1000);
+
+        setCode(generator.generate()); // first generation before the interval starts
+      } catch (error) {
+        setState(Err(new Error("Failed to generate")));
+        cleanup();
+        captureException("Failed to generate", error);
+      }
+
+      return cleanup;
     }, [item, generator]);
 
     return { code, time, error, isLoading };

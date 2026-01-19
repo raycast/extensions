@@ -26,7 +26,7 @@ export default async function Command({
     if (pathParts.length < 2 || !["p", "reel"].includes(pathParts[0])) {
       await showToast({
         title: "Error",
-        message: "Invalid Instagram post URL format.",
+        message: "Invalid Instagram post or reel URL format.",
         style: Toast.Style.Failure,
       });
       return;

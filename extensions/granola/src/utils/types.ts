@@ -28,13 +28,13 @@ export interface DocumentStructure {
 
 export interface NoteData {
   isLoading: boolean;
-  data: GetDocumentsResponse | undefined;
+  data: GetDocumentsResponse<Doc> | undefined;
   revalidate: () => void;
 }
 
 // Main response interface
-export interface GetDocumentsResponse {
-  docs?: Document[];
+export interface GetDocumentsResponse<TDoc = Document> {
+  docs?: TDoc[];
   deleted?: string[];
 }
 
@@ -77,10 +77,13 @@ export interface Document {
   notification_config: null;
 }
 
+// Lightweight Doc type - excludes large fields (notes_markdown, people) loaded on-demand
 export type Doc = Pick<
   Document,
-  "id" | "title" | "created_at" | "creation_source" | "public" | "notes_markdown" | "sharing_link_visibility"
->;
+  "id" | "title" | "created_at" | "creation_source" | "public" | "sharing_link_visibility"
+> & {
+  notes_markdown?: string; // Optional - loaded on-demand when viewing "My Notes" or exporting
+};
 
 // Notes structure
 export interface Notes {
@@ -130,7 +133,7 @@ export interface PanelsByDocId {
 
 export interface NoteActionsProps {
   doc: Doc;
-  panels: PanelsByDocId;
+  panels: PanelsByDocId | null;
   children?: ReactNode;
 }
 
@@ -187,6 +190,24 @@ export interface Creator {
 export interface Attendee {
   name?: string;
   email?: string;
+  details?: {
+    person?: {
+      name?: {
+        fullName?: string;
+      };
+      avatar?: string;
+      linkedin?: {
+        handle?: string;
+      };
+      employment?: {
+        name?: string;
+        title?: string;
+      };
+    };
+    company?: {
+      name?: string;
+    };
+  };
 }
 
 export interface TranscriptSegment {
@@ -240,4 +261,82 @@ export interface FoldersResponse {
   lists: {
     [key: string]: Folder;
   };
+}
+
+// Person type from cache
+export interface Person {
+  id: string;
+  created_at: string;
+  user_id: string;
+  name: string;
+  job_title: string;
+  company_name: string;
+  company_description: string;
+  links: Array<{
+    url: string;
+    title: string;
+  }>;
+  email: string;
+  avatar: string;
+  favorite_panel_templates?: Array<{
+    template_id: string;
+  }>;
+  user_type?: string;
+  subscription_name?: string;
+  // Meeting metadata
+  meetingCount?: number;
+  lastMeetingDate?: string;
+  meetingIds?: string[];
+}
+
+// Company type (extracted from people)
+export interface Company {
+  name: string;
+  description: string;
+  people: Person[];
+  // Company metadata
+  totalMeetings?: number;
+  lastMeetingDate?: string;
+}
+
+// Recipes types
+export interface RecipeConfig {
+  instructions: string;
+  generate_artifact?: boolean;
+  examples?: unknown[];
+}
+
+export interface Recipe {
+  slug: string;
+  config: RecipeConfig;
+  creation_context?: string;
+  id?: string;
+  user_id?: string;
+  workspace_id?: string | null;
+  visibility?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+  source_recipe_id?: string | null;
+}
+
+export interface DefaultRecipe {
+  slug: string;
+  defaultConfig: RecipeConfig;
+}
+
+export interface RecipesApiResponse {
+  userRecipes?: Recipe[];
+  defaultRecipes?: DefaultRecipe[];
+  sharedRecipes?: Recipe[];
+  publicRecipes?: Recipe[];
+  unlistedRecipes?: Recipe[];
+}
+
+export interface RecipesListResult {
+  featureEnabled: boolean;
+  userRecipes: Recipe[];
+  defaultRecipes?: DefaultRecipe[];
+  sharedRecipes?: Recipe[];
+  unlistedRecipes?: Recipe[];
 }

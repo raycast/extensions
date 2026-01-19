@@ -10,6 +10,16 @@ type AssigneeSection = {
   name: string;
 };
 
+type Section = {
+  gid: string;
+  name: string;
+};
+
+type Membership = {
+  project: Project;
+  section: Section | null;
+};
+
 type Assignee = {
   gid: string;
   name: string;
@@ -30,6 +40,11 @@ export type CustomField = {
   resource_subtype: string;
 };
 
+type Tag = {
+  gid: string;
+  name: string;
+};
+
 export type Task = {
   gid: string;
   id: string;
@@ -43,10 +58,12 @@ export type Task = {
   assignee_section: AssigneeSection;
   assignee: Assignee | null;
   custom_fields: CustomField[];
+  memberships: Membership[];
+  tags: Tag[];
 };
 
 const taskFields =
-  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name";
+  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name";
 
 export async function getMyTasks(workspace: string, showCompletedTasks: boolean) {
   const {
@@ -83,7 +100,7 @@ export async function getTask(taskId: string) {
   return data.data;
 }
 
-type TaskPayload = {
+export type TaskPayload = {
   workspace: string;
 } & Partial<{
   name: string;
@@ -93,6 +110,9 @@ type TaskPayload = {
   start_on: string;
   assignee: string;
   custom_fields: Record<string, string>;
+  html_notes: string;
+  memberships: { project: string; section?: string }[];
+  tags: string[];
 }>;
 
 export async function createTask(payload: TaskPayload) {

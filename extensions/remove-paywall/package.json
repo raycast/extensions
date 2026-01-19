@@ -8,7 +8,9 @@
   "contributors": [
     "Whitespace",
     "DannySeidel",
-    "artivilla"
+    "artivilla",
+    "maxoliinyk",
+    "0xdhrv"
   ],
   "categories": [
     "Web"
@@ -19,6 +21,20 @@
       "name": "remove-paywall",
       "title": "Remove Paywall",
       "description": "Remove the paywall from the selected or clipboard URL.",
+      "shortcut": {
+        "macOS": {
+          "modifiers": [
+            "cmd"
+          ],
+          "key": "o"
+        },
+        "Windows": {
+          "modifiers": [
+            "ctrl"
+          ],
+          "key": "o"
+        }
+      },
       "mode": "no-view",
       "arguments": [
         {
@@ -46,13 +62,61 @@
               "value": "https://www.removepaywall.com"
             },
             {
-              "title": "freedium.cfd",
-              "value": "https://freedium.cfd"
+              "title": "freedium-mirror.cfd",
+              "value": "https://freedium-mirror.cfd"
             }
           ]
         }
       ]
+    },
+    {
+      "name": "remove-paywall-current-tab",
+      "title": "Remove Paywall from Current Tab",
+      "description": "Remove the paywall from the URL in your active browser tab.",
+      "shortcut": {
+        "macOS": {
+          "modifiers": [
+            "cmd",
+            "shift"
+          ],
+          "key": "o"
+        },
+        "Windows": {
+          "modifiers": [
+            "ctrl",
+            "shift"
+          ],
+          "key": "o"
+        }
+      },
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-paywall-clipboard",
+      "title": "Remove Paywall from Clipboard",
+      "description": "Remove the paywall from a clipboard URL.",
+      "shortcut": {
+        "macOS": {
+          "modifiers": [
+            "cmd",
+            "shift"
+          ],
+          "key": "c"
+        },
+        "Windows": {
+          "modifiers": [
+            "ctrl",
+            "shift"
+          ],
+          "key": "c"
+        }
+      },
+      "mode": "no-view"
     }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "preferences": [
     {
@@ -75,28 +139,31 @@
           "value": "https://www.removepaywall.com"
         },
         {
-          "title": "Freedium (freedium.cfd)",
-          "value": "https://freedium.cfd"
+          "title": "Freedium (freedium-mirror.cfd)",
+          "value": "https://freedium-mirror.cfd"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1"
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.5",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module"
 }

@@ -1,5 +1,17 @@
 # SolusVM 2 Changelog
 
+## [Snapshots, Member Invites, Reinstall Server] - 2025-06-18
+
+- In Servers:
+    - Reinstall Server (**Application** or **Operating System**)
+    - View Snapshots
+        - Create Snapshot
+        - Remove Snapshot
+- In Members:
+    - Invite Member
+        - Resend Invite
+    - Remove Member
+
 ## [Initial Version] - 2025-05-30
 
 - View Projects

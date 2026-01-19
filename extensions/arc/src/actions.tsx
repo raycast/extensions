@@ -18,17 +18,23 @@ import { getSpaceTitle, isTab, showFailureToast } from "./utils";
 function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {
     try {
-      if (isTab(props.tabOrUrl)) {
-        const tab = props.tabOrUrl;
-        await closeMainWindow();
-        await selectTab(tab);
-        return;
+      if (typeof props.tabOrUrl === "string") {
+        await open(props.tabOrUrl, "company.thebrowser.Browser");
       } else {
-        await open(props.tabOrUrl as string, "company.thebrowser.Browser");
+        await closeMainWindow();
+        try {
+          await selectTab(props.tabOrUrl);
+        } catch (e) {
+          if (props.tabOrUrl.url) {
+            await open(props.tabOrUrl.url, "company.thebrowser.Browser");
+          } else {
+            throw e;
+          }
+        }
       }
     } catch (e) {
       console.error(e);
-      await open(props.tabOrUrl as string, "company.thebrowser.Browser");
+      await showFailureToast(e, { title: "Failed opening in Arc" });
     }
   }
 
@@ -140,6 +146,9 @@ const browserBundleIds = new Set([
   "com.microsoft.edgemac.beta",
   "com.vivaldi.vivaldi",
   "com.kagi.kagimacos", // Orion
+  "app.zen-browser.zen",
+  "company.thebrowser.dia",
+  "ai.perplexity.comet",
 ]);
 
 function OpenInOtherBrowserAction(props: { url: string }) {

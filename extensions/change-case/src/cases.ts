@@ -1,22 +1,26 @@
 import * as changeCase from "change-case";
 import {
+  CaseFunction,
+  capitalCase,
   lowerCase,
   lowerFirst,
   kebabUpperCase,
   upperCase,
   upperFirst,
   titleCase,
-  spongeCase,
+  alternatingCase,
+  randomCase,
   swapCase,
+  sentenceCase,
 } from "./customCases";
 import { getPreferenceValues } from "@raycast/api";
 
-export type CaseFunction = (input: string, options?: changeCase.Options) => string;
+export type { CaseFunction };
 export type CaseFunctions = Record<string, CaseFunction>;
 
 export const functions: CaseFunctions = {
   "Camel Case": changeCase.camelCase,
-  "Capital Case": changeCase.capitalCase,
+  "Capital Case": capitalCase,
   "Constant Case": changeCase.constantCase,
   "Dot Case": changeCase.dotCase,
   "Header Case": changeCase.trainCase,
@@ -28,9 +32,10 @@ export const functions: CaseFunctions = {
   "Pascal Case": changeCase.pascalCase,
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
-  "Random Case": spongeCase,
-  "Sentence Case": changeCase.sentenceCase,
+  "Random Case": randomCase,
+  "Sentence Case": sentenceCase,
   "Snake Case": changeCase.snakeCase,
+  "Alternating Case": alternatingCase,
   "Swap Case": swapCase,
   "Title Case": titleCase,
   "Upper Case": upperCase,
@@ -44,8 +49,9 @@ export const aliases: Record<CaseType, string[]> = {
   "Header Case": ["train", "dash"],
   "No Case": ["none"],
   "Kebab Case": ["dash", "slug", "param"],
-  "Random Case": ["sponge"],
+  "Random Case": ["random"],
   "Swap Case": ["reverse"],
+  "Alternating Case": ["alternating", "sponge"],
   "Constant Case": ["macro"],
 };
 

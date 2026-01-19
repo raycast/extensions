@@ -1,6 +1,10 @@
 # Esports Pass Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Fix Incorrect Date] - 2025-08-08
+
+- Fix timezone issue in Matches/Results command
+
+## [Windows] - 2025-05-02
 
 - Make Available on Windows
 

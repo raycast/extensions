@@ -1,126 +1,129 @@
 # Google Scholar Search for Raycast
 
-Quickly search and explore academic articles from Google Scholar directly within Raycast, with powerful bookmark management and AI tool integration.
+A streamlined Raycast extension for searching Google Scholar academic articles and research papers. Built with compliance and simplicity in mind.
 
-## Features
+## 🔍 Overview
 
-### 🔍 **Search & Discovery**
-*   **Comprehensive Search**: Utilize Google Scholar's advanced search operators directly from a Raycast form:
-    *   Search by keywords, exact phrases, authors, publication, and date ranges.
-    *   Specify word occurrence (anywhere or in the title).
-*   **Detailed Results**: View search results with titles, authors, snippets, publication year, and citation counts.
-*   **Direct Links**: Quickly open article pages or available PDF links in your browser.
-*   **Pagination**: Load more search results beyond the initial page.
-*   **Sorting**: Sort results by relevance or by date.
+This extension provides a clean, efficient interface to search Google Scholar directly from Raycast. Instead of web scraping, it constructs proper Google Scholar search URLs and opens them in your browser, ensuring full compliance while maintaining excellent usability.
 
-### ⭐ **Bookmark Management**
-*   **Save Articles**: Bookmark articles with `⌘D` shortcut directly from search results.
-*   **Dedicated Bookmarks View**: Access all saved articles via the "Show Bookmarks" command.
-*   **Smart Organization**: Sort bookmarks by date saved, title, or publication year.
-*   **Visual Indicators**: Star icons show bookmark status in search results.
-*   **Bulk Management**: Clear all bookmarks with confirmation dialog.
-*   **Persistent Storage**: Bookmarks are saved locally with complete article metadata.
+## ✨ Features
 
-### 👨‍🎓 **Author Profiles**
-*   **Profile Links**: Direct access to author Google Scholar profiles.
-*   **Quick Actions**: Open author profiles directly from search results and bookmarks.
+### 🎯 **Advanced Search Interface**
+- **Multiple search fields** - All words, exact phrases, at least one word, without words
+- **Author search** - Find papers by specific researchers
+- **Publication filtering** - Search within specific journals or conferences
+- **Smart year filtering** - Only available when relevant (disabled for newest-first sorting)
+- **Word occurrence targeting** - Search in titles only or anywhere in articles
 
-### 📚 **Citations & Export**
-*   **BibTeX Citations**: Easily copy BibTeX citations for your reference manager (`⌘⇧C`).
-*   **Multiple Access Points**: Copy citations from both search results and bookmarks.
-*   **Formatted Output**: Properly formatted BibTeX entries with all available metadata.
+### 📊 **Intelligent Sorting**
+- **Relevance-based** - Google Scholar's default ranking with year filtering
+- **Date-based** - Newest articles first (year filtering automatically disabled for logical consistency)
 
-### 🤖 **AI Tools Integration**
-*   **Programmatic Access**: Four AI tools for automated Google Scholar interactions:
-    *   `search-scholar`: Search articles with structured parameters
-    *   `getSavedBookmarks`: Retrieve all saved bookmarks
-    *   `toggleArticleBookmark`: Add or remove bookmarks
-    *   `checkIfArticleIsBookmarked`: Check bookmark status
-*   **AI Assistant Support**: Use natural language to search and manage your academic research.
+### 💾 **Search History**
+- **Recent searches** - Keeps track of your last 10 searches
+- **Quick display** - Shows 5 most recent searches in the form
+- **Smart formatting** - Displays search terms, authors, and year ranges clearly
 
-### ⚡ **Performance & Reliability**
-*   **Caching**: Recently fetched results are cached to speed up repeated searches and reduce network requests.
-*   **Robust Interaction**: Includes User-Agent rotation and smart retries to handle Google Scholar's rate limits gracefully.
-*   **Error Handling**: Comprehensive error handling with user-friendly messages and retry mechanisms.
+### 🚀 **Seamless Integration**
+- **Direct browser opening** - Results open in your default browser
+- **Google Scholar integration** - Quick access to main Google Scholar page
+- **Keyboard shortcuts** - Efficient navigation with `Cmd+O` for Google Scholar
 
-## Commands
+## 🛡️ Compliance & Privacy
 
-### Search Articles
-1. Trigger Raycast and type "Search Articles" or use the Google Scholar extension.
-2. Fill in the search form with your desired parameters.
-3. Browse results, bookmark articles, and access author profiles.
+### **Terms of Service Compliant**
+- ✅ **No web scraping** - Respects Google Scholar's robots.txt and ToS
+- ✅ **Official URLs** - Uses Google Scholar's documented search parameters
+- ✅ **Browser-based** - All interactions happen through your browser, not automated requests
 
-### Show Bookmarks
-1. Type "Show Bookmarks" in Raycast to view all saved articles.
-2. Sort bookmarks by various criteria using the dropdown menu.
-3. Manage individual bookmarks or clear all at once.
+### **Privacy Focused**
+- ✅ **Local storage only** - Search history stored locally on your device
+- ✅ **No data collection** - No analytics, tracking, or external data transmission
+- ✅ **No API keys required** - No third-party services or accounts needed
 
-## How to Use
+## 🚀 Installation
 
-### Searching for Articles
-1.  Trigger Raycast and type the command name.
-2.  Fill in the search form with your desired parameters.
-    *   Use fields like "All Words", "Exact Phrase", "Authors", "Publication", "From Year", "To Year", etc.
-    *   Choose where words should occur (anywhere in the article or in the title).
-3.  Press `Enter` or click the "Search" action.
-4.  Browse the list of search results.
-    *   View details for each article.
-    *   Use the Action Panel (`⌘K` or `Enter` on an item) to:
-        *   Open the article link in your browser.
-        *   Open the PDF link (if available).
-        *   **Save/Remove bookmark** (`⌘D`).
-        *   **Copy the BibTeX citation** (`⌘⇧C`).
-        *   **Open author profiles** (Google Scholar).
-5.  **Load More Results**: If more results are available, a "Load More Results" item will appear at the end of the list. Activate it to fetch the next page.
-6.  **Sort Results**: Use the dropdown menu at the top right to sort by "Relevance" or "Date".
+1. Open Raycast
+2. Go to Extensions
+3. Search for "Google Scholar"
+4. Install and start searching!
 
-### Managing Bookmarks
-1.  **Save Articles**: While viewing search results, press `⌘D` or use the "Save Bookmark" action on any article.
-2.  **View Bookmarks**: Use the "Show Bookmarks" command to see all saved articles.
-3.  **Sort Bookmarks**: Use the dropdown to sort by:
-    *   Date Saved (newest/oldest first)
-    *   Title (A-Z or Z-A)
-    *   Year (newest/oldest first)
-4.  **Remove Bookmarks**: Press `⌘D` or use the "Remove Bookmark" action from either search results or the bookmarks view.
-5.  **Clear All**: Use the "Clear All Bookmarks" action (with confirmation) to remove all saved articles.
+## 📖 Usage
 
-### Using AI Tools
-The extension provides AI tools that can be used with AI assistants or programmatically:
-*   Ask your AI assistant to search for specific articles
-*   Request your bookmarked articles list
-*   Add or remove bookmarks via natural language commands
-*   Check if specific articles are already bookmarked
+1. **Launch the extension** - Type "Search Articles" in Raycast
+2. **Fill search criteria** - Add any combination of search terms
+3. **Choose sorting** - Relevance (with optional year filter) or newest first
+4. **Submit** - Extension opens Google Scholar with your search in the browser
+5. **Review results** - Browse and access papers directly on Google Scholar
 
-## For Developers
+### Example Searches
 
-This extension is built using React and TypeScript with the Raycast API.
+**Machine Learning Research:**
+- All Words: `machine learning`
+- Publication: `ICML OR NeurIPS OR ICLR`
+- From Year: `2022`
 
-### Project Structure
+**Specific Author Work:**
+- Author: `Geoffrey Hinton`
+- Exact Phrase: `deep learning`
+- Sort: `Date (newest first)`
 
-*   `src/search-articles.tsx`: Main search command entry point with shared interfaces and utility functions.
-*   `src/show-bookmarks.tsx`: Dedicated command for viewing and managing bookmarked articles.
-*   `src/components/FormComponent.tsx`: Defines the search input form.
-*   `src/components/SearchResultsComponent.tsx`: Handles fetching, displaying, and interacting with search results.
-*   `src/utils/cache.ts`: Custom file-based caching mechanism.
-*   `src/utils/parser.ts`: Logic for parsing HTML from Google Scholar search results.
-*   `src/utils/userAgents.ts`: Provides a list of user agents for rotation.
-*   `src/utils/bookmarks.ts`: Bookmark management functionality and storage.
-*   `src/utils/bibtex.ts`: BibTeX citation generation utilities.
-*   `src/tools/`: AI tools for programmatic access to extension functionality.
-*   `assets/`: Contains extension icons and other static assets.
-*   `package.json`: Defines dependencies, scripts, and extension metadata.
+**Targeted Topic Search:**
+- All Words: `neural networks`
+- Without Words: `survey review`
+- Where: `In the title`
 
-### AI Tools
-The extension includes four AI tools for integration with AI assistants:
-*   `search-scholar.ts`: Search Google Scholar with structured parameters
-*   `getSavedBookmarks.ts`: Retrieve all saved bookmarked articles
-*   `toggleArticleBookmark.ts`: Toggle bookmark status for articles
-*   `checkIfArticleIsBookmarked.ts`: Check if an article is bookmarked
+## 🔧 Technical Details
 
-### Note on Rate Limiting
+### **Search URL Construction**
+The extension builds proper Google Scholar URLs using documented parameters:
+- `as_q` - All words
+- `as_epq` - Exact phrase
+- `as_oq` - At least one word
+- `as_eq` - Without words
+- `as_sauthors` - Author
+- `as_publication` - Publication
+- `as_ylo/as_yhi` - Year range
+- `scisbd` - Sort order
 
-This extension makes requests directly to Google Scholar. While it includes features like User-Agent rotation and retries on rate limit errors (like HTTP 429), excessively frequent or rapid searches may lead to temporary blocking or CAPTCHA challenges from Google Scholar. The extension aims to handle these gracefully by informing the user.
+### **Smart Form Logic**
+- Year filtering only appears when sort is set to "Relevance"
+- Prevents illogical combinations (newest articles + year restrictions)
+- Dynamic form updates based on user selections
+
+## 📋 Requirements
+
+- Raycast (latest version recommended)
+- Default web browser
+- Internet connection
+
+## 🤝 Contributing
+
+This extension is designed to be simple and compliant. If you have suggestions for improvements that maintain these principles:
+
+1. Fork the repository
+2. Make your changes
+3. Submit a pull request
+
+## 🆘 Support
+
+For issues or questions:
+- Check that your search has at least one field filled
+- Ensure your default browser can access Google Scholar
+- Try simpler search terms if you get no results
+
+## 🎯 Why This Approach?
+
+This extension was redesigned to prioritize **compliance** and **sustainability**:
+
+- **Respectful** - Follows Google Scholar's intended usage patterns
+- **Reliable** - Won't break due to anti-scraping measures
+- **Fast** - No API calls or data processing delays
+- **Transparent** - You see exactly what Google Scholar shows
+- **Future-proof** - Works with Google Scholar's official interface
+
+By opening searches in your browser, you get the full Google Scholar experience with all its features, while the extension provides the convenience of advanced search construction from Raycast.
 
 ---
 
-Enjoy enhanced academic research productivity with Google Scholar in Raycast!
+**Made with ❤️ for the research community**

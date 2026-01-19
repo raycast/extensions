@@ -101,7 +101,7 @@ function forceNewDeployment(service: Service) {
           );
           toast.style = Toast.Style.Success;
           toast.title = "Force Deployment done";
-        } catch (err) {
+        } catch (_err) {
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to deploy";
         }

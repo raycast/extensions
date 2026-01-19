@@ -25,7 +25,7 @@ export default function People() {
       failureToastOptions: {
         title: "Could not perform search",
       },
-    }
+    },
   );
 
   const titleText =

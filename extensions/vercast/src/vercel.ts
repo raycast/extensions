@@ -1,5 +1,4 @@
 import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch, { Headers } from "node-fetch";
 import type {
   Team,
   Deployment,
@@ -14,11 +13,11 @@ import type {
 } from "./types";
 
 export const token = getPreferenceValues().accessToken;
-const headers = new Headers({
+const headers = {
   Authorization: "Bearer " + token,
-});
+};
 
-export const FetchHeaders = [...headers];
+export const FetchHeaders = Object.entries(headers);
 
 const apiURL = "https://api.vercel.com/";
 
@@ -140,6 +139,25 @@ export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch 
       title: "Failed to fetch deployments",
     });
     throw new Error("Failed to fetch deployments");
+  }
+}
+
+export async function fetchLatestDeployment(teamId?: string): Promise<Deployment | null> {
+  try {
+    const fetchURL = getFetchDeploymentsURL(teamId, undefined, 1);
+    const response = await fetch(fetchURL, {
+      method: "get",
+      headers: headers,
+    });
+    const json = (await response.json()) as { deployments: Deployment[] };
+    return json.deployments[0] ?? null;
+  } catch (err) {
+    console.error(err);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to fetch latest deployment",
+    });
+    throw new Error("Failed to fetch latest deployment");
   }
 }
 

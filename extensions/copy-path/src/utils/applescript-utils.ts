@@ -21,6 +21,44 @@ export const getFocusFinderPath = async () => {
   }
 };
 
+export const scriptWindowPath = (app: Application) => `
+set windowPath to ""
+tell application "System Events"
+	tell process "${app.name}"
+		tell (1st window whose value of attribute "AXMain" is true)
+			try
+				set windowPath to value of attribute "AXDocument"
+			on error
+				set windowPath to ""
+			end try
+		end tell
+	end tell
+end tell
+return windowPath
+`;
+
+export const getFocusWindowPath = async (app: Application) => {
+  try {
+    let path = await runAppleScript(scriptWindowPath(app));
+    if (path == "missing value" || path == "") {
+      return "";
+    }
+    if (!path.startsWith("file://") && !path.startsWith("/")) {
+      return "";
+    }
+    if (path.startsWith("file://")) {
+      path = path.replace("file://", "");
+    }
+    try {
+      return decodeURIComponent(path);
+    } catch {
+      return path;
+    }
+  } catch (e) {
+    return "";
+  }
+};
+
 export const scriptWindowTitle = (app: Application) => `
 set windowTitle to ""
 try

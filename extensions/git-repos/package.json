@@ -9,7 +9,9 @@
     "nitishpdmn",
     "go_dima",
     "cameronsstone",
-    "hacdias"
+    "hacdias",
+    "AaronMoat",
+    "shkreios"
   ],
   "categories": [
     "Developer Tools",
@@ -156,5 +158,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

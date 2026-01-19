@@ -1,15 +1,16 @@
 import { showHUD, Clipboard, getPreferenceValues } from "@raycast/api";
-import { validateArguments } from "./utiils";
-import { PicsumArguments } from "./types";
+import { validateArguments } from "@/utils";
+import { PicsumArguments } from "@/types";
 
 const BASE_URL = "https://picsum.photos/";
 
 export default async function PicsumCommand(props: { arguments: PicsumArguments }) {
   const width = props.arguments.width;
   const height = props.arguments.height;
+  const grayscale = props.arguments.grayscale;
   const { action: preference = "clipboard" } = getPreferenceValues();
 
-  const image_url = `${BASE_URL}${width}${height !== "" ? "/" + height : ""}`;
+  const image_url = `${BASE_URL}${width}${height !== "" ? "/" + height : ""}${grayscale === "true" ? "?grayscale" : ""}`;
 
   // Arguements error check
   if (!validateArguments(width, height)) {

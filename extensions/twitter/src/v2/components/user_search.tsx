@@ -33,7 +33,6 @@ export function SearchUserListV2(): ReactElement {
   // INFO search user via twitter.com because twitter v2 has no endpoint for user search
   return (
     <List
-      searchText={search}
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search Users by Name or Handle (e.g. @tonka_2000 or Michael Aigner)"
     >

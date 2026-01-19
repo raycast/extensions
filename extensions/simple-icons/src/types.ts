@@ -28,6 +28,10 @@ export type IconData = {
   aliases?: Aliases;
 };
 
+export type PackageJson = {
+  version: string;
+};
+
 export type JsDelivrNpmResponse = {
   type: string;
   name: string;

@@ -1,5 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
 import { flavors, type FlavorName } from "@catppuccin/palette";
+import { getPreferenceValues } from "@raycast/api";
 
 export interface Preferences {
   flavor: keyof typeof flavors;

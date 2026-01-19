@@ -1,28 +1,38 @@
 import { dirname, basename } from "path";
 import tildify from "tildify";
-import { ZedEntry } from "./zedEntries";
+import { Workspace, ZedWorkspaceType } from "./workspaces";
 
 export interface Entry {
   id: number;
-  uri: string;
   path: string;
+  uri: string;
   title: string;
   subtitle: string;
-  is_remote: boolean;
+  type: ZedWorkspaceType;
+  isOpen?: boolean;
+  wsl?: { user: string | null; distro: string | null } | null;
 }
 
-export function getEntry(entry: ZedEntry): Entry | null {
+export function getEntry(workspace: Workspace): Entry | null {
   try {
-    const title = decodeURIComponent(basename(entry.path));
-    const subtitle = tildify(dirname(entry.path)) + (entry.host ? " [SSH: " + entry.host + "]" : "");
+    const suffix = workspace.wsl
+      ? ` [WSL: ${workspace.wsl.distro}]`
+      : workspace.type === "remote"
+        ? " [SSH: " + workspace.host + "]"
+        : "";
+
+    const title = decodeURIComponent(basename(workspace.path)) || workspace.path;
+    const subtitle = tildify(dirname(workspace.path)) + suffix;
 
     return {
-      id: entry.id,
-      uri: entry.uri,
-      path: entry.path,
+      id: workspace.id,
+      type: workspace.type,
+      path: workspace.path,
+      uri: workspace.uri,
       title,
       subtitle,
-      is_remote: !!entry.host,
+      isOpen: workspace.isOpen,
+      wsl: workspace.wsl,
     };
   } catch {
     return null;

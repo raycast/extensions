@@ -49,8 +49,12 @@ export default () => {
                 <Action.CopyToClipboard
                   title="Copy Work Item URL"
                   content={`${baseApiUrl()}/_workitems/edit/${pbi.id}`}
-                  icon={Icon.CopyClipboard}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Work Item Id"
+                  content={pbi.id}
+                  shortcut={{ modifiers: ["cmd"], key: "i" }}
                 />
               </ActionPanel>
             }
