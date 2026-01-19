@@ -19,9 +19,6 @@ declare namespace Preferences {
 
 declare namespace Arguments {
   /** Arguments passed to the `set-brightness` command */
-  export type SetBrightness = {
-  /** 1-100 */
-  "level": string
-}
+  export type SetBrightness = {}
 }
 

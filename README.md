@@ -4,8 +4,8 @@ Control macOS display brightness directly from Raycast.
 
 ## Features
 
-- **Set Brightness**: Set display brightness to any level between 1-100
-- **Show Brightness**: Display the current brightness level
+- **Set Brightness**: View current brightness and set it to any level between 1-100
+- Shows the brightness change (old → new) after setting
 
 Works with all Mac displays including XDR/Liquid Retina displays.
 
@@ -40,18 +40,12 @@ _(Coming soon)_
 
 ## Usage
 
-### Set Brightness
-
 1. Open Raycast (Cmd+Space)
 2. Type "Set Brightness"
-3. Enter a value between 1-100
-4. Press Enter
-
-### Show Brightness
-
-1. Open Raycast (Cmd+Space)
-2. Type "Show Brightness"
-3. Press Enter to see the current brightness level
+3. The form will show your current brightness level
+4. Enter a new value between 1-100
+5. Press Enter to apply
+6. A HUD notification will show the change (e.g., "☀️ 50% → 75%")
 
 ## License
 

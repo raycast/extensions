@@ -1,11 +1,12 @@
-import { showToast, Toast, showHUD, LaunchProps, LocalStorage } from "@raycast/api";
+import { showToast, Toast, showHUD, LocalStorage, Form, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { homedir } from "os";
 
 const execAsync = promisify(exec);
 
-interface SetBrightnessArguments {
+interface BrightnessFormValues {
   level: string;
 }
 
@@ -27,65 +28,109 @@ async function setBrightnessWithLunar(level: number): Promise<void> {
   await execAsync(`"${lunarPath}" set brightness ${level}`);
 }
 
-export default async function Command(props: LaunchProps<{ arguments: SetBrightnessArguments }>) {
-  const { level } = props.arguments;
+export default function Command() {
+  const [currentBrightness, setCurrentBrightness] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { pop } = useNavigation();
 
-  try {
-    // Validate input
-    const brightnessLevel = parseInt(level, 10);
-
-    if (isNaN(brightnessLevel)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid Input",
-        message: "Please enter a number between 1 and 100",
-      });
-      return;
-    }
-
-    if (brightnessLevel < 1 || brightnessLevel > 100) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Out of Range",
-        message: "Brightness must be between 1 and 100",
-      });
-      return;
-    }
-
-    // Show progress
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Setting Brightness",
-      message: `Setting to ${brightnessLevel}%...`,
-    });
-
-    try {
-      // Get current brightness before changing
-      const currentBrightness = await getBrightnessWithLunar();
-      
-      await setBrightnessWithLunar(brightnessLevel);
-      // Store the brightness value for reference
-      await LocalStorage.setItem("lastBrightness", brightnessLevel.toString());
-      
-      // Show old → new brightness in HUD
-      const oldValue = currentBrightness !== null ? `${currentBrightness}%` : "?";
-      await showHUD(`☀️ ${oldValue} → ${brightnessLevel}%`);
-    } catch (error: any) {
-      if (error.message.includes("lunar") || error.message.includes("not found")) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Lunar Not Installed",
-          message: "Install Lunar: brew install --cask lunar",
-        });
-      } else {
-        throw error;
+  // Fetch current brightness on load
+  useEffect(() => {
+    async function fetchBrightness() {
+      try {
+        const brightness = await getBrightnessWithLunar();
+        setCurrentBrightness(brightness);
+      } catch (error) {
+        console.error("Failed to fetch brightness:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
-  } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: error instanceof Error ? error.message : "Failed to set brightness",
-    });
+    fetchBrightness();
+  }, []);
+
+  async function handleSubmit(values: BrightnessFormValues) {
+    try {
+      // Validate input
+      const brightnessLevel = parseInt(values.level, 10);
+
+      if (isNaN(brightnessLevel)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Input",
+          message: "Please enter a number between 1 and 100",
+        });
+        return;
+      }
+
+      if (brightnessLevel < 1 || brightnessLevel > 100) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Out of Range",
+          message: "Brightness must be between 1 and 100",
+        });
+        return;
+      }
+
+      // Show progress
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Setting Brightness",
+        message: `Setting to ${brightnessLevel}%...`,
+      });
+
+      try {
+        await setBrightnessWithLunar(brightnessLevel);
+        // Store the brightness value for reference
+        await LocalStorage.setItem("lastBrightness", brightnessLevel.toString());
+
+        // Show old → new brightness in HUD
+        const oldValue = currentBrightness !== null ? `${currentBrightness}%` : "?";
+        await showHUD(`☀️ ${oldValue} → ${brightnessLevel}%`);
+        
+        // Close the form
+        pop();
+      } catch (error: any) {
+        if (error.message.includes("lunar") || error.message.includes("not found")) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Lunar Not Installed",
+            message: "Install Lunar: brew install --cask lunar",
+          });
+        } else {
+          throw error;
+        }
+      }
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error instanceof Error ? error.message : "Failed to set brightness",
+      });
+    }
   }
+
+  const currentBrightnessText = isLoading
+    ? "Loading..."
+    : currentBrightness !== null
+    ? `${currentBrightness}%`
+    : "Unknown";
+
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Set Brightness" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="Current Brightness" text={currentBrightnessText} />
+      <Form.TextField
+        id="level"
+        title="New Brightness"
+        placeholder="1-100"
+        info="Enter a value between 1 and 100"
+      />
+    </Form>
+  );
 }

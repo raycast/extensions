@@ -10,16 +10,8 @@
     {
       "name": "set-brightness",
       "title": "Set Brightness",
-      "description": "Set display brightness (shows old → new)",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "level",
-          "type": "text",
-          "placeholder": "1-100",
-          "required": true
-        }
-      ]
+      "description": "Set display brightness (shows current value)",
+      "mode": "view"
     }
   ],
   "dependencies": {
