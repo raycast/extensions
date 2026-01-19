@@ -121,7 +121,6 @@ export function FileActionsPanel({
 
         <Action.CreateQuicklink
           title="Create Quicklink"
-          icon={Icon.Quicklink}
           quicklink={{ link: item.webUrl, name: item.name }}
           shortcut={{
             macOS: { modifiers: ["shift", "cmd"], key: "q" },
