@@ -67,6 +67,15 @@ Discover and install Convex components:
 - See npm download stats
 - Direct links to component repositories
 
+### Configure Deploy Key
+
+Set up deploy key authentication for direct access to a specific deployment:
+
+- Alternative to OAuth browser login
+- Perfect for accessing a single deployment quickly
+- Validates credentials before saving
+- Easy disconnect option
+
 ### Open Dashboard
 
 Quickly open the current deployment in the Convex dashboard in your browser. No-view command for instant access.
@@ -86,35 +95,77 @@ Copy your current deployment URL to clipboard with a single command. Perfect for
 ### Manual Installation (Development)
 
 1. Clone this repository
-2. Navigate to `apps/raycast`
+2. Navigate to `extensions/convex`
 3. Run `npm install` or `pnpm install`
 4. Run `npm run dev` to start development mode
 
 ## Authentication
 
-This extension uses **OAuth 2.0 Device Authorization Flow** to securely authenticate with your Convex account.
+This extension supports two authentication methods:
 
-### How it works:
+### Option 1: OAuth Login (Recommended for multiple projects)
+
+Uses **OAuth 2.0 Device Authorization Flow** to securely authenticate with your Convex account.
+
+#### How it works:
 
 1. When you first use the extension, you'll see a "Sign in with Convex" button
 2. Click to start authentication - a browser window will open
 3. Complete the sign-in in your browser (you'll see a verification code)
 4. Once authenticated, you'll have access to all your Convex projects
 
-### Security:
+#### Security:
 
 - No client secrets are stored in the extension
 - Tokens are stored securely using Raycast's LocalStorage API
 - You can sign out at any time from any command
 
+### Option 2: Deploy Key (Recommended for single deployment access)
+
+Use a deploy key for direct access to a specific deployment without browser login.
+
+#### How to set up:
+
+**Method A: Using the Configure Deploy Key command (Recommended)**
+
+1. Open Raycast and search for "Configure Deploy Key"
+2. Enter your Deploy Key (get from Convex Dashboard → Settings → Deploy Key)
+3. Enter your Deployment URL (e.g., `https://your-deployment.convex.cloud`)
+4. The credentials will be validated before saving
+
+**Method B: Using Extension Preferences**
+
+1. Open Raycast Preferences (⌘,)
+2. Go to Extensions → Convex
+3. Enter your Deploy Key and Deployment URL
+
+#### Deploy Key Format:
+
+- **Deploy Key**: `instance-name|0a1b2c3d4e5f...` (from Dashboard → Settings → Deploy Key)
+- **Deployment URL**: `https://instance-name.convex.cloud`
+
+#### Important Notes:
+
+- Deploy key mode locks you to a single deployment
+- You cannot switch between projects/deployments in deploy key mode
+- To switch projects, disconnect the deploy key first
+- BigBrain features (team/project selection) are not available with deploy keys
+
 ## Usage
 
-### First Time Setup
+### First Time Setup (OAuth)
 
 1. Open Raycast and search for "Manage Projects"
 2. Click "Sign in with Convex" to authenticate
 3. Select your team, project, and deployment
 4. You're ready to use all commands!
+
+### First Time Setup (Deploy Key)
+
+1. Open Raycast and search for "Configure Deploy Key"
+2. Enter your deploy key and deployment URL
+3. Click "Save Configuration"
+4. You're ready to use data, functions, and logs commands!
 
 ### Switching Deployments
 
@@ -176,13 +227,26 @@ This extension uses **OAuth 2.0 Device Authorization Flow** to securely authenti
 
 ### "No Deployment Selected"
 
-Use the "Manage Projects" command to select a team, project, and deployment first.
+Use the "Manage Projects" command to select a team, project, and deployment first. Or use "Configure Deploy Key" to set up deploy key authentication.
 
 ### Authentication Issues
 
 1. Try signing out and signing back in
 2. Check that you have access to the team/project in the Convex Dashboard
 3. Ensure your browser can reach `auth.convex.dev`
+
+### Deploy Key Issues
+
+1. Verify the deploy key is correct (Dashboard → Settings → Deploy Key)
+2. Make sure the deployment URL matches your deployment
+3. Use "Configure Deploy Key" to validate and re-enter credentials
+
+### "BigBrain API error: 401 Unauthorized"
+
+This error occurs when trying to use OAuth features with an invalid or expired token:
+
+1. Sign out and sign back in
+2. Or switch to deploy key mode if you only need access to one deployment
 
 ### Functions Not Loading
 
@@ -198,12 +262,12 @@ Use the "Manage Projects" command to select a team, project, and deployment firs
 
 ## Development
 
-This extension is part of the [Convex Panel](https://github.com/convex-panel/convex-panel) monorepo.
+This extension is part of the [Convex Panel](https://github.com/get-convex/convex-panel) monorepo.
 
 ### Structure
 
 ```
-apps/raycast/
+extensions/convex/
 ├── src/
 │   ├── switch-project.tsx       # Manage Projects command
 │   ├── switch-deployment.tsx    # Switch Deployment command
@@ -212,12 +276,14 @@ apps/raycast/
 │   ├── logs.tsx                 # Logs viewer command
 │   ├── search-docs.tsx          # Search Docs command
 │   ├── components.tsx           # Components browser command
+│   ├── configure-deploy-key.tsx # Configure Deploy Key command
 │   ├── open-dashboard.tsx       # Open Dashboard command
 │   ├── copy-deployment-url.tsx  # Copy Deployment URL command
 │   ├── lib/
 │   │   ├── auth.ts              # OAuth device code flow
 │   │   ├── api.ts               # Convex API client
-│   │   ├── bigbrain.ts          # BigBrain API for docs/components
+│   │   ├── bigbrain.ts          # BigBrain API for teams/projects
+│   │   ├── deployKeyAuth.ts     # Deploy key authentication
 │   │   └── constants.ts         # Shared constants
 │   ├── hooks/
 │   │   ├── useConvexAuth.ts     # Authentication hook
@@ -240,15 +306,15 @@ apps/raycast/
 ### Running Locally
 
 ```bash
-cd apps/raycast
-pnpm install
-pnpm dev
+cd extensions/convex
+npm install
+npm run dev
 ```
 
 ### Building
 
 ```bash
-pnpm build
+npm run build
 ```
 
 ## Contributing

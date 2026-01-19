@@ -1,5 +1,13 @@
 # Convex Changelog
 
+## [Deploy Key Authentication] - {PR_MERGE_DATE}
+
+- Add deploy key authentication as alternative to OAuth login
+- Add "Configure Deploy Key" command for easy setup with validation
+- Add extension preferences for deploy key and deployment URL
+- Support both OAuth and deploy key modes across all commands
+- Improve error handling for authentication modes
+
 ## [Enhanced Logs, Data & Documentation] - 2026-01-15
 
 - Add documentation browser with 60+ Convex docs organized by category
@@ -14,7 +22,7 @@
 - Improve field value formatting for timestamps, objects, and arrays
 - Update log display to match Convex dashboard styling
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-15
 
 - Add project switcher to navigate between teams, projects, and deployments
 - Add function runner to execute queries, mutations, and actions with arguments
