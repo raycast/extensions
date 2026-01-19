@@ -4,9 +4,9 @@ Sync your Withings health data (weight, blood pressure, body composition) to Gar
 
 ## Screenshots
 
-![Raycast Commands](metadata/withings-sync-1.png)
-![Extension Settings](metadata/withings-sync-2.png)
-![View Measurements](metadata/withings-sync-3.png)
+<img src="metadata/withings-sync-1.png" width="600" alt="Raycast Commands" />
+<img src="metadata/withings-sync-2.png" width="600" alt="Extension Settings" />
+<img src="metadata/withings-sync-3.png" width="600" alt="View Measurements" />
 
 ## Features
 
