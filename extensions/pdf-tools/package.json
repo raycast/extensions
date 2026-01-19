@@ -198,7 +198,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.82.3",
-    "universal-selection": "^0.1.9"
+    "universal-selection": "^0.1.10"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
