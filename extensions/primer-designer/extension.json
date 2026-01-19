@@ -1,0 +1,19 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "primer-designer",
+  "title": "Primer Designer",
+  "description": "Design genetic primers for sequence amplification",
+  "icon": "extension-icon.png",
+  "author": "markiwan",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Developer Tools"],
+  "commands": [
+    {
+      "name": "primer",
+      "title": "Primer",
+      "description": "Paste a DNA sequence and instantly generate primers",
+      "mode": "view"
+    }
+  ]
+}
