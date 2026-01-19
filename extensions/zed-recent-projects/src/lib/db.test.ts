@@ -32,9 +32,11 @@ describe("Zed DB Integration Tests", () => {
         id: parseInt(row[1], 10),
         paths: row[2],
         timestamp: parseInt(row[3], 10),
-        host: row[4] || undefined,
-        user: row[5] || undefined,
-        port: row[6] ? parseInt(row[6], 10) : undefined,
+        window_id: row[4] ? parseInt(row[4], 10) : null,
+        session_id: row[5] || null,
+        host: row[6] || undefined,
+        user: row[7] || undefined,
+        port: row[8] ? parseInt(row[8], 10) : undefined,
       }));
 
       const parsedWorkspaces = zedWorkspaces
@@ -66,9 +68,11 @@ describe("Zed DB Integration Tests", () => {
         id: parseInt(row[1], 10),
         paths: row[2],
         timestamp: parseInt(row[3], 10),
-        host: row[4] || undefined,
-        user: row[5] || undefined,
-        port: row[6] ? parseInt(row[6], 10) : undefined,
+        window_id: row[4] ? parseInt(row[4], 10) : null,
+        session_id: row[5] || null,
+        host: row[6] || undefined,
+        user: row[7] || undefined,
+        port: row[8] ? parseInt(row[8], 10) : undefined,
       }));
 
       const parsedWorkspaces = zedWorkspaces

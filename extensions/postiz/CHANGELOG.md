@@ -1,5 +1,17 @@
 # Postiz Changelog
 
+## [Jump to Today + Filter by State] - 2026-01-19
+
+In Search Posts **v2**:
+- "Jump to Today" takes you to the current date parsed according to **display** settings
+- Added _state_ filter to same dropdown
+
+## [Yearly Display + Content Search] - 2026-01-17
+
+In Search Posts **v2**:
+- Searching now does a simple content inclusion search in post content rather than title
+- Added "Year" display option
+
 ## [Go to Different Periods in v2] - 2025-12-07
 
 In Search Posts **v2**:

@@ -12,7 +12,8 @@
     "sebboer",
     "shkm",
     "constantins2001",
-    "xmok"
+    "xmok",
+    "pcamminadi"
   ],
   "license": "MIT",
   "preferences": [
@@ -63,6 +64,14 @@
       "subtitle": "Clockify",
       "description": "Manage Clockify time entries with Raycast",
       "mode": "view"
+    },
+    {
+      "name": "clockifymenu",
+      "title": "Current Timer",
+      "subtitle": "Clockify",
+      "description": "Show current Clockify timer in menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
     }
   ],
   "dependencies": {
@@ -88,5 +97,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

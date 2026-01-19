@@ -1,6 +1,6 @@
 # VirusTotal Changelog
 
-## [Add IP Address Support] - {PR_MERGE_DATE}
+## [Add IP Address Support] - 2026-01-12
 
 - Added support for IP address analysis (IPv4 and IPv6)
 

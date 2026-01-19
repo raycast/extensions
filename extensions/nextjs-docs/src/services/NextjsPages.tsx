@@ -19,7 +19,7 @@ export async function getPagesFromGithub() {
   if (!data || !data.tree) throw new Error("Please visit https://nextjs.org/");
   const results = data.tree
     .filter((file: TreeType) => file.type == "blob")
-    .map((file: TopicType) => {
+    .map((file: TreeType) => {
       const item: TopicType = {
         type: "",
         path: "",

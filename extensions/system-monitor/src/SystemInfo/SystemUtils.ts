@@ -13,11 +13,13 @@ export async function calculateDiskStorage() {
       const diskName = disk.mount === "/" ? "Macintosh HD" : (disk.mount as string).split("/").pop();
       const totalSize = (disk.size / (1024 * 1024 * 1024)).toFixed(2);
       const totalAvailableStorage = (disk.available / (1024 * 1024 * 1024)).toFixed(2);
+      const usedStorage = (+totalSize - +totalAvailableStorage).toFixed(2);
 
       return {
         diskName,
         totalSize,
         totalAvailableStorage,
+        usedStorage,
       } as DiskInterface;
     });
 }

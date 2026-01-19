@@ -1,5 +1,9 @@
 # Raycast Browsers Profiles
 
+## [Fix crash when reading Chromium profiles] - 2026-01-16
+
+- Fix ENOENT error when iterating over non-profile directories in browser data folder
+
 ## [Allow the user to filter out non-interesting profiles] - 2026-01-13
 
 - Adding an option to let the users select only a subset of the available browsers

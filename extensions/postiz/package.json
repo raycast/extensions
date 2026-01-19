@@ -64,8 +64,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "date-fns": "^4.1.0",
     "turndown": "^7.2.2"
   },
