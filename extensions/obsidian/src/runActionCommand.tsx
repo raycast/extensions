@@ -54,7 +54,22 @@ function ActionInput({ action }: ComponentProps) {
       return;
     }
 
-    let expandedPath = await applyTemplates("", action.path);
+    let pathContent = "";
+    if (action.path.includes("{content}")) {
+      pathContent = content.split("\n")[0];
+      pathContent = pathContent
+        .replace(/^#+\s+/g, "")
+        .replace(/\[\[([^\]]+)\]\]/g, "$1")
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replace(/[*_`]/g, "")
+        .trim()
+        .substring(0, 100)
+        .replace(/\s+/g, "_");
+    }
+
+    let expandedPath = action.path.includes("{content}")
+      ? await applyTemplates(pathContent, action.path)
+      : await applyTemplates("", action.path);
     if (!expandedPath.toLowerCase().endsWith(".md")) {
       expandedPath += ".md";
     }
@@ -207,7 +222,7 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
               <Action.CopyToClipboard
                 title="Copy Quicklink URL"
                 content={`raycast://extensions/marcjulian/obsidian/runActionCommand?launchContext=${encodeURIComponent(
-                  JSON.stringify({ actionId: a.id })
+                  JSON.stringify({ actionId: a.id }),
                 )}`}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
