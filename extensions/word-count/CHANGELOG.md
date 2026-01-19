@@ -1,6 +1,6 @@
 # Word Count Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2026-01-19
 
 - **Added screenshot-based word counting** - Capture any text on screen and get instant counts using OCR
   - New "Count from Screenshot" command (macOS only)
