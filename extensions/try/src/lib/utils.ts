@@ -6,7 +6,6 @@ import { getTryPath } from "./constants";
 export function getTryDirectories(): TryDirectory[] {
   const tryPath = getTryPath();
   if (!existsSync(tryPath)) {
-    mkdirSync(tryPath, { recursive: true });
     return [];
   }
 
@@ -69,58 +68,45 @@ export function generateDatePrefix(): string {
 }
 
 /**
- * Resolve a unique directory name, matching try CLI behavior.
+ * Resolve a unique name by handling collisions.
  * If name ends with digits (e.g., test1), increment the number (test2, test3...).
  * Otherwise, append -2, -3, etc.
  */
-function resolveUniqueName(baseName: string): string {
-  const tryPath = getTryPath();
-  const datePrefix = generateDatePrefix();
-  const initial = `${datePrefix}-${baseName}`;
-  const initialPath = join(tryPath, initial);
-
-  if (!existsSync(initialPath)) {
-    return baseName;
+export function resolveUniqueName(name: string, exists: (candidate: string) => boolean): string {
+  if (!exists(name)) {
+    return name;
   }
 
-  // Check if name ends with digits
-  const match = baseName.match(/^(.*?)(\d+)$/);
+  const match = name.match(/^(.*?)(\d+)$/);
 
   if (match) {
     // Name ends with digits, increment the number
     const stem = match[1];
     let num = parseInt(match[2], 10) + 1;
-
-    while (true) {
-      const candidate = `${stem}${num}`;
-      const candidatePath = join(tryPath, `${datePrefix}-${candidate}`);
-      if (!existsSync(candidatePath)) {
-        return candidate;
-      }
+    while (exists(`${stem}${num}`)) {
       num++;
     }
-  } else {
-    // No numeric suffix, use -2, -3 style
-    let suffix = 2;
-    while (true) {
-      const candidate = `${baseName}-${suffix}`;
-      const candidatePath = join(tryPath, `${datePrefix}-${candidate}`);
-      if (!existsSync(candidatePath)) {
-        return candidate;
-      }
-      suffix++;
-    }
+    return `${stem}${num}`;
   }
+
+  // No numeric suffix, use -2, -3 style
+  let suffix = 2;
+  while (exists(`${name}-${suffix}`)) {
+    suffix++;
+  }
+  return `${name}-${suffix}`;
 }
 
 export function createTryDirectory(name: string): string {
   const tryPath = getTryPath();
   const datePrefix = generateDatePrefix();
   const sanitizedName = name.replace(/\s+/g, "-").toLowerCase();
-  const uniqueName = resolveUniqueName(sanitizedName);
-  const dirName = `${datePrefix}-${uniqueName}`;
-  const fullPath = join(tryPath, dirName);
 
+  const uniqueName = resolveUniqueName(`${datePrefix}-${sanitizedName}`, (candidate) =>
+    existsSync(join(tryPath, candidate)),
+  );
+
+  const fullPath = join(tryPath, uniqueName);
   mkdirSync(fullPath, { recursive: true });
 
   return fullPath;
