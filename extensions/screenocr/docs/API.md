@@ -32,14 +32,12 @@ import { LaunchType, open } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
 
 // Call ScreenOCR and receive the result via callback
-await crossLaunchCommand(
-  {
-    name: "recognize-text",
-    type: LaunchType.UserInitiated,
-    extensionName: "screenocr",
-    ownerOrAuthorName: "huzef44",
-  }
-).catch(() => {
+await crossLaunchCommand({
+  name: "recognize-text",
+  type: LaunchType.UserInitiated,
+  extensionName: "screenocr",
+  ownerOrAuthorName: "huzef44",
+}).catch(() => {
   // Redirect to Store if ScreenOCR is not installed
   open("raycast://extensions/huzef44/screenocr");
 });
@@ -51,8 +49,8 @@ await crossLaunchCommand(
 import { LaunchProps } from "@raycast/api";
 
 type OCRResult = {
-  text?: string;   // The recognized text, or null if no text was detected
-  error?: string;  // Error message if OCR failed
+  text: string | null;
+  error?: string;
 };
 
 export default function Command({ launchContext = {} }: LaunchProps<{ launchContext?: OCRResult }>) {
