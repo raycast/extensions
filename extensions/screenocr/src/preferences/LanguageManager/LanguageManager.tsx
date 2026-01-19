@@ -80,7 +80,7 @@ export const LanguagesManagerList = () => {
   const selectLanguage = (language: Language) => {
     const selectedLanguagesWithoutPrimary = selectedLanguages.filter(
       (lang) => lang.value !== preference.primaryLanguage,
-    );·
+    );
     setSelectedLanguages((prev) => [...prev, language]);
     const payload = [...selectedLanguagesWithoutPrimary, language];
     LocalStorage.setItem("SelectedLanguages", JSON.stringify(payload));
