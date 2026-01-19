@@ -1,6 +1,6 @@
 # Postiz Changelog
 
-## [Jump to Today + Filter by State] - {PR_MERGE_DATE}
+## [Jump to Today + Filter by State] - 2026-01-19
 
 In Search Posts **v2**:
 - "Jump to Today" takes you to the current date parsed according to **display** settings
