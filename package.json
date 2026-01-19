@@ -1,11 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dnb-content-viewer",
-  "title": "DNB Inhalte",
+  "name": "book-content-viewer",
+  "title": "Search Book Content",
   "description": "Show book contents of \"Deutsche Nationalbibliothek\", if ISBN 10/13 exists",
   "icon": "extension-icon.png",
   "author": "wdeu",
-  "owner": "wdeu-team",
+  "version": "1.0.0",
   "platforms": [
     "macOS",
     "Windows"
@@ -16,8 +16,8 @@
   "license": "MIT",
   "commands": [
     {
-           "name": "open-content",
-      "title": "DNB Buch-Inhaltsverzeichnis",
+           "name": "search-content",
+      "title": "Search Book Content",
       "description": "Mit der ISBN zum Inhaltsverzeichnis und/oder Inhaltstext eines Buches",
       "mode": "no-view",
       "arguments": [
