@@ -15,8 +15,6 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `set-brightness` command */
   export type SetBrightness = ExtensionPreferences & {}
-  /** Preferences accessible in the `show-brightness` command */
-  export type ShowBrightness = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -25,7 +23,5 @@ declare namespace Arguments {
   /** 1-100 */
   "level": string
 }
-  /** Arguments passed to the `show-brightness` command */
-  export type ShowBrightness = {}
 }
 

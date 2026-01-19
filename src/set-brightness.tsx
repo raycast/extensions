@@ -9,6 +9,18 @@ interface SetBrightnessArguments {
   level: string;
 }
 
+// Get current brightness using Lunar CLI
+async function getBrightnessWithLunar(): Promise<number | null> {
+  try {
+    const lunarPath = `${homedir()}/.local/bin/lunar`;
+    const { stdout } = await execAsync(`"${lunarPath}" get brightness`);
+    const match = stdout.match(/brightness:\s*(\d+)/);
+    return match ? parseInt(match[1], 10) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
 // Set brightness using Lunar CLI
 async function setBrightnessWithLunar(level: number): Promise<void> {
   const lunarPath = `${homedir()}/.local/bin/lunar`;
@@ -48,10 +60,16 @@ export default async function Command(props: LaunchProps<{ arguments: SetBrightn
     });
 
     try {
+      // Get current brightness before changing
+      const currentBrightness = await getBrightnessWithLunar();
+      
       await setBrightnessWithLunar(brightnessLevel);
-      // Store the brightness value for the "Show Brightness" command
+      // Store the brightness value for reference
       await LocalStorage.setItem("lastBrightness", brightnessLevel.toString());
-      await showHUD(`✓ Brightness set to ${brightnessLevel}%`);
+      
+      // Show old → new brightness in HUD
+      const oldValue = currentBrightness !== null ? `${currentBrightness}%` : "?";
+      await showHUD(`☀️ ${oldValue} → ${brightnessLevel}%`);
     } catch (error: any) {
       if (error.message.includes("lunar") || error.message.includes("not found")) {
         await showToast({
