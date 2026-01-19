@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira-worklogs",
+  "title": "Jira Worklogs",
+  "description": "Manage and bulk upload Jira worklogs locally",
+  "icon": "extension-icon.png",
+  "author": "davekeehl",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-worklog",
+      "title": "Add Worklog",
+      "description": "Add a new worklog to local storage or upload directly to Jira",
+      "mode": "view"
+    },
+    {
+      "name": "manage-local-worklogs",
+      "title": "Manage Local Worklogs",
+      "description": "View and manage locally stored worklogs",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "jiraDomain",
+      "title": "Jira Domain",
+      "description": "Your Jira instance domain (e.g., yourcompany.atlassian.net)",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Your Jira account email",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Jira API Token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "dailyHours",
+      "title": "Expected Daily Hours",
+      "description": "Optional: Expected hours per day (e.g., 8). Shows remaining time in Manage Worklogs.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.1",
+    "date-fns": "4.1.0",
+    "node-fetch": "3.3.2"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "4.7.0",
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "9.22.0",
+    "prettier": "3.5.3",
+    "typescript": "5.8.2",
+    "vitest": "3.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
