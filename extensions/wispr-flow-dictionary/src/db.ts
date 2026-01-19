@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 import { homedir } from "os";
 import { join } from "path";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate as uuidValidate } from "uuid";
 
 const DB_PATH = join(
   homedir(),
@@ -11,6 +11,26 @@ const DB_PATH = join(
   "flow.sqlite",
 );
 const NULL_UUID = "00000000-0000-0000-0000-000000000000";
+
+/**
+ * Escapes a string for safe use in SQLite queries.
+ * - Doubles single quotes (SQL standard escaping)
+ * - Removes null bytes which can truncate strings
+ * - Limits length to prevent DoS
+ */
+function escapeString(value: string, maxLength = 1000): string {
+  return value.slice(0, maxLength).replace(/\0/g, "").replace(/'/g, "''");
+}
+
+/**
+ * Validates that a string is a valid UUID to prevent injection in ID fields.
+ */
+function validateUuid(id: string): string {
+  if (!uuidValidate(id)) {
+    throw new Error("Invalid UUID");
+  }
+  return id;
+}
 
 export interface DictionaryEntry {
   id: string;
@@ -76,9 +96,9 @@ function formatDateForWispr(date: Date): string {
 export function addWord(phrase: string, replacement?: string): DictionaryEntry {
   const now = formatDateForWispr(new Date());
   const id = uuidv4();
-  const escapedPhrase = phrase.replace(/'/g, "''");
+  const escapedPhrase = escapeString(phrase, 255);
   const replacementValue = replacement
-    ? `'${replacement.replace(/'/g, "''")}'`
+    ? `'${escapeString(replacement, 255)}'`
     : "NULL";
 
   runQuery(`
@@ -100,9 +120,10 @@ export function addWord(phrase: string, replacement?: string): DictionaryEntry {
 }
 
 export function deleteWord(id: string): void {
+  const validId = validateUuid(id);
   const now = formatDateForWispr(new Date());
   runQuery(
-    `UPDATE Dictionary SET isDeleted = 1, modifiedAt = '${now}' WHERE id = '${id}'`,
+    `UPDATE Dictionary SET isDeleted = 1, modifiedAt = '${now}' WHERE id = '${validId}'`,
   );
 }
 
@@ -111,18 +132,19 @@ export function updateWord(
   phrase: string,
   replacement?: string,
 ): void {
+  const validId = validateUuid(id);
   const now = formatDateForWispr(new Date());
-  const escapedPhrase = phrase.replace(/'/g, "''");
+  const escapedPhrase = escapeString(phrase, 255);
   const replacementValue = replacement
-    ? `'${replacement.replace(/'/g, "''")}'`
+    ? `'${escapeString(replacement, 255)}'`
     : "NULL";
   runQuery(
-    `UPDATE Dictionary SET phrase = '${escapedPhrase}', replacement = ${replacementValue}, modifiedAt = '${now}' WHERE id = '${id}'`,
+    `UPDATE Dictionary SET phrase = '${escapedPhrase}', replacement = ${replacementValue}, modifiedAt = '${now}' WHERE id = '${validId}'`,
   );
 }
 
 export function wordExists(phrase: string): boolean {
-  const escapedPhrase = phrase.replace(/'/g, "''");
+  const escapedPhrase = escapeString(phrase, 255);
   const rows = runQueryJson(
     `SELECT id FROM Dictionary WHERE phrase = '${escapedPhrase}' AND isDeleted = 0 LIMIT 1`,
   );
