@@ -1,5 +1,6 @@
 // src/types.ts
 import ignore from "ignore";
+import { WriteStream } from "fs";
 
 /**
  * Represents a file or directory within the project structure.
@@ -49,6 +50,7 @@ export interface ProcessDirectoryOptions {
     filesProcessed: number;
     totalSize: number;
   };
+  writeStream?: WriteStream;
 }
 
 /**
