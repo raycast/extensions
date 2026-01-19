@@ -20,11 +20,10 @@ import {
   DEFAULT_MAX_FILE_SIZE_BYTES,
   MIN_MAX_FILE_SIZE_MB,
   MAX_MAX_FILE_SIZE_MB,
-  PREVIEW_MAX_FILES,
-  PREVIEW_MAX_PATHS,
   CLIPBOARD_MAX_SIZE_BYTES,
 } from "./constants";
-import { estimateTokens } from "./utils/tokens";
+import { useProcessingMode } from "./hooks/useProcessingMode";
+import { useProjectStats } from "./hooks/useProjectStats";
 // GenerationConfig is not directly used in this file, FileProcessorConfig is.
 // If GenerationConfig is only defined in types.ts and used by FileProcessorConfig,
 // then it's fine. If it was meant to be used here, we need to ensure it is.
@@ -116,6 +115,18 @@ const INITIAL_STATE: AppState = {
 export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
   // Changed props to _props
   const [state, setState] = useState<AppState>(INITIAL_STATE);
+
+  // Use hooks to manage processing mode and statistics
+  const { processOnlySelectedFiles, selectedFilePaths, setProcessOnlySelectedFiles, setSelectedFilePaths } =
+    useProcessingMode(state.finderSelectionInfo, state.useDirectoryInsteadOfFiles);
+
+  const { estimatedStats, isCalculatingStats, setEstimatedStats } = useProjectStats(
+    state.currentStep,
+    state.projectDirectory,
+    processOnlySelectedFiles,
+    selectedFilePaths,
+    state.maxFileSizeMbString,
+  );
 
   /**
    * Analyzes Finder selection and returns information for UI decision making.
@@ -244,126 +255,22 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
     initializeFinderPath();
   }, []); // Empty dependency array ensures this runs only once on mount.
 
-  /**
-   * Effect to update processing mode when finder selection or directory mode changes.
-   * Replaces the setTimeout pattern with proper React effect.
-   */
+  // Synchronize state with hooks for backward compatibility
   useEffect(() => {
-    if (state.finderSelectionInfo) {
-      const shouldUseFiles = Boolean(state.finderSelectionInfo.hasFiles && !state.useDirectoryInsteadOfFiles);
-      setState((prev) => ({
-        ...prev,
-        processOnlySelectedFiles: shouldUseFiles,
-        selectedFilePaths: shouldUseFiles ? prev.finderSelectionInfo?.selectedFiles || [] : [],
-      }));
-    }
-  }, [state.finderSelectionInfo, state.useDirectoryInsteadOfFiles]);
+    setState((prev) => ({
+      ...prev,
+      processOnlySelectedFiles,
+      selectedFilePaths,
+    }));
+  }, [processOnlySelectedFiles, selectedFilePaths]);
 
-  /**
-   * Effect to pre-calculate statistics when entering configureGeneration step.
-   * This runs in the background to estimate file size and token count.
-   * Optimized to avoid generating full output in memory - only scans files and estimates.
-   * Uses debounce to avoid recalculating on every keystroke in maxFileSizeMbString field.
-   */
   useEffect(() => {
-    // Debounce calculation to avoid interrupting user input
-    const timeoutId = setTimeout(() => {
-      async function calculatePreviewStats() {
-        if (state.currentStep !== "configureGeneration" || !state.projectDirectory) {
-          return;
-        }
-
-        if (state.isCalculatingStats || state.estimatedStats) {
-          return; // Already calculating or already calculated
-        }
-
-        setState((prev) => ({ ...prev, isCalculatingStats: true }));
-
-        try {
-          // Simple estimation based on file sizes without reading content
-          // This avoids memory issues from generating full output
-          let totalSize = 0;
-          let fileCount = 0;
-
-          const maxFileSizeBytes = parseFloat(state.maxFileSizeMbString || "1") * 1024 * 1024;
-
-          async function scanDirectory(dirPath: string): Promise<void> {
-            try {
-              const entries = await fs.readdir(dirPath, { withFileTypes: true });
-              for (const entry of entries) {
-                const fullPath = path.join(dirPath, entry.name);
-                try {
-                  const stats = await fs.stat(fullPath);
-                  if (entry.isDirectory()) {
-                    // Skip common ignored directories
-                    if (!["node_modules", ".git", "dist", "build", ".next", ".cache"].includes(entry.name)) {
-                      await scanDirectory(fullPath);
-                    }
-                  } else if (entry.isFile() && stats.size <= maxFileSizeBytes) {
-                    totalSize += stats.size;
-                    fileCount++;
-                    // Limit scanning to prevent long delays
-                    if (fileCount >= PREVIEW_MAX_FILES) {
-                      return;
-                    }
-                  }
-                } catch {
-                  // Ignore errors for individual files
-                }
-              }
-            } catch {
-              // Ignore directory read errors
-            }
-          }
-
-          if (state.processOnlySelectedFiles && state.selectedFilePaths) {
-            // Scan selected files/directories
-            for (const selectedPath of state.selectedFilePaths.slice(0, PREVIEW_MAX_PATHS)) {
-              // Limit paths for preview
-              try {
-                const stats = await fs.stat(selectedPath);
-                if (stats.isDirectory()) {
-                  await scanDirectory(selectedPath);
-                } else if (stats.isFile() && stats.size <= maxFileSizeBytes) {
-                  totalSize += stats.size;
-                  fileCount++;
-                }
-              } catch {
-                // Ignore errors
-              }
-            }
-          } else {
-            // Scan entire directory
-            await scanDirectory(state.projectDirectory);
-          }
-
-          // Estimate output size: file content + structure + metadata
-          // Add overhead for formatting (tags, metadata, etc.) - roughly 20% overhead
-          const estimatedOutputSize = Math.floor(totalSize * 1.2);
-          const estimatedTokens = estimateTokens("x".repeat(estimatedOutputSize));
-
-          setState((prev) => ({
-            ...prev,
-            estimatedStats: { size: estimatedOutputSize, tokens: estimatedTokens },
-            isCalculatingStats: false,
-          }));
-        } catch (error) {
-          console.error("Error calculating preview stats:", error);
-          setState((prev) => ({ ...prev, isCalculatingStats: false }));
-        }
-      }
-
-      calculatePreviewStats();
-    }, 1500); // 1.5s debounce to allow user to finish typing before recalculating stats
-
-    return () => clearTimeout(timeoutId);
-  }, [
-    state.currentStep,
-    state.projectDirectory,
-    state.processOnlySelectedFiles,
-    state.selectedFilePaths,
-    state.maxFileSizeMbString, // Re-added with longer debounce to update stats after user finishes typing
-  ]);
+    setState((prev) => ({
+      ...prev,
+      estimatedStats,
+      isCalculatingStats,
+    }));
+  }, [estimatedStats, isCalculatingStats]);
 
   /**
    * Finds the common parent directory for an array of paths.
@@ -503,16 +410,17 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
 
         const nextStep = "configureGeneration";
 
+        // Update processing mode using hook setters
+        setProcessOnlySelectedFiles(isMultiSelection);
+        setSelectedFilePaths(selectedPaths);
+        setEstimatedStats(null); // Reset stats to trigger recalculation with new selection
+
         setState((prev) => ({
           ...prev,
           isLoading: false,
           projectDirectory: derivedRoot,
-          selectedFilePaths: selectedPaths, // Store all selected paths
-          processOnlySelectedFiles: isMultiSelection,
           outputFileName: sanitizeFileName(`${dirName}_project_code.txt`),
           currentStep: nextStep,
-          estimatedStats: null, // Reset stats to trigger recalculation
-          isCalculatingStats: false,
           formErrors: {},
         }));
       } catch (e) {
@@ -615,13 +523,13 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
     // Determine output directory:
     // - If processing multiple selected items: save in the common parent (projectDirectory)
     // - If processing entire directory: save in parent directory (one level up)
-    const outputDirectory = state.processOnlySelectedFiles
+    const outputDirectory = processOnlySelectedFiles
       ? state.projectDirectory // Common parent for multiple selections
       : path.dirname(state.projectDirectory); // Parent directory for single directory
     const outputFilePath = path.join(outputDirectory, finalOutputFileName);
 
     // Validate that selectedFilePaths is set when processOnlySelectedFiles is true
-    if (state.processOnlySelectedFiles && (!state.selectedFilePaths || state.selectedFilePaths.length === 0)) {
+    if (processOnlySelectedFiles && (!selectedFilePaths || selectedFilePaths.length === 0)) {
       setState((prev) => ({
         ...prev,
         isLoading: false,
@@ -643,8 +551,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       maxFileSizeBytes: parseFloat(state.maxFileSizeMbString) * 1024 * 1024,
       additionalIgnorePatterns: state.additionalIgnorePatterns,
       includeAiInstructions: state.includeAiInstructions,
-      processOnlySelectedFiles: state.processOnlySelectedFiles,
-      selectedFilePaths: state.selectedFilePaths,
+      processOnlySelectedFiles,
+      selectedFilePaths,
     };
 
     try {
@@ -700,9 +608,9 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       console.error("Generation Error:", e);
       console.error("Error details:", {
         projectDirectory: state.projectDirectory,
-        processOnlySelectedFiles: state.processOnlySelectedFiles,
-        selectedFilePaths: state.selectedFilePaths,
-        selectedFilePathsLength: state.selectedFilePaths?.length,
+        processOnlySelectedFiles,
+        selectedFilePaths,
+        selectedFilePathsLength: selectedFilePaths?.length,
       });
       setState((prev) => ({
         ...prev,
@@ -798,6 +706,9 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
                   // Don't allow changing the directory selection when in directory mode
                   return;
                 }
+                // Update selected file paths using hook setter
+                setSelectedFilePaths(newFiles);
+
                 setState((prev) => {
                   const updatedSelectionInfo = prev.finderSelectionInfo
                     ? {
@@ -808,7 +719,6 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
                   return {
                     ...prev,
                     finderSelectionInfo: updatedSelectionInfo,
-                    selectedFilePaths: newFiles,
                   };
                 });
               }}
@@ -901,15 +811,15 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
         }
       >
         <Form.Description text={`Selected Project: ${state.projectDirectory}`} />
-        {state.processOnlySelectedFiles && (
-          <Form.Description text={`Processing Mode: Selected files only (${state.selectedFilePaths.length} items)`} />
+        {processOnlySelectedFiles && (
+          <Form.Description text={`Processing Mode: Selected files only (${selectedFilePaths.length} items)`} />
         )}
-        {!state.processOnlySelectedFiles && <Form.Description text="Processing Mode: Entire directory" />}
-        {state.isCalculatingStats && <Form.Description text="Calculating preview statistics..." />}
-        {state.estimatedStats && !state.isCalculatingStats && (
+        {!processOnlySelectedFiles && <Form.Description text="Processing Mode: Entire directory" />}
+        {isCalculatingStats && <Form.Description text="Calculating preview statistics..." />}
+        {estimatedStats && !isCalculatingStats && (
           <>
-            <Form.Description text={`Estimated size: ${(state.estimatedStats.size / 1024 / 1024).toFixed(2)} MB`} />
-            <Form.Description text={`Estimated tokens: ~${state.estimatedStats.tokens.toLocaleString()}`} />
+            <Form.Description text={`Estimated size: ${(estimatedStats.size / 1024 / 1024).toFixed(2)} MB`} />
+            <Form.Description text={`Estimated tokens: ~${estimatedStats.tokens.toLocaleString()}`} />
           </>
         )}
         <Form.Separator />
@@ -920,7 +830,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           value={state.outputFileName}
           error={state.formErrors.outputFileName}
           onChange={(newValue) => {
-            setState((prev) => ({ ...prev, outputFileName: newValue, estimatedStats: null }));
+            setState((prev) => ({ ...prev, outputFileName: newValue }));
+            setEstimatedStats(null);
             if (state.formErrors.outputFileName)
               setState((prev) => ({ ...prev, formErrors: { ...prev.formErrors, outputFileName: undefined } }));
           }}
@@ -933,8 +844,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           value={state.maxFileSizeMbString}
           error={state.formErrors.maxFileSizeMbString}
           onChange={(newValue) => {
-            // Reset stats to trigger recalculation with new max file size
-            setState((prev) => ({ ...prev, maxFileSizeMbString: newValue, estimatedStats: null }));
+            setState((prev) => ({ ...prev, maxFileSizeMbString: newValue }));
+            setEstimatedStats(null); // Reset stats to trigger recalculation with new max file size
             if (state.formErrors.maxFileSizeMbString)
               setState((prev) => ({ ...prev, formErrors: { ...prev.formErrors, maxFileSizeMbString: undefined } }));
           }}
@@ -963,9 +874,10 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           id="includeAiInstructions"
           label="Include AI Instructions"
           value={state.includeAiInstructions}
-          onChange={(newValue) =>
-            setState((prev) => ({ ...prev, includeAiInstructions: newValue, estimatedStats: null }))
-          }
+          onChange={(newValue) => {
+            setState((prev) => ({ ...prev, includeAiInstructions: newValue }));
+            setEstimatedStats(null);
+          }}
           info="Includes special <ai_instruction> and <ai_analysis_guide> tags in the output, which can help AI models better process the code."
         />
         <Form.Checkbox
@@ -1036,10 +948,7 @@ Use the actions below to open the file or copy its path.`;
                   finderSelectionInfo: null,
                   finderSelectedPaths: [],
                   pickerSelectedPaths: [],
-                  selectedFilePaths: [],
-                  processOnlySelectedFiles: false,
                   generationResult: null,
-                  estimatedStats: null,
                   formErrors: {},
                 }));
               }}
