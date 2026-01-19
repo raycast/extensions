@@ -250,8 +250,8 @@ function FileListItem(
             {context.file.status === "staged" && (
               <>
                 <FileUnstageAction {...context} />
-                <ToggleDetailAction controller={context.toggleController} />
                 <FileManagerActions filePath={context.file.absolutePath} />
+                <ToggleDetailAction controller={context.toggleController} />
                 <CopyToClipboardMenuAction
                   contents={[
                     { title: "Relative Path", content: context.file.relativePath, icon: Icon.Document },
@@ -266,8 +266,8 @@ function FileListItem(
               <>
                 {context.file.isConflicted && <FileResolveConflictAction {...context} />}
                 <FileStageAction {...context} />
-                <ToggleDetailAction controller={context.toggleController} />
                 <FileManagerActions filePath={context.file.absolutePath} />
+                <ToggleDetailAction controller={context.toggleController} />
                 <CopyToClipboardMenuAction
                   contents={[
                     { title: "Relative Path", content: context.file.relativePath, icon: Icon.Document },
@@ -281,7 +281,7 @@ function FileListItem(
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            {context.branches.data.currentBranch && <CommitChangesAction {...context} />}
+            <CommitChangesAction {...context} />
             <ConflictAbortAction {...context} />
             <FileStageAllAction {...context} />
             <FileUnstageAllAction {...context} />

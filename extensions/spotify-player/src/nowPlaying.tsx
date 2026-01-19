@@ -35,7 +35,7 @@ import { StartRadioAction } from "./components/StartRadioAction";
 import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
 import { getErrorMessage } from "./helpers/getError";
-import isMenuBarAvailable from "./helpers/isMenuBarAvailable";
+import { triggerMenuBarRefresh } from "./helpers/triggerMenuBarRefresh";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
@@ -203,11 +203,7 @@ function NowPlayingCommand() {
           onAction={async () => {
             try {
               await skipToNext();
-
-              if (isMenuBarAvailable()) {
-                await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
-              }
-
+              await triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to next");
                 await popToRoot();
@@ -237,11 +233,7 @@ function NowPlayingCommand() {
           onAction={async () => {
             try {
               await skipToPrevious();
-
-              if (isMenuBarAvailable()) {
-                await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
-              }
-
+              await triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to previous");
                 await popToRoot();

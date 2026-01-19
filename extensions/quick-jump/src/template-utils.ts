@@ -6,6 +6,7 @@ import {
   getEnhancedKeywords,
   combineKeywords,
   getFallbackIcon,
+  mergePlaceholders,
 } from "./utils";
 
 export function getAllAppliedTemplates(entity: Templateable, rootData: Root): string[] {
@@ -40,15 +41,16 @@ export function createTemplateDisplayUrls(
     const template = rootData.templates?.[templateKey];
     if (!template || !template.templateUrl) continue;
 
-    if (!entity.templatePlaceholders) continue;
+    const placeholders = mergePlaceholders(rootData.globalPlaceholders, entity.templatePlaceholders);
 
-    const finalUrl = applyTemplate(template.templateUrl, entity.templatePlaceholders);
+    if (!placeholders) continue;
+
+    const finalUrl = applyTemplate(template.templateUrl, placeholders);
     const tags = template.tags || [];
 
     templateUrls.push({
       key: `${keyPrefix}-template-${templateKey}`,
       title: getSafeTitle(template.title),
-      subtitle: finalUrl,
       url: finalUrl,
       keywords: combineKeywords(getEnhancedKeywords(getSafeTitle(template.title)), tags, getDomainKeywords(finalUrl)),
       icon: getFallbackIcon(template.icon || fallbackIcon, !!template.openIn),

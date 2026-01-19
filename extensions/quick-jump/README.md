@@ -14,8 +14,10 @@ Quick Jump is a Raycast extension designed to give you and your team quick, orga
 
 -   **Centralized Configuration:** Define all your links from GitLab repositories to Grafana dashboards in a single, easy-to-manage JSON file.
 -   **Powerful Templating:** Create dynamic URLs for common patterns (e.g., Kibana logs, Project dashboard, Git Urls) using placeholders.
+-   **Global Placeholders:** Define common placeholder values once and use them across all templates. Local placeholders can override global ones.
 -   **Template Groups:** Reduce configuration duplication by grouping common templates and applying them with a single line.
 -   **Smart Search:** Instantly find what you need by searching across group names, group titles, URL titles, tags (including tags on group-specific URLs), and even URL domains.
+-   **Detail Views:** Press `Cmd+D` on any item to see comprehensive details including URLs, tags, placeholders, templates, and search keywords.
 -   **"Open In" Integration:** Go beyond the browser and open links directly in their native applications, like VS Code or IntelliJ IDEA. Works with all URL types: regular URLs, group-specific URLs, and templates.
 -   **Local Icons:** Use local icon files for groups, URLs, and templates, plus automatic application icons for "Open In" actions.
 -   **Quick Editing:** An "Open Config File" action is built right in, so you can add or update your links.
@@ -25,36 +27,43 @@ Quick Jump is a Raycast extension designed to give you and your team quick, orga
 1.  After installing the extension, open the "Search" command.
 2.  Raycast will prompt you to set the **JSON File Path** in the extension's preferences.
 
+### Extension Preferences
+
+The extension provides the following preferences:
+
+- **JSON File Path** (required): Path to your JSON configuration file
+- **Show All Group URLs**: When enabled, displays all URLs from all groups directly on the main search page instead of requiring navigation into groups. Groups themselves are hidden when this option is active.
+
 ### JSON File Structure
 
-The JSON file has four main sections: `groups`, `urls`, `templates`, and `templateGroups`.
+The JSON file has five main sections: `groups`, `urls`, `templates`, `templateGroups`, and `globalPlaceholders`.
 
 ```json
 {
+  "globalPlaceholders": {
+    "company-domain": "company.net",
+    "region": "us-east-1"
+  },
   "groups": {
     "my-project": {
       "title": "My Awesome Project",
       "icon": "project.png",
-      "linkedUrls": ["gitlab-repo", "project-dashboard"],
+      "linkedUrls": ["gitlab-repo"],
       "otherUrls": {
         "staging-env": {
           "title": "Staging Environment",
           "url": "https://staging.my-project.com",
           "icon": "dashboard.png",
-          "tags": ["staging", "environment"],
-          "openIn": "com.microsoft.VSCode"
-        },
-        "local-dev": {
-          "url": "http://localhost:3000",
+          "tags": ["staging"],
           "openIn": "Google Chrome"
         }
       },
       "templatePlaceholders": {
-        "key": "my-project-name",
+        "project-id": "my-project-123",
         "path": "/path/to/project"
       },
-      "appliedTemplateGroups": ["default-templates"],
-      "tags": ["project", "frontend"]
+      "appliedTemplateGroups": ["dev-tools"],
+      "tags": ["project"]
     }
   },
   "urls": {
@@ -62,92 +71,38 @@ The JSON file has four main sections: `groups`, `urls`, `templates`, and `templa
       "title": "My Project Repo",
       "url": "https://gitlab.com/your-org/my-project",
       "icon": "gitlab.png",
-      "tags": ["git", "source-code"],
-      "openIn": "com.google.Chrome"
-    },
-    "project-dashboard": {
-      "title": "Project Dashboard",
-      "url": "https://grafana.company.net/d/project-overview",
-      "icon": "grafana.png",
+      "tags": ["git"],
+      "appliedTemplates": ["open-in-code"],
       "templatePlaceholders": {
-        "key": "my-project-123",
-        "cluster-name": "foo"
-      },
-      "appliedTemplateGroups": ["dashboard-templates"],
-      "tags": ["monitoring", "dashboard"]
-    },
-    "couchbase-cluster": {
-      "title": "Couchbase Cluster",
-      "url": "https://couchbase.company.net",
-      "icon": "couchbase.png",
-      "templatePlaceholders": {
-        "bucket-name": "user-data"
-      },
-      "appliedTemplates": ["bucket-stats", "bucket-docs"],
-      "tags": ["database", "nosql"]
+        "path": "/workspace/my-project"
+      }
     }
   },
   "templates": {
-    "project-logs": {
-      "title": "Project Logs",
-      "templateUrl": "https://your-logging-url.company.net/browse/${key}",
-      "icon": "kibana.png",
-      "tags": ["logging", "debugging"]
-    },
-    "cluster-monitoring": {
-      "title": "Cluster Monitoring",
-      "templateUrl": "https://monitoring.company.net/cluster/${cluster-name}",
+    "monitoring": {
+      "title": "Monitoring Dashboard",
+      "templateUrl": "https://grafana.${company-domain}/d/${project-id}?region=${region}",
       "icon": "grafana.png",
-      "tags": ["monitoring", "cluster"]
-    },
-    "bucket-stats": {
-      "title": "Bucket Statistics",
-      "templateUrl": "https://couchbase.company.net/buckets/${bucket-name}/stats",
-      "icon": "couchbase.png",
-      "tags": ["stats", "bucket"]
-    },
-    "bucket-docs": {
-      "title": "Bucket Documents",
-      "templateUrl": "https://couchbase.company.net/buckets/${bucket-name}/docs",
-      "icon": "couchbase.png",
-      "tags": ["docs", "bucket"]
-    },
-    "jira-ticket": {
-      "title": "Jira Ticket",
-      "templateUrl": "https://your-org.atlassian.net/browse/${key}",
-      "icon": "jira.png",
-      "tags": ["ticket", "issue"]
+      "tags": ["monitoring"]
     },
     "open-in-code": {
       "title": "Open in VSCode",
       "templateUrl": "vscode://file/${path}",
       "openIn": "com.microsoft.VSCode"
-    },
-    "open-in-intellij": {
-      "title": "Open in IntelliJ",
-      "templateUrl": "idea://open?file=${path}",
-      "openIn": "com.jetbrains.intellij"
     }
   },
   "templateGroups": {
-    "default-templates": {
-      "appliedTemplates": [
-        "project-logs",
-        "jira-ticket",
-        "open-in-code",
-        "open-in-intellij"
-      ]
-    },
-    "dashboard-templates": {
-      "appliedTemplates": ["project-logs", "cluster-monitoring"]
+    "dev-tools": {
+      "appliedTemplates": ["monitoring", "open-in-code"]
     }
   }
 }
 ```
 
+-   **globalPlaceholders:** (Optional) Define placeholder values that are available to all templates across your configuration. These can be overridden by `templatePlaceholders` defined in individual groups or URLs. Perfect for common values like domain names, cluster names, or environment-specific settings.
 -   **groups:** The main organizational unit. A group can link to shared URLs (`linkedUrls`), define group-specific URLs (`otherUrls`), apply templates, and define its own placeholder values. Each group can have an optional `title` for display purposes (if not provided, the group key is used as the title). URLs in `otherUrls` can have their own titles, icons, tags, and `openIn` applications.
 -   **urls:** A library of shared, static URLs that can be referenced by one or more groups. URLs can also have their own templates and template groups applied. Each URL can have an optional `title` for display purposes (if not provided, the URL key is used as the title). URLs also support the `openIn` field to specify which application should open the URL.
--   **templates:** Reusable URL patterns. Any instance of `${key}` will be replaced by the `templatePlaceholders` defined in the group or URL.
+-   **templates:** Reusable URL patterns. Any instance of `${placeholder}` will be replaced by values from `globalPlaceholders` or `templatePlaceholders` defined in the group or URL (with local values taking precedence).
 -   **templateGroups:** A powerful feature to reduce repetition. Define a set of templates here and apply them to your groups or URLs using the `appliedTemplateGroups` property.
 
 ### Icons
@@ -188,9 +143,52 @@ If you need icons for services not included above, you have several options:
 1. **Absolute file paths**: Use the full path to any PNG file on your system
 2. **Web URLs**: Use direct URLs to PNG files (e.g., `"icon": "https://example.com/icon.png"`)
 
+## Global Placeholders
+
+Global placeholders allow you to define common template values once and use them across all your templates. This is especially useful for:
+- Domain names that appear in multiple URLs
+- Environment-specific values (cluster names, regions, etc.)
+- Common project identifiers
+
+**Example:**
+
+```json
+{
+  "globalPlaceholders": {
+    "company-domain": "company.net",
+    "region": "us-east-1",
+    "env": "production"
+  },
+  "templates": {
+    "monitoring": {
+      "title": "Monitoring Dashboard",
+      "templateUrl": "https://grafana.${company-domain}/d/${project-id}?region=${region}"
+    },
+    "logs": {
+      "title": "Application Logs",
+      "templateUrl": "https://kibana.${company-domain}/app/logs?env=${env}"
+    }
+  },
+  "groups": {
+    "my-service": {
+      "templatePlaceholders": {
+        "project-id": "my-service-123"
+      },
+      "appliedTemplates": ["monitoring", "logs"]
+    }
+  }
+}
+```
+
+In this example:
+- `company-domain`, `region`, and `env` are defined globally
+- `project-id` is defined at the group level
+- The monitoring template uses both global (`company-domain`, `region`) and local (`project-id`) placeholders
+- Local placeholders always override global ones if they have the same name
+
 ## Using Templates and the `openIn` Field
 
-You can define templates for URLs that require dynamic values. Use `${placeholder}` syntax in the `templateUrl`, and the extension will prompt you to fill in those values.
+You can define templates for URLs that require dynamic values. Use `${placeholder}` syntax in the `templateUrl`, and values will be replaced from `globalPlaceholders` or `templatePlaceholders` (with local values taking precedence).
 
 You can also specify the application to open the URL with the `openIn` field for any URL type (regular URLs, other URLs in groups, and templates). This can be:
 - The app's name (e.g., `"Google Chrome"`, `"Visual Studio Code"`)

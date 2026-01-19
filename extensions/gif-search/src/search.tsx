@@ -1,5 +1,3 @@
-import "./fetch-polyfill";
-
 import { useState } from "react";
 import { useCachedState } from "@raycast/utils";
 

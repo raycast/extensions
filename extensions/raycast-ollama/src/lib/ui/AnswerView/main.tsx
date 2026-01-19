@@ -24,7 +24,7 @@ interface props {
  * Return JSX element with generated text and relative metadata.
  * @returns Raycast Answer View.
  */
-export function AnswerView(props: props): JSX.Element {
+export function AnswerView(props: props) {
   const {
     data: Model,
     revalidate: RevalidateModel,
@@ -41,8 +41,8 @@ export function AnswerView(props: props): JSX.Element {
     },
   });
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
-  const query: React.MutableRefObject<undefined | string> = React.useRef();
-  const images: React.MutableRefObject<undefined | RaycastImage[]> = React.useRef();
+  const query: React.MutableRefObject<undefined | string> = React.useRef(undefined);
+  const images: React.MutableRefObject<undefined | RaycastImage[]> = React.useRef(undefined);
   const [imageView, setImageView]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answer, setAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answerMetadata, setAnswerMetadata]: [
@@ -94,7 +94,7 @@ export function AnswerView(props: props): JSX.Element {
   /**
    * Answer Action Menu.
    */
-  function AnswerAction(): JSX.Element {
+  function AnswerAction() {
     return (
       <ActionPanel title="Actions">
         <Action.CopyToClipboard content={answer} />
@@ -131,7 +131,7 @@ export function AnswerView(props: props): JSX.Element {
    * @param prop.answer - Ollama Generate Response.
    * @param prop.tag - Ollama Model Tag Response.
    */
-  function AnswerMetadata(prop: { answer: OllamaApiGenerateResponse; tag: OllamaApiTagsResponseModel }): JSX.Element {
+  function AnswerMetadata(prop: { answer: OllamaApiGenerateResponse; tag: OllamaApiTagsResponseModel }) {
     return (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Model" text={prop.tag.name} />

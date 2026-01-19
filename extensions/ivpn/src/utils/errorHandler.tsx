@@ -68,7 +68,6 @@ export function handleError(
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser
-                    // eslint-disable-next-line
                     title="Get IVPN"
                     icon={Icon.Globe}
                     url={GET_IVPN_URL}
@@ -93,12 +92,7 @@ export function handleError(
                   icon={Icon.MagnifyingGlass}
                   url={RESEARCH_CLI_NOT_FOUND_ISSUE}
                 />
-                <Action.Open
-                  // eslint-disable-next-line
-                  title="Contact IVPN Support"
-                  icon={Icon.Envelope}
-                  target="mailto:support@ivpn.net"
-                />
+                <Action.Open title="Contact IVPN Support" icon={Icon.Envelope} target="mailto:support@ivpn.net" />
                 <Action
                   title="Quit Raycast"
                   icon={Icon.Power}
@@ -151,12 +145,7 @@ export function handleError(
           actions={
             <ActionPanel>
               <Action title="Reload" icon={Icon.RotateAntiClockwise} onAction={retry} />
-              <Action.OpenInBrowser
-                // eslint-disable-next-line
-                title="Visit IVPN Website"
-                icon={Icon.Globe}
-                url="https://ivpn.net"
-              />
+              <Action.OpenInBrowser title="Visit IVPN Website" icon={Icon.Globe} url="https://ivpn.net" />
             </ActionPanel>
           }
         />

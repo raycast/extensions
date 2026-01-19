@@ -12,7 +12,7 @@ const useResolver = (input: ParsedInput | null, execute = true) => {
     AD: boolean;
     CD: boolean;
     Question: { name: string; type: number }[];
-    Answer: { name: string; type: number; TTL: number; data: string }[];
+    Answer?: { name: string; type: number; TTL: number; data: string }[];
   }>(`https://1.1.1.1/dns-query?name=${input?.input}`, {
     headers: {
       accept: "application/dns-json",
@@ -31,7 +31,7 @@ const useResolver = (input: ParsedInput | null, execute = true) => {
     if (input && input.isIp) {
       return input.input;
     }
-    if (!data || isLoading) {
+    if (!data || isLoading || !data.Answer) {
       return null;
     }
 

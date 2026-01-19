@@ -1,5 +1,32 @@
 # Pipedrive Changelog
 
+## [Create & Edit Deals, Contacts, Organizations] - 2025-12-28
+
+### New Features
+
+- Create deals, contacts, and organizations directly from Raycast
+- Edit deals, contacts, and organizations from search results
+- Create a person/organization inline from form dropdowns and auto-select it
+
+### Improvements
+
+- Searchable dropdown selectors for related records
+- Cache organizations for faster contact creation and fewer API calls
+- Duplicate detection with confirmation prompts and post-create quick actions
+- Centralized API client helpers for URL building, consistent error handling, and abort-safe requests
+- Single animated toast for create/update flows to reduce noisy notifications
+
+### Security
+
+- Validate Pipedrive domain before API calls and browser actions
+- Redact API tokens from surfaced error messages
+
+### Bug Fixes
+
+- Fix shortcuts for quick access to create new items
+- Abort in-flight requests on navigation
+- Suppress failure toasts on intentional aborted requests
+
 ## [Windows Support + Fix CHANGELOG Dates] - 2025-12-04
 
 - Update `shortcut`s to be cross platform

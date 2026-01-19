@@ -1,9 +1,11 @@
-import { Icon, List } from "@raycast/api";
+import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import os from "node:os";
 
 import { Actions } from "../components/Actions";
 import { calculateDiskStorage, getOSInfo, getSerialNumber } from "./SystemUtils";
+
+const { displayMode } = getPreferenceValues<ExtensionPreferences>();
 
 export default function SystemInfo() {
   return (
@@ -50,7 +52,11 @@ function SystemInfoDetail() {
               <List.Item.Detail.Metadata.Label
                 key={index}
                 title={disk.diskName}
-                text={`${disk.totalAvailableStorage} GB available of ${disk.totalSize} GB`}
+                text={
+                  displayMode === "free"
+                    ? `${disk.totalAvailableStorage} GB available of ${disk.totalSize} GB`
+                    : `${disk.usedStorage} GB used of ${disk.totalSize} GB`
+                }
               />
             );
           })}

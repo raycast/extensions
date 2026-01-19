@@ -1,9 +1,14 @@
 import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
 import { ComputeInstance, ComputeService } from "../ComputeService";
+import { useStreamerMode } from "../../../utils/useStreamerMode";
+import { maskIPIfEnabled } from "../../../utils/maskSensitiveData";
+import { StreamerModeAction } from "../../../components/StreamerModeAction";
+import { CloudShellAction } from "../../../components/CloudShellAction";
 
 interface InstanceListItemProps {
   instance: ComputeInstance;
   service: ComputeService | null;
+  projectId: string;
   onViewDetails: (instance: ComputeInstance) => void;
   onStart: (instance: ComputeInstance) => Promise<void>;
   onStop: (instance: ComputeInstance) => Promise<void>;
@@ -14,12 +19,15 @@ interface InstanceListItemProps {
 export default function InstanceListItem({
   instance,
   service,
+  projectId,
   onViewDetails,
   onStart,
   onStop,
   onSshCommand,
   onCreateVM,
 }: InstanceListItemProps) {
+  const { isEnabled: isStreamerMode } = useStreamerMode();
+
   // Get status icon and color
   const statusIcon = getStatusIcon(instance.status);
 
@@ -27,9 +35,11 @@ export default function InstanceListItem({
   const zone = service?.formatZone(instance.zone) || instance.zone;
   const machineType = service?.formatMachineType(instance.machineType) || instance.machineType;
 
-  // Get internal and external IPs if available
-  const internalIP = instance.networkInterfaces?.[0]?.networkIP || "N/A";
-  const externalIP = instance.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP || "None";
+  // Get internal and external IPs if available (masked if streamer mode)
+  const rawInternalIP = instance.networkInterfaces?.[0]?.networkIP || "N/A";
+  const rawExternalIP = instance.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP || "None";
+  const internalIP = rawInternalIP === "N/A" ? "N/A" : maskIPIfEnabled(rawInternalIP, isStreamerMode);
+  const externalIP = rawExternalIP === "None" ? "None" : maskIPIfEnabled(rawExternalIP, isStreamerMode);
 
   return (
     <List.Item
@@ -64,6 +74,12 @@ export default function InstanceListItem({
               onAction={onCreateVM}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Privacy">
+            <StreamerModeAction />
           </ActionPanel.Section>
         </ActionPanel>
       }

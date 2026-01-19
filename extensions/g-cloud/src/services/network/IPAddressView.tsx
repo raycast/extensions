@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Clipboard } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { NetworkService, IPAddress, NetworkServiceError } from "./NetworkService";
+import { NetworkService, IPAddress } from "./NetworkService";
+import { useStreamerMode } from "../../utils/useStreamerMode";
+import { maskIPIfEnabled } from "../../utils/maskSensitiveData";
+import { StreamerModeAction } from "../../components/StreamerModeAction";
 
 interface IPAddressViewProps {
   projectId: string;
@@ -16,6 +18,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
   const [selectedRegion, setSelectedRegion] = useState<string | undefined>(undefined);
   const [regions, setRegions] = useState<string[]>([]);
   const { push } = useNavigation();
+  const { isEnabled: isStreamerMode } = useStreamerMode();
 
   useEffect(() => {
     const networkService = new NetworkService(gcloudPath, projectId);
@@ -44,7 +47,11 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
       } catch (error) {
         console.error("Error initializing:", error);
         loadingToast.hide();
-        showFailureToast(error instanceof NetworkServiceError ? error.message : "Failed to load IP addresses");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load IP addresses",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -87,7 +94,11 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
     } catch (error) {
       console.error("Error refreshing IPs:", error);
       loadingToast.hide();
-      showFailureToast(error instanceof NetworkServiceError ? error.message : "Failed to refresh IP addresses");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to refresh IP addresses",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +130,11 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
         });
       } catch (error) {
         console.error("Error fetching IPs:", error);
-        showFailureToast(error instanceof NetworkServiceError ? error.message : "Failed to fetch IP addresses");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch IP addresses",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -261,7 +276,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
           <List.Item
             key={ip.id || ip.name}
             title={ip.name}
-            subtitle={ip.address}
+            subtitle={maskIPIfEnabled(ip.address, isStreamerMode)}
             accessories={[
               {
                 text: formatAddressType(ip.addressType),
@@ -285,7 +300,10 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="IP Address Details" />
                     <List.Item.Detail.Metadata.Label title="Name" text={ip.name} />
-                    <List.Item.Detail.Metadata.Label title="IP Address" text={ip.address} />
+                    <List.Item.Detail.Metadata.Label
+                      title="IP Address"
+                      text={maskIPIfEnabled(ip.address, isStreamerMode)}
+                    />
                     <List.Item.Detail.Metadata.Label title="Description" text={ip.description || "No description"} />
                     <List.Item.Detail.Metadata.Label title="ID" text={ip.id} />
                     <List.Item.Detail.Metadata.Separator />
@@ -361,6 +379,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                     );
                   }}
                 />
+                <StreamerModeAction />
               </ActionPanel>
             }
           />
@@ -443,17 +462,29 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     networkTier?: string;
   }) {
     if (!values.name) {
-      showFailureToast("Please enter an IP address name");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Please enter an IP address name",
+      });
       return;
     }
 
     if (!values.region) {
-      showFailureToast("Please select a region for the IP address");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Please select a region for the IP address",
+      });
       return;
     }
 
     if (values.addressType === "INTERNAL" && !values.subnet) {
-      showFailureToast("Please select a subnet for internal IP address");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Please select a subnet for internal IP address",
+      });
       return;
     }
 
@@ -504,11 +535,11 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     } catch (error) {
       console.error("Error creating IP address:", error);
       loadingToast.hide();
-      showFailureToast(
-        error instanceof NetworkServiceError
-          ? error.message
-          : `Failed to create IP address: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create IP address",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }
