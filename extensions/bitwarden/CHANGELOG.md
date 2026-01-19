@@ -1,5 +1,7 @@
 # Bitwarden Changelog
 
+## [Added PasteUsernameAction] - 2026-01-01
+
 ## [Added support for Windows] - 2025-10-15
 
 ## [New Command] - 2025-10-07

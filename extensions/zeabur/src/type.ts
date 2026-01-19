@@ -43,6 +43,8 @@ export interface TemplateInfo {
   name: string;
   description: string;
   iconURL: string;
+  deploymentCnt: number;
+  services: [];
 }
 
 export interface Project {
@@ -79,6 +81,11 @@ export interface ProjectInfo {
     name: string;
     __typename: string;
   }[];
+}
+
+export interface ProjectWithServices {
+  project: ProjectInfo;
+  services: ServiceInfo[];
 }
 
 export interface ProjectServices {
@@ -151,6 +158,13 @@ export interface DeploymentInfo {
   };
 }
 
+export interface DeploymentWithContext {
+  deployment: DeploymentInfo;
+  projectId: string;
+  projectName: string;
+  serviceName: string;
+}
+
 export interface DeleteProject {
   data: {
     deleteProject: boolean;
@@ -193,5 +207,124 @@ export interface ProjectUsage {
       }[];
       budget: number;
     };
+  };
+}
+
+export interface Servers {
+  data: {
+    servers: ServerInfo[];
+  };
+}
+
+export interface ServerInfo {
+  _id: string;
+  name: string;
+  providerInfo: {
+    icon: string;
+    __typename: string;
+    code: string;
+    console: string;
+    homepage: string;
+    name: string;
+  };
+  ip: string;
+  sshPort: number;
+  sshUsername: string;
+  continent: string;
+  country: string;
+  city: string;
+  createdAt: string;
+  isAutoRenewDisabled: boolean;
+  isManaged: boolean;
+  __typename: string;
+}
+
+export interface ServerWithStatus {
+  data: {
+    server: ServerWithStatusInfo;
+  };
+}
+
+export interface ServerWithStatusInfo {
+  _id: string;
+  status: {
+    isOnline: boolean;
+    totalCPU: number;
+    totalMemory: number;
+    usedCPU: number;
+    usedMemory: number;
+    warnings: string[];
+    vmStatus: string;
+    __typename: string;
+  };
+  __typename: string;
+}
+
+// AI Hub Types
+export interface AIHubKey {
+  keyID: string;
+  alias: string;
+  cost: number;
+  __typename: string;
+}
+
+export interface AIHubTenantInfo {
+  balance: number;
+  keys: AIHubKey[];
+  providerCustomerID: string;
+  provider: string;
+  autoRechargeThreshold: number;
+  autoRechargeAmount: number;
+  __typename: string;
+}
+
+export interface AIHubTenant {
+  data: {
+    aihubTenant: AIHubTenantInfo;
+  };
+}
+
+export interface AIHubDailyUsage {
+  date: string;
+  spend: number;
+  __typename: string;
+}
+
+export interface AIHubMonthlyUsageInfo {
+  totalSpend: number;
+  dailyUsage: AIHubDailyUsage[];
+  __typename: string;
+}
+
+export interface AIHubMonthlyUsage {
+  data: {
+    aihubMonthlyUsage: AIHubMonthlyUsageInfo;
+  };
+}
+
+// AIHub Spend Logs Types
+export interface AIHubSpendLog {
+  timestamp: string;
+  cost: number;
+  totalTokens: number;
+  promptTokens: number;
+  completionTokens: number;
+  model: string;
+  keyAlias: string;
+  __typename: string;
+}
+
+export interface AIHubSpendLogsPaginatedInfo {
+  data: AIHubSpendLog[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  __typename: string;
+}
+
+export interface AIHubSpendLogsPaginated {
+  data: {
+    aihubSpendLogsPaginated: AIHubSpendLogsPaginatedInfo;
   };
 }

@@ -1,5 +1,5 @@
 import React, { ReactElement, useState } from "react";
-import { List, showToast, Toast, Action, Icon, ActionPanel } from "@raycast/api";
+import { List, showToast, Toast, Action, Icon, ActionPanel, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
   useAllLanguageSets,
@@ -28,9 +28,9 @@ const QuickLanguageSetShifterActions = () => {
   return (
     <ActionPanel.Section title="Language Set">
       <Action
-        title="Go to previous Language Set"
+        title="Go to Previous Language Set"
         icon={Icon.ArrowUp}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+        shortcut={Keyboard.Shortcut.Common.MoveUp}
         onAction={() => {
           if (selectedLanguageSetIndex <= 0) {
             setSelectedLanguageSet(allLanguages[allLanguages.length - 1]);
@@ -40,9 +40,9 @@ const QuickLanguageSetShifterActions = () => {
         }}
       />
       <Action
-        title="Go to next Language Set"
+        title="Go to Next Language Set"
         icon={Icon.ArrowDown}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+        shortcut={Keyboard.Shortcut.Common.MoveDown}
         onAction={() => {
           if (selectedLanguageSetIndex >= allLanguages.length - 1) {
             setSelectedLanguageSet(allLanguages[0]);
@@ -94,7 +94,7 @@ const DoubleWayTranslateItem: React.FC<{
                     <Action
                       title="Play Text-To-Speech"
                       icon={Icon.Play}
-                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                       onAction={() => playTTS(r.translatedText, r.langTo)}
                     />
                     <OpenOnGoogleTranslateWebsiteAction translationText={value} translation={r} />
@@ -165,7 +165,7 @@ const TranslateItem: React.FC<{
               <Action
                 title="Play Text-To-Speech"
                 icon={Icon.Play}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                 onAction={() => playTTS(result.translatedText, langToCode)}
               />
             )}

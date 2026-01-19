@@ -20,21 +20,21 @@
       "name": "mirror",
       "title": "Mirror",
       "type": "dropdown",
-      "default": "https://annas-archive.org",
+      "default": "https://annas-archive.li",
       "description": "Choose a mirror to use",
       "required": false,
       "data": [
         {
-          "value": "https://annas-archive.org",
-          "title": "https://annas-archive.org"
-        },
-        {
-          "value": "https://annas-archive.se",
-          "title": "https://annas-archive.se"
-        },
-        {
           "value": "https://annas-archive.li",
           "title": "https://annas-archive.li"
+        },
+        {
+          "value": "https://annas-archive.pm",
+          "title": "https://annas-archive.pm"
+        },
+        {
+          "value": "https://annas-archive.in",
+          "title": "https://annas-archive.in"
         }
       ]
     },
@@ -52,17 +52,17 @@
     "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "cheerio": "^1.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^9.39.1",
-    "prettier": "^3.6.2",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
     "typescript": "^5.9.3"
   },
   "scripts": {

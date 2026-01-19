@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import * as gandiAPI from "./api";
-import type { DomainAvailability } from "./types";
+import type { DomainAvailability, DomainAvailabilityPrice } from "./types";
 
 // Very light validation: "name.tld" (at least one dot, no spaces)
 const looksLikeDomain = (s: string) => /^(?:[a-z0-9-]+\.)+[a-z]{2,}$/i.test(s.trim());
@@ -24,7 +23,7 @@ const getTaxRate = (a: DomainAvailability | null) => {
 };
 
 const getLowestPrices = (a: DomainAvailability | null): LowestPrices => {
-  const priceList: any[] = a?.products?.flatMap((p: any) => (Array.isArray(p?.prices) ? p.prices : [])) ?? [];
+  const priceList = a?.products?.flatMap((p) => (Array.isArray(p?.prices) ? p.prices : [])) ?? [];
   if (priceList.length === 0) return { after: null, before: null };
   const afterVals = priceList.map((p) => (typeof p?.price_after_taxes === "number" ? p.price_after_taxes : Infinity));
   const beforeVals = priceList.map((p) =>
@@ -38,10 +37,10 @@ const getLowestPrices = (a: DomainAvailability | null): LowestPrices => {
 // Lowest prices restricted to a specific product process (e.g., create, renew)
 const getLowestPricesForProcess = (a: DomainAvailability | null, process: string): LowestPrices => {
   const pro = (process || "").toLowerCase();
-  const priceList: any[] =
+  const priceList =
     a?.products
-      ?.filter((p: any) => (p?.process || p?.action || "").toLowerCase() === pro)
-      ?.flatMap((p: any) => (Array.isArray(p?.prices) ? p.prices : [])) ?? [];
+      ?.filter((p) => (p?.process || p?.action || "").toLowerCase() === pro)
+      ?.flatMap((p) => (Array.isArray(p?.prices) ? p.prices : [])) ?? [];
   if (priceList.length === 0) return { after: null, before: null };
   const afterVals = priceList.map((p) => (typeof p?.price_after_taxes === "number" ? p.price_after_taxes : Infinity));
   const beforeVals = priceList.map((p) =>
@@ -60,7 +59,7 @@ const humanizeSectionTitle = (process?: string): string => {
   return (process || "PRICING").toString().replace(/_/g, " ");
 };
 
-const humanizeItemTitle = (process: string | undefined, price: any): string => {
+const humanizeItemTitle = (process: string | undefined, price: DomainAvailabilityPrice): string => {
   const p = String(process || "").toLowerCase();
   const unit = String(price?.duration_unit || "year");
   const min = Number(price?.min_duration ?? 1);
@@ -141,7 +140,7 @@ function PricingSections({
   if (!Array.isArray(availability.products) || availability.products.length === 0) return null;
   return (
     <>
-      {availability.products.map((product: any) => {
+      {availability.products.map((product) => {
         const prices = Array.isArray(product?.prices) ? product.prices : [];
         const sectionTitle = humanizeSectionTitle(product.process || product.action);
         return (
@@ -149,7 +148,7 @@ function PricingSections({
             {prices.length === 0 ? (
               <List.Item icon={Icon.Info} title="Pricing not available" subtitle="No price data returned" />
             ) : (
-              prices.map((price: any) => (
+              prices.map((price) => (
                 <List.Item
                   key={`${product.action}-${price.duration_unit}-${price.min_duration}-${price.max_duration}`}
                   icon={Icon.Coins}
@@ -314,7 +313,7 @@ export default function CheckAvailability() {
   }, [sld, tld, COMMON_TLDS]);
 
   type AltResult = { domain: string; availability: DomainAvailability | null };
-  const { data: altData } = usePromise(
+  const { isLoading: isLoadingAlt, data: altData } = usePromise(
     async (domains: string[]) => {
       if (altDomains.length === 0) return [] as AltResult[];
       const results = await Promise.allSettled(
@@ -379,6 +378,7 @@ export default function CheckAvailability() {
 
   return (
     <List
+      isLoading={isLoading || isLoadingAlt}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Type a domain (e.g., example.com)"

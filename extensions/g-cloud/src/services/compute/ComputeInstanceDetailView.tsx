@@ -13,7 +13,9 @@ import {
 } from "@raycast/api";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import { useMemo, useCallback } from "react";
-import { showFailureToast } from "@raycast/utils";
+import { useStreamerMode } from "../../utils/useStreamerMode";
+import { maskIPIfEnabled, maskEmailIfEnabled } from "../../utils/maskSensitiveData";
+import { StreamerModeAction } from "../../components/StreamerModeAction";
 
 interface ComputeInstanceDetailViewProps {
   instance: ComputeInstance;
@@ -30,6 +32,7 @@ export default function ComputeInstanceDetailView({
 }: ComputeInstanceDetailViewProps): JSX.Element {
   const zone = service.formatZone(instance.zone);
   const machineType = service.formatMachineType(instance.machineType);
+  const { isEnabled: isStreamerMode } = useStreamerMode();
 
   // Memoize status info to avoid re-rendering
   const statusInfo = useMemo(() => {
@@ -62,12 +65,12 @@ export default function ComputeInstanceDetailView({
         <Detail.Metadata.Label
           key={`network-${index}`}
           title={`Interface ${index + 1}`}
-          text={nic.networkIP}
+          text={maskIPIfEnabled(nic.networkIP, isStreamerMode)}
           icon={{ source: Icon.Network }}
         />
       );
     });
-  }, [instance.networkInterfaces]);
+  }, [instance.networkInterfaces, isStreamerMode]);
 
   // Memoize external IPs
   const externalIPs = useMemo(() => {
@@ -79,12 +82,12 @@ export default function ComputeInstanceDetailView({
         <Detail.Metadata.Label
           key={`external-ip-${index}`}
           title={`External IP (Interface ${index + 1})`}
-          text={externalIP}
+          text={maskIPIfEnabled(externalIP, isStreamerMode)}
           icon={{ source: Icon.Globe }}
         />
       );
     });
-  }, [instance.networkInterfaces]);
+  }, [instance.networkInterfaces, isStreamerMode]);
 
   // Memoize disks information
   const disksInfo = useMemo(() => {
@@ -151,7 +154,9 @@ export default function ComputeInstanceDetailView({
       instance.networkInterfaces.forEach((nic, index) => {
         const network = nic.network.split("/").pop() || "";
         const external = nic.accessConfigs?.find((config) => config.natIP)?.natIP || "-";
-        md += `| Interface ${index + 1} | \`${nic.networkIP}\` | \`${external}\` | ${network} |\n`;
+        const maskedInternal = maskIPIfEnabled(nic.networkIP, isStreamerMode);
+        const maskedExternal = external === "-" ? "-" : maskIPIfEnabled(external, isStreamerMode);
+        md += `| Interface ${index + 1} | \`${maskedInternal}\` | \`${maskedExternal}\` | ${network} |\n`;
       });
 
       md += "\n";
@@ -175,7 +180,7 @@ export default function ComputeInstanceDetailView({
     if (instance.serviceAccounts && instance.serviceAccounts.length > 0) {
       md += `## Service Accounts\n\n`;
       instance.serviceAccounts.forEach((sa) => {
-        md += `### ${sa.email}\n\n`;
+        md += `### ${maskEmailIfEnabled(sa.email, isStreamerMode)}\n\n`;
         md += "| Scope | Description |\n";
         md += "|-------|-------------|\n";
         sa.scopes.forEach((scope) => {
@@ -226,7 +231,7 @@ export default function ComputeInstanceDetailView({
     md += `**Tip:** Press ⌘+R to refresh instance details • Press ⌘+S to ${instance.status.toLowerCase() === "running" ? "stop" : "start"} instance\n`;
 
     return md;
-  }, [instance, machineType, zone]);
+  }, [instance, machineType, zone, isStreamerMode]);
 
   // Create action handlers with useCallback
   const copyInstanceName = useCallback(() => {
@@ -278,11 +283,13 @@ export default function ComputeInstanceDetailView({
       await onRefresh();
       popToRoot();
     } catch (error) {
-      showFailureToast(error, {
+      showToast({
+        style: Toast.Style.Failure,
         title: `Failed to Start ${instance.name}`,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }, [instance.name, zone, service, onRefresh]);
+  }, [instance.name, zone, service, onRefresh, projectId]);
 
   const handleStopInstance = useCallback(async () => {
     const shouldProceed = await confirmAlert({
@@ -306,33 +313,27 @@ export default function ComputeInstanceDetailView({
       const result = await service.stopInstance(instance.name, zone);
       loadingToast.hide();
 
-      if (result.success) {
-        if (result.isTimedOut) {
-          showToast({
-            style: Toast.Style.Success,
-            title: `Stopping ${instance.name}`,
-            message: "The instance is in the process of stopping. This may take several minutes to complete.",
-          });
-        } else {
-          showToast({
-            style: Toast.Style.Success,
-            title: `Stopped ${instance.name}`,
-            message: "The instance has been stopped",
-          });
-        }
-
-        await onRefresh();
-        popToRoot();
+      if (result.isTimedOut) {
+        showToast({
+          style: Toast.Style.Success,
+          title: `Stopping ${instance.name}`,
+          message: "The instance is in the process of stopping. This may take several minutes to complete.",
+        });
       } else {
         showToast({
-          style: Toast.Style.Failure,
-          title: `Failed to Stop ${instance.name}`,
-          message: "An error occurred while trying to stop the VM",
+          style: Toast.Style.Success,
+          title: `Stopped ${instance.name}`,
+          message: "The instance has been stopped",
         });
       }
+
+      await onRefresh();
+      popToRoot();
     } catch (error) {
-      showFailureToast(error, {
+      showToast({
+        style: Toast.Style.Failure,
         title: `Failed to Stop ${instance.name}`,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }, [instance.name, zone, service, onRefresh]);
@@ -443,6 +444,9 @@ export default function ComputeInstanceDetailView({
                 />
               )
             )}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Privacy">
+            <StreamerModeAction />
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -32,6 +32,20 @@
       "subtitle": "ClickUp",
       "description": "Browse ClickUp docs from Raycast",
       "mode": "view"
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "subtitle": "ClickUp",
+      "description": "View tasks assigned to you",
+      "mode": "view"
+    },
+    {
+      "name": "lists",
+      "title": "Browse Lists",
+      "subtitle": "ClickUp",
+      "description": "Browse all ClickUp lists",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -182,8 +196,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1",
-    "axios": "^0.24.0"
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -198,7 +211,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

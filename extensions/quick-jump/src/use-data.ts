@@ -3,9 +3,10 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Root, Preferences } from "./types";
+import { Root } from "./types";
 import { ERROR_MESSAGES } from "./constants";
 import { validateConfiguration, ValidationResult } from "./validation";
+import { clearKeywordCache, clearDomainCache } from "./utils";
 
 export function useData() {
   const [data, setData] = useState<Root | null>(null);
@@ -52,6 +53,11 @@ export function useData() {
       const validation = validateConfiguration(jsonData);
       setValidationResult(validation);
       lastFileStats.current = currentFileStats;
+
+      // Clear caches when config reloads to avoid stale data
+      clearKeywordCache();
+      clearDomainCache();
+
       setData(jsonData);
     } catch (err) {
       console.error("Failed to load configuration:", err);

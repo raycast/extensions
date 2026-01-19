@@ -1,5 +1,9 @@
 # Prism Launcher Changelog
 
+## [Fix] - 2026-01-09
+
+- Removed workaround and moved to using app picker
+
 ## [Fix] - 2025-12-01
 
 - Actual temp fix for windows
