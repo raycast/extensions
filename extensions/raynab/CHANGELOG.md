@@ -1,6 +1,6 @@
 # Raynab Changelog
 
-## [Fixed Invalid Date Error in Transaction Form] - {PR_MERGE_DATE}
+## [Fixed Invalid Date Error in Transaction Form] - 2026-01-19
 
 ### 🐞 Bug Fixes
 - Fixed `RangeError: Invalid time value` error that occurred when creating transactions
