@@ -5,7 +5,7 @@ The file is located at `~/Library/Application Support/com.nuebling.mac-mouse-fix
 
 A custom config path can be specified in the extension preferences if your config file is in a different location.
 
-It contains entries for all settings of the MMF app. Editing a value in the file will need a reload of the MMF helper process for the udpate to appear in the app.
+It contains entries for all settings of the MMF app. Editing a value in the file will need a reload of the MMF helper process for the update to appear in the app.
 
 ## MMF Helper Process
 
