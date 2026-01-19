@@ -1,5 +1,9 @@
 # Font Sniper Changelog
 
+## Chore - {PR_MERGE_DATE}
+
+- Added disclaimer to the extension description
+
 ## 2026-01-16
 
 - Added Windows support
