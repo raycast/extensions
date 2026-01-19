@@ -1,4 +1,4 @@
-import { showToast, Toast, LaunchProps } from "@raycast/api";
+import { showToast, Toast, showHUD, LaunchProps } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 
@@ -6,6 +6,35 @@ const execAsync = promisify(exec);
 
 interface SetBrightnessArguments {
   level: string;
+}
+
+// AppleScript to set brightness using keyboard simulation
+async function setBrightnessWithKeys(targetLevel: number): Promise<void> {
+  // First, get current brightness to calculate steps
+  let currentBrightness = 50; // Default assumption
+  
+  try {
+    const { stdout } = await execAsync("brightness -l 2>/dev/null | grep -oE '[0-9.]+$'");
+    const value = parseFloat(stdout.trim());
+    if (!isNaN(value)) {
+      currentBrightness = Math.round(value * 100);
+    }
+  } catch {
+    // If we can't get current brightness, start from middle
+  }
+
+  const diff = targetLevel - currentBrightness;
+  const steps = Math.abs(diff);
+  const keyCode = diff > 0 ? 144 : 145; // 144 = brightness up, 145 = brightness down
+
+  if (steps === 0) {
+    return;
+  }
+
+  // Press the brightness key multiple times
+  const script = `repeat ${steps} times\n  tell application "System Events" to key code ${keyCode}\n  delay 0.05\nend repeat`;
+  
+  await execAsync(`osascript -e '${script}'`);
 }
 
 export default async function Command(props: LaunchProps<{ arguments: SetBrightnessArguments }>) {
@@ -33,35 +62,25 @@ export default async function Command(props: LaunchProps<{ arguments: SetBrightn
       return;
     }
 
-    // Convert to 0-1 scale for the brightness command
-    const brightnessValue = brightnessLevel / 100;
-
-    // Show progress toast
+    // Show progress
     await showToast({
       style: Toast.Style.Animated,
       title: "Setting Brightness",
       message: `Setting to ${brightnessLevel}%...`,
     });
 
-    // Execute brightness command
     try {
-      await execAsync(`brightness ${brightnessValue.toFixed(2)}`);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Brightness Set",
-        message: `Display brightness set to ${brightnessLevel}%`,
-      });
-    } catch (execError: any) {
-      // Check if brightness tool is not installed
-      if (execError.message.includes("command not found") || execError.message.includes("not found")) {
+      await setBrightnessWithKeys(brightnessLevel);
+      await showHUD(`✓ Brightness set to ${brightnessLevel}%`);
+    } catch (error: any) {
+      if (error.message.includes("not allowed")) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Brightness Tool Not Found",
-          message: "Please install: brew install brightness",
+          title: "Permission Required",
+          message: "Grant Raycast Accessibility permission in System Settings",
         });
       } else {
-        throw execError;
+        throw error;
       }
     }
   } catch (error) {

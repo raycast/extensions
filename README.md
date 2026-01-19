@@ -9,11 +9,26 @@ Control macOS display brightness directly from Raycast.
 
 ## Prerequisites
 
-This extension requires the `brightness` CLI tool to be installed:
+### 1. Install brightness tool
 
 ```bash
 brew install brightness
 ```
+
+### 2. Grant Raycast Permissions
+
+For brightness control to work, Raycast needs permissions:
+
+1. Open **System Settings** → **Privacy & Security**
+2. Grant Raycast access to:
+   - **Accessibility** (required for XDR displays)
+   - **Screen Recording** (may be needed)
+
+**Note for XDR Display Users**: The standard `brightness` tool may not work with XDR displays (Liquid Retina XDR). If you encounter errors, consider using:
+- [BetterDisplay](https://github.com/waydabber/BetterDisplay) (recommended)
+- [Lunar](https://lunar.fyi/)
+
+These apps provide better XDR display support and can be controlled via CLI or Raycast extensions.
 
 ## Installation
 
