@@ -1,6 +1,6 @@
 # Selfh.st Icons Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-01-19
 
 - Add Windows Support
 - Update dependencies
