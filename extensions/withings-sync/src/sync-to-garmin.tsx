@@ -335,7 +335,6 @@ export default function SyncToGarmin() {
         endDate,
       );
 
-
       // Write debug data to file for inspection
       await writeDebugData("garmin-check", {
         timestamp: new Date().toISOString(),
