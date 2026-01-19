@@ -8,6 +8,7 @@ import {
   Clipboard,
   Form,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
@@ -468,7 +469,7 @@ ${isArchived ? "*This item has been completed*" : "*Press Enter to pop this item
                             <Action.Push
                               title="Edit Item"
                               icon={Icon.Pencil}
-                              shortcut={{ modifiers: ["cmd"], key: "e" }}
+                              shortcut={Keyboard.Shortcut.Common.Edit}
                               target={
                                 <EditItemForm item={item} onSave={loadQueue} />
                               }
@@ -476,7 +477,7 @@ ${isArchived ? "*This item has been completed*" : "*Press Enter to pop this item
                           </ActionPanel.Section>
                           <ActionPanel.Section title="Reorder">
                             <Action
-                              title="Move Up"
+                              title="Move up"
                               icon={Icon.ChevronUp}
                               shortcut={{
                                 modifiers: ["shift"],
@@ -498,11 +499,11 @@ ${isArchived ? "*This item has been completed*" : "*Press Enter to pop this item
                             <Action
                               title={`Pop from ${queueName}`}
                               icon={Icon.Bolt}
-                              shortcut={{ modifiers: ["cmd"], key: "p" }}
+                              shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
                               onAction={() => handlePopFromQueue(queueName)}
                             />
                             <Action
-                              title="Pop Highest (any Queue)"
+                              title="Pop Highest (Any Queue)"
                               icon={Icon.Bolt}
                               shortcut={{
                                 modifiers: ["cmd", "shift"],
@@ -565,7 +566,7 @@ ${isArchived ? "*This item has been completed*" : "*Press Enter to pop this item
                             <Action.Push
                               title="Settings"
                               icon={Icon.Gear}
-                              shortcut={{ modifiers: ["cmd"], key: "," }}
+                              shortcut={{ modifiers: ["cmd", "opt"], key: "," }}
                               target={<SettingsForm onSave={loadQueue} />}
                             />
                           </ActionPanel.Section>
@@ -682,7 +683,7 @@ ${isArchived ? "*This item has been completed*" : "*Press Enter to pop this item
                         <Action.Push
                           title="Settings"
                           icon={Icon.Gear}
-                          shortcut={{ modifiers: ["cmd"], key: "," }}
+                          shortcut={{ modifiers: ["cmd", "opt"], key: "," }}
                           target={<SettingsForm onSave={loadQueue} />}
                         />
                       </ActionPanel.Section>
