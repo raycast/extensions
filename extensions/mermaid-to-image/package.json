@@ -13,13 +13,13 @@
       "Generate a sequence diagram showing API request/response and copy image",
       "Draw a class diagram for Animal, Duck, Fish and copy it"
     ],
-    "instructions": "Your main task is to help users create mermaid diagrams and copy their images to the clipboard: when the user asks to draw/generate/create a diagram and copy it, first generate a complete and valid mermaid syntax yourself, then immediately call generateMermaidImageTool and pass the syntax as the mermaidSyntax parameter to the tool, don't just reply with the syntax.",
+    "instructions": "Your main task is to help users create mermaid diagrams and copy their images to the clipboard. When the user asks to draw/generate/create a diagram, first generate a complete and valid mermaid syntax yourself, then immediately call generateMermaidImageTool and pass the syntax as the mermaidSyntax parameter. The tool returns ready-to-display markdown (e.g., ![Mermaid Diagram](file://...)) - you MUST output this markdown exactly as returned, without modification. Do NOT call the tool multiple times for the same diagram.",
     "creativity": 0.6,
     "evals": [
       {
         "input": "@mermaid-to-image Draw a simple flowchart A -> B and copy the image.",
         "mocks": {
-          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+          "generate-mermaid-diagram-with-ai": "![Mermaid Diagram](file:///Users/username/Downloads/MermaidDiagrams/diagram-1234567890.png)"
         },
         "expected": [
           {
@@ -28,7 +28,7 @@
             }
           },
           {
-            "includes": "copied to your clipboard"
+            "includes": "![Mermaid Diagram]"
           }
         ],
         "usedAsExample": true
@@ -36,7 +36,7 @@
       {
         "input": "@mermaid-to-image convert below mermaid code to image and copy it. graph TD        A[Start] --> B{Is it working?}        B -->|Yes| C[Great!]        B -->|No| D[Debug]        D --> B",
         "mocks": {
-          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+          "generate-mermaid-diagram-with-ai": "![Mermaid Diagram](file:///Users/username/Downloads/MermaidDiagrams/diagram-1234567891.png)"
         },
         "expected": [
           {
@@ -50,7 +50,7 @@
       {
         "input": "@mermaid-to-image Create a class diagram for Vehicle and Car (Car inherits from Vehicle) and copy the resulting image.",
         "mocks": {
-          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+          "generate-mermaid-diagram-with-ai": "![Mermaid Diagram](file:///Users/username/Downloads/MermaidDiagrams/diagram-1234567892.png)"
         },
         "expected": [
           {
@@ -175,5 +175,8 @@
       "required": false,
       "placeholder": "/Users/username/.nvm/versions/node/v22.12.0/bin/mmdc"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

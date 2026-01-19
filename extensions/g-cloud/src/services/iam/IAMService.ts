@@ -3,7 +3,6 @@
  * Uses REST APIs for improved performance (no CLI subprocess overhead)
  */
 
-import { showFailureToast } from "@raycast/utils";
 import { getRoleInfo as getGCPRoleInfo, formatRoleName as formatGCPRoleName } from "../../utils/iamRoles";
 import {
   getProjectIamPolicy,
@@ -113,101 +112,76 @@ export class IAMService {
       return cachedPolicy.policy;
     }
 
-    try {
-      let apiPolicy: ApiIamPolicy;
+    let apiPolicy: ApiIamPolicy;
 
-      if (resourceType === "storage" && resourceName) {
-        // Use REST API for bucket IAM
-        const bucketPolicy = await getBucketIamPolicy(this.gcloudPath, resourceName);
-        apiPolicy = {
-          version: 1,
-          etag: bucketPolicy.etag || "",
-          bindings: bucketPolicy.bindings,
-        };
-      } else {
-        // Use REST API for project IAM policy
-        apiPolicy = await getProjectIamPolicy(this.gcloudPath, this.projectId);
-      }
-
-      if (!apiPolicy.bindings || !Array.isArray(apiPolicy.bindings)) {
-        // Return empty policy if no bindings
-        const emptyPolicy: IAMPolicy = { version: 1, etag: "", bindings: [] };
-        this.policyCache.set(cacheKey, { policy: emptyPolicy, timestamp: now });
-        return emptyPolicy;
-      }
-
-      const policy = this.convertPolicy(apiPolicy);
-      this.policyCache.set(cacheKey, { policy, timestamp: now });
-
-      return policy;
-    } catch (error: unknown) {
-      console.error("Error fetching IAM policy:", error);
-      showFailureToast({
-        title: "Failed to Fetch IAM Policy",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
+    if (resourceType === "storage" && resourceName) {
+      // Use REST API for bucket IAM
+      const bucketPolicy = await getBucketIamPolicy(this.gcloudPath, resourceName);
+      apiPolicy = {
+        version: 1,
+        etag: bucketPolicy.etag || "",
+        bindings: bucketPolicy.bindings,
+      };
+    } else {
+      // Use REST API for project IAM policy
+      apiPolicy = await getProjectIamPolicy(this.gcloudPath, this.projectId);
     }
+
+    if (!apiPolicy.bindings || !Array.isArray(apiPolicy.bindings)) {
+      // Return empty policy if no bindings
+      const emptyPolicy: IAMPolicy = { version: 1, etag: "", bindings: [] };
+      this.policyCache.set(cacheKey, { policy: emptyPolicy, timestamp: now });
+      return emptyPolicy;
+    }
+
+    const policy = this.convertPolicy(apiPolicy);
+    this.policyCache.set(cacheKey, { policy, timestamp: now });
+
+    return policy;
   }
 
   async getIAMPrincipals(resourceType?: string, resourceName?: string): Promise<IAMPrincipal[]> {
-    try {
-      const policy = await this.getIAMPolicy(resourceType, resourceName);
+    const policy = await this.getIAMPolicy(resourceType, resourceName);
 
-      const principalsMap = new Map<string, IAMPrincipal>();
+    const principalsMap = new Map<string, IAMPrincipal>();
 
-      for (const binding of policy.bindings) {
-        for (const member of binding.members) {
-          const [type, id] = member.includes(":") ? member.split(":", 2) : [member, ""];
-          const principalKey = `${type}:${id}`;
+    for (const binding of policy.bindings) {
+      for (const member of binding.members) {
+        const [type, id] = member.includes(":") ? member.split(":", 2) : [member, ""];
+        const principalKey = `${type}:${id}`;
 
-          if (!principalsMap.has(principalKey)) {
-            principalsMap.set(principalKey, {
-              type,
-              id,
-              email: id,
-              displayName: this.formatMemberType(type),
-              roles: [],
-            });
-          }
-
-          const principal = principalsMap.get(principalKey);
-          if (!principal) {
-            showFailureToast({
-              title: "IAM Principal Error",
-              message: `Failed to get principal for ${principalKey}`,
-            });
-            throw new Error(`Failed to get principal for ${principalKey} - this should never happen`);
-          }
-
-          const roleInfo = this.getRoleInfo(binding.role);
-
-          principal.roles.push({
-            role: binding.role,
-            title: roleInfo.title,
-            description: roleInfo.description,
-            condition: binding.condition,
+        if (!principalsMap.has(principalKey)) {
+          principalsMap.set(principalKey, {
+            type,
+            id,
+            email: id,
+            displayName: this.formatMemberType(type),
+            roles: [],
           });
         }
+
+        const principal = principalsMap.get(principalKey)!;
+
+        const roleInfo = this.getRoleInfo(binding.role);
+
+        principal.roles.push({
+          role: binding.role,
+          title: roleInfo.title,
+          description: roleInfo.description,
+          condition: binding.condition,
+        });
       }
-
-      const principalsArray = Array.from(principalsMap.values());
-      principalsArray.sort((a, b) => {
-        if (a.type !== b.type) {
-          return a.type.localeCompare(b.type);
-        }
-        return a.id.localeCompare(b.id);
-      });
-
-      return principalsArray;
-    } catch (error: unknown) {
-      console.error("Error getting IAM principals:", error);
-      showFailureToast({
-        title: "Failed to Get IAM Principals",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
     }
+
+    const principalsArray = Array.from(principalsMap.values());
+    principalsArray.sort((a, b) => {
+      if (a.type !== b.type) {
+        return a.type.localeCompare(b.type);
+      }
+      return a.id.localeCompare(b.id);
+    });
+
+    return principalsArray;
   }
 
   async addMember(
@@ -218,10 +192,6 @@ export class IAMService {
     resourceName?: string,
   ): Promise<void> {
     if (!this.validateMemberId(memberType, memberId)) {
-      showFailureToast({
-        title: "Invalid Member ID",
-        message: `Invalid format for ${memberType}: ${memberId}`,
-      });
       throw new Error(`Invalid member ID format for ${memberType}`);
     }
 
@@ -254,7 +224,6 @@ export class IAMService {
       const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
       this.policyCache.delete(cacheKey);
     } catch (error: unknown) {
-      console.error("Error adding member:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       const isPermissionDenied =
         errorMessage.toLowerCase().includes("permission denied") || errorMessage.includes("403");
@@ -275,10 +244,6 @@ export class IAMService {
     resourceName?: string,
   ): Promise<void> {
     if (!this.validateMemberId(memberType, memberId)) {
-      showFailureToast({
-        title: "Invalid Member ID",
-        message: `Invalid format for ${memberType}: ${memberId}`,
-      });
       throw new Error(`Invalid member ID format for ${memberType}`);
     }
 
@@ -306,7 +271,6 @@ export class IAMService {
       const cacheKey = resourceType && resourceName ? `${resourceType}:${resourceName}` : `project:${this.projectId}`;
       this.policyCache.delete(cacheKey);
     } catch (error: unknown) {
-      console.error("Error removing member:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       const isPermissionDenied =
         errorMessage.toLowerCase().includes("permission denied") || errorMessage.includes("403");
@@ -320,48 +284,30 @@ export class IAMService {
   }
 
   async getServiceAccounts(): Promise<IAMServiceAccount[]> {
-    try {
-      // Use REST API instead of gcloud CLI
-      const serviceAccounts = await apiListServiceAccounts(this.gcloudPath, this.projectId);
+    // Use REST API instead of gcloud CLI
+    const serviceAccounts = await apiListServiceAccounts(this.gcloudPath, this.projectId);
 
-      return serviceAccounts.map((sa: ApiServiceAccount) => ({
-        name: sa.name,
-        email: sa.email,
-        displayName: sa.displayName || sa.email.split("@")[0],
-        description: sa.description,
-        disabled: sa.disabled || false,
-      }));
-    } catch (error: unknown) {
-      console.error("Error getting service accounts:", error);
-      showFailureToast({
-        title: "Failed to Get Service Accounts",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
-    }
+    return serviceAccounts.map((sa: ApiServiceAccount) => ({
+      name: sa.name,
+      email: sa.email,
+      displayName: sa.displayName || sa.email.split("@")[0],
+      description: sa.description,
+      disabled: sa.disabled || false,
+    }));
   }
 
   async getCustomRoles(): Promise<IAMCustomRole[]> {
-    try {
-      // Use REST API instead of gcloud CLI
-      const roles = await apiListIamRoles(this.gcloudPath);
+    // Use REST API instead of gcloud CLI
+    const roles = await apiListIamRoles(this.gcloudPath);
 
-      return roles.map((role: ApiIamRole) => ({
-        name: role.name,
-        title: role.title || this.formatRoleName(role.name),
-        description: role.description || "",
-        permissions: role.includedPermissions || [],
-        stage: role.stage || "GA",
-        etag: role.etag || "",
-      }));
-    } catch (error: unknown) {
-      console.error("Error getting custom roles:", error);
-      showFailureToast({
-        title: "Failed to Get Custom Roles",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
-    }
+    return roles.map((role: ApiIamRole) => ({
+      name: role.name,
+      title: role.title || this.formatRoleName(role.name),
+      description: role.description || "",
+      permissions: role.includedPermissions || [],
+      stage: role.stage || "GA",
+      etag: role.etag || "",
+    }));
   }
 
   formatMemberType(type: string): string {

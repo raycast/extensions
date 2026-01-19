@@ -7,6 +7,7 @@ import {
   CopyUsernameAction,
   OpenUrlInBrowserAction,
   PastePasswordAction,
+  PasteUsernameAction,
   ShowCardDetailsAction,
   ShowNotesAction,
   ShowIdentityDetailsAction,
@@ -40,6 +41,7 @@ const VaultItemActionPanel = () => {
           <CopyTotpAction />
           <PasteTotpAction />
           <CopyUsernameAction />
+          <PasteUsernameAction />
           <OpenUrlInBrowserAction />
           <CopyLoginUrisActions />
           <ShowNotesAction />

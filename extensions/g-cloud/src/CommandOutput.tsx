@@ -1,5 +1,4 @@
 import { ActionPanel, Action, Detail, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -37,7 +36,8 @@ export default function CommandOutput({ command, projectId, gcloudPath }: Comman
       showToast({ style: Toast.Style.Success, title: "Command executed successfully" });
     } catch (err) {
       const error = err as Error;
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to execute command",
         message: error.message,
       });

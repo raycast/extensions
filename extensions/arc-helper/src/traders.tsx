@@ -1,7 +1,8 @@
-import { ActionPanel, Action, List, Detail, Icon, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { API, TradersResponse, TraderItem, getRarityColor } from "./api";
+import { getCached, setCache, CacheKeys } from "./cache";
 
 function TraderItemDetail({ item, trader }: { item: TraderItem; trader: string }) {
   const markdown = `
@@ -59,11 +60,27 @@ export default function Traders() {
   const [searchText, setSearchText] = useState("");
   const [traderFilter, setTraderFilter] = useState<string>("all");
 
+  const cachedTraders = getCached<Record<string, TraderItem[]>>(CacheKeys.traders);
+
   const { isLoading, data } = useFetch<TradersResponse>(API.traders, {
     keepPreviousData: true,
+    onError() {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load traders",
+        message: "Server temporarily unavailable. Please try again.",
+      });
+    },
   });
 
-  const tradersData = data?.data || {};
+  // Update cache when data changes
+  useEffect(() => {
+    if (data?.data && Object.keys(data.data).length > 0) {
+      setCache(CacheKeys.traders, data.data);
+    }
+  }, [data]);
+
+  const tradersData = data?.data || cachedTraders || {};
   const traderNames = Object.keys(tradersData).sort();
 
   const filteredTraders = traderFilter === "all" ? traderNames : traderNames.filter((t) => t === traderFilter);

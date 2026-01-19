@@ -1,9 +1,11 @@
-import { Icon, List } from "@raycast/api";
+import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useInterval } from "usehooks-ts";
 import { usePromise } from "@raycast/utils";
 
 import { Actions } from "../components/Actions";
 import { getTopRamProcess, getMemoryUsage } from "./MemoryUtils";
+
+const { displayMode } = getPreferenceValues<ExtensionPreferences>();
 
 export default function MemoryMonitor() {
   const { data, revalidate } = usePromise(async () => {
@@ -26,7 +28,15 @@ export default function MemoryMonitor() {
       id="memory"
       title="Memory"
       icon={Icon.MemoryChip}
-      accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage} % (~ ${data.freeMem} GB)` }]}
+      accessories={[
+        {
+          text: !data
+            ? "Loading…"
+            : displayMode === "free"
+              ? `${data.freeMemPercentage} % (~ ${data.freeMem} GB)`
+              : `${100 - +data.freeMemPercentage} % (~ ${+data.totalMem - +data.freeMem} GB)`,
+        },
+      ]}
       detail={
         <MemoryMonitorDetail
           freeMem={data?.freeMem || ""}
@@ -62,8 +72,16 @@ function MemoryMonitorDetail({
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Total RAM" text={`${totalMem} GB`} />
-          <List.Item.Detail.Metadata.Label title="Free RAM" text={`${freeMem} GB`} />
-          <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${freeMemPercentage} %`} />
+          {displayMode === "free" ? (
+            <List.Item.Detail.Metadata.Label title="Free RAM" text={`${freeMem} GB`} />
+          ) : (
+            <List.Item.Detail.Metadata.Label title="Used RAM" text={`${+totalMem - +freeMem} GB`} />
+          )}
+          {displayMode === "free" ? (
+            <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${freeMemPercentage} %`} />
+          ) : (
+            <List.Item.Detail.Metadata.Label title="Used RAM %" text={`${100 - +freeMemPercentage} %`} />
+          )}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Process Name" text="RAM" />
           {topProcess &&

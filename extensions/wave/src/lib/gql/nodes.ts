@@ -34,6 +34,21 @@ const Invoice = `
             symbol
         }
     }
+    subtotal {
+        value
+        currency {
+            symbol
+        }
+    }
+    discounts {
+        name
+    }
+    discountTotal {
+        value
+        currency {
+            symbol
+        }
+    }
     total {
         value
         currency {
@@ -56,11 +71,12 @@ const Invoice = `
         }
         description
         quantity
-        price
+        unitPrice
         subtotal {
             value
             currency {
-            symbol
+                symbol
+                exponent
             }
         }
         total {

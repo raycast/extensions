@@ -3,7 +3,9 @@
 ## [Update] - 2025-12-16
 
 ### Fixed
-- Fixed memory issues (JS heap out of memory) by optimizing string concatenation and reducing safety limits
+- Fixed memory issues (JS heap out of memory) by implementing streaming file processing
+- File contents are now formatted and written to output immediately, reducing memory usage by 50-70%
+- Improved safety limit checks with better error messages and earlier validation
 
 ## [Update] - 2025-12-02
 
