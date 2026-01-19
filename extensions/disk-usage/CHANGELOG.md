@@ -1,6 +1,6 @@
 # Disk Usage Changelog
 
-## [Bug Fix] - {PR_VERSION}
+## [Bug Fix] - {PR_MERGE_DATE}
 - Fix file deletion if they have already been deleted. `Error: ENOENT: no such file or directory, realpath`
 
 ## [Improvements] - 2026-01-04
