@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-01-19
 
 - Add "Refresh" action to message actions
 - Add preference to auto-fill the reply subject when replying to an email
