@@ -11,6 +11,7 @@ export default function SearchFiles() {
     items,
     currentFolder,
     currentDrive,
+    selectedDriveId,
     nextLink,
     installedOfficeApps,
     oneDriveDrives,
@@ -44,6 +45,7 @@ export default function SearchFiles() {
           <DriveDropdown
             oneDriveDrives={oneDriveDrives}
             sharepointSites={sharepointSites}
+            selectedDriveId={selectedDriveId}
             onDriveChange={handleDriveChange}
           />
         ) : undefined
