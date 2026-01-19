@@ -7,7 +7,7 @@ import type { FileNode } from "../types";
 import { createUsageBar } from "../utils/format";
 import { hasStoredSnapshot } from "../utils/storage";
 import { FolderView } from "./FolderView";
-import { existsSync } from "node:fs";
+import { access, constants } from "node:fs/promises";
 
 const FileRow: FC<{
   node: FileNode;
@@ -18,13 +18,18 @@ const FileRow: FC<{
   const selection = useSelection();
   const isSelected = selection.has(node.path);
   const isDeletingThis = isDeleting && isSelected;
-  const isExists = existsSync(node.path);
 
   useEffect(() => {
-    if (!isExists) {
-      send({ type: "ITEM_MISSING", path: node.path, bytes: node.bytes });
-    }
-  }, [node.path, isExists]);
+    const checkExistence = async () => {
+      try {
+        await access(node.path, constants.F_OK);
+      } catch {
+        send({ type: "ITEM_MISSING", path: node.path, bytes: node.bytes });
+      }
+    };
+
+    checkExistence();
+  }, []);
 
   const isFolderWithContent = hasStoredSnapshot(node.path);
 
