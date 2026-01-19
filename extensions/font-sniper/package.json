@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "font-sniper",
   "title": "Font Sniper",
-  "description": "Identify and download fonts from any website.",
+  "description": "Identify and download fonts from any website.\n\nDisclaimer: FontSniper detects loaded browser fonts for testing/research only. Read more in README",
   "icon": "extension-icon.png",
   "author": "riomadeit",
+  "contributors": [
+    "0xdhrv"
+  ],
   "categories": [
     "Developer Tools",
     "Web"
