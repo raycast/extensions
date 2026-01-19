@@ -35,7 +35,11 @@ export function ReferenceDetail({
             ))}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Source" text={entry.path} />
-          <Detail.Metadata.Link title="GitHub" text="Open file" target={entry.link} />
+          <Detail.Metadata.Link
+            title="GitHub"
+            text="Open file"
+            target={entry.link}
+          />
         </Detail.Metadata>
       }
     />

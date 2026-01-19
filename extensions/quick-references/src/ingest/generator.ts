@@ -17,23 +17,21 @@ const MAX_SNIPPET_LINES = 12;
 
 export async function buildDatasetFromDir(
   postsDir: string,
-  options: BuildOptions = {}
+  options: BuildOptions = {},
 ): Promise<Dataset> {
   const files = (await fs.promises.readdir(postsDir))
     .filter((file) => file.endsWith(".md"))
     .sort();
 
   const limitedFiles =
-    options.limit && options.limit > 0
-      ? files.slice(0, options.limit)
-      : files;
+    options.limit && options.limit > 0 ? files.slice(0, options.limit) : files;
 
   const entries = await Promise.all(
     limitedFiles.map(async (file) => {
       const filePath = path.join(postsDir, file);
       const raw = await fs.promises.readFile(filePath, "utf8");
       return parseMarkdownFile(file, raw);
-    })
+    }),
   );
 
   const index: ReferenceIndexItem[] = entries.map((entry) => entry.index);
@@ -58,7 +56,7 @@ export async function buildDatasetFromDir(
 
 function parseMarkdownFile(
   filename: string,
-  raw: string
+  raw: string,
 ): { index: ReferenceIndexItem; content: string } {
   const { data, content } = matter(raw);
   const frontmatter = data as Frontmatter;
@@ -125,7 +123,7 @@ function deriveSummary(body: string, intro?: string): string {
   const paragraphs = body.split(/\n{2,}/);
   const firstParagraph = paragraphs.find(
     (paragraph) =>
-      paragraph.trim().length > 0 && !paragraph.trim().startsWith("#")
+      paragraph.trim().length > 0 && !paragraph.trim().startsWith("#"),
   );
 
   if (firstParagraph) {

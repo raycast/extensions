@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { ReferenceIndexItem } from "../types";
 
@@ -6,7 +5,7 @@ interface ReferenceActionPanelProps {
   entry: ReferenceIndexItem;
   isFavorite: boolean;
   onToggleFavorite: () => void;
-  detailTarget?: ReactNode;
+  detailTarget?: React.ReactElement;
   onOpen?: () => void;
 }
 
@@ -28,7 +27,11 @@ export function ReferenceActionPanel({
         />
       )}
       {entry.topSnippet && (
-        <Action.CopyToClipboard title="Copy Top Snippet" content={entry.topSnippet} icon={Icon.Clipboard} />
+        <Action.CopyToClipboard
+          title="Copy Top Snippet"
+          content={entry.topSnippet}
+          icon={Icon.Clipboard}
+        />
       )}
       <Action.CopyToClipboard title="Copy Title" content={entry.title} />
       <Action.CopyToClipboard title="Copy Link" content={entry.link} />

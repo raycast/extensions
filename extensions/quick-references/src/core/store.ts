@@ -20,7 +20,10 @@ export class PreferenceStore {
 
   async addRecent(id: ReferenceId): Promise<void> {
     const recents = await this.getRecents();
-    const next = [id, ...recents.filter((item) => item !== id)].slice(0, RECENT_LIMIT);
+    const next = [id, ...recents.filter((item) => item !== id)].slice(
+      0,
+      RECENT_LIMIT,
+    );
     await LocalStorage.setItem(RECENTS_KEY, JSON.stringify(next));
   }
 

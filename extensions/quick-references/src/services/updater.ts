@@ -6,7 +6,8 @@ import { DatasetRepository } from "../core/dataset-repository";
 import { buildDatasetFromDir } from "../ingest/generator";
 import { Dataset } from "../types";
 
-const ZIP_URL = "https://codeload.github.com/Fechin/reference/zip/refs/heads/main";
+const ZIP_URL =
+  "https://codeload.github.com/Fechin/reference/zip/refs/heads/main";
 
 export class ReferenceUpdater {
   constructor(private readonly repository = new DatasetRepository()) {}
@@ -14,7 +15,7 @@ export class ReferenceUpdater {
   async update(): Promise<Dataset> {
     const buffer = await downloadZip();
     const workspace = await fs.promises.mkdtemp(
-      path.join(os.tmpdir(), "quickreferences-")
+      path.join(os.tmpdir(), "quickreferences-"),
     );
 
     try {
@@ -37,7 +38,9 @@ export class ReferenceUpdater {
 async function downloadZip(): Promise<Buffer> {
   const response = await fetch(ZIP_URL);
   if (!response.ok) {
-    throw new Error(`Download failed (${response.status}): ${response.statusText}`);
+    throw new Error(
+      `Download failed (${response.status}): ${response.statusText}`,
+    );
   }
 
   const arrayBuffer = await response.arrayBuffer();

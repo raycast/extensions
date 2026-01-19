@@ -41,7 +41,11 @@ export default function UpdateReferences() {
   return <Detail markdown={buildMarkdown(status, meta, error)} />;
 }
 
-function buildMarkdown(status: string, meta?: DatasetMeta, error?: string): string {
+function buildMarkdown(
+  status: string,
+  meta?: DatasetMeta,
+  error?: string,
+): string {
   if (error) {
     return `# QuickReferences Update\n\n❌ ${status}\n\n\`\`\`\n${error}\n\`\`\``;
   }
