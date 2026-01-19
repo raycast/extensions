@@ -1,6 +1,6 @@
 # Font Sniper Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2026-01-19
 
 - Added disclaimer to the extension description
 
