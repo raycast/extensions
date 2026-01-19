@@ -1,3 +1,26 @@
+/**
+ * article-loader - Pure async utility for fetching and parsing articles
+ *
+ * This module handles all the "heavy lifting" of article extraction:
+ * fetching HTML, parsing with Readability, paywall bypass, and Markdown conversion.
+ * It is stateless and has no React dependencies.
+ *
+ * Responsibilities:
+ * - Fetching HTML from URLs (via fetcher.ts)
+ * - Parsing with Mozilla Readability (via readability.ts)
+ * - Paywall bypass attempts (via paywall-hopper.ts)
+ * - Browser tab fallback for blocked pages (via browser-extension.ts)
+ * - Converting parsed content to Markdown (via markdown.ts)
+ * - Returning discriminated union results for different outcomes
+ *
+ * Relationship to useArticleReader.ts:
+ * - This module is consumed by the useArticleReader hook
+ * - The hook manages React state; this module handles fetch/parse logic
+ * - Returns LoadArticleResult which the hook interprets to update UI state
+ *
+ * @see src/hooks/useArticleReader.ts for the React state management layer
+ */
+
 import { urlLog, paywallLog } from "./logger";
 import { fetchHtml } from "./fetcher";
 import { parseArticle } from "./readability";
@@ -40,8 +63,8 @@ export async function loadArticleFromUrl(
   let archiveSource: ArchiveSource | undefined;
 
   if (!fetchResult.success) {
-    // Check if this is a blocked error (403) that could be resolved
-    if (fetchResult.error.type === "blocked" && fetchResult.error.statusCode === 403) {
+    // Check if this is a blocked error (401, 403, 429, 451) that could be resolved
+    if (fetchResult.error.type === "blocked") {
       // First, try automatic fallback: check if URL is already open in a browser tab
       const browserResult = await tryGetContentFromOpenTab(url);
 
@@ -52,7 +75,7 @@ export async function loadArticleFromUrl(
 
       // If Paywall Hopper is enabled, try bypass methods before showing blocked view
       if (options.enablePaywallHopper) {
-        paywallLog.log("hopper:blocked-page-detected", { url, statusCode: 403 });
+        paywallLog.log("hopper:blocked-page-detected", { url, statusCode: fetchResult.error.statusCode });
 
         const hopperResult = await tryBypassPaywall(url);
 

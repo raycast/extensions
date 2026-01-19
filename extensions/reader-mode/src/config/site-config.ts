@@ -9,6 +9,24 @@
  * dedicated extractors in src/extractors/ which provide richer content extraction.
  */
 
+/**
+ * Configuration for formatting image captions.
+ * Used for sites that have separate caption text and credit elements.
+ */
+export interface CaptionConfig {
+  /**
+   * CSS selector for the caption text element.
+   * This text will be wrapped in <em> tags for italic formatting.
+   */
+  textSelector: string;
+
+  /**
+   * CSS selector for the photo credit element.
+   * A space will be prepended to separate it from the caption text.
+   */
+  creditSelector: string;
+}
+
 export interface SiteConfig {
   /** Display name for the site */
   name: string;
@@ -51,6 +69,13 @@ export interface SiteConfig {
    * Useful for sites with rich structured data.
    */
   preferSchemaOrg?: boolean;
+
+  /**
+   * Configuration for formatting image captions.
+   * Wraps caption text in <em> and adds space before credits.
+   * Useful for Condé Nast sites and others with structured captions.
+   */
+  captionConfig?: CaptionConfig;
 }
 
 /**
@@ -337,6 +362,23 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
     },
   ],
 
+  // Le Monde
+  [
+    /^(.*\.)?lemonde\.fr$/i,
+    {
+      name: "Le Monde",
+      articleSelector: ".article__content",
+      removeSelectors: [
+        ".reading-mode-only",
+        ".capping",
+        ".article__header",
+        ".ds-header",
+        ".ds-article-status",
+        ".ds-footer",
+      ],
+    },
+  ],
+
   // Mashable
   [
     /^(.*\.)?mashable\.com$/i,
@@ -407,6 +449,29 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
     },
   ],
 
+  // WSJ
+  [
+    /^(.*\.)?wsj\.com$/i,
+    {
+      name: "WSJ",
+      articleSelector: ".article-container",
+      removeSelectors: [".e1jdulti0"],
+    },
+  ],
+
+  // Vanity Fair (Condé Nast)
+  [
+    /^(.*\.)?vanityfair\.com$/i,
+    {
+      name: "Vanity Fair",
+      articleSelector: "article",
+      removeSelectors: [".e1jdulti0"],
+      captionConfig: {
+        textSelector: ".caption__text, [class*='CaptionText-']",
+        creditSelector: ".caption__credit, [class*='CaptionCredit-']",
+      },
+    },
+  ],
   // Atlantic
   [
     /^(.*\.)?theatlantic\.com$/i,

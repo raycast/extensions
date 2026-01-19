@@ -1,7 +1,6 @@
 # Reader Raycast Extension
 
 > **Purpose:** Rapid prototype sketch for Claude Opus 4.5 implementation
-
 > **Instructions:** Fill in sections below. Use `[TBD]` for unknowns—Claude will clarify or research.
 
 ---
@@ -10,11 +9,11 @@
 
 **Extension Name:** `Reader`
 
-**One-liner:** *Reader makes it easy to read web content in a clean interface, like Safari's Reader Mode.*
+**One-liner:** _Reader makes it easy to read web content in a clean interface, like Safari's Reader Mode._
 
-**Problem it solves:** *Webpages are covered in pop-overs, adverts, and other distractions. Reader helps you read without distraction right in Raycast.*
+**Problem it solves:** _Webpages are covered in pop-overs, adverts, and other distractions. Reader helps you read without distraction right in Raycast._
 
-**Inspiration / prior art:** *[Dark Reader](https://darkreader.org/), Mozilla's [Readability](https://github.com/mozilla/readability), Safari Web Reader, [Jina Reader](https://jina.ai/reader/), [Article Summarizer](https://github.com/sawyerh/article-summarizer/tree/main), [Reader View](https://github.com/rNeomy/reader-view),* Mercury/Postlight Reader ([source](github.com/postlight/parser)), [Webpage to Markdown](https://www.raycast.com/treyg/webpage-to-markdown) ([source](https://github.com/raycast/extensions/tree/1cf953d3b35e16d134c11763a04256bb9911b0f5/extensions/webpage-to-markdown/))
+**Inspiration / prior art:** _[Dark Reader](https://darkreader.org/), Mozilla's [Readability](https://github.com/mozilla/readability), Safari Web Reader, [Jina Reader](https://jina.ai/reader/), [Article Summarizer](https://github.com/sawyerh/article-summarizer/tree/main), [Reader View](https://github.com/rNeomy/reader-view),_ Mercury/Postlight Reader ([source](github.com/postlight/parser)), [Webpage to Markdown](https://www.raycast.com/treyg/webpage-to-markdown) ([source](https://github.com/raycast/extensions/tree/1cf953d3b35e16d134c11763a04256bb9911b0f5/extensions/webpage-to-markdown/))
 
 ---
 
@@ -33,7 +32,7 @@
 
 Let's start with [html-to-markdown](https://github.com/Goldziher/html-to-markdown) and see how good and speedy the rendering is.
 
-I would like to offer a preference to enable summarization at the top of the page (similar to *[Article Summarizer](https://github.com/sawyerh/article-summarizer/tree/main)*, but using a call to Raycast AI). 
+I would like to offer a preference to enable summarization at the top of the page (similar to _[Article Summarizer](https://github.com/sawyerh/article-summarizer/tree/main)_, but using a call to Raycast AI).
 
 ---
 
@@ -41,24 +40,24 @@ I would like to offer a preference to enable summarization at the top of the pag
 
 ### Command: `[Open Reader] [URL]`
 
-- **Trigger:** *User types `reader` or something like it into Raycast with a URL as the required argument*
-- **Input:** *The user types or pastes a URL, or we use the selected text, or we get the current tab from the Raycast Browser Extension.*
-- **Output:** *We render a Detail view with cleaned the title of the article set in h1, and then a blocked AI-summary, and then display just the essential content of the webpage — no ads, sidebars, footers, headers, or any other irrelevant information.*
-- **Key actions:** *Copy as Markdown (primary action), Copy Summary, The user can Open the URL, Copy the URL*
+- **Trigger:** _User types `reader` or something like it into Raycast with a URL as the required argument_
+- **Input:** _The user types or pastes a URL, or we use the selected text, or we get the current tab from the Raycast Browser Extension._
+- **Output:** _We render a Detail view with cleaned the title of the article set in h1, and then a blocked AI-summary, and then display just the essential content of the webpage — no ads, sidebars, footers, headers, or any other irrelevant information._
+- **Key actions:** _Copy as Markdown (primary action), Copy Summary, The user can Open the URL, Copy the URL_
 
 ---
 
 ## 4. UI Sketch
 
-*Quick visual metaphor or wireframe description. Be loose—this is a napkin sketch.*
+_Quick visual metaphor or wireframe description. Be loose—this is a napkin sketch._
 
 ![webpage-to-markdown 2025-12-27 at 22.08.28.png](https://resv2.craft.do/user/full/a5e6a4bd-0794-266d-e54e-5b99edfcc562/doc/F5D499EE-FC9B-4C35-B0DB-ABA294F89472/B2EB91FF-C45A-44CA-B97B-6CE09B16CD03_2/73XGxWbqEee9igpS3MYGHKZl0RLQ5OpSHrOOvzZBh0oz/webpage-to-markdown%202025-12-27%20at%2022.08.28.png)
 
-This is the Webpage to Markdown extension. 
+This is the Webpage to Markdown extension.
 
-It's pretty close to what I want, but I don't want the sidebar, and I want the content to be much significantly cleaner — no advertising content, etc. 
+It's pretty close to what I want, but I don't want the sidebar, and I want the content to be much significantly cleaner — no advertising content, etc.
 
-I want an AI summary (One line + three bullets) at the top. I like the idea of letting people choose different [summary styles](https://intercom.help/particlenews/en/articles/10094099-particle-stories#h_fa2e60fd2e) like Particle News: 
+I want an AI summary (One line + three bullets) at the top. I like the idea of letting people choose different [summary styles](https://intercom.help/particlenews/en/articles/10094099-particle-stories#h_fa2e60fd2e) like Particle News:
 
 ## **Overview**
 
@@ -104,10 +103,10 @@ In Particle, you can follow anything. Tap a highlighted word to find out more ab
 
 ### Suggested for This Extension
 
-*Claude should research and suggest packages. Seed ideas here:*
+_Claude should research and suggest packages. Seed ideas here:_
 
-- `[html-to-markdown]` — *markdown parsing*
-- `[Mozilla's Readability`, `Postlight Reader]` — *webpage cleaning*
+- `[html-to-markdown]` — _markdown parsing_
+- `[Mozilla's Readability`, `Postlight Reader]` — _webpage cleaning_
 
 ### Research Prompts for Claude
 
@@ -121,9 +120,9 @@ In Particle, you can follow anything. Tap a highlighted word to find out more ab
 
 ## 7. Edge Cases & Concerns
 
-*Things Claude should handle or ask about:*
+_Things Claude should handle or ask about:_
 
-❌  Offline behavior?
+❌ Offline behavior?
 
 ❌ Empty states / no results?
 
@@ -145,13 +144,13 @@ e.g. URL not public
 
 ## 8. Nice-to-Haves (v2+)
 
-*We should be able to get pretty far shimming together existing open source projects, so it's definitely out of scope for v1 to create our own parser or content scraper.* 
+_We should be able to get pretty far shimming together existing open source projects, so it's definitely out of scope for v1 to create our own parser or content scraper._
 
 ---
 
 ## 9. Open Questions
 
-*It may be possible to ask Raycast AI to extract the content from a webpage and then we just need to convert it into Markdown, unless Raycast AI already doesn't that for us. We should see if that's possible first before building our own scraper, cleaner, and converter!* 
+_It may be possible to ask Raycast AI to extract the content from a webpage and then we just need to convert it into Markdown, unless Raycast AI already doesn't that for us. We should see if that's possible first before building our own scraper, cleaner, and converter!_
 
 ---
 

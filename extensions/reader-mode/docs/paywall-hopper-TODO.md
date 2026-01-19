@@ -114,7 +114,7 @@
     success: boolean;
     html?: string;
     archiveUrl?: string;
-    service: 'archive.is' | 'wayback';
+    service: "archive.is" | "wayback";
     timestamp?: string;
     error?: string;
   }
@@ -208,12 +208,12 @@
 
 - [x] Paywall Hopper runs automatically on 403 blocked pages (when enabled)
 - [x] Falls back to BlockedPageView only after all bypass methods fail
-- [ ] *(Future)* Show manual "Try Paywall Hopper" option in BlockedPageView
+- [ ] _(Future)_ Show manual "Try Paywall Hopper" option in BlockedPageView
 
 ### 7.3 Actions
 
 - [x] Add "Copy Archived URL" action (when `archiveSource.url` present)
-- [ ] *(Future)* Add "Try Paywall Hopper" manual action for retries
+- [ ] _(Future)_ Add "Try Paywall Hopper" manual action for retries
 
 ### 7.4 Toast Notifications
 
@@ -298,24 +298,24 @@ No new npm packages required. Uses existing:
 
 ## Files to Create
 
-| File | Purpose |
-|------|---------|
-| `src/utils/paywall-hopper.ts` | Orchestrate bypass attempts |
+| File                           | Purpose                     |
+| ------------------------------ | --------------------------- |
+| `src/utils/paywall-hopper.ts`  | Orchestrate bypass attempts |
 | `src/utils/archive-fetcher.ts` | Fetch from archive services |
 
 ## Files to Modify
 
-| File | Changes |
-|------|---------|
-| `src/extractors/_base.ts` | Add `isPaywalled()`, `getPaywallSelectors()` |
-| `src/extractors/medium.ts` | Add Medium-specific paywall detection |
-| `src/utils/fetcher.ts` | Add `fetchHtmlAsGooglebot()` |
-| `src/utils/article-loader.ts` | Integrate Paywall Hopper flow |
-| `src/utils/markdown.ts` | Add archive source annotation |
-| `src/utils/logger.ts` | Add `paywallLog` logger |
-| `src/types/article.ts` | Add `archiveSource` field |
-| `src/open.tsx` | Add UI for paywall detection, actions |
-| `package.json` | Add `enablePaywallHopper` preference |
+| File                          | Changes                                      |
+| ----------------------------- | -------------------------------------------- |
+| `src/extractors/_base.ts`     | Add `isPaywalled()`, `getPaywallSelectors()` |
+| `src/extractors/medium.ts`    | Add Medium-specific paywall detection        |
+| `src/utils/fetcher.ts`        | Add `fetchHtmlAsGooglebot()`                 |
+| `src/utils/article-loader.ts` | Integrate Paywall Hopper flow                |
+| `src/utils/markdown.ts`       | Add archive source annotation                |
+| `src/utils/logger.ts`         | Add `paywallLog` logger                      |
+| `src/types/article.ts`        | Add `archiveSource` field                    |
+| `src/open.tsx`                | Add UI for paywall detection, actions        |
+| `package.json`                | Add `enablePaywallHopper` preference         |
 
 ---
 

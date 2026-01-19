@@ -5,7 +5,9 @@
   "description": "Read the web distraction-free in Raycast.",
   "icon": "reader-icon.png",
   "author": "chrismessina",
-  "contributors": ["heytommy"],
+  "contributors": [
+    "heytommy"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -32,6 +34,22 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "open-clipboard",
+      "title": "Open Clipboard in Reader Mode",
+      "subtitle": "Reader Mode",
+      "description": "Open URL from clipboard in reader mode",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-current-tab",
+      "title": "Open Current Tab in Reader Mode",
+      "subtitle": "Reader Mode",
+      "description": "Open current browser tab in reader mode",
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -61,14 +79,38 @@
       "default": "overview",
       "required": false,
       "data": [
-        { "title": "Overview", "value": "overview" },
-        { "title": "Raycast-style", "value": "raycast-style" },
-        { "title": "Arc-style", "value": "arc-style" },
-        { "title": "Opposing Sides", "value": "opposite-sides" },
-        { "title": "The 5 Ws", "value": "five-ws" },
-        { "title": "Explain Like I'm 5", "value": "eli5" },
-        { "title": "Translated Overview", "value": "translated" },
-        { "title": "People, Places & Things", "value": "entities" }
+        {
+          "title": "Overview",
+          "value": "overview"
+        },
+        {
+          "title": "Raycast-style",
+          "value": "raycast-style"
+        },
+        {
+          "title": "Arc-style",
+          "value": "arc-style"
+        },
+        {
+          "title": "Opposing Sides",
+          "value": "opposite-sides"
+        },
+        {
+          "title": "The 5 Ws",
+          "value": "five-ws"
+        },
+        {
+          "title": "Explain Like I'm 5",
+          "value": "eli5"
+        },
+        {
+          "title": "Translated Overview",
+          "value": "translated"
+        },
+        {
+          "title": "People, Places & Things",
+          "value": "entities"
+        }
       ]
     },
     {
@@ -79,26 +121,86 @@
       "default": "es-ES",
       "required": false,
       "data": [
-        { "title": "🇪🇸 Spanish", "value": "es-ES" },
-        { "title": "🇫🇷 French", "value": "fr-FR" },
-        { "title": "🇩🇪 German", "value": "de-DE" },
-        { "title": "🇮🇹 Italian", "value": "it-IT" },
-        { "title": "🇧🇷 Portuguese", "value": "pt-BR" },
-        { "title": "🇯🇵 Japanese", "value": "ja-JP" },
-        { "title": "🇨🇳 Chinese (Simplified)", "value": "zh-Hans" },
-        { "title": "🇹🇼 Chinese (Traditional)", "value": "zh-Hant" },
-        { "title": "🇰🇷 Korean", "value": "ko-KR" },
-        { "title": "🇷🇺 Russian", "value": "ru-RU" },
-        { "title": "🇸🇦 Arabic", "value": "ar-SA" },
-        { "title": "🇮🇳 Hindi", "value": "hi-IN" },
-        { "title": "🇳🇱 Dutch", "value": "nl-NL" },
-        { "title": "🇵🇱 Polish", "value": "pl-PL" },
-        { "title": "🇸🇪 Swedish", "value": "sv-SE" },
-        { "title": "🇹🇷 Turkish", "value": "tr-TR" },
-        { "title": "🇻🇳 Vietnamese", "value": "vi-VN" },
-        { "title": "🇹🇭 Thai", "value": "th-TH" },
-        { "title": "🇬🇷 Greek", "value": "el-GR" },
-        { "title": "🇮🇱 Hebrew", "value": "he-IL" }
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr-FR"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de-DE"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it-IT"
+        },
+        {
+          "title": "🇧🇷 Portuguese",
+          "value": "pt-BR"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja-JP"
+        },
+        {
+          "title": "🇨🇳 Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "🇹🇼 Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko-KR"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru-RU"
+        },
+        {
+          "title": "🇸🇦 Arabic",
+          "value": "ar-SA"
+        },
+        {
+          "title": "🇮🇳 Hindi",
+          "value": "hi-IN"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl-NL"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "pl-PL"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "sv-SE"
+        },
+        {
+          "title": "🇹🇷 Turkish",
+          "value": "tr-TR"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi-VN"
+        },
+        {
+          "title": "🇹🇭 Thai",
+          "value": "th-TH"
+        },
+        {
+          "title": "🇬🇷 Greek",
+          "value": "el-GR"
+        },
+        {
+          "title": "🇮🇱 Hebrew",
+          "value": "he-IL"
+        }
       ]
     },
     {

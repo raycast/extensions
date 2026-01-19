@@ -214,6 +214,7 @@ export function isKnownPaywalledSite(url: string): boolean {
     "wired.com",
     "medium.com",
     "substack.com",
+    "lemonde.fr",
   ];
 
   return knownPaywalledDomains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));

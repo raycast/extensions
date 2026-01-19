@@ -344,6 +344,33 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
           });
         });
       }
+
+      // Format captions: wrap text in <em> and add space before credits
+      if (config.captionConfig) {
+        const { textSelector, creditSelector } = config.captionConfig;
+
+        document.querySelectorAll(textSelector).forEach((captionText) => {
+          // Ensure caption text ends with a period
+          const text = captionText.textContent?.trim() || "";
+          if (text && !text.endsWith(".") && !text.endsWith("!") && !text.endsWith("?")) {
+            captionText.textContent = text + ".";
+          }
+
+          // Wrap caption text in <em> for italic formatting
+          const em = document.createElement("em");
+          em.innerHTML = captionText.innerHTML;
+          captionText.innerHTML = "";
+          captionText.appendChild(em);
+        });
+
+        document.querySelectorAll(creditSelector).forEach((credit) => {
+          // Add a space before the credit text
+          const textContent = credit.textContent?.trim();
+          if (textContent) {
+            credit.textContent = " " + textContent;
+          }
+        });
+      }
     }
   } catch {
     // Invalid URL, skip site config

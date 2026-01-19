@@ -24,13 +24,13 @@ The Paywall Hopper provides intelligent fallback content retrieval when articles
 
 ### Techniques Evaluated
 
-| Technique | Description | Reliability | Notes |
-|-----------|-------------|-------------|-------|
-| **Googlebot UA** | Fetch with search engine crawler User-Agent | High | Many sites serve full content for SEO |
-| **archive.is** | Fetch from archive.is/archive.today | High | Best for recent paywalled content |
-| **Wayback Machine** | Fetch from web.archive.org | Medium | Broader coverage, may be outdated |
-| **Jina.ai** | Markdown extraction service | Medium | Future enhancement |
-| **Browser Tab Import** | Use authenticated session | High | For paying subscribers |
+| Technique              | Description                                 | Reliability | Notes                                 |
+| ---------------------- | ------------------------------------------- | ----------- | ------------------------------------- |
+| **Googlebot UA**       | Fetch with search engine crawler User-Agent | High        | Many sites serve full content for SEO |
+| **archive.is**         | Fetch from archive.is/archive.today         | High        | Best for recent paywalled content     |
+| **Wayback Machine**    | Fetch from web.archive.org                  | Medium      | Broader coverage, may be outdated     |
+| **Jina.ai**            | Markdown extraction service                 | Medium      | Future enhancement                    |
+| **Browser Tab Import** | Use authenticated session                   | High        | For paying subscribers                |
 
 ### Key Insights
 
@@ -39,7 +39,8 @@ The Paywall Hopper provides intelligent fallback content retrieval when articles
 From [wasi-master/13ft](https://github.com/wasi-master/13ft):
 
 ```typescript
-const GOOGLEBOT_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
+const GOOGLEBOT_USER_AGENT =
+  "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
 ```
 
 Many paywalled sites serve full content to Googlebot for SEO indexing. This is our **first-line bypass** before hitting archive services.
@@ -91,7 +92,7 @@ Extend `BaseExtractor` with paywall detection:
 ```typescript
 abstract class BaseExtractor {
   // ... existing methods ...
-  
+
   /**
    * Detect if the page appears to be paywalled.
    * Override in site-specific extractors for accurate detection.
@@ -99,14 +100,14 @@ abstract class BaseExtractor {
   isPaywalled(): boolean {
     return this.detectGenericPaywall();
   }
-  
+
   /**
    * Get paywall-specific CSS selectors for this site.
    */
   getPaywallSelectors(): string[] {
     return [];
   }
-  
+
   /**
    * Generic paywall detection heuristics.
    */
@@ -173,14 +174,14 @@ abstract class BaseExtractor {
 
 Applied when no site-specific extractor exists:
 
-| Signal | Weight | Description |
-|--------|--------|-------------|
-| Short content | High | Article body < 500 chars |
-| Truncation markers | High | "Continue reading...", "Read more...", ellipsis at end |
-| Paywall keywords | Medium | "Subscribe", "Sign in", "Members only", "Premium" |
-| Overlay elements | Medium | `[class*="paywall"]`, `[class*="subscribe-wall"]` |
-| Login prompts | Medium | "Sign in to continue reading" |
-| Metered message | Low | "You have X free articles remaining" |
+| Signal             | Weight | Description                                            |
+| ------------------ | ------ | ------------------------------------------------------ |
+| Short content      | High   | Article body < 500 chars                               |
+| Truncation markers | High   | "Continue reading...", "Read more...", ellipsis at end |
+| Paywall keywords   | Medium | "Subscribe", "Sign in", "Members only", "Premium"      |
+| Overlay elements   | Medium | `[class*="paywall"]`, `[class*="subscribe-wall"]`      |
+| Login prompts      | Medium | "Sign in to continue reading"                          |
+| Metered message    | Low    | "You have X free articles remaining"                   |
 
 ### Site-Specific Detection
 
@@ -193,20 +194,16 @@ class MediumExtractor extends BaseExtractor {
     // Medium-specific: check for "Member-only story" badge
     const memberBadge = this.querySelector('[data-testid="storyMemberOnlyBadge"]');
     if (memberBadge) return true;
-    
+
     // Check for paywall modal
     const paywallModal = this.querySelector('[data-testid="paywall-modal"]');
     if (paywallModal) return true;
-    
+
     return this.detectGenericPaywall();
   }
-  
+
   getPaywallSelectors(): string[] {
-    return [
-      '[data-testid="storyMemberOnlyBadge"]',
-      '[data-testid="paywall-modal"]',
-      '.meteredContent',
-    ];
+    return ['[data-testid="storyMemberOnlyBadge"]', '[data-testid="paywall-modal"]', ".meteredContent"];
   }
 }
 ```
@@ -271,11 +268,11 @@ export const PAYWALL_KEYWORDS: RegExp[] = [
   /subscribe now/i,
   /already a (?:subscriber|member)\?/i,
   /you(?:'ve| have) (?:reached|used) your (?:free )?(?:article|story) limit/i,
-  
+
   // NYTimes-specific patterns
   /you have a preview view of this article/i,
   /thank you for your patience while we verify access/i,
-  
+
   // Add your new site's patterns here:
   /your site's specific paywall message/i,
 ];
@@ -285,10 +282,7 @@ export const PAYWALL_KEYWORDS: RegExp[] = [
 
 ```typescript
 export const SITE_PAYWALL_SELECTORS: Record<string, string[]> = {
-  "example.com": [
-    '[class*="paywall"]',
-    '.subscription-required',
-  ],
+  "example.com": ['[class*="paywall"]', ".subscription-required"],
 };
 ```
 
@@ -323,21 +317,21 @@ The patterns added to detect this:
 async function fetchFromArchiveIs(url: string): Promise<ArchiveFetchResult> {
   // archive.is stores snapshots and serves them
   const archiveUrl = `https://archive.is/newest/${encodeURIComponent(url)}`;
-  
+
   const response = await fetch(archiveUrl, {
     timeout: ARCHIVE_IS_TIMEOUT_MS,
-    redirect: 'follow',
+    redirect: "follow",
   });
-  
+
   // archive.is redirects to the actual snapshot URL
   const snapshotUrl = response.url;
   const html = await response.text();
-  
+
   return {
     success: true,
     html,
     archiveUrl: snapshotUrl,
-    service: 'archive.is',
+    service: "archive.is",
   };
 }
 ```
@@ -350,19 +344,19 @@ async function fetchFromWayback(url: string): Promise<ArchiveFetchResult> {
   const apiUrl = `https://archive.org/wayback/available?url=${encodeURIComponent(url)}`;
   const apiResponse = await fetch(apiUrl);
   const data = await apiResponse.json();
-  
+
   if (!data.archived_snapshots?.closest?.url) {
-    return { success: false, error: 'No snapshot available' };
+    return { success: false, error: "No snapshot available" };
   }
-  
+
   const snapshotUrl = data.archived_snapshots.closest.url;
-  const html = await fetch(snapshotUrl).then(r => r.text());
-  
+  const html = await fetch(snapshotUrl).then((r) => r.text());
+
   return {
     success: true,
     html,
     archiveUrl: snapshotUrl,
-    service: 'wayback',
+    service: "wayback",
     timestamp: data.archived_snapshots.closest.timestamp,
   };
 }
@@ -374,26 +368,26 @@ async function fetchFromWayback(url: string): Promise<ArchiveFetchResult> {
 
 ```typescript
 // Timeouts (archive services can be slow)
-export const FETCH_TIMEOUT_MS = 30000;        // Normal fetch (existing)
-export const GOOGLEBOT_TIMEOUT_MS = 15000;    // Googlebot fetch
-export const ARCHIVE_IS_TIMEOUT_MS = 45000;   // archive.is can be slow
-export const WAYBACK_TIMEOUT_MS = 30000;      // Wayback Machine
+export const FETCH_TIMEOUT_MS = 30000; // Normal fetch (existing)
+export const GOOGLEBOT_TIMEOUT_MS = 15000; // Googlebot fetch
+export const ARCHIVE_IS_TIMEOUT_MS = 45000; // archive.is can be slow
+export const WAYBACK_TIMEOUT_MS = 30000; // Wayback Machine
 
 // User Agents
-export const GOOGLEBOT_USER_AGENT = 
+export const GOOGLEBOT_USER_AGENT =
   "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/127.0.6533.119 Mobile Safari/537.36 " +
   "(compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
 
 // Paywall detection thresholds
-export const MIN_ARTICLE_LENGTH = 500;        // Chars below this = likely truncated
+export const MIN_ARTICLE_LENGTH = 500; // Chars below this = likely truncated
 export const TRUNCATION_PATTERNS = [
   /continue reading/i,
   /read more/i,
   /subscribe to/i,
   /sign in to continue/i,
   /members only/i,
-  /\.\.\.$/,  // Ends with ellipsis
+  /\.\.\.$/, // Ends with ellipsis
 ];
 ```
 
@@ -433,12 +427,12 @@ Article content...
 
 New actions when paywall is detected:
 
-| Action | Shortcut | Description |
-|--------|----------|-------------|
-| Import from Browser Tab | `⌘I` | Use authenticated browser session |
-| Open in Browser & Import | `⌘O` | Open URL, then import |
-| Try Paywall Hopper | `⌘P` | Attempt bypass methods |
-| Copy URL to Archived Copy | `⌘⇧C` | Copy archive.is URL |
+| Action                    | Shortcut | Description                       |
+| ------------------------- | -------- | --------------------------------- |
+| Import from Browser Tab   | `⌘I`     | Use authenticated browser session |
+| Open in Browser & Import  | `⌘O`     | Open URL, then import             |
+| Try Paywall Hopper        | `⌘P`     | Attempt bypass methods            |
+| Copy URL to Archived Copy | `⌘⇧C`    | Copy archive.is URL               |
 
 ### Toast Notifications
 
@@ -455,13 +449,13 @@ Extend `ArticleState` in `src/types/article.ts`:
 ```typescript
 export interface ArticleState {
   // ... existing fields ...
-  
+
   /** Source of archived content, if retrieved via Paywall Hopper */
   archiveSource?: {
-    service: 'googlebot' | 'archive.is' | 'wayback' | 'browser';
-    url?: string;           // URL to the archived copy
-    timestamp?: string;     // When the archive was captured
-    retrievedAt: string;    // When we fetched it
+    service: "googlebot" | "archive.is" | "wayback" | "browser";
+    url?: string; // URL to the archived copy
+    timestamp?: string; // When the archive was captured
+    retrievedAt: string; // When we fetched it
   };
 }
 ```
@@ -497,13 +491,13 @@ paywallLog.log("bypass:wayback:failed", { url, reason });
 
 ### Test URLs
 
-| Site | URL Type | Expected Behavior |
-|------|----------|-------------------|
-| WSJ | Paywalled | Googlebot or archive.is should work |
-| NYT | Metered | May work with Googlebot |
-| Medium | Member-only | Extractor detects, archive.is fallback |
-| The Atlantic | Paywalled | Archive services |
-| WaPo | Metered | Googlebot may work |
+| Site         | URL Type    | Expected Behavior                      |
+| ------------ | ----------- | -------------------------------------- |
+| WSJ          | Paywalled   | Googlebot or archive.is should work    |
+| NYT          | Metered     | May work with Googlebot                |
+| Medium       | Member-only | Extractor detects, archive.is fallback |
+| The Atlantic | Paywalled   | Archive services                       |
+| WaPo         | Metered     | Googlebot may work                     |
 
 ### Test Scenarios
 

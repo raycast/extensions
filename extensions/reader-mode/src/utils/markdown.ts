@@ -156,6 +156,73 @@ export interface FormatArticleOptions {
 }
 
 /**
+ * Extracts the base image identifier from a URL, stripping size/dimension parameters.
+ * This helps match the same image served at different sizes (common with CDNs).
+ *
+ * Examples:
+ * - Le Monde: /119/0/5000/3333/1440/960/60/0/df2f706_... → df2f706_...
+ * - Generic CDN: image.jpg?w=800&h=600 → image.jpg
+ */
+function getImageIdentifier(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const pathname = parsed.pathname;
+
+    // Extract the filename (last path segment)
+    const filename = pathname.split("/").pop() || pathname;
+
+    // For URLs with query params (e.g., ?w=800&h=600), strip them
+    // The pathname already excludes query params, so just return filename
+    return filename.toLowerCase();
+  } catch {
+    // If URL parsing fails, try to extract filename from the string
+    const match = url.match(/\/([^/?]+)(?:\?|$)/);
+    return (match?.[1] || url).toLowerCase();
+  }
+}
+
+/**
+ * Removes duplicate images from markdown content that match the featured article image.
+ * This prevents the same image from appearing twice when the article image is prepended.
+ *
+ * @param markdown - The markdown content to process
+ * @param articleImageUrl - The featured image URL that will be prepended
+ * @returns The markdown with duplicate images removed
+ */
+export function dedupeArticleImage(markdown: string, articleImageUrl: string): string {
+  const articleImageId = getImageIdentifier(articleImageUrl);
+
+  // Match markdown image syntax: ![alt](url) or ![](url)
+  const imageRegex = /!\[[^\]]*\]\(([^)]+)\)/g;
+
+  // Track if we've removed any images (for logging)
+  let removedCount = 0;
+
+  const result = markdown.replace(imageRegex, (match, imageUrl) => {
+    const contentImageId = getImageIdentifier(imageUrl);
+
+    // If the image identifiers match, this is a duplicate - remove it
+    if (contentImageId === articleImageId) {
+      removedCount++;
+      // Return empty string to remove the image, but preserve any surrounding whitespace handling
+      return "";
+    }
+
+    return match;
+  });
+
+  if (removedCount > 0) {
+    parseLog.log("markdown:dedupe-images", {
+      articleImageId,
+      removedCount,
+    });
+  }
+
+  // Clean up any double newlines left by removed images
+  return result.replace(/\n{3,}/g, "\n\n");
+}
+
+/**
  * Formats article content into Markdown (body only, no title/metadata)
  * Title and metadata are now handled in the component to avoid duplication
  */
@@ -166,6 +233,9 @@ export function formatArticle(title: string, content: string, options?: FormatAr
 
   // Prepend article image if available from metadata (OG/Twitter Card)
   if (options?.image) {
+    // First, remove any duplicate images from the content that match the article image
+    contentMarkdown = dedupeArticleImage(contentMarkdown, options.image);
+    // Then prepend the article image
     contentMarkdown = `![](${options.image})\n\n${contentMarkdown}`;
   }
 

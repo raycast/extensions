@@ -21,6 +21,15 @@ Read the web distraction-free in Raycast.
 - **Browser Extension Fallback** - Access blocked pages and re-import member-only content via the Raycast browser extension
 - **Smart URL Detection** - Automatically detects URLs from arguments, clipboard, selection, or active browser tab
 
+## Commands
+
+| Command                             | Description                                  | Default  |
+| ----------------------------------- | -------------------------------------------- | -------- |
+| **Open in Reader Mode**             | Main command - opens a URL in reader mode    | Enabled  |
+| **Open Clipboard in Reader Mode**   | Opens URL from clipboard directly            | Disabled |
+| **Open Current Tab in Reader Mode** | Opens the current browser tab in reader mode | Disabled |
+
+The clipboard and current tab commands are disabled by default to reduce command clutter. Enable them in Raycast Settings → Extensions → Reader Mode if you prefer dedicated commands over the main command's auto-detection.
 
 ## Architecture
 
@@ -34,11 +43,11 @@ Reader Mode uses a multi-layered approach to extract clean article content:
 
 #### Extractors vs Site Config
 
-| Approach | Use Case | Examples |
-|----------|----------|----------|
-| **Extractors** | Sites needing custom DOM traversal and content transformation | Hacker News, GitHub, Reddit |
-| **Site Config** | Sites needing only CSS selector adjustments | Medium, Substack, news sites |
-| **Readability** | Standard article pages | Most blogs and news articles |
+| Approach        | Use Case                                                      | Examples                     |
+| --------------- | ------------------------------------------------------------- | ---------------------------- |
+| **Extractors**  | Sites needing custom DOM traversal and content transformation | Hacker News, GitHub, Reddit  |
+| **Site Config** | Sites needing only CSS selector adjustments                   | Medium, Substack, news sites |
+| **Readability** | Standard article pages                                        | Most blogs and news articles |
 
 ### Adding Support for New Sites
 
@@ -109,20 +118,20 @@ export const SUMMARY_PROMPTS: Record<SummaryStyle, PromptConfig> = {
 ```
 
 Each prompt config includes:
+
 - **`label`** - Human-readable name shown in the UI
 - **`buildPrompt`** - Function that generates the full prompt from article context
 
 ### Summary Styles
 
-| Style | Description |
-|-------|-------------|
-| **Overview** | One-liner summary + 3 key bullet points |
-| **Opposite Sides** | Two contrasting viewpoints from the article |
-| **The 5 Ws** | Who, What, Where, When, Why breakdown |
-| **Explain Like I'm 5** | Simplified explanation using simple language |
-| **Translated Overview** | Overview translated to a specified language |
-| **People, Places & Things** | Key entities extracted with context |
-
+| Style                       | Description                                  |
+| --------------------------- | -------------------------------------------- |
+| **Overview**                | One-liner summary + 3 key bullet points      |
+| **Opposite Sides**          | Two contrasting viewpoints from the article  |
+| **The 5 Ws**                | Who, What, Where, When, Why breakdown        |
+| **Explain Like I'm 5**      | Simplified explanation using simple language |
+| **Translated Overview**     | Overview translated to a specified language  |
+| **People, Places & Things** | Key entities extracted with context          |
 
 ## Browser Extension Integration
 
@@ -169,7 +178,6 @@ For paywalled or member-only articles (like Medium member stories), you can re-i
 - The article must be open in a browser tab
 - You must be logged in to the site in your browser
 - The browser tab must be active (focused) when importing
-
 
 ### Inspiration: Defuddle
 

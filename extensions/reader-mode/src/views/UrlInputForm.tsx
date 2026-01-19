@@ -54,9 +54,9 @@ export function UrlInputForm({ initialUrl, invalidInput, onSubmit }: UrlInputFor
   const getDescription = () => {
     if (invalidInput) {
       const truncated = invalidInput.length > 100 ? `${invalidInput.slice(0, 100)}...` : invalidInput;
-      return `Couldn't find a valid link in your input "${truncated}".\n\nEnter a valid URL and hit return.`;
+      return `Hmm, "${truncated}" doesn't look like a URL.\n\nPaste or type a link below to get started.`;
     }
-    return "No URL was found in your clipboard, selection, or browser. Please enter a URL to read.";
+    return "Paste or type a URL below to read it in a clean, distraction-free view.";
   };
 
   return (

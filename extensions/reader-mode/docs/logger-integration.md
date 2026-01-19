@@ -71,12 +71,12 @@ export default function Command() {
 
 Apply this transformation pattern throughout the codebase:
 
-| **Before**                        | **After**                                    |
-| --------------------------------- | -------------------------------------------- |
-| `console.log("Fetching data...")` | `log.log("fetch:start", { url })`            |
-| `console.log("Result:", data)`    | `log.log("fetch:result", { data })`          |
-| `console.error("Failed:", err)`   | `log.error("fetch:error", { error })`        |
-| `console.warn("Deprecated")`      | `log.warn("api:deprecated", { reason })`     |
+| **Before**                        | **After**                                |
+| --------------------------------- | ---------------------------------------- |
+| `console.log("Fetching data...")` | `log.log("fetch:start", { url })`        |
+| `console.log("Result:", data)`    | `log.log("fetch:result", { data })`      |
+| `console.error("Failed:", err)`   | `log.error("fetch:error", { error })`    |
+| `console.warn("Deprecated")`      | `log.warn("api:deprecated", { reason })` |
 
 ## Step 5: Event Naming Convention
 
@@ -92,11 +92,11 @@ Use `category:action` format:
 
 The Logger provides three methods:
 
-| **Method** | **When to Use**                          |
-| ---------- | ---------------------------------------- |
-| `log()`    | General diagnostics and flow tracking    |
-| `warn()`   | Recoverable issues, deprecations         |
-| `error()`  | Failures requiring attention             |
+| **Method** | **When to Use**                       |
+| ---------- | ------------------------------------- |
+| `log()`    | General diagnostics and flow tracking |
+| `warn()`   | Recoverable issues, deprecations      |
+| `error()`  | Failures requiring attention          |
 
 All logs are controlled by the `verboseLogging` preference—when enabled, all messages appear; when disabled, only errors are shown (aligned with Raycast's toast system).
 
@@ -106,10 +106,10 @@ Always include relevant identifiers:
 
 ```typescript
 // Good: structured context
-log.log("item:process", { 
-  itemId: item.id, 
+log.log("item:process", {
+  itemId: item.id,
   type: item.type,
-  count: items.length 
+  count: items.length,
 });
 
 // Avoid: string interpolation
