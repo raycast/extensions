@@ -90,7 +90,7 @@ async function handleSubmit(
     });
 
     popToRoot();
-  } catch (_error) {
+  } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to duplicate configuration",
