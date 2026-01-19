@@ -1,6 +1,6 @@
 # Change Case Changelog
 
-## [Refactor and ESLint Compatibility] - {PR_MERGE_DATE}
+## [Refactor and ESLint Compatibility] - 2026-01-19
 
 - Added a proper `alternatingCase` transformation alongside the existing `randomCase` option
 - Updated function names and aliases to prioritize "alternating" while maintaining backward compatibility
