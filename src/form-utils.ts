@@ -1,7 +1,7 @@
 import { Application, showToast, Toast, confirmAlert } from "@raycast/api";
 import { Folder, FolderItem } from "./types";
 import { createWebsiteItem } from "./utils";
-import { normalizeUrl, isValidUrl, fetchAndCacheFavicon, fetchWebsiteTitle, extractDomain } from "./favicon";
+import { normalizeUrl, isValidUrl, fetchWebsiteTitle, extractDomain } from "./favicon";
 
 // Shared content type for both forms
 export type ContentType = "applications" | "websites" | "folders";
@@ -22,6 +22,25 @@ export const filterFolders = (items: FolderItem[]): Array<FolderItem & { folderI
  */
 export function createFolderMap(folders: Folder[]): Map<string, Folder> {
   return new Map(folders.map((f) => [f.id, f]));
+}
+
+/**
+ * Create a Map for O(1) website lookups by normalized URL
+ * Use this instead of repeated filterWebsites + find calls
+ */
+export function createWebsiteUrlMap(items: FolderItem[]): Map<string, FolderItem & { url: string }> {
+  return new Map(filterWebsites(items).map((w) => [normalizeUrl(w.url), w]));
+}
+
+/**
+ * Separate items into duplicates and new items based on a Set of existing values
+ * Generic helper to reduce duplicate filtering logic
+ */
+export function separateDuplicates<T>(items: T[], existingSet: Set<T>): { duplicates: T[]; new: T[] } {
+  return {
+    duplicates: items.filter((item) => existingSet.has(item)),
+    new: items.filter((item) => !existingSet.has(item)),
+  };
 }
 
 /**
@@ -159,8 +178,7 @@ export function findDuplicateUrls(urlInput: string, existingItems: FolderItem[])
   const urlLines = parseWebsiteUrls(urlInput);
   if (urlLines.length === 0) return [];
 
-  // Build lookup map for existing websites
-  const existingByUrl = new Map(filterWebsites(existingItems).map((w) => [normalizeUrl(w.url), w]));
+  const existingByUrl = createWebsiteUrlMap(existingItems);
 
   // Find duplicates
   return urlLines.filter((url) => existingByUrl.has(url)).map((url) => ({ url, name: existingByUrl.get(url)!.name }));
@@ -223,8 +241,9 @@ export async function confirmDuplicateUrls(duplicates: { url: string; name: stri
 /**
  * Process website URLs and create FolderItems
  * Supports markdown link syntax for custom titles: [Custom Title](https://example.com)
- * Reuses existing items when possible to preserve icons and names
- * Fetches page titles and favicons for new URLs (unless custom title provided)
+ * Reuses existing items when possible to preserve names
+ * Fetches page titles for new URLs (unless custom title provided)
+ * Favicons are fetched dynamically via @raycast/utils getFavicon
  * @param urlInput - Multiline string of URLs or markdown links
  * @param existingItems - Existing items in the folder
  * @param includeDuplicates - Whether to include duplicate URLs (default: true)
@@ -237,15 +256,14 @@ export async function processWebsiteUrls(
   const urlEntries = parseWebsiteUrlsWithTitles(urlInput);
   if (urlEntries.length === 0) return [];
 
-  // Build lookup map for existing websites
-  const existingByUrl = new Map(filterWebsites(existingItems).map((w) => [normalizeUrl(w.url), w]));
+  const existingByUrl = createWebsiteUrlMap(existingItems);
 
   // Determine which entries to process
   const entriesToProcess = includeDuplicates ? urlEntries : urlEntries.filter((entry) => !existingByUrl.has(entry.url));
 
   if (entriesToProcess.length === 0) return [];
 
-  // Count new URLs that need fetching (not in existing items AND no custom title)
+  // Count new URLs that need title fetching (not in existing items AND no custom title)
   const urlsNeedingFetch = entriesToProcess.filter((entry) => !existingByUrl.has(entry.url) && !entry.title);
 
   if (urlsNeedingFetch.length > 0) {
@@ -261,15 +279,14 @@ export async function processWebsiteUrls(
     const existing = existingByUrl.get(entry.url);
     if (existing && !entry.title) {
       // For duplicates without custom title, create a new item (copy) with a new ID
-      items.push(createWebsiteItem(entry.url, existing.name, existing.icon));
+      items.push(createWebsiteItem(entry.url, existing.name));
     } else if (entry.title) {
-      // Custom title provided via markdown syntax - just fetch favicon
-      const iconPath = await fetchAndCacheFavicon(entry.url);
-      items.push(createWebsiteItem(entry.url, entry.title, iconPath));
+      // Custom title provided via markdown syntax
+      items.push(createWebsiteItem(entry.url, entry.title));
     } else {
-      // Fetch both title and favicon for new URLs
-      const [title, iconPath] = await Promise.all([fetchWebsiteTitle(entry.url), fetchAndCacheFavicon(entry.url)]);
-      items.push(createWebsiteItem(entry.url, title, iconPath));
+      // Fetch title for new URLs (favicons handled by getFavicon at render time)
+      const title = await fetchWebsiteTitle(entry.url);
+      items.push(createWebsiteItem(entry.url, title));
     }
   }
 

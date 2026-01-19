@@ -33,7 +33,6 @@ import {
   useCopyUrls,
 } from "./hooks";
 import { filterApplications, filterWebsites } from "./form-utils";
-import { fetchAndCacheFavicon } from "./favicon";
 import AddItemsForm from "./components/add-items-form";
 import WebsiteEditForm from "./components/website-edit-form";
 import MoveToFolderForm from "./components/move-to-folder-form";
@@ -291,31 +290,6 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
     [folder, folderId, applications, allFolders, handleSave],
   );
 
-  const handleRefreshFavicon = useCallback(
-    async (item: FolderItem) => {
-      if (!folder || item.type !== "website" || !item.url) return;
-
-      await showToast({ title: "Refreshing favicon...", style: Toast.Style.Animated });
-
-      // Force re-fetch, bypassing cache
-      const newIconPath = await fetchAndCacheFavicon(item.url, true);
-
-      // Update the item with the new icon path
-      const updatedItems = folder.items.map((i) => (i.id === item.id ? { ...i, icon: newIconPath } : i));
-
-      await updateFolder(folderId, { items: updatedItems });
-
-      await showToast({
-        title: newIconPath ? "Favicon refreshed" : "No favicon found",
-        message: item.name,
-        style: Toast.Style.Success,
-      });
-
-      await handleSave();
-    },
-    [folder, folderId, handleSave],
-  );
-
   const handleOpenItem = useCallback(
     async (item: FolderItem) => {
       try {
@@ -454,20 +428,12 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
         <ActionPanel.Section title="Organize">
           {folder && <AddItemsAction folder={folder} onSave={handleSave} />}
           {item.type === "website" && folder && (
-            <>
-              <Action.Push
-                title="Edit Website"
-                icon={Icon.Pencil}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-                target={<WebsiteEditForm folder={folder} item={item} onSave={handleSave} />}
-              />
-              <Action
-                title="Refresh Favicon"
-                icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={() => handleRefreshFavicon(item)}
-              />
-            </>
+            <Action.Push
+              title="Edit Website"
+              icon={Icon.Pencil}
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              target={<WebsiteEditForm folder={folder} item={item} onSave={handleSave} />}
+            />
           )}
           {item.type === "folder" &&
             item.folderId &&
@@ -529,7 +495,6 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
       handleSave,
       handleRemoveItem,
       handleDuplicateItem,
-      handleRefreshFavicon,
       handleRemoveDuplicates,
       duplicateInfo,
       revalidate,

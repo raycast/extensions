@@ -109,3 +109,41 @@ export function isCssColorName(color: string): boolean {
 export function cssColorToHex(color: string): string | undefined {
   return CSS_COLORS[color.toLowerCase()];
 }
+
+/**
+ * Validate color format (hex with or without #, or CSS color name)
+ */
+export function isValidHexColor(color: string): boolean {
+  if (!color) return false;
+  // Check for CSS color name first
+  if (isCssColorName(color)) return true;
+  // Check for hex format
+  return /^#?([0-9A-Fa-f]{3}){1,2}$/.test(color);
+}
+
+/**
+ * Normalize color to full 6-digit hex format with # prefix
+ * Accepts: hex (with/without #), shorthand hex (#CCC), CSS color names
+ * Examples: "red" → "#FF0000", "CCC" → "#CCCCCC", "#ABC" → "#AABBCC"
+ */
+export function normalizeHexColor(color: string): string {
+  if (!color) return color;
+
+  // Check for CSS color name first
+  const cssHex = cssColorToHex(color);
+  if (cssHex) return cssHex;
+
+  // Add # prefix if missing
+  let hex = color.startsWith("#") ? color : `#${color}`;
+
+  // Expand shorthand hex (#RGB → #RRGGBB)
+  if (hex.length === 4) {
+    const r = hex[1];
+    const g = hex[2];
+    const b = hex[3];
+    hex = `#${r}${r}${g}${g}${b}${b}`;
+  }
+
+  // Uppercase for consistency
+  return hex.toUpperCase();
+}

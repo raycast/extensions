@@ -1,7 +1,8 @@
-import { Application, Icon, open, showToast, Toast } from "@raycast/api";
+import { Application, Icon, Image, open, showToast, Toast } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { FolderItem, Folder } from "./types";
-import { getCachedFavicon, extractDomain, isValidFaviconPath } from "./favicon";
-import { isCssColorName, cssColorToHex } from "./css-colors";
+import { extractDomain } from "./favicon";
+import { isValidHexColor } from "./css-colors";
 
 // Types
 export type SortMethod = "alphabetical" | "length" | "recent" | "none";
@@ -80,7 +81,7 @@ export function findApplicationByItemPath(itemPath: string, applications: Applic
 }
 
 // Icon type that includes tinted icons and source URLs
-export type FolderIconType = Icon | { source: Icon; tintColor: string } | { fileIcon: string } | { source: string };
+export type FolderIconType = Icon | { source: Icon; tintColor: string } | { fileIcon: string } | Image.ImageLike;
 
 /**
  * Get icon for a folder item
@@ -97,20 +98,9 @@ export function getItemIcon(item: FolderItem, applications: Application[], folde
     return Icon.Folder;
   }
 
-  if (item.type === "website") {
-    // Try to use stored icon path if it's still valid
-    if (item.icon && isValidFaviconPath(item.icon)) {
-      return { source: item.icon };
-    }
-    // Try cached favicon by URL
-    if (item.url) {
-      const cachedPath = getCachedFavicon(item.url);
-      if (cachedPath) {
-        return { source: cachedPath };
-      }
-    }
-    // Fall back to Globe icon (more reliable than Google's placeholder images)
-    return Icon.Globe;
+  if (item.type === "website" && item.url) {
+    // Use Raycast's built-in getFavicon which handles caching and multiple providers
+    return getFavicon(item.url, { fallback: Icon.Globe });
   }
 
   if (item.path) {
@@ -300,43 +290,8 @@ export function getFolderIconPlain(iconName?: string): Icon {
   return iconName ? (Icon as Record<string, Icon>)[iconName] || Icon.Folder : Icon.Folder;
 }
 
-/**
- * Validate color format (hex with or without #, or CSS color name)
- */
-export function isValidHexColor(color: string): boolean {
-  if (!color) return false;
-  // Check for CSS color name first
-  if (isCssColorName(color)) return true;
-  // Check for hex format
-  return /^#?([0-9A-Fa-f]{3}){1,2}$/.test(color);
-}
-
-/**
- * Normalize color to full 6-digit hex format with # prefix
- * Accepts: hex (with/without #), shorthand hex (#CCC), CSS color names
- * Examples: "red" → "#FF0000", "CCC" → "#CCCCCC", "#ABC" → "#AABBCC"
- */
-export function normalizeHexColor(color: string): string {
-  if (!color) return color;
-
-  // Check for CSS color name first
-  const cssHex = cssColorToHex(color);
-  if (cssHex) return cssHex;
-
-  // Add # prefix if missing
-  let hex = color.startsWith("#") ? color : `#${color}`;
-
-  // Expand shorthand hex (#RGB → #RRGGBB)
-  if (hex.length === 4) {
-    const r = hex[1];
-    const g = hex[2];
-    const b = hex[3];
-    hex = `#${r}${r}${g}${g}${b}${b}`;
-  }
-
-  // Uppercase for consistency
-  return hex.toUpperCase();
-}
+// Re-export color utilities from css-colors.ts for backward compatibility
+export { isValidHexColor, normalizeHexColor } from "./css-colors";
 
 /**
  * Pluralize a word based on count

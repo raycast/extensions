@@ -12,6 +12,7 @@ import {
   findDuplicateUrls,
   confirmDuplicateUrls,
   confirmDuplicates,
+  separateDuplicates,
   DuplicateInfo,
 } from "../form-utils";
 import { CREATE_NEW_FOLDER_VALUE } from "../constants";
@@ -35,12 +36,12 @@ function AddItemsForm({ folder, onSave }: AddItemsFormProps) {
 
   // Get existing item paths/ids for duplicate detection
   const existingAppPaths = useMemo(
-    () => new Set(folder.items.filter((i) => i.type === "application").map((i) => i.path)),
+    () => new Set(folder.items.filter((i) => i.type === "application" && i.path).map((i) => i.path as string)),
     [folder.items],
   );
 
   const existingFolderIds = useMemo(
-    () => new Set(folder.items.filter((i) => i.type === "folder").map((i) => i.folderId)),
+    () => new Set(folder.items.filter((i) => i.type === "folder" && i.folderId).map((i) => i.folderId as string)),
     [folder.items],
   );
 
@@ -68,8 +69,7 @@ function AddItemsForm({ folder, onSave }: AddItemsFormProps) {
 
       // Check for duplicate applications
       const apps = values.applications || [];
-      const duplicateApps = apps.filter((path) => existingAppPaths.has(path));
-      const newApps = apps.filter((path) => !existingAppPaths.has(path));
+      const { duplicates: duplicateApps, new: newApps } = separateDuplicates(apps, existingAppPaths);
 
       duplicateApps.forEach((path) => {
         const app = applications.find((a) => a.path === path);
@@ -78,8 +78,7 @@ function AddItemsForm({ folder, onSave }: AddItemsFormProps) {
 
       // Check for duplicate folders (exclude the CREATE_NEW_FOLDER_VALUE)
       const folders = (values.folders || []).filter((id) => id !== CREATE_NEW_FOLDER_VALUE);
-      const duplicateFolders = folders.filter((id) => existingFolderIds.has(id));
-      const newFolders = folders.filter((id) => !existingFolderIds.has(id));
+      const { duplicates: duplicateFolders, new: newFolders } = separateDuplicates(folders, existingFolderIds);
 
       duplicateFolders.forEach((id) => {
         const f = allFolders.find((f) => f.id === id);
