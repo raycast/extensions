@@ -80,9 +80,7 @@ export const LanguagesManagerList = () => {
       selectedLanguages as unknown as string,
     ) as Language[];
 
-    setSelectedLanguages((draft) => {
-      draft.push(...data, primaryLanguage);
-    });
+    setSelectedLanguages((draft) => [...draft, ...data, primaryLanguage]);
   };
 
   const selectLanguage = (language: Language) => {
