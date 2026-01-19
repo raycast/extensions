@@ -1,17 +1,8 @@
 import { ActionPanel, Action, List, Icon, showToast, Toast, open, closeMainWindow } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { homedir } from "os";
-import { readdir, readFile } from "fs/promises";
 import { join } from "path";
-
-interface Extension {
-  id: string;
-  name: string;
-  version: string;
-  description: string;
-  publisher: string;
-  enabled: boolean;
-}
+import { getLocalExtensions, Extension } from "./lib/qoder";
 
 export default function Command() {
   const [extensions, setExtensions] = useState<Extension[]>([]);
@@ -23,43 +14,14 @@ export default function Command() {
 
   async function loadInstalledExtensions() {
     try {
-      const extensionsPath = join(homedir(), ".qoder", "extensions");
+      const extensionList = await getLocalExtensions();
 
-      const extensionDirs = await readdir(extensionsPath, { withFileTypes: true });
-      const extensionList: Extension[] = [];
-
-      for (const dir of extensionDirs) {
-        if (!dir.isDirectory()) continue;
-
-        try {
-          const packageJsonPath = join(extensionsPath, dir.name, "package.json");
-          const packageData = await readFile(packageJsonPath, "utf-8");
-          const packageJson = JSON.parse(packageData);
-
-          extensionList.push({
-            id: dir.name,
-            name: packageJson.displayName || packageJson.name || dir.name,
-            version: packageJson.version || "Unknown",
-            description: packageJson.description || "No description",
-            publisher: packageJson.publisher || "Unknown",
-            enabled: true, // Default to enabled, could check settings if needed
-          });
-        } catch {
-          // If package.json can't be read, add basic info
-          extensionList.push({
-            id: dir.name,
-            name: dir.name,
-            version: "Unknown",
-            description: "Extension information not available",
-            publisher: "Unknown",
-            enabled: true,
-          });
-        }
+      if (extensionList) {
+        extensionList.sort((a, b) => a.name.localeCompare(b.name));
+        setExtensions(extensionList);
+      } else {
+        setExtensions([]);
       }
-
-      // Sort by name
-      extensionList.sort((a, b) => a.name.localeCompare(b.name));
-      setExtensions(extensionList);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -98,12 +60,10 @@ export default function Command() {
           <List.Item
             key={extension.id}
             title={extension.name}
-            subtitle={`v${extension.version} • ${extension.publisher}`}
+            subtitle={`v${extension.version}${extension.publisherDisplayName ? ` • ${extension.publisherDisplayName}` : ""}`}
             accessories={[
-              {
-                text: extension.enabled ? "Enabled" : "Disabled",
-                icon: extension.enabled ? Icon.CheckCircle : Icon.XMarkCircle,
-              },
+              ...(extension.preRelease ? [{ tag: { value: "Pre-release", color: "#FFA500" } }] : []),
+              ...(extension.preview ? [{ tag: { value: "Preview", color: "#00BFFF" } }] : []),
             ]}
             icon={Icon.Box}
             actions={
@@ -124,14 +84,25 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label title="Name" text={extension.name} />
                     <List.Item.Detail.Metadata.Label title="ID" text={extension.id} />
                     <List.Item.Detail.Metadata.Label title="Version" text={extension.version} />
-                    <List.Item.Detail.Metadata.Label title="Publisher" text={extension.publisher} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Description" text={extension.description} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Status"
-                      text={extension.enabled ? "Enabled" : "Disabled"}
-                      icon={extension.enabled ? Icon.CheckCircle : Icon.XMarkCircle}
-                    />
+                    {extension.publisherDisplayName && (
+                      <List.Item.Detail.Metadata.Label title="Publisher" text={extension.publisherDisplayName} />
+                    )}
+                    {extension.preRelease && (
+                      <List.Item.Detail.Metadata.TagList title="Release Type">
+                        <List.Item.Detail.Metadata.TagList.Item text="Pre-release" color="#FFA500" />
+                      </List.Item.Detail.Metadata.TagList>
+                    )}
+                    {extension.preview && (
+                      <List.Item.Detail.Metadata.TagList title="Status">
+                        <List.Item.Detail.Metadata.TagList.Item text="Preview" color="#00BFFF" />
+                      </List.Item.Detail.Metadata.TagList>
+                    )}
+                    {extension.installedTimestamp && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Installed"
+                        text={new Date(extension.installedTimestamp).toLocaleString()}
+                      />
+                    )}
                   </List.Item.Detail.Metadata>
                 }
               />

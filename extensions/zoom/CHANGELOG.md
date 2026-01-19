@@ -1,6 +1,6 @@
 # Zoom Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-01-05
 
 - Added Windows support for starting, joining, and scheduling Zoom meetings.
 

@@ -1,5 +1,11 @@
 # System Monitor Changelog
 
+## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
+
+- Add a preference to toggle between free and used display modes for CPU, Memory and more (ref: [Issue #24612](https://github.com/raycast/extensions/issues/24612)).
+- Modernize extension to use latest Raycast configuration.
+- Add README.md.
+
 ## [New Additions] - 2025-08-05
 
 - Add a new preference option for the `Menubar System Monitor` command to customize the menu bar icon.

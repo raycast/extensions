@@ -1,6 +1,11 @@
 # Qoder Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.1]- 2026-01-08
+
+### Changed
+- Refactor extension loading logic in "Show Installed Extensions" command
+
+## [1.0.0] - 2026-01-07
 
 - Initial release
 - Add "Open New Window" command to open a new Qoder window

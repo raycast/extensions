@@ -1,5 +1,0 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`Zed DB Integration Tests > v28 Schema > should fetch and parse workspaces correctly 1`] = `[]`;
-
-exports[`Zed DB Integration Tests > v30 Schema > should fetch and parse workspaces correctly 1`] = `[]`;

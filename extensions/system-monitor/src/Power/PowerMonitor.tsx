@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useInterval } from "usehooks-ts";
 import { usePromise } from "@raycast/utils";
 
@@ -6,6 +6,8 @@ import { Actions } from "../components/Actions";
 import { BatteryDataInterface } from "../Interfaces";
 import { convertMinutesToHours } from "../utils";
 import { getBatteryData, getTimeOnBattery } from "./PowerUtils";
+
+const { displayMode } = getPreferenceValues<ExtensionPreferences>();
 
 export default function PowerMonitor() {
   const { revalidate, data } = usePromise(async () => {
@@ -25,7 +27,15 @@ export default function PowerMonitor() {
       id="power"
       title="Power"
       icon={Icon.Plug}
-      accessories={[{ text: data?.batteryData ? `${data?.batteryData?.batteryLevel} %` : "Loading…" }]}
+      accessories={[
+        {
+          text: data?.batteryData
+            ? displayMode === "free"
+              ? `${data?.batteryData?.batteryLevel} %`
+              : `${100 - +data?.batteryData?.batteryLevel} %`
+            : "Loading…",
+        },
+      ]}
       detail={<PowerMonitorDetail batteryData={data?.batteryData} isOnAC={data?.isOnAC} />}
       actions={<Actions radioButtonNumber={3} />}
     />
@@ -42,7 +52,14 @@ function PowerMonitorDetail({ batteryData, isOnAC }: { batteryData?: BatteryData
       isLoading={!!batteryData || isLoadingTimeOnBattery}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Battery Level" text={`${batteryData?.batteryLevel}%`} />
+          {displayMode === "free" ? (
+            <List.Item.Detail.Metadata.Label title="Battery Level" text={`${batteryData?.batteryLevel}%`} />
+          ) : (
+            <List.Item.Detail.Metadata.Label
+              title="Battery Level (Used)"
+              text={`${batteryData?.batteryLevel ? 100 - +batteryData.batteryLevel : "N/A"}%`}
+            />
+          )}
           <List.Item.Detail.Metadata.Label title="Charging" text={batteryData?.isCharging ? "Yes" : "No"} />
           <List.Item.Detail.Metadata.Label title="Cycle Count" text={batteryData?.cycleCount || "Loading…"} />
           <List.Item.Detail.Metadata.Label title="Battery Condition" text={batteryData?.condition || "Loading…"} />

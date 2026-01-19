@@ -126,6 +126,12 @@ export interface PlaceEventsData {
   events: EventEntry[];
 }
 
+export interface SearchEventsResponse {
+  entries: EventEntry[];
+  has_more: boolean;
+  next_cursor: string | null;
+}
+
 export const CONTINENT_NAMES: Record<string, string> = {
   apac: "Asia & Pacific",
   europe: "Europe",
