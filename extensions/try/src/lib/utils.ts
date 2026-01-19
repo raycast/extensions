@@ -3,7 +3,7 @@ import { join } from "path";
 import { TryDirectory } from "../types";
 import { getTryPath } from "./constants";
 
-export function getTryDirectories(): TryDirectory[] {
+export async function getTryDirectories(): Promise<TryDirectory[]> {
   const tryPath = getTryPath();
   if (!existsSync(tryPath)) {
     return [];
