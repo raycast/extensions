@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { LocalSendDevice } from "../types";
 
 export const testDeviceConnection = async (

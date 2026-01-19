@@ -10,12 +10,6 @@ import { isFavoriteDevice } from "./favorites";
 const SERVER_STATUS_KEY = "receive-server-status";
 const PENDING_TRANSFERS_KEY = "pending-transfers";
 
-interface Preferences {
-  downloadPath: string;
-  enableReceive: boolean;
-  quickSave: "off" | "favorites" | "on";
-}
-
 interface Session {
   sessionId: string;
   files: Record<string, { token: string; metadata: FileMetadata }>;

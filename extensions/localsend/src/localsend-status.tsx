@@ -13,12 +13,6 @@ import { getDiscoveryStatus } from "./utils/discovery-service";
 
 const QUICK_SAVE_KEY = "quick-save-mode";
 
-interface Preferences {
-  httpPort: string;
-  enableReceive: boolean;
-  quickSave: "off" | "favorites" | "on";
-}
-
 export default function Command() {
   const [localIPs, setLocalIPs] = useState<string[]>(["Loading..."]);
   const [deviceInfo, setDeviceInfo] = useState(getDeviceInfo());

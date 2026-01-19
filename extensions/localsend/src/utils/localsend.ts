@@ -1,19 +1,9 @@
 import dgram from "node:dgram";
 import os from "node:os";
 import crypto from "node:crypto";
-import fetch from "node-fetch";
 import https from "node:https";
 import { getPreferenceValues } from "@raycast/api";
 import { DeviceInfo, LocalSendDevice, PrepareUploadRequest, PrepareUploadResponse, FileMetadata } from "../types";
-
-interface Preferences {
-  deviceName: string;
-  deviceType: string;
-  deviceModel: string;
-  httpPort: string;
-  downloadPath: string;
-  enableReceive: boolean;
-}
 
 export const MULTICAST_ADDRESS = "224.0.0.167";
 export const MULTICAST_PORT = 53317;

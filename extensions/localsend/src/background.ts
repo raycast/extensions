@@ -2,12 +2,6 @@ import { getPreferenceValues, environment } from "@raycast/api";
 import { startReceiveServer } from "./utils/receive-server";
 import { startDiscoveryService } from "./utils/discovery-service";
 
-interface Preferences {
-  httpPort: string;
-  enableReceive: boolean;
-  enableDiscovery?: boolean;
-}
-
 const initializeServices = async () => {
   if (!environment.canAccess(environment.supportPath)) {
     return;

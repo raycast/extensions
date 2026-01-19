@@ -25,12 +25,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 
-interface Preferences {
-  httpPort: string;
-  downloadPath: string;
-  enableReceive: boolean;
-}
-
 interface ReceivedFile {
   name: string;
   path: string;
