@@ -1,6 +1,6 @@
 # Umami Changelog
 
-## [View Admin Users] - {PR_MERGE_DATE}
+## [View Admin Users] - 2026-01-19
 
 - View Admin Users (only supported in **self-hosted**)
 
