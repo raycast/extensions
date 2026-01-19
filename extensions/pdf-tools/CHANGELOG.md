@@ -1,6 +1,6 @@
 # PDF Tools Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-01-19
 
 - Add support for third-party file managers.
 
