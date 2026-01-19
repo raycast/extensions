@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-01-19
 
 - Added [cross-extension support](https://github.com/LitoMore/raycast-cross-extension-conventions) to enable OCR results to be used by other extensions
 - Added documentation to include [cross-extension usage](docs/cross-extension-usage.md)
