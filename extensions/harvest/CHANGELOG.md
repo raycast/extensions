@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-01-19
 
 - Fix: Clearing notes when editing a time entry now properly deletes the note
 - Fix: Duration parsing now runs on submit, not just on blur
