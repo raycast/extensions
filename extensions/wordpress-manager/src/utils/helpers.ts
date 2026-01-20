@@ -1,13 +1,9 @@
 import { getPreferenceValues, Color, Icon } from "@raycast/api";
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 
-interface Preferences {
-  siteUrl: string;
-}
-
 // URL helpers
 export function getAdminUrl(path = ""): string {
-  const { siteUrl } = getPreferenceValues<Preferences>();
+  const { siteUrl } = getPreferenceValues();
   return `${siteUrl.replace(/\/$/, "")}/wp-admin/${path}`;
 }
 

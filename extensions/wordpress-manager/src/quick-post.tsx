@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, popToRoot, open } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, popToRoot, open, Icon } from "@raycast/api";
 import { useState } from "react";
 import { wp, useCategories, getTitle, getEditPostUrl } from "./utils";
 
@@ -56,14 +56,14 @@ export default function QuickPost() {
         <ActionPanel>
           <Action.SubmitForm
             title="Publish Now"
-            icon="checkmark-circle"
+            icon={Icon.CheckCircle}
             onSubmit={(values) =>
               handleSubmit(values as { title: string; content: string; categories: string[] }, true)
             }
           />
           <Action.SubmitForm
             title="Save as Draft"
-            icon="document"
+            icon={Icon.Document}
             onSubmit={(values) =>
               handleSubmit(values as { title: string; content: string; categories: string[] }, false)
             }
