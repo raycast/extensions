@@ -639,13 +639,11 @@ export default function ViewImages() {
                 </ActionPanel.Section>
                 {githubToken && (
                   <ActionPanel.Section>
-                    <Action.ConfirmAction
+                    <Action
                       title="Delete Image"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      onConfirm={() => handleDeleteImage(image)}
-                      dialogTitle="Delete Image"
-                      dialogMessage={`Are you sure you want to delete "${image.name}"? This action cannot be undone.`}
+                      onAction={() => handleDeleteImage(image)}
                     />
                   </ActionPanel.Section>
                 )}
