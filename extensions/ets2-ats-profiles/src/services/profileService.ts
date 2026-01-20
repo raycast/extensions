@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, trash } from "@raycast/api";
 import fs from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
@@ -167,7 +167,7 @@ export async function duplicateProfile(profile: Profile, game: Game): Promise<vo
     // Clean up if duplication failed
     if (fs.existsSync(newProfilePath)) {
       try {
-        fs.rmSync(newProfilePath, { recursive: true, force: true });
+        await trash(newProfilePath);
       } catch {
         // Ignore cleanup errors
       }
