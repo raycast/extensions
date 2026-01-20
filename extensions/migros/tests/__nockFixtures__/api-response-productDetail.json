@@ -48,7 +48,7 @@
           }
         },
         "rating": {
-          "nbReviews": 370,
+          "nbReviews": 372,
           "nbStars": 4.5
         },
         "migipediaUrl": "https://migipedia.migros.ch/de/products/104241300000"
@@ -311,56 +311,25 @@
     "isConsignmentProduct": false,
     "offer": {
       "price": {
-        "displayUnitPrice": false,
+        "displayUnitPrice": true,
         "advertisedDisplayValue": "4.60",
         "effectiveDisplayValue": "4.60",
         "multiplier": 1,
         "effectiveValue": 4.6,
         "advertisedValue": 4.6,
         "unitPrice": {
-          "value": 1.91,
+          "value": 1.92,
           "unit": "100g"
         }
       },
-      "promotionPrice": {
-        "displayUnitPrice": true,
-        "advertisedDisplayValue": "3.08",
-        "effectiveDisplayValue": "3.08",
-        "multiplier": 1,
-        "effectiveValue": 3.08,
-        "advertisedValue": 3.08,
-        "unitPrice": {
-          "value": 1.28,
-          "unit": "100g"
-        }
-      },
-      "priceInsteadOfLabel": "statt",
       "quantity": "12 x 20g",
-      "quantityPrice": "1.28/100g",
+      "quantityPrice": "1.92/100g",
       "isVariableWeight": false,
       "channel": {
         "offerType": "OFFLINE",
         "region": "gmzh"
       },
       "maxOrderableQuantityV2": 96,
-      "badges": [
-        {
-          "type": "PERCENTAGE_PROMOTION",
-          "description": "33%",
-          "enrichedDescription": "33%",
-          "rawDescription": "33%"
-        },
-        {
-          "type": "MINIMUM_PIECES",
-          "description": "Ab 2 Stück",
-          "enrichedDescription": "Ab 2 Stück",
-          "rawDescription": "Ab 2 Stück"
-        }
-      ],
-      "promotionDateRange": {
-        "startDate": "2026-01-13",
-        "endDate": "2026-01-19"
-      },
       "isNewOffer": false,
       "isNotMorningDeliverable": false,
       "displayPrice": true,

@@ -37,7 +37,6 @@ import {
   getStoreDisplayInfo,
   stripHtml,
 } from "./lib/helpers";
-import { t } from "./lib/translations";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types & Constants
@@ -87,16 +86,15 @@ function StoreAvailabilityMetadata({
   MetadataLabel: typeof List.Item.Detail.Metadata.Label | typeof Detail.Metadata.Label;
   MetadataSeparator?: typeof List.Item.Detail.Metadata.Separator | typeof Detail.Metadata.Separator;
 }) {
-  const { language } = getPreferenceValues<Preferences>();
   if (storeAvailabilities.length === 0) return null;
 
   return (
     <>
       {MetadataSeparator && <MetadataSeparator />}
-      <MetadataLabel title={t("storeAvailability", language)} text="" />
+      <MetadataLabel title="Store Availability" text="" />
       {storeAvailabilities.map((sa) => {
-        const { storeId, storeName } = getStoreDisplayInfo(sa.store, language);
-        const { stockText, status } = getStockInfo(sa.stock, language);
+        const { storeId, storeName } = getStoreDisplayInfo(sa.store);
+        const { stockText, status } = getStockInfo(sa.stock);
         return (
           <MetadataLabel
             key={storeId}
@@ -125,12 +123,11 @@ function ProductActions({
   isFavorite: boolean;
   onToggleFavorite: (product: ProductCard) => void;
 }) {
-  const { language } = getPreferenceValues<Preferences>();
   return (
     <ActionPanel>
       {showViewDetails && (
         <Action.Push
-          title={t("viewDetails", language)}
+          title="View Details"
           icon={Icon.Eye}
           target={
             <ProductDetailView
@@ -145,26 +142,26 @@ function ProductActions({
       )}
       {product.productUrls && (
         <Action.OpenInBrowser
-          title={t("openOnMigros", language)}
+          title="Open on Migros.ch"
           url={product.productUrls}
           shortcut={{ modifiers: ["cmd"], key: "return" }}
         />
       )}
       <Action
-        title={isFavorite ? t("removeFavorite", language) : t("addFavorite", language)}
+        title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
         icon={isFavorite ? Icon.StarDisabled : Icon.Star}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
         onAction={() => onToggleFavorite(product)}
       />
-      <Action.CopyToClipboard title={t("copyProductName", language)} content={product.name} />
+      <Action.CopyToClipboard title="Copy Product Name" content={product.name} />
       {storeAvailabilities.length > 0 && (
-        <ActionPanel.Section title={t("setPreferredStore", language)}>
+        <ActionPanel.Section title="Preferred Store">
           {storeAvailabilities.map((sa) => {
-            const { storeId, storeName } = getStoreDisplayInfo(sa.store, language);
+            const { storeId, storeName } = getStoreDisplayInfo(sa.store);
             return (
               <Action
                 key={storeId}
-                title={`${t("setAsPreferred", language)}: ${storeName}${sa.isPreferred ? " ✓" : ""}`}
+                title={`Prefer: ${storeName}${sa.isPreferred ? " ✓" : ""}`}
                 icon={sa.isPreferred ? Icon.StarCircle : Icon.Star}
                 onAction={() => onSetPreferred(storeId)}
               />
@@ -197,10 +194,9 @@ const ProductListItem = memo(function ProductListItem({
   isFavorite: boolean;
   onToggleFavorite: (product: ProductCard) => void;
 }) {
-  const { language } = getPreferenceValues<Preferences>();
   const thumbnailUrl = getProductImageUrl(product, "thumbnail");
   const imageUrl = getProductImageUrl(product);
-  const price = formatPrice(product, language);
+  const price = formatPrice(product);
 
   // Memoize markdown to prevent re-render flickering
   const markdown = useMemo(
@@ -221,9 +217,9 @@ const ProductListItem = memo(function ProductListItem({
           markdown={markdown}
           metadata={
             <List.Item.Detail.Metadata>
-              {price && <List.Item.Detail.Metadata.Label title={t("price", language)} text={price} />}
+              {price && <List.Item.Detail.Metadata.Label title="Price" text={price} />}
               {product.offer?.quantity && (
-                <List.Item.Detail.Metadata.Label title={t("quantity", language)} text={product.offer.quantity} />
+                <List.Item.Detail.Metadata.Label title="Quantity" text={product.offer.quantity} />
               )}
               {isHighlighted && (
                 <StoreAvailabilityMetadata
@@ -266,10 +262,10 @@ function ProductDetailView({
   isFavorite: boolean;
   onToggleFavorite: (product: ProductCard) => void;
 }) {
-  const { language, zipCode } = getPreferenceValues<Preferences>();
+  const { zipCode } = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
   const imageUrl = getProductImageUrl(product);
-  const price = formatPrice(product, language, { includeBadges: false });
+  const price = formatPrice(product, { includeBadges: false });
   const category = product.breadcrumb?.map((b) => b.name).join(" > ") || "";
 
   // Local favorite state to update UI immediately in detail view
@@ -294,7 +290,6 @@ function ProductDetailView({
               warehouseId: fulfillment.warehouseId,
               region: fulfillment.cooperative,
             },
-            language,
           },
           token,
         ),
@@ -318,17 +313,17 @@ function ProductDetailView({
     // Add ingredients to markdown if available
     const ingredients = productDetail?.productInformation?.mainInformation?.ingredients;
     if (ingredients) {
-      md += `\n\n### ${t("ingredients", language)}\n${stripHtml(ingredients)}`;
+      md += `\n\n### Ingredients\n${stripHtml(ingredients)}`;
     }
 
     // Add nutrition table to markdown if available
     const nutrientsTable = productDetail?.productInformation?.nutrientsInformation?.nutrientsTable;
     if (nutrientsTable && nutrientsTable.rows.length > 0) {
-      md += formatNutritionTableMarkdown(nutrientsTable.rows, t("nutrition", language), t("per100g", language));
+      md += formatNutritionTableMarkdown(nutrientsTable.rows, "Nutrition", "per 100g");
     }
 
     return md;
-  }, [imageUrl, product.name, product.description, productDetail, language]);
+  }, [imageUrl, product.name, product.description, productDetail]);
 
   return (
     <Detail
@@ -337,19 +332,17 @@ function ProductDetailView({
       navigationTitle={product.name}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title={t("name", language)} text={product.name} />
-          {product.brand && <Detail.Metadata.Label title={t("brand", language)} text={product.brand} />}
-          {price && <Detail.Metadata.Label title={t("price", language)} text={price} />}
+          <Detail.Metadata.Label title="Name" text={product.name} />
+          {product.brand && <Detail.Metadata.Label title="Brand" text={product.brand} />}
+          {price && <Detail.Metadata.Label title="Price" text={price} />}
           {product.offer?.badges && product.offer.badges.length > 0 && (
-            <Detail.Metadata.TagList title={t("promotions", language)}>
+            <Detail.Metadata.TagList title="Promotions">
               {product.offer.badges.map((badge, idx) => (
                 <Detail.Metadata.TagList.Item key={idx} text={badge.description} color="#ff6600" />
               ))}
             </Detail.Metadata.TagList>
           )}
-          {product.offer?.quantity && (
-            <Detail.Metadata.Label title={t("quantity", language)} text={product.offer.quantity} />
-          )}
+          {product.offer?.quantity && <Detail.Metadata.Label title="Quantity" text={product.offer.quantity} />}
 
           {/* Rating */}
           {productDetail?.productInformation?.mainInformation?.rating &&
@@ -360,9 +353,9 @@ function ProductDetailView({
                 <>
                   <Detail.Metadata.Separator />
                   <Detail.Metadata.Link
-                    title={t("rating", language)}
+                    title="Rating"
                     text={ratingText}
-                    target={`https://migipedia.migros.ch/${language}/products/${product.migrosId}?utm_source=www.migros.ch&utm_medium=owned&utm_content=mo-produktlink`}
+                    target={`https://migipedia.migros.ch/products/${product.migrosId}?utm_source=www.migros.ch&utm_medium=owned&utm_content=mo-produktlink`}
                   />
                 </>
               );
@@ -373,7 +366,7 @@ function ProductDetailView({
             <>
               <Detail.Metadata.Separator />
               <Detail.Metadata.Label
-                title={t("allergens", language)}
+                title="Allergens"
                 text={productDetail.productInformation.mainInformation.allergens}
               />
             </>
@@ -383,10 +376,7 @@ function ProductDetailView({
           {productDetail?.productInformation?.mainInformation?.origin && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.Label
-                title={t("origin", language)}
-                text={productDetail.productInformation.mainInformation.origin}
-              />
+              <Detail.Metadata.Label title="Origin" text={productDetail.productInformation.mainInformation.origin} />
             </>
           )}
 
@@ -394,18 +384,18 @@ function ProductDetailView({
           {category && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.Label title={t("category", language)} text={category} />
+              <Detail.Metadata.Label title="Category" text={category} />
             </>
           )}
 
           {/* Store Availability */}
           <Detail.Metadata.Separator />
           {storeAvailabilities.length === 0 ? (
-            <Detail.Metadata.Label title={t("storeAvailability", language)} text={t("loading", language)} />
+            <Detail.Metadata.Label title="Store Availability" text="Loading..." />
           ) : (
             storeAvailabilities.map((sa) => {
-              const { storeId, storeName } = getStoreDisplayInfo(sa.store, language);
-              const { stockText, status } = getStockInfo(sa.stock, language);
+              const { storeId, storeName } = getStoreDisplayInfo(sa.store);
+              const { stockText, status } = getStockInfo(sa.stock);
               return (
                 <Detail.Metadata.Label
                   key={storeId}
@@ -421,31 +411,29 @@ function ProductDetailView({
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Actions">
-            {product.productUrls && (
-              <Action.OpenInBrowser title={t("openOnMigros", language)} url={product.productUrls} />
-            )}
+            {product.productUrls && <Action.OpenInBrowser title="Open on Migros.ch" url={product.productUrls} />}
             <Action
-              title={isFavorite ? t("removeFavorite", language) : t("addFavorite", language)}
+              title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
               icon={isFavorite ? Icon.StarDisabled : Icon.Star}
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
               onAction={handleToggleFavorite}
             />
-            <Action.CopyToClipboard title={t("copyProductName", language)} content={product.name} />
+            <Action.CopyToClipboard title="Copy Product Name" content={product.name} />
             <Action
-              title={t("goBackToList", language)}
+              title="Go Back to List"
               icon={Icon.ArrowLeft}
               onAction={pop}
               shortcut={{ modifiers: ["cmd"], key: "[" }}
             />
           </ActionPanel.Section>
           {storeAvailabilities.length > 0 && (
-            <ActionPanel.Section title={t("setPreferredStore", language)}>
+            <ActionPanel.Section title="Preferred Store">
               {storeAvailabilities.map((sa) => {
-                const { storeId, storeName } = getStoreDisplayInfo(sa.store, language);
+                const { storeId, storeName } = getStoreDisplayInfo(sa.store);
                 return (
                   <Action
                     key={storeId}
-                    title={`${t("setAsPreferred", language)}: ${storeName}${sa.isPreferred ? " ✓" : ""}`}
+                    title={`Prefer: ${storeName}${sa.isPreferred ? " ✓" : ""}`}
                     icon={sa.isPreferred ? Icon.StarCircle : Icon.Star}
                     onAction={() => onSetPreferred(storeId)}
                   />
@@ -668,7 +656,7 @@ export default function SearchMigros() {
     async (storeId: string) => {
       await LocalStorage.setItem(PREFERRED_STORE_KEY, storeId);
       setPreferredStoreId(storeId);
-      await showToast({ style: Toast.Style.Success, title: t("preferredStoreSaved", preferences.language) });
+      await showToast({ style: Toast.Style.Success, title: "Preferred store saved" });
     },
     [preferences.language],
   );
@@ -683,7 +671,7 @@ export default function SearchMigros() {
 
         if (isCurrentlyFavorite) {
           newFavorites = currentFavorites.filter((f) => f.uid !== product.uid);
-          showToast({ style: Toast.Style.Success, title: t("favoriteRemoved", preferences.language) });
+          showToast({ style: Toast.Style.Success, title: "Removed from Favorites" });
         } else {
           const favoriteData: FavoriteProduct = {
             uid: product.uid,
@@ -695,7 +683,7 @@ export default function SearchMigros() {
             favoritedAt: Date.now(),
           };
           newFavorites = [...currentFavorites, favoriteData];
-          showToast({ style: Toast.Style.Success, title: t("favoriteAdded", preferences.language) });
+          showToast({ style: Toast.Style.Success, title: "Added to Favorites" });
         }
 
         // Persist to LocalStorage (fire and forget)
@@ -745,7 +733,7 @@ export default function SearchMigros() {
   if (searchError) {
     showToast({
       style: Toast.Style.Failure,
-      title: t("searchFailed", preferences.language),
+      title: "Search failed",
       message: String(searchError),
     });
   }
@@ -754,7 +742,7 @@ export default function SearchMigros() {
     <List
       isLoading={isSearching || isLoadingAvailability || isLoadingPromotions || isLoadingFavorites}
       isShowingDetail
-      searchBarPlaceholder={t("searchPlaceholder", preferences.language)}
+      searchBarPlaceholder="Search Migros products..."
       onSearchTextChange={handleSearchTextChange}
       onSelectionChange={(id) => {
         if (!id) {
@@ -766,12 +754,12 @@ export default function SearchMigros() {
       searchBarAccessory={
         availableCategories.length > 0 ? (
           <List.Dropdown
-            tooltip={t("filterByCategory", preferences.language)}
+            tooltip="Filter by Category"
             value={selectedCategory || "all"}
             onChange={(value) => setSelectedCategory(value === "all" ? null : value)}
           >
-            <List.Dropdown.Item title={t("allCategories", preferences.language)} value="all" />
-            <List.Dropdown.Section title={t("categories", preferences.language)}>
+            <List.Dropdown.Item title="All Categories" value="all" />
+            <List.Dropdown.Section title="Categories">
               {availableCategories.map((cat) => (
                 <List.Dropdown.Item
                   key={cat.id}
@@ -790,8 +778,8 @@ export default function SearchMigros() {
         searchResults && searchResults.length === 0 ? (
           <List.EmptyView
             icon={Icon.XMarkCircle}
-            title={t("noProductsFound", preferences.language)}
-            description={`${t("noResultsFor", preferences.language)} "${searchText}"`}
+            title="No products found"
+            description={`No results for "${searchText}"`}
           />
         ) : (
           searchResults?.map((product) => (
@@ -811,7 +799,7 @@ export default function SearchMigros() {
         // Favorites and Promotions view when no search text
         <>
           {favoriteProductCards && favoriteProductCards.length > 0 && (
-            <List.Section title={t("favorites", preferences.language)}>
+            <List.Section title="Favorites">
               {favoriteProductCards.map((product) => (
                 <ProductListItem
                   key={`favorite-${product.uid}`}
@@ -827,7 +815,7 @@ export default function SearchMigros() {
             </List.Section>
           )}
           {promotionsData?.promotionDetails && promotionsData.promotionDetails.length > 0 && (
-            <List.Section title={t("promotions", preferences.language)}>
+            <List.Section title="Promotions">
               {promotionsData.promotionDetails.map((promo) => {
                 const firstProductId = promo.productIds[0];
                 const firstProduct = promotionsData.products.find((p) => p.uid === firstProductId);

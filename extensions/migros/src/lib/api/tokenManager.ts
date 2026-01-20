@@ -72,7 +72,6 @@ export async function withValidToken<T>(apiCall: (token: string) => Promise<T>):
     return await apiCall(token);
   } catch (error: unknown) {
     // Debug: log error structure and status (remove in production)
-    // eslint-disable-next-line no-console
     const err = error as { response?: { status?: number; data?: unknown } };
     console.error("[withValidToken] API call failed", {
       error: err,

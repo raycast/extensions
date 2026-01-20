@@ -1,5 +1,4 @@
 import { NutrientsTableRow, ProductCard, StoreInfo } from "./api/migrosApi";
-import { t } from "./translations";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // String Helpers
@@ -26,18 +25,18 @@ export interface StockInfo {
   status: StockStatus;
 }
 
-export function getStockInfo(stock: number | string, language: string): StockInfo {
+export function getStockInfo(stock: number | string): StockInfo {
   const stockNum = typeof stock === "string" ? parseInt(stock, 10) : stock;
   const isOutOfStock = isNaN(stockNum) || stockNum <= 0;
   const isLowStock = !isOutOfStock && stockNum <= 5;
-  const stockText = isOutOfStock ? t("outOfStock", language) : `${stockNum} ${t("inStock", language)}`;
+  const stockText = isOutOfStock ? "Out of stock" : `${stockNum} in stock`;
   const status: StockStatus = isOutOfStock ? "out-of-stock" : isLowStock ? "low-stock" : "in-stock";
   return { stockNum, isOutOfStock, isLowStock, stockText, status };
 }
 
-export function getStoreDisplayInfo(store: StoreInfo, language: string): { storeId: string; storeName: string } {
+export function getStoreDisplayInfo(store: StoreInfo): { storeId: string; storeName: string } {
   const storeId = store.costCenterId || store.storeId || "";
-  const storeName = store.storeName || store.name || t("unknownStore", language);
+  const storeName = store.storeName || store.name || "Unknown Store";
   return { storeId, storeName };
 }
 
@@ -74,12 +73,7 @@ export function getProductImageUrl(product: ProductCard, size: ImageSize = "orig
 // ─────────────────────────────────────────────────────────────────────────────
 // Price Formatting
 // ─────────────────────────────────────────────────────────────────────────────
-
-export function formatPrice(
-  product: ProductCard,
-  language: string = "de",
-  options: { includeBadges?: boolean } = {},
-): string {
+export function formatPrice(product: ProductCard, options: { includeBadges?: boolean } = {}): string {
   const { includeBadges = true } = options;
   const offer = product.offer;
   if (!offer) return "";
@@ -91,7 +85,7 @@ export function formatPrice(
     const promoPrice = offer.promotionPrice.effectiveValue;
     const originalPrice = offer.price?.effectiveValue ?? offer.price?.value;
     if (originalPrice !== undefined) {
-      const insteadOf = offer.priceInsteadOfLabel || t("insteadOf", language);
+      const insteadOf = offer.priceInsteadOfLabel || "instead of";
       priceText = `CHF ${promoPrice.toFixed(2)} (${insteadOf} ${originalPrice.toFixed(2)})`;
     } else {
       priceText = `CHF ${promoPrice.toFixed(2)}`;
