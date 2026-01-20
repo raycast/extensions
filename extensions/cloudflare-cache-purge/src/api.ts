@@ -2,11 +2,6 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 const API_BASE = "https://api.cloudflare.com/client/v4";
 
-interface Preferences {
-  apiToken: string;
-  defaultZoneId?: string;
-}
-
 export interface Zone {
   id: string;
   name: string;

@@ -1,6 +1,6 @@
 # Cloudflare Cache Purge Changelog
 
-## [Initial Version] - 2026-01-20
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Purge entire site cache for any Cloudflare zone
 - Purge specific URLs (up to 30 at once)
