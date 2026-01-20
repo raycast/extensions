@@ -1,6 +1,6 @@
 # Figma Link Cleaner Changelog
 
-## [1.0.0] - 2026-01-19
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
