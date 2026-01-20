@@ -14,6 +14,12 @@ import path from "path";
 import { createWorkspace, saveWorkspace, Workspace } from "./utils/workspaces";
 import { getRecentProjects, Project } from "./utils/projects";
 
+interface Preferences {
+  projectPaths: string;
+  maxDepth: string;
+  useShellHistory: boolean;
+}
+
 interface CreateWorkspaceProps {
   workspace?: Workspace;
   onSave?: () => void;
@@ -32,15 +38,15 @@ export default function CreateWorkspace({
   const [isLoading, setIsLoading] = useState(true);
   const [customPaths, setCustomPaths] = useState<string[]>([]);
 
-  const preferences = getPreferenceValues<Preferences.CreateWorkspace>();
+  const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     const loadProjects = async () => {
       const projectPaths = preferences.projectPaths
         .split(",")
-        .map((p) => p.trim())
-        .map((p) => p.replace(/^~/, homedir()))
-        .filter((p) => p.length > 0);
+        .map((p: string) => p.trim())
+        .map((p: string) => p.replace(/^~/, homedir()))
+        .filter((p: string) => p.length > 0);
 
       const maxDepth = parseInt(preferences.maxDepth, 10) || 2;
       const projects = await getRecentProjects(

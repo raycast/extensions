@@ -12,14 +12,20 @@ import { useCachedPromise } from "@raycast/utils";
 import { homedir } from "os";
 import { getRecentProjects, Project } from "./utils/projects";
 
+interface Preferences {
+  projectPaths: string;
+  maxDepth: string;
+  useShellHistory: boolean;
+}
+
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences.Index>();
+  const preferences = getPreferenceValues<Preferences>();
 
   const projectPaths = preferences.projectPaths
     .split(",")
-    .map((p) => p.trim())
-    .map((p) => p.replace(/^~/, homedir()))
-    .filter((p) => p.length > 0);
+    .map((p: string) => p.trim())
+    .map((p: string) => p.replace(/^~/, homedir()))
+    .filter((p: string) => p.length > 0);
 
   const maxDepth = parseInt(preferences.maxDepth, 10) || 2;
 
