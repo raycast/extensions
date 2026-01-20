@@ -3,9 +3,7 @@ import { useCachedPromise, useFetch } from "@raycast/utils";
 import { URLSearchParams } from "url";
 import { ListActivitiesResponse, ListSessionsResponse, ListSourcesResponse, Session, Source } from "./types";
 
-interface ExtensionPreferences {
-  julesApiKey: string;
-}
+const { julesApiKey } = getPreferenceValues<Preferences>();
 
 const { julesApiKey } = getPreferenceValues<ExtensionPreferences>();
 
