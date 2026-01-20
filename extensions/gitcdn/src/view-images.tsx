@@ -482,6 +482,7 @@ export default function ViewImages() {
       const buffer = Buffer.from(arrayBuffer);
 
       // Save to Downloads folder
+      const fs = require("fs");
       const downloadsPath = path.join(process.env.HOME || "", "Downloads");
       const filePath = path.join(downloadsPath, image.name);
 
