@@ -181,75 +181,35 @@ describe("caffeineModel", () => {
       test("returns 'no-more-caffeine' when current residual >= threshold", () => {
         const now = new Date("2026-01-19T22:30:00");
         const bedtime = new Date("2026-01-19T22:00:00");
-        const status = determineStatus(
-          10,
-          50,
-          200,
-          undefined,
-          now,
-          bedtime,
-          55,
-        );
+        const status = determineStatus(10, 50, 200, undefined, now, bedtime, 55);
         expect(status).toBe("no-more-caffeine");
       });
 
       test("returns 'warning' when current residual is 50-100% of threshold", () => {
         const now = new Date("2026-01-19T23:00:00");
         const bedtime = new Date("2026-01-19T22:00:00");
-        const status = determineStatus(
-          10,
-          50,
-          200,
-          undefined,
-          now,
-          bedtime,
-          30,
-        );
+        const status = determineStatus(10, 50, 200, undefined, now, bedtime, 30);
         expect(status).toBe("warning");
       });
 
       test("returns 'safe' when current residual is below warning threshold", () => {
         const now = new Date("2026-01-19T23:00:00");
         const bedtime = new Date("2026-01-19T22:00:00");
-        const status = determineStatus(
-          10,
-          50,
-          200,
-          undefined,
-          now,
-          bedtime,
-          20,
-        );
+        const status = determineStatus(10, 50, 200, undefined, now, bedtime, 20);
         expect(status).toBe("safe");
       });
 
       test("returns to normal judgment after 6 hours past bedtime", () => {
         const now = new Date("2026-01-20T04:30:00");
         const bedtime = new Date("2026-01-19T22:00:00");
-        const status = determineStatus(
-          60,
-          50,
-          200,
-          undefined,
-          now,
-          bedtime,
-          55,
-        );
+        const status = determineStatus(60, 50, 200, undefined, now, bedtime, 55);
         expect(status).toBe("no-more-caffeine");
       });
 
       test("still uses past-bedtime judgment at exactly 6 hours", () => {
         const now = new Date("2026-01-20T03:59:00");
         const bedtime = new Date("2026-01-19T22:00:00");
-        const status = determineStatus(
-          10,
-          50,
-          200,
-          undefined,
-          now,
-          bedtime,
-          55,
-        );
+        const status = determineStatus(10, 50, 200, undefined, now, bedtime, 55);
         expect(status).toBe("no-more-caffeine");
       });
     });
