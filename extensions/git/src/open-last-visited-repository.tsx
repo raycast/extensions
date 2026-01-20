@@ -19,7 +19,7 @@ export default function OpenLastVisitedRepository() {
 
     // Sort by lastOpenedAt descending and get the first one
     return currentRepositories.sort((a, b) => b.lastOpenedAt - a.lastOpenedAt)[0];
-  }, []);
+  }, []); // compute only once on amount of repositories change
 
   if (!lastVisitedRepository) {
     return <ManageRepositories />;
