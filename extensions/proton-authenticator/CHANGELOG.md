@@ -1,6 +1,6 @@
 # Proton Authenticator Changelog
 
-## [Add live sync support] - {PR_MERGE_DATE}
+## [Add live sync support] - 2026-01-20
 
 ### Added
 
