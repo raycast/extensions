@@ -1,10 +1,5 @@
 import { Clipboard, getPreferenceValues, showToast, Toast, showHUD } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-  username: string;
-}
-
 function isValidUrl(string: string): boolean {
   try {
     new URL(string);

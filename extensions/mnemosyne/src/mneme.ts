@@ -1,15 +1,5 @@
 import { getPreferenceValues, showToast, Toast, showHUD, LaunchProps } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-  username: string;
-}
-
-interface Arguments {
-  url?: string;
-  title?: string;
-}
-
 function isValidUrl(string: string): boolean {
   try {
     new URL(string);
@@ -19,7 +9,7 @@ function isValidUrl(string: string): boolean {
   }
 }
 
-export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.Mneme }>) {
   const { url, title } = props.arguments;
 
   const trimmedUrl = url?.trim();
