@@ -161,8 +161,8 @@ function ProductActions({
             return (
               <Action
                 key={storeId}
-                title={`Prefer: ${storeName}${sa.isPreferred ? " ✓" : ""}`}
-                icon={sa.isPreferred ? Icon.StarCircle : Icon.Star}
+                title={`Prefer: ${storeName}`}
+                icon={sa.isPreferred ? Icon.StarCircle : Icon.Circle}
                 onAction={() => onSetPreferred(storeId)}
               />
             );
