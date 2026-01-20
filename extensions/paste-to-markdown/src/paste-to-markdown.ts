@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
 import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
 import TurndownService from "turndown";
+import { gfm } from "@joplin/turndown-plugin-gfm";
 
 async function getClipboardHTML(): Promise<string> {
   // Helper function to get HTML from clipboard using AppleScript as @raycast/api clipboard does not read HTML from the clipboard properly
@@ -46,6 +47,9 @@ export default async function Command() {
       linkStyle: preferences.linkStyle,
       linkReferenceStyle: preferences.linkReferenceStyle,
     });
+
+    // Use GFM plugin for GitHub Flavored Markdown support (tables, strikethrough, etc.)
+    turndownService.use(gfm);
 
     console.debug("Trying to get HTML...");
     const html = await getClipboardHTML();

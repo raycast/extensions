@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import fetch from "node-fetch";
+import { ReactElement } from "react";
 
 interface PackageDetailProps {
   name: string;
@@ -62,7 +62,7 @@ type PackageInfo = {
   }[];
 };
 
-export const PackageDetail = ({ name, version }: PackageDetailProps): JSX.Element => {
+export const PackageDetail = ({ name, version }: PackageDetailProps): ReactElement => {
   const { data, isLoading } = usePromise(
     async () => {
       const response = await fetch(`https://pypi.org/pypi/${name}/${version}/json`);

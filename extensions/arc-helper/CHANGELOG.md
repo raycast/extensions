@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.0] - 2026-01-04
+
+### Added
+
+- **Windows Support** - Extension now works on both macOS and Windows
+  - All keyboard shortcuts work cross-platform (Cmd on macOS, Ctrl on Windows)
+- **Shared API Cache** - Data is cached for 60 minutes across all commands
+  - Reduces API calls to MetaForge (helps avoid rate limits)
+  - Faster load times when switching between commands
+
+### Fixed
+
+- Added graceful error handling for API failures - shows friendly toast instead of crashing
+
 ## [1.3.0] - 2025-12-25
 
 ### Added

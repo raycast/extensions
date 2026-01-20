@@ -73,6 +73,26 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "open-latest-deployment",
+      "title": "Open Latest Deployment",
+      "description": "Open your latest deployment in the browser",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openTarget",
+          "title": "Open Target",
+          "description": "Choose where to open the latest deployment",
+          "type": "dropdown",
+          "required": false,
+          "default": "vercel",
+          "data": [
+            { "title": "Vercel Dashboard", "value": "vercel" },
+            { "title": "Deploy URL", "value": "deployUrl" }
+          ]
+        }
+      ]
     }
   ],
   "tools": [

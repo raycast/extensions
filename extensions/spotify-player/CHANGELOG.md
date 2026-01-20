@@ -1,5 +1,23 @@
 # Spotify Player Changelog
 
+## [Fix] - 2026-01-14
+
+- Fixed error toast when Menu Bar Player command is disabled (handles "No enabled command" error)
+
+## [Chore] - 2026-01-13
+
+- Remove `dancannon` from contributors
+
+## [Minor Fixes] - 2026-01-06
+
+- Fixed error toast "Menu Bar Player must be activated" when using Next/Previous in Now Playing without the Menu Bar Player command enabled
+
+## [Show Error View in Queue] - 2026-01-01
+
+- Add "queue" to README and mark as premium-only
+- When an error occurs in queue, show the error view
+- When an error occurs in devices, show the error view
+
 ## [Generate Playlist Improvements] - 2025-12-05
 
 - Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation  

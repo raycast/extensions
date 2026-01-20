@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "django-docs",
+  "title": "Django Docs",
+  "description": "Navigate and search through Django documentation",
+  "icon": "extension-icon.png",
+  "author": "JensAstrup",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "subtitle": "Django Docs",
+      "description": "Searches through the Django documentation",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-docs",
+      "title": "Refresh Django Documentation Cache",
+      "subtitle": "Django Docs",
+      "description": "Background job to refresh cached documentation",
+      "mode": "no-view",
+      "interval": "1d"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.1",
+    "@raycast/utils": "1.17.0",
+    "cheerio": "1.0.0",
+    "turndown": "7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "29.5.14",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/turndown": "5.0.5",
+    "eslint": "9.22.0",
+    "jest": "29.7.0",
+    "jest-environment-jsdom": "29.7.0",
+    "prettier": "3.5.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "ts-jest": "29.2.5",
+    "typescript": "5.8.2"
+  },
+  "version": "1.0.1",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

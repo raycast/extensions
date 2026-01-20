@@ -1,5 +1,5 @@
 import { writeFile, mkdir } from "node:fs/promises";
-import { resolveAndValidatePath } from "../utils/workspace";
+import { resolveAndValidatePath, isAutoEditEnabled } from "../utils/workspace";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 
@@ -19,6 +19,10 @@ type Input = {
 };
 
 export async function confirmation({ path, content, overwrite = false }: Input) {
+  if (isAutoEditEnabled()) {
+    return undefined;
+  }
+
   const filePath = resolveAndValidatePath(path);
 
   // Check if file already exists

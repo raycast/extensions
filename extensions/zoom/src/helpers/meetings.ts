@@ -74,7 +74,10 @@ export function getMeetingsSections(meetings?: Meeting[]) {
     return [];
   }
 
-  const [recurringMeetingsWithNoFixedTime, otherMeetings] = partition(meetings, (meeting) => meeting.type === 3);
+  const [recurringMeetingsWithNoFixedTime, otherMeetings] = partition(
+    meetings,
+    (meeting: Meeting) => meeting.type === 3,
+  );
   const scheduledMeetings = otherMeetings as ScheduledMeeting[];
 
   const sections = Object.values(
@@ -94,7 +97,7 @@ export function getMeetingsSections(meetings?: Meeting[]) {
       acc[title].meetings.push(meeting);
 
       return acc;
-    }, {})
+    }, {}),
   );
 
   sections.sort((a, b) => compareAsc(a.date, b.date));
@@ -109,4 +112,42 @@ export function getMeetingsSections(meetings?: Meeting[]) {
   }
 
   return sectionsWithoutDates;
+}
+
+const isWindows = process.platform === "win32";
+
+/**
+ * Gets the appropriate Zoom URL based on the platform
+ * On Windows, uses zoommtg:// protocol to launch Zoom app directly
+ * On macOS, uses HTTPS URL which opens in browser and then launches Zoom
+ * @param zoomUrl - The Zoom HTTPS join URL (e.g., https://us04web.zoom.us/j/123456789?pwd=abc123)
+ * @returns The appropriate URL for the current platform
+ */
+export function getZoomUrlForPlatform(zoomUrl: string): string {
+  if (!isWindows) return zoomUrl;
+
+  try {
+    const url = new URL(zoomUrl);
+    const meetingId = url.pathname.split("/").pop() || "";
+    const password = url.searchParams.get("pwd");
+
+    let zoommtgUrl = `zoommtg://zoom.us/join?confno=${meetingId}`;
+    if (password) {
+      zoommtgUrl += `&pwd=${encodeURIComponent(password)}`;
+    }
+    return zoommtgUrl;
+  } catch {
+    return zoomUrl;
+  }
+}
+
+/**
+ * Gets the appropriate Zoom URL for a meeting ID (without password)
+ * On Windows, uses zoommtg:// protocol to launch Zoom app directly
+ * On macOS, uses HTTPS URL which opens in browser and then launches Zoom
+ * @param meetingId - The Zoom meeting ID
+ * @returns The appropriate URL for the current platform
+ */
+export function getZoomUrlForMeetingId(meetingId: string): string {
+  return isWindows ? `zoommtg://zoom.us/join?confno=${meetingId}` : `https://zoom.us/j/${meetingId}`;
 }

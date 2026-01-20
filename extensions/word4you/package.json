@@ -42,8 +42,8 @@
       "required": false,
       "title": "Gemini Model Name",
       "description": "The Gemini model to use for text explanations",
-      "default": "gemini-2.0-flash-001",
-      "placeholder": "gemini-2.0-flash-001"
+      "default": "gemini-2.5-flash-lite",
+      "placeholder": "gemini-2.5-flash-lite"
     },
     {
       "name": "qwenApiKey",
@@ -59,8 +59,8 @@
       "required": false,
       "title": "QWEN Model Name",
       "description": "The QWEN model to use for text explanations",
-      "default": "qwen-turbo",
-      "placeholder": "qwen-turbo"
+      "default": "qwen-flash",
+      "placeholder": "qwen-flash"
     },
     {
       "name": "vocabularyBaseDir",

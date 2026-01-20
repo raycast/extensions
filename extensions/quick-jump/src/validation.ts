@@ -192,7 +192,9 @@ function validateTemplateable(
   }
 
   const allRequiredPlaceholders = new Set<string>();
-  const allProvidedPlaceholders = Object.keys(entity.templatePlaceholders || {});
+  const localProvidedPlaceholders = Object.keys(entity.templatePlaceholders || {});
+  const globalProvidedPlaceholders = Object.keys(data.globalPlaceholders || {});
+  const allProvidedPlaceholders = [...localProvidedPlaceholders, ...globalProvidedPlaceholders];
 
   for (const templateKey of allAppliedTemplates) {
     const template = data.templates?.[templateKey];
@@ -209,12 +211,12 @@ function validateTemplateable(
         message: `Template requires placeholder "${placeholder}" but it's not defined`,
         location: `${location}.templatePlaceholders`,
         severity: "error",
-        suggestion: `Add "${placeholder}": "your-value" to templatePlaceholders`,
+        suggestion: `Add "${placeholder}": "your-value" to templatePlaceholders or globalPlaceholders`,
       });
     }
   }
 
-  const unusedPlaceholders = allProvidedPlaceholders.filter((p) => !allRequiredPlaceholders.has(p));
+  const unusedPlaceholders = localProvidedPlaceholders.filter((p) => !allRequiredPlaceholders.has(p));
   if (unusedPlaceholders.length > 0) {
     warnings.push({
       type: "missing_placeholder",

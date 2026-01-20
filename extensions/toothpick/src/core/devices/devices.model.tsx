@@ -1,4 +1,4 @@
-import { Action, Clipboard, Color, Icon, Image, List } from "@raycast/api";
+import { Action, Clipboard, Color, Icon, Image, Keyboard, List } from "@raycast/api";
 import { ReactNode } from "react";
 import { DevicesMap } from "src/core/devices/constants/specifications";
 import { DeviceBatteryLevels } from "./devices.types";
@@ -77,12 +77,14 @@ export class Device {
         key="copy-device-data"
         onAction={() => Clipboard.copy(JSON.stringify(this.rawDeviceData))}
         icon={Icon.ComputerChip}
+        shortcut={Keyboard.Shortcut.Common.Copy}
       />,
       <Action
         title={`Copy Device Name`}
         key="copy-device-name"
         onAction={() => Clipboard.copy(this.name)}
         icon={Icon.Pencil}
+        shortcut={Keyboard.Shortcut.Common.CopyName}
       />,
       ...additionalActions,
     ];
@@ -129,7 +131,7 @@ export class Device {
 
     try {
       return DevicesMap[this.vendorId][this.productId][iconType];
-    } catch (error) {
+    } catch {
       return undefined;
     }
   }

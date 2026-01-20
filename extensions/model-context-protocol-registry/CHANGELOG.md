@@ -1,5 +1,13 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Anytype MCP Server] - 2026-01-13
+
+Update Anytype MCP Server to use the latest version of the Anytype API.
+
+## [Add Circleback MCP Server] - 2026-01-13
+
+Add official Circleback MCP Server to registry.
+
 ## [Add Atono MCP Server] - 2025-12-08
 
 Add official Atono MCP Server to registry to manage projects

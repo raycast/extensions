@@ -13,7 +13,6 @@ import {
   Form,
   Image,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -298,11 +297,6 @@ export default function StorageObjectsView({
       }
 
       setError(`${errorTitle}: ${errorMessage}`);
-
-      showFailureToast({
-        title: errorTitle,
-        message: errorMessage,
-      });
     } finally {
       setIsFetching(false);
       setIsLoading(false);
@@ -370,9 +364,10 @@ export default function StorageObjectsView({
           errorMessage = `The object "${objectName}" was not found. It may have been deleted already.`;
         }
 
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: errorTitle,
-          message: errorMessage,
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
@@ -429,9 +424,10 @@ export default function StorageObjectsView({
         errorMessage = `Cannot read from ${filePath}. Please check your file permissions.`;
       }
 
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: errorTitle,
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -491,9 +487,10 @@ export default function StorageObjectsView({
         }
       }
 
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: errorTitle,
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -637,10 +634,10 @@ export default function StorageObjectsView({
       loadingToast.hide();
       console.error("Error fetching object details:", error);
 
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to fetch object details",
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -745,9 +742,10 @@ export default function StorageObjectsView({
         errorMessage = "You don't have permission to create folders in this bucket.";
       }
 
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: errorTitle,
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }

@@ -13,7 +13,11 @@ import { ACL } from "@uploadthing/shared";
 import { useCachedPromise } from "@raycast/utils";
 // this is needed to solve error: https://docs.uploadthing.com/faq#i-am-getting-a-invalid-signing-secret-error
 import { webcrypto as crypto } from "node:crypto";
-globalThis.crypto = crypto;
+
+// should work fine on windows and mac
+if (!globalThis.crypto) {
+  globalThis.crypto = crypto;
+}
 
 export const useUpload = () => {
   const toast = useRef<Toast | null>(null);
