@@ -9,10 +9,6 @@ import { homedir } from "os";
 import path from "path";
 import fs from "fs";
 
-interface Preferences {
-  editor: string;
-}
-
 // Ghostty checks these paths in order
 const CONFIG_PATHS = [
   // XDG config (Linux style, also works on macOS)
@@ -28,7 +24,7 @@ const CONFIG_PATHS = [
 ];
 
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.OpenConfig>();
 
   // Find existing config file
   let configPath: string | null = null;

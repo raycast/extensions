@@ -14,12 +14,6 @@ import path from "path";
 import { createWorkspace, saveWorkspace, Workspace } from "./utils/workspaces";
 import { getRecentProjects, Project } from "./utils/projects";
 
-interface Preferences {
-  projectPaths: string;
-  maxDepth: string;
-  useShellHistory: boolean;
-}
-
 interface CreateWorkspaceProps {
   workspace?: Workspace;
   onSave?: () => void;
@@ -38,7 +32,7 @@ export default function CreateWorkspace({
   const [isLoading, setIsLoading] = useState(true);
   const [customPaths, setCustomPaths] = useState<string[]>([]);
 
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.CreateWorkspace>();
 
   useEffect(() => {
     const loadProjects = async () => {

@@ -1,6 +1,6 @@
 # Ghostty Launcher Changelog
 
-## [Initial Version] - 2025-01-21
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add Recent Projects command to browse and open recent projects in Ghostty
 - Add Workspaces command to save and open multiple projects as tabs

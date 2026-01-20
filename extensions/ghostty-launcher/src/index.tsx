@@ -12,14 +12,8 @@ import { useCachedPromise } from "@raycast/utils";
 import { homedir } from "os";
 import { getRecentProjects, Project } from "./utils/projects";
 
-interface Preferences {
-  projectPaths: string;
-  maxDepth: string;
-  useShellHistory: boolean;
-}
-
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
 
   const projectPaths = preferences.projectPaths
     .split(",")
