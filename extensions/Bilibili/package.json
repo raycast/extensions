@@ -80,13 +80,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^2.2.2",
     "crypto-js": "^4.2.0",
-    "node-notifier": "^10.0.1",
     "run-applescript": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node-notifier": "^8.0.5",
     "@types/qrcode": "^1.5.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

@@ -1,38 +1,33 @@
 import { formatUrl } from "./utils";
 import { checkLogin, getDynamicFeed } from "./apis";
 import { spawnSync } from "child_process";
-// import {notifier} from "node-notifier";
 import { runAppleScript } from "run-applescript";
 import { getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
+import { runPowerShellScript } from "@raycast/utils";
+import path from "path";
 
 interface Preferences {
   justNotifyVideos: boolean;
   terminalNotifierPath: string;
-  notificationAppId?: string;
 }
 const preference: Preferences = getPreferenceValues();
 
-function doNotify(title: string, type: Bilibili.DynamicType, subtitle: string, link: string) {
+async function doNotify(title: string, type: Bilibili.DynamicType, subtitle: string, link: string) {
   if (preference.justNotifyVideos && type !== "DYNAMIC_TYPE_AV") return;
 
-  // to-fix: Windows notification support
-  // if (process.platform === "win32") {
-  //   const appId = preference.notificationAppId?.trim() || "Raycast Bilibili";
+  if (process.platform === "win32") {
+    try {
+      const logoPath = path.resolve(__dirname, "assets/bilibili.png");
+      await runPowerShellScript(`
+        $button = New-BTButton -Content "View" -Arguments "${formatUrl(link)}"
+        New-BurntToastNotification -Text "${title} - Bilibili","${subtitle}" -Sound Default -Button $button -AppLogo "${logoPath}"
+        `);
+    } catch (error) {
+      console.error("BurntToast failed to show notification", error);
+    }
 
-  //   try {
-  //     notifier.notify({
-  //       title: `${title} - Bilibili`,
-  //       message: subtitle,
-  //       sound: true,
-  //       open: formatUrl(link),
-  //       wait: false,
-  //     });
-  //   } catch (error) {
-  //     console.error("node-notifier failed to show notification", error);
-  //   }
-
-  //   return;
-  // }
+    return;
+  }
 
   // Darwin (macOS) fallback
   if (!preference.terminalNotifierPath) {
@@ -102,24 +97,11 @@ function sleep(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-export function testNotification() {
-  console.log("Triggering test notification...");
-  doNotify(
-    "Test Bilibili",
-    "DYNAMIC_TYPE_WORD",
-    "This is a test notification from Raycast Bilibili Extension",
-    "https://www.bilibili.com"
-  );
-}
-
 export default async function Command() {
   if (!checkLogin()) {
     showHUD("Please use Login Bilibili command to login first.");
     return;
   }
-
-  // Active testing trigger
-  testNotification();
 
   const items = await getDynamicFeed();
   const newNotifications = items.map((item) => item.id_str);

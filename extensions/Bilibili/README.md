@@ -20,4 +20,4 @@
 - Notifications:
   - Only push video update reminders, the default is Off
   - Use terminal-notifier to push, download terminal-notifier through `brew install terminal-notifier`, then get the address to fill in through `which terminal-notifier`
-  - Windows uses node-notifier; set the Windows notification AppID preference (defaults to "Raycast Bilibili") so toasts appear in the notification center
+  - Windows uses BurntToast for push notifications, you need to install the BurntToast module first, run `Install-Module -Name BurntToast -Scope CurrentUser -Force` in PowerShell as an administrator to install

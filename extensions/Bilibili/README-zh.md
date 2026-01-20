@@ -20,4 +20,4 @@
 - Notifications:
   - 只推送视频更新提醒，默认为 关闭
   - 使用 terminal-notifier 进行推送, 通过 `brew install terminal-notifier` 下载 `terminal-notifier` 后通过 `which terminal-notifier` 获取地址填入
-  - Windows 使用 node-notifier，设置 Windows notification AppID（默认为 "Raycast Bilibili"）以便通知出现在通知中心
+  - Windows 使用 BurntToast 进行推送, 需要先安装 BurntToast 模块, 通过 PowerShell 以管理员身份运行 `Install-Module -Name BurntToast -Scope CurrentUser -Force` 进行安装
