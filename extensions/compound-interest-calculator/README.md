@@ -1,19 +1,19 @@
-# Compound Calculator for Raycast
+# Compound Interest Calculator
 
-Calculate compound interest and regular savings instantly with Raycast.
+Calculate compound interest and recurring contributions instantly with Raycast.
 
 ## Features
 
-- **Compound Calculator**: Intuitive form input for calculations
-- **Compound Quick**: Fast calculations with command arguments (for power users)
+- **Calculate**: Intuitive form input for calculations
+- **Quick Calculate**: Fast calculations with command arguments (for power users)
 - **After-Tax Calculation**: Simple tax calculation on gains
 - **Flexible Input**: Supports various formats ($, ¥, 万円, commas, etc.)
 
 ## Usage
 
-### Compound Calculator (Form)
+### Calculate (Form)
 
-Launch `Compound Calculator` in Raycast and fill in the form.
+Launch `Calculate` command in Raycast and fill in the form.
 
 | Field | Description | Example |
 |-------|-------------|---------|
@@ -25,9 +25,9 @@ Launch `Compound Calculator` in Raycast and fill in the form.
 | After-Tax | Apply tax to gains | Toggle on/off |
 | Tax Rate | Tax percentage | Set in preferences or per-calculation |
 
-### Compound Quick (Arguments)
+### Quick Calculate (Arguments)
 
-Launch `Compound Quick` in Raycast and enter arguments separated by **spaces**.
+Launch `Quick Calculate` command in Raycast and enter arguments separated by **spaces**.
 
 #### Input Patterns
 

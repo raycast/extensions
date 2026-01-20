@@ -1,10 +1,10 @@
-# Compound Changelog
+# Compound Interest Calculator Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
 ### Features
-- **Compound Calculator**: Calculate compound interest with form input
-- **Compound Quick**: Fast calculation with command arguments
+- **Calculate**: Calculate compound interest with form input
+- **Quick Calculate**: Fast calculation with command arguments
 - Compound interest calculation for principal only (yearly/monthly/daily)
 - Compound interest calculation with monthly contributions
 - After-tax calculation (simplified mode)

@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "compound",
-  "title": "Compound",
-  "description": "Instantly calculate compound interest and regular savings. Get all the info you need for investment or savings decisions at a glance.",
+  "name": "compound-interest-calculator",
+  "title": "Compound Interest Calculator",
+  "description": "Calculate compound interest and recurring contributions. Get instant results for your investment and savings planning.",
   "icon": "extension-icon.png",
   "author": "atsushi_kawamura",
   "platforms": [
@@ -17,13 +17,13 @@
   "commands": [
     {
       "name": "compound-calculator",
-      "title": "Compound Calculator",
+      "title": "Calculate",
       "description": "Calculate compound interest with form input",
       "mode": "view"
     },
     {
       "name": "compound-quick",
-      "title": "Compound Quick",
+      "title": "Quick Calculate",
       "description": "Calculate compound interest instantly with arguments",
       "mode": "view",
       "arguments": [
