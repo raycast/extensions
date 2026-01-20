@@ -1,6 +1,6 @@
 # Lark Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-01-20
 
 - Support for parent folder display
 - Update project dependencies
