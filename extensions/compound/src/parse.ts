@@ -1,20 +1,10 @@
 import type { Params, CompoundFrequency, CurrencyCode, RoundingMethod } from "./types";
 
-type Language = "en" | "ja";
-
 const errorMessages = {
-  en: {
-    rateAndYearsRequired: "Rate and years are required",
-    rateOutOfRange: "Rate must be between -100% and 1000%",
-    yearsOutOfRange: "Years must be greater than 0 and less than or equal to 100",
-    negativeValues: "Principal and monthly contributions must be 0 or greater",
-  },
-  ja: {
-    rateAndYearsRequired: "利率と期間は必須です",
-    rateOutOfRange: "利率は -100% から 1000% の範囲で指定してください",
-    yearsOutOfRange: "期間は 0 より大きく 100 年以下で指定してください",
-    negativeValues: "元本と積立額は 0 以上で指定してください",
-  },
+  rateAndYearsRequired: "Rate and years are required",
+  rateOutOfRange: "Rate must be between -100% and 1000%",
+  yearsOutOfRange: "Years must be greater than 0 and less than or equal to 100",
+  negativeValues: "Principal and monthly contributions must be 0 or greater",
 } as const;
 
 /**
@@ -55,8 +45,7 @@ function normalizeNumber(str: string): number {
  * - Period: 10y, 10years, 10年, 6m, 6months, 6ヶ月
  * - Money: 10000, 100,000, $100, ¥1,000, 10万円
  */
-export function parseQuickInput(query: string, preferences: Preferences, language: Language = "en"): Params {
-  const errors = errorMessages[language];
+export function parseQuickInput(query: string, preferences: Preferences): Params {
   const params: Partial<Params> = {
     principal: 0,
     monthly: 0,
@@ -184,19 +173,19 @@ export function parseQuickInput(query: string, preferences: Preferences, languag
   }
 
   if (!params.ratePct || !params.years) {
-    throw new Error(errors.rateAndYearsRequired);
+    throw new Error(errorMessages.rateAndYearsRequired);
   }
 
   if (params.ratePct <= -100 || params.ratePct >= 1000) {
-    throw new Error(errors.rateOutOfRange);
+    throw new Error(errorMessages.rateOutOfRange);
   }
 
   if (params.years <= 0 || params.years > 100) {
-    throw new Error(errors.yearsOutOfRange);
+    throw new Error(errorMessages.yearsOutOfRange);
   }
 
   if (params.principal! < 0 || params.monthly! < 0) {
-    throw new Error(errors.negativeValues);
+    throw new Error(errorMessages.negativeValues);
   }
 
   return params as Params;
@@ -217,9 +206,7 @@ export function parseFormInput(
     currency: CurrencyCode;
     rounding: RoundingMethod;
   },
-  language: Language = "en",
 ): Params {
-  const errors = errorMessages[language];
   const principal = normalizeNumber(values.principal || "0");
   const monthly = normalizeNumber(values.monthly || "0");
   const ratePct = normalizeNumber(values.rate);
@@ -227,19 +214,19 @@ export function parseFormInput(
   const taxRatePct = normalizeNumber(values.taxRate);
 
   if (!ratePct || !years) {
-    throw new Error(errors.rateAndYearsRequired);
+    throw new Error(errorMessages.rateAndYearsRequired);
   }
 
   if (ratePct <= -100 || ratePct >= 1000) {
-    throw new Error(errors.rateOutOfRange);
+    throw new Error(errorMessages.rateOutOfRange);
   }
 
   if (years <= 0 || years > 100) {
-    throw new Error(errors.yearsOutOfRange);
+    throw new Error(errorMessages.yearsOutOfRange);
   }
 
   if (principal < 0 || monthly < 0) {
-    throw new Error(errors.negativeValues);
+    throw new Error(errorMessages.negativeValues);
   }
 
   return {

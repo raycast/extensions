@@ -8,16 +8,6 @@ Calculate compound interest and regular savings instantly with Raycast.
 - **Compound Quick**: Fast calculations with command arguments (for power users)
 - **After-Tax Calculation**: Simple tax calculation on gains
 - **Flexible Input**: Supports various formats ($, ¥, 万円, commas, etc.)
-- **Multi-Language Support**: English and Japanese (日本語)
-
-## Language Support
-
-The extension supports **English** and **Japanese (日本語)**.
-
-- **Default**: English
-- **Change Language**: Go to Extension Preferences → Language / 言語
-
-All UI elements, error messages, and output formats will be displayed in your selected language.
 
 ## Usage
 
@@ -71,17 +61,16 @@ Launch `Compound Quick` in Raycast and enter arguments separated by **spaces**.
 #### Examples
 
 ```bash
-# English
+# Basic examples
 5% 10y                          # Rate 5%, 10 years
 $10,000 5% 10y                  # $10,000 principal
 $10,000 5% 10years $500         # + $500/month contribution
 $10,000 5% 10y $500 20%         # + 20% tax
 
-# Japanese
-5% 10年                         # 利率5%、10年
-100万円 5% 10年                  # 元本100万円
-100万円 5% 10年 3万円            # + 毎月3万円積立
-100万円 5% 10年 3万円 20%        # + 税率20%
+# Also supports Japanese number formats (for input flexibility)
+100万円 5% 10年                  # 100万円 principal, 5%, 10 years
+100万円 5% 10年 3万円            # + 3万円/month contribution
+100万円 5% 10年 3万円 20%        # + 20% tax
 
 # Key-value format
 p=10000 r=5 y=10 m=500 tax=20
@@ -129,11 +118,17 @@ Available actions in the result view:
 
 | Setting | Options | Default |
 |---------|---------|---------|
-| Language | English / 日本語 | English |
 | Default Currency | USD / EUR / JPY | USD |
 | Default Tax Rate | 0-100% | Empty (0%) |
 | Compound Frequency | Yearly / Monthly / Daily | Monthly |
 | Rounding Method | Floor / Round / Ceiling | Round |
+
+## Implementation Notes
+
+This extension follows Raycast's guidelines for US English-only UI:
+- All UI elements, labels, and error messages are in English
+- Currency display uses preferences API (USD/EUR/JPY selection)
+- Japanese input formats (100万円, 10年, etc.) are supported for input flexibility, not as UI localization
 
 ## License
 

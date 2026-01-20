@@ -10,7 +10,6 @@
 - After-tax calculation (simplified mode)
 - Multiple copy formats (Text/Markdown/CSV)
 - Configurable defaults (currency, tax rate, compound frequency, rounding)
-- Multi-language support: English and Japanese
 
 ### Input Formats
 - Flexible input formats with space separation
