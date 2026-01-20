@@ -5,7 +5,7 @@ import { fetchHeadOnlyWithFallback, fetchWithTimeout, fetchTextResource } from "
 import { fetchWaybackMachineData } from "../utils/waybackUtils";
 import { fetchHostMetadata } from "../utils/hostMetaUtils";
 import { useCache } from "./useCache";
-import { LIMITS, withRetry } from "../utils/config";
+import { LIMITS } from "../utils/config";
 import {
   DiggerResult,
   OverviewData,
@@ -266,15 +266,8 @@ export function useFetchSite(url?: string) {
           });
         }
 
-        const retryOpts = { maxAttempts: 2, signal: abortController.signal };
-        const dnsPromise = withAbort(
-          withRetry(() => performDNSLookup(hostname), retryOpts),
-          undefined,
-        );
-        const certPromise = withAbort(
-          withRetry(() => getTLSCertificateInfo(hostname), retryOpts),
-          null,
-        );
+        const dnsPromise = withAbort(performDNSLookup(hostname), undefined);
+        const certPromise = withAbort(getTLSCertificateInfo(hostname), null);
         const waybackPromise = withAbort(fetchWaybackMachineData(normalizedUrl), undefined);
         const hostMetaPromise = withAbort(fetchHostMetadata(normalizedUrl), undefined);
 

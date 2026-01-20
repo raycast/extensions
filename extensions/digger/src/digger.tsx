@@ -18,11 +18,7 @@ interface Arguments {
   url?: string;
 }
 
-const preferences = getPreferenceValues<{
-  autoLoadUrlFromClipboard: boolean;
-  autoLoadUrlFromSelectedText: boolean;
-  enableBrowserExtensionSupport: boolean;
-}>();
+const preferences = getPreferenceValues();
 
 export default function Command(props: { arguments: Arguments }) {
   const { url: inputUrl } = props.arguments;
