@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#grad1)"/>
+  <g fill="white">
+    <!-- Stylized S for Sheaf -->
+    <path d="M256 100c-80 0-120 40-120 80 0 50 50 70 100 85 40 12 60 25 60 45 0 25-25 40-60 40-45 0-75-20-95-50l-35 35c30 45 80 77 130 77 80 0 130-45 130-95 0-55-45-75-105-95-35-12-55-22-55-40 0-20 20-32 50-32 35 0 60 15 80 40l35-35c-30-35-70-55-115-55z" transform="translate(0, 20)"/>
+    <!-- Code brackets -->
+    <path d="M150 380l-30-20 60-90-60-90 30-20 80 110z" opacity="0.7"/>
+    <path d="M362 380l30-20-60-90 60-90-30-20-80 110z" opacity="0.7"/>
+  </g>
+</svg>
