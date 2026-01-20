@@ -9,6 +9,7 @@
 ![Bilibili](./metadata/bilibili-1.png)
 
 ### 功能
+
 - 浏览订阅信息 (Show Dynamic Feed)
 - 订阅更新推送 (Notifications)
 - Cmd + Enter 查看对应视频 AI 总结
@@ -17,5 +18,6 @@
 ### 配置
 
 - Notifications:
-	- 只推送视频更新提醒，默认为 关闭
-	- 使用 terminal-notifier 进行推送, 通过 `brew install terminal-notifier` 下载 `terminal-notifier` 后通过 `which terminal-notifier` 获取地址填入
+  - 只推送视频更新提醒，默认为 关闭
+  - 使用 terminal-notifier 进行推送, 通过 `brew install terminal-notifier` 下载 `terminal-notifier` 后通过 `which terminal-notifier` 获取地址填入
+  - Windows 使用 node-notifier，设置 Windows notification AppID（默认为 "Raycast Bilibili"）以便通知出现在通知中心

@@ -18,5 +18,6 @@
 ### Preferences
 
 - Notifications:
-	- Only push video update reminders, the default is Off
-	- Use terminal-notifier to push, download terminal-notifier through `brew install terminal-notifier`, then get the address to fill in through `which terminal-notifier`
+  - Only push video update reminders, the default is Off
+  - Use terminal-notifier to push, download terminal-notifier through `brew install terminal-notifier`, then get the address to fill in through `which terminal-notifier`
+  - Windows uses node-notifier; set the Windows notification AppID preference (defaults to "Raycast Bilibili") so toasts appear in the notification center
