@@ -59,7 +59,14 @@ export default function Command() {
         throw new Error(`Failed to create session: ${response.statusText} - ${errorText}`);
       }
 
-      const result = await response.json();
+      const jsonResponse = await response.json();
+
+      // Runtime validation to ensure safety
+      if (!jsonResponse || typeof (jsonResponse as { name?: unknown }).name !== "string") {
+        throw new Error("Invalid API response: 'name' property is missing or not a string.");
+      }
+
+      const result = jsonResponse as { name: string };
       console.log("Session created:", result);
 
       toast.style = Toast.Style.Success;
