@@ -107,7 +107,9 @@ export default function Command() {
   // Separate favorites from other results when not searching
   const favoriteItems = useMemo(() => {
     if (query.trim().length > 0 || !data) return [];
-    return data.index.filter((item: ReferenceIndexItem) => favorites.has(item.id));
+    return data.index.filter((item: ReferenceIndexItem) =>
+      favorites.has(item.id),
+    );
   }, [data, favorites, query]);
 
   const otherResults = useMemo((): ReferenceIndexItem[] => {
@@ -116,7 +118,9 @@ export default function Command() {
       return results.map((r) => r.item);
     }
     // When not searching, exclude favorites from main list
-    return results.map((r) => r.item).filter((item: ReferenceIndexItem) => !favorites.has(item.id));
+    return results
+      .map((r) => r.item)
+      .filter((item: ReferenceIndexItem) => !favorites.has(item.id));
   }, [results, favorites, query]);
 
   const renderItem = (item: ReferenceIndexItem) => {
