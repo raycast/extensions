@@ -1,5 +1,10 @@
 # Vercast Changelog
 
+## [2.14] - {PR_MERGE_DATE}
+
+- Update `Check Domain Availability` command to use the new Vercel API
+- Added `Visit on Vercel` action to projects and domains lists
+
 ## [2.13] - 2026-01-05
 
 - Added `Open Latest Deployment` command to open the latest deployment target or the Vercel dashboard
