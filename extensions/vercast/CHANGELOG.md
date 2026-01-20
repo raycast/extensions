@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.14] - {PR_MERGE_DATE}
+## [2.14] - 2026-01-20
 
 - Update `Check Domain Availability` command to use the new Vercel API
 - Added `Visit on Vercel` action to projects and domains lists
