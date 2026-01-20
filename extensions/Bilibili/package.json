@@ -58,14 +58,6 @@
           "required": false,
           "description": "If you have already installed terminal-notifier, you can find its path by running `which terminal-notifier` in the terminal.",
           "type": "textfield"
-        },
-        {
-          "title": "Windows notification AppID",
-          "name": "notificationAppId",
-          "required": false,
-          "description": "AppID used by Windows toast notifications (node-notifier). Set this so notifications appear in the Windows notification center.",
-          "type": "textfield",
-          "default": "Raycast Bilibili"
         }
       ],
       "mode": "no-view",
