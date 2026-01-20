@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.14] - 2026-01-20
+## [2.14] - {PR_MERGE_DATE}
 
 - Removed token length validation as vercel tokens can now be longer
 
