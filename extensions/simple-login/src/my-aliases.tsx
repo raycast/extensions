@@ -98,7 +98,7 @@ export default function Command() {
               />
               <Action
                 title={alias.pinned ? "Unpin" : "Pin"}
-                icon={alias.enabled ? Icon.TackDisabled : Icon.Tack}
+                icon={alias.pinned ? Icon.TackDisabled : Icon.Tack}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                 onAction={() => handlePinAlias(alias)}
               />

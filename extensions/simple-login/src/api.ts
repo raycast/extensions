@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const BASE_URL = "https://app.simplelogin.io/api";
 
-interface Preferences {
-  apiKey: string;
-}
-
 export interface AliasContact {
   email: string;
   name: string | null;
