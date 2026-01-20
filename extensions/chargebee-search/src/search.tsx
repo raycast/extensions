@@ -6,7 +6,6 @@ import {
   Icon,
   Color,
   LocalStorage,
-  Keyboard,
 } from "@raycast/api";
 import { useCustomers } from "./hooks/useCustomers";
 import { useInvoices } from "./hooks/useInvoices";
@@ -46,7 +45,9 @@ async function addToHistory(item: Omit<HistoryItem, "timestamp">) {
   const newItem: HistoryItem = { ...item, timestamp: Date.now() };
 
   // Remove duplicates and add new item at the start
-  const filtered = history.filter((h) => !(h.type === item.type && h.id === item.id));
+  const filtered = history.filter(
+    (h) => !(h.type === item.type && h.id === item.id),
+  );
   const updated = [newItem, ...filtered].slice(0, MAX_HISTORY);
 
   await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
@@ -91,7 +92,13 @@ function getSiteBadgeColor(site: string): Color {
   return siteColorMap.get(site) || Color.Blue;
 }
 
-function CustomerListItem({ customer, onOpen }: { customer: CustomerWithMeta; onOpen?: () => void }) {
+function CustomerListItem({
+  customer,
+  onOpen,
+}: {
+  customer: CustomerWithMeta;
+  onOpen?: () => void;
+}) {
   const customerUrl = `https://${customer.siteId}.chargebee.com/admin-console/customers/${customer.id}`;
   const subscriptionUrl = customer.subscription
     ? `https://${customer.siteId}.chargebee.com/admin-console/subscriptions/${customer.subscription.id}`
@@ -103,7 +110,10 @@ function CustomerListItem({ customer, onOpen }: { customer: CustomerWithMeta; on
   const renewalDate = customer.subscription?.current_term_end
     ? formatDate(customer.subscription.current_term_end)
     : "N/A";
-  const title = customer.company || `${customer.first_name || ""} ${customer.last_name || ""}`.trim() || customer.id;
+  const title =
+    customer.company ||
+    `${customer.first_name || ""} ${customer.last_name || ""}`.trim() ||
+    customer.id;
 
   const handleOpen = async () => {
     await addToHistory({
@@ -140,18 +150,36 @@ function CustomerListItem({ customer, onOpen }: { customer: CustomerWithMeta; on
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open Customer" url={customerUrl} onOpen={handleOpen} />
+            <Action.OpenInBrowser
+              title="Open Customer"
+              url={customerUrl}
+              onOpen={handleOpen}
+            />
             {subscriptionUrl && (
-              <Action.OpenInBrowser title="Open Subscription" url={subscriptionUrl} icon={Icon.Calendar} />
+              <Action.OpenInBrowser
+                title="Open Subscription"
+                url={subscriptionUrl}
+                icon={Icon.Calendar}
+              />
             )}
             {lastInvoiceUrl && (
-              <Action.OpenInBrowser title="Open Last Invoice" url={lastInvoiceUrl} icon={Icon.Document} />
+              <Action.OpenInBrowser
+                title="Open Last Invoice"
+                url={lastInvoiceUrl}
+                icon={Icon.Document}
+              />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Customer ID" content={customer.id} />
+            <Action.CopyToClipboard
+              title="Copy Customer Id"
+              content={customer.id}
+            />
             {customer.email && (
-              <Action.CopyToClipboard title="Copy Email" content={customer.email} />
+              <Action.CopyToClipboard
+                title="Copy Email"
+                content={customer.email}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -160,7 +188,13 @@ function CustomerListItem({ customer, onOpen }: { customer: CustomerWithMeta; on
   );
 }
 
-function InvoiceListItem({ invoice, onOpen }: { invoice: InvoiceWithMeta; onOpen?: () => void }) {
+function InvoiceListItem({
+  invoice,
+  onOpen,
+}: {
+  invoice: InvoiceWithMeta;
+  onOpen?: () => void;
+}) {
   const invoiceUrl = `https://${invoice.siteId}.chargebee.com/admin-console/invoices/${invoice.id}`;
   const invoicePdfUrl = `https://${invoice.siteId}.chargebee.com/admin-console/invoices/${invoice.id}/pdf`;
   const customerUrl = `https://${invoice.siteId}.chargebee.com/admin-console/customers/${invoice.customer_id}`;
@@ -206,15 +240,29 @@ function InvoiceListItem({ invoice, onOpen }: { invoice: InvoiceWithMeta; onOpen
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open Invoice" url={invoiceUrl} onOpen={handleOpen} />
+            <Action.OpenInBrowser
+              title="Open Invoice"
+              url={invoiceUrl}
+              onOpen={handleOpen}
+            />
             <Action.OpenInBrowser title="Open Customer" url={customerUrl} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="View PDF" url={invoicePdfUrl} icon={Icon.Document} />
+            <Action.OpenInBrowser
+              title="View Pdf"
+              url={invoicePdfUrl}
+              icon={Icon.Document}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Invoice Number" content={invoice.id} />
-            <Action.CopyToClipboard title="Copy Customer ID" content={invoice.customer_id} />
+            <Action.CopyToClipboard
+              title="Copy Invoice Number"
+              content={invoice.id}
+            />
+            <Action.CopyToClipboard
+              title="Copy Customer Id"
+              content={invoice.customer_id}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -222,7 +270,13 @@ function InvoiceListItem({ invoice, onOpen }: { invoice: InvoiceWithMeta; onOpen
   );
 }
 
-function CreditNoteListItem({ creditNote, onOpen }: { creditNote: CreditNoteWithMeta; onOpen?: () => void }) {
+function CreditNoteListItem({
+  creditNote,
+  onOpen,
+}: {
+  creditNote: CreditNoteWithMeta;
+  onOpen?: () => void;
+}) {
   const creditNoteUrl = `https://${creditNote.siteId}.chargebee.com/admin-console/credit_notes/${creditNote.id}`;
 
   const handleOpen = async () => {
@@ -265,16 +319,20 @@ function CreditNoteListItem({ creditNote, onOpen }: { creditNote: CreditNoteWith
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open Credit Note" url={creditNoteUrl} onOpen={handleOpen} />
+            <Action.OpenInBrowser
+              title="Open Credit Note"
+              url={creditNoteUrl}
+              onOpen={handleOpen}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Credit Note ID"
+              title="Copy Credit Note Id"
               content={creditNote.id}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
             <Action.CopyToClipboard
-              title="Copy Customer ID"
+              title="Copy Customer Id"
               content={creditNote.customer_id}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
@@ -285,9 +343,25 @@ function CreditNoteListItem({ creditNote, onOpen }: { creditNote: CreditNoteWith
   );
 }
 
-function HistoryListItem({ item, onOpen }: { item: HistoryItem; onOpen?: () => void }) {
-  const typeIcon = item.type === "customer" ? Icon.Person : item.type === "invoice" ? Icon.Document : Icon.Receipt;
-  const typeLabel = item.type === "customer" ? "Customer" : item.type === "invoice" ? "Invoice" : "Credit Note";
+function HistoryListItem({
+  item,
+  onOpen,
+}: {
+  item: HistoryItem;
+  onOpen?: () => void;
+}) {
+  const typeIcon =
+    item.type === "customer"
+      ? Icon.Person
+      : item.type === "invoice"
+        ? Icon.Document
+        : Icon.Receipt;
+  const typeLabel =
+    item.type === "customer"
+      ? "Customer"
+      : item.type === "invoice"
+        ? "Invoice"
+        : "Credit Note";
 
   const handleOpen = async () => {
     await addToHistory({
@@ -318,22 +392,15 @@ function HistoryListItem({ item, onOpen }: { item: HistoryItem; onOpen?: () => v
       ]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Chargebee" url={item.url} onOpen={handleOpen} />
+          <Action.OpenInBrowser
+            title="Open in Chargebee"
+            url={item.url}
+            onOpen={handleOpen}
+          />
         </ActionPanel>
       }
     />
   );
-}
-
-function getSearchPlaceholder(searchType: SearchType): string {
-  switch (searchType) {
-    case "customer":
-      return "Search customers by company name...";
-    case "invoice":
-      return "Search invoices by number...";
-    case "credit_note":
-      return "Search credit notes by ID...";
-  }
 }
 
 function getEmptyViewTitle(searchType: SearchType, search: string): string {
@@ -342,7 +409,9 @@ function getEmptyViewTitle(searchType: SearchType, search: string): string {
   }
   switch (searchType) {
     case "customer":
-      return search.length < 2 ? "Type at least 2 characters" : "No customers found";
+      return search.length < 2
+        ? "Type at least 2 characters"
+        : "No customers found";
     case "invoice":
       return "No invoices found";
     case "credit_note":
@@ -364,19 +433,27 @@ function getEmptyViewDescription(searchType: SearchType): string {
 export default function Command() {
   const [search, setSearch] = useState("");
   const searchType = detectSearchType(search);
-  const { history, isLoading: isLoadingHistory, refresh: refreshHistory } = useHistory();
+  const {
+    history,
+    isLoading: isLoadingHistory,
+    refresh: refreshHistory,
+  } = useHistory();
 
   const { customers, isLoading: isLoadingCustomers } = useCustomers(
-    searchType === "customer" ? search : ""
+    searchType === "customer" ? search : "",
   );
   const { invoices, isLoading: isLoadingInvoices } = useInvoices(
-    searchType === "invoice" ? search : ""
+    searchType === "invoice" ? search : "",
   );
   const { creditNotes, isLoading: isLoadingCreditNotes } = useCreditNotes(
-    searchType === "credit_note" ? search : ""
+    searchType === "credit_note" ? search : "",
   );
 
-  const isLoading = isLoadingHistory || isLoadingCustomers || isLoadingInvoices || isLoadingCreditNotes;
+  const isLoading =
+    isLoadingHistory ||
+    isLoadingCustomers ||
+    isLoadingInvoices ||
+    isLoadingCreditNotes;
   const showHistory = !search && history.length > 0;
 
   return (
@@ -398,48 +475,73 @@ export default function Command() {
       {showHistory && (
         <List.Section title="Recent">
           {history.map((item) => (
-            <HistoryListItem key={`${item.type}-${item.id}`} item={item} onOpen={refreshHistory} />
+            <HistoryListItem
+              key={`${item.type}-${item.id}`}
+              item={item}
+              onOpen={refreshHistory}
+            />
           ))}
         </List.Section>
       )}
 
-      {search && searchType === "customer" && customers.length === 0 && !isLoadingCustomers && (
-        <List.EmptyView
-          title={getEmptyViewTitle(searchType, search)}
-          description={getEmptyViewDescription(searchType)}
-          icon={Icon.MagnifyingGlass}
-        />
-      )}
+      {search &&
+        searchType === "customer" &&
+        customers.length === 0 &&
+        !isLoadingCustomers && (
+          <List.EmptyView
+            title={getEmptyViewTitle(searchType, search)}
+            description={getEmptyViewDescription(searchType)}
+            icon={Icon.MagnifyingGlass}
+          />
+        )}
 
-      {search && searchType === "invoice" && invoices.length === 0 && !isLoadingInvoices && (
-        <List.EmptyView
-          title={getEmptyViewTitle(searchType, search)}
-          description={getEmptyViewDescription(searchType)}
-          icon={Icon.MagnifyingGlass}
-        />
-      )}
+      {search &&
+        searchType === "invoice" &&
+        invoices.length === 0 &&
+        !isLoadingInvoices && (
+          <List.EmptyView
+            title={getEmptyViewTitle(searchType, search)}
+            description={getEmptyViewDescription(searchType)}
+            icon={Icon.MagnifyingGlass}
+          />
+        )}
 
-      {search && searchType === "credit_note" && creditNotes.length === 0 && !isLoadingCreditNotes && (
-        <List.EmptyView
-          title={getEmptyViewTitle(searchType, search)}
-          description={getEmptyViewDescription(searchType)}
-          icon={Icon.MagnifyingGlass}
-        />
-      )}
+      {search &&
+        searchType === "credit_note" &&
+        creditNotes.length === 0 &&
+        !isLoadingCreditNotes && (
+          <List.EmptyView
+            title={getEmptyViewTitle(searchType, search)}
+            description={getEmptyViewDescription(searchType)}
+            icon={Icon.MagnifyingGlass}
+          />
+        )}
 
       {searchType === "customer" &&
         customers.map((customer) => (
-          <CustomerListItem key={`${customer.site}-${customer.id}`} customer={customer} onOpen={refreshHistory} />
+          <CustomerListItem
+            key={`${customer.site}-${customer.id}`}
+            customer={customer}
+            onOpen={refreshHistory}
+          />
         ))}
 
       {searchType === "invoice" &&
         invoices.map((invoice) => (
-          <InvoiceListItem key={`${invoice.site}-${invoice.id}`} invoice={invoice} onOpen={refreshHistory} />
+          <InvoiceListItem
+            key={`${invoice.site}-${invoice.id}`}
+            invoice={invoice}
+            onOpen={refreshHistory}
+          />
         ))}
 
       {searchType === "credit_note" &&
         creditNotes.map((creditNote) => (
-          <CreditNoteListItem key={`${creditNote.site}-${creditNote.id}`} creditNote={creditNote} onOpen={refreshHistory} />
+          <CreditNoteListItem
+            key={`${creditNote.site}-${creditNote.id}`}
+            creditNote={creditNote}
+            onOpen={refreshHistory}
+          />
         ))}
     </List>
   );

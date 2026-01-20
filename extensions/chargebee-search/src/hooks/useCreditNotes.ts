@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSiteConfigs, chargebeeRequest } from "./useChargebee";
 import {
   ChargebeeCreditNote,
@@ -19,7 +19,7 @@ interface CustomerResponse {
 
 async function searchCreditNotesForSite(
   siteConfig: SiteConfig,
-  creditNoteId: string
+  creditNoteId: string,
 ): Promise<CreditNoteWithMeta[]> {
   if (!creditNoteId) return [];
 
@@ -31,7 +31,7 @@ async function searchCreditNotesForSite(
       {
         "id[starts_with]": creditNoteId,
         limit: "10",
-      }
+      },
     );
 
     const creditNotes = response.list.map((item) => item.credit_note);
@@ -44,10 +44,11 @@ async function searchCreditNotesForSite(
         try {
           const customerResponse = await chargebeeRequest<CustomerResponse>(
             siteConfig,
-            `/customers/${creditNote.customer_id}`
+            `/customers/${creditNote.customer_id}`,
           );
           const customer = customerResponse.customer;
-          customerName = customer.company ||
+          customerName =
+            customer.company ||
             [customer.first_name, customer.last_name].filter(Boolean).join(" ");
         } catch {
           customerName = creditNote.customer_id;
@@ -59,12 +60,15 @@ async function searchCreditNotesForSite(
           siteId: siteConfig.site,
           customerName,
         };
-      })
+      }),
     );
 
     return creditNotesWithMeta;
   } catch (error) {
-    console.error(`Error searching credit notes for ${siteConfig.name}:`, error);
+    console.error(
+      `Error searching credit notes for ${siteConfig.name}:`,
+      error,
+    );
     return [];
   }
 }
@@ -76,7 +80,8 @@ export function useCreditNotes(creditNoteId: string) {
   const [lastSearch, setLastSearch] = useState("");
 
   // Track if we should be loading (search changed and is valid)
-  const shouldBeLoading = creditNoteId.length > 0 && creditNoteId !== lastSearch;
+  const shouldBeLoading =
+    creditNoteId.length > 0 && creditNoteId !== lastSearch;
 
   useEffect(() => {
     if (!creditNoteId) {
@@ -90,7 +95,11 @@ export function useCreditNotes(creditNoteId: string) {
     setLastSearch(creditNoteId);
 
     // Search both sites in parallel
-    Promise.all(siteConfigs.map((config) => searchCreditNotesForSite(config, creditNoteId)))
+    Promise.all(
+      siteConfigs.map((config) =>
+        searchCreditNotesForSite(config, creditNoteId),
+      ),
+    )
       .then((results) => {
         const merged = results.flat();
         // Sort by date (newest first)

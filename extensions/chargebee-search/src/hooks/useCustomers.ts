@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSiteConfigs, chargebeeRequest } from "./useChargebee";
 import {
   ChargebeeCustomer,
@@ -28,7 +28,7 @@ interface InvoiceListResponse {
 
 async function searchCustomersForSite(
   siteConfig: SiteConfig,
-  search: string
+  search: string,
 ): Promise<CustomerWithMeta[]> {
   if (!search || search.length < 2) return [];
 
@@ -36,37 +36,38 @@ async function searchCustomersForSite(
     // Hybrid approach:
     // 1. API search with starts_with (for prefix matches)
     // 2. Fetch recent customers and filter locally (for substring/contains matches)
-    const [companyResults, firstNameResults, emailResults, recentCustomers] = await Promise.all([
-      chargebeeRequest<CustomerListResponse>(siteConfig, "/customers", {
-        "company[starts_with]": search,
-        limit: "20",
-      }).catch((e) => {
-        console.error(`[${siteConfig.name}] company search error:`, e);
-        return { list: [] };
-      }),
-      chargebeeRequest<CustomerListResponse>(siteConfig, "/customers", {
-        "first_name[starts_with]": search,
-        limit: "20",
-      }).catch((e) => {
-        console.error(`[${siteConfig.name}] first_name search error:`, e);
-        return { list: [] };
-      }),
-      chargebeeRequest<CustomerListResponse>(siteConfig, "/customers", {
-        "email[starts_with]": search,
-        limit: "20",
-      }).catch((e) => {
-        console.error(`[${siteConfig.name}] email search error:`, e);
-        return { list: [] };
-      }),
-      // Fetch recent customers for local "contains" filtering
-      chargebeeRequest<CustomerListResponse>(siteConfig, "/customers", {
-        limit: "100",
-        "sort_by[desc]": "created_at",
-      }).catch((e) => {
-        console.error(`[${siteConfig.name}] recent customers error:`, e);
-        return { list: [] };
-      }),
-    ]);
+    const [companyResults, firstNameResults, emailResults, recentCustomers] =
+      await Promise.all([
+        chargebeeRequest<CustomerListResponse>(siteConfig, "/customers", {
+          "company[starts_with]": search,
+          limit: "20",
+        }).catch((e) => {
+          console.error(`[${siteConfig.name}] company search error:`, e);
+          return { list: [] };
+        }),
+        chargebeeRequest<CustomerListResponse>(siteConfig, "/customers", {
+          "first_name[starts_with]": search,
+          limit: "20",
+        }).catch((e) => {
+          console.error(`[${siteConfig.name}] first_name search error:`, e);
+          return { list: [] };
+        }),
+        chargebeeRequest<CustomerListResponse>(siteConfig, "/customers", {
+          "email[starts_with]": search,
+          limit: "20",
+        }).catch((e) => {
+          console.error(`[${siteConfig.name}] email search error:`, e);
+          return { list: [] };
+        }),
+        // Fetch recent customers for local "contains" filtering
+        chargebeeRequest<CustomerListResponse>(siteConfig, "/customers", {
+          limit: "100",
+          "sort_by[desc]": "created_at",
+        }).catch((e) => {
+          console.error(`[${siteConfig.name}] recent customers error:`, e);
+          return { list: [] };
+        }),
+      ]);
 
     // Filter recent customers locally by "contains" (case-insensitive)
     const searchLower = search.toLowerCase();
@@ -74,9 +75,14 @@ async function searchCustomersForSite(
       .map((item) => item.customer)
       .filter((customer) => {
         const company = customer.company?.toLowerCase() || "";
-        const fullName = `${customer.first_name || ""} ${customer.last_name || ""}`.toLowerCase();
+        const fullName =
+          `${customer.first_name || ""} ${customer.last_name || ""}`.toLowerCase();
         const email = customer.email?.toLowerCase() || "";
-        return company.includes(searchLower) || fullName.includes(searchLower) || email.includes(searchLower);
+        return (
+          company.includes(searchLower) ||
+          fullName.includes(searchLower) ||
+          email.includes(searchLower)
+        );
       });
 
     // Merge API results + local matches, deduplicate by customer ID
@@ -88,7 +94,7 @@ async function searchCustomersForSite(
     ];
 
     const customers = Array.from(
-      new Map(allCustomers.map((c) => [c.id, c])).values()
+      new Map(allCustomers.map((c) => [c.id, c])).values(),
     );
 
     // Fetch subscriptions and last invoice for each customer
@@ -103,17 +109,13 @@ async function searchCustomersForSite(
                 "customer_id[is]": customer.id,
                 limit: "1",
                 "sort_by[desc]": "created_at",
-              }
+              },
             ),
-            chargebeeRequest<InvoiceListResponse>(
-              siteConfig,
-              "/invoices",
-              {
-                "customer_id[is]": customer.id,
-                limit: "1",
-                "sort_by[desc]": "date",
-              }
-            ),
+            chargebeeRequest<InvoiceListResponse>(siteConfig, "/invoices", {
+              "customer_id[is]": customer.id,
+              limit: "1",
+              "sort_by[desc]": "date",
+            }),
           ]);
 
           const subscription = subResponse.list[0]?.subscription;
@@ -133,7 +135,7 @@ async function searchCustomersForSite(
             siteId: siteConfig.site,
           };
         }
-      })
+      }),
     );
 
     return customersWithMeta;
@@ -164,7 +166,9 @@ export function useCustomers(search: string) {
     setLastSearch(search);
 
     // Search both sites in parallel
-    Promise.all(siteConfigs.map((config) => searchCustomersForSite(config, search)))
+    Promise.all(
+      siteConfigs.map((config) => searchCustomersForSite(config, search)),
+    )
       .then((results) => {
         const merged = results.flat();
         // Sort by renewal date: furthest in future first, no renewal at bottom

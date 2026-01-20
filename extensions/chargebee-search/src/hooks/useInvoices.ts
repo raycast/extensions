@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSiteConfigs, chargebeeRequest } from "./useChargebee";
 import {
   ChargebeeInvoice,
@@ -19,7 +19,7 @@ interface CustomerResponse {
 
 async function searchInvoicesForSite(
   siteConfig: SiteConfig,
-  invoiceNumber: string
+  invoiceNumber: string,
 ): Promise<InvoiceWithMeta[]> {
   if (!invoiceNumber) return [];
 
@@ -31,7 +31,7 @@ async function searchInvoicesForSite(
       {
         "id[is]": invoiceNumber,
         limit: "10",
-      }
+      },
     );
 
     const invoices = response.list.map((item) => item.invoice);
@@ -39,8 +39,12 @@ async function searchInvoicesForSite(
     // Fetch customer name for each invoice
     const invoicesWithMeta: InvoiceWithMeta[] = await Promise.all(
       invoices.map(async (invoice) => {
-        let customerName = invoice.billing_address?.company ||
-          [invoice.billing_address?.first_name, invoice.billing_address?.last_name]
+        let customerName =
+          invoice.billing_address?.company ||
+          [
+            invoice.billing_address?.first_name,
+            invoice.billing_address?.last_name,
+          ]
             .filter(Boolean)
             .join(" ") ||
           undefined;
@@ -50,11 +54,14 @@ async function searchInvoicesForSite(
           try {
             const customerResponse = await chargebeeRequest<CustomerResponse>(
               siteConfig,
-              `/customers/${invoice.customer_id}`
+              `/customers/${invoice.customer_id}`,
             );
             const customer = customerResponse.customer;
-            customerName = customer.company ||
-              [customer.first_name, customer.last_name].filter(Boolean).join(" ");
+            customerName =
+              customer.company ||
+              [customer.first_name, customer.last_name]
+                .filter(Boolean)
+                .join(" ");
           } catch {
             customerName = invoice.customer_id;
           }
@@ -66,7 +73,7 @@ async function searchInvoicesForSite(
           siteId: siteConfig.site,
           customerName,
         };
-      })
+      }),
     );
 
     return invoicesWithMeta;
@@ -83,7 +90,8 @@ export function useInvoices(invoiceNumber: string) {
   const [lastSearch, setLastSearch] = useState("");
 
   // Track if we should be loading (search changed and is valid)
-  const shouldBeLoading = invoiceNumber.length > 0 && invoiceNumber !== lastSearch;
+  const shouldBeLoading =
+    invoiceNumber.length > 0 && invoiceNumber !== lastSearch;
 
   useEffect(() => {
     if (!invoiceNumber) {
@@ -97,7 +105,9 @@ export function useInvoices(invoiceNumber: string) {
     setLastSearch(invoiceNumber);
 
     // Search both sites in parallel
-    Promise.all(siteConfigs.map((config) => searchInvoicesForSite(config, invoiceNumber)))
+    Promise.all(
+      siteConfigs.map((config) => searchInvoicesForSite(config, invoiceNumber)),
+    )
       .then((results) => {
         const merged = results.flat();
         // Sort by date (newest first)

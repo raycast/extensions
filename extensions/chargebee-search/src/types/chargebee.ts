@@ -28,7 +28,13 @@ export interface ChargebeeCustomer {
 export interface ChargebeeSubscription {
   id: string;
   customer_id: string;
-  status: "future" | "in_trial" | "active" | "non_renewing" | "paused" | "cancelled";
+  status:
+    | "future"
+    | "in_trial"
+    | "active"
+    | "non_renewing"
+    | "paused"
+    | "cancelled";
   current_term_end?: number;
   next_billing_at?: number;
 }
@@ -77,4 +83,7 @@ export interface CreditNoteWithMeta extends ChargebeeCreditNote {
 
 export type SearchType = "customer" | "invoice" | "credit_note";
 
-export type SearchResult = CustomerWithMeta | InvoiceWithMeta | CreditNoteWithMeta;
+export type SearchResult =
+  | CustomerWithMeta
+  | InvoiceWithMeta
+  | CreditNoteWithMeta;

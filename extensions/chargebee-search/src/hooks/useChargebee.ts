@@ -32,7 +32,7 @@ export function getAuthHeader(apiKey: string): string {
 export async function chargebeeRequest<T>(
   siteConfig: SiteConfig,
   endpoint: string,
-  params?: Record<string, string>
+  params?: Record<string, string>,
 ): Promise<T> {
   let url = `https://${siteConfig.site}.chargebee.com/api/v2${endpoint}`;
 
@@ -55,7 +55,9 @@ export async function chargebeeRequest<T>(
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`Chargebee API error: ${response.status} ${response.statusText} - ${errorBody}`);
+    throw new Error(
+      `Chargebee API error: ${response.status} ${response.statusText} - ${errorBody}`,
+    );
   }
 
   return response.json() as Promise<T>;
