@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-01-20
 
 ### Fixed
 - Fixed memory leaks when updating file metadata in generated files
