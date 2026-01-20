@@ -17,11 +17,12 @@ async function doNotify(title: string, type: Bilibili.DynamicType, subtitle: str
 
   if (process.platform === "win32") {
     try {
+      const escapePowerShell = (str: string) => str.replace(/["'`$]/g, '`$&');
       const logoPath = path.resolve(__dirname, "assets/bilibili.png");
       await runPowerShellScript(`
         $button = New-BTButton -Content "View" -Arguments "${formatUrl(link)}"
-        New-BurntToastNotification -Text "${title} - Bilibili","${subtitle}" -Sound Default -Button $button -AppLogo "${logoPath}"
-        `);
+        New-BurntToastNotification -Text "${escapePowerShell(title)} - Bilibili","${escapePowerShell(subtitle)}" -Sound Default -Button $button -AppLogo "${logoPath}"
+      `);
     } catch (error) {
       console.error("BurntToast failed to show notification", error);
     }
