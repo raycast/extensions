@@ -1,12 +1,12 @@
 import { Form, ActionPanel, Action, showToast, Toast, Detail, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
-import type { Params, Result } from "./types";
+import type { Params, Result, ExtensionPreferences } from "./types";
 import { parseFormInput } from "./parse";
 import { calcCompound } from "./calc";
 import { formatMoney, toMarkdown, toClipboardText, toCSV } from "./format";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const [result, setResult] = useState<{ params: Params; result: Result } | null>(null);
 
   const defaultTaxRate = preferences.defaultTaxRate || "";

@@ -1,6 +1,6 @@
 import { LaunchProps, getPreferenceValues, Detail, ActionPanel, Action, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
-import type { Params, Result } from "./types";
+import type { Params, Result, ExtensionPreferences } from "./types";
 import { parseQuickInput } from "./parse";
 import { calcCompound } from "./calc";
 import { toMarkdown, toClipboardText, toCSV } from "./format";
@@ -10,7 +10,7 @@ interface Arguments {
 }
 
 export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const [result, setResult] = useState<{ params: Params; result: Result } | null>(null);
   const [error, setError] = useState<string | null>(null);
 

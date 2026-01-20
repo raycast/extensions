@@ -1,4 +1,4 @@
-import type { Params, CompoundFrequency, CurrencyCode, RoundingMethod } from "./types";
+import type { Params, CompoundFrequency, CurrencyCode, RoundingMethod, ExtensionPreferences } from "./types";
 
 const errorMessages = {
   rateAndYearsRequired: "Rate and years are required",
@@ -45,7 +45,7 @@ function normalizeNumber(str: string): number {
  * - Period: 10y, 10years, 10年, 6m, 6months, 6ヶ月
  * - Money: 10000, 100,000, $100, ¥1,000, 10万円
  */
-export function parseQuickInput(query: string, preferences: Preferences): Params {
+export function parseQuickInput(query: string, preferences: ExtensionPreferences): Params {
   const params: Partial<Params> = {
     principal: 0,
     monthly: 0,

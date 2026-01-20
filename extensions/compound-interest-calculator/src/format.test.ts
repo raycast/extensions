@@ -26,50 +26,40 @@ const baseResult: Result = {
 
 describe("formatMoney", () => {
   describe("currency formatting", () => {
-    test("USD format (English)", () => {
-      const result = formatMoney(1234567, "USD", "floor", "en");
+    test("USD format", () => {
+      const result = formatMoney(1234567, "USD", "floor");
       expect(result).toBe("$1,234,567");
     });
 
-    test("USD format (Japanese)", () => {
-      const result = formatMoney(1234567, "USD", "floor", "ja");
-      expect(result).toBe("$1,234,567");
-    });
-
-    test("JPY format (English)", () => {
-      const result = formatMoney(1234567, "JPY", "floor", "en");
+    test("JPY format", () => {
+      const result = formatMoney(1234567, "JPY", "floor");
       expect(result).toBe("¥1,234,567");
     });
 
-    test("JPY format (Japanese)", () => {
-      const result = formatMoney(1234567, "JPY", "floor", "ja");
-      expect(result).toBe("￥1,234,567");
-    });
-
     test("EUR format", () => {
-      const result = formatMoney(1234567, "EUR", "floor", "en");
+      const result = formatMoney(1234567, "EUR", "floor");
       expect(result).toContain("1,234,567");
     });
   });
 
   describe("rounding methods", () => {
     test("floor: 1234.9 -> 1234", () => {
-      const result = formatMoney(1234.9, "USD", "floor", "en");
+      const result = formatMoney(1234.9, "USD", "floor");
       expect(result).toBe("$1,234");
     });
 
     test("round: 1234.5 -> 1235", () => {
-      const result = formatMoney(1234.5, "USD", "round", "en");
+      const result = formatMoney(1234.5, "USD", "round");
       expect(result).toBe("$1,235");
     });
 
     test("round: 1234.4 -> 1234", () => {
-      const result = formatMoney(1234.4, "USD", "round", "en");
+      const result = formatMoney(1234.4, "USD", "round");
       expect(result).toBe("$1,234");
     });
 
     test("ceil: 1234.1 -> 1235", () => {
-      const result = formatMoney(1234.1, "USD", "ceil", "en");
+      const result = formatMoney(1234.1, "USD", "ceil");
       expect(result).toBe("$1,235");
     });
   });
@@ -77,38 +67,31 @@ describe("formatMoney", () => {
 
 describe("toMarkdown", () => {
   test("basic output contains title and final amount", () => {
-    const md = toMarkdown(baseResult, baseParams, "en");
+    const md = toMarkdown(baseResult, baseParams);
     expect(md).toContain("# Calculation Result");
     expect(md).toContain("## Final Amount");
     expect(md).toContain("Before Tax");
   });
 
   test("includes breakdown section", () => {
-    const md = toMarkdown(baseResult, baseParams, "en");
+    const md = toMarkdown(baseResult, baseParams);
     expect(md).toContain("## Breakdown");
     expect(md).toContain("Total Principal");
     expect(md).toContain("Gain");
   });
 
   test("includes conditions section", () => {
-    const md = toMarkdown(baseResult, baseParams, "en");
+    const md = toMarkdown(baseResult, baseParams);
     expect(md).toContain("## Calculation Conditions");
     expect(md).toContain("Principal");
     expect(md).toContain("Annual Rate");
     expect(md).toContain("Period");
   });
 
-  test("Japanese output", () => {
-    const md = toMarkdown(baseResult, baseParams, "ja");
-    expect(md).toContain("# 計算結果");
-    expect(md).toContain("## 最終金額");
-    expect(md).toContain("税引前");
-  });
-
   test("with after-tax calculation", () => {
     const params = { ...baseParams, afterTax: true, taxRatePct: 20 };
     const result = { ...baseResult, fvAfterTax: 150000, tax: 12889 };
-    const md = toMarkdown(result, params, "en");
+    const md = toMarkdown(result, params);
     expect(md).toContain("After Tax");
     expect(md).toContain("Tax Amount");
     expect(md).toContain("Tax Rate");
@@ -117,30 +100,23 @@ describe("toMarkdown", () => {
   test("with monthly contributions", () => {
     const params = { ...baseParams, monthly: 30000 };
     const result = { ...baseResult, contrib: 3700000 };
-    const md = toMarkdown(result, params, "en");
+    const md = toMarkdown(result, params);
     expect(md).toContain("Monthly Contribution");
   });
 });
 
 describe("toClipboardText", () => {
-  test("basic output (English)", () => {
-    const text = toClipboardText(baseResult, baseParams, "en");
+  test("basic output", () => {
+    const text = toClipboardText(baseResult, baseParams);
     expect(text).toContain("Final Amount:");
     expect(text).toContain("Total Principal:");
     expect(text).toContain("Gain:");
   });
 
-  test("basic output (Japanese)", () => {
-    const text = toClipboardText(baseResult, baseParams, "ja");
-    expect(text).toContain("最終金額:");
-    expect(text).toContain("元本合計:");
-    expect(text).toContain("利益:");
-  });
-
   test("with after-tax", () => {
     const params = { ...baseParams, afterTax: true, taxRatePct: 20 };
     const result = { ...baseResult, fvAfterTax: 150000, tax: 12889 };
-    const text = toClipboardText(result, params, "en");
+    const text = toClipboardText(result, params);
     expect(text).toContain("After Tax:");
     expect(text).toContain("Tax Amount:");
   });

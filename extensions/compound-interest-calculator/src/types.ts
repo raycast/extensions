@@ -4,6 +4,13 @@ export type RoundingMethod = "floor" | "round" | "ceil";
 
 export type CurrencyCode = "JPY" | "USD" | "EUR";
 
+export interface ExtensionPreferences {
+  defaultCurrency: CurrencyCode;
+  defaultTaxRate: string;
+  defaultCompoundFreq: CompoundFrequency;
+  defaultRounding: RoundingMethod;
+}
+
 export interface Params {
   /** Initial investment amount */
   principal: number;
