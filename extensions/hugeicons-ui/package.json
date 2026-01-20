@@ -66,5 +66,8 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "generate-icons": "bun scripts/generate-hugeicons-metadata.ts"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
