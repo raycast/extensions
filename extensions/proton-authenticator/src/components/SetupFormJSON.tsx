@@ -1,14 +1,14 @@
 import { Action, ActionPanel, Form, showToast, Toast, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
-import { saveAccountsToStorage } from "./lib/storage";
-import { TOTPAccount } from "./types";
+import { saveAccountsToStorage } from "../lib/storage";
+import { TOTPAccount } from "../types";
 
-interface SetupFormProps {
+interface SetupFormJSONProps {
   onAccountsLoaded: (accounts: TOTPAccount[]) => void;
 }
 
-export default function SetupForm({ onAccountsLoaded }: SetupFormProps) {
+export default function SetupFormJSON({ onAccountsLoaded }: SetupFormJSONProps) {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,7 +51,19 @@ export default function SetupForm({ onAccountsLoaded }: SetupFormProps) {
         allowMultipleSelection={false}
         canChooseFiles={true}
         canChooseDirectories={false}
-        info="Get this file by going into the Proton Authenticator app settings -> Export"
+      />
+      <Form.Description
+        title="How to get your JSON file"
+        text={`1. Open Proton Authenticator app
+2. Go to Settings > Export
+3. Select "Plain text" and save the JSON file
+4. Select the exported JSON file in the extension`}
+      />
+      <Form.Description
+        title="Note"
+        text={
+          "Using JSON import means your accounts won't auto-update when adding/removing accounts. To get live updates, use the local database option."
+        }
       />
     </Form>
   );

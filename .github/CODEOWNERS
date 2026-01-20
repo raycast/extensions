@@ -1301,6 +1301,7 @@
 /extensions/mixpanel                                                @smsimone @xmok
 /extensions/mlb-scores                                              @jso8910 @RobErskine
 /extensions/mldocs                                                  @sadanand-singh
+/extensions/mnemosyne                                               @adityasarkar
 /extensions/mobius-materials                                        @tjwds
 /extensions/mochi                                                   @kawamataryo
 /extensions/moco                                                    @eviscares @el-schneider
@@ -1412,7 +1413,7 @@
 /extensions/not-diamond                                             @dragos199993
 /extensions/note-in-google-doc                                      @mnttnm
 /extensions/noteplan-3                                              @shakedlokits @lukerandall @pr1mal @JamesDommisse
-/extensions/notion                                                  @HenriChabrand @mathieudutour @metakirby5 @erics118 @bkeys818 @AlexIsMaking @Yakitrak @tleo19 @dariuszpaluch @zsidnam @edomora97 @samuelkraft @abesto @xmok @pernielsentikaer
+/extensions/notion                                                  @HenriChabrand @mathieudutour @metakirby5 @erics118 @AlexIsMaking @Yakitrak @tleo19 @dariuszpaluch @zsidnam @edomora97 @samuelkraft @abesto @xmok @pernielsentikaer
 /extensions/notion_researcher                                       @razgaon
 /extensions/notis                                                   @mindtheflo
 /extensions/noun-project                                            @RobErskine
@@ -1421,7 +1422,7 @@
 /extensions/nowplaying-cli                                          @yusufakdenizxd
 /extensions/ns-nl-search                                            @flaticols
 /extensions/nsis-reference                                          @idleberg @xmok
-/extensions/ntfy                                                    @wesleycoder
+/extensions/ntfy                                                    @wesleycoder @xmok
 /extensions/nts                                                     @tiktuk
 /extensions/nts-radio                                               @arjanski
 /extensions/nu-nieuws                                               @j3lte
@@ -2245,7 +2246,7 @@
 /extensions/to-streamshare                                          @0PandaDEV @bkuzmanoski
 /extensions/todo-list                                               @maggie-j-liu @joshkorol @madza91 @pernielsentikaer @ridemountainpig @dedalusj @xmok
 /extensions/todoist                                                 @thomaslombart @AnishDe12020 @kud @casassg @Princeyadav05 @jfkisafk @ridemountainpig @kcole93 @RobErskine @jagadeesh-k-2802 @scottlovegrove @scottlovegrove @FlohGro-dev @dedalusj @WilliamSault @adityaastro @alanwill @erayack @chialiyun
-/extensions/toggl-track                                             @franzwilhelm @bkeys818 @michaelfaisst @teziovsky @lukebars @tangerine1202 @AlexIsMaking @ARui-tw @pernielsentikaer @AdrianKokot @xmok
+/extensions/toggl-track                                             @franzwilhelm @michaelfaisst @teziovsky @lukebars @tangerine1202 @AlexIsMaking @ARui-tw @pernielsentikaer @AdrianKokot @xmok
 /extensions/toggle-desktop-visibility                               @Haojen @VatsalSy @hetommy
 /extensions/toggle-fn                                               @elonwoo @pernielsentikaer @jcelaya775
 /extensions/toggle-grayscale                                        @zcsabbagh @artivilla
@@ -2467,7 +2468,7 @@
 /extensions/wol                                                     @bxb100 @sanjevirau
 /extensions/wolfram-alpha                                           @mathieudutour
 /extensions/word-count                                              @itsmingjie @koayon @chrismessina
-/extensions/word-search                                             @RishabSwift @thomaspaulmann @bkeys818 @j3lte
+/extensions/word-search                                             @RishabSwift @thomaspaulmann @j3lte
 /extensions/word4you                                                @gnehz972
 /extensions/wordle                                                  @chrisalxlng
 /extensions/wordpress-docs                                          @tillkruss @KevinBatdorf
