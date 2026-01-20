@@ -122,10 +122,3 @@ Available actions in the result view:
 | Default Tax Rate | 0-100% | Empty (0%) |
 | Compound Frequency | Yearly / Monthly / Daily | Monthly |
 | Rounding Method | Floor / Round / Ceiling | Round |
-
-## Implementation Notes
-
-This extension follows Raycast's guidelines for US English-only UI:
-- All UI elements, labels, and error messages are in English
-- Currency display uses preferences API (USD/EUR/JPY selection)
-- Japanese input formats (100万円, 10年, etc.) are supported for input flexibility, not as UI localization
