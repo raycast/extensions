@@ -168,12 +168,6 @@ function generateMarkdownReport(data: DiggerResult): string {
     if (discoverability.sitemap) {
       markdown += `- **Sitemap**: ${discoverability.sitemap}\n`;
     }
-    if (discoverability.rss) {
-      markdown += `- **RSS**: ${discoverability.rss}\n`;
-    }
-    if (discoverability.atom) {
-      markdown += `- **Atom**: ${discoverability.atom}\n`;
-    }
     markdown += `\n`;
   }
 
