@@ -12,7 +12,23 @@ import { getApiClient } from "./api";
 import { useEffect, useState } from "react";
 import convertTime from "./convert-time";
 import dayjs from "dayjs";
-import { getStrings } from "./i18n";
+
+const hudCompleteMessages = [
+  "🎉 Great job! Keep it up!",
+  "💹 Another win for productivity",
+  "💰 Your time bank just got richer",
+  "✅ One less thing to worry about",
+];
+const actionLabels = {
+  markComplete: "Mark as Done",
+  openInBrowser: "Open in Browser",
+};
+const accessoryLabels = {
+  updatedAt: "Updated",
+};
+const toastLabels = {
+  errorTitle: "Error",
+};
 
 type ApiIssue = Awaited<
   ReturnType<ReturnType<typeof getApiClient>["Issues"]["ListIssues"]>
@@ -25,7 +41,6 @@ interface State {
 
 export default function CompleteTask() {
   const [state, setState] = useState<State>({});
-  const strings = getStrings();
 
   const { repo } = getPreferenceValues();
   const client = getApiClient();
@@ -50,7 +65,7 @@ export default function CompleteTask() {
 
   if (state.error) {
     showToast({
-      title: strings.toasts.errorTitle,
+      title: toastLabels.errorTitle,
       message: state.error.message,
       style: Toast.Style.Failure,
     });
@@ -75,8 +90,8 @@ export default function CompleteTask() {
 
     if (updatedIssue.state === "closed") {
       showHUD(
-        strings.hud.complete[
-          Math.floor(Math.random() * strings.hud.complete.length)
+        hudCompleteMessages[
+          Math.floor(Math.random() * hudCompleteMessages.length)
         ],
       );
 
@@ -97,20 +112,20 @@ export default function CompleteTask() {
           actions={
             <ActionPanel>
               <Action
-                title={strings.actions.markComplete}
+                title={actionLabels.markComplete}
                 onAction={async () => {
                   await handleComplete(issue);
                 }}
               />
               <Action.OpenInBrowser
-                title={strings.actions.openInBrowser}
+                title={actionLabels.openInBrowser}
                 url={`${gitDomain}/${repo}/-/issues/${issue.number}`}
               />
             </ActionPanel>
           }
           accessories={[
             {
-              text: `${strings.labels.updatedAt} ${convertTime(
+              text: `${accessoryLabels.updatedAt} ${convertTime(
                 issue.last_acted_at,
               )}`,
               icon: Icon.Clock,

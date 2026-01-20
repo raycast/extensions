@@ -6,21 +6,29 @@ import {
   Toast,
 } from "@raycast/api";
 import { getApiClient } from "./api";
-import { getStrings } from "./i18n";
+
+const hudCreateMessages = [
+  "💪 Task recorded successfully, let's get to work!",
+  "🍊 Time to take a break - I'll be here when you're ready",
+  "💾 Successfully saved, your brain RAM is now freed up",
+];
+const recordingToast = "Recording task...";
+const recordingFailedToast = "Failed to record task...";
+const errorUnknownToast = "Unknown error";
+const recordingMessage = (title: string) => `🐮 Recording task: ${title}`;
 
 export default async function CreateTask(
   props: LaunchProps<{ arguments: { title: string } }>,
 ) {
   const { title } = props.arguments;
-  const strings = getStrings();
 
   const { repo } = getPreferenceValues();
   const client = getApiClient();
 
   try {
     await showToast({
-      title: strings.toasts.recording,
-      message: strings.toasts.recordingMessage(title),
+      title: recordingToast,
+      message: recordingMessage(title),
       style: Toast.Style.Animated,
     });
 
@@ -31,13 +39,12 @@ export default async function CreateTask(
       } as Parameters<typeof client.Issues.CreateIssue>[0]["post_issue_form"],
     });
     await showHUD(
-      strings.hud.create[Math.floor(Math.random() * strings.hud.create.length)],
+      hudCreateMessages[Math.floor(Math.random() * hudCreateMessages.length)],
     );
   } catch (error) {
     await showToast({
-      title: strings.toasts.recordingFailed,
-      message:
-        error instanceof Error ? error.message : strings.toasts.errorUnknown,
+      title: recordingFailedToast,
+      message: error instanceof Error ? error.message : errorUnknownToast,
       style: Toast.Style.Failure,
     });
   }

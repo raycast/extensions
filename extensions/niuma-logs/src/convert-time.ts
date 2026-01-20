@@ -1,11 +1,18 @@
 import dayjs from "dayjs";
-import { getStrings } from "./i18n";
+
+const timeStrings = {
+  monthsAgo: (count: number) => `${count} months ago`,
+  weeksAgo: (count: number) => `${count} weeks ago`,
+  daysAgo: (count: number) => `${count} days ago`,
+  hoursAgo: (count: number) => `${count} hours ago`,
+  minutesAgo: (count: number) => `${count} minutes ago`,
+  justNow: "just now",
+};
 
 export default function convertTime(
   dateTime: string | number | Date | undefined,
 ) {
   if (!dateTime) return "";
-  const { time } = getStrings();
   const currentTime = dayjs();
   const oldTime = dayjs(dateTime);
 
@@ -16,22 +23,22 @@ export default function convertTime(
   const diffMinutes = currentTime.diff(oldTime, "minute");
 
   if (diffMonths >= 1 && diffMonths < 4) {
-    return time.monthsAgo(diffMonths);
+    return timeStrings.monthsAgo(diffMonths);
   }
   if (diffWeeks >= 1 && diffWeeks < 4) {
-    return time.weeksAgo(diffWeeks);
+    return timeStrings.weeksAgo(diffWeeks);
   }
   if (diffDays >= 1 && diffDays < 7) {
-    return time.daysAgo(diffDays);
+    return timeStrings.daysAgo(diffDays);
   }
   if (diffHours >= 1 && diffHours < 24) {
-    return time.hoursAgo(diffHours);
+    return timeStrings.hoursAgo(diffHours);
   }
   if (diffMinutes >= 1 && diffMinutes < 60) {
-    return time.minutesAgo(diffMinutes);
+    return timeStrings.minutesAgo(diffMinutes);
   }
   if (diffMinutes >= 0 && diffMinutes < 1) {
-    return time.justNow;
+    return timeStrings.justNow;
   }
   return dayjs(dateTime).format("YYYY-MM-DD");
 }

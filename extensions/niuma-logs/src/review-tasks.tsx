@@ -1,10 +1,13 @@
 import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { isAxiosError } from "axios";
 import { getApiClient } from "./api";
-import { getStrings } from "./i18n";
+
+const missionDescription = "Niuma Logs Review View";
+const openingToast = "Opening...";
+const reviewFailedToast = "Failed to open review...";
+const errorUnknownToast = "Unknown error";
 
 export default async function ReviewTasks() {
-  const strings = getStrings();
   const { repo: repoSlug, gitDomain } = getPreferenceValues();
   const client = getApiClient();
 
@@ -19,13 +22,13 @@ export default async function ReviewTasks() {
       group: missionGroup,
       request: {
         name: missionSubSlug,
-        description: strings.review.missionDescription,
+        description: missionDescription,
         repos: [repoSlug],
         visibility: "private",
       },
     };
     await showToast({
-      title: strings.toasts.opening,
+      title: openingToast,
       style: Toast.Style.Animated,
     });
 
@@ -40,9 +43,8 @@ export default async function ReviewTasks() {
     }
 
     await showToast({
-      title: strings.toasts.reviewFailed,
-      message:
-        error instanceof Error ? error.message : strings.toasts.errorUnknown,
+      title: reviewFailedToast,
+      message: error instanceof Error ? error.message : errorUnknownToast,
       style: Toast.Style.Failure,
     });
   }

@@ -1,59 +1,59 @@
-<h1 align="center">牛马绘</h1>
+<h1 align="center">Niuma Logs</h1>
 
 <p align="center"><img width="400" src="./readme-assets/logo.gif" alt="logo"></p>
 
-<p align="center">每一行日志，都是赛博牛马的史诗。</p>
+<p align="center">Every log line tells the story of a cyber workhorse.</p>
 
-> 时间，它都去哪儿了？
+> Where does all the time go?
 >
-> —— 鲁迅
+> — Lu Xun
 
-## 原来时间都在这儿
+## Here's Where Your Time Went
 
-> 如果你也想知道你的时间去哪儿了
+> If you want to know where your time goes
 >
-> 如果你也想用最流畅的方式记录你的日常工作
+> If you want to record your daily work in the smoothest way possible
 >
-> 如果你也想拥有如下图一样的甘特图来 review 自己的工作
+> If you want a Gantt chart like the one below to review your work
 >
-> 如果你也不想在 OKR 考核季抓耳挠腮、绞尽脑汁、苦思冥想，不知自己忙了些什么
+> If you don't want to rack your brain during OKR review season, wondering what you've been busy with
 >
-> 如果你刚好用 Mac
+> If you happen to use a Mac
 >
-> 如果你刚好使用 [Raycast](https://www.raycast.com/) 或者有兴趣了解它
+> If you happen to use [Raycast](https://www.raycast.com/) or are interested in learning about it
 
-🎉 恭喜你，找到了宝藏 ：）
+🎉 Congratulations, you've found a treasure :)
 
 ![examples](./readme-assets/examples.png)
 
-它工作起来是这个样子的：
+Here's how it works:
 
 ![showcase](./readme-assets/showcase.gif)
 
-## 高亮特点
+## Highlights
 
-⚡️ **零摩擦力**记录日常任务，不让记录任务也成为一项任务
+⚡️ **Zero friction** for recording daily tasks — don't let logging become another task
 
-🎥 通过甘特图透视，让**你的时间去向一目了然**
+🎥 **Visualize where your time goes** through Gantt chart perspective
 
-🔐 数据权限可设置，**大可放心**
+🔐 Data permissions are configurable — **rest assured**
 
-## 快速开始
+## Quick Start
 
-[👉 点击这里查看安装教程](./QUICKSTART.md)
+[👉 Click here for installation guide](./QUICKSTART.md)
 
-## 食用技巧
+## Usage Tips
 
-- 当开始做一件事情的时候，可以呼起 Raycast 面板，输入 `开始`、`start`、`^` 均可以找到《开始任务》。
+- When you start working on something, bring up the Raycast panel and type `start`, `^` to find "Start Task".
 
-- 当完成一件事情的时候，可以呼起 Raycast 面板，输入 `完成`、`complete`、`$` 等字样，均可找到《完成任务》。回车后查看未完成列表，选择后即可标记完成。
+- When you finish something, bring up the Raycast panel and type `complete`, `done`, `$` to find "Complete Task". Press Enter to see the incomplete list, then select a task to mark it as done.
 
-- 无需担心任务的颗粒度，大到半年的长期目标，小到半小时内即可完成的小任务，都可以随手记上。记上之后，就可以减少你脑部 RAM 的使用，从而减缓焦虑，更专注做眼前的事情。
+- Don't worry about task granularity — from long-term goals spanning half a year to small tasks completable in half an hour, just jot them down. Once recorded, you can free up your brain's RAM, reduce anxiety, and focus better on what's in front of you.
 
-- 个人事项、工作任务，无需区分，只要是接到任务时，手在键盘上，一股脑往里面塞就可以了。数据安全无需担心，一切都存放在你的私有仓库中。且在 woa 内网中。
+- Personal matters, work tasks — no need to distinguish. As long as your hands are on the keyboard when you receive a task, just dump it all in. No need to worry about data security — everything is stored in your private repository.
 
-- 当你完成了任务，不知道接下来做什么的时候，可以呼起《完成任务》。方便地找到待办事项，从容决定下一个工作事项。
+- When you've completed a task and don't know what to do next, bring up "Complete Task". It's a convenient way to find your to-do items and calmly decide on your next work item.
 
-- 当你怀疑自己的工作和人生是否有意义的时候，打开甘特图。希望你看着一路走来的印记，能重拾积极乐观和勇气。
+- When you question whether your work and life have meaning, open the Gantt chart. Hopefully, looking at the footprints you've left along the way will help you regain optimism and courage.
 
-- 如果你觉得这个小工具对你有一点点积极作用，别犹豫，分享给你的朋友吧。牛马之间亦有真情！
+- If you find this little tool helpful in any way, don't hesitate to share it with your friends. There's genuine camaraderie among us workhorses!
