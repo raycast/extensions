@@ -2,8 +2,7 @@ import { Detail, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import * as cheerio from "cheerio";
 import { truncateText, formatDate } from "../utils/formatters";
-
-const MAX_DISPLAY_ENTRIES = 100;
+import { LIMITS } from "../utils/config";
 
 interface SitemapEntry {
   loc: string;
@@ -36,7 +35,7 @@ function parseSitemap(xml: string): ParsedSitemap {
     });
     return {
       type: "index",
-      entries: entries.slice(0, MAX_DISPLAY_ENTRIES),
+      entries: entries.slice(0, LIMITS.MAX_DISPLAY_ENTRIES),
       totalCount: entries.length,
     };
   }
@@ -58,7 +57,7 @@ function parseSitemap(xml: string): ParsedSitemap {
     });
     return {
       type: "urlset",
-      entries: entries.slice(0, MAX_DISPLAY_ENTRIES),
+      entries: entries.slice(0, LIMITS.MAX_DISPLAY_ENTRIES),
       totalCount: entries.length,
     };
   }
@@ -76,8 +75,8 @@ function formatSitemapMarkdown(sitemap: ParsedSitemap, url: string): string {
   const typeLabel = type === "index" ? "Sitemap Index" : "Sitemap";
   const entryType = type === "index" ? "child sitemaps" : "URLs";
   const countText =
-    totalCount > MAX_DISPLAY_ENTRIES
-      ? `Showing ${MAX_DISPLAY_ENTRIES} of ${totalCount} ${entryType}`
+    totalCount > LIMITS.MAX_DISPLAY_ENTRIES
+      ? `Showing ${LIMITS.MAX_DISPLAY_ENTRIES} of ${totalCount} ${entryType}`
       : `${totalCount} ${entryType}`;
 
   let markdown = `# ${typeLabel}\n\n**${countText}**\n\n`;
