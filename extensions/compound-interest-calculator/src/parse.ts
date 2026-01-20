@@ -146,7 +146,6 @@ export function parseQuickInput(query: string, preferences: ExtensionPreferences
       params.principal = positionalArgs[0];
       params.ratePct = positionalArgs[1];
     } else if (positionalArgs.length === 1) {
-      // 期間が設定済みで引数が1つなら、利率として解釈
       params.ratePct = positionalArgs[0];
     }
   } else {
