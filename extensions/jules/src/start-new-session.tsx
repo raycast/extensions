@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast, useNavigation } from "@raycast/api";
 import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
-import { useSources, Preferences, Source, API_BASE_URL } from "./api";
+import { useSources, Preferences, Source, API_BASE_URL, API_KEY_ERROR_MESSAGE } from "./api";
 
 type FormValues = {
   source: string;
@@ -24,7 +24,10 @@ export default function Command() {
       },
       execute: !!selectedSource,
       onError: (error) => {
-        showFailureToast(error, { title: "Failed to fetch source details" });
+        showFailureToast(error, {
+          title: "Failed to fetch source details",
+          message: API_KEY_ERROR_MESSAGE,
+        });
       },
     },
   );

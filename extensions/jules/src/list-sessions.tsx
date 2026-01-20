@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
-import { useSources, Preferences, API_BASE_URL } from "./api";
+import { useSources, Preferences, API_BASE_URL, API_KEY_ERROR_MESSAGE } from "./api";
 
 type Session = {
   name: string;
@@ -207,7 +207,10 @@ function SessionActivities({ session }: { session: Session }) {
         "X-Goog-Api-Key": preferences.julesApiKey,
       },
       onError: (error) => {
-        showFailureToast(error, { title: "Failed to fetch activities" });
+        showFailureToast(error, {
+          title: "Failed to fetch activities",
+          message: API_KEY_ERROR_MESSAGE,
+        });
       },
     },
   );
@@ -275,7 +278,10 @@ export default function Command() {
       "X-Goog-Api-Key": preferences.julesApiKey,
     },
     onError: (error) => {
-      showFailureToast(error, { title: "Failed to fetch sessions" });
+      showFailureToast(error, {
+        title: "Failed to fetch sessions",
+        message: API_KEY_ERROR_MESSAGE,
+      });
     },
   });
 

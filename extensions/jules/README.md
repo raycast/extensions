@@ -28,6 +28,15 @@ Bring the power of the Google Jules coding agent directly to your fingertips wit
    - Run the `Import Extension` command.
    - Select the directory containing this repository.
 
+## Setup
+
+To use this extension, you need a **Jules API Key**:
+
+1. Log in to the [Jules Web App](https://jules.google.com).
+2. Go to **Settings** > **API** at [jules.google.com/settings/api](https://jules.google.com/settings/api).
+3. Under the **API Keys** section, click **Create a new secret key**.
+4. Copy the key and paste it into the Raycast extension preferences when prompted.
+
 ## Usage
 
 Once installed, simply open Raycast and search for "Jules" to see the available commands.

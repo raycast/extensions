@@ -18,16 +18,16 @@
     {
       "name": "start-new-session",
       "title": "Start Session",
-      "subtitle": "Google Jules",
       "description": "Start a new coding session with Google Jules",
-      "mode": "view"
+      "mode": "view",
+      "icon": "extension-icon.png"
     },
     {
       "name": "list-sessions",
       "title": "Search Sessions",
-      "subtitle": "Google Jules",
       "description": "Search and manage your Google Jules sessions",
-      "mode": "view"
+      "mode": "view",
+      "icon": "extension-icon.png"
     }
   ],
   "preferences": [
@@ -36,17 +36,17 @@
       "type": "password",
       "required": true,
       "title": "Jules API Key",
-      "description": "API Key for Jules",
+      "description": "To get your API key: 1. Login to jules.google.com 2. Go to Settings > API (https://jules.google.com/settings/api) 3. Create a new secret key and paste it here.",
       "placeholder": "Enter your Jules API Key"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.9",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
+    "@types/node": "25.0.9",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",

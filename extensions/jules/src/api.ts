@@ -30,6 +30,9 @@ export type SourcesResponse = {
   nextPageToken?: string;
 };
 
+export const API_KEY_ERROR_MESSAGE =
+  "Please check your Jules API key in Settings (https://jules.google.com/settings/api)";
+
 export function useSources() {
   const preferences = getPreferenceValues<Preferences>();
   const [selectedSource, setSelectedSource] = useState<string>("");
@@ -39,7 +42,10 @@ export function useSources() {
       "X-Goog-Api-Key": preferences.julesApiKey,
     },
     onError: (error) => {
-      showFailureToast(error, { title: "Failed to fetch sources" });
+      showFailureToast(error, {
+        title: "Failed to fetch sources",
+        message: API_KEY_ERROR_MESSAGE,
+      });
     },
   });
 
