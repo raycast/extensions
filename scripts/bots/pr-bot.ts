@@ -364,16 +364,7 @@ async function checkForDocsInPullRequestDiff(
       repo: context.repo.repo,
       pull_number: context.issue.number,
     });
-
-    for (const file of files) {
-      const filePath = file.filename;
-
-      if (/^docs\//.test(filePath)) {
-        return true;
-      }
-    }
-
-    return false;
+    return files.some((file) => file.filename.startsWith("docs/"));
   } catch (error) {
     console.error("Failed to check for docs in PR diff:", error);
     return false;
