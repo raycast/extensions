@@ -1,8 +1,9 @@
-import { showToast, Toast, showHUD, LocalStorage, Form, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { showToast, Toast, showHUD, LocalStorage, Form, ActionPanel, Action, useNavigation, Detail, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { homedir } from "os";
+import { existsSync } from "fs";
 
 const execAsync = promisify(exec);
 
@@ -28,24 +29,46 @@ async function setBrightnessWithLunar(level: number): Promise<void> {
   await execAsync(`"${lunarPath}" set brightness ${level}`);
 }
 
+// Check if Lunar is installed
+function isLunarInstalled(): { app: boolean; cli: boolean } {
+  const appInstalled = existsSync("/Applications/Lunar.app");
+  const cliInstalled = existsSync(`${homedir()}/.local/bin/lunar`);
+  return { app: appInstalled, cli: cliInstalled };
+}
+
+// Install Lunar CLI
+async function installLunarCLI(): Promise<boolean> {
+  try {
+    await execAsync("/Applications/Lunar.app/Contents/MacOS/Lunar install-cli");
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 export default function Command() {
   const [currentBrightness, setCurrentBrightness] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lunarStatus, setLunarStatus] = useState<{ app: boolean; cli: boolean } | null>(null);
   const { pop } = useNavigation();
 
-  // Fetch current brightness on load
+  // Check Lunar installation and fetch current brightness on load
   useEffect(() => {
-    async function fetchBrightness() {
-      try {
-        const brightness = await getBrightnessWithLunar();
-        setCurrentBrightness(brightness);
-      } catch (error) {
-        console.error("Failed to fetch brightness:", error);
-      } finally {
-        setIsLoading(false);
+    async function initialize() {
+      const status = isLunarInstalled();
+      setLunarStatus(status);
+
+      if (status.app && status.cli) {
+        try {
+          const brightness = await getBrightnessWithLunar();
+          setCurrentBrightness(brightness);
+        } catch (error) {
+          console.error("Failed to fetch brightness:", error);
+        }
       }
+      setIsLoading(false);
     }
-    fetchBrightness();
+    initialize();
   }, []);
 
   async function handleSubmit(values: BrightnessFormValues) {
@@ -107,6 +130,102 @@ export default function Command() {
         message: error instanceof Error ? error.message : "Failed to set brightness",
       });
     }
+  }
+
+  // Handle Lunar CLI installation
+  async function handleInstallCLI() {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Installing Lunar CLI",
+      message: "This will take a few seconds...",
+    });
+
+    const success = await installLunarCLI();
+    if (success) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Lunar CLI Installed",
+        message: "You can now use the extension!",
+      });
+      // Refresh the status
+      const status = isLunarInstalled();
+      setLunarStatus(status);
+      if (status.cli) {
+        const brightness = await getBrightnessWithLunar();
+        setCurrentBrightness(brightness);
+      }
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Installation Failed",
+        message: "Please try installing manually",
+      });
+    }
+  }
+
+  // If Lunar is not installed, show installation guide
+  if (!isLoading && lunarStatus && (!lunarStatus.app || !lunarStatus.cli)) {
+    const markdown = `# Lunar Setup Required
+
+This extension requires [Lunar](https://lunar.fyi/) to control display brightness.
+
+## Installation Status
+
+- Lunar App: ${lunarStatus.app ? "✅ Installed" : "❌ Not Installed"}
+- Lunar CLI: ${lunarStatus.cli ? "✅ Installed" : "❌ Not Installed"}
+
+## What to do:
+
+${
+  !lunarStatus.app
+    ? `### 1. Install Lunar App
+
+Click "Install Lunar" below to open the installation page, or run:
+
+\`\`\`bash
+brew install --cask lunar
+\`\`\`
+
+After installation, restart this command.`
+    : ""
+}
+
+${
+  lunarStatus.app && !lunarStatus.cli
+    ? `### Install Lunar CLI
+
+Click "Install CLI" below to automatically install the Lunar CLI.
+
+Or run this command manually:
+
+\`\`\`bash
+/Applications/Lunar.app/Contents/MacOS/Lunar install-cli
+\`\`\`
+`
+    : ""
+}
+
+**Lunar is free** for basic brightness control!
+`;
+
+    return (
+      <Detail
+        markdown={markdown}
+        actions={
+          <ActionPanel>
+            {!lunarStatus.app && (
+              <>
+                <Action.Open title="Install Lunar" target="https://lunar.fyi/" />
+                <Action.Open title="Install via Homebrew" target="x-man-page://brew" />
+              </>
+            )}
+            {lunarStatus.app && !lunarStatus.cli && (
+              <Action title="Install Lunar CLI" onAction={handleInstallCLI} />
+            )}
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   const currentBrightnessText = isLoading
