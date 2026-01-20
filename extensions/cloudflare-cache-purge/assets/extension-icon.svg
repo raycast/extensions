@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#F6821F"/>
+  
+  <!-- Cloud shape representing Cloudflare -->
+  <path d="M356 320H156c-33.1 0-60-26.9-60-60 0-28.7 20.2-52.7 47.2-58.5C147.8 168.8 177.8 144 214 144c30.9 0 57.7 17.5 71.2 43.1C293.1 181.1 303.9 176 316 176c26.5 0 48 21.5 48 48 0 2.7-.2 5.4-.7 8C389.5 236.5 408 258.3 408 284c0 19.9-16.1 36-36 36h-16z" fill="white"/>
+  
+  <!-- Refresh/clear arrows -->
+  <g transform="translate(256, 256)">
+    <path d="M-30 -20 L-30 20 L-50 0 Z" fill="#F6821F"/>
+    <path d="M30 20 L30 -20 L50 0 Z" fill="#F6821F"/>
+    <path d="M-40 0 A40 40 0 0 1 0 -40" stroke="#F6821F" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <path d="M40 0 A40 40 0 0 1 0 40" stroke="#F6821F" stroke-width="12" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
