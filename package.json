@@ -3,7 +3,7 @@
   "name": "brightness-control",
   "title": "Brightness Control",
   "description": "Control macOS display brightness with simple commands",
-  "icon": "assets/icon.png",
+  "icon": "☀️",
   "author": "pavzagor",
   "categories": [
     "System"
