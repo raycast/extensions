@@ -35,10 +35,7 @@ import { useCachedPromise, useLocalStorage } from '@raycast/utils';
 
 const renderService = new Service(getKey());
 
-type DefaultAction = 'showDetails' | 'showDeploys' | 'openInRender';
-
-const { defaultAction } =
-  getPreferenceValues<{ defaultAction: DefaultAction }>();
+const { defaultAction } = getPreferenceValues<Preferences>();
 
 interface ServiceActionsProps {
   service: ServiceResponse;
