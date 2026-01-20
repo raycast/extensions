@@ -109,10 +109,14 @@ export default function Command({
       return;
     }
 
-    formatDuration(hours);
+    const parsedHours = formatDuration(hours);
+    if (hours && !parsedHours) {
+      showToast({ style: Toast.Style.Failure, title: "Invalid Duration" });
+      return;
+    }
     const spentDate = isDate(values.spent_date) ? values.spent_date : viewDate;
 
-    if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !hours)
+    if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !parsedHours)
       if (
         !(await confirmAlert({
           icon: Icon.ExclamationMark,
@@ -129,6 +133,14 @@ export default function Command({
     await toast.show();
 
     const data = omitBy(values, isEmpty);
+    // Always include notes when editing to allow clearing
+    if (entry?.id && !data.notes) {
+      data.notes = "";
+    }
+    // Use parsed hours instead of raw form value
+    if (parsedHours) {
+      data.hours = parsedHours;
+    }
     const timeEntry = await newTimeEntry(
       {
         ...data,
@@ -163,16 +175,16 @@ export default function Command({
     return project ? project.task_assignments : [];
   }, [projects, projectId]);
 
-  function formatDuration(value?: string) {
+  function formatDuration(value?: string): string | undefined {
     if (!value) {
       setHoursError(undefined);
-      return;
+      return undefined;
     }
 
     const duration = parseDuration(value);
     if (!duration) {
       setHoursError("Invalid duration");
-      return;
+      return undefined;
     }
 
     setHoursError(undefined);
@@ -180,14 +192,16 @@ export default function Command({
     const useHoursMinutes =
       timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes");
 
+    let formatted: string;
     if (useHoursMinutes) {
       const h = Math.floor(totalMinutes / 60);
       const m = totalMinutes % 60;
-      return setHours(`${h}:${m < 10 ? "0" : ""}${m}`);
+      formatted = `${h}:${m < 10 ? "0" : ""}${m}`;
     } else {
-      // decimal
-      return setHours((totalMinutes / 60).toFixed(2));
+      formatted = (totalMinutes / 60).toFixed(2);
     }
+    setHours(formatted);
+    return formatted;
   }
 
   return (

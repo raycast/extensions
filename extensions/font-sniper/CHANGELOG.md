@@ -1,6 +1,10 @@
 # Font Sniper Changelog
 
-## 2026-01-16
+## [Chore] - 2026-01-19
+
+- Added disclaimer to the extension description
+
+## [Update] - 2026-01-16
 
 - Added Windows support
 - Added WOFF to TTF/OTF conversion (previously only WOFF2)
@@ -9,7 +13,7 @@
 - Auto-convert to desktop format now enabled by default
 - Simplified keyboard shortcuts
 
-## Initial Release - 2026-01-15
+## [Initial Release] - 2026-01-15
 
 - Extract fonts from any website URL
 - Support for WOFF2, WOFF, TTF, OTF, and EOT formats

@@ -97,10 +97,12 @@ async function generateDiagramWithExplicitNode(
 
 /**
  * Generate Mermaid diagram using explicit Node.js path and execFile
+ * @param forceFormat - Optional parameter to force a specific output format (e.g., 'png' for AI Tool)
  */
 export async function generateMermaidDiagram(
   mermaidCode: string,
   tempFileRef: MutableRefObject<string | null>,
+  forceFormat?: string,
 ): Promise<string> {
   try {
     const preferences = getPreferenceValues<Preferences>();
@@ -110,10 +112,27 @@ export async function generateMermaidDiagram(
     const tempFile = createTempFile(cleanCode, "mmd");
     tempFileRef.current = tempFile;
 
-    // Create output path
-    const outputPath = path.join(environment.supportPath, `diagram-${Date.now()}.${preferences.outputFormat}`);
+    // Determine output format (force PNG for AI Tool, otherwise use preference)
+    const outputFormat = forceFormat || preferences.outputFormat;
 
-    console.log(`Generating diagram, theme: ${preferences.theme}, format: ${preferences.outputFormat}`);
+    // Determine output directory based on mode:
+    // - AI Tool mode (forceFormat exists): Use ~/Downloads/MermaidDiagrams/ for easy user access
+    // - Manual mode (forceFormat undefined): Use environment.supportPath for temporary storage
+    let outputPath: string;
+    if (forceFormat) {
+      // AI Tool mode: Save to Downloads for permanent storage and inline display
+      const homeDir = process.env.HOME || process.env.USERPROFILE || "";
+      const diagramsDir = path.join(homeDir, "Downloads", "MermaidDiagrams");
+      if (!fs.existsSync(diagramsDir)) {
+        fs.mkdirSync(diagramsDir, { recursive: true });
+      }
+      outputPath = path.join(diagramsDir, `diagram-${Date.now()}.${outputFormat}`);
+    } else {
+      // Manual mode: Use support path for temporary storage
+      outputPath = path.join(environment.supportPath, `diagram-${Date.now()}.${outputFormat}`);
+    }
+
+    console.log(`Generating diagram, theme: ${preferences.theme}, format: ${outputFormat}`);
 
     // Find Node.js path
     let nodePath;
