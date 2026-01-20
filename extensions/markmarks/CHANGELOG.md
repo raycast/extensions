@@ -1,6 +1,6 @@
 # MarkMarks Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-01-20
 
 - Add Dia browser support
 
