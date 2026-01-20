@@ -9,13 +9,20 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   Detail,
-  showHUD,
   getSelectedFinderItems,
   LocalStorage,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import * as fs from "fs";
 import * as path from "path";
+import {
+  parseRepoUrl,
+  isImageFile,
+  uploadImageToRepo,
+  deleteImageFromRepo,
+  getDefaultBranch,
+  validateGitHubToken,
+  type RepoInfo,
+} from "./utils/github";
 
 interface Preferences {
   defaultRepo?: string;
@@ -37,42 +44,6 @@ interface ImageFile {
   sha: string;
 }
 
-interface RepoInfo {
-  owner: string;
-  repo: string;
-  branch: string;
-}
-
-const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".bmp"];
-
-function parseRepoUrl(url: string): RepoInfo | null {
-  // Handle various GitHub URL formats:
-  // https://github.com/owner/repo
-  // https://github.com/owner/repo/tree/branch
-  // https://github.com/owner/repo/blob/branch/path
-  // owner/repo
-  const githubMatch = url.match(/github\.com\/([^/]+)\/([^/]+)(?:\/tree\/([^/]+))?(?:\/blob\/([^/]+))?/);
-  if (githubMatch) {
-    return {
-      owner: githubMatch[1],
-      repo: githubMatch[2],
-      branch: githubMatch[3] || githubMatch[4] || "main",
-    };
-  }
-
-  // Handle owner/repo format
-  const simpleMatch = url.match(/^([^/]+)\/([^/]+)$/);
-  if (simpleMatch) {
-    return {
-      owner: simpleMatch[1],
-      repo: simpleMatch[2],
-      branch: "main",
-    };
-  }
-
-  return null;
-}
-
 function generateCDNUrl(owner: string, repo: string, branch: string, path: string): string {
   // Use jsDelivr CDN for better performance and reliability
   return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${path}`;
@@ -80,127 +51,6 @@ function generateCDNUrl(owner: string, repo: string, branch: string, path: strin
 
 function generateRawUrl(owner: string, repo: string, branch: string, path: string): string {
   return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
-}
-
-function isImageFile(filename: string): boolean {
-  const lower = filename.toLowerCase();
-  return IMAGE_EXTENSIONS.some((ext) => lower.endsWith(ext));
-}
-
-// GitHub API functions for file operations
-async function uploadImageToRepo(
-  repoInfo: RepoInfo,
-  filePath: string,
-  targetPath: string,
-  githubToken: string,
-): Promise<void> {
-  const { owner, repo, branch } = repoInfo;
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${targetPath}`;
-
-  // Read file and encode to base64
-  const fileContent = fs.readFileSync(filePath);
-  const base64Content = fileContent.toString("base64");
-
-  const response = await fetch(apiUrl, {
-    method: "PUT",
-    headers: {
-      Accept: "application/vnd.github.v3+json",
-      Authorization: `token ${githubToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: `Add image: ${targetPath}`,
-      content: base64Content,
-      branch: branch,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    if (response.status === 422 && error.message?.includes("already exists")) {
-      // File exists, try to update it
-      return updateImageInRepo(repoInfo, filePath, targetPath, githubToken);
-    }
-    throw new Error(error.message || `Failed to upload: ${response.statusText}`);
-  }
-}
-
-async function updateImageInRepo(
-  repoInfo: RepoInfo,
-  filePath: string,
-  targetPath: string,
-  githubToken: string,
-): Promise<void> {
-  const { owner, repo, branch } = repoInfo;
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${targetPath}`;
-
-  // Get current file SHA
-  const getResponse = await fetch(`${apiUrl}?ref=${branch}`, {
-    headers: {
-      Accept: "application/vnd.github.v3+json",
-      Authorization: `token ${githubToken}`,
-    },
-  });
-
-  if (!getResponse.ok) {
-    throw new Error(`Failed to get file info: ${getResponse.statusText}`);
-  }
-
-  const fileInfo = await getResponse.json();
-  const sha = fileInfo.sha;
-
-  // Read file and encode to base64
-  const fileContent = fs.readFileSync(filePath);
-  const base64Content = fileContent.toString("base64");
-
-  const response = await fetch(apiUrl, {
-    method: "PUT",
-    headers: {
-      Accept: "application/vnd.github.v3+json",
-      Authorization: `token ${githubToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: `Update image: ${targetPath}`,
-      content: base64Content,
-      branch: branch,
-      sha: sha,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || `Failed to update: ${response.statusText}`);
-  }
-}
-
-async function deleteImageFromRepo(
-  repoInfo: RepoInfo,
-  imagePath: string,
-  sha: string,
-  githubToken: string,
-): Promise<void> {
-  const { owner, repo, branch } = repoInfo;
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${imagePath}`;
-
-  const response = await fetch(apiUrl, {
-    method: "DELETE",
-    headers: {
-      Accept: "application/vnd.github.v3+json",
-      Authorization: `token ${githubToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: `Delete image: ${imagePath}`,
-      branch: branch,
-      sha: sha,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || `Failed to delete: ${response.statusText}`);
-  }
 }
 
 async function fetchImagesFromRepo(
@@ -229,7 +79,13 @@ async function fetchImagesFromRepo(
       } else if (tryFallbackBranch && branch === "master") {
         return fetchImagesFromRepo({ ...repoInfo, branch: "main" }, path, false, githubToken);
       }
-      throw new Error("Repository or path not found. The branch might not exist.");
+
+      // Provide helpful error message about which branches were tried
+      const triedBranches =
+        branch === "main" || branch === "master" ? "both 'main' and 'master' branches" : `'${branch}' branch`;
+      throw new Error(
+        `Repository or path not found. Tried ${triedBranches}. Please verify the repository exists and the branch name is correct.`,
+      );
     }
     if (response.status === 403) {
       const rateLimitReset = response.headers.get("x-ratelimit-reset");
@@ -284,7 +140,6 @@ export default function ViewImages() {
   const preferences = getPreferenceValues<Preferences>();
   const defaultRepo = preferences.defaultRepo?.trim() || "";
   const githubToken = preferences.githubToken?.trim();
-  const [searchText, setSearchText] = useState<string>("");
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(true); // Start with loading to prevent empty state flash
   const [error, setError] = useState<string | null>(null);
@@ -301,29 +156,26 @@ export default function ViewImages() {
         setCachedData(null);
 
         // Immediately trigger a refresh if we have repo info
-        if (defaultRepo) {
-          const parsed = parseRepoUrl(defaultRepo);
-          if (parsed && repoInfo) {
-            setIsLoading(true);
-            fetchImagesFromRepo(parsed, "", true, githubToken)
-              .then((fetchedImages) => {
-                setImages(fetchedImages);
-                setCachedData({
-                  images: fetchedImages,
-                  timestamp: Date.now(),
-                  repoKey: `${parsed.owner}/${parsed.repo}@${parsed.branch}`,
-                });
-                setIsLoading(false);
-              })
-              .catch(() => {
-                setIsLoading(false);
+        if (repoInfo) {
+          setIsLoading(true);
+          fetchImagesFromRepo(repoInfo, "", true, githubToken)
+            .then((fetchedImages) => {
+              setImages(fetchedImages);
+              setCachedData({
+                images: fetchedImages,
+                timestamp: Date.now(),
+                repoKey: `${repoInfo.owner}/${repoInfo.repo}@${repoInfo.branch}`,
               });
-          }
+              setIsLoading(false);
+            })
+            .catch(() => {
+              setIsLoading(false);
+            });
         }
       }
     };
 
-    const interval = setInterval(checkCacheInvalidation, 100);
+    const interval = setInterval(checkCacheInvalidation, 500);
     // Also check immediately on mount
     checkCacheInvalidation();
     return () => clearInterval(interval);
@@ -348,22 +200,31 @@ export default function ViewImages() {
       return;
     }
 
-    const repoKey = `${parsed.owner}/${parsed.repo}@${parsed.branch}`;
-
     // Always show loading state while checking cache invalidation
-    setRepoInfo(parsed);
     setIsLoading(true);
     setError(null);
 
     // Check if cache was cleared first (before showing cached data)
     const checkCacheAndLoad = async () => {
+      // Check if branch was explicitly set in URL (has /tree/ or /blob/)
+      const hasBranchInUrl = defaultRepo.includes("/tree/") || defaultRepo.includes("/blob/");
+
+      // If no explicit branch, fetch the actual default branch from GitHub
+      let repoInfoWithBranch = parsed;
+      if (!hasBranchInUrl) {
+        const actualBranch = await getDefaultBranch(parsed.owner, parsed.repo, githubToken);
+        repoInfoWithBranch = { ...parsed, branch: actualBranch };
+      }
+
+      const repoKey = `${repoInfoWithBranch.owner}/${repoInfoWithBranch.repo}@${repoInfoWithBranch.branch}`;
+      setRepoInfo(repoInfoWithBranch);
       const cacheCleared = await LocalStorage.getItem("cache-cleared");
       if (cacheCleared) {
         // Cache was cleared, fetch fresh data
         // Keep showing old images while loading new ones
         await LocalStorage.removeItem("cache-cleared");
         setCachedData(null);
-        fetchImagesFromRepo(parsed, "", true, githubToken)
+        fetchImagesFromRepo(repoInfoWithBranch, "", true, githubToken)
           .then((fetchedImages) => {
             setImages(fetchedImages);
             setCachedData({
@@ -414,7 +275,7 @@ export default function ViewImages() {
       }
 
       // No valid cache, fetch fresh
-      fetchImagesFromRepo(parsed, "", true, githubToken)
+      fetchImagesFromRepo(repoInfoWithBranch, "", true, githubToken)
         .then((fetchedImages) => {
           setImages(fetchedImages);
           setCachedData({
@@ -444,37 +305,6 @@ export default function ViewImages() {
     };
 
     checkCacheAndLoad();
-
-    setRepoInfo(parsed);
-    setIsLoading(true);
-    setError(null);
-    fetchImagesFromRepo(parsed, "", true, githubToken)
-      .then((fetchedImages) => {
-        setImages(fetchedImages);
-        setCachedData({
-          images: fetchedImages,
-          timestamp: Date.now(),
-          repoKey,
-        });
-        setIsLoading(false);
-        if (fetchedImages.length === 0) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "No images found",
-            message: "No image files found in this repository",
-          });
-        }
-      })
-      .catch((err) => {
-        setError(err.message);
-        setIsLoading(false);
-        setImages([]);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: err.message,
-        });
-      });
   }, [defaultRepo, githubToken, cachedData, setCachedData]);
 
   const refreshImages = () => {
@@ -518,6 +348,16 @@ export default function ViewImages() {
       return;
     }
 
+    const tokenValidation = validateGitHubToken(githubToken);
+    if (!tokenValidation.valid) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid GitHub Token",
+        message: tokenValidation.error || "Please check your GitHub token in preferences.",
+      });
+      return;
+    }
+
     if (!repoInfo) {
       showToast({
         style: Toast.Style.Failure,
@@ -543,7 +383,7 @@ export default function ViewImages() {
       }
 
       setIsLoading(true);
-      showToast({
+      const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Uploading images...",
         message: `Uploading ${imageFiles.length} image${imageFiles.length !== 1 ? "s" : ""}`,
@@ -559,7 +399,9 @@ export default function ViewImages() {
 
       // Clear cache and refresh
       setCachedData(null);
-      showHUD(`Uploaded ${imageFiles.length} image${imageFiles.length !== 1 ? "s" : ""}`);
+      toast.style = Toast.Style.Success;
+      toast.title = "Upload Complete";
+      toast.message = `Uploaded ${imageFiles.length} image${imageFiles.length !== 1 ? "s" : ""}`;
       refreshImages();
     } catch (error) {
       showToast({
@@ -581,6 +423,16 @@ export default function ViewImages() {
       return;
     }
 
+    const tokenValidation = validateGitHubToken(githubToken);
+    if (!tokenValidation.valid) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid GitHub Token",
+        message: tokenValidation.error || "Please check your GitHub token in preferences.",
+      });
+      return;
+    }
+
     if (!repoInfo) {
       return;
     }
@@ -598,9 +450,9 @@ export default function ViewImages() {
       // Clear cache and refresh
       setCachedData(null);
       setIsLoading(false);
-      toast.hide();
-
-      showHUD(`Deleted ${image.name}`);
+      toast.style = Toast.Style.Success;
+      toast.title = "Image Deleted";
+      toast.message = image.name;
       refreshImages();
     } catch (error) {
       setIsLoading(false);
@@ -614,7 +466,7 @@ export default function ViewImages() {
 
   const handleDownloadImage = async (image: ImageFile) => {
     try {
-      showToast({
+      const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Downloading image...",
         message: image.name,
@@ -645,12 +497,9 @@ export default function ViewImages() {
 
       fs.writeFileSync(finalPath, buffer);
 
-      showHUD(`Downloaded ${image.name}`);
-      showToast({
-        style: Toast.Style.Success,
-        title: "Download Complete",
-        message: `Saved to Downloads/${path.basename(finalPath)}`,
-      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Download Complete";
+      toast.message = `Saved to Downloads/${path.basename(finalPath)}`;
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -660,23 +509,9 @@ export default function ViewImages() {
     }
   };
 
-  // Filter images based on search text
-  const filteredImages = searchText.trim()
-    ? images.filter(
-        (image) =>
-          image.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          image.path.toLowerCase().includes(searchText.toLowerCase()),
-      )
-    : images;
-
   if (error && !defaultRepo) {
     return (
-      <Grid
-        columns={5}
-        inset={Grid.Inset.Large}
-        searchBarPlaceholder="Search images..."
-        onSearchTextChange={setSearchText}
-      >
+      <Grid columns={5} inset={Grid.Inset.Large} searchBarPlaceholder="Search images...">
         <Grid.EmptyView
           icon={Icon.ExclamationMark}
           title="No Repository Configured"
@@ -698,7 +533,7 @@ export default function ViewImages() {
       isLoading={isLoading}
       searchBarPlaceholder={
         repoInfo
-          ? `Search ${filteredImages.length} image${filteredImages.length !== 1 ? "s" : ""} in ${repoInfo.owner}/${repoInfo.repo}...`
+          ? `Search ${images.length} image${images.length !== 1 ? "s" : ""} in ${repoInfo.owner}/${repoInfo.repo}...`
           : "Search images..."
       }
       searchBarAccessory={
@@ -708,8 +543,6 @@ export default function ViewImages() {
           </Grid.Dropdown>
         ) : undefined
       }
-      onSearchTextChange={setSearchText}
-      filtering={false}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Manage Images">
@@ -749,15 +582,11 @@ export default function ViewImages() {
             </ActionPanel>
           }
         />
-      ) : filteredImages.length === 0 && !isLoading ? (
+      ) : images.length === 0 && !isLoading ? (
         <Grid.EmptyView
           icon={Icon.Image}
-          title={searchText.trim() ? "No matching images" : "No images found"}
-          description={
-            searchText.trim()
-              ? `No images match "${searchText}" in ${repoInfo?.owner}/${repoInfo?.repo}`
-              : `No image files found in ${repoInfo?.owner}/${repoInfo?.repo}`
-          }
+          title="No images found"
+          description={`No image files found in ${repoInfo?.owner}/${repoInfo?.repo}`}
           actions={
             <ActionPanel>
               <Action
@@ -777,7 +606,7 @@ export default function ViewImages() {
           }
         />
       ) : (
-        filteredImages.map((image) => (
+        images.map((image) => (
           <Grid.Item
             key={image.sha}
             content={image.cdnUrl}
@@ -809,11 +638,13 @@ export default function ViewImages() {
                 </ActionPanel.Section>
                 {githubToken && (
                   <ActionPanel.Section>
-                    <Action
+                    <Action.ConfirmAction
                       title="Delete Image"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      onAction={() => handleDeleteImage(image)}
+                      onConfirm={() => handleDeleteImage(image)}
+                      dialogTitle="Delete Image"
+                      dialogMessage={`Are you sure you want to delete "${image.name}"? This action cannot be undone.`}
                     />
                   </ActionPanel.Section>
                 )}

@@ -1,6 +1,6 @@
 # GitCDN Changelog
 
-## [Initial Version] - 2024-12-19
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 
