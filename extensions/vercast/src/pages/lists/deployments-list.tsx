@@ -67,7 +67,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                     icon={Icon.Link}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "opt"], key: "v" },
-                      windows: { modifiers: ["ctrl", "opt"], key: "v" },
+                      Windows: { modifiers: ["ctrl", "opt"], key: "v" },
                     }}
                   />
                 )}
@@ -77,7 +77,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                   icon={Icon.CopyClipboard}
                   shortcut={{
                     macOS: { modifiers: ["cmd", "opt"], key: "c" },
-                    windows: { modifiers: ["ctrl", "opt"], key: "c" },
+                    Windows: { modifiers: ["ctrl", "opt"], key: "c" },
                   }}
                 />
               </ActionPanel>

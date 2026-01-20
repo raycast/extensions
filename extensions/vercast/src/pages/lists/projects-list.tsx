@@ -104,7 +104,7 @@ const ProjectListSection = () => {
                 icon={Icon.Globe}
                 shortcut={{
                   macOS: { modifiers: ["cmd", "opt"], key: "v" },
-                  windows: { modifiers: ["ctrl", "opt"], key: "v" },
+                  Windows: { modifiers: ["ctrl", "opt"], key: "v" },
                 }}
               />
             </ActionPanel>
