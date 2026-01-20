@@ -13,6 +13,7 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import * as fs from "fs";
 import * as path from "path";
 import {
   parseRepoUrl,
@@ -482,7 +483,6 @@ export default function ViewImages() {
       const buffer = Buffer.from(arrayBuffer);
 
       // Save to Downloads folder
-      const fs = require("fs");
       const downloadsPath = path.join(process.env.HOME || "", "Downloads");
       const filePath = path.join(downloadsPath, image.name);
 
