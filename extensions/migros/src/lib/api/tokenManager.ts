@@ -4,6 +4,14 @@ import { getGuestToken, GuestToken } from "./migrosApi";
 const cache = new Cache();
 const TOKEN_KEY = "migros_token";
 
+// Token TTL: 20 hours (conservative, tokens observed to expire in 1-2 days)
+const TOKEN_TTL_MS = 20 * 60 * 60 * 1000;
+
+interface CachedToken {
+  token: string;
+  expiresAt: number;
+}
+
 /**
  * Get a valid token from cache or fetch a new one.
  * This is the primary way to get a token for API calls.
@@ -11,7 +19,15 @@ const TOKEN_KEY = "migros_token";
 export async function getValidToken(): Promise<string> {
   const cached = cache.get(TOKEN_KEY);
   if (cached) {
-    return cached;
+    try {
+      const data: CachedToken = JSON.parse(cached);
+      if (Date.now() < data.expiresAt) {
+        return data.token;
+      }
+      // Token expired, fall through to refresh
+    } catch {
+      // Invalid cache data, fall through to refresh
+    }
   }
 
   return await refreshToken();
@@ -25,7 +41,11 @@ export async function refreshToken(): Promise<string> {
   const token = tokenResult.token;
 
   if (token) {
-    cache.set(TOKEN_KEY, token);
+    const cachedToken: CachedToken = {
+      token,
+      expiresAt: Date.now() + TOKEN_TTL_MS,
+    };
+    cache.set(TOKEN_KEY, JSON.stringify(cachedToken));
   }
 
   return token;
@@ -51,10 +71,15 @@ export async function withValidToken<T>(apiCall: (token: string) => Promise<T>):
   try {
     return await apiCall(token);
   } catch (error: unknown) {
-    // Check if it's an axios error with response status
-    const axiosError = error as { response?: { status?: number } };
-    if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
-      // Token expired or invalid, refresh and retry
+    // Debug: log error structure and status (remove in production)
+    // eslint-disable-next-line no-console
+    const err = error as { response?: { status?: number; data?: unknown } };
+    console.error("[withValidToken] API call failed", {
+      error: err,
+      status: err.response?.status,
+      data: err.response?.data,
+    });
+    if (err.response?.status === 401 || err.response?.status === 403) {
       clearToken();
       token = await refreshToken();
       return await apiCall(token);
