@@ -11,6 +11,7 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
+  /*
   const assignReadyForReviewTo = "pernielsentikaer";
 
   if (context.payload.action === "ready_for_review" && !context.payload.pull_request.draft) {
@@ -26,6 +27,7 @@ export default async ({ github, context }: API) => {
       console.error(`Failed to assign PR to ${assignReadyForReviewTo}:`, error);
     }
   }
+  */
 
   console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
 
