@@ -80,24 +80,6 @@
       "description": "Git API access token.",
       "type": "password",
       "required": true
-    },
-    {
-      "type": "dropdown",
-      "name": "language",
-      "title": "Language",
-      "description": "UI language",
-      "required": false,
-      "default": "zh-CN",
-      "data": [
-        {
-          "title": "中文",
-          "value": "zh-CN"
-        },
-        {
-          "title": "English",
-          "value": "en"
-        }
-      ]
     }
   ],
   "dependencies": {
