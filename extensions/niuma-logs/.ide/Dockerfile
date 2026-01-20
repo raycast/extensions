@@ -1,7 +1,9 @@
 FROM cnbcool/default-dev-env:latest
 ARG NODE_VERSION=22
 
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+RUN curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh -o /tmp/nvm-install.sh && \
+    bash /tmp/nvm-install.sh && \
+    rm /tmp/nvm-install.sh
 
 ENV NVM_DIR=/root/.nvm
 
