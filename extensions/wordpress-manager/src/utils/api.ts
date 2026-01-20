@@ -1,5 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch, { RequestInit } from "node-fetch";
+
 import {
   WPPost,
   WPPage,
@@ -18,18 +18,12 @@ import {
   ApiError,
 } from "./types";
 
-interface Preferences {
-  siteUrl: string;
-  username: string;
-  applicationPassword: string;
-}
-
 class WordPressAPI {
   private baseUrl: string;
   private authHeader: string;
 
   constructor() {
-    const prefs = getPreferenceValues<Preferences>();
+    const prefs = getPreferenceValues();
     this.baseUrl = prefs.siteUrl.replace(/\/$/, "") + "/wp-json/wp/v2";
     const credentials = Buffer.from(`${prefs.username}:${prefs.applicationPassword}`).toString("base64");
     this.authHeader = `Basic ${credentials}`;
@@ -317,7 +311,7 @@ class WordPressAPI {
 
   // Site Info
   async getSiteInfo(): Promise<WPSiteInfo> {
-    const prefs = getPreferenceValues<Preferences>();
+    const prefs = getPreferenceValues();
     const url = prefs.siteUrl.replace(/\/$/, "") + "/wp-json";
 
     const response = await fetch(url, {
