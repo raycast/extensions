@@ -194,19 +194,17 @@ export function parseQuickInput(query: string, preferences: Preferences): Params
 /**
  * Parse form input values into calculation parameters.
  */
-export function parseFormInput(
-  values: {
-    principal: string;
-    rate: string;
-    years: string;
-    monthly: string;
-    freq: CompoundFrequency;
-    afterTax: boolean;
-    taxRate: string;
-    currency: CurrencyCode;
-    rounding: RoundingMethod;
-  },
-): Params {
+export function parseFormInput(values: {
+  principal: string;
+  rate: string;
+  years: string;
+  monthly: string;
+  freq: CompoundFrequency;
+  afterTax: boolean;
+  taxRate: string;
+  currency: CurrencyCode;
+  rounding: RoundingMethod;
+}): Params {
   const principal = normalizeNumber(values.principal || "0");
   const monthly = normalizeNumber(values.monthly || "0");
   const ratePct = normalizeNumber(values.rate);

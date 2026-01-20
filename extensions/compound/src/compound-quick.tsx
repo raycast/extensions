@@ -60,11 +60,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       result.params.freq === "yearly" ? "Yearly" : result.params.freq === "monthly" ? "Monthly" : "Daily";
 
     const roundingLabel =
-      result.params.rounding === "floor"
-        ? "Floor"
-        : result.params.rounding === "round"
-          ? "Round"
-          : "Ceiling";
+      result.params.rounding === "floor" ? "Floor" : result.params.rounding === "round" ? "Round" : "Ceiling";
 
     const periodText =
       result.result.months < 12 ? `${result.result.months} months` : `${result.result.months / 12} years`;
@@ -152,11 +148,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Example: Rate and years" content="5% 10y" />
-          <Action.CopyToClipboard title="Copy Example: Principal only" content="$10,000 5% 10y" />
-          <Action.CopyToClipboard title="Copy Example: With monthly" content="$10,000 5% 10years $500" />
-          <Action.CopyToClipboard title="Copy Example: With tax" content="$10,000 5% 10y $500 20%" />
-          <Action.CopyToClipboard title="Copy Example: Key-value" content="p=10000 r=5 y=10 m=500 tax=20" />
+          <Action.CopyToClipboard title="Copy Example: Rate and Years" content="5% 10y" />
+          <Action.CopyToClipboard title="Copy Example: Principal Only" content="$10,000 5% 10y" />
+          <Action.CopyToClipboard title="Copy Example: with Monthly" content="$10,000 5% 10years $500" />
+          <Action.CopyToClipboard title="Copy Example: with Tax" content="$10,000 5% 10y $500 20%" />
+          <Action.CopyToClipboard title="Copy Example: Key-Value" content="p=10000 r=5 y=10 m=500 tax=20" />
         </ActionPanel>
       }
     />

@@ -12,11 +12,7 @@ function applyRounding(value: number, rounding: RoundingMethod): number {
 }
 
 /** Format a number as currency with locale-aware formatting. */
-export function formatMoney(
-  value: number,
-  currency: CurrencyCode,
-  rounding: RoundingMethod,
-): string {
+export function formatMoney(value: number, currency: CurrencyCode, rounding: RoundingMethod): string {
   const rounded = applyRounding(value, rounding);
   const locale = "en-US";
 

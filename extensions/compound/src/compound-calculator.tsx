@@ -93,13 +93,23 @@ export default function Command() {
     >
       <Form.Description text="Calculate compound interest and regular savings" />
 
-      <Form.TextField id="principal" title="Principal (Initial Investment)" placeholder="e.g., 100000 or 100,000" defaultValue="0" />
+      <Form.TextField
+        id="principal"
+        title="Principal (Initial Investment)"
+        placeholder="e.g., 100000 or 100,000"
+        defaultValue="0"
+      />
 
       <Form.TextField id="rate" title="Annual Interest Rate (%)" placeholder="e.g., 5 or 5%" />
 
       <Form.TextField id="years" title="Period (Years)" placeholder="e.g., 10 or 10y" />
 
-      <Form.TextField id="monthly" title="Monthly Contribution" placeholder="e.g., 30000 (0 if none)" defaultValue="0" />
+      <Form.TextField
+        id="monthly"
+        title="Monthly Contribution"
+        placeholder="e.g., 30000 (0 if none)"
+        defaultValue="0"
+      />
 
       <Form.Separator />
 
@@ -115,7 +125,12 @@ export default function Command() {
 
       <Form.Checkbox id="afterTax" title="After-Tax Calculation" label="Apply tax rate to gains" defaultValue={false} />
 
-      <Form.TextField id="taxRate" title="Tax Rate (%)" placeholder="e.g., 20 (varies by country)" defaultValue={defaultTaxRate} />
+      <Form.TextField
+        id="taxRate"
+        title="Tax Rate (%)"
+        placeholder="e.g., 20 (varies by country)"
+        defaultValue={defaultTaxRate}
+      />
 
       <Form.Separator />
 
