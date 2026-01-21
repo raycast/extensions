@@ -1,6 +1,6 @@
 # Render Changelog
 
-## [Add Configurable Default Action] - {PR_MERGE_DATE}
+## [Add Configurable Default Action] - 2026-01-21
 
 - Added preference to configure the default action when pressing Enter on a service
 - Options: Show Details, Show Deploys, or Open in Render
