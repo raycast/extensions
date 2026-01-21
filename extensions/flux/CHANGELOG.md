@@ -1,6 +1,6 @@
 # Flux Changelog
 
-## [Added Flux] - {PR_MERGE_DATE}
+## [Added Flux] - 2026-01-21
 
 Initial release of this extension with commands for f.lux:
 
