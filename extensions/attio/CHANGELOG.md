@@ -1,6 +1,6 @@
 # Attio Changelog
 
-## [Edit Task] - {PR_MERGE_DATE}
+## [Edit Task] - 2026-01-21
 
 - Edit Tasks
 
