@@ -18,7 +18,7 @@
       "name": "configure-flux",
       "title": "Configure F.lux Options",
       "subtitle": "f.lux",
-      "description": "Toggle F.lux settings (e.g., fast transitions, dim on disable, etc.",
+      "description": "Toggle F.lux settings (e.g., fast transitions, dim on disable, etc.)",
       "mode": "view"
     },
     {
