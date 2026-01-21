@@ -57,6 +57,7 @@ const SOLAR_HOLIDAYS: Record<string, HolidayInfo | string> = {
   "19/11": "👨 Nam giới",
   "20/11": { name: "👩 Nhà giáo", startYear: 1982 },
   "23/11": { name: "🏥 Chữ thập đỏ", startYear: 1946 },
+  "24/11": { name: "🇻🇳 Văn hoá VN", startYear: 2026 },
   "1/12": "🎗️ AIDS",
   "19/12": { name: "🔫 Kháng chiến", startYear: 1946 },
   "24/12": "🎄 Giáng sinh",
@@ -105,6 +106,10 @@ export function getHoliday(
     if (typeof holiday === "string") {
       return holiday;
     } else {
+      if (holiday.startYear && solarYear < holiday.startYear) {
+        return null;
+      }
+
       if (
         mode === "full" &&
         holiday.startYear &&

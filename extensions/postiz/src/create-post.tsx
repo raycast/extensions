@@ -1,6 +1,6 @@
 import { useNavigation, showToast, Toast, Form, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
-import { buildPostizApiUrl, POSTIZ_HEADERS, parsePostizResponse } from "./postiz";
+import { buildPostizApiUrl, POSTIZ_HEADERS, parsePostizResponse, CHANNEL_MAX_LENGTH } from "./postiz";
 import { Integration } from "./types";
 const { postiz_version } = getPreferenceValues<Preferences>();
 
@@ -18,7 +18,7 @@ export default function CreatePost() {
     integrationId: string;
     content: string;
   };
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+  const { handleSubmit, itemProps, values } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating");
       try {
@@ -62,6 +62,9 @@ export default function CreatePost() {
       content: FormValidation.Required,
     },
   });
+
+  const selectedChannel = channels.find((channel) => channel.id === values.integrationId);
+
   return (
     <Form
       isLoading={isLoading}
@@ -85,6 +88,9 @@ export default function CreatePost() {
         ))}
       </Form.Dropdown>
       <Form.TextArea title="Content" {...itemProps.content} />
+      {selectedChannel && CHANNEL_MAX_LENGTH[selectedChannel.identifier] && (
+        <Form.Description text={`${values.content?.length || 0}/${CHANNEL_MAX_LENGTH[selectedChannel.identifier]}`} />
+      )}
     </Form>
   );
 }
