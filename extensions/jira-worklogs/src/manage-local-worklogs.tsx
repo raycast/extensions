@@ -17,6 +17,7 @@ import { formatDuration, getErrorMessage } from "@/utils/format";
 import { jiraClient } from "@/utils/jira";
 import { deleteWorklog, getWorklogs, saveWorklog } from "@/utils/storage";
 import AddWorklogCommand from "./add-worklog";
+import SplitWorklogCommand from "./split-worklog";
 
 const formatOptions = { showZeroHours: false, hideZeroMinutes: true, padHours: false, padMinutes: false };
 
@@ -344,6 +345,12 @@ export default function Command() {
                           title="Edit Worklog"
                           icon={Icon.Pencil}
                           target={<AddWorklogCommand worklog={worklog} onSave={loadWorklogs} />}
+                        />
+                        <Action.Push
+                          title="Split Worklog"
+                          icon={Icon.Ticket}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                          target={<SplitWorklogCommand worklog={worklog} onSave={loadWorklogs} />}
                         />
                         {worklog.endTime && (
                           <Action
