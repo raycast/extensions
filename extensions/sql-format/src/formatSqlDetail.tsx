@@ -10,10 +10,6 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 
-interface Preferences {
-  autoPaste: boolean;
-}
-
 /**
  * Component for displaying formatted SQL with copy/paste actions
  * @param sql - The formatted SQL string to display
