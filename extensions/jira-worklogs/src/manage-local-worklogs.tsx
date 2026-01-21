@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { differenceInSeconds, format, parseISO } from "date-fns";
 
-import { Worklog, WorklogPreferences } from "@/types";
+import { Worklog } from "@/types";
 import { formatDuration, getErrorMessage } from "@/utils/format";
 import { jiraClient } from "@/utils/jira";
 import { deleteWorklog, getWorklogs, saveWorklog } from "@/utils/storage";
@@ -22,7 +22,7 @@ import SplitWorklogCommand from "./split-worklog";
 const summaryOptions = { showZeroHours: false, hideZeroMinutes: true, padHours: false, padMinutes: false };
 
 function getSectionSubtitle(totalSeconds: number): string {
-  const prefs = getPreferenceValues<WorklogPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const dailyHours = prefs.dailyHours ? parseFloat(prefs.dailyHours) : null;
 
   if (dailyHours && dailyHours > 0) {

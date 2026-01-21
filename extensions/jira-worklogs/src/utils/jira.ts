@@ -1,13 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import { JiraIssue, JiraPreferences, Worklog } from "@/types";
+import { JiraIssue, Worklog } from "@/types";
 
 class JiraClient {
   private domain: string;
   private auth: string;
 
   constructor() {
-    const prefs = getPreferenceValues<JiraPreferences>();
+    const prefs = getPreferenceValues<Preferences>();
     this.domain = prefs.jiraDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
     this.auth = Buffer.from(`${prefs.email}:${prefs.apiToken}`).toString("base64");
   }
