@@ -23,9 +23,7 @@ function findNodeBinDir(): string | null {
   return null;
 }
 
-interface Preferences {
-  npmToken: string;
-}
+export default function Command() {
 
 export default function Command() {
   async function handleSubmit(values: { packageName: string; otp?: string }) {
