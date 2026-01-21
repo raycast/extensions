@@ -22,7 +22,7 @@ You need a query.domains API key to use this extension.
 3. Navigate to [API Keys page](https://query.domains/account/api-keys)
 4. Copy your API key
 
-![API Key Dashboard](./metadata/screenshot-1-api-key-dashboard.png)
+![API Key Dashboard](./media/screenshot-1-api-key-dashboard.png)
 
 ### 2. Install and Configure
 
@@ -39,8 +39,6 @@ You need a query.domains API key to use this extension.
 2. Navigate to Extensions → Query Domains
 3. Edit the "TLD List" field with your preferred TLDs (comma-separated)
 4. Default: `com,ai,org,net,io,app,dev,xyz,co,me,tech,online`
-
-![TLD List Configuration](./metadata/screenshot-3-tld-list-preferences.png)
 
 ## Usage
 

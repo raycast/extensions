@@ -16,11 +16,6 @@ import { formatRegistrationDate } from "./utils";
 import { DEFAULT_TLDS } from "./constants";
 import { DomainDetail } from "./components/DomainDetail";
 
-interface Preferences {
-  apiKey: string;
-  tldList?: string;
-}
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { apiKey, tldList } = getPreferenceValues<Preferences>();
