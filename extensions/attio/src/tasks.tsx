@@ -132,7 +132,13 @@ export default function Tasks() {
             onAction={() => toggleTask(task)}
           />
           <Action.Push icon={Icon.Pencil} title="Update Task" target={<UpdateTask task={task} />} onPop={mutate} />
-          <Action.Push icon={Icon.Plus} title="New Task" target={<NewTask />} onPop={mutate} shortcut={Keyboard.Shortcut.Common.New} />
+          <Action.Push
+            icon={Icon.Plus}
+            title="New Task"
+            target={<NewTask />}
+            onPop={mutate}
+            shortcut={Keyboard.Shortcut.Common.New}
+          />
           <Action
             icon={Icon.Trash}
             title="Delete Task"
@@ -186,13 +192,13 @@ export default function Tasks() {
   );
 }
 
-function UpdateTask({task}: {task: Task}) {
+function UpdateTask({ task }: { task: Task }) {
   type FormValues = {
     content: string;
     deadlineAt: Date | null;
     isCompleted: boolean;
   };
-  const {pop} = useNavigation();
+  const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating");
@@ -201,10 +207,10 @@ function UpdateTask({task}: {task: Task}) {
           taskId: task.id.taskId,
           requestBody: {
             data: {
-            ...values,
-            deadlineAt: values.deadlineAt ? values.deadlineAt.toISOString() : null,
-            }
-          }
+              ...values,
+              deadlineAt: values.deadlineAt ? values.deadlineAt.toISOString() : null,
+            },
+          },
         });
         toast.style = Toast.Style.Success;
         toast.title = "Updated";
@@ -222,7 +228,7 @@ function UpdateTask({task}: {task: Task}) {
       content: task.contentPlaintext,
       deadlineAt: task.deadlineAt ? new Date(task.deadlineAt) : null,
       isCompleted: task.isCompleted,
-    }
+    },
   });
   return (
     <Form
