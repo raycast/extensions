@@ -1,6 +1,6 @@
 #  Zed Recent Projects Changelog
 
-## [Multi-folder Workspace Support] - {PR_MERGE_DATE}
+## [Multi-folder Workspace Support] - 2026-01-21
 
 - Add support for multi-folder workspaces (requires Zed CLI to be installed)
 - Multi-folder workspaces now display all folder names comma-separated in the title
