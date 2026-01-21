@@ -1,6 +1,6 @@
 # Parse Changelog
 
-## [v1.1] - {PR_MERGE_DATE}
+## [v1.1] - 2026-01-21
 
 - Fix URI malformed error when parsing text with special characters
 - Improve light mode contrast for better readability
