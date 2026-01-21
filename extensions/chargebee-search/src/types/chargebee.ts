@@ -1,13 +1,6 @@
 export type SiteName = string;
 
-export interface Preferences {
-  primary_site: string;
-  primary_site_name: string;
-  primary_api_key: string;
-  secondary_site?: string;
-  secondary_site_name?: string;
-  secondary_api_key?: string;
-}
+export type SiteName = string;
 
 export interface SiteConfig {
   name: SiteName;
