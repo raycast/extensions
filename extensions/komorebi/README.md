@@ -1,6 +1,6 @@
-# Komorebi & YASB Control
+# Komorebi
 
-Simple Raycast extension to run komorebic and yasbc commands from Raycast.
+Simple Raycast extension to run `komorebic` commands from Raycast.
 
 It literally just runs `komorebic` commands in the terminal, so you need to have [komorebi](https://github.com/LGUG2Z/komorebi) installed and configured on your machine.
 
