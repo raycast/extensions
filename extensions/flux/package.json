@@ -15,6 +15,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "configure-flux",
+      "title": "Configure F.lux Options",
+      "subtitle": "f.lux",
+      "description": "Toggle F.lux settings (e.g., fast transitions, dim on disable, etc.",
+      "mode": "view"
+    },
+    {
       "name": "disable-flux-for-an-hour",
       "title": "Disable F.lux for an Hour",
       "subtitle": "f.lux",
@@ -27,6 +34,34 @@
       "subtitle": "f.lux",
       "description": "Disable f.lux using select options.",
       "mode": "view"
+    },
+    {
+      "name": "open-flux-preferences",
+      "title": "Open F.lux Preferences",
+      "subtitle": "f.lux",
+      "description": "Open the f.lux preferences window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quit-flux",
+      "title": "Quit F.lux",
+      "subtitle": "f.lux",
+      "description": "Quit the f.lux application.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-flux-darkroom",
+      "title": "Toggle F.lux Color Effect to Darkroom",
+      "subtitle": "f.lux",
+      "description": "Quickly set the f.lux color effect to Darkroom.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-flux-movie-mode",
+      "title": "Toggle F.lux Color Effect to Movie Mode",
+      "subtitle": "f.lux",
+      "description": "Quickly set the f.lux color effect to Movie Mode.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
