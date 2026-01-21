@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "komorebi-yasb-control",
-  "title": "Komorebi & YASB Control",
-  "description": "Control your komorebi and YASB inside Raycast.",
+  "name": "komorebi-control",
+  "title": "Komorebi Control",
+  "description": "Control your komorebi inside Raycast.",
   "icon": "komorebi-icon.png",
   "author": "nivx18818",
   "platforms": [
@@ -92,30 +92,6 @@
       "title": "Restart Windows Explorer",
       "subtitle": "Windows",
       "description": "Restart Windows Explorer",
-      "mode": "no-view"
-    },
-    {
-      "name": "yasb-start",
-      "title": "Start YASB",
-      "subtitle": "YASB",
-      "description": "Start YASB status bar",
-      "icon": "yasb-icon.png",
-      "mode": "no-view"
-    },
-    {
-      "name": "yasb-stop",
-      "title": "Stop YASB",
-      "subtitle": "YASB",
-      "description": "Stop YASB status bar",
-      "icon": "yasb-icon.png",
-      "mode": "no-view"
-    },
-    {
-      "name": "yasb-reload",
-      "title": "Reload YASB",
-      "subtitle": "YASB",
-      "description": "Reload YASB status bar",
-      "icon": "yasb-icon.png",
       "mode": "no-view"
     }
   ],

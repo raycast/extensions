@@ -2,13 +2,12 @@
 
 Simple Raycast extension to run komorebic and yasbc commands from Raycast.
 
-It literally just runs `komorebic` and `yasbc` commands in the terminal, so you need to have [komorebi](https://github.com/LGUG2Z/komorebi) and [YASB](https://github.com/amnweb/yasb) installed and configured on your machine.
+It literally just runs `komorebic` commands in the terminal, so you need to have [komorebi](https://github.com/LGUG2Z/komorebi) installed and configured on your machine.
 
 ## Features
 
-This extension currently supports basic komorebi and YASB operations:
+This extension currently supports basic komorebi operations:
 - Stop komorebi
-- Start, stop, and reload YASB
 - Window management (focus, move, resize)
 - Workspace switching
 - Stack operations and stackbar configuration
@@ -20,11 +19,9 @@ This extension currently supports basic komorebi and YASB operations:
 
 Starting komorebi from Raycast doesn't work reliably due to Windows' process ownership model.
 
-**The problem:** Komorebi needs to be a child of the Windows shell (explorer.exe) to properly manage windows. When YASB starts komorebi, it works because YASB itself is a tray app running as a shell descendant with access to the desktop message loop. Raycast extensions, however, run in a managed Node.js runtime that doesn't participate in the shell's message pump, so komorebi can't get the necessary privileges to control windows system-wide.
+**The problem:** Komorebi needs to be a child of the Windows shell (explorer.exe) to properly manage windows. Raycast extensions, however, run in a managed Node.js runtime that doesn't participate in the shell's message pump, so komorebi can't get the necessary privileges to control windows system-wide.
 
-**The solution:** Use YASB's tray menu, a shell script, or run `komorebic start --whkd` directly from PowerShell/CMD to start komorebi. Once it's running, you can use this extension to control it.
-
-**Note:** YASB doesn't have the same restriction since it's just a Python app that doesn't need shell-level window management privileges.
+**The solution:** Run `komorebic start --whkd` directly from PowerShell/CMD to start komorebi. Once it's running, you can use this extension to control it.
 
 ## Contributing
 
