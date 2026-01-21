@@ -24,8 +24,6 @@ function findNodeBinDir(): string | null {
 }
 
 export default function Command() {
-
-export default function Command() {
   async function handleSubmit(values: { packageName: string; otp?: string }) {
     const { packageName, otp } = values;
 
