@@ -21,12 +21,7 @@ export interface Space {
   isDefault?: boolean;
 }
 
-interface Preferences {
-  documentsApiUrl?: string;
-  dailyNotesAndTasksApiUrl?: string;
-  documentsApiKey?: string;
-  dailyNotesAndTasksApiKey?: string;
-}
+// Preferences are auto-generated in raycast-env.d.ts - no manual interface needed
 
 /** Error response from Craft API when daily note doesn't exist */
 interface CraftApiErrorResponse {
