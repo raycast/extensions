@@ -1,10 +1,10 @@
 import { List, ActionPanel, Action, popToRoot, getPreferenceValues } from "@raycast/api";
 import { runWithFeedback } from "./utils/run";
-import { Preferences } from "./types";
+import { Preferences, parseWorkspaceCount } from "./types";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const workspaceCount = parseInt(preferences.workspaceCount) || 10;
+  const workspaceCount = parseWorkspaceCount(preferences.workspaceCount);
   const workspaces = Array.from({ length: workspaceCount }, (_, i) => ({
     title: `Workspace ${i}`,
     value: i,

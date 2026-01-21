@@ -2,14 +2,14 @@ import { List, ActionPanel, Action, popToRoot } from "@raycast/api";
 import { runWithFeedback } from "./utils/run";
 
 const resizeActions = [
-  { title: "Increase Width", value: "resize axis horizontal increase" },
-  { title: "Decrease Width", value: "resize axis horizontal decrease" },
-  { title: "Increase Height", value: "resize axis vertical increase" },
-  { title: "Decrease Height", value: "resize axis vertical decrease" },
-  { title: "Resize Left Edge", value: "resize edge left increase" },
-  { title: "Resize Right Edge", value: "resize edge right increase" },
-  { title: "Resize Top Edge", value: "resize edge top increase" },
-  { title: "Resize Bottom Edge", value: "resize edge bottom increase" },
+  { title: "Increase Width", args: ["resize", "axis", "horizontal", "increase"] },
+  { title: "Decrease Width", args: ["resize", "axis", "horizontal", "decrease"] },
+  { title: "Increase Height", args: ["resize", "axis", "vertical", "increase"] },
+  { title: "Decrease Height", args: ["resize", "axis", "vertical", "decrease"] },
+  { title: "Resize Left Edge", args: ["resize", "edge", "left", "increase"] },
+  { title: "Resize Right Edge", args: ["resize", "edge", "right", "increase"] },
+  { title: "Resize Top Edge", args: ["resize", "edge", "top", "increase"] },
+  { title: "Resize Bottom Edge", args: ["resize", "edge", "bottom", "increase"] },
 ];
 
 export default function Command() {
@@ -17,15 +17,14 @@ export default function Command() {
     <List navigationTitle="Resize Window">
       {resizeActions.map((action) => (
         <List.Item
-          key={action.value}
+          key={action.title}
           title={action.title}
           actions={
             <ActionPanel>
               <Action
                 title="Resize"
                 onAction={async () => {
-                  const args = action.value.split(" ");
-                  await runWithFeedback("komorebic", args, `✓ ${action.title}`);
+                  await runWithFeedback("komorebic", action.args, `✓ ${action.title}`);
                   await popToRoot();
                 }}
               />

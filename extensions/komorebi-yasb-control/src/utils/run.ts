@@ -28,6 +28,9 @@ export function run(
 
 /**
  * Run a command and show a success HUD, or error HUD if it fails
+ * @param throwOnError - Whether to re-throw errors after showing HUD
+ *   - Use false for no-view commands to prevent unhandled rejections
+ *   - Use true (default) for view commands where Raycast can show error UI
  */
 export async function runWithFeedback(
   command: string,
@@ -35,6 +38,7 @@ export async function runWithFeedback(
   successMessage: string,
   errorMessage?: string,
   timeoutMs: number = 5000,
+  throwOnError: boolean = true,
 ): Promise<void> {
   try {
     await new Promise<void>((resolve, reject) => {
@@ -61,6 +65,8 @@ export async function runWithFeedback(
     const message = errorMessage || `Failed: ${successMessage}`;
     await showHUD(message);
     console.error(error);
-    throw error;
+    if (throwOnError) {
+      throw error;
+    }
   }
 }

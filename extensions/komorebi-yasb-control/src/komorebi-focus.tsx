@@ -2,12 +2,12 @@ import { List, ActionPanel, Action, popToRoot } from "@raycast/api";
 import { runWithFeedback } from "./utils/run";
 
 const directions = [
-  { title: "Focus Left", value: "left" },
-  { title: "Focus Right", value: "right" },
-  { title: "Focus Up", value: "up" },
-  { title: "Focus Down", value: "down" },
-  { title: "Cycle Focus Next", value: "cycle-focus next" },
-  { title: "Cycle Focus Previous", value: "cycle-focus previous" },
+  { title: "Focus Left", args: ["focus", "left"] },
+  { title: "Focus Right", args: ["focus", "right"] },
+  { title: "Focus Up", args: ["focus", "up"] },
+  { title: "Focus Down", args: ["focus", "down"] },
+  { title: "Cycle Focus Next", args: ["cycle-focus", "next"] },
+  { title: "Cycle Focus Previous", args: ["cycle-focus", "previous"] },
 ];
 
 export default function Command() {
@@ -15,15 +15,14 @@ export default function Command() {
     <List navigationTitle="Cycle Focus">
       {directions.map((dir) => (
         <List.Item
-          key={dir.value}
+          key={dir.title}
           title={dir.title}
           actions={
             <ActionPanel>
               <Action
                 title="Focus Window"
                 onAction={async () => {
-                  const args = dir.value.split(" ");
-                  await runWithFeedback("komorebic", args, `✓ ${dir.title}`);
+                  await runWithFeedback("komorebic", dir.args, `✓ ${dir.title}`);
                   await popToRoot();
                 }}
               />
