@@ -1,6 +1,6 @@
 # Convex Changelog
 
-## [Deploy Key Authentication] - {PR_MERGE_DATE}
+## [Deploy Key Authentication] - 2026-01-21
 
 - Add deploy key authentication as alternative to OAuth login
 - Add "Configure Deploy Key" command for easy setup with validation
