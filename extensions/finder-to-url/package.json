@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "finder-to-url",
+  "title": "Finder to URL",
+  "description": "Generate URLs from selected Finder files' paths and copy to clipboard",
+  "icon": "extension_icon.png",
+  "author": "giray_songul_gry",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-as-url",
+      "title": "Copy as URL",
+      "description": "Copy selected Finder items as URLs to clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "startsWith",
+      "title": "Starts With",
+      "description": "The path segment to match and cut from (e.g., /cdn). Leave empty to copy full path.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "prefix",
+      "title": "URL Prefix",
+      "description": "The prefix to add before the matched path (e.g., https://my.cdn.com). Leave empty to copy full path.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
