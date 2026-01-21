@@ -2,49 +2,7 @@ import { useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon, getPreferenceValues } from "@raycast/api";
 import { sendEmail } from "./smtp-client";
 import { marked } from "marked";
-import { Preferences } from "./types";
-
-// Convert HTML to plain text with better formatting
-function htmlToPlainText(html: string): string {
-  let text = html;
-
-  // Remove style, script, and head tags with their content
-  text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
-  text = text.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
-  text = text.replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "");
-
-  // Remove XML/VML behavior declarations
-  text = text.replace(/v\\:\*\s*\{[^}]*\}/gi, "");
-  text = text.replace(/o\\:\*\s*\{[^}]*\}/gi, "");
-  text = text.replace(/w\\:\*\s*\{[^}]*\}/gi, "");
-  text = text.replace(/\.shape\s*\{[^}]*\}/gi, "");
-
-  // Convert common HTML entities
-  text = text.replace(/&nbsp;/gi, " ");
-  text = text.replace(/&amp;/gi, "&");
-  text = text.replace(/&lt;/gi, "<");
-  text = text.replace(/&gt;/gi, ">");
-  text = text.replace(/&quot;/gi, '"');
-  text = text.replace(/&#(\d+);/gi, (_, num) => String.fromCharCode(parseInt(num, 10)));
-
-  // Convert line breaks
-  text = text.replace(/<br\s*\/?>/gi, "\n");
-  text = text.replace(/<\/p>/gi, "\n\n");
-  text = text.replace(/<\/div>/gi, "\n");
-  text = text.replace(/<\/li>/gi, "\n");
-  text = text.replace(/<\/tr>/gi, "\n");
-
-  // Remove all remaining HTML tags
-  text = text.replace(/<[^>]+>/g, "");
-
-  // Clean up whitespace
-  text = text.replace(/[ \t]+/g, " "); // Multiple spaces/tabs to single space
-  text = text.replace(/\n[ \t]+/g, "\n"); // Remove leading whitespace on lines
-  text = text.replace(/[ \t]+\n/g, "\n"); // Remove trailing whitespace on lines
-  text = text.replace(/\n{3,}/g, "\n\n"); // Max 2 consecutive newlines
-
-  return text.trim();
-}
+import { convert } from "html-to-text";
 
 export type ComposeMode = "reply" | "replyAll" | "forward" | "new";
 
@@ -108,7 +66,7 @@ export function ComposeForm({ mode, originalEmail }: ComposeFormProps) {
     if (!originalEmail) return "";
     const dateStr = originalEmail.date.toLocaleString();
     // Clean up HTML if present in the body
-    const cleanBody = htmlToPlainText(originalEmail.body);
+    const cleanBody = convert(originalEmail.body, { wordwrap: false });
     // Add > prefix to each line for proper email quoting
     const quotedLines = cleanBody
       .split("\n")

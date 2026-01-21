@@ -1,7 +1,7 @@
 import { ImapFlow, MailboxObject, ListResponse } from "imapflow";
 import { simpleParser, ParsedMail } from "mailparser";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Email, EmailAddress, Folder, Preferences } from "./types";
+import { Email, EmailAddress, Folder } from "./types";
 
 // Check if host is localhost (safe for unencrypted local connections)
 function isLocalhostHost(host: string): boolean {

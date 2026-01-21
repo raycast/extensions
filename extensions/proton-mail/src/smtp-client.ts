@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Preferences } from "./types";
 
 // Check if host is localhost (safe for unencrypted local connections)
 function isLocalhostHost(host: string): boolean {

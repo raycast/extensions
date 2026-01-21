@@ -28,7 +28,7 @@ import {
   archiveEmail,
   disconnectClient,
 } from "./imap-client";
-import { Email, Folder, EmailFilter, Preferences } from "./types";
+import { Email, Folder, EmailFilter } from "./types";
 import { ComposeForm, ComposeMode } from "./compose-form";
 import { AttachmentList } from "./attachment-list";
 

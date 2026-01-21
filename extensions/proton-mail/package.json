@@ -125,6 +125,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^1.17.0",
+    "html-to-text": "^9.0.5",
     "imapflow": "^1.0.171",
     "mailparser": "^3.7.2",
     "marked": "^17.0.1",
@@ -132,6 +133,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
+    "@types/html-to-text": "^9.0.4",
     "@types/mailparser": "^3.4.5",
     "@types/node": "22.13.10",
     "@types/nodemailer": "^6.4.17",
