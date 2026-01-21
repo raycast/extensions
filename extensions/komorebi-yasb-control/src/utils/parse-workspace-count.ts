@@ -1,7 +1,3 @@
-export interface Preferences {
-  workspaceCount: string;
-}
-
 /**
  * Parse and validate workspace count from preferences
  * Returns a number between 1 and 20, defaulting to 10 if invalid

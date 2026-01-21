@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, popToRoot, getPreferenceValues } from "@raycast/api";
 import { runWithFeedback } from "./utils/run";
-import { Preferences, parseWorkspaceCount } from "./types";
+import { parseWorkspaceCount } from "./utils/parse-workspace-count";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
