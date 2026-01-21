@@ -45,11 +45,9 @@ const SCREEN_SHARING_PATH = join(
 function buildVncUrl(location: VncLocation): string {
   let url = "vnc://";
 
-  // Add credentials if available
-  if (location.username || location.password) {
-    if (location.username) {
-      url += encodeURIComponent(location.username);
-    }
+  // Add credentials if username is available (password without username is not valid in VNC URLs)
+  if (location.username) {
+    url += encodeURIComponent(location.username);
     if (location.password) {
       url += `:${encodeURIComponent(location.password)}`;
     }
@@ -153,7 +151,7 @@ function AddConnectionForm({
       id: `custom-${Date.now()}`,
       name: values.name.trim(),
       host: values.host.trim(),
-      port: values.port ? parseInt(values.port) : undefined,
+      port: values.port ? parseInt(values.port) || undefined : undefined,
       username: values.username.trim() || undefined,
       password: values.password || undefined,
       source: "custom",
@@ -233,7 +231,7 @@ function EditConnectionForm({
       ...location,
       name: values.name.trim(),
       host: values.host.trim(),
-      port: values.port ? parseInt(values.port) : undefined,
+      port: values.port ? parseInt(values.port) || undefined : undefined,
       username: values.username.trim() || undefined,
       password: values.password || undefined,
     };
