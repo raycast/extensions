@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch, { RequestInit, Response } from "node-fetch";
 
 import { JiraIssue, JiraPreferences, Worklog } from "@/types";
 
