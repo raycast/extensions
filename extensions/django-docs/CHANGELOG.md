@@ -1,6 +1,6 @@
 # Django Docs Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2026-01-21
 
 - Improved search results by adding section headings to the search index
 
