@@ -204,7 +204,6 @@ export default function Command() {
                     key={shortcut.name}
                     icon={getIconForAction(shortcut.action, shortcut.isOn)}
                     title={shortcut.accessoryName}
-                    subtitle={shortcut.name !== shortcut.accessoryName ? shortcut.name : undefined}
                     accessories={accessoriesList}
                     keywords={[shortcut.name, shortcut.accessoryName, shortcut.action]}
                     actions={

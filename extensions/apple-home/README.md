@@ -9,7 +9,7 @@ This extension uses the macOS Shortcuts app to control HomeKit accessories. You'
 ### Step 1: Create a Folder in Shortcuts
 
 1. Open the **Shortcuts** app on your Mac
-2. Create a new folder called **HomeKit** (or customize the name in extension preferences)
+2. Create a new folder called **HomeKit**
 
 ### Step 2: Create Shortcuts for Your Accessories
 
@@ -26,14 +26,6 @@ For accessories you want to toggle on/off, create two shortcuts:
    - Add "Get State of Home Accessory" action → Select your accessory
    - The shortcut should output the state (on/off)
 
-#### Simple On/Off Shortcuts
-
-For explicit on/off control without state tracking:
-
-- `Turn on [Accessory Name]` - Turns the accessory on
-- `Turn off [Accessory Name]` - Turns the accessory off
-- `Toggle [Accessory Name]` - Toggles the accessory
-
 #### Scene Shortcuts
 
 For shortcuts that control multiple accessories (scenes), simply name them without the above prefixes:
@@ -47,8 +39,6 @@ For shortcuts that control multiple accessories (scenes), simply name them witho
 |---------------|------|-------------|
 | `Bedroom Light` | Toggle | Controls bedroom light |
 | `Get Bedroom Light State` | State | Returns on/off state |
-| `Turn on Kitchen` | On | Turns on kitchen lights |
-| `Turn off Kitchen` | Off | Turns off kitchen lights |
 | `Movie Night` | Scene | Activates movie scene |
 
 ## Features
@@ -59,18 +49,11 @@ For shortcuts that control multiple accessories (scenes), simply name them witho
 - **Scenes Support**: Run multi-accessory scenes
 - **Search**: Find accessories quickly with fuzzy search
 
-## Preferences
-
-| Preference | Description | Default |
-|------------|-------------|---------|
-| Shortcuts Folder | Folder name in Shortcuts app containing your HomeKit shortcuts | `HomeKit` |
-
 ## Troubleshooting
 
 ### Shortcuts not appearing
 
-- Make sure your shortcuts are in the correct folder (default: "HomeKit")
-- Check that the folder name in extension preferences matches your Shortcuts folder
+- Make sure your shortcuts are in the **HomeKit** folder in the Shortcuts app
 
 ### State not showing
 
