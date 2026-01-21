@@ -1,5 +1,11 @@
 # Parse Changelog
 
+## [1.1.0] - 2026-01-20
+
+- Added Windows support
+- Updated dependencies
+- Fixed infinite loop issue caused by `useEffect` + `setState`
+
 ## [1.0.0] - 2026-01-16
 
 - Speed read text at 300-700 WPM using RSVP technique
