@@ -24,6 +24,13 @@
       "subtitle": "Umami",
       "description": "View your websites and their stats",
       "mode": "view"
+    },
+    {
+      "name": "view-users",
+      "title": "View Users",
+      "subtitle": "Umami",
+      "description": "View your users",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -62,7 +69,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "@umami/api-client": "^0.80.0"
   },

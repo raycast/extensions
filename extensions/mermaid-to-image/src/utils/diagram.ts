@@ -12,6 +12,16 @@ import { showFailureToast } from "@raycast/utils";
 const execFilePromise = promisify(execFile);
 
 /**
+ * Options for diagram generation
+ */
+interface DiagramOptions {
+  scale?: number;
+  width?: number;
+  height?: number;
+  format?: string;
+}
+
+/**
  * Clean Mermaid code by removing markdown fences if present
  */
 export function cleanMermaidCode(mermaidCode: string): string {
@@ -36,6 +46,7 @@ async function generateDiagramWithExplicitNode(
   theme: string,
   tempFileRef: MutableRefObject<string | null>,
   timeout: number,
+  options?: DiagramOptions,
 ): Promise<string> {
   // Define a helper function for cleanup operations
   const cleanupResources = (filePath: string | null) => {
@@ -48,8 +59,28 @@ async function generateDiagramWithExplicitNode(
   try {
     console.log(`Executing: ${nodePath} ${mmdcPath} with input ${inputFile} and output ${outputPath}`);
 
-    // Prepare arguments for mmdc
-    const args = [mmdcPath, "-i", inputFile, "-o", outputPath, "-t", theme, "-b", "transparent", "--scale", "2"];
+    // Prepare arguments for mmdc with enhanced settings
+    const args = [
+      mmdcPath,
+      "-i",
+      inputFile,
+      "-o",
+      outputPath,
+      "-t",
+      theme,
+      "-b",
+      "transparent",
+      "--scale",
+      String(options?.scale || 2), // default increased to 4
+    ];
+
+    // Add optional width and height if specified
+    if (options?.width) {
+      args.push("--width", String(options.width));
+    }
+    if (options?.height) {
+      args.push("--height", String(options.height));
+    }
 
     // Set environment with extended PATH to help find dependencies
     const env = {
@@ -97,12 +128,16 @@ async function generateDiagramWithExplicitNode(
 
 /**
  * Generate Mermaid diagram using explicit Node.js path and execFile
+ * @param mermaidCode - The Mermaid syntax code
+ * @param tempFileRef - Reference to temporary file for cleanup
  * @param forceFormat - Optional parameter to force a specific output format (e.g., 'png' for AI Tool)
+ * @param options - Optional generation options (scale, width, height)
  */
 export async function generateMermaidDiagram(
   mermaidCode: string,
   tempFileRef: MutableRefObject<string | null>,
   forceFormat?: string,
+  options?: DiagramOptions,
 ): Promise<string> {
   try {
     const preferences = getPreferenceValues<Preferences>();
@@ -113,7 +148,7 @@ export async function generateMermaidDiagram(
     tempFileRef.current = tempFile;
 
     // Determine output format (force PNG for AI Tool, otherwise use preference)
-    const outputFormat = forceFormat || preferences.outputFormat;
+    const outputFormat = forceFormat || options?.format || preferences.outputFormat || "png";
 
     // Determine output directory based on mode:
     // - AI Tool mode (forceFormat exists): Use ~/Downloads/MermaidDiagrams/ for easy user access
@@ -126,13 +161,19 @@ export async function generateMermaidDiagram(
       if (!fs.existsSync(diagramsDir)) {
         fs.mkdirSync(diagramsDir, { recursive: true });
       }
-      outputPath = path.join(diagramsDir, `diagram-${Date.now()}.${outputFormat}`);
+
+      // Create a more descriptive filename with timestamp
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+      outputPath = path.join(diagramsDir, `mermaid-diagram-${timestamp}.${outputFormat}`);
     } else {
       // Manual mode: Use support path for temporary storage
       outputPath = path.join(environment.supportPath, `diagram-${Date.now()}.${outputFormat}`);
     }
 
     console.log(`Generating diagram, theme: ${preferences.theme}, format: ${outputFormat}`);
+    if (options) {
+      console.log(`Options: scale=${options.scale}, width=${options.width}, height=${options.height}`);
+    }
 
     // Find Node.js path
     let nodePath;
@@ -166,6 +207,7 @@ export async function generateMermaidDiagram(
       preferences.theme,
       tempFileRef,
       timeoutInMs,
+      options, // pass options parameter
     );
   } catch (error) {
     // Handle errors at the top level

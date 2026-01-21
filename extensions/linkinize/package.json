@@ -1,11 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linkinize",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "title": "Linkinize",
-  "description": "Linkinize Bookmarks For Teams",
+  "description": "AI Bookmark Manager For Teams",
   "icon": "icon.png",
-  "author": "hazaveh",
+  "access": "public",
+  "author": "nader_ikladious",
+  "owner": "linkinize",
+  "contributors": [
+    "hazaveh"
+  ],
   "categories": [
     "Productivity"
   ],

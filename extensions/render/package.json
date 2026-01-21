@@ -30,6 +30,28 @@
       "title": "API Key",
       "description": "Account API key",
       "placeholder": "rnd_xxxx..xxx"
+    },
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "description": "Select the default action when pressing Enter on a service",
+      "default": "showDetails",
+      "data": [
+        {
+          "title": "Show Details",
+          "value": "showDetails"
+        },
+        {
+          "title": "Show Deploys",
+          "value": "showDeploys"
+        },
+        {
+          "title": "Open in Render",
+          "value": "openInRender"
+        }
+      ]
     }
   ],
   "dependencies": {
