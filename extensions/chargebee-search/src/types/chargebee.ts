@@ -1,7 +1,5 @@
 export type SiteName = string;
 
-export type SiteName = string;
-
 export interface SiteConfig {
   name: SiteName;
   site: string;
