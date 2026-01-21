@@ -57,3 +57,15 @@ export function shortenTransport(transport: string): string {
   if (lower === "streamable-http" || lower === "sse") return "HTTP";
   return transport;
 }
+
+// Extract GitHub owner/repo from a GitHub URL
+export function extractGitHubRepo(url?: string): { owner: string; repo: string } | null {
+  if (!url) return null;
+  const match = url.match(/github\.com\/([^/]+)\/([^/]+)/);
+  if (match) {
+    // Remove .git suffix if present
+    const repo = match[2].replace(/\.git$/, "");
+    return { owner: match[1], repo };
+  }
+  return null;
+}

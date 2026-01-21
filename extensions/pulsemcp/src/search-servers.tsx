@@ -1,7 +1,7 @@
 import { List, Icon, ActionPanel, Action, Detail, Keyboard, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo } from "react";
-import { formatNumber, formatDate, extractAuthor, getAuthorUrl } from "./utils";
+import { formatNumber, formatDate, extractAuthor, getAuthorUrl, extractGitHubRepo } from "./utils";
 import { parseDropdownValue } from "./dropdown-utils";
 
 type SortOption = "popularity" | "name";
@@ -73,6 +73,16 @@ interface PulseResponse {
   };
 }
 
+interface GitHubRepoResponse {
+  pushed_at?: string;
+}
+
+interface GitHubReleaseResponse {
+  published_at?: string;
+  tag_name?: string;
+  message?: string; // "Not Found" when no releases
+}
+
 const BASE_URL = "https://api.pulsemcp.com/v0.1";
 const API_KEY = "ee8403eb-e9f7-4b10-8125-c821c14dce5d"; // eslint-disable-line no-secrets/no-secrets
 const TENANT_ID = "pulsemcp-all";
@@ -86,6 +96,35 @@ function ServerDetail({ entry }: { entry: ServerEntry }) {
   const hasRemotes = (server.remotes?.length ?? 0) > 0;
   const hasPackages = server.packages && server.packages.filter((p) => p.name || p.identifier).length > 0;
 
+  // Build PulseMCP page URL from server name
+  const pulsemcpUrl = `https://pulsemcp.com/servers/${encodeURIComponent(server.name)}`;
+  const repoUrl = server.repository?.url;
+  const websiteUrl = server.websiteUrl ?? repoUrl;
+  const author = extractAuthor(repoUrl, server.name);
+  const authorUrl = getAuthorUrl(repoUrl, server.name);
+
+  // Fetch GitHub release data for actual update date (prefer releases, fall back to pushed_at)
+  const githubRepo = extractGitHubRepo(repoUrl);
+  const githubReleaseUrl = githubRepo
+    ? `https://api.github.com/repos/${githubRepo.owner}/${githubRepo.repo}/releases/latest`
+    : null;
+  const githubRepoUrl = githubRepo ? `https://api.github.com/repos/${githubRepo.owner}/${githubRepo.repo}` : null;
+
+  const { data: releaseData, isLoading: isLoadingRelease } = useFetch<GitHubReleaseResponse>(githubReleaseUrl ?? "", {
+    execute: !!githubReleaseUrl,
+  });
+
+  // Only fetch repo data if no release found (fallback to pushed_at)
+  const hasNoRelease = releaseData?.message === "Not Found" || (!releaseData?.published_at && !isLoadingRelease);
+  const { data: repoData, isLoading: isLoadingRepo } = useFetch<GitHubRepoResponse>(githubRepoUrl ?? "", {
+    execute: !!githubRepoUrl && hasNoRelease,
+  });
+
+  const isLoadingGithub = isLoadingRelease || (hasNoRelease && isLoadingRepo);
+
+  // Use release published_at if available, otherwise fall back to repo pushed_at
+  const actualUpdatedAt = releaseData?.published_at ?? repoData?.pushed_at;
+
   // Get freshness color for updated date (needs Raycast Color, so kept here)
   const getFreshnessColor = (dateStr?: string) => {
     if (!dateStr) return null;
@@ -95,19 +134,19 @@ function ServerDetail({ entry }: { entry: ServerEntry }) {
     return Color.Red;
   };
 
-  // Build PulseMCP page URL from server name
-  const pulsemcpUrl = `https://pulsemcp.com/servers/${encodeURIComponent(server.name)}`;
-  const repoUrl = server.repository?.url;
-  const websiteUrl = server.websiteUrl ?? repoUrl;
-  const author = extractAuthor(repoUrl, server.name);
-  const authorUrl = getAuthorUrl(repoUrl, server.name);
+  // Build info section - use GitHub release/pushed_at for actual update date
+  const getUpdatedDisplay = () => {
+    if (isLoadingGithub && githubRepo) return "**Updated:** Loading...";
+    if (actualUpdatedAt) return `**Updated:** ${formatDate(actualUpdatedAt)}`;
+    if (githubRepo) return "**Updated:** ?"; // GitHub repo but no data (rate limited or error)
+    return null; // No GitHub repo, don't show update date
+  };
 
-  // Build info section
   const infoItems = [
     server.version ? `**Version:** \`${server.version}\`` : null,
     author ? `**Author:** [${author}](${authorUrl})` : null,
     versionMeta?.publishedAt ? `**Published:** ${formatDate(versionMeta.publishedAt)}` : null,
-    versionMeta?.updatedAt ? `**Updated:** ${formatDate(versionMeta.updatedAt)}` : null,
+    getUpdatedDisplay(),
   ].filter(Boolean);
 
   // Build visitor stats (check for null/undefined, not truthiness, to show 0 values)
@@ -178,18 +217,20 @@ ${server
               <Detail.Metadata.TagList.Item text="Official" color={Color.Green} icon="official-icon.svg" />
             )}
             {server.$schema && <Detail.Metadata.TagList.Item text="server.json" color={Color.Blue} />}
-            {versionMeta?.updatedAt && (
+            {actualUpdatedAt ? (
               <Detail.Metadata.TagList.Item
                 text={(() => {
                   const monthsDiff =
-                    (new Date().getTime() - new Date(versionMeta.updatedAt).getTime()) / (1000 * 60 * 60 * 24 * 30);
+                    (new Date().getTime() - new Date(actualUpdatedAt).getTime()) / (1000 * 60 * 60 * 24 * 30);
                   if (monthsDiff <= 3) return "Updated<3M";
                   if (monthsDiff <= 6) return "Updated>3M";
                   return "Updated>6M";
                 })()}
-                color={getFreshnessColor(versionMeta.updatedAt)}
+                color={getFreshnessColor(actualUpdatedAt)}
               />
-            )}
+            ) : githubRepo && !isLoadingGithub ? (
+              <Detail.Metadata.TagList.Item text="Updated: ?" color={Color.SecondaryText} />
+            ) : null}
           </Detail.Metadata.TagList>
         </Detail.Metadata>
       }
@@ -310,18 +351,6 @@ export default function Command() {
           const repoUrl = server.repository?.url;
           const websiteUrl = server.websiteUrl ?? repoUrl;
 
-          // Get freshness info for list view
-          const versionMeta = entry._meta?.["com.pulsemcp/server-version"];
-          const getFreshnessTag = () => {
-            if (!versionMeta?.updatedAt) return null;
-            const monthsDiff =
-              (new Date().getTime() - new Date(versionMeta.updatedAt).getTime()) / (1000 * 60 * 60 * 24 * 30);
-            if (monthsDiff <= 3) return { value: "Updated<3M", color: Color.Green };
-            if (monthsDiff <= 6) return { value: "Updated>3M", color: Color.Orange };
-            return { value: "Updated>6M", color: Color.Red };
-          };
-          const freshnessTag = getFreshnessTag();
-
           return (
             <List.Item
               key={server.name}
@@ -329,14 +358,6 @@ export default function Command() {
               subtitle={truncatedSubtitle}
               accessories={[
                 ...(meta?.isOfficial ? [{ icon: "official-icon.svg", tooltip: "Official" }] : []),
-                ...(freshnessTag
-                  ? [
-                      {
-                        tag: freshnessTag,
-                        tooltip: `Last updated: ${versionMeta?.updatedAt ? new Date(versionMeta.updatedAt).toLocaleDateString() : "Unknown"}`,
-                      },
-                    ]
-                  : []),
                 ...(meta?.visitorsEstimateTotal
                   ? [
                       {

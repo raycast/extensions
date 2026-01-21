@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { formatNumber, formatDate, getFreshnessLabel, extractAuthor, getAuthorUrl, shortenTransport } from "./utils";
+import {
+  formatNumber,
+  formatDate,
+  getFreshnessLabel,
+  extractAuthor,
+  getAuthorUrl,
+  shortenTransport,
+  extractGitHubRepo,
+} from "./utils";
 
 describe("formatNumber", () => {
   it("returns '0' for null or undefined", () => {
@@ -114,5 +122,38 @@ describe("shortenTransport", () => {
   it("keeps other transport types as-is", () => {
     expect(shortenTransport("stdio")).toBe("stdio");
     expect(shortenTransport("websocket")).toBe("websocket");
+  });
+});
+
+describe("extractGitHubRepo", () => {
+  it("returns null for undefined or non-GitHub URLs", () => {
+    expect(extractGitHubRepo(undefined)).toBe(null);
+    expect(extractGitHubRepo("https://gitlab.com/user/repo")).toBe(null);
+    expect(extractGitHubRepo("https://example.com")).toBe(null);
+  });
+
+  it("extracts owner and repo from GitHub URLs", () => {
+    expect(extractGitHubRepo("https://github.com/stripe/agent-toolkit")).toEqual({
+      owner: "stripe",
+      repo: "agent-toolkit",
+    });
+    expect(extractGitHubRepo("https://github.com/modelcontextprotocol/servers")).toEqual({
+      owner: "modelcontextprotocol",
+      repo: "servers",
+    });
+  });
+
+  it("handles .git suffix", () => {
+    expect(extractGitHubRepo("https://github.com/user/repo.git")).toEqual({
+      owner: "user",
+      repo: "repo",
+    });
+  });
+
+  it("handles URLs with trailing paths", () => {
+    expect(extractGitHubRepo("https://github.com/user/repo/tree/main")).toEqual({
+      owner: "user",
+      repo: "repo",
+    });
   });
 });

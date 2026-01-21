@@ -1,5 +1,16 @@
 # PulseMCP Changelog
 
+## [Fix Updated Date] - {PR_MERGE_DATE}
+
+### Fixed
+- "Updated" date now shows actual last update from GitHub (was incorrectly showing PulseMCP sync date)
+- Uses GitHub Releases API for servers with releases, falls back to last commit date
+- Shows "?" for non-GitHub repos or when data unavailable
+
+### Changed
+- Removed freshness tags from list view (GitHub API rate limits)
+- Freshness badge now only shown in detail view with accurate data
+
 ## [v0.1 API Migration] - 2026-01-04
 
 ### API & Data
