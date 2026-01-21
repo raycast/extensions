@@ -32,6 +32,13 @@
       "mode": "no-view"
     },
     {
+      "name": "komorebi-toggle-pause",
+      "title": "Toggle Pause",
+      "subtitle": "komorebi",
+      "description": "Toggle komorebi pause state",
+      "mode": "no-view"
+    },
+    {
       "name": "komorebi-retile",
       "title": "Retile Windows",
       "subtitle": "komorebi",
