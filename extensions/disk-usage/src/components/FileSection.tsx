@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showInFinder, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, type FC } from "react";
 import { useSelection } from "../hooks/use-selection";
 import type { DiskUsageSend } from "../machines/disk-usage-machine";
@@ -16,25 +16,42 @@ const FileRow: FC<{
   isDeleting: boolean;
 }> = ({ node, maxSize, send, isDeleting }) => {
   const selection = useSelection();
+  const { push } = useNavigation();
   const isSelected = selection.has(node.path);
   const isDeletingThis = isDeleting && isSelected;
-
-  useEffect(() => {
-    const checkExistence = async () => {
-      try {
-        await access(node.path, constants.F_OK);
-      } catch {
-        send({ type: "ITEM_MISSING", path: node.path, bytes: node.bytes });
-      }
-    };
-
-    checkExistence();
-  }, []);
 
   const isFolderWithContent = hasStoredSnapshot(node.path);
 
   const handleToggle = () => selection.toggle(node.path);
-  const handleClear = () => selection.clear();
+  const handleShowInFinder = async () => {
+    selection.clear();
+    try {
+      await showInFinder(node.path);
+    } catch {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "File missing",
+        message: "Removing from list...",
+      });
+      send({ type: "ITEM_MISSING", path: node.path, bytes: node.bytes });
+    }
+  };
+
+  const handleEnterFolder = async () => {
+    selection.clear();
+    try {
+      await access(node.path, constants.F_OK);
+
+      push(<FolderView title={node.name} rootPath={node.path} send={send} isDeleting={isDeleting} />);
+    } catch {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Folder missing",
+        message: "Removing from list...",
+      });
+      send({ type: "ITEM_MISSING", path: node.path, bytes: node.bytes });
+    }
+  };
   const handleTrash = () => {
     const paths = selectionStore.size > 0 ? selectionStore.getAll() : [node.path];
     send({ type: "DELETE_ITEMS", paths });
@@ -50,14 +67,9 @@ const FileRow: FC<{
       actions={
         <ActionPanel>
           {isFolderWithContent ? (
-            <Action.Push
-              title="Open Folder"
-              icon={Icon.ArrowRight}
-              onPush={handleClear}
-              target={<FolderView title={node.name} rootPath={node.path} send={send} isDeleting={isDeleting} />}
-            />
+            <Action title="Open Folder" icon={Icon.ArrowRight} onAction={handleEnterFolder} />
           ) : (
-            <Action.ShowInFinder path={node.path} />
+            <Action title="Show in Finder" icon={Icon.Finder} onAction={handleShowInFinder} />
           )}
 
           <Action.CopyToClipboard

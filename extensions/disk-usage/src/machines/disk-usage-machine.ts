@@ -34,7 +34,7 @@ export const diskUsageMachine = createMachine({
   states: {
     checkingCache: {
       invoke: {
-        src: fromPromise(async () => await hasIndex()),
+        src: fromPromise(hasIndex),
         onDone: [
           { target: "loadingUsage", guard: ({ event }) => event.output === true },
           { target: "loadingUsage", actions: assign({ needsScan: true }) },
