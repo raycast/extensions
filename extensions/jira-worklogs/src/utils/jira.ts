@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import { JiraIssue, Worklog } from "@/types";
+import { JiraIssue, Worklog } from "@/types/models";
 
 class JiraClient {
   private domain: string;

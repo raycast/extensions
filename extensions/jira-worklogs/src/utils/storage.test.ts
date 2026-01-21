@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { __resetMockStorage, LocalStorage } from "@/__mocks__/@raycast/api";
-import { Worklog } from "@/types";
+import { Worklog } from "@/types/models";
 import { clearWorklogs, deleteWorklog, getWorklogs, saveWorklog } from "./storage";
 
 const WORKLOGS_KEY = "jira-worklogs-local";

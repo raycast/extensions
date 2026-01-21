@@ -3,7 +3,7 @@ import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@ray
 import { randomUUID } from "crypto";
 import { addHours, addMinutes, differenceInSeconds, isAfter, isBefore, isValid } from "date-fns";
 
-import { Worklog } from "@/types";
+import { Worklog } from "@/types/models";
 import { getErrorMessage } from "@/utils/format";
 import { saveWorklog } from "@/utils/storage";
 

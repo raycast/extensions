@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 
-import { Worklog } from "@/types";
+import { Worklog } from "@/types/models";
 
 const WORKLOGS_KEY = "jira-worklogs-local";
 

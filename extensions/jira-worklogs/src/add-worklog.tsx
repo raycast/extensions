@@ -3,7 +3,7 @@ import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast, useNaviga
 import { randomUUID } from "crypto";
 import { differenceInSeconds } from "date-fns";
 
-import { JiraIssue, Worklog } from "@/types";
+import { JiraIssue, Worklog } from "@/types/models";
 import { getErrorMessage } from "@/utils/format";
 import { useDebounce } from "@/utils/hooks";
 import { jiraClient } from "@/utils/jira";

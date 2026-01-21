@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { differenceInSeconds, format, parseISO } from "date-fns";
 
-import { Worklog } from "@/types";
+import { Worklog } from "@/types/models";
 import { formatDuration, getErrorMessage } from "@/utils/format";
 import { jiraClient } from "@/utils/jira";
 import { deleteWorklog, getWorklogs, saveWorklog } from "@/utils/storage";
