@@ -11,6 +11,12 @@ describe("formatDuration", () => {
       expect(formatDuration(1)).toBe("00h 00m");
     });
 
+    it("handles 44 and 45 minute durations correctly", () => {
+      expect(formatDuration(2640)).toBe("00h 44m"); // 44 * 60
+      expect(formatDuration(2700)).toBe("00h 45m"); // 45 * 60
+      expect(formatDuration(2699)).toBe("00h 44m"); // 44 * 60 + 59
+    });
+
     it("handles zero seconds", () => {
       expect(formatDuration(0)).toBe("00h 00m");
     });

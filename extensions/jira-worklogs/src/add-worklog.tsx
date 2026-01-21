@@ -136,7 +136,11 @@ export default function Command({ worklog, onSave }: Props) {
 
     let durationSeconds: number | undefined;
     if (!isInProgress && values.endTime) {
-      durationSeconds = differenceInSeconds(values.endTime, startTime);
+      // Normalize dates to remove milliseconds for accurate duration calculation
+      // This prevents off-by-one errors when milliseconds are present
+      const normalizedStartTime = new Date(Math.floor(startTime.getTime() / 1000) * 1000);
+      const normalizedEndTime = new Date(Math.floor(values.endTime.getTime() / 1000) * 1000);
+      durationSeconds = differenceInSeconds(normalizedEndTime, normalizedStartTime);
       if (durationSeconds <= 0) {
         await showToast({ style: Toast.Style.Failure, title: "Duration must be positive" });
         return;
