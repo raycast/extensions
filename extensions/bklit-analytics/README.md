@@ -1,14 +1,23 @@
 # Bklit Analytics Extension
 
-Keep track of your website analytics right from your macOS menu bar. See your top countries, pageviews, and visitor stats from the last 24 hours at a glance.
+Keep track of your website analytics right from your macOS menu bar. View comprehensive analytics including top countries, device usage, top pages, referrers, and more - all from the last 24 hours.
 
 ## Features
 
-- 📊 **Menu Bar Integration**: View total pageviews directly in your menu bar
-- 🌍 **Top Countries**: See your top 5 countries with flags, views, and unique visitors
-- 🔄 **Auto-refresh**: Data updates every 5 minutes automatically
-- ⚡ **Lightning Fast**: Cached data loads instantly when you click
+### Menu Bar Command
+- 📊 **Live Pageview Count**: View total pageviews directly in your menu bar
+- 🌍 **Top 5 Countries**: See your top countries with flags, views, and unique visitors
+- 🔄 **Auto-refresh**: Data updates every 2 minutes automatically
+- ⚡ **Lightning Fast**: Optimized ClickHouse queries (15-50ms response time)
 - 🎨 **Light & Dark Mode**: Icons adapt to your system theme
+
+### Analytics Snapshot Command
+- 📈 **Top Countries**: Interactive view with visual charts and detailed stats
+- 📱 **Device Usage**: Mobile vs Desktop breakdown with percentages
+- 🔗 **Top Referrers**: See where your traffic comes from
+- 📄 **Top Pages**: Most visited pages on your site
+- 🎨 **Beautiful Charts**: QuickChart-powered visualizations
+- ⌘R **Manual Refresh**: Update all data instantly
 
 ## Getting Started
 
@@ -37,34 +46,38 @@ That's it! The extension will appear in your menu bar showing your analytics.
 
 ## Usage
 
-### Menu Bar Display
+### Menu Bar Command
 
-The menu bar shows:
+The menu bar shows your total pageviews from the last 24 hours. Click to see:
 
-- 📈 Total pageviews from the last 24 hours
-- 🎯 Custom Bklit icon (adapts to light/dark mode)
-
-### Dropdown Menu
-
-Click the menu bar icon to see:
-
-- **Top 5 Countries**: Ranked by pageviews with visitor counts
+- **Top 5 Countries**: Ranked by pageviews with flags and visitor counts
 - **Quick Actions**:
   - Open your Bklit Dashboard
-  - Refresh data manually
-  - Access preferences
+  - Refresh data manually (`⌘R`)
+  - Access preferences (`⌘,`)
 
-### Keyboard Shortcuts
+### Analytics Snapshot Command
 
-- `⌘ R` - Refresh data
-- `⌘ ,` - Open preferences
+Run **Show Analytics Snapshot** from Raycast to see:
+
+- **Top Countries**: Visual bar chart with country flags and detailed metrics
+- **Device Usage**: Pie chart showing mobile vs desktop distribution
+- **Top Referrers**: Bar chart of your traffic sources
+- **Top Pages**: Most visited pages with view counts
+
+All sections include:
+- Interactive charts powered by QuickChart
+- Detailed metadata and percentages
+- Quick actions to open dashboard or refresh data (`⌘R`)
 
 ## Privacy & Performance
 
-- Your API token is stored securely in Raycast's encrypted preferences
-- Analytics data is cached locally for instant display
-- Updates every 5 minutes in the background (minimal API usage)
-- No data is collected or shared outside of Bklit
+- 🔒 Your API token is stored securely in Raycast's encrypted preferences
+- ⚡ Optimized ClickHouse queries deliver data in 15-50ms
+- 💾 Analytics data is cached locally for instant display
+- 🔄 Menu bar updates every 2 minutes in the background
+- 🚫 No data is collected or shared outside of Bklit
+- 🌐 Supports custom dashboard URLs for self-hosted instances
 
 ## Support
 

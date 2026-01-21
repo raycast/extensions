@@ -6,6 +6,8 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
+  environment,
+  LaunchType,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
@@ -16,6 +18,7 @@ import { formatNumber, formatNumberLong } from "./utils/formatters";
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const dashboardUrl = preferences.dashboardUrl || "https://app.bklit.com";
+  const isBackgroundLaunch = environment.launchType === LaunchType.Background;
 
   // Fetch countries data with total pageviews
   const { data, isLoading, error, revalidate } = useCachedPromise(
@@ -33,16 +36,16 @@ export default function Command() {
     },
   );
 
-  // Show toast notification for errors
+  // Show toast notification for errors (only for user-initiated launches)
   useEffect(() => {
-    if (error) {
+    if (error && !isBackgroundLaunch) {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load analytics",
         message: error.message || "Network error",
       });
     }
-  }, [error]);
+  }, [error, isBackgroundLaunch]);
 
   // Use totalPageviews from API response
   const totalViews = data?.totalPageviews || 0;
@@ -62,7 +65,7 @@ export default function Command() {
     <MenuBarExtra
       icon={menuBarIcon}
       title={menuBarTitle}
-      isLoading={isLoading && !data}
+      isLoading={isLoading}
       tooltip="Bklit Analytics - Last 24 hours"
     >
       {error ? (
