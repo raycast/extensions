@@ -1,6 +1,6 @@
 # Fancy Text Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-01-06
 
 - Added a new action to decorate the generated fancy text
 
