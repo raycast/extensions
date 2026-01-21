@@ -71,7 +71,8 @@ class JiraClient {
   }
 
   async searchIssues(query: string): Promise<JiraIssue[]> {
-    const jql = `(summary ~ "${query}*" OR summary ~ "${query}~" OR key ~ "${query}") AND assignee = currentUser() ORDER BY updated DESC`;
+    const escapedQuery = query.replace(/"/g, '\\"');
+    const jql = `(summary ~ "${escapedQuery}*" OR summary ~ "${escapedQuery}~" OR key ~ "${escapedQuery}") AND assignee = currentUser() ORDER BY updated DESC`;
 
     const response = await this.fetch("search/jql", {
       method: "POST",
