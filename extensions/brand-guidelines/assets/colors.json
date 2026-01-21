@@ -1,0 +1,20 @@
+[
+  { "value": "#000000", "name": "Wayfindr Midnight" },
+  { "value": "#101828", "name": "Wayfindr Deep Navy" },
+  { "value": "#25593a", "name": "Wayfindr Evergreen" },
+  { "value": "#365b6d", "name": "Wayfindr Harbor" },
+  { "value": "#378264", "name": "Wayfindr Canopy" },
+  { "value": "#81a2b1", "name": "Wayfindr Coastal Mist" },
+  { "value": "#a05f9a", "name": "Wayfindr Orchid" },
+  { "value": "#a6b1eb", "name": "Wayfindr Periwinkle" },
+  { "value": "#a7b6f1", "name": "Wayfindr Skylight" },
+  { "value": "#adcaaf", "name": "Wayfindr Sage" },
+  { "value": "#b8d8e4", "name": "Wayfindr Ice" },
+  { "value": "#eaecf0", "name": "Wayfindr Cloud" },
+  { "value": "#eba72f", "name": "Wayfindr Amber" },
+  { "value": "#edb85a", "name": "Wayfindr Sunbeam" },
+  { "value": "#efba5b", "name": "Wayfindr Honey" },
+  { "value": "#efd4f7", "name": "Wayfindr Lilac" },
+  { "value": "#f2d0f7", "name": "Wayfindr Blossom" },
+  { "value": "#f6d3fa", "name": "Wayfindr Petal" }
+]
