@@ -1,15 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { SiteConfig } from "../types/chargebee";
 
-interface Preferences {
-  primary_site: string;
-  primary_site_name: string;
-  primary_api_key: string;
-  secondary_site?: string;
-  secondary_site_name?: string;
-  secondary_api_key?: string;
-}
-
 export function useSiteConfigs(): SiteConfig[] {
   const prefs = getPreferenceValues<Preferences>();
 
