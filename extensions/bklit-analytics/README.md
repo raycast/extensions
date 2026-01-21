@@ -5,6 +5,7 @@ Keep track of your website analytics right from your macOS menu bar. View compre
 ## Features
 
 ### Menu Bar Command
+
 - 📊 **Live Pageview Count**: View total pageviews directly in your menu bar
 - 🌍 **Top 5 Countries**: See your top countries with flags, views, and unique visitors
 - 🔄 **Auto-refresh**: Data updates every 2 minutes automatically
@@ -12,6 +13,7 @@ Keep track of your website analytics right from your macOS menu bar. View compre
 - 🎨 **Light & Dark Mode**: Icons adapt to your system theme
 
 ### Analytics Snapshot Command
+
 - 📈 **Top Countries**: Interactive view with visual charts and detailed stats
 - 📱 **Device Usage**: Mobile vs Desktop breakdown with percentages
 - 🔗 **Top Referrers**: See where your traffic comes from
@@ -66,6 +68,7 @@ Run **Show Analytics Snapshot** from Raycast to see:
 - **Top Pages**: Most visited pages with view counts
 
 All sections include:
+
 - Interactive charts powered by QuickChart
 - Detailed metadata and percentages
 - Quick actions to open dashboard or refresh data (`⌘R`)
