@@ -1,5 +1,10 @@
 # Fancy Text Changelog
 
+## [Improvement] {PR_MERGE_DATE}
+
+- Removed the unnecessary useEffect for near instant performance
+- Removed the loading state since there's no need for it
+
 ## [Feature] - 2026-01-06
 
 - Added a new action to decorate the generated fancy text
