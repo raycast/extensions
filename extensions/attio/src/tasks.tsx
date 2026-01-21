@@ -194,7 +194,6 @@ export default function Tasks() {
 
 function UpdateTask({ task }: { task: Task }) {
   type FormValues = {
-    content: string;
     deadlineAt: Date | null;
     isCompleted: boolean;
   };
@@ -207,7 +206,7 @@ function UpdateTask({ task }: { task: Task }) {
           taskId: task.id.taskId,
           requestBody: {
             data: {
-              ...values,
+              isCompleted: values.isCompleted,
               deadlineAt: values.deadlineAt ? values.deadlineAt.toISOString() : null,
             },
           },
@@ -221,25 +220,21 @@ function UpdateTask({ task }: { task: Task }) {
         toast.message = parseErrorMessage(error);
       }
     },
-    validation: {
-      content: FormValidation.Required,
-    },
     initialValues: {
-      content: task.contentPlaintext,
       deadlineAt: task.deadlineAt ? new Date(task.deadlineAt) : null,
       isCompleted: task.isCompleted,
     },
   });
   return (
     <Form
-      navigationTitle={`Tasks / ${task.id} / Update`}
+      navigationTitle={`Tasks / ${task.id.taskId} / Update`}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} title="Update Task" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Content" placeholder="Tweet about @Attio" {...itemProps.content} />
+      <Form.Description title="Content" text={task.contentPlaintext} />
       <Form.DatePicker title="Deadline" {...itemProps.deadlineAt} />
       <Form.Checkbox label="Completed" {...itemProps.isCompleted} />
     </Form>
