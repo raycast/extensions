@@ -36,6 +36,16 @@ This extension provides quick access to f.lux controls without leaving Raycast:
 - **Open F.lux Preferences** - Open the f.lux preferences window
 - **Quit F.lux** - Quit the f.lux application
 
+## Commands
+
+- Configure F.lux Options
+- Disable F.lux for an Hour
+- Disable F.lux for...
+- Toggle F.lux Color Effect to Darkroom
+- Toggle F.lux Color Effect to Movie Mode
+- Open F.lux Preferences
+- Quit F.lux
+
 ## Requirements
 
 - macOS
