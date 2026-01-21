@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef } from "react";
 import {
   ActionPanel,
   Action,
@@ -15,8 +15,8 @@ export default function Command() {
   const startTime = useRef(0);
   const [taps, setTaps] = useState<number>(0);
   const [bpm, setBPM] = useState<number>(0);
+  const [bpmToSave, setBpmToSave] = useState<number>(0);
   const preferences = getPreferenceValues<Preferences>();
-  const timeoutId = useRef<NodeJS.Timeout | null>(null);
 
   interface Preferences {
     seconds: number;
@@ -39,20 +39,18 @@ export default function Command() {
     setBPM((taps / timesince) * 60);
 
     const bpmToSave = Math.round((taps / timesince) * 60);
-
-    if (timeoutId.current !== null) {
-      clearTimeout(timeoutId.current);
-    }
-
-    timeoutId.current = setTimeout(async () => {
-      await Clipboard.copy(bpmToSave.toString());
-      await showToast({
-        style: Toast.Style.Success,
-        title: `BPM: ${bpmToSave}`,
-        message: "Copied to clipboard...",
-      });
-    }, 5000);
+    setBpmToSave(bpmToSave);
   }, [taps]);
+
+  // onAction callback
+  const handleCopyBPM = async () => {
+    await Clipboard.copy(bpmToSave.toString());
+    await showToast({
+      style: Toast.Style.Success,
+      title: `BPM: ${bpmToSave}`,
+      message: "Copied to clipboard...",
+    });
+  };
 
   return (
     <List>
@@ -68,6 +66,12 @@ export default function Command() {
               icon={Icon.Eraser}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={() => resetStart(0)}
+            />
+            <Action
+              title="Copy BPM to Clipboard"
+              icon={Icon.Clipboard}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onAction={handleCopyBPM}
             />
             <ActionPanel.Section key="secondary">
               <Action
