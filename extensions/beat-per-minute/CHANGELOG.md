@@ -1,6 +1,6 @@
 # BPM Calculator Changelog
 
-## [Unreleased]
+## [Copy BPM Feature] - {PR_MERGE_DATE}
 
 ### Changed
 
