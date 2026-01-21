@@ -1,10 +1,10 @@
-import { List, ActionPanel, Action, showHUD, popToRoot } from "@raycast/api";
-import { run } from "./utils/run";
+import { List, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { runWithFeedback } from "./utils/run";
 
 const modes = [
-  { title: "Always", value: "always", message: "Stack bar mode: always" },
-  { title: "Never", value: "never", message: "Stack bar mode: never" },
-  { title: "On Stack", value: "on-stack", message: "Stack bar mode: on-stack" },
+  { title: "Always", value: "always", message: "✓ Stack bar mode: always" },
+  { title: "Never", value: "never", message: "✓ Stack bar mode: never" },
+  { title: "On Stack", value: "on-stack", message: "✓ Stack bar mode: on-stack" },
 ];
 
 export default function Command() {
@@ -19,8 +19,7 @@ export default function Command() {
               <Action
                 title="Set Mode"
                 onAction={async () => {
-                  run("komorebic", ["stackbar-mode", mode.value]);
-                  await showHUD(mode.message);
+                  await runWithFeedback("komorebic", ["stackbar-mode", mode.value], mode.message);
                   await popToRoot();
                 }}
               />

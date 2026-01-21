@@ -1,10 +1,5 @@
-import { showHUD } from "@raycast/api";
-import { run } from "./utils/run";
+import { runWithFeedback } from "./utils/run";
 
 export default async function Command() {
-  run("yasbc", ["start"], async (error) => {
-    await showHUD("Failed to start YASB");
-    console.error(error);
-  });
-  await showHUD("YASB started");
+  await runWithFeedback("yasbc", ["start"], "YASB started", "Failed to start YASB");
 }

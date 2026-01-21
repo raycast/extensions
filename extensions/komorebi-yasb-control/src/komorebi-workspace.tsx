@@ -1,12 +1,15 @@
-import { List, ActionPanel, Action, showHUD, popToRoot } from "@raycast/api";
-import { run } from "./utils/run";
-
-const workspaces = Array.from({ length: 10 }, (_, i) => ({
-  title: `Workspace ${i}`,
-  value: i,
-}));
+import { List, ActionPanel, Action, popToRoot, getPreferenceValues } from "@raycast/api";
+import { runWithFeedback } from "./utils/run";
+import { Preferences } from "./types";
 
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+  const workspaceCount = parseInt(preferences.workspaceCount) || 10;
+  const workspaces = Array.from({ length: workspaceCount }, (_, i) => ({
+    title: `Workspace ${i}`,
+    value: i,
+  }));
+
   return (
     <List navigationTitle="Switch Workspace">
       {workspaces.map((ws) => (
@@ -18,16 +21,22 @@ export default function Command() {
               <Action
                 title="Switch to Workspace"
                 onAction={async () => {
-                  run("komorebic", ["focus-workspace", ws.value.toString()]);
-                  await showHUD(`Switched to ${ws.title}`);
+                  await runWithFeedback(
+                    "komorebic",
+                    ["focus-workspace", ws.value.toString()],
+                    `✓ Switched to ${ws.title}`,
+                  );
                   await popToRoot();
                 }}
               />
               <Action
                 title="Move Window to Workspace"
                 onAction={async () => {
-                  run("komorebic", ["move-to-workspace", ws.value.toString()]);
-                  await showHUD(`Moved window to ${ws.title}`);
+                  await runWithFeedback(
+                    "komorebic",
+                    ["move-to-workspace", ws.value.toString()],
+                    `✓ Moved window to ${ws.title}`,
+                  );
                   await popToRoot();
                 }}
               />

@@ -1,10 +1,5 @@
-import { showHUD } from "@raycast/api";
-import { run } from "./utils/run";
+import { runWithFeedback } from "./utils/run";
 
 export default async function Command() {
-  run("komorebic", ["retile"], async (error) => {
-    await showHUD("Failed to retile windows");
-    console.error(error);
-  });
-  await showHUD("Windows retiled");
+  await runWithFeedback("komorebic", ["retile"], "Windows retiled", "Failed to retile windows");
 }

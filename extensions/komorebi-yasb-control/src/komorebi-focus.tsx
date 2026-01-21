@@ -1,5 +1,5 @@
-import { List, ActionPanel, Action, showHUD, popToRoot } from "@raycast/api";
-import { run } from "./utils/run";
+import { List, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { runWithFeedback } from "./utils/run";
 
 const directions = [
   { title: "Focus Left", value: "left" },
@@ -23,8 +23,7 @@ export default function Command() {
                 title="Focus Window"
                 onAction={async () => {
                   const args = dir.value.split(" ");
-                  run("komorebic", args);
-                  await showHUD(`✓ ${dir.title}`);
+                  await runWithFeedback("komorebic", args, `✓ ${dir.title}`);
                   await popToRoot();
                 }}
               />

@@ -13,6 +13,16 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "workspaceCount",
+      "type": "textfield",
+      "required": false,
+      "title": "Workspace Count",
+      "description": "Number of workspaces to display (default: 10)",
+      "default": "10"
+    }
+  ],
   "commands": [
     {
       "name": "komorebi-stop",

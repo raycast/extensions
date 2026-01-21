@@ -1,5 +1,5 @@
-import { List, ActionPanel, Action, showHUD, popToRoot } from "@raycast/api";
-import { run } from "./utils/run";
+import { List, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { runWithFeedback } from "./utils/run";
 
 const directions = [
   { title: "Move Left", value: "left" },
@@ -20,8 +20,7 @@ export default function Command() {
               <Action
                 title="Move Window"
                 onAction={async () => {
-                  run("komorebic", ["move", dir.value]);
-                  await showHUD(`Moved ${dir.value}`);
+                  await runWithFeedback("komorebic", ["move", dir.value], `✓ Moved ${dir.value}`);
                   await popToRoot();
                 }}
               />

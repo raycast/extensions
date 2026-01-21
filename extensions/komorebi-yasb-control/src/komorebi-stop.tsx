@@ -1,10 +1,5 @@
-import { showHUD } from "@raycast/api";
-import { run } from "./utils/run";
+import { runWithFeedback } from "./utils/run";
 
 export default async function Command() {
-  run("komorebic", ["stop", "--whkd"], async (error) => {
-    await showHUD("Failed to stop komorebi");
-    console.error(error);
-  });
-  await showHUD("Komorebi stopped");
+  await runWithFeedback("komorebic", ["stop", "--whkd"], "Komorebi stopped", "Failed to stop komorebi");
 }

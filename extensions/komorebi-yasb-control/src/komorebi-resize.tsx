@@ -1,5 +1,5 @@
-import { List, ActionPanel, Action, showHUD, popToRoot } from "@raycast/api";
-import { run } from "./utils/run";
+import { List, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { runWithFeedback } from "./utils/run";
 
 const resizeActions = [
   { title: "Increase Width", value: "resize axis horizontal increase" },
@@ -25,8 +25,7 @@ export default function Command() {
                 title="Resize"
                 onAction={async () => {
                   const args = action.value.split(" ");
-                  run("komorebic", args);
-                  await showHUD(action.title);
+                  await runWithFeedback("komorebic", args, `✓ ${action.title}`);
                   await popToRoot();
                 }}
               />

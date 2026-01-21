@@ -1,32 +1,31 @@
-import { List, ActionPanel, Action, showHUD, popToRoot } from "@raycast/api";
-import { run } from "./utils/run";
+import { List, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { runWithFeedback } from "./utils/run";
 
 const stackActions = [
-  { title: "Stack Left", command: ["stack", "left"], message: "Stacked left" },
+  { title: "Stack Left", command: ["stack", "left"], message: "✓ Stacked left" },
   {
     title: "Stack Right",
     command: ["stack", "right"],
-    message: "Stacked right",
+    message: "✓ Stacked right",
   },
-  { title: "Stack Up", command: ["stack", "up"], message: "Stacked up" },
-  { title: "Stack Down", command: ["stack", "down"], message: "Stacked down" },
-  { title: "Unstack", command: ["unstack"], message: "Window unstacked" },
+  { title: "Stack Up", command: ["stack", "up"], message: "✓ Stacked up" },
+  { title: "Stack Down", command: ["stack", "down"], message: "✓ Stacked down" },
+  { title: "Unstack", command: ["unstack"], message: "✓ Window unstacked" },
 ];
 
 export default function Command() {
   return (
     <List navigationTitle="Stack Operations">
-      {stackActions.map((action, index) => (
+      {stackActions.map((action) => (
         <List.Item
-          key={index}
+          key={action.title}
           title={action.title}
           actions={
             <ActionPanel>
               <Action
                 title="Execute"
                 onAction={async () => {
-                  run("komorebic", action.command);
-                  await showHUD(action.message);
+                  await runWithFeedback("komorebic", action.command, action.message);
                   await popToRoot();
                 }}
               />
