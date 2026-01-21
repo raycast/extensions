@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "komorebi-control",
-  "title": "Komorebi Control",
+  "name": "komorebi",
+  "title": "Komorebi",
   "description": "Control your komorebi inside Raycast.",
   "icon": "komorebi-icon.png",
   "author": "nivx18818",
