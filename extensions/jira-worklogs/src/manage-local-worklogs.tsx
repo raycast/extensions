@@ -19,7 +19,7 @@ import { deleteWorklog, getWorklogs, saveWorklog } from "@/utils/storage";
 import AddWorklogCommand from "./add-worklog";
 import SplitWorklogCommand from "./split-worklog";
 
-const formatOptions = { showZeroHours: false, hideZeroMinutes: true, padHours: false, padMinutes: false };
+const summaryOptions = { showZeroHours: false, hideZeroMinutes: true, padHours: false, padMinutes: false };
 
 function getSectionSubtitle(totalSeconds: number): string {
   const prefs = getPreferenceValues<WorklogPreferences>();
@@ -30,15 +30,15 @@ function getSectionSubtitle(totalSeconds: number): string {
     const remainingSeconds = expectedSeconds - totalSeconds;
 
     if (remainingSeconds > 0) {
-      return `Total: ${formatDuration(totalSeconds, formatOptions)} (${formatDuration(remainingSeconds, { ...formatOptions, ceiling: true })} remaining)`;
+      return `Total: ${formatDuration(totalSeconds, summaryOptions)} (${formatDuration(remainingSeconds, { ...summaryOptions, ceiling: true })} remaining)`;
     } else if (remainingSeconds < 0) {
-      return `Total: ${formatDuration(totalSeconds, formatOptions)} (+${formatDuration(Math.abs(remainingSeconds), formatOptions)} overtime)`;
+      return `Total: ${formatDuration(totalSeconds, summaryOptions)} (+${formatDuration(Math.abs(remainingSeconds), summaryOptions)} overtime)`;
     } else {
-      return `Total: ${formatDuration(totalSeconds, formatOptions)} ✓`;
+      return `Total: ${formatDuration(totalSeconds, summaryOptions)} ✓`;
     }
   }
 
-  return `Total: ${formatDuration(totalSeconds, formatOptions)}`;
+  return `Total: ${formatDuration(totalSeconds, summaryOptions)}`;
 }
 
 export default function Command() {
@@ -175,7 +175,7 @@ export default function Command() {
     if (
       await confirmAlert({
         title: "Confirm Upload",
-        message: `Upload ${toUpload.length} worklogs totaling ${formatDuration(totalTimeSeconds, { showZeroHours: false, padHours: false, padMinutes: false })} to Jira?`,
+        message: `Upload ${toUpload.length} worklogs totaling ${formatDuration(totalTimeSeconds, summaryOptions)} to Jira?`,
       })
     ) {
       const toast = await showToast({
@@ -289,11 +289,8 @@ export default function Command() {
                     {
                       tag: {
                         value: !worklog.endTime
-                          ? formatDuration(
-                              Math.max(0, differenceInSeconds(now, parseISO(worklog.startTime))),
-                              formatOptions,
-                            )
-                          : formatDuration(worklog.durationSeconds!, formatOptions),
+                          ? formatDuration(Math.max(0, differenceInSeconds(now, parseISO(worklog.startTime))))
+                          : formatDuration(worklog.durationSeconds!),
                         color: !worklog.endTime ? Color.Blue : Color.SecondaryText,
                       },
                     },
