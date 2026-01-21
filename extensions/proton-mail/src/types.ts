@@ -1,13 +1,4 @@
-export interface Preferences {
-  imapHost: string;
-  imapPort: string;
-  smtpHost: string;
-  smtpPort: string;
-  username: string;
-  password: string;
-  emailsToLoad: string;
-  composeFormat: "markdown" | "plaintext";
-}
+export interface Email {
 
 export interface Email {
   uid: number;
