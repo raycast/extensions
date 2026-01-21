@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, showInFinder, showToast, Toast, useNavigation } from "@raycast/api";
-import { useEffect, type FC } from "react";
+import type { FC } from "react";
 import { useSelection } from "../hooks/use-selection";
 import type { DiskUsageSend } from "../machines/disk-usage-machine";
 import selectionStore from "../stores/selection-store";
