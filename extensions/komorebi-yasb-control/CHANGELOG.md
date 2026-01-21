@@ -1,5 +1,5 @@
 # Changelog
 
-# [Release] - 2026-01-19
+# [Release] - {PR_MERGE_DATE}
 
 Add Komorebi & YASB Control extension
