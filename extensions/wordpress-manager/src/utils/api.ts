@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, Cache } from "@raycast/api";
 
 import {
   WPPost,
@@ -21,6 +21,7 @@ import {
 class WordPressAPI {
   private baseUrl: string;
   private authHeader: string;
+  private cache = new Cache();
 
   constructor() {
     const prefs = getPreferenceValues();
@@ -70,6 +71,17 @@ class WordPressAPI {
       fetchOptions.body = JSON.stringify(body);
     }
 
+    if (method !== "GET") {
+      this.cache.clear();
+    }
+
+    if (method === "GET") {
+      const cached = this.cache.get(url);
+      if (cached) {
+        return JSON.parse(cached) as T;
+      }
+    }
+
     try {
       const response = await fetch(url, fetchOptions);
 
@@ -88,7 +100,13 @@ class WordPressAPI {
         return {} as T;
       }
 
-      return (await response.json()) as T;
+      const data = (await response.json()) as T;
+
+      if (method === "GET") {
+        this.cache.set(url, JSON.stringify(data));
+      }
+
+      return data;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error occurred";
       await showToast({
@@ -314,6 +332,11 @@ class WordPressAPI {
     const prefs = getPreferenceValues();
     const url = prefs.siteUrl.replace(/\/$/, "") + "/wp-json";
 
+    const cached = this.cache.get(url);
+    if (cached) {
+      return JSON.parse(cached) as WPSiteInfo;
+    }
+
     const response = await fetch(url, {
       headers: {
         Authorization: this.authHeader,
@@ -324,7 +347,9 @@ class WordPressAPI {
       throw new Error(`Failed to fetch site info: ${response.statusText}`);
     }
 
-    return (await response.json()) as WPSiteInfo;
+    const data = (await response.json()) as WPSiteInfo;
+    this.cache.set(url, JSON.stringify(data));
+    return data;
   }
 
   // Search across content types
