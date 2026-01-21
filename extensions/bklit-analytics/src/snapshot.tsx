@@ -13,7 +13,6 @@ import { useCachedPromise } from "@raycast/utils";
 import { fetchDeviceUsage, fetchTopCountries, fetchTopReferrers, fetchTopPages } from "./api/client";
 import { formatNumberLong } from "./utils/formatters";
 import { getCountryFlag } from "./utils/country-flags";
-import type { Preferences } from "./types";
 import { useState, useEffect } from "react";
 
 type AnalyticsSection = "countries" | "device" | "referrers" | "pages";
@@ -28,6 +27,7 @@ export default function Command() {
     data: deviceData,
     isLoading: deviceLoading,
     error: deviceError,
+    revalidate: revalidateDevice,
   } = useCachedPromise(
     async () => {
       const result = await fetchDeviceUsage();
@@ -42,6 +42,7 @@ export default function Command() {
     data: countriesData,
     isLoading: countriesLoading,
     error: countriesError,
+    revalidate: revalidateCountries,
   } = useCachedPromise(
     async () => {
       const result = await fetchTopCountries();
@@ -56,6 +57,7 @@ export default function Command() {
     data: referrersData,
     isLoading: referrersLoading,
     error: referrersError,
+    revalidate: revalidateReferrers,
   } = useCachedPromise(
     async () => {
       const result = await fetchTopReferrers();
@@ -70,6 +72,7 @@ export default function Command() {
     data: pagesData,
     isLoading: pagesLoading,
     error: pagesError,
+    revalidate: revalidatePages,
   } = useCachedPromise(
     async () => {
       const result = await fetchTopPages();
@@ -79,6 +82,14 @@ export default function Command() {
     [],
     { initialData: undefined, keepPreviousData: true },
   );
+
+  // Refresh all data
+  const refreshAll = () => {
+    revalidateDevice();
+    revalidateCountries();
+    revalidateReferrers();
+    revalidatePages();
+  };
 
   // Handle errors with toast notifications
   useEffect(() => {
@@ -424,6 +435,12 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open Dashboard" url={`${dashboardUrl}/projects/${preferences.projectId}`} />
+            <Action
+              title="Refresh All Data"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={refreshAll}
+            />
             <Action title="Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
@@ -442,6 +459,12 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open Dashboard" url={`${dashboardUrl}/projects/${preferences.projectId}`} />
+            <Action
+              title="Refresh All Data"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={refreshAll}
+            />
             <Action title="Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
@@ -456,6 +479,12 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open Dashboard" url={`${dashboardUrl}/projects/${preferences.projectId}`} />
+            <Action
+              title="Refresh All Data"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={refreshAll}
+            />
             <Action title="Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
@@ -470,6 +499,12 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open Dashboard" url={`${dashboardUrl}/projects/${preferences.projectId}`} />
+            <Action
+              title="Refresh All Data"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={refreshAll}
+            />
             <Action title="Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }

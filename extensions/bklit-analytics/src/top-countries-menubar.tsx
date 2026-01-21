@@ -12,13 +12,12 @@ import { useEffect } from "react";
 import { fetchTopCountries } from "./api/client";
 import { getCountryFlag } from "./utils/country-flags";
 import { formatNumber, formatNumberLong } from "./utils/formatters";
-import type { Preferences } from "./types";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const dashboardUrl = preferences.dashboardUrl || "https://app.bklit.com";
 
-  // Fetch data with 5-minute cache
+  // Fetch countries data with total pageviews
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
       const result = await fetchTopCountries();
@@ -45,14 +44,14 @@ export default function Command() {
     }
   }, [error]);
 
-  // Calculate total views
-  const totalViews = data?.data?.reduce((sum, country) => sum + country.views, 0) || 0;
+  // Use totalPageviews from API response
+  const totalViews = data?.totalPageviews || 0;
 
   // Menu bar title - don't show "Loading..." if we have cached data
   const menuBarTitle = error
     ? "Error"
     : totalViews > 0
-      ? `${formatNumber(totalViews)}`
+      ? formatNumber(totalViews)
       : isLoading
         ? "Loading..."
         : "No data";
@@ -76,7 +75,7 @@ export default function Command() {
         </>
       ) : data?.data && data.data.length > 0 ? (
         <>
-          <MenuBarExtra.Section title={`Top Countries (${formatNumberLong(totalViews)} total pageviews)`}>
+          <MenuBarExtra.Section title={`Top 5 Countries (${formatNumberLong(totalViews)} total pageviews)`}>
             {data.data.map((country) => (
               <MenuBarExtra.Item
                 key={country.countryCode}

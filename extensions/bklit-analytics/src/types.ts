@@ -1,9 +1,3 @@
-export interface Preferences {
-  apiToken: string;
-  projectId: string;
-  dashboardUrl?: string;
-}
-
 export interface TopCountryData {
   country: string;
   countryCode: string;
@@ -14,6 +8,7 @@ export interface TopCountryData {
 export interface ApiResponse {
   success: boolean;
   data?: TopCountryData[];
+  totalPageviews?: number;
   error?: string;
   period?: {
     startDate: string;
@@ -52,6 +47,7 @@ export interface ReferrerData {
 export interface ReferrerApiResponse {
   success: boolean;
   data?: ReferrerData[];
+  totalPageviews?: number;
   error?: string;
   period?: {
     startDate: string;
@@ -67,6 +63,24 @@ export interface PageData {
 export interface PageApiResponse {
   success: boolean;
   data?: PageData[];
+  totalPageviews?: number;
+  error?: string;
+  period?: {
+    startDate: string;
+    endDate: string;
+  };
+}
+
+export interface BrowserData {
+  browser: string;
+  views: number;
+  percentage: number;
+}
+
+export interface BrowserUsageApiResponse {
+  success: boolean;
+  data?: BrowserData[];
+  totalPageviews?: number;
   error?: string;
   period?: {
     startDate: string;

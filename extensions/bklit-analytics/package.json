@@ -22,7 +22,7 @@
       "subtitle": "Bklit Analytics",
       "description": "Shows top countries from the last 24 hours in your menu bar",
       "mode": "menu-bar",
-      "interval": "5m"
+      "interval": "2m"
     },
     {
       "name": "snapshot",
