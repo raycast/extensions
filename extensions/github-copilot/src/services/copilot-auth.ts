@@ -5,6 +5,7 @@ const DEVICE_CODE_URL = "https://github.com/login/device/code";
 const ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token";
 
 const STORAGE_KEY = "copilot_github_access_token";
+const AUTH_TIMEOUT_MINUTES = 10;
 
 type DeviceCodeResponse = {
   device_code: string;
@@ -50,10 +51,24 @@ export async function initiateDeviceFlow(): Promise<DeviceCodeResponse> {
   return response.json() as Promise<DeviceCodeResponse>;
 }
 
-export async function pollForAccessToken(deviceCode: string, interval: number = 5): Promise<string> {
+type PollOptions = {
+  deviceCode: string;
+  interval?: number;
+  timeoutMs?: number;
+};
+
+export async function pollForAccessToken({
+  deviceCode,
+  interval = 5,
+  timeoutMs = AUTH_TIMEOUT_MINUTES * 60 * 1000,
+}: PollOptions): Promise<string> {
   const pollInterval = Math.max(interval, 5) * 1000;
+  const startTime = Date.now();
 
   while (true) {
+    if (Date.now() - startTime > timeoutMs) {
+      throw new Error("Authentication timed out. Please try again.");
+    }
     await sleep(pollInterval);
 
     const response = await fetch(ACCESS_TOKEN_URL, {

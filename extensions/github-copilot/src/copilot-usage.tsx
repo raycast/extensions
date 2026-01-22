@@ -27,7 +27,7 @@ function Command() {
         message: `Enter ${deviceFlow.user_code} at github.com/login/device`,
       });
 
-      await pollForAccessToken(deviceFlow.device_code, deviceFlow.interval);
+      await pollForAccessToken({ deviceCode: deviceFlow.device_code, interval: deviceFlow.interval });
 
       await showToast({ style: Toast.Style.Success, title: "Authenticated successfully" });
       setUserCode(null);

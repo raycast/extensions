@@ -1,5 +1,11 @@
 # GitHub Copilot Changelog
 
+## [Copilot usage auth] - 2026-01-22
+
+- Fix auth for Copilot usage command using device flow
+- Add login/logout actions
+- Add 10 min timeout to auth polling
+
 ## [Menu bar command] - 2026-01-09
 
 - Hide the menu bar command when there are no open pull requests
