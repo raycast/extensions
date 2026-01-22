@@ -8,9 +8,9 @@ import type {
 } from "../types";
 
 const DEFAULT_DASHBOARD_URL = "https://app.bklit.com";
-// Increased timeout to 60 seconds since API can sometimes take 30+ seconds
-// This prevents premature timeouts while still preventing infinite hangs
-const FETCH_TIMEOUT_MS = 60000; // 60 seconds timeout
+// API endpoints optimized with ClickHouse aggregation (~20-50ms warm, ~1-3s cold start)
+// 15 second timeout provides margin for cold starts while failing fast on real issues
+const FETCH_TIMEOUT_MS = 15000; // 15 seconds timeout
 
 // Helper function to add timeout to fetch requests
 async function fetchWithTimeout(
@@ -32,7 +32,7 @@ async function fetchWithTimeout(
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {
       const timeoutSeconds = Math.round(timeoutMs / 1000);
-      throw new Error(`Request timeout after ${timeoutSeconds} seconds. The API may be slow - please try again.`);
+      throw new Error(`Request timeout after ${timeoutSeconds}s. The server may be experiencing high load.`);
     }
     throw error;
   }
@@ -62,10 +62,11 @@ async function makeApiRequest(
   );
 
   const fetchTime = Date.now() - startTime;
-  // Note: This API typically takes 8-12 seconds per endpoint (server-side performance)
-  // Only warn if it's unusually slow (>15 seconds)
-  if (fetchTime > 15000) {
-    console.warn(`[API] Very slow fetch for ${endpointName}: ${fetchTime}ms`);
+  // ClickHouse-optimized endpoints: ~20-50ms warm, ~1-3s cold start
+  if (fetchTime > 3000) {
+    console.warn(`[API] Slow fetch for ${endpointName}: ${fetchTime}ms (cold start)`);
+  } else if (fetchTime > 500) {
+    console.log(`[API] ${endpointName} fetched in ${fetchTime}ms (warming up)`);
   } else {
     console.log(`[API] ${endpointName} fetched in ${fetchTime}ms`);
   }
@@ -251,4 +252,30 @@ export async function fetchBrowserUsage(): Promise<BrowserUsageApiResponse> {
       error: error instanceof Error ? error.message : "Network error",
     };
   }
+}
+
+// Combined fetch for all analytics data - runs requests in parallel
+// This is more efficient than separate useCachedPromise calls
+export interface AllAnalyticsData {
+  countries: ApiResponse;
+  deviceUsage: DeviceUsageApiResponse;
+  referrers: ReferrerApiResponse;
+  pages: PageApiResponse;
+}
+
+export async function fetchAllAnalytics(): Promise<AllAnalyticsData> {
+  const startTime = Date.now();
+  console.log("[API] Starting parallel fetch for all analytics...");
+
+  const [countries, deviceUsage, referrers, pages] = await Promise.all([
+    fetchTopCountries(),
+    fetchDeviceUsage(),
+    fetchTopReferrers(),
+    fetchTopPages(),
+  ]);
+
+  const totalTime = Date.now() - startTime;
+  console.log(`[API] All analytics fetched in ${totalTime}ms (parallel)`);
+
+  return { countries, deviceUsage, referrers, pages };
 }

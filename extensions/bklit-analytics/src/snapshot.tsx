@@ -1,117 +1,75 @@
 import { List, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchDeviceUsage, fetchTopCountries, fetchTopReferrers, fetchTopPages } from "./api/client";
+import { fetchAllAnalytics } from "./api/client";
 import { useState, useEffect, useMemo } from "react";
 import { DeviceUsageDetail } from "./components/DeviceUsageDetail";
 import { CountriesDetail } from "./components/CountriesDetail";
 import { ReferrersDetail } from "./components/ReferrersDetail";
 import { PagesDetail } from "./components/PagesDetail";
 import { CommonActions } from "./components/CommonActions";
-import { AnalyticsSection } from "./types";
+import { AnalyticsSection, DeviceUsageData, TopCountryData, ReferrerData, PageData } from "./types";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const dashboardUrl = preferences.dashboardUrl || "https://app.bklit.com";
   const [selectedSection, setSelectedSection] = useState<AnalyticsSection>("countries");
 
-  // Fetch each endpoint separately for progressive updates
-  // This allows data to appear as it arrives, rather than waiting for all requests
-  const {
-    data: deviceResult,
-    isLoading: deviceLoading,
-    error: deviceError,
-    revalidate: revalidateDevice,
-  } = useCachedPromise(
+  // Fetch all endpoints in parallel with a single cached promise
+  // This ensures truly parallel execution and single cache management
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
-      const result = await fetchDeviceUsage();
-      if (!result.success) throw new Error(result.error || "Failed to fetch device data");
-      return result.data;
-    },
-    [],
-    { initialData: undefined, keepPreviousData: true },
-  );
+      const result = await fetchAllAnalytics();
 
-  const {
-    data: countriesData,
-    isLoading: countriesLoading,
-    error: countriesError,
-    revalidate: revalidateCountries,
-  } = useCachedPromise(
-    async () => {
-      const result = await fetchTopCountries();
-      if (!result.success) throw new Error(result.error || "Failed to fetch countries data");
-      return result.data;
-    },
-    [],
-    { initialData: undefined, keepPreviousData: true },
-  );
+      // Collect errors from individual endpoints
+      const errors: string[] = [];
+      if (!result.countries.success) errors.push(`Countries: ${result.countries.error}`);
+      if (!result.deviceUsage.success) errors.push(`Device: ${result.deviceUsage.error}`);
+      if (!result.referrers.success) errors.push(`Referrers: ${result.referrers.error}`);
+      if (!result.pages.success) errors.push(`Pages: ${result.pages.error}`);
 
-  const {
-    data: referrersData,
-    isLoading: referrersLoading,
-    error: referrersError,
-    revalidate: revalidateReferrers,
-  } = useCachedPromise(
-    async () => {
-      const result = await fetchTopReferrers();
-      if (!result.success) throw new Error(result.error || "Failed to fetch referrers data");
-      return result.data;
-    },
-    [],
-    { initialData: undefined, keepPreviousData: true },
-  );
-
-  const {
-    data: pagesData,
-    isLoading: pagesLoading,
-    error: pagesError,
-    revalidate: revalidatePages,
-  } = useCachedPromise(
-    async () => {
-      const result = await fetchTopPages();
-      if (!result.success) throw new Error(result.error || "Failed to fetch pages data");
-      return result.data;
-    },
-    [],
-    { initialData: undefined, keepPreviousData: true },
-  );
-
-  const isLoading = deviceLoading || countriesLoading || referrersLoading || pagesLoading;
-
-  // Refresh all data
-  const refreshAll = () => {
-    revalidateDevice();
-    revalidateCountries();
-    revalidateReferrers();
-    revalidatePages();
-  };
-
-  // Handle errors with toast notifications (consolidated)
-  // Note: Multiple errors may trigger multiple toasts, which is intentional to show all failures
-  useEffect(() => {
-    const errors = [
-      { error: deviceError, name: "device" },
-      { error: countriesError, name: "countries" },
-      { error: referrersError, name: "referrers" },
-      { error: pagesError, name: "pages" },
-    ];
-
-    errors.forEach(({ error, name }) => {
-      if (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: `Failed to load ${name} data`,
-          message: error.message,
-        });
+      // If all failed, throw an error
+      if (errors.length === 4) {
+        throw new Error(errors[0]);
       }
-    });
-  }, [deviceError, countriesError, referrersError, pagesError]);
+
+      return {
+        device: result.deviceUsage.data,
+        countries: result.countries.data,
+        referrers: result.referrers.data,
+        pages: result.pages.data,
+        partialErrors: errors.length > 0 ? errors : undefined,
+      };
+    },
+    [],
+    { initialData: undefined, keepPreviousData: true },
+  );
+
+  // Extract data from combined result
+  const deviceResult: DeviceUsageData | undefined = data?.device;
+  const countriesData: TopCountryData[] | undefined = data?.countries;
+  const referrersData: ReferrerData[] | undefined = data?.referrers;
+  const pagesData: PageData[] | undefined = data?.pages;
+
+  // Handle errors with toast notifications
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load analytics",
+        message: error.message,
+      });
+    } else if (data?.partialErrors) {
+      // Show warning for partial failures
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Some data failed to load",
+        message: data.partialErrors.join(", "),
+      });
+    }
+  }, [error, data?.partialErrors]);
 
   // Memoize computed values to avoid recalculations
-  const hasErrors = useMemo(
-    () => !isLoading && !!(deviceError || countriesError || referrersError || pagesError),
-    [isLoading, deviceError, countriesError, referrersError, pagesError],
-  );
+  const hasErrors = useMemo(() => !isLoading && !!error, [isLoading, error]);
 
   const hasValidData = useMemo(
     () =>
@@ -129,15 +87,9 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Failed to Load Data"
-          description={
-            deviceError?.message ||
-            countriesError?.message ||
-            referrersError?.message ||
-            pagesError?.message ||
-            "Unable to load analytics data. Please check your API key and project ID."
-          }
+          description={error?.message || "Unable to load analytics data. Please check your API key and project ID."}
           actions={
-            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={refreshAll} />
+            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={revalidate} />
           }
         />
       </List>
@@ -154,7 +106,7 @@ export default function Command() {
           title="No Data Available"
           description="No analytics data found. Make sure your project has collected some data."
           actions={
-            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={refreshAll} />
+            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={revalidate} />
           }
         />
       </List>
@@ -176,9 +128,9 @@ export default function Command() {
           accessories={
             countriesData && countriesData.length > 0 ? [{ text: `${countriesData.length} countries` }] : undefined
           }
-          detail={<CountriesDetail data={countriesData} isLoading={countriesLoading} />}
+          detail={<CountriesDetail data={countriesData} isLoading={isLoading} />}
           actions={
-            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={refreshAll} />
+            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={revalidate} />
           }
         />
 
@@ -195,9 +147,9 @@ export default function Command() {
                 ]
               : undefined
           }
-          detail={<DeviceUsageDetail data={deviceResult} isLoading={deviceLoading} />}
+          detail={<DeviceUsageDetail data={deviceResult} isLoading={isLoading} />}
           actions={
-            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={refreshAll} />
+            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={revalidate} />
           }
         />
 
@@ -208,9 +160,9 @@ export default function Command() {
           accessories={
             referrersData && referrersData.length > 0 ? [{ text: `${referrersData.length} sources` }] : undefined
           }
-          detail={<ReferrersDetail data={referrersData} isLoading={referrersLoading} />}
+          detail={<ReferrersDetail data={referrersData} isLoading={isLoading} />}
           actions={
-            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={refreshAll} />
+            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={revalidate} />
           }
         />
 
@@ -219,9 +171,9 @@ export default function Command() {
           title="Top Pages"
           icon={Icon.Document}
           accessories={pagesData && pagesData.length > 0 ? [{ text: `${pagesData.length} pages` }] : undefined}
-          detail={<PagesDetail data={pagesData} isLoading={pagesLoading} />}
+          detail={<PagesDetail data={pagesData} isLoading={isLoading} />}
           actions={
-            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={refreshAll} />
+            <CommonActions dashboardUrl={dashboardUrl} projectId={preferences.projectId} onRefresh={revalidate} />
           }
         />
       </>
