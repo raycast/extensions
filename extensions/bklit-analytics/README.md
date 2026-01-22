@@ -1,3 +1,5 @@
+![Bklit Analytics Extension](./assets/twitter-raycast.png)
+
 # Bklit Analytics Extension
 
 Keep track of your website analytics right from your macOS menu bar. View comprehensive analytics including top countries, device usage, top pages, referrers, and more - all from the last 24 hours.
