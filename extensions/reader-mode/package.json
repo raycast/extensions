@@ -213,6 +213,13 @@
       "required": false
     },
     {
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Path to save downloaded files. If not set, defaults to Downloads folder.",
+      "type": "directory",
+      "required": false
+    },
+    {
       "name": "enablePaywallHopper",
       "title": "Paywall Hopper",
       "description": "Try to retrieve paywalled or member-only content from archive services.",

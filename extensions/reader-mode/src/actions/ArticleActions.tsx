@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, Keyboard, showToast, Toast, getPreferenceValues, showInFinder } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 import { writeFile, mkdir } from "fs/promises";
@@ -22,9 +22,7 @@ interface ArticleActionsProps {
   articleUrl: string;
   articleTitle: string;
   markdown: string;
-  articleMarkdown: string;
   currentSummary: string | null;
-  summaryStyle: SummaryStyle | null;
   canAccessAI: boolean;
   isSummarizing?: boolean;
   onSummarize: (style: SummaryStyle) => void;
@@ -41,17 +39,24 @@ function sanitizeFilename(title: string): string {
 }
 
 async function saveFile(content: string, filename: string, extension: string): Promise<void> {
-  const downloadsDir = join(homedir(), "Downloads");
+  const { downloadPath } = getPreferenceValues<ExtensionPreferences>();
+  const saveDir = downloadPath || join(homedir(), "Downloads");
   const fullFilename = `${sanitizeFilename(filename)}.${extension}`;
-  const filepath = join(downloadsDir, fullFilename);
+  const filepath = join(saveDir, fullFilename);
 
   try {
-    await mkdir(downloadsDir, { recursive: true });
+    await mkdir(saveDir, { recursive: true });
     await writeFile(filepath, content, "utf-8");
     await showToast({
       style: Toast.Style.Success,
       title: "File Saved",
       message: fullFilename,
+      primaryAction: {
+        title: "Reveal in Finder",
+        onAction: async () => {
+          await showInFinder(filepath);
+        },
+      },
     });
   } catch (error) {
     await showToast({
@@ -66,9 +71,7 @@ export function ArticleActions({
   articleUrl,
   articleTitle,
   markdown,
-  articleMarkdown,
   currentSummary,
-  summaryStyle,
   canAccessAI,
   isSummarizing,
   onSummarize,
@@ -76,8 +79,6 @@ export function ArticleActions({
   onReimportFromBrowser,
   archiveSource,
 }: ArticleActionsProps) {
-  const hasSummary = !!currentSummary;
-
   return (
     <ActionPanel>
       {isSummarizing && onStopSummarizing && (
@@ -96,65 +97,24 @@ export function ArticleActions({
         </ActionPanel.Submenu>
       )}
 
-      {/* Copy… submenu */}
-      <ActionPanel.Submenu title="Copy…" icon={Icon.Clipboard} shortcut={Keyboard.Shortcut.Common.Copy}>
-        {hasSummary && (
-          <>
-            <Action.CopyToClipboard title="Summary as Markdown" content={currentSummary} icon={Icon.Document} />
-            <Action.CopyToClipboard title="Summary as HTML" content={markdownToHtml(currentSummary)} icon={Icon.Code} />
-          </>
-        )}
-        <Action.CopyToClipboard title="Article as Markdown" content={articleMarkdown} icon={Icon.Document} />
-        <Action.CopyToClipboard title="Article as HTML" content={markdownToHtml(articleMarkdown)} icon={Icon.Code} />
-        {hasSummary && summaryStyle && (
-          <>
-            <Action.CopyToClipboard title="All as Markdown" content={markdown} icon={Icon.Document} />
-            <Action.CopyToClipboard title="All as HTML" content={markdownToHtml(markdown)} icon={Icon.Code} />
-          </>
-        )}
-      </ActionPanel.Submenu>
-
-      {/* Save… submenu */}
-      <ActionPanel.Submenu title="Save…" icon={Icon.Download} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
-        {hasSummary && (
-          <>
-            <Action
-              title="Summary as Markdown"
-              icon={Icon.Document}
-              onAction={() => saveFile(currentSummary, `${articleTitle}-summary`, "md")}
-            />
-            <Action
-              title="Summary as HTML"
-              icon={Icon.Code}
-              onAction={() => saveFile(markdownToHtml(currentSummary), `${articleTitle}-summary`, "html")}
-            />
-          </>
-        )}
-        <Action
-          title="Article as Markdown"
-          icon={Icon.Document}
-          onAction={() => saveFile(articleMarkdown, articleTitle, "md")}
-        />
-        <Action
-          title="Article as HTML"
-          icon={Icon.Code}
-          onAction={() => saveFile(markdownToHtml(articleMarkdown), articleTitle, "html")}
-        />
-        {hasSummary && summaryStyle && (
-          <>
-            <Action
-              title="All as Markdown"
-              icon={Icon.Document}
-              onAction={() => saveFile(markdown, `${articleTitle}-with-summary`, "md")}
-            />
-            <Action
-              title="All as HTML"
-              icon={Icon.Code}
-              onAction={() => saveFile(markdownToHtml(markdown), `${articleTitle}-with-summary`, "html")}
-            />
-          </>
-        )}
-      </ActionPanel.Submenu>
+      <Action.CopyToClipboard
+        title="Copy as Markdown"
+        content={markdown}
+        icon={Icon.Document}
+        shortcut={Keyboard.Shortcut.Common.Copy}
+      />
+      <Action.CopyToClipboard title="Copy as HTML" content={markdownToHtml(markdown)} icon={Icon.Code} />
+      <Action
+        title="Save as Markdown"
+        icon={Icon.Document}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        onAction={() => saveFile(markdown, articleTitle, "md")}
+      />
+      <Action
+        title="Save as HTML"
+        icon={Icon.Code}
+        onAction={() => saveFile(markdownToHtml(markdown), articleTitle, "html")}
+      />
 
       <Action.OpenInBrowser title="Open in Browser" url={articleUrl} shortcut={Keyboard.Shortcut.Common.Open} />
       <Action.CopyToClipboard

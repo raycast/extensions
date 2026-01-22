@@ -101,7 +101,6 @@ export function ArticleDetailView({
   onReimportFromBrowser,
 }: ArticleDetailViewProps) {
   const markdown = buildMarkdown(article, summaryStyle, currentSummary, isSummarizing);
-  const articleMarkdown = buildArticleMarkdown(article);
 
   return (
     <Detail
@@ -113,9 +112,7 @@ export function ArticleDetailView({
           articleUrl={article.url}
           articleTitle={article.title}
           markdown={markdown}
-          articleMarkdown={articleMarkdown}
           currentSummary={currentSummary}
-          summaryStyle={summaryStyle}
           canAccessAI={canAccessAI}
           isSummarizing={isSummarizing}
           onSummarize={onSummarize}
