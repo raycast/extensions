@@ -53,7 +53,9 @@ export function Details(props: DetailsProps) {
 
     return `
 <img src="${result.imageUrl}" width="150" />
+
 # ${result.name}
+
 ${description}
 
 ## ${pluralize(result.playableOn.length, "Platform")}
@@ -131,16 +133,16 @@ function parseDetails(html: string, id: string): HowLongToBeatEntry {
   let gameplayMainExtra = 0;
   let gameplayComplete = 0;
 
-  gameName = $("div[class*=GameHeader_profile_header__]").text();
-  imageUrl = $("div[class*=GameHeader_game_image__]").find("img")[0].attribs.src;
+  gameName = $("div[class*='profile_header'].shadow_text").text();
+  imageUrl = $("div[class*='game_image']").find("img")[0].attribs.src;
 
-  const liElements = $("div[class*=GameStats_game_times__] li");
+  const divElements = $("div[class*='game_times'] div");
 
-  const gameDescription = $(".in.back_primary.shadow_box div[class*=GameSummary_large__]").text();
+  const gameDescription = $(".in.back_primary.shadow_box div[class*='GameSummary'][class*='large']").text();
 
   let platforms: string[] = [];
 
-  $("div[class*=GameSummary_profile_info__]").each(function () {
+  $("div[class*='GameSummary'][class*='profile_info']").each(function () {
     const metaData = $(this).text();
     const platformKeyword = metaData.includes("Platforms:") ? "Platforms:" : "Platform:";
     platforms = metaData
@@ -150,7 +152,7 @@ function parseDetails(html: string, id: string): HowLongToBeatEntry {
       .map((data) => data.trim());
   });
 
-  liElements.each(function () {
+  divElements.each(function () {
     const type: string = $(this).find("h4").text();
     const time: number = parseTime($(this).find("h5").text());
     if (type.startsWith("Main Story") || type.startsWith("Single-Player") || type.startsWith("Solo")) {

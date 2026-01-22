@@ -1,5 +1,10 @@
 # Howlongtobeat Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix: search error when fetching games by search
+- Fix: detail page not loading
+
 ## [Fixes] - 2025-10-13
 
 - Fix: Hash not found error when fetching games by search
