@@ -60,7 +60,7 @@ function SearchListItem({
   return (
     <List.Item
       title={searchResult.name}
-      accessoryTitle={!isShowingDetail ? `Main Story: ${mainStoryText}` : undefined}
+      subtitle={!isShowingDetail ? `Main Story: ${mainStoryText}` : undefined}
       detail={
         <List.Item.Detail
           isLoading={isLoading}
@@ -91,8 +91,8 @@ function SearchListItem({
               onAction={() => push(<Details id={searchResult.id} name={searchResult.name} />)}
             />
             <Action
-              title={isShowingDetail ? "Hide Preview" : "Show Preview"}
-              icon={Icon.TextDocument}
+              title="Toggle Details"
+              icon={Icon.AppWindowSidebarLeft}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
               onAction={onToggleDetail}
             />
