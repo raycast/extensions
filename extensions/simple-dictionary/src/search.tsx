@@ -21,7 +21,6 @@ import { useEffect, useState } from "react";
 import Dictionary, { GroupedEntry, Sense } from "./classes/dictionary";
 import Favorite from "./classes/favorite";
 import History from "./classes/history";
-import { showFailureToast } from "@raycast/utils";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.Search }>) {
   let d: Dictionary;
@@ -37,20 +36,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   const [languageFull, setLanguageFull] = useState<string>(language);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Record<string, boolean>>({}); // key: `${partOfSpeech}-${j}`
-
-  if (!language) {
-    showFailureToast("Please select a language");
-    return (
-      <Detail
-        markdown={`# ERROR \n\n Please select a language via Argument OR set a default one in Preferences`}
-        actions={
-          <ActionPanel>
-            <Action icon={Icon.Gear} title="Open Command Preferences" onAction={openCommandPreferences} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
 
   useEffect(() => {
     d = new Dictionary(language, word);
@@ -102,6 +87,19 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
 
     if (Object.keys(groupedEntries).length) checkFavorites();
   }, [groupedEntries, languageFull, word]);
+
+  if (!language) {
+    return (
+      <Detail
+        markdown={`# ERROR \n\n Please select a language via Argument OR set a default one in Preferences`}
+        actions={
+          <ActionPanel>
+            <Action icon={Icon.Gear} title="Open Command Preferences" onAction={openCommandPreferences} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   return (
     <List
