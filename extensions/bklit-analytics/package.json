@@ -5,12 +5,12 @@
   "description": "This extension allows you to see your analytics daily digest both in your menu bar and in a snapshot view.",
   "icon": "extension-icon.png",
   "author": "uixmat",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "platforms": [
     "macOS",
     "Windows"
-  ],
-  "contributors": [
-    "pernielsentikaer"
   ],
   "categories": [
     "Web",
