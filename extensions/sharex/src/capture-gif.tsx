@@ -1,9 +1,9 @@
 import { showToast, Toast, closeMainWindow, getPreferenceValues } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { access } from "fs/promises";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export default async function Command() {
   await closeMainWindow();
@@ -12,7 +12,7 @@ export default async function Command() {
     const sharexPath = prefs.sharexPath || "C:\\Program Files\\ShareX\\ShareX.exe";
 
     await access(sharexPath);
-    await execAsync(`"${sharexPath}" -ScreenRecorderGIF`);
+    await execFileAsync(sharexPath, ["-ScreenRecorderGIF"]);
   } catch (error) {
     const title =
       error instanceof Error && "code" in error && error.code === "ENOENT"
