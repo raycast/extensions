@@ -4,6 +4,13 @@
   "title": "ShareX",
   "description": "Browse and create ShareX screenshots, videos, and GIFs from Raycast",
   "icon": "ShareX_Logo.png",
+  "author": "the_revolution",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -30,33 +37,6 @@
       "description": "Capture screen as GIF via ShareX",
       "mode": "no-view"
     }
-  ],
-  "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
-  },
-  "scripts": {
-    "dev": "ray develop",
-    "lint": "ray lint",
-    "fix-lint": "ray lint --fix",
-    "build": "ray build",
-    "publish": "npx @raycast/api@latest publish",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
-  },
-  "author": "the_revolution",
-  "platforms": [
-    "Windows"
-  ],
-  "categories": [
-    "Media"
   ],
   "preferences": [
     {
@@ -140,6 +120,35 @@
           "value": "16/9"
         }
       ]
+    },
+    {
+      "name": "mockMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Mock Mode",
+      "description": "Enable mock mode for screenshots",
+      "default": false,
+      "label": "Enable Mock Mode"
     }
-  ]
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
 }

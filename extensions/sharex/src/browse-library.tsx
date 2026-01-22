@@ -16,13 +16,6 @@ import { homedir } from "os";
 import { join } from "path";
 import { readdir, stat } from "fs/promises";
 
-interface Preferences {
-  screenshotsPath: string;
-  folderLimit: string;
-  gridColumns: string;
-  aspectRatio: string;
-}
-
 interface Screenshot {
   path: string;
   name: string;
@@ -44,6 +37,29 @@ export default function Command() {
 
   async function loadScreenshots() {
     const prefs = getPreferenceValues<Preferences>();
+
+    if (prefs.mockMode) {
+      const mockScreenshots: Screenshot[] = [];
+      const folders = ["2025-12", "2025-11", "2025-10"];
+      const prefixes = ["node", "Zed", "Capture"];
+
+      for (const folder of folders) {
+        for (let i = 0; i < 15; i++) {
+          const prefix = prefixes[i % prefixes.length];
+          const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
+          mockScreenshots.push({
+            path: `https://picsum.photos/seed/${folder}-${i}/800/600`,
+            name: `${prefix}_${timestamp}_${i}.png`,
+            folder: folder,
+            created: Date.now() - i * 3600000 - folders.indexOf(folder) * 86400000 * 30,
+          });
+        }
+      }
+      setScreenshots(mockScreenshots);
+      setIsLoading(false);
+      return;
+    }
+
     const basePath = prefs.screenshotsPath || join(homedir(), "Documents", "ShareX", "Screenshots");
     const limit = parseInt(prefs.folderLimit) || 5;
 
@@ -183,27 +199,33 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Open title="Open" target={screenshot.path} />
-                  <Action.ShowInFinder path={screenshot.path} shortcut={{ modifiers: ["ctrl"], key: "enter" }} />
-                  <Action
-                    title="Copy File"
-                    icon={Icon.CopyClipboard}
-                    shortcut={{ modifiers: ["ctrl"], key: "c" }}
-                    onAction={() => copyFileToClipboard(screenshot.path)}
-                  />
+                  {!screenshot.path.startsWith("http") && (
+                    <>
+                      <Action.ShowInFinder path={screenshot.path} shortcut={{ modifiers: ["ctrl"], key: "enter" }} />
+                      <Action
+                        title="Copy File"
+                        icon={Icon.CopyClipboard}
+                        shortcut={{ modifiers: ["ctrl"], key: "c" }}
+                        onAction={() => copyFileToClipboard(screenshot.path)}
+                      />
+                    </>
+                  )}
                   <Action.CopyToClipboard
                     content={screenshot.path}
                     title="Copy Path"
                     shortcut={{ modifiers: ["ctrl", "shift"], key: "c" }}
                   />
-                  <ActionPanel.Section>
-                    <Action
-                      title="Delete File"
-                      icon={Icon.Trash}
-                      style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["ctrl"], key: "d" }}
-                      onAction={() => deleteFile(screenshot.path)}
-                    />
-                  </ActionPanel.Section>
+                  {!screenshot.path.startsWith("http") && (
+                    <ActionPanel.Section>
+                      <Action
+                        title="Delete File"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        shortcut={{ modifiers: ["ctrl"], key: "d" }}
+                        onAction={() => deleteFile(screenshot.path)}
+                      />
+                    </ActionPanel.Section>
+                  )}
                 </ActionPanel>
               }
             />
