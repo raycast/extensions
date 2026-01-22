@@ -51,11 +51,11 @@ export default function CronJobs() {
 
   const autoRefreshMinutes = useMemo(
     () => parsePositiveInt(preferences.autoRefreshMinutes, 60),
-    [preferences],
+    [preferences.autoRefreshMinutes],
   );
   const runHistoryLimit = useMemo(
     () => parsePositiveInt(preferences.runHistoryLimit, 5),
-    [preferences],
+    [preferences.runHistoryLimit],
   );
   const client = useMemo(
     () => createSupabaseClient(preferences),

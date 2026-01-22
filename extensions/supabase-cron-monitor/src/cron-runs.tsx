@@ -51,7 +51,7 @@ export default function CronRuns() {
 
   const runHistoryLimit = useMemo(
     () => parsePositiveInt(preferences.runHistoryLimit, 25),
-    [preferences],
+    [preferences.runHistoryLimit],
   );
   const client = useMemo(
     () => createSupabaseClient(preferences),

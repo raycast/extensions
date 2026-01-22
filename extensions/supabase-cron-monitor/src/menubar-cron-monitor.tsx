@@ -43,8 +43,14 @@ const FAILED_JOBS_KEY = "menuBarFailedJobs";
 
 export default function MenubarCronMonitor() {
   const preferences = getPreferenceValues<Preferences.MenubarCronMonitor>();
-  const refreshMinutes = parsePositiveInt(preferences.menuBarRefreshMinutes, 5);
-  const jobFilter = preferences.menuBarJobFilter ?? "all";
+  const refreshMinutes = useMemo(
+    () => parsePositiveInt(preferences.menuBarRefreshMinutes, 5),
+    [preferences.menuBarRefreshMinutes],
+  );
+  const jobFilter = useMemo(
+    () => preferences.menuBarJobFilter ?? "all",
+    [preferences.menuBarJobFilter],
+  );
   const client = useMemo(
     () => createSupabaseClient(preferences),
     [preferences.supabaseUrl, preferences.serviceRoleKey],
