@@ -1,6 +1,6 @@
 import { Cache } from "@raycast/api";
 import { FulfillmentSelection, getFulfillmentSelection } from "./migrosApi";
-import { getValidToken } from "./tokenManager";
+import { withValidToken } from "./tokenManager";
 
 const cache = new Cache();
 const FULFILLMENT_KEY_PREFIX = "fulfillment_";
@@ -63,9 +63,8 @@ export async function getFulfillmentForZip(zipCode: string): Promise<Fulfillment
     return cached;
   }
 
-  // Fetch from API
-  const token = await getValidToken();
-  const fulfillment = await getFulfillmentSelection(zipCode, token);
+  // Fetch from API with automatic token refresh on 401/403
+  const fulfillment = await withValidToken((token) => getFulfillmentSelection(zipCode, token));
 
   // Cache the result
   const cacheEntry: CachedFulfillment = {

@@ -1,6 +1,6 @@
 import { Cache } from "@raycast/api";
 import { searchStoresByQuery, StoreInfo } from "./migrosApi";
-import { getValidToken } from "./tokenManager";
+import { withValidToken } from "./tokenManager";
 
 const cache = new Cache();
 const STORES_KEY_PREFIX = "stores_";
@@ -63,9 +63,8 @@ export async function getStoresForZip(zipCode: string, maxStores?: number): Prom
     return maxStores ? cached.slice(0, maxStores) : cached;
   }
 
-  // Fetch from API
-  const token = await getValidToken();
-  const stores = await searchStoresByQuery(zipCode, token);
+  // Fetch from API with automatic token refresh on 401/403
+  const stores = await withValidToken((token) => searchStoresByQuery(zipCode, token));
   const storeList = Array.isArray(stores) ? stores : [];
 
   // Cache the result

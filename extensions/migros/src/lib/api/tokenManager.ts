@@ -71,7 +71,6 @@ export async function withValidToken<T>(apiCall: (token: string) => Promise<T>):
   try {
     return await apiCall(token);
   } catch (error: unknown) {
-    // Debug: log error structure and status (remove in production)
     const err = error as { response?: { status?: number; data?: unknown } };
     console.error("[withValidToken] API call failed", {
       error: err,
