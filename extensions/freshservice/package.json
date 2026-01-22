@@ -1,0 +1,71 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "freshservice",
+    "title": "Freshservice",
+    "description": "Manage Freshservice tickets and tasks",
+    "icon": "icon.png",
+    "author": "michael",
+    "categories": [
+        "Productivity",
+        "Communication"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "create-ticket",
+            "title": "Create Ticket",
+            "description": "Create a new support ticket",
+            "mode": "view"
+        },
+        {
+            "name": "open-tickets",
+            "title": "Open Tickets",
+            "description": "View open tickets assigned to you",
+            "mode": "view"
+        },
+        {
+            "name": "search-tickets",
+            "title": "Search Tickets",
+            "description": "Search for tickets",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.79.0",
+        "@raycast/utils": "^1.16.3",
+        "axios": "^1.7.2",
+        "date-fns": "^3.6.0"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.8",
+        "@types/node": "20.8.10",
+        "@types/react": "18.2.27",
+        "eslint": "^8.57.0",
+        "prettier": "^3.3.3",
+        "typescript": "^5.4.5"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    },
+    "preferences": [
+        {
+            "name": "domain",
+            "title": "Freshservice Domain",
+            "description": "Your Freshservice domain (e.g., company.freshservice.com)",
+            "type": "textfield",
+            "required": true,
+            "placeholder": "company.freshservice.com"
+        },
+        {
+            "name": "apiKey",
+            "title": "API Key",
+            "description": "Your Freshservice API Key",
+            "type": "password",
+            "required": true
+        }
+    ]
+}

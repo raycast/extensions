@@ -1,0 +1,8 @@
+node_modules
+.DS_Store
+dist
+*.log
+.vscode
+.idea
+.ray-metadata
+raycast-env.d.ts
