@@ -2,7 +2,7 @@
  * Hook for fetching multiple specific users by their logins
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "./useAuth";
 import { User } from "../lib/types";
 import { API_BASE_URL } from "../lib/constants";
@@ -25,6 +25,9 @@ export function usePinnedUsers(logins: string[], options: UsePinnedUsersOptions 
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
+
+  // Memoize the joined logins string to prevent unnecessary re-renders
+  const loginsKey = useMemo(() => logins.join(","), [logins.join(",")]);
 
   async function fetchUsers() {
     if (!accessToken || logins.length === 0 || !execute) {
@@ -64,7 +67,7 @@ export function usePinnedUsers(logins: string[], options: UsePinnedUsersOptions 
 
   useEffect(() => {
     fetchUsers();
-  }, [logins.join(","), accessToken, execute]);
+  }, [loginsKey, accessToken, execute]);
 
   return {
     users,
