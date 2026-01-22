@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, ActionPanel, Action, Clipboard, showToast, Toast, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Clipboard, showToast, Toast, Icon, getSelectedText } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 
@@ -102,10 +102,22 @@ export default function Command() {
     return Array.from(items);
   };
 
-  // 加载剪切板内容
+  // 加载剪切板内容或选中的文本
   useEffect(() => {
-    async function loadClipboard() {
+    async function loadContent() {
       try {
+        // 优先尝试获取选中的文本
+        try {
+          const selected = await getSelectedText();
+          if (selected && selected.trim()) {
+            setInputText(selected.trim());
+            setIsLoading(false);
+            return;
+          }
+        } catch {
+          // 忽略获取选中这一步的错误（通常是因为没有选中文本）
+        }
+
         const text = await Clipboard.readText();
         let systemClipboard = "";
         try {
@@ -121,7 +133,7 @@ export default function Command() {
         setIsLoading(false);
       }
     }
-    loadClipboard();
+    loadContent();
   }, []);
 
   const handleCopy = async (text: string) => {
