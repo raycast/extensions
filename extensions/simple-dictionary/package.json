@@ -31,14 +31,14 @@
       "preferences": [
         {
           "name": "default_language",
-          "title": "Language",
-          "description": "Default language",
+          "title": "Default Language",
+          "description": "Select a default language",
           "placeholder": "language",
           "required": false,
           "type": "dropdown",
           "data": [
             {
-              "title": "Select a language",
+              "title": "Select a default language",
               "value": ""
             },
             {

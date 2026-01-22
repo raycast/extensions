@@ -91,7 +91,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   if (!language) {
     return (
       <Detail
-        markdown={`# ERROR \n\n Please select a language via Argument OR set a default one in Preferences`}
+        markdown={`Please select a language for your query or set a default one in Preferences`}
         actions={
           <ActionPanel>
             <Action icon={Icon.Gear} title="Open Command Preferences" onAction={openCommandPreferences} />
