@@ -1,0 +1,13 @@
+node_modules/
+.DS_Store
+.raycast/
+dist/
+
+# Raycast build output
+*.raycast
+
+# Logs
+*.log
+
+# Secrets
+.env

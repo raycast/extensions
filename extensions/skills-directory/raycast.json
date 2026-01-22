@@ -1,0 +1,17 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "schemaVersion": 1,
+  "name": "skills-directory",
+  "title": "Skills.sh Search",
+  "description": "Search and install skills from skills.sh",
+  "icon": "assets/icon.png",
+  "author": "dominiklukes",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Skills.sh Search",
+      "description": "Search skills from skills.sh and install with the skills CLI",
+      "mode": "view"
+    }
+  ]
+}

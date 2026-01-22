@@ -1,0 +1,1202 @@
+[
+  {
+    "rank": 1,
+    "name": "vercel-react-best-practices",
+    "repo": "vercel-labs/agent-skills",
+    "installs": "26.3K"
+  },
+  {
+    "rank": 2,
+    "name": "web-design-guidelines",
+    "repo": "vercel-labs/agent-skills",
+    "installs": "20.0K"
+  },
+  {
+    "rank": 3,
+    "name": "remotion-best-practices",
+    "repo": "remotion-dev/skills",
+    "installs": "4.4K"
+  },
+  {
+    "rank": 4,
+    "name": "building-native-ui",
+    "repo": "expo/skills",
+    "installs": "1.6K"
+  },
+  {
+    "rank": 5,
+    "name": "upgrading-expo",
+    "repo": "expo/skills",
+    "installs": "1.5K"
+  },
+  {
+    "rank": 6,
+    "name": "frontend-design",
+    "repo": "anthropics/skills",
+    "installs": "1.5K"
+  },
+  {
+    "rank": 7,
+    "name": "native-data-fetching",
+    "repo": "expo/skills",
+    "installs": "1.4K"
+  },
+  {
+    "rank": 8,
+    "name": "expo-dev-client",
+    "repo": "expo/skills",
+    "installs": "1.3K"
+  },
+  {
+    "rank": 9,
+    "name": "expo-deployment",
+    "repo": "expo/skills",
+    "installs": "1.2K"
+  },
+  {
+    "rank": 10,
+    "name": "better-auth-best-practices",
+    "repo": "better-auth/skills",
+    "installs": "1.2K"
+  },
+  {
+    "rank": 11,
+    "name": "expo-api-routes",
+    "repo": "expo/skills",
+    "installs": "1.2K"
+  },
+  {
+    "rank": 12,
+    "name": "skill-creator",
+    "repo": "anthropics/skills",
+    "installs": "1.1K"
+  },
+  {
+    "rank": 13,
+    "name": "expo-cicd-workflows",
+    "repo": "expo/skills",
+    "installs": "1.1K"
+  },
+  {
+    "rank": 14,
+    "name": "expo-tailwind-setup",
+    "repo": "expo/skills",
+    "installs": "1.1K"
+  },
+  {
+    "rank": 15,
+    "name": "use-dom",
+    "repo": "expo/skills",
+    "installs": "1.1K"
+  },
+  {
+    "rank": 16,
+    "name": "react-native-best-practices",
+    "repo": "callstackincubator/agent-skills",
+    "installs": "955"
+  },
+  {
+    "rank": 17,
+    "name": "agent-browser",
+    "repo": "vercel-labs/agent-browser",
+    "installs": "935"
+  },
+  {
+    "rank": 18,
+    "name": "seo-audit",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "839"
+  },
+  {
+    "rank": 19,
+    "name": "copywriting",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "818"
+  },
+  {
+    "rank": 20,
+    "name": "create-auth-skill",
+    "repo": "better-auth/skills",
+    "installs": "751"
+  },
+  {
+    "rank": 21,
+    "name": "marketing-psychology",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "672"
+  },
+  {
+    "rank": 22,
+    "name": "programmatic-seo",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "668"
+  },
+  {
+    "rank": 23,
+    "name": "marketing-ideas",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "620"
+  },
+  {
+    "rank": 24,
+    "name": "copy-editing",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "589"
+  },
+  {
+    "rank": 25,
+    "name": "pricing-strategy",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "581"
+  },
+  {
+    "rank": 26,
+    "name": "social-content",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "575"
+  },
+  {
+    "rank": 27,
+    "name": "page-cro",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "555"
+  },
+  {
+    "rank": 28,
+    "name": "launch-strategy",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "553"
+  },
+  {
+    "rank": 29,
+    "name": "baoyu-article-illustrator",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "552"
+  },
+  {
+    "rank": 30,
+    "name": "baoyu-slide-deck",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "550"
+  },
+  {
+    "rank": 31,
+    "name": "competitor-alternatives",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "545"
+  },
+  {
+    "rank": 32,
+    "name": "onboarding-cro",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "523"
+  },
+  {
+    "rank": 33,
+    "name": "baoyu-cover-image",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "523"
+  },
+  {
+    "rank": 34,
+    "name": "email-sequence",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "519"
+  },
+  {
+    "rank": 35,
+    "name": "analytics-tracking",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "517"
+  },
+  {
+    "rank": 36,
+    "name": "schema-markup",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "514"
+  },
+  {
+    "rank": 37,
+    "name": "signup-flow-cro",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "513"
+  },
+  {
+    "rank": 38,
+    "name": "free-tool-strategy",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "503"
+  },
+  {
+    "rank": 39,
+    "name": "paid-ads",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "502"
+  },
+  {
+    "rank": 40,
+    "name": "baoyu-comic",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "501"
+  },
+  {
+    "rank": 41,
+    "name": "baoyu-xhs-images",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "495"
+  },
+  {
+    "rank": 42,
+    "name": "form-cro",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "494"
+  },
+  {
+    "rank": 43,
+    "name": "paywall-upgrade-cro",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "492"
+  },
+  {
+    "rank": 44,
+    "name": "referral-program",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "490"
+  },
+  {
+    "rank": 45,
+    "name": "popup-cro",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "485"
+  },
+  {
+    "rank": 46,
+    "name": "pdf",
+    "repo": "anthropics/skills",
+    "installs": "485"
+  },
+  {
+    "rank": 47,
+    "name": "ab-test-setup",
+    "repo": "coreyhaines31/marketingskills",
+    "installs": "474"
+  },
+  {
+    "rank": 48,
+    "name": "baoyu-post-to-wechat",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "445"
+  },
+  {
+    "rank": 49,
+    "name": "baoyu-post-to-x",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "437"
+  },
+  {
+    "rank": 50,
+    "name": "xlsx",
+    "repo": "anthropics/skills",
+    "installs": "391"
+  },
+  {
+    "rank": 51,
+    "name": "pptx",
+    "repo": "anthropics/skills",
+    "installs": "386"
+  },
+  {
+    "rank": 52,
+    "name": "docx",
+    "repo": "anthropics/skills",
+    "installs": "369"
+  },
+  {
+    "rank": 53,
+    "name": "release-skills",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "356"
+  },
+  {
+    "rank": 54,
+    "name": "brainstorming",
+    "repo": "obra/superpowers",
+    "installs": "354"
+  },
+  {
+    "rank": 55,
+    "name": "webapp-testing",
+    "repo": "anthropics/skills",
+    "installs": "349"
+  },
+  {
+    "rank": 56,
+    "name": "baoyu-danger-gemini-web",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "336"
+  },
+  {
+    "rank": 57,
+    "name": "baoyu-compress-image",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "335"
+  },
+  {
+    "rank": 58,
+    "name": "mcp-builder",
+    "repo": "anthropics/skills",
+    "installs": "323"
+  },
+  {
+    "rank": 59,
+    "name": "canvas-design",
+    "repo": "anthropics/skills",
+    "installs": "310"
+  },
+  {
+    "rank": 60,
+    "name": "baoyu-danger-x-to-markdown",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "309"
+  },
+  {
+    "rank": 61,
+    "name": "vue",
+    "repo": "onmax/nuxt-skills",
+    "installs": "301"
+  },
+  {
+    "rank": 62,
+    "name": "test-driven-development",
+    "repo": "obra/superpowers",
+    "installs": "297"
+  },
+  {
+    "rank": 63,
+    "name": "doc-coauthoring",
+    "repo": "anthropics/skills",
+    "installs": "284"
+  },
+  {
+    "rank": 64,
+    "name": "systematic-debugging",
+    "repo": "obra/superpowers",
+    "installs": "275"
+  },
+  {
+    "rank": 65,
+    "name": "theme-factory",
+    "repo": "anthropics/skills",
+    "installs": "267"
+  },
+  {
+    "rank": 66,
+    "name": "nuxt",
+    "repo": "onmax/nuxt-skills",
+    "installs": "258"
+  },
+  {
+    "rank": 67,
+    "name": "humanizer-zh",
+    "repo": "op7418/humanizer-zh",
+    "installs": "254"
+  },
+  {
+    "rank": 68,
+    "name": "web-artifacts-builder",
+    "repo": "anthropics/skills",
+    "installs": "253"
+  },
+  {
+    "rank": 69,
+    "name": "writing-plans",
+    "repo": "obra/superpowers",
+    "installs": "251"
+  },
+  {
+    "rank": 70,
+    "name": "executing-plans",
+    "repo": "obra/superpowers",
+    "installs": "248"
+  },
+  {
+    "rank": 71,
+    "name": "verification-before-completion",
+    "repo": "obra/superpowers",
+    "installs": "248"
+  },
+  {
+    "rank": 72,
+    "name": "algorithmic-art",
+    "repo": "anthropics/skills",
+    "installs": "242"
+  },
+  {
+    "rank": 73,
+    "name": "requesting-code-review",
+    "repo": "obra/superpowers",
+    "installs": "241"
+  },
+  {
+    "rank": 74,
+    "name": "subagent-driven-development",
+    "repo": "obra/superpowers",
+    "installs": "237"
+  },
+  {
+    "rank": 75,
+    "name": "writing-skills",
+    "repo": "obra/superpowers",
+    "installs": "237"
+  },
+  {
+    "rank": 76,
+    "name": "using-superpowers",
+    "repo": "obra/superpowers",
+    "installs": "237"
+  },
+  {
+    "rank": 77,
+    "name": "internal-comms",
+    "repo": "anthropics/skills",
+    "installs": "235"
+  },
+  {
+    "rank": 78,
+    "name": "dispatching-parallel-agents",
+    "repo": "obra/superpowers",
+    "installs": "231"
+  },
+  {
+    "rank": 79,
+    "name": "brand-guidelines",
+    "repo": "anthropics/skills",
+    "installs": "227"
+  },
+  {
+    "rank": 80,
+    "name": "ui-ux-pro-max",
+    "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+    "installs": "226"
+  },
+  {
+    "rank": 81,
+    "name": "receiving-code-review",
+    "repo": "obra/superpowers",
+    "installs": "225"
+  },
+  {
+    "rank": 82,
+    "name": "using-git-worktrees",
+    "repo": "obra/superpowers",
+    "installs": "218"
+  },
+  {
+    "rank": 83,
+    "name": "template-skill",
+    "repo": "anthropics/skills",
+    "installs": "216"
+  },
+  {
+    "rank": 84,
+    "name": "nuxt-ui",
+    "repo": "onmax/nuxt-skills",
+    "installs": "209"
+  },
+  {
+    "rank": 85,
+    "name": "finishing-a-development-branch",
+    "repo": "obra/superpowers",
+    "installs": "208"
+  },
+  {
+    "rank": 86,
+    "name": "better auth best practices",
+    "repo": "better-auth/skills",
+    "installs": "206"
+  },
+  {
+    "rank": 87,
+    "name": "slack-gif-creator",
+    "repo": "anthropics/skills",
+    "installs": "205"
+  },
+  {
+    "rank": 88,
+    "name": "ts-library",
+    "repo": "onmax/nuxt-skills",
+    "installs": "176"
+  },
+  {
+    "rank": 89,
+    "name": "baoyu-infographic",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "153"
+  },
+  {
+    "rank": 90,
+    "name": "reka-ui",
+    "repo": "onmax/nuxt-skills",
+    "installs": "150"
+  },
+  {
+    "rank": 91,
+    "name": "create auth skill",
+    "repo": "better-auth/skills",
+    "installs": "134"
+  },
+  {
+    "rank": 92,
+    "name": "logging-best-practices",
+    "repo": "boristane/agent-skills",
+    "installs": "133"
+  },
+  {
+    "rank": 93,
+    "name": "threejs-animation",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "130"
+  },
+  {
+    "rank": 94,
+    "name": "elysiajs",
+    "repo": "elysiajs/skills",
+    "installs": "125"
+  },
+  {
+    "rank": 95,
+    "name": "baoyu-gemini-web",
+    "repo": "jimliu/baoyu-skills",
+    "installs": "120"
+  },
+  {
+    "rank": 96,
+    "name": "threejs-fundamentals",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "120"
+  },
+  {
+    "rank": 97,
+    "name": "document-writer",
+    "repo": "onmax/nuxt-skills",
+    "installs": "119"
+  },
+  {
+    "rank": 98,
+    "name": "nuxt-modules",
+    "repo": "onmax/nuxt-skills",
+    "installs": "117"
+  },
+  {
+    "rank": 99,
+    "name": "threejs-materials",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "115"
+  },
+  {
+    "rank": 100,
+    "name": "threejs-interaction",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "115"
+  },
+  {
+    "rank": 101,
+    "name": "threejs-lighting",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "114"
+  },
+  {
+    "rank": 102,
+    "name": "threejs-shaders",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "113"
+  },
+  {
+    "rank": 103,
+    "name": "threejs-geometry",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "113"
+  },
+  {
+    "rank": 104,
+    "name": "threejs-loaders",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "113"
+  },
+  {
+    "rank": 105,
+    "name": "threejs-postprocessing",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "113"
+  },
+  {
+    "rank": 106,
+    "name": "threejs-textures",
+    "repo": "cloudai-x/threejs-skills",
+    "installs": "112"
+  },
+  {
+    "rank": 107,
+    "name": "nuxt-content",
+    "repo": "onmax/nuxt-skills",
+    "installs": "110"
+  },
+  {
+    "rank": 108,
+    "name": "obsidian-markdown",
+    "repo": "kepano/obsidian-skills",
+    "installs": "105"
+  },
+  {
+    "rank": 109,
+    "name": "planning-with-files",
+    "repo": "othmanadi/planning-with-files",
+    "installs": "105"
+  },
+  {
+    "rank": 110,
+    "name": "nuxt-better-auth",
+    "repo": "onmax/nuxt-skills",
+    "installs": "104"
+  },
+  {
+    "rank": 111,
+    "name": "ask-questions-if-underspecified",
+    "repo": "trailofbits/skills",
+    "installs": "91"
+  },
+  {
+    "rank": 112,
+    "name": "nuxthub",
+    "repo": "onmax/nuxt-skills",
+    "installs": "91"
+  },
+  {
+    "rank": 113,
+    "name": "motion",
+    "repo": "onmax/nuxt-skills",
+    "installs": "90"
+  },
+  {
+    "rank": 114,
+    "name": "obsidian-bases",
+    "repo": "kepano/obsidian-skills",
+    "installs": "86"
+  },
+  {
+    "rank": 115,
+    "name": "json-canvas",
+    "repo": "kepano/obsidian-skills",
+    "installs": "81"
+  },
+  {
+    "rank": 116,
+    "name": "tanstack-query",
+    "repo": "jezweb/claude-skills",
+    "installs": "80"
+  },
+  {
+    "rank": 117,
+    "name": "vueuse",
+    "repo": "onmax/nuxt-skills",
+    "installs": "79"
+  },
+  {
+    "rank": 118,
+    "name": "context7",
+    "repo": "intellectronica/agent-skills",
+    "installs": "75"
+  },
+  {
+    "rank": 119,
+    "name": "typescript-advanced-types",
+    "repo": "wshobson/agents",
+    "installs": "73"
+  },
+  {
+    "rank": 120,
+    "name": "humanizer",
+    "repo": "blader/humanizer",
+    "installs": "71"
+  },
+  {
+    "rank": 121,
+    "name": "semgrep",
+    "repo": "trailofbits/skills",
+    "installs": "71"
+  },
+  {
+    "rank": 122,
+    "name": "swiftui-ui-patterns",
+    "repo": "dimillian/skills",
+    "installs": "70"
+  },
+  {
+    "rank": 123,
+    "name": "openrouter-typescript-sdk",
+    "repo": "openrouterteam/agent-skills",
+    "installs": "68"
+  },
+  {
+    "rank": 124,
+    "name": "property-based-testing",
+    "repo": "trailofbits/skills",
+    "installs": "68"
+  },
+  {
+    "rank": 125,
+    "name": "guidelines-advisor",
+    "repo": "trailofbits/skills",
+    "installs": "68"
+  },
+  {
+    "rank": 126,
+    "name": "nestjs-best-practices",
+    "repo": "kadajett/agent-nestjs-skills",
+    "installs": "68"
+  },
+  {
+    "rank": 127,
+    "name": "secure-workflow-guide",
+    "repo": "trailofbits/skills",
+    "installs": "67"
+  },
+  {
+    "rank": 128,
+    "name": "variant-analysis",
+    "repo": "trailofbits/skills",
+    "installs": "67"
+  },
+  {
+    "rank": 129,
+    "name": "sharp-edges",
+    "repo": "trailofbits/skills",
+    "installs": "67"
+  },
+  {
+    "rank": 130,
+    "name": "frontend-design",
+    "repo": "anthropics/claude-code",
+    "installs": "67"
+  },
+  {
+    "rank": 131,
+    "name": "codeql",
+    "repo": "trailofbits/skills",
+    "installs": "66"
+  },
+  {
+    "rank": 132,
+    "name": "sarif-parsing",
+    "repo": "trailofbits/skills",
+    "installs": "66"
+  },
+  {
+    "rank": 133,
+    "name": "differential-review",
+    "repo": "trailofbits/skills",
+    "installs": "65"
+  },
+  {
+    "rank": 134,
+    "name": "token-integration-analyzer",
+    "repo": "trailofbits/skills",
+    "installs": "65"
+  },
+  {
+    "rank": 135,
+    "name": "shadcn-ui",
+    "repo": "giuseppe-trisciuoglio/developer-kit",
+    "installs": "65"
+  },
+  {
+    "rank": 136,
+    "name": "stripe-best-practices",
+    "repo": "anthropics/claude-plugins-official",
+    "installs": "65"
+  },
+  {
+    "rank": 137,
+    "name": "convex best practices",
+    "repo": "waynesutton/convexskills",
+    "installs": "65"
+  },
+  {
+    "rank": 138,
+    "name": "agent-md-refactor",
+    "repo": "softaworks/agent-toolkit",
+    "installs": "64"
+  },
+  {
+    "rank": 139,
+    "name": "react-dev",
+    "repo": "softaworks/agent-toolkit",
+    "installs": "64"
+  },
+  {
+    "rank": 140,
+    "name": "fuzzing-obstacles",
+    "repo": "trailofbits/skills",
+    "installs": "64"
+  },
+  {
+    "rank": 141,
+    "name": "skill-lookup",
+    "repo": "f/awesome-chatgpt-prompts",
+    "installs": "63"
+  },
+  {
+    "rank": 142,
+    "name": "writing-clearly-and-concisely",
+    "repo": "softaworks/agent-toolkit",
+    "installs": "61"
+  },
+  {
+    "rank": 143,
+    "name": "gemini",
+    "repo": "softaworks/agent-toolkit",
+    "installs": "60"
+  },
+  {
+    "rank": 144,
+    "name": "code-maturity-assessor",
+    "repo": "trailofbits/skills",
+    "installs": "60"
+  },
+  {
+    "rank": 145,
+    "name": "stripe-best-practices",
+    "repo": "stripe/ai",
+    "installs": "60"
+  },
+  {
+    "rank": 146,
+    "name": "three-best-practices",
+    "repo": "emalorenzo/three-agent-skills",
+    "installs": "58"
+  },
+  {
+    "rank": 147,
+    "name": "news-aggregator-skill",
+    "repo": "cclank/news-aggregator-skill",
+    "installs": "58"
+  },
+  {
+    "rank": 148,
+    "name": "spec-to-code-compliance",
+    "repo": "trailofbits/skills",
+    "installs": "58"
+  },
+  {
+    "rank": 149,
+    "name": "crafting-effective-readmes",
+    "repo": "softaworks/agent-toolkit",
+    "installs": "57"
+  },
+  {
+    "rank": 150,
+    "name": "audit-context-building",
+    "repo": "trailofbits/skills",
+    "installs": "57"
+  },
+  {
+    "rank": 151,
+    "name": "convex http actions",
+    "repo": "waynesutton/convexskills",
+    "installs": "57"
+  },
+  {
+    "rank": 152,
+    "name": "convex file storage",
+    "repo": "waynesutton/convexskills",
+    "installs": "56"
+  },
+  {
+    "rank": 153,
+    "name": "convex realtime",
+    "repo": "waynesutton/convexskills",
+    "installs": "56"
+  },
+  {
+    "rank": 154,
+    "name": "audit-prep-assistant",
+    "repo": "trailofbits/skills",
+    "installs": "56"
+  },
+  {
+    "rank": 155,
+    "name": "convex schema validator",
+    "repo": "waynesutton/convexskills",
+    "installs": "55"
+  },
+  {
+    "rank": 156,
+    "name": "intent-layer",
+    "repo": "crafter-station/skills",
+    "installs": "55"
+  },
+  {
+    "rank": 157,
+    "name": "fix-review",
+    "repo": "trailofbits/skills",
+    "installs": "55"
+  },
+  {
+    "rank": 158,
+    "name": "constant-time-testing",
+    "repo": "trailofbits/skills",
+    "installs": "54"
+  },
+  {
+    "rank": 159,
+    "name": "wycheproof",
+    "repo": "trailofbits/skills",
+    "installs": "54"
+  },
+  {
+    "rank": 160,
+    "name": "entry-point-analyzer",
+    "repo": "trailofbits/skills",
+    "installs": "54"
+  },
+  {
+    "rank": 161,
+    "name": "dwarf-expert",
+    "repo": "trailofbits/skills",
+    "installs": "54"
+  },
+  {
+    "rank": 162,
+    "name": "convex functions",
+    "repo": "waynesutton/convexskills",
+    "installs": "54"
+  },
+  {
+    "rank": 163,
+    "name": "testing-handbook-generator",
+    "repo": "trailofbits/skills",
+    "installs": "54"
+  },
+  {
+    "rank": 164,
+    "name": "convex migrations",
+    "repo": "waynesutton/convexskills",
+    "installs": "54"
+  },
+  {
+    "rank": 165,
+    "name": "coverage-analysis",
+    "repo": "trailofbits/skills",
+    "installs": "54"
+  },
+  {
+    "rank": 166,
+    "name": "address-sanitizer",
+    "repo": "trailofbits/skills",
+    "installs": "54"
+  },
+  {
+    "rank": 167,
+    "name": "swiftui-liquid-glass",
+    "repo": "dimillian/skills",
+    "installs": "54"
+  },
+  {
+    "rank": 168,
+    "name": "constant-time-analysis",
+    "repo": "trailofbits/skills",
+    "installs": "54"
+  },
+  {
+    "rank": 169,
+    "name": "burpsuite-project-parser",
+    "repo": "trailofbits/skills",
+    "installs": "53"
+  },
+  {
+    "rank": 170,
+    "name": "aflpp",
+    "repo": "trailofbits/skills",
+    "installs": "53"
+  },
+  {
+    "rank": 171,
+    "name": "solana-vulnerability-scanner",
+    "repo": "trailofbits/skills",
+    "installs": "53"
+  },
+  {
+    "rank": 172,
+    "name": "atheris",
+    "repo": "trailofbits/skills",
+    "installs": "53"
+  },
+  {
+    "rank": 173,
+    "name": "session-handoff",
+    "repo": "softaworks/agent-toolkit",
+    "installs": "53"
+  },
+  {
+    "rank": 174,
+    "name": "ossfuzz",
+    "repo": "trailofbits/skills",
+    "installs": "53"
+  },
+  {
+    "rank": 175,
+    "name": "semgrep-rule-creator",
+    "repo": "trailofbits/skills",
+    "installs": "53"
+  },
+  {
+    "rank": 176,
+    "name": "convex cron jobs",
+    "repo": "waynesutton/convexskills",
+    "installs": "53"
+  },
+  {
+    "rank": 177,
+    "name": "fuzzing-dictionary",
+    "repo": "trailofbits/skills",
+    "installs": "53"
+  },
+  {
+    "rank": 178,
+    "name": "interpreting-culture-index",
+    "repo": "trailofbits/skills",
+    "installs": "53"
+  },
+  {
+    "rank": 179,
+    "name": "convex security check",
+    "repo": "waynesutton/convexskills",
+    "installs": "53"
+  },
+  {
+    "rank": 180,
+    "name": "harness-writing",
+    "repo": "trailofbits/skills",
+    "installs": "52"
+  },
+  {
+    "rank": 181,
+    "name": "substrate-vulnerability-scanner",
+    "repo": "trailofbits/skills",
+    "installs": "52"
+  },
+  {
+    "rank": 182,
+    "name": "meme-factory",
+    "repo": "softaworks/agent-toolkit",
+    "installs": "52"
+  },
+  {
+    "rank": 183,
+    "name": "cargo-fuzz",
+    "repo": "trailofbits/skills",
+    "installs": "52"
+  },
+  {
+    "rank": 184,
+    "name": "frontend-code-review",
+    "repo": "langgenius/dify",
+    "installs": "52"
+  },
+  {
+    "rank": 185,
+    "name": "r3f-best-practices",
+    "repo": "emalorenzo/three-agent-skills",
+    "installs": "52"
+  },
+  {
+    "rank": 186,
+    "name": "ruzzy",
+    "repo": "trailofbits/skills",
+    "installs": "52"
+  },
+  {
+    "rank": 187,
+    "name": "ton-vulnerability-scanner",
+    "repo": "trailofbits/skills",
+    "installs": "52"
+  },
+  {
+    "rank": 188,
+    "name": "libafl",
+    "repo": "trailofbits/skills",
+    "installs": "52"
+  },
+  {
+    "rank": 189,
+    "name": "convex security audit",
+    "repo": "waynesutton/convexskills",
+    "installs": "52"
+  },
+  {
+    "rank": 190,
+    "name": "convex agents",
+    "repo": "waynesutton/convexskills",
+    "installs": "51"
+  },
+  {
+    "rank": 191,
+    "name": "cairo-vulnerability-scanner",
+    "repo": "trailofbits/skills",
+    "installs": "51"
+  },
+  {
+    "rank": 192,
+    "name": "algorand-vulnerability-scanner",
+    "repo": "trailofbits/skills",
+    "installs": "51"
+  },
+  {
+    "rank": 193,
+    "name": "convex component authoring",
+    "repo": "waynesutton/convexskills",
+    "installs": "51"
+  },
+  {
+    "rank": 194,
+    "name": "libfuzzer",
+    "repo": "trailofbits/skills",
+    "installs": "51"
+  },
+  {
+    "rank": 195,
+    "name": "cosmos-vulnerability-scanner",
+    "repo": "trailofbits/skills",
+    "installs": "51"
+  },
+  {
+    "rank": 196,
+    "name": "notebooklm",
+    "repo": "pleaseprompto/notebooklm-skill",
+    "installs": "50"
+  },
+  {
+    "rank": 197,
+    "name": "skill-creator",
+    "repo": "langgenius/dify",
+    "installs": "50"
+  },
+  {
+    "rank": 198,
+    "name": "tailwind-design-system",
+    "repo": "wshobson/agents",
+    "installs": "50"
+  },
+  {
+    "rank": 199,
+    "name": "supabase-best-practices",
+    "repo": "pedrobarretocw/supabase-best-practices",
+    "installs": "49"
+  },
+  {
+    "rank": 200,
+    "name": "postgresql-table-design",
+    "repo": "wshobson/agents",
+    "installs": "48"
+  }
+]

@@ -1,0 +1,43 @@
+{
+  "name": "skills-directory",
+  "title": "Skills.sh Search",
+  "description": "Search and install skills from skills.sh",
+  "version": "1.0.0",
+  "license": "MIT",
+  "icon": "icon.png",
+  "author": "dominiklukes",
+  "main": "src/index.tsx",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Skills.sh Search",
+      "description": "Search skills from skills.sh and install with the skills CLI",
+      "icon": "icon.png",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray dev",
+    "lint": "ray lint",
+    "extract": "node scripts/extract-skills.js"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^20.11.17",
+    "@types/react": "^18.2.43",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.2",
+    "typescript": "^5.3.3"
+  }
+}
