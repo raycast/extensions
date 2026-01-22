@@ -87,3 +87,5 @@ export interface BrowserUsageApiResponse {
     endDate: string;
   };
 }
+
+export type AnalyticsSection = "countries" | "device" | "referrers" | "pages";

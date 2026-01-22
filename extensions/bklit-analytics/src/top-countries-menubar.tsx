@@ -23,7 +23,12 @@ export default function Command() {
   // Fetch countries data with total pageviews
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
+      const startTime = Date.now();
+      console.log("[MenuBar] Starting fetch...");
       const result = await fetchTopCountries();
+      const fetchTime = Date.now() - startTime;
+      console.log(`[MenuBar] Fetch completed in ${fetchTime}ms`);
+
       if (!result.success) {
         throw new Error(result.error || "Failed to fetch data");
       }
@@ -49,6 +54,13 @@ export default function Command() {
 
   // Use totalPageviews from API response
   const totalViews = data?.totalPageviews || 0;
+
+  // Debug: Log render state
+  useEffect(() => {
+    console.log(
+      `[MenuBar] Render - isLoading: ${isLoading}, hasData: ${!!data}, totalViews: ${totalViews}, error: ${!!error}`,
+    );
+  }, [isLoading, data, totalViews, error]);
 
   // Menu bar title - don't show "Loading..." if we have cached data
   const menuBarTitle = error
