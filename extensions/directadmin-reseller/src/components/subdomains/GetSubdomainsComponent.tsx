@@ -4,18 +4,20 @@ import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, sho
 import { SuccessResponse } from "../../types";
 import { getFavicon } from "@raycast/utils";
 import CreateSubdomainComponent from "./CreateSubdomainComponent";
+import { Panel } from "../../types/panel";
 
 type GetSubdomainsComponentProps = {
   domain: string;
   userToImpersonate?: string;
+  panel?: Panel;
 };
-export default function GetSubdomainsComponent({ domain, userToImpersonate = "" }: GetSubdomainsComponentProps) {
+export default function GetSubdomainsComponent({ domain, userToImpersonate = "", panel }: GetSubdomainsComponentProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [subdomains, setSubdomains] = useState<string[]>();
 
   async function getFromApi() {
     setIsLoading(true);
-    const response = await getSubdomains(domain, userToImpersonate);
+    const response = await getSubdomains(domain, userToImpersonate, panel);
     if (response.error === "0") {
       // this endpoint returns nothing if no subdomains so we handle it
       const list = "list" in response ? (response.list as string[]) : [];
