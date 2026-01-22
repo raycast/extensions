@@ -13,7 +13,7 @@ export async function fetchLists(): Promise<{ id: string; title: string }[]> {
     },
   });
   if (!response.ok) {
-    console.error("fetch items error:", await response.text());
+    console.error("fetch lists error:", await response.text());
     throw new Error(response.statusText);
   }
   const json = (await response.json()) as {
@@ -38,7 +38,7 @@ export async function fetchList(tasklist: string, showCompleted = false): Promis
     },
   });
   if (!response.ok) {
-    console.error("fetch items error:", await response.text());
+    console.error("fetch list error:", await response.text());
     throw new Error(response.statusText);
   }
   const json = (await response.json()) as {
@@ -89,7 +89,7 @@ export async function deleteTask(tasklist: string, id: string): Promise<void> {
     },
   });
   if (!response.ok) {
-    console.error("fetch items error:", await response.text());
+    console.error("delete task error:", await response.text());
     throw new Error(response.statusText);
   }
 }
@@ -104,7 +104,7 @@ export async function createTask(tasklist: string, task: TaskForm): Promise<void
     },
   });
   if (!response.ok) {
-    console.error("fetch items error:", await response.text());
+    console.error("create task error:", await response.text());
     throw new Error(response.statusText);
   }
 }
@@ -118,7 +118,7 @@ export async function editTask(tasklist: string, task: Task): Promise<void> {
     },
   });
   if (!response.ok) {
-    console.error("fetch items error:", await response.text());
+    console.error("edit task error:", await response.text());
     throw new Error(response.statusText);
   }
 }
@@ -139,7 +139,7 @@ export async function toggleTask(tasklist: string, task: Task): Promise<void> {
     },
   });
   if (!response.ok) {
-    console.error("fetch items error:", await response.text());
+    console.error("toggle task error:", await response.text());
     throw new Error(response.statusText);
   }
 }

@@ -66,6 +66,5 @@ export default function EmptyView(props: {
           }
         />
       );
-      break;
   }
 }

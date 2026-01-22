@@ -11,15 +11,15 @@
     "ridemountainpig",
     "greczimarton"
   ],
+  "keywords": [
+    "gtask"
+  ],
   "platforms": [
     "macOS",
     "Windows"
   ],
   "categories": [
     "Productivity"
-  ],
-  "keywords": [
-    "gtask"
   ],
   "license": "MIT",
   "commands": [

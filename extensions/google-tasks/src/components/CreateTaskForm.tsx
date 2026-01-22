@@ -20,18 +20,23 @@ export default function CreateTaskForm(props: {
   const [lists, setLists] = useState<{ id: string; title: string }[]>([]);
   const { pop } = useNavigation();
   const { handleSubmit, itemProps, setValue } = useForm<CreateTaskFormValues>({
-    onSubmit(values) {
-      props.onCreate(values.listId, {
-        title: values.title,
-        notes: values.notes,
-        due: values.due,
-      });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Task Created!",
-        message: `${values.title} created`,
-      });
-      pop();
+    async onSubmit(values) {
+      try {
+        await props.onCreate(values.listId, {
+          title: values.title,
+          notes: values.notes,
+          due: values.due,
+        });
+        showToast({
+          style: Toast.Style.Success,
+          title: "Task Created!",
+          message: `${values.title} created`,
+        });
+        pop();
+      } catch (error) {
+        // Error handling is done in the parent component
+        throw error;
+      }
     },
     initialValues: { title: props.title, listId: props.listId },
     validation: {
@@ -44,7 +49,7 @@ export default function CreateTaskForm(props: {
       try {
         const fetchedLists = await fetchLists();
         setLists(fetchedLists);
-        const preferences = getPreferenceValues();
+        const preferences = getPreferenceValues<Preferences>();
         if (preferences.defaultListName && !props.listId) {
           const defaultList = fetchedLists.find((list) => list.title === preferences.defaultListName);
           if (defaultList) {

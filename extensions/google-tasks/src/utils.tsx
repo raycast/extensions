@@ -2,27 +2,21 @@ import { Color, Icon } from "@raycast/api";
 import { Task } from "./types";
 
 export function isCompleted(task: Task): boolean {
-  if (task.status === "completed") {
-    return true;
-  } else {
-    return false;
-  }
+  return task.status === "completed";
 }
 
 export function getChildren(parent: Task, tasks: Task[]): Task[] {
-  const children: Task[] = tasks.filter(function (task) {
-    return task.parent == parent.id;
-  });
-  return children;
+  return tasks.filter((task) => task.parent === parent.id);
 }
 
 export function getIdNames(tasks: Task[]): { [key: string]: string } {
-  const id_names: { [key: string]: string } = {};
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    id_names[element.id] = element.title;
-  }
-  return id_names;
+  return tasks.reduce(
+    (acc, task) => {
+      acc[task.id] = task.title;
+      return acc;
+    },
+    {} as { [key: string]: string },
+  );
 }
 
 export function getIcon(task: Task): { source: Icon; tintColor?: Color } {
