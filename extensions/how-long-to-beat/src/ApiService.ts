@@ -90,7 +90,7 @@ export class ApiService {
         throw new Error(`Request failed: ${response.statusText}`);
       }
 
-      const responseData = await response.json() as T;
+      const responseData = (await response.json()) as T;
       return { data: responseData };
     } catch (error) {
       if (timeoutId) clearTimeout(timeoutId);

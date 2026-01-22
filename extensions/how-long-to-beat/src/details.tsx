@@ -1,11 +1,9 @@
-import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
-import { useCallback, useMemo } from "react";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { HowLongToBeatEntry } from "howlongtobeat";
 import { HltbSearch } from "./hltbsearch";
 import { pluralize } from "./helpers";
-import UserAgent from "user-agents";
 import * as cheerio from "cheerio";
-import { useFetch } from "@raycast/utils";
+import { useGameDetailFetch } from "./useGameDetailFetch";
 
 interface DetailsProps {
   id: string;
@@ -15,47 +13,7 @@ interface DetailsProps {
 export function Details(props: DetailsProps) {
   const { id, name } = props;
 
-  const absoluteUrl = useMemo(() => new URL(id, HltbSearch.DETAIL_URL).href, [id]);
-
-  const { isLoading, data: result } = useFetch(absoluteUrl, {
-    headers: {
-      "User-Agent": new UserAgent().toString(),
-      origin: "https://howlongtobeat.com",
-      referer: "https://howlongtobeat.com",
-    },
-    mapResult(html: string) {
-      return {
-        data: parseDetails(html, id),
-      };
-    },
-    onError(error) {
-      showToast({ style: Toast.Style.Failure, title: "Error building detail page", message: String(error) });
-    },
-  });
-
-  const markdown = useMemo(() => {
-    if (isLoading) {
-      return "";
-    }
-
-    if (!result) {
-      return "This game cannot be found...";
-    }
-
-    // Description need to be parsed before to display it.
-    const description = result.description.split("\t").shift();
-
-    return `
-<img src="${result.imageUrl}" width="150" />
-
-# ${result.name}
-
-${description}
-
-## ${pluralize(result.playableOn.length, "Platform")}
-${result.playableOn.join(", ")}
-    `;
-  }, [isLoading, result]);
+  const { isLoading, data: result, markdown } = useGameDetailFetch(id);
 
   const url = `${HltbSearch.DETAIL_URL}${id}`;
 
@@ -63,8 +21,7 @@ ${result.playableOn.join(", ")}
   const mainStoryText = mainStoryHours >= 1 ? `${result?.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
 
   const mainExtraHours = result?.gameplayMainExtra || 0;
-  const mainExtraText =
-    mainExtraHours >= 1 ? `${result?.gameplayMainExtra} ${pluralize(mainExtraHours, "hour")}` : "-";
+  const mainExtraText = mainExtraHours >= 1 ? `${result?.gameplayMainExtra} ${pluralize(mainExtraHours, "hour")}` : "-";
 
   const completionistsHours = result?.gameplayCompletionist || 0;
   const completionistsText =

@@ -5,7 +5,7 @@ import { Details } from "./details";
 import { pluralize } from "./helpers";
 import { HltbSearch } from "./hltbsearch";
 import { useCachedPromise } from "@raycast/utils";
-import { useGameDetail } from "./GameDetail";
+import { useGameDetailFetch } from "./useGameDetailFetch";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -37,7 +37,7 @@ export default function Command() {
 function SearchListItem({
   searchResult,
   isShowingDetail,
-  onToggleDetail
+  onToggleDetail,
 }: {
   searchResult: HowLongToBeatEntry;
   isShowingDetail: boolean;
@@ -45,7 +45,7 @@ function SearchListItem({
 }) {
   const url = `${HltbSearch.DETAIL_URL}${searchResult.id}`;
   const { push } = useNavigation();
-  const { result, isLoading, markdown } = useGameDetail(searchResult.id, isShowingDetail);
+  const { data: result, isLoading, markdown } = useGameDetailFetch(searchResult.id, isShowingDetail);
 
   const mainStoryHours = searchResult.gameplayMain || 0;
   const mainStoryText = mainStoryHours >= 1 ? `${searchResult.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
@@ -54,7 +54,8 @@ function SearchListItem({
   const mainExtraText = mainExtraHours >= 1 ? `${result?.gameplayMainExtra} ${pluralize(mainExtraHours, "hour")}` : "-";
 
   const completionistsHours = result?.gameplayCompletionist || 0;
-  const completionistsText = completionistsHours >= 1 ? `${result?.gameplayCompletionist} ${pluralize(completionistsHours, "hour")}` : "-";
+  const completionistsText =
+    completionistsHours >= 1 ? `${result?.gameplayCompletionist} ${pluralize(completionistsHours, "hour")}` : "-";
 
   return (
     <List.Item
