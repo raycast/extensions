@@ -1,0 +1,13 @@
+# This folder stores screenshots for the Raycast Store
+#
+# Screenshot requirements:
+# - Format: PNG
+# - Size: 2000x1250 pixels
+# - Use Raycast's Window Capture feature to take screenshots
+#
+# To capture screenshots:
+# 1. Open Raycast Preferences
+# 2. Go to Advanced → Set Window Capture Shortcut
+# 3. Run the extension command
+# 4. Press your Window Capture shortcut
+# 5. Save the screenshot to this folder

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "menubar-toggler",
+  "title": "Menu Bar Toggler",
+  "description": "Control menu bar auto-hide settings",
+  "icon": "icon.png",
+  "author": "xupeng",
+  "categories": [
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "menubar-toggler",
+      "title": "Toggle Menu Bar",
+      "description": "Toggle menu bar auto-hide",
+      "mode": "no-view"
+    }
+  ],
+  "engines": {
+    "raycast": ">=1.85.0"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.85.0"
+  },
+  "devDependencies": {
+    "@raycast/api": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "prettier": "^3.8.1",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.53.1"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "npx ray publish"
+  },
+  "license": "MIT"
+}
