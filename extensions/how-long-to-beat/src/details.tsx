@@ -134,7 +134,7 @@ function parseDetails(html: string, id: string): HowLongToBeatEntry {
   let gameplayComplete = 0;
 
   gameName = $("div[class*='profile_header'].shadow_text").text();
-  imageUrl = $("div[class*='game_image']").find("img")[0].attribs.src;
+  imageUrl = $("div[class*='game_image']").find("img")[0]?.attribs?.src || "";
 
   const divElements = $("div[class*='game_times'] div");
 
