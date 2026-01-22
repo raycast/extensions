@@ -29,7 +29,7 @@ export default function Command() {
         };
       },
       keepPreviousData: true,
-      initialData: [],
+      initialData: [] as Ticket[],
     },
   );
 
@@ -39,7 +39,7 @@ export default function Command() {
       pagination={pagination}
       searchBarPlaceholder="Filter tickets..."
     >
-      {data.map((ticket) => (
+      {(data as Ticket[]).map((ticket) => (
         <TicketListItem key={ticket.id} ticket={ticket} />
       ))}
     </List>

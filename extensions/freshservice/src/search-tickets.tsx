@@ -38,7 +38,7 @@ export default function Command() {
         };
       },
       keepPreviousData: true,
-      initialData: [],
+      initialData: [] as Ticket[],
     },
   );
 
@@ -50,7 +50,7 @@ export default function Command() {
       searchBarPlaceholder="Search by subject..."
       throttle
     >
-      {data.map((ticket) => (
+      {(data as Ticket[]).map((ticket) => (
         <TicketListItem key={ticket.id} ticket={ticket} />
       ))}
     </List>
