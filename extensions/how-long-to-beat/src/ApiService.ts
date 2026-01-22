@@ -27,21 +27,25 @@ export class ApiService {
       return this.tokenCache.value;
     }
 
-    const response = await this.getInstance().get<{ token: string }>(
-      `${HLTB_API_SEARCH_INIT_ENDPOINT}?t=${Date.now()}`,
-      {
-        headers: {
-          referer: `${HLTB_BASE_URL}?q=${query}`,
+    try {
+      const response = await this.getInstance().get<{ token: string }>(
+        `${HLTB_API_SEARCH_INIT_ENDPOINT}?t=${Date.now()}`,
+        {
+          headers: {
+            referer: `${HLTB_BASE_URL}?q=${query}`,
+          },
         },
-      },
-    );
+      );
 
-    this.tokenCache = {
-      value: response.data.token,
-      timestamp: Date.now(),
-    };
+      this.tokenCache = {
+        value: response.data.token,
+        timestamp: Date.now(),
+      };
 
-    return this.tokenCache.value;
+      return this.tokenCache.value;
+    } catch {
+      throw new Error("failed to fetch auth token");
+    }
   }
 
   public static async postWithAuth<T>(
