@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "electricity",
+  "title": "Electricity Prices",
+  "description": "View electricity prices from Nordpool for Nordic & Baltic countries - current price, next 24 hours, cheapest hour",
+  "icon": "extension-icon.png",
+  "author": "tristankrass",
+  "platforms": ["macOS"],
+  "categories": ["Finance"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "electricity",
+      "title": "View Prices",
+      "description": "View current and upcoming electricity prices",
+      "mode": "view"
+    },
+    {
+      "name": "price-chart",
+      "title": "Price Chart",
+      "description": "Visual chart of electricity prices",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Price",
+      "description": "Current electricity price in menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "region",
+      "title": "Region",
+      "description": "Select your electricity price region",
+      "type": "dropdown",
+      "required": true,
+      "default": "EE",
+      "data": [
+        { "title": "🇪🇪 Estonia", "value": "EE" },
+        { "title": "🇱🇻 Latvia", "value": "LV" },
+        { "title": "🇱🇹 Lithuania", "value": "LT" },
+        { "title": "🇫🇮 Finland", "value": "FI" },
+        { "title": "🇸🇪 Sweden SE1 (Luleå)", "value": "SE1" },
+        { "title": "🇸🇪 Sweden SE2 (Sundsvall)", "value": "SE2" },
+        { "title": "🇸🇪 Sweden SE3 (Stockholm)", "value": "SE3" },
+        { "title": "🇸🇪 Sweden SE4 (Malmö)", "value": "SE4" },
+        { "title": "🇳🇴 Norway NO1 (Oslo)", "value": "NO1" },
+        { "title": "🇳🇴 Norway NO2 (Kristiansand)", "value": "NO2" },
+        { "title": "🇳🇴 Norway NO3 (Trondheim)", "value": "NO3" },
+        { "title": "🇳🇴 Norway NO4 (Tromsø)", "value": "NO4" },
+        { "title": "🇳🇴 Norway NO5 (Bergen)", "value": "NO5" },
+        { "title": "🇩🇰 Denmark DK1 (West)", "value": "DK1" },
+        { "title": "🇩🇰 Denmark DK2 (East)", "value": "DK2" },
+        { "title": "🇩🇪 Germany-Luxembourg", "value": "DE-LU" },
+        { "title": "🇳🇱 Netherlands", "value": "NL" },
+        { "title": "🇧🇪 Belgium", "value": "BE" },
+        { "title": "🇦🇹 Austria", "value": "AT" },
+        { "title": "🇫🇷 France", "value": "FR" },
+        { "title": "🇵🇱 Poland", "value": "PL" }
+      ]
+    },
+    {
+      "name": "vatRate",
+      "title": "VAT Rate (%)",
+      "description": "Your country's VAT percentage. Examples: Estonia 24%, Finland 25.5%, Sweden 25%, Norway 25%, Germany 19%, Netherlands 21%",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "cheapThreshold",
+      "title": "Cheap Price Limit",
+      "description": "Prices below this (in cents/kWh with VAT) show as GREEN. Typical: 3-8 depending on your market",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    },
+    {
+      "name": "averageThreshold",
+      "title": "Average Price Limit",
+      "description": "Prices below this (in cents/kWh with VAT) show as BLUE. Typical: 8-15 depending on your market",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "highThreshold",
+      "title": "High Price Limit",
+      "description": "Prices below this show as ORANGE, above shows as RED (expensive). Typical: 15-25 depending on your market",
+      "type": "textfield",
+      "required": false,
+      "default": "20"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
