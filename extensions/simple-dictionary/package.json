@@ -38,8 +38,8 @@
           "type": "dropdown",
           "data": [
             {
-"title": "Select a language",
-"value": ""
+              "title": "Select a language",
+              "value": ""
             },
             {
               "title": "Catalan",
