@@ -19,7 +19,7 @@ export function DeviceUsageDetail({ data, isLoading }: DeviceUsageDetailProps) {
   }
 
   // If we have data but are loading (refreshing), show spinner
-  const isRefreshing = isLoading && data && data.mobile && data.desktop;
+  const isRefreshing = isLoading && !!(data?.mobile && data?.desktop);
 
   const mobileViews = data.mobile?.views ?? 0;
   const desktopViews = data.desktop?.views ?? 0;
