@@ -15,19 +15,22 @@
             "name": "create-ticket",
             "title": "Create Ticket",
             "description": "Create a new support ticket",
-            "mode": "view"
+            "mode": "view",
+            "icon": "icon.png"
         },
         {
             "name": "open-tickets",
             "title": "Open Tickets",
             "description": "View open tickets assigned to you",
-            "mode": "view"
+            "mode": "view",
+            "icon": "icon.png"
         },
         {
             "name": "search-tickets",
             "title": "Search Tickets",
             "description": "Search for tickets",
-            "mode": "view"
+            "mode": "view",
+            "icon": "icon.png"
         }
     ],
     "dependencies": {
