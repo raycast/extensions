@@ -67,8 +67,8 @@ export class ApiService {
   ): Promise<{ data: T }> {
     const token = await this.getAuthToken(query);
 
-    const controller = new AbortController();
-    const timeoutId = config?.timeout ? setTimeout(() => controller.abort(), config.timeout) : null;
+    const controller = config?.signal ? null : new AbortController();
+    const timeoutId = config?.timeout && controller ? setTimeout(() => controller.abort(), config.timeout) : null;
 
     const absoluteUrl = new URL(url, HLTB_BASE_URL).href;
 
@@ -81,7 +81,7 @@ export class ApiService {
           "x-auth-token": token,
         },
         body: JSON.stringify(data),
-        signal: config?.signal || controller.signal,
+        signal: config?.signal || controller?.signal,
       });
 
       if (timeoutId) clearTimeout(timeoutId);

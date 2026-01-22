@@ -37,7 +37,7 @@ export class HltbSearch {
     search.searchTerms = query;
 
     try {
-      const result = await ApiService.postWithAuth<SearchResponse>(HLTB_API_SEARCH_ENDPOINT, search, query[0], {
+      const result = await ApiService.postWithAuth<SearchResponse>(HLTB_API_SEARCH_ENDPOINT, search, query[0] || "", {
         timeout: 20000,
         signal,
       });
