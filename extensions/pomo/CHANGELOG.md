@@ -1,6 +1,6 @@
 # Pomo Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-22
 
 - Initial release
 - Start timers: 5, 10, 15, 25, and 45 minutes
