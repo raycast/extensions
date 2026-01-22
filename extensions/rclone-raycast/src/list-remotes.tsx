@@ -44,7 +44,7 @@ export default function Command() {
                     title: "Refreshing remotes...",
                     style: Toast.Style.Animated,
                   });
-                  await Promise.all([revalidate, new Promise((resolve) => setTimeout(resolve, 1000))]);
+                  await revalidate();
                   await showToast({
                     title: "Remotes refreshed",
                     style: Toast.Style.Success,

@@ -241,7 +241,7 @@ async function handleRemoveRemote(remote: string, onUpdate?: () => void) {
     await showToast({ style: Toast.Style.Success, title: `${remote} removed` });
     onUpdate?.();
 	
-	await new Promise(resolve => setTimeout(resolve, 1000));
+    await popToRoot();
     await popToRoot();
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
