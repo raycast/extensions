@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "logos-notes-sync",
+  "title": "Logos Notes Sync",
+  "description": "Sync notes and highlights from Logos Bible Software to Obsidian",
+  "icon": "icon.png",
+  "author": "herman_bavinck",
+  "categories": ["Productivity", "Applications"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "obsidianVaultPath",
+      "title": "Obsidian Vault Path",
+      "description": "Path to your Obsidian vault's Logos folder",
+      "placeholder": "~/Tyler's Vault/006 Digital/Logos",
+      "type": "textfield",
+      "required": true,
+      "default": ""
+    },
+    {
+      "name": "excludedResources",
+      "title": "Excluded Resources",
+      "description": "Comma-separated list of resource IDs to exclude (e.g., LLS:ESV,LLS:NIV)",
+      "placeholder": "LLS:ESV,LLS:NIV",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "includeHighlightColor",
+      "title": "Include Highlight Color",
+      "description": "Show highlight color in notes (e.g., [yellow])",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Include highlight color prefix"
+    },
+    {
+      "name": "readwiseToken",
+      "title": "Readwise Access Token",
+      "description": "Your Readwise access token (get it from readwise.io/access_token). Leave empty to disable Readwise sync.",
+      "placeholder": "Your Readwise API token",
+      "type": "password",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "syncToReadwise",
+      "title": "Sync to Readwise",
+      "description": "Send highlights to Readwise in addition to Obsidian",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Readwise sync"
+    },
+    {
+      "name": "autoSyncEnabled",
+      "title": "Auto-Sync Daily",
+      "description": "Automatically sync highlights once per day in the background",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable daily auto-sync"
+    }
+  ],
+  "commands": [
+    {
+      "name": "sync-notes",
+      "title": "Sync Notes",
+      "subtitle": "Logos",
+      "description": "Sync all notes and highlights from Logos to Obsidian",
+      "mode": "no-view"
+    },
+    {
+      "name": "login",
+      "title": "Login to Logos",
+      "subtitle": "Logos",
+      "description": "Authenticate with your Logos account",
+      "mode": "view"
+    },
+    {
+      "name": "background-sync",
+      "title": "Background Sync",
+      "subtitle": "Logos",
+      "description": "Background task for daily auto-sync",
+      "mode": "no-view",
+      "interval": "1d"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "^1.4.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "~20.8.0",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "@types/react": "18.2.27",
+    "react": "18.2.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
