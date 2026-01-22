@@ -24,24 +24,13 @@ import {
   getSqlEditorUrl,
 } from "./supabase";
 import { setupSql } from "./setupSql";
-import {
-  CronJobWithRun,
-  ExtensionPreferences,
-  FetchMode,
-  JobRunDetail,
-} from "./types";
+import { CronJobWithRun, FetchMode, JobRunDetail } from "./types";
 import { computeJobStatus, formatDateTime, statusLabel } from "./utils";
 import {
   DEFAULT_SETUP_MESSAGE,
   isMissingSetupError,
   toErrorMessage,
 } from "./errors";
-
-type MenuBarPreferences = {
-  customIconUrl?: string;
-  menuBarRefreshMinutes?: string;
-  menuBarJobFilter?: "all" | "active" | "failing";
-};
 
 type MenuBarData = {
   jobs: CronJobWithRun[];
@@ -53,9 +42,7 @@ type MenuBarData = {
 const FAILED_JOBS_KEY = "menuBarFailedJobs";
 
 export default function MenubarCronMonitor() {
-  const preferences = getPreferenceValues<
-    ExtensionPreferences & MenuBarPreferences
-  >();
+  const preferences = getPreferenceValues<Preferences.MenubarCronMonitor>();
   const refreshMinutes = parsePositiveInt(preferences.menuBarRefreshMinutes, 5);
   const jobFilter = preferences.menuBarJobFilter ?? "all";
   const client = useMemo(

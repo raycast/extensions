@@ -28,13 +28,6 @@ export type FetchMode = "view" | "rpc";
 
 export type JobStatus = "running" | "success" | "failed" | "unknown";
 
-export type ExtensionPreferences = {
-  supabaseUrl: string;
-  serviceRoleKey: string;
-  autoRefreshMinutes?: string;
-  runHistoryLimit?: string;
-};
-
 export type CronJobWithRun = CronJob & {
   lastRun?: JobRunDetail | null;
   lastRunFetchError?: string | null;

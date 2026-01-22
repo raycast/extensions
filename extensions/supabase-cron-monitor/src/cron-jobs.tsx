@@ -23,7 +23,7 @@ import {
   fetchLastRun,
   getSqlEditorUrl,
 } from "./supabase";
-import { CronJobWithRun, ExtensionPreferences, FetchMode } from "./types";
+import { CronJobWithRun, FetchMode } from "./types";
 import {
   computeJobStatus,
   formatDateTime,
@@ -40,7 +40,7 @@ type ViewState = {
 };
 
 export default function CronJobs() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences.CronJobs>();
   const [state, setState] = useState<ViewState>({
     isLoading: true,
     jobs: [],

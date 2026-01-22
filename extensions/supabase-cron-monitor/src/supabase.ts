@@ -5,16 +5,9 @@ import {
   isMissingSetupErrorLike,
   toErrorMessage,
 } from "./errors";
-import {
-  CronJob,
-  ExtensionPreferences,
-  FetchMode,
-  JobRunDetail,
-} from "./types";
+import { CronJob, FetchMode, JobRunDetail } from "./types";
 
-export function createSupabaseClient(
-  preferences: ExtensionPreferences,
-): SupabaseClient {
+export function createSupabaseClient(preferences: Preferences): SupabaseClient {
   return createClient(preferences.supabaseUrl, preferences.serviceRoleKey, {
     auth: {
       persistSession: false,
