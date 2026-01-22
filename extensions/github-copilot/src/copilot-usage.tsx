@@ -82,7 +82,7 @@ function Command() {
 
   if ((needsAuth && !isLoading) || isAuthenticating) {
     return (
-      <List>
+      <List isLoading={isAuthenticating}>
         <List.Item
           icon={{ source: "github-logo.png" }}
           title={userCode ? `Enter code: ${userCode}` : "Sign in with GitHub"}

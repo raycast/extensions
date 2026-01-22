@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { sleep } from "../utils";
 
 const COPILOT_CLIENT_ID = "Iv1.b507a08c87ecfe98";
 const DEVICE_CODE_URL = "https://github.com/login/device/code";
@@ -57,6 +58,28 @@ type PollOptions = {
   timeoutMs?: number;
 };
 
+async function handleAccessTokenResponse(data: AccessTokenResponse, interval: number): Promise<string | null> {
+  if (data.access_token) {
+    return data.access_token;
+  }
+
+  switch (data.error) {
+    case "authorization_pending":
+      return null;
+    case "slow_down":
+      await sleep((data.interval ?? interval + 5) * 1000);
+      return null;
+    case "expired_token":
+      throw new Error("Device code expired. Please try again.");
+    case "access_denied":
+      throw new Error("Authorization was denied.");
+    case undefined:
+      return null;
+    default:
+      throw new Error(data.error_description ?? data.error);
+  }
+}
+
 export async function pollForAccessToken({
   deviceCode,
   interval = 5,
@@ -90,30 +113,10 @@ export async function pollForAccessToken({
 
     const data = (await response.json()) as AccessTokenResponse;
 
-    if (data.access_token) {
-      await LocalStorage.setItem(STORAGE_KEY, data.access_token);
-      return data.access_token;
-    }
-
-    if (data.error === "authorization_pending") {
-      continue;
-    }
-
-    if (data.error === "slow_down") {
-      await sleep((data.interval ?? interval + 5) * 1000);
-      continue;
-    }
-
-    if (data.error === "expired_token") {
-      throw new Error("Device code expired. Please try again.");
-    }
-
-    if (data.error === "access_denied") {
-      throw new Error("Authorization was denied.");
-    }
-
-    if (data.error) {
-      throw new Error(data.error_description ?? data.error);
+    const token = await handleAccessTokenResponse(data, interval);
+    if (token) {
+      await LocalStorage.setItem(STORAGE_KEY, token);
+      return token;
     }
   }
 }
@@ -126,5 +129,3 @@ export async function getCachedGitHubToken(): Promise<string | null> {
 export async function clearCopilotToken(): Promise<void> {
   await LocalStorage.removeItem(STORAGE_KEY);
 }
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

@@ -7,6 +7,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { getCachedGitHubToken, clearCopilotToken, AuthenticationRequiredError } from "./copilot-auth";
+import { sleep } from "../utils";
 
 // The state of an agent session returned from Copilot API
 enum AgentSessionState {
@@ -151,7 +152,7 @@ type CopilotUsage = {
   allowanceResetAt: string;
 };
 
-export async function createTask(
+async function createTask(
   repository: string,
   prompt: string,
   branch: string,
@@ -271,8 +272,6 @@ const pollJobUntilPullRequestReady = async ({
   }
 };
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 /**
  * Try to get token from apps.json (legacy fallback for users who have it)
  */
@@ -308,27 +307,27 @@ const getAppsJsonToken = (): string | null => {
 
 /**
  * Get a valid Copilot token using the following priority:
- * 1. apps.json fallback (for users with IDE extensions)
- * 2. Cached GitHub access token (from device flow)
+ * 1. Cached GitHub access token (from device flow)
+ * 2. apps.json fallback (for users with IDE extensions)
  */
 const getCopilotToken = async (): Promise<string> => {
-  // 1. Try apps.json fallback
-  const appsJsonToken = getAppsJsonToken();
-  if (appsJsonToken) {
-    return appsJsonToken;
-  }
-
-  // 2. Try cached GitHub access token (from device flow)
+  // 1. Try cached GitHub access token (from device flow)
   const cachedGitHubToken = await getCachedGitHubToken();
   if (cachedGitHubToken) {
     return cachedGitHubToken;
+  }
+
+  // 2. Try apps.json fallback
+  const appsJsonToken = getAppsJsonToken();
+  if (appsJsonToken) {
+    return appsJsonToken;
   }
 
   // Need device flow authentication
   throw new AuthenticationRequiredError("Please authenticate with GitHub Copilot");
 };
 
-export const fetchSessions = async (): Promise<PullRequestWithAgentSessions[]> => {
+const fetchSessions = async (): Promise<PullRequestWithAgentSessions[]> => {
   const { token } = getAccessToken();
 
   const listSessionsResponse = await fetch("https://api.githubcopilot.com/agents/sessions", {
@@ -434,16 +433,23 @@ export const fetchSessions = async (): Promise<PullRequestWithAgentSessions[]> =
   return transformedPullRequestsWithAgentSessions;
 };
 
-export const fetchCopilotUsage = async (): Promise<CopilotUsage> => {
-  const token = await getCopilotToken();
+const fetchCopilotUsage = async (): Promise<CopilotUsage> => {
+  const makeRequest = async (token: string): Promise<Response> =>
+    fetch("https://api.github.com/copilot_internal/user", {
+      headers: { authorization: `Bearer ${token}` },
+    });
 
-  const response = await fetch("https://api.github.com/copilot_internal/user", {
-    headers: { authorization: `Bearer ${token}` },
-  });
+  let token = await getCopilotToken();
+  let response = await makeRequest(token);
+
+  if (!response.ok && (response.status === 401 || response.status === 403)) {
+    await clearCopilotToken();
+    token = await getCopilotToken();
+    response = await makeRequest(token);
+  }
 
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
-      await clearCopilotToken();
       throw new AuthenticationRequiredError("Authentication failed. Please re-authenticate.");
     }
     throw new Error(`Failed to fetch Copilot usage: ${response.status} ${response.statusText}`);
@@ -455,13 +461,13 @@ export const fetchCopilotUsage = async (): Promise<CopilotUsage> => {
 
 export { AuthenticationRequiredError, clearCopilotToken, initiateDeviceFlow, pollForAccessToken } from "./copilot-auth";
 
-// Export types for use in other files
-export type {
-  AgentSession,
-  PullRequest,
-  PullRequestWithAgentSessions,
-  CopilotUsage,
-  CopilotInternalUserResponse,
-  QuotaSnapshot,
+export {
+  AgentSessionState,
+  createTask,
+  fetchSessions,
+  fetchCopilotUsage,
+  type PullRequestWithAgentSessions,
+  type CopilotUsage,
+  type CopilotInternalUserResponse,
+  type QuotaSnapshot,
 };
-export { AgentSessionState };
