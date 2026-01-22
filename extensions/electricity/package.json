@@ -12,19 +12,22 @@
     {
       "name": "electricity",
       "title": "View Prices",
-      "description": "View current and upcoming electricity prices",
+      "subtitle": "Nordpool",
+      "description": "View current and upcoming electricity prices with smart recommendations",
       "mode": "view"
     },
     {
       "name": "price-chart",
       "title": "Price Chart",
-      "description": "Visual chart of electricity prices",
+      "subtitle": "Nordpool",
+      "description": "Visual chart of electricity prices for the next 24 hours",
       "mode": "view"
     },
     {
       "name": "menu-bar",
       "title": "Menu Bar Price",
-      "description": "Current electricity price in menu bar",
+      "subtitle": "Nordpool",
+      "description": "Monitor current electricity price in your menu bar",
       "mode": "menu-bar",
       "interval": "10m"
     }

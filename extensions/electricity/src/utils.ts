@@ -1,5 +1,5 @@
 import { Color, Icon, getPreferenceValues } from "@raycast/api";
-import { PriceRow, Preferences } from "./api";
+import { PriceRow } from "./api";
 
 /**
  * Price tier types

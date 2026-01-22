@@ -29,14 +29,6 @@ interface NordpoolResponse {
   multiAreaEntries: NordpoolEntry[];
 }
 
-export interface Preferences {
-  region: string;
-  vatRate: string;
-  cheapThreshold: string;
-  averageThreshold: string;
-  highThreshold: string;
-}
-
 /**
  * Get user preferences with defaults
  */
