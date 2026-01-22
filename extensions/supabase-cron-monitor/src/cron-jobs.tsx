@@ -307,7 +307,7 @@ export default function CronJobs() {
 
 function parsePositiveInt(value: string | undefined, fallback: number): number {
   const parsed = Number.parseInt(value ?? "", 10);
-  if (Number.isNaN(parsed) || parsed < 0) return fallback;
+  if (Number.isNaN(parsed) || parsed < 1) return fallback;
   return parsed;
 }
 

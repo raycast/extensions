@@ -10,7 +10,10 @@ export function jobRunHadErrors(run: JobRunDetail): boolean {
   if (isSuccess) {
     return normalizeStatus(run.return_message).includes("error");
   }
-  return true;
+  // Only return true for actual failure statuses
+  const isFailed =
+    normalized.includes("failed") || normalized.includes("error");
+  return isFailed;
 }
 
 export function computeJobStatus(
