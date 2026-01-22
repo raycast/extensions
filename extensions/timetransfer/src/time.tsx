@@ -6,57 +6,80 @@ import { promisify } from "util";
 const execAsync = promisify(exec);
 
 /**
- * 将时间戳转换为中文日期格式
- * @param timestamp 时间戳（毫秒或秒）
- * @returns 格式化后的日期字符串 "YYYY-MM-DD HH:mm:ss"
+ * 格式化日期对象为 "YYYY-MM-DD HH:mm:ss"
  */
-export function timestampToChineseDate(timestamp: number | string): string {
-  // 处理字符串类型的时间戳
-  const numTimestamp = typeof timestamp === "string" ? parseFloat(timestamp) : timestamp;
-
-  // 判断是秒级时间戳还是毫秒级时间戳
-  // 如果时间戳小于 13 位数字，认为是秒级，需要转换为毫秒
-  const milliseconds = numTimestamp < 1e12 ? numTimestamp * 1000 : numTimestamp;
-
-  // 创建 Date 对象
-  const date = new Date(milliseconds);
-
-  // 检查日期是否有效
-  if (isNaN(date.getTime())) {
-    throw new Error("无效的时间戳");
-  }
-
-  // 格式化日期为 "YYYY-MM-DD HH:mm:ss"
+function formatDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const seconds = String(date.getSeconds()).padStart(2, "0");
-
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 /**
- * 检查字符串是否为有效的时间戳
+ * 尝试解析输入并返回转换结果
+ * @param input 时间戳或日期字符串
+ * @returns 转换结果或 null (无法转换)
  */
-function isValidTimestamp(str: string): boolean {
-  const trimmed = str.trim();
-  if (!trimmed) return false;
-  const num = parseFloat(trimmed);
-  if (isNaN(num)) return false;
-  try {
-    timestampToChineseDate(num);
-    return true;
-  } catch {
-    return false;
+function tryConvert(input: string): { type: "timestamp" | "date"; result: string; original: string } | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  // 1. 尝试作为时间戳处理 (纯数字)
+  if (/^\d+$/.test(trimmed)) {
+    let num = parseFloat(trimmed);
+    // 简单的判定：如果位数较少(<=10位)，视为秒，转毫秒
+    if (trimmed.length <= 10) {
+      num *= 1000;
+    }
+    const date = new Date(num);
+    if (!isNaN(date.getTime())) {
+      return {
+        type: "timestamp",
+        original: trimmed,
+        result: formatDate(date),
+      };
+    }
   }
+
+  // 2. 尝试作为日期字符串处理
+  // 支持格式: yyyy-MM-dd, yyyy/MM/dd, yyyyMMdd等
+  // 简单的正则匹配常见格式，或者直接交给 Date.parse / new Date
+  // 为了支持 yyyyMMdd 这种紧凑格式，可能需要手动处理一下
+  let dateToParse = trimmed;
+
+  // 处理 yyyyMMdd (8位且纯数字) - 在上面纯数字判断里可能已经被当做时间戳处理了？
+  // 实际上 20230101 (8位) 作为毫秒是 1970年，作为秒是 1970年
+  // 所以对于 8 位数字，优先当做日期 yyyyMMdd 处理可能更符合直觉？
+  // 或者用户就是想转这个秒数。
+  // 策略：如果解析出来的 Date 年份在 1970-1971 之间（即数值较小），以此判断可能不是用户原本想要的“近代时间戳”
+  // 但这样有歧义。
+  // 让我们遵循“显式大于隐式”的原则，通常时间戳由机器生成，日期由人输入。
+  // 8位数字 20231010 -> 2023-10-10 是更常见的需求。
+  if (/^\d{8}$/.test(trimmed)) {
+    const y = trimmed.slice(0, 4);
+    const m = trimmed.slice(4, 6);
+    const d = trimmed.slice(6, 8);
+    dateToParse = `${y}-${m}-${d}`;
+  }
+
+  const date = new Date(dateToParse);
+  if (!isNaN(date.getTime())) {
+    return {
+      type: "date",
+      original: trimmed,
+      result: date.getTime().toString(),
+    };
+  }
+
+  return null;
 }
 
 export default function Command() {
   const [clipboardText, setClipboardText] = useState<string>("");
   const [inputText, setInputText] = useState<string>("");
-  const [result, setResult] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // 解析剪切板内容，提取所有可能的条目
@@ -64,81 +87,34 @@ export default function Command() {
     if (!text || !text.trim()) return [];
 
     const items: Set<string> = new Set();
-
-    // 方法1: 按行分割（保留所有原始行）
     const lines = text
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line);
+
     lines.forEach((line) => {
       items.add(line);
+      // 简单的分割尝试
+      const spaceItems = line.split(/\s+/).filter(Boolean);
+      spaceItems.forEach((item) => items.add(item));
     });
 
-    // 方法2: 从每行中提取可能的时间戳（按空格、逗号等分割）
-    lines.forEach((line) => {
-      // 如果整行是纯数字时间戳，已经添加过了，跳过
-      if (/^\d+$/.test(line) && line.length >= 8 && line.length <= 15) {
-        return;
-      }
-
-      // 按空格分割
-      const spaceItems = line
-        .split(/\s+/)
-        .map((item) => item.trim())
-        .filter((item) => item);
-      spaceItems.forEach((item) => {
-        // 添加看起来像时间戳的项（纯数字，长度合理）
-        if (/^\d+$/.test(item) && item.length >= 8 && item.length <= 15) {
-          items.add(item);
-        }
-      });
-
-      // 按逗号、分号等常见分隔符分割
-      const commaItems = line
-        .split(/[,;，；]/)
-        .map((item) => item.trim())
-        .filter((item) => item);
-      commaItems.forEach((item) => {
-        if (/^\d+$/.test(item) && item.length >= 8 && item.length <= 15) {
-          items.add(item);
-        }
-      });
-    });
-
-    // 返回去重后的数组，按原始顺序（优先显示完整的行）
-    const result: string[] = [];
-    // 先添加所有原始行
-    lines.forEach((line) => {
-      if (items.has(line)) {
-        result.push(line);
-        items.delete(line);
-      }
-    });
-    // 再添加其他提取出的时间戳
-    items.forEach((item) => result.push(item));
-
-    return result;
+    return Array.from(items);
   };
 
   // 加载剪切板内容
   useEffect(() => {
     async function loadClipboard() {
       try {
-        // 方法1: 使用 Raycast API 读取
         const text = await Clipboard.readText();
-
-        // 方法2: 尝试使用系统命令获取更多内容（macOS）
         let systemClipboard = "";
         try {
           const { stdout } = await execAsync("pbpaste");
           systemClipboard = stdout || "";
         } catch {
-          // 如果系统命令失败，忽略
+          // ignore
         }
-
-        // 合并两种方式获取的内容
-        const combinedText = text || systemClipboard || "";
-        setClipboardText(combinedText);
+        setClipboardText(text || systemClipboard || "");
       } catch {
         setClipboardText("");
       } finally {
@@ -148,116 +124,102 @@ export default function Command() {
     loadClipboard();
   }, []);
 
-  // 处理转换
-  const handleConvert = async (timestamp: string) => {
-    if (!timestamp || !timestamp.trim()) {
-      setResult("");
-      return;
-    }
-
-    try {
-      const dateString = timestampToChineseDate(timestamp);
-      setResult(dateString);
-      await Clipboard.copy(dateString);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "转换成功",
-        message: dateString,
-      });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "转换失败",
-        message: error instanceof Error ? error.message : "未知错误",
-      });
-      setResult("");
-    }
+  const handleCopy = async (text: string) => {
+    await Clipboard.copy(text);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "已复制到剪切板",
+      message: text,
+    });
   };
 
-  // 解析剪切板内容，提取所有可能的时间戳
+  // 决定显示什么列表
+  // 如果有输入，优先显示输入的转换结果
+  // 如果没输入，显示剪切板内容的转换结果
+
+  const searchText = inputText.trim();
+
+  // 计算输入框内容的转换结果
+  const inputConversion = searchText ? tryConvert(searchText) : null;
+
+  // 计算剪切板内容的转换结果
   const clipboardItems = parseClipboardContent(clipboardText);
+  const clipboardConversions = clipboardItems
+    .map((item) => tryConvert(item))
+    .filter((item) => item !== null) as NonNullable<ReturnType<typeof tryConvert>>[];
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="输入时间戳或选择剪切板内容..."
+      searchBarPlaceholder="输入时间戳 (167...) 或日期 (2023-01-01)..."
       onSearchTextChange={setInputText}
       searchText={inputText}
     >
-      {result && (
+      {/* 1. 输入内容的转换结果 (如果有输入且能转换) */}
+      {inputConversion && (
         <List.Section title="转换结果">
           <List.Item
             icon={Icon.CheckCircle}
-            title={result}
-            subtitle="已复制到剪切板"
+            title={inputConversion.result}
+            subtitle={`源: ${inputConversion.original} (${
+              inputConversion.type === "timestamp" ? "时间戳 -> 日期" : "日期 -> 时间戳"
+            })`}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={result} title="复制结果" />
+                <Action
+                  title="复制结果"
+                  onAction={() => handleCopy(inputConversion.result)}
+                  icon={Icon.CopyClipboard}
+                />
+                <Action.CopyToClipboard content={inputConversion.original} title="复制原始内容" />
               </ActionPanel>
             }
           />
         </List.Section>
       )}
 
-      {clipboardItems.length > 0 && (
-        <List.Section title="剪切板内容">
-          {clipboardItems.map((item, index) => {
-            const trimmedItem = item.trim();
-            const isValid = isValidTimestamp(trimmedItem);
-
-            return (
-              <List.Item
-                key={index}
-                icon={isValid ? Icon.Clock : Icon.XMarkCircle}
-                title={trimmedItem}
-                subtitle={isValid ? "点击回车或选择以转换" : "不是有效的时间戳"}
-                actions={
-                  <ActionPanel>
-                    {isValid && (
-                      <Action
-                        title="转换并复制"
-                        onAction={() => handleConvert(trimmedItem)}
-                        icon={Icon.CheckCircle}
-                        shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                      />
-                    )}
-                    <Action.CopyToClipboard content={trimmedItem} title="复制原始内容" />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
-        </List.Section>
-      )}
-
-      {inputText && inputText.trim() && (
-        <List.Section title="输入的内容">
+      {/* 2. 输入内容的原始值 (如果不能转换，或者作为候选项) */}
+      {searchText && !inputConversion && (
+        <List.Section title="输入内容">
           <List.Item
-            icon={isValidTimestamp(inputText.trim()) ? Icon.Clock : Icon.Text}
-            title={inputText.trim()}
-            subtitle={isValidTimestamp(inputText.trim()) ? "按回车键转换" : "不是有效的时间戳"}
+            icon={Icon.Text}
+            title={searchText}
+            subtitle="无法识别为有效的时间戳或日期"
             actions={
               <ActionPanel>
-                {isValidTimestamp(inputText.trim()) && (
-                  <Action
-                    title="转换并复制"
-                    onAction={() => handleConvert(inputText.trim())}
-                    icon={Icon.CheckCircle}
-                    shortcut={{ modifiers: [], key: "enter" }}
-                  />
-                )}
-                <Action.CopyToClipboard content={inputText.trim()} title="复制输入内容" />
+                <Action.CopyToClipboard content={searchText} title="复制内容" />
               </ActionPanel>
             }
           />
         </List.Section>
       )}
 
-      {!clipboardText && !inputText && !isLoading && (
+      {/* 3. 剪切板内容的转换建议 (仅当没有输入时显示，或者作为下方列表) */}
+      {!searchText && clipboardConversions.length > 0 && (
+        <List.Section title="剪切板中的时间信息">
+          {clipboardConversions.map((item, index) => (
+            <List.Item
+              key={index}
+              icon={Icon.Clock}
+              title={item.result}
+              subtitle={`源: ${item.original}`}
+              actions={
+                <ActionPanel>
+                  <Action title="复制结果" onAction={() => handleCopy(item.result)} icon={Icon.CopyClipboard} />
+                  <Action.CopyToClipboard content={item.original} title="复制原始内容" />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+
+      {/* 4. 空状态 */}
+      {!searchText && clipboardConversions.length === 0 && !isLoading && (
         <List.EmptyView
-          icon={Icon.Clipboard}
-          title="剪切板为空"
-          description="请复制时间戳到剪切板，或在上方输入框中输入时间戳后按回车"
+          icon={Icon.Clock}
+          title="无需回车，即时转换"
+          description="输入时间戳或日期，或者是复制相关内容到剪切板"
         />
       )}
     </List>
