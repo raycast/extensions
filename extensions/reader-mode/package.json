@@ -246,6 +246,7 @@
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "linkedom": "^0.18.12",
+    "marked": "^17.0.1",
     "turndown": "^7.2.2",
     "turndown-plugin-gfm": "^1.0.2"
   },

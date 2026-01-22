@@ -15,12 +15,11 @@ interface ArticleDetailViewProps {
   onReimportFromBrowser?: () => void;
 }
 
-function buildMarkdown(
-  article: ArticleState,
-  summaryStyle: SummaryStyle | null,
-  currentSummary: string | null,
-  isSummarizing: boolean,
-): string {
+/**
+ * Builds the article header (title + metadata) as Markdown.
+ * Reusable for both display and export.
+ */
+export function buildArticleHeader(article: ArticleState): string {
   const parts: string[] = [];
 
   // 1. Title
@@ -52,31 +51,42 @@ function buildMarkdown(
     parts.push("", `*${metaParts.join(" • ")}*`);
   }
 
-  // 3. Summary section (if applicable)
-  // Show summary if: auto-summary is enabled OR user manually requested one (summaryStyle is set)
-  if (summaryStyle) {
-    parts.push("", "---");
+  return parts.join("\n");
+}
 
+/**
+ * Builds article-only Markdown (header + body, no summary).
+ * Used for "Copy/Save Article" actions.
+ */
+export function buildArticleMarkdown(article: ArticleState): string {
+  const header = buildArticleHeader(article);
+  return [header, "", "---", "", article.bodyMarkdown].join("\n");
+}
+
+/**
+ * Builds the full display Markdown (header + optional summary + body).
+ */
+function buildMarkdown(
+  article: ArticleState,
+  summaryStyle: SummaryStyle | null,
+  currentSummary: string | null,
+  isSummarizing: boolean,
+): string {
+  const header = buildArticleHeader(article);
+  const parts: string[] = [header, "", "---"];
+
+  if (summaryStyle) {
     if (isSummarizing && currentSummary) {
-      // Streaming in progress - show partial summary
       parts.push("", formatSummaryBlock(currentSummary, summaryStyle), "", "*Generating summary...*");
     } else if (isSummarizing) {
-      // Just started, no data yet
       parts.push("", "> Generating summary...");
     } else if (currentSummary) {
-      // Complete summary
       parts.push("", formatSummaryBlock(currentSummary, summaryStyle));
     }
-
-    parts.push("", "---");
-  } else {
-    // No summary - just add separator before body
     parts.push("", "---");
   }
 
-  // 4. Body content
   parts.push("", article.bodyMarkdown);
-
   return parts.join("\n");
 }
 
@@ -91,6 +101,7 @@ export function ArticleDetailView({
   onReimportFromBrowser,
 }: ArticleDetailViewProps) {
   const markdown = buildMarkdown(article, summaryStyle, currentSummary, isSummarizing);
+  const articleMarkdown = buildArticleMarkdown(article);
 
   return (
     <Detail
@@ -100,8 +111,11 @@ export function ArticleDetailView({
       actions={
         <ArticleActions
           articleUrl={article.url}
+          articleTitle={article.title}
           markdown={markdown}
+          articleMarkdown={articleMarkdown}
           currentSummary={currentSummary}
+          summaryStyle={summaryStyle}
           canAccessAI={canAccessAI}
           isSummarizing={isSummarizing}
           onSummarize={onSummarize}
