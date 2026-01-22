@@ -1,7 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 import { fetchMounts } from "../lib/api";
 
-
 export default function useRemoteMountPoints(remote: string) {
   return useCachedPromise(
     async (remoteName: string) => {
@@ -13,7 +12,7 @@ export default function useRemoteMountPoints(remote: string) {
     [remote],
     {
       keepPreviousData: true,
-    }
+    },
   );
 }
 
@@ -28,4 +27,3 @@ function matchesRemote(fsValue: string, remoteName: string) {
 
   return fsValue.startsWith(`${remoteName}:`);
 }
-

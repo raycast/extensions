@@ -4,15 +4,15 @@
   "title": "Rclone",
   "description": "A Raycast extension for Rclone",
   "icon": "icon.png",
-  "categories": [
-    "Data",
-    "Developer Tools",
-    "System"
-  ],
   "author": "rclone",
   "platforms": [
     "macOS",
     "Windows"
+  ],
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "System"
   ],
   "license": "MIT",
   "commands": [

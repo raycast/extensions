@@ -1,4 +1,3 @@
-
 import type { components } from "rclone-openapi";
 
 export type OptionsInfoOption = components["schemas"]["OptionsInfoOption"];
@@ -8,10 +7,12 @@ export function sortByName(a: OptionsInfoOption, b: OptionsInfoOption) {
 }
 
 export function normalizeGroups(groups?: string) {
-  return groups
-    ?.split(/[,\s]+/)
-    .map((item) => item.trim())
-    .filter(Boolean) ?? [];
+  return (
+    groups
+      ?.split(/[,\s]+/)
+      .map((item) => item.trim())
+      .filter(Boolean) ?? []
+  );
 }
 
 export function flagHasGroup(flag: OptionsInfoOption | undefined, group: string) {

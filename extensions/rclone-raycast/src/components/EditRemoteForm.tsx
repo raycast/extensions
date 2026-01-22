@@ -35,10 +35,7 @@ export default function EditRemoteForm({ remote }: { remote: string }) {
   });
 
   const providers = providersResponse?.providers ?? [];
-  const sortedProviders = useMemo(
-    () => [...providers].sort((a, b) => a.Name.localeCompare(b.Name)),
-    [providers],
-  );
+  const sortedProviders = useMemo(() => [...providers].sort((a, b) => a.Name.localeCompare(b.Name)), [providers]);
 
   const currentType = (remoteConfig?.type ?? config.type) as string | undefined;
   const currentBackend = useMemo(() => {
@@ -153,8 +150,7 @@ export default function EditRemoteForm({ remote }: { remote: string }) {
           <Form.Dropdown.Item value="" title="Select a provider" />
           {option.Examples.map((example, index) => {
             const dropdownValue = example.Value ?? "";
-            const itemKey =
-              dropdownValue && dropdownValue.length > 0 ? dropdownValue : `provider-example-${index}`;
+            const itemKey = dropdownValue && dropdownValue.length > 0 ? dropdownValue : `provider-example-${index}`;
             return (
               <Form.Dropdown.Item
                 key={itemKey}
@@ -206,7 +202,7 @@ export default function EditRemoteForm({ remote }: { remote: string }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={isSaving ? "Saving..." : "Save Changes"}
+            title={isSaving ? "Saving…" : "Save Changes"}
             icon={Icon.Checkmark}
             onSubmit={handleSubmit}
           />
@@ -227,9 +223,7 @@ export default function EditRemoteForm({ remote }: { remote: string }) {
       <Form.Description title="Remote" text={remote} />
       <Form.Description title="Type" text={currentType ?? "Unknown"} />
 
-      {providersError ? (
-        <Form.Description text={`Failed to load providers: ${providersError.message}`} />
-      ) : null}
+      {providersError ? <Form.Description text={`Failed to load providers: ${providersError.message}`} /> : null}
 
       {basicFields.map((option) => renderOptionField(option))}
 

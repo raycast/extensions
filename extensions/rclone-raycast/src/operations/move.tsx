@@ -1,28 +1,29 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 import { Fragment, useCallback, useMemo, useState } from "react";
-import useOptionsInfo from "hooks/useOptionsInfo";
-import useGlobalOptions from "hooks/useGlobalOptions";
-import rclone from "lib/rclone";
-import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "lib/operations";
+import useOptionsInfo from "../hooks/useOptionsInfo";
+import useGlobalOptions from "../hooks/useGlobalOptions";
+import rclone from "../lib/rclone";
+import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "../lib/operations";
 
-export default function purgeOperation({ initialRemote }: { initialRemote: string }) {
-  const [path, setPath] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
+export default function moveOperation({ initialRemote }: { initialRemote: string }) {
+  const [source, setSource] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
+  const [destination, setDestination] = useState<string>("");
   const [flagValues, setFlagValues] = useState<Record<string, string>>({});
 
-  const {
-    data: allFlagsData,
-    isLoading: isLoadingAllFlags,
-    error: allFlagsError,
-  } = useOptionsInfo();
+  const { data: allFlagsData, isLoading: isLoadingAllFlags, error: allFlagsError } = useOptionsInfo();
 
-  const {
-    data: globalFlags,
-    isLoading: isLoadingGlobalFlags,
-    error: globalFlagsError,
-  } = useGlobalOptions();
+  const { data: globalFlags, isLoading: isLoadingGlobalFlags, error: globalFlagsError } = useGlobalOptions();
 
   const mainFlags = allFlagsData?.main;
+
   const filterFlagsSource = allFlagsData?.filter;
+
+  const copyFlags = useMemo(() => {
+    if (!mainFlags) {
+      return [];
+    }
+    return mainFlags.filter((flag) => flagHasGroup(flag, "Copy")).sort(sortByName);
+  }, [mainFlags]);
 
   const filterFlags = useMemo(() => {
     if (!filterFlagsSource) {
@@ -39,7 +40,7 @@ export default function purgeOperation({ initialRemote }: { initialRemote: strin
       .filter((flag) => {
         return (
           flagHasGroup(flag, "Performance") ||
-		  flagHasGroup(flag, "Listing") ||
+          flagHasGroup(flag, "Listing") ||
           flagHasGroup(flag, "Networking") ||
           flagHasGroup(flag, "Check") ||
           flag?.Name === "use_server_modtime"
@@ -51,6 +52,12 @@ export default function purgeOperation({ initialRemote }: { initialRemote: strin
   const sections = useMemo(
     () =>
       ({
+        move: {
+          id: "move",
+          title: "Move",
+          flags: copyFlags,
+          globalNamespace: "main",
+        },
         filter: {
           id: "filter",
           title: "Filter",
@@ -63,20 +70,23 @@ export default function purgeOperation({ initialRemote }: { initialRemote: strin
           flags: configFlags,
           globalNamespace: "main",
         },
-      } as const),
-    [filterFlags, configFlags],
+      }) as const,
+    [copyFlags, filterFlags, configFlags],
   );
 
   const availableSections = useMemo(
-    () =>
-      Object.values(sections).filter(
-        (section) => section && section.flags.length > 0,
-      ),
+    () => Object.values(sections).filter((section) => section && section.flags.length > 0),
     [sections],
   );
 
   const flagSectionLookup = useMemo(() => {
-    const lookup: Record<string, { sectionId: typeof sections[keyof typeof sections]["id"]; globalNamespace: typeof sections[keyof typeof sections]["globalNamespace"] }> = {};
+    const lookup: Record<
+      string,
+      {
+        sectionId: (typeof sections)[keyof typeof sections]["id"];
+        globalNamespace: (typeof sections)[keyof typeof sections]["globalNamespace"];
+      }
+    > = {};
     availableSections.forEach((section) => {
       section.flags.forEach((flag) => {
         if (flag?.FieldName) {
@@ -161,13 +171,23 @@ export default function purgeOperation({ initialRemote }: { initialRemote: strin
   );
 
   const handleSubmit = async () => {
-    const trimmedPath = path.trim();
+    const trimmedSource = source.trim();
+    const trimmedDestination = destination.trim();
 
-    if (!trimmedPath) {
+    if (!trimmedSource || !trimmedDestination) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Missing path",
-        message: "Please provide a path.",
+        message: "Please provide both a source and destination.",
+      });
+      return;
+    }
+
+    if (trimmedSource === trimmedDestination) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid paths",
+        message: "Source and destination cannot be the same.",
       });
       return;
     }
@@ -187,53 +207,40 @@ export default function purgeOperation({ initialRemote }: { initialRemote: strin
 
     const configPayload = Object.keys(configOverrides).length > 0 ? JSON.stringify(configOverrides) : undefined;
     const filterPayload = Object.keys(filterOverrides).length > 0 ? JSON.stringify(filterOverrides) : undefined;
-	
-	const splitPath = trimmedPath.split(":");
-	const pathFs = splitPath[0];
-	const pathRemote = splitPath[1];
-	
-	if (!pathFs || !pathRemote) {
-		await showToast({
-			style: Toast.Style.Failure,
-			title: "Invalid path",
-			message: "Path must be in the format 'remote:/path'.",
-		});
-		return;
-	}
-	
+
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Starting purge...",
-      message: `Purging ${trimmedPath}`,
+      title: "Starting move...",
+      message: `Moving ${trimmedSource} to ${trimmedDestination}`,
     });
 
     try {
-      await rclone("/operations/purge", {
+      await rclone("/sync/move", {
         params: {
           query: {
-            fs: pathFs,
-			remote: pathRemote,
+            srcFs: trimmedSource,
+            dstFs: trimmedDestination,
             _config: configPayload,
             _filter: filterPayload,
-			_async: true,
+            _async: true,
           },
         },
       });
 
       toast.style = Toast.Style.Success;
-      toast.title = "Purge started";
-      toast.message = `Purge ${trimmedPath} initiated`;
+      toast.title = "Move started";
+      toast.message = `Move from ${trimmedSource} to ${trimmedDestination} initiated`;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to start purge";
+      toast.title = "Failed to start move";
       toast.message = message;
     }
   };
 
   return (
     <Form
-      navigationTitle="purge"
+      navigationTitle="move"
       isLoading={isLoadingFlags}
       actions={
         <ActionPanel>
@@ -241,13 +248,20 @@ export default function purgeOperation({ initialRemote }: { initialRemote: strin
         </ActionPanel>
       }
     >
-      <Form.Description title="Paths" text="Configure the path for the purge." />
+      <Form.Description title="Paths" text="Configure the source and destination for the copy." />
       <Form.TextField
-        id="path"
-        title="Path"
-        value={path}
-        onChange={setPath}
-        placeholder="remote:/path"
+        id="source"
+        title="Source"
+        value={source}
+        onChange={setSource}
+        placeholder="remote:/path or /local/path"
+      />
+      <Form.TextField
+        id="destination"
+        title="Destination"
+        value={destination}
+        onChange={setDestination}
+        placeholder="remote:/path or /local/path"
       />
       <Form.Separator />
 

@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { spawn } from "node:child_process";
-import { fetchPid } from "lib/api";
+import { fetchPid } from "./lib/api";
 
 type DaemonStatus = "checking" | "starting" | "running" | "error" | "stopped";
 
@@ -85,6 +85,7 @@ export default function Command() {
             <Action
               title={isStopping ? "Stopping…" : "Stop Daemon"}
               onAction={handleStopDaemon}
+              icon={Icon.Eject}
               style={Action.Style.Destructive}
             />
           </ActionPanel>

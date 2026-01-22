@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*", "raycast-env.d.ts", "components/**/*", "hooks/**/*", "lib/**/*", "operations"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2023"],
     "module": "commonjs",
@@ -11,10 +11,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@operations/*": ["operations/*"]
-    }
+    "resolveJsonModule": true
   }
 }

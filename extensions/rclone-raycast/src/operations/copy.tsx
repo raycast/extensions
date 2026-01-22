@@ -1,41 +1,37 @@
-/*
-https://rclone.org/rc/#operations-copyurl
-
-operations/copyurl: Copy the URL to the object
-This takes the following parameters:
-
-fs - a remote name string e.g. "drive:"
-remote - a path within that remote e.g. "dir"
-url - string, URL to read from
-autoFilename - boolean, set to true to retrieve destination file name from url
-See the copyurl command for more information on the above.
-*/
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 import { Fragment, useCallback, useMemo, useState } from "react";
-import useOptionsInfo from "hooks/useOptionsInfo";
-import useGlobalOptions from "hooks/useGlobalOptions";
-import rclone from "lib/rclone";
-import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "lib/operations";
+import useOptionsInfo from "../hooks/useOptionsInfo";
+import useGlobalOptions from "../hooks/useGlobalOptions";
+import rclone from "../lib/rclone";
+import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "../lib/operations";
 
-export default function copyurlOperation({ initialRemote }: { initialRemote: string }) {
-  const [url, setUrl] = useState<string>("");
-  const [destination, setDestination] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
+export default function copyOperation({ initialRemote }: { initialRemote: string }) {
+  const [source, setSource] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
+  const [destination, setDestination] = useState<string>("");
   const [flagValues, setFlagValues] = useState<Record<string, string>>({});
 
-  const {
-    data: allFlagsData,
-    isLoading: isLoadingAllFlags,
-    error: allFlagsError,
-  } = useOptionsInfo();
+  const { data: allFlagsData, isLoading: isLoadingAllFlags, error: allFlagsError } = useOptionsInfo();
 
-  const {
-    data: globalFlags,
-    isLoading: isLoadingGlobalFlags,
-    error: globalFlagsError,
-  } = useGlobalOptions();
+  const { data: globalFlags, isLoading: isLoadingGlobalFlags, error: globalFlagsError } = useGlobalOptions();
 
   const mainFlags = allFlagsData?.main;
-  
+
+  const filterFlagsSource = allFlagsData?.filter;
+
+  const copyFlags = useMemo(() => {
+    if (!mainFlags) {
+      return [];
+    }
+    return mainFlags.filter((flag) => flagHasGroup(flag, "Copy")).sort(sortByName);
+  }, [mainFlags]);
+
+  const filterFlags = useMemo(() => {
+    if (!filterFlagsSource) {
+      return [];
+    }
+    return [...filterFlagsSource].sort(sortByName);
+  }, [filterFlagsSource]);
+
   const configFlags = useMemo(() => {
     if (!mainFlags) {
       return [];
@@ -44,7 +40,7 @@ export default function copyurlOperation({ initialRemote }: { initialRemote: str
       .filter((flag) => {
         return (
           flagHasGroup(flag, "Performance") ||
-		  flagHasGroup(flag, "Listing") ||
+          flagHasGroup(flag, "Listing") ||
           flagHasGroup(flag, "Networking") ||
           flagHasGroup(flag, "Check") ||
           flag?.Name === "use_server_modtime"
@@ -56,26 +52,41 @@ export default function copyurlOperation({ initialRemote }: { initialRemote: str
   const sections = useMemo(
     () =>
       ({
+        copy: {
+          id: "copy",
+          title: "Copy",
+          flags: copyFlags,
+          globalNamespace: "main",
+        },
+        filter: {
+          id: "filter",
+          title: "Filter",
+          flags: filterFlags,
+          globalNamespace: "filter",
+        },
         config: {
           id: "config",
           title: "Config",
           flags: configFlags,
           globalNamespace: "main",
         },
-      } as const),
-    [ configFlags],
+      }) as const,
+    [copyFlags, filterFlags, configFlags],
   );
 
   const availableSections = useMemo(
-    () =>
-      Object.values(sections).filter(
-        (section) => section && section.flags.length > 0,
-      ),
+    () => Object.values(sections).filter((section) => section && section.flags.length > 0),
     [sections],
   );
 
   const flagSectionLookup = useMemo(() => {
-    const lookup: Record<string, { sectionId: typeof sections[keyof typeof sections]["id"]; globalNamespace: typeof sections[keyof typeof sections]["globalNamespace"] }> = {};
+    const lookup: Record<
+      string,
+      {
+        sectionId: (typeof sections)[keyof typeof sections]["id"];
+        globalNamespace: (typeof sections)[keyof typeof sections]["globalNamespace"];
+      }
+    > = {};
     availableSections.forEach((section) => {
       section.flags.forEach((flag) => {
         if (flag?.FieldName) {
@@ -160,88 +171,76 @@ export default function copyurlOperation({ initialRemote }: { initialRemote: str
   );
 
   const handleSubmit = async () => {
-    const trimmedUrl = url.trim();
+    const trimmedSource = source.trim();
     const trimmedDestination = destination.trim();
 
-    if (!trimmedUrl || !trimmedDestination) {
+    if (!trimmedSource || !trimmedDestination) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Missing URL or destination",
-        message: "Please provide both a URL and destination.",
+        title: "Missing path",
+        message: "Please provide both a source and destination.",
       });
       return;
     }
 
-	try {
-		const urlObject = new URL(trimmedUrl);
-	} catch (error) {
-		await showToast({
-			style: Toast.Style.Failure,
-			title: "Invalid URL",
-			message: "Please provide a valid URL.",
-		});
-		return;
-	}
+    if (trimmedSource === trimmedDestination) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid paths",
+        message: "Source and destination cannot be the same.",
+      });
+      return;
+    }
 
     const dirtyFlags = Object.entries(flagValues);
     const configOverrides: Record<string, string> = {};
+    const filterOverrides: Record<string, string> = {};
 
     dirtyFlags.forEach(([flagName]) => {
+      const namespace = flagSectionLookup[flagName]?.globalNamespace ?? "main";
+      if (namespace === "filter") {
+        filterOverrides[flagName] = flagValues[flagName];
+      } else {
         configOverrides[flagName] = flagValues[flagName];
+      }
     });
 
     const configPayload = Object.keys(configOverrides).length > 0 ? JSON.stringify(configOverrides) : undefined;
+    const filterPayload = Object.keys(filterOverrides).length > 0 ? JSON.stringify(filterOverrides) : undefined;
 
-	const normalizedDestination = trimmedDestination.replace(/[\\/]+$/, "");
-	const normalizedPath = normalizedDestination.replace(/\\/g, "/");
-	const destinationSegments = normalizedPath.split("/");
-	let dstRemote = destinationSegments.pop() ?? "";
-	let dstFs = destinationSegments.join("/");
-
-	
-	if (!dstFs || !dstRemote) {
-		await showToast({
-			style: Toast.Style.Failure,
-			title: "Invalid destination path",
-			message: "Destination path must be in the format 'remote:/path/filename.ext'.",
-		});
-		return;
-	}
-	
-	
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Starting download...",
-      message: `Downloading ${trimmedUrl} to ${trimmedDestination}`,
+      title: "Starting copy...",
+      message: `Copying ${trimmedSource} to ${trimmedDestination}`,
     });
 
     try {
-      await rclone("/operations/copyurl", {
+      await rclone("/sync/copy", {
         params: {
           query: {
-            url: trimmedUrl,
-			fs: dstFs,
-			remote: dstRemote,
+            srcFs: trimmedSource,
+            dstFs: trimmedDestination,
             _config: configPayload,
-			_async: true,
+            _filter: filterPayload,
+            _async: true,
           },
         },
       });
 
       toast.style = Toast.Style.Success;
-      toast.title = "Download started";
-      toast.message = `Download ${trimmedUrl} to ${trimmedDestination} initiated`;
+      toast.title = "Copy started";
+      toast.message = `Copy from ${trimmedSource} to ${trimmedDestination} initiated`;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to start download";
+      toast.title = "Failed to start copy";
       toast.message = message;
     }
   };
 
   return (
     <Form
-      navigationTitle="copyurl"
+      navigationTitle="copy"
       isLoading={isLoadingFlags}
       actions={
         <ActionPanel>
@@ -249,20 +248,20 @@ export default function copyurlOperation({ initialRemote }: { initialRemote: str
         </ActionPanel>
       }
     >
-      <Form.Description title="URL" text="Configure the URL and destination for the download." />
+      <Form.Description title="Paths" text="Configure the source and destination for the copy." />
       <Form.TextField
-        id="url"
-        title="URL"
-        value={url}
-        onChange={setUrl}
-        placeholder="https://example.com/file.txt"
+        id="source"
+        title="Source"
+        value={source}
+        onChange={setSource}
+        placeholder="remote:/path or /local/path"
       />
       <Form.TextField
         id="destination"
         title="Destination"
         value={destination}
         onChange={setDestination}
-        placeholder="remote:/path or /local/path (including filename)"
+        placeholder="remote:/path or /local/path"
       />
       <Form.Separator />
 

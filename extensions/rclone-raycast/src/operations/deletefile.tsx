@@ -1,44 +1,39 @@
+/*
+https://rclone.org/rc/#operations-deletefile
+
+operations/deletefile: Remove the single file pointed to
+This takes the following parameters:
+
+fs - a remote name string e.g. "drive:"
+remote - a path within that remote e.g. "dir"
+*/
+/*
+https://rclone.org/rc/#operations-copyfile
+
+operations/copyfile: Copy a file from source remote to destination remote
+This takes the following parameters:
+
+srcFs - a remote name string e.g. "drive:" for the source, "/" for local filesystem
+srcRemote - a path within that remote e.g. "file.txt" for the source
+dstFs - a remote name string e.g. "drive2:" for the destination, "/" for local filesystem
+dstRemote - a path within that remote e.g. "file2.txt" for the destination
+*/
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 import { Fragment, useCallback, useMemo, useState } from "react";
-import useOptionsInfo from "hooks/useOptionsInfo";
-import useGlobalOptions from "hooks/useGlobalOptions";
-import rclone from "lib/rclone";
-import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "lib/operations";
+import useOptionsInfo from "../hooks/useOptionsInfo";
+import useGlobalOptions from "../hooks/useGlobalOptions";
+import rclone from "../lib/rclone";
+import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "../lib/operations";
 
-export default function moveOperation({ initialRemote }: { initialRemote: string }) {
-  const [source, setSource] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
-  const [destination, setDestination] = useState<string>("");
+export default function deletefileOperation({ initialRemote }: { initialRemote: string }) {
+  const [path, setPath] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
   const [flagValues, setFlagValues] = useState<Record<string, string>>({});
 
-  const {
-    data: allFlagsData,
-    isLoading: isLoadingAllFlags,
-    error: allFlagsError,
-  } = useOptionsInfo();
+  const { data: allFlagsData, isLoading: isLoadingAllFlags, error: allFlagsError } = useOptionsInfo();
 
-  const {
-    data: globalFlags,
-    isLoading: isLoadingGlobalFlags,
-    error: globalFlagsError,
-  } = useGlobalOptions();
+  const { data: globalFlags, isLoading: isLoadingGlobalFlags, error: globalFlagsError } = useGlobalOptions();
 
   const mainFlags = allFlagsData?.main;
-  
-  const filterFlagsSource = allFlagsData?.filter;
-
-  const copyFlags = useMemo(() => {
-    if (!mainFlags) {
-      return [];
-    }
-    return mainFlags.filter((flag) => flagHasGroup(flag, "Copy")).sort(sortByName);
-  }, [mainFlags]);
-
-  const filterFlags = useMemo(() => {
-    if (!filterFlagsSource) {
-      return [];
-    }
-    return [...filterFlagsSource].sort(sortByName);
-  }, [filterFlagsSource]);
 
   const configFlags = useMemo(() => {
     if (!mainFlags) {
@@ -48,7 +43,7 @@ export default function moveOperation({ initialRemote }: { initialRemote: string
       .filter((flag) => {
         return (
           flagHasGroup(flag, "Performance") ||
-		  flagHasGroup(flag, "Listing") ||
+          flagHasGroup(flag, "Listing") ||
           flagHasGroup(flag, "Networking") ||
           flagHasGroup(flag, "Check") ||
           flag?.Name === "use_server_modtime"
@@ -60,38 +55,29 @@ export default function moveOperation({ initialRemote }: { initialRemote: string
   const sections = useMemo(
     () =>
       ({
-        move: {
-          id: "move",
-          title: "Move",
-          flags: copyFlags,
-          globalNamespace: "main",
-        },
-        filter: {
-          id: "filter",
-          title: "Filter",
-          flags: filterFlags,
-          globalNamespace: "filter",
-        },
         config: {
           id: "config",
           title: "Config",
           flags: configFlags,
           globalNamespace: "main",
         },
-      } as const),
-    [copyFlags, filterFlags, configFlags],
+      }) as const,
+    [configFlags],
   );
 
   const availableSections = useMemo(
-    () =>
-      Object.values(sections).filter(
-        (section) => section && section.flags.length > 0,
-      ),
+    () => Object.values(sections).filter((section) => section && section.flags.length > 0),
     [sections],
   );
 
   const flagSectionLookup = useMemo(() => {
-    const lookup: Record<string, { sectionId: typeof sections[keyof typeof sections]["id"]; globalNamespace: typeof sections[keyof typeof sections]["globalNamespace"] }> = {};
+    const lookup: Record<
+      string,
+      {
+        sectionId: (typeof sections)[keyof typeof sections]["id"];
+        globalNamespace: (typeof sections)[keyof typeof sections]["globalNamespace"];
+      }
+    > = {};
     availableSections.forEach((section) => {
       section.flags.forEach((flag) => {
         if (flag?.FieldName) {
@@ -176,76 +162,71 @@ export default function moveOperation({ initialRemote }: { initialRemote: string
   );
 
   const handleSubmit = async () => {
-    const trimmedSource = source.trim();
-    const trimmedDestination = destination.trim();
+    const trimmedPath = path.trim();
 
-    if (!trimmedSource || !trimmedDestination) {
+    if (!trimmedPath) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Missing path",
-        message: "Please provide both a source and destination.",
-      });
-      return;
-    }
-
-    if (trimmedSource === trimmedDestination) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid paths",
-        message: "Source and destination cannot be the same.",
+        message: "Please provide a path.",
       });
       return;
     }
 
     const dirtyFlags = Object.entries(flagValues);
     const configOverrides: Record<string, string> = {};
-    const filterOverrides: Record<string, string> = {};
 
     dirtyFlags.forEach(([flagName]) => {
-      const namespace = flagSectionLookup[flagName]?.globalNamespace ?? "main";
-      if (namespace === "filter") {
-        filterOverrides[flagName] = flagValues[flagName];
-      } else {
-        configOverrides[flagName] = flagValues[flagName];
-      }
+      configOverrides[flagName] = flagValues[flagName];
     });
 
     const configPayload = Object.keys(configOverrides).length > 0 ? JSON.stringify(configOverrides) : undefined;
-    const filterPayload = Object.keys(filterOverrides).length > 0 ? JSON.stringify(filterOverrides) : undefined;
+
+    const splitPath = trimmedPath.split(":");
+    const pathFs = splitPath[0];
+    const pathRemote = splitPath[1];
+
+    if (!pathFs || !pathRemote) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid source path",
+        message: "Source path must be in the format 'remote:/path'.",
+      });
+      return;
+    }
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Starting move...",
-      message: `Moving ${trimmedSource} to ${trimmedDestination}`,
+      title: "Starting copy...",
+      message: `Deleting ${trimmedPath}`,
     });
 
     try {
-      await rclone("/sync/move", {
+      await rclone("/operations/deletefile", {
         params: {
           query: {
-            srcFs: trimmedSource,
-            dstFs: trimmedDestination,
+            fs: trimmedPath,
+            remote: pathRemote,
             _config: configPayload,
-            _filter: filterPayload,
-			_async: true,
+            _async: true,
           },
         },
       });
 
       toast.style = Toast.Style.Success;
-      toast.title = "Move started";
-      toast.message = `Move from ${trimmedSource} to ${trimmedDestination} initiated`;
+      toast.title = "Delete started";
+      toast.message = `Delete ${trimmedPath} initiated`;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to start move";
+      toast.title = "Failed to start delete";
       toast.message = message;
     }
   };
 
   return (
     <Form
-      navigationTitle="move"
+      navigationTitle="deletefile"
       isLoading={isLoadingFlags}
       actions={
         <ActionPanel>
@@ -253,21 +234,8 @@ export default function moveOperation({ initialRemote }: { initialRemote: string
         </ActionPanel>
       }
     >
-      <Form.Description title="Paths" text="Configure the source and destination for the copy." />
-      <Form.TextField
-        id="source"
-        title="Source"
-        value={source}
-        onChange={setSource}
-        placeholder="remote:/path or /local/path"
-      />
-      <Form.TextField
-        id="destination"
-        title="Destination"
-        value={destination}
-        onChange={setDestination}
-        placeholder="remote:/path or /local/path"
-      />
+      <Form.Description title="Paths" text="Configure the path for the delete." />
+      <Form.TextField id="path" title="Path" value={path} onChange={setPath} placeholder="remote:/path" />
       <Form.Separator />
 
       {flagsError ? (

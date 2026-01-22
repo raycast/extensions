@@ -19,23 +19,11 @@ import rclone from "../lib/rclone";
 import useRemoteMountPoints from "../hooks/useRemoteMountPoints";
 
 export default function RemoteDetail({ remote, onUpdate }: { remote: string; onUpdate?: () => void }) {
-  const {
-    data: remoteConfig,
-    isLoading: isRemoteLoading,
-    error: remoteError,
-  } = useRemoteConfig(remote);
+  const { data: remoteConfig, isLoading: isRemoteLoading, error: remoteError } = useRemoteConfig(remote);
 
-  const {
-    data: dumpData,
-    isLoading: isDumpLoading,
-    error: dumpError,
-  } = useConfigDump();
-  
-  const {
-    data: mountPoints,
-    isLoading: isMountsLoading,
-    revalidate: revalidateMounts,
-  } = useRemoteMountPoints(remote);
+  const { data: dumpData, isLoading: isDumpLoading, error: dumpError } = useConfigDump();
+
+  const { data: mountPoints, isLoading: isMountsLoading, revalidate: revalidateMounts } = useRemoteMountPoints(remote);
 
   const remoteEntries = useMemo(() => {
     if (!dumpData || typeof dumpData !== "object") {
@@ -74,7 +62,7 @@ export default function RemoteDetail({ remote, onUpdate }: { remote: string; onU
         toast.message = message;
       }
     },
-    [revalidateMounts]
+    [revalidateMounts],
   );
 
   return (
@@ -97,7 +85,7 @@ export default function RemoteDetail({ remote, onUpdate }: { remote: string; onU
         />
       ) : (
         <>
-		   <List.Section title="Details">
+          <List.Section title="Details">
             <List.Item
               title={remote}
               icon={Icon.Info}
@@ -113,7 +101,6 @@ export default function RemoteDetail({ remote, onUpdate }: { remote: string; onU
                             key={key}
                             title={key}
                             text={value !== undefined ? String(value) : ""}
-
                           />
                         ))
                       ) : (
@@ -172,7 +159,7 @@ export default function RemoteDetail({ remote, onUpdate }: { remote: string; onU
               }
             />
           </List.Section>
-		  {mountPointEntries.length > 0 && (
+          {mountPointEntries.length > 0 && (
             <List.Section title="Mount Points">
               {mountPointEntries.map((mountPoint) => (
                 <List.Item
@@ -215,7 +202,7 @@ export default function RemoteDetail({ remote, onUpdate }: { remote: string; onU
     </List>
   );
 }
-  
+
 async function handleRemoveRemote(remote: string, onUpdate?: () => void) {
   const confirmed = await confirmAlert({
     title: `Remove ${remote}?`,
@@ -240,7 +227,7 @@ async function handleRemoveRemote(remote: string, onUpdate?: () => void) {
     });
     await showToast({ style: Toast.Style.Success, title: `${remote} removed` });
     onUpdate?.();
-	
+
     await popToRoot();
     await popToRoot();
   } catch (error) {

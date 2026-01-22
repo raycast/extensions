@@ -1,29 +1,21 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 import { Fragment, useCallback, useMemo, useState } from "react";
-import useOptionsInfo from "hooks/useOptionsInfo";
-import useGlobalOptions from "hooks/useGlobalOptions";
-import rclone from "lib/rclone";
-import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "lib/operations";
+import useOptionsInfo from "../hooks/useOptionsInfo";
+import useGlobalOptions from "../hooks/useGlobalOptions";
+import rclone from "../lib/rclone";
+import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "../lib/operations";
 
 export default function syncOperation({ initialRemote }: { initialRemote: string }) {
   const [source, setSource] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
   const [destination, setDestination] = useState<string>("");
   const [flagValues, setFlagValues] = useState<Record<string, string>>({});
 
-  const {
-    data: allFlagsData,
-    isLoading: isLoadingAllFlags,
-    error: allFlagsError,
-  } = useOptionsInfo();
+  const { data: allFlagsData, isLoading: isLoadingAllFlags, error: allFlagsError } = useOptionsInfo();
 
-  const {
-    data: globalFlags,
-    isLoading: isLoadingGlobalFlags,
-    error: globalFlagsError,
-  } = useGlobalOptions();
+  const { data: globalFlags, isLoading: isLoadingGlobalFlags, error: globalFlagsError } = useGlobalOptions();
 
   const mainFlags = allFlagsData?.main;
-  
+
   const filterFlagsSource = allFlagsData?.filter;
 
   const syncFlags = useMemo(() => {
@@ -48,7 +40,7 @@ export default function syncOperation({ initialRemote }: { initialRemote: string
       .filter((flag) => {
         return (
           flagHasGroup(flag, "Performance") ||
-		  flagHasGroup(flag, "Listing") ||
+          flagHasGroup(flag, "Listing") ||
           flagHasGroup(flag, "Networking") ||
           flagHasGroup(flag, "Check") ||
           flag?.Name === "use_server_modtime"
@@ -78,20 +70,23 @@ export default function syncOperation({ initialRemote }: { initialRemote: string
           flags: configFlags,
           globalNamespace: "main",
         },
-      } as const),
+      }) as const,
     [syncFlags, filterFlags, configFlags],
   );
 
   const availableSections = useMemo(
-    () =>
-      Object.values(sections).filter(
-        (section) => section && section.flags.length > 0,
-      ),
+    () => Object.values(sections).filter((section) => section && section.flags.length > 0),
     [sections],
   );
 
   const flagSectionLookup = useMemo(() => {
-    const lookup: Record<string, { sectionId: typeof sections[keyof typeof sections]["id"]; globalNamespace: typeof sections[keyof typeof sections]["globalNamespace"] }> = {};
+    const lookup: Record<
+      string,
+      {
+        sectionId: (typeof sections)[keyof typeof sections]["id"];
+        globalNamespace: (typeof sections)[keyof typeof sections]["globalNamespace"];
+      }
+    > = {};
     availableSections.forEach((section) => {
       section.flags.forEach((flag) => {
         if (flag?.FieldName) {
@@ -227,7 +222,7 @@ export default function syncOperation({ initialRemote }: { initialRemote: string
             dstFs: trimmedDestination,
             _config: configPayload,
             _filter: filterPayload,
-			_async: true,
+            _async: true,
           },
         },
       });

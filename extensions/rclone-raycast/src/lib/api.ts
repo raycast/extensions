@@ -27,5 +27,5 @@ export async function fetchPid() {
 }
 
 export async function fetchMounts() {
-	return await rclone("/mount/listmounts");
+  return await rclone("/mount/listmounts");
 }

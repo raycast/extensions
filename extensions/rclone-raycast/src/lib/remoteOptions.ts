@@ -32,10 +32,7 @@ function shouldRenderOption(option: BackendOption, config: RemoteConfigState) {
   return option.Provider.includes(providerValue);
 }
 
-export function dedupeBackendOptions(
-  options: BackendOption[] | undefined,
-  config: RemoteConfigState,
-): BackendOption[] {
+export function dedupeBackendOptions(options: BackendOption[] | undefined, config: RemoteConfigState): BackendOption[] {
   if (!options) {
     return [];
   }
@@ -95,4 +92,3 @@ export function buildInfo(option: BackendOption, description: string) {
   }
   return infoParts.length > 0 ? infoParts.join("\n\n") : undefined;
 }
-

@@ -1,5 +1,3 @@
-
-
 export const SUPPORTED_OPERATIONS = ["Mount", "Copy", "Sync", "Move", "Delete", "Purge"];
 
 const MountDescription = `
@@ -83,14 +81,14 @@ Use it cautiously when retiring environments or wiping buckets before repurposin
 `;
 
 export const OPERATION_DESCRIPTIONS = {
-	Mount: MountDescription,
-	Copy: CopyDescription,
-	CopyFile: CopyFileDescription,
-	CopyUrl: CopyUrlDescription,
-	Sync: SyncDescription,
-	Move: MoveDescription,
-	MoveFile: MoveFileDescription,
-	Delete: DeleteDescription,
-	DeleteFile: DeleteFileDescription,
-	Purge: PurgeDescription,
+  Mount: MountDescription,
+  Copy: CopyDescription,
+  CopyFile: CopyFileDescription,
+  CopyUrl: CopyUrlDescription,
+  Sync: SyncDescription,
+  Move: MoveDescription,
+  MoveFile: MoveFileDescription,
+  Delete: DeleteDescription,
+  DeleteFile: DeleteFileDescription,
+  Purge: PurgeDescription,
 } as const;

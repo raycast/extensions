@@ -1,37 +1,20 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 import { Fragment, useCallback, useMemo, useState } from "react";
-import useOptionsInfo from "hooks/useOptionsInfo";
-import useGlobalOptions from "hooks/useGlobalOptions";
-import rclone from "lib/rclone";
-import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "lib/operations";
+import useOptionsInfo from "../hooks/useOptionsInfo";
+import useGlobalOptions from "../hooks/useGlobalOptions";
+import rclone from "../lib/rclone";
+import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "../lib/operations";
 
-export default function copyOperation({ initialRemote }: { initialRemote: string }) {
-  const [source, setSource] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
-  const [destination, setDestination] = useState<string>("");
+export default function deleteOperation({ initialRemote }: { initialRemote: string }) {
+  const [path, setPath] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
   const [flagValues, setFlagValues] = useState<Record<string, string>>({});
 
-  const {
-    data: allFlagsData,
-    isLoading: isLoadingAllFlags,
-    error: allFlagsError,
-  } = useOptionsInfo();
+  const { data: allFlagsData, isLoading: isLoadingAllFlags, error: allFlagsError } = useOptionsInfo();
 
-  const {
-    data: globalFlags,
-    isLoading: isLoadingGlobalFlags,
-    error: globalFlagsError,
-  } = useGlobalOptions();
+  const { data: globalFlags, isLoading: isLoadingGlobalFlags, error: globalFlagsError } = useGlobalOptions();
 
   const mainFlags = allFlagsData?.main;
-  
   const filterFlagsSource = allFlagsData?.filter;
-
-  const copyFlags = useMemo(() => {
-    if (!mainFlags) {
-      return [];
-    }
-    return mainFlags.filter((flag) => flagHasGroup(flag, "Copy")).sort(sortByName);
-  }, [mainFlags]);
 
   const filterFlags = useMemo(() => {
     if (!filterFlagsSource) {
@@ -48,7 +31,7 @@ export default function copyOperation({ initialRemote }: { initialRemote: string
       .filter((flag) => {
         return (
           flagHasGroup(flag, "Performance") ||
-		  flagHasGroup(flag, "Listing") ||
+          flagHasGroup(flag, "Listing") ||
           flagHasGroup(flag, "Networking") ||
           flagHasGroup(flag, "Check") ||
           flag?.Name === "use_server_modtime"
@@ -57,17 +40,9 @@ export default function copyOperation({ initialRemote }: { initialRemote: string
       .sort(sortByName);
   }, [mainFlags]);
 
- 
-
   const sections = useMemo(
     () =>
       ({
-        copy: {
-          id: "copy",
-          title: "Copy",
-          flags: copyFlags,
-          globalNamespace: "main",
-        },
         filter: {
           id: "filter",
           title: "Filter",
@@ -80,20 +55,23 @@ export default function copyOperation({ initialRemote }: { initialRemote: string
           flags: configFlags,
           globalNamespace: "main",
         },
-      } as const),
-    [copyFlags, filterFlags, configFlags],
+      }) as const,
+    [filterFlags, configFlags],
   );
 
   const availableSections = useMemo(
-    () =>
-      Object.values(sections).filter(
-        (section) => section && section.flags.length > 0,
-      ),
+    () => Object.values(sections).filter((section) => section && section.flags.length > 0),
     [sections],
   );
 
   const flagSectionLookup = useMemo(() => {
-    const lookup: Record<string, { sectionId: typeof sections[keyof typeof sections]["id"]; globalNamespace: typeof sections[keyof typeof sections]["globalNamespace"] }> = {};
+    const lookup: Record<
+      string,
+      {
+        sectionId: (typeof sections)[keyof typeof sections]["id"];
+        globalNamespace: (typeof sections)[keyof typeof sections]["globalNamespace"];
+      }
+    > = {};
     availableSections.forEach((section) => {
       section.flags.forEach((flag) => {
         if (flag?.FieldName) {
@@ -178,23 +156,13 @@ export default function copyOperation({ initialRemote }: { initialRemote: string
   );
 
   const handleSubmit = async () => {
-    const trimmedSource = source.trim();
-    const trimmedDestination = destination.trim();
+    const trimmedPath = path.trim();
 
-    if (!trimmedSource || !trimmedDestination) {
+    if (!trimmedPath) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Missing path",
-        message: "Please provide both a source and destination.",
-      });
-      return;
-    }
-
-    if (trimmedSource === trimmedDestination) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid paths",
-        message: "Source and destination cannot be the same.",
+        message: "Please provide a path.",
       });
       return;
     }
@@ -217,37 +185,36 @@ export default function copyOperation({ initialRemote }: { initialRemote: string
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Starting copy...",
-      message: `Copying ${trimmedSource} to ${trimmedDestination}`,
+      title: "Starting delete...",
+      message: `Deleting ${trimmedPath}`,
     });
 
     try {
-      await rclone("/sync/copy", {
+      await rclone("/operations/delete", {
         params: {
           query: {
-            srcFs: trimmedSource,
-            dstFs: trimmedDestination,
+            fs: trimmedPath,
             _config: configPayload,
             _filter: filterPayload,
-			_async: true,
+            _async: true,
           },
         },
       });
 
       toast.style = Toast.Style.Success;
-      toast.title = "Copy started";
-      toast.message = `Copy from ${trimmedSource} to ${trimmedDestination} initiated`;
+      toast.title = "Delete started";
+      toast.message = `Delete ${trimmedPath} initiated`;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to start copy";
+      toast.title = "Failed to start delete";
       toast.message = message;
     }
   };
 
   return (
     <Form
-      navigationTitle="copy"
+      navigationTitle="delete"
       isLoading={isLoadingFlags}
       actions={
         <ActionPanel>
@@ -255,19 +222,12 @@ export default function copyOperation({ initialRemote }: { initialRemote: string
         </ActionPanel>
       }
     >
-      <Form.Description title="Paths" text="Configure the source and destination for the copy." />
+      <Form.Description title="Paths" text="Configure the path for the delete." />
       <Form.TextField
-        id="source"
-        title="Source"
-        value={source}
-        onChange={setSource}
-        placeholder="remote:/path or /local/path"
-      />
-      <Form.TextField
-        id="destination"
-        title="Destination"
-        value={destination}
-        onChange={setDestination}
+        id="path"
+        title="Path"
+        value={path}
+        onChange={setPath}
         placeholder="remote:/path or /local/path"
       />
       <Form.Separator />

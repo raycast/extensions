@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Form, Icon, showToast, Toast, popToRoot } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import rclone from "../lib/rclone";
+import rclone from "./lib/rclone";
 import {
   BackendOption,
   RemoteConfigState,
@@ -10,7 +10,7 @@ import {
   isProviderOption,
   toBoolean,
   toStringValue,
-} from "../lib/remoteOptions";
+} from "./lib/remoteOptions";
 
 export default function Command() {
   return <CreateRemoteForm />;

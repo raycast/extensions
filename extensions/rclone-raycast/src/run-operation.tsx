@@ -1,15 +1,15 @@
 import { Action, ActionPanel, LaunchProps, List } from "@raycast/api";
-import MountOperation from "@operations/mount";
-import CopyOperation from "@operations/copy";
-import CopyFileOperation from "@operations/copyfile";
-import CopyUrlOperation from "@operations/copyurl";
-import SyncOperation from "@operations/sync";
-import MoveOperation from "@operations/move";
-import MoveFileOperation from "@operations/movefile";
-import DeleteOperation from "@operations/delete";
-import DeleteFileOperation from "@operations/deletefile";
-import PurgeOperation from "@operations/purge";
-import { OPERATION_DESCRIPTIONS } from "../lib/constants";
+import MountOperation from "./operations/mount";
+import CopyOperation from "./operations/copy";
+import CopyFileOperation from "./operations/copyfile";
+import CopyUrlOperation from "./operations/copyurl";
+import SyncOperation from "./operations/sync";
+import MoveOperation from "./operations/move";
+import MoveFileOperation from "./operations/movefile";
+import DeleteOperation from "./operations/delete";
+import DeleteFileOperation from "./operations/deletefile";
+import PurgeOperation from "./operations/purge";
+import { OPERATION_DESCRIPTIONS } from "./lib/constants";
 
 type RemoteLaunchProps = LaunchProps<{ arguments: Arguments.RunOperation }> & {
   launchContext?: {

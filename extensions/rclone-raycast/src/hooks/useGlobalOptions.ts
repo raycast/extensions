@@ -6,4 +6,3 @@ export default function useGlobalOptions() {
     keepPreviousData: true,
   });
 }
-

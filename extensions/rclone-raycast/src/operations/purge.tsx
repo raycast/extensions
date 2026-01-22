@@ -1,32 +1,20 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 import { Fragment, useCallback, useMemo, useState } from "react";
-import useOptionsInfo from "hooks/useOptionsInfo";
-import useGlobalOptions from "hooks/useGlobalOptions";
-import rclone from "lib/rclone";
-import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "lib/operations";
+import useOptionsInfo from "../hooks/useOptionsInfo";
+import useGlobalOptions from "../hooks/useGlobalOptions";
+import rclone from "../lib/rclone";
+import { buildFlagInfo, flagHasGroup, OptionsInfoOption, serializeOptionValue, sortByName } from "../lib/operations";
 
-export default function mountOperation({ initialRemote }: { initialRemote: string }) {
-  const [source, setSource] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
-  const [mountpoint, setMountpoint] = useState<string>("");
+export default function purgeOperation({ initialRemote }: { initialRemote: string }) {
+  const [path, setPath] = useState<string>(initialRemote ? `${initialRemote}:/` : "");
   const [flagValues, setFlagValues] = useState<Record<string, string>>({});
 
-  const {
-    data: allFlagsData,
-    isLoading: isLoadingAllFlags,
-    error: allFlagsError,
-  } = useOptionsInfo();
+  const { data: allFlagsData, isLoading: isLoadingAllFlags, error: allFlagsError } = useOptionsInfo();
 
-  const {
-    data: globalFlags,
-    isLoading: isLoadingGlobalFlags,
-    error: globalFlagsError,
-  } = useGlobalOptions();
+  const { data: globalFlags, isLoading: isLoadingGlobalFlags, error: globalFlagsError } = useGlobalOptions();
 
   const mainFlags = allFlagsData?.main;
-  
   const filterFlagsSource = allFlagsData?.filter;
-  const vfsFlagsSource = allFlagsData?.vfs;
-	const mountFlagsSource = allFlagsData?.mount;
 
   const filterFlags = useMemo(() => {
     if (!filterFlagsSource) {
@@ -43,7 +31,7 @@ export default function mountOperation({ initialRemote }: { initialRemote: strin
       .filter((flag) => {
         return (
           flagHasGroup(flag, "Performance") ||
-		  flagHasGroup(flag, "Listing") ||
+          flagHasGroup(flag, "Listing") ||
           flagHasGroup(flag, "Networking") ||
           flagHasGroup(flag, "Check") ||
           flag?.Name === "use_server_modtime"
@@ -52,35 +40,9 @@ export default function mountOperation({ initialRemote }: { initialRemote: strin
       .sort(sortByName);
   }, [mainFlags]);
 
-  const vfsFlags = useMemo(() => {
-    if (!vfsFlagsSource) {
-      return [];
-    }
-    return [...vfsFlagsSource].sort(sortByName);
-  }, [vfsFlagsSource]);
-  
-  const mountFlags = useMemo(() => {
-    if (!mountFlagsSource) {
-      return [];
-    }
-    return mountFlagsSource.filter((flag: any) => !['debug_fuse', 'daemon', 'daemon_timeout'].includes(flag.Name)).sort(sortByName);
-  }, [mountFlagsSource]);
-
   const sections = useMemo(
     () =>
       ({
-        mount: {
-          id: "mount",
-          title: "Mount",
-          flags: mountFlags,
-          globalNamespace: "mount",
-        },
-        vfs: {
-          id: "vfs",
-          title: "VFS",
-          flags: vfsFlags,
-          globalNamespace: "vfs",
-        },
         filter: {
           id: "filter",
           title: "Filter",
@@ -93,20 +55,23 @@ export default function mountOperation({ initialRemote }: { initialRemote: strin
           flags: configFlags,
           globalNamespace: "main",
         },
-      } as const),
-    [mountFlags, vfsFlags, filterFlags, configFlags],
+      }) as const,
+    [filterFlags, configFlags],
   );
 
   const availableSections = useMemo(
-    () =>
-      Object.values(sections).filter(
-        (section) => section && section.flags.length > 0,
-      ),
+    () => Object.values(sections).filter((section) => section && section.flags.length > 0),
     [sections],
   );
 
   const flagSectionLookup = useMemo(() => {
-    const lookup: Record<string, { sectionId: typeof sections[keyof typeof sections]["id"]; globalNamespace: typeof sections[keyof typeof sections]["globalNamespace"] }> = {};
+    const lookup: Record<
+      string,
+      {
+        sectionId: (typeof sections)[keyof typeof sections]["id"];
+        globalNamespace: (typeof sections)[keyof typeof sections]["globalNamespace"];
+      }
+    > = {};
     availableSections.forEach((section) => {
       section.flags.forEach((flag) => {
         if (flag?.FieldName) {
@@ -191,14 +156,13 @@ export default function mountOperation({ initialRemote }: { initialRemote: strin
   );
 
   const handleSubmit = async () => {
-    const trimmedSource = source.trim();
-    const trimmedMountpoint = mountpoint.trim();
+    const trimmedPath = path.trim();
 
-    if (!trimmedSource || !trimmedMountpoint) {
+    if (!trimmedPath) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Missing path",
-        message: "Please provide both a source and destination.",
+        message: "Please provide a path.",
       });
       return;
     }
@@ -206,17 +170,11 @@ export default function mountOperation({ initialRemote }: { initialRemote: strin
     const dirtyFlags = Object.entries(flagValues);
     const configOverrides: Record<string, string> = {};
     const filterOverrides: Record<string, string> = {};
-	const mountOverrides: Record<string, string> = {};
-	const vfsOverrides: Record<string, string> = {};
-    
-	dirtyFlags.forEach(([flagName]) => {
+
+    dirtyFlags.forEach(([flagName]) => {
       const namespace = flagSectionLookup[flagName]?.globalNamespace ?? "main";
       if (namespace === "filter") {
         filterOverrides[flagName] = flagValues[flagName];
-      } else if (namespace === "mount") {
-        mountOverrides[flagName] = flagValues[flagName];
-      } else if (namespace === "vfs") {
-        vfsOverrides[flagName] = flagValues[flagName];
       } else {
         configOverrides[flagName] = flagValues[flagName];
       }
@@ -224,45 +182,53 @@ export default function mountOperation({ initialRemote }: { initialRemote: strin
 
     const configPayload = Object.keys(configOverrides).length > 0 ? JSON.stringify(configOverrides) : undefined;
     const filterPayload = Object.keys(filterOverrides).length > 0 ? JSON.stringify(filterOverrides) : undefined;
-	const mountPayload = Object.keys(mountOverrides).length > 0 ? JSON.stringify(mountOverrides) : undefined;
-	const vfsPayload = Object.keys(vfsOverrides).length > 0 ? JSON.stringify(vfsOverrides) : undefined;
-	
+
+    const splitPath = trimmedPath.split(":");
+    const pathFs = splitPath[0];
+    const pathRemote = splitPath[1];
+
+    if (!pathFs || !pathRemote) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid path",
+        message: "Path must be in the format 'remote:/path'.",
+      });
+      return;
+    }
+
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Starting mount...",
-      message: `Mounting ${trimmedSource} to ${trimmedMountpoint}`,
+      title: "Starting purge...",
+      message: `Purging ${trimmedPath}`,
     });
 
     try {
-      await rclone("/mount/mount", {
+      await rclone("/operations/purge", {
         params: {
           query: {
-			fs: trimmedSource,
-			mountPoint: trimmedMountpoint,
-			mountType: 'nfsmount',
-			mountOpt: mountPayload,
-			vfsOpt: vfsPayload,
+            fs: pathFs,
+            remote: pathRemote,
             _config: configPayload,
             _filter: filterPayload,
-			_async: true,
+            _async: true,
           },
         },
       });
 
       toast.style = Toast.Style.Success;
-      toast.title = "Mount started";
-      toast.message = `Mount ${trimmedSource} at ${trimmedMountpoint} initiated`;
+      toast.title = "Purge started";
+      toast.message = `Purge ${trimmedPath} initiated`;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to start mount";
+      toast.title = "Failed to start purge";
       toast.message = message;
     }
   };
 
   return (
     <Form
-      navigationTitle="mount"
+      navigationTitle="purge"
       isLoading={isLoadingFlags}
       actions={
         <ActionPanel>
@@ -270,21 +236,8 @@ export default function mountOperation({ initialRemote }: { initialRemote: strin
         </ActionPanel>
       }
     >
-      <Form.Description title="Paths" text="Configure the source and mountpoint for the mount." />
-      <Form.TextField
-        id="source"
-        title="Source"
-        value={source}
-        onChange={setSource}
-        placeholder="remote:/path or /local/path"
-      />
-      <Form.TextField
-        id="mountpoint"
-        title="Mountpoint"
-        value={mountpoint}
-        onChange={setMountpoint}
-        placeholder="C:\local\path or /local/path or * (on windows)"
-      />
+      <Form.Description title="Paths" text="Configure the path for the purge." />
+      <Form.TextField id="path" title="Path" value={path} onChange={setPath} placeholder="remote:/path" />
       <Form.Separator />
 
       {flagsError ? (
