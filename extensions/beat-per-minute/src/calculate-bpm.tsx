@@ -9,6 +9,7 @@ import {
   Clipboard,
   Toast,
   showToast,
+  Keyboard,
 } from "@raycast/api";
 
 export default function Command() {
@@ -57,7 +58,13 @@ export default function Command() {
       <List.EmptyView
         icon={taps % 2 === 0 ? "metronome-left.png" : "metronome-right.png"}
         title={startTime && bpm > 0 ? `Calculated BPM: ${bpm.toFixed(0)}` : "Ready to start!"}
-        description={startTime ? "Keep pressing enter to the beat!" : "Hit enter to the beat!"}
+        description={
+          startTime && bpm > 0
+            ? `Halftime: ${Math.floor(bpm) / 2} | Doubletime: ${Math.floor(bpm) * 2}`
+            : startTime
+            ? "Keep pressing enter to the beat!"
+            : "Hit enter to the beat!"
+        }
         actions={
           <ActionPanel>
             <Action title="Beat" icon={Icon.Music} onAction={handleTap} />
@@ -70,14 +77,14 @@ export default function Command() {
             <Action
               title="Copy BPM to Clipboard"
               icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
               onAction={handleCopyBPM}
             />
             <ActionPanel.Section key="secondary">
               <Action
                 icon={Icon.Gear}
                 title="Open Command Preferences"
-                shortcut={{ modifiers: ["cmd"], key: "," }} // `shortcut` prop provided to the Action `Open Command Preferences` is reserved by Raycast and has been removed. Please use another shortcut
+                shortcut={{ modifiers: ["cmd"], key: "," }}
                 onAction={openCommandPreferences}
               />
             </ActionPanel.Section>
