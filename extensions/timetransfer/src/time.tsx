@@ -151,7 +151,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="输入时间戳 (167...) 或日期 (2023-01-01)..."
+      searchBarPlaceholder="输入时间戳或日期 (YYYY-MM-DD)..."
       onSearchTextChange={setInputText}
       searchText={inputText}
     >
@@ -216,11 +216,7 @@ export default function Command() {
 
       {/* 4. 空状态 */}
       {!searchText && clipboardConversions.length === 0 && !isLoading && (
-        <List.EmptyView
-          icon={Icon.Clock}
-          title="无需回车，即时转换"
-          description="输入时间戳或日期，或者是复制相关内容到剪切板"
-        />
+        <List.EmptyView icon={Icon.Clock} description="输入时间戳或日期，或者是复制相关内容到剪切板" />
       )}
     </List>
   );
