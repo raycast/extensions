@@ -4,11 +4,10 @@
 
 - Added configurable character limit setting (default: 200)
 - Fixed long text translation stuck issue
-- Added comprehensive multi-language support for all UI elements
 - Improved text truncation with ellipsis display
 - Enhanced error handling and Toast notifications
-- Refactored duplicate functions and unified text management
 - Fixed TypeScript compilation errors and async/await issues
+- Removed custom localization to comply with Raycast extension guidelines
 
 ## [Update] - 2023-12-21
 

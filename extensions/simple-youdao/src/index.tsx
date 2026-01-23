@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Icon,
   Color,
@@ -17,108 +17,6 @@ import crypto, { randomUUID } from "crypto";
 import fs from "fs";
 import sound from "sound-play";
 import { URLSearchParams } from "url";
-
-// Unified management of multilingual text
-function getLocalizedText(key: string, language: string, params?: { [key: string]: string | number }): string {
-  const langCode = language.includes("2") ? language.split("2")[1] : language.split("2")[0];
-
-  const texts: { [key: string]: { [lang: string]: string } } = {
-    // Truncation related text
-    truncatedMessage: {
-      "zh-CHS": `\n\n*(文本过长，已截取前{limit}字符进行翻译)*`,
-      en: `\n\n*(Text too long, truncated to first {limit} characters for translation)*`,
-      ja: `\n\n*(テキストが長すぎます。最初の{limit}文字に切り詰められました)*`,
-      ko: `\n\n*(텍스트가 너무 깁니다. 처음 {limit}자로 잘랐습니다)*`,
-      fr: `\n\n*(Texte trop long, tronqué aux {limit} premiers caractères)*`,
-      es: `\n\n*(Texto demasiado largo, truncado a los primeros {limit} caracteres)*`,
-    },
-    truncatedMetadata: {
-      "zh-CHS": "文本过长，已截取前{limit}字符进行翻译",
-      en: "Text truncated to first {limit} characters",
-      ja: "{limit}文字に切り詰められました",
-      ko: "{limit}자로 잘랐습니다",
-      fr: "Tronqué aux {limit} premiers caractères",
-      es: "Truncado a los primeros {limit} caracteres",
-    },
-
-    // UI text
-    translationResult: {
-      "zh-CHS": "翻译结果",
-      en: "Translation Result",
-      ja: "翻訳結果",
-      ko: "번역 결과",
-      fr: "Résultat de la traduction",
-      es: "Resultado de la traducción",
-    },
-    originalText: {
-      "zh-CHS": "原文",
-      en: "Original Text",
-      ja: "原文",
-      ko: "원본",
-      fr: "Texte original",
-      es: "Texto original",
-    },
-    phonetic: {
-      "zh-CHS": "音标",
-      en: "Phonetic",
-      ja: "発音",
-      ko: "발음",
-      fr: "Phonétique",
-      es: "Fonética",
-    },
-    detail: {
-      "zh-CHS": "详细",
-      en: "Detail",
-      ja: "詳細",
-      ko: "상세",
-      fr: "Détail",
-      es: "Detalle",
-    },
-    webTranslate: {
-      "zh-CHS": "网络翻译",
-      en: "Web Translate",
-      ja: "ウェブ翻訳",
-      ko: "웹 번역",
-      fr: "Traduction web",
-      es: "Traducción web",
-    },
-    hint: {
-      "zh-CHS": "提示",
-      en: "Hint",
-      ja: "ヒント",
-      ko: "힌트",
-      fr: "Indice",
-      es: "Pista",
-    },
-    readOriginal: {
-      "zh-CHS": "朗读原文",
-      en: "Read Original",
-      ja: "原文を読む",
-      ko: "원본 읽기",
-      fr: "Lire l'original",
-      es: "Leer original",
-    },
-    readTranslated: {
-      "zh-CHS": "朗读译文",
-      en: "Read Translated",
-      ja: "訳文を読む",
-      ko: "번역문 읽기",
-      fr: "Lire la traduction",
-      es: "Leer traducción",
-    },
-  };
-
-  let text = texts[key]?.[langCode] || texts[key]?.["en"] || key;
-
-  // Replace parameters
-  if (params) {
-    Object.entries(params).forEach(([paramKey, paramValue]) => {
-      text = text.replace(new RegExp(`{${paramKey}}`, "g"), String(paramValue));
-    });
-  }
-
-  return text;
-}
 
 function truncateText(text: string, limit: number): string {
   if (text.length <= limit) return text;
@@ -179,23 +77,14 @@ function Translate({
   return (
     <>
       {translate_result.translation ? (
-        <List.Section title={getLocalizedText("translationResult", translate_result.l)}>
+        <List.Section title="Translation Result">
           {translate_result.translation.map((item: string, index: number) => {
-            const displayText =
-              state.isTruncated && translate_result.translation && index === translate_result.translation.length - 1
-                ? item +
-                  "..." +
-                  getLocalizedText("truncatedMessage", translate_result.l, { limit: state.charLimit || 200 })
-                : item;
+            const displayText = item;
 
             return (
               <List.Item
                 key={index}
-                title={
-                  index === 0
-                    ? getLocalizedText("translationResult", translate_result.l)
-                    : `${getLocalizedText("translationResult", translate_result.l)} ${index + 1}`
-                }
+                title={index === 0 ? "Translation Result" : `Translation Result ${index + 1}`}
                 icon={{ source: Icon.Dot, tintColor: Color.Red }}
                 detail={
                   <List.Item.Detail
@@ -203,26 +92,21 @@ function Translate({
                     metadata={
                       <List.Item.Detail.Metadata>
                         <List.Item.Detail.Metadata.Label
-                          title={getLocalizedText("originalText", translate_result.l)}
+                          title="Original Text"
                           text={truncateText(state.searchText || "", 100)}
                         />
                         {translate_result.basic?.phonetic && (
                           <>
                             <List.Item.Detail.Metadata.Separator />
-                            <List.Item.Detail.Metadata.Label
-                              title={getLocalizedText("phonetic", translate_result.l)}
-                              text={translate_result.basic.phonetic}
-                            />
+                            <List.Item.Detail.Metadata.Label title="Phonetic" text={translate_result.basic.phonetic} />
                           </>
                         )}
                         {state.isTruncated && (
                           <>
                             <List.Item.Detail.Metadata.Separator />
                             <List.Item.Detail.Metadata.Label
-                              title={getLocalizedText("hint", translate_result.l)}
-                              text={getLocalizedText("truncatedMetadata", translate_result.l, {
-                                limit: state.charLimit || 200,
-                              })}
+                              title="Note"
+                              text={`Text truncated to first ${state.charLimit || 200} characters`}
                             />
                           </>
                         )}
@@ -251,7 +135,7 @@ function Translate({
         </List.Section>
       ) : null}
       {translate_result.basic && translate_result.basic.explains && translate_result.basic.explains.length > 0 ? (
-        <List.Section title={getLocalizedText("detail", translate_result.l)}>
+        <List.Section title="Detail">
           {translate_result.basic.explains.map((item: string, index: number) => (
             <List.Item
               key={index}
@@ -271,7 +155,7 @@ function Translate({
         </List.Section>
       ) : null}
       {translate_result.web && translate_result.web.length > 0 ? (
-        <List.Section title={getLocalizedText("webTranslate", translate_result.l)}>
+        <List.Section title="Web Translate">
           {translate_result.web.map((item: TranslateWebResult, index: number) => (
             <List.Item
               key={index}
@@ -340,7 +224,7 @@ function TranslateResultActionPanel(props: {
           }
         }}
         shortcut={{ modifiers: ["ctrl"], key: "return" }}
-        title={getLocalizedText("readOriginal", language)}
+        title="Read Original"
       />
       {speak_url ? (
         <Action
@@ -365,7 +249,7 @@ function TranslateResultActionPanel(props: {
             }
           }}
           shortcut={{ modifiers: ["shift"], key: "return" }}
-          title={getLocalizedText("readTranslated", language)}
+          title="Read Translated"
         />
       ) : null}
     </ActionPanel>
