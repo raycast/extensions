@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-01-23
 
 - Bring the profile window to front instead of adding a new tab
 - Simplify deeplink integration
