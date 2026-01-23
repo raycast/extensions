@@ -22,7 +22,7 @@ export default function AccountDropdown({ onAccountChange }: Props) {
     if (!selectedAccountId || isSelectedAccountInvalid) {
       setSelectedAccountId(accounts[0]?.id);
     }
-  }, [accounts]);
+  }, [accounts, selectedAccountId, setSelectedAccountId]);
 
   // When account changes, update LocalStorage and trigger callback
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function AccountDropdown({ onAccountChange }: Props) {
     };
 
     updateAccount();
-  }, [selectedAccountId]);
+  }, [selectedAccountId, onAccountChange]);
 
   // Don't show dropdown if no accounts or only one account
   if (!accounts || accounts.length < 2) {

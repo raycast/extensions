@@ -22,7 +22,7 @@ The extension supports managing multiple SpinupWP accounts. Use the **SpinupWP A
 
 When multiple accounts are configured, a dropdown selector appears in the search bar of each command, allowing you to quickly switch between accounts. The extension automatically uses the selected account for all API operations.
 
-**Note:** If you only have one SpinupWP account, you can use either the single account setup (Default API token preference) or the multi-account system. The multi-account system is recommended if you plan to add more accounts in the future.
+**Note:** If you only have one SpinupWP account, you can use either the single account setup (Default API token preference) or the multi-account system.
 
 ## Features
 

@@ -8,7 +8,14 @@ function getStatusIcon(event: Event): { source: Icon; tintColor: Color } {
   if (event.status === "deployed") {
     return { source: Icon.CheckCircle, tintColor: Color.Green };
   }
-  return { source: Icon.XMarkCircle, tintColor: Color.Red };
+  if (event.status === "failed") {
+    return { source: Icon.XMarkCircle, tintColor: Color.Red };
+  }
+  if (event.status === "queued") {
+    return { source: Icon.Circle, tintColor: Color.Orange };
+  }
+  // creating, updating, deleting are in-progress statuses
+  return { source: Icon.Clock, tintColor: Color.Yellow };
 }
 
 function formatDate(dateString: string): string {
@@ -21,6 +28,9 @@ function formatDuration(event: Event): string | null {
   const start = new Date(event.started_at).getTime();
   const end = new Date(event.finished_at).getTime();
   const durationMs = end - start;
+
+  // Return null if duration is negative (invalid data)
+  if (durationMs < 0) return null;
 
   if (durationMs < 1000) return `${durationMs}ms`;
   if (durationMs < 60000) return `${Math.round(durationMs / 1000)}s`;
