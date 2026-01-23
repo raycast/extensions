@@ -1,0 +1,195 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "whisper-realtime",
+  "title": "Whisper Realtime",
+  "description": "Real-time audio transcription using whisper.cpp with speaker diarization",
+  "icon": "command-icon.png",
+  "author": "tubone24",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-transcription",
+      "title": "Start Transcription",
+      "description": "Start real-time audio transcription with speaker diarization",
+      "mode": "view"
+    },
+    {
+      "name": "voice-input",
+      "title": "Voice Input",
+      "description": "Quick voice-to-text input - speak and paste directly to focused app",
+      "mode": "view"
+    },
+    {
+      "name": "manage-dictionary",
+      "title": "Manage Dictionary",
+      "description": "View, add, edit, and delete dictionary entries for text replacement",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "whisperRealtimePath",
+      "title": "whisper-realtime Path",
+      "description": "Path to the whisper-realtime project directory",
+      "type": "directory",
+      "required": true,
+      "default": ""
+    },
+    {
+      "name": "model",
+      "title": "Whisper Model",
+      "description": "The Whisper model to use for transcription",
+      "type": "dropdown",
+      "required": false,
+      "default": "large-v3-turbo",
+      "data": [
+        {
+          "title": "Tiny",
+          "value": "tiny"
+        },
+        {
+          "title": "Base",
+          "value": "base"
+        },
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large v3",
+          "value": "large-v3"
+        },
+        {
+          "title": "Large v3 Turbo (Recommended)",
+          "value": "large-v3-turbo"
+        }
+      ]
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Language for transcription",
+      "type": "dropdown",
+      "required": false,
+      "default": "ja",
+      "data": [
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Auto-detect",
+          "value": "auto"
+        }
+      ]
+    },
+    {
+      "name": "enableSpeaker",
+      "title": "Speaker Diarization",
+      "description": "Enable speaker diarization (identifies different speakers)",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable speaker separation"
+    },
+    {
+      "name": "outputDirectory",
+      "title": "Output Directory",
+      "description": "Directory to save transcription and recording files",
+      "type": "directory",
+      "required": false,
+      "default": "~/Documents/Transcriptions"
+    },
+    {
+      "name": "enableRecording",
+      "title": "Audio Recording",
+      "description": "Record audio while transcribing (saves as WAV file)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable audio recording"
+    },
+    {
+      "name": "audioSource",
+      "title": "Audio Source",
+      "description": "Audio input source for transcription",
+      "type": "dropdown",
+      "required": false,
+      "default": "mic",
+      "data": [
+        {
+          "title": "Microphone",
+          "value": "mic"
+        },
+        {
+          "title": "System Audio",
+          "value": "system"
+        },
+        {
+          "title": "Both (Mic + System)",
+          "value": "both"
+        }
+      ]
+    },
+    {
+      "name": "processingStep",
+      "title": "Processing Step (ms)",
+      "description": "Processing step interval in milliseconds (default: 500)",
+      "type": "textfield",
+      "required": false,
+      "default": "500"
+    },
+    {
+      "name": "processingLength",
+      "title": "Processing Window (ms)",
+      "description": "Processing window length in milliseconds - shorter means faster response (default: 3000)",
+      "type": "textfield",
+      "required": false,
+      "default": "3000"
+    },
+    {
+      "name": "enableVad",
+      "title": "Voice Activity Detection",
+      "description": "Use VAD to filter out non-speech audio",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable VAD"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.2",
+    "@raycast/utils": "^2.2.2"
+  },
+  "overrides": {
+    "@types/react": "18.2.79"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.11.0",
+    "@types/react": "18.2.79",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.0",
+    "react-devtools-core": "4.28.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
