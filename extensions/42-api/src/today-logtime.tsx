@@ -1,7 +1,6 @@
 import { MenuBarExtra, getPreferenceValues, Icon, environment, open, LocalStorage, Color } from "@raycast/api";
 import { useEffect, useMemo } from "react";
 import { useUser, useLocationStats } from "./hooks";
-import { Preferences } from "./lib/types";
 import { formatTime, calculateGoalTimes, formatDateString } from "./lib/utils";
 
 async function triggerConfetti() {

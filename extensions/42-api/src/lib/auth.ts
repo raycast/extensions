@@ -1,11 +1,6 @@
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { TOKEN_EXPIRY_BUFFER } from "./constants";
 
-interface AuthPreferences {
-  clientId: string;
-  clientSecret: string;
-}
-
 interface TokenData {
   access_token: string;
   expires_in: number;
@@ -38,7 +33,7 @@ export async function getAccessToken(): Promise<string | null> {
 }
 
 async function fetchNewToken(): Promise<string> {
-  const preferences = getPreferenceValues<AuthPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   if (!preferences.clientId || !preferences.clientSecret) {
     throw new Error("Client ID and Client Secret must be configured in preferences");

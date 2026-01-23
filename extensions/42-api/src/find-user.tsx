@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { useUsers, usePinnedUsers, useLocationStats, SearchMode } from "./hooks";
-import { Preferences, User } from "./lib/types";
+import { User } from "./lib/types";
 
 const PINNED_USERS_KEY = "pinned-users";
 const PINNED_USERS_CACHE_KEY = "pinned-users-cache";
