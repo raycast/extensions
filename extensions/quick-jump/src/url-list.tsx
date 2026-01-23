@@ -65,15 +65,16 @@ export function URLList({ group, rootData, isLoading = false }: URLListProps) {
 
       const tags = linkedUrl.tags || [];
       const title = linkedUrl.title || linkedUrlKey;
+      const resolvedUrl = applyTemplate(linkedUrl.url, placeholders);
       linkedUrls.push({
         key: `linked-${linkedUrlKey}`,
         title: title,
-        url: linkedUrl.url,
+        url: resolvedUrl,
         keywords: combineKeywords(
           getEnhancedKeywords(linkedUrlKey),
           getEnhancedKeywords(title),
           tags,
-          getDomainKeywords(linkedUrl.url),
+          getDomainKeywords(resolvedUrl),
         ),
         icon: getFallbackIcon(linkedUrl.icon, !!linkedUrl.openIn),
         tags: tags,
