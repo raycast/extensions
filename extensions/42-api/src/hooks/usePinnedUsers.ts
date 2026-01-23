@@ -27,7 +27,7 @@ export function usePinnedUsers(logins: string[], options: UsePinnedUsersOptions 
   const [error, setError] = useState<Error | undefined>();
 
   // Memoize the joined logins string to prevent unnecessary re-renders
-  const loginsKey = useMemo(() => logins.join(","), [logins.join(",")]);
+  const loginsKey = useMemo(() => logins.join(","), [logins]);
 
   async function fetchUsers() {
     if (!accessToken || logins.length === 0 || !execute) {
