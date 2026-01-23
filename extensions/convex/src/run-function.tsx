@@ -25,7 +25,8 @@ import {
   useProjects,
   useDeployments,
 } from "./hooks/useConvexData";
-import { runFunction, type FunctionSpec } from "./lib/api";
+import { runFunction, type FunctionSpec, type AuthOptions } from "./lib/api";
+import { type DeployKeyConfig } from "./lib/deployKeyAuth";
 
 interface FunctionWithPath extends FunctionSpec {
   fullPath: string;
@@ -33,18 +34,22 @@ interface FunctionWithPath extends FunctionSpec {
 }
 
 export default function RunFunctionCommand() {
-  const { session, selectedContext } = useConvexAuth();
+  const { session, selectedContext, isDeployKeyMode, deployKeyConfig } =
+    useConvexAuth();
   const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
 
   const accessToken = session?.accessToken ?? null;
   const deploymentName = selectedContext.deploymentName;
 
-  // Fetch context data
-  const { data: teams } = useTeams(accessToken);
-  const { data: projects } = useProjects(accessToken, selectedContext.teamId);
+  // Fetch context data (only in OAuth mode - not available with deploy keys)
+  const { data: teams } = useTeams(isDeployKeyMode ? null : accessToken);
+  const { data: projects } = useProjects(
+    isDeployKeyMode ? null : accessToken,
+    selectedContext.teamId,
+  );
   const { data: deployments } = useDeployments(
-    accessToken,
+    isDeployKeyMode ? null : accessToken,
     selectedContext.projectId,
   );
 
@@ -56,10 +61,11 @@ export default function RunFunctionCommand() {
     (d) => d.name === deploymentName,
   );
 
-  // Fetch functions
+  // Fetch functions (supports both OAuth and deploy key modes)
   const { data: modules, isLoading: functionsLoading } = useFunctions(
     accessToken,
     deploymentName,
+    deployKeyConfig,
   );
 
   // Handle authentication
@@ -74,7 +80,7 @@ export default function RunFunctionCommand() {
       <List>
         <List.EmptyView
           title="No Deployment Selected"
-          description="Use 'Switch Convex Project' to select a deployment first"
+          description="Use 'Manage Projects' to select a deployment first"
           icon={Icon.Cloud}
         />
       </List>
@@ -131,6 +137,7 @@ export default function RunFunctionCommand() {
         functionSpec={fn}
         deploymentName={deploymentName}
         accessToken={accessToken!}
+        deployKeyConfig={deployKeyConfig}
         teamSlug={selectedTeam?.slug}
         projectSlug={selectedProject?.slug}
         deploymentType={selectedDeployment?.deploymentType}
@@ -207,6 +214,7 @@ interface FunctionRunnerProps {
   functionSpec: FunctionWithPath;
   deploymentName: string;
   accessToken: string;
+  deployKeyConfig?: DeployKeyConfig | null;
   teamSlug?: string;
   projectSlug?: string;
   deploymentType?: string;
@@ -216,6 +224,7 @@ function FunctionRunner({
   functionSpec,
   deploymentName,
   accessToken,
+  deployKeyConfig,
   teamSlug,
   projectSlug,
   deploymentType,
@@ -245,13 +254,29 @@ function FunctionRunner({
     setResult(null);
 
     try {
-      const response = await runFunction(
-        deploymentName,
-        accessToken,
-        functionSpec.fullPath,
-        functionSpec.functionType,
-        args,
-      );
+      let response;
+      if (deployKeyConfig) {
+        // Deploy key mode
+        const auth: AuthOptions = {
+          deployKey: deployKeyConfig.deployKey,
+          deploymentUrl: deployKeyConfig.deploymentUrl,
+        };
+        response = await runFunction(
+          auth,
+          functionSpec.fullPath,
+          functionSpec.functionType,
+          args,
+        );
+      } else {
+        // OAuth mode
+        response = await runFunction(
+          deploymentName,
+          accessToken,
+          functionSpec.fullPath,
+          functionSpec.functionType,
+          args,
+        );
+      }
 
       setResult({
         data: response.result,

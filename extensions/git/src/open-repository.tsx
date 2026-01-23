@@ -7,7 +7,7 @@ import { StatusView } from "./components/views/StatusView";
 import { CommitsView } from "./components/views/CommitsView";
 import { StashesView } from "./components/views/StashesView";
 import FilesView from "./components/views/FilesView";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useGitBranches } from "./hooks/useGitBranches";
 import { useGitCommits } from "./hooks/useGitCommits";
 import { useGitStash } from "./hooks/useGitStash";
@@ -77,11 +77,12 @@ export type RepositoryContext = {
 export type NavigationContext = {
   currentView: GitView;
   navigateTo: (destination: GitView) => void;
+  switchTo: (repositoryPath: string) => void;
 };
 
 export default function OpenRepository({ arguments: args }: { arguments: Arguments }) {
   const [currentView, setCurrentView] = useCachedState<GitView>("git-current-view", "branches");
-  const repositoryPath = args.path;
+  const [repositoryPath, setRepositoryPath] = useState<string>(args.path);
 
   // Hook for working with a Git repository (synchronous validation)
   const { gitManager, error } = useGitRepository(repositoryPath);
@@ -127,6 +128,7 @@ export default function OpenRepository({ arguments: args }: { arguments: Argumen
     tags: tagsContext,
     currentView,
     navigateTo: setCurrentView,
+    switchTo: setRepositoryPath,
   };
 
   // Render the corresponding view

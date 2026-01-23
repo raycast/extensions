@@ -1,5 +1,11 @@
 # Vercast Changelog
 
+## [2.14] - 2026-01-20
+
+- Removed token length validation as vercel tokens can now be longer
+- Update `Check Domain Availability` command to use the new Vercel API
+- Added `Visit on Vercel` action to projects and domains lists
+
 ## [2.13] - 2026-01-05
 
 - Added `Open Latest Deployment` command to open the latest deployment target or the Vercel dashboard

@@ -109,19 +109,26 @@ function BusinessInvoices({ business }: { business: Business }) {
           {filteredInvoices.map((invoice) => {
             const title = `${invoice.title} - ${invoice.invoiceNumber}`;
             const markdown = `# ${title}
-| ${invoice.itemTitle} | ${invoice.unitTitle} | ${invoice.priceTitle} | ${invoice.amountTitle} |
+| BILL TO | - | - | - |
+| ------- | - | - | - |
+| ${invoice.customer.name} | | **Invoice Date** | ${invoice.invoiceDate} |
+| | | **Payment Due** | ${invoice.dueDate} |
+| | | **Amount Due** (${invoice.amountDue.currency.code}) | ${invoice.amountDue.currency.symbol}${invoice.amountDue.value}
+
+
+| **${invoice.itemTitle}** | **${invoice.unitTitle}** | **${invoice.priceTitle}** | **${invoice.amountTitle}** |
 |----------------------|----------------------|-----------------------|------------------------|
 ${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.unitPrice} | ${item.subtotal.currency.symbol}${calculateInvoiceItemAmount(item)}`).join(`\n`)}
 
-|  |  | Subtotal | ${invoice.subtotal.currency.symbol}${invoice.subtotal.value} |
+|  |  | **Subtotal** | ${invoice.subtotal.currency.symbol}${invoice.subtotal.value} |
 |--|--|-------|--------------------------------------------------------|
 ${invoice.discounts.length ? `| | | ${invoice.discounts[0].name} | (${invoice.discountTotal.currency.symbol}${invoice.discountTotal.value}) |` : ""}
 
-|  |  | Total | ${invoice.total.currency.symbol}${invoice.total.value} |
+|  |  | **Total** | ${invoice.total.currency.symbol}${invoice.total.value} |
 |--|--|-------|--------------------------------------------------------|
 | | | Paid | ${invoice.amountPaid.currency.symbol}${invoice.amountPaid.value} |
 
-|  |  | Amount Due (${invoice.amountDue.currency.code}) | ${invoice.amountDue.currency.symbol}${invoice.amountDue.value} |
+|  |  | **Amount Due (${invoice.amountDue.currency.code})** | ${invoice.amountDue.currency.symbol}${invoice.amountDue.value} |
 |--|--|-------|--------------------------------------------------------|`;
 
             return (
