@@ -1,55 +1,43 @@
 # I Ching Divination
 
-A Raycast extension for performing I Ching divination, providing random divination results and interpretations for all 64 hexagrams.
+A Raycast extension for performing I Ching divination using the traditional three-coin method. Consult the Book of Changes (易經) for guidance through all 64 hexagrams.
 
 ## Features
 
-- Interactive hexagram drawing process: Step-by-step generation of six lines
-- Three-coin method: Simulates the traditional I Ching divination method
-- Complete 64 hexagrams data: Includes hexagram names, pinyin, symbols, and interpretations
-- **Multi-language support**: Supports Traditional Chinese (Hong Kong) and English
-- Language switching: Switch languages at runtime (shortcut: ⌘L)
+- **Interactive coin tossing**: Step-by-step generation of six lines with visual feedback and loading states
+- **Three-coin method**: Simulates the traditional I Ching divination technique with randomized delays
+- **Complete 64 hexagrams**: Includes Chinese names (漢字), pinyin romanization, and interpretations
+- **Changing lines detection**: Identifies Old Yang (老陽) and Old Yin (老陰) lines that indicate transformation
+- **Keyboard shortcuts**: Quick reset with `Cmd+R`
 
 ## Usage
 
-1. Type "易經占卜" or "I Ching Divination" in Raycast
-2. Press Enter or click "Start Divination" to begin
-3. Press Enter or click "Toss Coins" each time to generate one line (6 times total)
-4. After completion, view the divination results, including:
-   - Hexagram number and name
-   - Hexagram symbols (e.g., Heaven, Earth, Water, Fire, etc.)
-   - Display of the six lines
-   - Hexagram interpretation and advice
+1. Open Raycast and search for "I Ching Divination"
+2. Press `Enter` to start the divination
+3. Press `Enter` to toss coins for each line (6 tosses total)
+4. View your hexagram result with:
+   - Hexagram number and Chinese name
+   - Pinyin pronunciation
+   - Symbolic meaning (Heaven, Earth, Water, Fire, etc.)
+   - Line-by-line breakdown showing changing lines
+   - Interpretation and advice
 
-## Language Settings
+## The Three-Coin Method
 
-### Setting Default Language
+Each line is determined by tossing three coins:
 
-1. Open Raycast Settings
-2. Find the "I Ching Divination" extension
-3. In the "Language" option, select your preferred language:
-   - Traditional Chinese (Hong Kong)
-   - English
+| Result  | Line Type  | Changing? |
+| ------- | ---------- | --------- |
+| 3 heads | Old Yang   | Yes       |
+| 2 heads | Young Yin  | No        |
+| 1 head  | Young Yang | No        |
+| 0 heads | Old Yin    | Yes       |
 
-### Switching Language at Runtime
-
-- Use the shortcut **⌘L** to switch between Traditional Chinese and English
-- Or select "Switch to English" / "切換到繁體中文" in the action panel
-
-**Note**: Language settings changed at runtime are only effective for the current session. When reopening the extension, it will use the default language selected in preferences.
+Changing lines (Old Yang and Old Yin) indicate areas of transformation in your situation.
 
 ## About I Ching
 
-The I Ching (易經) is one of the ancient Chinese classics, used for divination and philosophical reflection. It contains 64 hexagrams, each composed of six lines (yao), representing different situations and advice.
-
-## Multi-language Support
-
-This extension supports the following languages:
-
-- **Traditional Chinese (Hong Kong)** (zh-HK) - Default
-- **English** (en)
-
-All UI text and hexagram interpretations have been translated and can be switched at runtime.
+The I Ching (易經), or Book of Changes, is one of the oldest Chinese classics, used for over 3,000 years for divination and philosophical reflection. It contains 64 hexagrams, each composed of six lines (爻 yáo), representing different life situations and guidance.
 
 ## Development
 
@@ -63,7 +51,7 @@ npm run dev
 # Build
 npm run build
 
-# Check code
+# Lint
 npm run lint
 ```
 

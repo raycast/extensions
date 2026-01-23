@@ -13,26 +13,7 @@
     "Fun"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "language",
-      "type": "dropdown",
-      "required": false,
-      "title": "Language",
-      "description": "Select your preferred language",
-      "default": "en",
-      "data": [
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "繁體中文",
-          "value": "zh-HK"
-        }
-      ]
-    }
-  ],
+  "preferences": [],
   "commands": [
     {
       "name": "iching-divination",
