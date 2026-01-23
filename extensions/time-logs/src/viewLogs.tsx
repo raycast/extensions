@@ -33,11 +33,6 @@ import {
 import { getProgressIcon, showFailureToast, useLocalStorage } from "@raycast/utils";
 import { ProjectForm } from "./components/ProjectForm";
 
-// Preferences interface
-interface Preferences {
-  roundingInterval: string;
-}
-
 // Simple date formatter (DD/MM)
 function formatSimpleDate(date: Date): string {
   return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}`;
