@@ -46,12 +46,12 @@ export async function getServers(): Promise<Server[]> {
   const headers = await getHeaders();
 
   while (nextPage) {
-    const response = await fetch(nextPage, {
+    const response: Response = await fetch(nextPage, {
       method: "GET",
       headers,
     });
 
-    const result = await handleResponse<ApiResponse<Server[]>>(response);
+    const result: ApiResponse<Server[]> = await handleResponse<ApiResponse<Server[]>>(response);
     allServers.push(...result.data);
     nextPage = result.pagination?.next || null;
   }
@@ -140,12 +140,12 @@ export async function getSites(): Promise<Site[]> {
   const headers = await getHeaders();
 
   while (nextPage) {
-    const response = await fetch(nextPage, {
+    const response: Response = await fetch(nextPage, {
       method: "GET",
       headers,
     });
 
-    const result = await handleResponse<ApiResponse<Site[]>>(response);
+    const result: ApiResponse<Site[]> = await handleResponse<ApiResponse<Site[]>>(response);
     allSites.push(...result.data);
     nextPage = result.pagination?.next || null;
   }
@@ -233,12 +233,12 @@ export async function getEvents(maxPages: number = 5): Promise<Event[]> {
   const headers = await getHeaders();
 
   while (nextPage && pagesLoaded < maxPages) {
-    const response = await fetch(nextPage, {
+    const response: Response = await fetch(nextPage, {
       method: "GET",
       headers,
     });
 
-    const result = await handleResponse<ApiResponse<Event[]>>(response);
+    const result: ApiResponse<Event[]> = await handleResponse<ApiResponse<Event[]>>(response);
     // Deduplicate events by ID
     for (const event of result.data) {
       eventsMap.set(event.id, event);

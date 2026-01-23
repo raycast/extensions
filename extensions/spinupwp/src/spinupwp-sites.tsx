@@ -182,7 +182,6 @@ function SiteActions({ site, onDeleted }: { site: Site; onDeleted: () => void })
         <Action.Push
           title="Delete Site…"
           icon={Icon.Trash}
-          style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           target={<DeleteSiteForm site={site} onDeleted={onDeleted} />}
         />
