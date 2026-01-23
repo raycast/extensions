@@ -1,27 +1,30 @@
-import { getPreferenceValues, Icon, List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { Contact } from "./types";
-
-const { api_key } = getPreferenceValues<ExtensionPreferences>();
-const API_URL = "https://api.nicnames.com/2/";
-const API_HEADERS = {
-  Accept: "application/json",
-  "Content-Type": "application/json",
-  "x-api-key": api_key
-};
+import { callApi } from "./nicnames";
 
 export default function Contacts() {
-  const {isLoading, data: contacts} = useFetch(API_URL + "contact", {
-    headers: API_HEADERS,
-    mapResult(result: {list: Contact[]}) {
-      return {
-        data: result.list
-      }
+  const { isLoading, data: contacts } = useCachedPromise(
+    async () => {
+      const result = await callApi<{ list: Contact[] }>("contact");
+      return result.list;
     },
-    initialData: []
-  });
+    [],
+    {
+      initialData: [],
+    },
+  );
 
-  return <List isLoading={isLoading}>
-    {contacts.map(contact => <List.Item key={contact.contactId} icon={Icon.Person} title={[contact.firstName, contact.middleName, contact.lastName].join(" ")} subtitle={contact.email} />)}
-  </List>
+  return (
+    <List isLoading={isLoading}>
+      {contacts.map((contact) => (
+        <List.Item
+          key={contact.contactId}
+          icon={Icon.Person}
+          title={[contact.firstName, contact.middleName, contact.lastName].join(" ")}
+          subtitle={contact.email}
+        />
+      ))}
+    </List>
+  );
 }
