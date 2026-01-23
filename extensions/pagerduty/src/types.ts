@@ -43,3 +43,28 @@ export type Filter = "all" | IncidentStatus;
 export interface Preferences {
   apiKey: string;
 }
+
+export interface OncallShift {
+  escalation_policy: {
+    id: string;
+    summary: string;
+    html_url: string;
+  };
+  schedule?: {
+    id: string;
+    summary: string;
+  };
+  user: {
+    id: string;
+    summary: string;
+  };
+  start: string; // ISO 8601 timestamp
+  end: string; // ISO 8601 timestamp
+}
+
+export interface ListOncallsResponse {
+  oncalls: OncallShift[];
+  limit: number;
+  offset: number;
+  more: boolean;
+}
