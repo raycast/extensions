@@ -1,6 +1,6 @@
 # iOS Resolution Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-01-23
 
 - Browse all devices (iPhone, iPad, iPod touch, Apple Watch)
 - View device specifications: logical/physical resolution, PPI, scale factor, screen diagonal, aspect ratio
