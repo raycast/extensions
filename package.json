@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "brightness-control",
-  "title": "Brightness Control",
+  "name": "control-brightness",
+  "title": "Control Brightness",
   "description": "Control macOS display brightness with simple commands",
   "icon": "icon.png",
   "author": "pavzagor",
@@ -34,8 +34,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray publish"
   },
   "platforms": ["macOS"]
 }
