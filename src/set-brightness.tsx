@@ -1,4 +1,14 @@
-import { showToast, Toast, showHUD, LocalStorage, Form, ActionPanel, Action, useNavigation, Detail } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  showHUD,
+  LocalStorage,
+  Form,
+  ActionPanel,
+  Action,
+  useNavigation,
+  Detail,
+} from "@raycast/api";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
@@ -13,32 +23,32 @@ async function retryWithBackoff<T>(
   operation: () => Promise<T>,
   maxRetries: number = 3,
   initialDelay: number = 500,
-  validator?: (result: T) => boolean
+  validator?: (result: T) => boolean,
 ): Promise<T> {
-  let lastError: any;
-  
+  let lastError: unknown;
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const result = await operation();
-      
+
       // If validator is provided, check if result is valid
       if (validator && !validator(result)) {
         throw new Error("Validation failed");
       }
-      
+
       return result;
     } catch (error) {
       lastError = error;
       console.error(`Attempt ${attempt + 1}/${maxRetries} failed:`, error);
-      
+
       if (attempt < maxRetries - 1) {
         const delay = initialDelay * Math.pow(2, attempt);
         console.log(`Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
-  
+
   throw lastError;
 }
 
@@ -57,6 +67,15 @@ interface DisplayInfo {
   adaptive: boolean;
 }
 
+interface LunarDisplayData {
+  id: number | string;
+  name: string;
+  brightness: number;
+  main: boolean;
+  active: boolean;
+  adaptive?: boolean;
+}
+
 // Get current brightness using Lunar CLI
 async function getBrightnessWithLunar(): Promise<number | null> {
   try {
@@ -67,12 +86,6 @@ async function getBrightnessWithLunar(): Promise<number | null> {
   } catch (error) {
     return null;
   }
-}
-
-// Set brightness using Lunar CLI
-async function setBrightnessWithLunar(level: number): Promise<void> {
-  const lunarPath = `${homedir()}/.local/bin/lunar`;
-  await execAsync(`"${lunarPath}" set brightness ${level}`);
 }
 
 // Check if Lunar is installed
@@ -97,42 +110,44 @@ async function getDisplays(): Promise<DisplayInfo[]> {
   return retryWithBackoff(
     async () => {
       const lunarPath = `${homedir()}/.local/bin/lunar`;
-      const { stdout } = await execAsync(`"${lunarPath}" displays --json`, { timeout: 5000 });
-      
+      const { stdout } = await execAsync(`"${lunarPath}" displays --json`, {
+        timeout: 5000,
+      });
+
       if (!stdout || stdout.trim() === "") {
         throw new Error("Empty response from Lunar displays command");
       }
-      
+
       // Extract JSON from output (it might have other text before/after)
       let jsonStr = stdout.trim();
-      const jsonStart = jsonStr.indexOf('{');
-      
+      const jsonStart = jsonStr.indexOf("{");
+
       if (jsonStart === -1) {
         throw new Error("No JSON found in Lunar output");
       }
-      
+
       // Find the matching closing brace by counting braces
       let braceCount = 0;
       let jsonEnd = -1;
       for (let i = jsonStart; i < jsonStr.length; i++) {
-        if (jsonStr[i] === '{') braceCount++;
-        if (jsonStr[i] === '}') braceCount--;
+        if (jsonStr[i] === "{") braceCount++;
+        if (jsonStr[i] === "}") braceCount--;
         if (braceCount === 0) {
           jsonEnd = i;
           break;
         }
       }
-      
+
       if (jsonEnd === -1) {
         throw new Error("Could not find end of JSON in Lunar output");
       }
-      
+
       jsonStr = jsonStr.substring(jsonStart, jsonEnd + 1);
       const displaysData = JSON.parse(jsonStr);
-      
+
       const displays: DisplayInfo[] = [];
       for (const [serial, data] of Object.entries(displaysData)) {
-        const displayData = data as any;
+        const displayData = data as LunarDisplayData;
         if (displayData.active) {
           displays.push({
             id: displayData.id.toString(),
@@ -145,19 +160,19 @@ async function getDisplays(): Promise<DisplayInfo[]> {
           });
         }
       }
-      
+
       // Sort displays: main display first
       displays.sort((a, b) => {
         if (a.main && !b.main) return -1;
         if (!a.main && b.main) return 1;
         return 0;
       });
-      
+
       return displays;
     },
     3,
     500,
-    (displays) => displays.length > 0 // Validate that we got at least one display
+    (displays) => displays.length > 0, // Validate that we got at least one display
   );
 }
 
@@ -167,29 +182,34 @@ async function getCursorDisplay(): Promise<string | null> {
     return await retryWithBackoff(
       async () => {
         const lunarPath = `${homedir()}/.local/bin/lunar`;
-        const { stdout } = await execAsync(`"${lunarPath}" displays cursor serial`, { timeout: 3000 });
-        
+        const { stdout } = await execAsync(
+          `"${lunarPath}" displays cursor serial`,
+          { timeout: 3000 },
+        );
+
         if (!stdout || stdout.trim() === "") {
           throw new Error("Empty response from Lunar cursor command");
         }
-        
+
         // Output format: "Serial: <serial>" or just the serial
         const serialMatch = stdout.match(/[Ss]erial:\s*(.+)/);
         if (serialMatch) {
           return serialMatch[1].trim();
         }
-        
+
         // Try to extract UUID format directly (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
-        const uuidMatch = stdout.match(/([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})/i);
+        const uuidMatch = stdout.match(
+          /([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})/i,
+        );
         if (uuidMatch) {
           return uuidMatch[1];
         }
-        
+
         throw new Error("Could not parse serial from output");
       },
       3,
       300,
-      (serial) => serial !== null && serial.length > 0 // Validate we got a serial
+      (serial) => serial !== null && serial.length > 0, // Validate we got a serial
     );
   } catch (error) {
     console.error("Failed to get cursor display after retries:", error);
@@ -198,100 +218,136 @@ async function getCursorDisplay(): Promise<string | null> {
 }
 
 // Get brightness for a specific display
-async function getBrightnessForDisplay(displaySerial: string): Promise<number | null> {
+async function getBrightnessForDisplay(
+  displaySerial: string,
+): Promise<number | null> {
   try {
     return await retryWithBackoff(
       async () => {
         const lunarPath = `${homedir()}/.local/bin/lunar`;
-        const { stdout } = await execAsync(`"${lunarPath}" displays "${displaySerial}" brightness`, { timeout: 3000 });
+        const { stdout } = await execAsync(
+          `"${lunarPath}" displays "${displaySerial}" brightness`,
+          { timeout: 3000 },
+        );
         const match = stdout.match(/brightness:\s*(\d+)/i);
-        
+
         if (!match) {
           throw new Error("Could not parse brightness from output");
         }
-        
+
         return parseInt(match[1], 10);
       },
       3,
       300,
-      (brightness) => brightness !== null && brightness >= 0 && brightness <= 100 // Validate brightness is in range
+      (brightness) =>
+        brightness !== null && brightness >= 0 && brightness <= 100, // Validate brightness is in range
     );
   } catch (error) {
-    console.error(`Failed to get brightness for display ${displaySerial} after retries:`, error);
+    console.error(
+      `Failed to get brightness for display ${displaySerial} after retries:`,
+      error,
+    );
     return null;
   }
 }
 
 // Set adaptive mode for a specific display
-async function setAdaptiveMode(displaySerial: string, enabled: boolean): Promise<void> {
+async function setAdaptiveMode(
+  displaySerial: string,
+  enabled: boolean,
+): Promise<void> {
   await retryWithBackoff(
     async () => {
       const lunarPath = `${homedir()}/.local/bin/lunar`;
       const mode = enabled ? "on" : "off";
-      
+
       console.log(`Setting adaptive mode for ${displaySerial} to ${mode}`);
-      await execAsync(`"${lunarPath}" displays "${displaySerial}" adaptive ${mode}`, { timeout: 3000 });
-      
+      await execAsync(
+        `"${lunarPath}" displays "${displaySerial}" adaptive ${mode}`,
+        { timeout: 3000 },
+      );
+
       // Wait a bit for the change to take effect
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
       return;
     },
     3,
-    300
+    300,
   );
 }
 
 // Set brightness for a specific display with verification
-async function setBrightnessForDisplay(displaySerial: string, level: number, adaptive: boolean): Promise<void> {
+async function setBrightnessForDisplay(
+  displaySerial: string,
+  level: number,
+  adaptive: boolean,
+): Promise<void> {
   // If adaptive mode is enabled, disable it first to unlink the display
   if (adaptive) {
-    console.log(`Display ${displaySerial} has adaptive mode enabled, disabling it first...`);
+    console.log(
+      `Display ${displaySerial} has adaptive mode enabled, disabling it first...`,
+    );
     try {
       await setAdaptiveMode(displaySerial, false);
       console.log(`Adaptive mode disabled for ${displaySerial}`);
     } catch (error) {
-      console.error(`Failed to disable adaptive mode for ${displaySerial}:`, error);
+      console.error(
+        `Failed to disable adaptive mode for ${displaySerial}:`,
+        error,
+      );
       // Continue anyway - the brightness command might still work
     }
   }
-  
+
   await retryWithBackoff(
     async () => {
       const lunarPath = `${homedir()}/.local/bin/lunar`;
-      
+
       // Set the brightness
       console.log(`Setting brightness for ${displaySerial} to ${level}%`);
-      await execAsync(`"${lunarPath}" displays "${displaySerial}" brightness ${level}`, { timeout: 5000 });
-      
+      await execAsync(
+        `"${lunarPath}" displays "${displaySerial}" brightness ${level}`,
+        { timeout: 5000 },
+      );
+
       // Wait a bit for the change to take effect
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       // Verify the change by reading back the brightness
       const actualBrightness = await getBrightnessForDisplay(displaySerial);
-      
+
       if (actualBrightness === null) {
         throw new Error("Could not verify brightness change");
       }
-      
+
       // Allow a small tolerance (±2%) for verification
       const tolerance = 2;
       if (Math.abs(actualBrightness - level) > tolerance) {
-        throw new Error(`Brightness mismatch: expected ${level}%, got ${actualBrightness}%`);
+        throw new Error(
+          `Brightness mismatch: expected ${level}%, got ${actualBrightness}%`,
+        );
       }
-      
-      console.log(`Verified brightness for ${displaySerial} is now ${actualBrightness}%`);
+
+      console.log(
+        `Verified brightness for ${displaySerial} is now ${actualBrightness}%`,
+      );
       return;
     },
     5, // More retries for setting
-    500
+    500,
   );
 }
 
 export default function Command() {
-  const [currentBrightness, setCurrentBrightness] = useState<number | null>(null);
+  const [currentBrightness, setCurrentBrightness] = useState<number | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
-  const [lunarStatus, setLunarStatus] = useState<{ app: boolean; cli: boolean } | null>(null);
+  const [lunarStatus, setLunarStatus] = useState<{
+    app: boolean;
+    cli: boolean;
+  } | null>(null);
   const [displays, setDisplays] = useState<DisplayInfo[]>([]);
   const [selectedDisplay, setSelectedDisplay] = useState<string>("");
   const { pop } = useNavigation();
@@ -321,22 +377,31 @@ export default function Command() {
 
           // Get the display where cursor is currently located (with built-in retry logic)
           const cursorDisplaySerial = await getCursorDisplay();
-          
+
           // Verify the cursor display is in our list
-          const cursorDisplayExists = cursorDisplaySerial && allDisplays.some(d => d.serial === cursorDisplaySerial);
-          
+          const cursorDisplayExists =
+            cursorDisplaySerial &&
+            allDisplays.some((d) => d.serial === cursorDisplaySerial);
+
           if (cursorDisplayExists) {
             // Set the cursor display as selected
-            console.log(`Detected cursor on display: ${allDisplays.find(d => d.serial === cursorDisplaySerial)?.name}`);
+            console.log(
+              `Detected cursor on display: ${allDisplays.find((d) => d.serial === cursorDisplaySerial)?.name}`,
+            );
             setSelectedDisplay(cursorDisplaySerial!);
-            
+
             // Get brightness for the cursor display (with built-in retry logic)
-            const brightness = await getBrightnessForDisplay(cursorDisplaySerial!);
+            const brightness = await getBrightnessForDisplay(
+              cursorDisplaySerial!,
+            );
             setCurrentBrightness(brightness);
           } else {
             // Fallback to main display or first display
-            const mainDisplay = allDisplays.find(d => d.main) || allDisplays[0];
-            console.log(`Cursor detection failed or not in list, falling back to ${mainDisplay.name}`);
+            const mainDisplay =
+              allDisplays.find((d) => d.main) || allDisplays[0];
+            console.log(
+              `Cursor detection failed or not in list, falling back to ${mainDisplay.name}`,
+            );
             setSelectedDisplay(mainDisplay.serial);
             setCurrentBrightness(mainDisplay.brightness);
           }
@@ -345,7 +410,10 @@ export default function Command() {
           await showToast({
             style: Toast.Style.Failure,
             title: "Failed to Load Displays",
-            message: error instanceof Error ? error.message : "Please try reopening the command",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Please try reopening the command",
           });
         }
       }
@@ -357,14 +425,14 @@ export default function Command() {
   // Handle display selection change
   async function handleDisplayChange(newDisplaySerial: string) {
     setSelectedDisplay(newDisplaySerial);
-    
+
     // Update current brightness for the newly selected display
     try {
       const brightness = await getBrightnessForDisplay(newDisplaySerial);
       setCurrentBrightness(brightness);
     } catch (error) {
       console.error("Failed to get brightness for display:", error);
-      const display = displays.find(d => d.serial === newDisplaySerial);
+      const display = displays.find((d) => d.serial === newDisplaySerial);
       if (display) {
         setCurrentBrightness(display.brightness);
       }
@@ -392,11 +460,11 @@ export default function Command() {
 
     try {
       await setAdaptiveMode(selectedDisplay, newValue);
-      
+
       // Refresh display list to get updated adaptive state
       const updatedDisplays = await getDisplays();
       setDisplays(updatedDisplays);
-      
+
       await showToast({
         style: Toast.Style.Success,
         title: "Sync Mode Updated",
@@ -465,25 +533,38 @@ export default function Command() {
 
         const displayInfo = displays.find((d) => d.serial === selectedDisplay);
         const displayName = displayInfo?.name || "Display";
-        
+
         // Set brightness with retry and verification (will auto-disable adaptive mode if needed)
-        await setBrightnessForDisplay(selectedDisplay, brightnessLevel, displayInfo?.adaptive || false);
-        
+        await setBrightnessForDisplay(
+          selectedDisplay,
+          brightnessLevel,
+          displayInfo?.adaptive || false,
+        );
+
         // Store the brightness value for reference
-        await LocalStorage.setItem("lastBrightness", brightnessLevel.toString());
+        await LocalStorage.setItem(
+          "lastBrightness",
+          brightnessLevel.toString(),
+        );
 
         // Show old → new brightness in HUD with display name
-        const oldValue = currentBrightness !== null ? `${currentBrightness}%` : "?";
+        const oldValue =
+          currentBrightness !== null ? `${currentBrightness}%` : "?";
         if (showMaxMessage) {
           await showHUD(`🚀 ${displayName}: Brightness to the max!`);
         } else {
           await showHUD(`☀️ ${displayName}: ${oldValue} → ${brightnessLevel}%`);
         }
-        
+
         // Close the form
         pop();
-      } catch (error: any) {
-        if (error.message.includes("lunar") || error.message.includes("not found")) {
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        if (
+          errorMessage.includes("lunar") ||
+          errorMessage.includes("not found")
+        ) {
           await showToast({
             style: Toast.Style.Failure,
             title: "Lunar Not Installed",
@@ -497,7 +578,8 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: error instanceof Error ? error.message : "Failed to set brightness",
+        message:
+          error instanceof Error ? error.message : "Failed to set brightness",
       });
     }
   }
@@ -585,12 +667,18 @@ Or run this command manually:
           <ActionPanel>
             {!lunarStatus.app && (
               <>
-                <Action.Open title="Install Lunar" target="https://lunar.fyi/" />
-                <Action.Open title="Install via Homebrew" target="x-man-page://brew" />
+                <Action.Open
+                  title="Install Lunar"
+                  target="https://lunar.fyi/"
+                />
+                <Action.Open
+                  title="Install Via Homebrew"
+                  target="x-man-page://brew"
+                />
               </>
             )}
             {lunarStatus.app && !lunarStatus.cli && (
-              <Action title="Install Lunar CLI" onAction={handleInstallCLI} />
+              <Action title="Install Lunar Cli" onAction={handleInstallCLI} />
             )}
           </ActionPanel>
         }
@@ -598,18 +686,20 @@ Or run this command manually:
     );
   }
 
-  const selectedDisplayInfo = displays.find((d) => d.serial === selectedDisplay);
-  const displayNameText = selectedDisplayInfo 
+  const selectedDisplayInfo = displays.find(
+    (d) => d.serial === selectedDisplay,
+  );
+  const displayNameText = selectedDisplayInfo
     ? `${selectedDisplayInfo.name}${selectedDisplayInfo.main ? " (Main)" : ""}`
-    : displays.length > 0 
-    ? "Select a display"
-    : "No displays found";
-  
+    : displays.length > 0
+      ? "Select a display"
+      : "No displays found";
+
   const currentBrightnessText = isLoading
     ? "Loading..."
     : currentBrightness !== null
-    ? `${currentBrightness}%`
-    : "Unknown";
+      ? `${currentBrightness}%`
+      : "Unknown";
 
   return (
     <Form
@@ -637,7 +727,10 @@ Or run this command manually:
         </Form.Dropdown>
       )}
       <Form.Description title="Current Display" text={displayNameText} />
-      <Form.Description title="Current Brightness" text={currentBrightnessText} />
+      <Form.Description
+        title="Current Brightness"
+        text={currentBrightnessText}
+      />
       <Form.Separator />
       {selectedDisplayInfo && !selectedDisplayInfo.main && (
         <Form.Checkbox

@@ -3,7 +3,7 @@
   "name": "brightness-control",
   "title": "Brightness Control",
   "description": "Control macOS display brightness with simple commands",
-  "icon": "☀️",
+  "icon": "icon.png",
   "author": "pavzagor",
   "categories": [
     "System"
@@ -37,5 +37,5 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
-  "platforms": ["macos"]
+  "platforms": ["macOS"]
 }
