@@ -6,7 +6,7 @@ import { exportQuestionsAsMarkdown } from "./questions";
 import AnswersCommand from "./answer-40-questions";
 
 export default function Command() {
-  const prefs = getPreferenceValues<PreferenceValues>();
+  const preferences = getPreferenceValues<PreferenceValues>();
   const [questionsFile, setQuestionsFile] = useState<QuestionsFile | null>(null);
   const [answers, setAnswers] = useState<AnswersFile>({});
   const currentYear = new Date().getFullYear();
@@ -15,8 +15,8 @@ export default function Command() {
 
   async function load() {
     setIsLoading(true);
-    const lang = prefs.language ?? "en";
-    const repo = prefs.questionsRepo;
+    const lang = preferences.language ?? "en";
+    const repo = preferences.questionsRepo;
     try {
       await ensureQuestionsLoaded(lang, repo);
     } catch (e) {
@@ -39,7 +39,7 @@ export default function Command() {
 
   useEffect(() => {
     load();
-  }, [prefs.language]);
+  }, [preferences.language]);
 
   const years = Object.keys(answers).sort((a, b) => parseInt(b) - parseInt(a));
 
@@ -66,12 +66,12 @@ export default function Command() {
           title="No questions found"
           description={
             "Ensure the questions are available for the selected language in the configured repository (" +
-            prefs.questionsRepo +
+            preferences.questionsRepo +
             ")."
           }
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={"https://github.com/" + prefs.questionsRepo} />
+              <Action.OpenInBrowser url={"https://github.com/" + preferences.questionsRepo} />
             </ActionPanel>
           }
         />

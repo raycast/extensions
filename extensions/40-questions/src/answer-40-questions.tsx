@@ -71,7 +71,7 @@ export default function Command({
       setErrorText("Required");
       return;
     }
-    setErrorText("Required");
+    setErrorText("");
     const payload = {
       id: currentYear + "_" + questionNumber,
       questionId: questionNumber,

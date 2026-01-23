@@ -25,8 +25,7 @@
       "title": "Browse 40 Questions",
       "description": "Browse the 40 questions and view your answers by year",
       "mode": "view"
-    }
-    ,
+    },
     {
       "name": "import-answers",
       "title": "Import 40 Questions from Clipboard",
@@ -49,39 +48,138 @@
       "required": true,
       "type": "dropdown",
       "data": [
-        { "title": "English", "value": "en" },
-        { "title": "Arabic", "value": "ar" },
-        { "title": "Bulgarian", "value": "bg" },
-        { "title": "Czech", "value": "CS" },
-        { "title": "Danish", "value": "da" },
-        { "title": "German", "value": "de" },
-        { "title": "Spanish", "value": "es" },
-        { "title": "Persian", "value": "fa" },
-        { "title": "French", "value": "fr" },
-        { "title": "Hindi", "value": "hi" },
-        { "title": "Hungarian", "value": "hu" },
-        { "title": "Indonesian", "value": "id" },
-        { "title": "Dhivehi", "value": "dv" },
-        { "title": "Japanese", "value": "ja" },
-        { "title": "Korean", "value": "ko" },
-        { "title": "Lithuanian", "value": "lt" },
-        { "title": "Latvian", "value": "lv" },
-        { "title": "Malayalam", "value": "ml" },
-        { "title": "Marathi", "value": "mr" },
-        { "title": "Dutch", "value": "nl" },
-        { "title": "Norwegian", "value": "no" },
-        { "title": "Polish", "value": "pl" },
-        { "title": "Portuguese", "value": "pt" },
-        { "title": "Russian", "value": "ru" },
-        { "title": "Slovak", "value": "sk" },
-        { "title": "Swedish", "value": "SV" },
-        { "title": "Tamil", "value": "ta" },
-        { "title": "Thai", "value": "th" },
-        { "title": "Turkish", "value": "tr" },
-        { "title": "Ukrainian", "value": "uk" },
-        { "title": "Vietnamese", "value": "Vi" },
-        { "title": "Chinese (Simplified)", "value": "zh-hans" },
-        { "title": "Chinese (Traditional)", "value": "zh-hant" }
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Czech",
+          "value": "CS"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Persian",
+          "value": "fa"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Dhivehi",
+          "value": "dv"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "Malayalam",
+          "value": "ml"
+        },
+        {
+          "title": "Marathi",
+          "value": "mr"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Norwegian",
+          "value": "no"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "Swedish",
+          "value": "SV"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "Vi"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-hans"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-hant"
+        }
       ],
       "default": "en"
     },
@@ -95,16 +193,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.10",
+    "@types/react": "19.2.9",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
