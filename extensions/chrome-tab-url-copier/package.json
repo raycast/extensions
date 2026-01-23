@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chrome-tab-url-copier",
+  "title": "Chrome Tab URL Copier",
+  "description": "Browse and copy Chrome tab URLs in Markdown or plain text format. Active tab shown first.",
+  "icon": "chrome.png",
+  "author": "bett.yyy",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-chrome-tabs",
+      "title": "Browse Chrome Tabs",
+      "subtitle": "Chrome",
+      "description": "Browse all open Chrome tabs and copy URLs in Markdown or plain text format",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
