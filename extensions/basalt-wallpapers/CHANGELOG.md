@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - 2026-01-23
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release of Basalt for Raycast.
 - View today's hand-picked wallpapers.
