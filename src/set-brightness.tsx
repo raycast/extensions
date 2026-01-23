@@ -418,24 +418,31 @@ export default function Command() {
   async function handleSubmit(values: BrightnessFormValues) {
     try {
       // Validate input
-      const brightnessLevel = parseInt(values.level, 10);
+      let brightnessLevel = parseInt(values.level, 10);
 
       if (isNaN(brightnessLevel)) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Invalid Input",
-          message: "Please enter a number between 1 and 100",
+          message: "Please enter a number",
         });
         return;
       }
 
-      if (brightnessLevel < 1 || brightnessLevel > 100) {
+      if (brightnessLevel < 1) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Out of Range",
-          message: "Brightness must be between 1 and 100",
+          message: "Brightness must be at least 1",
         });
         return;
+      }
+
+      // Handle values greater than 100 - clamp to 100 and show special message
+      let showMaxMessage = false;
+      if (brightnessLevel > 100) {
+        brightnessLevel = 100;
+        showMaxMessage = true;
       }
 
       // Show progress
@@ -467,7 +474,11 @@ export default function Command() {
 
         // Show old → new brightness in HUD with display name
         const oldValue = currentBrightness !== null ? `${currentBrightness}%` : "?";
-        await showHUD(`☀️ ${displayName}: ${oldValue} → ${brightnessLevel}%`);
+        if (showMaxMessage) {
+          await showHUD(`🚀 ${displayName}: Brightness to the max!`);
+        } else {
+          await showHUD(`☀️ ${displayName}: ${oldValue} → ${brightnessLevel}%`);
+        }
         
         // Close the form
         pop();
