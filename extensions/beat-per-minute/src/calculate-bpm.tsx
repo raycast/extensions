@@ -19,10 +19,6 @@ export default function Command() {
   const [bpmToSave, setBpmToSave] = useState<number>(0);
   const preferences = getPreferenceValues<Preferences>();
 
-  interface Preferences {
-    seconds: number;
-  }
-
   function resetStart(value: number) {
     startTime.current = value;
     setTaps(0);
@@ -31,7 +27,7 @@ export default function Command() {
 
   const handleTap = useCallback(() => {
     const timesince = (new Date().getTime() - startTime.current) / 1000;
-    if (timesince > preferences.seconds) {
+    if (timesince > Number(preferences.seconds)) {
       resetStart(new Date().getTime());
     }
 
@@ -62,29 +58,36 @@ export default function Command() {
           startTime && bpm > 0
             ? `Halftime: ${Math.floor(bpm) / 2} | Doubletime: ${Math.floor(bpm) * 2}`
             : startTime
-            ? "Keep pressing enter to the beat!"
-            : "Hit enter to the beat!"
+              ? "Keep pressing enter to the beat!"
+              : "Hit enter to the beat!"
         }
         actions={
           <ActionPanel>
             <Action title="Beat" icon={Icon.Music} onAction={handleTap} />
-            <Action
-              title="Reset"
-              icon={Icon.Eraser}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={() => resetStart(0)}
-            />
-            <Action
-              title="Copy BPM to Clipboard"
-              icon={Icon.Clipboard}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-              onAction={handleCopyBPM}
-            />
+            {taps > 0 && (
+              <>
+                <Action
+                  title="Reset"
+                  icon={Icon.Eraser}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={() => resetStart(0)}
+                />
+                <Action
+                  title="Copy BPM to Clipboard"
+                  icon={Icon.Clipboard}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                  onAction={handleCopyBPM}
+                />
+              </>
+            )}
             <ActionPanel.Section key="secondary">
               <Action
                 icon={Icon.Gear}
                 title="Open Command Preferences"
-                shortcut={{ modifiers: ["cmd"], key: "," }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "," },
+                  Windows: { modifiers: ["ctrl"], key: "," },
+                }}
                 onAction={openCommandPreferences}
               />
             </ActionPanel.Section>
