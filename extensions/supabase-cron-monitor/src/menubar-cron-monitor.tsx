@@ -14,6 +14,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { SupabaseClient } from "@supabase/supabase-js";
 import React, { useEffect, useMemo } from "react";
 import {
   createSupabaseClient,
@@ -64,13 +65,25 @@ export default function MenubarCronMonitor() {
     [preferences.supabaseUrl],
   );
 
+  const runHistoryLimitValue = useMemo(
+    () => parsePositiveInt(preferences.runHistoryLimit, 5),
+    [preferences.runHistoryLimit],
+  );
+
   const { data, isLoading, revalidate, error } = usePromise(
-    async (): Promise<MenuBarData> => {
-      const { jobs, mode } = await fetchCronJobs(client);
+    async (
+      supabaseClient: SupabaseClient,
+      historyLimit: number,
+    ): Promise<MenuBarData> => {
+      const { jobs, mode } = await fetchCronJobs(supabaseClient);
       const enriched = await Promise.all(
         jobs.map(async (job) => {
           try {
-            const lastRun = await fetchLastRun(client, job.jobname, mode);
+            const lastRun = await fetchLastRun(
+              supabaseClient,
+              job.jobname,
+              mode,
+            );
             return { ...job, lastRun };
           } catch (err) {
             return {
@@ -83,8 +96,8 @@ export default function MenubarCronMonitor() {
       );
 
       const recentRunsRaw = await fetchRecentRuns(
-        client,
-        parsePositiveInt(preferences.runHistoryLimit, 5),
+        supabaseClient,
+        historyLimit,
         mode,
       );
       const jobNameMap = new Map<number, string>(
@@ -96,6 +109,7 @@ export default function MenubarCronMonitor() {
       }));
       return { jobs: enriched, recentRuns, mode, lastUpdatedAt: new Date() };
     },
+    [client, runHistoryLimitValue],
   );
 
   useEffect(() => {
