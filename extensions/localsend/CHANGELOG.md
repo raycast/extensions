@@ -89,6 +89,6 @@
 ### Developer Features
 - Modern Node.js v24 patterns
 - Arrow functions throughout
-- Native fetch API via node-fetch
+- Native fetch API (Node.js built-in)
 - TypeScript strict mode
 - Clean, maintainable code structure
