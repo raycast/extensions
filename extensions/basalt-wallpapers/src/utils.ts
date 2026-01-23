@@ -1,10 +1,7 @@
-import { exec } from "child_process";
-import { promisify } from "util";
 import fs from "fs";
 import path from "path";
 import { environment } from "@raycast/api";
-
-const execPromise = promisify(exec);
+import { runAppleScript } from "@raycast/utils";
 
 export const API_TRIPLE_URL =
   "https://basalt-prod.up.railway.app/api/wallpapers/raycast-triple";
