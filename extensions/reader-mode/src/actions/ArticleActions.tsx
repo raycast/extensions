@@ -1,4 +1,16 @@
-import { ActionPanel, Action, Icon, Keyboard, showToast, Toast, getPreferenceValues, showInFinder } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  showInFinder,
+  Clipboard,
+  closeMainWindow,
+  showHUD,
+} from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 import { writeFile, mkdir } from "fs/promises";
@@ -103,7 +115,16 @@ export function ArticleActions({
         icon={Icon.Document}
         shortcut={Keyboard.Shortcut.Common.Copy}
       />
-      <Action.CopyToClipboard title="Copy as HTML" content={markdownToHtml(markdown)} icon={Icon.Code} />
+      <Action
+        title="Copy as HTML"
+        icon={Icon.Code}
+        onAction={async () => {
+          const html = markdownToHtml(markdown);
+          await Clipboard.copy({ text: html, html });
+          await closeMainWindow();
+          await showHUD("Copied HTML to Clipboard");
+        }}
+      />
       <Action
         title="Save as Markdown"
         icon={Icon.Document}
