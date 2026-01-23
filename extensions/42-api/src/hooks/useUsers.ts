@@ -36,10 +36,7 @@ export function useUsers(searchQuery: string, options: UseUsersOptions = {}): Us
   const { accessToken, isAuthenticating, authenticate } = useAuth();
 
   const url = useMemo(() => {
-    if (!accessToken || isAuthenticating) return "";
-
-    // If no search query, return empty URL (we'll handle pinned users in the component)
-    if (!searchQuery.trim()) return "";
+    if (!accessToken || isAuthenticating || !searchQuery.trim()) return API_BASE_URL;
 
     const baseUrl = `${API_BASE_URL}/users`;
     const params = new URLSearchParams();
@@ -73,9 +70,14 @@ export function useUsers(searchQuery: string, options: UseUsersOptions = {}): Us
       Authorization: `Bearer ${accessToken || ""}`,
       "Content-Type": "application/json",
     },
-    execute: execute && !!url,
+    execute: execute && !!searchQuery.trim() && !!accessToken && !isAuthenticating,
     keepPreviousData: false,
-    failureToastOptions: suppressToasts ? { title: "" } : undefined,
+    failureToastOptions: suppressToasts
+      ? { title: "" }
+      : {
+          title: "Failed to search users",
+          message: `Could not search for "${searchQuery}"`,
+        },
   });
 
   return {

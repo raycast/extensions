@@ -27,7 +27,33 @@
       "subtitle": "42 API",
       "description": "Compute your logtime for today.",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "userLogin",
+          "title": "Your 42 Login",
+          "description": "Your 42 username (for menu bar logtime display)",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "maujogue"
+        },
+        {
+          "name": "goalHours",
+          "title": "Daily Goal (hours)",
+          "description": "The target number of hours to reach before triggering confetti",
+          "type": "textfield",
+          "default": "7",
+          "required": false
+        },
+        {
+          "name": "goalMinutes",
+          "title": "Daily Goal (minutes)",
+          "description": "The target number of minutes to reach before triggering confetti",
+          "type": "textfield",
+          "default": "0",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -54,30 +80,6 @@
       "description": "Enable debug mode to see detailed error messages",
       "type": "checkbox",
       "default": false,
-      "required": false
-    },
-    {
-      "name": "userLogin",
-      "title": "Your 42 Login",
-      "description": "Your 42 username (for menu bar logtime display)",
-      "type": "textfield",
-      "required": true,
-      "placeholder": "maujogue"
-    },
-    {
-      "name": "goalHours",
-      "title": "Daily Goal (hours)",
-      "description": "The target number of hours to reach before triggering confetti",
-      "type": "textfield",
-      "default": "7",
-      "required": false
-    },
-    {
-      "name": "goalMinutes",
-      "title": "Daily Goal (minutes)",
-      "description": "The target number of minutes to reach before triggering confetti",
-      "type": "textfield",
-      "default": "0",
       "required": false
     }
   ],

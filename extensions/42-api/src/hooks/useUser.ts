@@ -30,7 +30,7 @@ export function useUser(login: string, options: UseUserOptions = {}): UseUserRet
   const { accessToken, isAuthenticating, authenticate } = useAuth();
 
   const url = useMemo(() => {
-    if (!login || !accessToken || isAuthenticating) return "";
+    if (!login || !accessToken || isAuthenticating) return API_BASE_URL;
     return `${API_BASE_URL}/users/${login}`;
   }, [login, accessToken, isAuthenticating]);
 
@@ -44,9 +44,14 @@ export function useUser(login: string, options: UseUserOptions = {}): UseUserRet
       Authorization: `Bearer ${accessToken || ""}`,
       "Content-Type": "application/json",
     },
-    execute: execute && !!url,
+    execute: execute && !!login && !!accessToken && !isAuthenticating,
     keepPreviousData: false,
-    failureToastOptions: suppressToasts ? { title: "" } : undefined,
+    failureToastOptions: suppressToasts
+      ? { title: "" }
+      : {
+          title: "Failed to fetch user data",
+          message: `Could not load user "${login}"`,
+        },
   });
 
   return {

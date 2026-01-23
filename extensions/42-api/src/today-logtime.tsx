@@ -1,5 +1,16 @@
-import { MenuBarExtra, getPreferenceValues, Icon, environment, open, LocalStorage, Color } from "@raycast/api";
-import { useEffect, useMemo } from "react";
+import {
+  MenuBarExtra,
+  getPreferenceValues,
+  Icon,
+  environment,
+  open,
+  LocalStorage,
+  Color,
+  LaunchType,
+  openCommandPreferences,
+  launchCommand,
+} from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { useUser, useLocationStats } from "./hooks";
 import { formatTime, calculateGoalTimes, formatDateString } from "./lib/utils";
 
@@ -12,19 +23,20 @@ async function triggerConfetti() {
 }
 
 // Check if running in background mode
-const isBackgroundMode = environment.launchType === "background";
+const isBackgroundMode = environment.launchType === LaunchType.Background;
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.TodayLogtime>();
 
   // Fetch user data
   const {
     user,
     revalidate: revalidateUser,
     isLoading: isLoadingUser,
+    error: userError,
   } = useUser(preferences.userLogin || "", {
-    execute: isBackgroundMode && !!preferences.userLogin,
-    suppressToasts: isBackgroundMode,
+    execute: !!preferences.userLogin,
+    suppressToasts: !preferences.debugMode && isBackgroundMode,
   });
 
   // Fetch today's location stats
@@ -34,11 +46,25 @@ export default function Command() {
     todayLogtimeSeconds,
     isLoading: isLoadingStats,
     revalidate: revalidateStats,
+    error: statsError,
   } = useLocationStats(user?.id, {
     daysBack: 0,
-    execute: isBackgroundMode && !!user?.id,
-    suppressToasts: isBackgroundMode,
+    execute: !!user?.id,
+    suppressToasts: !preferences.debugMode && isBackgroundMode,
   });
+
+  const [lastRefresh, setLastRefresh] = useState<string | null>(null);
+
+  useEffect(() => {
+    handleRefresh();
+  }, []);
+
+  useEffect(() => {
+    if (user || stats) {
+      const date = new Date();
+      setLastRefresh(date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }));
+    }
+  }, [user, stats]);
 
   const isLoading = isLoadingUser || isLoadingStats;
 
@@ -63,7 +89,7 @@ export default function Command() {
   useEffect(() => {
     async function checkAndCelebrate() {
       // Don't trigger in background mode or if data is still loading
-      if (isBackgroundMode || isLoading || !stats) return;
+      if (isLoading || !stats) return;
 
       const storedState = await LocalStorage.getItem<string>("confetti-state");
       const state = storedState
@@ -115,7 +141,7 @@ export default function Command() {
   };
 
   // Show loading state
-  if (isLoading && !stats) {
+  if (isLoading && !stats && !!preferences.userLogin) {
     return (
       <MenuBarExtra icon={Icon.Clock} tooltip="Loading today's logtime..." isLoading={true}>
         <MenuBarExtra.Item title="Loading..." />
@@ -124,11 +150,41 @@ export default function Command() {
   }
 
   // Show error if userLogin is not configured
-  if (!preferences.userLogin) {
+  if (!preferences.userLogin || userError || statsError) {
     return (
-      <MenuBarExtra icon={Icon.Clock} tooltip="Configure your 42 login in preferences">
-        <MenuBarExtra.Item title="Configure Login" />
-        <MenuBarExtra.Item title="Go to Preferences" />
+      <MenuBarExtra
+        icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
+        tooltip="Configure your 42 login in preferences"
+      >
+        {userError && (
+          <>
+            <MenuBarExtra.Item title={`Can't find user "${preferences.userLogin}"`} />
+            <MenuBarExtra.Item
+              title="Find user"
+              icon={Icon.MagnifyingGlass}
+              onAction={async () => {
+                await launchCommand({ name: "find-user", type: LaunchType.UserInitiated });
+              }}
+            />
+          </>
+        )}
+        <MenuBarExtra.Item title="Configure User Login" icon={Icon.Gear} onAction={openCommandPreferences} />
+        {preferences.debugMode && (userError || statsError) && (
+          <MenuBarExtra.Section title="Debug Info">
+            {userError && (
+              <MenuBarExtra.Item
+                title={`User Error: ${userError.message}`}
+                icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+              />
+            )}
+            {statsError && (
+              <MenuBarExtra.Item
+                title={`Stats Error: ${statsError.message}`}
+                icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+              />
+            )}
+          </MenuBarExtra.Section>
+        )}
       </MenuBarExtra>
     );
   }
@@ -161,12 +217,14 @@ export default function Command() {
         </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section title="Actions">
+        <MenuBarExtra.Item title={`Last refresh: ${lastRefresh ? lastRefresh : "Never"}`} />
         <MenuBarExtra.Item
           title="Refresh"
           icon={Icon.ArrowClockwise}
           onAction={handleRefresh}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
+        <MenuBarExtra.Item title="Configure Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

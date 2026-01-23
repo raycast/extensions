@@ -46,7 +46,7 @@ export function useLocationStats(
   }, [customDateRange, daysBack]);
 
   const url = useMemo(() => {
-    if (!userId || !accessToken || isAuthenticating) return "";
+    if (!userId || !accessToken || isAuthenticating) return API_BASE_URL;
     return `${API_BASE_URL}/users/${userId}/locations_stats?begin_at=${dateRange.beginAt}&end_at=${dateRange.endAt}`;
   }, [userId, accessToken, isAuthenticating, dateRange]);
 
@@ -60,9 +60,14 @@ export function useLocationStats(
       Authorization: `Bearer ${accessToken || ""}`,
       "Content-Type": "application/json",
     },
-    execute: execute && !!url,
+    execute: execute && !!userId && !!accessToken && !isAuthenticating,
     keepPreviousData: true,
-    failureToastOptions: suppressToasts ? { title: "" } : undefined,
+    failureToastOptions: suppressToasts
+      ? { title: "" }
+      : {
+          title: "Failed to fetch location stats",
+          message: `Could not load logtime data for user ID ${userId}`,
+        },
   });
 
   // Compute derived values
