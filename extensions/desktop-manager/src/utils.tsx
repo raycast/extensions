@@ -70,15 +70,24 @@ export function hasAccessToDesktopFolder() {
   }
 }
 
-export async function deleteFileOrFolder(filePath: string) {
+export async function deleteFileOrFolder(filePath: string): Promise<boolean> {
   if (preferences.deletionBehavior === "trash") {
+    const shouldTrash = await confirmAlert({
+      title: "Move to Trash?",
+      message: `Are you sure you want to move to trash:\n${filePath}?`,
+      primaryAction: { title: "Move to Trash" },
+    });
+    if (!shouldTrash) {
+      return false;
+    }
     try {
       await trash(filePath);
       await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+      return true;
     } catch (error) {
       await showFailureToast(error, { title: "Move to Trash Failed" });
+      return false;
     }
-    return;
   }
 
   const shouldDelete = await confirmAlert({
@@ -90,17 +99,63 @@ export async function deleteFileOrFolder(filePath: string) {
   });
 
   if (!shouldDelete) {
-    await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
-    return;
+    return false;
   }
 
   try {
     await rm(filePath, { recursive: true, force: true });
     await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
+    return true;
   } catch (error) {
     if (error instanceof Error) {
       await showFailureToast(error, { title: "Deletion Failed" });
     }
+    return false;
+  }
+}
+
+export async function deleteMultipleFilesOrFolders(filePaths: string[]): Promise<boolean> {
+  if (filePaths.length === 0) return false;
+
+  if (preferences.deletionBehavior === "trash") {
+    const shouldTrash = await confirmAlert({
+      title: "Move to Trash?",
+      message: `Are you sure you want to move ${filePaths.length} item(s) to trash?`,
+      primaryAction: { title: "Move to Trash" },
+    });
+    if (!shouldTrash) {
+      return false;
+    }
+    try {
+      await trash(filePaths);
+      await showToast({ style: Toast.Style.Success, title: `${filePaths.length} Item(s) Moved to Trash` });
+      return true;
+    } catch (error) {
+      await showFailureToast(error, { title: "Move to Trash Failed" });
+      return false;
+    }
+  }
+
+  const shouldDelete = await confirmAlert({
+    title: "Delete Items?",
+    message: `Are you sure you want to permanently delete ${filePaths.length} item(s)?`,
+    primaryAction: { title: "Delete" },
+  });
+  if (!shouldDelete) {
+    return false;
+  }
+
+  try {
+    for (const filePath of filePaths) {
+      await rm(filePath, { recursive: true, force: true });
+    }
+    await showToast({ style: Toast.Style.Success, title: `${filePaths.length} Item(s) Deleted` });
+    return true;
+  } catch (error) {
+    if (error instanceof Error) {
+      await showFailureToast(error, { title: "Deletion Failed" });
+    }
+    return false;
   }
 }
 

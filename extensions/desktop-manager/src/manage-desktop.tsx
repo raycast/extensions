@@ -1,7 +1,13 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { PathLike } from "fs";
 import { useState } from "react";
-import { desktopFolder, getDesktopFiles, withAccessToDesktopFolder } from "./utils";
+import {
+  desktopFolder,
+  getDesktopFiles,
+  withAccessToDesktopFolder,
+  deleteFileOrFolder,
+  deleteMultipleFilesOrFolders,
+} from "./utils";
 
 function Command() {
   const [desktopFiles, setDesktopFiles] = useState(getDesktopFiles());
@@ -60,17 +66,29 @@ function Command() {
                 <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <Action.Trash
+                <Action
                   title="Delete File"
-                  paths={file.path}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  onTrash={handleTrash}
+                  onAction={async () => {
+                    const deleted = await deleteFileOrFolder(file.path);
+                    if (deleted) {
+                      handleTrash(file.path);
+                    }
+                  }}
                 />
-                <Action.Trash
+                <Action
                   title="Delete All Desktop Files"
-                  paths={desktopFiles.map((f) => f.path)}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                  onTrash={handleTrash}
+                  onAction={async () => {
+                    const deleted = await deleteMultipleFilesOrFolders(desktopFiles.map((f) => f.path));
+                    if (deleted) {
+                      handleTrash(desktopFiles.map((f) => f.path));
+                    }
+                  }}
                 />
               </ActionPanel.Section>
             </ActionPanel>
