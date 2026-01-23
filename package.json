@@ -2,51 +2,49 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brightness-control",
   "title": "Brightness Control",
-  "description": "Control macOS display brightness with simple commands",
-  "icon": "☀️",
-  "author": "pavzagor",
+  "description": "Quickly controls the brightness levels of your display",
+  "icon": "command-icon.png",
+  "author": "cali",
+  "categories": [
+    "System"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "set-brightness",
-      "title": "Set Brightness",
-      "description": "Set display brightness level (1-100)",
+      "name": "up",
+      "title": "Brightness Up",
+      "description": "Increases the brightness by 10% of your display",
       "mode": "no-view",
-      "arguments": [
-        {
-          "name": "level",
-          "type": "text",
-          "placeholder": "1-100",
-          "required": true
-        }
-      ]
+      "icon": "brightness-up.png"
     },
     {
-      "name": "show-brightness",
-      "title": "Show Brightness",
-      "description": "Display current brightness level",
-      "mode": "no-view"
+      "name": "down",
+      "title": "Brightness Down",
+      "description": "Decreases the brightness by 10% of your display",
+      "mode": "no-view",
+      "icon": "brightness-down.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.38.2",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray publish"
   },
-  "platforms": ["macos"]
+  "platforms": [
+    "macOS"
+  ]
 }
