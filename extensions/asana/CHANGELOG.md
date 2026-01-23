@@ -1,6 +1,6 @@
 # Asana Changelog
 
-## [Add subtasks support and tag management] - {PR_MERGE_DATE}
+## [Add subtasks support and tag management] - 2026-01-23
 
 - Added ability to view subtasks for a task in the detail view
 - Added action to create subtasks under a parent task
