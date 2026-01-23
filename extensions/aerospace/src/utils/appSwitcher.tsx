@@ -1,4 +1,4 @@
-import { popToRoot } from "@raycast/api";
+import { popToRoot, closeMainWindow } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { shellEnvSync } from "shell-env";
 
@@ -78,4 +78,5 @@ export function focusWindow(windowId: string) {
   });
 
   popToRoot({ clearSearchBar: true });
+  closeMainWindow({ clearRootSearch: true });
 }

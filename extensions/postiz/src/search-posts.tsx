@@ -40,7 +40,7 @@ import {
   STATE_COLORS,
   STATE_ICONS,
 } from "./postiz";
-import { Identifier, Post } from "./types";
+import { Identifier, Post, State } from "./types";
 import CreatePost from "./create-post";
 import TurndownService from "turndown";
 
@@ -69,6 +69,7 @@ const getProviderIdentifierIcon = (providerIdentifier: string) => `platforms/${p
 export default function SearchPosts() {
   type Display = "day" | "week" | "month" | "year";
   const [display, setDisplay] = useState<Display>("week");
+  const [postState, setPostState] = useState<State>();
   const [date, setDate] = useState(new Date());
   const { startDate, endDate } = useMemo(() => {
     switch (display) {
@@ -192,6 +193,12 @@ export default function SearchPosts() {
             }
             shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
           />
+          <Action
+            icon={Icon.Calendar}
+            title="Jump to Today"
+            onAction={() => setDate(new Date())}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
+          />
           <Action.Push
             icon={Icon.Calendar}
             title="Go to Specific Date"
@@ -204,20 +211,48 @@ export default function SearchPosts() {
   };
 
   const [searchText, setSearchText] = useState("");
-  const filteredPosts = posts.filter((post) => post.content.toLowerCase().includes(searchText.toLowerCase()));
+  const filteredPosts = posts.filter(
+    (post) => post.content.toLowerCase().includes(searchText.toLowerCase()) && (!postState || post.state === postState),
+  );
   return (
     <List
       isLoading={isLoading}
       isShowingDetail
+      searchBarPlaceholder={`Search ${postState || "all"} posts`}
       filtering={false}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         postiz_version === "1" ? undefined : (
-          <List.Dropdown tooltip="Display" onChange={(d) => setDisplay(d as Display)} defaultValue="week" storeValue>
-            <List.Dropdown.Item icon={Icon.Calendar} title="Day" value="day" />
-            <List.Dropdown.Item icon={Icon.Calendar} title="Week" value="week" />
-            <List.Dropdown.Item icon={Icon.Calendar} title="Month" value="month" />
-            <List.Dropdown.Item icon={Icon.Calendar} title="Year" value="year" />
+          <List.Dropdown
+            tooltip="Display"
+            onChange={(d) => {
+              const [key, value] = d.split("=");
+              if (key === "display") {
+                setDisplay(value as Display);
+              } else if (key === "state") {
+                setPostState(value as State);
+              }
+            }}
+            defaultValue="display=week"
+            storeValue
+          >
+            <List.Dropdown.Section title="Display">
+              <List.Dropdown.Item icon={Icon.Calendar} title="Day" value="display=day" />
+              <List.Dropdown.Item icon={Icon.Calendar} title="Week" value="display=week" />
+              <List.Dropdown.Item icon={Icon.Calendar} title="Month" value="display=month" />
+              <List.Dropdown.Item icon={Icon.Calendar} title="Year" value="display=year" />
+            </List.Dropdown.Section>
+            <List.Dropdown.Section title="State">
+              <List.Dropdown.Item icon={Icon.Circle} title="All" value="state=" />
+              {Object.keys(State).map((state) => (
+                <List.Dropdown.Item
+                  key={state}
+                  icon={STATE_ICONS[state as State]}
+                  title={state}
+                  value={`state=${state}`}
+                />
+              ))}
+            </List.Dropdown.Section>
           </List.Dropdown>
         )
       }

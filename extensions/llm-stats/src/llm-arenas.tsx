@@ -178,10 +178,8 @@ function createVoteAccessory(model: ArenaModel): List.Item.Accessory | undefined
   }
 
   return {
-    text: {
-      value: `${model.wins}`,
-      color: Color.PrimaryText,
-    },
+    text: `${model.wins}`,
+    icon: Icon.ThumbsUp,
     tooltip: "Votes",
   };
 }

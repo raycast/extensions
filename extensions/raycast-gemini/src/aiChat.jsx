@@ -12,8 +12,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import Gemini from "gemini-ai";
-import fetch from "node-fetch";
+import { GoogleGenAI } from "@google/genai";
 import { useEffect, useState } from "react";
 import { getSafetySettings } from "./api/safetySettings";
 
@@ -36,8 +35,7 @@ export default function Chat({ launchContext }) {
   }
 
   const { apiKey, defaultModel } = getPreferenceValues();
-  const gemini = new Gemini(apiKey, { fetch });
-
+  const genAI = new GoogleGenAI({ apiKey });
   let createNewChatName = (prefix = "New Chat ") => {
     const existingChatNames = chatData.chats.map((x) => x.name);
     const newChatNumbers = existingChatNames
@@ -94,15 +92,14 @@ export default function Chat({ launchContext }) {
         />
         <Form.Dropdown id="model" defaultValue="default">
           <Form.Dropdown.Item title="Default" value="default" />
-          <Form.Dropdown.Item title="Gemini 1.5 Pro" value="gemini-1.5-pro-latest" />
-          <Form.Dropdown.Item title="Gemini 1.5 Flash" value="gemini-1.5-flash-latest" />
           <Form.Dropdown.Item title="Gemini 2.0 Flash Experimental" value="gemini-2.0-flash-exp" />
           <Form.Dropdown.Item title="Gemini Experimental 1206" value="gemini-exp-1206" />
           <Form.Dropdown.Item
             title="Gemini 2.0 Flash Thinking Experimental"
             value="gemini-2.0-flash-thinking-exp-1219"
           />
-          <Form.Dropdown.Item title="LearnLM 1.5 Pro Experimental" value="learnlm-1.5-pro-experimental" />
+          <Form.Dropdown.Item title="Gemini 3.0 Flash" value="gemini-3-flash-preview" />
+          <Form.Dropdown.Item title="Gemini 3.0 Pro" value="gemini-3-pro-preview" />
         </Form.Dropdown>
       </Form>
     );
@@ -122,10 +119,8 @@ export default function Chat({ launchContext }) {
 
             const query = searchText;
             setSearchText("");
-            if (
-              getChat(chatData.currentChat).messages.length == 0 ||
-              getChat(chatData.currentChat).messages[0].finished
-            ) {
+            const currentChatObj = getChat(chatData.currentChat);
+            if (currentChatObj.messages.length == 0 || currentChatObj.messages[0].finished) {
               toast(Toast.Style.Animated, "Response Loading", "Please Wait");
               setChatData((x) => {
                 let newChatData = structuredClone(x);
@@ -137,48 +132,69 @@ export default function Chat({ launchContext }) {
                   creationDate: new Date().toISOString(),
                   finished: false,
                 });
-
-                (async () => {
-                  try {
-                    let currentChat = getChat(chatData.currentChat);
-                    let aiChat = gemini.createChat({
-                      model: currentChat.model ?? defaultModel,
-                      messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
-                      safetySettings: getSafetySettings(),
-                    });
-
-                    await aiChat.ask(query, {
-                      stream: (x) => {
-                        setChatData((oldData) => {
-                          let newChatData = structuredClone(oldData);
-                          getChat(chatData.currentChat, newChatData.chats).messages[0].answer += x;
-                          return newChatData;
-                        });
-                      },
-                    });
-
-                    setChatData((oldData) => {
-                      let newChatData = structuredClone(oldData);
-                      getChat(chatData.currentChat, newChatData.chats).messages[0].finished = true;
-                      return newChatData;
-                    });
-
-                    toast(Toast.Style.Success, "Response Loaded");
-                  } catch (e) {
-                    setChatData((oldData) => {
-                      let newChatData = structuredClone(oldData);
-                      getChat(chatData.currentChat, newChatData.chats).messages.shift();
-                      return newChatData;
-                    });
-                    if (e.message.includes("429")) {
-                      toast(Toast.Style.Failure, "You have been rate-limited.", "Please slow down.");
-                    } else {
-                      toast(Toast.Style.Failure, "Gemini cannot process this message.");
-                    }
-                  }
-                })();
                 return newChatData;
               });
+
+              (async () => {
+                try {
+                  const historyMessages = currentChatObj.messages
+                    .slice(1)
+                    .reverse()
+                    .filter((msg) => msg.prompt && msg.prompt.trim() && msg.answer && msg.answer.trim())
+                    .map((msg) => [
+                      { role: "user", parts: [{ text: msg.prompt }] },
+                      { role: "model", parts: [{ text: msg.answer }] },
+                    ])
+                    .flat();
+
+                  const modelName = currentChatObj.model ?? defaultModel;
+                  const chatSession = genAI.chats.create({
+                    model: modelName,
+                    config: {
+                      safetySettings: getSafetySettings(),
+                    },
+                    history: historyMessages,
+                  });
+
+                  const result = await chatSession.sendMessageStream({
+                    message: query,
+                  });
+
+                  for await (const chunk of result) {
+                    const chunkText = chunk.text;
+                    if (chunkText) {
+                      setChatData((oldData) => {
+                        let newChatData = structuredClone(oldData);
+                        const chatToUpdate = getChat(chatData.currentChat, newChatData.chats);
+                        if (chatToUpdate && chatToUpdate.messages[0]) {
+                          chatToUpdate.messages[0].answer += chunkText;
+                        }
+                        return newChatData;
+                      });
+                    }
+                  }
+
+                  setChatData((oldData) => {
+                    let newChatData = structuredClone(oldData);
+                    getChat(chatData.currentChat, newChatData.chats).messages[0].finished = true;
+                    return newChatData;
+                  });
+
+                  toast(Toast.Style.Success, "Response Loaded");
+                } catch (e) {
+                  setChatData((oldData) => {
+                    let newChatData = structuredClone(oldData);
+                    getChat(chatData.currentChat, newChatData.chats).messages.shift();
+                    return newChatData;
+                  });
+                  console.error(e);
+                  if (e.message && e.message.includes("429")) {
+                    toast(Toast.Style.Failure, "You have been rate-limited.", "Please slow down.");
+                  } else {
+                    toast(Toast.Style.Failure, "Gemini cannot process this message.", e.message);
+                  }
+                }
+              })();
             } else {
               toast(Toast.Style.Failure, "Please Wait", "Only one message at a time.");
             }
@@ -317,24 +333,45 @@ export default function Chat({ launchContext }) {
 
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
           let currentChat = getChat(newData.currentChat, newData.chats);
-          let aiChat = gemini.createChat({
+          const historyMessages = currentChat.messages
+            .slice(1)
+            .reverse()
+            .filter((msg) => msg.prompt && msg.prompt.trim() && msg.answer && msg.answer.trim())
+            .map((msg) => [
+              { role: "user", parts: [{ text: msg.prompt }] },
+              { role: "model", parts: [{ text: msg.answer }] },
+            ])
+            .flat();
+
+          const chatSession = genAI.chats.create({
             model: currentChat.model ?? defaultModel,
-            messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
-            safetySettings: getSafetySettings(),
+            config: {
+              safetySettings: getSafetySettings(),
+            },
+            history: historyMessages,
           });
           currentChat.messages[0].answer = "";
+          const promptToRegen = currentChat.messages[0].prompt;
           toast(Toast.Style.Animated, "Regenerating Last Message");
           (async () => {
             try {
-              await aiChat.ask(getChat(newData.currentChat, newData.chats).messages[0].prompt, {
-                stream: (x) => {
+              const result = await chatSession.sendMessageStream({
+                message: promptToRegen,
+              });
+
+              for await (const chunk of result.stream) {
+                const chunkText = chunk.text;
+                if (chunkText) {
                   setChatData((oldData) => {
                     let newChatData = structuredClone(oldData);
-                    getChat(newData.currentChat, newChatData.chats).messages[0].answer += x;
+                    const chat = getChat(newData.currentChat, newChatData.chats);
+                    if (chat && chat.messages[0]) {
+                      chat.messages[0].answer += chunkText;
+                    }
                     return newChatData;
                   });
-                },
-              });
+                }
+              }
 
               setChatData((oldData) => {
                 let newChatData = structuredClone(oldData);
@@ -343,13 +380,13 @@ export default function Chat({ launchContext }) {
               });
 
               toast(Toast.Style.Success, "Response Loaded");
-            } catch {
+            } catch (e) {
               setChatData((oldData) => {
                 let newChatData = structuredClone(oldData);
                 getChat(newData.currentChat, newChatData.chats).messages.shift();
                 return newChatData;
               });
-              toast(Toast.Style.Failure, "Gemini cannot process this message.");
+              toast(Toast.Style.Failure, "Gemini cannot process this message.", e.message);
             }
           })();
         }
@@ -419,13 +456,18 @@ export default function Chat({ launchContext }) {
     for (const chat of customChat) {
       if (chat.name === target) return chat;
     }
+    return null;
   };
 
-  return chatData === null ? (
-    <List searchText={searchText} onSearchTextChange={setSearchText}>
-      <List.EmptyView icon={Icon.Stars} title="Send a Message to Gemini to get started." />
-    </List>
-  ) : (
+  if (chatData === null) {
+    return (
+      <List searchText={searchText} onSearchTextChange={setSearchText}>
+        <List.EmptyView icon={Icon.Stars} title="Loading Chat..." />
+      </List>
+    );
+  }
+
+  return (
     <List
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -450,7 +492,7 @@ export default function Chat({ launchContext }) {
     >
       {(() => {
         let chat = getChat(chatData.currentChat);
-        if (!chat.messages.length) {
+        if (!chat || !chat.messages.length) {
           return (
             <List.EmptyView
               icon={Icon.Stars}
@@ -464,7 +506,7 @@ export default function Chat({ launchContext }) {
             <List.Item
               title={x.prompt}
               subtitle={formatDate(x.creationDate)}
-              detail={<List.Item.Detail markdown={x.answer} />}
+              detail={<List.Item.Detail markdown={x.answer || ""} />} // Safeguard: x.answer || ""
               key={x.prompt + x.creationDate}
               actions={<GeminiActionPanel idx={i} />}
             />

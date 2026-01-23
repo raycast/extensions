@@ -35,6 +35,7 @@
     "@raycast/api": "1.104.1",
     "@raycast/utils": "1.17.0",
     "cheerio": "1.0.0",
+    "fuse.js": "7.1.0",
     "turndown": "7.2.0"
   },
   "devDependencies": {
@@ -55,7 +56,7 @@
     "ts-jest": "29.2.5",
     "typescript": "5.8.2"
   },
-  "version": "1.0.1",
+  "version": "1.2.0",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",

@@ -1,3 +1,18 @@
+export type UmamiAdminUser = {
+  id: string;
+  username: string;
+  password: string;
+  role: string;
+  logoUrl: string | null;
+  displayName: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  _count: {
+    websiteUser: number;
+  };
+};
+
 export type UmamiMe = {
   id: string;
   username: string;

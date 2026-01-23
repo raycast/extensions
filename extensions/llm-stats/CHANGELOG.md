@@ -1,6 +1,11 @@
 # LLM Stats Changelog
 
-## [Unreleased] - 2026-01-17
+## [0.1.1] - 2026-01-19
+
+### Changed
+- Return vote icon instead of text structure for votes accessory
+
+## [0.1.0] - 2026-01-15
 
 ### Added
 - External links support for arenas

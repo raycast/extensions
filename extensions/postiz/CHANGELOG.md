@@ -1,5 +1,16 @@
 # Postiz Changelog
 
+## [Character Counter in New Post] - 2026-01-19
+
+In **Create Post**:
+- Added character counter for content based on selected channel
+
+## [Jump to Today + Filter by State] - 2026-01-19
+
+In Search Posts **v2**:
+- "Jump to Today" takes you to the current date parsed according to **display** settings
+- Added _state_ filter to same dropdown
+
 ## [Yearly Display + Content Search] - 2026-01-17
 
 In Search Posts **v2**:
