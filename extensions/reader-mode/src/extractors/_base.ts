@@ -1,16 +1,17 @@
+import { parseHTML } from "linkedom";
 import { ExtractedMetadata } from "../utils/metadata-extractor";
 
 /**
- * Linkedom document/element type - linkedom doesn't export proper types,
- * so we use a structural type that matches the DOM API we need.
+ * Linkedom document type - use the actual type from parseHTML for full DOM API support.
+ * This provides all standard DOM methods (querySelector, cloneNode, remove, etc.)
  */
-export interface ExtractorDocument {
-  querySelector(selector: string): ExtractorDocument | null;
-  querySelectorAll(selector: string): NodeListOf<Element> | ExtractorDocument[];
-  textContent?: string | null;
-  innerHTML?: string;
-  getAttribute?(attr: string): string | null;
-}
+export type ExtractorDocument = ReturnType<typeof parseHTML>["document"];
+
+/**
+ * Element type for queried elements - used by helper methods that work with
+ * individual DOM elements rather than the full document.
+ */
+export type ExtractorElement = Element;
 
 /**
  * Result returned by an extractor
@@ -86,7 +87,7 @@ export abstract class BaseExtractor {
   /**
    * Helper to safely query a selector
    */
-  protected querySelector(selector: string): ExtractorDocument | null {
+  protected querySelector(selector: string): ExtractorElement | null {
     try {
       return this.document.querySelector(selector);
     } catch {
@@ -97,7 +98,7 @@ export abstract class BaseExtractor {
   /**
    * Helper to safely query all matching elements
    */
-  protected querySelectorAll(selector: string): ExtractorDocument[] {
+  protected querySelectorAll(selector: string): ExtractorElement[] {
     try {
       return Array.from(this.document.querySelectorAll(selector));
     } catch {
@@ -108,7 +109,7 @@ export abstract class BaseExtractor {
   /**
    * Helper to get text content from an element
    */
-  protected getTextContent(element: ExtractorDocument | null): string {
+  protected getTextContent(element: ExtractorElement | null): string {
     if (!element) return "";
     return element.textContent?.trim() || "";
   }
@@ -116,7 +117,7 @@ export abstract class BaseExtractor {
   /**
    * Helper to get innerHTML from an element
    */
-  protected getInnerHTML(element: ExtractorDocument | null): string {
+  protected getInnerHTML(element: ExtractorElement | null): string {
     if (!element) return "";
     return element.innerHTML?.trim() || "";
   }
@@ -124,7 +125,7 @@ export abstract class BaseExtractor {
   /**
    * Helper to get an attribute value
    */
-  protected getAttribute(element: ExtractorDocument | null, attr: string): string | null {
+  protected getAttribute(element: ExtractorElement | null, attr: string): string | null {
     if (!element) return null;
     return element.getAttribute?.(attr) || null;
   }
