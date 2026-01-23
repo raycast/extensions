@@ -1,5 +1,5 @@
 # rclone Changelog
 
-## [Added rclone] - {PR_MERGE_DATE}
+## [Added rclone] - 2026-01-23
 
 Initial version
