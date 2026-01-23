@@ -23,6 +23,7 @@ export default function Command() {
     startTime.current = value;
     setTaps(0);
     setBPM(0);
+    setBpmToSave(0);
   }
 
   const handleTap = useCallback(() => {
