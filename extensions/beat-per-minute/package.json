@@ -6,7 +6,7 @@
   "icon": "metronome.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "mite404"
+    "ethan_anderson"
   ],
   "platforms": [
     "macOS",
@@ -53,7 +53,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.2"
+    "@raycast/api": "^1.104.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
