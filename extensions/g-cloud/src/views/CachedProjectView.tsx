@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { CacheManager, Project } from "../utils/CacheManager";
 import ProjectView from "../ProjectView";
 import { executeGcloudCommand } from "../gcloud";
-import { showFailureToast } from "@raycast/utils";
 
 interface CachedProjectViewProps {
   gcloudPath: string;
@@ -82,8 +81,8 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         }
       } catch (error) {
         console.error("Error fetching all projects:", error);
-
-        await showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Warning: Projects List Not Available",
           message: "Browse All Projects functionality may be limited. Please try again later.",
         });
@@ -93,11 +92,6 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
     } catch (error) {
       console.error("Error initializing cached project view:", error);
       setError("Failed to load cached project");
-
-      await showFailureToast({
-        title: "Failed to load cached project",
-        message: error instanceof Error ? error.message : String(error),
-      });
     } finally {
       setIsLoading(false);
     }
@@ -205,9 +199,10 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         console.error("Error during navigation:", error);
 
         if (isActive) {
-          await showFailureToast({
+          showToast({
+            style: Toast.Style.Failure,
             title: "Navigation failed",
-            message: error instanceof Error ? error.message : String(error),
+            message: error instanceof Error ? error.message : "Unknown error",
           });
         }
       }
@@ -241,7 +236,8 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
   async function selectProject(projectId: string) {
     if (!projectId || typeof projectId !== "string") {
       console.error("Invalid project ID:", projectId);
-      await showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid project ID",
         message: "Cannot select project with invalid ID",
       });
@@ -283,9 +279,10 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
 
       initialize();
     } catch (error) {
-      await showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to update cache settings",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -312,9 +309,10 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         message: `Auth cache duration set to ${hours} hours`,
       });
     } catch (error) {
-      await showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to update auth cache settings",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }

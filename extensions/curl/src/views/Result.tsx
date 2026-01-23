@@ -1,5 +1,5 @@
 /* eslint-disable @raycast/prefer-title-case */
-import { Action, ActionPanel, Color, Detail } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Keyboard } from "@raycast/api";
 import { AxiosRequestConfig } from "axios";
 import { methodColors } from "../../utils";
 
@@ -61,13 +61,17 @@ export default function ResultView({
           <Action.CopyToClipboard
             title="Copy JSONPath Result"
             content={jsonPathResultToClipboard}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
           />
-          <Action.CopyToClipboard title="Copy Response" content={JSON.stringify(result.response.data, null, 2)} />
+          <Action.CopyToClipboard
+            title="Copy Response"
+            content={JSON.stringify(result.response.data, null, 2)}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
           <Action.CopyToClipboard
             title="Copy Headers"
             content={JSON.stringify(result.response.headers, null, 2)}
-            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "h" }, Windows: { modifiers: ["ctrl"], key: "h" } }}
           />
         </ActionPanel>
       }

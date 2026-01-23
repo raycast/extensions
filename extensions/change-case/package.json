@@ -15,6 +15,7 @@
     "PWrzesinski",
     "yug2005",
     "ridemountainpig",
+    "degouville",
     "xmok",
     "chrismessina"
   ],
@@ -273,6 +274,14 @@
       "required": false
     },
     {
+      "name": "AlternatingCase",
+      "type": "checkbox",
+      "description": "Enable the \"SpOnGeCaSe\" Transformation (alternating case)",
+      "label": "Sponge Case",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "SwapCase",
       "type": "checkbox",
       "description": "Enable the \"sWAP cASE\" Transformation",
@@ -306,19 +315,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
+    "@raycast/api": "^1.104.1",
     "change-case": "^5.4.4",
-    "sponge-case": "^2.0.3",
     "swap-case": "^3.0.3",
-    "title-case": "^4.3.1"
+    "title-case": "^4.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "eslint": "^9.39.1",
-    "typescript": "^5.9.3",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
-    "prettier": "^3.7.4"
+    "@types/node": "^22.19.3",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

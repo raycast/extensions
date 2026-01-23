@@ -16,6 +16,7 @@ This extension leverages the [Git sparse-checkout](https://git-scm.com/docs/git-
 - [x] Sparse-checkout an extension
 - [x] Remove an extension from forked list
 - [x] Synchronizes the forked repository with the upstream repository on local
+- [x] Manage sparse-checkout directories via UI
 
 ## GitHub Permission Scopes
 
@@ -33,6 +34,10 @@ This extension requires the following [GitHub API permission scopes](https://doc
 ### "Can I use Git commands directly?"
 
 You can always open your forked extension folder in the terminal to work with CLI commands directly. We also prepared a [CHEATSHEET.md](https://github.com/raycast/extensions/tree/main/extensions/forked-extensions/CHEATSHEET.md) if you want to learn more about the Git commands used in this extension.
+
+### "How to add or remove a sparse-checkout directory?"
+
+You can add a directory with the `git sparse-checkout add` command. Or use this extension's "Manage Sparse-Checkout" action to add or remove sparse-checkout directories via the UI.
 
 ### "I used this extension to convert an existing full-checkout repository to sparse-checkout but my `.git` folder still has a massive size"
 

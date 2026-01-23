@@ -1,5 +1,10 @@
 # Git Repos Changelog
 
+## [Enhancement] - 2026-01-19
+
+- Added "Create Quicklink" action to GitRepoListItem component
+- Added "shkreios" to contributors list
+
 ## [Bug Fix] - 2025-09-10
 
 - Fixes determination of remote URLs for worktrees.

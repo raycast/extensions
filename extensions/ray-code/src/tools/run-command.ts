@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { getWorkspaceRoot, resolveAndValidatePath } from "../utils/workspace";
+import { getShellEnv, EXEC_ENV_OVERRIDES } from "../utils/shell";
 
 const execFileAsync = promisify(execFile);
 
@@ -52,21 +53,16 @@ export default async function ({ command, cwd, timeout = DEFAULT_TIMEOUT }: Inpu
   const workspaceRoot = getWorkspaceRoot();
   const workingDir = cwd ? resolveAndValidatePath(cwd) : workspaceRoot;
 
-  // Use the user's interactive login shell to execute commands
-  // Note: Shell interpretation is intentional here to support shell features like pipes,
-  // redirects, and variable expansion. Security is handled via user confirmation prompt.
-  const userShell = process.env.SHELL || "/bin/sh";
+  const shellEnv = await getShellEnv();
 
   try {
-    const { stdout, stderr } = await execFileAsync(userShell, ["-l", "-c", command], {
+    const { stdout, stderr } = await execFileAsync(shellEnv.shell, ["-l", "-c", command], {
       cwd: workingDir,
       timeout,
       maxBuffer: 1024 * 1024 * 5, // 5MB buffer
       env: {
-        ...process.env,
-        // Ensure consistent output formatting
-        FORCE_COLOR: "0",
-        NO_COLOR: "1",
+        ...shellEnv.env,
+        ...EXEC_ENV_OVERRIDES,
       },
     });
 

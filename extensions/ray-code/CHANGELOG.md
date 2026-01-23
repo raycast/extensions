@@ -1,5 +1,9 @@
 # Ray Code Changelog
 
+## [Fix the issue with accessing the user shell properly] - 2026-01-02
+
+- `process.env.SHELL` is undefined, use the shell-env package instead
+
 ## [Auto Edit, Run Command and Git Tools] - 2026-01-01
 
 ### Added

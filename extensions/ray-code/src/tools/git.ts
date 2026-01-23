@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { getWorkspaceRoot, isAutoEditEnabled } from "../utils/workspace";
+import { getShellEnv, EXEC_ENV_OVERRIDES } from "../utils/shell";
 
 const execFileAsync = promisify(execFile);
 
@@ -261,6 +262,8 @@ export default async function ({ subcommand, args = "" }: Input) {
   // This avoids shell interpretation entirely by passing arguments directly to git
   const gitArgs = [subcommand, ...parseArgs(args)];
 
+  const shellEnv = await getShellEnv();
+
   try {
     // Execute git directly without a shell wrapper to prevent shell injection
     const { stdout, stderr } = await execFileAsync("git", gitArgs, {
@@ -268,12 +271,10 @@ export default async function ({ subcommand, args = "" }: Input) {
       timeout: DEFAULT_TIMEOUT,
       maxBuffer: 1024 * 1024 * 5, // 5MB buffer
       env: {
-        ...process.env,
+        ...shellEnv.env,
+        ...EXEC_ENV_OVERRIDES,
         // Disable git pager for consistent output
         GIT_PAGER: "",
-        // Ensure consistent output formatting
-        FORCE_COLOR: "0",
-        NO_COLOR: "1",
       },
     });
 

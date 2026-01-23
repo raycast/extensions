@@ -4,7 +4,14 @@ import * as os from "os";
 import path from "path";
 import { useEffect, useState } from "react";
 import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
-import { fileExists, getErrorMessage, openURIinVSCode, raycastForVSCodeURI, waitForFileExists } from "./utils";
+import {
+  fileExists,
+  getErrorMessage,
+  isWin,
+  openURIinVSCode,
+  raycastForVSCodeURI,
+  waitForFileExists,
+} from "./lib/utils";
 
 interface CommandMetadata {
   command: string;
@@ -14,10 +21,12 @@ interface CommandMetadata {
 
 function transitFolder(): string {
   const build = getBuildNamePreference();
-  const ts = path.join(
-    os.homedir(),
-    `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`,
-  );
+
+  let ts = path.join(os.homedir(), `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`);
+
+  if (isWin) {
+    ts = path.join(os.homedir(), `AppData/Roaming/${build}/User/globalStorage/tonka3000.raycast/transit`);
+  }
   return ts;
 }
 
@@ -130,6 +139,7 @@ export default function CommandPaletteCommand() {
       {error && (
         <List.EmptyView
           title="No Response from Raycast for VSCode extension"
+          description="Please ensure the Raycast for VSCode extension is installed and running"
           icon="⚠️"
           actions={
             <ActionPanel>

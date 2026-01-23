@@ -15,7 +15,8 @@
     "xmok",
     "ridemountainpig",
     "sebdanielsson",
-    "1weiho"
+    "1weiho",
+    "thomas-forbes"
   ],
   "commands": [
     {
@@ -71,6 +72,32 @@
           "type": "text",
           "placeholder": "example.com",
           "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-latest-deployment",
+      "title": "Open Latest Deployment",
+      "description": "Open your latest deployment in the browser",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openTarget",
+          "title": "Open Target",
+          "description": "Choose where to open the latest deployment",
+          "type": "dropdown",
+          "required": false,
+          "default": "vercel",
+          "data": [
+            {
+              "title": "Vercel Dashboard",
+              "value": "vercel"
+            },
+            {
+              "title": "Deploy URL",
+              "value": "deployUrl"
+            }
+          ]
         }
       ]
     }
@@ -387,7 +414,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "~1.102.3",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.0",
     "swr": "^2.3.4"
   },

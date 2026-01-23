@@ -1,5 +1,9 @@
 # bmrks Changelog
 
+## [Improvement] - 2026-01-14
+
+- Added feature to manage groups: create and delete group.
+
 ## [Change "Delete" Shortcut] - 2025-09-24
 
 - Changed "Delete" Shortcut to `Keyboard.Shortcut.Common.Remove` (default: `ctrl`+`x`) (ref: [Issue #21681](https://github.com/raycast/extensions/issues/21681))
