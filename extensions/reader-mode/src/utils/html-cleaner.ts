@@ -251,14 +251,12 @@ const MIN_TEXT_LENGTH_FOR_DENSITY = 50;
  * Link density = (text length in links) / (total text length)
  * Excludes hash-only anchors (internal page links).
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getLinkDensity(element: any): number {
+function getLinkDensity(element: Element): number {
   const textLength = (element.textContent || "").length;
   if (textLength === 0) return 0;
 
   let linkLength = 0;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  element.querySelectorAll("a").forEach((link: any) => {
+  element.querySelectorAll("a").forEach((link) => {
     const href = link.getAttribute("href") || "";
     // Don't count hash-only links (internal anchors)
     if (href.startsWith("#")) return;
@@ -309,8 +307,7 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
       // Remove elements specified by site config
       if (config.removeSelectors) {
         config.removeSelectors.forEach((selector: string) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          document.querySelectorAll(selector).forEach((el: any) => {
+          document.querySelectorAll(selector).forEach((el) => {
             el.remove();
             removedCount++;
           });
@@ -377,8 +374,7 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
   }
 
   // Build a set of protected elements
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const protectedElements = new Set<any>();
+  const protectedElements = new Set<Element>();
 
   // Collect all selectors to protect (built-in + site config articleSelector)
   const allProtectedSelectors = [...PROTECTED_SELECTORS];
@@ -396,8 +392,7 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
 
   allProtectedSelectors.forEach((selector) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document.querySelectorAll(selector).forEach((el: any) => {
+      document.querySelectorAll(selector).forEach((el) => {
         protectedElements.add(el);
         // Also protect all ancestors
         let parent = el.parentElement;
@@ -406,8 +401,7 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
           parent = parent.parentElement;
         }
         // Also protect all descendants
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        el.querySelectorAll("*").forEach((child: any) => {
+        el.querySelectorAll("*").forEach((child) => {
           protectedElements.add(child);
         });
       });
@@ -419,8 +413,7 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
   // Remove negative elements (unless protected)
   NEGATIVE_SELECTORS.forEach((selector) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document.querySelectorAll(selector).forEach((el: any) => {
+      document.querySelectorAll(selector).forEach((el) => {
         // Don't remove if it's protected or inside a protected element
         if (protectedElements.has(el)) return;
 
@@ -447,8 +440,7 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
 
   // Remove link-dense elements (likely navigation, not content)
   // Target div/section/aside elements that are mostly links
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  document.querySelectorAll("div, section, aside, ul").forEach((el: any) => {
+  document.querySelectorAll("div, section, aside, ul").forEach((el) => {
     // Skip protected elements
     if (protectedElements.has(el)) return;
 

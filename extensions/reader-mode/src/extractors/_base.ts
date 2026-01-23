@@ -1,7 +1,16 @@
 import { ExtractedMetadata } from "../utils/metadata-extractor";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ExtractorDocument = any;
+/**
+ * Linkedom document/element type - linkedom doesn't export proper types,
+ * so we use a structural type that matches the DOM API we need.
+ */
+export interface ExtractorDocument {
+  querySelector(selector: string): ExtractorDocument | null;
+  querySelectorAll(selector: string): NodeListOf<Element> | ExtractorDocument[];
+  textContent?: string | null;
+  innerHTML?: string;
+  getAttribute?(attr: string): string | null;
+}
 
 /**
  * Result returned by an extractor

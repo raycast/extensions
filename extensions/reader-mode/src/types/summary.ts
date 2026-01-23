@@ -6,15 +6,15 @@ export type SummaryStyle =
   | "opposite-sides"
   | "five-ws"
   | "eli5"
-  | "translated"
   | "entities"
-  | "arc-style"
-  | "raycast-style";
+  | "comprehensive"
+  | "at-a-glance";
 
 /**
  * Supported languages for translation (BCP 47 locale codes)
  */
 export type SupportedLanguage =
+  | "en-US"
   | "es-ES"
   | "fr-FR"
   | "de-DE"

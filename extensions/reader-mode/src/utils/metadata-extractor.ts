@@ -1,8 +1,7 @@
 import { parseHTML } from "linkedom";
 import { parseLog } from "./logger";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type LinkedomDocument = any;
+type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
 
 /**
  * Metadata extracted from a page using Schema.org JSON-LD, Open Graph, Twitter Cards, and meta tags.
@@ -104,8 +103,7 @@ export class MetadataExtractor {
 
     const results: Record<string, unknown>[] = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    scripts.forEach((script: any) => {
+    scripts.forEach((script) => {
       try {
         const content = script.textContent?.trim();
         if (content) {
@@ -143,8 +141,7 @@ export class MetadataExtractor {
    */
   private static collectMetaTags(doc: LinkedomDocument): MetaTagItem[] {
     const tags: MetaTagItem[] = [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    doc.querySelectorAll("meta").forEach((meta: any) => {
+    doc.querySelectorAll("meta").forEach((meta) => {
       tags.push({
         name: meta.getAttribute("name"),
         property: meta.getAttribute("property"),

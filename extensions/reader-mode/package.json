@@ -73,7 +73,7 @@
     },
     {
       "name": "defaultSummaryStyle",
-      "title": "Summary Style",
+      "title": "Default Summary Style",
       "description": "Default style for summaries.",
       "type": "dropdown",
       "default": "overview",
@@ -84,12 +84,12 @@
           "value": "overview"
         },
         {
-          "title": "Raycast-style",
-          "value": "raycast-style"
+          "title": "At a Glance",
+          "value": "at-a-glance"
         },
         {
-          "title": "Arc-style",
-          "value": "arc-style"
+          "title": "Comprehensive",
+          "value": "comprehensive"
         },
         {
           "title": "Opposing Sides",
@@ -104,23 +104,23 @@
           "value": "eli5"
         },
         {
-          "title": "Translated Overview",
-          "value": "translated"
-        },
-        {
           "title": "People, Places & Things",
           "value": "entities"
         }
       ]
     },
     {
-      "name": "translationLanguage",
-      "title": "Translated Overview Language",
-      "description": "Default language for translated summaries.",
+      "name": "summaryOutputLanguage",
+      "title": "Summary Output Language",
+      "description": "Language for AI-generated summaries.",
       "type": "dropdown",
-      "default": "es-ES",
+      "default": "en-US",
       "required": false,
       "data": [
+        {
+          "title": "🇺🇸 English",
+          "value": "en-US"
+        },
         {
           "title": "🇪🇸 Spanish",
           "value": "es-ES"

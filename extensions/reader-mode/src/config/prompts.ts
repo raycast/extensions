@@ -1,5 +1,5 @@
 import { AI, environment } from "@raycast/api";
-import { SummaryStyle, TranslationOptions } from "../types/summary";
+import { SummaryStyle, SupportedLanguage, TranslationOptions } from "../types/summary";
 import { getCachedTitle, setCachedTitle } from "../utils/summaryCache";
 
 /**
@@ -48,6 +48,42 @@ export async function rewriteArticleTitle(originalTitle: string, url: string): P
 }
 
 /**
+ * Language names for output language instruction
+ */
+const LANGUAGE_NAMES: Record<SupportedLanguage, string> = {
+  "en-US": "English",
+  "es-ES": "Spanish",
+  "fr-FR": "French",
+  "de-DE": "German",
+  "it-IT": "Italian",
+  "pt-BR": "Portuguese",
+  "ja-JP": "Japanese",
+  "zh-Hans": "Chinese (Simplified)",
+  "zh-Hant": "Chinese (Traditional)",
+  "ko-KR": "Korean",
+  "ru-RU": "Russian",
+  "ar-SA": "Arabic",
+  "hi-IN": "Hindi",
+  "nl-NL": "Dutch",
+  "pl-PL": "Polish",
+  "sv-SE": "Swedish",
+  "tr-TR": "Turkish",
+  "vi-VN": "Vietnamese",
+  "th-TH": "Thai",
+  "el-GR": "Greek",
+  "he-IL": "Hebrew",
+};
+
+/**
+ * Get language instruction suffix for non-English languages
+ */
+function getLanguageInstruction(language?: SupportedLanguage): string {
+  if (!language || language === "en-US") return "";
+  const langName = LANGUAGE_NAMES[language] || language;
+  return `\n\nOutput your response in ${langName}.`;
+}
+
+/**
  * Prompt configuration for each summary style
  */
 interface PromptConfig {
@@ -69,7 +105,7 @@ export function buildBaseContext(title: string, content: string): string {
 export const SUMMARY_PROMPTS: Record<SummaryStyle, PromptConfig> = {
   overview: {
     label: "Overview",
-    buildPrompt: (context) => `${context}
+    buildPrompt: (context, options) => `${context}
 
 Summarize this article with:
 1. A single one-liner summary (one sentence capturing the main point)
@@ -80,12 +116,12 @@ Format your response EXACTLY like this:
 
 - [key point 1]
 - [key point 2]
-- [key point 3]`,
+- [key point 3]${getLanguageInstruction(options?.language)}`,
   },
 
-  "arc-style": {
-    label: "Arc-style",
-    buildPrompt: (context) => `${context}
+  "at-a-glance": {
+    label: "At a Glance",
+    buildPrompt: (context, options) => `${context}
 The reader opened a webpage that's too long for them to read right now.
 
 You will:
@@ -100,24 +136,24 @@ Do NOT repeat text or concepts in your summary.
 If the webpage is for a recipe, first describe the style and type of dish this is and then provide exact steps for the preparation and cooking instructions. List all ingredients including exact measurements and amounts. Also note number of servings and cooking or preparation times.
 If the page is for a restaurant, write a brief description of why it is notable, write a list of what's on the menu and provide opening times, addresses, and contact details.
 
-Format your response EXACTLY as bullet points with clear, specific information. Each bullet point MUST start with a **bold lead-in phrase** followed by a colon, then the explanation (e.g., "**Key finding:** The details..."). Start immediately with bullet points - do not include any introductory text or paragraphs. Provide 4-7 key points, but no less than three. Don't summarize what's already covered by the webpage title.`,
+Format your response EXACTLY as bullet points with clear, specific information. Each bullet point MUST start with a **bold lead-in phrase** followed by a colon, then the explanation (e.g., "**Key finding:** The details..."). Start immediately with bullet points - do not include any introductory text or paragraphs. Provide 4-7 key points, but no less than three. Don't summarize what's already covered by the webpage title.${getLanguageInstruction(options?.language)}`,
   },
 
   "opposite-sides": {
     label: "Opposing Sides",
-    buildPrompt: (context) => `${context}
+    buildPrompt: (context, options) => `${context}
 
 Analyze this article and present two contrasting viewpoints or perspectives that emerge from or relate to the content. If the article itself presents opposing views, summarize them. If not, identify the main argument and present a reasonable counterargument.
 
 Format your response EXACTLY like this:
 **Perspective A:** [first viewpoint summary]
 
-**Perspective B:** [contrasting viewpoint summary]`,
+**Perspective B:** [contrasting viewpoint summary]${getLanguageInstruction(options?.language)}`,
   },
 
   "five-ws": {
     label: "The 5 Ws",
-    buildPrompt: (context) => `${context}
+    buildPrompt: (context, options) => `${context}
 
 Summarize this article using the 5 Ws framework. Extract the key information for each category. If any category is not applicable or not mentioned, indicate "Not specified."
 
@@ -126,61 +162,21 @@ Format your response EXACTLY like this:
 - **What:** [what happened or is being discussed]
 - **Where:** [where it takes place]
 - **When:** [when it happened or is happening]
-- **Why:** [why it matters or the reason behind it]`,
+- **Why:** [why it matters or the reason behind it]${getLanguageInstruction(options?.language)}`,
   },
 
   eli5: {
     label: "Explain Like I'm 5",
-    buildPrompt: (context) => `${context}
+    buildPrompt: (context, options) => `${context}
 
 Explain this article in very simple terms that a 5-year-old could understand. Use simple words, short sentences, and relatable analogies. Avoid jargon and technical terms.
 
-Format your response as a simple, friendly explanation in 2-3 short paragraphs.`,
-  },
-
-  translated: {
-    label: "Translated Overview",
-    buildPrompt: (context, options) => {
-      const LANGUAGE_NAMES: Record<string, string> = {
-        "es-ES": "Spanish",
-        "fr-FR": "French",
-        "de-DE": "German",
-        "it-IT": "Italian",
-        "pt-BR": "Portuguese",
-        "ja-JP": "Japanese",
-        "zh-Hans": "Chinese (Simplified)",
-        "zh-Hant": "Chinese (Traditional)",
-        "ko-KR": "Korean",
-        "ru-RU": "Russian",
-        "ar-SA": "Arabic",
-        "hi-IN": "Hindi",
-        "nl-NL": "Dutch",
-        "pl-PL": "Polish",
-        "sv-SE": "Swedish",
-        "tr-TR": "Turkish",
-        "vi-VN": "Vietnamese",
-        "th-TH": "Thai",
-        "el-GR": "Greek",
-        "he-IL": "Hebrew",
-      };
-      const lang = options?.language ? LANGUAGE_NAMES[options.language] || options.language : "Spanish";
-      const level = options?.level || "intermediate";
-      return `${context}
-
-Provide an overview summary of this article translated into ${lang} at a ${level} language level.
-
-Format your response EXACTLY like this:
-** [one-liner summary in ${lang}]
-
-- [key point 1 in ${lang}]
-- [key point 2 in ${lang}]
-- [key point 3 in ${lang}]`;
-    },
+Format your response as a simple, friendly explanation in 2-3 short paragraphs.${getLanguageInstruction(options?.language)}`,
   },
 
   entities: {
     label: "People, Places & Things",
-    buildPrompt: (context) => `${context}
+    buildPrompt: (context, options) => `${context}
 
 Extract and list the key entities (people, places, and things) mentioned in this article. For each entity, provide brief context about their relevance to the article.
 
@@ -194,12 +190,12 @@ Format your response EXACTLY like this:
 **Things:**
 - **[Entity]:** [brief context]
 
-If a category has no relevant entities, you may omit it.`,
+If a category has no relevant entities, you may omit it.${getLanguageInstruction(options?.language)}`,
   },
 
-  "raycast-style": {
-    label: "Raycast-style",
-    buildPrompt: (context) => `${context}
+  comprehensive: {
+    label: "Comprehensive",
+    buildPrompt: (context, options) => `${context}
 
 Summarize this article with the following format:
 [one to two sentence summary with the most important information]
@@ -214,7 +210,7 @@ Rules:
 - ALWAYS capture the tone, perspective, and POV of the author
 - NEVER add information not present in the article
 - Keep bullet points as short as possible
-- Provide EXACTLY three key takeaways`,
+- Provide EXACTLY three key takeaways${getLanguageInstruction(options?.language)}`,
   },
 };
 

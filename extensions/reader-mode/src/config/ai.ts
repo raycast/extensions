@@ -17,7 +17,7 @@ export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
     model: AI.Model["OpenAI_GPT-5_nano"],
     creativity: "low",
   },
-  "raycast-style": {
+  comprehensive: {
     model: AI.Model["OpenAI_GPT-5_nano"],
     creativity: "low",
   },
@@ -33,15 +33,11 @@ export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
     model: AI.Model["OpenAI_GPT-5_nano"],
     creativity: "medium",
   },
-  translated: {
-    model: AI.Model["OpenAI_GPT-5_nano"],
-    creativity: "low",
-  },
   entities: {
     model: AI.Model["OpenAI_GPT-5_nano"],
     creativity: "low",
   },
-  "arc-style": {
+  "at-a-glance": {
     model: AI.Model["OpenAI_GPT-5_nano"],
     creativity: "low",
   },

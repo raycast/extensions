@@ -168,8 +168,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       const estimatedTokens = Math.ceil(summaryData.length / 4);
       logSummarySuccess(summaryStyle, summaryData.length, durationMs, estimatedTokens);
 
-      const language = summaryStyle === "translated" ? preferences.translationLanguage : undefined;
-      setCachedSummary(article.url, summaryStyle, summaryData, language);
+      setCachedSummary(article.url, summaryStyle, summaryData, preferences.summaryOutputLanguage);
       setCompletedSummary(summaryData);
 
       if (toastRef.current) {
@@ -186,7 +185,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     completedSummary,
     cachedSummary,
     summaryStartTime,
-    preferences.translationLanguage,
+    preferences.summaryOutputLanguage,
   ]);
 
   // Handle summarization with cache check
@@ -197,18 +196,17 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       setSummaryStyle(style);
       setCachedSummaryState(null);
 
-      const language = style === "translated" ? preferences.translationLanguage : undefined;
-      const cached = await getCachedSummary(article.url, style, language);
+      const cached = await getCachedSummary(article.url, style, preferences.summaryOutputLanguage);
       if (cached) {
         setCachedSummaryState(cached);
         return;
       }
 
-      const translationOptions = language ? { language } : undefined;
+      const translationOptions = { language: preferences.summaryOutputLanguage };
       const prompt = buildSummaryPrompt(article.title, article.textContent, style, translationOptions);
       setSummaryPrompt(prompt);
     },
-    [article, preferences.translationLanguage],
+    [article, preferences.summaryOutputLanguage],
   );
 
   // Handle stopping summarization
@@ -223,8 +221,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     const lastStyle = await getLastSummaryStyle(article.url);
 
     if (lastStyle) {
-      const language = lastStyle === "translated" ? preferences.translationLanguage : undefined;
-      const cached = await getCachedSummary(article.url, lastStyle, language);
+      const cached = await getCachedSummary(article.url, lastStyle, preferences.summaryOutputLanguage);
 
       if (cached) {
         setSummaryStyle(lastStyle);
@@ -242,7 +239,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       toastRef.current.hide();
       toastRef.current = null;
     }
-  }, [article, preferences.translationLanguage]);
+  }, [article, preferences.summaryOutputLanguage]);
 
   // Process article loading result
   const handleLoadResult = useCallback(

@@ -21,12 +21,11 @@ import { markdownToHtml } from "../utils/html-export";
 
 export const SUMMARY_STYLES: { style: SummaryStyle; icon: Icon }[] = [
   { style: "overview", icon: Icon.List },
-  { style: "raycast-style", icon: Icon.RaycastLogoPos },
-  { style: "arc-style", icon: Icon.Stars },
+  { style: "at-a-glance", icon: Icon.Stars },
+  { style: "comprehensive", icon: Icon.RaycastLogoPos },
   { style: "opposite-sides", icon: Icon.Switch },
   { style: "five-ws", icon: Icon.QuestionMark },
   { style: "eli5", icon: Icon.SpeechBubble },
-  { style: "translated", icon: Icon.Globe },
   { style: "entities", icon: Icon.Person },
 ];
 
@@ -93,10 +92,10 @@ export function ArticleActions({
 }: ArticleActionsProps) {
   return (
     <ActionPanel>
+      {/* AI Summary Section */}
       {isSummarizing && onStopSummarizing && (
         <Action title="Stop Summarizing" icon={Icon.Stop} onAction={onStopSummarizing} />
       )}
-
       {canAccessAI && (
         <ActionPanel.Submenu
           title={currentSummary ? "Change Summary Style" : "Summarize…"}
@@ -109,56 +108,63 @@ export function ArticleActions({
         </ActionPanel.Submenu>
       )}
 
-      <Action.CopyToClipboard
-        title="Copy as Markdown"
-        content={markdown}
-        icon={Icon.Document}
-        shortcut={Keyboard.Shortcut.Common.Copy}
-      />
-      <Action
-        title="Copy as HTML"
-        icon={Icon.Code}
-        onAction={async () => {
-          const html = markdownToHtml(markdown);
-          await Clipboard.copy({ text: html, html });
-          await closeMainWindow();
-          await showHUD("Copied HTML to Clipboard");
-        }}
-      />
-      <Action
-        title="Save as Markdown"
-        icon={Icon.Document}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-        onAction={() => saveFile(markdown, articleTitle, "md")}
-      />
-      <Action
-        title="Save as HTML"
-        icon={Icon.Code}
-        onAction={() => saveFile(markdownToHtml(markdown), articleTitle, "html")}
-      />
-
-      <Action.OpenInBrowser title="Open in Browser" url={articleUrl} shortcut={Keyboard.Shortcut.Common.Open} />
-      <Action.CopyToClipboard
-        title="Copy URL"
-        content={articleUrl}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-      />
-      {archiveSource?.url && (
+      {/* Copy & Save Section */}
+      <ActionPanel.Section title="Copy & Save">
         <Action.CopyToClipboard
-          title="Copy Archived Copy URL"
-          content={archiveSource.url}
-          icon={Icon.Clock}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          title="Copy as Markdown"
+          content={markdown}
+          icon={Icon.Document}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
-      )}
-      {onReimportFromBrowser && (
         <Action
-          title="Import from Browser Tab"
-          icon={Icon.Globe}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-          onAction={onReimportFromBrowser}
+          title="Copy as HTML"
+          icon={Icon.Code}
+          onAction={async () => {
+            const html = markdownToHtml(markdown);
+            await Clipboard.copy({ text: html, html });
+            await closeMainWindow();
+            await showHUD("Copied HTML to Clipboard");
+          }}
         />
-      )}
+        <Action.CopyToClipboard
+          title="Copy URL"
+          content={articleUrl}
+          icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        />
+        {archiveSource?.url && (
+          <Action.CopyToClipboard
+            title="Copy Archived URL"
+            content={archiveSource.url}
+            icon={Icon.Clock}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          />
+        )}
+        <Action
+          title="Save as Markdown"
+          icon={Icon.Document}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          onAction={() => saveFile(markdown, articleTitle, "md")}
+        />
+        <Action
+          title="Save as HTML"
+          icon={Icon.Code}
+          onAction={() => saveFile(markdownToHtml(markdown), articleTitle, "html")}
+        />
+      </ActionPanel.Section>
+
+      {/* Open & Share Section */}
+      <ActionPanel.Section title="Open & Share">
+        {onReimportFromBrowser && (
+          <Action
+            title="Import from Browser Tab"
+            icon={Icon.Globe}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            onAction={onReimportFromBrowser}
+          />
+        )}
+        <Action.OpenInBrowser title="Open in Browser" url={articleUrl} shortcut={Keyboard.Shortcut.Common.Open} />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }

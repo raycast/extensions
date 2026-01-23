@@ -13,4 +13,5 @@ compiled_raycast_rust
 # misc
 .DS_Store
 .claude
+.windsurf/*
 .github/.private

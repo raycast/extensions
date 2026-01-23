@@ -47,8 +47,7 @@ turndown.remove([
 
 // Custom rule to filter elements by role attribute
 turndown.addRule("removeByRole", {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  filter: (node: any) => {
+  filter: (node) => {
     const role = node.getAttribute?.("role");
     return role === "complementary" || role === "navigation";
   },

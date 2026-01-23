@@ -124,14 +124,19 @@ Each prompt config includes:
 
 ### Summary Styles
 
-| Style                       | Description                                  |
-| --------------------------- | -------------------------------------------- |
-| **Overview**                | One-liner summary + 3 key bullet points      |
-| **Opposite Sides**          | Two contrasting viewpoints from the article  |
-| **The 5 Ws**                | Who, What, Where, When, Why breakdown        |
-| **Explain Like I'm 5**      | Simplified explanation using simple language |
-| **Translated Overview**     | Overview translated to a specified language  |
-| **People, Places & Things** | Key entities extracted with context          |
+| Style                       | Description                                           |
+| --------------------------- | ----------------------------------------------------- |
+| **Overview**                | One-liner summary + 3 key bullet points               |
+| **At a Glance**             | Summary + Key Takeaways in a concise format           |
+| **Comprehensive**           | Fact-filled bullet points from the author's POV       |
+| **Opposing Sides**          | Two contrasting viewpoints from the article           |
+| **The 5 Ws**                | Who, What, Where, When, Why breakdown                 |
+| **Explain Like I'm 5**      | Simplified explanation using simple language          |
+| **People, Places & Things** | Key entities extracted with context                   |
+
+### Summary Output Language
+
+All summary styles can be generated in your preferred language. Set the **Summary Output Language** preference to choose from 21 supported languages including English (default), Spanish, French, German, Japanese, Chinese, and more. When a non-English language is selected, summaries will be generated in that language regardless of the article's original language.
 
 ## Browser Extension Integration
 

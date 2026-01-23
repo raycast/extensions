@@ -105,7 +105,6 @@ export function ArticleDetailView({
   return (
     <Detail
       markdown={markdown}
-      navigationTitle={article.title}
       isLoading={isSummarizing}
       actions={
         <ArticleActions
