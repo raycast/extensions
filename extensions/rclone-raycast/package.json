@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rclone-raycast",
-  "title": "Rclone",
-  "description": "A Raycast extension for Rclone",
+  "title": "rclone",
+  "description": "A Raycast extension for rclone",
   "icon": "icon.png",
   "author": "rclone",
   "platforms": [
@@ -19,24 +19,28 @@
     {
       "name": "list-remotes",
       "title": "List Remotes",
+      "subtitle": "rclone",
       "description": "See a list of all remotes",
       "mode": "view"
     },
     {
       "name": "create-remote",
       "title": "Create Remote",
+      "subtitle": "rclone",
       "description": "Create a new rclone remote",
       "mode": "view"
     },
     {
       "name": "run-operation",
       "title": "Run Operation",
+      "subtitle": "rclone",
       "description": "Run an rclone operation",
       "mode": "view"
     },
     {
       "name": "start-daemon",
       "title": "Start Daemon",
+      "subtitle": "rclone",
       "description": "Start the rclone daemon",
       "mode": "view"
     }

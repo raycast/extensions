@@ -218,7 +218,6 @@ function CreateRemoteForm() {
 
   return (
     <Form
-      navigationTitle="Create Remote"
       isLoading={isLoadingProviders}
       enableDrafts
       actions={

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, showToast, Toast, popToRoot } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { spawn } from "node:child_process";
 import { fetchPid } from "./lib/api";
@@ -65,10 +65,21 @@ export default function Command() {
       const pidToStop = daemonPid ?? (await fetchDaemonPidOrThrow());
       await terminateDaemon(pidToStop);
       setDaemonPid(undefined);
-      setStatus("stopped");
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Daemon stopped",
+        message: "The rclone daemon has been stopped.",
+      });
+      await popToRoot();
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      const message = getErrorMessage(error);
+      setErrorMessage(message);
       setStatus("error");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to stop daemon",
+        message,
+      });
     } finally {
       setIsStopping(false);
     }
@@ -76,7 +87,6 @@ export default function Command() {
 
   return (
     <Detail
-      navigationTitle="Rclone Daemon"
       markdown={contentForStatus}
       isLoading={status === "checking" || status === "starting" || isStopping}
       actions={
@@ -137,7 +147,13 @@ async function fetchDaemonPidOrThrow() {
 
 async function terminateDaemon(pid: number) {
   try {
-    process.kill(pid, "SIGTERM");
+    // On Windows, SIGTERM is not supported, so we call kill without a signal
+    // On Unix, we use SIGTERM for graceful termination
+    if (process.platform === "win32") {
+      process.kill(pid);
+    } else {
+      process.kill(pid, "SIGTERM");
+    }
   } catch (error) {
     const nodeError = error as NodeJS.ErrnoException;
     if (!nodeError || nodeError.code !== "ESRCH") {
@@ -154,7 +170,7 @@ async function terminateDaemon(pid: number) {
     }
   }
 
-  throw new Error("Rclone daemon did not exit in time");
+  throw new Error("rclone daemon did not exit in time");
 }
 
 function delay(ms: number) {
@@ -178,12 +194,12 @@ function getContentForStatus(status: DaemonStatus, errorMessage?: string) {
     case "starting":
       return `# Starting rclone...\n\nLaunching \`rclone ${RCLONE_ARGS.join(" ")}\` and waiting for the RC daemon to respond.`;
     case "running":
-      return `# Rclone is running!\n\nThe RC daemon is accepting requests at \`http://localhost:5572\`, you can continue using the extension.`;
+      return `# rclone is running!\n\nThe RC daemon is accepting requests at \`http://localhost:5572\`, you can continue using the extension.`;
     case "stopped":
-      return `# Rclone daemon stopped.\n\nThe RC daemon has been stopped. Reopen this command to start it again.`;
+      return `# rclone daemon stopped.\n\nThe RC daemon has been stopped. Reopen this command to start it again.`;
     case "error":
       return `# Failed to start rclone ):\n\n${errorMessage ?? "Unknown error"}`;
     default:
-      return `# Rclone daemon is in an unknown status.\n\nPlease try again.`;
+      return `# rclone daemon is in an unknown status.\n\nPlease try again.`;
   }
 }

@@ -21,7 +21,7 @@ export default function Command({ launchContext }: RemoteLaunchProps) {
   const remote = launchContext?.remote ?? "";
 
   return (
-    <List navigationTitle="Operations" searchBarPlaceholder="Search operations" isShowingDetail>
+    <List searchBarPlaceholder="Search operations" isShowingDetail>
       <List.Section title="Operations">
         <List.Item
           title="mount"

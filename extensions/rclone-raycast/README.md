@@ -1,11 +1,10 @@
 # Rclone
 
 > Control rclone's Remote Control daemon (RC) from Raycast
- 
+
  <p align="center">
     <img src="./assets/icon.png" width="150" height="150" />
 </p>
-
 
 **Browse && create remotes, start jobs, and manage mounts without leaving the command palette.**
 
@@ -23,6 +22,8 @@
 2. [`rclone`](https://rclone.org/downloads/) available on your `$PATH` (v1.63 or newer recommended).
 3. An RC daemon reachable at `http://localhost:5572`
 
+**Windows users:** Make sure `rclone.exe` is in your system PATH. For mount operations, you'll need [WinFsp](https://winfsp.dev/) installed.
+
 Start the daemon manually:
 
 ```bash
@@ -33,19 +34,19 @@ rclone rcd --rc-no-auth
 
 ## Getting Started
 
-1. **Install** – add the Rclone extension from the Raycast Store (or `ray install` while developing).
+1. **Install** – add the rclone extension from the Raycast Store (or `ray install` while developing).
 2. **Launch the daemon** – use the included `Start Daemon` command or run `rclone rcd --rc-no-auth` yourself.
 3. **Manage remotes** – open `List Remotes` to inspect, edit, delete, or view mount points; use `Create Remote` for new backends.
 4. **Run operations** – open `Run Operation`, pick an action, review optional flags, and submit. Each job calls the matching RC endpoint (for example `/sync/copy` for Copy) and displays success/failure toasts.
 
 ## Commands
 
-| Command          | Purpose                                                                                  |
-| ---------------- | ---------------------------------------------------------------------------------------- |
-| `List Remotes`   | Browse remotes, open details, inspect mount points, and jump into edit or operation flows |
-| `Create Remote`  | Guided creation form with provider metadata, advanced options, and validation             |
-| `Run Operation`  | Catalog of RC operations (mount/copy/sync/move/delete/purge variants) with flag controls  |
-| `Start Daemon`   | Ensure `rclone rcd --rc-no-auth` is running; view status and stop the spawned process     |
+| Command         | Purpose                                                                                   |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| `List Remotes`  | Browse remotes, open details, inspect mount points, and jump into edit or operation flows |
+| `Create Remote` | Guided creation form with provider metadata, advanced options, and validation             |
+| `Run Operation` | Catalog of RC operations (mount/copy/sync/move/delete/purge variants) with flag controls  |
+| `Start Daemon`  | Ensure `rclone rcd --rc-no-auth` is running; view status and stop the spawned process     |
 
 ## Tips
 

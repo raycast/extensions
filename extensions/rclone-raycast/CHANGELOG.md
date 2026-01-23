@@ -1,5 +1,5 @@
-# Rclone Changelog
+# rclone Changelog
 
-## [Added Rclone] - {PR_MERGE_DATE}
+## [Added rclone] - {PR_MERGE_DATE}
 
 Initial version
