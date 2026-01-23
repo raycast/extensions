@@ -1,6 +1,13 @@
 import { List } from "@raycast/api";
 import { Group, Root, DisplayUrl } from "./types";
-import { getDomainKeywords, getEnhancedKeywords, combineKeywords, getFallbackIcon } from "./utils";
+import {
+  getDomainKeywords,
+  getEnhancedKeywords,
+  combineKeywords,
+  getFallbackIcon,
+  applyTemplate,
+  mergePlaceholders,
+} from "./utils";
 import { createTemplateDisplayUrls } from "./template-utils";
 import { useApplications } from "./hooks/use-applications";
 import { URLListItem } from "./components/url-list-item";
@@ -17,18 +24,31 @@ export function URLList({ group, rootData, isLoading = false }: URLListProps) {
 
   const combinedLoading = isLoading || applicationsLoading;
 
+  const placeholdersResult = mergePlaceholders(rootData.globalPlaceholders, group.templatePlaceholders);
+
+  if (!placeholdersResult.success) {
+    return (
+      <List isLoading={combinedLoading}>
+        <List.EmptyView title="Configuration Error" description={placeholdersResult.error} />
+      </List>
+    );
+  }
+
+  const placeholders = placeholdersResult.placeholders;
+
   const otherUrls: DisplayUrl[] = Object.entries(group.otherUrls || {}).map(([key, otherUrl]) => {
     const title = otherUrl.title || key;
     const tags = otherUrl.tags || [];
+    const resolvedUrl = applyTemplate(otherUrl.url, placeholders);
     return {
       key: `other-${key}`,
       title: title,
-      url: otherUrl.url,
+      url: resolvedUrl,
       keywords: combineKeywords(
         getEnhancedKeywords(key),
         getEnhancedKeywords(title),
         tags,
-        getDomainKeywords(otherUrl.url),
+        getDomainKeywords(resolvedUrl),
       ),
       icon: getFallbackIcon(otherUrl.icon, !!otherUrl.openIn),
       tags: tags,
