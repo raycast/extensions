@@ -1,0 +1,93 @@
+{
+  "name": "xiaohe-query",
+  "title": "Xiaohe Query",
+  "description": "Search for Xiaohe encodings and decompositions.",
+  "icon": "extension-icon.png",
+  "author": "dongqing",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "main",
+      "title": "Xiaohe Query",
+      "subtitle": "Query text encoding",
+      "description": "Search for encoding of a Chinese character.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "@raycast/utils": "^1.16.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0"
+  },
+  "preferences": [
+    {
+      "name": "inputStrategy",
+      "type": "dropdown",
+      "required": false,
+      "title": "取词策略",
+      "description": "决定扩展启动时如何获取文字",
+      "default": "auto",
+      "data": [
+        {
+          "title": "智能自动 (选区优先)",
+          "value": "auto"
+        },
+        {
+          "title": "仅获取选中文字",
+          "value": "selection"
+        },
+        {
+          "title": "仅获取剪贴板",
+          "value": "clipboard"
+        },
+        {
+          "title": "手动输入",
+          "value": "manual"
+        }
+      ]
+    },
+    {
+      "name": "aiCreativity",
+      "type": "dropdown",
+      "required": false,
+      "title": "AI 创造性",
+      "description": "控制 AI 回答的发散程度",
+      "default": "0",
+      "data": [
+        {
+          "title": "严谨 (0.0)",
+          "value": "0"
+        },
+        {
+          "title": "平衡 (0.5)",
+          "value": "0.5"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Extension to npm.\\n\\nIf you intend to release it to the Raycast Store, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
