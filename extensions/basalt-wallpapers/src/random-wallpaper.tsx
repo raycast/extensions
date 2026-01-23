@@ -1,5 +1,4 @@
 import { showToast, Toast, closeMainWindow, popToRoot } from "@raycast/api";
-import fetch from "node-fetch";
 import { setDesktopWallpaper, Wallpaper, API_RANDOM_URL } from "./utils";
 
 export default async function Command() {
