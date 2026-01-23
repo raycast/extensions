@@ -84,3 +84,29 @@ export interface CreateTicketPayload {
   priority: number;
   status: number;
 }
+
+export interface Requester {
+  id: number;
+  first_name: string;
+  last_name: string;
+  primary_email: string;
+  job_title?: string;
+  work_phone_number?: string;
+  mobile_phone_number?: string;
+  department_ids?: number[];
+  is_agent?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Asset {
+  id: number;
+  display_id: number;
+  name: string;
+  asset_type_id: number;
+  asset_tag?: string;
+  user_id?: number;
+  assigned_on?: string;
+  created_at: string;
+  updated_at: string;
+}

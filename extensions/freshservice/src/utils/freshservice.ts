@@ -107,3 +107,32 @@ export const getAgentMe = async () => {
   const response = await client.get("/agents/me");
   return response.data;
 };
+
+export const getRequesters = async (query?: string) => {
+  const client = getClient();
+  const params: Record<string, string> = {};
+  if (query && query.trim()) {
+    // Use starts-with search using the ~ operator
+    params.query = `~name:'${query.trim()}'`;
+  }
+  const response = await client.get("/requesters", { params });
+  return response.data;
+};
+
+export const getRequesterTickets = async (requesterId: number) => {
+  const client = getClient();
+  // Use /tickets/filter endpoint with properly formatted query
+  const response = await client.get("/tickets/filter", {
+    params: { query: `"requester_id:${requesterId}"` },
+  });
+  return response.data;
+};
+
+export const getRequesterAssets = async (requesterId: number) => {
+  const client = getClient();
+  // Use filter parameter (not query) for assets
+  const response = await client.get("/assets", {
+    params: { filter: `"user_id:${requesterId}"` },
+  });
+  return response.data;
+};

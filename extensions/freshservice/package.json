@@ -31,6 +31,13 @@
             "description": "Search for tickets",
             "mode": "view",
             "icon": "icon.png"
+        },
+        {
+            "name": "search-requesters",
+            "title": "Search Requesters",
+            "description": "Search for requesters and view their tickets and assets",
+            "mode": "view",
+            "icon": "icon.png"
         }
     ],
     "dependencies": {

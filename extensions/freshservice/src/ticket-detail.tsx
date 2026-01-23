@@ -78,7 +78,15 @@ export default function TicketDetail({
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to update status";
-      if (error instanceof Error) {
+      if (axios.isAxiosError(error)) {
+        toast.message = error.response?.data?.message || error.message;
+        if (error.response?.data?.errors) {
+          const firstError = error.response.data.errors[0];
+          if (firstError) {
+            toast.message = `${firstError.field}: ${firstError.message}`;
+          }
+        }
+      } else if (error instanceof Error) {
         toast.message = error.message;
       }
     }
