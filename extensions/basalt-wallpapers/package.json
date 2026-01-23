@@ -1,0 +1,46 @@
+{
+  "name": "basalt-wallpapers",
+  "title": "Art Wallpapers. Basalt",
+  "description": "Hand-picked art, daily.",
+  "icon": "basalt-icon.png",
+  "author": "yevgen_glukhov",
+  "categories": [
+    "Design Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Today's Wallpapers",
+      "description": "View and set today's Basalt wallpaper",
+      "mode": "view",
+      "icon": "basalt-icon.png"
+    },
+    {
+      "name": "random-wallpaper",
+      "title": "Set Random Wallpaper",
+      "description": "Set a random wallpaper from Basalt",
+      "mode": "no-view",
+      "icon": "basalt-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray dev",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
