@@ -220,6 +220,16 @@ function validateTemplateable(
     referencedPlaceholders.forEach((placeholder) => allRequiredPlaceholders.add(placeholder));
   }
 
+  // Check placeholders used in otherUrls (for groups)
+  if ("otherUrls" in entity && entity.otherUrls) {
+    for (const url of Object.values(entity.otherUrls)) {
+      if (url?.url) {
+        const referencedPlaceholders = extractPlaceholders(url.url);
+        referencedPlaceholders.forEach((placeholder) => allRequiredPlaceholders.add(placeholder));
+      }
+    }
+  }
+
   for (const placeholder of allRequiredPlaceholders) {
     if (!allProvidedPlaceholders.includes(placeholder)) {
       errors.push({
