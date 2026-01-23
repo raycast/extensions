@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, useNavigation, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation, Keyboard, getPreferenceValues } from "@raycast/api";
 import { Group, Url } from "./types";
 import { URLList } from "./url-list";
 import { useData } from "./use-data";
@@ -8,12 +8,14 @@ import { useApplications } from "./hooks/use-applications";
 import { URLListItem } from "./components/url-list-item";
 import { OpenConfigFileAction } from "./components/open-config-action";
 import { HelpView } from "./components/help-view";
+import { GroupDetailView } from "./components/group-detail-view";
 import { SECTION_TITLES, ACTION_TITLES } from "./constants";
 
 export default function Command() {
   const { data, loading, error, validationResult } = useData();
   const { push } = useNavigation();
   const { applications } = useApplications();
+  const preferences = getPreferenceValues<Preferences>();
 
   const openConfigFileShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 
@@ -58,37 +60,168 @@ export default function Command() {
         </List.Section>
       )}
 
-      <List.Section title={SECTION_TITLES.GROUPS}>
-        {Object.entries(data.groups || {}).map(([key, group]: [string, Group]) => {
-          const tags = group.tags || [];
-          const accessories = getTagAccessories(tags);
-          const title = group.title || key;
-          const keywords = combineKeywords(getEnhancedKeywords(key), getEnhancedKeywords(title), tags);
-          return (
-            <List.Item
-              key={key}
-              icon={getFallbackIcon(group.icon, false)}
-              title={title}
-              keywords={keywords}
-              accessories={accessories}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title={ACTION_TITLES.BROWSE_GROUP}
-                    icon={Icon.Folder}
-                    onAction={() => {
-                      push(<URLList group={group} rootData={data} isLoading={loading} />);
+      {!preferences.showAllGroupUrls && (
+        <List.Section title={SECTION_TITLES.GROUPS}>
+          {Object.entries(data.groups || {}).map(([key, group]: [string, Group]) => {
+            const tags = group.tags || [];
+            const accessories = getTagAccessories(tags);
+            const title = group.title || key;
+            const keywords = combineKeywords(getEnhancedKeywords(key), getEnhancedKeywords(title), tags);
+            return (
+              <List.Item
+                key={key}
+                icon={getFallbackIcon(group.icon, false)}
+                title={title}
+                keywords={keywords}
+                accessories={accessories}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title={ACTION_TITLES.BROWSE_GROUP}
+                      icon={Icon.Folder}
+                      onAction={() => {
+                        push(<URLList group={group} rootData={data} isLoading={loading} />);
+                      }}
+                    />
+                    <Action.Push
+                      title="Show Details"
+                      icon={Icon.Eye}
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      target={
+                        <GroupDetailView
+                          groupKey={key}
+                          group={group}
+                          rootData={data}
+                          onBrowseGroup={() => {
+                            push(<URLList group={group} rootData={data} isLoading={loading} />);
+                          }}
+                        />
+                      }
+                    />
+                    <ActionPanel.Section>
+                      <OpenConfigFileAction shortcut={openConfigFileShortcut} />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
+
+      {preferences.showAllGroupUrls && (
+        <List.Section title="All Group URLs">
+          {Object.entries(data.groups || {}).flatMap(([groupKey, group]: [string, Group]) => {
+            const groupTitle = group.title || groupKey;
+            const groupTags = group.tags || [];
+            const items = [];
+
+            // Pre-compute group keywords once
+            const groupKeywords = getEnhancedKeywords(`${groupKey} ${groupTitle}`);
+
+            if (group.linkedUrls && group.linkedUrls.length > 0) {
+              for (const linkedUrlKey of group.linkedUrls) {
+                const linkedUrl = data.urls?.[linkedUrlKey];
+                if (!linkedUrl) continue;
+
+                const tags = [...groupTags, ...(linkedUrl.tags || [])];
+                const title = linkedUrl.title || linkedUrlKey;
+                const searchableTitle = `${groupTitle} ${title}`;
+                items.push(
+                  <URLListItem
+                    key={`group-${groupKey}-linked-${linkedUrlKey}`}
+                    item={{
+                      key: `group-${groupKey}-linked-${linkedUrlKey}`,
+                      title: `${groupTitle} → ${title}`,
+                      url: linkedUrl.url,
+                      keywords: combineKeywords(
+                        getEnhancedKeywords(searchableTitle),
+                        groupKeywords,
+                        tags,
+                        getDomainKeywords(linkedUrl.url),
+                      ),
+                      icon: getFallbackIcon(linkedUrl.icon, !!linkedUrl.openIn),
+                      tags: tags,
+                      openIn: linkedUrl.openIn,
                     }}
-                  />
-                  <ActionPanel.Section>
-                    <OpenConfigFileAction shortcut={openConfigFileShortcut} />
-                  </ActionPanel.Section>
-                </ActionPanel>
+                    applications={applications}
+                  />,
+                );
+
+                const templateUrls = createTemplateDisplayUrls(
+                  linkedUrl,
+                  data,
+                  `group-${groupKey}-linked-${linkedUrlKey}`,
+                  linkedUrl.icon,
+                );
+                templateUrls.forEach((templateUrl) => {
+                  const searchableTitle = `${groupTitle} ${title} ${templateUrl.title}`;
+                  items.push(
+                    <URLListItem
+                      key={templateUrl.key}
+                      item={{
+                        ...templateUrl,
+                        title: `${groupTitle} → ${title} - ${templateUrl.title}`,
+                        keywords: combineKeywords(
+                          getEnhancedKeywords(searchableTitle),
+                          groupKeywords,
+                          templateUrl.keywords,
+                        ),
+                      }}
+                      applications={applications}
+                    />,
+                  );
+                });
               }
-            />
-          );
-        })}
-      </List.Section>
+            }
+
+            if (group.otherUrls) {
+              Object.entries(group.otherUrls).forEach(([otherUrlKey, otherUrl]) => {
+                const tags = [...groupTags, ...(otherUrl.tags || [])];
+                const title = otherUrl.title || otherUrlKey;
+                const searchableTitle = `${groupTitle} ${title}`;
+                items.push(
+                  <URLListItem
+                    key={`group-${groupKey}-other-${otherUrlKey}`}
+                    item={{
+                      key: `group-${groupKey}-other-${otherUrlKey}`,
+                      title: `${groupTitle} → ${title}`,
+                      url: otherUrl.url,
+                      keywords: combineKeywords(
+                        getEnhancedKeywords(searchableTitle),
+                        groupKeywords,
+                        tags,
+                        getDomainKeywords(otherUrl.url),
+                      ),
+                      icon: getFallbackIcon(otherUrl.icon, !!otherUrl.openIn),
+                      tags: tags,
+                      openIn: otherUrl.openIn,
+                    }}
+                    applications={applications}
+                  />,
+                );
+              });
+            }
+
+            const templateUrls = createTemplateDisplayUrls(group, data, `group-${groupKey}-template`);
+            templateUrls.forEach((templateUrl) => {
+              items.push(
+                <URLListItem
+                  key={templateUrl.key}
+                  item={{
+                    ...templateUrl,
+                    title: `${groupTitle} → ${templateUrl.title}`,
+                    keywords: combineKeywords(groupKeywords, templateUrl.keywords),
+                  }}
+                  applications={applications}
+                />,
+              );
+            });
+
+            return items;
+          })}
+        </List.Section>
+      )}
 
       <List.Section title={SECTION_TITLES.ALL_URLS}>
         {Object.entries(data.urls || {}).flatMap(([key, url]: [string, Url]) => {
@@ -108,7 +241,6 @@ export default function Command() {
                 key,
                 title: title,
                 url: url.url,
-                subtitle: url.url,
                 keywords: keywords,
                 icon: getFallbackIcon(url.icon, !!url.openIn),
                 tags: tags,

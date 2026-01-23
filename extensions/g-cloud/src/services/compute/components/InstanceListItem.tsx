@@ -3,10 +3,12 @@ import { ComputeInstance, ComputeService } from "../ComputeService";
 import { useStreamerMode } from "../../../utils/useStreamerMode";
 import { maskIPIfEnabled } from "../../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../../components/StreamerModeAction";
+import { CloudShellAction } from "../../../components/CloudShellAction";
 
 interface InstanceListItemProps {
   instance: ComputeInstance;
   service: ComputeService | null;
+  projectId: string;
   onViewDetails: (instance: ComputeInstance) => void;
   onStart: (instance: ComputeInstance) => Promise<void>;
   onStop: (instance: ComputeInstance) => Promise<void>;
@@ -17,6 +19,7 @@ interface InstanceListItemProps {
 export default function InstanceListItem({
   instance,
   service,
+  projectId,
   onViewDetails,
   onStart,
   onStop,
@@ -71,6 +74,9 @@ export default function InstanceListItem({
               onAction={onCreateVM}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Privacy">
             <StreamerModeAction />

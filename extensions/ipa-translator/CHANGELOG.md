@@ -1,6 +1,6 @@
 # IPA Tramslator Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-08-12
 
 - Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
 

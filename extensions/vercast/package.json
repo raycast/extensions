@@ -15,7 +15,8 @@
     "xmok",
     "ridemountainpig",
     "sebdanielsson",
-    "1weiho"
+    "1weiho",
+    "thomas-forbes"
   ],
   "commands": [
     {
@@ -88,8 +89,14 @@
           "required": false,
           "default": "vercel",
           "data": [
-            { "title": "Vercel Dashboard", "value": "vercel" },
-            { "title": "Deploy URL", "value": "deployUrl" }
+            {
+              "title": "Vercel Dashboard",
+              "value": "vercel"
+            },
+            {
+              "title": "Deploy URL",
+              "value": "deployUrl"
+            }
           ]
         }
       ]
@@ -407,7 +414,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "~1.102.3",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.0",
     "swr": "^2.3.4"
   },

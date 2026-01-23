@@ -1,5 +1,28 @@
 # Changelog
 
+## [Fixes] - 2026-01-15
+
+### Fixed
+
+- **Request Timeout**: Fixed error where request to get window list would timeout after 5 seconds.
+
+## [Encoding Fixes] - 2026-01-15
+
+### Fixed
+
+- **Window name encoding** Missing special characters like é, ő, etc. and emojis from titles caused by not specifying encoding in PS script
+
+## [Performance & Pin Fixes] - 2026-01-05
+
+### Fixed
+
+- **Pins**: Pins now work by application name only, so pinning apps like Discord keeps it pinned regardless of which channel you're viewing.
+
+### Improved
+
+- **Refresh Rate**: Window list now auto-refreshes every 1 second (was 10 seconds).
+- **Icon Caching**: Icons are cached on disk and load in background, with automatic cleanup after 7 days.
+
 ## [Pin System Fixes] - 2026-01-05
 
 ### Fixed
