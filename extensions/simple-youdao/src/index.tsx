@@ -419,7 +419,9 @@ function pronunceIt(speak_url: string | undefined, speak_text: string | undefine
   }
   fetch(speak_url)
     .then((res) => {
-      if (res.status !== 200 && res.headers.get("Content-Type") === "audio/mp3" && speak_text != undefined) {
+      if (res.status === 200 && res.headers.get("Content-Type") === "audio/mp3") {
+        return res;
+      } else if (speak_text != undefined) {
         return fetch(`http://dict.youdao.com/dictvoice?audio=${speak_text}`);
       } else {
         return res;
