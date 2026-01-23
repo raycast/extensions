@@ -127,3 +127,122 @@ export function parseSources(content: string): ReadonlyArray<{ path: string }> {
   }
   return result;
 }
+
+/**
+ * Parses PATH modifications from zshrc content
+ * Matches: export PATH="...", path+=(...), PATH="..."
+ * @param content The raw content to parse
+ * @returns Array of PATH objects with entry and type (export, append, prepend)
+ */
+export function parsePathEntries(
+  content: string,
+): ReadonlyArray<{ entry: string; type: "export" | "append" | "prepend" | "set" }> {
+  const result: Array<{ entry: string; type: "export" | "append" | "prepend" | "set" }> = [];
+
+  // Match export PATH="..."
+  const exportRegex = /^(?:\s*)export\s+PATH\s*=\s*["']?(.+?)["']?(?:\s*)$/gm;
+  let match: RegExpExecArray | null;
+  while ((match = exportRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "export" });
+    }
+  }
+
+  // Match path+=(...) - zsh array append
+  const appendRegex = /^(?:\s*)path\+?=\s*\(([^)]+)\)(?:\s*)$/gm;
+  while ((match = appendRegex.exec(content)) !== null) {
+    if (match[1]) {
+      const paths = match[1].split(/\s+/).filter((p) => p.trim());
+      paths.forEach((p) => {
+        result.push({ entry: p.trim(), type: "append" });
+      });
+    }
+  }
+
+  // Match PATH="$PATH:..."
+  const pathModifyRegex = /^(?:\s*)PATH\s*=\s*["']?\$PATH:(.+?)["']?(?:\s*)$/gm;
+  while ((match = pathModifyRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "append" });
+    }
+  }
+
+  // Match PATH="...:$PATH"
+  const pathPrependRegex = /^(?:\s*)PATH\s*=\s*["']?(.+?):\$PATH["']?(?:\s*)$/gm;
+  while ((match = pathPrependRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "prepend" });
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Parses FPATH modifications from zshrc content
+ * @param content The raw content to parse
+ * @returns Array of FPATH objects with entry and type
+ */
+export function parseFpathEntries(
+  content: string,
+): ReadonlyArray<{ entry: string; type: "export" | "append" | "prepend" | "set" }> {
+  const result: Array<{ entry: string; type: "export" | "append" | "prepend" | "set" }> = [];
+
+  // Match export FPATH="..."
+  const exportRegex = /^(?:\s*)export\s+FPATH\s*=\s*["']?(.+?)["']?(?:\s*)$/gm;
+  let match: RegExpExecArray | null;
+  while ((match = exportRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "export" });
+    }
+  }
+
+  // Match fpath+=(...) - zsh array append
+  const appendRegex = /^(?:\s*)fpath\+?=\s*\(([^)]+)\)(?:\s*)$/gm;
+  while ((match = appendRegex.exec(content)) !== null) {
+    if (match[1]) {
+      const paths = match[1].split(/\s+/).filter((p) => p.trim());
+      paths.forEach((p) => {
+        result.push({ entry: p.trim(), type: "append" });
+      });
+    }
+  }
+
+  // Match FPATH="$FPATH:..."
+  const fpathModifyRegex = /^(?:\s*)FPATH\s*=\s*["']?\$FPATH:(.+?)["']?(?:\s*)$/gm;
+  while ((match = fpathModifyRegex.exec(content)) !== null) {
+    if (match[1]) {
+      result.push({ entry: match[1], type: "append" });
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Parses keybindings (bindkey) from zshrc content
+ * @param content The raw content to parse
+ * @returns Array of keybinding objects with key and command
+ */
+export function parseKeybindings(content: string): ReadonlyArray<{ key: string; command: string; widget?: string }> {
+  const result: Array<{ key: string; command: string; widget?: string }> = [];
+
+  // Match bindkey "key" command
+  const bindkeyRegex = /^(?:\s*)bindkey\s+['"]?([^'"]+)['"]?\s+(.+?)(?:\s*)$/gm;
+  let match: RegExpExecArray | null;
+  while ((match = bindkeyRegex.exec(content)) !== null) {
+    if (match[1] && match[2]) {
+      result.push({ key: match[1], command: match[2].trim() });
+    }
+  }
+
+  // Match bindkey -s "key" "replacement" (string replacement)
+  const bindkeyStringRegex = /^(?:\s*)bindkey\s+-s\s+['"]?([^'"]+)['"]?\s+['"]?([^'"]+)['"]?(?:\s*)$/gm;
+  while ((match = bindkeyStringRegex.exec(content)) !== null) {
+    if (match[1] && match[2]) {
+      result.push({ key: match[1], command: match[2].trim(), widget: "string-replacement" });
+    }
+  }
+
+  return result;
+}

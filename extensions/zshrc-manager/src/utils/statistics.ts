@@ -5,7 +5,7 @@
  * across logical sections and entry types.
  */
 
-import { LogicalSection } from "../lib/parse-zshrc";
+import type { LogicalSection } from "../lib/parse-zshrc";
 import {
   parseAliases,
   parseExports,
