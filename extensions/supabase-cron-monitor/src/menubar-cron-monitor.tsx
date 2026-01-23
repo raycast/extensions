@@ -109,7 +109,7 @@ export default function MenubarCronMonitor() {
       }));
       return { jobs: enriched, recentRuns, mode, lastUpdatedAt: new Date() };
     },
-    [client, runHistoryLimitValue],
+    [client, runHistoryLimitValue, refreshMinutes],
   );
 
   useEffect(() => {
