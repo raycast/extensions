@@ -54,6 +54,7 @@ interface DisplayInfo {
   brightness: number;
   main: boolean;
   active: boolean;
+  adaptive: boolean;
 }
 
 // Get current brightness using Lunar CLI
@@ -140,6 +141,7 @@ async function getDisplays(): Promise<DisplayInfo[]> {
             brightness: displayData.brightness,
             main: displayData.main,
             active: displayData.active,
+            adaptive: displayData.adaptive || false,
           });
         }
       }
@@ -220,8 +222,40 @@ async function getBrightnessForDisplay(displaySerial: string): Promise<number | 
   }
 }
 
+// Set adaptive mode for a specific display
+async function setAdaptiveMode(displaySerial: string, enabled: boolean): Promise<void> {
+  await retryWithBackoff(
+    async () => {
+      const lunarPath = `${homedir()}/.local/bin/lunar`;
+      const mode = enabled ? "on" : "off";
+      
+      console.log(`Setting adaptive mode for ${displaySerial} to ${mode}`);
+      await execAsync(`"${lunarPath}" displays "${displaySerial}" adaptive ${mode}`, { timeout: 3000 });
+      
+      // Wait a bit for the change to take effect
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      return;
+    },
+    3,
+    300
+  );
+}
+
 // Set brightness for a specific display with verification
-async function setBrightnessForDisplay(displaySerial: string, level: number): Promise<void> {
+async function setBrightnessForDisplay(displaySerial: string, level: number, adaptive: boolean): Promise<void> {
+  // If adaptive mode is enabled, disable it first to unlink the display
+  if (adaptive) {
+    console.log(`Display ${displaySerial} has adaptive mode enabled, disabling it first...`);
+    try {
+      await setAdaptiveMode(displaySerial, false);
+      console.log(`Adaptive mode disabled for ${displaySerial}`);
+    } catch (error) {
+      console.error(`Failed to disable adaptive mode for ${displaySerial}:`, error);
+      // Continue anyway - the brightness command might still work
+    }
+  }
+  
   await retryWithBackoff(
     async () => {
       const lunarPath = `${homedir()}/.local/bin/lunar`;
@@ -337,6 +371,50 @@ export default function Command() {
     }
   }
 
+  // Handle toggling sync mode
+  async function handleSyncModeChange(newValue: boolean) {
+    if (!selectedDisplay) {
+      return;
+    }
+
+    const displayInfo = displays.find((d) => d.serial === selectedDisplay);
+    if (!displayInfo) {
+      return;
+    }
+
+    const action = newValue ? "Enabling" : "Disabling";
+
+    await showToast({
+      style: Toast.Style.Animated,
+      title: `${action} Sync`,
+      message: `${action} sync mode for ${displayInfo.name}...`,
+    });
+
+    try {
+      await setAdaptiveMode(selectedDisplay, newValue);
+      
+      // Refresh display list to get updated adaptive state
+      const updatedDisplays = await getDisplays();
+      setDisplays(updatedDisplays);
+      
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Sync Mode Updated",
+        message: `Sync is now ${newValue ? "enabled" : "disabled"} for ${displayInfo.name}`,
+      });
+    } catch (error) {
+      console.error("Failed to toggle sync mode:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Toggle Sync",
+        message: error instanceof Error ? error.message : "An error occurred",
+      });
+      // Refresh to revert UI state on error
+      const updatedDisplays = await getDisplays();
+      setDisplays(updatedDisplays);
+    }
+  }
+
   async function handleSubmit(values: BrightnessFormValues) {
     try {
       // Validate input
@@ -381,8 +459,8 @@ export default function Command() {
         const displayInfo = displays.find((d) => d.serial === selectedDisplay);
         const displayName = displayInfo?.name || "Display";
         
-        // Set brightness with retry and verification
-        await setBrightnessForDisplay(selectedDisplay, brightnessLevel);
+        // Set brightness with retry and verification (will auto-disable adaptive mode if needed)
+        await setBrightnessForDisplay(selectedDisplay, brightnessLevel, displayInfo?.adaptive || false);
         
         // Store the brightness value for reference
         await LocalStorage.setItem("lastBrightness", brightnessLevel.toString());
@@ -549,6 +627,16 @@ Or run this command manually:
       )}
       <Form.Description title="Current Display" text={displayNameText} />
       <Form.Description title="Current Brightness" text={currentBrightnessText} />
+      <Form.Separator />
+      {selectedDisplayInfo && !selectedDisplayInfo.main && (
+        <Form.Checkbox
+          id="syncMode"
+          label="Sync with other displays"
+          value={selectedDisplayInfo.adaptive}
+          onChange={handleSyncModeChange}
+          info="When enabled, this display's brightness will automatically follow your main display"
+        />
+      )}
       <Form.TextField
         id="level"
         title="New Brightness"
