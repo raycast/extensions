@@ -91,7 +91,7 @@
       "title": "Desktop Folder",
       "description": "The folder where your desktop files are stored",
       "default": "~/Desktop",
-      "required": true
+      "required": false
     },
     {
       "type": "dropdown",

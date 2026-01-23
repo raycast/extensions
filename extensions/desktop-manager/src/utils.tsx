@@ -62,7 +62,7 @@ export function getLatestDesktopFile() {
 
 export function hasAccessToDesktopFolder() {
   try {
-    accessSync(preferences.desktopFolder, constants.R_OK);
+    accessSync(desktopFolder, constants.R_OK);
     return true;
   } catch (error) {
     console.error(error);
