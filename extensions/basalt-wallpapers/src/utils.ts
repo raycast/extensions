@@ -2,7 +2,6 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
 import path from "path";
-import fetch from "node-fetch";
 import { environment } from "@raycast/api";
 
 const execPromise = promisify(exec);
